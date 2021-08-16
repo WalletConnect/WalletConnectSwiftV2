@@ -26,57 +26,37 @@ struct JSONRPCError: Error, Codable {
     let message: String
 }
 
-struct JSONRPCRequest<T: Codable>: Encodable, JSONConvertible {
-    let id: Int64 = Self.generateId()
-    let jsonrpc = "2.0"
-    let method: String
+struct JSONRPCRequest<T: Codable>: Codable {
+    let id: Int64
+    let jsonrpc: String
+    let method: ClientSynchMethod
     let params: T
+    
+    enum CodingKeys: CodingKey {
+        case id
+        case jsonrpc
+        case method
+        case params
+    }
     
     private static func generateId() -> Int64 {
         return Int64(Date().timeIntervalSince1970) * 1000
     }
 }
 
-struct JSONRPCResponse<T: Codable>: Codable {
-    let jsonrpc = "2.0"
-    let id: Int64
-    let result: T
-
-    enum CodingKeys: String, CodingKey {
-        case jsonrpc
-        case id
-        case result
-        case error
-    }
-
-    init(id: Int64, result: T) {
-        self.id = id
-        self.result = result
-    }
-}
-
-struct JSONRPCErrorResponse: Codable {
-    let jsonrpc = "2.0"
-    let id: Int64
-    let error: JSONRPCError
-}
-
-extension JSONRPCResponse {
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(id, forKey: .id)
-        try container.encode(jsonrpc, forKey: .jsonrpc)
-        try container.encode(result, forKey: .result)
-    }
-
+extension JSONRPCRequest where T == ClientSynchParams {
     init(from decoder: Decoder) throws {
-        let values = try decoder.container(keyedBy: CodingKeys.self)
-        if let error = try values.decodeIfPresent(JSONRPCError.self, forKey: .error) {
-            throw error
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(Int64.self, forKey: .id)
+        jsonrpc = try container.decode(String.self, forKey: .jsonrpc)
+        method = try container.decode(ClientSynchMethod.self, forKey: .method)
+        switch method {
+        case .pairingApprove:
+            let paramsValue = try container.decode(PairingApproveParams.self, forKey: .params)
+            params = .pairingApprove(paramsValue)
+        case .pairingReject:
+            let paramsValue = try container.decode(PairingRejectParams.self, forKey: .params)
+            params = .pairingReject(paramsValue)
         }
-        self.id = try values.decode(Int64.self, forKey: .id)
-        self.result = try values.decode(T.self, forKey: .result)
     }
 }
-
-

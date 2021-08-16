@@ -14,7 +14,12 @@ final class JSONRPCSerialiserTests: XCTestCase {
     """
     
     override func setUp() {
-        let codec = AES_256_CBC_HMAC_SHA256_Codec()
+        var codec = MockedCodec()
+        codec.decodedJson = json
+        codec.encryptionPayload = EncryptionPayload(iv: HexString(SerialiserTestsSamples.iv),
+                                                    publicKey: HexString(SerialiserTestsSamples.publicKey),
+                                                    mac: HexString(SerialiserTestsSamples.mac),
+                                                    cipherText: HexString(SerialiserTestsSamples.cipherText))
         self.serialiser = JSONRPCSerialiser(codec: codec)
     }
     
@@ -22,9 +27,24 @@ final class JSONRPCSerialiserTests: XCTestCase {
         serialiser = nil
     }
     
-    func testDeserialisedMatchesOriginal() {
-        let serialisedMessage = serialiser.serialise(json: json)
-        let deserialisedString = serialiser.deserialise(message: serialisedMessage)
-        XCTAssertEqual(deserialisedString, json, "deserialised message does not match original string")
+    func testSerialise() {
+        let serialisedMessage = serialiser.serialise(json: json, key: "")
+        let serialisedMessageSample = SerialiserTestsSamples.serialisedMessage
+        XCTAssertEqual(serialisedMessage, serialisedMessageSample)
+    }
+    
+    func testDeserialise() {
+        let serialisedMessageSample = SerialiserTestsSamples.serialisedMessage
+        let deserialisedJSON = try! serialiser.deserialise(message: serialisedMessageSample, key: "")
+        XCTFail("not implemented")
+    }
+    
+    func testDeserialiseIntoPayload() {
+        let payload = try! serialiser.deserialiseIntoPayload(message: SerialiserTestsSamples.serialisedMessage)
+        XCTAssertEqual(payload.iv.string, SerialiserTestsSamples.iv)
+        XCTAssertEqual(payload.publicKey.string, SerialiserTestsSamples.publicKey)
+        XCTAssertEqual(payload.mac.string, SerialiserTestsSamples.mac)
+        XCTAssertEqual(payload.cipherText.string, SerialiserTestsSamples.cipherText)
     }
 }
+
