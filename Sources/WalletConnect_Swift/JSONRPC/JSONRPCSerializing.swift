@@ -10,7 +10,7 @@ enum JSONRPCSerialiserError: String, Error, CustomStringConvertible {
 protocol JSONRPCSerialising {
     var codec: Codec {get}
     func serialise(json: String, key: String) -> String
-    func deserialise(message: String, key: String) throws -> String
+    func deserialise(message: String, key: String) throws -> JSONRPCRequest<ClientSynchParams, ClientSynchMethod>
 }
 
 class JSONRPCSerialiser: JSONRPCSerialising {
@@ -20,12 +20,13 @@ class JSONRPCSerialiser: JSONRPCSerialising {
         self.codec = codec
     }
     
-    func deserialise(message: String, key: String) throws -> String {
+    func deserialise(message: String, key: String) throws -> JSONRPCRequest<ClientSynchParams, ClientSynchMethod> {
         let encryptionPayload = try deserialiseIntoPayload(message: message)
-        codec.decode(payload: encryptionPayload, key: key)
-        
-        decode by method-enum, params must be enum argument
-        return ""
+        let decryptedJSONRPC = codec.decode(payload: encryptionPayload, key: key)
+        guard let JSONRPCData = decryptedJSONRPC.data(using: .utf8) else {
+            throw DataConversionError.stringToDataFailed
+        }
+        return try JSONDecoder().decode(JSONRPCRequest<ClientSynchParams, ClientSynchMethod>.self, from: JSONRPCData)
     }
     
     func serialise(json: String, key: String) -> String {
@@ -71,36 +72,43 @@ enum ClientSynchMethod: String, Codable {
     case pairingReject = "wc_pairingReject"
 }
 
-enum ClientSynchParams: Codable {
-    init(from decoder: Decoder) throws {
-        fatalError("not implemented")
-    }
-    
-    func encode(to encoder: Encoder) throws {
-        switch self {
-        case .pairingApprove(_):
-            <#code#>
-        case .pairingReject(_):
-            <#code#>
+enum ClientSynchParams: Codable, Equatable {
+    static func == (lhs: ClientSynchParams, rhs: ClientSynchParams) -> Bool {
+        switch (lhs, rhs) {
+        case (.pairingApprove(let lhsParam), .pairingApprove(let rhsParam)):
+            return lhsParam == rhsParam
+        case (.pairingReject(let lhsParam), pairingReject(let rhsParam)):
+            return lhsParam == rhsParam
+        default:
+            return false
         }
     }
     
     case pairingApprove(PairingApproveParams)
     case pairingReject(PairingRejectParams)
+
+    init(from decoder: Decoder) throws {
+        fatalError("not implemented")
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        fatalError("not implemented")
+    }
+    
 }
 
-struct PairingApproveParams: Codable {
+struct PairingApproveParams: Codable, Equatable {
     let topic: String
     
     enum CodingKeys: CodingKey {
         case topic
     }
-//    let relay: RelayProtocolOptions
-//    let responder: PairingParticipant
-//    let expiry: number
-//    let state: PairingState
 }
 
-struct PairingRejectParams: Codable {
+struct PairingRejectParams: Codable, Equatable {
     let reason: String
+    
+    enum CodingKeys: CodingKey {
+        case reason
+    }
 }

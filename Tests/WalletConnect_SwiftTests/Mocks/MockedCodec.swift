@@ -3,7 +3,7 @@
 import Foundation
 @testable import WalletConnect_Swift
 
-struct MockedCodec: Codec {
+class MockedCodec: Codec {
     var encryptionPayload: EncryptionPayload!
     var decodedJson: String!
     func encode(message: String, key: String) -> EncryptionPayload {

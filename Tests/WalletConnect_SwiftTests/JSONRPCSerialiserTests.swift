@@ -7,19 +7,14 @@ import XCTest
 
 final class JSONRPCSerialiserTests: XCTestCase {
     var serialiser: JSONRPCSerialiser!
-    private let json = """
-    {
-        "key": "value"
-    }
-    """
     
     override func setUp() {
-        var codec = MockedCodec()
-        codec.decodedJson = json
-        codec.encryptionPayload = EncryptionPayload(iv: HexString(SerialiserTestsSamples.iv),
-                                                    publicKey: HexString(SerialiserTestsSamples.publicKey),
-                                                    mac: HexString(SerialiserTestsSamples.mac),
-                                                    cipherText: HexString(SerialiserTestsSamples.cipherText))
+        let codec = MockedCodec()
+        codec.decodedJson = SerialiserTestData.pairingApproveJSON
+        codec.encryptionPayload = EncryptionPayload(iv: HexString(SerialiserTestData.iv),
+                                                    publicKey: HexString(SerialiserTestData.publicKey),
+                                                    mac: HexString(SerialiserTestData.mac),
+                                                    cipherText: HexString(SerialiserTestData.cipherText))
         self.serialiser = JSONRPCSerialiser(codec: codec)
     }
     
@@ -28,23 +23,24 @@ final class JSONRPCSerialiserTests: XCTestCase {
     }
     
     func testSerialise() {
-        let serialisedMessage = serialiser.serialise(json: json, key: "")
-        let serialisedMessageSample = SerialiserTestsSamples.serialisedMessage
+        let serialisedMessage = serialiser.serialise(json: SerialiserTestData.pairingApproveJSON, key: "")
+        let serialisedMessageSample = SerialiserTestData.serialisedMessage
         XCTAssertEqual(serialisedMessage, serialisedMessageSample)
     }
     
     func testDeserialise() {
-        let serialisedMessageSample = SerialiserTestsSamples.serialisedMessage
+        let serialisedMessageSample = SerialiserTestData.serialisedMessage
+        (serialiser.codec as! MockedCodec).decodedJson = SerialiserTestData.pairingApproveJSON
         let deserialisedJSON = try! serialiser.deserialise(message: serialisedMessageSample, key: "")
-        XCTFail("not implemented")
+        XCTAssertEqual(deserialisedJSON.params, SerialiserTestData.pairingApproveJSONRPCRequest.params)
     }
     
     func testDeserialiseIntoPayload() {
-        let payload = try! serialiser.deserialiseIntoPayload(message: SerialiserTestsSamples.serialisedMessage)
-        XCTAssertEqual(payload.iv.string, SerialiserTestsSamples.iv)
-        XCTAssertEqual(payload.publicKey.string, SerialiserTestsSamples.publicKey)
-        XCTAssertEqual(payload.mac.string, SerialiserTestsSamples.mac)
-        XCTAssertEqual(payload.cipherText.string, SerialiserTestsSamples.cipherText)
+        let payload = try! serialiser.deserialiseIntoPayload(message: SerialiserTestData.serialisedMessage)
+        XCTAssertEqual(payload.iv.string, SerialiserTestData.iv)
+        XCTAssertEqual(payload.publicKey.string, SerialiserTestData.publicKey)
+        XCTAssertEqual(payload.mac.string, SerialiserTestData.mac)
+        XCTAssertEqual(payload.cipherText.string, SerialiserTestData.cipherText)
     }
 }
 

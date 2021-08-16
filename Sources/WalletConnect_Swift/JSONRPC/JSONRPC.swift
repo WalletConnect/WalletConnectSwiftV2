@@ -26,10 +26,10 @@ struct JSONRPCError: Error, Codable {
     let message: String
 }
 
-struct JSONRPCRequest<T: Codable>: Codable {
+struct JSONRPCRequest<T: Codable, U: Codable>: Codable {
     let id: Int64
     let jsonrpc: String
-    let method: ClientSynchMethod
+    let method: U
     let params: T
     
     enum CodingKeys: CodingKey {
@@ -44,7 +44,7 @@ struct JSONRPCRequest<T: Codable>: Codable {
     }
 }
 
-extension JSONRPCRequest where T == ClientSynchParams {
+extension JSONRPCRequest where T == ClientSynchParams, U == ClientSynchMethod {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(Int64.self, forKey: .id)
