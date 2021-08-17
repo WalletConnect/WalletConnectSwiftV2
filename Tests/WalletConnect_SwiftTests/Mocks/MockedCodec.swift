@@ -6,7 +6,7 @@ import Foundation
 class MockedCodec: Codec {
     var encryptionPayload: EncryptionPayload!
     var decodedJson: String!
-    func encode(message: String, key: String) -> EncryptionPayload {
+    func encode(plainText message: String, key: String) -> EncryptionPayload {
         return encryptionPayload
     }
     

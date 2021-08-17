@@ -29,6 +29,21 @@ struct HexString: Codable {
         data = Data(hex: string)
     }
 }
+protocol Codec {
+    func encode(plainText: String, key: String) -> EncryptionPayload
+    func decode(payload: EncryptionPayload, key: String) -> String
+}
+
+struct EncryptionPayload: Codable {
+    var iv: HexString
+    var publicKey: HexString
+    var mac: HexString
+    var cipherText: HexString
+    
+    static let ivLength = 16
+    static let publicKeyLength = 32
+    static let macLength = 32
+}
 //protocol Codec {
 //    func encode(plainText: String, key: String) throws -> String
 //    func decode(cipherText: String, key: String) throws -> String
