@@ -35,10 +35,10 @@ protocol Codec {
 }
 
 struct EncryptionPayload: Codable {
-    var iv: HexString
-    var publicKey: HexString
-    var mac: HexString
-    var cipherText: HexString
+    var iv: String
+    var publicKey: String
+    var mac: String
+    var cipherText: String
     
     static let ivLength = 16
     static let publicKeyLength = 32

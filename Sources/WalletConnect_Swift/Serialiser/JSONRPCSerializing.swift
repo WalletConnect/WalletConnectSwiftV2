@@ -26,7 +26,7 @@ class JSONRPCSerialiser: JSONRPCSerialising {
     
     func serialise(json: String, key: String) -> String {
         let payload = codec.encode(plainText: json, key: key)
-        return "\(payload.iv.string)\(payload.publicKey.string)\(payload.mac.string)\(payload.cipherText.string)"
+        return "\(payload.iv)\(payload.publicKey)\(payload.mac)\(payload.cipherText)"
     }
     
     func deserialiseIntoPayload(message: String) throws -> EncryptionPayload {
@@ -40,7 +40,7 @@ class JSONRPCSerialiser: JSONRPCSerialising {
         let iv = data.subdata(in: 0..<pubKeyRangeStartIndex).toHexString()
         let pubKey = data.subdata(in: pubKeyRangeStartIndex..<macStartIndex).toHexString()
         let mac = data.subdata(in: macStartIndex..<cipherTextStartIndex).toHexString()
-        let cipherText = data.subdata(in: cipherTextStartIndex..<data.count)
-        return EncryptionPayload(iv: HexString(iv), publicKey: HexString(pubKey), mac: HexString(mac), cipherText: HexString(cipherText))
+        let cipherText = data.subdata(in: cipherTextStartIndex..<data.count).toHexString()
+        return EncryptionPayload(iv: iv, publicKey: pubKey, mac: mac, cipherText: cipherText)
     }
 }

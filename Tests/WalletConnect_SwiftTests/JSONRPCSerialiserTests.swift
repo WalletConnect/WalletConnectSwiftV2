@@ -11,10 +11,10 @@ final class JSONRPCSerialiserTests: XCTestCase {
     override func setUp() {
         let codec = MockedCodec()
         codec.decodedJson = SerialiserTestData.pairingApproveJSON
-        codec.encryptionPayload = EncryptionPayload(iv: HexString(SerialiserTestData.iv),
-                                                    publicKey: HexString(SerialiserTestData.publicKey),
-                                                    mac: HexString(SerialiserTestData.mac),
-                                                    cipherText: HexString(SerialiserTestData.cipherText))
+        codec.encryptionPayload = EncryptionPayload(iv: SerialiserTestData.iv,
+                                                    publicKey: SerialiserTestData.publicKey,
+                                                    mac: SerialiserTestData.mac,
+                                                    cipherText: SerialiserTestData.cipherText)
         self.serialiser = JSONRPCSerialiser(codec: codec)
     }
     
@@ -37,10 +37,10 @@ final class JSONRPCSerialiserTests: XCTestCase {
     
     func testDeserialiseIntoPayload() {
         let payload = try! serialiser.deserialiseIntoPayload(message: SerialiserTestData.serialisedMessage)
-        XCTAssertEqual(payload.iv.string, SerialiserTestData.iv)
-        XCTAssertEqual(payload.publicKey.string, SerialiserTestData.publicKey)
-        XCTAssertEqual(payload.mac.string, SerialiserTestData.mac)
-        XCTAssertEqual(payload.cipherText.string, SerialiserTestData.cipherText)
+        XCTAssertEqual(payload.iv, SerialiserTestData.iv)
+        XCTAssertEqual(payload.publicKey, SerialiserTestData.publicKey)
+        XCTAssertEqual(payload.mac, SerialiserTestData.mac)
+        XCTAssertEqual(payload.cipherText, SerialiserTestData.cipherText)
     }
 }
 
