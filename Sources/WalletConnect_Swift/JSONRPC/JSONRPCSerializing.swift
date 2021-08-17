@@ -125,6 +125,9 @@ extension ClientSynchJSONRPC {
     }
     
     enum Params: Codable, Equatable {
+        case pairingApprove(PairingApproveParams)
+        case pairingReject(PairingRejectParams)
+        
         static func == (lhs: Params, rhs: Params) -> Bool {
             switch (lhs, rhs) {
             case (.pairingApprove(let lhsParam), .pairingApprove(let rhsParam)):
@@ -135,9 +138,6 @@ extension ClientSynchJSONRPC {
                 return false
             }
         }
-        
-        case pairingApprove(PairingApproveParams)
-        case pairingReject(PairingRejectParams)
         
         init(from decoder: Decoder) throws {
             fatalError("forbidden")
