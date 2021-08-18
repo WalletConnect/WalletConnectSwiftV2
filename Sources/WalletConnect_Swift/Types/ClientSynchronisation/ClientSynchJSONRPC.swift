@@ -44,7 +44,9 @@ extension ClientSynchJSONRPC {
         case pairingApprove = "wc_pairingApprove"
         case pairingReject = "wc_pairingReject"
     }
-    
+}
+
+extension ClientSynchJSONRPC {
     enum Params: Codable, Equatable {
         case pairingApprove(PairingApproveParams)
         case pairingReject(PairingRejectParams)
