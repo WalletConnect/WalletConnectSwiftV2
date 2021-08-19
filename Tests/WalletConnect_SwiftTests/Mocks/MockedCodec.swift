@@ -6,11 +6,12 @@ import Foundation
 class MockedCodec: Codec {
     var encryptionPayload: EncryptionPayload!
     var decodedJson: String!
-    func encode(plainText message: String, key: String) -> EncryptionPayload {
+
+    func encode(plainText: String, agreementKeys: X25519AgreementKeys) throws -> EncryptionPayload {
         return encryptionPayload
     }
     
-    func decode(payload: EncryptionPayload, key: String) -> String {
+    func decode(payload: EncryptionPayload, symmetricKey: Data) throws -> String {
         return decodedJson
     }
 }

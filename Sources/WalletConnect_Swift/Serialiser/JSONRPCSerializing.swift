@@ -4,8 +4,8 @@ import Foundation
 
 protocol JSONRPCSerialising {
     var codec: Codec {get}
-    func serialise(json: String, key: String) -> String
-    func deserialise(message: String, key: String) throws -> ClientSynchJSONRPC
+    func serialise(json: String, agreementKeys: X25519AgreementKeys) throws -> String
+    func deserialise(message: String, symmetricKey: Data) throws -> ClientSynchJSONRPC
 }
 
 class JSONRPCSerialiser: JSONRPCSerialising {
@@ -15,22 +15,22 @@ class JSONRPCSerialiser: JSONRPCSerialising {
         self.codec = codec
     }
     
-    func deserialise(message: String, key: String) throws -> ClientSynchJSONRPC {
+    func deserialise(message: String, symmetricKey: Data) throws -> ClientSynchJSONRPC {
         let encryptionPayload = try deserialiseIntoPayload(message: message)
-        let decryptedJSONRPC = codec.decode(payload: encryptionPayload, key: key)
+        let decryptedJSONRPC = try codec.decode(payload: encryptionPayload, symmetricKey: symmetricKey)
         guard let JSONRPCData = decryptedJSONRPC.data(using: .utf8) else {
             throw DataConversionError.stringToDataFailed
         }
         return try JSONDecoder().decode(ClientSynchJSONRPC.self, from: JSONRPCData)
     }
     
-    func serialise(json: String, key: String) -> String {
-        let payload = codec.encode(plainText: json, key: key)
+    func serialise(json: String, agreementKeys: X25519AgreementKeys) throws -> String {
+        let payload = try codec.encode(plainText: json, agreementKeys: agreementKeys)
         return "\(payload.iv)\(payload.publicKey)\(payload.mac)\(payload.cipherText)"
     }
     
     func deserialiseIntoPayload(message: String) throws -> EncryptionPayload {
-        let data = Data.fromHex(message)!
+        let data = Data(hex: message)
         guard data.count > EncryptionPayload.ivLength + EncryptionPayload.publicKeyLength + EncryptionPayload.macLength else {
             throw JSONRPCSerialiserError.messageToShort
         }

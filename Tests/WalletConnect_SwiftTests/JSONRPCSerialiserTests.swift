@@ -22,7 +22,8 @@ final class JSONRPCSerialiserTests: XCTestCase {
                                                     publicKey: SerialiserTestData.publicKey,
                                                     mac: SerialiserTestData.mac,
                                                     cipherText: SerialiserTestData.cipherText)
-        let serialisedMessage = serialiser.serialise(json: SerialiserTestData.pairingApproveJSON, key: "")
+        let agreementKeys = X25519AgreementKeys(sharedKey: Data(hex: ""), publicKey: Data(hex: ""))
+        let serialisedMessage = try! serialiser.serialise(json: SerialiserTestData.pairingApproveJSON, agreementKeys: agreementKeys)
         let serialisedMessageSample = SerialiserTestData.serialisedMessage
         XCTAssertEqual(serialisedMessage, serialisedMessageSample)
     }
@@ -30,7 +31,7 @@ final class JSONRPCSerialiserTests: XCTestCase {
     func testDeserialise() {
         let serialisedMessageSample = SerialiserTestData.serialisedMessage
         codec.decodedJson = SerialiserTestData.pairingApproveJSON
-        let deserialisedJSON = try! serialiser.deserialise(message: serialisedMessageSample, key: "")
+        let deserialisedJSON = try! serialiser.deserialise(message: serialisedMessageSample, symmetricKey: Data(hex: ""))
         XCTAssertEqual(deserialisedJSON.params, SerialiserTestData.pairingApproveJSONRPCRequest.params)
     }
     
