@@ -15,20 +15,20 @@ class AES_256_CBC_HMAC_SHA256_Codec: Codec {
         let (cipherText, iv) = try encrypt(key: encryptionKey, data: plainTextData)
         let dataToMac = iv + agreementKeys.publicKey + cipherText
         let hmac = try authenticationCode(key: authenticationKey, data: dataToMac)
-        return EncryptionPayload(iv: iv.toHexString(),
-                                 publicKey: agreementKeys.publicKey.toHexString(),
-                                 mac: hmac.toHexString(),
-                                 cipherText: cipherText.toHexString())
+        return EncryptionPayload(iv: iv,
+                                 publicKey: agreementKeys.publicKey,
+                                 mac: hmac,
+                                 cipherText: cipherText)
     }
     
     func decode(payload: EncryptionPayload, symmetricKey: Data) throws -> String {
         let (decryptionKey, authenticationKey) = getKeyPair(from: symmetricKey)
-        let dataToMac = Data(hex: payload.iv) + Data(hex: payload.publicKey) + Data(hex: payload.cipherText)
+        let dataToMac = payload.iv + payload.publicKey + payload.cipherText
         let hmac = try authenticationCode(key: authenticationKey, data: dataToMac)
-        guard hmac == Data(hex: payload.mac) else {
+        guard hmac == payload.mac else {
             throw CodecError.macAuthenticationFailed
         }
-        let plainTextData = try decrypt(key: decryptionKey, data: Data(hex: payload.cipherText), iv: Data(hex: payload.iv))
+        let plainTextData = try decrypt(key: decryptionKey, data: payload.cipherText, iv: payload.iv)
         let plainText = try string(data: plainTextData)
         return plainText
     }
