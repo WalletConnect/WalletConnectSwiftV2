@@ -4,17 +4,24 @@ import Foundation
 import CryptoSwift
 
 protocol Codec {
+    var hmacAuthenticator: HMACAutenticating {get}
     func encode(plainText: String, agreementKeys: X25519AgreementKeys) throws -> EncryptionPayload
     func decode(payload: EncryptionPayload, symmetricKey: Data) throws -> String
 }
 
 class AES_256_CBC_HMAC_SHA256_Codec: Codec {
+    let hmacAuthenticator: HMACAutenticating
+    
+    init(hmacAuthenticator: HMACAutenticating = HMACAutenticator()) {
+        self.hmacAuthenticator = hmacAuthenticator
+    }
+    
     func encode(plainText: String, agreementKeys: X25519AgreementKeys) throws -> EncryptionPayload {
         let (encryptionKey, authenticationKey) = getKeyPair(from: agreementKeys.sharedKey)
         let plainTextData = try data(string: plainText)
         let (cipherText, iv) = try encrypt(key: encryptionKey, data: plainTextData)
         let dataToMac = iv + agreementKeys.publicKey + cipherText
-        let hmac = try authenticationCode(key: authenticationKey, data: dataToMac)
+        let hmac = try hmacAuthenticator.generateAuthenticationDigest(for: dataToMac, using: authenticationKey)
         return EncryptionPayload(iv: iv,
                                  publicKey: agreementKeys.publicKey,
                                  mac: hmac,
@@ -24,10 +31,7 @@ class AES_256_CBC_HMAC_SHA256_Codec: Codec {
     func decode(payload: EncryptionPayload, symmetricKey: Data) throws -> String {
         let (decryptionKey, authenticationKey) = getKeyPair(from: symmetricKey)
         let dataToMac = payload.iv + payload.publicKey + payload.cipherText
-        let hmac = try authenticationCode(key: authenticationKey, data: dataToMac)
-        guard hmac == payload.mac else {
-            throw CodecError.macAuthenticationFailed
-        }
+        try hmacAuthenticator.validateAuthentication(for: dataToMac, with: payload.mac, using: authenticationKey)
         let plainTextData = try decrypt(key: decryptionKey, data: payload.cipherText, iv: payload.iv)
         let plainText = try string(data: plainTextData)
         return plainText
@@ -44,12 +48,6 @@ class AES_256_CBC_HMAC_SHA256_Codec: Codec {
         let cipher = try AES(key: key.bytes, blockMode: CBC(iv: iv.bytes))
         let plainText = try cipher.decrypt(data.bytes)
         return Data(plainText)
-    }
-
-    private func authenticationCode(key: Data, data: Data) throws -> Data {
-        let algo = HMAC(key: key.bytes, variant: .sha256)
-        let digest = try algo.authenticate(data.bytes)
-        return Data(digest)
     }
 
     private func data(string: String) throws -> Data {
