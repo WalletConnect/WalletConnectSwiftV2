@@ -4,7 +4,7 @@ import Foundation
 
 protocol JSONRPCSerialising {
     var codec: Codec {get}
-    func serialise(json: String, agreementKeys: X25519AgreementKeys) throws -> String
+    func serialise(json: String, agreementKeys: Crypto.X25519.AgreementKeys) throws -> String
     func deserialise(message: String, symmetricKey: Data) throws -> ClientSynchJSONRPC
 }
 
@@ -17,14 +17,14 @@ class JSONRPCSerialiser: JSONRPCSerialising {
     
     func deserialise(message: String, symmetricKey: Data) throws -> ClientSynchJSONRPC {
         let encryptionPayload = try deserialiseIntoPayload(message: message)
-        let decryptedJSONRPC = try codec.decode(payload: encryptionPayload, symmetricKey: symmetricKey)
+        let decryptedJSONRPC = try codec.decode(payload: encryptionPayload, sharedKey: symmetricKey)
         guard let JSONRPCData = decryptedJSONRPC.data(using: .utf8) else {
             throw DataConversionError.stringToDataFailed
         }
         return try JSONDecoder().decode(ClientSynchJSONRPC.self, from: JSONRPCData)
     }
     
-    func serialise(json: String, agreementKeys: X25519AgreementKeys) throws -> String {
+    func serialise(json: String, agreementKeys: Crypto.X25519.AgreementKeys) throws -> String {
         let payload = try codec.encode(plainText: json, agreementKeys: agreementKeys)
         let iv = payload.iv.toHexString()
         let publicKey = payload.publicKey.toHexString()
