@@ -5,10 +5,6 @@ import CryptoKit
 
 extension Crypto.X25519 {
     struct PrivateKey: Equatable {
-        static func == (lhs: Crypto.X25519.PrivateKey, rhs: Crypto.X25519.PrivateKey) -> Bool {
-            lhs.raw == rhs.raw
-        }
-        
         private let privateKey: Curve25519.KeyAgreement.PrivateKey
         
         var raw: Data {
@@ -24,6 +20,10 @@ extension Crypto.X25519 {
         
         init(raw: Data) throws {
             privateKey = try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: raw)
+        }
+        
+        static func == (lhs: Crypto.X25519.PrivateKey, rhs: Crypto.X25519.PrivateKey) -> Bool {
+            lhs.raw == rhs.raw
         }
     }
     
