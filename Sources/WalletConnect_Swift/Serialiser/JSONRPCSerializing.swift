@@ -17,7 +17,7 @@ class JSONRPCSerialiser: JSONRPCSerialising {
     
     func deserialise(message: String, symmetricKey: Data) throws -> ClientSynchJSONRPC {
         let encryptionPayload = try deserialiseIntoPayload(message: message)
-        let decryptedJSONRPC = try codec.decode(payload: encryptionPayload, sharedKey: symmetricKey)
+        let decryptedJSONRPC = try codec.decode(payload: encryptionPayload, sharedSecret: symmetricKey)
         guard let JSONRPCData = decryptedJSONRPC.data(using: .utf8) else {
             throw DataConversionError.stringToDataFailed
         }

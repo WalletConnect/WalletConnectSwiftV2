@@ -17,7 +17,7 @@ class MockedCodec: Codec {
         return encryptionPayload
     }
     
-    func decode(payload: EncryptionPayload, sharedKey: Data) throws -> String {
+    func decode(payload: EncryptionPayload, sharedSecret: Data) throws -> String {
         return decodedJson
     }
 }

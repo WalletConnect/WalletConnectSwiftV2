@@ -16,7 +16,7 @@ class Crypto {
     }
     
     func set(agreementKeys: Crypto.X25519.AgreementKeys, topic: String) {
-        keychain[topic] = agreementKeys.sharedKey + agreementKeys.publicKey
+        keychain[topic] = agreementKeys.sharedSecret + agreementKeys.publicKey
     }
     
     func getPrivateKey(for publicKey: Data) throws -> Crypto.X25519.PrivateKey? {
@@ -30,14 +30,18 @@ class Crypto {
         guard let concatenatedAgreementKeys = keychain[topic] else {
             return nil
         }
-        let (sharedKey, publicKey) = split(concatinatedAgreementKeys: concatenatedAgreementKeys)
-        return Crypto.X25519.AgreementKeys(sharedKey: sharedKey, publicKey: publicKey)
+        let (sharedSecret, publicKey) = split(concatinatedAgreementKeys: concatenatedAgreementKeys)
+        return Crypto.X25519.AgreementKeys(sharedSecret: sharedSecret, publicKey: publicKey)
+    }
+    
+    func hasKeys(for topic: String) -> Bool {
+        return keychain[topic] != nil
     }
     
     private func split(concatinatedAgreementKeys: Data) -> (Data, Data) {
-        let sharedKey = concatinatedAgreementKeys.subdata(in: 0..<32)
+        let sharedSecret = concatinatedAgreementKeys.subdata(in: 0..<32)
         let publicKey = concatinatedAgreementKeys.subdata(in: 32..<64)
-        return (sharedKey, publicKey)
+        return (sharedSecret, publicKey)
     }
 }
 

@@ -13,9 +13,8 @@ extension Crypto {
             let cryptoKitPrivateKey = try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: privateKey.raw)
             let peerPublicKey = try Curve25519.KeyAgreement.PublicKey(rawRepresentation: peerPublicKey)
             let sharedSecret = try cryptoKitPrivateKey.sharedSecretFromKeyAgreement(with: peerPublicKey)
-            let sharedKey = sharedSecret.x963DerivedSymmetricKey(using: SHA256.self, sharedInfo: sharedInfo, outputByteCount: 32)
-            let rawSharedKey = sharedKey.withUnsafeBytes { return Data(Array($0)) }
-            return AgreementKeys(sharedKey: rawSharedKey, publicKey: privateKey.publicKey)
+            let rawSharedSecret = sharedSecret.withUnsafeBytes { return Data(Array($0)) }
+            return AgreementKeys(sharedSecret: rawSharedSecret, publicKey: privateKey.publicKey)
         }
     }
 }

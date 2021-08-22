@@ -28,7 +28,7 @@ extension Crypto.X25519 {
     }
     
     struct AgreementKeys: Equatable {
-        let sharedKey: Data
+        let sharedSecret: Data
         let publicKey: Data
     }
 }
