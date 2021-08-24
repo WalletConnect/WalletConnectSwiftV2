@@ -2,9 +2,13 @@
 
 import Foundation
 
-public class WalletConnectClient {
-    
+public class DebugClient {
+    let relay: Relay
+    let crypto: Crypto
     public init(relayUrl: URL = URL(string: "wss://relay.walletconnect.org/?protocol=wc&version=2")!) {
+        let transport = JSONRPCTransport(url: relayUrl)
+        self.crypto = Crypto()
+        self.relay = Relay(transport: transport, crypto: crypto)
     }
     
     public func pair(with url: String) throws {
@@ -12,6 +16,24 @@ public class WalletConnectClient {
             throw WalletConnectError.PairingParamsUriInitialization
         }
         let proposal = formatPairingProposal(from: pairingParamsUri)
+
+        let peerPublic = Data(hex: proposal.proposer.publicKey)
+        let privateKey = Crypto.X25519.generatePrivateKey()
+        let selfParticipant = PairingParticipant(publicKey: privateKey.publicKey.toHexString())
+        let agreementKeys = try Crypto.X25519.generateAgreementKeys(peerPublicKey: peerPublic, privateKey: privateKey)
+        crypto.set(agreementKeys: agreementKeys, topic: proposal.topic)
+        crypto.set(privateKey: privateKey)
+        
+        
+        
+        
+        let appMetadata = AppMetadata(name: "iOS", description: nil, url: nil, icons: nil)
+        let approve = PairingApproveParams(topic: proposal.topic,
+                                           relay: RelayProtocolOptions(protocol: "waku", params: nil),
+                                           responder: selfParticipant,
+                                           expiry: proposal.ttl,
+                                           state: PairingState(metadata: appMetadata))
+        relay.publish(topic: proposal.topic, payload: approve)
     }
     
     func formatPairingProposal(from uri: PairParamsUri) -> PairingProposal {

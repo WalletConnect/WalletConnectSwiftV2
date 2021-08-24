@@ -25,6 +25,7 @@ class Relay {
             let params = RelayJSONRPC.PublishParams(topic: topic, message: message, ttl: defaultTtl)
             let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.rawValue, params: params)
             let requestJson = try request.json()
+            Logger.debug("Relay: Will publish message on topic: \(topic)")
             transport.send(requestJson)
         } catch {
             Logger.debug(error)
