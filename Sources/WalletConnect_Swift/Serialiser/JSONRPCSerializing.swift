@@ -11,7 +11,7 @@ protocol JSONRPCSerialising {
 class JSONRPCSerialiser: JSONRPCSerialising {
     var codec: Codec
     
-    init(codec: Codec) {
+    init(codec: Codec = AES_256_CBC_HMAC_SHA256_Codec()) {
         self.codec = codec
     }
     

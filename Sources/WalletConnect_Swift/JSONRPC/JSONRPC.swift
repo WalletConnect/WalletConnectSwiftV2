@@ -6,7 +6,7 @@ protocol JSONConvertible where Self: Encodable {
     func json() throws -> String
 }
 
-extension JSONConvertible  {
+extension Encodable  {
     func json() throws -> String {
         let data = try JSONEncoder().encode(self)
         guard let string = String(data: data, encoding: .utf8) else {
@@ -26,10 +26,10 @@ struct JSONRPCError: Error, Codable {
     let message: String
 }
 
-struct JSONRPCRequest<T: Codable, U: Codable>: Codable {
+struct JSONRPCRequest<T: Codable>: Codable {
     let id: Int64
     let jsonrpc: String
-    let method: U
+    let method: String
     let params: T
     
     enum CodingKeys: CodingKey {
@@ -39,6 +39,13 @@ struct JSONRPCRequest<T: Codable, U: Codable>: Codable {
         case params
     }
     
+    init(method: String, params: T) {
+        self.id = JSONRPCRequest.generateId()
+        self.jsonrpc = "2.0"
+        self.method = method
+        self.params = params
+    }
+
     private static func generateId() -> Int64 {
         return Int64(Date().timeIntervalSince1970) * 1000
     }
