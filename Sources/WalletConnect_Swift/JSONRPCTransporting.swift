@@ -3,11 +3,13 @@
 import Foundation
 
 protocol JSONRPCTransporting {
-    func send(_ string: String)
+    var onMessage: ((String)->())? {get set}
+    func send(_ string: String, completion: @escaping (Error?)->())
     func disconnect()
 }
 
 class JSONRPCTransport: NSObject, JSONRPCTransporting, URLSessionWebSocketDelegate {
+    var onMessage: ((String) -> ())?
     var session: URLSession!
     var onConnect: (() -> ())?
     var onDisconnect: (() -> ())?
@@ -19,9 +21,10 @@ class JSONRPCTransport: NSObject, JSONRPCTransporting, URLSessionWebSocketDelega
         listen(on: url)
     }
 
-    func send(_ string: String)  {
+    func send(_ string: String, completion: @escaping (Error?)->())  {
         DispatchQueue.global().async {
             self.webSocketTask.send(.string(string)) { error in
+            completion(error)
               if let error = error {
                 print("Error when sending a message \(error)")
               }

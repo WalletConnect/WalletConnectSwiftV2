@@ -19,4 +19,19 @@ enum RelayJSONRPC {
     struct SubscribeParams: Codable {
         let topic: String
     }
+    
+    struct SubscriptionData: Decodable {
+        let topic: String
+        let message: String
+    }
+    
+    struct SubscriptionParams: Decodable {
+        let id: String
+        let data: SubscriptionData
+    }
+    
+    struct UnsubscribeParams: Codable {
+        let id: String
+        let topic: String
+    }
 }

@@ -2,25 +2,6 @@
 
 import Foundation
 
-protocol JSONConvertible where Self: Encodable {
-    func json() throws -> String
-}
-
-extension Encodable  {
-    func json() throws -> String {
-        let data = try JSONEncoder().encode(self)
-        guard let string = String(data: data, encoding: .utf8) else {
-            throw DataConversionError.dataToStringFailed
-        }
-        return string
-    }
-}
-
-enum DataConversionError: Error {
-    case stringToDataFailed
-    case dataToStringFailed
-}
-
 struct JSONRPCError: Error, Codable {
     let code: Int
     let message: String

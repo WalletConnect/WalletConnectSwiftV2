@@ -8,13 +8,4 @@ struct PairingApproveParams: Codable, Equatable {
     let responder: PairingParticipant
     let expiry: Int
     let state: PairingState
-    
-    enum CodingKeys: CodingKey {
-        case topic
-        case relay
-        case responder
-        case expiry
-        case state
-    }
-
 }
