@@ -1,6 +1,8 @@
 // 
 
 import Foundation
+import CryptoKit
+import CryptoSwift
 
 public class DebugClient {
     let relay: Relay
@@ -23,17 +25,15 @@ public class DebugClient {
         let agreementKeys = try Crypto.X25519.generateAgreementKeys(peerPublicKey: peerPublic, privateKey: privateKey)
         crypto.set(agreementKeys: agreementKeys, topic: proposal.topic)
         crypto.set(privateKey: privateKey)
-        
-        
-        
-        
+        let expiry = proposal.ttl + Int(Date().timeIntervalSince1970)
         let appMetadata = AppMetadata(name: "iOS", description: nil, url: nil, icons: nil)
         let approve = PairingApproveParams(topic: proposal.topic,
                                            relay: RelayProtocolOptions(protocol: "waku", params: nil),
                                            responder: selfParticipant,
-                                           expiry: proposal.ttl,
+                                           expiry: expiry,
                                            state: PairingState(metadata: appMetadata))
-        relay.publish(topic: proposal.topic, payload: approve)
+        let jsonRpc = ClientSynchJSONRPC(method: ClientSynchJSONRPC.Method.pairingApprove, params: ClientSynchJSONRPC.Params.pairingApprove(approve))
+        relay.publish(topic: proposal.topic, payload: jsonRpc)
     }
     
     func formatPairingProposal(from uri: PairParamsUri) -> PairingProposal {

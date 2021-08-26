@@ -20,12 +20,12 @@ enum RelayJSONRPC {
         let topic: String
     }
     
-    struct SubscriptionData: Decodable {
+    struct SubscriptionData: Codable {
         let topic: String
         let message: String
     }
     
-    struct SubscriptionParams: Decodable {
+    struct SubscriptionParams: Codable {
         let id: String
         let data: SubscriptionData
     }
