@@ -32,3 +32,19 @@ struct JSONRPCRequest<T: Codable>: Codable {
     }
 }
 
+struct JSONRPCResponse<T: Codable>: Codable {
+    let jsonrpc = "2.0"
+    let id: Int64
+    let result: T
+
+    enum CodingKeys: String, CodingKey {
+        case jsonrpc
+        case id
+        case result
+    }
+
+    init(id: Int64, result: T) {
+        self.id = id
+        self.result = result
+    }
+}

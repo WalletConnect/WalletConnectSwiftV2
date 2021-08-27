@@ -1,7 +1,7 @@
 //
 
 import Foundation
-class DefaultSubscriber: Subscriber {
+class MockedSubscriber: Subscriber {
     var topic: String = ""
     func update(with jsonRpcRequest: ClientSynchJSONRPC) {
         
@@ -70,7 +70,7 @@ class Relay {
                 }
             }
         } catch {
-            Logger.debug(error)
+            Logger.error(error)
         }
     }
     
@@ -87,7 +87,7 @@ class Relay {
                 }
             }
         } catch {
-            Logger.debug(error)
+            Logger.error(error)
         }
     }
     
@@ -100,22 +100,36 @@ class Relay {
     }
     
     private func setUpTransport() {
-//        transport.onMessage = { [unowned self] message in
-//            if let request = self.getSubscriptionRequest(from: message) {
-//                let topic = request.params.data.topic
-//                if let agreementKeys = self.crypto.getAgreementKeys(for: topic) {
-//
-//
-//
-//                    let deserialisedJsonRpcRequest = self.jsonRpcSerialiser.deserialise(message: request.params.data.message, symmetricKey: agreementKeys.sharedSecret)
-//                    if let subscriber = getSubscriber(for: topic) {
-//                        subscriber.update(with: <#T##JSONRPCRequest<Decodable & Encodable>#>)
-//                    }
-//                } else {
-//                    Logger.debug("Did not find key associated with topic: \(topic)")
-//                }
-//            }
-//        }
+        transport.onPayload = { [unowned self] payload in
+            self.onPayload(payload)
+        }
+    }
+    
+    private func onPayload(_ payload: String) {
+        if let request = getSubscriptionRequest(from: payload) {
+            let topic = request.params.data.topic
+            if let agreementKeys = crypto.getAgreementKeys(for: topic) {
+                let message = request.params.data.message
+                do {
+                    let deserialisedJsonRpcRequest = try jsonRpcSerialiser.deserialise(message: message, symmetricKey: agreementKeys.sharedSecret)
+                    if let subscriber = getSubscriber(for: topic) {
+                        subscriber.update(with: deserialisedJsonRpcRequest)
+                    }
+                    let response = JSONRPCResponse(id: request.id, result: true)
+                    let responseJson = try response.json()
+                    transport.send(responseJson) { error in
+                        if let error = error {
+                            Logger.debug("Failed to Respond for request id: \(request.id)")
+                            Logger.error(error)
+                        }
+                    }
+                } catch {
+                    Logger.error(error)
+                }
+            } else {
+                Logger.debug("Did not find key associated with topic: \(topic)")
+            }
+        }
     }
         
     private func getSubscriptionRequest(from message: String) -> JSONRPCRequest<RelayJSONRPC.SubscriptionParams>? {
@@ -131,10 +145,5 @@ class Relay {
     private func getSubscriber(for topic: String) -> Subscriber? {
         return subscribers.first{$0.topic == topic}
     }
-}
 
-extension String {
-    func toHexEncodedString(uppercase: Bool = true, prefix: String = "", separator: String = "") -> String {
-        return unicodeScalars.map { prefix + .init($0.value, radix: 16, uppercase: uppercase) } .joined(separator: separator)
-    }
 }

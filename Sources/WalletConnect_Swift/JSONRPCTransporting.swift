@@ -3,13 +3,13 @@
 import Foundation
 
 protocol JSONRPCTransporting {
-    var onMessage: ((String)->())? {get set}
+    var onPayload: ((String)->())? {get set}
     func send(_ string: String, completion: @escaping (Error?)->())
     func disconnect()
 }
 
 class JSONRPCTransport: NSObject, JSONRPCTransporting, URLSessionWebSocketDelegate {
-    var onMessage: ((String) -> ())?
+    var onPayload: ((String) -> ())?
     var session: URLSession!
     var onConnect: (() -> ())?
     var onDisconnect: (() -> ())?
