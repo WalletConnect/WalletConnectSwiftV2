@@ -5,8 +5,8 @@ import CryptoSwift
 
 protocol Codec {
     var hmacAuthenticator: HMACAutenticating {get}
-    func encode(plainText: String, agreementKeys: X25519AgreementKeys) throws -> EncryptionPayload
-    func decode(payload: EncryptionPayload, symmetricKey: Data) throws -> String
+    func encode(plainText: String, agreementKeys: Crypto.X25519.AgreementKeys) throws -> EncryptionPayload
+    func decode(payload: EncryptionPayload, sharedSecret: Data) throws -> String
 }
 
 class AES_256_CBC_HMAC_SHA256_Codec: Codec {
@@ -16,8 +16,8 @@ class AES_256_CBC_HMAC_SHA256_Codec: Codec {
         self.hmacAuthenticator = hmacAuthenticator
     }
     
-    func encode(plainText: String, agreementKeys: X25519AgreementKeys) throws -> EncryptionPayload {
-        let (encryptionKey, authenticationKey) = getKeyPair(from: agreementKeys.sharedKey)
+    func encode(plainText: String, agreementKeys: Crypto.X25519.AgreementKeys) throws -> EncryptionPayload {
+        let (encryptionKey, authenticationKey) = getKeyPair(from: agreementKeys.sharedSecret)
         let plainTextData = try data(string: plainText)
         let (cipherText, iv) = try encrypt(key: encryptionKey, data: plainTextData)
         let dataToMac = iv + agreementKeys.publicKey + cipherText
@@ -28,8 +28,8 @@ class AES_256_CBC_HMAC_SHA256_Codec: Codec {
                                  cipherText: cipherText)
     }
     
-    func decode(payload: EncryptionPayload, symmetricKey: Data) throws -> String {
-        let (decryptionKey, authenticationKey) = getKeyPair(from: symmetricKey)
+    func decode(payload: EncryptionPayload, sharedSecret: Data) throws -> String {
+        let (decryptionKey, authenticationKey) = getKeyPair(from: sharedSecret)
         let dataToMac = payload.iv + payload.publicKey + payload.cipherText
         try hmacAuthenticator.validateAuthentication(for: dataToMac, with: payload.mac, using: authenticationKey)
         let plainTextData = try decrypt(key: decryptionKey, data: payload.cipherText, iv: payload.iv)
