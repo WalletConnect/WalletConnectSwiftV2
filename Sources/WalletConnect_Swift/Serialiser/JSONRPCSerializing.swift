@@ -4,8 +4,8 @@ import Foundation
 
 protocol JSONRPCSerialising {
     var codec: Codec {get}
-    func serialise(json: String, key: String) -> String
-    func deserialise(message: String, key: String) throws -> ClientSynchJSONRPC
+    func serialise(json: String, agreementKeys: X25519AgreementKeys) throws -> String
+    func deserialise(message: String, symmetricKey: Data) throws -> ClientSynchJSONRPC
 }
 
 class JSONRPCSerialiser: JSONRPCSerialising {
@@ -15,32 +15,36 @@ class JSONRPCSerialiser: JSONRPCSerialising {
         self.codec = codec
     }
     
-    func deserialise(message: String, key: String) throws -> ClientSynchJSONRPC {
+    func deserialise(message: String, symmetricKey: Data) throws -> ClientSynchJSONRPC {
         let encryptionPayload = try deserialiseIntoPayload(message: message)
-        let decryptedJSONRPC = codec.decode(payload: encryptionPayload, key: key)
+        let decryptedJSONRPC = try codec.decode(payload: encryptionPayload, symmetricKey: symmetricKey)
         guard let JSONRPCData = decryptedJSONRPC.data(using: .utf8) else {
             throw DataConversionError.stringToDataFailed
         }
         return try JSONDecoder().decode(ClientSynchJSONRPC.self, from: JSONRPCData)
     }
     
-    func serialise(json: String, key: String) -> String {
-        let payload = codec.encode(plainText: json, key: key)
-        return "\(payload.iv)\(payload.publicKey)\(payload.mac)\(payload.cipherText)"
+    func serialise(json: String, agreementKeys: X25519AgreementKeys) throws -> String {
+        let payload = try codec.encode(plainText: json, agreementKeys: agreementKeys)
+        let iv = payload.iv.toHexString()
+        let publicKey = payload.publicKey.toHexString()
+        let mac = payload.mac.toHexString()
+        let cipherText = payload.cipherText.toHexString()
+        return "\(iv)\(publicKey)\(mac)\(cipherText)"
     }
     
     func deserialiseIntoPayload(message: String) throws -> EncryptionPayload {
-        let data = Data.fromHex(message)!
+        let data = Data(hex: message)
         guard data.count > EncryptionPayload.ivLength + EncryptionPayload.publicKeyLength + EncryptionPayload.macLength else {
             throw JSONRPCSerialiserError.messageToShort
         }
         let pubKeyRangeStartIndex = EncryptionPayload.ivLength
         let macStartIndex = pubKeyRangeStartIndex + EncryptionPayload.publicKeyLength
         let cipherTextStartIndex = macStartIndex + EncryptionPayload.macLength
-        let iv = data.subdata(in: 0..<pubKeyRangeStartIndex).toHexString()
-        let pubKey = data.subdata(in: pubKeyRangeStartIndex..<macStartIndex).toHexString()
-        let mac = data.subdata(in: macStartIndex..<cipherTextStartIndex).toHexString()
-        let cipherText = data.subdata(in: cipherTextStartIndex..<data.count).toHexString()
+        let iv = data.subdata(in: 0..<pubKeyRangeStartIndex)
+        let pubKey = data.subdata(in: pubKeyRangeStartIndex..<macStartIndex)
+        let mac = data.subdata(in: macStartIndex..<cipherTextStartIndex)
+        let cipherText = data.subdata(in: cipherTextStartIndex..<data.count)
         return EncryptionPayload(iv: iv, publicKey: pubKey, mac: mac, cipherText: cipherText)
     }
 }
