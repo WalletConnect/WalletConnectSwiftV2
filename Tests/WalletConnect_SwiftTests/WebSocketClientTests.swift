@@ -1,9 +1,9 @@
 import XCTest
 @testable import WalletConnect_Swift
 
-final class WebSocketClientTests: XCTestCase {
+final class WebSocketSessionTests: XCTestCase {
     
-    var sut: WebSocketClient!
+    var sut: WebSocketSession!
     
     var webSocketTaskMock: URLSessionWebSocketTaskMock!
     var sessionMock: URLSessionMock!
@@ -11,7 +11,7 @@ final class WebSocketClientTests: XCTestCase {
     override func setUp() {
         webSocketTaskMock = URLSessionWebSocketTaskMock()
         sessionMock = URLSessionMock(webSocketTaskMock: webSocketTaskMock)
-        sut = WebSocketClient(session: sessionMock)
+        sut = WebSocketSession(session: sessionMock)
     }
     
     override func tearDown() {

@@ -1,6 +1,6 @@
 import Foundation
 
-final class WebSocketClient: NSObject {
+final class WebSocketSession: NSObject {
     
     private let session: URLSessionProtocol
     
