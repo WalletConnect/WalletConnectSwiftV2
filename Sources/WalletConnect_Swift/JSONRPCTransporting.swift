@@ -52,13 +52,14 @@ class JSONRPCTransport: NSObject, JSONRPCTransporting, URLSessionWebSocketDelega
         switch result {
         case .success(let message):
           switch message {
-          case .data(let data):
-            print("Data received \(data)")
           case .string(let text):
-            print("Text received \(text)")
+            Logger.debug("Transport: Text received \(text)")
+            onPayload?(text)
+          default:
+            Logger.debug("Transport: Unexpected type of message received")
           }
         case .failure(let error):
-          print("Error when receiving \(error)")
+            Logger.debug("Error when receiving \(error)")
         }
         self.listen()
       }

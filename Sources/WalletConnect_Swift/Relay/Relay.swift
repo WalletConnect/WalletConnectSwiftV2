@@ -1,26 +1,14 @@
-//
 
 import Foundation
-class MockedSubscriber: Subscriber {
-    var topic: String = ""
-    func update(with jsonRpcRequest: ClientSynchJSONRPC) {
-        
-    }
-}
-
-protocol Subscriber: class {
-    var topic: String {get set}
-    func update(with jsonRpcRequest: ClientSynchJSONRPC)
-}
 
 class Relay {
     private let defaultTtl = Time.sixHours
-    private let jsonRpcSerialiser: JSONRPCSerialiser
+    private let jsonRpcSerialiser: JSONRPCSerialising
     private var transport: JSONRPCTransporting
     private let crypto: Crypto
-    var subscribers = [Subscriber]()
+    var subscribers = [RelaySubscriber]()
 
-    init(jsonRpcSerialiser: JSONRPCSerialiser = JSONRPCSerialiser(),
+    init(jsonRpcSerialiser: JSONRPCSerialising = JSONRPCSerialiser(),
          transport: JSONRPCTransporting,
          crypto: Crypto) {
         self.jsonRpcSerialiser = jsonRpcSerialiser
@@ -30,21 +18,17 @@ class Relay {
     }
     
     func publish(topic: String, payload: Encodable) {
-        let agreementKeys = crypto.getAgreementKeys(for: topic)
-        let hasKeysForTopic = agreementKeys != nil
         do {
             let messageJson = try payload.json()
             var message: String
-            if hasKeysForTopic {
-                message = try jsonRpcSerialiser.serialise(json: messageJson, agreementKeys: agreementKeys!)
+            if let agreementKeys = crypto.getAgreementKeys(for: topic) {
+                message = try jsonRpcSerialiser.serialise(json: messageJson, agreementKeys: agreementKeys)
             } else {
                 message = messageJson.toHexEncodedString(uppercase: false)
             }
             let params = RelayJSONRPC.PublishParams(topic: topic, message: message, ttl: defaultTtl)
             let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.rawValue, params: params)
             let requestJson = try request.json()
-            print(messageJson)
-            print(requestJson)
             Logger.debug("Publishing Payload on Topic: \(topic)")
             transport.send(requestJson) { error in
                 if let error = error {
@@ -91,11 +75,11 @@ class Relay {
         }
     }
     
-    func addSubscriber(_ subscriber: Subscriber) {
+    func addSubscriber(_ subscriber: RelaySubscriber) {
         subscribers.append(subscriber)
     }
     
-    func removeSubscriber(_ subscriber: Subscriber) {
+    func removeSubscriber(_ subscriber: RelaySubscriber) {
         subscribers.removeAll{$0===subscriber}
     }
     
@@ -142,7 +126,7 @@ class Relay {
         }
     }
     
-    private func getSubscriber(for topic: String) -> Subscriber? {
+    private func getSubscriber(for topic: String) -> RelaySubscriber? {
         return subscribers.first{$0.topic == topic}
     }
 
