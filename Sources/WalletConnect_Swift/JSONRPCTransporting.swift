@@ -4,15 +4,17 @@ import Foundation
 
 protocol JSONRPCTransporting {
     var onPayload: ((String)->())? {get set}
+    var onConnected: (()->())? {get set}
+    var onDisconnected: (()->())? {get set}
     func send(_ string: String, completion: @escaping (Error?)->())
     func disconnect()
 }
 
 class JSONRPCTransport: NSObject, JSONRPCTransporting, URLSessionWebSocketDelegate {
+    var onConnected: (() -> ())?
+    var onDisconnected: (() -> ())?
     var onPayload: ((String) -> ())?
     var session: URLSession!
-    var onConnect: (() -> ())?
-    var onDisconnect: (() -> ())?
     var onReceiveMessage: (() -> ())?
     var webSocketTask: URLSessionWebSocketTask!
     
@@ -67,9 +69,11 @@ class JSONRPCTransport: NSObject, JSONRPCTransporting, URLSessionWebSocketDelega
     
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         print("Web Socket did disconnect")
+        onDisconnected?()
     }
     
     public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
         print("Web Socket did connect")
+        onConnected?()
     }
 }
