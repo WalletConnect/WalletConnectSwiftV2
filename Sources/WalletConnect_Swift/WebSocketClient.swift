@@ -2,11 +2,15 @@ import Foundation
 
 final class WebSocketClient: NSObject {
     
-    private let session: URLSession
+    private let session: URLSessionProtocol
     
-    private var webSocketTask: URLSessionWebSocketTask?
+    private var webSocketTask: URLSessionWebSocketTaskProtocol?
     
-    init(session: URLSession) {
+    var isConnected: Bool {
+        webSocketTask != nil
+    }
+    
+    init(session: URLSessionProtocol) {
         self.session = session
         super.init()
     }
@@ -42,4 +46,20 @@ final class WebSocketClient: NSObject {
 }
 
 protocol URLSessionProtocol {
+    func webSocketTask(with url: URL) -> URLSessionWebSocketTaskProtocol
 }
+
+extension URLSession: URLSessionProtocol {
+    func webSocketTask(with url: URL) -> URLSessionWebSocketTaskProtocol {
+        webSocketTask(with: url) as URLSessionWebSocketTask
+    }
+}
+
+protocol URLSessionWebSocketTaskProtocol {
+    func resume()
+    func cancel()
+    func send(_ message: URLSessionWebSocketTask.Message, completionHandler: @escaping (Error?) -> Void)
+    func receive(completionHandler: @escaping (Result<URLSessionWebSocketTask.Message, Error>) -> Void)
+}
+
+extension URLSessionWebSocketTask: URLSessionWebSocketTaskProtocol {}

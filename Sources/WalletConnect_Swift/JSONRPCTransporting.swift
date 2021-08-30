@@ -41,7 +41,7 @@ class JSONRPCTransport: NSObject, JSONRPCTransporting, URLSessionWebSocketDelega
     
     private func listen(on url: URL) {
         session = URLSession(configuration: .default, delegate: self, delegateQueue: OperationQueue())
-        session.webSocketTask(with: url)
+        session.webSocketTask(with: url) as URLSessionWebSocketTask
         var request = URLRequest(url: url)
         request.timeoutInterval = 20
         webSocketTask = session.webSocketTask(with: url)
