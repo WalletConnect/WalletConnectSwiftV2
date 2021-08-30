@@ -5,13 +5,13 @@ final class WebSocketSession: NSObject {
     var onMessageReceived: ((String) -> ())?
     var onError: ((Error) -> ())?
     
-    private let session: URLSessionProtocol
-    
-    private var webSocketTask: URLSessionWebSocketTaskProtocol?
-    
     var isConnected: Bool {
         webSocketTask != nil
     }
+    
+    private let session: URLSessionProtocol
+    
+    private var webSocketTask: URLSessionWebSocketTaskProtocol?
     
     init(session: URLSessionProtocol) {
         self.session = session
