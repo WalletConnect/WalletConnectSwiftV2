@@ -45,64 +45,65 @@ final class WebSocketSessionTests: XCTestCase {
         XCTAssertFalse(webSocketTaskMock.didCallSend)
     }
     
-    func testSendMessage() {
+    func testSendMessageSuccess() {
         let expectedMessage = "message"
+        var didCallbackError = false
+        sut.onError = { _ in didCallbackError = true }
+        
         sut.connect(on: URL.stub())
         sut.send(expectedMessage)
+        
         XCTAssertTrue(webSocketTaskMock.didCallSend)
+        XCTAssertFalse(didCallbackError)
         guard case .string(let message) = webSocketTaskMock.lastMessageSent else { XCTFail(); return }
         XCTAssertEqual(message, expectedMessage)
     }
-}
 
-final class URLSessionMock: URLSessionProtocol {
-    
-    let webSocketTaskMock: URLSessionWebSocketTaskMock
-    
-    var lastSessionTaskURL: URL?
-    
-    init(webSocketTaskMock: URLSessionWebSocketTaskMock) {
-        self.webSocketTaskMock = webSocketTaskMock
+    func testSendMessageFailure() {
+        var didCallbackError = false
+        sut.onError = { _ in didCallbackError = true }
+        webSocketTaskMock.sendMessageError = NSError(domain: "", code: -9999, userInfo: nil)
+        
+        sut.connect(on: URL.stub())
+        sut.send("")
+        
+        XCTAssertTrue(didCallbackError)
     }
     
-    func webSocketTask(with url: URL) -> URLSessionWebSocketTaskProtocol {
-        lastSessionTaskURL = url
-        return webSocketTaskMock
-    }
-}
-
-final class URLSessionWebSocketTaskMock: URLSessionWebSocketTaskProtocol {
-    
-    var didCallResume = false
-    var didCallCancel = false
-    
-    var lastMessageSent: URLSessionWebSocketTask.Message?
-    var didCallSend: Bool {
-        lastMessageSent != nil
+    func testReceiveMessageSuccess() {
+        let expectedMessage = "message"
+        var callbackMessage: String? = nil
+        sut.onMessageReceived = { callbackMessage = $0 }
+        webSocketTaskMock.receiveMessageResult = .success(.string(expectedMessage))
+        
+        sut.connect(on: URL.stub())
+        
+        XCTAssertEqual(callbackMessage, expectedMessage)
+        XCTAssert(webSocketTaskMock.receiveCallsCount == 2)
     }
     
-    var didCallReceive = false
-    
-    func resume() {
-        didCallResume = true
+    func testReceiveMessageSuccessButUnexpectedType() {
+        var callbackMessage: String? = nil
+        sut.onMessageReceived = { callbackMessage = $0 }
+        var didCallbackError = false
+        sut.onError = { _ in didCallbackError = true }
+        webSocketTaskMock.receiveMessageResult = .success(.data("message".data(using: .utf8)!))
+        
+        sut.connect(on: URL.stub())
+        
+        XCTAssertNil(callbackMessage)
+        XCTAssertFalse(didCallbackError)
+        XCTAssert(webSocketTaskMock.receiveCallsCount == 2)
     }
     
-    func cancel() {
-        didCallCancel = true
-    }
-    
-    func send(_ message: URLSessionWebSocketTask.Message, completionHandler: @escaping (Error?) -> Void) {
-        lastMessageSent = message
-    }
-    
-    func receive(completionHandler: @escaping (Result<URLSessionWebSocketTask.Message, Error>) -> Void) {
-        didCallReceive = true
-    }
-}
-
-extension URL {
-    
-    static func stub() -> URL {
-        URL(string: "https://httpbin.org")!
+    func testReceiveMessageFailure() {
+        var didCallbackError = false
+        sut.onError = { _ in didCallbackError = true }
+        webSocketTaskMock.receiveMessageResult = .failure(NSError(domain: "", code: -9999, userInfo: nil))
+        
+        sut.connect(on: URL.stub())
+        
+        XCTAssertTrue(didCallbackError)
+        XCTAssert(webSocketTaskMock.receiveCallsCount == 2)
     }
 }
