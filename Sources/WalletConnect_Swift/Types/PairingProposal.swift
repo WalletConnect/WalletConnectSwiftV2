@@ -16,7 +16,7 @@ struct PairingProposer {
   let controller: Bool
 }
 
-struct RelayProtocolOptions: Codable {
+struct RelayProtocolOptions: Codable, Equatable {
     let `protocol`: String
     let params: [String]?
 }

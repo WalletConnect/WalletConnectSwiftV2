@@ -16,7 +16,7 @@ struct ClientSynchJSONRPC: Codable {
         case params
     }
     
-    internal init(id: Int64, jsonrpc: String, method: Method, params: Params) {
+    internal init(id: Int64 = generateId(), jsonrpc: String = "2.0", method: Method, params: Params) {
         self.id = id
         self.jsonrpc = jsonrpc
         self.method = method
@@ -36,6 +36,23 @@ struct ClientSynchJSONRPC: Codable {
             let paramsValue = try container.decode(PairingRejectParams.self, forKey: .params)
             params = .pairingReject(paramsValue)
         }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(jsonrpc, forKey: .jsonrpc)
+        try container.encode(method.rawValue, forKey: .method)
+        switch params {
+        case .pairingApprove(let params):
+            try container.encode(params, forKey: .params)
+        case .pairingReject(let params):
+            try container.encode(params, forKey: .params)
+        }
+    }
+    
+    private static func generateId() -> Int64 {
+        return Int64(Date().timeIntervalSince1970) * 1000
     }
 }
 

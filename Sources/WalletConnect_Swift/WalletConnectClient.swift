@@ -25,10 +25,6 @@ public class WalletConnectClient {
     }
 }
 
-protocol SequenceEngine {
-    var sequence: Sequence {get}
-    var relay: Relay {get}
-}
 
 enum SequenceStatus {
     case pending
@@ -39,10 +35,4 @@ enum SequenceStatus {
 
 protocol Sequence {
     var status: SequenceStatus {get set}
-}
-
-class Relay {
-    func publish(){}
-    func subscribe(){}
-    func unsubscribe(){}
 }
