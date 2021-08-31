@@ -3,5 +3,5 @@
 import Foundation
 
 enum Time {
-    static let sixHours = 21600
+    static let hour = 3600
 }

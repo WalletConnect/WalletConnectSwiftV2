@@ -2,7 +2,7 @@
 import Foundation
 
 class Relay {
-    private let defaultTtl = Time.sixHours
+    private let defaultTtl = 6*Time.hour
     private let jsonRpcSerialiser: JSONRPCSerialising
     private var transport: JSONRPCTransporting
     private let crypto: Crypto
