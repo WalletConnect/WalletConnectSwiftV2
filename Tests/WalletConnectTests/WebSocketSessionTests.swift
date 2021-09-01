@@ -1,5 +1,5 @@
 import XCTest
-@testable import WalletConnect_Swift
+@testable import WalletConnect
 
 final class WebSocketSessionTests: XCTestCase {
     

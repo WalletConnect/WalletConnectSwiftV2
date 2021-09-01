@@ -1,7 +1,7 @@
 import XCTest
 
-import WalletConnect_SwiftTests
+import WalletConnectTests
 
 var tests = [XCTestCaseEntry]()
-tests += WalletConnect_SwiftTests.allTests()
+tests += WalletConnectTests.allTests()
 XCTMain(tests)

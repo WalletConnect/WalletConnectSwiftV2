@@ -3,7 +3,7 @@
 import Foundation
 
 import XCTest
-@testable import WalletConnect_Swift
+@testable import WalletConnect
 
 final class JSONRPCSerialiserTests: XCTestCase {
     var serialiser: JSONRPCSerialiser!
