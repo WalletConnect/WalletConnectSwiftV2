@@ -1,7 +1,7 @@
 // 
 
 import Foundation
-@testable import WalletConnect_Swift
+@testable import WalletConnect
 
 class MockedJSONRPCTransport: JSONRPCTransporting {
     var onConnected: (() -> ())?

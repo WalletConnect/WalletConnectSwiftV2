@@ -2,7 +2,7 @@
 
 import Foundation
 import XCTest
-@testable import WalletConnect_Swift
+@testable import WalletConnect
 
 class HMACAutenticatorTests: XCTestCase {
     let authenticationKey = Data(hex: "da4e6a3641db794441206145d6610d30bd5b403c624a5a4f69feb370cc59924d")

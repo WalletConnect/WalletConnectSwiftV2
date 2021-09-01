@@ -1,5 +1,5 @@
 import Foundation
-@testable import WalletConnect_Swift
+@testable import WalletConnect
 
 final class URLSessionWebSocketTaskMock: URLSessionWebSocketTaskProtocol {
     

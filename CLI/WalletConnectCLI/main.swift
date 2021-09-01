@@ -1,7 +1,7 @@
 // 
 
 import Foundation
-import WalletConnect_Swift
+import WalletConnect
 
 let consoleIO = ConsoleIO()
 consoleIO.printUsage()

@@ -1,7 +1,7 @@
 
 import Foundation
 import XCTest
-@testable import WalletConnect_Swift
+@testable import WalletConnect
 
 
 class RelayTests: XCTestCase {

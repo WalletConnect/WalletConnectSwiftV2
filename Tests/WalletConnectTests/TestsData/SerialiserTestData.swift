@@ -1,7 +1,7 @@
 // 
 
 import Foundation
-@testable import WalletConnect_Swift
+@testable import WalletConnect
 
 enum SerialiserTestData {
     static let emptyAgreementKeys = Crypto.X25519.AgreementKeys(sharedSecret: Data(hex: ""), publicKey: Data(hex: ""))
