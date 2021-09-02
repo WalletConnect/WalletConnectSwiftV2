@@ -20,7 +20,7 @@ public class WalletConnectClient {
                                proposer: PairingProposer(publicKey: uri.publicKey,
                                                          controller: uri.controller),
                                signal: PairingSignal(params: PairingSignal.Params(uri: uri.raw)),
-                               permissions: PairingProposedPermissions(jsonrpc: JSONRPC(methods: [])),
+                               permissions: PairingProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [])),
                                ttl: defaultTtl)
     }
 }

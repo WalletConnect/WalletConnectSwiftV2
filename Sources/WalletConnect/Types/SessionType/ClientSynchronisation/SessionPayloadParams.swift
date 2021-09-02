@@ -1,19 +1,21 @@
 
 import Foundation
 
-struct SessionPayloadParams: Codable {
-    let request: Request
-    let chainId: String?
+extension SessionType {
+    struct PayloadParams: Codable {
+        let request: Request
+        let chainId: String?
+    }
 }
 
-extension SessionPayloadParams {
+extension SessionType.PayloadParams {
     struct Request: Codable {
         let method: String
         let params: Params
     }
 }
 
-extension SessionPayloadParams.Request {
+extension SessionType.PayloadParams.Request {
     enum Params: Codable {
         init(from decoder: Decoder) throws {
             fatalError("not implemented")

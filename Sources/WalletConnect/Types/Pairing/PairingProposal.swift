@@ -16,10 +16,14 @@ struct PairingProposer: Codable {
 }
 
 struct PairingProposedPermissions: Codable {
-    let jsonrpc: JSONRPC
+    let jsonrpc: SequenceType.JSONRPC
 }
 
 struct PairingPermissions: Codable {
-    let jsonrpc: JSONRPC
+    let jsonrpc: SequenceType.JSONRPC
     let controller: Controller
+}
+
+struct JSONRPC: Codable {
+    let methods: [String]
 }
