@@ -2,8 +2,8 @@
 
 import Foundation
 
-struct PairingSignal {
-    struct Params {
+struct PairingSignal: Codable {
+    struct Params: Codable {
         let uri: String
     }
     let type = "uri"

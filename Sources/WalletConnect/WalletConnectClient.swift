@@ -13,15 +13,15 @@ public class WalletConnectClient {
         }
         let proposal = formatPairingProposal(from: pairingParamsUri)
     }
-    
+    let defaultTtl = 2592000
     func formatPairingProposal(from uri: PairParamsUri) -> PairingProposal {
         return PairingProposal(topic: uri.topic,
                                relay: uri.relay,
                                proposer: PairingProposer(publicKey: uri.publicKey,
                                                          controller: uri.controller),
                                signal: PairingSignal(params: PairingSignal.Params(uri: uri.raw)),
-                               permissions: PairingProposedPermissions(jsonrpc: PairingProposedPermissions.JSONRPC(methods: [])),
-                               ttl: Pairing.defaultTtl)
+                               permissions: PairingProposedPermissions(jsonrpc: JSONRPC(methods: [])),
+                               ttl: defaultTtl)
     }
 }
 

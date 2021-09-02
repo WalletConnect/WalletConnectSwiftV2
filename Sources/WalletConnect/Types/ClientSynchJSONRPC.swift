@@ -1,7 +1,5 @@
-// 
 
 import Foundation
-
 
 struct ClientSynchJSONRPC: Codable {
     let id: Int64
