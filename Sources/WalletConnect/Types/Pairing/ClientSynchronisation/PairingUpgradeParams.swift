@@ -1,7 +1,8 @@
 
 import Foundation
 
-struct PairingUpgradeParams: Codable {
-    let permissions: PairingPermissions
+extension PairingType {
+    struct UpgradeParams: Codable {
+        let permissions: Permissions
+    }
 }
-

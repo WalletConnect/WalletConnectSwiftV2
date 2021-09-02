@@ -1,12 +1,14 @@
 
 import Foundation
 
-typealias PairingSuccessResponse = PairingApproveParams
-
-struct PairingState: Codable, Equatable {
-    let metadata: AppMetadata
-}
-
-struct PairingParticipant:Codable, Equatable {
-    let publicKey: String
+extension PairingType {
+    typealias SuccessResponse = PairingType.ApproveParams
+    
+    struct State: Codable, Equatable {
+        let metadata: AppMetadata
+    }
+    
+    struct Participant:Codable, Equatable {
+        let publicKey: String
+    }
 }

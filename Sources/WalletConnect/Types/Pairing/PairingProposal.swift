@@ -1,29 +1,31 @@
 
 import Foundation
 
-struct PairingProposal: Codable {
-    let topic: String
-    let relay: RelayProtocolOptions
-    let proposer: PairingProposer
-    let signal: PairingSignal
-    let permissions: PairingProposedPermissions
-    let ttl: Int
-}
-
-struct PairingProposer: Codable {
-    let publicKey: String
-    let controller: Bool
-}
-
-struct PairingProposedPermissions: Codable {
-    let jsonrpc: SequenceType.JSONRPC
-}
-
-struct PairingPermissions: Codable {
-    let jsonrpc: SequenceType.JSONRPC
-    let controller: Controller
-}
-
-struct JSONRPC: Codable {
-    let methods: [String]
+extension PairingType {
+    struct Proposal: Codable {
+        let topic: String
+        let relay: RelayProtocolOptions
+        let proposer: Proposer
+        let signal: Signal
+        let permissions: ProposedPermissions
+        let ttl: Int
+    }
+    
+    struct Proposer: Codable {
+        let publicKey: String
+        let controller: Bool
+    }
+    
+    struct ProposedPermissions: Codable {
+        let jsonrpc: JSONRPC
+    }
+    
+    struct Permissions: Codable {
+        let jsonrpc: JSONRPC
+        let controller: Controller
+    }
+    
+    struct JSONRPC: Codable {
+        let methods: [String]
+    }
 }

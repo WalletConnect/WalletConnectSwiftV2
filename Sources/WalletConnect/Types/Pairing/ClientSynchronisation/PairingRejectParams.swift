@@ -1,6 +1,8 @@
 
 import Foundation
 
-struct PairingRejectParams: Codable, Equatable {
-    let reason: String
+extension PairingType {
+    struct RejectParams: Codable, Equatable {
+        let reason: String
+    }
 }

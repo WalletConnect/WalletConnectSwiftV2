@@ -1,6 +1,8 @@
 
 import Foundation
 
-struct PairingDeleteParams: Codable {
-    let reason: String
+extension PairingType {
+    struct DeleteParams: Codable {
+        let reason: String
+    }
 }

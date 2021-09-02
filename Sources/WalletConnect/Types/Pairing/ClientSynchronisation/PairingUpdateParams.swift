@@ -1,6 +1,8 @@
 
 import Foundation
 
-struct PairingUpdateParams: Codable {
-    let state: PairingState
+extension PairingType {
+    struct UpdateParams: Codable {
+        let state: State
+    }
 }

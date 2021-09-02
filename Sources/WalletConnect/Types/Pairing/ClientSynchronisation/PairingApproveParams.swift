@@ -1,10 +1,12 @@
 
 import Foundation
 
-struct PairingApproveParams: Codable, Equatable {
-    let topic: String
-    let relay: RelayProtocolOptions
-    let responder: PairingParticipant
-    let expiry: Int
-    let state: PairingState
+extension PairingType {
+    struct ApproveParams: Codable, Equatable {
+        let topic: String
+        let relay: RelayProtocolOptions
+        let responder: Participant
+        let expiry: Int
+        let state: State
+    }
 }
