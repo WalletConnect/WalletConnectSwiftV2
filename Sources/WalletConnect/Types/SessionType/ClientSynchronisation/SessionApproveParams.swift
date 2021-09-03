@@ -2,7 +2,7 @@
 import Foundation
 
 extension SessionType {
-    struct ApproveParams {
+    struct ApproveParams: Codable {
         let topic: String
         let relay: RelayProtocolOptions
         let responder: Participant
