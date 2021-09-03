@@ -2,7 +2,7 @@
 import Foundation
 
 extension SessionType {
-    struct SessionRejectParams: Codable, Equatable {
+    struct RejectParams: Codable, Equatable {
         let reason: String
     }
 }
