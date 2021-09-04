@@ -33,13 +33,5 @@ final class JSONRPCSerialiserTests: XCTestCase {
         let deserialisedJSONRPC = try! serialiser.deserialise(message: serialisedMessageSample, symmetricKey: Data(hex: ""))
         XCTAssertEqual(deserialisedJSONRPC.params, SerialiserTestData.pairingApproveJSONRPCRequest.params)
     }
-    
-    func testDeserialiseIntoPayload() {
-        let payload = try! serialiser.deserialiseIntoPayload(message: SerialiserTestData.serialisedMessage)
-        XCTAssertEqual(payload.iv, SerialiserTestData.iv)
-        XCTAssertEqual(payload.publicKey, SerialiserTestData.publicKey)
-        XCTAssertEqual(payload.mac, SerialiserTestData.mac)
-        XCTAssertEqual(payload.cipherText, SerialiserTestData.cipherText)
-    }
 }
 
