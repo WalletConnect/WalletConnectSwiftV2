@@ -2,7 +2,7 @@
 import Foundation
 
 extension PairingType {
-    struct UpdateParams: Codable {
+    struct UpdateParams: Codable, Equatable {
         let state: State
     }
 }

@@ -11,21 +11,21 @@ extension PairingType {
         let ttl: Int
     }
     
-    struct Proposer: Codable {
+    struct Proposer: Codable, Equatable {
         let publicKey: String
         let controller: Bool
     }
     
-    struct ProposedPermissions: Codable {
+    struct ProposedPermissions: Codable, Equatable {
         let jsonrpc: JSONRPC
     }
     
-    struct Permissions: Codable {
+    struct Permissions: Codable, Equatable {
         let jsonrpc: JSONRPC
         let controller: Controller
     }
     
-    struct JSONRPC: Codable {
+    struct JSONRPC: Codable, Equatable {
         let methods: [String]
     }
 }

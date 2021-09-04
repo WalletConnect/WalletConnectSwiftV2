@@ -2,7 +2,7 @@
 import Foundation
 
 extension SessionType {
-    struct UpgradeParams: Codable {
+    struct UpgradeParams: Codable, Equatable {
         let permissions: Permissions
     }
 }

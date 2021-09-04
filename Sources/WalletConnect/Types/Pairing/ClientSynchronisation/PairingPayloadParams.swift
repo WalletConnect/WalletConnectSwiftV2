@@ -2,20 +2,20 @@
 import Foundation
 
 extension PairingType {
-    struct PayloadParams: Codable {
+    struct PayloadParams: Codable, Equatable {
         let request: Request
     }
     
 }
 extension PairingType.PayloadParams {
-    struct Request: Codable {
+    struct Request: Codable, Equatable {
         let method: String
         let params: Params
     }
 }
 
 extension PairingType.PayloadParams.Request {
-    enum Params: Codable {
+    enum Params: Codable, Equatable {
         init(from decoder: Decoder) throws {
             fatalError("not implemented")
         }
