@@ -30,7 +30,7 @@ class RelayTests: XCTestCase {
         subscriber.topic = topic
         crypto.set(agreementKeys: Crypto.X25519.AgreementKeys(sharedSecret: Data(), publicKey: Data()), topic: topic)
         relay.addSubscriber(subscriber)
-        transport.onPayload?(testPayload)
+        transport.onMessage?(testPayload)
         XCTAssertTrue(subscriber.notified)
     }
     

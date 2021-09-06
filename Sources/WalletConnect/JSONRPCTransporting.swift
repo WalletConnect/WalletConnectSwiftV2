@@ -3,76 +3,55 @@
 import Foundation
 
 protocol JSONRPCTransporting {
-    var onPayload: ((String)->())? {get set}
-    var onConnected: (()->())? {get set}
-    var onDisconnected: (()->())? {get set}
+    var onConnect: (()->())? {get set}
+    var onDisconnect: (()->())? {get set}
+    var onMessage: ((String) -> ())? {get set}
     func send(_ string: String, completion: @escaping (Error?)->())
     func disconnect()
 }
 
-class JSONRPCTransport: NSObject, JSONRPCTransporting, URLSessionWebSocketDelegate {
-    var onConnected: (() -> ())?
-    var onDisconnected: (() -> ())?
-    var onPayload: ((String) -> ())?
-    var session: URLSession!
-    var onReceiveMessage: (() -> ())?
-    var webSocketTask: URLSessionWebSocketTask!
+final class JSONRPCTransport: NSObject, JSONRPCTransporting {
+    
+    var onConnect: (() -> ())?
+    var onDisconnect: (() -> ())?
+    var onMessage: ((String) -> ())?
+    
+    private let queue = OperationQueue()
+    
+    private lazy var socket: WebSocketSession = {
+        let urlSession = URLSession(configuration: .default, delegate: self, delegateQueue: queue)
+        let socket = WebSocketSession(session: urlSession)
+        socket.onMessageReceived = { [weak self] in
+            self?.onMessage?($0)
+        }
+        return socket
+    }()
     
     init(url: URL) {
         super.init()
-        listen(on: url)
+        socket.connect(on: url)
     }
 
     func send(_ string: String, completion: @escaping (Error?)->())  {
         DispatchQueue.global().async {
-            self.webSocketTask.send(.string(string)) { error in
-            completion(error)
-              if let error = error {
-                print("Error when sending a message \(error)")
-              }
-            }
+            self.socket.send(string)
         }
     }
     
-    public func disconnect() {
-        let reason = "Closing connection".data(using: .utf8)
-        webSocketTask.cancel(with: .goingAway, reason: reason)
+    func disconnect() {
+        socket.disconnect()
     }
+}
+
+extension JSONRPCTransport: URLSessionWebSocketDelegate {
     
-    private func listen(on url: URL) {
-        session = URLSession(configuration: .default, delegate: self, delegateQueue: OperationQueue())
-        var request = URLRequest(url: url)
-        request.timeoutInterval = 20
-        webSocketTask = session.webSocketTask(with: url)
-        webSocketTask.resume()
-        listen()
-    }
-    
-    private func listen() {
-      webSocketTask.receive { [unowned self] result in
-        switch result {
-        case .success(let message):
-          switch message {
-          case .string(let text):
-            Logger.debug("Transport: Text received \(text)")
-            onPayload?(text)
-          default:
-            Logger.debug("Transport: Unexpected type of message received")
-          }
-        case .failure(let error):
-            Logger.debug("Error when receiving \(error)")
-        }
-        self.listen()
-      }
+    public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
+        print("Web Socket did connect")
+        onConnect?()
     }
     
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         print("Web Socket did disconnect")
-        onDisconnected?()
-    }
-    
-    public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
-        print("Web Socket did connect")
-        onConnected?()
+        onDisconnect?()
     }
 }

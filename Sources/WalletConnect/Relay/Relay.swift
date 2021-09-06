@@ -84,7 +84,7 @@ class Relay {
     }
     
     private func setUpTransport() {
-        transport.onPayload = { [unowned self] payload in
+        transport.onMessage = { [unowned self] payload in
             self.onPayload(payload)
         }
     }
