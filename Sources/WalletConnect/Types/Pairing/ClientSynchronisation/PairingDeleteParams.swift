@@ -2,7 +2,7 @@
 import Foundation
 
 extension PairingType {
-    struct DeleteParams: Codable {
+    struct DeleteParams: Codable, Equatable {
         let reason: String
     }
 }

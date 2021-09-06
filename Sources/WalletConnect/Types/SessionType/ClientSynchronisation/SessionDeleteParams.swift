@@ -2,7 +2,7 @@
 import Foundation
 
 extension SessionType {
-    struct DeleteParams: Codable {
+    struct DeleteParams: Codable, Equatable {
         let reason: String
     }
 }

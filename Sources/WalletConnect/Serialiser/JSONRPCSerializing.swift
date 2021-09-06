@@ -33,7 +33,7 @@ class JSONRPCSerialiser: JSONRPCSerialising {
         return "\(iv)\(publicKey)\(mac)\(cipherText)"
     }
     
-    func deserialiseIntoPayload(message: String) throws -> EncryptionPayload {
+    private func deserialiseIntoPayload(message: String) throws -> EncryptionPayload {
         let data = Data(hex: message)
         guard data.count > EncryptionPayload.ivLength + EncryptionPayload.publicKeyLength + EncryptionPayload.macLength else {
             throw JSONRPCSerialiserError.messageToShort

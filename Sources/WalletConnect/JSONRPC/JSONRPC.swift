@@ -28,7 +28,7 @@ struct JSONRPCRequest<T: Codable>: Codable {
     }
 
     private static func generateId() -> Int64 {
-        return Int64(Date().timeIntervalSince1970) * 1000
+        return Int64(Date().timeIntervalSince1970 * 1000)
     }
 }
 

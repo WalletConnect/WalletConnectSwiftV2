@@ -2,7 +2,7 @@
 import Foundation
 
 extension SessionType {
-    struct UpdateParams: Codable {
+    struct UpdateParams: Codable, Equatable {
         let state: State
     }
 }
