@@ -23,5 +23,8 @@ let package = Package(
         .testTarget(
             name: "WalletConnectTests",
             dependencies: ["WalletConnect"]),
+        .testTarget(
+            name: "IntegrationTests",
+            dependencies: ["WalletConnect"]),
     ]
 )
