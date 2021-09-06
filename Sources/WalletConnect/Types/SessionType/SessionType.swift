@@ -1,0 +1,4 @@
+
+import Foundation
+
+enum SessionType {}

@@ -8,20 +8,20 @@ public class WalletConnectClient {
     }
     
     public func pair(with url: String) throws {
-        guard let pairingParamsUri = PairParamsUri(url) else {
+        guard let pairingParamsUri = PairingType.ParamsUri(url) else {
             throw WalletConnectError.PairingParamsUriInitialization
         }
         let proposal = formatPairingProposal(from: pairingParamsUri)
     }
-    
-    func formatPairingProposal(from uri: PairParamsUri) -> PairingProposal {
-        return PairingProposal(topic: uri.topic,
+    let defaultTtl = 2592000
+    func formatPairingProposal(from uri: PairingType.ParamsUri) -> PairingType.Proposal {
+        return PairingType.Proposal(topic: uri.topic,
                                relay: uri.relay,
-                               proposer: PairingProposer(publicKey: uri.publicKey,
+                               proposer: PairingType.Proposer(publicKey: uri.publicKey,
                                                          controller: uri.controller),
-                               signal: PairingSignal(params: PairingSignal.Params(uri: uri.raw)),
-                               permissions: PairingProposedPermissions(jsonrpc: PairingProposedPermissions.JSONRPC(methods: [])),
-                               ttl: Pairing.defaultTtl)
+                               signal: PairingType.Signal(params: PairingType.Signal.Params(uri: uri.raw)),
+                               permissions: PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [])),
+                               ttl: defaultTtl)
     }
 }
 

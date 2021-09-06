@@ -1,7 +1,5 @@
-// 
 
 import Foundation
-
 
 struct ClientSynchJSONRPC: Codable {
     let id: Int64
@@ -30,10 +28,10 @@ struct ClientSynchJSONRPC: Codable {
         method = try container.decode(Method.self, forKey: .method)
         switch method {
         case .pairingApprove:
-            let paramsValue = try container.decode(PairingApproveParams.self, forKey: .params)
+            let paramsValue = try container.decode(PairingType.ApproveParams.self, forKey: .params)
             params = .pairingApprove(paramsValue)
         case .pairingReject:
-            let paramsValue = try container.decode(PairingRejectParams.self, forKey: .params)
+            let paramsValue = try container.decode(PairingType.RejectParams.self, forKey: .params)
             params = .pairingReject(paramsValue)
         }
     }
@@ -65,8 +63,8 @@ extension ClientSynchJSONRPC {
 
 extension ClientSynchJSONRPC {
     enum Params: Codable, Equatable {
-        case pairingApprove(PairingApproveParams)
-        case pairingReject(PairingRejectParams)
+        case pairingApprove(PairingType.ApproveParams)
+        case pairingReject(PairingType.RejectParams)
         
         static func == (lhs: Params, rhs: Params) -> Bool {
             switch (lhs, rhs) {
