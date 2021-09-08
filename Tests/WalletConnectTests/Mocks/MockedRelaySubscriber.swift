@@ -11,7 +11,8 @@ class MockedRelaySubscriber: RelaySubscriber {
         notified = true
     }
     
-    func onResponse(requestId: String, responseType: Relay.SubscriberResponseType) {
+    func onResponse(requestId: Int64, responseType: Relay.JSONRPCResponseType) {
+        <#code#>
     }
     
     func isSubscribing(for subscriptionId: String) -> Bool {
