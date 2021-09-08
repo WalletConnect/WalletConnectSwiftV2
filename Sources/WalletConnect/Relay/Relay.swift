@@ -17,7 +17,7 @@ class Relay {
         setUpTransport()
     }
     
-    func publish(topic: String, payload: Encodable) {
+    func publish(topic: String, payload: Encodable, subscriber: RelaySubscriber) {
         do {
             let messageJson = try payload.json()
             var message: String
@@ -29,6 +29,7 @@ class Relay {
             let params = RelayJSONRPC.PublishParams(topic: topic, message: message, ttl: defaultTtl)
             let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.rawValue, params: params)
             let requestJson = try request.json()
+            subscriber.set(pendingRequestId: request.id)
             Logger.debug("Publishing Payload on Topic: \(topic)")
             transport.send(requestJson) { error in
                 if let error = error {
@@ -41,7 +42,7 @@ class Relay {
         }
     }
     
-    func subscribe(topic: String) {
+    func subscribe(topic: String, subscriber: RelaySubscriber) {
         Logger.debug("Subscribing on Topic: \(topic)")
         let params = RelayJSONRPC.SubscribeParams(topic: topic)
         let request = JSONRPCRequest(method: RelayJSONRPC.Method.subscribe.rawValue, params: params)
@@ -53,6 +54,7 @@ class Relay {
                     Logger.error(error)
                 }
             }
+            subscriber.set(pendingRequestId: request.id)
         } catch {
             Logger.error(error)
         }
@@ -96,8 +98,8 @@ class Relay {
                 let message = request.params.data.message
                 do {
                     let deserialisedJsonRpcRequest = try jsonRpcSerialiser.deserialise(message: message, symmetricKey: agreementKeys.sharedSecret)
-                    if let subscriber = getSubscriber(for: topic) {
-                        subscriber.update(with: deserialisedJsonRpcRequest)
+                    if let subscriber = getSubscriberFor(subscriptionId: request.params.id) {
+                        subscriber.onRequest(deserialisedJsonRpcRequest)
                     }
                     let response = JSONRPCResponse(id: request.id, result: true)
                     let responseJson = try response.json()
@@ -126,8 +128,13 @@ class Relay {
         }
     }
     
-    private func getSubscriber(for topic: String) -> RelaySubscriber? {
-        return subscribers.first{$0.topic == topic}
+    private func getSubscriberFor(subscriptionId: String) -> RelaySubscriber? {
+        return subscribers.first{$0.isSubscribing(for: subscriptionId)}
+    }
+    
+    private func getSubscriberFor(requestId: Int64) -> RelaySubscriber? {
+        return subscribers.first{$0.hasPendingRequest(id: requestId)}
+
     }
 
 }

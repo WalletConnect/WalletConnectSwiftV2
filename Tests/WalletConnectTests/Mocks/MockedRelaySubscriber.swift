@@ -1,13 +1,28 @@
-// 
 
 import Foundation
 @testable import WalletConnect
 
-
 class MockedRelaySubscriber: RelaySubscriber {
-    var topic: String = ""
+    var subscriptionIds = [String]()
+    var pendingRequestsIds = [Int64]()
     var notified = false
-    func update(with jsonRpcRequest: ClientSynchJSONRPC) {
+    
+    func onRequest(_ jsonRpcRequest: ClientSynchJSONRPC) {
         notified = true
+    }
+    
+    func onResponse(requestId: String, responseType: Relay.SubscriberResponseType) {
+    }
+    
+    func isSubscribing(for subscriptionId: String) -> Bool {
+        return subscriptionIds.contains(subscriptionId)
+    }
+    
+    func hasPendingRequest(id: Int64) -> Bool {
+        return pendingRequestsIds.contains(id)
+    }
+    
+    func set(pendingRequestId: Int64) {
+        pendingRequestsIds.append(pendingRequestId)
     }
 }
