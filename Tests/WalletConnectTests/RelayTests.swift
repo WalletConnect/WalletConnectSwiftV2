@@ -23,11 +23,12 @@ class RelayTests: XCTestCase {
         serialiser = nil
     }
     
-    func testNotifySubscriberOnPayload() {
+    func testNotifySubscriberOnWakuSubscriptionPayload() {
         let topic = "fefc3dc39cacbc562ed58f92b296e2d65a6b07ef08992b93db5b3cb86280635a"
+        let subscriptionId = "0847f4e1dd19cf03a43dc7525f39896b630e9da33e4683c8efbc92ea671b5e07"
         serialiser.deserialised = SerialiserTestData.pairingApproveJSONRPCRequest
         let subscriber = MockedRelaySubscriber()
-        subscriber.topic = topic
+        subscriber.subscriptionIds.append(subscriptionId)
         crypto.set(agreementKeys: Crypto.X25519.AgreementKeys(sharedSecret: Data(), publicKey: Data()), topic: topic)
         relay.addSubscriber(subscriber)
         transport.onPayload?(testPayload)
@@ -35,7 +36,8 @@ class RelayTests: XCTestCase {
     }
     
     func testSendOnPublish() {
-        relay.publish(topic: "", payload: "")
+        let subscriber = MockedRelaySubscriber()
+        relay.publish(topic: "", payload: "", subscriber: subscriber)
         XCTAssertTrue(transport.send)
     }
 }
