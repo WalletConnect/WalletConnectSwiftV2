@@ -3,7 +3,6 @@ import Foundation
 @testable import WalletConnect
 
 class MockedRelaySubscriber: RelaySubscriber {
-    var relay: Relay!
     var subscriptionIds = [String]()
     var pendingRequestsIds = [Int64]()
     var notified = false

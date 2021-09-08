@@ -2,7 +2,6 @@
 import Foundation
 
 protocol RelaySubscriber: class {
-    var relay: Relay! { get }
     func onRequest(_ jsonRpcRequest: ClientSynchJSONRPC)
     func onResponse(requestId: String, responseType: Relay.SubscriberResponseType)
     func isSubscribing(for subscriptionId: String) -> Bool
