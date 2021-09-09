@@ -2,7 +2,7 @@
 import Foundation
 
 extension PairingType {
-    struct Proposal: Codable {
+    struct Proposal: Codable, SequenceProposal {
         let topic: String
         let relay: RelayProtocolOptions
         let proposer: Proposer
