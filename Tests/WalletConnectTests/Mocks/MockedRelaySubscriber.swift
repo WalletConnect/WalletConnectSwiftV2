@@ -5,13 +5,21 @@ import Foundation
 class MockedRelaySubscriber: RelaySubscriber {
     var subscriptionIds = [String]()
     var pendingRequestsIds = [Int64]()
-    var notified = false
-    
+    var jsonRpcRequest: ClientSynchJSONRPC? = nil
+    var requestAcknowledged: Bool = false
+    var subscriptionAcknowledged: Bool = false
+
     func onRequest(_ jsonRpcRequest: ClientSynchJSONRPC) {
-        notified = true
+        self.jsonRpcRequest = jsonRpcRequest
     }
     
-    func onResponse(requestId: String, responseType: Relay.SubscriberResponseType) {
+    func onResponse(requestId: Int64, responseType: JSONRPCResponseType) {
+        switch responseType {
+        case .requestAcknowledge:
+            requestAcknowledged = true
+        case .subscriptionAcknowledge(_):
+            subscriptionAcknowledged = true
+        }
     }
     
     func isSubscribing(for subscriptionId: String) -> Bool {

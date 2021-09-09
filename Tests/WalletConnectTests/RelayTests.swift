@@ -32,12 +32,27 @@ class RelayTests: XCTestCase {
         crypto.set(agreementKeys: Crypto.X25519.AgreementKeys(sharedSecret: Data(), publicKey: Data()), topic: topic)
         relay.addSubscriber(subscriber)
         transport.onMessage?(testPayload)
-        XCTAssertTrue(subscriber.notified)
+        XCTAssertNotNil(subscriber.jsonRpcRequest)
     }
     
-    func testSendOnPublish() {
+    func testNotifySubscriberOnRequestAcknowledge() {
         let subscriber = MockedRelaySubscriber()
-        relay.publish(topic: "", payload: "", subscriber: subscriber)
+        subscriber.set(pendingRequestId: 1631033330664162)
+        relay.addSubscriber(subscriber)
+        transport.onMessage?(testRequestAcknowledgement)
+        XCTAssertTrue(subscriber.requestAcknowledged)
+    }
+    
+    func testNotifySubscriberOnSubscriptionAcknowledgement() {
+        let subscriber = MockedRelaySubscriber()
+        relay.addSubscriber(subscriber)
+        subscriber.set(pendingRequestId: 1631033320624908)
+        transport.onMessage?(testSubscriptionAcknowledgement)
+        XCTAssertTrue(subscriber.subscriptionAcknowledged)
+    }
+
+    func testSendOnPublish() {
+        _ = try! relay.publish(topic: "", payload: "")
         XCTAssertTrue(transport.send)
     }
 }
@@ -56,4 +71,14 @@ fileprivate let testPayload =
       }
    }
 }
+"""
+
+fileprivate let testRequestAcknowledgement =
+"""
+{"id":1631033330664162,"jsonrpc":"2.0","result":true}
+"""
+
+fileprivate let testSubscriptionAcknowledgement =
+"""
+{"id":1631033320624908,"jsonrpc":"2.0","result":"1565a44d5467d02bf6749f894312268d3f6acae78d0adb994dc5ce8d13b6a32e"}
 """
