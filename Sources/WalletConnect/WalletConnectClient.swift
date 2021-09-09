@@ -17,8 +17,8 @@ public class WalletConnectClient {
         // TODO: Store api key and setup relayer
     }
     
-    public func pair(with url: String, completion: @escaping (Result<String, Error>) -> Void) throws {
-        guard let pairingURI = PairingType.ParamsUri(url) else {
+    public func pair(uriString: String, completion: @escaping (Result<String, Error>) -> Void) throws {
+        guard let pairingURI = PairingType.ParamsUri(uriString) else {
             throw WalletConnectError.PairingParamsUriInitialization
         }
         let proposal = PairingType.Proposal.createFromURI(pairingURI)

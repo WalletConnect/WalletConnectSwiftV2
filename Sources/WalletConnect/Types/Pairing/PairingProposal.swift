@@ -41,7 +41,7 @@ extension PairingType.Proposal {
                 publicKey: uri.publicKey,
                 controller: uri.controller),
             signal: PairingType.Signal(params: PairingType.Signal.Params(uri: uri.raw)),
-            permissions: PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [])),
+            permissions: PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: ["wc_sessionPropose"])),
             ttl: PairingType.defaultTTL
         )
     }
