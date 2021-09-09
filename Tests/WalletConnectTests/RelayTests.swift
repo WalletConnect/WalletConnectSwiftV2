@@ -52,8 +52,7 @@ class RelayTests: XCTestCase {
     }
 
     func testSendOnPublish() {
-        let subscriber = MockedRelaySubscriber()
-        relay.publish(topic: "", payload: "", subscriber: subscriber)
+        _ = try! relay.publish(topic: "", payload: "")
         XCTAssertTrue(transport.send)
     }
 }

@@ -13,7 +13,7 @@ class MockedRelaySubscriber: RelaySubscriber {
         self.jsonRpcRequest = jsonRpcRequest
     }
     
-    func onResponse(requestId: Int64, responseType: Relay.JSONRPCResponseType) {
+    func onResponse(requestId: Int64, responseType: JSONRPCResponseType) {
         switch responseType {
         case .requestAcknowledge:
             requestAcknowledged = true

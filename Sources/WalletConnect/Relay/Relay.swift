@@ -2,6 +2,7 @@
 import Foundation
 
 class Relay {
+    // ttl for waku network to persist message for comunitationg client in case request is not acknowledged
     private let defaultTtl = 6*Time.hour
     private let jsonRpcSerialiser: JSONRPCSerialising
     private var transport: JSONRPCTransporting
@@ -16,64 +17,53 @@ class Relay {
         self.crypto = crypto
         setUpTransport()
     }
-    
-    func publish(topic: String, payload: Encodable, subscriber: RelaySubscriber) {
-        do {
-            let messageJson = try payload.json()
-            var message: String
-            if let agreementKeys = crypto.getAgreementKeys(for: topic) {
-                message = try jsonRpcSerialiser.serialise(json: messageJson, agreementKeys: agreementKeys)
-            } else {
-                message = messageJson.toHexEncodedString(uppercase: false)
-            }
-            let params = RelayJSONRPC.PublishParams(topic: topic, message: message, ttl: defaultTtl)
-            let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.rawValue, params: params)
-            let requestJson = try request.json()
-            subscriber.set(pendingRequestId: request.id)
-            Logger.debug("Publishing Payload on Topic: \(topic)")
-            transport.send(requestJson) { error in
-                if let error = error {
-                    Logger.debug("Failed to Publish Payload")
-                    Logger.error(error)
-                }
-            }
-        } catch {
-            Logger.debug(error)
+
+    /// - returns: request id
+    func publish(topic: String, payload: Encodable) throws -> Int64 {
+        let messageJson = try payload.json()
+        var message: String
+        if let agreementKeys = crypto.getAgreementKeys(for: topic) {
+            message = try jsonRpcSerialiser.serialise(json: messageJson, agreementKeys: agreementKeys)
+        } else {
+            message = messageJson.toHexEncodedString(uppercase: false)
         }
+        let params = RelayJSONRPC.PublishParams(topic: topic, message: message, ttl: defaultTtl)
+        let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.rawValue, params: params)
+        let requestJson = try request.json()
+        Logger.debug("Publishing Payload on Topic: \(topic)")
+        transport.send(requestJson) { error in
+            if let error = error {
+                Logger.debug("Failed to Publish Payload")
+                Logger.error(error)
+            }
+        }
+        return request.id
     }
-    
-    func subscribe(topic: String, subscriber: RelaySubscriber) {
+    /// - returns: request id
+    func subscribe(topic: String) throws -> Int64 {
         Logger.debug("Subscribing on Topic: \(topic)")
         let params = RelayJSONRPC.SubscribeParams(topic: topic)
         let request = JSONRPCRequest(method: RelayJSONRPC.Method.subscribe.rawValue, params: params)
-        do {
-            let requestJson = try request.json()
-            transport.send(requestJson) { error in
-                if let error = error {
-                    Logger.debug("Failed to Subscribe on Topic")
-                    Logger.error(error)
-                }
+        let requestJson = try request.json()
+        transport.send(requestJson) { error in
+            if let error = error {
+                Logger.debug("Failed to Subscribe on Topic")
+                Logger.error(error)
             }
-            subscriber.set(pendingRequestId: request.id)
-        } catch {
-            Logger.error(error)
         }
+        return request.id
     }
     
-    func unsubscribe(topic: String, id: String) {
+    func unsubscribe(topic: String, id: String) throws {
         Logger.debug("Unsubscribing on Topic: \(topic)")
         let params = RelayJSONRPC.UnsubscribeParams(id: id, topic: topic)
         let request = JSONRPCRequest(method: RelayJSONRPC.Method.unsubscribe.rawValue, params: params)
-        do {
-            let requestJson = try request.json()
-            transport.send(requestJson) { error in
-                if let error = error {
-                    Logger.debug("Failed to Unsubscribe on Topic")
-                    Logger.error(error)
-                }
+        let requestJson = try request.json()
+        transport.send(requestJson) { error in
+            if let error = error {
+                Logger.debug("Failed to Unsubscribe on Topic")
+                Logger.error(error)
             }
-        } catch {
-            Logger.error(error)
         }
     }
     
