@@ -1,3 +1,5 @@
+import Foundation
+
 public struct WalletClientOptions {
     let apiKey: String
     let name: String
