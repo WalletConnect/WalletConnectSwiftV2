@@ -97,8 +97,3 @@ fileprivate let testPayload =
    }
 }
 """
-
-fileprivate let testSubscriptionAcknowledgement =
-"""
-{"id":1631033320624908,"jsonrpc":"2.0","result":"1565a44d5467d02bf6749f894312268d3f6acae78d0adb994dc5ce8d13b6a32e"}
-"""
