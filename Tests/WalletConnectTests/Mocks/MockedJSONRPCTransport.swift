@@ -7,9 +7,9 @@ class MockedJSONRPCTransport: JSONRPCTransporting {
     var onConnect: (() -> ())?
     var onDisconnect: (() -> ())?
     var onMessage: ((String) -> ())?
-    var send = false
+    var sent = false
     func send(_ string: String, completion: @escaping (Error?) -> ()) {
-        send = true
+        sent = true
     }
     
     func disconnect() {}

@@ -1,14 +1,15 @@
 
 import Foundation
+import Combine
 import XCTest
 @testable import WalletConnect
-
 
 class RelayTests: XCTestCase {
     var relay: Relay!
     var transport: MockedJSONRPCTransport!
     var serialiser: MockedJSONRPCSerialiser!
     var crypto: Crypto!
+    private var publishers = [AnyCancellable]()
 
     override func setUp() {
         crypto = Crypto(keychain: DictionaryKeychain())
@@ -23,37 +24,61 @@ class RelayTests: XCTestCase {
         serialiser = nil
     }
     
-    func testNotifySubscriberOnWakuSubscriptionPayload() {
+    func testNotifyOnClientSynchJsonRpc() {
+        let requestExpectation = expectation(description: "request")
         let topic = "fefc3dc39cacbc562ed58f92b296e2d65a6b07ef08992b93db5b3cb86280635a"
-        let subscriptionId = "0847f4e1dd19cf03a43dc7525f39896b630e9da33e4683c8efbc92ea671b5e07"
+        relay.clientSynchJsonRpcPublisher.sink { (request) in
+            requestExpectation.fulfill()
+        }.store(in: &publishers)
         serialiser.deserialised = SerialiserTestData.pairingApproveJSONRPCRequest
-        let subscriber = MockedRelaySubscriber()
-        subscriber.subscriptionIds.append(subscriptionId)
         crypto.set(agreementKeys: Crypto.X25519.AgreementKeys(sharedSecret: Data(), publicKey: Data()), topic: topic)
-        relay.addSubscriber(subscriber)
         transport.onMessage?(testPayload)
-        XCTAssertNotNil(subscriber.jsonRpcRequest)
+        waitForExpectations(timeout: 0.001, handler: nil)
     }
     
-    func testNotifySubscriberOnRequestAcknowledge() {
-        let subscriber = MockedRelaySubscriber()
-        subscriber.set(pendingRequestId: 1631033330664162)
-        relay.addSubscriber(subscriber)
-        transport.onMessage?(testRequestAcknowledgement)
-        XCTAssertTrue(subscriber.requestAcknowledged)
+    func testPublishRequestAcknowledge() {
+        let acknowledgeExpectation = expectation(description: "acknowledge")
+        let requestId = try! relay.publish(topic: "", payload: "{}") {
+            acknowledgeExpectation.fulfill()
+        }
+        let response = try! JSONRPCResponse<Bool>(id: requestId, result: true).json()
+        transport.onMessage?(response)
+        waitForExpectations(timeout: 0.001, handler: nil)
     }
     
-    func testNotifySubscriberOnSubscriptionAcknowledgement() {
-        let subscriber = MockedRelaySubscriber()
-        relay.addSubscriber(subscriber)
-        subscriber.set(pendingRequestId: 1631033320624908)
-        transport.onMessage?(testSubscriptionAcknowledgement)
-        XCTAssertTrue(subscriber.subscriptionAcknowledged)
+    func testSubscriptionAcknowledgement() {
+        let acknowledgeExpectation = expectation(description: "acknowledge")
+        let requestId = try! relay.subscribe(topic: "") { subscriptionId in
+            acknowledgeExpectation.fulfill()
+        }
+        let subscriptionAcknowledgement = try! JSONRPCResponse<String>(id: requestId, result: "").json()
+        transport.onMessage?(subscriptionAcknowledgement)
+        waitForExpectations(timeout: 0.001, handler: nil)
+    }
+    
+    func testUnsubscribeRequestAcknowledge() {
+        let acknowledgeExpectation = expectation(description: "acknowledge")
+        let requestId = try! relay.unsubscribe(topic: "", id: "") {
+            acknowledgeExpectation.fulfill()
+        }
+        let response = try! JSONRPCResponse<Bool>(id: requestId, result: true).json()
+        transport.onMessage?(response)
+        waitForExpectations(timeout: 0.001, handler: nil)
     }
 
     func testSendOnPublish() {
-        _ = try! relay.publish(topic: "", payload: "")
-        XCTAssertTrue(transport.send)
+        _ = try! relay.publish(topic: "", payload: "") {}
+        XCTAssertTrue(transport.sent)
+    }
+    
+    func testSendOnSubscribe() {
+        _ = try! relay.subscribe(topic: "") {_ in }
+        XCTAssertTrue(transport.sent)
+    }
+    
+    func testSendOnUnsubscribe() {
+        _ = try! relay.unsubscribe(topic: "", id: "") {}
+        XCTAssertTrue(transport.sent)
     }
 }
 
@@ -71,11 +96,6 @@ fileprivate let testPayload =
       }
    }
 }
-"""
-
-fileprivate let testRequestAcknowledgement =
-"""
-{"id":1631033330664162,"jsonrpc":"2.0","result":true}
 """
 
 fileprivate let testSubscriptionAcknowledgement =
