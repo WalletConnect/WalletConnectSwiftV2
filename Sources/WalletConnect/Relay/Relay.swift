@@ -179,19 +179,23 @@ class Relay: Relaying {
             do {
                 let deserialisedJsonRpcRequest = try jsonRpcSerialiser.deserialise(message: message, symmetricKey: agreementKeys.sharedSecret)
                 clientSynchJsonRpcPublisherSubject.send(deserialisedJsonRpcRequest)
-                let response = JSONRPCResponse(id: request.id, result: true)
-                let responseJson = try response.json()
-                transport.send(responseJson) { error in
-                    if let error = error {
-                        Logger.debug("Failed to Respond for request id: \(request.id)")
-                        Logger.error(error)
-                    }
-                }
+                acknowledgeSubscription(requestId: request.id)
             } catch {
                 Logger.error(error)
             }
         } else {
             Logger.debug("Did not find key associated with topic: \(topic)")
+        }
+    }
+    
+    private func acknowledgeSubscription(requestId: Int64) {
+        let response = JSONRPCResponse(id: requestId, result: true)
+        let responseJson = try! response.json()
+        transport.send(responseJson) { error in
+            if let error = error {
+                Logger.debug("Failed to Respond for request id: \(requestId)")
+                Logger.error(error)
+            }
         }
     }
 }
