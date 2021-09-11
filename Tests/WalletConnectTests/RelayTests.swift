@@ -38,7 +38,7 @@ class RelayTests: XCTestCase {
     
     func testPublishRequestAcknowledge() {
         let acknowledgeExpectation = expectation(description: "acknowledge")
-        let requestId = try! relay.publish(topic: "", payload: "{}") {
+        let requestId = try! relay.publish(topic: "", payload: "{}") {_ in
             acknowledgeExpectation.fulfill()
         }
         let response = try! JSONRPCResponse<Bool>(id: requestId, result: true).json()
@@ -58,7 +58,7 @@ class RelayTests: XCTestCase {
     
     func testUnsubscribeRequestAcknowledge() {
         let acknowledgeExpectation = expectation(description: "acknowledge")
-        let requestId = try! relay.unsubscribe(topic: "", id: "") {
+        let requestId = try! relay.unsubscribe(topic: "", id: "") {_ in
             acknowledgeExpectation.fulfill()
         }
         let response = try! JSONRPCResponse<Bool>(id: requestId, result: true).json()
@@ -67,7 +67,7 @@ class RelayTests: XCTestCase {
     }
 
     func testSendOnPublish() {
-        _ = try! relay.publish(topic: "", payload: "") {}
+        _ = try! relay.publish(topic: "", payload: "") {_ in }
         XCTAssertTrue(transport.sent)
     }
     
@@ -77,7 +77,7 @@ class RelayTests: XCTestCase {
     }
     
     func testSendOnUnsubscribe() {
-        _ = try! relay.unsubscribe(topic: "", id: "") {}
+        _ = try! relay.unsubscribe(topic: "", id: "") {_ in }
         XCTAssertTrue(transport.sent)
     }
 }

@@ -4,11 +4,11 @@ import Combine
 
 protocol Relaying {
     /// - returns: request id
-    func publish(topic: String, payload: Encodable, completion: @escaping (()->())) throws -> Int64
+    func publish(topic: String, payload: Encodable, completion: @escaping ((Result<Void, Error>)->())) throws -> Int64
     /// - returns: request id
-    func subscribe(topic: String, completion: @escaping ((String)->())) throws -> Int64
+    func subscribe(topic: String, completion: @escaping ((Result<String, Error>)->())) throws -> Int64
     /// - returns: request id
-    func unsubscribe(topic: String, id: String, completion: @escaping (()->())) throws -> Int64
+    func unsubscribe(topic: String, id: String, completion: @escaping ((Result<Void, Error>)->())) throws -> Int64
 }
 
 class Relay: Relaying {
@@ -39,7 +39,7 @@ class Relay: Relaying {
         setUpTransport()
     }
 
-    func publish(topic: String, payload: Encodable, completion: @escaping (()->())) throws -> Int64 {
+    func publish(topic: String, payload: Encodable, completion: @escaping ((Result<Void, Error>)->())) throws -> Int64 {
         let messageJson = try payload.json()
         var message: String
         if let agreementKeys = crypto.getAgreementKeys(for: topic) {
@@ -51,60 +51,66 @@ class Relay: Relaying {
         let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.rawValue, params: params)
         let requestJson = try request.json()
         Logger.debug("Publishing Payload on Topic: \(topic)")
+        var cancellable: AnyCancellable!
         transport.send(requestJson) { error in
             if let error = error {
                 Logger.debug("Failed to Publish Payload")
                 Logger.error(error)
+                cancellable.cancel()
+                completion(.failure(error))
             }
         }
-        var cancellable: AnyCancellable!
         cancellable = requestAcknowledgePublisher
             .filter {$0.id == request.id}
             .sink { (subscriptionResponse) in
             cancellable.cancel()
-            completion()
+                completion(.success(()))
         }
         return request.id
     }
     
-    func subscribe(topic: String, completion: @escaping ((String)->())) throws -> Int64  {
+    func subscribe(topic: String, completion: @escaping ((Result<String, Error>)->())) throws -> Int64 {
         Logger.debug("Subscribing on Topic: \(topic)")
         let params = RelayJSONRPC.SubscribeParams(topic: topic)
         let request = JSONRPCRequest(method: RelayJSONRPC.Method.subscribe.rawValue, params: params)
         let requestJson = try request.json()
+        var cancellable: AnyCancellable!
         transport.send(requestJson) { error in
             if let error = error {
                 Logger.debug("Failed to Subscribe on Topic")
                 Logger.error(error)
+                cancellable.cancel()
+                completion(.failure(error))
             }
         }
-        var cancellable: AnyCancellable!
         cancellable = subscriptionResponsePublisher
             .filter {$0.id == request.id}
             .sink { (subscriptionResponse) in
             cancellable.cancel()
-            completion(subscriptionResponse.result)
+                completion(.success(subscriptionResponse.result))
         }
         return request.id
     }
     
-    func unsubscribe(topic: String, id: String, completion: @escaping (()->())) throws -> Int64 {
+    func unsubscribe(topic: String, id: String, completion: @escaping ((Result<Void, Error>)->())) throws -> Int64 {
         Logger.debug("Unsubscribing on Topic: \(topic)")
         let params = RelayJSONRPC.UnsubscribeParams(id: id, topic: topic)
         let request = JSONRPCRequest(method: RelayJSONRPC.Method.unsubscribe.rawValue, params: params)
         let requestJson = try request.json()
+        var cancellable: AnyCancellable!
         transport.send(requestJson) { error in
             if let error = error {
                 Logger.debug("Failed to Unsubscribe on Topic")
                 Logger.error(error)
+                cancellable.cancel()
+                completion(.failure(error))
             }
         }
-        var cancellable: AnyCancellable!
         cancellable = requestAcknowledgePublisher
             .filter {$0.id == request.id}
             .sink { (subscriptionResponse) in
             cancellable.cancel()
-            completion()
+                completion(.success(()))
         }
         return request.id
     }
