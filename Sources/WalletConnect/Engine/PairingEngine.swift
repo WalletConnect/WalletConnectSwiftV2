@@ -16,15 +16,14 @@ final class PairingEngine: SequenceEngine {
     }
     
     func respond(to proposal: PairingType.Proposal, completion: @escaping (Result<String, Error>) -> Void) {
-        
         let privateKey = Crypto.X25519.generatePrivateKey()
-        let publicKey = privateKey.publicKey.toHexString()
+        let selfPublicKey = privateKey.publicKey.toHexString()
         
         let pendingPairing = PairingType.Pending(
             status: .responded,
             topic: proposal.topic,
             relay: proposal.relay,
-            self: PairingType.Participant(publicKey: publicKey),
+            self: PairingType.Participant(publicKey: selfPublicKey),
             proposal: proposal)
         
         pendingPairings.set(topic: proposal.topic, sequenceData: .pending(pendingPairing))
@@ -35,12 +34,12 @@ final class PairingEngine: SequenceEngine {
             privateKey: privateKey)
         let topicB = agreementKeys.sharedSecret.sha256().toHexString()
         
-        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : publicKey
+        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : selfPublicKey
         let settledPairing = PairingType.Settled(
             topic: topicB,
             relay: proposal.relay,
             sharedKey: agreementKeys.sharedSecret.toHexString(),
-            self: PairingType.Participant(publicKey: publicKey),
+            self: PairingType.Participant(publicKey: selfPublicKey),
             peer: PairingType.Participant(publicKey: proposal.proposer.publicKey),
             permissions: PairingType.Permissions(
                 jsonrpc: proposal.permissions.jsonrpc,
@@ -48,12 +47,14 @@ final class PairingEngine: SequenceEngine {
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
             state: nil) // FIXME: State
         settledPairings.set(topic: topicB, sequenceData: .settled(settledPairing))
+        crypto.set(agreementKeys: agreementKeys, topic: topicB)
+        crypto.set(privateKey: privateKey)
         
         // publish approve on topic A
         let approveParams = PairingType.ApproveParams(
             topic: proposal.topic,
             relay: proposal.relay,
-            responder: PairingType.Participant(publicKey: publicKey),
+            responder: PairingType.Participant(publicKey: selfPublicKey),
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
             state: nil) // FIXME: State
         let approvalPayload = ClientSynchJSONRPC(method: .pairingApprove, params: .pairingApprove(approveParams))
