@@ -2,16 +2,17 @@ import Foundation
 
 final class PairingEngine: SequenceEngine {
     
-    var pendingPairings: SequenceSubscribing!
-    var settledPairings: SequenceSubscribing!
+    private let pendingPairings: SequenceSubscribing
+    private let settledPairings: SequenceSubscribing!
     
-//    let history
+    private let relayer: Relaying
+    private let crypto: Crypto
     
-    var relayer: Relaying!
-    var crypto: Crypto!
-    
-    init() {
-        
+    init(relay: Relaying, crypto: Crypto) {
+        self.relayer = relay
+        self.crypto = crypto
+        self.pendingPairings = Subscription(relay: relay)
+        self.settledPairings = Subscription(relay: relay)
     }
     
     func respond(to proposal: PairingType.Proposal, completion: @escaping (Result<String, Error>) -> Void) {
@@ -34,15 +35,18 @@ final class PairingEngine: SequenceEngine {
             privateKey: privateKey)
         let topicB = agreementKeys.sharedSecret.sha256().toHexString()
         
+        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : publicKey
         let settledPairing = PairingType.Settled(
             topic: topicB,
             relay: proposal.relay,
             sharedKey: agreementKeys.sharedSecret.toHexString(),
             self: PairingType.Participant(publicKey: publicKey),
             peer: PairingType.Participant(publicKey: proposal.proposer.publicKey),
-            permissions: PairingType.Permissions(jsonrpc: proposal.permissions, controller: proposal.proposer.controller),
+            permissions: PairingType.Permissions(
+                jsonrpc: proposal.permissions.jsonrpc,
+                controller: Controller(publicKey: controllerKey)),
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
-            state: nil)
+            state: nil) // FIXME: State
         settledPairings.set(topic: topicB, sequenceData: .settled(settledPairing))
         
         // publish approve on topic A
@@ -51,13 +55,14 @@ final class PairingEngine: SequenceEngine {
             relay: proposal.relay,
             responder: PairingType.Participant(publicKey: publicKey),
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
-            state: nil)
+            state: nil) // FIXME: State
         let approvalPayload = ClientSynchJSONRPC(method: .pairingApprove, params: .pairingApprove(approveParams))
         
         _ = try? relayer.publish(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
             switch result {
             case .success:
                 self?.pendingPairings.remove(topic: proposal.topic)
+                print("Success on wc_pairingApprove")
                 completion(.success(proposal.topic))
             case .failure(let error):
                 completion(.failure(error))
