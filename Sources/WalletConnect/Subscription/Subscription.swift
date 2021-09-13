@@ -1,26 +1,6 @@
 
 import Foundation
 
-enum SequenceData: Equatable {
-    case settled(PairingType.Settled)
-    case pending(PairingType.Pending)
-    static func == (lhs: SequenceData, rhs: SequenceData) -> Bool {
-        switch (lhs, rhs) {
-        case (.pending(let lhsPending), .pending(let rhsPending)):
-            return lhsPending == rhsPending
-        case (.settled(let lhsSettled), .settled(let rhsSettled)):
-            return lhsSettled == rhsSettled
-        default:
-            return false
-        }
-    }
-}
-struct SubscriptionParams: Equatable {
-    let id: String
-    let topic: String
-    let sequence: SequenceData
-}
-
 protocol SequenceSubscribing {
     func set(topic: String, sequenceData: SequenceData)
     func get(topic: String) -> SequenceData?
@@ -30,7 +10,6 @@ protocol SequenceSubscribing {
 class Subscription: SequenceSubscribing {
     private var relay: Relaying
     var subscriptions: [String: SubscriptionParams] = [:]
-    var pendingRequestIds = Set<Int64>()
 
     init(relay: Relaying) {
         self.relay = relay
@@ -74,7 +53,7 @@ class Subscription: SequenceSubscribing {
     
     // MARK: - Private
     
-    func subscribeAndSet(topic: String, sequenceData: SequenceData)  {
+    private func subscribeAndSet(topic: String, sequenceData: SequenceData)  {
         do {
             let _ = try relay.subscribe(topic: topic, completion: { [unowned self] result in
                 switch result {
