@@ -46,6 +46,7 @@ class Relay: Relaying {
             message = try jsonRpcSerialiser.serialise(json: messageJson, agreementKeys: agreementKeys)
         } else {
             message = messageJson.toHexEncodedString(uppercase: false)
+
         }
         let params = RelayJSONRPC.PublishParams(topic: topic, message: message, ttl: defaultTtl)
         let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.rawValue, params: params)
