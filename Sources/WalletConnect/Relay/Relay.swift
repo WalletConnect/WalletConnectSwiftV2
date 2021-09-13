@@ -1,14 +1,35 @@
 
 import Foundation
+import Combine
 
-class Relay {
+protocol Relaying {
+    /// - returns: request id
+    func publish(topic: String, payload: Encodable, completion: @escaping ((Result<Void, Error>)->())) throws -> Int64
+    /// - returns: request id
+    func subscribe(topic: String, completion: @escaping ((Result<String, Error>)->())) throws -> Int64
+    /// - returns: request id
+    func unsubscribe(topic: String, id: String, completion: @escaping ((Result<Void, Error>)->())) throws -> Int64
+}
+
+class Relay: Relaying {
     // ttl for waku network to persist message for comunitationg client in case request is not acknowledged
     private let defaultTtl = 6*Time.hour
     private let jsonRpcSerialiser: JSONRPCSerialising
     private var transport: JSONRPCTransporting
     private let crypto: Crypto
-    var subscribers = [RelaySubscriber]()
-
+    private var subscriptionResponsePublisher: AnyPublisher<JSONRPCResponse<String>, Never> {
+        subscriptionResponsePublisherSubject.eraseToAnyPublisher()
+    }
+    private let subscriptionResponsePublisherSubject = PassthroughSubject<JSONRPCResponse<String>, Never>()
+    private var requestAcknowledgePublisher: AnyPublisher<JSONRPCResponse<Bool>, Never> {
+        requestAcknowledgePublisherSubject.eraseToAnyPublisher()
+    }
+    private let requestAcknowledgePublisherSubject = PassthroughSubject<JSONRPCResponse<Bool>, Never>()
+    var clientSynchJsonRpcPublisher: AnyPublisher<ClientSynchJSONRPC, Never> {
+        clientSynchJsonRpcPublisherSubject.eraseToAnyPublisher()
+    }
+    private let clientSynchJsonRpcPublisherSubject = PassthroughSubject<ClientSynchJSONRPC, Never>()
+    
     init(jsonRpcSerialiser: JSONRPCSerialising = JSONRPCSerialiser(),
          transport: JSONRPCTransporting,
          crypto: Crypto) {
@@ -18,8 +39,7 @@ class Relay {
         setUpTransport()
     }
 
-    /// - returns: request id
-    func publish(topic: String, payload: Encodable) throws -> Int64 {
+    func publish(topic: String, payload: Encodable, completion: @escaping ((Result<Void, Error>)->())) throws -> Int64 {
         let messageJson = try payload.json()
         var message: String
         if let agreementKeys = crypto.getAgreementKeys(for: topic) {
@@ -31,50 +51,70 @@ class Relay {
         let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.rawValue, params: params)
         let requestJson = try request.json()
         Logger.debug("Publishing Payload on Topic: \(topic)")
+        var cancellable: AnyCancellable!
         transport.send(requestJson) { error in
             if let error = error {
                 Logger.debug("Failed to Publish Payload")
                 Logger.error(error)
+                cancellable.cancel()
+                completion(.failure(error))
             }
+        }
+        cancellable = requestAcknowledgePublisher
+            .filter {$0.id == request.id}
+            .sink { (subscriptionResponse) in
+            cancellable.cancel()
+                completion(.success(()))
         }
         return request.id
     }
-    /// - returns: request id
-    func subscribe(topic: String) throws -> Int64 {
+    
+    func subscribe(topic: String, completion: @escaping ((Result<String, Error>)->())) throws -> Int64 {
         Logger.debug("Subscribing on Topic: \(topic)")
         let params = RelayJSONRPC.SubscribeParams(topic: topic)
         let request = JSONRPCRequest(method: RelayJSONRPC.Method.subscribe.rawValue, params: params)
         let requestJson = try request.json()
+        var cancellable: AnyCancellable!
         transport.send(requestJson) { error in
             if let error = error {
                 Logger.debug("Failed to Subscribe on Topic")
                 Logger.error(error)
+                cancellable.cancel()
+                completion(.failure(error))
             }
+        }
+        cancellable = subscriptionResponsePublisher
+            .filter {$0.id == request.id}
+            .sink { (subscriptionResponse) in
+            cancellable.cancel()
+                completion(.success(subscriptionResponse.result))
         }
         return request.id
     }
     
-    func unsubscribe(topic: String, id: String) throws {
+    func unsubscribe(topic: String, id: String, completion: @escaping ((Result<Void, Error>)->())) throws -> Int64 {
         Logger.debug("Unsubscribing on Topic: \(topic)")
         let params = RelayJSONRPC.UnsubscribeParams(id: id, topic: topic)
         let request = JSONRPCRequest(method: RelayJSONRPC.Method.unsubscribe.rawValue, params: params)
         let requestJson = try request.json()
+        var cancellable: AnyCancellable!
         transport.send(requestJson) { error in
             if let error = error {
                 Logger.debug("Failed to Unsubscribe on Topic")
                 Logger.error(error)
+                cancellable.cancel()
+                completion(.failure(error))
             }
         }
+        cancellable = requestAcknowledgePublisher
+            .filter {$0.id == request.id}
+            .sink { (subscriptionResponse) in
+            cancellable.cancel()
+                completion(.success(()))
+        }
+        return request.id
     }
-    
-    func addSubscriber(_ subscriber: RelaySubscriber) {
-        subscribers.append(subscriber)
-    }
-    
-    func removeSubscriber(_ subscriber: RelaySubscriber) {
-        subscribers.removeAll{$0===subscriber}
-    }
-    
+
     private func setUpTransport() {
         transport.onMessage = { [unowned self] payload in
             self.onPayload(payload)
@@ -85,17 +125,9 @@ class Relay {
         if let request = getClientSubscriptionRequest(from: payload) {
             manageSubscriptionRequest(request)
         } else if let response = getRequestAcknowledgement(from: payload) {
-            guard let subscriber = getSubscriberFor(requestId: response.id) else {
-                Logger.debug("Could not find associated subscriber with request id")
-                return
-            }
-            subscriber.onResponse(requestId: response.id, responseType: .requestAcknowledge)
+            requestAcknowledgePublisherSubject.send(response)
         } else if let response = getNetworkSubscriptionResponse(from: payload) {
-            guard let subscriber = getSubscriberFor(requestId: response.id) else {
-                Logger.debug("Could not find associated subscriber with request id")
-                return
-            }
-            subscriber.onResponse(requestId: response.id, responseType: .subscriptionAcknowledge(response.result))
+            subscriptionResponsePublisherSubject.send(response)
         } else if let response = getErrorResponse(from: payload) {
             Logger.error("Received error message from network, code: \(response.code), message: \(response.message)")
         } else {
@@ -146,17 +178,8 @@ class Relay {
             let message = request.params.data.message
             do {
                 let deserialisedJsonRpcRequest = try jsonRpcSerialiser.deserialise(message: message, symmetricKey: agreementKeys.sharedSecret)
-                if let subscriber = getSubscriberFor(subscriptionId: request.params.id) {
-                    subscriber.onRequest(deserialisedJsonRpcRequest)
-                }
-                let response = JSONRPCResponse(id: request.id, result: true)
-                let responseJson = try response.json()
-                transport.send(responseJson) { error in
-                    if let error = error {
-                        Logger.debug("Failed to Respond for request id: \(request.id)")
-                        Logger.error(error)
-                    }
-                }
+                clientSynchJsonRpcPublisherSubject.send(deserialisedJsonRpcRequest)
+                acknowledgeSubscription(requestId: request.id)
             } catch {
                 Logger.error(error)
             }
@@ -165,11 +188,14 @@ class Relay {
         }
     }
     
-    private func getSubscriberFor(subscriptionId: String) -> RelaySubscriber? {
-        return subscribers.first{$0.isSubscribing(for: subscriptionId)}
-    }
-    
-    private func getSubscriberFor(requestId: Int64) -> RelaySubscriber? {
-        return subscribers.first{$0.hasPendingRequest(id: requestId)}
+    private func acknowledgeSubscription(requestId: Int64) {
+        let response = JSONRPCResponse(id: requestId, result: true)
+        let responseJson = try! response.json()
+        transport.send(responseJson) { error in
+            if let error = error {
+                Logger.debug("Failed to Respond for request id: \(requestId)")
+                Logger.error(error)
+            }
+        }
     }
 }
