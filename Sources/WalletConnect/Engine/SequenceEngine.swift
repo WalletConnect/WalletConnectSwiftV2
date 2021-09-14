@@ -1,8 +1,10 @@
 protocol SequenceEngine {
-    func respond(to proposal: SequenceProposal, completion: @escaping (Result<String, Error>) -> Void)
+    func respond(to proposal: PairingType.Proposal, completion: @escaping (Result<String, Error>) -> Void)
 }
 
 protocol SequenceProposal {
+    var topic: String { get }
+    var relay: RelayProtocolOptions { get }
 }
 
 enum SequenceStatus {

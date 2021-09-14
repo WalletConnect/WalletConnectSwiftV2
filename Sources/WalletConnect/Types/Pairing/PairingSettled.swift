@@ -9,7 +9,7 @@ extension PairingType {
         let peer: Participant
         let permissions: Permissions
         let expiry: Int
-        let state: State
+        let state: State?
     }
     
     struct Pending: Equatable {

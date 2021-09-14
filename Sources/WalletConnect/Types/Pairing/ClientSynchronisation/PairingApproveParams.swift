@@ -7,6 +7,6 @@ extension PairingType {
         let relay: RelayProtocolOptions
         let responder: Participant
         let expiry: Int
-        let state: State
+        let state: State?
     }
 }

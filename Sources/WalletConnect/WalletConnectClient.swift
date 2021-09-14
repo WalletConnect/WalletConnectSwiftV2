@@ -8,16 +8,20 @@ public class WalletConnectClient {
     
     let isController: Bool
     
-    private var pairingEngine: SequenceEngine
+    private let pairingEngine: SequenceEngine
+    private let relay: Relay
+    private let crypto = Crypto()
     
     public init(options: WalletClientOptions) {
         self.isController = options.isController
         self.metadata = options.metadata
-        self.pairingEngine = PairingEngine()
-        // TODO: Store api key and setup relayer
+        self.relay = Relay(transport: JSONRPCTransport(url: options.relayURL), crypto: crypto)
+        self.pairingEngine = PairingEngine(relay: relay, crypto: crypto)
+        // TODO: Store api key
     }
     
     public func pair(uriString: String, completion: @escaping (Result<String, Error>) -> Void) throws {
+        print("start pair")
         guard let pairingURI = PairingType.ParamsUri(uriString) else {
             throw WalletConnectError.PairingParamsUriInitialization
         }
