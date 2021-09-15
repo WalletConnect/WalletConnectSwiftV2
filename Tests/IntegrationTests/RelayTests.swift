@@ -39,37 +39,44 @@ final class RelayTests: XCTestCase {
     func testConnect() {
         let expect = expectation(description: "subs call must succeed")
         
-        let url1 = URL(string: "wss://staging.walletconnect.org?apiKey=c4f79cc821944d9680842e34466bfbd")!
-        let url2 = URL(string: "wss://staging.walletconnect.org?apiKey=c4f79cc821944d9680842e34466bfbe")!
-        let transportA = JSONRPCTransport(url: url1)
-        let relayA = Relay(transport: transportA, crypto: Crypto())
+//        let url1 = url//URL(string: "wss://staging.walletconnect.org?apiKey=c4f79cc821944d9680842e34466bfbd")!
+//        let url2 = url//URL(string: "wss://staging.walletconnect.org?apiKey=c4f79cc821944d9680842e34466bfbe")!
+//        let transportA = JSONRPCTransport(url: url1)
+//        let relayA = Relay(transport: transportA, crypto: Crypto())
+//
+//        let transportB = JSONRPCTransport(url: url2)
+//        let relayB = Relay(transport: transportB, crypto: Crypto())
         
-        let transportB = JSONRPCTransport(url: url2)
-        let relayB = Relay(transport: transportA, crypto: Crypto())
+        let relayA = makeRelay()
+        let relayB = makeRelay()
         
         let topic = "8097df5f14871126866252c1b7479a14aefb980188fc35ec97d130d24bd887b3"
         
         let canc = relayB.clientSynchJsonRpcPublisher.sink { jsonRPC in
-            let json = try! jsonRPC.params.json()
-            print("Received subscription: \(json)")
-            expect.fulfill()
+            if case .pairingApprove(let params) = jsonRPC.params {
+                print("Received subscription: \(params)")
+                expect.fulfill()
+            }
         }
         
 //        let sema = DispatchSemaphore(value: 0)
         
-        transportA.onConnect = {
-            print("Connect transport A")
-//            sema.signal()
-        }
-        transportB.onConnect = {
-            print("Connect transport B")
-//            sema.signal()
-        }
+//        transportA.onConnect = {
+//            print("Connect transport A")
+////            sema.signal()
+//        }
+//        transportB.onConnect = {
+//            print("Connect transport B")
+////            sema.signal()
+//        }
 //        sema.wait()
 //        sema.wait()
         
+        let grp = DispatchGroup()
+        
+        grp.enter()
         print("Subscribing relay A")
-        _ = try? relayA.subscribe(topic: topic) { result in
+        _ = try! relayA.subscribe(topic: topic) { result in
             print("Relay A Subscribe result: \(result)")
             switch result {
             case .success(let subID):
@@ -79,11 +86,13 @@ final class RelayTests: XCTestCase {
                 print("ERROR: \(error)")
                 XCTFail()
             }
+            grp.leave()
         }
 //        sema.wait()
         
+        grp.enter()
         print("Subscribing relay B")
-        _ = try? relayB.subscribe(topic: topic) { result in
+        _ = try! relayB.subscribe(topic: topic) { result in
             print("Relay B Subscribe result: \(result)")
             switch result {
             case .success(let subID):
@@ -93,13 +102,22 @@ final class RelayTests: XCTestCase {
                 print("ERROR: \(error)")
                 XCTFail()
             }
+            grp.leave()
         }
+        grp.wait(timeout: .now() + 5.0)
 //        sema.wait()
         
-        
-        _ = try? relayA.publish(topic: topic, payload: "Hello") { result in
-            print("Publish message result: \(result)")
-        }
+        print("Publishing payload")
+//        DispatchQueue.global().asyncAfter(deadline: .now() + 0.3) {
+            let params = PairingType.ApproveParams(
+                topic: "", relay: RelayProtocolOptions(protocol: "", params: nil), responder: PairingType.Participant(publicKey: ""), expiry: 0, state: nil)
+            let syncMethod = ClientSynchJSONRPC(method: .pairingApprove, params: .pairingApprove(params))
+//            let payload = String(data: try! JSONEncoder().encode(syncMethod), encoding: .utf8)!
+            let
+            _ = try? relayA.publish(topic: topic, payload: syncMethod) { result in
+                print("Publish message result: \(result)")
+            }
+//        }
         
         waitForExpectations(timeout: 5.0, handler: nil)
         print()

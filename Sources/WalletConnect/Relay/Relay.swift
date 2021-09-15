@@ -117,8 +117,8 @@ class Relay: Relaying {
     }
 
     private func setUpTransport() {
-        transport.onMessage = { [unowned self] payload in
-            self.onPayload(payload)
+        transport.onMessage = { [weak self] payload in
+            self?.onPayload(payload)
         }
     }
 
@@ -145,6 +145,10 @@ class Relay: Relaying {
             return nil
         }
     }
+    
+//    private func tryDecode<T: Decodable>(from payload: String) -> JSONRPCRequest<T>? {
+//
+//    }
     
     private func getNetworkSubscriptionResponse(from payload: String) -> JSONRPCResponse<String>? {
         if let data = payload.data(using: .utf8),
@@ -185,7 +189,20 @@ class Relay: Relaying {
                 Logger.error(error)
             }
         } else {
-            Logger.debug("Did not find key associated with topic: \(topic)")
+//            Logger.debug("Did not find key associated with topic: \(topic)")
+            let message = request.params.data.message
+            let jsonData = Data(hex: message)
+//            guard let jsonData = message.data(using: .utf8) else {
+//                Logger.error(DataConversionError.stringToDataFailed)
+//                return
+//            }
+            do {
+                let deserialisedJsonRpcRequest = try JSONDecoder().decode(ClientSynchJSONRPC.self, from: jsonData)
+                clientSynchJsonRpcPublisherSubject.send(deserialisedJsonRpcRequest)
+                acknowledgeSubscription(requestId: request.id)
+            } catch {
+                Logger.error(error)
+            }
         }
     }
     
