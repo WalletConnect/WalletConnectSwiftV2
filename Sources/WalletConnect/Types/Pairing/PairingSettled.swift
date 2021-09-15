@@ -1,7 +1,8 @@
 
 import Foundation
+
 extension PairingType {
-    struct Settled: Codable, Equatable {
+    struct Settled: Codable, SequenceSettled, Equatable {
         let topic: String
         let relay: RelayProtocolOptions
         let sharedKey: String
@@ -12,10 +13,10 @@ extension PairingType {
         let state: State?
     }
     
-    struct Pending: Equatable {
-        enum PendingStatus: Equatable {
-            case proposed
-            case responded
+    struct Pending: Codable, SequencePending, Equatable {
+        enum PendingStatus: String, Equatable, Codable {
+            case proposed = "proposed"
+            case responded = "responded"
         }
         let status: PendingStatus
         let topic: String
@@ -24,4 +25,3 @@ extension PairingType {
         let proposal: Proposal
     }
 }
-
