@@ -1,15 +1,15 @@
 
 import Foundation
 
-class Sequences {
-    var sequences: [Pairing] = []
+class Sequences<T: Sequence> {
+    var sequences: [T] = []
     
     func create(topic: String, sequenceState: SequenceState) {
-        let sequence = Pairing(topic: topic, sequenceState: sequenceState)
+        let sequence = T(topic: topic, sequenceState: sequenceState)
         sequences.append(sequence)
     }
     
-    func get(topic: String) -> Pairing? {
+    func get(topic: String) -> T? {
         sequences.first{$0.topic == topic}
     }
 

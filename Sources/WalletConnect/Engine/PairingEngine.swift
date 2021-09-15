@@ -1,7 +1,7 @@
 import Foundation
 
 final class PairingEngine: SequenceEngine {
-    private let sequences: Sequences
+    private let sequences: Sequences<Pairing>
     private let wcSubscriber: WCSubscribing
     private let relayer: Relaying
     private let crypto: Crypto
@@ -9,7 +9,7 @@ final class PairingEngine: SequenceEngine {
     init(relay: Relaying,
          crypto: Crypto,
          subscriber: WCSubscribing,
-         sequences: Sequences = Sequences()) {
+         sequences: Sequences<Pairing> = Sequences<Pairing>()) {
         self.relayer = relay
         self.crypto = crypto
         self.wcSubscriber = subscriber

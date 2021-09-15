@@ -4,7 +4,7 @@ import XCTest
 @testable import WalletConnect
 
 class SequencesTests: XCTestCase {
-    var sequences: Sequences!
+    var sequences: Sequences<Pairing>!
 
     override func setUp() {
         sequences = Sequences()
