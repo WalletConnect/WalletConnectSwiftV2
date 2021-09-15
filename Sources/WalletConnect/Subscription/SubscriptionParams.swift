@@ -1,10 +1,10 @@
 
 import Foundation
 
-enum SequenceData: Equatable {
+enum SequenceState: Equatable {
     case settled(PairingType.Settled)
     case pending(PairingType.Pending)
-    static func == (lhs: SequenceData, rhs: SequenceData) -> Bool {
+    static func == (lhs: SequenceState, rhs: SequenceState) -> Bool {
         switch (lhs, rhs) {
         case (.pending(let lhsPending), .pending(let rhsPending)):
             return lhsPending == rhsPending
@@ -14,10 +14,4 @@ enum SequenceData: Equatable {
             return false
         }
     }
-}
-
-struct SubscriptionParams: Equatable {
-    let id: String
-    let topic: String
-    let sequence: SequenceData
 }

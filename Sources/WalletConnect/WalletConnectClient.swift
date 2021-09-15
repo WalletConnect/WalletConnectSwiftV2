@@ -16,7 +16,8 @@ public class WalletConnectClient {
         self.isController = options.isController
         self.metadata = options.metadata
         self.relay = Relay(transport: JSONRPCTransport(url: options.relayURL), crypto: crypto)
-        self.pairingEngine = PairingEngine(relay: relay, crypto: crypto)
+        let wcSubscriber = WCSubscriber(relay: relay)
+        self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: wcSubscriber)
         // TODO: Store api key
     }
     

@@ -1,15 +1,15 @@
 
 import Foundation
 
-protocol SequenceSubscribing {
-    func set(topic: String, sequenceData: SequenceData)
-    func get(topic: String) -> SequenceData?
-    func remove(topic: String)
+protocol WCSubscribing {
+    func setSubscription(topic: String)
+    func getSubscription(topic: String) -> String?
+    func removeSubscription(topic: String)
 }
 
-class Subscription: SequenceSubscribing {
+class WCSubscriber: WCSubscribing {
     private var relay: Relaying
-    var subscriptions: [String: SubscriptionParams] = [:]
+    var subscriptions: [String: String] = [:]
 
     init(relay: Relaying) {
         self.relay = relay
@@ -17,29 +17,34 @@ class Subscription: SequenceSubscribing {
 
     // MARK: - Sequence Subscribing Interface
 
-    func set(topic: String, sequenceData: SequenceData) {
+    func setSubscription(topic: String) {
         Logger.debug("Setting Subscription...")
-        subscribeAndSet(topic: topic, sequenceData: sequenceData)
-    }
-
-    func get(topic: String) -> SequenceData? {
-        Logger.debug("Getting Subscription...")
-        if let subscription = subscriptions[topic] {
-            Logger.debug("Subscription for a topic: \(topic) found")
-            return subscription.sequence
-        } else {
-            Logger.error("Subscription for a topic: \(topic) not found")
-            return nil
+        do {
+            let _ = try relay.subscribe(topic: topic, completion: { [unowned self] result in
+                switch result {
+                case .success(let subscriptionId):
+                    self.subscriptions[topic] = subscriptionId
+                case .failure(let error):
+                    Logger.error("Could not subscribe for topic: \(topic), error: \(error)")
+                }
+            })
+        } catch {
+            Logger.error("Could not subscribe for topic: \(topic), error: \(error)")
         }
     }
     
-    func remove(topic: String) {
+    /// - returns: subscription id
+    func getSubscription(topic: String) -> String? {
+        return subscriptions[topic]
+    }
+    
+    func removeSubscription(topic: String) {
         Logger.debug("Removing subscription for topic: \(topic)")
-        guard let subscriptionParams = subscriptions[topic] else {
+        guard let subscriptionId = subscriptions[topic] else {
             Logger.error("Cannot unsubscribe on topic: \(topic)")
             return
         }
-        let _ = try? relay.unsubscribe(topic: topic, id: subscriptionParams.id) { [unowned self] result in
+        let _ = try? relay.unsubscribe(topic: topic, id: subscriptionId) { [unowned self] result in
             switch result {
             case .success():
                 Logger.debug("Successfuly unsubscribed on topic: \(topic)")
@@ -48,24 +53,6 @@ class Subscription: SequenceSubscribing {
                 Logger.error("Failed to remove subscription")
                 return
             }
-        }
-    }
-    
-    // MARK: - Private
-    
-    private func subscribeAndSet(topic: String, sequenceData: SequenceData)  {
-        do {
-            let _ = try relay.subscribe(topic: topic, completion: { [unowned self] result in
-                switch result {
-                case .success(let subscriptionId):
-                    let subscriptionParams = SubscriptionParams(id: subscriptionId, topic: topic, sequence: sequenceData)
-                    self.subscriptions[topic] = subscriptionParams
-                case .failure(let error):
-                    Logger.error("Could not subscribe for topic: \(topic), error: \(error)")
-                }
-            })
-        } catch {
-            Logger.error("Could not subscribe for topic: \(topic), error: \(error)")
         }
     }
 }

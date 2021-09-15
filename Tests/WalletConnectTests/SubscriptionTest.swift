@@ -3,33 +3,31 @@ import Foundation
 import XCTest
 @testable import WalletConnect
 
-class SubscriptionTest: XCTestCase {
+class WCSubscriberTest: XCTestCase {
     var relay: MockedRelay!
-    var subscription: Subscription!
+    var subscriber: WCSubscriber!
     override func setUp() {
         relay = MockedRelay()
-        subscription = Subscription(relay: relay)
+        subscriber = WCSubscriber(relay: relay)
     }
 
     override func tearDown() {
         relay = nil
-        subscription = nil
+        subscriber = nil
     }
     
     func testSetGetSubscription() {
         let topic = "1234"
-        let sequenceData = SequenceData.pending(testPendingSequence)
-        subscription.set(topic: topic, sequenceData: sequenceData)
-        XCTAssertNotNil(subscription.get(topic: topic))
+        subscriber.setSubscription(topic: topic)
+        XCTAssertNotNil(subscriber.getSubscription(topic: topic))
         XCTAssertTrue(relay.didCallSubscribe)
     }
     
     func testRemoveSubscription() {
         let topic = "1234"
-        let sequenceData = SequenceData.pending(testPendingSequence)
-        subscription.set(topic: topic, sequenceData: sequenceData)
-        subscription.remove(topic: topic)
-        XCTAssertNil(subscription.get(topic: topic))
+        subscriber.setSubscription(topic: topic)
+        subscriber.removeSubscription(topic: topic)
+        XCTAssertNil(subscriber.getSubscription(topic: topic))
         XCTAssertTrue(relay.didCallUnsubscribe)
     }
 }
