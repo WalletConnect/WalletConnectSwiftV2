@@ -1,7 +1,6 @@
 
 import Foundation
 
-
 class Sequences {
     var sequences: [Pairing] = []
     

@@ -1,7 +1,6 @@
 import Foundation
 
 final class PairingEngine: SequenceEngine {
-    
     private let sequences: Sequences
     private let wcSubscriber: WCSubscribing
     private let relayer: Relaying

@@ -13,18 +13,3 @@ enum SequenceStatus {
     case responded
     case settled
 }
-
-protocol Sequence: AnyObject {
-    var topic: String {get set}
-    var sequenceState: SequenceState {get set}
-}
-
-class Pairing: Sequence {
-    var topic: String
-    var sequenceState: SequenceState
-    
-    internal init(topic: String, sequenceState: SequenceState) {
-        self.topic = topic
-        self.sequenceState = sequenceState
-    }
-}
