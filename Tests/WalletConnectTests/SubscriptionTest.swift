@@ -31,16 +31,3 @@ class WCSubscriberTest: XCTestCase {
         XCTAssertTrue(relay.didCallUnsubscribe)
     }
 }
-
-fileprivate let testPendingSequence = PairingType.Pending(status: .proposed,
-                                                          topic: "1234",
-                                                          relay: RelayProtocolOptions(protocol: "",
-                                                                                      params: nil),
-                                                          self: PairingType.Participant(publicKey: ""),
-                                                          proposal: PairingType.Proposal(topic: "",
-                                                                                         relay: RelayProtocolOptions(protocol: "",
-                                                                                                                     params: nil),
-                                                                                         proposer: PairingType.Proposer(publicKey: "",
-                                                                                                                        controller: false),
-                                                                                         signal: PairingType.Signal(params: PairingType.Signal.Params(uri: "")),
-                                                                                         permissions: PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [])), ttl: 0))
