@@ -1,5 +1,6 @@
 
 import Foundation
+import Combine
 
 protocol WCSubscribing {
     func setSubscription(topic: String)
@@ -10,9 +11,11 @@ protocol WCSubscribing {
 class WCSubscriber: WCSubscribing {
     private var relay: Relaying
     var subscriptions: [String: String] = [:]
-
+    var onPayload: ((WCSubscriptionPayload)->())?
+    private var publishers = [AnyCancellable]()
     init(relay: Relaying) {
         self.relay = relay
+        setSubscribingForPayloads()
     }
 
     // MARK: - Sequence Subscribing Interface
@@ -54,5 +57,13 @@ class WCSubscriber: WCSubscribing {
                 return
             }
         }
+    }
+    
+    private func setSubscribingForPayloads() {
+        relay.clientSynchJsonRpcPublisher
+            .filter {[weak self] in self?.subscriptions.values.contains($0.subscriptionId) ?? false}
+            .sink { [weak self] subscriptionPayload in
+                self?.onPayload?(subscriptionPayload)
+            }.store(in: &publishers)
     }
 }

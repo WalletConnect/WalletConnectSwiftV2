@@ -30,4 +30,32 @@ class WCSubscriberTest: XCTestCase {
         XCTAssertNil(subscriber.getSubscription(topic: topic))
         XCTAssertTrue(relay.didCallUnsubscribe)
     }
+    
+    func testSubscriberPassesPayloadOnSubscribedEvent() {
+        let subscriptionExpectation = expectation(description: "subscription")
+        let topic = "1234"
+        let subscriptionId = "5853ad129f4753ca930c4a4b954d6d83cdcd7a4e63017548c2fddf829a3d8f2b"
+        relay.subscribeCompletionId = subscriptionId
+        subscriber.setSubscription(topic: topic)
+        subscriber.onPayload = { _ in
+            subscriptionExpectation.fulfill()
+        }
+        relay.sendSubscriptionPayloadOn(topic: topic, subscriptionId: subscriptionId)
+        waitForExpectations(timeout: 0.001, handler: nil)
+    }
+    
+    func testSubscriberNotPassesPayloadOnNotSubscribedEvent() {
+        let topic = "1234"
+        let subscribeCompletionId = "5853ad129f4753ca930c4a4b954d6d83cdcd7a4e63017548c2fddf829a3d8f2b"
+        relay.subscribeCompletionId = subscribeCompletionId
+        subscriber.setSubscription(topic: topic)
+        var onPayloadCalled = false
+        subscriber.onPayload = { _ in
+            onPayloadCalled = true
+        }
+        let payloadSubscriptionId = "dfddff4753ca930c4a4b954d6d83cdcd7a4e63017548c2fddf829a3d8f2b"
+        relay.sendSubscriptionPayloadOn(topic: topic, subscriptionId: payloadSubscriptionId)
+        Thread.sleep(forTimeInterval: 0.001)
+        XCTAssertFalse(onPayloadCalled)
+    }
 }

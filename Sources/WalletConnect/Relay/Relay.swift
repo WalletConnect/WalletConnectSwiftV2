@@ -3,6 +3,7 @@ import Foundation
 import Combine
 
 protocol Relaying {
+    var clientSynchJsonRpcPublisher: AnyPublisher<WCSubscriptionPayload, Never> {get}
     /// - returns: request id
     func publish(topic: String, payload: Encodable, completion: @escaping ((Result<Void, Error>)->())) throws -> Int64
     /// - returns: request id
@@ -25,10 +26,10 @@ class Relay: Relaying {
         requestAcknowledgePublisherSubject.eraseToAnyPublisher()
     }
     private let requestAcknowledgePublisherSubject = PassthroughSubject<JSONRPCResponse<Bool>, Never>()
-    var clientSynchJsonRpcPublisher: AnyPublisher<ClientSynchJSONRPC, Never> {
+    var clientSynchJsonRpcPublisher: AnyPublisher<WCSubscriptionPayload, Never> {
         clientSynchJsonRpcPublisherSubject.eraseToAnyPublisher()
     }
-    private let clientSynchJsonRpcPublisherSubject = PassthroughSubject<ClientSynchJSONRPC, Never>()
+    private let clientSynchJsonRpcPublisherSubject = PassthroughSubject<WCSubscriptionPayload, Never>()
     
     init(jsonRpcSerialiser: JSONRPCSerialising = JSONRPCSerialiser(),
          transport: JSONRPCTransporting,
@@ -179,7 +180,8 @@ class Relay: Relaying {
             let message = request.params.data.message
             do {
                 let deserialisedJsonRpcRequest = try jsonRpcSerialiser.deserialise(message: message, symmetricKey: agreementKeys.sharedSecret)
-                clientSynchJsonRpcPublisherSubject.send(deserialisedJsonRpcRequest)
+                let payload = WCSubscriptionPayload(topic: topic, subscriptionId: request.params.id, clientSynchJsonRpc: deserialisedJsonRpcRequest)
+                clientSynchJsonRpcPublisherSubject.send(payload)
                 acknowledgeSubscription(requestId: request.id)
             } catch {
                 Logger.error(error)
