@@ -12,6 +12,9 @@ protocol Relaying {
 }
 
 class Relay: Relaying {
+    
+    var onPayload: ((ClientSynchJSONRPC) -> Void)?
+    
     // ttl for waku network to persist message for comunitationg client in case request is not acknowledged
     private let defaultTtl = 6*Time.hour
     private let jsonRpcSerialiser: JSONRPCSerialising
@@ -30,15 +33,27 @@ class Relay: Relaying {
     }
     private let clientSynchJsonRpcPublisherSubject = PassthroughSubject<ClientSynchJSONRPC, Never>()
     
+    private var payloadCancellable: AnyCancellable?
+    
     init(jsonRpcSerialiser: JSONRPCSerialising = JSONRPCSerialiser(),
          transport: JSONRPCTransporting,
          crypto: Crypto) {
         self.jsonRpcSerialiser = jsonRpcSerialiser
         self.transport = transport
         self.crypto = crypto
-        setUpTransport()
+        setUpBindings()
     }
 
+    private func setUpBindings() {
+        transport.onMessage = { [weak self] payload in
+            self?.handlePayloadMessage(payload)
+        }
+        payloadCancellable = clientSynchJsonRpcPublisher
+            .sink { [weak self] jsonRPC in
+            self?.onPayload?(jsonRPC)
+        }
+    }
+    
     func publish(topic: String, payload: Encodable, completion: @escaping ((Result<Void, Error>)->())) throws -> Int64 {
         let messageJson = try payload.json()
         var message: String
@@ -116,62 +131,25 @@ class Relay: Relaying {
         return request.id
     }
 
-    private func setUpTransport() {
-        transport.onMessage = { [weak self] payload in
-            self?.onPayload(payload)
-        }
-    }
-
-    private func onPayload(_ payload: String) {
-        if let request = getClientSubscriptionRequest(from: payload) {
+    private func handlePayloadMessage(_ payload: String) {
+        if let request = tryDecode(JSONRPCRequest<RelayJSONRPC.SubscriptionParams>.self, from: payload),
+           request.method == RelayJSONRPC.Method.subscription.rawValue {
             manageSubscriptionRequest(request)
-        } else if let response = getRequestAcknowledgement(from: payload) {
+        } else if let response = tryDecode(JSONRPCResponse<Bool>.self, from: payload) {
             requestAcknowledgePublisherSubject.send(response)
-        } else if let response = getNetworkSubscriptionResponse(from: payload) {
+        } else if let response = tryDecode(JSONRPCResponse<String>.self, from: payload) {
             subscriptionResponsePublisherSubject.send(response)
-        } else if let response = getErrorResponse(from: payload) {
+        } else if let response = tryDecode(JSONRPCError.self, from: payload) {
             Logger.error("Received error message from network, code: \(response.code), message: \(response.message)")
         } else {
             Logger.error("Unexpected response from network")
         }
     }
     
-    private func getClientSubscriptionRequest(from payload: String) -> JSONRPCRequest<RelayJSONRPC.SubscriptionParams>? {
+    private func tryDecode<T: Decodable>(_ type: T.Type, from payload: String) -> T? {
         if let data = payload.data(using: .utf8),
-           let request = try? JSONDecoder().decode(JSONRPCRequest<RelayJSONRPC.SubscriptionParams>.self, from: data),
-           request.method == RelayJSONRPC.Method.subscription.rawValue {
-            return request
-        } else {
-            return nil
-        }
-    }
-    
-//    private func tryDecode<T: Decodable>(from payload: String) -> JSONRPCRequest<T>? {
-//
-//    }
-    
-    private func getNetworkSubscriptionResponse(from payload: String) -> JSONRPCResponse<String>? {
-        if let data = payload.data(using: .utf8),
-           let response = try? JSONDecoder().decode(JSONRPCResponse<String>.self, from: data) {
+           let response = try? JSONDecoder().decode(T.self, from: data) {
             return response
-        } else {
-            return nil
-        }
-    }
-    
-    private func getRequestAcknowledgement(from payload: String) -> JSONRPCResponse<Bool>? {
-        if let data = payload.data(using: .utf8),
-           let response = try? JSONDecoder().decode(JSONRPCResponse<Bool>.self, from: data) {
-            return response
-        } else {
-            return nil
-        }
-    }
-    
-    private func getErrorResponse(from payload: String) -> JSONRPCError? {
-        if let data = payload.data(using: .utf8),
-           let request = try? JSONDecoder().decode(JSONRPCError.self, from: data) {
-            return request
         } else {
             return nil
         }
@@ -179,30 +157,19 @@ class Relay: Relaying {
     
     private func manageSubscriptionRequest(_ request: JSONRPCRequest<RelayJSONRPC.SubscriptionParams>) {
         let topic = request.params.data.topic
-        if let agreementKeys = crypto.getAgreementKeys(for: topic) {
-            let message = request.params.data.message
-            do {
-                let deserialisedJsonRpcRequest = try jsonRpcSerialiser.deserialise(message: message, symmetricKey: agreementKeys.sharedSecret)
-                clientSynchJsonRpcPublisherSubject.send(deserialisedJsonRpcRequest)
-                acknowledgeSubscription(requestId: request.id)
-            } catch {
-                Logger.error(error)
+        let message = request.params.data.message
+        do {
+            let deserialisedJsonRpcRequest: ClientSynchJSONRPC
+            if let agreementKeys = crypto.getAgreementKeys(for: topic) {
+                deserialisedJsonRpcRequest = try jsonRpcSerialiser.deserialise(message: message, symmetricKey: agreementKeys.sharedSecret)
+            } else {
+                let jsonData = Data(hex: message)
+                deserialisedJsonRpcRequest = try JSONDecoder().decode(ClientSynchJSONRPC.self, from: jsonData)
             }
-        } else {
-//            Logger.debug("Did not find key associated with topic: \(topic)")
-            let message = request.params.data.message
-            let jsonData = Data(hex: message)
-//            guard let jsonData = message.data(using: .utf8) else {
-//                Logger.error(DataConversionError.stringToDataFailed)
-//                return
-//            }
-            do {
-                let deserialisedJsonRpcRequest = try JSONDecoder().decode(ClientSynchJSONRPC.self, from: jsonData)
-                clientSynchJsonRpcPublisherSubject.send(deserialisedJsonRpcRequest)
-                acknowledgeSubscription(requestId: request.id)
-            } catch {
-                Logger.error(error)
-            }
+            clientSynchJsonRpcPublisherSubject.send(deserialisedJsonRpcRequest)
+            acknowledgeSubscription(requestId: request.id)
+        } catch {
+            Logger.error(error)
         }
     }
     
