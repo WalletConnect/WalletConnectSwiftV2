@@ -32,13 +32,13 @@ class WCSubscriberTest: XCTestCase {
     }
     
     func testSubscriberPassesPayloadOnSubscribedEvent() {
-        let expectation = expectation(description: "subscription")
+        let subscriptionExpectation = expectation(description: "subscription")
         let topic = "1234"
         let subscriptionId = "5853ad129f4753ca930c4a4b954d6d83cdcd7a4e63017548c2fddf829a3d8f2b"
         relay.subscribeCompletionId = subscriptionId
         subscriber.setSubscription(topic: topic)
         subscriber.onPayload = { _ in
-            expectation.fulfill()
+            subscriptionExpectation.fulfill()
         }
         relay.sendSubscriptionPayloadOn(topic: topic, subscriptionId: subscriptionId)
         waitForExpectations(timeout: 0.001, handler: nil)
