@@ -15,7 +15,7 @@ class WCSubscriber: WCSubscribing {
     private var publishers = [AnyCancellable]()
     init(relay: Relaying) {
         self.relay = relay
-        setSubscriptions()
+        setSubscribingForPayloads()
     }
 
     // MARK: - Sequence Subscribing Interface
@@ -59,7 +59,7 @@ class WCSubscriber: WCSubscribing {
         }
     }
     
-    func setSubscribingForPayloads() {
+    private func setSubscribingForPayloads() {
         relay.clientSynchJsonRpcPublisher
             .filter {[weak self] in self?.subscriptions.values.contains($0.subscriptionId) ?? false}
             .sink { [weak self] subscriptionPayload in
