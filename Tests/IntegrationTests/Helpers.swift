@@ -1,7 +1,7 @@
 import Foundation
 @testable import WalletConnect
 
-let defaultTimeout: TimeInterval = 3.0
+let defaultTimeout: TimeInterval = 5.0
 
 extension String {
     static func randomTopic() -> String {

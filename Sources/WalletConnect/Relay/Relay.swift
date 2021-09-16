@@ -13,8 +13,6 @@ protocol Relaying {
 
 class Relay: Relaying {
     
-    var onPayload: ((ClientSynchJSONRPC) -> Void)?
-    
     // ttl for waku network to persist message for comunitationg client in case request is not acknowledged
     private let defaultTtl = 6*Time.hour
     private let jsonRpcSerialiser: JSONRPCSerialising
@@ -47,10 +45,6 @@ class Relay: Relaying {
     private func setUpBindings() {
         transport.onMessage = { [weak self] payload in
             self?.handlePayloadMessage(payload)
-        }
-        payloadCancellable = clientSynchJsonRpcPublisher
-            .sink { [weak self] jsonRPC in
-            self?.onPayload?(jsonRPC)
         }
     }
     

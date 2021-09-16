@@ -29,10 +29,10 @@ final class RelayTests: XCTestCase {
         let expectation = expectation(description: "publish payloads must be sent and received successfuly")
         expectation.expectedFulfillmentCount = 4
         
-        relayA.onPayload = {
+        _ = relayA.clientSynchJsonRpcPublisher.sink {
             $0.isPairingApprove ? expectation.fulfill() : XCTFail("unexpected client sync method received")
         }
-        relayB.onPayload = {
+        _ = relayB.clientSynchJsonRpcPublisher.sink {
             $0.isPairingApprove ? expectation.fulfill() : XCTFail("unexpected client sync method received")
         }
         
