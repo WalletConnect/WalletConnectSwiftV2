@@ -1,18 +1,19 @@
 import Foundation
 
 final class PairingEngine: SequenceEngine {
-    
-    private let pendingPairings: SequenceSubscribing
-    private let settledPairings: SequenceSubscribing!
-    
+    private let sequences: Sequences<Pairing>
+    private let wcSubscriber: WCSubscribing
     private let relayer: Relaying
     private let crypto: Crypto
     
-    init(relay: Relaying, crypto: Crypto) {
+    init(relay: Relaying,
+         crypto: Crypto,
+         subscriber: WCSubscribing,
+         sequences: Sequences<Pairing> = Sequences<Pairing>()) {
         self.relayer = relay
         self.crypto = crypto
-        self.pendingPairings = Subscription(relay: relay)
-        self.settledPairings = Subscription(relay: relay)
+        self.wcSubscriber = subscriber
+        self.sequences = sequences
     }
     
     func respond(to proposal: PairingType.Proposal, completion: @escaping (Result<String, Error>) -> Void) {
@@ -26,17 +27,17 @@ final class PairingEngine: SequenceEngine {
             self: PairingType.Participant(publicKey: selfPublicKey),
             proposal: proposal)
         
-        pendingPairings.set(topic: proposal.topic, sequenceData: .pending(pendingPairing))
-        
+        wcSubscriber.setSubscription(topic: proposal.topic)
+        sequences.create(topic: proposal.topic, sequenceState: .pending(pendingPairing))
         // settle on topic B
         let agreementKeys = try! Crypto.X25519.generateAgreementKeys(
             peerPublicKey: Data(hex: proposal.proposer.publicKey),
             privateKey: privateKey)
-        let topicB = agreementKeys.sharedSecret.sha256().toHexString()
+        let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
         
         let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : selfPublicKey
         let settledPairing = PairingType.Settled(
-            topic: topicB,
+            topic: settledTopic,
             relay: proposal.relay,
             sharedKey: agreementKeys.sharedSecret.toHexString(),
             self: PairingType.Participant(publicKey: selfPublicKey),
@@ -46,8 +47,12 @@ final class PairingEngine: SequenceEngine {
                 controller: Controller(publicKey: controllerKey)),
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
             state: nil) // FIXME: State
-        settledPairings.set(topic: topicB, sequenceData: .settled(settledPairing))
-        crypto.set(agreementKeys: agreementKeys, topic: topicB)
+        
+                
+        wcSubscriber.setSubscription(topic: settledTopic)
+        sequences.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledPairing))
+        
+        crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         crypto.set(privateKey: privateKey)
         
         // publish approve on topic A
@@ -62,7 +67,7 @@ final class PairingEngine: SequenceEngine {
         _ = try? relayer.publish(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
             switch result {
             case .success:
-                self?.pendingPairings.remove(topic: proposal.topic)
+                self?.wcSubscriber.removeSubscription(topic: proposal.topic)
                 print("Success on wc_pairingApprove")
                 completion(.success(proposal.topic))
             case .failure(let error):
