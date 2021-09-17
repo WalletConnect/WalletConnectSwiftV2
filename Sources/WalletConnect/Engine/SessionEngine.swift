@@ -1,20 +1,5 @@
 import Foundation
 
-class Session: Sequence {
-    
-    var topic: String
-    var sequenceState: SequenceState
-    
-    required init(topic: String, sequenceState: SequenceState) {
-        self.topic = topic
-        self.sequenceState = sequenceState
-    }
-    
-    struct Pending: SequencePending, Equatable {
-        
-    }
-}
-
 final class SessionEngine {
     
     private let sequences: Sequences<Session>
@@ -70,6 +55,8 @@ final class SessionEngine {
         _ = try? relayer.publish(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
             switch result {
             case .success:
+                self?.crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
+                self?.crypto.set(privateKey: privateKey)
                 self?.sequences.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledSession))
                 self?.wcSubscriber.setSubscription(topic: settledTopic)
                 print("Success on wc_sessionApprove")
