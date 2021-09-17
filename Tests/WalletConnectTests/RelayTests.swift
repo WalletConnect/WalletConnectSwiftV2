@@ -36,6 +36,16 @@ class RelayTests: XCTestCase {
         waitForExpectations(timeout: 0.001, handler: nil)
     }
     
+    func testNotifyOnClientSyncJsonRpcUnencryptedData() {
+        let requestExpectation = expectation(description: "request")
+        relay.clientSynchJsonRpcPublisher.sink { request in
+            XCTAssert(request.clientSynchJsonRpc.method == .pairingApprove)
+            requestExpectation.fulfill()
+        }.store(in: &publishers)
+        transport.onMessage?(SerialiserTestData.unencryptedPairingApproveSubscription)
+        waitForExpectations(timeout: 0.001, handler: nil)
+    }
+    
     func testPublishRequestAcknowledge() {
         let acknowledgeExpectation = expectation(description: "acknowledge")
         let requestId = try! relay.publish(topic: "", payload: "{}") {_ in

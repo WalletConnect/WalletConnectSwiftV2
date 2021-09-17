@@ -176,18 +176,20 @@ class Relay: Relaying {
     
     private func manageSubscriptionRequest(_ request: JSONRPCRequest<RelayJSONRPC.SubscriptionParams>) {
         let topic = request.params.data.topic
-        if let agreementKeys = crypto.getAgreementKeys(for: topic) {
-            let message = request.params.data.message
-            do {
-                let deserialisedJsonRpcRequest = try jsonRpcSerialiser.deserialise(message: message, symmetricKey: agreementKeys.sharedSecret)
-                let payload = WCSubscriptionPayload(topic: topic, subscriptionId: request.params.id, clientSynchJsonRpc: deserialisedJsonRpcRequest)
-                clientSynchJsonRpcPublisherSubject.send(payload)
-                acknowledgeSubscription(requestId: request.id)
-            } catch {
-                Logger.error(error)
+        let message = request.params.data.message
+        do {
+            let deserialisedJsonRpcRequest: ClientSynchJSONRPC
+            if let agreementKeys = crypto.getAgreementKeys(for: topic) {
+                deserialisedJsonRpcRequest = try jsonRpcSerialiser.deserialise(message: message, symmetricKey: agreementKeys.sharedSecret)
+            } else {
+                let jsonData = Data(hex: message)
+                deserialisedJsonRpcRequest = try JSONDecoder().decode(ClientSynchJSONRPC.self, from: jsonData)
             }
-        } else {
-            Logger.debug("Did not find key associated with topic: \(topic)")
+            let payload = WCSubscriptionPayload(topic: topic, subscriptionId: request.params.id, clientSynchJsonRpc: deserialisedJsonRpcRequest)
+            clientSynchJsonRpcPublisherSubject.send(payload)
+            acknowledgeSubscription(requestId: request.id)
+        } catch {
+            Logger.error(error)
         }
     }
     

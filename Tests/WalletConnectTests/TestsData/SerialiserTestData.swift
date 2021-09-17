@@ -24,6 +24,15 @@ enum SerialiserTestData {
                                                                                                                                    url: nil,
                                                                                                                                    icons: nil)))))
     
+    static let unencryptedPairingApproveSubscription = try! JSONRPCRequest(
+        method: RelayJSONRPC.Method.subscription.rawValue,
+        params: RelayJSONRPC.SubscriptionParams(
+            id: "", data: RelayJSONRPC.SubscriptionData(
+                topic: "", message: pairingApproveJSONRPCRequest.json().toHexEncodedString(uppercase: false)
+            )
+        )
+    ).json()
+    
     static let pairingApproveJSON = """
     {
     "id":1630150217000,
