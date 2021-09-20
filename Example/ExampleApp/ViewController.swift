@@ -1,7 +1,7 @@
 import UIKit
 import WalletConnect
 
-class ViewController: UIViewController {
+final class ViewController: UIViewController {
 
     let client: WalletConnectClient = {
         let options = WalletClientOptions(
@@ -13,8 +13,32 @@ class ViewController: UIViewController {
         return WalletConnectClient(options: options)
     }()
     
+    let scanButton: UIBarButtonItem = {
+        UIBarButtonItem(
+            image: UIImage(systemName: "qrcode.viewfinder"),
+            style: .plain,
+            target: self,
+            action: #selector(openScanner)
+        )
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
+        navigationItem.rightBarButtonItem = scanButton
+    }
+    
+    @objc
+    private func openScanner() {
+        let scannerViewController = ScannerViewController()
+        scannerViewController.delegate = self
+        navigationController?.pushViewController(scannerViewController, animated: true)
+    }
+}
+
+extension ViewController: ScannerViewControllerDelegate {
+    
+    func didScan(_ code: String) {
+        print(code)
     }
 }
