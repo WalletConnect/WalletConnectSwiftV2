@@ -13,6 +13,10 @@ protocol Relaying {
 
 class Relay: Relaying {
     
+    private typealias SubscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>
+    private typealias SubscriptionResponse = JSONRPCResponse<String>
+    private typealias RequestAcknowledgement = JSONRPCResponse<Bool>
+    
     // ttl for waku network to persist message for comunitationg client in case request is not acknowledged
     private let defaultTtl = 6*Time.hour
     private let jsonRpcSerialiser: JSONRPCSerialising
@@ -126,12 +130,12 @@ class Relay: Relaying {
     }
 
     private func handlePayloadMessage(_ payload: String) {
-        if let request = tryDecode(JSONRPCRequest<RelayJSONRPC.SubscriptionParams>.self, from: payload),
+        if let request = tryDecode(SubscriptionRequest.self, from: payload),
            request.method == RelayJSONRPC.Method.subscription.rawValue {
             manageSubscriptionRequest(request)
-        } else if let response = tryDecode(JSONRPCResponse<Bool>.self, from: payload) {
+        } else if let response = tryDecode(RequestAcknowledgement.self, from: payload) {
             requestAcknowledgePublisherSubject.send(response)
-        } else if let response = tryDecode(JSONRPCResponse<String>.self, from: payload) {
+        } else if let response = tryDecode(SubscriptionResponse.self, from: payload) {
             subscriptionResponsePublisherSubject.send(response)
         } else if let response = tryDecode(JSONRPCError.self, from: payload) {
             Logger.error("Received error message from network, code: \(response.code), message: \(response.message)")
