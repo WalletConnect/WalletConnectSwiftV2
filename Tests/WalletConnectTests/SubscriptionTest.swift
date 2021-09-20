@@ -3,46 +3,59 @@ import Foundation
 import XCTest
 @testable import WalletConnect
 
-class SubscriptionTest: XCTestCase {
+class WCSubscriberTest: XCTestCase {
     var relay: MockedRelay!
-    var subscription: Subscription!
+    var subscriber: WCSubscriber!
     override func setUp() {
         relay = MockedRelay()
-        subscription = Subscription(relay: relay)
+        subscriber = WCSubscriber(relay: relay)
     }
 
     override func tearDown() {
         relay = nil
-        subscription = nil
+        subscriber = nil
     }
     
     func testSetGetSubscription() {
         let topic = "1234"
-        let sequenceData = SequenceData.pending(testPendingSequence)
-        subscription.set(topic: topic, sequenceData: sequenceData)
-        XCTAssertNotNil(subscription.get(topic: topic))
+        subscriber.setSubscription(topic: topic)
+        XCTAssertNotNil(subscriber.getSubscription(topic: topic))
         XCTAssertTrue(relay.didCallSubscribe)
     }
     
     func testRemoveSubscription() {
         let topic = "1234"
-        let sequenceData = SequenceData.pending(testPendingSequence)
-        subscription.set(topic: topic, sequenceData: sequenceData)
-        subscription.remove(topic: topic)
-        XCTAssertNil(subscription.get(topic: topic))
+        subscriber.setSubscription(topic: topic)
+        subscriber.removeSubscription(topic: topic)
+        XCTAssertNil(subscriber.getSubscription(topic: topic))
         XCTAssertTrue(relay.didCallUnsubscribe)
     }
+    
+    func testSubscriberPassesPayloadOnSubscribedEvent() {
+        let subscriptionExpectation = expectation(description: "subscription")
+        let topic = "1234"
+        let subscriptionId = "5853ad129f4753ca930c4a4b954d6d83cdcd7a4e63017548c2fddf829a3d8f2b"
+        relay.subscribeCompletionId = subscriptionId
+        subscriber.setSubscription(topic: topic)
+        subscriber.onSubscription = { _ in
+            subscriptionExpectation.fulfill()
+        }
+        relay.sendSubscriptionPayloadOn(topic: topic, subscriptionId: subscriptionId)
+        waitForExpectations(timeout: 0.001, handler: nil)
+    }
+    
+    func testSubscriberNotPassesPayloadOnNotSubscribedEvent() {
+        let topic = "1234"
+        let subscribeCompletionId = "5853ad129f4753ca930c4a4b954d6d83cdcd7a4e63017548c2fddf829a3d8f2b"
+        relay.subscribeCompletionId = subscribeCompletionId
+        subscriber.setSubscription(topic: topic)
+        var onPayloadCalled = false
+        subscriber.onSubscription = { _ in
+            onPayloadCalled = true
+        }
+        let payloadSubscriptionId = "dfddff4753ca930c4a4b954d6d83cdcd7a4e63017548c2fddf829a3d8f2b"
+        relay.sendSubscriptionPayloadOn(topic: topic, subscriptionId: payloadSubscriptionId)
+        Thread.sleep(forTimeInterval: 0.001)
+        XCTAssertFalse(onPayloadCalled)
+    }
 }
-
-fileprivate let testPendingSequence = PairingType.Pending(status: .proposed,
-                                                          topic: "1234",
-                                                          relay: RelayProtocolOptions(protocol: "",
-                                                                                      params: nil),
-                                                          self: PairingType.Participant(publicKey: ""),
-                                                          proposal: PairingType.Proposal(topic: "",
-                                                                                         relay: RelayProtocolOptions(protocol: "",
-                                                                                                                     params: nil),
-                                                                                         proposer: PairingType.Proposer(publicKey: "",
-                                                                                                                        controller: false),
-                                                                                         signal: PairingType.Signal(params: PairingType.Signal.Params(uri: "")),
-                                                                                         permissions: PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [])), ttl: 0))

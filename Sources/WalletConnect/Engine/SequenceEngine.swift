@@ -13,7 +13,3 @@ enum SequenceStatus {
     case responded
     case settled
 }
-
-protocol Sequence {
-    var status: SequenceStatus {get set}
-}

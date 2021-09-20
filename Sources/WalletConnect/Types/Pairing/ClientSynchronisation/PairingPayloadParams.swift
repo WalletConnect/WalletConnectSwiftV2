@@ -9,8 +9,8 @@ extension PairingType {
 }
 extension PairingType.PayloadParams {
     struct Request: Codable, Equatable {
-        let method: String
-        let params: Params
+        let method: PairingType.PayloadMethods
+        let params: JSONRPCRequest<SessionType.ProposeParams>
     }
 }
 
