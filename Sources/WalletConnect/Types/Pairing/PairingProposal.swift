@@ -28,6 +28,10 @@ extension PairingType {
     struct JSONRPC: Codable, Equatable {
         let methods: [String]
     }
+    
+    enum PayloadMethods: String, Codable, Equatable {
+        case sessionPropose = "wc_sessionPropose"
+    }
 }
 
 extension PairingType.Proposal {
@@ -40,7 +44,7 @@ extension PairingType.Proposal {
                 publicKey: uri.publicKey,
                 controller: uri.controller),
             signal: PairingType.Signal(params: PairingType.Signal.Params(uri: uri.raw)),
-            permissions: PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: ["wc_sessionPropose"])),
+            permissions: PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [PairingType.PayloadMethods.sessionPropose.rawValue])),
             ttl: PairingType.defaultTTL
         )
     }

@@ -1,10 +1,11 @@
 import Foundation
 
 final class PairingEngine: SequenceEngine {
-    private let sequences: Sequences<Pairing>
     private let wcSubscriber: WCSubscribing
     private let relayer: Relaying
     private let crypto: Crypto
+    let sequences: Sequences<Pairing>
+    var onSessionProposal: ((SessionType.Proposal, Pairing)->())?
     
     init(relay: Relaying,
          crypto: Crypto,
@@ -14,6 +15,7 @@ final class PairingEngine: SequenceEngine {
         self.crypto = crypto
         self.wcSubscriber = subscriber
         self.sequences = sequences
+        setUpWCRequestHandling()
     }
     
     func respond(to proposal: PairingType.Proposal, completion: @escaping (Result<String, Error>) -> Void) {
@@ -74,5 +76,39 @@ final class PairingEngine: SequenceEngine {
                 completion(.failure(error))
             }
         }
+    }
+    
+    private func setUpWCRequestHandling() {
+        wcSubscriber.onSubscription = { [unowned self] subscriptionPayload in
+            switch subscriptionPayload.clientSynchJsonRpc.params {
+            case .pairingApprove(_):
+                fatalError("Not Implemented")
+            case .pairingReject(_):
+                fatalError("Not Implemented")
+            case .pairingUpdate(_):
+                fatalError("Not Implemented")
+            case .pairingUpgrade(_):
+                fatalError("Not Implemented")
+            case .pairingDelete(_):
+                fatalError("Not Implemented")
+            case .pairingPayload(let pairingPayload):
+                self.managePairingPayload(pairingPayload, for: subscriptionPayload.topic)
+            default:
+                fatalError("not expected method type")
+            }
+        }
+    }
+    
+    private func managePairingPayload(_ payload: PairingType.PayloadParams, for topic: String) {
+        guard let pairing = sequences.get(topic: topic) else {
+            Logger.error("Pairing for the topic: \(topic) does not exist")
+            return
+        }
+        guard payload.request.method == PairingType.PayloadMethods.sessionPropose else {
+            Logger.error("Forbidden WCPairingPayload method")
+            return
+        }
+        let sessionProposal = payload.request.params.params
+        onSessionProposal?(sessionProposal, pairing)
     }
 }

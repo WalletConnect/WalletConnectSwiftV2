@@ -1,5 +1,6 @@
 
 import Foundation
+
 extension SessionType {
     struct Settled: Codable {
         let topic: String

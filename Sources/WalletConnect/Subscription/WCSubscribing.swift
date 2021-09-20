@@ -2,7 +2,8 @@
 import Foundation
 import Combine
 
-protocol WCSubscribing {
+protocol WCSubscribing: AnyObject {
+    var onSubscription: ((WCSubscriptionPayload)->())? {get set}
     func setSubscription(topic: String)
     func getSubscription(topic: String) -> String?
     func removeSubscription(topic: String)
@@ -11,7 +12,7 @@ protocol WCSubscribing {
 class WCSubscriber: WCSubscribing {
     private var relay: Relaying
     var subscriptions: [String: String] = [:]
-    var onPayload: ((WCSubscriptionPayload)->())?
+    var onSubscription: ((WCSubscriptionPayload)->())?
     private var publishers = [AnyCancellable]()
     init(relay: Relaying) {
         self.relay = relay
@@ -63,7 +64,7 @@ class WCSubscriber: WCSubscribing {
         relay.clientSynchJsonRpcPublisher
             .filter {[weak self] in self?.subscriptions.values.contains($0.subscriptionId) ?? false}
             .sink { [weak self] subscriptionPayload in
-                self?.onPayload?(subscriptionPayload)
+                self?.onSubscription?(subscriptionPayload)
             }.store(in: &publishers)
     }
 }

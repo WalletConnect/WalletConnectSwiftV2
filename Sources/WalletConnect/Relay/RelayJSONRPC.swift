@@ -10,27 +10,27 @@ enum RelayJSONRPC {
         case unsubscribe = "waku_unsubscribe"
     }
     
-    struct PublishParams: Codable {
+    struct PublishParams: Codable, Equatable {
         let topic: String
         let message: String
         let ttl: Int
     }
     
-    struct SubscribeParams: Codable {
+    struct SubscribeParams: Codable, Equatable {
         let topic: String
     }
     
-    struct SubscriptionData: Codable {
+    struct SubscriptionData: Codable, Equatable {
         let topic: String
         let message: String
     }
     
-    struct SubscriptionParams: Codable {
+    struct SubscriptionParams: Codable, Equatable {
         let id: String
         let data: SubscriptionData
     }
     
-    struct UnsubscribeParams: Codable {
+    struct UnsubscribeParams: Codable, Equatable {
         let id: String
         let topic: String
     }
