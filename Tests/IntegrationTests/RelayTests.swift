@@ -1,10 +1,12 @@
 import XCTest
+import Combine
 @testable import WalletConnect
 
 final class RelayTests: XCTestCase {
     
     let url = URL(string: "wss://staging.walletconnect.org")!
-    
+    private var publishers = [AnyCancellable]()
+
     func makeRelay() -> Relay {
         let transport = JSONRPCTransport(url: url)
         return Relay(transport: transport, crypto: Crypto())
@@ -24,19 +26,20 @@ final class RelayTests: XCTestCase {
 //    func testEndToEndPayload() {
 //        let relayA = makeRelay()
 //        let relayB = makeRelay()
+//        
 //        let topic = String.randomTopic()
 //        let params = PairingType.ApproveParams.stub()
 //        let payloadToPublish = ClientSynchJSONRPC(method: .pairingApprove, params: .pairingApprove(params))
 //        let expectation = expectation(description: "publish payloads must be sent and received successfuly")
 //        expectation.expectedFulfillmentCount = 4
-//
-//        _ = relayA.clientSynchJsonRpcPublisher.sink {
+//        
+//        relayA.clientSynchJsonRpcPublisher.sink {
 //            $0.isPairingApprove ? expectation.fulfill() : XCTFail("unexpected client sync method received")
-//        }
-//        _ = relayB.clientSynchJsonRpcPublisher.sink {
+//        }.store(in: &publishers)
+//        relayB.clientSynchJsonRpcPublisher.sink {
 //            $0.isPairingApprove ? expectation.fulfill() : XCTFail("unexpected client sync method received")
-//        }
-//
+//        }.store(in: &publishers)
+//        
 //        let dispatchGroup = DispatchGroup()
 //        [relayA, relayB].forEach { relay in
 //            dispatchGroup.enter()
@@ -55,7 +58,7 @@ final class RelayTests: XCTestCase {
 //        _ = try? relayB.publish(topic: topic, payload: payloadToPublish) { result in
 //            result.isSuccess ? expectation.fulfill() : XCTFail("relay B did not receive a success result on publish")
 //        }
-//
+//        
 //        waitForExpectations(timeout: defaultTimeout, handler: nil)
 //    }
 }
