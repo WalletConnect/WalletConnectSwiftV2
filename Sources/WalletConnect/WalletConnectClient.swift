@@ -45,10 +45,10 @@ public class WalletConnectClient {
     }
     
     public func approve() {
-        
+        // TODO
     }
     
     public func reject() {
-        // session.respond
+        // TODO
     }
 }

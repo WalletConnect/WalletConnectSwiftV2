@@ -41,7 +41,6 @@ final class SessionEngine {
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
             state: SessionType.State(accounts: [])) // FIXME: State
         
-        // publish approve on topic C
         let approveParams = SessionType.ApproveParams(
             topic: proposal.topic,
             relay: proposal.relay,
@@ -73,7 +72,7 @@ final class SessionEngine {
         let rejectPayload = ClientSynchJSONRPC(method: .sessionReject, params: .sessionReject(rejectParams))
         
         _ = try? relayer.publish(topic: proposal.topic, payload: rejectPayload) { result in
-            // handle result
+            print("Reject result: \(result)")
         }
     }
 }
