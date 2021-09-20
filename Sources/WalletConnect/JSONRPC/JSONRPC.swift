@@ -7,7 +7,7 @@ struct JSONRPCError: Error, Codable {
     let message: String
 }
 
-struct JSONRPCRequest<T: Codable>: Codable {
+struct JSONRPCRequest<T: Codable&Equatable>: Codable, Equatable {
     let id: Int64
     let jsonrpc: String
     let method: String
