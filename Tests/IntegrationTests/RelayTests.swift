@@ -14,10 +14,10 @@ final class RelayTests: XCTestCase {
     
     func testSubscribe() {
         let relay = makeRelay()
-        let expectation = expectation(description: "subscribe call must succeed")
+        let subscribeExpectation = expectation(description: "subscribe call must succeed")
         
         _ = try? relay.subscribe(topic: String.randomTopic()) { result in
-            result.isSuccess ? expectation.fulfill() : XCTFail("subscribe result must be a success")
+            result.isSuccess ? subscribeExpectation.fulfill() : XCTFail("subscribe result must be a success")
         }
         waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
