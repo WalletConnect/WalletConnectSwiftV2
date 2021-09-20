@@ -13,23 +13,20 @@ final class ViewController: UIViewController {
         return WalletConnectClient(options: options)
     }()
     
-    let scanButton: UIBarButtonItem = {
-        UIBarButtonItem(
-            image: UIImage(systemName: "qrcode.viewfinder"),
-            style: .plain,
-            target: self,
-            action: #selector(openScanner)
-        )
-    }()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        navigationItem.rightBarButtonItem = scanButton
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            image: UIImage(systemName: "qrcode.viewfinder"),
+            style: .plain,
+            target: self,
+            action: #selector(showScanner)
+        )
     }
     
     @objc
-    private func openScanner() {
+    private func showScanner() {
         let scannerViewController = ScannerViewController()
         scannerViewController.delegate = self
         navigationController?.pushViewController(scannerViewController, animated: true)
@@ -39,6 +36,8 @@ final class ViewController: UIViewController {
 extension ViewController: ScannerViewControllerDelegate {
     
     func didScan(_ code: String) {
+        navigationController?.popToViewController(self, animated: true)
         print(code)
+        // TODO: Start pairing
     }
 }
