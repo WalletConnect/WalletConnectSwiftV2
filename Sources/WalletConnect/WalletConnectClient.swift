@@ -9,6 +9,7 @@ public class WalletConnectClient {
     let isController: Bool
     
     private let pairingEngine: SequenceEngine
+    private let sessionEngine: SessionEngine
     private let relay: Relay
     private let crypto = Crypto()
     
@@ -18,12 +19,13 @@ public class WalletConnectClient {
         self.relay = Relay(transport: JSONRPCTransport(url: options.relayURL), crypto: crypto)
         let wcSubscriber = WCSubscriber(relay: relay)
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: wcSubscriber)
+        self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: wcSubscriber)
         // TODO: Store api key
     }
     
-    public func pair(uriString: String, completion: @escaping (Result<String, Error>) -> Void) throws {
+    public func pair(uri: String, completion: @escaping (Result<String, Error>) -> Void) throws {
         print("start pair")
-        guard let pairingURI = PairingType.ParamsUri(uriString) else {
+        guard let pairingURI = PairingType.ParamsUri(uri) else {
             throw WalletConnectError.PairingParamsUriInitialization
         }
         let proposal = PairingType.Proposal.createFromURI(pairingURI)
@@ -40,5 +42,13 @@ public class WalletConnectClient {
             }
             completion(result)
         }
+    }
+    
+    public func approve() {
+        // TODO
+    }
+    
+    public func reject() {
+        // TODO
     }
 }
