@@ -13,6 +13,11 @@ protocol Relaying {
 }
 
 class Relay: Relaying {
+    
+    private typealias SubscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>
+    private typealias SubscriptionResponse = JSONRPCResponse<String>
+    private typealias RequestAcknowledgement = JSONRPCResponse<Bool>
+    
     // ttl for waku network to persist message for comunitationg client in case request is not acknowledged
     private let defaultTtl = 6*Time.hour
     private let jsonRpcSerialiser: JSONRPCSerialising
@@ -31,15 +36,23 @@ class Relay: Relaying {
     }
     private let clientSynchJsonRpcPublisherSubject = PassthroughSubject<WCSubscriptionPayload, Never>()
     
+    private var payloadCancellable: AnyCancellable?
+    
     init(jsonRpcSerialiser: JSONRPCSerialising = JSONRPCSerialiser(),
          transport: JSONRPCTransporting,
          crypto: Crypto) {
         self.jsonRpcSerialiser = jsonRpcSerialiser
         self.transport = transport
         self.crypto = crypto
-        setUpTransport()
+        setUpBindings()
     }
 
+    private func setUpBindings() {
+        transport.onMessage = { [weak self] payload in
+            self?.handlePayloadMessage(payload)
+        }
+    }
+    
     func publish(topic: String, payload: Encodable, completion: @escaping ((Result<Void, Error>)->())) throws -> Int64 {
         let messageJson = try payload.json()
         var message: String
@@ -117,58 +130,25 @@ class Relay: Relaying {
         return request.id
     }
 
-    private func setUpTransport() {
-        transport.onMessage = { [unowned self] payload in
-            self.onPayload(payload)
-        }
-    }
-
-    private func onPayload(_ payload: String) {
-        if let request = getClientSubscriptionRequest(from: payload) {
+    private func handlePayloadMessage(_ payload: String) {
+        if let request = tryDecode(SubscriptionRequest.self, from: payload),
+           request.method == RelayJSONRPC.Method.subscription.rawValue {
             manageSubscriptionRequest(request)
-        } else if let response = getRequestAcknowledgement(from: payload) {
+        } else if let response = tryDecode(RequestAcknowledgement.self, from: payload) {
             requestAcknowledgePublisherSubject.send(response)
-        } else if let response = getNetworkSubscriptionResponse(from: payload) {
+        } else if let response = tryDecode(SubscriptionResponse.self, from: payload) {
             subscriptionResponsePublisherSubject.send(response)
-        } else if let response = getErrorResponse(from: payload) {
+        } else if let response = tryDecode(JSONRPCError.self, from: payload) {
             Logger.error("Received error message from network, code: \(response.code), message: \(response.message)")
         } else {
             Logger.error("Unexpected response from network")
         }
     }
     
-    private func getClientSubscriptionRequest(from payload: String) -> JSONRPCRequest<RelayJSONRPC.SubscriptionParams>? {
+    private func tryDecode<T: Decodable>(_ type: T.Type, from payload: String) -> T? {
         if let data = payload.data(using: .utf8),
-           let request = try? JSONDecoder().decode(JSONRPCRequest<RelayJSONRPC.SubscriptionParams>.self, from: data),
-           request.method == RelayJSONRPC.Method.subscription.rawValue {
-            return request
-        } else {
-            return nil
-        }
-    }
-    
-    private func getNetworkSubscriptionResponse(from payload: String) -> JSONRPCResponse<String>? {
-        if let data = payload.data(using: .utf8),
-           let response = try? JSONDecoder().decode(JSONRPCResponse<String>.self, from: data) {
+           let response = try? JSONDecoder().decode(T.self, from: data) {
             return response
-        } else {
-            return nil
-        }
-    }
-    
-    private func getRequestAcknowledgement(from payload: String) -> JSONRPCResponse<Bool>? {
-        if let data = payload.data(using: .utf8),
-           let response = try? JSONDecoder().decode(JSONRPCResponse<Bool>.self, from: data) {
-            return response
-        } else {
-            return nil
-        }
-    }
-    
-    private func getErrorResponse(from payload: String) -> JSONRPCError? {
-        if let data = payload.data(using: .utf8),
-           let request = try? JSONDecoder().decode(JSONRPCError.self, from: data) {
-            return request
         } else {
             return nil
         }
