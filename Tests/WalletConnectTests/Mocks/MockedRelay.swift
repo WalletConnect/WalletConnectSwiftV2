@@ -11,8 +11,10 @@ class MockedRelay: Relaying {
     var subscribeCompletionId: String = ""
     var didCallSubscribe = false
     var didCallUnsubscribe = false
+    var didCallPublish = false
     func publish(topic: String, payload: Encodable, completion: @escaping ((Result<Void, Error>) -> ())) throws -> Int64 {
-        fatalError()
+        didCallPublish = true
+        return 0
     }
     
     func subscribe(topic: String, completion: @escaping ((Result<String, Error>) -> ())) throws -> Int64 {
