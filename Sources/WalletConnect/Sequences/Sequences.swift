@@ -2,7 +2,7 @@
 import Foundation
 
 class Sequences<T: Sequence> {
-    let serialQueue = DispatchQueue(label: UUID().uuidString)
+    let serialQueue = DispatchQueue(label: "sequence queue: \(UUID().uuidString)")
     var sequences: [T] = []
     
     func create(topic: String, sequenceState: SequenceState) {
