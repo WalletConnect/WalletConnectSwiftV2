@@ -61,6 +61,10 @@ public class WalletConnectClient {
     // for responder to reject a session proposal
     public func reject(proposal: SessionType.Proposal, reason: SessionType.Reason) {
         sessionEngine.reject(proposal: proposal, reason: reason)
+    } 
+    
+    public func getActiveSessions() -> [Session] {
+        return sessionEngine.sequences.getAll()
     }
 }
 

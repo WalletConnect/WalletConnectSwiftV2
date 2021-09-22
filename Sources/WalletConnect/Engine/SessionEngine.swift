@@ -76,8 +76,9 @@ final class SessionEngine {
     
     func delete(params: SessionType.DeleteParams) {
         Logger.debug("Will delete session for reason: message: \(params.reason.message) code: \(params.reason.code)")
-        sequences.delete(topic: topic)
-        wcSubscriber.removeSubscription(topic: topic)        do {
+        sequences.delete(topic: params.topic)
+        wcSubscriber.removeSubscription(topic: params.topic)
+        do {
             _ = try relayer.publish(topic: params.topic, payload: params) { result in
                 print("Session Delete result: \(result)")
             }

@@ -3,12 +3,18 @@ import Foundation
 
 class Sequences<T: Sequence> {
     let serialQueue = DispatchQueue(label: "sequence queue: \(UUID().uuidString)")
-    var sequences: [T] = []
+    private var sequences: [T] = []
     
     func create(topic: String, sequenceState: SequenceState) {
         let sequence = T(topic: topic, sequenceState: sequenceState)
         serialQueue.sync {
             sequences.append(sequence)
+        }
+    }
+    
+    func getAll() -> [T] {
+        serialQueue.sync {
+            sequences
         }
     }
     

@@ -1,4 +1,4 @@
-class Session: Sequence {
+public class Session: Sequence {
     
     var topic: String
     var sequenceState: SequenceState
