@@ -2,7 +2,7 @@
 import Foundation
 
 extension PairingType {
-    struct Settled: Codable, SequenceSettled, Equatable {
+    public struct Settled: Codable, SequenceSettled, Equatable {
         let topic: String
         let relay: RelayProtocolOptions
         let sharedKey: String

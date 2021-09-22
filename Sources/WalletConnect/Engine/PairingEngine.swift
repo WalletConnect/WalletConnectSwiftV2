@@ -6,6 +6,7 @@ final class PairingEngine: SequenceEngine {
     private let crypto: Crypto
     let sequences: Sequences<Pairing>
     var onSessionProposal: ((SessionType.Proposal)->())?
+    var onPairingSettled: ((PairingType.Settled)->())?
     
     init(relay: Relaying,
          crypto: Crypto,

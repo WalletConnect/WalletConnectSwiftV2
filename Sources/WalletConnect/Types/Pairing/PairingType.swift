@@ -1,6 +1,6 @@
 
 import Foundation
 
-enum PairingType {
+public enum PairingType {
     static let defaultTTL = Time.day * 30
 }

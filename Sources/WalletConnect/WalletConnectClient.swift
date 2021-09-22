@@ -23,6 +23,9 @@ public class WalletConnectClient {
         pairingEngine.onSessionProposal = { [unowned self] proposal in
             self.delegate?.didReceiveSessionProposal(proposal)
         }
+        pairingEngine.onPairingSettled = { [unowned self] settledPairing in
+            self.delegate?.didSettlePairing(settledPairing)
+        }
         // TODO: Store api key
     }
     
@@ -74,4 +77,6 @@ public class WalletConnectClient {
 
 public protocol WalletConnectClientDelegate: AnyObject {
     func didReceiveSessionProposal(_ sessionProposal: SessionType.Proposal)
+    func didSettleSession(_ sessionSettled: SessionType.Settled)
+    func didSettlePairing(_ settledPairing: PairingType.Settled)
 }
