@@ -5,7 +5,7 @@ final class PairingEngine: SequenceEngine {
     private let relayer: Relaying
     private let crypto: Crypto
     let sequences: Sequences<Pairing>
-    var onSessionProposal: ((SessionType.Proposal, Pairing)->())?
+    var onSessionProposal: ((SessionType.Proposal)->())?
     
     init(relay: Relaying,
          crypto: Crypto,
@@ -109,7 +109,7 @@ final class PairingEngine: SequenceEngine {
             return
         }
         let sessionProposal = payload.request.params.params
-        onSessionProposal?(sessionProposal, pairing)
+        onSessionProposal?(sessionProposal)
     }
     
     private func manageSequenceDelete(_ deleteParams: PairingType.DeleteParams, topic: String) {

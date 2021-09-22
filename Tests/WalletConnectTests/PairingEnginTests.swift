@@ -27,7 +27,7 @@ class PairingEngineTests: XCTestCase {
         let proposalExpectation = expectation(description: "on session proposal is called after pairing payload")
         engine.sequences.create(topic: topic, sequenceState: sequencePendingState)
         let subscriptionPayload = WCSubscriptionPayload(topic: topic, subscriptionId: "", clientSynchJsonRpc: sessionProposal)
-        engine.onSessionProposal = { (_,_) in
+        engine.onSessionProposal = { (_) in
             proposalExpectation.fulfill()
         }
         subscriber.onSubscription?(subscriptionPayload)

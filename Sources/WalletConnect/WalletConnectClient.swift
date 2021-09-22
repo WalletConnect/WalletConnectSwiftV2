@@ -5,10 +5,10 @@ import Foundation
 public class WalletConnectClient {
     
     let metadata: AppMetadata
-    
+    public weak var delegate: WalletConnectClientDelegate?
     let isController: Bool
     
-    private let pairingEngine: SequenceEngine
+    private let pairingEngine: PairingEngine
     private let sessionEngine: SessionEngine
     private let relay: Relay
     private let crypto = Crypto()
@@ -20,6 +20,9 @@ public class WalletConnectClient {
         let wcSubscriber = WCSubscriber(relay: relay)
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: wcSubscriber)
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: wcSubscriber)
+        pairingEngine.onSessionProposal = { [unowned self] proposal in
+            self.delegate?.didReceiveSessionProposal(proposal)
+        }
         // TODO: Store api key
     }
     
@@ -44,8 +47,8 @@ public class WalletConnectClient {
         }
     }
     
-    public func disconnect(params: DisconnectParams) {
-        sessionEngine.delete(params: SessionType.DeleteParams(params))
+    public func disconnect(params: SessionType.DeleteParams) {
+        sessionEngine.delete(params: params)
     }
     
     public func approve() {
@@ -55,4 +58,8 @@ public class WalletConnectClient {
     public func reject() {
         // TODO
     }
+}
+
+public protocol WalletConnectClientDelegate: AnyObject {
+    func didReceiveSessionProposal(_ sessionProposal: SessionType.Proposal)
 }
