@@ -12,7 +12,7 @@ extension SessionType {
         }
     }
     
-    struct Reason: Codable, Equatable {
+    public struct Reason: Codable, Equatable {
         let code: Int
         let message: String
     }

@@ -26,6 +26,7 @@ public class WalletConnectClient {
         // TODO: Store api key
     }
     
+    // for responder to receive a session proposal from a proposer
     public func pair(uri: String, completion: @escaping (Result<String, Error>) -> Void) throws {
         print("start pair")
         guard let pairingURI = PairingType.ParamsUri(uri) else {
@@ -47,16 +48,19 @@ public class WalletConnectClient {
         }
     }
     
+    // for either to disconnect a session
     public func disconnect(params: SessionType.DeleteParams) {
         sessionEngine.delete(params: params)
     }
     
-    public func approve() {
-        // TODO
+    // for responder to approve a session proposal
+    public func approve(proposal: SessionType.Proposal, completion: @escaping ((Result<SessionType.Settled, Error>) -> Void)) {
+        sessionEngine.approve(proposal: proposal, completion: completion)
     }
     
-    public func reject() {
-        // TODO
+    // for responder to reject a session proposal
+    public func reject(proposal: SessionType.Proposal, reason: SessionType.Reason) {
+        sessionEngine.reject(proposal: proposal, reason: reason)
     }
 }
 
