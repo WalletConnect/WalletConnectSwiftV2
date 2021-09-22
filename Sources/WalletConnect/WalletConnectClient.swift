@@ -29,7 +29,7 @@ public class WalletConnectClient {
     // for responder to receive a session proposal from a proposer
     public func pair(uri: String, completion: @escaping (Result<String, Error>) -> Void) throws {
         print("start pair")
-        guard let pairingURI = PairingType.ParamsUri(uri) else {
+        guard let pairingURI = PairingType.UriParameters(uri) else {
             throw WalletConnectError.PairingParamsUriInitialization
         }
         let proposal = PairingType.Proposal.createFromURI(pairingURI)
@@ -61,10 +61,18 @@ public class WalletConnectClient {
     // for responder to reject a session proposal
     public func reject(proposal: SessionType.Proposal, reason: SessionType.Reason) {
         sessionEngine.reject(proposal: proposal, reason: reason)
-    } 
+    }
+    
+    
+    
+    
     
     public func getActiveSessions() -> [Session] {
         return sessionEngine.sequences.getAll()
+    }
+    
+    public func createPairingProposalUri() -> String {
+        fatalError()
     }
 }
 

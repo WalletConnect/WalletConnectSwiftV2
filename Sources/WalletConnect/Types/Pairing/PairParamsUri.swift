@@ -2,14 +2,14 @@
 import Foundation
 
 extension PairingType {
-    public struct ParamsUri {
+    public struct UriParameters {
         let version: String
         let topic: String
         let publicKey: String
         let controller: Bool
         let relay: RelayProtocolOptions
         let raw: String
-        
+
         public init?(_ str: String) {
             guard str.hasPrefix("wc:") else {
                 return nil
@@ -39,6 +39,14 @@ extension PairingType {
             self.relay = try! JSONDecoder().decode(RelayProtocolOptions.self, from:  Data(relay.utf8))
             self.controller = controller
             self.raw = str
+        }
+        
+        
+        func absoluteString() -> String? {
+            guard let relay = try? relay.json().addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) else {
+                return nil
+            }
+            return "wc:\(topic)@\(version)?controller=\(controller)&publicKey=\(publicKey)&relay=\(relay)"
         }
     }
 }

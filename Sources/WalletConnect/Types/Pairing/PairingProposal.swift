@@ -36,7 +36,7 @@ extension PairingType {
 
 extension PairingType.Proposal {
     
-    static func createFromURI(_ uri: PairingType.ParamsUri) -> PairingType.Proposal {
+    static func createFromURI(_ uri: PairingType.UriParameters) -> PairingType.Proposal {
         PairingType.Proposal(
             topic: uri.topic,
             relay: uri.relay,
