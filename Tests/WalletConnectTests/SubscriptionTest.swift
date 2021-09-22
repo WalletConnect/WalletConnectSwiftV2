@@ -42,7 +42,7 @@ class WCSubscriberTest: XCTestCase {
         }
         Thread.sleep(forTimeInterval: 0.01)
         relay.sendSubscriptionPayloadOn(topic: topic, subscriptionId: subscriptionId)
-        waitForExpectations(timeout: 0.2, handler: nil)
+        waitForExpectations(timeout: 0.1, handler: nil)
     }
     
     func testSubscriberNotPassesPayloadOnNotSubscribedEvent() {

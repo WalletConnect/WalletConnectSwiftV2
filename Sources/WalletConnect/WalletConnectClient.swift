@@ -44,6 +44,10 @@ public class WalletConnectClient {
         }
     }
     
+    public func disconnect(params: DisconnectParams) {
+        sessionEngine.delete(params: SessionType.DeleteParams(params))
+    }
+    
     public func approve() {
         // TODO
     }

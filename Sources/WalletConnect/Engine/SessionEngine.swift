@@ -2,7 +2,7 @@ import Foundation
 
 final class SessionEngine {
     
-    private let sequences: Sequences<Session>
+    let sequences: Sequences<Session>
     private let wcSubscriber: WCSubscribing
     private let relayer: Relaying
     private let crypto: Crypto
@@ -67,12 +67,24 @@ final class SessionEngine {
     }
     
     func reject(proposal: SessionType.Proposal, reason: String) {
-        
         let rejectParams = SessionType.RejectParams(reason: reason)
         let rejectPayload = ClientSynchJSONRPC(method: .sessionReject, params: .sessionReject(rejectParams))
         
         _ = try? relayer.publish(topic: proposal.topic, payload: rejectPayload) { result in
             print("Reject result: \(result)")
+        }
+    }
+    
+    func delete(params: SessionType.DeleteParams) {
+        Logger.debug("Will delete session for reason: message: \(params.reason.message) code: \(params.reason.code)")
+        sequences.delete(topic: params.topic)
+        wcSubscriber.removeSubscription(topic: params.topic)
+        do {
+            _ = try relayer.publish(topic: params.topic, payload: params) { result in
+                print("Session Delete result: \(result)")
+            }
+        }  catch {
+            Logger.error(error)
         }
     }
 }

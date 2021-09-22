@@ -1,11 +1,9 @@
 
 import Foundation
 
-extension PairingType {
-    struct DeleteParams: Codable, Equatable {
-        let reason: Reason
-    }
-    
+public struct DisconnectParams: Codable, Equatable {
+    let reason: Reason
+    let topic: String
     struct Reason: Codable, Equatable {
         let code: Int
         let message: String

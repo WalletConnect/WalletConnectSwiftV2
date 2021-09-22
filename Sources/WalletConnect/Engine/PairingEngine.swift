@@ -119,4 +119,5 @@ final class PairingEngine: SequenceEngine {
         sequences.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
     }
+    
 }
