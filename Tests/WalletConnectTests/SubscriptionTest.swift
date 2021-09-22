@@ -32,7 +32,7 @@ class WCSubscriberTest: XCTestCase {
     }
     
     func testSubscriberPassesPayloadOnSubscribedEvent() {
-        let subscriptionExpectation = expectation(description: "subscription")
+        let subscriptionExpectation = expectation(description: "onSubscription callback executed")
         let topic = "1234"
         let subscriptionId = "5853ad129f4753ca930c4a4b954d6d83cdcd7a4e63017548c2fddf829a3d8f2b"
         relay.subscribeCompletionId = subscriptionId
@@ -40,8 +40,9 @@ class WCSubscriberTest: XCTestCase {
         subscriber.onSubscription = { _ in
             subscriptionExpectation.fulfill()
         }
+        Thread.sleep(forTimeInterval: 0.01)
         relay.sendSubscriptionPayloadOn(topic: topic, subscriptionId: subscriptionId)
-        waitForExpectations(timeout: 0.001, handler: nil)
+        waitForExpectations(timeout: 0.2, handler: nil)
     }
     
     func testSubscriberNotPassesPayloadOnNotSubscribedEvent() {
@@ -55,7 +56,6 @@ class WCSubscriberTest: XCTestCase {
         }
         let payloadSubscriptionId = "dfddff4753ca930c4a4b954d6d83cdcd7a4e63017548c2fddf829a3d8f2b"
         relay.sendSubscriptionPayloadOn(topic: topic, subscriptionId: payloadSubscriptionId)
-        Thread.sleep(forTimeInterval: 0.001)
         XCTAssertFalse(onPayloadCalled)
     }
 }
