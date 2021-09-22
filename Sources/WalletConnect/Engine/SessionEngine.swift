@@ -69,7 +69,6 @@ final class SessionEngine {
     func reject(proposal: SessionType.Proposal, reason: SessionType.Reason) {
         let rejectParams = SessionType.RejectParams(reason: reason)
         let rejectPayload = ClientSynchJSONRPC(method: .sessionReject, params: .sessionReject(rejectParams))
-        removeSequence(topic: proposal.topic)
         _ = try? relayer.publish(topic: proposal.topic, payload: rejectPayload) { result in
             print("Reject result: \(result)")
         }
@@ -77,18 +76,13 @@ final class SessionEngine {
     
     func delete(params: SessionType.DeleteParams) {
         Logger.debug("Will delete session for reason: message: \(params.reason.message) code: \(params.reason.code)")
-        removeSequence(topic: params.topic)
-        do {
+        sequences.delete(topic: topic)
+        wcSubscriber.removeSubscription(topic: topic)        do {
             _ = try relayer.publish(topic: params.topic, payload: params) { result in
                 print("Session Delete result: \(result)")
             }
         }  catch {
             Logger.error(error)
         }
-    }
-    
-    private func removeSequence(topic: String) {
-        sequences.delete(topic: topic)
-        wcSubscriber.removeSubscription(topic: topic)
     }
 }
