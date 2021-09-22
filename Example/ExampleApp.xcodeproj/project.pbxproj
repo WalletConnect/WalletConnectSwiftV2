@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		761C649A26FB7ABB004239D1 /* ProposerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761C649926FB7ABB004239D1 /* ProposerViewController.swift */; };
 		761C649C26FB7B7F004239D1 /* ResponderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761C649B26FB7B7F004239D1 /* ResponderViewController.swift */; };
+		761C649E26FB7FD7004239D1 /* SessionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761C649D26FB7FD7004239D1 /* SessionViewController.swift */; };
+		761C64A326FB83CE004239D1 /* SessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761C64A226FB83CE004239D1 /* SessionView.swift */; };
 		764E1D4026F8D3FC00A1FB15 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764E1D3F26F8D3FC00A1FB15 /* AppDelegate.swift */; };
 		764E1D4226F8D3FC00A1FB15 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764E1D4126F8D3FC00A1FB15 /* SceneDelegate.swift */; };
 		764E1D4926F8D3FE00A1FB15 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 764E1D4826F8D3FE00A1FB15 /* Assets.xcassets */; };
@@ -20,6 +22,8 @@
 /* Begin PBXFileReference section */
 		761C649926FB7ABB004239D1 /* ProposerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProposerViewController.swift; sourceTree = "<group>"; };
 		761C649B26FB7B7F004239D1 /* ResponderViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResponderViewController.swift; sourceTree = "<group>"; };
+		761C649D26FB7FD7004239D1 /* SessionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionViewController.swift; sourceTree = "<group>"; };
+		761C64A226FB83CE004239D1 /* SessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionView.swift; sourceTree = "<group>"; };
 		764E1D3C26F8D3FC00A1FB15 /* ExampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ExampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		764E1D3F26F8D3FC00A1FB15 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		764E1D4126F8D3FC00A1FB15 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -44,6 +48,25 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		761C64A026FB8387004239D1 /* Responder */ = {
+			isa = PBXGroup;
+			children = (
+				761C649B26FB7B7F004239D1 /* ResponderViewController.swift */,
+				764E1D5926F8DF1B00A1FB15 /* ScannerViewController.swift */,
+				761C649D26FB7FD7004239D1 /* SessionViewController.swift */,
+				761C64A226FB83CE004239D1 /* SessionView.swift */,
+			);
+			path = Responder;
+			sourceTree = "<group>";
+		};
+		761C64A126FB838D004239D1 /* Proposer */ = {
+			isa = PBXGroup;
+			children = (
+				761C649926FB7ABB004239D1 /* ProposerViewController.swift */,
+			);
+			path = Proposer;
+			sourceTree = "<group>";
+		};
 		764E1D3326F8D3FC00A1FB15 = {
 			isa = PBXGroup;
 			children = (
@@ -67,9 +90,8 @@
 			children = (
 				764E1D3F26F8D3FC00A1FB15 /* AppDelegate.swift */,
 				764E1D4126F8D3FC00A1FB15 /* SceneDelegate.swift */,
-				761C649B26FB7B7F004239D1 /* ResponderViewController.swift */,
-				761C649926FB7ABB004239D1 /* ProposerViewController.swift */,
-				764E1D5926F8DF1B00A1FB15 /* ScannerViewController.swift */,
+				761C64A026FB8387004239D1 /* Responder */,
+				761C64A126FB838D004239D1 /* Proposer */,
 				764E1D4826F8D3FE00A1FB15 /* Assets.xcassets */,
 				764E1D4A26F8D3FE00A1FB15 /* LaunchScreen.storyboard */,
 				764E1D4D26F8D3FE00A1FB15 /* Info.plist */,
@@ -158,9 +180,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				761C64A326FB83CE004239D1 /* SessionView.swift in Sources */,
 				761C649A26FB7ABB004239D1 /* ProposerViewController.swift in Sources */,
 				764E1D4026F8D3FC00A1FB15 /* AppDelegate.swift in Sources */,
 				761C649C26FB7B7F004239D1 /* ResponderViewController.swift in Sources */,
+				761C649E26FB7FD7004239D1 /* SessionViewController.swift in Sources */,
 				764E1D4226F8D3FC00A1FB15 /* SceneDelegate.swift in Sources */,
 				764E1D5A26F8DF1B00A1FB15 /* ScannerViewController.swift in Sources */,
 			);

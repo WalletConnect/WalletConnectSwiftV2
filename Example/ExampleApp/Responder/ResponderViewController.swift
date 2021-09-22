@@ -28,9 +28,16 @@ final class ResponderViewController: UIViewController {
     
     @objc
     private func showScanner() {
-        let scannerViewController = ScannerViewController()
-        scannerViewController.delegate = self
-        navigationController?.pushViewController(scannerViewController, animated: true)
+//        let scannerViewController = ScannerViewController()
+//        scannerViewController.delegate = self
+//        navigationController?.pushViewController(scannerViewController, animated: true)
+        showSessionProposal()
+    }
+    
+    private func showSessionProposal() {
+        let proposalViewController = SessionViewController()
+//        proposalViewController.modalPresentationStyle = .pageSheet
+        present(proposalViewController, animated: true)
     }
 }
 
