@@ -14,7 +14,6 @@ final class SessionViewController: UIViewController {
         super.viewDidLoad()
         sessionView.approveButton.addTarget(self, action: #selector(approveSession), for: .touchUpInside)
         sessionView.rejectButton.addTarget(self, action: #selector(rejectSession), for: .touchUpInside)
-        
     }
     
     func show(_ sessionInfo: SessionInfo) {
@@ -22,6 +21,8 @@ final class SessionViewController: UIViewController {
         sessionView.descriptionLabel.text = sessionInfo.descriptionText
         sessionView.urlLabel.text = sessionInfo.dappURL
         sessionView.loadImage(at: sessionInfo.iconURL)
+        sessionView.list(chains: sessionInfo.chains)
+        sessionView.list(methods: sessionInfo.methods)
     }
     
     @objc

@@ -12,7 +12,7 @@ final class SessionView: UIView {
     
     let nameLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.preferredFont(forTextStyle: .headline)
+        label.font = UIFont.systemFont(ofSize: 17.0, weight: .heavy)
         return label
     }()
     
@@ -38,6 +38,7 @@ final class SessionView: UIView {
         button.backgroundColor = .systemBlue
         button.tintColor = .white
         button.layer.cornerRadius = 8
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 17.0, weight: .semibold)
         return button
     }()
     
@@ -47,7 +48,32 @@ final class SessionView: UIView {
         button.backgroundColor = .systemRed
         button.tintColor = .white
         button.layer.cornerRadius = 8
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 17.0, weight: .semibold)
         return button
+    }()
+    
+    let headerStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 16
+        stackView.alignment = .center
+        return stackView
+    }()
+    
+    let chainsStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 10
+        stackView.alignment = .leading
+        return stackView
+    }()
+    
+    let methodsStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 10
+        stackView.alignment = .leading
+        return stackView
     }()
     
     override init(frame: CGRect) {
@@ -55,11 +81,14 @@ final class SessionView: UIView {
         backgroundColor = .systemBackground
         
         addSubview(iconView)
-        addSubview(nameLabel)
-        addSubview(descriptionLabel)
-        addSubview(urlLabel)
+        addSubview(headerStackView)
+        addSubview(chainsStackView)
+        addSubview(methodsStackView)
         addSubview(approveButton)
         addSubview(rejectButton)
+        headerStackView.addArrangedSubview(nameLabel)
+        headerStackView.addArrangedSubview(urlLabel)
+        headerStackView.addArrangedSubview(descriptionLabel)
         
         subviews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
         
@@ -69,15 +98,17 @@ final class SessionView: UIView {
             iconView.widthAnchor.constraint(equalToConstant: 64),
             iconView.heightAnchor.constraint(equalToConstant: 64),
             
-            nameLabel.topAnchor.constraint(equalTo: iconView.bottomAnchor, constant: 32),
-            nameLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+            headerStackView.topAnchor.constraint(equalTo: iconView.bottomAnchor, constant: 32),
+            headerStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
+            headerStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
             
-            descriptionLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 16),
-            descriptionLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            descriptionLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            chainsStackView.topAnchor.constraint(equalTo: headerStackView.bottomAnchor, constant: 24),
+            chainsStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
+            chainsStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
             
-            urlLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 16),
-            urlLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+            methodsStackView.topAnchor.constraint(equalTo: chainsStackView.bottomAnchor, constant: 24),
+            methodsStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
+            methodsStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
             
             approveButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -16),
             approveButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
@@ -101,6 +132,52 @@ final class SessionView: UIView {
                 }
             }
         }
+    }
+    
+    func list(chains: [String]) {
+        let label = UILabel()
+        label.text = "Chains"
+        label.font = UIFont.systemFont(ofSize: 17.0, weight: .heavy)
+        chainsStackView.addArrangedSubview(label)
+        chains.forEach {
+            chainsStackView.addArrangedSubview(ListItem(text: $0))
+        }
+    }
+    
+    func list(methods: [String]) {
+        let label = UILabel()
+        label.text = "Methods"
+        label.font = UIFont.systemFont(ofSize: 17.0, weight: .heavy)
+        methodsStackView.addArrangedSubview(label)
+        methods.forEach {
+            methodsStackView.addArrangedSubview(ListItem(text: $0))
+        }
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+fileprivate final class ListItem: UIView {
+    
+    private let label: UILabel = {
+        let label = UILabel()
+        label.textColor = .secondaryLabel
+        return label
+    }()
+    
+    init(text: String) {
+        super.init(frame: .zero)
+        label.text = text
+        label.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(label)
+        NSLayoutConstraint.activate([
+            label.topAnchor.constraint(equalTo: topAnchor),
+            label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            label.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            label.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
     }
     
     required init?(coder: NSCoder) {
