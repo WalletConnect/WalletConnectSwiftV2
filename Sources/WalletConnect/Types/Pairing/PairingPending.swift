@@ -1,7 +1,6 @@
 
 import Foundation
 
-
 extension PairingType {
     struct Pending: Codable, SequencePending, Equatable {
         enum PendingStatus: String, Equatable, Codable {

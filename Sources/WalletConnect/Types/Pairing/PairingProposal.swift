@@ -43,7 +43,7 @@ extension PairingType.Proposal {
             proposer: PairingType.Proposer(
                 publicKey: uri.publicKey,
                 controller: uri.controller),
-            signal: PairingType.Signal(params: PairingType.Signal.Params(uri: uri.raw)),
+            signal: PairingType.Signal(params: PairingType.Signal.Params(uri: uri.absoluteString()!)),
             permissions: PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [PairingType.PayloadMethods.sessionPropose.rawValue])),
             ttl: PairingType.defaultTTL
         )

@@ -91,7 +91,7 @@ final class PairingEngine: SequenceEngine {
             case .pairingUpgrade(_):
                 fatalError("Not Implemented")
             case .pairingDelete(let deleteParams):
-                handleSequenceDelete(deleteParams, topic: subscriptionPayload.topic)
+                handlePairingDelete(deleteParams, topic: subscriptionPayload.topic)
             case .pairingPayload(let pairingPayload):
                 self.handlePairingPayload(pairingPayload, for: subscriptionPayload.topic)
             default:
@@ -113,7 +113,7 @@ final class PairingEngine: SequenceEngine {
         onSessionProposal?(sessionProposal)
     }
     
-    private func handleSequenceDelete(_ deleteParams: PairingType.DeleteParams, topic: String) {
+    private func handlePairingDelete(_ deleteParams: PairingType.DeleteParams, topic: String) {
         Logger.debug("-------------------------------------")
         Logger.debug("Paired client removed pairing - reason: \(deleteParams.reason.message), code: \(deleteParams.reason.code)")
         Logger.debug("-------------------------------------")
@@ -155,4 +155,8 @@ final class PairingEngine: SequenceEngine {
         wcSubscriber.removeSubscription(topic: proposal.topic)
     }
     
+    //for proposer to be able to generate pairing propose uri
+    func createPendingPairing() -> PairingType.Pending {
+        fatalError()
+    }
 }

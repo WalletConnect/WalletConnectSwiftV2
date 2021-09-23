@@ -8,7 +8,14 @@ extension PairingType {
         let publicKey: String
         let controller: Bool
         let relay: RelayProtocolOptions
-        let raw: String
+        
+        init(version: String = "2", topic: String, publicKey: String, controller: Bool, relay: RelayProtocolOptions) {
+            self.version = version
+            self.topic = topic
+            self.publicKey = publicKey
+            self.controller = controller
+            self.relay = relay
+        }
 
         public init?(_ str: String) {
             guard str.hasPrefix("wc:") else {
@@ -38,7 +45,6 @@ extension PairingType {
             self.publicKey = publicKey
             self.relay = try! JSONDecoder().decode(RelayProtocolOptions.self, from:  Data(relay.utf8))
             self.controller = controller
-            self.raw = str
         }
         
         

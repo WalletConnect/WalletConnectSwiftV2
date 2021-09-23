@@ -29,6 +29,11 @@ public class WalletConnectClient {
         // TODO: Store api key
     }
     
+    // for proposer to propose a session to a responder
+    public func connect(params: ConnectParams, completion: @escaping (Result<SessionType.Settled, Error>) -> Void) {
+        
+    }
+    
     // for responder to receive a session proposal from a proposer
     public func pair(uri: String, completion: @escaping (Result<String, Error>) -> Void) throws {
         print("start pair")
@@ -65,13 +70,14 @@ public class WalletConnectClient {
     public func reject(proposal: SessionType.Proposal, reason: SessionType.Reason) {
         sessionEngine.reject(proposal: proposal, reason: reason)
     }
-
+    
     public func getActiveSessions() -> [Session] {
         return sessionEngine.sequences.getAll()
     }
     
-    public func createPairingProposalUri() -> String {
-        fatalError()
+    public func createPairingProposalUri() -> String? {
+        let pairing = pairingEngine.createPendingPairing()
+        return PairingType.UriParameters(topic: pairing.topic, publicKey: pairing.`self`.publicKey, controller: false, relay: pairing.relay).absoluteString()
     }
 }
 
@@ -79,4 +85,15 @@ public protocol WalletConnectClientDelegate: AnyObject {
     func didReceiveSessionProposal(_ sessionProposal: SessionType.Proposal)
     func didSettleSession(_ sessionSettled: SessionType.Settled)
     func didSettlePairing(_ settledPairing: PairingType.Settled)
+}
+
+
+public struct ConnectParams {
+    let permissions: SessionType.BasePermissions
+    let metadata: AppMetadata?
+    let relay: RelayProtocolOptions
+    let pairing: ParamsPairing
+    struct ParamsPairing {
+        let topic: String
+    }
 }
