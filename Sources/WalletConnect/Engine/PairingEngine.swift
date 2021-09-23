@@ -4,6 +4,7 @@ final class PairingEngine: SequenceEngine {
     private let wcSubscriber: WCSubscribing
     private let relayer: Relaying
     private let crypto: Crypto
+    private var isController: Bool
     let sequences: Sequences<Pairing>
     var onSessionProposal: ((SessionType.Proposal)->())?
     var onPairingSettled: ((PairingType.Settled)->())?
@@ -11,11 +12,13 @@ final class PairingEngine: SequenceEngine {
     init(relay: Relaying,
          crypto: Crypto,
          subscriber: WCSubscribing,
-         sequences: Sequences<Pairing> = Sequences<Pairing>()) {
+         sequences: Sequences<Pairing> = Sequences<Pairing>(),
+         isController: Bool) {
         self.relayer = relay
         self.crypto = crypto
         self.wcSubscriber = subscriber
         self.sequences = sequences
+        self.isController = isController
         setUpWCRequestHandling()
     }
     
@@ -76,6 +79,52 @@ final class PairingEngine: SequenceEngine {
             case .failure(let error):
                 completion(.failure(error))
             }
+        }
+    }
+    
+    func propose(_ params: ConnectParams) -> PairingType.Pending? {
+        Logger.debug("Propose Pairing")
+        guard let topic = generateTopic() else {
+            Logger.debug("Could not generate topic")
+            return nil
+        }
+        let privateKey = Crypto.X25519.generatePrivateKey()
+        let publicKey = privateKey.publicKey.toHexString()
+        crypto.set(privateKey: privateKey)
+        let proposer = PairingType.Proposer(publicKey: publicKey, controller: isController)
+        let uri = PairingType.UriParameters(topic: topic, publicKey: publicKey, controller: isController, relay: params.relay).absoluteString()!
+        let signalParams = PairingType.Signal.Params(uri: uri)
+        let signal = PairingType.Signal(params: signalParams)
+        let proposal = PairingType.Proposal(topic: topic, relay: params.relay, proposer: proposer, signal: signal, permissions: params.permissions, ttl: getDefaultTTL())
+        let `self` = PairingType.Participant(publicKey: publicKey, metadata: params.metadata)
+        let pending = PairingType.Pending(status: .proposed, topic: topic, relay: params.relay, self: `self`, proposal: proposal)
+        sequences.create(topic: topic, sequenceState: pending)
+        wcSubscriber.setSubscription(topic: topic)
+        return pending
+    }
+    
+    private func getDefaultTTL() -> Int {
+        30 * Time.day
+    }
+    
+    //for proposer to be able to generate pairing propose uri
+    func createPendingPairing() -> PairingType.Pending {
+        fatalError()
+    }
+    
+    //MARK: - Private
+    
+    func generateTopic() -> String? {
+
+        var keyData = Data(count: 32)
+        let result = keyData.withUnsafeMutableBytes {
+            SecRandomCopyBytes(kSecRandomDefault, 32, $0.baseAddress!)
+        }
+        if result == errSecSuccess {
+            return keyData.base64EncodedString()
+        } else {
+            print("Problem generating random bytes")
+            return nil
         }
     }
     
@@ -153,10 +202,5 @@ final class PairingEngine: SequenceEngine {
         sequences.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledPairing))
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
-    }
-    
-    //for proposer to be able to generate pairing propose uri
-    func createPendingPairing() -> PairingType.Pending {
-        fatalError()
     }
 }

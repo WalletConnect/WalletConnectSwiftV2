@@ -12,7 +12,7 @@ final class ClientTests: XCTestCase {
         return Relay(transport: transport, crypto: Crypto())
     }
     
-    func testSettlePairing() {
+    func testPairingWithoutSession() {
         
     }
 }

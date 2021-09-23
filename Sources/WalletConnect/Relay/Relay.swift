@@ -18,7 +18,7 @@ class Relay: Relaying {
     private typealias SubscriptionResponse = JSONRPCResponse<String>
     private typealias RequestAcknowledgement = JSONRPCResponse<Bool>
     
-    // ttl for waku network to persist message for comunitationg client in case request is not acknowledged
+    // ttl for waku network to persist message for peer client in case request is not acknowledged
     private let defaultTtl = 6*Time.hour
     private let jsonRpcSerialiser: JSONRPCSerialising
     private var transport: JSONRPCTransporting

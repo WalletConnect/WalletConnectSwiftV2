@@ -18,6 +18,17 @@ class Sequences<T: Sequence> {
         }
     }
     
+    func getSettled() -> [SequenceSettled] {
+        getAll().compactMap { sequence in
+            switch sequence.sequenceState {
+            case .settled(let settled):
+                return settled
+            case .pending(_):
+                return nil
+            }
+        }
+    }
+    
     func get(topic: String) -> T? {
         serialQueue.sync {
             sequences.first{$0.topic == topic}
