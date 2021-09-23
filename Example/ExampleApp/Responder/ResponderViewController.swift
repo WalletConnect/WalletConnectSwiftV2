@@ -28,14 +28,14 @@ final class ResponderViewController: UIViewController {
     
     @objc
     private func showScanner() {
-//        let scannerViewController = ScannerViewController()
-//        scannerViewController.delegate = self
-//        navigationController?.pushViewController(scannerViewController, animated: true)
-        showSessionProposal()
+        let scannerViewController = ScannerViewController()
+        scannerViewController.delegate = self
+        present(scannerViewController, animated: true)
     }
     
     private func showSessionProposal() {
         let proposalViewController = SessionViewController()
+        proposalViewController.delegate = self
         proposalViewController.show(SessionInfo.mock())
         present(proposalViewController, animated: true)
     }
@@ -44,8 +44,18 @@ final class ResponderViewController: UIViewController {
 extension ResponderViewController: ScannerViewControllerDelegate {
     
     func didScan(_ code: String) {
-        navigationController?.popToViewController(self, animated: true)
         print(code)
         // TODO: Start pairing
+    }
+}
+
+extension ResponderViewController: SessionViewControllerDelegate {
+    
+    func didApproveSession() {
+        print("did approve session")
+    }
+    
+    func didRejectSession() {
+        print("did reject session")
     }
 }

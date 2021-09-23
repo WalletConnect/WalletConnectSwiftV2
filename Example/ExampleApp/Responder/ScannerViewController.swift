@@ -13,6 +13,8 @@ final class ScannerViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .black
+        
         guard let captureDevice = AVCaptureDevice.default(for: .video) else {
             return
         }
@@ -53,6 +55,7 @@ extension ScannerViewController: AVCaptureMetadataOutputObjectsDelegate {
             metadata.type == .qr,
             let qrCode = metadata.stringValue {
             delegate?.didScan(qrCode)
+            dismiss(animated: true)
         }
     }
 }

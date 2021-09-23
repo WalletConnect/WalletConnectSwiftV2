@@ -1,6 +1,13 @@
 import UIKit
 
+protocol SessionViewControllerDelegate: AnyObject {
+    func didApproveSession()
+    func didRejectSession()
+}
+
 final class SessionViewController: UIViewController {
+    
+    weak var delegate: SessionViewControllerDelegate?
     
     private let sessionView = {
         SessionView()
@@ -27,11 +34,13 @@ final class SessionViewController: UIViewController {
     
     @objc
     private func approveSession() {
-        print("approve")
+        delegate?.didApproveSession()
+        dismiss(animated: true)
     }
     
     @objc
     private func rejectSession() {
-        print("reject")
+        delegate?.didRejectSession()
+        dismiss(animated: true)
     }
 }
