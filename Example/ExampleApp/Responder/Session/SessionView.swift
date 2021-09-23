@@ -6,18 +6,20 @@ final class SessionView: UIView {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
         imageView.backgroundColor = .systemFill
+        imageView.layer.cornerRadius = 32
         return imageView
     }()
     
     let nameLabel: UILabel = {
         let label = UILabel()
-        label.text = "Dapp Name"
+        label.font = UIFont.preferredFont(forTextStyle: .headline)
         return label
     }()
     
     let descriptionLabel: UILabel = {
         let label = UILabel()
-        label.text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris at eleifend est, vel porta enim. Praesent non placerat orci. Curabitur orci sem, molestie feugiat enim eu, tincidunt tincidunt est."
+        label.font = UIFont.preferredFont(forTextStyle: .subheadline)
+        label.textColor = .secondaryLabel
         label.numberOfLines = 0
         label.textAlignment = .center
         return label
@@ -25,15 +27,16 @@ final class SessionView: UIView {
     
     let urlLabel: UILabel = {
         let label = UILabel()
-        label.text = "decentralized.finance"
+        label.font = UIFont.boldSystemFont(ofSize: 14.0)
+        label.textColor = .tertiaryLabel
         return label
     }()
     
     let approveButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Approve", for: .normal)
-        button.tintColor = .white
         button.backgroundColor = .systemBlue
+        button.tintColor = .white
         button.layer.cornerRadius = 8
         return button
     }()
@@ -41,8 +44,8 @@ final class SessionView: UIView {
     let rejectButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Reject", for: .normal)
-        button.tintColor = .white
         button.backgroundColor = .systemRed
+        button.tintColor = .white
         button.layer.cornerRadius = 8
         return button
     }()
@@ -87,6 +90,17 @@ final class SessionView: UIView {
             approveButton.widthAnchor.constraint(equalTo: rejectButton.widthAnchor),
             rejectButton.leadingAnchor.constraint(equalTo: approveButton.trailingAnchor, constant: 16),
         ])
+    }
+    
+    func loadImage(at url: String) {
+        guard let iconURL = URL(string: url) else { return }
+        DispatchQueue.global().async {
+            if let imageData = try? Data(contentsOf: iconURL) {
+                DispatchQueue.main.async { [weak self] in
+                    self?.iconView.image = UIImage(data: imageData)
+                }
+            }
+        }
     }
     
     required init?(coder: NSCoder) {

@@ -36,7 +36,7 @@ final class ResponderViewController: UIViewController {
     
     private func showSessionProposal() {
         let proposalViewController = SessionViewController()
-//        proposalViewController.modalPresentationStyle = .pageSheet
+        proposalViewController.show(SessionInfo.mock())
         present(proposalViewController, animated: true)
     }
 }
