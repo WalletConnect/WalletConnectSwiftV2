@@ -13,7 +13,7 @@ class PairingEngineTests: XCTestCase {
         crypto = Crypto(keychain: DictionaryKeychain())
         relay = MockedRelay()
         subscriber = MockedSubscriber()
-        engine = PairingEngine(relay: relay, crypto: crypto, subscriber: subscriber)
+        engine = PairingEngine(relay: relay, crypto: crypto, subscriber: subscriber, isController: false)
     }
 
     override func tearDown() {

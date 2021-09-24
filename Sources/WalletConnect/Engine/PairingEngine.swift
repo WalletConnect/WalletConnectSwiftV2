@@ -95,10 +95,11 @@ final class PairingEngine: SequenceEngine {
         let uri = PairingType.UriParameters(topic: topic, publicKey: publicKey, controller: isController, relay: params.relay).absoluteString()!
         let signalParams = PairingType.Signal.Params(uri: uri)
         let signal = PairingType.Signal(params: signalParams)
-        let proposal = PairingType.Proposal(topic: topic, relay: params.relay, proposer: proposer, signal: signal, permissions: params.permissions, ttl: getDefaultTTL())
+        let permissions = getDefaultPermissions()
+        let proposal = PairingType.Proposal(topic: topic, relay: params.relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
         let `self` = PairingType.Participant(publicKey: publicKey, metadata: params.metadata)
         let pending = PairingType.Pending(status: .proposed, topic: topic, relay: params.relay, self: `self`, proposal: proposal)
-        sequences.create(topic: topic, sequenceState: pending)
+        sequences.create(topic: topic, sequenceState: .pending(pending))
         wcSubscriber.setSubscription(topic: topic)
         return pending
     }
@@ -106,26 +107,24 @@ final class PairingEngine: SequenceEngine {
     private func getDefaultTTL() -> Int {
         30 * Time.day
     }
-    
-    //for proposer to be able to generate pairing propose uri
-    func createPendingPairing() -> PairingType.Pending {
-        fatalError()
-    }
-    
+
     //MARK: - Private
     
-    func generateTopic() -> String? {
-
+    private func generateTopic() -> String? {
         var keyData = Data(count: 32)
         let result = keyData.withUnsafeMutableBytes {
             SecRandomCopyBytes(kSecRandomDefault, 32, $0.baseAddress!)
         }
         if result == errSecSuccess {
-            return keyData.base64EncodedString()
+            return keyData.toHexString()
         } else {
             print("Problem generating random bytes")
             return nil
         }
+    }
+    
+    private func getDefaultPermissions() -> PairingType.ProposedPermissions {
+        PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [PairingType.PayloadMethods.sessionPropose.rawValue]))
     }
     
     private func setUpWCRequestHandling() {
@@ -202,5 +201,6 @@ final class PairingEngine: SequenceEngine {
         sequences.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledPairing))
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
+        onPairingSettled?(settledPairing)
     }
 }

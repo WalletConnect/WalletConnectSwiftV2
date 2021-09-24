@@ -1,4 +1,3 @@
-// 
 
 import Foundation
 
@@ -7,7 +6,6 @@ public class WalletConnectClient {
     let metadata: AppMetadata
     public weak var delegate: WalletConnectClientDelegate?
     let isController: Bool
-    
     private let pairingEngine: PairingEngine
     private let sessionEngine: SessionEngine
     private let relay: Relay
@@ -31,15 +29,16 @@ public class WalletConnectClient {
     }
     
     // for proposer to propose a session to a responder
-    public func connect(params: ConnectParams) -> String {
+    public func connect(params: ConnectParams) -> String? {
         Logger.debug("Connecting Application")
         if let topic = params.pairing?.topic,
            let pairing = pairingEngine.sequences.get(topic: topic ){
             Logger.debug("Connecting with existing pairing")
-            createSession(pairing: pairing, completion: completion)
+            createSession(pairing: pairing)
+            return nil
         } else {
-            pairingEngine.propose(params)
-            createSession(pairing: <#T##Pairing#>, completion: <#T##(Result<SessionType.Settled, Error>) -> Void#>)
+            let pending = pairingEngine.propose(params)
+            return pending?.proposal.signal.params.uri
         }
     }
     
@@ -90,7 +89,7 @@ public class WalletConnectClient {
     
     //MARK: - Private
     
-    private func createSession(pairing: Pairing, completion: @escaping (Result<SessionType.Settled, Error>) -> Void) {
+    private func createSession(pairing: Pairing) {
         
     }
 }
