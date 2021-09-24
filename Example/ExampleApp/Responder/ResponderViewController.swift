@@ -1,7 +1,7 @@
 import UIKit
 import WalletConnect
 
-final class ViewController: UIViewController {
+final class ResponderViewController: UIViewController {
 
     let client: WalletConnectClient = {
         let options = WalletClientOptions(
@@ -15,6 +15,7 @@ final class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.title = "Wallet"
         view.backgroundColor = .systemBackground
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(
@@ -29,15 +30,32 @@ final class ViewController: UIViewController {
     private func showScanner() {
         let scannerViewController = ScannerViewController()
         scannerViewController.delegate = self
-        navigationController?.pushViewController(scannerViewController, animated: true)
+        present(scannerViewController, animated: true)
+    }
+    
+    private func showSessionProposal() {
+        let proposalViewController = SessionViewController()
+        proposalViewController.delegate = self
+        proposalViewController.show(SessionInfo.mock())
+        present(proposalViewController, animated: true)
     }
 }
 
-extension ViewController: ScannerViewControllerDelegate {
+extension ResponderViewController: ScannerViewControllerDelegate {
     
     func didScan(_ code: String) {
-        navigationController?.popToViewController(self, animated: true)
         print(code)
         // TODO: Start pairing
+    }
+}
+
+extension ResponderViewController: SessionViewControllerDelegate {
+    
+    func didApproveSession() {
+        print("did approve session")
+    }
+    
+    func didRejectSession() {
+        print("did reject session")
     }
 }
