@@ -13,10 +13,17 @@ final class ResponderViewController: UIViewController {
         return WalletConnectClient(options: options)
     }()
     
+    private let responderView: ResponderView = {
+        ResponderView()
+    }()
+    
+    override func loadView() {
+        view = responderView
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Wallet"
-        view.backgroundColor = .systemBackground
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "qrcode.viewfinder"),
