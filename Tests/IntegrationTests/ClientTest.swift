@@ -53,9 +53,9 @@ final class ClientTests: XCTestCase {
             responder.client.approve(proposal: proposal) { result in
                 switch result {
                 case .success(_):
-                    <#code#>
+                    break
                 case .failure(_):
-                    <#code#>
+                    XCTFail()
                 }
             }
         }

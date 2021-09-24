@@ -7,15 +7,17 @@ final class SessionEngine {
     private let relayer: Relaying
     private let crypto: Crypto
     private var isController: Bool
-    private var metadata: AppMetadata?
+    private var metadata: AppMetadata
     var onSessionApproved: ((SessionType.Settled)->())?
 
     init(relay: Relaying,
          crypto: Crypto,
          subscriber: WCSubscribing,
-         isController: Bool) {
+         isController: Bool,
+         metadata: AppMetadata) {
         self.relayer = relay
         self.crypto = crypto
+        self.metadata = metadata
         self.wcSubscriber = subscriber
         self.sequences = Sequences<Session>()
         self.isController = isController
@@ -23,7 +25,7 @@ final class SessionEngine {
     }
     
     func approve(proposal: SessionType.Proposal, completion: @escaping (Result<SessionType.Settled, Error>) -> Void) {
-        
+        Logger.debug("Approve session")
         let privateKey = Crypto.X25519.generatePrivateKey()
         let selfPublicKey = privateKey.publicKey.toHexString()
         
@@ -61,7 +63,7 @@ final class SessionEngine {
             state: SessionType.State(accounts: [])) // FIXME: State
         let approvalPayload = ClientSynchJSONRPC(method: .sessionApprove, params: .sessionApprove(approveParams))
         
-        _ = try? relayer.publish(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
+        _ = try? relayer.publish(topic: settledTopic, payload: approvalPayload) { [weak self] result in
             switch result {
             case .success:
                 self?.crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
@@ -97,26 +99,48 @@ final class SessionEngine {
         }
     }
     
-    func propose(_ params: ConnectParams) -> PairingType.Pending? {
-        Logger.debug("Propose Pairing")
-        guard let topic = generateTopic() else {
+    func proposeSession(with settledPairing: PairingType.Settled) {
+        Logger.debug("Propose Session")
+        guard let pendingSessionTopic = generateTopic() else {
             Logger.debug("Could not generate topic")
-            return nil
+            return
         }
         let privateKey = Crypto.X25519.generatePrivateKey()
         let publicKey = privateKey.publicKey.toHexString()
         crypto.set(privateKey: privateKey)
-        let proposer = PairingType.Proposer(publicKey: publicKey, controller: isController)
-        let uri = PairingType.UriParameters(topic: topic, publicKey: publicKey, controller: isController, relay: params.relay).absoluteString()!
-        let signalParams = PairingType.Signal.Params(uri: uri)
-        let signal = PairingType.Signal(params: signalParams)
-        let permissions = getDefaultPermissions()
-        let proposal = PairingType.Proposal(topic: topic, relay: params.relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
-        let `self` = PairingType.Participant(publicKey: publicKey, metadata: params.metadata)
-        let pending = PairingType.Pending(status: .proposed, topic: topic, relay: params.relay, self: `self`, proposal: proposal)
-        sequences.create(topic: topic, sequenceState: .pending(pending))
-        wcSubscriber.setSubscription(topic: topic)
-        return pending
+        
+        
+        // FIX - permissions should match permissions set in client's connect method
+        let permissions = SessionType.ProposedPermissions(blockchain: SessionType.Blockchain(chains: []),
+                                                          jsonrpc: SessionType.JSONRPC(methods: ["eth_signTypedData"]),
+                                                          notifications: SessionType.Notifications(types: []))
+        
+        let proposer = SessionType.Proposer(publicKey: publicKey, controller: isController, metadata: metadata)
+
+        let signal = SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: settledPairing.topic))
+        let proposal = SessionType.Proposal(topic: pendingSessionTopic, relay: settledPairing.relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
+        let selfParticipant = SessionType.Participant(publicKey: publicKey, metadata: metadata)
+        let pending = SessionType.Pending(status: .proposed, topic: pendingSessionTopic, relay: settledPairing.relay, self: selfParticipant, proposal: proposal)
+        sequences.create(topic: pendingSessionTopic, sequenceState: .pending(pending))
+        wcSubscriber.setSubscription(topic: pendingSessionTopic)
+
+        let jsonRpcRequest = JSONRPCRequest<SessionType.ProposeParams>(method: ClientSynchJSONRPC.Method.sessionPropose.rawValue, params: proposal)
+        
+        let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: jsonRpcRequest)
+        
+        
+        let pairingPayloadParams = PairingType.PayloadParams(request: request)
+        
+        let pairingPayloadRequest = ClientSynchJSONRPC(method: .pairingPayload, params: .pairingPayload(pairingPayloadParams))
+        _ = try? relayer.publish(topic: settledPairing.topic, payload: pairingPayloadRequest) { [unowned self] result in
+            switch result {
+            case .success:
+                self.wcSubscriber.removeSubscription(topic: pendingSessionTopic)
+                Logger.debug("Sent Session Proposal")
+            case .failure(let error):
+                Logger.debug("Could not send session proposal")
+            }
+        }
     }
     
     //MARK: - Private

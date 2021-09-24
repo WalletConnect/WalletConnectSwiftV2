@@ -16,16 +16,15 @@ public class WalletConnectClient {
         self.isController = options.isController
         self.metadata = options.metadata
         self.relay = Relay(transport: JSONRPCTransport(url: options.relayURL), crypto: crypto)
-        let wcSubscriber = WCSubscriber(relay: relay)
-        self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: wcSubscriber, isController: options.isController)
-        self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: wcSubscriber)
+        self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay), isController: options.isController, metadata: options.metadata)
+        self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay), isController: isController, metadata: options.metadata)
         pairingEngine.onSessionProposal = { [unowned self] proposal in
             self.delegate?.didReceiveSessionProposal(proposal)
         }
         // for proposer to propose session
         pairingEngine.onPairingApproved = { [unowned self] settledPairing in
             self.delegate?.didSettlePairing(settledPairing)
-            createSession(pairing: settledPairing)
+            self.sessionEngine.proposeSession(with: settledPairing)
         }
         // TODO: Store api key
     }
@@ -90,10 +89,6 @@ public class WalletConnectClient {
     }
     
     //MARK: - Private
-    
-    private func createSession(pairing: PairingType.Settled) {
-        
-    }
 }
 
 public protocol WalletConnectClientDelegate: AnyObject {

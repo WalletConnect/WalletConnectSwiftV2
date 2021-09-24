@@ -8,15 +8,18 @@ final class PairingEngine: SequenceEngine {
     let sequences: Sequences<Pairing>
     var onSessionProposal: ((SessionType.Proposal)->())?
     var onPairingApproved: ((PairingType.Settled)->())?
-    
+    private var metadata: AppMetadata
+
     init(relay: Relaying,
          crypto: Crypto,
          subscriber: WCSubscribing,
          sequences: Sequences<Pairing> = Sequences<Pairing>(),
-         isController: Bool) {
+         isController: Bool,
+         metadata: AppMetadata) {
         self.relayer = relay
         self.crypto = crypto
         self.wcSubscriber = subscriber
+        self.metadata = metadata
         self.sequences = sequences
         self.isController = isController
         setUpWCRequestHandling()
@@ -204,3 +207,4 @@ final class PairingEngine: SequenceEngine {
         onPairingApproved?(settledPairing)
     }
 }
+

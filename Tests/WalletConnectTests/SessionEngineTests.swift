@@ -12,7 +12,9 @@ class SessionEngineTests: XCTestCase {
         crypto = Crypto(keychain: DictionaryKeychain())
         relay = MockedRelay()
         subscriber = MockedSubscriber()
-        engine = SessionEngine(relay: relay, crypto: crypto, subscriber: subscriber)
+        let meta = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
+
+        engine = SessionEngine(relay: relay, crypto: crypto, subscriber: subscriber, isController: false, metadata: meta)
     }
 
     override func tearDown() {
