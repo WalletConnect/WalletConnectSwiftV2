@@ -1,3 +1,4 @@
+
 public class Session: Sequence {
     
     var topic: String
@@ -6,9 +7,5 @@ public class Session: Sequence {
     required init(topic: String, sequenceState: SequenceState) {
         self.topic = topic
         self.sequenceState = sequenceState
-    }
-    
-    struct Pending: SequencePending, Equatable {
-        
     }
 }

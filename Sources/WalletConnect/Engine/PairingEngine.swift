@@ -7,7 +7,7 @@ final class PairingEngine: SequenceEngine {
     private var isController: Bool
     let sequences: Sequences<Pairing>
     var onSessionProposal: ((SessionType.Proposal)->())?
-    var onPairingSettled: ((PairingType.Settled)->())?
+    var onPairingApproved: ((PairingType.Settled)->())?
     
     init(relay: Relaying,
          crypto: Crypto,
@@ -103,12 +103,12 @@ final class PairingEngine: SequenceEngine {
         wcSubscriber.setSubscription(topic: topic)
         return pending
     }
+
+    //MARK: - Private
     
     private func getDefaultTTL() -> Int {
         30 * Time.day
     }
-
-    //MARK: - Private
     
     private func generateTopic() -> String? {
         var keyData = Data(count: 32)
@@ -201,6 +201,6 @@ final class PairingEngine: SequenceEngine {
         sequences.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledPairing))
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
-        onPairingSettled?(settledPairing)
+        onPairingApproved?(settledPairing)
     }
 }

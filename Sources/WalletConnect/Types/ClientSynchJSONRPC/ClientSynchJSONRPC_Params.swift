@@ -9,6 +9,7 @@ extension ClientSynchJSONRPC {
         case pairingUpgrade(PairingType.UpgradeParams)
         case pairingDelete(PairingType.DeleteParams)
         case pairingPayload(PairingType.PayloadParams)
+        // sessionPropose method exists exclusively within a pairing payload
         case sessionPropose(SessionType.ProposeParams)
         case sessionApprove(SessionType.ApproveParams)
         case sessionReject(SessionType.RejectParams)

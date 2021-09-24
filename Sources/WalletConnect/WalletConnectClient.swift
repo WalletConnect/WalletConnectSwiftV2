@@ -22,8 +22,10 @@ public class WalletConnectClient {
         pairingEngine.onSessionProposal = { [unowned self] proposal in
             self.delegate?.didReceiveSessionProposal(proposal)
         }
-        pairingEngine.onPairingSettled = { [unowned self] settledPairing in
+        // for proposer to propose session
+        pairingEngine.onPairingApproved = { [unowned self] settledPairing in
             self.delegate?.didSettlePairing(settledPairing)
+            createSession(pairing: settledPairing)
         }
         // TODO: Store api key
     }
@@ -32,9 +34,9 @@ public class WalletConnectClient {
     public func connect(params: ConnectParams) -> String? {
         Logger.debug("Connecting Application")
         if let topic = params.pairing?.topic,
-           let pairing = pairingEngine.sequences.get(topic: topic ){
+           let pairing = pairingEngine.sequences.get(topic: topic) {
             Logger.debug("Connecting with existing pairing")
-            createSession(pairing: pairing)
+            fatalError("not implemented")
             return nil
         } else {
             let pending = pairingEngine.propose(params)
@@ -89,7 +91,7 @@ public class WalletConnectClient {
     
     //MARK: - Private
     
-    private func createSession(pairing: Pairing) {
+    private func createSession(pairing: PairingType.Settled) {
         
     }
 }
@@ -110,3 +112,4 @@ public struct ConnectParams {
         let topic: String
     }
 }
+

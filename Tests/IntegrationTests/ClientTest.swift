@@ -22,7 +22,6 @@ final class ClientTests: XCTestCase {
         let permissions = SessionType.BasePermissions(blockchain: SessionType.BlockchainTypes.Permissions(chains: [""]))
         let relay = RelayProtocolOptions(protocol: "waku", params: nil)
         let connectParams = ConnectParams(permissions: permissions, metadata: proposer.client.metadata, relay: relay, pairing: nil)
-        
         let uri = proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri) { result in
             switch result {
@@ -32,9 +31,39 @@ final class ClientTests: XCTestCase {
                 XCTFail()
             }
         }
-        
         proposer.onPairingSettled = { pairing in
             proposerSettlesPairingExpectation.fulfill()
+        }
+        waitForExpectations(timeout: 2.0, handler: nil)
+    }
+
+    func testNewSession() {
+        let proposerSettlesSessionExpectation = expectation(description: "Proposer settles session")
+        let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
+        let proposer = makeClientDelegate(isController: false)
+        let responder = makeClientDelegate(isController: true)
+        
+        let permissions = SessionType.BasePermissions(blockchain: SessionType.BlockchainTypes.Permissions(chains: [""]))
+        let relay = RelayProtocolOptions(protocol: "waku", params: nil)
+        let connectParams = ConnectParams(permissions: permissions, metadata: proposer.client.metadata, relay: relay, pairing: nil)
+        let uri = proposer.client.connect(params: connectParams)!
+        _ = try! responder.client.pair(uri: uri) { _ in
+        }
+        responder.onSessionProposal = { proposal in
+            responder.client.approve(proposal: proposal) { result in
+                switch result {
+                case .success(_):
+                    <#code#>
+                case .failure(_):
+                    <#code#>
+                }
+            }
+        }
+        responder.onSessionSettled = { _ in
+            responderSettlesSessionExpectation.fulfill()
+        }
+        proposer.onSessionSettled = { _ in
+            proposerSettlesSessionExpectation.fulfill()
         }
         waitForExpectations(timeout: 2.0, handler: nil)
     }
@@ -62,6 +91,4 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didSettlePairing(_ settledPairing: PairingType.Settled) {
         onPairingSettled?(settledPairing)
     }
-    
-    
 }
