@@ -5,7 +5,7 @@ import XCTest
 
 final class ClientTests: XCTestCase {
     
-    let url = URL(string: "wss://staging.walletconnect.org")!
+    let url = URL(string: "wss://relay.walletconnect.org")!
 
     func makeClientDelegate(isController: Bool) -> ClientDelegate {
         let options = WalletClientOptions(apiKey: "", name: "", isController: isController, metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil), relayURL: url)
