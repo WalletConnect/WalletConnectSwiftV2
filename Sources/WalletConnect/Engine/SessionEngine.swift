@@ -63,14 +63,14 @@ final class SessionEngine {
             state: SessionType.State(accounts: [])) // FIXME: State
         let approvalPayload = ClientSynchJSONRPC(method: .sessionApprove, params: .sessionApprove(approveParams))
         
-        _ = try? relayer.publish(topic: settledTopic, payload: approvalPayload) { [weak self] result in
+        _ = try? relayer.publish(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
             switch result {
             case .success:
                 self?.crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
                 self?.crypto.set(privateKey: privateKey)
                 self?.sequences.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledSession))
                 self?.wcSubscriber.setSubscription(topic: settledTopic)
-                print("Success on wc_sessionApprove")
+                print("Success on wc_sessionApprove, published on topic: \(proposal.topic), settled topic: \(settledTopic)")
                 completion(.success(settledSession))
             case .failure(let error):
                 completion(.failure(error))
@@ -100,11 +100,11 @@ final class SessionEngine {
     }
     
     func proposeSession(with settledPairing: PairingType.Settled) {
-        Logger.debug("Propose Session")
         guard let pendingSessionTopic = generateTopic() else {
             Logger.debug("Could not generate topic")
             return
         }
+        Logger.debug("Propose Session on topic: \(pendingSessionTopic)")
         let privateKey = Crypto.X25519.generatePrivateKey()
         let publicKey = privateKey.publicKey.toHexString()
         crypto.set(privateKey: privateKey)
@@ -135,10 +135,9 @@ final class SessionEngine {
         _ = try? relayer.publish(topic: settledPairing.topic, payload: pairingPayloadRequest) { [unowned self] result in
             switch result {
             case .success:
-                self.wcSubscriber.removeSubscription(topic: pendingSessionTopic)
                 Logger.debug("Sent Session Proposal")
             case .failure(let error):
-                Logger.debug("Could not send session proposal")
+                Logger.debug("Could not send session proposal error: \(error)")
             }
         }
     }

@@ -65,7 +65,7 @@ final class ClientTests: XCTestCase {
         proposer.onSessionSettled = { _ in
             proposerSettlesSessionExpectation.fulfill()
         }
-        waitForExpectations(timeout: 2.0, handler: nil)
+        waitForExpectations(timeout: 3.0, handler: nil)
     }
 }
 

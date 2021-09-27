@@ -26,6 +26,9 @@ public class WalletConnectClient {
             self.delegate?.didSettlePairing(settledPairing)
             self.sessionEngine.proposeSession(with: settledPairing)
         }
+        sessionEngine.onSessionApproved = { [unowned self] settledSession in
+            self.delegate?.didSettleSession(settledSession)
+        }
         // TODO: Store api key
     }
     
@@ -72,7 +75,14 @@ public class WalletConnectClient {
     
     // for responder to approve a session proposal
     public func approve(proposal: SessionType.Proposal, completion: @escaping ((Result<SessionType.Settled, Error>) -> Void)) {
-        sessionEngine.approve(proposal: proposal, completion: completion)
+        sessionEngine.approve(proposal: proposal) { [unowned self] result in
+            switch result {
+            case .success(let settledSession):
+                self.delegate?.didSettleSession(settledSession)
+            case .failure(let error):
+                print(error)
+            }
+        }
     }
     
     // for responder to reject a session proposal
