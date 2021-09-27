@@ -178,6 +178,7 @@ final class PairingEngine: SequenceEngine {
               case let .pending(sequencePending) = pairing.sequenceState,
               let pairingPending = sequencePending as? PairingType.Pending else {
                   Logger.debug("Could not find pending pairing associated with topic \(approveParams.topic)")
+                  return
         }
         let selfPublicKey = Data(hex: pairingPending.`self`.publicKey)
         let privateKey = try! crypto.getPrivateKey(for: selfPublicKey)!
