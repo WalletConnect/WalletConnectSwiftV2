@@ -13,10 +13,19 @@ final class ResponderViewController: UIViewController {
         return WalletConnectClient(options: options)
     }()
     
+    var sessionItems: [ActiveSessionItem] = []
+    
+    private let responderView: ResponderView = {
+        ResponderView()
+    }()
+    
+    override func loadView() {
+        view = responderView
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Wallet"
-        view.backgroundColor = .systemBackground
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "qrcode.viewfinder"),
@@ -24,6 +33,10 @@ final class ResponderViewController: UIViewController {
             target: self,
             action: #selector(showScanner)
         )
+        
+        responderView.tableView.dataSource = self
+        responderView.tableView.delegate = self
+        sessionItems = ActiveSessionItem.mockList()
     }
     
     @objc
@@ -38,6 +51,34 @@ final class ResponderViewController: UIViewController {
         proposalViewController.delegate = self
         proposalViewController.show(SessionInfo.mock())
         present(proposalViewController, animated: true)
+    }
+}
+
+extension ResponderViewController: UITableViewDataSource, UITableViewDelegate {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        sessionItems.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "sessionCell", for: indexPath) as! ActiveSessionCell
+        cell.item = sessionItems[indexPath.row]
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            sessionItems.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .automatic)
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
+        "Disconnect"
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        print("did select row \(indexPath)")
     }
 }
 

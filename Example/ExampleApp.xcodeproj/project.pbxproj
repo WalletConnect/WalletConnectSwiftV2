@@ -18,6 +18,9 @@
 		764E1D4C26F8D3FE00A1FB15 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 764E1D4A26F8D3FE00A1FB15 /* LaunchScreen.storyboard */; };
 		764E1D5826F8DBAB00A1FB15 /* WalletConnect in Frameworks */ = {isa = PBXBuildFile; productRef = 764E1D5726F8DBAB00A1FB15 /* WalletConnect */; };
 		764E1D5A26F8DF1B00A1FB15 /* ScannerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764E1D5926F8DF1B00A1FB15 /* ScannerViewController.swift */; };
+		76744CF526FDFB6B00B77ED9 /* ResponderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF426FDFB6B00B77ED9 /* ResponderView.swift */; };
+		76744CF726FE4D5400B77ED9 /* ActiveSessionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */; };
+		76744CF926FE4D7400B77ED9 /* ActiveSessionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +39,9 @@
 		764E1D5526F8DADE00A1FB15 /* WalletConnectSwiftV2 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WalletConnectSwiftV2; path = ..; sourceTree = "<group>"; };
 		764E1D5626F8DB6000A1FB15 /* WalletConnectSwiftV2 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WalletConnectSwiftV2; path = ..; sourceTree = "<group>"; };
 		764E1D5926F8DF1B00A1FB15 /* ScannerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerViewController.swift; sourceTree = "<group>"; };
+		76744CF426FDFB6B00B77ED9 /* ResponderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponderView.swift; sourceTree = "<group>"; };
+		76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionItem.swift; sourceTree = "<group>"; };
+		76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +60,9 @@
 			isa = PBXGroup;
 			children = (
 				761C649B26FB7B7F004239D1 /* ResponderViewController.swift */,
+				76744CF426FDFB6B00B77ED9 /* ResponderView.swift */,
+				76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */,
+				76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */,
 				764E1D5926F8DF1B00A1FB15 /* ScannerViewController.swift */,
 				761C64A426FCB08B004239D1 /* Session */,
 			);
@@ -192,11 +201,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				761C64A326FB83CE004239D1 /* SessionView.swift in Sources */,
+				76744CF526FDFB6B00B77ED9 /* ResponderView.swift in Sources */,
 				761C649A26FB7ABB004239D1 /* ProposerViewController.swift in Sources */,
+				76744CF926FE4D7400B77ED9 /* ActiveSessionCell.swift in Sources */,
 				764E1D4026F8D3FC00A1FB15 /* AppDelegate.swift in Sources */,
 				761C649C26FB7B7F004239D1 /* ResponderViewController.swift in Sources */,
 				761C64A626FCB0AA004239D1 /* SessionInfo.swift in Sources */,
 				761C649E26FB7FD7004239D1 /* SessionViewController.swift in Sources */,
+				76744CF726FE4D5400B77ED9 /* ActiveSessionItem.swift in Sources */,
 				764E1D4226F8D3FC00A1FB15 /* SceneDelegate.swift in Sources */,
 				764E1D5A26F8DF1B00A1FB15 /* ScannerViewController.swift in Sources */,
 			);
