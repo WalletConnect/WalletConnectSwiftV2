@@ -20,8 +20,7 @@ final class ClientTests: XCTestCase {
         let responder = makeClientDelegate(isController: true)
         
         let permissions = SessionType.BasePermissions(blockchain: SessionType.BlockchainTypes.Permissions(chains: [""]))
-        let relay = RelayProtocolOptions(protocol: "waku", params: nil)
-        let connectParams = ConnectParams(permissions: permissions, metadata: proposer.client.metadata, relay: relay, pairing: nil)
+        let connectParams = ConnectParams(permissions: permissions)
         let uri = proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri) { result in
             switch result {
@@ -44,8 +43,7 @@ final class ClientTests: XCTestCase {
         let responder = makeClientDelegate(isController: true)
         
         let permissions = SessionType.BasePermissions(blockchain: SessionType.BlockchainTypes.Permissions(chains: [""]))
-        let relay = RelayProtocolOptions(protocol: "waku", params: nil)
-        let connectParams = ConnectParams(permissions: permissions, metadata: proposer.client.metadata, relay: relay, pairing: nil)
+        let connectParams = ConnectParams(permissions: permissions)
         let uri = proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri) { _ in
         }

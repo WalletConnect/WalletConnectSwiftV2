@@ -93,15 +93,16 @@ final class PairingEngine: SequenceEngine {
         }
         let privateKey = Crypto.X25519.generatePrivateKey()
         let publicKey = privateKey.publicKey.toHexString()
+        let relay = RelayProtocolOptions(protocol: "waku", params: nil)
         crypto.set(privateKey: privateKey)
         let proposer = PairingType.Proposer(publicKey: publicKey, controller: isController)
-        let uri = PairingType.UriParameters(topic: topic, publicKey: publicKey, controller: isController, relay: params.relay).absoluteString()!
+        let uri = PairingType.UriParameters(topic: topic, publicKey: publicKey, controller: isController, relay: relay).absoluteString()!
         let signalParams = PairingType.Signal.Params(uri: uri)
         let signal = PairingType.Signal(params: signalParams)
         let permissions = getDefaultPermissions()
-        let proposal = PairingType.Proposal(topic: topic, relay: params.relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
-        let `self` = PairingType.Participant(publicKey: publicKey, metadata: params.metadata)
-        let pending = PairingType.Pending(status: .proposed, topic: topic, relay: params.relay, self: `self`, proposal: proposal)
+        let proposal = PairingType.Proposal(topic: topic, relay: relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
+        let `self` = PairingType.Participant(publicKey: publicKey, metadata: metadata)
+        let pending = PairingType.Pending(status: .proposed, topic: topic, relay: relay, self: `self`, proposal: proposal)
         sequences.create(topic: topic, sequenceState: .pending(pending))
         wcSubscriber.setSubscription(topic: topic)
         return pending

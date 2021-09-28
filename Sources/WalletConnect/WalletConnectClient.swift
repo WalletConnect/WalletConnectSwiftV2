@@ -1,11 +1,11 @@
 
 import Foundation
 
-public class WalletConnectClient {
+public final class WalletConnectClient {
     
-    let metadata: AppMetadata
+    private let metadata: AppMetadata
     public weak var delegate: WalletConnectClientDelegate?
-    let isController: Bool
+    private let isController: Bool
     private let pairingEngine: PairingEngine
     private let sessionEngine: SessionEngine
     private let relay: Relay
@@ -16,8 +16,8 @@ public class WalletConnectClient {
         self.isController = options.isController
         self.metadata = options.metadata
         self.relay = Relay(transport: JSONRPCTransport(url: options.relayURL), crypto: crypto)
-        self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay), isController: options.isController, metadata: options.metadata)
-        self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay), isController: isController, metadata: options.metadata)
+        self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay), isController: isController, metadata: metadata)
+        self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay), isController: isController, metadata: metadata)
         pairingEngine.onSessionProposal = { [unowned self] proposal in
             self.delegate?.didReceiveSessionProposal(proposal)
         }
@@ -109,11 +109,18 @@ public protocol WalletConnectClientDelegate: AnyObject {
 
 
 public struct ConnectParams {
-    let permissions: SessionType.BasePermissions
-    let metadata: AppMetadata?
-    let relay: RelayProtocolOptions
+    let permissions: SessionType.ProposedPermissions
     let pairing: ParamsPairing?
-    struct ParamsPairing {
+    
+    public init(permissions: SessionType.ProposedPermissions, topic: String? = nil) {
+        self.permissions = permissions
+        if let topic = topic {
+            self.pairing = ParamsPairing(topic: topic)
+        } else {
+            self.pairing = nil
+        }
+    }
+    public struct ParamsPairing {
         let topic: String
     }
 }

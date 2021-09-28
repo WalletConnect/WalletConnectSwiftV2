@@ -17,16 +17,16 @@ extension SessionType {
         let metadata: AppMetadata
     }
     
-    struct ProposedPermissions: Codable, Equatable {
+    public struct ProposedPermissions: Codable, Equatable {
         let blockchain: Blockchain
         let jsonrpc: JSONRPC
-        let notifications: Notifications
+        let notifications: Notifications?
     }
     
     struct Permissions: Codable, Equatable {
         let blockchain: Blockchain
         let jsonrpc: JSONRPC
-        let notifications: Notifications
+        let notifications: Notifications?
         let controller: Controller
     }
     
