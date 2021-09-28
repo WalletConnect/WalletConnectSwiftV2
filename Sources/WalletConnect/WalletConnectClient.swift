@@ -80,6 +80,16 @@ public final class WalletConnectClient {
         }
     }
     
+    // for proposer to request JSON-RPC
+    public func request(params: SessionType.RequestParams) {
+        sessionEngine.request(params: params)
+    }
+    
+    // for responder to respond JSON-RPC
+    public func respond(params: RespondParams) {
+        
+    }
+    
     // for responder to reject a session proposal
     public func reject(proposal: SessionType.Proposal, reason: SessionType.Reason) {
         sessionEngine.reject(proposal: proposal, reason: reason)
@@ -120,7 +130,6 @@ public protocol WalletConnectClientDelegate: AnyObject {
     func didSettlePairing(_ settledPairing: PairingType.Settled)
 }
 
-
 public struct ConnectParams {
     let permissions: SessionType.Permissions
     let pairing: ParamsPairing?
@@ -136,5 +145,10 @@ public struct ConnectParams {
     public struct ParamsPairing {
         let topic: String
     }
+}
+
+public struct RespondParams: Codable, Equatable {
+    let topic: String
+//    let response: String
 }
 

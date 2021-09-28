@@ -129,6 +129,24 @@ final class SessionEngine {
         }
     }
     
+    func request(params: SessionType.RequestParams) {
+        guard let _ = sequences.get(topic: params.topic) else {
+            Logger.debug("Could not find session for topic \(params.topic)")
+            return
+        }
+        let request = SessionType.PayloadParams.Request(method: params.method, params: params.params)
+        let sessionPayloadParams = SessionType.PayloadParams(request: request, chainId: params.chainId)
+        let sessionPayloadRequest = ClientSynchJSONRPC(method: .sessionPayload, params: .sessionPayload(sessionPayloadParams))
+        _ = try? relayer.publish(topic: params.topic, payload: sessionPayloadRequest) { [unowned self] result in
+            switch result {
+            case .success:
+                Logger.debug("Sent Session Payload")
+            case .failure(let error):
+                Logger.debug("Could not send session payload, error: \(error)")
+            }
+        }
+    }
+    
     //MARK: - Private
 
     private func getDefaultTTL() -> Int {
