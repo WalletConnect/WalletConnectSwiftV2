@@ -109,10 +109,10 @@ public protocol WalletConnectClientDelegate: AnyObject {
 
 
 public struct ConnectParams {
-    let permissions: SessionType.ProposedPermissions
+    let permissions: SessionType.Permissions
     let pairing: ParamsPairing?
     
-    public init(permissions: SessionType.ProposedPermissions, topic: String? = nil) {
+    public init(permissions: SessionType.Permissions, topic: String? = nil) {
         self.permissions = permissions
         if let topic = topic {
             self.pairing = ParamsPairing(topic: topic)

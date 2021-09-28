@@ -111,9 +111,9 @@ final class SessionEngine {
         
         
         // FIX - permissions should match permissions set in client's connect method
-        let permissions = SessionType.ProposedPermissions(blockchain: SessionType.Blockchain(chains: []),
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []),
                                                           jsonrpc: SessionType.JSONRPC(methods: ["eth_signTypedData"]),
-                                                          notifications: SessionType.Notifications(types: []))
+                                                  notifications: SessionType.Notifications(types: []), controller: nil)
         
         let proposer = SessionType.Proposer(publicKey: publicKey, controller: isController, metadata: metadata)
 

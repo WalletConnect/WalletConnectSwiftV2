@@ -19,7 +19,7 @@ final class ClientTests: XCTestCase {
         let proposer = makeClientDelegate(isController: false)
         let responder = makeClientDelegate(isController: true)
         
-        let permissions = SessionType.BasePermissions(blockchain: SessionType.BlockchainTypes.Permissions(chains: [""]))
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
         let connectParams = ConnectParams(permissions: permissions)
         let uri = proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri) { result in
@@ -42,7 +42,7 @@ final class ClientTests: XCTestCase {
         let proposer = makeClientDelegate(isController: false)
         let responder = makeClientDelegate(isController: true)
         
-        let permissions = SessionType.BasePermissions(blockchain: SessionType.BlockchainTypes.Permissions(chains: [""]))
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
         let connectParams = ConnectParams(permissions: permissions)
         let uri = proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri) { _ in
