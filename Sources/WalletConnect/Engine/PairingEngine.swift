@@ -66,7 +66,6 @@ final class PairingEngine: SequenceEngine {
         
         // publish approve on topic A
         let approveParams = PairingType.ApproveParams(
-            topic: proposal.topic,
             relay: proposal.relay,
             responder: PairingType.Participant(publicKey: selfPublicKey),
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
@@ -135,7 +134,7 @@ final class PairingEngine: SequenceEngine {
         wcSubscriber.onSubscription = { [unowned self] subscriptionPayload in
             switch subscriptionPayload.clientSynchJsonRpc.params {
             case .pairingApprove(let approveParams):
-                handlePairingApprove(approveParams)
+                handlePairingApprove(approveParams: approveParams, topic: subscriptionPayload.topic)
             case .pairingReject(_):
                 fatalError("Not Implemented")
             case .pairingUpdate(_):
@@ -173,12 +172,12 @@ final class PairingEngine: SequenceEngine {
         wcSubscriber.removeSubscription(topic: topic)
     }
     
-    private func handlePairingApprove(_ approveParams: PairingType.ApproveParams) {
-        Logger.debug("Responder Client approved pairing on topic: \(approveParams.topic)")
-        guard let pairing = sequences.get(topic: approveParams.topic),
+    private func handlePairingApprove(approveParams: PairingType.ApproveParams, topic: String) {
+        Logger.debug("Responder Client approved pairing on topic: \(topic)")
+        guard let pairing = sequences.get(topic: topic),
               case let .pending(sequencePending) = pairing.sequenceState,
               let pairingPending = sequencePending as? PairingType.Pending else {
-                  Logger.debug("Could not find pending pairing associated with topic \(approveParams.topic)")
+                  Logger.debug("Could not find pending pairing associated with topic \(topic)")
                   return
         }
         let selfPublicKey = Data(hex: pairingPending.`self`.publicKey)
