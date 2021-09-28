@@ -66,6 +66,9 @@ final class ClientTests: XCTestCase {
         waitForExpectations(timeout: 3.0, handler: nil)
     }
     
+    func testProposerSendRequest() {
+        
+    }
 }
 
 class ClientDelegate: WalletConnectClientDelegate {

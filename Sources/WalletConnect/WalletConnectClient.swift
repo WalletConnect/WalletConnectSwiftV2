@@ -121,15 +121,15 @@ public final class WalletConnectClient {
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
             self.delegate?.didSettleSession(settledSession)
         }
-        sessionEngine.onPayload = { [unowned self] payload, topic in
-            self.delegate?.didReceive(sessionPayload: payload, on: topic)
+        sessionEngine.onPayload = { [unowned self] sessionPayloadInfo in
+            self.delegate?.didReceive(sessionPayload: sessionPayloadInfo)
         }
     }
 }
 
 public protocol WalletConnectClientDelegate: AnyObject {
     func didReceive(sessionProposal: SessionType.Proposal)
-    func didReceive(sessionPayload: SessionType.PayloadParams, on topic: String)
+    func didReceive(sessionPayload: SessionPayloadInfo)
     func didSettleSession(_ sessionSettled: SessionType.Settled)
     func didSettlePairing(_ settledPairing: PairingType.Settled)
 }
@@ -156,3 +156,8 @@ public struct RespondParams: Codable, Equatable {
 //    let response: String
 }
 
+public struct SessionPayloadInfo: Codable, Equatable {
+    let params: SessionType.PayloadParams
+    let topic: String
+    let requestId: Int64
+}

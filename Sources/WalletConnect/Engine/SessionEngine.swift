@@ -14,7 +14,7 @@ final class SessionEngine {
     private var isController: Bool
     private var metadata: AppMetadata
     var onSessionApproved: ((SessionType.Settled)->())?
-    var onPayload: ((SessionType.PayloadParams, String)->())?
+    var onPayload: ((SessionPayloadInfo)->())?
 
     init(relay: Relaying,
          crypto: Crypto,
@@ -189,35 +189,36 @@ final class SessionEngine {
                 fatalError("Not implemented")
             case .sessionDelete(_):
                 fatalError("Not implemented")
-            case .sessionPayload(let sessionPayload):
-                self.handleSessionPayload(sessionPayload, topic: subscriptionPayload.topic)
+            case .sessionPayload(let sessionPayloadParams):
+                let sessionPayloadInfo = SessionPayloadInfo(params: sessionPayloadParams, topic: subscriptionPayload.topic, requestId: subscriptionPayload.clientSynchJsonRpc.id)
+                self.handleSessionPayload(sessionPayloadInfo)
             default:
                 fatalError("unexpected method type")
             }
         }
     }
     
-    private func handleSessionPayload(_ sessionPayload: SessionType.PayloadParams, topic: String) {
+    private func handleSessionPayload(_ sessionPayloadInfo: SessionPayloadInfo) {
         do {
-            try validatePayload(sessionPayload, topic: topic)
-            onPayload?(sessionPayload, topic)
+            try validatePayload(sessionPayloadInfo)
+            onPayload?(sessionPayloadInfo)
         } catch {
             Logger.error(error)
         }
     }
     
-    private func validatePayload(_ sessionPayload: SessionType.PayloadParams, topic: String) throws {
-        guard let session = sequences.get(topic: topic),
+    private func validatePayload(_ sessionPayloadInfo: SessionPayloadInfo) throws {
+        guard let session = sequences.get(topic: sessionPayloadInfo.topic),
               case .settled(let sequenceSettled) = session.sequenceState,
         let settledSession = sequenceSettled as? SessionType.Settled else {
             throw SessionEngineError.noSettledSessionForPayload
         }
-        if let chainId = sessionPayload.chainId {
+        if let chainId = sessionPayloadInfo.params.chainId {
             guard settledSession.permissions.blockchain.chains.contains(chainId) else {
                 throw SessionEngineError.unauthorizedTargetChain
             }
         }
-        guard settledSession.permissions.jsonrpc.methods.contains(sessionPayload.request.method) else {
+        guard settledSession.permissions.jsonrpc.methods.contains(sessionPayloadInfo.params.request.method) else {
             throw SessionEngineError.unauthorizedMethod
         }
     }
