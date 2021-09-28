@@ -4,7 +4,7 @@ import Combine
 
 final class RelayTests: XCTestCase {
     
-    let url = URL(string: "wss://staging.walletconnect.org")!
+    let url = URL(string: "wss://relay.walletconnect.org")!
     private var publishers = [AnyCancellable]()
 
     func makeRelay() -> Relay {

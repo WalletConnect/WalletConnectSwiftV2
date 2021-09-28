@@ -1,4 +1,8 @@
 
 import Foundation
 
-enum SessionType {}
+public enum SessionType {}
+
+extension SessionType {
+
+}

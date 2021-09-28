@@ -2,7 +2,7 @@
 import Foundation
 
 extension SessionType {
-    struct Proposal: Codable, Equatable {
+    public struct Proposal: Codable, Equatable {
         let topic: String
         let relay: RelayProtocolOptions
         let proposer: Proposer

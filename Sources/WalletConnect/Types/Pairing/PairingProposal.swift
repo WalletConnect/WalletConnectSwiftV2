@@ -36,14 +36,14 @@ extension PairingType {
 
 extension PairingType.Proposal {
     
-    static func createFromURI(_ uri: PairingType.ParamsUri) -> PairingType.Proposal {
+    static func createFromURI(_ uri: PairingType.UriParameters) -> PairingType.Proposal {
         PairingType.Proposal(
             topic: uri.topic,
             relay: uri.relay,
             proposer: PairingType.Proposer(
                 publicKey: uri.publicKey,
                 controller: uri.controller),
-            signal: PairingType.Signal(params: PairingType.Signal.Params(uri: uri.raw)),
+            signal: PairingType.Signal(params: PairingType.Signal.Params(uri: uri.absoluteString()!)),
             permissions: PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [PairingType.PayloadMethods.sessionPropose.rawValue])),
             ttl: PairingType.defaultTTL
         )
