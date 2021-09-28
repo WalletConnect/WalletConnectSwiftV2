@@ -99,7 +99,7 @@ final class SessionEngine {
         }
     }
     
-    func proposeSession(with settledPairing: PairingType.Settled) {
+    func proposeSession(settledPairing: PairingType.Settled, permissions: SessionType.Permissions) {
         guard let pendingSessionTopic = generateTopic() else {
             Logger.debug("Could not generate topic")
             return
@@ -108,29 +108,16 @@ final class SessionEngine {
         let privateKey = Crypto.X25519.generatePrivateKey()
         let publicKey = privateKey.publicKey.toHexString()
         crypto.set(privateKey: privateKey)
-        
-        
-        // FIX - permissions should match permissions set in client's connect method
-        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []),
-                                                          jsonrpc: SessionType.JSONRPC(methods: ["eth_signTypedData"]),
-                                                  notifications: SessionType.Notifications(types: []), controller: nil)
-        
         let proposer = SessionType.Proposer(publicKey: publicKey, controller: isController, metadata: metadata)
-
         let signal = SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: settledPairing.topic))
         let proposal = SessionType.Proposal(topic: pendingSessionTopic, relay: settledPairing.relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
         let selfParticipant = SessionType.Participant(publicKey: publicKey, metadata: metadata)
         let pending = SessionType.Pending(status: .proposed, topic: pendingSessionTopic, relay: settledPairing.relay, self: selfParticipant, proposal: proposal)
         sequences.create(topic: pendingSessionTopic, sequenceState: .pending(pending))
         wcSubscriber.setSubscription(topic: pendingSessionTopic)
-
         let jsonRpcRequest = JSONRPCRequest<SessionType.ProposeParams>(method: ClientSynchJSONRPC.Method.sessionPropose.rawValue, params: proposal)
-        
         let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: jsonRpcRequest)
-        
-        
         let pairingPayloadParams = PairingType.PayloadParams(request: request)
-        
         let pairingPayloadRequest = ClientSynchJSONRPC(method: .pairingPayload, params: .pairingPayload(pairingPayloadParams))
         _ = try? relayer.publish(topic: settledPairing.topic, payload: pairingPayloadRequest) { [unowned self] result in
             switch result {

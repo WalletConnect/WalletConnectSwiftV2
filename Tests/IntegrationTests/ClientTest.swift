@@ -21,7 +21,7 @@ final class ClientTests: XCTestCase {
         
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
         let connectParams = ConnectParams(permissions: permissions)
-        let uri = proposer.client.connect(params: connectParams)!
+        let uri = try! proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri) { result in
             switch result {
             case .success(_):
@@ -44,7 +44,7 @@ final class ClientTests: XCTestCase {
         
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
         let connectParams = ConnectParams(permissions: permissions)
-        let uri = proposer.client.connect(params: connectParams)!
+        let uri = try! proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri) { _ in
         }
         responder.onSessionProposal = { proposal in

@@ -10,6 +10,8 @@ public final class WalletConnectClient {
     private let sessionEngine: SessionEngine
     private let relay: Relay
     private let crypto = Crypto()
+    private var sessionPermissions: [String: SessionType.Permissions] = [:]
+
     
     // MARK: - Public interface
     public init(options: WalletClientOptions) {
@@ -18,22 +20,12 @@ public final class WalletConnectClient {
         self.relay = Relay(transport: JSONRPCTransport(url: options.relayURL), crypto: crypto)
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay), isController: isController, metadata: metadata)
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay), isController: isController, metadata: metadata)
-        pairingEngine.onSessionProposal = { [unowned self] proposal in
-            self.delegate?.didReceiveSessionProposal(proposal)
-        }
-        // for proposer to propose session
-        pairingEngine.onPairingApproved = { [unowned self] settledPairing in
-            self.delegate?.didSettlePairing(settledPairing)
-            self.sessionEngine.proposeSession(with: settledPairing)
-        }
-        sessionEngine.onSessionApproved = { [unowned self] settledSession in
-            self.delegate?.didSettleSession(settledSession)
-        }
+        setUpEnginesCallbacks()
         // TODO: Store api key
     }
     
     // for proposer to propose a session to a responder
-    public func connect(params: ConnectParams) -> String? {
+    public func connect(params: ConnectParams) throws -> String? {
         Logger.debug("Connecting Application")
         if let topic = params.pairing?.topic,
            let pairing = pairingEngine.sequences.get(topic: topic) {
@@ -41,8 +33,11 @@ public final class WalletConnectClient {
             fatalError("not implemented")
             return nil
         } else {
-            let pending = pairingEngine.propose(params)
-            return pending?.proposal.signal.params.uri
+            guard let pending = pairingEngine.propose(params) else {
+                throw WalletConnectError.connection
+            }
+            sessionPermissions[pending.topic] = params.permissions
+            return pending.proposal.signal.params.uri
         }
     }
     
@@ -99,6 +94,24 @@ public final class WalletConnectClient {
     }
     
     //MARK: - Private
+    
+    private func setUpEnginesCallbacks() {
+        pairingEngine.onSessionProposal = { [unowned self] proposal in
+            self.delegate?.didReceiveSessionProposal(proposal)
+        }
+        pairingEngine.onPairingApproved = { [unowned self] settledPairing, pendingTopic in
+            self.delegate?.didSettlePairing(settledPairing)
+            guard let permissions = sessionPermissions[pendingTopic] else {
+                Logger.debug("Cound not find permissions for pending topic: \(pendingTopic)")
+                return
+            }
+            sessionPermissions[pendingTopic] = nil
+            self.sessionEngine.proposeSession(settledPairing: settledPairing, permissions: permissions)
+        }
+        sessionEngine.onSessionApproved = { [unowned self] settledSession in
+            self.delegate?.didSettleSession(settledSession)
+        }
+    }
 }
 
 public protocol WalletConnectClientDelegate: AnyObject {

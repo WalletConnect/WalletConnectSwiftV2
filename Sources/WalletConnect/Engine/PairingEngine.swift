@@ -7,8 +7,9 @@ final class PairingEngine: SequenceEngine {
     private var isController: Bool
     let sequences: Sequences<Pairing>
     var onSessionProposal: ((SessionType.Proposal)->())?
-    var onPairingApproved: ((PairingType.Settled)->())?
+    var onPairingApproved: ((PairingType.Settled, String)->())?
     private var metadata: AppMetadata
+    
 
     init(relay: Relaying,
          crypto: Crypto,
@@ -134,7 +135,7 @@ final class PairingEngine: SequenceEngine {
         wcSubscriber.onSubscription = { [unowned self] subscriptionPayload in
             switch subscriptionPayload.clientSynchJsonRpc.params {
             case .pairingApprove(let approveParams):
-                handlePairingApprove(approveParams: approveParams, topic: subscriptionPayload.topic)
+                handlePairingApprove(approveParams: approveParams, pendingTopic: subscriptionPayload.topic)
             case .pairingReject(_):
                 fatalError("Not Implemented")
             case .pairingUpdate(_):
@@ -172,12 +173,12 @@ final class PairingEngine: SequenceEngine {
         wcSubscriber.removeSubscription(topic: topic)
     }
     
-    private func handlePairingApprove(approveParams: PairingType.ApproveParams, topic: String) {
-        Logger.debug("Responder Client approved pairing on topic: \(topic)")
-        guard let pairing = sequences.get(topic: topic),
+    private func handlePairingApprove(approveParams: PairingType.ApproveParams, pendingTopic: String) {
+        Logger.debug("Responder Client approved pairing on topic: \(pendingTopic)")
+        guard let pairing = sequences.get(topic: pendingTopic),
               case let .pending(sequencePending) = pairing.sequenceState,
               let pairingPending = sequencePending as? PairingType.Pending else {
-                  Logger.debug("Could not find pending pairing associated with topic \(topic)")
+                  Logger.debug("Could not find pending pairing associated with topic \(pendingTopic)")
                   return
         }
         let selfPublicKey = Data(hex: pairingPending.`self`.publicKey)
@@ -205,7 +206,7 @@ final class PairingEngine: SequenceEngine {
         sequences.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledPairing))
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
-        onPairingApproved?(settledPairing)
+        onPairingApproved?(settledPairing, pendingTopic)
     }
 }
 
