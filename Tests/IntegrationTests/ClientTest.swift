@@ -66,22 +66,19 @@ final class ClientTests: XCTestCase {
         waitForExpectations(timeout: 3.0, handler: nil)
     }
     
-    func test
 }
 
 class ClientDelegate: WalletConnectClientDelegate {
+    
     var client: WalletConnectClient
     var onSessionSettled: ((SessionType.Settled)->())?
     var onPairingSettled: ((PairingType.Settled)->())?
     var onSessionProposal: ((SessionType.Proposal)->())?
+    var onSessionPayload: ((SessionType.PayloadParams, String)->())?
 
     internal init(client: WalletConnectClient) {
         self.client = client
         client.delegate = self
-    }
-
-    func didReceiveSessionProposal(_ sessionProposal: SessionType.Proposal) {
-        onSessionProposal?(sessionProposal)
     }
     
     func didSettleSession(_ sessionSettled: SessionType.Settled) {
@@ -90,5 +87,12 @@ class ClientDelegate: WalletConnectClientDelegate {
     
     func didSettlePairing(_ settledPairing: PairingType.Settled) {
         onPairingSettled?(settledPairing)
+    }
+    func didReceive(sessionProposal: SessionType.Proposal) {
+        onSessionProposal?(sessionProposal)
+    }
+    
+    func didReceive(sessionPayload: SessionType.PayloadParams, on topic: String) {
+        onSessionPayload?(sessionPayload, topic)
     }
 }

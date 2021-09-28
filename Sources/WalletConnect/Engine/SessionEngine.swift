@@ -1,7 +1,12 @@
 import Foundation
 
+enum SessionEngineError: Error {
+    case unauthorizedTargetChain
+    case noSettledSessionForPayload
+    case unauthorizedMethod
+}
+
 final class SessionEngine {
-    
     let sequences: Sequences<Session>
     private let wcSubscriber: WCSubscribing
     private let relayer: Relaying
@@ -9,6 +14,7 @@ final class SessionEngine {
     private var isController: Bool
     private var metadata: AppMetadata
     var onSessionApproved: ((SessionType.Settled)->())?
+    var onPayload: ((SessionType.PayloadParams, String)->())?
 
     init(relay: Relaying,
          crypto: Crypto,
@@ -183,11 +189,36 @@ final class SessionEngine {
                 fatalError("Not implemented")
             case .sessionDelete(_):
                 fatalError("Not implemented")
-            case .sessionPayload(_):
-                fatalError("Not implemented")
+            case .sessionPayload(let sessionPayload):
+                self.handleSessionPayload(sessionPayload, topic: subscriptionPayload.topic)
             default:
-                fatalError("not expected method type")
+                fatalError("unexpected method type")
             }
+        }
+    }
+    
+    private func handleSessionPayload(_ sessionPayload: SessionType.PayloadParams, topic: String) {
+        do {
+            try validatePayload(sessionPayload, topic: topic)
+            onPayload?(sessionPayload, topic)
+        } catch {
+            Logger.error(error)
+        }
+    }
+    
+    private func validatePayload(_ sessionPayload: SessionType.PayloadParams, topic: String) throws {
+        guard let session = sequences.get(topic: topic),
+              case .settled(let sequenceSettled) = session.sequenceState,
+        let settledSession = sequenceSettled as? SessionType.Settled else {
+            throw SessionEngineError.noSettledSessionForPayload
+        }
+        if let chainId = sessionPayload.chainId {
+            guard settledSession.permissions.blockchain.chains.contains(chainId) else {
+                throw SessionEngineError.unauthorizedTargetChain
+            }
+        }
+        guard settledSession.permissions.jsonrpc.methods.contains(sessionPayload.request.method) else {
+            throw SessionEngineError.unauthorizedMethod
         }
     }
     

@@ -2,16 +2,16 @@
 import Foundation
 
 extension SessionType {
-    struct PayloadParams: Codable, Equatable {
+    public struct PayloadParams: Codable, Equatable {
         let request: Request
         let chainId: String?
     }
 }
 
 extension SessionType.PayloadParams {
-    struct Request: Codable, Equatable {
+    public struct Request: Codable, Equatable {
         let method: String
-        let params: String // String until we not agree on protocol
+        let params: String // String until we not agree on protocol level
     }
 }
 //

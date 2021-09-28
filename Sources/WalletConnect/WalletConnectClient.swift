@@ -107,7 +107,7 @@ public final class WalletConnectClient {
     
     private func setUpEnginesCallbacks() {
         pairingEngine.onSessionProposal = { [unowned self] proposal in
-            self.delegate?.didReceiveSessionProposal(proposal)
+            self.delegate?.didReceive(sessionProposal: proposal)
         }
         pairingEngine.onPairingApproved = { [unowned self] settledPairing, pendingTopic in
             self.delegate?.didSettlePairing(settledPairing)
@@ -121,11 +121,15 @@ public final class WalletConnectClient {
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
             self.delegate?.didSettleSession(settledSession)
         }
+        sessionEngine.onPayload = { [unowned self] payload, topic in
+            self.delegate?.didReceive(sessionPayload: payload, on: topic)
+        }
     }
 }
 
 public protocol WalletConnectClientDelegate: AnyObject {
-    func didReceiveSessionProposal(_ sessionProposal: SessionType.Proposal)
+    func didReceive(sessionProposal: SessionType.Proposal)
+    func didReceive(sessionPayload: SessionType.PayloadParams, on topic: String)
     func didSettleSession(_ sessionSettled: SessionType.Settled)
     func didSettlePairing(_ settledPairing: PairingType.Settled)
 }
