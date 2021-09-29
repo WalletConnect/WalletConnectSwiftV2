@@ -54,7 +54,7 @@ final class ClientTests: XCTestCase {
         waitForExpectations(timeout: 3.0, handler: nil)
     }
     
-    func testProposerSendRequestToResponder() {
+    func testProposerRequestExchangesSessionPayload() {
         let requestExpectation = expectation(description: "Responder receives request")
         let proposer = makeClientDelegate(isController: false)
         let responder = makeClientDelegate(isController: true)
@@ -75,10 +75,29 @@ final class ClientTests: XCTestCase {
         responder.onSessionRequest = { sessionRequest in
             XCTAssertEqual(sessionRequest.request.method, method)
             XCTAssertEqual(sessionRequest.request.params, params)
-            responder.client.respond(topic: sessionRequest.topic, response: JSONRPCResponse<String>(response))
+            XCTFail("fix response")
+//            responder.client.respond(topic: sessionRequest.topic, response: JSONRPCResponse<String>(response))
             requestExpectation.fulfill()
         }
         waitForExpectations(timeout: 3.0, handler: nil)
+    }
+    
+    func testResponderRejectsSession() {
+        let sessionRejectExpectation = expectation(description: "Responded is notified on session rejection")
+        let proposer = makeClientDelegate(isController: false)
+        let responder = makeClientDelegate(isController: true)
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        _ = try! responder.client.pair(uri: uri)
+        responder.onSessionProposal = { proposal in
+            responder.client.reject(proposal: proposal, reason: SessionType.Reason(code: WalletConnectError.sessionNotApproved.code, message: WalletConnectError.sessionNotApproved.description))
+        }
+        proposer.onSessionRejected = { _, reason in
+            XCTAssertEqual(reason.code, WalletConnectError.sessionNotApproved.code)
+            sessionRejectExpectation.fulfill()
+        }
+        waitForExpectations(timeout: 2.0, handler: nil)
     }
 }
 
@@ -88,12 +107,16 @@ class ClientDelegate: WalletConnectClientDelegate {
     var onPairingSettled: ((PairingType.Settled)->())?
     var onSessionProposal: ((SessionType.Proposal)->())?
     var onSessionRequest: ((SessionRequest)->())?
+    var onSessionRejected: ((String, SessionType.Reason)->())?
 
     internal init(client: WalletConnectClient) {
         self.client = client
         client.delegate = self
     }
     
+    func didReject(sessionPendingTopic: String, reason: SessionType.Reason) {
+        onSessionRejected?(sessionPendingTopic, reason)
+    }
     func didSettle(session: SessionType.Settled) {
         onSessionSettled?(session)
     }

@@ -16,6 +16,7 @@ final class SessionEngine {
     var onSessionApproved: ((SessionType.Settled)->())?
     var onSessionRequest: ((SessionRequest)->())?
     var onSessionResponse: ((JSONRPCResponse<String>)->())?
+    var onSessionRejected: ((String, SessionType.Reason)->())?
 
     init(relay: Relaying,
          crypto: Crypto,
@@ -197,8 +198,8 @@ final class SessionEngine {
             switch subscriptionPayload.clientSynchJsonRpc.params {
             case .sessionApprove(let approveParams):
                 self.handleSessionApprove(approveParams)
-            case .sessionReject(_):
-                handleSessionReject()
+            case .sessionReject(let rejectParams):
+                handleSessionReject(rejectParams, topic: subscriptionPayload.topic)
             case .sessionUpdate(_):
                 fatalError("Not implemented")
             case .sessionUpgrade(_):
@@ -215,8 +216,13 @@ final class SessionEngine {
         }
     }
     
-    func handleSessionReject() {
-        
+    func handleSessionReject(_ rejectParams: SessionType.RejectParams, topic: String) {
+        guard let _ = sequences.get(topic: topic) else {
+            Logger.debug("Could not find session for topic \(topic)")
+            return
+        }
+        sequences.delete(topic: topic)
+        onSessionRejected?(topic, rejectParams.reason)
     }
     
     private func handleSessionPayload(_ sessionRequest: SessionRequest) {

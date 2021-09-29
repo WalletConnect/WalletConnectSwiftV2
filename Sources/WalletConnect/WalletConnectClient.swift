@@ -2,7 +2,6 @@
 import Foundation
 
 public final class WalletConnectClient {
-    
     private let metadata: AppMetadata
     public weak var delegate: WalletConnectClientDelegate?
     private let isController: Bool
@@ -34,7 +33,7 @@ public final class WalletConnectClient {
             return nil
         } else {
             guard let pending = pairingEngine.propose(params) else {
-                throw WalletConnectError.connection
+                throw WalletConnectError.pairingProposalGenerationFailed
             }
             sessionPermissions[pending.topic] = params.permissions
             return pending.proposal.signal.params.uri
@@ -124,6 +123,9 @@ public final class WalletConnectClient {
         sessionEngine.onSessionRequest = { [unowned self] sessionPayloadInfo in
             self.delegate?.didReceive(sessionRequest: sessionPayloadInfo)
         }
+        sessionEngine.onSessionRejected = { [unowned self] pendingTopic, reason in
+            self.delegate?.didReject(sessionPendingTopic: pendingTopic, reason: reason)
+        }
     }
 }
 
@@ -132,6 +134,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     func didReceive(sessionRequest: SessionRequest)
     func didSettle(session: SessionType.Settled)
     func didSettle(pairing: PairingType.Settled)
+    func didReject(sessionPendingTopic: String, reason: SessionType.Reason)
 }
 
 public struct ConnectParams {
