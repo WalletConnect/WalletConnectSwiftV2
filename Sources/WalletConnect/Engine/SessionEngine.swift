@@ -14,7 +14,8 @@ final class SessionEngine {
     private var isController: Bool
     private var metadata: AppMetadata
     var onSessionApproved: ((SessionType.Settled)->())?
-    var onPayload: ((SessionRequest)->())?
+    var onSessionRequest: ((SessionRequest)->())?
+    var onSessionResponse: ((JSONRPCResponse<String>)->())?
 
     init(relay: Relaying,
          crypto: Crypto,
@@ -153,6 +154,21 @@ final class SessionEngine {
         }
     }
     
+    func respond(topic: String, response: JSONRPCResponse<String>) {
+        guard let _ = sequences.get(topic: topic) else {
+            Logger.debug("Could not find session for topic \(topic)")
+            return
+        }
+        _ = try? relayer.publish(topic: topic, payload: response) { [unowned self] result in
+            switch result {
+            case .success:
+                Logger.debug("Sent Session Payload")
+            case .failure(let error):
+                Logger.debug("Could not send session payload, error: \(error)")
+            }
+        }
+    }
+
     //MARK: - Private
 
     private func getDefaultTTL() -> Int {
@@ -182,7 +198,7 @@ final class SessionEngine {
             case .sessionApprove(let approveParams):
                 self.handleSessionApprove(approveParams)
             case .sessionReject(_):
-                fatalError("Not implemented")
+                handleSessionReject()
             case .sessionUpdate(_):
                 fatalError("Not implemented")
             case .sessionUpgrade(_):
@@ -190,7 +206,7 @@ final class SessionEngine {
             case .sessionDelete(_):
                 fatalError("Not implemented")
             case .sessionPayload(let sessionPayloadParams):
-                let jsonRpcRequest = JSONRPCRequest<String>(id: subscriptionPayload.clientSynchJsonRpc.id, method: sessionPayloadParams.request.method, params: sessionPayloadParams.request.params)
+                let jsonRpcRequest = JSONRPCRequest<String>(method: sessionPayloadParams.request.method, params: sessionPayloadParams.request.params)
                 let sessionRequest = SessionRequest(topic: subscriptionPayload.topic, request: jsonRpcRequest, chainId: sessionPayloadParams.chainId)
                 self.handleSessionPayload(sessionRequest)
             default:
@@ -199,10 +215,14 @@ final class SessionEngine {
         }
     }
     
+    func handleSessionReject() {
+        
+    }
+    
     private func handleSessionPayload(_ sessionRequest: SessionRequest) {
         do {
             try validatePayload(sessionRequest)
-            onPayload?(sessionRequest)
+            onSessionRequest?(sessionRequest)
         } catch {
             Logger.error(error)
         }

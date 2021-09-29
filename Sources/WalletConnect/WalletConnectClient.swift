@@ -86,8 +86,8 @@ public final class WalletConnectClient {
     }
     
     // for responder to respond JSON-RPC
-    public func respond(params: RespondParams) {
-        
+    public func respond(topic: String, response: JSONRPCResponse<String>) {
+        sessionEngine.respond(topic: topic, response: response)
     }
     
     // for responder to reject a session proposal
@@ -121,7 +121,7 @@ public final class WalletConnectClient {
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
             self.delegate?.didSettle(session: settledSession)
         }
-        sessionEngine.onPayload = { [unowned self] sessionPayloadInfo in
+        sessionEngine.onSessionRequest = { [unowned self] sessionPayloadInfo in
             self.delegate?.didReceive(sessionRequest: sessionPayloadInfo)
         }
     }
@@ -149,11 +149,6 @@ public struct ConnectParams {
     public struct ParamsPairing {
         let topic: String
     }
-}
-
-public struct RespondParams: Codable, Equatable {
-    let topic: String
-//    let response: String
 }
 
 public struct SessionRequest: Codable, Equatable {

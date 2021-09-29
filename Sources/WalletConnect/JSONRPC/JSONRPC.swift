@@ -33,7 +33,7 @@ struct JSONRPCRequest<T: Codable&Equatable>: Codable, Equatable {
     }
 }
 
-struct JSONRPCResponse<T: Codable>: Codable {
+public struct JSONRPCResponse<T: Codable>: Codable {
     let jsonrpc = "2.0"
     let id: Int64
     let result: T

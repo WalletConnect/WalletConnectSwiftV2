@@ -60,6 +60,7 @@ final class ClientTests: XCTestCase {
         let responder = makeClientDelegate(isController: true)
         let method = "eth_signTypedData"
         let params = "params"
+        let response = "response"
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: [method]))
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
@@ -74,6 +75,7 @@ final class ClientTests: XCTestCase {
         responder.onSessionRequest = { sessionRequest in
             XCTAssertEqual(sessionRequest.request.method, method)
             XCTAssertEqual(sessionRequest.request.params, params)
+            responder.client.respond(topic: sessionRequest.topic, response: JSONRPCResponse<String>(response))
             requestExpectation.fulfill()
         }
         waitForExpectations(timeout: 3.0, handler: nil)
