@@ -6,7 +6,6 @@ extension SessionType {
         let topic: String
         let method: String
         let params: String
-        let timeout: Int?
         let chainId: String?
     }
 }

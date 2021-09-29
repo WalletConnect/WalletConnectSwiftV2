@@ -1,6 +1,6 @@
 import Foundation
 
-final class PairingEngine: SequenceEngine {
+final class PairingEngine {
     private let wcSubscriber: WCSubscribing
     private let relayer: Relaying
     private let crypto: Crypto
@@ -26,7 +26,7 @@ final class PairingEngine: SequenceEngine {
         setUpWCRequestHandling()
     }
     
-    func respond(to proposal: PairingType.Proposal, completion: @escaping (Result<String, Error>) -> Void) {
+    func respond(to proposal: PairingType.Proposal, completion: @escaping (Result<PairingType.Settled, Error>) -> Void) {
         let privateKey = Crypto.X25519.generatePrivateKey()
         let selfPublicKey = privateKey.publicKey.toHexString()
         
@@ -78,7 +78,7 @@ final class PairingEngine: SequenceEngine {
             case .success:
                 self?.wcSubscriber.removeSubscription(topic: proposal.topic)
                 print("Success on wc_pairingApprove")
-                completion(.success(proposal.topic))
+                completion(.success(settledPairing))
             case .failure(let error):
                 completion(.failure(error))
             }

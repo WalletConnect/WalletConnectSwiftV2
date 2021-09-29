@@ -22,13 +22,9 @@ final class ClientTests: XCTestCase {
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
-        _ = try! responder.client.pair(uri: uri) { result in
-            switch result {
-            case .success(_):
-                responderSettlesPairingExpectation.fulfill()
-            case .failure(_):
-                XCTFail()
-            }
+        _ = try! responder.client.pair(uri: uri)
+        responder.onPairingSettled = { _ in
+            responderSettlesPairingExpectation.fulfill()
         }
         proposer.onPairingSettled = { pairing in
             proposerSettlesPairingExpectation.fulfill()
@@ -45,17 +41,9 @@ final class ClientTests: XCTestCase {
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
-        _ = try! responder.client.pair(uri: uri) { _ in
-        }
+        _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { proposal in
-            responder.client.approve(proposal: proposal) { result in
-                switch result {
-                case .success(_):
-                    break
-                case .failure(_):
-                    XCTFail()
-                }
-            }
+            responder.client.approve(proposal: proposal)
         }
         responder.onSessionSettled = { _ in
             responderSettlesSessionExpectation.fulfill()
@@ -66,8 +54,29 @@ final class ClientTests: XCTestCase {
         waitForExpectations(timeout: 3.0, handler: nil)
     }
     
-    func testProposerSendRequest() {
-        
+    func testProposerSendRequestToResponder() {
+        let requestExpectation = expectation(description: "Responder receives request")
+        let proposer = makeClientDelegate(isController: false)
+        let responder = makeClientDelegate(isController: true)
+        let method = "eth_signTypedData"
+        let params = "params"
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: [method]))
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        _ = try! responder.client.pair(uri: uri)
+        responder.onSessionProposal = { proposal in
+            responder.client.approve(proposal: proposal)
+        }
+        proposer.onSessionSettled = { settledSession in
+            let requestParams = SessionType.RequestParams(topic: settledSession.topic, method: method, params: params, chainId: nil)
+            proposer.client.request(params: requestParams)
+        }
+        responder.onSessionRequest = { sessionRequest in
+            XCTAssertEqual(sessionRequest.request.method, method)
+            XCTAssertEqual(sessionRequest.request.params, params)
+            requestExpectation.fulfill()
+        }
+        waitForExpectations(timeout: 3.0, handler: nil)
     }
 }
 
@@ -76,23 +85,23 @@ class ClientDelegate: WalletConnectClientDelegate {
     var onSessionSettled: ((SessionType.Settled)->())?
     var onPairingSettled: ((PairingType.Settled)->())?
     var onSessionProposal: ((SessionType.Proposal)->())?
-    var onSessionPayload: ((SessionPayloadInfo)->())?
+    var onSessionRequest: ((SessionRequest)->())?
 
     internal init(client: WalletConnectClient) {
         self.client = client
         client.delegate = self
     }
     
-    func didSettleSession(_ sessionSettled: SessionType.Settled) {
-        onSessionSettled?(sessionSettled)
+    func didSettle(session: SessionType.Settled) {
+        onSessionSettled?(session)
     }
-    func didSettlePairing(_ settledPairing: PairingType.Settled) {
-        onPairingSettled?(settledPairing)
+    func didSettle(pairing: PairingType.Settled) {
+        onPairingSettled?(pairing)
     }
     func didReceive(sessionProposal: SessionType.Proposal) {
         onSessionProposal?(sessionProposal)
     }
-    func didReceive(sessionPayload: SessionPayloadInfo) {
-        onSessionPayload?(sessionPayload)
+    func didReceive(sessionRequest: SessionRequest) {
+        onSessionRequest?(sessionRequest)
     }
 }

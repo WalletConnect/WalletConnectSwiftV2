@@ -8,6 +8,7 @@ struct JSONRPCError: Error, Codable {
 }
 
 struct JSONRPCRequest<T: Codable&Equatable>: Codable, Equatable {
+    
     let id: Int64
     let jsonrpc: String
     let method: String
@@ -20,8 +21,8 @@ struct JSONRPCRequest<T: Codable&Equatable>: Codable, Equatable {
         case params
     }
     
-    init(method: String, params: T) {
-        self.id = JSONRPCRequest.generateId()
+    init(id: Int64 = JSONRPCRequest.generateId(), method: String, params: T) {
+        self.id = id
         self.jsonrpc = "2.0"
         self.method = method
         self.params = params

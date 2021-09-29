@@ -107,4 +107,5 @@ struct ClientSynchJSONRPC: Codable {
     private static func generateId() -> Int64 {
         return Int64(Date().timeIntervalSince1970 * 1000)*1000 + Int64.random(in: 0..<1000)
     }
+
 }
