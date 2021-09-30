@@ -44,7 +44,10 @@ final class ResponderViewController: UIViewController {
     
     @objc
     private func showTextInput() {
-        print("show text field")
+        let alert = UIAlertController.createInputAlert { [weak self] inputText in
+            self?.pairClient(uri: inputText)
+        }
+        present(alert, animated: true)
     }
     
     private func showSessionProposal() {
@@ -52,6 +55,10 @@ final class ResponderViewController: UIViewController {
         proposalViewController.delegate = self
         proposalViewController.show(SessionInfo.mock())
         present(proposalViewController, animated: true)
+    }
+    
+    private func pairClient(uri: String) {
+        print("connecting to: \(uri)")
     }
 }
 
@@ -86,8 +93,7 @@ extension ResponderViewController: UITableViewDataSource, UITableViewDelegate {
 extension ResponderViewController: ScannerViewControllerDelegate {
     
     func didScan(_ code: String) {
-        print(code)
-        // TODO: Start pairing
+        pairClient(uri: code)
     }
 }
 
@@ -99,5 +105,25 @@ extension ResponderViewController: SessionViewControllerDelegate {
     
     func didRejectSession() {
         print("did reject session")
+    }
+}
+
+extension UIAlertController {
+    
+    static func createInputAlert(confirmHandler: @escaping (String) -> Void) -> UIAlertController {
+        let alert = UIAlertController(title: "Paste URI", message: "Enter a WalletConnect URI to connect.", preferredStyle: .alert)
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+        let confirmAction = UIAlertAction(title: "Connect", style: .default) { _ in
+            if let input = alert.textFields?.first?.text, !input.isEmpty {
+                confirmHandler(input)
+            }
+        }
+        alert.addTextField { textField in
+            textField.placeholder = "wc://a14aefb980188fc35ec9..."
+        }
+        alert.addAction(cancelAction)
+        alert.addAction(confirmAction)
+        alert.preferredAction = confirmAction
+        return alert
     }
 }
