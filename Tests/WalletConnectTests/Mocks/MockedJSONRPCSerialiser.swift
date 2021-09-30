@@ -4,6 +4,10 @@ import Foundation
 @testable import WalletConnect
 
 class MockedJSONRPCSerialiser: JSONRPCSerialising {
+    func deserialise(message: String, symmetricKey: Data) throws -> JSONRPCResponse<String> {
+        fatalError()
+    }
+    
     var codec: Codec
     var deserialised: ClientSynchJSONRPC!
     var serialised: String!

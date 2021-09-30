@@ -4,7 +4,7 @@ import Foundation
 
 class MockedSubscriber: WCSubscribing {
     var subscriptions: [String: String] = [:]
-    var onSubscription: ((WCSubscriptionPayload)->())?
+    var onRequestSubscription: ((WCRequestSubscriptionPayload)->())?
     
     func setSubscription(topic: String) {
         subscriptions[topic] = UUID().uuidString

@@ -1,14 +1,15 @@
 import Foundation
 
-final class PairingEngine: SequenceEngine {
+final class PairingEngine {
     private let wcSubscriber: WCSubscribing
     private let relayer: Relaying
     private let crypto: Crypto
     private var isController: Bool
     let sequences: Sequences<Pairing>
     var onSessionProposal: ((SessionType.Proposal)->())?
-    var onPairingApproved: ((PairingType.Settled)->())?
+    var onPairingApproved: ((PairingType.Settled, String)->())?
     private var metadata: AppMetadata
+    
 
     init(relay: Relaying,
          crypto: Crypto,
@@ -25,7 +26,7 @@ final class PairingEngine: SequenceEngine {
         setUpWCRequestHandling()
     }
     
-    func respond(to proposal: PairingType.Proposal, completion: @escaping (Result<String, Error>) -> Void) {
+    func respond(to proposal: PairingType.Proposal, completion: @escaping (Result<PairingType.Settled, Error>) -> Void) {
         let privateKey = Crypto.X25519.generatePrivateKey()
         let selfPublicKey = privateKey.publicKey.toHexString()
         
@@ -66,7 +67,6 @@ final class PairingEngine: SequenceEngine {
         
         // publish approve on topic A
         let approveParams = PairingType.ApproveParams(
-            topic: proposal.topic,
             relay: proposal.relay,
             responder: PairingType.Participant(publicKey: selfPublicKey),
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
@@ -78,7 +78,7 @@ final class PairingEngine: SequenceEngine {
             case .success:
                 self?.wcSubscriber.removeSubscription(topic: proposal.topic)
                 print("Success on wc_pairingApprove")
-                completion(.success(proposal.topic))
+                completion(.success(settledPairing))
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -93,15 +93,16 @@ final class PairingEngine: SequenceEngine {
         }
         let privateKey = Crypto.X25519.generatePrivateKey()
         let publicKey = privateKey.publicKey.toHexString()
+        let relay = RelayProtocolOptions(protocol: "waku", params: nil)
         crypto.set(privateKey: privateKey)
         let proposer = PairingType.Proposer(publicKey: publicKey, controller: isController)
-        let uri = PairingType.UriParameters(topic: topic, publicKey: publicKey, controller: isController, relay: params.relay).absoluteString()!
+        let uri = PairingType.UriParameters(topic: topic, publicKey: publicKey, controller: isController, relay: relay).absoluteString()!
         let signalParams = PairingType.Signal.Params(uri: uri)
         let signal = PairingType.Signal(params: signalParams)
         let permissions = getDefaultPermissions()
-        let proposal = PairingType.Proposal(topic: topic, relay: params.relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
-        let `self` = PairingType.Participant(publicKey: publicKey, metadata: params.metadata)
-        let pending = PairingType.Pending(status: .proposed, topic: topic, relay: params.relay, self: `self`, proposal: proposal)
+        let proposal = PairingType.Proposal(topic: topic, relay: relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
+        let `self` = PairingType.Participant(publicKey: publicKey, metadata: metadata)
+        let pending = PairingType.Pending(status: .proposed, topic: topic, relay: relay, self: `self`, proposal: proposal)
         sequences.create(topic: topic, sequenceState: .pending(pending))
         wcSubscriber.setSubscription(topic: topic)
         return pending
@@ -131,10 +132,10 @@ final class PairingEngine: SequenceEngine {
     }
     
     private func setUpWCRequestHandling() {
-        wcSubscriber.onSubscription = { [unowned self] subscriptionPayload in
+        wcSubscriber.onRequestSubscription = { [unowned self] subscriptionPayload in
             switch subscriptionPayload.clientSynchJsonRpc.params {
             case .pairingApprove(let approveParams):
-                handlePairingApprove(approveParams)
+                handlePairingApprove(approveParams: approveParams, pendingTopic: subscriptionPayload.topic)
             case .pairingReject(_):
                 fatalError("Not Implemented")
             case .pairingUpdate(_):
@@ -172,12 +173,12 @@ final class PairingEngine: SequenceEngine {
         wcSubscriber.removeSubscription(topic: topic)
     }
     
-    private func handlePairingApprove(_ approveParams: PairingType.ApproveParams) {
-        Logger.debug("Responder Client approved pairing on topic: \(approveParams.topic)")
-        guard let pairing = sequences.get(topic: approveParams.topic),
+    private func handlePairingApprove(approveParams: PairingType.ApproveParams, pendingTopic: String) {
+        Logger.debug("Responder Client approved pairing on topic: \(pendingTopic)")
+        guard let pairing = sequences.get(topic: pendingTopic),
               case let .pending(sequencePending) = pairing.sequenceState,
               let pairingPending = sequencePending as? PairingType.Pending else {
-                  Logger.debug("Could not find pending pairing associated with topic \(approveParams.topic)")
+                  Logger.debug("Could not find pending pairing associated with topic \(pendingTopic)")
                   return
         }
         let selfPublicKey = Data(hex: pairingPending.`self`.publicKey)
@@ -205,7 +206,7 @@ final class PairingEngine: SequenceEngine {
         sequences.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledPairing))
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
-        onPairingApproved?(settledPairing)
+        onPairingApproved?(settledPairing, pendingTopic)
     }
 }
 

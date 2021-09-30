@@ -6,6 +6,7 @@ protocol JSONRPCSerialising {
     var codec: Codec {get}
     func serialise(json: String, agreementKeys: Crypto.X25519.AgreementKeys) throws -> String
     func deserialise(message: String, symmetricKey: Data) throws -> ClientSynchJSONRPC
+    func deserialise(message: String, symmetricKey: Data) throws -> JSONRPCResponse<String>
 }
 
 class JSONRPCSerialiser: JSONRPCSerialising {
@@ -16,12 +17,13 @@ class JSONRPCSerialiser: JSONRPCSerialising {
     }
     
     func deserialise(message: String, symmetricKey: Data) throws -> ClientSynchJSONRPC {
-        let encryptionPayload = try deserialiseIntoPayload(message: message)
-        let decryptedJSONRPC = try codec.decode(payload: encryptionPayload, sharedSecret: symmetricKey)
-        guard let JSONRPCData = decryptedJSONRPC.data(using: .utf8) else {
-            throw DataConversionError.stringToDataFailed
-        }
+        let JSONRPCData = try decrypt(message: message, symmetricKey: symmetricKey)
         return try JSONDecoder().decode(ClientSynchJSONRPC.self, from: JSONRPCData)
+    }
+    
+    func deserialise(message: String, symmetricKey: Data) throws -> JSONRPCResponse<String> {
+        let JSONRPCData = try decrypt(message: message, symmetricKey: symmetricKey)
+        return try JSONDecoder().decode(JSONRPCResponse<String>.self, from: JSONRPCData)
     }
     
     func serialise(json: String, agreementKeys: Crypto.X25519.AgreementKeys) throws -> String {
@@ -31,6 +33,15 @@ class JSONRPCSerialiser: JSONRPCSerialising {
         let mac = payload.mac.toHexString()
         let cipherText = payload.cipherText.toHexString()
         return "\(iv)\(publicKey)\(mac)\(cipherText)"
+    }
+    
+    private func decrypt(message: String, symmetricKey: Data) throws -> Data {
+        let encryptionPayload = try deserialiseIntoPayload(message: message)
+        let decryptedJSONRPC = try codec.decode(payload: encryptionPayload, sharedSecret: symmetricKey)
+        guard let JSONRPCData = decryptedJSONRPC.data(using: .utf8) else {
+            throw DataConversionError.stringToDataFailed
+        }
+        return JSONRPCData
     }
     
     private func deserialiseIntoPayload(message: String) throws -> EncryptionPayload {

@@ -35,6 +35,6 @@ extension PairingType.ApproveParams {
     static func stub() -> PairingType.ApproveParams {
         let options = RelayProtocolOptions(protocol: "", params: nil)
         let participant = PairingType.Participant(publicKey: "")
-        return PairingType.ApproveParams(topic: "", relay: options, responder: participant, expiry: 0, state: nil)
+        return PairingType.ApproveParams(relay: options, responder: participant, expiry: 0, state: nil)
     }
 }

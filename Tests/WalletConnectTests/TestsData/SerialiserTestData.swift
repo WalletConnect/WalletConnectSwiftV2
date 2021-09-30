@@ -15,8 +15,7 @@ enum SerialiserTestData {
                                                                  jsonrpc: "2.0",
                                                                  method: ClientSynchJSONRPC.Method.pairingApprove,
                                                                  params: ClientSynchJSONRPC.Params.pairingApprove(
-                                                                    PairingType.ApproveParams(topic: "fefc3dc39cacbc562ed58f92b296e2d65a6b07ef08992b93db5b3cb86280635a",
-                                                                                         relay: RelayProtocolOptions(protocol: "waku",
+                                                                    PairingType.ApproveParams(relay: RelayProtocolOptions(protocol: "waku",
                                                                                                                      params: nil), responder: PairingType.Participant(publicKey: "be9225978b6287a02d259ee0d9d1bcb683082d8386b7fb14b58ac95b93b2ef43"),
                                                                                          expiry: 1632742217,
                                                                                          state: PairingType.State(metadata: AppMetadata(name: "iOS",

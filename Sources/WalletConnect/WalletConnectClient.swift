@@ -1,39 +1,30 @@
 
 import Foundation
 
-public class WalletConnectClient {
-    
-    let metadata: AppMetadata
+public final class WalletConnectClient {
+    private let metadata: AppMetadata
     public weak var delegate: WalletConnectClientDelegate?
-    let isController: Bool
+    private let isController: Bool
     private let pairingEngine: PairingEngine
     private let sessionEngine: SessionEngine
     private let relay: Relay
     private let crypto = Crypto()
+    private var sessionPermissions: [String: SessionType.Permissions] = [:]
+
     
     // MARK: - Public interface
     public init(options: WalletClientOptions) {
         self.isController = options.isController
         self.metadata = options.metadata
         self.relay = Relay(transport: JSONRPCTransport(url: options.relayURL), crypto: crypto)
-        self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay), isController: options.isController, metadata: options.metadata)
-        self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay), isController: isController, metadata: options.metadata)
-        pairingEngine.onSessionProposal = { [unowned self] proposal in
-            self.delegate?.didReceiveSessionProposal(proposal)
-        }
-        // for proposer to propose session
-        pairingEngine.onPairingApproved = { [unowned self] settledPairing in
-            self.delegate?.didSettlePairing(settledPairing)
-            self.sessionEngine.proposeSession(with: settledPairing)
-        }
-        sessionEngine.onSessionApproved = { [unowned self] settledSession in
-            self.delegate?.didSettleSession(settledSession)
-        }
+        self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay), isController: isController, metadata: metadata)
+        self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay), isController: isController, metadata: metadata)
+        setUpEnginesCallbacks()
         // TODO: Store api key
     }
     
     // for proposer to propose a session to a responder
-    public func connect(params: ConnectParams) -> String? {
+    public func connect(params: ConnectParams) throws -> String? {
         Logger.debug("Connecting Application")
         if let topic = params.pairing?.topic,
            let pairing = pairingEngine.sequences.get(topic: topic) {
@@ -41,13 +32,16 @@ public class WalletConnectClient {
             fatalError("not implemented")
             return nil
         } else {
-            let pending = pairingEngine.propose(params)
-            return pending?.proposal.signal.params.uri
+            guard let pending = pairingEngine.propose(params) else {
+                throw WalletConnectError.pairingProposalGenerationFailed
+            }
+            sessionPermissions[pending.topic] = params.permissions
+            return pending.proposal.signal.params.uri
         }
     }
     
     // for responder to receive a session proposal from a proposer
-    public func pair(uri: String, completion: @escaping (Result<String, Error>) -> Void) throws {
+    public func pair(uri: String) throws {
         print("start pair")
         guard let pairingURI = PairingType.UriParameters(uri) else {
             throw WalletConnectError.PairingParamsUriInitialization
@@ -57,14 +51,14 @@ public class WalletConnectClient {
         if !approved {
             throw WalletConnectError.unauthorizedMatchingController
         }
-        pairingEngine.respond(to: proposal) { result in
+        pairingEngine.respond(to: proposal) { [unowned self] result in
             switch result {
-            case .success:
+            case .success(let settledPairing):
                 print("Pairing Success")
+                self.delegate?.didSettle(pairing: settledPairing)
             case .failure(let error):
                 print("Pairing Failure: \(error)")
             }
-            completion(result)
         }
     }
     
@@ -74,15 +68,25 @@ public class WalletConnectClient {
     }
     
     // for responder to approve a session proposal
-    public func approve(proposal: SessionType.Proposal, completion: @escaping ((Result<SessionType.Settled, Error>) -> Void)) {
+    public func approve(proposal: SessionType.Proposal) {
         sessionEngine.approve(proposal: proposal) { [unowned self] result in
             switch result {
             case .success(let settledSession):
-                self.delegate?.didSettleSession(settledSession)
+                self.delegate?.didSettle(session: settledSession)
             case .failure(let error):
                 print(error)
             }
         }
+    }
+    
+    // for proposer to request JSON-RPC
+    public func request(params: SessionType.PayloadRequestParams, completion: @escaping (Result<JSONRPCResponse<String>, Error>) -> ()) {
+        sessionEngine.request(params: params, completion: completion)
+    }
+    
+    // for responder to respond JSON-RPC
+    public func respond(topic: String, response: JSONRPCResponse<String>) {
+        sessionEngine.respond(topic: topic, response: response)
     }
     
     // for responder to reject a session proposal
@@ -99,22 +103,59 @@ public class WalletConnectClient {
     }
     
     //MARK: - Private
+    
+    private func setUpEnginesCallbacks() {
+        pairingEngine.onSessionProposal = { [unowned self] proposal in
+            self.delegate?.didReceive(sessionProposal: proposal)
+        }
+        pairingEngine.onPairingApproved = { [unowned self] settledPairing, pendingTopic in
+            self.delegate?.didSettle(pairing: settledPairing)
+            guard let permissions = sessionPermissions[pendingTopic] else {
+                Logger.debug("Cound not find permissions for pending topic: \(pendingTopic)")
+                return
+            }
+            sessionPermissions[pendingTopic] = nil
+            self.sessionEngine.proposeSession(settledPairing: settledPairing, permissions: permissions)
+        }
+        sessionEngine.onSessionApproved = { [unowned self] settledSession in
+            self.delegate?.didSettle(session: settledSession)
+        }
+        sessionEngine.onSessionRejected = { [unowned self] pendingTopic, reason in
+            self.delegate?.didReject(sessionPendingTopic: pendingTopic, reason: reason)
+        }
+        sessionEngine.onSessionPayloadRequest = { [unowned self] sessionRequest in
+            self.delegate?.didReceive(sessionRequest: sessionRequest)
+        }
+    }
 }
 
 public protocol WalletConnectClientDelegate: AnyObject {
-    func didReceiveSessionProposal(_ sessionProposal: SessionType.Proposal)
-    func didSettleSession(_ sessionSettled: SessionType.Settled)
-    func didSettlePairing(_ settledPairing: PairingType.Settled)
+    func didReceive(sessionProposal: SessionType.Proposal)
+    func didReceive(sessionRequest: SessionRequest)
+    func didSettle(session: SessionType.Settled)
+    func didSettle(pairing: PairingType.Settled)
+    func didReject(sessionPendingTopic: String, reason: SessionType.Reason)
 }
 
-
 public struct ConnectParams {
-    let permissions: SessionType.BasePermissions
-    let metadata: AppMetadata?
-    let relay: RelayProtocolOptions
+    let permissions: SessionType.Permissions
     let pairing: ParamsPairing?
-    struct ParamsPairing {
+    
+    public init(permissions: SessionType.Permissions, topic: String? = nil) {
+        self.permissions = permissions
+        if let topic = topic {
+            self.pairing = ParamsPairing(topic: topic)
+        } else {
+            self.pairing = nil
+        }
+    }
+    public struct ParamsPairing {
         let topic: String
     }
 }
 
+public struct SessionRequest: Codable, Equatable {
+    let topic: String
+    let request: JSONRPCRequest<String>
+    let chainId: String?
+}

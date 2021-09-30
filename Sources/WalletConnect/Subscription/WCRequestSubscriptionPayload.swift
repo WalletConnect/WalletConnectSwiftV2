@@ -1,7 +1,7 @@
 
 import Foundation
 
-struct WCSubscriptionPayload {
+struct WCRequestSubscriptionPayload {
     let topic: String
     let subscriptionId: String
     let clientSynchJsonRpc: ClientSynchJSONRPC

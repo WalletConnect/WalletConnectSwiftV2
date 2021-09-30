@@ -37,7 +37,7 @@ class WCSubscriberTest: XCTestCase {
         let subscriptionId = "5853ad129f4753ca930c4a4b954d6d83cdcd7a4e63017548c2fddf829a3d8f2b"
         relay.subscribeCompletionId = subscriptionId
         subscriber.setSubscription(topic: topic)
-        subscriber.onSubscription = { _ in
+        subscriber.onRequestSubscription = { _ in
             subscriptionExpectation.fulfill()
         }
         Thread.sleep(forTimeInterval: 0.01)
@@ -51,7 +51,7 @@ class WCSubscriberTest: XCTestCase {
         relay.subscribeCompletionId = subscribeCompletionId
         subscriber.setSubscription(topic: topic)
         var onPayloadCalled = false
-        subscriber.onSubscription = { _ in
+        subscriber.onRequestSubscription = { _ in
             onPayloadCalled = true
         }
         let payloadSubscriptionId = "dfddff4753ca930c4a4b954d6d83cdcd7a4e63017548c2fddf829a3d8f2b"

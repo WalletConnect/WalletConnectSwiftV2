@@ -5,7 +5,7 @@ import XCTest
 
 final class ClientTests: XCTestCase {
     
-    let url = URL(string: "wss://relay.walletconnect.org")!
+    let url = URL(string: "wss://staging.walletconnect.org")!
 
     func makeClientDelegate(isController: Bool) -> ClientDelegate {
         let options = WalletClientOptions(apiKey: "", name: "", isController: isController, metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil), relayURL: url)
@@ -19,17 +19,12 @@ final class ClientTests: XCTestCase {
         let proposer = makeClientDelegate(isController: false)
         let responder = makeClientDelegate(isController: true)
         
-        let permissions = SessionType.BasePermissions(blockchain: SessionType.BlockchainTypes.Permissions(chains: [""]))
-        let relay = RelayProtocolOptions(protocol: "waku", params: nil)
-        let connectParams = ConnectParams(permissions: permissions, metadata: proposer.client.metadata, relay: relay, pairing: nil)
-        let uri = proposer.client.connect(params: connectParams)!
-        _ = try! responder.client.pair(uri: uri) { result in
-            switch result {
-            case .success(_):
-                responderSettlesPairingExpectation.fulfill()
-            case .failure(_):
-                XCTFail()
-            }
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        _ = try! responder.client.pair(uri: uri)
+        responder.onPairingSettled = { _ in
+            responderSettlesPairingExpectation.fulfill()
         }
         proposer.onPairingSettled = { pairing in
             proposerSettlesPairingExpectation.fulfill()
@@ -43,21 +38,12 @@ final class ClientTests: XCTestCase {
         let proposer = makeClientDelegate(isController: false)
         let responder = makeClientDelegate(isController: true)
         
-        let permissions = SessionType.BasePermissions(blockchain: SessionType.BlockchainTypes.Permissions(chains: [""]))
-        let relay = RelayProtocolOptions(protocol: "waku", params: nil)
-        let connectParams = ConnectParams(permissions: permissions, metadata: proposer.client.metadata, relay: relay, pairing: nil)
-        let uri = proposer.client.connect(params: connectParams)!
-        _ = try! responder.client.pair(uri: uri) { _ in
-        }
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { proposal in
-            responder.client.approve(proposal: proposal) { result in
-                switch result {
-                case .success(_):
-                    break
-                case .failure(_):
-                    XCTFail()
-                }
-            }
+            responder.client.approve(proposal: proposal)
         }
         responder.onSessionSettled = { _ in
             responderSettlesSessionExpectation.fulfill()
@@ -67,6 +53,62 @@ final class ClientTests: XCTestCase {
         }
         waitForExpectations(timeout: 3.0, handler: nil)
     }
+    
+    func testProposerRequestExchangesSessionPayload() {
+        let requestExpectation = expectation(description: "Responder receives request")
+        let responseExpectation = expectation(description: "Proposer receives response")
+
+        let proposer = makeClientDelegate(isController: false)
+        let responder = makeClientDelegate(isController: true)
+        let method = "eth_signTypedData"
+        let params = "params"
+        let response = "response"
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: [method]))
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        _ = try! responder.client.pair(uri: uri)
+        responder.onSessionProposal = { proposal in
+            responder.client.approve(proposal: proposal)
+        }
+        proposer.onSessionSettled = { settledSession in
+            let requestParams = SessionType.PayloadRequestParams(topic: settledSession.topic, method: method, params: params, chainId: nil)
+            proposer.client.request(params: requestParams) { result in
+                switch result {
+                case .success(let jsonRpcResponse):
+                    XCTAssertEqual(jsonRpcResponse.result, response)
+                    responseExpectation.fulfill()
+                case .failure(_):
+                    XCTFail()
+                }
+            }
+        }
+        responder.onSessionRequest = { sessionRequest in
+            XCTAssertEqual(sessionRequest.request.method, method)
+            XCTAssertEqual(sessionRequest.request.params, params)
+            let jsonrpcResponse = JSONRPCResponse<String>(id: sessionRequest.request.id, result: response)
+            responder.client.respond(topic: sessionRequest.topic, response: jsonrpcResponse)
+            requestExpectation.fulfill()
+        }
+        waitForExpectations(timeout: 3.0, handler: nil)
+    }
+    
+    func testResponderRejectsSession() {
+        let sessionRejectExpectation = expectation(description: "Responded is notified on session rejection")
+        let proposer = makeClientDelegate(isController: false)
+        let responder = makeClientDelegate(isController: true)
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        _ = try! responder.client.pair(uri: uri)
+        responder.onSessionProposal = { proposal in
+            responder.client.reject(proposal: proposal, reason: SessionType.Reason(code: WalletConnectError.sessionNotApproved.code, message: WalletConnectError.sessionNotApproved.description))
+        }
+        proposer.onSessionRejected = { _, reason in
+            XCTAssertEqual(reason.code, WalletConnectError.sessionNotApproved.code)
+            sessionRejectExpectation.fulfill()
+        }
+        waitForExpectations(timeout: 2.0, handler: nil)
+    }
 }
 
 class ClientDelegate: WalletConnectClientDelegate {
@@ -74,21 +116,27 @@ class ClientDelegate: WalletConnectClientDelegate {
     var onSessionSettled: ((SessionType.Settled)->())?
     var onPairingSettled: ((PairingType.Settled)->())?
     var onSessionProposal: ((SessionType.Proposal)->())?
+    var onSessionRequest: ((SessionRequest)->())?
+    var onSessionRejected: ((String, SessionType.Reason)->())?
 
     internal init(client: WalletConnectClient) {
         self.client = client
         client.delegate = self
     }
-
-    func didReceiveSessionProposal(_ sessionProposal: SessionType.Proposal) {
+    
+    func didReject(sessionPendingTopic: String, reason: SessionType.Reason) {
+        onSessionRejected?(sessionPendingTopic, reason)
+    }
+    func didSettle(session: SessionType.Settled) {
+        onSessionSettled?(session)
+    }
+    func didSettle(pairing: PairingType.Settled) {
+        onPairingSettled?(pairing)
+    }
+    func didReceive(sessionProposal: SessionType.Proposal) {
         onSessionProposal?(sessionProposal)
     }
-    
-    func didSettleSession(_ sessionSettled: SessionType.Settled) {
-        onSessionSettled?(sessionSettled)
-    }
-    
-    func didSettlePairing(_ settledPairing: PairingType.Settled) {
-        onPairingSettled?(settledPairing)
+    func didReceive(sessionRequest: SessionRequest) {
+        onSessionRequest?(sessionRequest)
     }
 }

@@ -3,7 +3,8 @@ import Foundation
 import Combine
 
 protocol Relaying {
-    var clientSynchJsonRpcPublisher: AnyPublisher<WCSubscriptionPayload, Never> {get}
+    var wcResponsePublisher: AnyPublisher<JSONRPCResponse<String>, Never> {get}
+    var clientSynchJsonRpcPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
     /// - returns: request id
     func publish(topic: String, payload: Encodable, completion: @escaping ((Result<Void, Error>)->())) throws -> Int64
     /// - returns: request id
@@ -31,10 +32,15 @@ class Relay: Relaying {
         requestAcknowledgePublisherSubject.eraseToAnyPublisher()
     }
     private let requestAcknowledgePublisherSubject = PassthroughSubject<JSONRPCResponse<Bool>, Never>()
-    var clientSynchJsonRpcPublisher: AnyPublisher<WCSubscriptionPayload, Never> {
+    var clientSynchJsonRpcPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {
         clientSynchJsonRpcPublisherSubject.eraseToAnyPublisher()
     }
-    private let clientSynchJsonRpcPublisherSubject = PassthroughSubject<WCSubscriptionPayload, Never>()
+    private let clientSynchJsonRpcPublisherSubject = PassthroughSubject<WCRequestSubscriptionPayload, Never>()
+    
+    var wcResponsePublisher: AnyPublisher<JSONRPCResponse<String>, Never> {
+        wcResponsePublisherSubject.eraseToAnyPublisher()
+    }
+    private let wcResponsePublisherSubject = PassthroughSubject<JSONRPCResponse<String>, Never>()
     
     private var payloadCancellable: AnyCancellable?
     
@@ -60,7 +66,6 @@ class Relay: Relaying {
             message = try jsonRpcSerialiser.serialise(json: messageJson, agreementKeys: agreementKeys)
         } else {
             message = messageJson.toHexEncodedString(uppercase: false)
-
         }
         let params = RelayJSONRPC.PublishParams(topic: topic, message: message, ttl: defaultTtl)
         let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.rawValue, params: params)
@@ -157,6 +162,16 @@ class Relay: Relaying {
     private func manageSubscriptionRequest(_ request: JSONRPCRequest<RelayJSONRPC.SubscriptionParams>) {
         let topic = request.params.data.topic
         let message = request.params.data.message
+        if let deserialisedJsonRpcRequest = deserialiseWCRequest(topic: topic, message: message) {
+            let payload = WCRequestSubscriptionPayload(topic: topic, subscriptionId: request.params.id, clientSynchJsonRpc: deserialisedJsonRpcRequest)
+            clientSynchJsonRpcPublisherSubject.send(payload)
+        } else if let deserialisedJsonRpcResponse = deserialiseWCResponse(topic: topic, message: message) {
+            wcResponsePublisherSubject.send(deserialisedJsonRpcResponse)
+        }
+        acknowledgeSubscription(requestId: request.id)
+    }
+    
+    private func deserialiseWCRequest(topic: String, message: String) -> ClientSynchJSONRPC? {
         do {
             let deserialisedJsonRpcRequest: ClientSynchJSONRPC
             if let agreementKeys = crypto.getAgreementKeys(for: topic) {
@@ -165,12 +180,18 @@ class Relay: Relaying {
                 let jsonData = Data(hex: message)
                 deserialisedJsonRpcRequest = try JSONDecoder().decode(ClientSynchJSONRPC.self, from: jsonData)
             }
-            let payload = WCSubscriptionPayload(topic: topic, subscriptionId: request.params.id, clientSynchJsonRpc: deserialisedJsonRpcRequest)
-            clientSynchJsonRpcPublisherSubject.send(payload)
-            acknowledgeSubscription(requestId: request.id)
+            return deserialisedJsonRpcRequest
         } catch {
             Logger.error(error)
+            return nil
         }
+    }
+    
+    private func deserialiseWCResponse(topic: String, message: String) -> JSONRPCResponse<String>? {
+        guard let agreementKeys = crypto.getAgreementKeys(for: topic) else {
+            return nil
+        }
+        return try? jsonRpcSerialiser.deserialise(message: message, symmetricKey: agreementKeys.sharedSecret)
     }
     
     private func acknowledgeSubscription(requestId: Int64) {

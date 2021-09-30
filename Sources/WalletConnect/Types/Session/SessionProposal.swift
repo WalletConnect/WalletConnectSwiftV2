@@ -7,7 +7,7 @@ extension SessionType {
         let relay: RelayProtocolOptions
         let proposer: Proposer
         let signal: Signal
-        let permissions: ProposedPermissions
+        let permissions: Permissions
         let ttl: Int
     }
     
@@ -17,24 +17,32 @@ extension SessionType {
         let metadata: AppMetadata
     }
     
-    struct ProposedPermissions: Codable, Equatable {
+    public struct Permissions: Codable, Equatable {
         let blockchain: Blockchain
         let jsonrpc: JSONRPC
-        let notifications: Notifications
+        let notifications: Notifications?
+        let controller: Controller?
+        
+        internal init(blockchain: SessionType.Blockchain, jsonrpc: SessionType.JSONRPC, notifications: SessionType.Notifications? = nil, controller: Controller? = nil) {
+            self.blockchain = blockchain
+            self.jsonrpc = jsonrpc
+            self.notifications = notifications
+            self.controller = controller
+        }
+        
+        public init(blockchain: SessionType.Blockchain, jsonrpc: SessionType.JSONRPC) {
+            self.blockchain = blockchain
+            self.jsonrpc = jsonrpc
+            self.notifications = nil
+            self.controller = nil
+        }
     }
     
-    struct Permissions: Codable, Equatable {
-        let blockchain: Blockchain
-        let jsonrpc: JSONRPC
-        let notifications: Notifications
-        let controller: Controller
-    }
-    
-    struct Blockchain: Codable, Equatable {
+    public struct Blockchain: Codable, Equatable {
         let chains: [String]
     }
     
-    struct JSONRPC: Codable, Equatable {
+    public struct JSONRPC: Codable, Equatable {
         let methods: [String]
     }
     
