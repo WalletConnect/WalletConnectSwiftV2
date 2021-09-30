@@ -72,8 +72,14 @@ final class ClientTests: XCTestCase {
         }
         proposer.onSessionSettled = { settledSession in
             let requestParams = SessionType.PayloadRequestParams(topic: settledSession.topic, method: method, params: params, chainId: nil)
-            proposer.client.request(params: requestParams) { _ in
-                responseExpectation.fulfill()
+            proposer.client.request(params: requestParams) { result in
+                switch result {
+                case .success(let jsonRpcResponse):
+                    XCTAssertEqual(jsonRpcResponse.result, response)
+                    responseExpectation.fulfill()
+                case .failure(_):
+                    XCTFail()
+                }
             }
         }
         responder.onSessionRequest = { sessionRequest in
