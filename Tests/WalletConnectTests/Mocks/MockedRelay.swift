@@ -4,8 +4,8 @@ import Combine
 @testable import WalletConnect
 
 class MockedRelay: Relaying {
-    private let clientSynchJsonRpcPublisherSubject = PassthroughSubject<WCSubscriptionPayload, Never>()
-    var clientSynchJsonRpcPublisher: AnyPublisher<WCSubscriptionPayload, Never> {
+    private let clientSynchJsonRpcPublisherSubject = PassthroughSubject<WCRequestSubscriptionPayload, Never>()
+    var clientSynchJsonRpcPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {
         clientSynchJsonRpcPublisherSubject.eraseToAnyPublisher()
     }
     var subscribeCompletionId: String = ""
@@ -30,7 +30,7 @@ class MockedRelay: Relaying {
     }
     
     func sendSubscriptionPayloadOn(topic: String, subscriptionId: String) {
-        let payload = WCSubscriptionPayload(topic: topic,
+        let payload = WCRequestSubscriptionPayload(topic: topic,
                                             subscriptionId: subscriptionId,
                                             clientSynchJsonRpc: SerialiserTestData.pairingApproveJSONRPCRequest)
         clientSynchJsonRpcPublisherSubject.send(payload)

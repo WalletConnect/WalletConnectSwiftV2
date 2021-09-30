@@ -132,7 +132,7 @@ final class PairingEngine {
     }
     
     private func setUpWCRequestHandling() {
-        wcSubscriber.onSubscription = { [unowned self] subscriptionPayload in
+        wcSubscriber.onRequestSubscription = { [unowned self] subscriptionPayload in
             switch subscriptionPayload.clientSynchJsonRpc.params {
             case .pairingApprove(let approveParams):
                 handlePairingApprove(approveParams: approveParams, pendingTopic: subscriptionPayload.topic)

@@ -14,8 +14,8 @@ final class SessionEngine {
     private var isController: Bool
     private var metadata: AppMetadata
     var onSessionApproved: ((SessionType.Settled)->())?
-    var onSessionRequest: ((SessionRequest)->())?
-    var onSessionResponse: ((JSONRPCResponse<String>)->())?
+    var onSessionPayloadRequest: ((SessionRequest)->())?
+    var onSessionPayloadResponse: ((JSONRPCResponse<String>)->())?
     var onSessionRejected: ((String, SessionType.Reason)->())?
 
     init(relay: Relaying,
@@ -136,8 +136,7 @@ final class SessionEngine {
             }
         }
     }
-    
-    func request(params: SessionType.RequestParams) {
+    func request(params: SessionType.PayloadRequestParams) {
         guard let _ = sequences.get(topic: params.topic) else {
             Logger.debug("Could not find session for topic \(params.topic)")
             return
@@ -145,7 +144,9 @@ final class SessionEngine {
         let request = SessionType.PayloadParams.Request(method: params.method, params: params.params)
         let sessionPayloadParams = SessionType.PayloadParams(request: request, chainId: params.chainId)
         let sessionPayloadRequest = ClientSynchJSONRPC(method: .sessionPayload, params: .sessionPayload(sessionPayloadParams))
-        _ = try? relayer.publish(topic: params.topic, payload: sessionPayloadRequest) { [unowned self] result in
+        
+        
+        _ = try? relayer.publish(topic: params.topic, payload: sessionPayloadRequest) { result in
             switch result {
             case .success:
                 Logger.debug("Sent Session Payload")
@@ -160,10 +161,10 @@ final class SessionEngine {
             Logger.debug("Could not find session for topic \(topic)")
             return
         }
-        _ = try? relayer.publish(topic: topic, payload: response) { [unowned self] result in
+        _ = try? relayer.publish(topic: topic, payload: response) {  result in
             switch result {
             case .success:
-                Logger.debug("Sent Session Payload")
+                Logger.debug("Sent Session Payload Response")
             case .failure(let error):
                 Logger.debug("Could not send session payload, error: \(error)")
             }
@@ -194,7 +195,7 @@ final class SessionEngine {
     }
     
     private func setUpWCRequestHandling() {
-        wcSubscriber.onSubscription = { [unowned self] subscriptionPayload in
+        wcSubscriber.onRequestSubscription = { [unowned self] subscriptionPayload in
             switch subscriptionPayload.clientSynchJsonRpc.params {
             case .sessionApprove(let approveParams):
                 self.handleSessionApprove(approveParams)
@@ -228,7 +229,7 @@ final class SessionEngine {
     private func handleSessionPayload(_ sessionRequest: SessionRequest) {
         do {
             try validatePayload(sessionRequest)
-            onSessionRequest?(sessionRequest)
+            onSessionPayloadRequest?(sessionRequest)
         } catch {
             Logger.error(error)
         }

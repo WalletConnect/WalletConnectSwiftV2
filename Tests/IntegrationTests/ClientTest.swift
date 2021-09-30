@@ -56,6 +56,8 @@ final class ClientTests: XCTestCase {
     
     func testProposerRequestExchangesSessionPayload() {
         let requestExpectation = expectation(description: "Responder receives request")
+        let responseExpectation = expectation(description: "Proposer receives response")
+
         let proposer = makeClientDelegate(isController: false)
         let responder = makeClientDelegate(isController: true)
         let method = "eth_signTypedData"
@@ -69,15 +71,18 @@ final class ClientTests: XCTestCase {
             responder.client.approve(proposal: proposal)
         }
         proposer.onSessionSettled = { settledSession in
-            let requestParams = SessionType.RequestParams(topic: settledSession.topic, method: method, params: params, chainId: nil)
+            let requestParams = SessionType.PayloadRequestParams(topic: settledSession.topic, method: method, params: params, chainId: nil)
             proposer.client.request(params: requestParams)
         }
         responder.onSessionRequest = { sessionRequest in
             XCTAssertEqual(sessionRequest.request.method, method)
             XCTAssertEqual(sessionRequest.request.params, params)
-            XCTFail("fix response")
-//            responder.client.respond(topic: sessionRequest.topic, response: JSONRPCResponse<String>(response))
+            let jsonrpcResponse = JSONRPCResponse<String>(id: sessionRequest.request.id, result: response)
+            responder.client.respond(topic: sessionRequest.topic, response: jsonrpcResponse)
             requestExpectation.fulfill()
+        }
+        proposer.onSessionPayloadResponse = { response in
+            responseExpectation.fulfill()
         }
         waitForExpectations(timeout: 3.0, handler: nil)
     }
@@ -108,6 +113,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     var onSessionProposal: ((SessionType.Proposal)->())?
     var onSessionRequest: ((SessionRequest)->())?
     var onSessionRejected: ((String, SessionType.Reason)->())?
+    var onSessionPayloadResponse: ((JSONRPCResponse<String>)->())?
 
     internal init(client: WalletConnectClient) {
         self.client = client
@@ -128,5 +134,8 @@ class ClientDelegate: WalletConnectClientDelegate {
     }
     func didReceive(sessionRequest: SessionRequest) {
         onSessionRequest?(sessionRequest)
+    }
+    func didReceive(sessionPayloadResponse: JSONRPCResponse<String>) {
+        onSessionPayloadResponse?(sessionPayloadResponse)
     }
 }

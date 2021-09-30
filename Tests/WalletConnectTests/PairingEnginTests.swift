@@ -27,11 +27,11 @@ class PairingEngineTests: XCTestCase {
         let topic = "1234"
         let proposalExpectation = expectation(description: "on session proposal is called after pairing payload")
         engine.sequences.create(topic: topic, sequenceState: sequencePendingState)
-        let subscriptionPayload = WCSubscriptionPayload(topic: topic, subscriptionId: "", clientSynchJsonRpc: sessionProposal)
+        let subscriptionPayload = WCRequestSubscriptionPayload(topic: topic, subscriptionId: "", clientSynchJsonRpc: sessionProposal)
         engine.onSessionProposal = { (_) in
             proposalExpectation.fulfill()
         }
-        subscriber.onSubscription?(subscriptionPayload)
+        subscriber.onRequestSubscription?(subscriptionPayload)
         waitForExpectations(timeout: 0.001, handler: nil)
     }
 }
