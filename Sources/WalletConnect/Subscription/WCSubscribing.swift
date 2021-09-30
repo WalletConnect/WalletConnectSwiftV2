@@ -13,7 +13,6 @@ class WCSubscriber: WCSubscribing {
     private var relay: Relaying
     var subscriptions: [String: String] = [:]
     var onRequestSubscription: ((WCRequestSubscriptionPayload)->())?
-    var onResponseSubscription:((WCResponseSubscriptionPayload)->())?
     private let concurrentQueue = DispatchQueue(label: "wc subscriber queue: \(UUID().uuidString)",
                                                 attributes: .concurrent)
     private var publishers = [AnyCancellable]()
