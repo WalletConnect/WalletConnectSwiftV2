@@ -80,8 +80,8 @@ public final class WalletConnectClient {
     }
     
     // for proposer to request JSON-RPC
-    public func request(params: SessionType.PayloadRequestParams) {
-        sessionEngine.request(params: params)
+    public func request(params: SessionType.PayloadRequestParams, completion: @escaping (Result<JSONRPCResponse<String>, Error>) -> ()) {
+        sessionEngine.request(params: params, completion: completion)
     }
     
     // for responder to respond JSON-RPC
@@ -126,16 +126,12 @@ public final class WalletConnectClient {
         sessionEngine.onSessionPayloadRequest = { [unowned self] sessionRequest in
             self.delegate?.didReceive(sessionRequest: sessionRequest)
         }
-        sessionEngine.onSessionPayloadResponse = { [unowned self] response in
-            self.delegate?.didReceive(sessionPayloadResponse: response)
-        }
     }
 }
 
 public protocol WalletConnectClientDelegate: AnyObject {
     func didReceive(sessionProposal: SessionType.Proposal)
     func didReceive(sessionRequest: SessionRequest)
-    func didReceive(sessionPayloadResponse: JSONRPCResponse<String>)
     func didSettle(session: SessionType.Settled)
     func didSettle(pairing: PairingType.Settled)
     func didReject(sessionPendingTopic: String, reason: SessionType.Reason)

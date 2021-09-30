@@ -3,8 +3,8 @@ import Foundation
 import Combine
 
 protocol Relaying {
+    var wcResponsePublisher: AnyPublisher<JSONRPCResponse<String>, Never> {get}
     var clientSynchJsonRpcPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
-    var clientSynchJsonRpcResponsePublisher: AnyPublisher<WCResponseSubscriptionPayload, Never> {get}
     /// - returns: request id
     func publish(topic: String, payload: Encodable, completion: @escaping ((Result<Void, Error>)->())) throws -> Int64
     /// - returns: request id
@@ -37,10 +37,10 @@ class Relay: Relaying {
     }
     private let clientSynchJsonRpcPublisherSubject = PassthroughSubject<WCRequestSubscriptionPayload, Never>()
     
-    var clientSynchJsonRpcResponsePublisher: AnyPublisher<WCResponseSubscriptionPayload, Never> {
-        clientSynchJsonRpcResponsePublisherSubject.eraseToAnyPublisher()
+    var wcResponsePublisher: AnyPublisher<JSONRPCResponse<String>, Never> {
+        wcResponsePublisherSubject.eraseToAnyPublisher()
     }
-    private let clientSynchJsonRpcResponsePublisherSubject = PassthroughSubject<WCResponseSubscriptionPayload, Never>()
+    private let wcResponsePublisherSubject = PassthroughSubject<JSONRPCResponse<String>, Never>()
     
     private var payloadCancellable: AnyCancellable?
     
@@ -166,8 +166,7 @@ class Relay: Relaying {
             let payload = WCRequestSubscriptionPayload(topic: topic, subscriptionId: request.params.id, clientSynchJsonRpc: deserialisedJsonRpcRequest)
             clientSynchJsonRpcPublisherSubject.send(payload)
         } else if let deserialisedJsonRpcResponse = deserialiseWCResponse(topic: topic, message: message) {
-            let payload = WCResponseSubscriptionPayload(topic: topic, subscriptionId: request.params.id, response: deserialisedJsonRpcResponse)
-            clientSynchJsonRpcResponsePublisherSubject.send(payload)
+            wcResponsePublisherSubject.send(deserialisedJsonRpcResponse)
         }
         acknowledgeSubscription(requestId: request.id)
     }

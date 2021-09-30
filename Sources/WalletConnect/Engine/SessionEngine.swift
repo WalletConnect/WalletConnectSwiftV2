@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 enum SessionEngineError: Error {
     case unauthorizedTargetChain
@@ -15,7 +16,6 @@ final class SessionEngine {
     private var metadata: AppMetadata
     var onSessionApproved: ((SessionType.Settled)->())?
     var onSessionPayloadRequest: ((SessionRequest)->())?
-    var onSessionPayloadResponse: ((JSONRPCResponse<String>)->())?
     var onSessionRejected: ((String, SessionType.Reason)->())?
 
     init(relay: Relaying,
@@ -136,7 +136,8 @@ final class SessionEngine {
             }
         }
     }
-    func request(params: SessionType.PayloadRequestParams) {
+    
+    func request(params: SessionType.PayloadRequestParams, completion: @escaping ((Result<JSONRPCResponse<String>, Error>)->())) {
         guard let _ = sequences.get(topic: params.topic) else {
             Logger.debug("Could not find session for topic \(params.topic)")
             return
@@ -144,14 +145,20 @@ final class SessionEngine {
         let request = SessionType.PayloadParams.Request(method: params.method, params: params.params)
         let sessionPayloadParams = SessionType.PayloadParams(request: request, chainId: params.chainId)
         let sessionPayloadRequest = ClientSynchJSONRPC(method: .sessionPayload, params: .sessionPayload(sessionPayloadParams))
-        
-        
+        var cancellable: AnyCancellable!
+        cancellable = relayer.wcResponsePublisher
+            .filter {$0.id == sessionPayloadRequest.id}
+            .sink { (wcPayloadResponse) in
+                cancellable.cancel()
+                completion(.success((wcPayloadResponse)))
+            }
         _ = try? relayer.publish(topic: params.topic, payload: sessionPayloadRequest) { result in
             switch result {
             case .success:
                 Logger.debug("Sent Session Payload")
             case .failure(let error):
                 Logger.debug("Could not send session payload, error: \(error)")
+                cancellable.cancel()
             }
         }
     }
@@ -208,9 +215,7 @@ final class SessionEngine {
             case .sessionDelete(_):
                 fatalError("Not implemented")
             case .sessionPayload(let sessionPayloadParams):
-                let jsonRpcRequest = JSONRPCRequest<String>(method: sessionPayloadParams.request.method, params: sessionPayloadParams.request.params)
-                let sessionRequest = SessionRequest(topic: subscriptionPayload.topic, request: jsonRpcRequest, chainId: sessionPayloadParams.chainId)
-                self.handleSessionPayload(sessionRequest)
+                self.handleSessionPayload(payloadParams: sessionPayloadParams, topic: subscriptionPayload.topic, requestId: subscriptionPayload.clientSynchJsonRpc.id)
             default:
                 fatalError("unexpected method type")
             }
@@ -226,7 +231,9 @@ final class SessionEngine {
         onSessionRejected?(topic, rejectParams.reason)
     }
     
-    private func handleSessionPayload(_ sessionRequest: SessionRequest) {
+    private func handleSessionPayload(payloadParams: SessionType.PayloadParams, topic: String, requestId: Int64) {
+        let jsonRpcRequest = JSONRPCRequest<String>(id: requestId, method: payloadParams.request.method, params: payloadParams.request.params)
+        let sessionRequest = SessionRequest(topic: topic, request: jsonRpcRequest, chainId: payloadParams.chainId)
         do {
             try validatePayload(sessionRequest)
             onSessionPayloadRequest?(sessionRequest)

@@ -4,7 +4,6 @@ import Combine
 
 protocol WCSubscribing: AnyObject {
     var onRequestSubscription: ((WCRequestSubscriptionPayload)->())? {get set}
-    var onResponseSubscription:((WCResponseSubscriptionPayload)->())? {get set}
     func setSubscription(topic: String)
     func getSubscription(topic: String) -> String?
     func removeSubscription(topic: String)
@@ -18,6 +17,7 @@ class WCSubscriber: WCSubscribing {
     private let concurrentQueue = DispatchQueue(label: "wc subscriber queue: \(UUID().uuidString)",
                                                 attributes: .concurrent)
     private var publishers = [AnyCancellable]()
+
     init(relay: Relaying) {
         self.relay = relay
         setSubscribingForPayloads()
