@@ -27,12 +27,8 @@ final class ResponderViewController: UIViewController {
         super.viewDidLoad()
         navigationItem.title = "Wallet"
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "qrcode.viewfinder"),
-            style: .plain,
-            target: self,
-            action: #selector(showScanner)
-        )
+        responderView.scanButton.addTarget(self, action: #selector(showScanner), for: .touchUpInside)
+        responderView.pasteButton.addTarget(self, action: #selector(showTextInput), for: .touchUpInside)
         
         responderView.tableView.dataSource = self
         responderView.tableView.delegate = self
@@ -44,6 +40,11 @@ final class ResponderViewController: UIViewController {
         let scannerViewController = ScannerViewController()
         scannerViewController.delegate = self
         present(scannerViewController, animated: true)
+    }
+    
+    @objc
+    private func showTextInput() {
+        print("show text field")
     }
     
     private func showSessionProposal() {
