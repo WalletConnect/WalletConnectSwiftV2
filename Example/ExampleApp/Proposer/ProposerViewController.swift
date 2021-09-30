@@ -43,7 +43,7 @@ final class ProposerViewController: UIViewController {
     }
     
     @objc func copyURI() {
-        // TODO: copy qr code uri to pasteboard
+        UIPasteboard.general.string = currentURI
     }
     
     private func generateQRCode(from string: String) -> UIImage? {
