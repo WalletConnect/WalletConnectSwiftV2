@@ -9,8 +9,8 @@ public struct AppMetadata: Codable, Equatable {
         self.icons = icons
     }
     
-    let name: String?
-    let description: String?
-    let url: String?
-    let icons: [String]?
+    public let name: String?
+    public let description: String?
+    public let url: String?
+    public let icons: [String]?
 }

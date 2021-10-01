@@ -6,14 +6,15 @@ final class ResponderViewController: UIViewController {
     let client: WalletConnectClient = {
         let options = WalletClientOptions(
             apiKey: "",
-            name: "Example",
+            name: "Example Responder",
             isController: true,
-            metadata: AppMetadata(name: "Example App", description: nil, url: nil, icons: nil),
+            metadata: AppMetadata(name: "Example Wallet", description: nil, url: nil, icons: nil),
             relayURL: URL(string: "wss://staging.walletconnect.org")!)
         return WalletConnectClient(options: options)
     }()
     
     var sessionItems: [ActiveSessionItem] = []
+    var currentProposal: SessionType.Proposal?
     
     private let responderView: ResponderView = {
         ResponderView()
@@ -27,16 +28,14 @@ final class ResponderViewController: UIViewController {
         super.viewDidLoad()
         navigationItem.title = "Wallet"
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "qrcode.viewfinder"),
-            style: .plain,
-            target: self,
-            action: #selector(showScanner)
-        )
+        responderView.scanButton.addTarget(self, action: #selector(showScanner), for: .touchUpInside)
+        responderView.pasteButton.addTarget(self, action: #selector(showTextInput), for: .touchUpInside)
         
         responderView.tableView.dataSource = self
         responderView.tableView.delegate = self
         sessionItems = ActiveSessionItem.mockList()
+        
+        client.delegate = self
     }
     
     @objc
@@ -46,11 +45,28 @@ final class ResponderViewController: UIViewController {
         present(scannerViewController, animated: true)
     }
     
-    private func showSessionProposal() {
+    @objc
+    private func showTextInput() {
+        let alert = UIAlertController.createInputAlert { [weak self] inputText in
+            self?.pairClient(uri: inputText)
+        }
+        present(alert, animated: true)
+    }
+    
+    private func showSessionProposal(_ info: SessionInfo) {
         let proposalViewController = SessionViewController()
         proposalViewController.delegate = self
-        proposalViewController.show(SessionInfo.mock())
+        proposalViewController.show(info)
         present(proposalViewController, animated: true)
+    }
+    
+    private func pairClient(uri: String) {
+        print("[RESPONDER] Pairing to: \(uri)")
+        do {
+            try client.pair(uri: uri)
+        } catch {
+            print("[PROPOSER] Pairing connect error: \(error)")
+        }
     }
 }
 
@@ -85,18 +101,88 @@ extension ResponderViewController: UITableViewDataSource, UITableViewDelegate {
 extension ResponderViewController: ScannerViewControllerDelegate {
     
     func didScan(_ code: String) {
-        print(code)
-        // TODO: Start pairing
+        pairClient(uri: code)
     }
 }
 
 extension ResponderViewController: SessionViewControllerDelegate {
     
     func didApproveSession() {
-        print("did approve session")
+        print("[RESPONDER] Approving session...")
+        let proposal = currentProposal!
+        currentProposal = nil
+        client.approve(proposal: proposal)
     }
     
     func didRejectSession() {
         print("did reject session")
+    }
+}
+
+extension ResponderViewController: WalletConnectClientDelegate {
+    
+    func didReceive(sessionProposal: SessionType.Proposal) {
+        print("[RESPONDER] WC: Did receive session proposal")
+        let appMetadata = sessionProposal.proposer.metadata
+        let info = SessionInfo(
+            name: appMetadata.name ?? "",
+            descriptionText: appMetadata.description ?? "",
+            dappURL: appMetadata.url ?? "",
+            iconURL: appMetadata.icons?.first ?? "",
+            chains: sessionProposal.permissions.blockchain.chains,
+            methods: sessionProposal.permissions.jsonrpc.methods)
+        currentProposal = sessionProposal
+        DispatchQueue.main.async { // FIXME: Delegate being called from background thread
+            self.showSessionProposal(info)
+        }
+    }
+    
+    func didReceive(sessionRequest: SessionRequest) {
+        print("[RESPONDER] WC: Did receive session request")
+    }
+    
+    func didSettle(session: SessionType.Settled) {
+        print("[RESPONDER] WC: Did settle session")
+        let settledSessions = client.getSettledSessions()
+        print("Settled sessions: \(settledSessions)")
+        let activeSessions = settledSessions.map { session -> ActiveSessionItem in
+            let app = session.peer.metadata
+            return ActiveSessionItem(
+                dappName: app?.name ?? "",
+                dappURL: app?.url ?? "",
+                iconURL: app?.icons?.first ?? "")
+        }
+        DispatchQueue.main.async { // FIXME: Delegate being called from background thread
+            self.sessionItems = activeSessions
+            self.responderView.tableView.reloadData()
+        }
+    }
+    
+    func didSettle(pairing: PairingType.Settled) {
+        print("[RESPONDER] WC: Did settle pairing")
+    }
+    
+    func didReject(sessionPendingTopic: String, reason: SessionType.Reason) {
+        print("[RESPONDER] WC: Did reject session")
+    }
+}
+
+extension UIAlertController {
+    
+    static func createInputAlert(confirmHandler: @escaping (String) -> Void) -> UIAlertController {
+        let alert = UIAlertController(title: "Paste URI", message: "Enter a WalletConnect URI to connect.", preferredStyle: .alert)
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+        let confirmAction = UIAlertAction(title: "Connect", style: .default) { _ in
+            if let input = alert.textFields?.first?.text, !input.isEmpty {
+                confirmHandler(input)
+            }
+        }
+        alert.addTextField { textField in
+            textField.placeholder = "wc://a14aefb980188fc35ec9..."
+        }
+        alert.addAction(cancelAction)
+        alert.addAction(confirmAction)
+        alert.preferredAction = confirmAction
+        return alert
     }
 }

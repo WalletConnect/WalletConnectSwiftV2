@@ -27,7 +27,7 @@
 /* Begin PBXFileReference section */
 		7603D74C2703429A00DD27A2 /* ProposerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProposerView.swift; sourceTree = "<group>"; };
 		761C649926FB7ABB004239D1 /* ProposerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProposerViewController.swift; sourceTree = "<group>"; };
-		761C649B26FB7B7F004239D1 /* ResponderViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResponderViewController.swift; sourceTree = "<group>"; };
+		761C649B26FB7B7F004239D1 /* ResponderViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResponderViewController.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		761C649D26FB7FD7004239D1 /* SessionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionViewController.swift; sourceTree = "<group>"; };
 		761C64A226FB83CE004239D1 /* SessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionView.swift; sourceTree = "<group>"; };
 		761C64A526FCB0AA004239D1 /* SessionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionInfo.swift; sourceTree = "<group>"; };

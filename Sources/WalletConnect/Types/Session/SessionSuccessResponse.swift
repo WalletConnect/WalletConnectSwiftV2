@@ -7,8 +7,8 @@ extension SessionType {
         let accounts: [String]
     }
     
-    struct Participant: Codable, Equatable {
+    public struct Participant: Codable, Equatable {
         let publicKey: String
-        let metadata: AppMetadata?
+        public let metadata: AppMetadata?
     }
 }
