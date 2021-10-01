@@ -34,6 +34,7 @@ final class SessionEngine {
     
     func approve(proposal: SessionType.Proposal, completion: @escaping (Result<SessionType.Settled, Error>) -> Void) {
         Logger.debug("Approve session")
+        print(proposal)
         let privateKey = Crypto.X25519.generatePrivateKey()
         let selfPublicKey = privateKey.publicKey.toHexString()
         
@@ -70,7 +71,7 @@ final class SessionEngine {
             expiry: expiry,
             state: sessionState)
         let approvalPayload = ClientSynchJSONRPC(method: .sessionApprove, params: .sessionApprove(approveParams))
-        
+        print(try! approvalPayload.json())
         _ = try? relayer.publish(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
             switch result {
             case .success:
@@ -81,6 +82,7 @@ final class SessionEngine {
                 print("Success on wc_sessionApprove, published on topic: \(proposal.topic), settled topic: \(settledTopic)")
                 completion(.success(settledSession))
             case .failure(let error):
+                Logger.error(error)
                 completion(.failure(error))
             }
         }
