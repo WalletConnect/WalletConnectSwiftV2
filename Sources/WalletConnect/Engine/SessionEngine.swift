@@ -50,25 +50,25 @@ final class SessionEngine {
             peerPublicKey: Data(hex: proposal.proposer.publicKey),
             privateKey: privateKey)
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
-        
+        let sessionState: SessionType.State = SessionType.State(accounts: ["eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb"])// FIXME: State
+        let expiry = Int(Date().timeIntervalSince1970) + proposal.ttl
         let settledSession = SessionType.Settled(
             topic: settledTopic,
             relay: proposal.relay,
             sharedKey: agreementKeys.sharedSecret.toHexString(),
-            self: SessionType.Participant(publicKey: selfPublicKey, metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil)),
+            self: SessionType.Participant(publicKey: selfPublicKey, metadata: metadata),
             peer: SessionType.Participant(publicKey: proposal.proposer.publicKey, metadata: proposal.proposer.metadata),
             permissions: pendingSession.proposal.permissions,
-            expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
-            state: SessionType.State(accounts: [])) // FIXME: State
+            expiry: expiry,
+            state: sessionState)
         
         let approveParams = SessionType.ApproveParams(
-            topic: proposal.topic,
             relay: proposal.relay,
             responder: SessionType.Participant(
                 publicKey: selfPublicKey,
-                metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil)), // FIXME: Metadata
-            expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
-            state: SessionType.State(accounts: [])) // FIXME: State
+                metadata: metadata),
+            expiry: expiry,
+            state: sessionState)
         let approvalPayload = ClientSynchJSONRPC(method: .sessionApprove, params: .sessionApprove(approveParams))
         
         _ = try? relayer.publish(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
@@ -204,7 +204,7 @@ final class SessionEngine {
         wcSubscriber.onRequestSubscription = { [unowned self] subscriptionPayload in
             switch subscriptionPayload.clientSynchJsonRpc.params {
             case .sessionApprove(let approveParams):
-                self.handleSessionApprove(approveParams)
+                self.handleSessionApprove(approveParams, topic: subscriptionPayload.topic)
             case .sessionReject(let rejectParams):
                 handleSessionReject(rejectParams, topic: subscriptionPayload.topic)
             case .sessionUpdate(_):
@@ -257,9 +257,9 @@ final class SessionEngine {
         }
     }
     
-    private func handleSessionApprove(_ approveParams: SessionType.ApproveParams) {
-        Logger.debug("Responder Client approved session on topic: \(approveParams.topic)")
-        guard let session = sequences.get(topic: approveParams.topic),
+    private func handleSessionApprove(_ approveParams: SessionType.ApproveParams, topic: String) {
+        Logger.debug("Responder Client approved session on topic: \(topic)")
+        guard let session = sequences.get(topic: topic),
               case let .pending(sequencePending) = session.sequenceState,
               let pendingSession = sequencePending as? SessionType.Pending else {
           fatalError()
