@@ -132,6 +132,8 @@ final class SessionEngine {
             switch result {
             case .success:
                 Logger.debug("Sent Session Proposal")
+                let pairingAgreementKeys = crypto.getAgreementKeys(for: settledPairing.topic)!
+                crypto.set(agreementKeys: pairingAgreementKeys, topic: proposal.topic)
             case .failure(let error):
                 Logger.debug("Could not send session proposal error: \(error)")
             }
