@@ -3,23 +3,23 @@ import Foundation
 
 extension SessionType {
     public struct Proposal: Codable, Equatable {
-        let topic: String
+        public let topic: String
         let relay: RelayProtocolOptions
-        let proposer: Proposer
+        public let proposer: Proposer
         let signal: Signal
-        let permissions: Permissions
-        let ttl: Int
+        public let permissions: Permissions
+        public let ttl: Int
     }
     
-    struct Proposer: Codable, Equatable {
+    public struct Proposer: Codable, Equatable {
         let publicKey: String
         let controller: Bool
-        let metadata: AppMetadata
+        public let metadata: AppMetadata
     }
     
     public struct Permissions: Codable, Equatable {
-        let blockchain: Blockchain
-        let jsonrpc: JSONRPC
+        public let blockchain: Blockchain
+        public let jsonrpc: JSONRPC
         let notifications: Notifications?
         let controller: Controller?
         
@@ -39,11 +39,19 @@ extension SessionType {
     }
     
     public struct Blockchain: Codable, Equatable {
-        let chains: [String]
+        public let chains: [String]
+        
+        public init(chains: [String]) {
+            self.chains = chains
+        }
     }
     
     public struct JSONRPC: Codable, Equatable {
-        let methods: [String]
+        public let methods: [String]
+        
+        public init(methods: [String]) {
+            self.methods = methods
+        }
     }
     
     struct Notifications: Codable, Equatable {

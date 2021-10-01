@@ -6,14 +6,15 @@ final class ResponderViewController: UIViewController {
     let client: WalletConnectClient = {
         let options = WalletClientOptions(
             apiKey: "",
-            name: "Example",
+            name: "Example Responder",
             isController: true,
-            metadata: AppMetadata(name: "Example App", description: nil, url: nil, icons: nil),
+            metadata: AppMetadata(name: "Example Wallet", description: nil, url: nil, icons: nil),
             relayURL: URL(string: "wss://staging.walletconnect.org")!)
         return WalletConnectClient(options: options)
     }()
     
     var sessionItems: [ActiveSessionItem] = []
+    var currentProposal: SessionType.Proposal?
     
     private let responderView: ResponderView = {
         ResponderView()
@@ -33,6 +34,8 @@ final class ResponderViewController: UIViewController {
         responderView.tableView.dataSource = self
         responderView.tableView.delegate = self
         sessionItems = ActiveSessionItem.mockList()
+        
+        client.delegate = self
     }
     
     @objc
@@ -50,15 +53,20 @@ final class ResponderViewController: UIViewController {
         present(alert, animated: true)
     }
     
-    private func showSessionProposal() {
+    private func showSessionProposal(_ info: SessionInfo) {
         let proposalViewController = SessionViewController()
         proposalViewController.delegate = self
-        proposalViewController.show(SessionInfo.mock())
+        proposalViewController.show(info)
         present(proposalViewController, animated: true)
     }
     
     private func pairClient(uri: String) {
-        print("connecting to: \(uri)")
+        print("[RESPONDER] Pairing to: \(uri)")
+        do {
+            try client.pair(uri: uri)
+        } catch {
+            print("[PROPOSER] Pairing connect error: \(error)")
+        }
     }
 }
 
@@ -100,11 +108,62 @@ extension ResponderViewController: ScannerViewControllerDelegate {
 extension ResponderViewController: SessionViewControllerDelegate {
     
     func didApproveSession() {
-        print("did approve session")
+        print("[RESPONDER] Approving session...")
+        let proposal = currentProposal!
+        currentProposal = nil
+        client.approve(proposal: proposal)
     }
     
     func didRejectSession() {
         print("did reject session")
+    }
+}
+
+extension ResponderViewController: WalletConnectClientDelegate {
+    
+    func didReceive(sessionProposal: SessionType.Proposal) {
+        print("[RESPONDER] WC: Did receive session proposal")
+        let appMetadata = sessionProposal.proposer.metadata
+        let info = SessionInfo(
+            name: appMetadata.name ?? "",
+            descriptionText: appMetadata.description ?? "",
+            dappURL: appMetadata.url ?? "",
+            iconURL: appMetadata.icons?.first ?? "",
+            chains: sessionProposal.permissions.blockchain.chains,
+            methods: sessionProposal.permissions.jsonrpc.methods)
+        currentProposal = sessionProposal
+        DispatchQueue.main.async { // FIXME: Delegate being called from background thread
+            self.showSessionProposal(info)
+        }
+    }
+    
+    func didReceive(sessionRequest: SessionRequest) {
+        print("[RESPONDER] WC: Did receive session request")
+    }
+    
+    func didSettle(session: SessionType.Settled) {
+        print("[RESPONDER] WC: Did settle session")
+        let settledSessions = client.getSettledSessions()
+        print("Settled sessions: \(settledSessions)")
+        let activeSessions = settledSessions.map { session -> ActiveSessionItem in
+            let app = session.peer.metadata
+            return ActiveSessionItem(
+                dappName: app?.name ?? "",
+                dappURL: app?.url ?? "",
+                iconURL: app?.icons?.first ?? "")
+        }
+        DispatchQueue.main.async { // FIXME: Delegate being called from background thread
+            self.sessionItems = activeSessions
+            self.responderView.tableView.reloadData()
+        }
+    }
+    
+    func didSettle(pairing: PairingType.Settled) {
+        print("[RESPONDER] WC: Did settle pairing")
+    }
+    
+    func didReject(sessionPendingTopic: String, reason: SessionType.Reason) {
+        print("[RESPONDER] WC: Did reject session")
     }
 }
 

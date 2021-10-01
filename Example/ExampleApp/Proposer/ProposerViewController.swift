@@ -1,6 +1,21 @@
 import UIKit
+import WalletConnect
 
 final class ProposerViewController: UIViewController {
+    
+    let client: WalletConnectClient = {
+        let options = WalletClientOptions(
+            apiKey: "",
+            name: "Example Proposer",
+            isController: false,
+            metadata: AppMetadata(
+                name: "Example Dapp",
+                description: "a description",
+                url: "wallet.connect",
+                icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"]),
+            relayURL: URL(string: "wss://staging.walletconnect.org")!)
+        return WalletConnectClient(options: options)
+    }()
     
     private var currentURI: String?
     
@@ -25,12 +40,32 @@ final class ProposerViewController: UIViewController {
         
         proposerView.copyButton.addTarget(self, action: #selector(copyURI), for: .touchUpInside)
         proposerView.copyButton.isHidden = true
+        
+        client.delegate = self
+    }
+    
+    @objc func copyURI() {
+        UIPasteboard.general.string = currentURI
     }
     
     @objc
     private func connect() {
-        // TODO: Propose pairing and get generated URI
-        let uriString = "wc:8097df5f14871126866252c1b7479a14aefb980188fc35ec97d130d24bd887c8@2?controller=false&publicKey=19c5ecc857963976fabb98ed6a3e0a6ab6b0d65c018b6e25fbdcd3a164def868&relay=%7B%22protocol%22%3A%22waku%22%7D"
+        print("[PROPOSER] Connecting to a pairing...")
+        let connectParams = ConnectParams(
+            permissions: SessionType.Permissions(
+                blockchain: SessionType.Blockchain(chains: ["a chain"]),
+                jsonrpc: SessionType.JSONRPC(methods: ["a method"])))
+        
+        do {
+            if let uri = try client.connect(params: connectParams) {
+                showQRCode(uriString: uri)
+            }
+        } catch {
+            print("[PROPOSER] Pairing connect error: \(error)")
+        }
+    }
+    
+    private func showQRCode(uriString: String) {
         currentURI = uriString
         DispatchQueue.global().async { [weak self] in
             if let qrImage = self?.generateQRCode(from: uriString) {
@@ -42,10 +77,6 @@ final class ProposerViewController: UIViewController {
         }
     }
     
-    @objc func copyURI() {
-        UIPasteboard.general.string = currentURI
-    }
-    
     private func generateQRCode(from string: String) -> UIImage? {
         let data = string.data(using: .ascii)
         if let filter = CIFilter(name: "CIQRCodeGenerator") {
@@ -55,5 +86,28 @@ final class ProposerViewController: UIViewController {
             }
         }
         return nil
+    }
+}
+
+extension ProposerViewController: WalletConnectClientDelegate {
+    
+    func didReceive(sessionProposal: SessionType.Proposal) {
+        print("[PROPOSER] WC: Did receive session proposal")
+    }
+    
+    func didReceive(sessionRequest: SessionRequest) {
+        print("[PROPOSER] WC: Did receive session request")
+    }
+    
+    func didSettle(session: SessionType.Settled) {
+        print("[PROPOSER] WC: Did settle session")
+    }
+    
+    func didSettle(pairing: PairingType.Settled) {
+        print("[PROPOSER] WC: Did settle pairing")
+    }
+    
+    func didReject(sessionPendingTopic: String, reason: SessionType.Reason) {
+        print("[PROPOSER] WC: Did reject session")
     }
 }
