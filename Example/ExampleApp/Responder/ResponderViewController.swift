@@ -88,6 +88,9 @@ extension ResponderViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
+            let item = sessionItems[indexPath.row]
+            let deleteParams = SessionType.DeleteParams(topic: item.topic, reason: SessionType.Reason(code: 0, message: "disconnect"))
+            client.disconnect(params: deleteParams)
             sessionItems.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .automatic)
         }
@@ -120,6 +123,9 @@ extension ResponderViewController: SessionViewControllerDelegate {
     
     func didRejectSession() {
         print("did reject session")
+        let proposal = currentProposal!
+        currentProposal = nil
+        client.reject(proposal: proposal, reason: SessionType.Reason(code: 0, message: "reject"))
     }
 }
 
@@ -153,7 +159,8 @@ extension ResponderViewController: WalletConnectClientDelegate {
             return ActiveSessionItem(
                 dappName: app?.name ?? "",
                 dappURL: app?.url ?? "",
-                iconURL: app?.icons?.first ?? "")
+                iconURL: app?.icons?.first ?? "",
+                topic: session.topic)
         }
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread
             self.sessionItems = activeSessions

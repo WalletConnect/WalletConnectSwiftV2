@@ -143,7 +143,8 @@ extension ProposerViewController: WalletConnectClientDelegate {
             return ActiveSessionItem(
                 dappName: app?.name ?? "",
                 dappURL: app?.url ?? "",
-                iconURL: app?.icons?.first ?? "")
+                iconURL: app?.icons?.first ?? "",
+                topic: pairing.topic)
         }
         DispatchQueue.main.async {
             self.activeItems = activePairings
