@@ -163,6 +163,9 @@ final class PairingEngine {
             return
         }
         let sessionProposal = payload.request.params
+        if let pairingAgreementKeys = crypto.getAgreementKeys(for: sessionProposal.signal.params.topic) {
+            crypto.set(agreementKeys: pairingAgreementKeys, topic: sessionProposal.topic)
+        }
         onSessionProposal?(sessionProposal)
     }
     
