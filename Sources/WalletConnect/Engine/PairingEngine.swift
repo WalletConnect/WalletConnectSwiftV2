@@ -200,7 +200,7 @@ final class PairingEngine {
             relay: approveParams.relay,
             sharedKey: agreementKeys.sharedSecret.toHexString(),
             self: PairingType.Participant(publicKey: selfPublicKey.toHexString()),
-            peer: PairingType.Participant(publicKey: approveParams.responder.publicKey),
+            peer: PairingType.Participant(publicKey: approveParams.responder.publicKey, metadata: approveParams.responder.metadata),
             permissions: PairingType.Permissions(
                 jsonrpc: proposal.permissions.jsonrpc,
                 controller: controller),

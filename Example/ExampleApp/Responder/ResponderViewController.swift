@@ -8,7 +8,11 @@ final class ResponderViewController: UIViewController {
             apiKey: "",
             name: "Example Responder",
             isController: true,
-            metadata: AppMetadata(name: "Example Wallet", description: nil, url: nil, icons: nil),
+            metadata: AppMetadata(
+                name: "Example Wallet",
+                description: "wallet description",
+                url: "example.wallet",
+                icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"]),
             relayURL: URL(string: "wss://staging.walletconnect.org")!)
         return WalletConnectClient(options: options)
     }()
@@ -144,7 +148,6 @@ extension ResponderViewController: WalletConnectClientDelegate {
     func didSettle(session: SessionType.Settled) {
         print("[RESPONDER] WC: Did settle session")
         let settledSessions = client.getSettledSessions()
-        print("Settled sessions: \(settledSessions)")
         let activeSessions = settledSessions.map { session -> ActiveSessionItem in
             let app = session.peer.metadata
             return ActiveSessionItem(
