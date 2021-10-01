@@ -123,8 +123,7 @@ final class SessionEngine {
         let pending = SessionType.Pending(status: .proposed, topic: pendingSessionTopic, relay: settledPairing.relay, self: selfParticipant, proposal: proposal)
         sequences.create(topic: pendingSessionTopic, sequenceState: .pending(pending))
         wcSubscriber.setSubscription(topic: pendingSessionTopic)
-        let jsonRpcRequest = JSONRPCRequest<SessionType.ProposeParams>(method: ClientSynchJSONRPC.Method.sessionPropose.rawValue, params: proposal)
-        let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: jsonRpcRequest)
+        let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: proposal)
         let pairingPayloadParams = PairingType.PayloadParams(request: request)
         let pairingPayloadRequest = ClientSynchJSONRPC(method: .pairingPayload, params: .pairingPayload(pairingPayloadParams))
         _ = try? relayer.publish(topic: settledPairing.topic, payload: pairingPayloadRequest) { [unowned self] result in
