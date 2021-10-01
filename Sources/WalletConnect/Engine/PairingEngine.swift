@@ -44,13 +44,13 @@ final class PairingEngine {
             peerPublicKey: Data(hex: proposal.proposer.publicKey),
             privateKey: privateKey)
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
-        
+        let selfParticipant = PairingType.Participant(publicKey: selfPublicKey, metadata: metadata)
         let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : selfPublicKey
         let settledPairing = PairingType.Settled(
             topic: settledTopic,
             relay: proposal.relay,
             sharedKey: agreementKeys.sharedSecret.toHexString(),
-            self: PairingType.Participant(publicKey: selfPublicKey),
+            self: selfParticipant,
             peer: PairingType.Participant(publicKey: proposal.proposer.publicKey),
             permissions: PairingType.Permissions(
                 jsonrpc: proposal.permissions.jsonrpc,
@@ -68,7 +68,7 @@ final class PairingEngine {
         // publish approve on topic A
         let approveParams = PairingType.ApproveParams(
             relay: proposal.relay,
-            responder: PairingType.Participant(publicKey: selfPublicKey),
+            responder: selfParticipant,
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
             state: nil) // FIXME: State
         let approvalPayload = ClientSynchJSONRPC(method: .pairingApprove, params: .pairingApprove(approveParams))
@@ -153,6 +153,7 @@ final class PairingEngine {
     }
     
     private func handlePairingPayload(_ payload: PairingType.PayloadParams, for topic: String) {
+        Logger.debug("Will handle pairing payload")
         guard let _ = sequences.get(topic: topic) else {
             Logger.error("Pairing for the topic: \(topic) does not exist")
             return
@@ -161,7 +162,10 @@ final class PairingEngine {
             Logger.error("Forbidden WCPairingPayload method")
             return
         }
-        let sessionProposal = payload.request.params.params
+        let sessionProposal = payload.request.params
+        if let pairingAgreementKeys = crypto.getAgreementKeys(for: sessionProposal.signal.params.topic) {
+            crypto.set(agreementKeys: pairingAgreementKeys, topic: sessionProposal.topic)
+        }
         onSessionProposal?(sessionProposal)
     }
     

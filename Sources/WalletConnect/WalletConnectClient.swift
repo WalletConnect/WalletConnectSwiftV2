@@ -10,7 +10,6 @@ public final class WalletConnectClient {
     private let relay: Relay
     private let crypto = Crypto()
     private var sessionPermissions: [String: SessionType.Permissions] = [:]
-
     
     // MARK: - Public interface
     public init(options: WalletClientOptions) {
