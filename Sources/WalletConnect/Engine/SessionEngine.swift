@@ -34,7 +34,6 @@ final class SessionEngine {
     
     func approve(proposal: SessionType.Proposal, completion: @escaping (Result<SessionType.Settled, Error>) -> Void) {
         Logger.debug("Approve session")
-        print(proposal)
         let privateKey = Crypto.X25519.generatePrivateKey()
         let selfPublicKey = privateKey.publicKey.toHexString()
         
@@ -71,7 +70,6 @@ final class SessionEngine {
             expiry: expiry,
             state: sessionState)
         let approvalPayload = ClientSynchJSONRPC(method: .sessionApprove, params: .sessionApprove(approveParams))
-        print(try! approvalPayload.json())
         _ = try? relayer.publish(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
             switch result {
             case .success:
@@ -79,7 +77,7 @@ final class SessionEngine {
                 self?.crypto.set(privateKey: privateKey)
                 self?.sequences.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledSession))
                 self?.wcSubscriber.setSubscription(topic: settledTopic)
-                print("Success on wc_sessionApprove, published on topic: \(proposal.topic), settled topic: \(settledTopic)")
+                Logger.debug("Success on wc_sessionApprove, published on topic: \(proposal.topic), settled topic: \(settledTopic)")
                 completion(.success(settledSession))
             case .failure(let error):
                 Logger.error(error)
@@ -92,7 +90,7 @@ final class SessionEngine {
         let rejectParams = SessionType.RejectParams(reason: reason)
         let rejectPayload = ClientSynchJSONRPC(method: .sessionReject, params: .sessionReject(rejectParams))
         _ = try? relayer.publish(topic: proposal.topic, payload: rejectPayload) { result in
-            print("Reject result: \(result)")
+            Logger.debug("Reject result: \(result)")
         }
     }
     
@@ -102,7 +100,7 @@ final class SessionEngine {
         wcSubscriber.removeSubscription(topic: params.topic)
         do {
             _ = try relayer.publish(topic: params.topic, payload: params) { result in
-                print("Session Delete result: \(result)")
+                Logger.debug("Session Delete result: \(result)")
             }
         }  catch {
             Logger.error(error)
@@ -195,7 +193,7 @@ final class SessionEngine {
         if result == errSecSuccess {
             return keyData.toHexString()
         } else {
-            print("Problem generating random bytes")
+            Logger.debug("Problem generating random bytes")
             return nil
         }
     }
