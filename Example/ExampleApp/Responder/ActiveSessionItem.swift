@@ -2,6 +2,7 @@ struct ActiveSessionItem {
     let dappName: String
     let dappURL: String
     let iconURL: String
+    let topic: String
 }
 
 extension ActiveSessionItem {
@@ -14,7 +15,8 @@ extension ActiveSessionItem {
         ActiveSessionItem(
             dappName: "PancakeSwap",
             dappURL: "pancakeswap.finance",
-            iconURL: "https://pancakeswap.finance/logo.png"
+            iconURL: "https://pancakeswap.finance/logo.png",
+            topic: ""
         )
     }
     
@@ -22,7 +24,8 @@ extension ActiveSessionItem {
         ActiveSessionItem(
             dappName: "Uniswap",
             dappURL: "app.uniswap.org",
-            iconURL: "https://s2.coinmarketcap.com/static/img/coins/64x64/7083.png"
+            iconURL: "https://s2.coinmarketcap.com/static/img/coins/64x64/7083.png",
+            topic: ""
         )
     }
     
@@ -30,7 +33,8 @@ extension ActiveSessionItem {
         ActiveSessionItem(
             dappName: "Sushi Swap",
             dappURL: "app.sushi.com",
-            iconURL: "https://s2.coinmarketcap.com/static/img/coins/64x64/6758.png"
+            iconURL: "https://s2.coinmarketcap.com/static/img/coins/64x64/6758.png",
+            topic: ""
         )
     }
 }

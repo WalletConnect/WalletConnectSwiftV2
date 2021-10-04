@@ -17,6 +17,7 @@ final class ProposerViewController: UIViewController {
         return WalletConnectClient(options: options)
     }()
     
+    var activeItems: [ActiveSessionItem] = []
     private var currentURI: String?
     
     private let proposerView: ProposerView = {
@@ -40,6 +41,9 @@ final class ProposerViewController: UIViewController {
         
         proposerView.copyButton.addTarget(self, action: #selector(copyURI), for: .touchUpInside)
         proposerView.copyButton.isHidden = true
+        
+        proposerView.tableView.dataSource = self
+        proposerView.tableView.delegate = self
         
         client.delegate = self
     }
@@ -89,6 +93,34 @@ final class ProposerViewController: UIViewController {
     }
 }
 
+extension ProposerViewController: UITableViewDataSource, UITableViewDelegate {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        activeItems.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "sessionCell", for: indexPath) as! ActiveSessionCell
+        cell.item = activeItems[indexPath.row]
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            activeItems.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .automatic)
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
+        "Disconnect"
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        print("did select row \(indexPath)")
+    }
+}
+
 extension ProposerViewController: WalletConnectClientDelegate {
     
     func didReceive(sessionProposal: SessionType.Proposal) {
@@ -105,6 +137,21 @@ extension ProposerViewController: WalletConnectClientDelegate {
     
     func didSettle(pairing: PairingType.Settled) {
         print("[PROPOSER] WC: Did settle pairing")
+        let settledPairings = client.getSettledPairings()
+        let activePairings = settledPairings.map { pairing -> ActiveSessionItem in
+            let app = pairing.peer.metadata
+            return ActiveSessionItem(
+                dappName: app?.name ?? "",
+                dappURL: app?.url ?? "",
+                iconURL: app?.icons?.first ?? "",
+                topic: pairing.topic)
+        }
+        DispatchQueue.main.async {
+            self.activeItems = activePairings
+            self.proposerView.tableView.reloadData()
+            self.proposerView.qrCodeView.image = nil
+            self.proposerView.copyButton.isHidden = true
+        }
     }
     
     func didReject(sessionPendingTopic: String, reason: SessionType.Reason) {

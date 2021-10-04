@@ -8,9 +8,9 @@ extension PairingType {
         let metadata: AppMetadata
     }
     
-    struct Participant:Codable, Equatable {
+    public struct Participant:Codable, Equatable {
         let publicKey: String
-        let metadata: AppMetadata?
+        public let metadata: AppMetadata?
         
         init(publicKey: String, metadata: AppMetadata? = nil) {
             self.publicKey = publicKey

@@ -3,11 +3,11 @@ import Foundation
 
 extension PairingType {
     public struct Settled: Codable, SequenceSettled, Equatable {
-        let topic: String
+        public let topic: String
         let relay: RelayProtocolOptions
         let sharedKey: String
         let `self`: Participant
-        let peer: Participant
+        public let peer: Participant
         let permissions: Permissions
         let expiry: Int
         let state: State?

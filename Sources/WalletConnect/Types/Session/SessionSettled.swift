@@ -3,7 +3,7 @@ import Foundation
 
 extension SessionType {
     public struct Settled: Codable, SequenceSettled, Equatable {
-        let topic: String
+        public let topic: String
         let relay: RelayProtocolOptions
         let sharedKey: String
         let `self`: Participant

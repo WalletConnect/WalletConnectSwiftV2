@@ -8,7 +8,11 @@ final class ResponderViewController: UIViewController {
             apiKey: "",
             name: "Example Responder",
             isController: true,
-            metadata: AppMetadata(name: "Example Wallet", description: nil, url: nil, icons: nil),
+            metadata: AppMetadata(
+                name: "Example Wallet",
+                description: "wallet description",
+                url: "example.wallet",
+                icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"]),
             relayURL: URL(string: "wss://staging.walletconnect.org")!)
         return WalletConnectClient(options: options)
     }()
@@ -84,6 +88,9 @@ extension ResponderViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
+            let item = sessionItems[indexPath.row]
+            let deleteParams = SessionType.DeleteParams(topic: item.topic, reason: SessionType.Reason(code: 0, message: "disconnect"))
+            client.disconnect(params: deleteParams)
             sessionItems.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .automatic)
         }
@@ -116,6 +123,9 @@ extension ResponderViewController: SessionViewControllerDelegate {
     
     func didRejectSession() {
         print("did reject session")
+        let proposal = currentProposal!
+        currentProposal = nil
+        client.reject(proposal: proposal, reason: SessionType.Reason(code: 0, message: "reject"))
     }
 }
 
@@ -144,13 +154,13 @@ extension ResponderViewController: WalletConnectClientDelegate {
     func didSettle(session: SessionType.Settled) {
         print("[RESPONDER] WC: Did settle session")
         let settledSessions = client.getSettledSessions()
-        print("Settled sessions: \(settledSessions)")
         let activeSessions = settledSessions.map { session -> ActiveSessionItem in
             let app = session.peer.metadata
             return ActiveSessionItem(
                 dappName: app?.name ?? "",
                 dappURL: app?.url ?? "",
-                iconURL: app?.icons?.first ?? "")
+                iconURL: app?.icons?.first ?? "",
+                topic: session.topic)
         }
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread
             self.sessionItems = activeSessions
