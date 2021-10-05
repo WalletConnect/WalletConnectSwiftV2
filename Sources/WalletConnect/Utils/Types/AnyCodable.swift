@@ -18,7 +18,7 @@ public struct AnyCodable: Decodable, Equatable {
         init?(stringValue: String) { self.stringValue = stringValue }
     }
     
-    init(value: Any) {
+    init(_ value: Any) {
         self.value = value
     }
     
@@ -58,14 +58,14 @@ extension AnyCodable: Encodable {
         if let array = value as? [Any] {
             var container = encoder.unkeyedContainer()
             for value in array {
-                let decodable = AnyCodable(value: value)
+                let decodable = AnyCodable(value)
                 try container.encode(decodable)
             }
         } else if let dictionary = value as? [String: Any] {
             var container = encoder.container(keyedBy: CodingKeys.self)
             for (key, value) in dictionary {
                 let codingKey = CodingKeys(stringValue: key)!
-                let decodable = AnyCodable(value: value)
+                let decodable = AnyCodable(value)
                 try container.encode(decodable, forKey: codingKey)
             }
         } else {

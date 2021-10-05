@@ -143,7 +143,7 @@ final class SessionEngine {
             Logger.debug("Could not find session for topic \(params.topic)")
             return
         }
-        let request = SessionType.PayloadParams.Request(method: params.method, params: AnyCodable(value: params.params))
+        let request = SessionType.PayloadParams.Request(method: params.method, params: AnyCodable(params.params))
         let sessionPayloadParams = SessionType.PayloadParams(request: request, chainId: params.chainId)
         let sessionPayloadRequest = ClientSynchJSONRPC(method: .sessionPayload, params: .sessionPayload(sessionPayloadParams))
         var cancellable: AnyCancellable!
@@ -164,7 +164,7 @@ final class SessionEngine {
         }
     }
     
-    func respond(topic: String, response: JSONRPCResponse<String>) {
+    func respond(topic: String, response: JSONRPCResponse<AnyCodable>) {
         guard let _ = sequences.get(topic: topic) else {
             Logger.debug("Could not find session for topic \(topic)")
             return
