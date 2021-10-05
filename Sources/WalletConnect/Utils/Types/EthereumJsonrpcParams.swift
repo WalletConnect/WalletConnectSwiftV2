@@ -1,6 +1,6 @@
 
 import Foundation
 
-public enum EthereumRequest {
+public enum EthereumJsonrpcParams {
     case ethSendTransaction(EthSendTransaction)
 }

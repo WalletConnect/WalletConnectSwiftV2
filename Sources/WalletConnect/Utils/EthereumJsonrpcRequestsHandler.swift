@@ -1,10 +1,10 @@
 
 import Foundation
 
-public struct EthereumRequestsHandler {
-    public static func handle(sessionRequest: SessionRequest) -> EthereumRequest? {
-        if sessionRequest.request.method == "eth_sendTransaction" {
-            if let ethSendTransactionRequestDictArray = sessionRequest.request.params.value as? [[String: String]],
+public struct EthereumJsonrpcRequestsHandler {
+    public static func handle(request: JSONRPCRequest<AnyCodable>) -> EthereumJsonrpcParams? {
+        if request.method == "eth_sendTransaction" {
+            if let ethSendTransactionRequestDictArray = request.params.value as? [[String: String]],
                let ethSendTransactionRequestDict = ethSendTransactionRequestDictArray.first,
                let from = ethSendTransactionRequestDict["from"],
                let data = ethSendTransactionRequestDict["data"],
