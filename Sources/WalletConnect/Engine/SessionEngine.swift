@@ -50,7 +50,7 @@ final class SessionEngine {
             peerPublicKey: Data(hex: proposal.proposer.publicKey),
             privateKey: privateKey)
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
-        let sessionState: SessionType.State = SessionType.State(accounts: ["eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb"])// FIXME: State
+        let sessionState: SessionType.State = SessionType.State(accounts: ["eip155:42:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb"])// FIXME: State
         let expiry = Int(Date().timeIntervalSince1970) + proposal.ttl
         let settledSession = SessionType.Settled(
             topic: settledTopic,
@@ -143,7 +143,7 @@ final class SessionEngine {
             Logger.debug("Could not find session for topic \(params.topic)")
             return
         }
-        let request = SessionType.PayloadParams.Request(method: params.method, params: params.params)
+        let request = SessionType.PayloadParams.Request(method: params.method, params: AnyCodable(value: params.params))
         let sessionPayloadParams = SessionType.PayloadParams(request: request, chainId: params.chainId)
         let sessionPayloadRequest = ClientSynchJSONRPC(method: .sessionPayload, params: .sessionPayload(sessionPayloadParams))
         var cancellable: AnyCancellable!
@@ -233,7 +233,7 @@ final class SessionEngine {
     }
     
     private func handleSessionPayload(payloadParams: SessionType.PayloadParams, topic: String, requestId: Int64) {
-        let jsonRpcRequest = JSONRPCRequest<String>(id: requestId, method: payloadParams.request.method, params: payloadParams.request.params)
+        let jsonRpcRequest = JSONRPCRequest<AnyCodable>(id: requestId, method: payloadParams.request.method, params: payloadParams.request.params)
         let sessionRequest = SessionRequest(topic: topic, request: jsonRpcRequest, chainId: payloadParams.chainId)
         do {
             try validatePayload(sessionRequest)
