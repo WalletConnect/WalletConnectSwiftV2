@@ -7,12 +7,12 @@ struct JSONRPCError: Error, Codable {
     let message: String
 }
 
-struct JSONRPCRequest<T: Codable&Equatable>: Codable, Equatable {
+public struct JSONRPCRequest<T: Codable&Equatable>: Codable, Equatable {
     
-    let id: Int64
-    let jsonrpc: String
-    let method: String
-    let params: T
+    public let id: Int64
+    public let jsonrpc: String
+    public let method: String
+    public let params: T
     
     enum CodingKeys: CodingKey {
         case id
@@ -34,9 +34,9 @@ struct JSONRPCRequest<T: Codable&Equatable>: Codable, Equatable {
 }
 
 public struct JSONRPCResponse<T: Codable>: Codable {
-    let jsonrpc = "2.0"
-    let id: Int64
-    let result: T
+    public let jsonrpc = "2.0"
+    public let id: Int64
+    public let result: T
 
     enum CodingKeys: String, CodingKey {
         case jsonrpc

@@ -154,7 +154,7 @@ public struct ConnectParams {
 }
 
 public struct SessionRequest: Codable, Equatable {
-    let topic: String
-    let request: JSONRPCRequest<AnyCodable>
-    let chainId: String?
+    public let topic: String
+    public let request: JSONRPCRequest<AnyCodable>
+    public let chainId: String?
 }

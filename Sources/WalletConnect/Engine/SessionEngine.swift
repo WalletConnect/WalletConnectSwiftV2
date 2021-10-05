@@ -50,7 +50,7 @@ final class SessionEngine {
             peerPublicKey: Data(hex: proposal.proposer.publicKey),
             privateKey: privateKey)
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
-        let sessionState: SessionType.State = SessionType.State(accounts: ["eip155:42:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb"])// FIXME: State
+        let sessionState: SessionType.State = SessionType.State(accounts: ["eip155:137:0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"])// FIXME: State
         let expiry = Int(Date().timeIntervalSince1970) + proposal.ttl
         let settledSession = SessionType.Settled(
             topic: settledTopic,
