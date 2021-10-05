@@ -44,7 +44,7 @@ public struct JSONRPCResponse<T: Codable>: Codable {
         case result
     }
 
-    init(id: Int64, result: T) {
+    public init(id: Int64, result: T) {
         self.id = id
         self.result = result
     }

@@ -2,7 +2,7 @@
 import Foundation
 
 public struct EthereumRequestsHandler {
-    public func handle(sessionRequest: SessionRequest) -> EthereumRequest? {
+    public static func handle(sessionRequest: SessionRequest) -> EthereumRequest? {
         if sessionRequest.request.method == "eth_sendTransaction" {
             if let ethSendTransactionRequestDictArray = sessionRequest.request.params.value as? [[String: String]],
                let ethSendTransactionRequestDict = ethSendTransactionRequestDictArray.first,
