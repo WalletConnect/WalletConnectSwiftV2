@@ -1,44 +1,4 @@
-
 import Foundation
-
-//protocol SuperCodableProtocol {
-//    associatedtype Value
-//}
-
-//struct SuperCodable: SuperCodableProtocol {
-//    let value: Value
-//}
-
-
-//public struct AnyCodable2: Codable {
-//
-//    let value: Any
-////    let metatype: Metatype
-//
-//    var encoderBlock: ((Encoder) throws -> Void)?
-//
-//    init<C>(_ codable: C) where C: Codable {
-////        let metatype = type(of: codable)
-//
-////        let data = try? JSONEncoder().encode(codable)
-//        value = codable
-//
-//        encoderBlock = { encoder in
-//            try codable.encode(to: encoder)
-//        }
-//    }
-//
-//    public init(from decoder: Decoder) throws {
-//        fatalError()
-//    }
-//
-//    public func encode(to encoder: Encoder) throws {
-//        try encoderBlock?(encoder)
-//    }
-//
-//
-//}
-
 
 public struct AnyCodable: Decodable, Encodable {
     
@@ -49,11 +9,7 @@ public struct AnyCodable: Decodable, Encodable {
     public init(_ value: Any) {
         self.value = value
     }
-    
-//    public init(enc: Codable) {
-//        self.value = enc
-//    }
-    
+
     public init<C>(_ codable: C) where C: Codable {
         self.value = codable
         customEncoder = { encoder in
@@ -139,18 +95,6 @@ extension AnyCodable {
                 try container.encode(stringVal)
             } else {
                 throw EncodingError.invalidValue(value, EncodingError.Context.init(codingPath: [], debugDescription: "The value is not encodable"))
-                
-//                let jsonData = try JSONSerialization.data(withJSONObject: value, options: [.fragmentsAllowed])
-//                let jsonObj = try JSONSerialization.jsonObject(with: jsonData, options: [.fragmentsAllowed])
-//                if let cast = jsonObj as? [String: Any] {
-//                    var container = encoder.container(keyedBy: CodingKeys.self)
-//                    for (key, value) in cast {
-//                        let codingKey = CodingKeys(stringValue: key)!
-//                        let decodable = AnyCodable(value)
-//                        try container.encode(decodable, forKey: codingKey)
-//                    }
-//                }
-                
             }
         }
     }
