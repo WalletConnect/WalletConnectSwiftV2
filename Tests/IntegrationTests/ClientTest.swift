@@ -121,7 +121,7 @@ final class ClientTests: XCTestCase {
             responder.client.approve(proposal: proposal)
         }
         proposer.onSessionSettled = { settledSession in
-            proposer.client.disconnect(params: SessionType.DeleteParams(topic: settledSession.topic, reason: SessionType.Reason(code: 1605, message: "")))
+            proposer.client.disconnect(topic: settledSession.topic, reason: SessionType.Reason(code: 5900, message: "User disconnected session"))
         }
         responder.onSessionDelete = {
             sessionDeleteExpectation.fulfill()
