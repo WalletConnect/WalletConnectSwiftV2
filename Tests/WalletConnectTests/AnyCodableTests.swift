@@ -1,29 +1,51 @@
 import XCTest
 @testable import WalletConnect
 
-struct CodableStub: Codable, Equatable {
+fileprivate struct SampleStruct: Codable, Equatable {
+    
     let bool: Bool
     let int: Int
     let double: Double
     let string: String
-    let object: Obje
+    let object: SubObject?
     
-    struct Obje: Codable, Equatable {
+    struct SubObject: Codable, Equatable {
         let string: String
     }
     
-    static func stub() -> CodableStub {
-        CodableStub(
+    static func stub() -> SampleStruct {
+        SampleStruct(
             bool: Bool.random(),
             int: Int.random(in: Int.min...Int.max),
             double: Double.random(in: -1337.00...1337.00),
             string: UUID().uuidString,
-            object: Obje(string: UUID().uuidString)
+            object: SubObject(string: UUID().uuidString)
         )
     }
+    
+    static let sampleJSONData = """
+{
+    "bool": true,
+    "int": 1337,
+    "double": 13.37,
+    "string": "verystringwow",
+    "object": {
+        "string": "0xdeadbeef"
+    }
+}
+""".data(using: .utf8)!
+   
+    static let invalidJSONData = """
+{
+    "bool": ****,
+    "int": 1337,
+    "double": 13.37,
+    "string": "verystringwow",
+}
+""".data(using: .utf8)!
 }
 
-class AnyCodableTests: XCTestCase {
+final class AnyCodableTests: XCTestCase {
 
     func testCodingBool() {
         [true, false].forEach { bool in
@@ -31,7 +53,7 @@ class AnyCodableTests: XCTestCase {
                 let anyCodable = AnyCodable(bool)
                 let encoded = try JSONEncoder().encode(anyCodable)
                 let decoded = try JSONDecoder().decode(AnyCodable.self, from: encoded)
-                let codingResult = decoded.get(Bool.self)
+                let codingResult = try decoded.get(Bool.self)
                 XCTAssertEqual(bool, codingResult)
             } catch {
                 XCTFail()
@@ -45,7 +67,7 @@ class AnyCodableTests: XCTestCase {
             let anyCodable = AnyCodable(int)
             let encoded = try JSONEncoder().encode(anyCodable)
             let decoded = try JSONDecoder().decode(AnyCodable.self, from: encoded)
-            let codingResult = decoded.get(Int.self)
+            let codingResult = try decoded.get(Int.self)
             XCTAssertEqual(int, codingResult)
         } catch {
             XCTFail()
@@ -58,7 +80,7 @@ class AnyCodableTests: XCTestCase {
             let anyCodable = AnyCodable(double)
             let encoded = try JSONEncoder().encode(anyCodable)
             let decoded = try JSONDecoder().decode(AnyCodable.self, from: encoded)
-            let codingResult = decoded.get(Double.self)
+            let codingResult = try decoded.get(Double.self)
             XCTAssertEqual(double, codingResult)
         } catch {
             XCTFail()
@@ -71,7 +93,7 @@ class AnyCodableTests: XCTestCase {
             let anyCodable = AnyCodable(string)
             let encoded = try JSONEncoder().encode(anyCodable)
             let decoded = try JSONDecoder().decode(AnyCodable.self, from: encoded)
-            let codingResult = decoded.get(String.self)
+            let codingResult = try decoded.get(String.self)
             XCTAssertEqual(string, codingResult)
         } catch {
             XCTFail()
@@ -84,7 +106,7 @@ class AnyCodableTests: XCTestCase {
             let anyCodable = AnyCodable(array)
             let encoded = try JSONEncoder().encode(anyCodable)
             let decoded = try JSONDecoder().decode(AnyCodable.self, from: encoded)
-            let codingResult = decoded.get([String].self)
+            let codingResult = try decoded.get([String].self)
             XCTAssertEqual(array, codingResult)
         } catch {
             XCTFail()
@@ -93,11 +115,11 @@ class AnyCodableTests: XCTestCase {
     
     func testCodingStruct() {
         do {
-            let object = CodableStub.stub()
+            let object = SampleStruct.stub()
             let value = AnyCodable(object)
             let encoded = try JSONEncoder().encode(value)
             let decoded = try JSONDecoder().decode(AnyCodable.self, from: encoded)
-            let codingResult = decoded.get(CodableStub.self)
+            let codingResult = try decoded.get(SampleStruct.self)
             XCTAssertEqual(object, codingResult)
         } catch {
             XCTFail()
@@ -106,14 +128,31 @@ class AnyCodableTests: XCTestCase {
     
     func testCodingStructArray() {
         do {
-            let objects = (1...10).map { _ in CodableStub.stub() }
+            let objects = (1...10).map { _ in SampleStruct.stub() }
             let value = AnyCodable(objects)
             let encoded = try JSONEncoder().encode(value)
             let decoded = try JSONDecoder().decode(AnyCodable.self, from: encoded)
-            let codingResult = decoded.get([CodableStub].self)
+            let codingResult = try decoded.get([SampleStruct].self)
             XCTAssertEqual(objects, codingResult)
         } catch {
             XCTFail()
+        }
+    }
+    
+    func testDecoding() {
+        do {
+            let data = SampleStruct.sampleJSONData
+            let decoded = try JSONDecoder().decode(AnyCodable.self, from: data)
+            _ = try JSONEncoder().encode(decoded)
+        } catch {
+            XCTFail()
+        }
+    }
+    
+    func testDecodeFail() {
+        let data = SampleStruct.invalidJSONData
+        XCTAssertThrowsError(try JSONDecoder().decode(AnyCodable.self, from: data)) { error in
+            XCTAssert(error is DecodingError)
         }
     }
 }

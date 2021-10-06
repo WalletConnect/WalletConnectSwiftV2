@@ -1,10 +1,10 @@
 import Foundation
 
-public struct AnyCodable: Decodable, Encodable {
+public struct AnyCodable {
     
     public let value: Any
     
-    var customEncoder: ((Encoder) throws -> Void)?
+    private var genericEncoding: ((Encoder) throws -> Void)?
     
     public init(_ value: Any) {
         self.value = value
@@ -12,23 +12,18 @@ public struct AnyCodable: Decodable, Encodable {
 
     public init<C>(_ codable: C) where C: Codable {
         self.value = codable
-        customEncoder = { encoder in
+        genericEncoding = { encoder in
             try codable.encode(to: encoder)
         }
     }
     
-    public func get<T: Codable>(_ type: T.Type) -> T? {
-        if let data = try? JSONSerialization.data(withJSONObject: value, options: [.fragmentsAllowed]) {
-            
-            if let decoded = try? JSONDecoder().decode(type, from: data) {
-                return decoded
-            }
-        }
-        return nil
+    public func get<T: Codable>(_ type: T.Type) throws -> T {
+        let valueData = try JSONSerialization.data(withJSONObject: value, options: [.fragmentsAllowed])
+        return try JSONDecoder().decode(type, from: valueData)
     }
 }
 
-extension AnyCodable {
+extension AnyCodable: Decodable, Encodable {
     
     struct CodingKeys: CodingKey {
         
@@ -45,74 +40,16 @@ extension AnyCodable {
             self.intValue = Int(stringValue)
         }
     }
-}
-
-extension AnyCodable {
-    
-    public func encode(to encoder: Encoder) throws {
-        if let encod = customEncoder {
-            try encod(encoder)
-            return
-        }
-//        throw WalletConnectError.pairingProposalGenerationFailed
-        
-        if let array = value as? [Any] {
-            
-            var container = encoder.unkeyedContainer()
-            
-            for value in array {
-                let decodable = AnyCodable(value)
-                try container.encode(decodable)
-            }
-        }
-        
-        else if let dictionary = value as? [String: Any] {
-            var container = encoder.container(keyedBy: CodingKeys.self)
-            for (key, value) in dictionary {
-                let codingKey = CodingKeys(stringValue: key)!
-                let decodable = AnyCodable(value)
-                try container.encode(decodable, forKey: codingKey)
-            }
-        }
-        
-//        else if let val = value as? Encodable {
-////            var container = encoder.unkeyedContainer()
-////            try container.encode(val)
-//            var container = encoder.container(keyedBy: CodingKeys.self)
-////            try container.encode(val)
-////            try container.encode(val, forKey: CodingKeys(stringValue: "key"))
-//        }
-        
-        else {
-            var container = encoder.singleValueContainer()
-            if let intVal = value as? Int {
-                try container.encode(intVal)
-            } else if let doubleVal = value as? Double {
-                try container.encode(doubleVal)
-            } else if let boolVal = value as? Bool {
-                try container.encode(boolVal)
-            } else if let stringVal = value as? String {
-                try container.encode(stringVal)
-            } else {
-                throw EncodingError.invalidValue(value, EncodingError.Context.init(codingPath: [], debugDescription: "The value is not encodable"))
-            }
-        }
-    }
-}
-
-extension AnyCodable {
     
     public init(from decoder: Decoder) throws {
         
         if let container = try? decoder.container(keyedBy: CodingKeys.self) {
-            
             var result = [String: Any]()
             try container.allKeys.forEach { (key) throws in
                 result[key.stringValue] = try container.decode(AnyCodable.self, forKey: key).value
             }
             value = result
         }
-        
         else if var container = try? decoder.unkeyedContainer() {
             var result = [Any]()
             while !container.isAtEnd {
@@ -120,7 +57,6 @@ extension AnyCodable {
             }
             value = result
         }
-        
         else if let container = try? decoder.singleValueContainer() {
             if let intVal = try? container.decode(Int.self) {
                 value = intVal
@@ -137,9 +73,39 @@ extension AnyCodable {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Could not serialise"))
         }
     }
+    
+    public func encode(to encoder: Encoder) throws {
+        if let encoding = genericEncoding {
+            try encoding(encoder)
+        } else if let array = value as? [Any] {
+            var container = encoder.unkeyedContainer()
+            for value in array {
+                let decodable = AnyCodable(value)
+                try container.encode(decodable)
+            }
+        } else if let dictionary = value as? [String: Any] {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            for (key, value) in dictionary {
+                let codingKey = CodingKeys(stringValue: key)!
+                let decodable = AnyCodable(value)
+                try container.encode(decodable, forKey: codingKey)
+            }
+        } else {
+            var container = encoder.singleValueContainer()
+            if let intVal = value as? Int {
+                try container.encode(intVal)
+            } else if let doubleVal = value as? Double {
+                try container.encode(doubleVal)
+            } else if let boolVal = value as? Bool {
+                try container.encode(boolVal)
+            } else if let stringVal = value as? String {
+                try container.encode(stringVal)
+            } else {
+                throw EncodingError.invalidValue(value, EncodingError.Context.init(codingPath: [], debugDescription: "The value is not encodable"))
+            }
+        }
+    }
 }
-
-
 
 extension AnyCodable: Equatable {
     public static func == (lhs: AnyCodable, rhs: AnyCodable) -> Bool {
