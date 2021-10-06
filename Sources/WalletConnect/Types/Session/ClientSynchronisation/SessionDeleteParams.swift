@@ -3,11 +3,8 @@ import Foundation
 
 extension SessionType {
     public struct DeleteParams: Codable, Equatable {
-        public let topic: String
         public let reason: Reason
-        
-        public init(topic: String, reason: SessionType.Reason) {
-            self.topic = topic
+        public init(reason: SessionType.Reason) {
             self.reason = reason
         }
     }

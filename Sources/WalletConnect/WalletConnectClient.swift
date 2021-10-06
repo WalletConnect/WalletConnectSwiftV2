@@ -62,8 +62,8 @@ public final class WalletConnectClient {
     }
     
     // for either to disconnect a session
-    public func disconnect(params: SessionType.DeleteParams) {
-        sessionEngine.delete(params: params)
+    public func disconnect(topic: String, reason: SessionType.Reason) {
+        sessionEngine.delete(topic: topic, reason: reason)
     }
     
     // for responder to approve a session proposal

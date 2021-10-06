@@ -95,14 +95,14 @@ final class SessionEngine {
         }
     }
     
-    func delete(params: SessionType.DeleteParams) {
-        Logger.debug("Will delete session for reason: message: \(params.reason.message) code: \(params.reason.code)")
-        sequences.delete(topic: params.topic)
-        wcSubscriber.removeSubscription(topic: params.topic)
-        let clientSynchParams = ClientSynchJSONRPC.Params.sessionDelete(params)
+    func delete(topic: String, reason: SessionType.Reason) {
+        Logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
+        sequences.delete(topic: topic)
+        wcSubscriber.removeSubscription(topic: topic)
+        let clientSynchParams = ClientSynchJSONRPC.Params.sessionDelete(SessionType.DeleteParams(reason: reason))
         let request = ClientSynchJSONRPC(method: .sessionDelete, params: clientSynchParams)
         do {
-            _ = try relayer.publish(topic: params.topic, payload: request) { result in
+            _ = try relayer.publish(topic: topic, payload: request) { result in
                 Logger.debug("Session Delete result: \(result)")
             }
         }  catch {
