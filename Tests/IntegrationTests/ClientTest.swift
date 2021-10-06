@@ -111,6 +111,26 @@ final class ClientTests: XCTestCase {
         }
         waitForExpectations(timeout: 2.0, handler: nil)
     }
+    
+    func testDeleteSession() {
+        let sessionDeleteExpectation = expectation(description: "Responder is notified on session deletion")
+        let proposer = makeClientDelegate(isController: false)
+        let responder = makeClientDelegate(isController: true)
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        _ = try! responder.client.pair(uri: uri)
+        responder.onSessionProposal = { proposal in
+            responder.client.approve(proposal: proposal)
+        }
+        proposer.onSessionSettled = { settledSession in
+            proposer.client.disconnect(topic: settledSession.topic, reason: SessionType.Reason(code: 5900, message: "User disconnected session"))
+        }
+        responder.onSessionDelete = {
+            sessionDeleteExpectation.fulfill()
+        }
+        waitForExpectations(timeout: 3.0, handler: nil)
+    }
 }
 
 class ClientDelegate: WalletConnectClientDelegate {
@@ -120,6 +140,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     var onSessionProposal: ((SessionType.Proposal)->())?
     var onSessionRequest: ((SessionRequest)->())?
     var onSessionRejected: ((String, SessionType.Reason)->())?
+    var onSessionDelete: (()->())?
 
     internal init(client: WalletConnectClient) {
         self.client = client
@@ -140,5 +161,8 @@ class ClientDelegate: WalletConnectClientDelegate {
     }
     func didReceive(sessionRequest: SessionRequest) {
         onSessionRequest?(sessionRequest)
+    }
+    func didDelete(sessionTopic: String, reason: SessionType.Reason) {
+        onSessionDelete?()
     }
 }

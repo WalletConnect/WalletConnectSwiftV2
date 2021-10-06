@@ -18,7 +18,7 @@ public struct AnyCodable: Decodable, Equatable {
         init?(stringValue: String) { self.stringValue = stringValue }
     }
     
-    init(_ value: Any) {
+    public init(_ value: Any) {
         self.value = value
     }
     
