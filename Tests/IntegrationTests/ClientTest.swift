@@ -84,8 +84,7 @@ final class ClientTests: XCTestCase {
         }
         responder.onSessionRequest = { sessionRequest in
             XCTAssertEqual(sessionRequest.request.method, method)
-            XCTAssertEqual(sessionRequest.request.params, params)
-            let jsonrpcResponse = JSONRPCResponse<String>(id: sessionRequest.request.id, result: response)
+            let jsonrpcResponse = JSONRPCResponse<AnyCodable>(id: sessionRequest.request.id, result: AnyCodable(response))
             responder.client.respond(topic: sessionRequest.topic, response: jsonrpcResponse)
             requestExpectation.fulfill()
         }

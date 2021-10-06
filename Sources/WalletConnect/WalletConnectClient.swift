@@ -84,7 +84,7 @@ public final class WalletConnectClient {
     }
     
     // for responder to respond JSON-RPC
-    public func respond(topic: String, response: JSONRPCResponse<String>) {
+    public func respond(topic: String, response: JSONRPCResponse<AnyCodable>) {
         sessionEngine.respond(topic: topic, response: response)
     }
     
@@ -154,7 +154,7 @@ public struct ConnectParams {
 }
 
 public struct SessionRequest: Codable, Equatable {
-    let topic: String
-    let request: JSONRPCRequest<String>
-    let chainId: String?
+    public let topic: String
+    public let request: JSONRPCRequest<AnyCodable>
+    public let chainId: String?
 }
