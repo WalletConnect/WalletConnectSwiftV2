@@ -37,18 +37,21 @@ final class ClientTests: XCTestCase {
         let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
         let proposer = makeClientDelegate(isController: false)
         let responder = makeClientDelegate(isController: true)
+        let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
         
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { proposal in
-            responder.client.approve(proposal: proposal)
+            responder.client.approve(proposal: proposal, accounts: [account])
         }
-        responder.onSessionSettled = { _ in
+        responder.onSessionSettled = { sessionSettled in
+            XCTAssertEqual(account, sessionSettled.state.accounts[0])
             responderSettlesSessionExpectation.fulfill()
         }
-        proposer.onSessionSettled = { _ in
+        proposer.onSessionSettled = { sessionSettled in
+            XCTAssertEqual(account, sessionSettled.state.accounts[0])
             proposerSettlesSessionExpectation.fulfill()
         }
         waitForExpectations(timeout: 3.0, handler: nil)
@@ -68,7 +71,7 @@ final class ClientTests: XCTestCase {
         let uri = try! proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { proposal in
-            responder.client.approve(proposal: proposal)
+            responder.client.approve(proposal: proposal, accounts: [])
         }
         proposer.onSessionSettled = { settledSession in
             let requestParams = SessionType.PayloadRequestParams(topic: settledSession.topic, method: method, params: params, chainId: nil)

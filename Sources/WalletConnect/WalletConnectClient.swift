@@ -67,8 +67,8 @@ public final class WalletConnectClient {
     }
     
     // for responder to approve a session proposal
-    public func approve(proposal: SessionType.Proposal) {
-        sessionEngine.approve(proposal: proposal) { [unowned self] result in
+    public func approve(proposal: SessionType.Proposal, accounts: [String]) {
+        sessionEngine.approve(proposal: proposal, accounts: accounts) { [unowned self] result in
             switch result {
             case .success(let settledSession):
                 self.delegate?.didSettle(session: settledSession)
