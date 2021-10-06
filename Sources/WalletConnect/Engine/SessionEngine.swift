@@ -17,6 +17,7 @@ final class SessionEngine {
     var onSessionApproved: ((SessionType.Settled)->())?
     var onSessionPayloadRequest: ((SessionRequest)->())?
     var onSessionRejected: ((String, SessionType.Reason)->())?
+    var onSessionDelete: ((String, SessionType.Reason)->())?
 
     init(relay: Relaying,
          crypto: Crypto,
@@ -98,8 +99,10 @@ final class SessionEngine {
         Logger.debug("Will delete session for reason: message: \(params.reason.message) code: \(params.reason.code)")
         sequences.delete(topic: params.topic)
         wcSubscriber.removeSubscription(topic: params.topic)
+        let clientSynchParams = ClientSynchJSONRPC.Params.sessionDelete(params)
+        let request = ClientSynchJSONRPC(method: .sessionDelete, params: clientSynchParams)
         do {
-            _ = try relayer.publish(topic: params.topic, payload: params) { result in
+            _ = try relayer.publish(topic: params.topic, payload: request) { result in
                 Logger.debug("Session Delete result: \(result)")
             }
         }  catch {
@@ -213,8 +216,8 @@ final class SessionEngine {
                 fatalError("Not implemented")
             case .sessionUpgrade(_):
                 fatalError("Not implemented")
-            case .sessionDelete(_):
-                fatalError("Not implemented")
+            case .sessionDelete(let deleteParams):
+                handleSessionDelete(deleteParams, topic: subscriptionPayload.topic)
             case .sessionPayload(let sessionPayloadParams):
                 self.handleSessionPayload(payloadParams: sessionPayloadParams, topic: subscriptionPayload.topic, requestId: subscriptionPayload.clientSynchJsonRpc.id)
             default:
@@ -223,12 +226,23 @@ final class SessionEngine {
         }
     }
     
-    func handleSessionReject(_ rejectParams: SessionType.RejectParams, topic: String) {
+    private func handleSessionDelete(_ deleteParams: SessionType.DeleteParams, topic: String) {
         guard let _ = sequences.get(topic: topic) else {
             Logger.debug("Could not find session for topic \(topic)")
             return
         }
         sequences.delete(topic: topic)
+        wcSubscriber.removeSubscription(topic: topic)
+        onSessionDelete?(topic, deleteParams.reason)
+    }
+    
+    private func handleSessionReject(_ rejectParams: SessionType.RejectParams, topic: String) {
+        guard let _ = sequences.get(topic: topic) else {
+            Logger.debug("Could not find session for topic \(topic)")
+            return
+        }
+        sequences.delete(topic: topic)
+        wcSubscriber.removeSubscription(topic: topic)
         onSessionRejected?(topic, rejectParams.reason)
     }
     
@@ -242,7 +256,7 @@ final class SessionEngine {
             Logger.error(error)
         }
     }
-    
+
     private func validatePayload(_ sessionRequest: SessionRequest) throws {
         guard let session = sequences.get(topic: sessionRequest.topic),
               case .settled(let sequenceSettled) = session.sequenceState,

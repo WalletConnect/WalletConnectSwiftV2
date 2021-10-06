@@ -125,6 +125,10 @@ public final class WalletConnectClient {
         sessionEngine.onSessionPayloadRequest = { [unowned self] sessionRequest in
             self.delegate?.didReceive(sessionRequest: sessionRequest)
         }
+        sessionEngine.onSessionDelete = { [unowned self] topic, reason in
+            self.delegate?.didDelete(sessionTopic: topic, reason: reason)
+            
+        }
     }
 }
 
@@ -134,6 +138,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     func didSettle(session: SessionType.Settled)
     func didSettle(pairing: PairingType.Settled)
     func didReject(sessionPendingTopic: String, reason: SessionType.Reason)
+    func didDelete(sessionTopic: String, reason: SessionType.Reason)
 }
 
 public struct ConnectParams {
