@@ -32,7 +32,7 @@ final class SessionEngine {
         setUpWCRequestHandling()
     }
     
-    func approve(proposal: SessionType.Proposal, completion: @escaping (Result<SessionType.Settled, Error>) -> Void) {
+    func approve(proposal: SessionType.Proposal, accounts: [String], completion: @escaping (Result<SessionType.Settled, Error>) -> Void) {
         Logger.debug("Approve session")
         let privateKey = Crypto.X25519.generatePrivateKey()
         let selfPublicKey = privateKey.publicKey.toHexString()
@@ -50,7 +50,7 @@ final class SessionEngine {
             peerPublicKey: Data(hex: proposal.proposer.publicKey),
             privateKey: privateKey)
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
-        let sessionState: SessionType.State = SessionType.State(accounts: ["eip155:137:0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"])// FIXME: State
+        let sessionState: SessionType.State = SessionType.State(accounts: accounts)
         let expiry = Int(Date().timeIntervalSince1970) + proposal.ttl
         let settledSession = SessionType.Settled(
             topic: settledTopic,

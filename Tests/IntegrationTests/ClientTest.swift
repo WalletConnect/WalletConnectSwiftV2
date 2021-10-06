@@ -43,7 +43,7 @@ final class ClientTests: XCTestCase {
         let uri = try! proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { proposal in
-            responder.client.approve(proposal: proposal)
+            responder.client.approve(proposal: proposal, accounts: [])
         }
         responder.onSessionSettled = { _ in
             responderSettlesSessionExpectation.fulfill()
@@ -68,7 +68,7 @@ final class ClientTests: XCTestCase {
         let uri = try! proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { proposal in
-            responder.client.approve(proposal: proposal)
+            responder.client.approve(proposal: proposal, accounts: [])
         }
         proposer.onSessionSettled = { settledSession in
             let requestParams = SessionType.PayloadRequestParams(topic: settledSession.topic, method: method, params: params, chainId: nil)
