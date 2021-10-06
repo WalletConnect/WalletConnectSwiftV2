@@ -126,7 +126,7 @@ final class ClientTests: XCTestCase {
         responder.onSessionDelete = {
             sessionDeleteExpectation.fulfill()
         }
-        waitForExpectations(timeout: 30.0, handler: nil)
+        waitForExpectations(timeout: 3.0, handler: nil)
     }
 }
 
