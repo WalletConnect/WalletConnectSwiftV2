@@ -121,7 +121,7 @@ final class ClientTests: XCTestCase {
         let uri = try! proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { proposal in
-            responder.client.approve(proposal: proposal)
+            responder.client.approve(proposal: proposal, accounts: [])
         }
         proposer.onSessionSettled = { settledSession in
             proposer.client.disconnect(topic: settledSession.topic, reason: SessionType.Reason(code: 5900, message: "User disconnected session"))
