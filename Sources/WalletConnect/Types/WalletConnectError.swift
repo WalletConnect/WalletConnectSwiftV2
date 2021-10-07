@@ -29,7 +29,7 @@ enum WalletConnectError: Error, CustomStringConvertible {
     }
     
     //FIX descriptions
-    var description: String {
+    var message: String {
         switch self {
         case .PairingParamsUriInitialization:
             return "PairingParamsUriInitialization"

@@ -49,7 +49,6 @@ final class PairingEngine {
         let settledPairing = PairingType.Settled(
             topic: settledTopic,
             relay: proposal.relay,
-            sharedKey: agreementKeys.sharedSecret.toHexString(),
             self: selfParticipant,
             peer: PairingType.Participant(publicKey: proposal.proposer.publicKey),
             permissions: PairingType.Permissions(
@@ -198,7 +197,6 @@ final class PairingEngine {
         let settledPairing = PairingType.Settled(
             topic: settledTopic,
             relay: approveParams.relay,
-            sharedKey: agreementKeys.sharedSecret.toHexString(),
             self: PairingType.Participant(publicKey: selfPublicKey.toHexString()),
             peer: PairingType.Participant(publicKey: approveParams.responder.publicKey, metadata: approveParams.responder.metadata),
             permissions: PairingType.Permissions(

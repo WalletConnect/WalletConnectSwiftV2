@@ -56,7 +56,6 @@ final class SessionEngine {
         let settledSession = SessionType.Settled(
             topic: settledTopic,
             relay: proposal.relay,
-            sharedKey: agreementKeys.sharedSecret.toHexString(),
             self: SessionType.Participant(publicKey: selfPublicKey, metadata: metadata),
             peer: SessionType.Participant(publicKey: proposal.proposer.publicKey, metadata: proposal.proposer.metadata),
             permissions: pendingSession.proposal.permissions,
@@ -252,9 +251,14 @@ final class SessionEngine {
         do {
             try validatePayload(sessionRequest)
             onSessionPayloadRequest?(sessionRequest)
-        } catch {
+        } catch { let error as WalletConnectError
             Logger.error(error)
         }
+    }
+    
+    private func resond(error: WalletConnectError, requestId: Int64, topic: String) {
+        let errorResponse = JSONRPCError(code: error.code, message: error.message)
+        relayer.publish(topic: topic, payload: errorResponse, completion: <#T##((Result<Void, Error>) -> ())##((Result<Void, Error>) -> ())##(Result<Void, Error>) -> ()#>)
     }
 
     private func validatePayload(_ sessionRequest: SessionRequest) throws {
@@ -295,7 +299,6 @@ final class SessionEngine {
         let settledSession = SessionType.Settled(
             topic: settledTopic,
             relay: approveParams.relay,
-            sharedKey: agreementKeys.sharedSecret.toHexString(),
             self: SessionType.Participant(publicKey: selfPublicKey.toHexString(), metadata: metadata),
             peer: SessionType.Participant(publicKey: approveParams.responder.publicKey, metadata: approveParams.responder.metadata),
             permissions: sessionPermissions,
