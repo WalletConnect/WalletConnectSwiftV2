@@ -251,14 +251,21 @@ final class SessionEngine {
         do {
             try validatePayload(sessionRequest)
             onSessionPayloadRequest?(sessionRequest)
-        } catch { let error as WalletConnectError
+        } catch let error as WalletConnectError {
             Logger.error(error)
-        }
+        } catch {}
     }
     
-    private func resond(error: WalletConnectError, requestId: Int64, topic: String) {
+    private func respond(error: WalletConnectError, requestId: Int64, topic: String) {
         let errorResponse = JSONRPCError(code: error.code, message: error.message)
-        relayer.publish(topic: topic, payload: errorResponse, completion: <#T##((Result<Void, Error>) -> ())##((Result<Void, Error>) -> ())##(Result<Void, Error>) -> ()#>)
+        _ = try? relayer.publish(topic: topic, payload: errorResponse) { result in
+            switch result {
+            case .success():
+                Logger.debug("successfully responded with error: \(error)")
+            case .failure(let error):
+                Logger.error(error)
+            }
+        }
     }
 
     private func validatePayload(_ sessionRequest: SessionRequest) throws {

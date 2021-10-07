@@ -41,4 +41,8 @@ enum WalletConnectError: Error, CustomStringConvertible {
             return "Session not approved"
         }
     }
+    
+    var description: String {
+        return "code: \(code) - message: \(message)"
+    }
 }
