@@ -103,10 +103,10 @@ final class ClientTests: XCTestCase {
         let uri = try! proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { proposal in
-            responder.client.reject(proposal: proposal, reason: SessionType.Reason(code: WalletConnectError.sessionNotApproved.code, message: WalletConnectError.sessionNotApproved.description))
+            responder.client.reject(proposal: proposal, reason: SessionType.Reason(code: WalletConnectError.notApproved.code, message: WalletConnectError.notApproved.description))
         }
         proposer.onSessionRejected = { _, reason in
-            XCTAssertEqual(reason.code, WalletConnectError.sessionNotApproved.code)
+            XCTAssertEqual(reason.code, WalletConnectError.notApproved.code)
             sessionRejectExpectation.fulfill()
         }
         waitForExpectations(timeout: 2.0, handler: nil)

@@ -1,12 +1,6 @@
 import Foundation
 import Combine
 
-enum SessionEngineError: Error {
-    case unauthorizedTargetChain
-    case noSettledSessionForPayload
-    case unauthorizedMethod
-}
-
 final class SessionEngine {
     let sequences: Sequences<Session>
     private let wcSubscriber: WCSubscribing
@@ -272,15 +266,15 @@ final class SessionEngine {
         guard let session = sequences.get(topic: sessionRequest.topic),
               case .settled(let sequenceSettled) = session.sequenceState,
         let settledSession = sequenceSettled as? SessionType.Settled else {
-            throw SessionEngineError.noSettledSessionForPayload
+            throw WalletConnectError.noSequenceForTopic
         }
         if let chainId = sessionRequest.chainId {
             guard settledSession.permissions.blockchain.chains.contains(chainId) else {
-                throw SessionEngineError.unauthorizedTargetChain
+                throw WalletConnectError.unAuthorizedTargetChain
             }
         }
         guard settledSession.permissions.jsonrpc.methods.contains(sessionRequest.request.method) else {
-            throw SessionEngineError.unauthorizedMethod
+            throw WalletConnectError.unAuthorizedJsonRpcMethod
         }
     }
     
