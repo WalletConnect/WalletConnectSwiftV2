@@ -89,8 +89,8 @@ extension ResponderViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let item = sessionItems[indexPath.row]
-            let deleteParams = SessionType.DeleteParams(topic: item.topic, reason: SessionType.Reason(code: 0, message: "disconnect"))
-            client.disconnect(params: deleteParams)
+//            let deleteParams = SessionType.DeleteParams(topic: item.topic, reason: SessionType.Reason(code: 0, message: "disconnect"))
+            client.disconnect(topic: item.topic, reason: SessionType.Reason(code: 0, message: "disconnect"))
             sessionItems.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .automatic)
         }
@@ -118,7 +118,7 @@ extension ResponderViewController: SessionViewControllerDelegate {
         print("[RESPONDER] Approving session...")
         let proposal = currentProposal!
         currentProposal = nil
-        client.approve(proposal: proposal)
+        client.approve(proposal: proposal, accounts: [])
     }
     
     func didRejectSession() {
@@ -130,6 +130,10 @@ extension ResponderViewController: SessionViewControllerDelegate {
 }
 
 extension ResponderViewController: WalletConnectClientDelegate {
+    
+    func didDelete(sessionTopic: String, reason: SessionType.Reason) {
+        
+    }
     
     func didReceive(sessionProposal: SessionType.Proposal) {
         print("[RESPONDER] WC: Did receive session proposal")

@@ -123,6 +123,10 @@ extension ProposerViewController: UITableViewDataSource, UITableViewDelegate {
 
 extension ProposerViewController: WalletConnectClientDelegate {
     
+    func didDelete(sessionTopic: String, reason: SessionType.Reason) {
+        
+    }
+    
     func didReceive(sessionProposal: SessionType.Proposal) {
         print("[PROPOSER] WC: Did receive session proposal")
     }
