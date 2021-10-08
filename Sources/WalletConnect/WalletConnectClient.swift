@@ -5,8 +5,8 @@ public final class WalletConnectClient {
     private let metadata: AppMetadata
     public weak var delegate: WalletConnectClientDelegate?
     private let isController: Bool
-    private let pairingEngine: PairingEngine
-    private let sessionEngine: SessionEngine
+    let pairingEngine: PairingEngine
+    let sessionEngine: SessionEngine
     private let relay: Relay
     private let crypto = Crypto()
     private var sessionPermissions: [String: SessionType.Permissions] = [:]

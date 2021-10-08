@@ -4,20 +4,26 @@ import XCTest
 @testable import WalletConnect
 
 final class ClientTests: XCTestCase {
-    
     let url = URL(string: "wss://staging.walletconnect.org")!
+    var proposer: ClientDelegate!
+    var responder: ClientDelegate!
+    override func setUp() {
+        proposer = Self.makeClientDelegate(isController: false, url: url)
+        responder = Self.makeClientDelegate(isController: true, url: url)
+    }
 
-    func makeClientDelegate(isController: Bool) -> ClientDelegate {
+    static func makeClientDelegate(isController: Bool, url: URL) -> ClientDelegate {
         let options = WalletClientOptions(apiKey: "", name: "", isController: isController, metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil), relayURL: url)
         let client = WalletConnectClient(options: options)
+        client.pairingEngine.sequencesStore = DictionarySequencesStore()
+        client.sessionEngine.sequencesStore = DictionarySequencesStore()
         return ClientDelegate(client: client)
     }
     
     func testNewPairingWithoutSession() {
         let proposerSettlesPairingExpectation = expectation(description: "Proposer settles pairing")
         let responderSettlesPairingExpectation = expectation(description: "Responder settles pairing")
-        let proposer = makeClientDelegate(isController: false)
-        let responder = makeClientDelegate(isController: true)
+
         
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
         let connectParams = ConnectParams(permissions: permissions)
@@ -35,16 +41,14 @@ final class ClientTests: XCTestCase {
     func testNewSession() {
         let proposerSettlesSessionExpectation = expectation(description: "Proposer settles session")
         let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
-        let proposer = makeClientDelegate(isController: false)
-        let responder = makeClientDelegate(isController: true)
         let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
         
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri)
-        responder.onSessionProposal = { proposal in
-            responder.client.approve(proposal: proposal, accounts: [account])
+        responder.onSessionProposal = { [unowned self] proposal in
+            self.responder.client.approve(proposal: proposal, accounts: [account])
         }
         responder.onSessionSettled = { sessionSettled in
             XCTAssertEqual(account, sessionSettled.state.accounts[0])
@@ -60,9 +64,6 @@ final class ClientTests: XCTestCase {
     func testProposerRequestExchangesSessionPayload() {
         let requestExpectation = expectation(description: "Responder receives request")
         let responseExpectation = expectation(description: "Proposer receives response")
-
-        let proposer = makeClientDelegate(isController: false)
-        let responder = makeClientDelegate(isController: true)
         let method = "eth_signTypedData"
         let params = "params"
         let response = "response"
@@ -70,12 +71,12 @@ final class ClientTests: XCTestCase {
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri)
-        responder.onSessionProposal = { proposal in
-            responder.client.approve(proposal: proposal, accounts: [])
+        responder.onSessionProposal = {[unowned self]  proposal in
+            self.responder.client.approve(proposal: proposal, accounts: [])
         }
-        proposer.onSessionSettled = { settledSession in
+        proposer.onSessionSettled = {[unowned self]  settledSession in
             let requestParams = SessionType.PayloadRequestParams(topic: settledSession.topic, method: method, params: params, chainId: nil)
-            proposer.client.request(params: requestParams) { result in
+            self.proposer.client.request(params: requestParams) { result in
                 switch result {
                 case .success(let jsonRpcResponse):
                     XCTAssertEqual(jsonRpcResponse.result, response)
@@ -85,10 +86,10 @@ final class ClientTests: XCTestCase {
                 }
             }
         }
-        responder.onSessionRequest = { sessionRequest in
+        responder.onSessionRequest = {[unowned self]  sessionRequest in
             XCTAssertEqual(sessionRequest.request.method, method)
             let jsonrpcResponse = JSONRPCResponse<AnyCodable>(id: sessionRequest.request.id, result: AnyCodable(response))
-            responder.client.respond(topic: sessionRequest.topic, response: jsonrpcResponse)
+            self.responder.client.respond(topic: sessionRequest.topic, response: jsonrpcResponse)
             requestExpectation.fulfill()
         }
         waitForExpectations(timeout: 3.0, handler: nil)
@@ -96,14 +97,12 @@ final class ClientTests: XCTestCase {
     
     func testResponderRejectsSession() {
         let sessionRejectExpectation = expectation(description: "Responded is notified on session rejection")
-        let proposer = makeClientDelegate(isController: false)
-        let responder = makeClientDelegate(isController: true)
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri)
-        responder.onSessionProposal = { proposal in
-            responder.client.reject(proposal: proposal, reason: SessionType.Reason(code: WalletConnectError.notApproved.code, message: WalletConnectError.notApproved.description))
+        responder.onSessionProposal = {[unowned self] proposal in
+            self.responder.client.reject(proposal: proposal, reason: SessionType.Reason(code: WalletConnectError.notApproved.code, message: WalletConnectError.notApproved.description))
         }
         proposer.onSessionRejected = { _, reason in
             XCTAssertEqual(reason.code, WalletConnectError.notApproved.code)
@@ -114,17 +113,15 @@ final class ClientTests: XCTestCase {
     
     func testDeleteSession() {
         let sessionDeleteExpectation = expectation(description: "Responder is notified on session deletion")
-        let proposer = makeClientDelegate(isController: false)
-        let responder = makeClientDelegate(isController: true)
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri)
-        responder.onSessionProposal = { proposal in
-            responder.client.approve(proposal: proposal, accounts: [])
+        responder.onSessionProposal = {[unowned self]  proposal in
+            self.responder.client.approve(proposal: proposal, accounts: [])
         }
-        proposer.onSessionSettled = { settledSession in
-            proposer.client.disconnect(topic: settledSession.topic, reason: SessionType.Reason(code: 5900, message: "User disconnected session"))
+        proposer.onSessionSettled = {[unowned self]  settledSession in
+            self.proposer.client.disconnect(topic: settledSession.topic, reason: SessionType.Reason(code: 5900, message: "User disconnected session"))
         }
         responder.onSessionDelete = {
             sessionDeleteExpectation.fulfill()
