@@ -4,6 +4,7 @@ import Combine
 
 protocol Relaying {
     var wcResponsePublisher: AnyPublisher<JSONRPCResponse<String>, Never> {get}
+    var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var clientSynchJsonRpcPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
     /// - returns: request id
     func publish(topic: String, payload: Encodable, completion: @escaping ((Result<Void, Error>)->())) throws -> Int64
@@ -14,7 +15,6 @@ protocol Relaying {
 }
 
 class Relay: Relaying {
-    
     private typealias SubscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>
     private typealias SubscriptionResponse = JSONRPCResponse<String>
     private typealias RequestAcknowledgement = JSONRPCResponse<Bool>
@@ -42,6 +42,12 @@ class Relay: Relaying {
     }
     private let wcResponsePublisherSubject = PassthroughSubject<JSONRPCResponse<String>, Never>()
     
+    
+    var transportConnectionPublisher: AnyPublisher<Void, Never> {
+        transportConnectionPublisherSubject.eraseToAnyPublisher()
+    }
+    private let transportConnectionPublisherSubject = PassthroughSubject<Void, Never>()
+    
     private var payloadCancellable: AnyCancellable?
     
     init(jsonRpcSerialiser: JSONRPCSerialising = JSONRPCSerialiser(),
@@ -56,6 +62,9 @@ class Relay: Relaying {
     private func setUpBindings() {
         transport.onMessage = { [weak self] payload in
             self?.handlePayloadMessage(payload)
+        }
+        transport.onConnect = { [unowned self] in
+            self.transportConnectionPublisherSubject.send()
         }
     }
     

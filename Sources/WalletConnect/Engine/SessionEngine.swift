@@ -12,6 +12,7 @@ final class SessionEngine {
     var onSessionPayloadRequest: ((SessionRequest)->())?
     var onSessionRejected: ((String, SessionType.Reason)->())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
+    private var publishers = [AnyCancellable]()
 
     init(relay: Relaying,
          crypto: Crypto,
@@ -315,6 +316,9 @@ final class SessionEngine {
     }
     
     private func restoreSubscriptions() {
-        sequencesStore.getAll().forEach{wcSubscriber.setSubscription(topic: $0.topic)}
+        relayer.transportConnectionPublisher
+            .sink { [unowned self] (_) in
+                sequencesStore.getAll().forEach{self.wcSubscriber.setSubscription(topic: $0.topic)}
+            }.store(in: &publishers)
     }
 }

@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 final class PairingEngine {
     private let wcSubscriber: WCSubscribing
@@ -9,7 +10,8 @@ final class PairingEngine {
     var onSessionProposal: ((SessionType.Proposal)->())?
     var onPairingApproved: ((PairingType.Settled, String)->())?
     private var metadata: AppMetadata
-    
+    private var publishers = [AnyCancellable]()
+
     init(relay: Relaying,
          crypto: Crypto,
          subscriber: WCSubscribing,
@@ -211,9 +213,10 @@ final class PairingEngine {
     }
     
     private func restoreSubscriptions() {
-        relayer.onProviderConnected = { [unowned self] in
-            self.sequencesStore.getAll().forEach{wcSubscriber.setSubscription(topic: $0.topic)}
-        }
+        relayer.transportConnectionPublisher
+            .sink { [unowned self] (_) in
+                sequencesStore.getAll().forEach{self.wcSubscriber.setSubscription(topic: $0.topic)}
+            }.store(in: &publishers)
     }
 }
 

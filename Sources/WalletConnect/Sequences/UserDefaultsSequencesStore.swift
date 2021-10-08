@@ -1,7 +1,7 @@
 
 import Foundation
 
-class UserDefaultsSequencesStore: SequencesStore {
+class UserDefaultsSequencesStore<T>: SequencesStore {
     // The UserDefaults class is thread-safe.
     let emo: String
     init() {
