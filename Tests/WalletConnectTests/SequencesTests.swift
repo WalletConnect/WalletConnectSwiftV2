@@ -7,13 +7,13 @@
 //    var sequences: SequencesStore!
 //
 //    override func setUp() {
-//        sequencesStore = Sequences()
+//        sequencesStore = DictionarySequencesStore()
 //    }
 //
 //    override func tearDown() {
 //        sequencesStore = nil
 //    }
-//    
+//
 //    func testUpdatePendingSequenceToSettled() {
 //        sequencesStore.create(topic: "1234", sequenceState: .pending(pendingSequenceStub))
 //        sequencesStore.update(topic: "1234", newTopic: "5678", sequenceState: .settled(settledSequenceStub))
@@ -21,7 +21,7 @@
 //        XCTAssertNil(sequences.get(topic:"1234"))
 //        XCTAssertEqual(sequences.get(topic: "5678")!.sequenceState, .settled(settledSequenceStub))
 //    }
-//    
+//
 //    func testCreateNewSequence() {
 //        sequences.create(topic: "1234", sequenceState: .pending(pendingSequenceStub))
 //        XCTAssertNotNil(sequences.get(topic: "1234"))
