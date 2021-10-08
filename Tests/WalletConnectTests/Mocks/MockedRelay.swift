@@ -4,6 +4,11 @@ import Combine
 @testable import WalletConnect
 
 class MockedRelay: Relaying {
+    var transportConnectionPublisher: AnyPublisher<Void, Never> {
+        transportConnectionPublisherSubject.eraseToAnyPublisher()
+    }
+    private let transportConnectionPublisherSubject = PassthroughSubject<Void, Never>()
+    
     var wcResponsePublisher: AnyPublisher<JSONRPCResponse<String>, Never> {
         wcResponsePublisherSubject.eraseToAnyPublisher()
     }

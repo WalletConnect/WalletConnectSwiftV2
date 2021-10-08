@@ -6,7 +6,7 @@ final class PairingEngine {
     private let relayer: Relaying
     private let crypto: Crypto
     private var isController: Bool
-    var sequencesStore: SequencesStore
+    var sequencesStore: PairingSequencesStore
     var onSessionProposal: ((SessionType.Proposal)->())?
     var onPairingApproved: ((PairingType.Settled, String)->())?
     private var metadata: AppMetadata
@@ -15,7 +15,7 @@ final class PairingEngine {
     init(relay: Relaying,
          crypto: Crypto,
          subscriber: WCSubscribing,
-         sequencesStore: SequencesStore = UserDefaultsSequencesStore(),
+         sequencesStore: PairingSequencesStore = PairingUserDefaultsStore(),
          isController: Bool,
          metadata: AppMetadata) {
         self.relayer = relay

@@ -2,7 +2,7 @@ import Foundation
 import Combine
 
 final class SessionEngine {
-    var sequencesStore: SequencesStore
+    var sequencesStore: SessionSequencesStore
     private let wcSubscriber: WCSubscribing
     private let relayer: Relaying
     private let crypto: Crypto
@@ -17,7 +17,7 @@ final class SessionEngine {
     init(relay: Relaying,
          crypto: Crypto,
          subscriber: WCSubscribing,
-         sequencesStore: SequencesStore = UserDefaultsSequencesStore(),
+         sequencesStore: SessionSequencesStore = SessionUserDefaultsStore(),
          isController: Bool,
          metadata: AppMetadata) {
         self.relayer = relay

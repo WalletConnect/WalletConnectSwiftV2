@@ -15,8 +15,8 @@ final class ClientTests: XCTestCase {
     static func makeClientDelegate(isController: Bool, url: URL) -> ClientDelegate {
         let options = WalletClientOptions(apiKey: "", name: "", isController: isController, metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil), relayURL: url)
         let client = WalletConnectClient(options: options)
-        client.pairingEngine.sequencesStore = DictionarySequencesStore()
-        client.sessionEngine.sequencesStore = DictionarySequencesStore()
+        client.pairingEngine.sequencesStore = PairingDictionaryStore()
+        client.sessionEngine.sequencesStore = SessionDictionaryStore()
         return ClientDelegate(client: client)
     }
     

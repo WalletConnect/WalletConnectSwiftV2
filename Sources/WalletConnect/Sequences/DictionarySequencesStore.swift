@@ -1,25 +1,10 @@
 
 import Foundation
 
-class DictionarySequencesStore: SequencesStore {
-    private let serialQueue = DispatchQueue(label: "sequence queue: \(UUID().uuidString)")
-    private var sequences = [String: SequenceState]()
-    
-    func create(topic: String, sequenceState: SequenceState) {
-        serialQueue.sync {
-            sequences[topic] = sequenceState
-        }
-    }
-    
-    func getAll() -> [SequenceState] {
-        serialQueue.sync {
-            sequences.map{$0.value}
-        }
-    }
-    
-    func getSettled() -> [SequenceSettled] {
-        getAll().compactMap { sequenceState in
-            switch sequenceState {
+class PairingDictionaryStore: DictionaryStore<PairingType.SequenceState>, PairingSequencesStore {
+    func getSettled() -> [PairingType.Settled] {
+        getAll().compactMap { sequence in
+            switch sequence {
             case .settled(let settled):
                 return settled
             case .pending(_):
@@ -27,14 +12,44 @@ class DictionarySequencesStore: SequencesStore {
             }
         }
     }
-        
-    func get(topic: String) -> SequenceState? {
+}
+
+class SessionDictionaryStore: DictionaryStore<SessionType.SequenceState>, SessionSequencesStore {
+    func getSettled() -> [SessionType.Settled] {
+        getAll().compactMap { sequence in
+            switch sequence {
+            case .settled(let settled):
+                return settled
+            case .pending(_):
+                return nil
+            }
+        }
+    }
+}
+
+class DictionaryStore<T> {
+    private let serialQueue = DispatchQueue(label: "sequence queue: \(UUID().uuidString)")
+    private var sequences = [String: T]()
+    
+    func create(topic: String, sequenceState: T) {
+        serialQueue.sync {
+            sequences[topic] = sequenceState
+        }
+    }
+    
+    func getAll() -> [T] {
+        serialQueue.sync {
+            sequences.map{$0.value}
+        }
+    }
+    
+    func get(topic: String) -> T? {
         serialQueue.sync {
             sequences[topic]
         }
     }
     
-    func update(topic: String, newTopic: String?, sequenceState: SequenceState) {
+    func update(topic: String, newTopic: String?, sequenceState: T) {
         serialQueue.sync {
             if let newTopic = newTopic {
                 sequences.removeValue(forKey: topic)
