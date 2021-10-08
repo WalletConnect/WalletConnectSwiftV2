@@ -26,6 +26,7 @@ final class SessionEngine {
         self.sequencesStore = sequencesStore
         self.isController = isController
         setUpWCRequestHandling()
+        restoreSubscriptions()
     }
     
     func approve(proposal: SessionType.Proposal, accounts: [String], completion: @escaping (Result<SessionType.Settled, Error>) -> Void) {
@@ -311,5 +312,9 @@ final class SessionEngine {
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
         onSessionApproved?(settledSession)
+    }
+    
+    private func restoreSubscriptions() {
+        sequencesStore.getAll().forEach{wcSubscriber.setSubscription(topic: $0.topic)}
     }
 }

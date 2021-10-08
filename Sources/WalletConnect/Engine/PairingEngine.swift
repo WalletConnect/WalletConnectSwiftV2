@@ -10,7 +10,6 @@ final class PairingEngine {
     var onPairingApproved: ((PairingType.Settled, String)->())?
     private var metadata: AppMetadata
     
-
     init(relay: Relaying,
          crypto: Crypto,
          subscriber: WCSubscribing,
@@ -24,6 +23,7 @@ final class PairingEngine {
         self.sequencesStore = sequencesStore
         self.isController = isController
         setUpWCRequestHandling()
+        restoreSubscriptions()
     }
     
     func respond(to proposal: PairingType.Proposal, completion: @escaping (Result<PairingType.Settled, Error>) -> Void) {
@@ -208,6 +208,12 @@ final class PairingEngine {
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
         onPairingApproved?(settledPairing, pendingTopic)
+    }
+    
+    private func restoreSubscriptions() {
+        relayer.onProviderConnected = { [unowned self] in
+            self.sequencesStore.getAll().forEach{wcSubscriber.setSubscription(topic: $0.topic)}
+        }
     }
 }
 

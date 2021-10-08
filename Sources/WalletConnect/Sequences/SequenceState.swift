@@ -21,6 +21,15 @@ enum SequenceState: Codable, Equatable {
         }
     }
     
+    var topic: String {
+        switch self {
+        case .settled(let sequence):
+            return sequence.topic
+        case .pending(let sequence):
+            return sequence.topic
+        }
+    }
+    
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         if let value = try? values.decode(PairingType.Settled.self, forKey: .settled) {
