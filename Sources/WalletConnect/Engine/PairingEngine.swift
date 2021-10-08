@@ -5,7 +5,7 @@ final class PairingEngine {
     private let relayer: Relaying
     private let crypto: Crypto
     private var isController: Bool
-    let sequences: Sequences<Pairing>
+    let sequencesStore: SequencesStore
     var onSessionProposal: ((SessionType.Proposal)->())?
     var onPairingApproved: ((PairingType.Settled, String)->())?
     private var metadata: AppMetadata
@@ -14,14 +14,14 @@ final class PairingEngine {
     init(relay: Relaying,
          crypto: Crypto,
          subscriber: WCSubscribing,
-         sequences: Sequences<Pairing> = Sequences<Pairing>(),
+         sequencesStore: SequencesStore = DictionarySequencesStore(),
          isController: Bool,
          metadata: AppMetadata) {
         self.relayer = relay
         self.crypto = crypto
         self.wcSubscriber = subscriber
         self.metadata = metadata
-        self.sequences = sequences
+        self.sequencesStore = sequencesStore
         self.isController = isController
         setUpWCRequestHandling()
     }
@@ -38,7 +38,7 @@ final class PairingEngine {
             proposal: proposal)
         
         wcSubscriber.setSubscription(topic: proposal.topic)
-        sequences.create(topic: proposal.topic, sequenceState: .pending(pendingPairing))
+        sequencesStore.create(topic: proposal.topic, sequenceState: .pending(pendingPairing))
         // settle on topic B
         let agreementKeys = try! Crypto.X25519.generateAgreementKeys(
             peerPublicKey: Data(hex: proposal.proposer.publicKey),
@@ -59,7 +59,7 @@ final class PairingEngine {
         
                 
         wcSubscriber.setSubscription(topic: settledTopic)
-        sequences.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledPairing))
+        sequencesStore.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledPairing))
         
         crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         crypto.set(privateKey: privateKey)
@@ -102,7 +102,7 @@ final class PairingEngine {
         let proposal = PairingType.Proposal(topic: topic, relay: relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
         let `self` = PairingType.Participant(publicKey: publicKey, metadata: metadata)
         let pending = PairingType.Pending(status: .proposed, topic: topic, relay: relay, self: `self`, proposal: proposal)
-        sequences.create(topic: topic, sequenceState: .pending(pending))
+        sequencesStore.create(topic: topic, sequenceState: .pending(pending))
         wcSubscriber.setSubscription(topic: topic)
         return pending
     }
@@ -153,7 +153,7 @@ final class PairingEngine {
     
     private func handlePairingPayload(_ payload: PairingType.PayloadParams, for topic: String) {
         Logger.debug("Will handle pairing payload")
-        guard let _ = sequences.get(topic: topic) else {
+        guard let _ = sequencesStore.get(topic: topic) else {
             Logger.error("Pairing for the topic: \(topic) does not exist")
             return
         }
@@ -172,14 +172,13 @@ final class PairingEngine {
         Logger.debug("-------------------------------------")
         Logger.debug("Paired client removed pairing - reason: \(deleteParams.reason.message), code: \(deleteParams.reason.code)")
         Logger.debug("-------------------------------------")
-        sequences.delete(topic: topic)
+        sequencesStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
     }
     
     private func handlePairingApprove(approveParams: PairingType.ApproveParams, pendingTopic: String) {
         Logger.debug("Responder Client approved pairing on topic: \(pendingTopic)")
-        guard let pairing = sequences.get(topic: pendingTopic),
-              case let .pending(sequencePending) = pairing.sequenceState,
+        guard case let .pending(sequencePending) = sequencesStore.get(topic: pendingTopic),
               let pairingPending = sequencePending as? PairingType.Pending else {
                   Logger.debug("Could not find pending pairing associated with topic \(pendingTopic)")
                   return
@@ -205,7 +204,7 @@ final class PairingEngine {
             expiry: approveParams.expiry,
             state: approveParams.state)
         
-        sequences.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledPairing))
+        sequencesStore.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledPairing))
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
         onPairingApproved?(settledPairing, pendingTopic)

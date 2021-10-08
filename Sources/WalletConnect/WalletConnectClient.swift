@@ -26,7 +26,7 @@ public final class WalletConnectClient {
     public func connect(params: ConnectParams) throws -> String? {
         Logger.debug("Connecting Application")
         if let topic = params.pairing?.topic,
-           let pairing = pairingEngine.sequences.get(topic: topic) {
+           let pairing = pairingEngine.sequencesStore.get(topic: topic) {
             Logger.debug("Connecting with existing pairing")
             fatalError("not implemented")
             return nil
@@ -94,11 +94,11 @@ public final class WalletConnectClient {
     }
     
     public func getSettledSessions() -> [SessionType.Settled] {
-        return sessionEngine.sequences.getSettled() as! [SessionType.Settled]
+        return sessionEngine.sequencesStore.getSettled() as! [SessionType.Settled]
     }
     
     public func getSettledPairings() -> [PairingType.Settled] {
-        pairingEngine.sequences.getSettled() as! [PairingType.Settled]
+        pairingEngine.sequencesStore.getSettled() as! [PairingType.Settled]
     }
     
     //MARK: - Private
