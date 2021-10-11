@@ -180,8 +180,7 @@ final class PairingEngine {
     
     private func handlePairingApprove(approveParams: PairingType.ApproveParams, pendingTopic: String) {
         Logger.debug("Responder Client approved pairing on topic: \(pendingTopic)")
-        guard case let .pending(sequencePending) = sequencesStore.get(topic: pendingTopic),
-              let pairingPending = sequencePending as? PairingType.Pending else {
+        guard case let .pending(pairingPending) = sequencesStore.get(topic: pendingTopic) else {
                   Logger.debug("Could not find pending pairing associated with topic \(pendingTopic)")
                   return
         }

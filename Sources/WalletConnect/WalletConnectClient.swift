@@ -94,11 +94,11 @@ public final class WalletConnectClient {
     }
     
     public func getSettledSessions() -> [SessionType.Settled] {
-        return sessionEngine.sequencesStore.getSettled() as! [SessionType.Settled]
+        return sessionEngine.sequencesStore.getSettled()
     }
     
     public func getSettledPairings() -> [PairingType.Settled] {
-        pairingEngine.sequencesStore.getSettled() as! [PairingType.Settled]
+        pairingEngine.sequencesStore.getSettled()
     }
     
     //MARK: - Private

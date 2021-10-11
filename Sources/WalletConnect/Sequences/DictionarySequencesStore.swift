@@ -50,20 +50,20 @@ class DictionaryStore<T> {
     }
     
     func update(topic: String, newTopic: String?, sequenceState: T) {
-        serialQueue.sync {
+        serialQueue.async { [weak self] in
             if let newTopic = newTopic {
-                sequences.removeValue(forKey: topic)
-                sequences[newTopic] = sequenceState
+                self?.sequences.removeValue(forKey: topic)
+                self?.sequences[newTopic] = sequenceState
             } else {
-                sequences[topic] = sequenceState
+                self?.sequences[topic] = sequenceState
             }
         }
     }
     
     func delete(topic: String) {
-        Logger.debug("Will delete sequence for topic: \(topic)")
-        serialQueue.sync {
-            sequences.removeValue(forKey: topic)
+        Logger.debug("Deleted sequence for topic: \(topic)")
+        serialQueue.async { [weak self] in
+            self?.sequences.removeValue(forKey: topic)
         }
     }
 }
