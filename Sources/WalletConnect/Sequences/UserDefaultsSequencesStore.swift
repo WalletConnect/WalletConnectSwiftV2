@@ -28,17 +28,9 @@ class SessionUserDefaultsStore: UserDefaultsStore<SessionType.SequenceState>, Se
 }
 
 class UserDefaultsStore<T: Codable> {
-
-    // The UserDefaults class is thread-safe.
-    let emo: String
-    init() {
-        self.emo = ["😌","🥰","😂","🤩","🥳"].randomElement()!
-    }
     private var defaults = UserDefaults.standard
     
     func create(topic: String, sequenceState: T) {
-        print("\(emo)will save for key: \(topic)")
-
         if let encoded = try? JSONEncoder().encode(sequenceState) {
             defaults.set(encoded, forKey: topic)
             defaults.dictionaryRepresentation()
@@ -53,17 +45,12 @@ class UserDefaultsStore<T: Codable> {
             } else {return nil}
         }
     }
-
     
     func get(topic: String) -> T? {
-        print("\(emo)will read for key \(topic)")
-
         if let data = defaults.object(forKey: topic) as? Data,
            let sequenceState = try? JSONDecoder().decode(T.self, from: data) {
             return sequenceState
         }
-        print("\(emo)could not find  value for key \(topic)")
-
         return nil
     }
     
