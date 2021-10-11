@@ -250,6 +250,7 @@ final class SessionEngine {
             onSessionPayloadRequest?(sessionRequest)
         } catch let error as WalletConnectError {
             Logger.error(error)
+            respond(error: error, requestId: jsonRpcRequest.id, topic: topic)
         } catch {}
     }
     
