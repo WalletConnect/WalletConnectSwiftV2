@@ -215,8 +215,8 @@ final class PairingEngine {
     private func restoreSubscriptions() {
         relayer.transportConnectionPublisher
             .sink { [unowned self] (_) in
-                sequencesStore.getAll().forEach{self.wcSubscriber.setSubscription(topic: $0.topic)}
+                let topics = sequencesStore.getAll().map{$0.topic}
+                topics.forEach{self.wcSubscriber.setSubscription(topic: $0)}
             }.store(in: &publishers)
     }
 }
-

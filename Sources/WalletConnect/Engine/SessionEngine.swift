@@ -266,11 +266,9 @@ final class SessionEngine {
     }
 
     private func validatePayload(_ sessionRequest: SessionRequest) throws {
-        guard let session = sequencesStore.get(topic: sessionRequest.topic),
-              case .settled(let sequenceSettled) = sequencesStore.get(topic: sessionRequest.topic),
-        let settledSession = sequenceSettled as? SessionType.Settled else {
-            throw WalletConnectError.noSequenceForTopic
-        }
+        guard case .settled(let settledSession) = sequencesStore.get(topic: sessionRequest.topic) else {
+                  throw WalletConnectError.noSequenceForTopic
+              }
         if let chainId = sessionRequest.chainId {
             guard settledSession.permissions.blockchain.chains.contains(chainId) else {
                 throw WalletConnectError.unAuthorizedTargetChain
@@ -283,10 +281,9 @@ final class SessionEngine {
     
     private func handleSessionApprove(_ approveParams: SessionType.ApproveParams, topic: String) {
         Logger.debug("Responder Client approved session on topic: \(topic)")
-        guard let session = sequencesStore.get(topic: topic),
-              case let .pending(sequencePending) = sequencesStore.get(topic: topic),
-              let pendingSession = sequencePending as? SessionType.Pending else {
-          fatalError()
+        guard case let .pending(pendingSession) = sequencesStore.get(topic: topic) else {
+                  Logger.error("Could not find pending session for topic: \(topic)")
+            return
         }
         let selfPublicKey = Data(hex: pendingSession.`self`.publicKey)
         let privateKey = try! crypto.getPrivateKey(for: selfPublicKey)!
@@ -318,7 +315,8 @@ final class SessionEngine {
     private func restoreSubscriptions() {
         relayer.transportConnectionPublisher
             .sink { [unowned self] (_) in
-                sequencesStore.getAll().forEach{self.wcSubscriber.setSubscription(topic: $0.topic)}
+                let topics = sequencesStore.getAll().map{$0.topic}
+                topics.forEach{self.wcSubscriber.setSubscription(topic: $0)}
             }.store(in: &publishers)
     }
 }

@@ -23,8 +23,6 @@ final class ClientTests: XCTestCase {
     func testNewPairingWithoutSession() {
         let proposerSettlesPairingExpectation = expectation(description: "Proposer settles pairing")
         let responderSettlesPairingExpectation = expectation(description: "Responder settles pairing")
-
-        
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
