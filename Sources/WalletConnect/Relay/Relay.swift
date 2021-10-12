@@ -71,7 +71,7 @@ class Relay: Relaying {
         }
     }
     
-    func publish(topic: String, payload: Encodable, completion: @escaping ((Result<Void, Error>)->())) throws -> Int64 {
+    @discardableResult func publish(topic: String, payload: Encodable, completion: @escaping ((Result<Void, Error>)->())) throws -> Int64 {
         let messageJson = try payload.json()
         var message: String
         if let agreementKeys = crypto.getAgreementKeys(for: topic) {

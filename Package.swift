@@ -1,12 +1,11 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.5
 
 import PackageDescription
 
 let package = Package(
     name: "WalletConnect",
     platforms: [
-        .iOS(.v13),
-        .macOS(.v10_15)
+        .iOS("13.0"), .macOS("12.0")
     ],
     products: [
         .library(
