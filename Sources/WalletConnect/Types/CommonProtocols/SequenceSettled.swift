@@ -1,7 +1,8 @@
 
 import Foundation
 
-protocol SequenceSettled {
+protocol SequenceSettled: Codable {
+    var topic: String {get}
     func isEqual(to: SequenceSettled) -> Bool
 
 }

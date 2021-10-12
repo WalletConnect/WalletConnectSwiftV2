@@ -4,12 +4,16 @@ import Foundation
 
 enum WalletConnectError: Error, CustomStringConvertible {
     // 1000 (Internal)
-    case sessionNotApproved
+    case notApproved
     case PairingParamsUriInitialization
     case unauthorizedMatchingController
+    case noSequenceForTopic
     case pairingProposalGenerationFailed
+
     // 2000 (Timeout)
     // 3000 (Unauthorized)
+    case unAuthorizedTargetChain
+    case unAuthorizedJsonRpcMethod
     // 4000 (EIP-1193)
     // 5000 (CAIP-25)
     // 9000 (Unknown)
@@ -18,18 +22,24 @@ enum WalletConnectError: Error, CustomStringConvertible {
     var code: Int {
         switch self {
         case .PairingParamsUriInitialization:
-            fatalError("Not implemented")
+            return 0000000
         case .unauthorizedMatchingController:
-            fatalError("Not implemented")
+            return 0000000
         case .pairingProposalGenerationFailed:
-            fatalError("Not implemented")
-        case .sessionNotApproved:
+            return 0000000
+        case .noSequenceForTopic:
+            return 0000000
+        case .notApproved:
             return 1601
+        case .unAuthorizedTargetChain:
+            return 3000
+        case .unAuthorizedJsonRpcMethod:
+            return 3001
         }
     }
     
     //FIX descriptions
-    var description: String {
+    var message: String {
         switch self {
         case .PairingParamsUriInitialization:
             return "PairingParamsUriInitialization"
@@ -37,8 +47,18 @@ enum WalletConnectError: Error, CustomStringConvertible {
             return "unauthorizedMatchingController"
         case .pairingProposalGenerationFailed:
             return "pairingProposalGenerationFailed"
-        case .sessionNotApproved:
+        case .notApproved:
             return "Session not approved"
+        case .unAuthorizedTargetChain:
+            return "Unauthorized Target ChainId Requested"
+        case .unAuthorizedJsonRpcMethod:
+            return "Unauthorized JSON-RPC Method Requested"
+        case .noSequenceForTopic:
+            return "noSequenceForTopic"
         }
+    }
+    
+    var description: String {
+        return "code: \(code) - message: \(message)"
     }
 }

@@ -1,7 +1,8 @@
 
 import Foundation
 
-protocol SequencePending {
+protocol SequencePending: Codable {
+    var topic: String {get}
     func isEqual(to: SequencePending) -> Bool
 
 }

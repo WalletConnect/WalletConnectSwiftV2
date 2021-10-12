@@ -13,7 +13,7 @@ final class ResponderViewController: UIViewController {
                 description: "wallet description",
                 url: "example.wallet",
                 icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"]),
-            relayURL: URL(string: "wss://staging.walletconnect.org")!)
+            relayURL: URL(string: "wss://relay.walletconnect.org")!)
         return WalletConnectClient(options: options)
     }()
     

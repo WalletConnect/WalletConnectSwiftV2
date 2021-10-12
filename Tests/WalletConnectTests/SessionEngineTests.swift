@@ -13,8 +13,7 @@ class SessionEngineTests: XCTestCase {
         relay = MockedRelay()
         subscriber = MockedSubscriber()
         let meta = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
-
-        engine = SessionEngine(relay: relay, crypto: crypto, subscriber: subscriber, isController: false, metadata: meta)
+        engine = SessionEngine(relay: relay, crypto: crypto, subscriber: subscriber, sequencesStore: SessionDictionaryStore(), isController: false, metadata: meta)
     }
 
     override func tearDown() {
