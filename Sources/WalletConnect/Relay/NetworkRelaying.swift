@@ -17,6 +17,8 @@ class WakuNetworkRelay: NetworkRelaying {
     private typealias SubscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>
     private typealias SubscriptionResponse = JSONRPCResponse<String>
     private typealias RequestAcknowledgement = JSONRPCResponse<Bool>
+    private let concurrentQueue = DispatchQueue(label: "waku relay queue: \(UUID().uuidString)",
+                                                attributes: .concurrent)
     var onConnect: (() -> ())?
     
     var onMessage: ((String, String) -> ())?
@@ -103,6 +105,9 @@ class WakuNetworkRelay: NetworkRelaying {
                 cancellable.cancel()
                 completion(error)
             } else {
+                self.concurrentQueue.async(flags: .barrier) { [weak self] in
+                    self?.subscriptions[topic] = nil
+                }
                 completion(nil)
             }
         }
@@ -127,7 +132,7 @@ class WakuNetworkRelay: NetworkRelaying {
     private func handlePayloadMessage(_ payload: String) {
         if let request = tryDecode(SubscriptionRequest.self, from: payload),
            request.method == RelayJSONRPC.Method.subscription.rawValue {
-            onMessage(request.params.data.topic, request.params.data.message)
+            onMessage?(request.params.data.topic, request.params.data.message)
             acknowledgeSubscription(requestId: request.id)
         } else if let response = tryDecode(RequestAcknowledgement.self, from: payload) {
             requestAcknowledgePublisherSubject.send(response)

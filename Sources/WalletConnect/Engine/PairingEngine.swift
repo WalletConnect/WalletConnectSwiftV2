@@ -3,7 +3,7 @@ import Combine
 
 final class PairingEngine {
     private let wcSubscriber: WCSubscribing
-    private let relayer: Relaying
+    private let relayer: WalletConnectRelaying
     private let crypto: Crypto
     private var isController: Bool
     var sequencesStore: PairingSequencesStore
@@ -13,7 +13,7 @@ final class PairingEngine {
     private var publishers = [AnyCancellable]()
     private let logger: BaseLogger
     
-    init(relay: Relaying,
+    init(relay: WalletConnectRelaying,
          crypto: Crypto,
          subscriber: WCSubscribing,
          sequencesStore: PairingSequencesStore,

@@ -4,7 +4,7 @@ import Combine
 final class SessionEngine {
     var sequencesStore: SessionSequencesStore
     private let wcSubscriber: WCSubscribing
-    private let relayer: Relaying
+    private let relayer: WalletConnectRelaying
     private let crypto: Crypto
     private var isController: Bool
     private var metadata: AppMetadata
@@ -15,7 +15,7 @@ final class SessionEngine {
     private var publishers = [AnyCancellable]()
     private let logger: BaseLogger
 
-    init(relay: Relaying,
+    init(relay: WalletConnectRelaying,
          crypto: Crypto,
          subscriber: WCSubscribing,
          sequencesStore: SessionSequencesStore,
@@ -140,7 +140,7 @@ final class SessionEngine {
         }
     }
     
-    func request(params: SessionType.PayloadRequestParams, completion: @escaping ((Result<JSONRPCResponse<String>, Error>)->())) {
+    func request(params: SessionType.PayloadRequestParams, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, Error>)->())) {
         guard let _ = sequencesStore.get(topic: params.topic) else {
             logger.debug("Could not find session for topic \(params.topic)")
             return
@@ -148,20 +148,14 @@ final class SessionEngine {
         let request = SessionType.PayloadParams.Request(method: params.method, params: AnyCodable(params.params))
         let sessionPayloadParams = SessionType.PayloadParams(request: request, chainId: params.chainId)
         let sessionPayloadRequest = ClientSynchJSONRPC(method: .sessionPayload, params: .sessionPayload(sessionPayloadParams))
-        var cancellable: AnyCancellable!
-        cancellable = relayer.wcResponsePublisher
-            .filter {$0.id == sessionPayloadRequest.id}
-            .sink { (wcPayloadResponse) in
-                cancellable.cancel()
-                completion(.success((wcPayloadResponse)))
-            }
-        _ = try? relayer.publish(topic: params.topic, payload: sessionPayloadRequest) { [weak self] result in
+
+        relayer.publish(topic: params.topic, payload: sessionPayloadRequest) { [weak self] result in
             switch result {
-            case .success:
+            case .success(let response):
+                completion(.success(response))
                 self?.logger.debug("Sent Session Payload")
             case .failure(let error):
                 self?.logger.debug("Could not send session payload, error: \(error)")
-                cancellable.cancel()
             }
         }
     }
@@ -171,7 +165,7 @@ final class SessionEngine {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
-        _ = try? relayer.publish(topic: topic, payload: response) { [weak self] result in
+        relayer.publish(topic: topic, payload: response) { [weak self] result in
             switch result {
             case .success:
                 self?.logger.debug("Sent Session Payload Response")
@@ -259,9 +253,9 @@ final class SessionEngine {
     
     private func respond(error: WalletConnectError, requestId: Int64, topic: String) {
         let errorResponse = JSONRPCError(code: error.code, message: error.localizedDescription)
-        _ = try? relayer.publish(topic: topic, payload: errorResponse) { [weak self] result in
+        relayer.publish(topic: topic, payload: errorResponse) { [weak self] result in
             switch result {
-            case .success():
+            case .success(let response):
                 self?.logger.debug("successfully responded with error: \(error)")
             case .failure(let error):
                 self?.logger.error(error)

@@ -16,7 +16,7 @@ public final class WalletConnectClient {
     private let isController: Bool
     let pairingEngine: PairingEngine
     let sessionEngine: SessionEngine
-    private let relay: Relay
+    private let relay: WalletConnectRelaying
     private let crypto = Crypto()
     private var sessionPermissions: [String: SessionType.Permissions] = [:]
     var logger: BaseLogger = ConsoleLogger()
@@ -26,11 +26,13 @@ public final class WalletConnectClient {
     public init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL) {
         self.metadata = metadata
         self.isController = isController
-        self.relay = Relay(transport: JSONRPCTransport(url: relayURL), crypto: crypto, logger: logger)
+        let wakuRelay = WakuNetworkRelay(transport: JSONRPCTransport(url: relayURL))
+        self.relay = WalletConnectRelay(networkRelayer: wakuRelay, crypto: crypto)
         let sessionSequencesStore = SessionUserDefaultsStore(logger: logger)
         let pairingSequencesStore = PairingUserDefaultsStore(logger: logger)
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
+
         setUpEnginesCallbacks()
         secureStorage.setAPIKey(apiKey)
     }
@@ -95,7 +97,7 @@ public final class WalletConnectClient {
     // TODO: Upgrade and update methods.
     
     // for proposer to request JSON-RPC
-    public func request(params: SessionType.PayloadRequestParams, completion: @escaping (Result<JSONRPCResponse<String>, Error>) -> ()) {
+    public func request(params: SessionType.PayloadRequestParams, completion: @escaping (Result<JSONRPCResponse<AnyCodable>, Error>) -> ()) {
         sessionEngine.request(params: params, completion: completion)
     }
     

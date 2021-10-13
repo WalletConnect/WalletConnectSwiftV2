@@ -7,7 +7,7 @@ protocol WalletConnectRelaying {
     var clientSynchJsonRpcPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
     func publish(topic: String, payload: Encodable, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCError>)->()))
     func subscribe(topic: String)
-    func unsubscribe(topic: String, id: String)
+    func unsubscribe(topic: String)
 }
 
 enum WCResponse {
@@ -61,7 +61,8 @@ class WalletConnectRelay: WalletConnectRelaying {
                 if let error = error {
                     Logger.error(error)
                 } else {
-                    let cancellable = self.wcResponsePublisher
+                    var cancellable: AnyCancellable!
+                    cancellable = self.wcResponsePublisher
                         .filter {$0.topic == topic}
                         .sink { (response) in
                             cancellable.cancel()
@@ -87,8 +88,8 @@ class WalletConnectRelay: WalletConnectRelaying {
         }
     }
 
-    func unsubscribe(topic: String, id: String) {
-        networkRelayer.unsubscribe(topic: topic, id: id) { error in
+    func unsubscribe(topic: String) {
+        networkRelayer.unsubscribe(topic: topic) { error in
             if let error = error {
                 Logger.error(error)
             }
