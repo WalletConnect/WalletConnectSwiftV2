@@ -6,7 +6,7 @@ protocol JSONRPCTransporting {
     var onConnect: (()->())? {get set}
     var onDisconnect: (()->())? {get set}
     var onMessage: ((String) -> ())? {get set}
-    func send(_ string: String) async -> Error?
+    func send(_ string: String, completion: @escaping (Error?)->())
     func disconnect()
 }
 

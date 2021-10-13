@@ -11,6 +11,7 @@ enum WalletConnectError: Error, CustomStringConvertible {
     case pairingProposalGenerationFailed
     case deserialisationFailed
     case keyNotFound
+    case subscriptionIdNotFound
 
     // 2000 (Timeout)
     // 3000 (Unauthorized)
@@ -30,6 +31,8 @@ enum WalletConnectError: Error, CustomStringConvertible {
         case .pairingProposalGenerationFailed:
             return 0000000
         case .deserialisationFailed:
+            return 000
+        case .subscriptionIdNotFound:
             return 000
         case .keyNotFound:
             return 0000
@@ -55,6 +58,8 @@ enum WalletConnectError: Error, CustomStringConvertible {
             return "pairingProposalGenerationFailed"
         case .deserialisationFailed:
             return "deserialisationFailed"
+        case .subscriptionIdNotFound:
+            return "subscriptionIdNotFound"
         case .keyNotFound:
             return "keyNotFound"
         case .notApproved:
