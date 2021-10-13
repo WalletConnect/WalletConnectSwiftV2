@@ -1,13 +1,6 @@
 import Foundation
 import CryptoKit
 
-protocol GenericPasswordConvertible {
-    init<D>(rawRepresentation data: D) throws where D: ContiguousBytes
-    var rawRepresentation: Data { get }
-}
-
-extension Curve25519.KeyAgreement.PrivateKey: GenericPasswordConvertible {}
-
 enum KeychainError: Error {
     case itemAlreadyExists(OSStatus)
     case itemNotFound(OSStatus)
@@ -17,7 +10,12 @@ enum KeychainError: Error {
     case failedToDelete(OSStatus)
 }
 
-final class KeychainStorage {
+protocol KeychainStorageProtocol {
+    func add<T: GenericPasswordConvertible>(_ item: T, forKey key: String) throws
+    func delete(key: String) throws
+}
+
+final class KeychainStorage: KeychainStorageProtocol {
     
     let service = "com.walletconnect.sdk"
     
