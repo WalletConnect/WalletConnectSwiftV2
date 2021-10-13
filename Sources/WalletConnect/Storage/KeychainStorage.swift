@@ -12,6 +12,7 @@ enum KeychainError: Error {
 
 protocol KeychainStorageProtocol {
     func add<T: GenericPasswordConvertible>(_ item: T, forKey key: String) throws
+    func read<T: GenericPasswordConvertible>(key: String) throws -> T
     func delete(key: String) throws
 }
 
@@ -25,7 +26,7 @@ final class KeychainStorage: KeychainStorageProtocol {
         self.secItem = keychainService
     }
     
-    func add<T: GenericPasswordConvertible>(_ item: T, forKey key: String) throws {
+    func add<T>(_ item: T, forKey key: String) throws where T : GenericPasswordConvertible {
         try add(data: item.rawRepresentation, forKey: key)
     }
     
@@ -43,7 +44,7 @@ final class KeychainStorage: KeychainStorageProtocol {
         }
     }
     
-    func read<T: GenericPasswordConvertible>(key: String) throws -> T {
+    func read<T>(key: String) throws -> T where T : GenericPasswordConvertible {
         guard let data = try readData(key: key) else {
             throw KeychainError.itemNotFound(errSecItemNotFound)
         }
@@ -67,7 +68,7 @@ final class KeychainStorage: KeychainStorageProtocol {
         }
     }
     
-    func update<T: GenericPasswordConvertible>(_ item: T, forKey key: String) throws {
+    func update<T>(_ item: T, forKey key: String) throws where T : GenericPasswordConvertible {
         try update(data: item.rawRepresentation, forKey: key)
     }
     
