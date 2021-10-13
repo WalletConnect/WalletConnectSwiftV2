@@ -5,9 +5,10 @@ import Foundation
 protocol JSONRPCSerialising {
     var codec: Codec {get}
     func serialise(json: String, agreementKeys: Crypto.X25519.AgreementKeys) throws -> String
-    func deserialise(message: String, symmetricKey: Data) throws -> ClientSynchJSONRPC
-    func deserialise(message: String, symmetricKey: Data) throws -> JSONRPCResponse<AnyCodable>
-    func deserialise(message: String, symmetricKey: Data) throws -> JSONRPCError 
+    func deserialise<T: Codable>(message: String, symmetricKey: Data) throws -> T
+//    func deserialise(message: String, symmetricKey: Data) throws -> ClientSynchJSONRPC
+//    func deserialise(message: String, symmetricKey: Data) throws -> JSONRPCResponse<AnyCodable>
+//    func deserialise(message: String, symmetricKey: Data) throws -> JSONRPCError 
 }
 
 class JSONRPCSerialiser: JSONRPCSerialising {

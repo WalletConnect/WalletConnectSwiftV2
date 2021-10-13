@@ -36,18 +36,18 @@ class Relay: Relaying {
         clientSynchJsonRpcPublisherSubject.eraseToAnyPublisher()
     }
     private let clientSynchJsonRpcPublisherSubject = PassthroughSubject<WCRequestSubscriptionPayload, Never>()
-    
+
     var wcResponsePublisher: AnyPublisher<JSONRPCResponse<String>, Never> {
         wcResponsePublisherSubject.eraseToAnyPublisher()
     }
     private let wcResponsePublisherSubject = PassthroughSubject<JSONRPCResponse<String>, Never>()
-    
-    
+
+
     var transportConnectionPublisher: AnyPublisher<Void, Never> {
         transportConnectionPublisherSubject.eraseToAnyPublisher()
     }
     private let transportConnectionPublisherSubject = PassthroughSubject<Void, Never>()
-    
+
     private var payloadCancellable: AnyCancellable?
     private let logger: BaseLogger
 
@@ -70,7 +70,7 @@ class Relay: Relaying {
             self.transportConnectionPublisherSubject.send()
         }
     }
-    
+
     @discardableResult func publish(topic: String, payload: Encodable, completion: @escaping ((Result<Void, Error>)->())) throws -> Int64 {
         let messageJson = try payload.json()
         var message: String
@@ -100,7 +100,7 @@ class Relay: Relaying {
         }
         return request.id
     }
-    
+
     func subscribe(topic: String, completion: @escaping ((Result<String, Error>)->())) throws -> Int64 {
         logger.debug("Subscribing on Topic: \(topic)")
         let params = RelayJSONRPC.SubscribeParams(topic: topic)
@@ -123,14 +123,14 @@ class Relay: Relaying {
         }
         return request.id
     }
-    
+
     func unsubscribe(topic: String, id: String, completion: @escaping ((Result<Void, Error>)->())) throws -> Int64 {
         logger.debug("Unsubscribing on Topic: \(topic)")
         let params = RelayJSONRPC.UnsubscribeParams(id: id, topic: topic)
         let request = JSONRPCRequest(method: RelayJSONRPC.Method.unsubscribe.rawValue, params: params)
         let requestJson = try request.json()
         var cancellable: AnyCancellable!
-        transport.send(requestJson) { [weak self]error in
+        transport.send(requestJson) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to Unsubscribe on Topic")
                 self?.logger.error(error)
@@ -141,9 +141,9 @@ class Relay: Relaying {
         cancellable = requestAcknowledgePublisher
             .filter {$0.id == request.id}
             .sink { (subscriptionResponse) in
-            cancellable.cancel()
+                cancellable.cancel()
                 completion(.success(()))
-        }
+            }
         return request.id
     }
 
@@ -161,7 +161,7 @@ class Relay: Relaying {
             logger.error("Unexpected response from network")
         }
     }
-    
+
     private func tryDecode<T: Decodable>(_ type: T.Type, from payload: String) -> T? {
         if let data = payload.data(using: .utf8),
            let response = try? JSONDecoder().decode(T.self, from: data) {
@@ -170,7 +170,7 @@ class Relay: Relaying {
             return nil
         }
     }
-    
+
     private func manageSubscriptionRequest(_ request: JSONRPCRequest<RelayJSONRPC.SubscriptionParams>) {
         let topic = request.params.data.topic
         let message = request.params.data.message
@@ -182,7 +182,7 @@ class Relay: Relaying {
         }
         acknowledgeSubscription(requestId: request.id)
     }
-    
+
     private func deserialiseWCRequest(topic: String, message: String) -> ClientSynchJSONRPC? {
         do {
             let deserialisedJsonRpcRequest: ClientSynchJSONRPC
@@ -198,14 +198,14 @@ class Relay: Relaying {
             return nil
         }
     }
-    
+
     private func deserialiseWCResponse(topic: String, message: String) -> JSONRPCResponse<String>? {
         guard let agreementKeys = crypto.getAgreementKeys(for: topic) else {
             return nil
         }
         return try? jsonRpcSerialiser.deserialise(message: message, symmetricKey: agreementKeys.sharedSecret)
     }
-    
+
     private func acknowledgeSubscription(requestId: Int64) {
         let response = JSONRPCResponse(id: requestId, result: true)
         let responseJson = try! response.json()
