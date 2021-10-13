@@ -6,8 +6,8 @@ protocol WalletConnectRelaying {
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var clientSynchJsonRpcPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
     func publish(topic: String, payload: Encodable) async throws -> Result<JSONRPCResponse<AnyCodable>, JSONRPCError>
-    func subscribe(topic: String) async -> Result<String, Error>
-    func unsubscribe(topic: String, id: String) async -> Result<Void, Error>
+    func subscribe(topic: String)
+    func unsubscribe(topic: String, id: String)
 }
 
 class WalletConnectRelay: WalletConnectRelaying {
@@ -39,12 +39,20 @@ class WalletConnectRelay: WalletConnectRelaying {
     
     
     
-    func subscribe(topic: String) async -> Result<String, Error> {
-        
+    func subscribe(topic: String)  {
+        do {
+            await try networkRelayer.subscribe(topic: topic)
+        } catch {
+            Logger.error(error)
+        }
     }
     
-    func unsubscribe(topic: String, id: String) async -> Result<Void, Error> {
-        
+    func unsubscribe(topic: String, id: String) {
+        do {
+            try await networkRelayer.unsubscribe(topic: topic, id: id)
+        } catch {
+            Logger.error(error)
+        }
     }
     
     
@@ -75,20 +83,47 @@ class WalletConnectRelay: WalletConnectRelaying {
 
 protocol NetworkRelaying {
     func publish(topic: String, message: String) async throws -> String
-    func subscribe(topic: String) async -> Result<String, Error>
-    func unsubscribe(topic: String, id: String) async -> Result<Void, Error>
+    func subscribe(topic: String) async throws
+    func unsubscribe(topic: String, id: String) async throws
 }
 
 class WakuNetworkRelay: NetworkRelaying {
+    private var transport: JSONRPCTransporting
+    var subscriptions: [String: String] = [:]
+    private var subscriptionResponsePublisher: AnyPublisher<JSONRPCResponse<String>, Never> {
+        subscriptionResponsePublisherSubject.eraseToAnyPublisher()
+    }
+    private let subscriptionResponsePublisherSubject = PassthroughSubject<JSONRPCResponse<String>, Never>()
+    
+    init(transport: JSONRPCTransporting) {
+        self.transport = transport
+//        setUpBindings()
+    }
+    
     func publish(topic: String, message: String) async throws -> String {
         
     }
     
-    func subscribe(topic: String) async -> Result<String, Error> {
-        <#code#>
+    func subscribe(topic: String) async throws {
+        let params = RelayJSONRPC.SubscribeParams(topic: topic)
+        let request = JSONRPCRequest(method: RelayJSONRPC.Method.subscribe.rawValue, params: params)
+        let requestJson = try request.json()
+        var cancellable: AnyCancellable!
+        if let error = await transport.send(requestJson) {
+            Logger.debug("Failed to Subscribe on Topic")
+            Logger.error(error)
+            cancellable.cancel()
+            throw error
+        }
+        cancellable = subscriptionResponsePublisher
+            .filter {$0.id == request.id}
+            .sink { [weak self] (subscriptionResponse) in
+            cancellable.cancel()
+                self?.subscriptions[topic] = subscriptionId
+        }
     }
     
-    func unsubscribe(topic: String, id: String) async -> Result<Void, Error> {
+    func unsubscribe(topic: String, id: String) async throws {
         <#code#>
     }
     

@@ -25,5 +25,6 @@ let package = Package(
         .testTarget(
             name: "IntegrationTests",
             dependencies: ["WalletConnect"]),
-    ]
+    ],
+    swiftLanguageVersions: [.v5]
 )
