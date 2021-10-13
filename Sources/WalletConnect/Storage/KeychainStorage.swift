@@ -1,15 +1,6 @@
 import Foundation
 import CryptoKit
 
-enum KeychainError: Error {
-    case itemAlreadyExists(OSStatus)
-    case itemNotFound(OSStatus)
-    case failedToStoreItem(OSStatus)
-    case failedToRead(OSStatus)
-    case failedToUpdate(OSStatus)
-    case failedToDelete(OSStatus)
-}
-
 protocol KeychainStorageProtocol {
     func add<T: GenericPasswordConvertible>(_ item: T, forKey key: String) throws
     func read<T: GenericPasswordConvertible>(key: String) throws -> T
@@ -37,16 +28,13 @@ final class KeychainStorage: KeychainStorageProtocol {
         let status = secItem.add(query as CFDictionary, nil)
         
         guard status == errSecSuccess else {
-            if status == errSecDuplicateItem {
-                throw KeychainError.itemAlreadyExists(status)
-            }
-            throw KeychainError.failedToStoreItem(status)
+            throw KeychainError(status)
         }
     }
     
     func read<T>(key: String) throws -> T where T : GenericPasswordConvertible {
         guard let data = try readData(key: key) else {
-            throw KeychainError.itemNotFound(errSecItemNotFound)
+            throw KeychainError(errSecItemNotFound)
         }
         return try T(rawRepresentation: data)
     }
@@ -64,7 +52,7 @@ final class KeychainStorage: KeychainStorageProtocol {
         case errSecItemNotFound:
             return nil
         default:
-            throw KeychainError.failedToRead(status)
+            throw KeychainError(status)
         }
     }
     
@@ -79,10 +67,7 @@ final class KeychainStorage: KeychainStorageProtocol {
         let status = secItem.update(query as CFDictionary, attributes as CFDictionary)
         
         guard status == errSecSuccess else {
-            if status == errSecItemNotFound {
-                throw KeychainError.itemNotFound(status)
-            }
-            throw KeychainError.failedToUpdate(status)
+            throw KeychainError(status)
         }
     }
     
@@ -92,7 +77,7 @@ final class KeychainStorage: KeychainStorageProtocol {
         let status = secItem.delete(query as CFDictionary)
         
         guard status == errSecSuccess || status == errSecItemNotFound else {
-            throw KeychainError.failedToDelete(status)
+            throw KeychainError(status)
         }
     }
     
@@ -103,7 +88,7 @@ final class KeychainStorage: KeychainStorageProtocol {
         ] as [String: Any]
         let status = secItem.delete(query as CFDictionary)
         guard status == errSecSuccess else {
-            throw KeychainError.failedToDelete(status)
+            throw KeychainError(status)
         }
     }
     

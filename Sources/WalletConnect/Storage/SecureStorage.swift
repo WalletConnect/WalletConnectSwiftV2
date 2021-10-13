@@ -6,10 +6,21 @@ final class SecureStorage {
     private let keychain: KeychainStorageProtocol
     private let queue: DispatchQueue
     
+    private let api = "api-key"
+    
     init(keychain: KeychainStorageProtocol = KeychainStorage(),
          dispatchQueue: DispatchQueue = DispatchQueue(label: "com.walletconnect.keychain.queue", qos: .default)) {
         self.keychain = keychain
         self.queue = dispatchQueue
+    }
+    
+    func setAPIKey(_ apiKey: String) {
+        removeValue(forKey: api)
+        set(apiKey, forKey: api)
+    }
+    
+    func getAPIKey() -> String? {
+        get(key: api)
     }
     
     func set<T>(_ value: T, forKey key: String) where T : GenericPasswordConvertible {

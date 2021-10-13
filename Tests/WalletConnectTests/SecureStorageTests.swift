@@ -42,7 +42,7 @@ final class SecureStorageTests: XCTestCase {
         }
     }
     
-    func testThreadSafety() {
+    func testThreadSafeAccess() {
         let count = 1000
         DispatchQueue.concurrentPerform(iterations: count) { i in
             let key = "key\(i)"
@@ -54,32 +54,5 @@ final class SecureStorageTests: XCTestCase {
             XCTAssertEqual(retrievedValue, value)
             XCTAssertNil(retrievedAfterDelete)
         }
-    }
-}
-
-final class KeychainStorageMock: KeychainStorageProtocol {
-    
-    var storage: [String: Data] = [:]
-    
-    private(set) var didCallAdd = false
-    private(set) var didCallRead = false
-    private(set) var didCallDelete = false
-    
-    func add<T>(_ item: T, forKey key: String) throws where T : GenericPasswordConvertible {
-        didCallAdd = true
-        storage[key] = item.rawRepresentation
-    }
-    
-    func read<T>(key: String) throws -> T where T : GenericPasswordConvertible {
-        didCallRead = true
-        if let data = storage[key] {
-            return try T(rawRepresentation: data)
-        }
-        throw WalletConnectError.notApproved
-    }
-    
-    func delete(key: String) throws {
-        didCallDelete = true
-        storage[key] = nil
     }
 }

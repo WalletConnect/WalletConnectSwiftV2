@@ -31,7 +31,8 @@ final class KeychainStorageTests: XCTestCase {
         let privateKey = Curve25519.KeyAgreement.PrivateKey()
         try? sut.add(privateKey, forKey: defaultIdentifier)
         XCTAssertThrowsError(try sut.add(privateKey, forKey: defaultIdentifier)) { error in
-            guard case KeychainError.itemAlreadyExists = error else { XCTFail(); return }
+            guard let error = error as? KeychainError else { XCTFail(); return }
+            XCTAssertEqual(error.status, errSecDuplicateItem)
         }
     }
     
@@ -39,7 +40,7 @@ final class KeychainStorageTests: XCTestCase {
         fakeKeychain.errorStatus = errSecMissingEntitlement
         let privateKey = Curve25519.KeyAgreement.PrivateKey()
         XCTAssertThrowsError(try sut.add(privateKey, forKey: defaultIdentifier)) { error in
-            guard case KeychainError.failedToStoreItem = error else { XCTFail(); return }
+            XCTAssert(error is KeychainError)
         }
     }
     
@@ -59,7 +60,8 @@ final class KeychainStorageTests: XCTestCase {
             let _: Curve25519.KeyAgreement.PrivateKey = try sut.read(key: "")
             XCTFail()
         } catch {
-            guard case KeychainError.itemNotFound = error else { XCTFail(); return }
+            guard let error = error as? KeychainError else { XCTFail(); return }
+            XCTAssertEqual(error.status, errSecItemNotFound)
         }
     }
     
@@ -71,7 +73,7 @@ final class KeychainStorageTests: XCTestCase {
             let _: Curve25519.KeyAgreement.PrivateKey = try sut.read(key: defaultIdentifier)
             XCTFail()
         } catch {
-            guard case KeychainError.failedToRead = error else { XCTFail(); return }
+            XCTAssert(error is KeychainError)
         }
     }
     
@@ -91,7 +93,8 @@ final class KeychainStorageTests: XCTestCase {
     func testUpdateItemNotFoundFails() {
         let privateKey = Curve25519.KeyAgreement.PrivateKey()
         XCTAssertThrowsError(try sut.update(privateKey, forKey: defaultIdentifier)) { error in
-            guard case KeychainError.itemNotFound = error else { XCTFail(); return }
+            guard let error = error as? KeychainError else { XCTFail(); return }
+            XCTAssertEqual(error.status, errSecItemNotFound)
         }
     }
     
@@ -104,7 +107,7 @@ final class KeychainStorageTests: XCTestCase {
             try sut.update(privateKeyB, forKey: defaultIdentifier)
             XCTFail()
         } catch {
-            guard case KeychainError.failedToUpdate = error else { XCTFail(); return }
+            XCTAssert(error is KeychainError)
         }
     }
     
@@ -131,7 +134,7 @@ final class KeychainStorageTests: XCTestCase {
             try sut.delete(key: defaultIdentifier)
             XCTFail()
         } catch {
-            guard case KeychainError.failedToDelete = error else { XCTFail(); return }
+            XCTAssert(error is KeychainError)
         }
     }
     
@@ -153,9 +156,7 @@ final class KeychainStorageTests: XCTestCase {
     
     func testDeleteAllFromCleanKeychain() {
         XCTAssertThrowsError(try sut.deleteAll()) { error in
-            guard case KeychainError.failedToDelete = error else {
-                XCTFail(); return
-            }
+            XCTAssert(error is KeychainError)
         }
     }
 }
