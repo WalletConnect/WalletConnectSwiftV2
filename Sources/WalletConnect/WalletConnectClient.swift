@@ -11,6 +11,8 @@ public final class WalletConnectClient {
     private let crypto = Crypto()
     private var sessionPermissions: [String: SessionType.Permissions] = [:]
     
+    private let secureStorage = SecureStorage()
+    
     // MARK: - Public interface
     public init(options: WalletClientOptions) {
         self.isController = options.isController
@@ -19,7 +21,7 @@ public final class WalletConnectClient {
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay), isController: isController, metadata: metadata)
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay), isController: isController, metadata: metadata)
         setUpEnginesCallbacks()
-        // TODO: Store api key
+        secureStorage.setAPIKey(options.apiKey)
     }
     
     // for proposer to propose a session to a responder
