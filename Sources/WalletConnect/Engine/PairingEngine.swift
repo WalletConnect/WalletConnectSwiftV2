@@ -77,7 +77,7 @@ final class PairingEngine {
             state: nil) // FIXME: State
         let approvalPayload = ClientSynchJSONRPC(method: .pairingApprove, params: .pairingApprove(approveParams))
         
-        _ = try? relayer.publish(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
+        relayer.publish(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
             switch result {
             case .success:
                 self?.wcSubscriber.removeSubscription(topic: proposal.topic)
@@ -139,7 +139,7 @@ final class PairingEngine {
         wcSubscriber.onRequestSubscription = { [unowned self] subscriptionPayload in
             switch subscriptionPayload.clientSynchJsonRpc.params {
             case .pairingApprove(let approveParams):
-                handlePairingApprove(approveParams: approveParams, pendingTopic: subscriptionPayload.topic)
+                handlePairingApprove(approveParams: approveParams, pendingTopic: subscriptionPayload.topic, reqestId: subscriptionPayload.clientSynchJsonRpc.id)
             case .pairingReject(_):
                 fatalError("Not Implemented")
             case .pairingUpdate(_):
@@ -149,14 +149,14 @@ final class PairingEngine {
             case .pairingDelete(let deleteParams):
                 handlePairingDelete(deleteParams, topic: subscriptionPayload.topic)
             case .pairingPayload(let pairingPayload):
-                self.handlePairingPayload(pairingPayload, for: subscriptionPayload.topic)
+                self.handlePairingPayload(pairingPayload, for: subscriptionPayload.topic, requestId: subscriptionPayload.clientSynchJsonRpc.id)
             default:
                 fatalError("not expected method type")
             }
         }
     }
     
-    private func handlePairingPayload(_ payload: PairingType.PayloadParams, for topic: String) {
+    private func handlePairingPayload(_ payload: PairingType.PayloadParams, for topic: String, requestId: Int64) {
         logger.debug("Will handle pairing payload")
         guard let _ = sequencesStore.get(topic: topic) else {
             logger.error("Pairing for the topic: \(topic) does not exist")
@@ -170,7 +170,10 @@ final class PairingEngine {
         if let pairingAgreementKeys = crypto.getAgreementKeys(for: sessionProposal.signal.params.topic) {
             crypto.set(agreementKeys: pairingAgreementKeys, topic: sessionProposal.topic)
         }
-        onSessionProposal?(sessionProposal)
+        let response = JSONRPCResponse<Bool>(id: requestId, result: true)
+        relayer.respond(topic: topic, payload: response) { [weak self] in
+            self?.onSessionProposal?(sessionProposal)
+        }
     }
     
     private func handlePairingDelete(_ deleteParams: PairingType.DeleteParams, topic: String) {
@@ -181,7 +184,7 @@ final class PairingEngine {
         wcSubscriber.removeSubscription(topic: topic)
     }
     
-    private func handlePairingApprove(approveParams: PairingType.ApproveParams, pendingTopic: String) {
+    private func handlePairingApprove(approveParams: PairingType.ApproveParams, pendingTopic: String, reqestId: Int64) {
         logger.debug("Responder Client approved pairing on topic: \(pendingTopic)")
         guard case let .pending(pairingPending) = sequencesStore.get(topic: pendingTopic) else {
                   logger.debug("Could not find pending pairing associated with topic \(pendingTopic)")
@@ -211,7 +214,10 @@ final class PairingEngine {
         sequencesStore.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledPairing))
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
-        onPairingApproved?(settledPairing, pendingTopic)
+        let response = JSONRPCResponse<Bool>(id: reqestId, result: true)
+        relayer.respond(topic: proposal.topic, payload: response) { [weak self] in
+            self?.onPairingApproved?(settledPairing, pendingTopic)
+        }
     }
     
     private func restoreSubscriptions() {

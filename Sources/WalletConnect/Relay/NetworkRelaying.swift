@@ -81,8 +81,9 @@ class WakuNetworkRelay: NetworkRelaying {
         }
         cancellable = subscriptionResponsePublisher
             .filter {$0.id == request.id}
-            .sink { (subscriptionResponse) in
+            .sink { [weak self] (subscriptionResponse) in
             cancellable.cancel()
+                self?.subscriptions[topic] = subscriptionResponse.result
                 completion(nil)
         }
         return request.id

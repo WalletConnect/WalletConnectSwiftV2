@@ -131,7 +131,7 @@ final class SessionEngine {
         _ = try? relayer.publish(topic: settledPairing.topic, payload: pairingPayloadRequest) { [unowned self] result in
             switch result {
             case .success:
-                logger.debug("Sent Session Proposal")
+                logger.debug("Sent Session Proposal -  pub \(privateKey.publicKey.toHexString())")
                 let pairingAgreementKeys = crypto.getAgreementKeys(for: settledPairing.topic)!
                 crypto.set(agreementKeys: pairingAgreementKeys, topic: proposal.topic)
             case .failure(let error):

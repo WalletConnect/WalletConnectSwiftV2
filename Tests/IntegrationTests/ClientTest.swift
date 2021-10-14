@@ -63,7 +63,7 @@ final class ClientTests: XCTestCase {
         }
         waitForExpectations(timeout: 3.0, handler: nil)
     }
-    
+
     func testResponderRejectsSession() {
         let sessionRejectExpectation = expectation(description: "Responded is notified on session rejection")
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))

@@ -6,6 +6,7 @@ protocol WalletConnectRelaying {
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var clientSynchJsonRpcPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
     func publish(topic: String, payload: Encodable, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCError>)->()))
+    func respond(topic: String, payload: Encodable, completion: @escaping (()->()))
     func subscribe(topic: String)
     func unsubscribe(topic: String)
 }
@@ -77,6 +78,16 @@ class WalletConnectRelay: WalletConnectRelaying {
             }
         } catch {
             Logger.error(error)
+        }
+    }
+    
+    func respond(topic: String, payload: Encodable, completion: @escaping (()->())) {
+        let message = try! serialise(topic: topic, jsonRpc: payload)
+        print("Responding....topic: \(topic)")
+        networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
+            print("responded")
+            //TODO
+            completion()
         }
     }
     
