@@ -19,7 +19,7 @@ final class KeychainStorageMock: KeychainStorageProtocol {
         if let data = storage[key] {
             return try T(rawRepresentation: data)
         }
-        throw WalletConnectError.notApproved // FIXME: throw a better error
+        throw WalletConnectError.internal(.notApproved) // FIXME: throw a better error
     }
     
     func delete(key: String) throws {

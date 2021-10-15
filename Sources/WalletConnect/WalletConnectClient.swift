@@ -36,7 +36,7 @@ public final class WalletConnectClient {
             return nil
         } else {
             guard let pending = pairingEngine.propose(params) else {
-                throw WalletConnectError.pairingProposalGenerationFailed
+                throw WalletConnectError.internal(.pairingProposalGenerationFailed)
             }
             sessionPermissions[pending.topic] = params.permissions
             return pending.proposal.signal.params.uri
@@ -47,12 +47,12 @@ public final class WalletConnectClient {
     public func pair(uri: String) throws {
         print("start pair")
         guard let pairingURI = PairingType.UriParameters(uri) else {
-            throw WalletConnectError.PairingParamsUriInitialization
+            throw WalletConnectError.internal(.pairingParamsURIInitialization)
         }
         let proposal = PairingType.Proposal.createFromURI(pairingURI)
         let approved = proposal.proposer.controller != isController
         if !approved {
-            throw WalletConnectError.unauthorizedMatchingController
+            throw WalletConnectError.internal(.unauthorizedMatchingController)
         }
         pairingEngine.respond(to: proposal) { [unowned self] result in
             switch result {
