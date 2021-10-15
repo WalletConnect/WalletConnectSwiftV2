@@ -4,17 +4,17 @@ import WalletConnect
 final class ResponderViewController: UIViewController {
 
     let client: WalletConnectClient = {
-        let options = WalletClientOptions(
+        let metadata = AppMetadata(
+            name: "Example Wallet",
+            description: "wallet description",
+            url: "example.wallet",
+            icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])
+        return WalletConnectClient(
+            metadata: metadata,
             apiKey: "",
-            name: "Example Responder",
             isController: true,
-            metadata: AppMetadata(
-                name: "Example Wallet",
-                description: "wallet description",
-                url: "example.wallet",
-                icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"]),
-            relayURL: URL(string: "wss://relay.walletconnect.org")!)
-        return WalletConnectClient(options: options)
+            relayURL: URL(string: "wss://relay.walletconnect.org")!
+        )
     }()
     
     var sessionItems: [ActiveSessionItem] = []
