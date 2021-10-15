@@ -34,8 +34,9 @@ extension SessionType {
                 self = .settled(value)
             } else if let value = try? values.decode(SessionType.Pending.self, forKey: .pending) {
                 self = .pending(value)
+            } else {
+                throw DecodingError.typeMismatch(Self.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Error"))
             }
-            throw DecodingError.typeMismatch(Self.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Error"))
         }
         
         func encode(to encoder: Encoder) throws {

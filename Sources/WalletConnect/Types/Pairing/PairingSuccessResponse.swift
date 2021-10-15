@@ -8,7 +8,7 @@ extension PairingType {
         let metadata: AppMetadata
     }
     
-    public struct Participant:Codable, Equatable {
+    public struct Participant: Codable, Equatable {
         let publicKey: String
         public let metadata: AppMetadata?
         

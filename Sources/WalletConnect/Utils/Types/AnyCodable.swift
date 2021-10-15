@@ -2,7 +2,7 @@ import Foundation
 
 public struct AnyCodable {
     
-    public let value: Any
+    private let value: Any
     
     private var genericEncoding: ((Encoder) throws -> Void)?
     
