@@ -11,19 +11,22 @@ final class PairingEngine {
     var onPairingApproved: ((PairingType.Settled, String)->())?
     private var metadata: AppMetadata
     private var publishers = [AnyCancellable]()
-
+    private let logger: BaseLogger
+    
     init(relay: Relaying,
          crypto: Crypto,
          subscriber: WCSubscribing,
-         sequencesStore: PairingSequencesStore = PairingUserDefaultsStore(),
+         sequencesStore: PairingSequencesStore,
          isController: Bool,
-         metadata: AppMetadata) {
+         metadata: AppMetadata,
+         logger: BaseLogger) {
         self.relayer = relay
         self.crypto = crypto
         self.wcSubscriber = subscriber
         self.metadata = metadata
         self.sequencesStore = sequencesStore
         self.isController = isController
+        self.logger = logger
         setUpWCRequestHandling()
         restoreSubscriptions()
     }
@@ -87,9 +90,9 @@ final class PairingEngine {
     }
     
     func propose(_ params: ConnectParams) -> PairingType.Pending? {
-        Logger.debug("Propose Pairing")
+        logger.debug("Propose Pairing")
         guard let topic = generateTopic() else {
-            Logger.debug("Could not generate topic")
+            logger.debug("Could not generate topic")
             return nil
         }
         let privateKey = Crypto.X25519.generatePrivateKey()
@@ -154,13 +157,13 @@ final class PairingEngine {
     }
     
     private func handlePairingPayload(_ payload: PairingType.PayloadParams, for topic: String) {
-        Logger.debug("Will handle pairing payload")
+        logger.debug("Will handle pairing payload")
         guard let _ = sequencesStore.get(topic: topic) else {
-            Logger.error("Pairing for the topic: \(topic) does not exist")
+            logger.error("Pairing for the topic: \(topic) does not exist")
             return
         }
         guard payload.request.method == PairingType.PayloadMethods.sessionPropose else {
-            Logger.error("Forbidden WCPairingPayload method")
+            logger.error("Forbidden WCPairingPayload method")
             return
         }
         let sessionProposal = payload.request.params
@@ -171,17 +174,17 @@ final class PairingEngine {
     }
     
     private func handlePairingDelete(_ deleteParams: PairingType.DeleteParams, topic: String) {
-        Logger.debug("-------------------------------------")
-        Logger.debug("Paired client removed pairing - reason: \(deleteParams.reason.message), code: \(deleteParams.reason.code)")
-        Logger.debug("-------------------------------------")
+        logger.debug("-------------------------------------")
+        logger.debug("Paired client removed pairing - reason: \(deleteParams.reason.message), code: \(deleteParams.reason.code)")
+        logger.debug("-------------------------------------")
         sequencesStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
     }
     
     private func handlePairingApprove(approveParams: PairingType.ApproveParams, pendingTopic: String) {
-        Logger.debug("Responder Client approved pairing on topic: \(pendingTopic)")
+        logger.debug("Responder Client approved pairing on topic: \(pendingTopic)")
         guard case let .pending(pairingPending) = sequencesStore.get(topic: pendingTopic) else {
-                  Logger.debug("Could not find pending pairing associated with topic \(pendingTopic)")
+                  logger.debug("Could not find pending pairing associated with topic \(pendingTopic)")
                   return
         }
         let selfPublicKey = Data(hex: pairingPending.`self`.publicKey)

@@ -14,7 +14,7 @@ class PairingEngineTests: XCTestCase {
         relay = MockedRelay()
         subscriber = MockedSubscriber()
         let meta = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
-        engine = PairingEngine(relay: relay, crypto: crypto, subscriber: subscriber, sequencesStore: PairingDictionaryStore(), isController: false, metadata: meta)
+        engine = PairingEngine(relay: relay, crypto: crypto, subscriber: subscriber, sequencesStore: PairingDictionaryStore(logger: MuteLogger()), isController: false, metadata: meta, logger: MuteLogger())
     }
 
     override func tearDown() {

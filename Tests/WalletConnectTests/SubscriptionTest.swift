@@ -8,7 +8,7 @@ class WCSubscriberTest: XCTestCase {
     var subscriber: WCSubscriber!
     override func setUp() {
         relay = MockedRelay()
-        subscriber = WCSubscriber(relay: relay)
+        subscriber = WCSubscriber(relay: relay, logger: MuteLogger())
     }
 
     override func tearDown() {

@@ -30,6 +30,11 @@ class SessionDictionaryStore: DictionaryStore<SessionType.SequenceState>, Sessio
 class DictionaryStore<T> {
     private let serialQueue = DispatchQueue(label: "sequence queue: \(UUID().uuidString)")
     private var sequences = [String: T]()
+    private let logger: BaseLogger
+
+    init(logger: BaseLogger) {
+        self.logger = logger
+    }
     
     func create(topic: String, sequenceState: T) {
         serialQueue.sync {
@@ -61,7 +66,7 @@ class DictionaryStore<T> {
     }
     
     func delete(topic: String) {
-        Logger.debug("Deleted sequence for topic: \(topic)")
+        logger.debug("Deleted sequence for topic: \(topic)")
         serialQueue.async { [weak self] in
             self?.sequences.removeValue(forKey: topic)
         }

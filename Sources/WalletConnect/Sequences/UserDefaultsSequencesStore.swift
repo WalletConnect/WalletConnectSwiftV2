@@ -29,6 +29,11 @@ class SessionUserDefaultsStore: UserDefaultsStore<SessionType.SequenceState>, Se
 
 class UserDefaultsStore<T: Codable> {
     private var defaults = UserDefaults.standard
+    private let logger: BaseLogger
+
+    init(logger: BaseLogger) {
+        self.logger = logger
+    }
     
     func create(topic: String, sequenceState: T) {
         do {
@@ -36,7 +41,7 @@ class UserDefaultsStore<T: Codable> {
             defaults.set(encoded, forKey: topic)
             defaults.dictionaryRepresentation()
         } catch {
-            Logger.error(error)
+            logger.error(error)
         }
     }
     
@@ -55,7 +60,7 @@ class UserDefaultsStore<T: Codable> {
                 let sequenceState = try JSONDecoder().decode(T.self, from: data)
                 return sequenceState
             } catch {
-                Logger.error(error)
+                logger.error(error)
             }
         }
         return nil
