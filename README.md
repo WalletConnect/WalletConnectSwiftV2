@@ -69,6 +69,11 @@ In order to parse JSON-RPC Requests received from "Requester" you can provide yo
 ```
 ##### Respond
 
+```Swift
+            let jsonrpcResponse = JSONRPCResponse<AnyCodable>(id: request.id, result: AnyCodable(responseParams))
+            client.respond(topic: sessionRequest.topic, response: jsonrpcResponse)
+```
+
 ## Installation
 ### Swift Package Manager
 Add .package(url:_:) to your Package.swift:
@@ -78,4 +83,6 @@ dependencies: [
 ],
 ```
 ## Example App
+open `Example/ExampleApp.xcodeproj`
 ## License
+LGPL-3.0
