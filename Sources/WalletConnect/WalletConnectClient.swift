@@ -10,26 +10,28 @@ public final class WalletConnectClient {
     private let relay: Relay
     private let crypto = Crypto()
     private var sessionPermissions: [String: SessionType.Permissions] = [:]
-    
+    var logger: BaseLogger = ConsoleLogger()
     private let secureStorage = SecureStorage()
     
     // MARK: - Public interface
     public init(options: WalletClientOptions) {
         self.isController = options.isController
         self.metadata = options.metadata
-        self.relay = Relay(transport: JSONRPCTransport(url: options.relayURL), crypto: crypto)
-        self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay), isController: isController, metadata: metadata)
-        self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay), isController: isController, metadata: metadata)
+        self.relay = Relay(transport: JSONRPCTransport(url: options.relayURL), crypto: crypto, logger: logger)
+        let sessionSequencesStore = SessionUserDefaultsStore(logger: logger)
+        let pairingSequencesStore = PairingUserDefaultsStore(logger: logger)
+        self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
+        self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
         setUpEnginesCallbacks()
         secureStorage.setAPIKey(options.apiKey)
     }
     
     // for proposer to propose a session to a responder
     public func connect(params: ConnectParams) throws -> String? {
-        Logger.debug("Connecting Application")
+        logger.debug("Connecting Application")
         if let topic = params.pairing?.topic,
            let pairing = pairingEngine.sequencesStore.get(topic: topic) {
-            Logger.debug("Connecting with existing pairing")
+            logger.debug("Connecting with existing pairing")
             fatalError("not implemented")
             return nil
         } else {
@@ -112,7 +114,7 @@ public final class WalletConnectClient {
         pairingEngine.onPairingApproved = { [unowned self] settledPairing, pendingTopic in
             self.delegate?.didSettle(pairing: settledPairing)
             guard let permissions = sessionPermissions[pendingTopic] else {
-                Logger.debug("Cound not find permissions for pending topic: \(pendingTopic)")
+                logger.debug("Cound not find permissions for pending topic: \(pendingTopic)")
                 return
             }
             sessionPermissions[pendingTopic] = nil

@@ -16,16 +16,19 @@ class WCSubscriber: WCSubscribing {
     private let concurrentQueue = DispatchQueue(label: "wc subscriber queue: \(UUID().uuidString)",
                                                 attributes: .concurrent)
     private var publishers = [AnyCancellable]()
+    private let logger: BaseLogger
 
-    init(relay: Relaying) {
+    init(relay: Relaying,
+         logger: BaseLogger) {
         self.relay = relay
+        self.logger = logger
         setSubscribingForPayloads()
     }
 
     // MARK: - Sequence Subscribing Interface
 
     func setSubscription(topic: String) {
-        Logger.debug("Setting Subscription...")
+        logger.debug("Setting Subscription...")
         do {
             let _ = try relay.subscribe(topic: topic, completion: { [unowned self] result in
                 switch result {
@@ -34,11 +37,11 @@ class WCSubscriber: WCSubscribing {
                         self?.subscriptions[topic] = subscriptionId
                     }
                 case .failure(let error):
-                    Logger.error("Could not subscribe for topic: \(topic), error: \(error)")
+                    logger.error("Could not subscribe for topic: \(topic), error: \(error)")
                 }
             })
         } catch {
-            Logger.error("Could not subscribe for topic: \(topic), error: \(error)")
+            logger.error("Could not subscribe for topic: \(topic), error: \(error)")
         }
     }
 
@@ -50,20 +53,20 @@ class WCSubscriber: WCSubscribing {
     }
     
     func removeSubscription(topic: String) {
-        Logger.debug("Removing subscription for topic: \(topic)")
+        logger.debug("Removing subscription for topic: \(topic)")
         guard let subscriptionId = getSubscription(topic: topic) else {
-            Logger.error("Cannot unsubscribe on topic: \(topic)")
+            logger.error("Cannot unsubscribe on topic: \(topic)")
             return
         }
         let _ = try? relay.unsubscribe(topic: topic, id: subscriptionId) { [unowned self] result in
             switch result {
             case .success():
-                Logger.debug("Successfuly unsubscribed on topic: \(topic)")
+                logger.debug("Successfuly unsubscribed on topic: \(topic)")
                 self.concurrentQueue.async(flags: .barrier) { [weak self] in
                     self?.subscriptions[topic] = nil
                 }
             case .failure(_):
-                Logger.error("Failed to remove subscription")
+                logger.error("Failed to remove subscription")
                 return
             }
         }

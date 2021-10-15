@@ -9,7 +9,7 @@ final class RelayTests: XCTestCase {
 
     func makeRelay() -> Relay {
         let transport = JSONRPCTransport(url: url)
-        return Relay(transport: transport, crypto: Crypto())
+        return Relay(transport: transport, crypto: Crypto(), logger: MuteLogger())
     }
     
     func testSubscribe() {

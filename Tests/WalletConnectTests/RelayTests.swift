@@ -15,7 +15,7 @@ class RelayTests: XCTestCase {
         crypto = Crypto(keychain: DictionaryKeychain())
         serialiser = MockedJSONRPCSerialiser()
         transport = MockedJSONRPCTransport()
-        relay = Relay(jsonRpcSerialiser: serialiser, transport: transport, crypto: crypto)
+        relay = Relay(jsonRpcSerialiser: serialiser, transport: transport, crypto: crypto, logger: MuteLogger())
     }
 
     override func tearDown() {

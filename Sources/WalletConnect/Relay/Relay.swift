@@ -49,13 +49,16 @@ class Relay: Relaying {
     private let transportConnectionPublisherSubject = PassthroughSubject<Void, Never>()
     
     private var payloadCancellable: AnyCancellable?
-    
+    private let logger: BaseLogger
+
     init(jsonRpcSerialiser: JSONRPCSerialising = JSONRPCSerialiser(),
          transport: JSONRPCTransporting,
-         crypto: Crypto) {
+         crypto: Crypto,
+         logger: BaseLogger) {
         self.jsonRpcSerialiser = jsonRpcSerialiser
         self.transport = transport
         self.crypto = crypto
+        self.logger = logger
         setUpBindings()
     }
 
@@ -79,12 +82,12 @@ class Relay: Relaying {
         let params = RelayJSONRPC.PublishParams(topic: topic, message: message, ttl: defaultTtl)
         let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.rawValue, params: params)
         let requestJson = try request.json()
-        Logger.debug("Publishing Payload on Topic: \(topic)")
+        logger.debug("Publishing Payload on Topic: \(topic)")
         var cancellable: AnyCancellable!
-        transport.send(requestJson) { error in
+        transport.send(requestJson) { [weak self]error in
             if let error = error {
-                Logger.debug("Failed to Publish Payload")
-                Logger.error(error)
+                self?.logger.debug("Failed to Publish Payload")
+                self?.logger.error(error)
                 cancellable.cancel()
                 completion(.failure(error))
             }
@@ -99,15 +102,15 @@ class Relay: Relaying {
     }
     
     func subscribe(topic: String, completion: @escaping ((Result<String, Error>)->())) throws -> Int64 {
-        Logger.debug("Subscribing on Topic: \(topic)")
+        logger.debug("Subscribing on Topic: \(topic)")
         let params = RelayJSONRPC.SubscribeParams(topic: topic)
         let request = JSONRPCRequest(method: RelayJSONRPC.Method.subscribe.rawValue, params: params)
         let requestJson = try request.json()
         var cancellable: AnyCancellable!
-        transport.send(requestJson) { error in
+        transport.send(requestJson) { [weak self]error in
             if let error = error {
-                Logger.debug("Failed to Subscribe on Topic")
-                Logger.error(error)
+                self?.logger.debug("Failed to Subscribe on Topic")
+                self?.logger.error(error)
                 cancellable.cancel()
                 completion(.failure(error))
             }
@@ -122,15 +125,15 @@ class Relay: Relaying {
     }
     
     func unsubscribe(topic: String, id: String, completion: @escaping ((Result<Void, Error>)->())) throws -> Int64 {
-        Logger.debug("Unsubscribing on Topic: \(topic)")
+        logger.debug("Unsubscribing on Topic: \(topic)")
         let params = RelayJSONRPC.UnsubscribeParams(id: id, topic: topic)
         let request = JSONRPCRequest(method: RelayJSONRPC.Method.unsubscribe.rawValue, params: params)
         let requestJson = try request.json()
         var cancellable: AnyCancellable!
-        transport.send(requestJson) { error in
+        transport.send(requestJson) { [weak self]error in
             if let error = error {
-                Logger.debug("Failed to Unsubscribe on Topic")
-                Logger.error(error)
+                self?.logger.debug("Failed to Unsubscribe on Topic")
+                self?.logger.error(error)
                 cancellable.cancel()
                 completion(.failure(error))
             }
@@ -153,9 +156,9 @@ class Relay: Relaying {
         } else if let response = tryDecode(SubscriptionResponse.self, from: payload) {
             subscriptionResponsePublisherSubject.send(response)
         } else if let response = tryDecode(JSONRPCError.self, from: payload) {
-            Logger.error("Received error message from network, code: \(response.code), message: \(response.message)")
+            logger.error("Received error message from network, code: \(response.code), message: \(response.message)")
         } else {
-            Logger.error("Unexpected response from network")
+            logger.error("Unexpected response from network")
         }
     }
     
@@ -191,7 +194,7 @@ class Relay: Relaying {
             }
             return deserialisedJsonRpcRequest
         } catch {
-            Logger.error(error)
+            logger.error(error)
             return nil
         }
     }
@@ -206,10 +209,10 @@ class Relay: Relaying {
     private func acknowledgeSubscription(requestId: Int64) {
         let response = JSONRPCResponse(id: requestId, result: true)
         let responseJson = try! response.json()
-        transport.send(responseJson) { error in
+        transport.send(responseJson) {[weak self] error in
             if let error = error {
-                Logger.debug("Failed to Respond for request id: \(requestId)")
-                Logger.error(error)
+                self?.logger.debug("Failed to Respond for request id: \(requestId)")
+                self?.logger.error(error)
             }
         }
     }

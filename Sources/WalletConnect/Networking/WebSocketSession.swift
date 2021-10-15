@@ -54,7 +54,7 @@ final class WebSocketSession: NSObject {
         case .string(let text):
             onMessageReceived?(text)
         default:
-            Logger.debug("Transport: Unexpected type of message received")
+            print("Transport: Unexpected type of message received")
         }
     }
 }
