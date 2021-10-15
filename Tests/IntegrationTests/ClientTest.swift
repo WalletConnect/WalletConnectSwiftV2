@@ -59,40 +59,6 @@ final class ClientTests: XCTestCase {
         waitForExpectations(timeout: 3.0, handler: nil)
     }
     
-    func testProposerRequestExchangesSessionPayload() {
-        let requestExpectation = expectation(description: "Responder receives request")
-        let responseExpectation = expectation(description: "Proposer receives response")
-        let method = "eth_signTypedData"
-        let params = "params"
-        let response = "response"
-        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: [method]))
-        let connectParams = ConnectParams(permissions: permissions)
-        let uri = try! proposer.client.connect(params: connectParams)!
-        _ = try! responder.client.pair(uri: uri)
-        responder.onSessionProposal = {[unowned self]  proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [])
-        }
-        proposer.onSessionSettled = {[unowned self]  settledSession in
-            let requestParams = SessionType.PayloadRequestParams(topic: settledSession.topic, method: method, params: params, chainId: nil)
-            self.proposer.client.request(params: requestParams) { result in
-                switch result {
-                case .success(let jsonRpcResponse):
-                    XCTAssertEqual(jsonRpcResponse.result, response)
-                    responseExpectation.fulfill()
-                case .failure(_):
-                    XCTFail()
-                }
-            }
-        }
-        responder.onSessionRequest = {[unowned self]  sessionRequest in
-            XCTAssertEqual(sessionRequest.request.method, method)
-            let jsonrpcResponse = JSONRPCResponse<AnyCodable>(id: sessionRequest.request.id, result: AnyCodable(response))
-            self.responder.client.respond(topic: sessionRequest.topic, response: jsonrpcResponse)
-            requestExpectation.fulfill()
-        }
-        waitForExpectations(timeout: 3.0, handler: nil)
-    }
-    
     func testResponderRejectsSession() {
         let sessionRejectExpectation = expectation(description: "Responded is notified on session rejection")
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
@@ -126,7 +92,53 @@ final class ClientTests: XCTestCase {
         }
         waitForExpectations(timeout: 3.0, handler: nil)
     }
+    
+    func testProposerRequestSessionPayload() {
+        let requestExpectation = expectation(description: "Responder receives request")
+        let responseExpectation = expectation(description: "Proposer receives response")
+        let method = "eth_sendTransaction"
+        let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]
+        let responseParams = "0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c"
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: [method]))
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        _ = try! responder.client.pair(uri: uri)
+        responder.onSessionProposal = {[unowned self]  proposal in
+            self.responder.client.approve(proposal: proposal, accounts: [])
+        }
+        proposer.onSessionSettled = {[unowned self]  settledSession in
+            let requestParams = SessionType.PayloadRequestParams(topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
+            self.proposer.client.request(params: requestParams) { result in
+                switch result {
+                case .success(let jsonRpcResponse):
+                    XCTAssertEqual(jsonRpcResponse.result, responseParams)
+                    responseExpectation.fulfill()
+                case .failure(_):
+                    XCTFail()
+                }
+            }
+        }
+        responder.onSessionRequest = {[unowned self]  sessionRequest in
+            XCTAssertEqual(sessionRequest.request.method, method)
+//            let ethSendTrancastion = sessionRequest.request.params as! [EthSendTransaction]
+//            XCTAssertEqual(ethSendTrancastion, params)
+            let jsonrpcResponse = JSONRPCResponse<AnyCodable>(id: sessionRequest.request.id, result: AnyCodable(responseParams))
+            self.responder.client.respond(topic: sessionRequest.topic, response: jsonrpcResponse)
+            requestExpectation.fulfill()
+        }
+        waitForExpectations(timeout: 3.0, handler: nil)
+    }
 }
+
+public struct EthSendTransaction: Codable, Equatable {
+    public let from: String
+    public let data: String
+    public let value: String
+    public let to: String
+    public let gasPrice: String
+    public let nonce: String
+}
+
 
 class ClientDelegate: WalletConnectClientDelegate {
     var client: WalletConnectClient
@@ -161,3 +173,15 @@ class ClientDelegate: WalletConnectClientDelegate {
         onSessionDelete?()
     }
 }
+
+fileprivate let ethSendTransaction = """
+   {
+      "from":"0xb60e8dd61c5d32be8058bb8eb970870f07233155",
+      "to":"0xd46e8dd67c5d32be8058bb8eb970870f07244567",
+      "data":"0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675",
+      "gas":"0x76c0",
+      "gasPrice":"0x9184e72a000",
+      "value":"0x9184e72a",
+      "nonce":"0x117"
+   }
+"""
