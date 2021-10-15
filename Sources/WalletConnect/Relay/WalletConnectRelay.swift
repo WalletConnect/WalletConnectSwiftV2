@@ -62,18 +62,20 @@ class WalletConnectRelay: WalletConnectRelaying {
                 if let error = error {
                     Logger.error(error)
                 } else {
-                    var cancellable: AnyCancellable!
-                    cancellable = self.wcResponsePublisher
-                        .filter {$0.topic == topic}
-                        .sink { (response) in
-                            cancellable.cancel()
-                            switch response {
-                            case .response(let response):
-                                completion(.success(response.value))
-                            case .error(let error):
-                                completion(.failure(error.value))
-                            }
-                        }
+                    let value = AnyCodable(true)
+                    completion(.success(JSONRPCResponse<AnyCodable>(id: 0, result: value)))
+//                    var cancellable: AnyCancellable!
+//                    cancellable = self.wcResponsePublisher
+//                        .filter {$0.topic == topic}
+//                        .sink { (response) in
+//                            cancellable.cancel()
+//                            switch response {
+//                            case .response(let response):
+//                                completion(.success(response.value))
+//                            case .error(let error):
+//                                completion(.failure(error.value))
+//                            }
+//                        }
                 }
             }
         } catch {

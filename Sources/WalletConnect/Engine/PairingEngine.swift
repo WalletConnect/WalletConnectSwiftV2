@@ -155,7 +155,8 @@ final class PairingEngine {
             }
         }
     }
-    
+    let engineId = UUID().uuidString
+
     private func handlePairingPayload(_ payload: PairingType.PayloadParams, for topic: String, requestId: Int64) {
         logger.debug("Will handle pairing payload")
         guard let _ = sequencesStore.get(topic: topic) else {
@@ -171,6 +172,7 @@ final class PairingEngine {
             crypto.set(agreementKeys: pairingAgreementKeys, topic: sessionProposal.topic)
         }
         let response = JSONRPCResponse<Bool>(id: requestId, result: true)
+        print("pairing engine id \(engineId)")
         relayer.respond(topic: topic, payload: response) { [weak self] in
             self?.onSessionProposal?(sessionProposal)
         }
