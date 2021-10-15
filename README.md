@@ -53,19 +53,11 @@ or
 ```
 #### JSON-RPC Payloads
 #### Receive
-In order to parse JSON-RPC Requests received from "Requester" you can provide your own requests parser or use one from SDK.
+You can parse JSON-RPC Requests received from "Requester" in `didReceive(sessionRequest: SessionRequest)` delegate function.
 
+Request parameters can be type casted based on request method as below:
 ```Swift
-    func didReceive(sessionRequest: SessionRequest) {
-    ...
-        if let request = EthereumJsonrpcRequestsHandler.handle(request: sessionRequest.request) {
-            switch request {
-            case .ethSendTransaction(let ethSendTransaction):
-                ....
-            }
-        }
-    ...
-    }
+            let params = try! sessionRequest.request.params.get([EthSendTransaction].self)
 ```
 ##### Respond
 

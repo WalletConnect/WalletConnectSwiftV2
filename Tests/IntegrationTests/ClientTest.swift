@@ -120,8 +120,8 @@ final class ClientTests: XCTestCase {
         }
         responder.onSessionRequest = {[unowned self]  sessionRequest in
             XCTAssertEqual(sessionRequest.request.method, method)
-//            let ethSendTrancastion = sessionRequest.request.params as! [EthSendTransaction]
-//            XCTAssertEqual(ethSendTrancastion, params)
+            let ethSendTrancastionParams = try! sessionRequest.request.params.get([EthSendTransaction].self)
+            XCTAssertEqual(ethSendTrancastionParams, params)
             let jsonrpcResponse = JSONRPCResponse<AnyCodable>(id: sessionRequest.request.id, result: AnyCodable(responseParams))
             self.responder.client.respond(topic: sessionRequest.topic, response: jsonrpcResponse)
             requestExpectation.fulfill()
