@@ -14,6 +14,16 @@ public final class WalletConnectClient {
     private let secureStorage = SecureStorage()
     
     // MARK: - Public interface
+    public init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL) {
+        self.metadata = metadata
+        self.isController = isController
+        self.relay = Relay(transport: JSONRPCTransport(url: relayURL), crypto: crypto)
+        self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay), isController: isController, metadata: metadata)
+        self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay), isController: isController, metadata: metadata)
+        setUpEnginesCallbacks()
+        secureStorage.setAPIKey(apiKey)
+    }
+    
     public init(options: WalletClientOptions) {
         self.isController = options.isController
         self.metadata = options.metadata
