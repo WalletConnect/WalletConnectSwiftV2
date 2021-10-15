@@ -18,7 +18,7 @@ final class ResponderViewController: UIViewController {
     }()
     
     var sessionItems: [ActiveSessionItem] = []
-    var currentProposal: SessionType.Proposal?
+    var currentProposal: SessionProposal?
     
     private let responderView: ResponderView = {
         ResponderView()
@@ -135,16 +135,16 @@ extension ResponderViewController: WalletConnectClientDelegate {
         
     }
     
-    func didReceive(sessionProposal: SessionType.Proposal) {
+    func didReceive(sessionProposal: SessionProposal) {
         print("[RESPONDER] WC: Did receive session proposal")
-        let appMetadata = sessionProposal.proposer.metadata
+        let appMetadata = sessionProposal.proposer
         let info = SessionInfo(
             name: appMetadata.name ?? "",
             descriptionText: appMetadata.description ?? "",
             dappURL: appMetadata.url ?? "",
             iconURL: appMetadata.icons?.first ?? "",
-            chains: sessionProposal.permissions.blockchain.chains,
-            methods: sessionProposal.permissions.jsonrpc.methods)
+            chains: sessionProposal.permissions.blockchains,
+            methods: sessionProposal.permissions.methods)
         currentProposal = sessionProposal
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread
             self.showSessionProposal(info)

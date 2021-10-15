@@ -127,7 +127,7 @@ extension ProposerViewController: WalletConnectClientDelegate {
         
     }
     
-    func didReceive(sessionProposal: SessionType.Proposal) {
+    func didReceive(sessionProposal: SessionProposal) {
         print("[PROPOSER] WC: Did receive session proposal")
     }
     

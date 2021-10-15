@@ -2,12 +2,22 @@
 import Foundation
 
 public protocol WalletConnectClientDelegate: AnyObject {
-    func didReceive(sessionProposal: SessionType.Proposal)
+    func didReceive(sessionProposal: SessionProposal)
     func didReceive(sessionRequest: SessionRequest)
     func didSettle(session: SessionType.Settled)
     func didSettle(pairing: PairingType.Settled)
     func didReject(sessionPendingTopic: String, reason: SessionType.Reason)
     func didDelete(sessionTopic: String, reason: SessionType.Reason)
+}
+
+public struct SessionProposal {
+    public let proposer: AppMetadata
+    public let permissions: SessionPermissions
+}
+
+public struct SessionPermissions {
+    public let blockchains: [String]
+    public let methods: [String]
 }
 
 public final class WalletConnectClient {
@@ -91,6 +101,10 @@ public final class WalletConnectClient {
         sessionEngine.reject(proposal: proposal, reason: reason)
     }
     
+    // FIXME!!!
+    public func approve(proposal: SessionProposal, accounts: [String]) {}
+    public func reject(proposal: SessionProposal, reason: SessionType.Reason) {}
+    
     // TODO: Upgrade and update methods.
     
     // for proposer to request JSON-RPC
@@ -122,7 +136,7 @@ public final class WalletConnectClient {
     
     private func setUpEnginesCallbacks() {
         pairingEngine.onSessionProposal = { [unowned self] proposal in
-            self.delegate?.didReceive(sessionProposal: proposal)
+            self.proposeSession(proposal: proposal)
         }
         pairingEngine.onPairingApproved = { [unowned self] settledPairing, pendingTopic in
             self.delegate?.didSettle(pairing: settledPairing)
@@ -146,6 +160,17 @@ public final class WalletConnectClient {
             self.delegate?.didDelete(sessionTopic: topic, reason: reason)
             
         }
+    }
+    
+    private func proposeSession(proposal: SessionType.Proposal) {
+        let sessionProposal = SessionProposal(
+            proposer: proposal.proposer.metadata,
+            permissions: SessionPermissions(
+                blockchains: proposal.permissions.blockchain.chains,
+                methods: proposal.permissions.jsonrpc.methods
+            )
+        )
+        delegate?.didReceive(sessionProposal: sessionProposal)
     }
 }
 
