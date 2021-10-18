@@ -69,6 +69,7 @@ final class WebSocketSessionTests: XCTestCase {
             XCTAssertNotNil(error)
             XCTAssert(error?.asNetworkError?.isSendMessageError == true)
         }
+        XCTAssertTrue(webSocketTaskMock.didCallSend)
     }
     
     func testReceiveMessageSuccess() {
