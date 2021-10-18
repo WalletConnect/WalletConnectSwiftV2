@@ -32,9 +32,9 @@ final class JSONRPCTransport: NSObject, JSONRPCTransporting {
         socket.connect(on: url)
     }
 
-    func send(_ string: String, completion: @escaping (Error?)->())  {
+    func send(_ string: String, completion: @escaping (Error?) -> Void) { // Change to non-optional?
         DispatchQueue.global().async {
-            self.socket.send(string)
+            self.socket.send(string, completionHandler: completion)
         }
     }
     

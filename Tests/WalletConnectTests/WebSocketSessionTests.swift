@@ -1,6 +1,39 @@
 import XCTest
 @testable import WalletConnect
 
+extension Error {
+    
+    var asNetworkError: NetworkError? {
+        return self as? NetworkError
+    }
+}
+
+extension NSError {
+    
+    static func mock(code: Int = -9999) -> NSError {
+        NSError(domain: "com.walletconnect.sdk.tests.error", code: code, userInfo: nil)
+    }
+}
+
+extension NetworkError {
+
+    var isWebSocketError: Bool {
+        guard case .webSocketNotConnected = self else { return false }
+        return true
+    }
+    
+    var isSendMessageError: Bool {
+        guard case .sendMessageFailed = self else { return false }
+        return true
+    }
+    
+    var isReceiveMessageError: Bool {
+        guard case .receiveMessageFailure = self else { return false }
+        return true
+    }
+}
+
+
 final class WebSocketSessionTests: XCTestCase {
     
     var sut: WebSocketSession!
@@ -40,34 +73,35 @@ final class WebSocketSessionTests: XCTestCase {
         XCTAssertTrue(webSocketTaskMock.didCallCancel)
     }
     
-    func testSendMessageFailsIfNotConnected() {
-        sut.send("")
-        XCTAssertFalse(webSocketTaskMock.didCallSend)
-    }
-    
-    func testSendMessageSuccess() {
+    func testSendMessageSuccessCallbacksNoError() {
         let expectedMessage = "message"
-        var didCallbackError = false
-        sut.onError = { _ in didCallbackError = true }
         
         sut.connect(on: URL.stub())
-        sut.send(expectedMessage)
+        sut.send(expectedMessage) { error in
+            XCTAssertNil(error)
+        }
         
         XCTAssertTrue(webSocketTaskMock.didCallSend)
-        XCTAssertFalse(didCallbackError)
         guard case .string(let message) = webSocketTaskMock.lastMessageSent else { XCTFail(); return }
         XCTAssertEqual(message, expectedMessage)
     }
+    
+    func testSendMessageFailsIfNotConnected() {
+        sut.send("") { error in
+            XCTAssertNotNil(error)
+            XCTAssert(error?.asNetworkError?.isWebSocketError == true)
+        }
+        XCTAssertFalse(webSocketTaskMock.didCallSend)
+    }
 
     func testSendMessageFailure() {
-        var didCallbackError = false
-        sut.onError = { _ in didCallbackError = true }
-        webSocketTaskMock.sendMessageError = NSError(domain: "", code: -9999, userInfo: nil)
+        webSocketTaskMock.sendMessageError = NSError.mock()
         
         sut.connect(on: URL.stub())
-        sut.send("")
-        
-        XCTAssertTrue(didCallbackError)
+        sut.send("") { error in
+            XCTAssertNotNil(error)
+            XCTAssert(error?.asNetworkError?.isSendMessageError == true)
+        }
     }
     
     func testReceiveMessageSuccess() {
@@ -86,7 +120,7 @@ final class WebSocketSessionTests: XCTestCase {
         var callbackMessage: String? = nil
         sut.onMessageReceived = { callbackMessage = $0 }
         var didCallbackError = false
-        sut.onError = { _ in didCallbackError = true }
+        sut.onMessageError = { _ in didCallbackError = true }
         webSocketTaskMock.receiveMessageResult = .success(.data("message".data(using: .utf8)!))
         
         sut.connect(on: URL.stub())
@@ -97,13 +131,14 @@ final class WebSocketSessionTests: XCTestCase {
     }
     
     func testReceiveMessageFailure() {
-        var didCallbackError = false
-        sut.onError = { _ in didCallbackError = true }
-        webSocketTaskMock.receiveMessageResult = .failure(NSError(domain: "", code: -9999, userInfo: nil))
+        sut.onMessageError = { error in
+            XCTAssertNotNil(error)
+            XCTAssert(error.asNetworkError?.isReceiveMessageError == true)
+        }
+        webSocketTaskMock.receiveMessageResult = .failure(NSError.mock())
         
         sut.connect(on: URL.stub())
         
-        XCTAssertTrue(didCallbackError)
         XCTAssert(webSocketTaskMock.receiveCallsCount == 2)
     }
 }

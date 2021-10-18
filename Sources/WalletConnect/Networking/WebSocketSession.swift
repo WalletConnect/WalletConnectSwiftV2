@@ -3,7 +3,7 @@ import Foundation
 final class WebSocketSession: NSObject {
     
     var onMessageReceived: ((String) -> ())?
-    var onError: ((Error) -> ())?
+    var onMessageError: ((Error) -> ())?
     
     var isConnected: Bool {
         webSocketTask != nil
@@ -29,11 +29,17 @@ final class WebSocketSession: NSObject {
         webSocketTask = nil
     }
     
-    func send(_ message: String) {
-        webSocketTask?.send(.string(message)) { [weak self] error in
-            if let error = error {
-                self?.onError?(error) // TODO: Handle different error types
+    func send(_ message: String, completionHandler: @escaping ((Error?) -> Void)) {
+        if let webSocketTask = webSocketTask {
+            webSocketTask.send(.string(message)) { error in
+                if let error = error {
+                    completionHandler(NetworkError.sendMessageFailed(error))
+                } else {
+                    completionHandler(nil)
+                }
             }
+        } else {
+            completionHandler(NetworkError.webSocketNotConnected)
         }
     }
     
@@ -43,7 +49,7 @@ final class WebSocketSession: NSObject {
             case .success(let message):
                 self?.handleMessage(message)
             case .failure(let error):
-                self?.onError?(error) // TODO: Handle different error types
+                self?.onMessageError?(NetworkError.receiveMessageFailure(error))
             }
             self?.listen()
         }
