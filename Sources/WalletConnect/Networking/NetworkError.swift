@@ -9,11 +9,11 @@ extension NetworkError {
     var localizedDescription: String {
         switch self {
         case .webSocketNotConnected:
-            return ""
+            return "Web socket is not connected to any URL."
         case .sendMessageFailed(let error):
-            return ""
+            return "Failed to send a message through the web socket: \(error)"
         case .receiveMessageFailure(let error):
-            return ""
+            return "An error happened when receiving a web socket message: \(error)"
         }
     }
 }
