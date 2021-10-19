@@ -5,19 +5,18 @@ import Combine
 import XCTest
 @testable import WalletConnect
 
-class RelayTests: XCTestCase {
-    var relay: WakuNetworkRelay!
+class WakuRelayTests: XCTestCase {
+    var wakuRelay: WakuNetworkRelay!
     var transport: MockedJSONRPCTransport!
-    private var publishers = [AnyCancellable]()
 
     override func setUp() {
         transport = MockedJSONRPCTransport()
-        let logger = ConsoleLogger()
-        relay = WakuNetworkRelay(transport: transport, logger: logger)
+        let logger = MuteLogger()
+        wakuRelay = WakuNetworkRelay(transport: transport, logger: logger)
     }
 
     override func tearDown() {
-        relay = nil
+        wakuRelay = nil
         transport = nil
     }
     
@@ -28,7 +27,7 @@ class RelayTests: XCTestCase {
         let subscriptionId = "sub-id"
         let subscriptionParams = RelayJSONRPC.SubscriptionParams(id: subscriptionId, data: RelayJSONRPC.SubscriptionData(topic: topic, message: message))
         let subscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>(id: 12345, method: RelayJSONRPC.Method.subscription.rawValue, params: subscriptionParams)
-        relay.onMessage = { subscriptionTopic, subscriptionMessage in
+        wakuRelay.onMessage = { subscriptionTopic, subscriptionMessage in
             XCTAssertEqual(subscriptionMessage, message)
             XCTAssertEqual(subscriptionTopic, topic)
             subscriptionExpectation.fulfill()
@@ -38,12 +37,21 @@ class RelayTests: XCTestCase {
     }
     
     func testCompletionOnSubscribe() {
-        
+        let subscribeExpectation = expectation(description: "subscribe completes with no error")
+        let topic = "0987"
+        let requestId = wakuRelay.subscribe(topic: topic) { error in
+            XCTAssertNil(error)
+            subscribeExpectation.fulfill()
+        }
+        let subscriptionId = "sub-id"
+        let subscribeResponse = JSONRPCResponse<String>(id: requestId, result: subscriptionId)
+        transport.onMessage?(try! subscribeResponse.json())
+        waitForExpectations(timeout: 0.001, handler: nil)
     }
     
     func testPublishRequestAcknowledge() {
         let acknowledgeExpectation = expectation(description: "completion with no error on waku request acknowledge after publish")
-        let requestId = relay.publish(topic: "", payload: "{}") { error in
+        let requestId = wakuRelay.publish(topic: "", payload: "{}") { error in
             acknowledgeExpectation.fulfill()
             XCTAssertNil(error)
         }
@@ -55,8 +63,8 @@ class RelayTests: XCTestCase {
     func testUnsubscribeRequestAcknowledge() {
         let acknowledgeExpectation = expectation(description: "completion with no error on waku request acknowledge after unsubscribe")
         let topic = "1234"
-        relay.subscriptions[topic] = ""
-        let requestId = relay.unsubscribe(topic: topic) { error in
+        wakuRelay.subscriptions[topic] = ""
+        let requestId = wakuRelay.unsubscribe(topic: topic) { error in
             XCTAssertNil(error)
             acknowledgeExpectation.fulfill()
         }
@@ -66,19 +74,19 @@ class RelayTests: XCTestCase {
     }
     
     func testSendOnPublish() {
-        relay.publish(topic: "", payload: "") {_ in }
+        wakuRelay.publish(topic: "", payload: "") {_ in }
         XCTAssertTrue(transport.sent)
     }
     
     func testSendOnSubscribe() {
-        relay.subscribe(topic: "") {_ in }
+        wakuRelay.subscribe(topic: "") {_ in }
         XCTAssertTrue(transport.sent)
     }
     
     func testSendOnUnsubscribe() {
         let topic = "123"
-        relay.subscriptions[topic] = ""
-        relay.unsubscribe(topic: topic) {_ in }
+        wakuRelay.subscriptions[topic] = ""
+        wakuRelay.unsubscribe(topic: topic) {_ in }
         XCTAssertTrue(transport.sent)
     }
 }
