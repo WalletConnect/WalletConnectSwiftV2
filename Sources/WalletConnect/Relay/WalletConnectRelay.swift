@@ -6,7 +6,7 @@ protocol WalletConnectRelaying {
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var clientSynchJsonRpcPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
     func publish(topic: String, payload: Encodable, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCError>)->()))
-    func respond(topic: String, payload: Encodable, completion: @escaping (()->()))
+    func respond(topic: String, payload: Encodable, completion: @escaping ((Error?)->()))
     func subscribe(topic: String)
     func unsubscribe(topic: String)
 }
@@ -65,11 +65,11 @@ class WalletConnectRelay: WalletConnectRelaying {
                 if let error = error {
                     self.logger.error(error)
                 } else {
-//                    let value = AnyCodable(true)
-//                    completion(.success(JSONRPCResponse<AnyCodable>(id: 0, result: value)))
                     var cancellable: AnyCancellable!
                     cancellable = self.wcResponsePublisher
-                        .filter {$0.topic == topic}
+                        .filter {
+                            $0.topic == topic
+                        }
                         .sink { (response) in
                             cancellable.cancel()
                             switch response {
@@ -86,13 +86,13 @@ class WalletConnectRelay: WalletConnectRelaying {
         }
     }
     
-    func respond(topic: String, payload: Encodable, completion: @escaping (()->())) {
+    func respond(topic: String, payload: Encodable, completion: @escaping ((Error?)->())) {
         let message = try! serialise(topic: topic, jsonRpc: payload)
         logger.debug("Responding....topic: \(topic)")
         networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
             self?.logger.debug("responded")
             //TODO
-            completion()
+            completion(error)
         }
     }
     
@@ -145,7 +145,7 @@ class WalletConnectRelay: WalletConnectRelaying {
             }
             return deserialisedJsonRpcRequest
         } catch {
-            logger.error(error)
+            logger.debug("Type \(T.self) does not match the payload")
             return nil
         }
     }

@@ -91,18 +91,3 @@ class WakuRelayTests: XCTestCase {
     }
 }
 
-fileprivate let testPayload =
-"""
-{
-   "id":1630300527198334,
-   "jsonrpc":"2.0",
-   "method":"waku_subscription",
-   "params":{
-      "id":"0847f4e1dd19cf03a43dc7525f39896b630e9da33e4683c8efbc92ea671b5e07",
-      "data":{
-         "topic":"fefc3dc39cacbc562ed58f92b296e2d65a6b07ef08992b93db5b3cb86280635a",
-         "message":"7b226964223a313633303330303532383030302c226a736f6e727063223a22322e30222c22726573756c74223a747275657d"
-      }
-   }
-}
-"""
