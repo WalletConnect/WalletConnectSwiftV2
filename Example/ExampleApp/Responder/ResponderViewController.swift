@@ -155,11 +155,11 @@ extension ResponderViewController: WalletConnectClientDelegate {
         print("[RESPONDER] WC: Did receive session request")
     }
     
-    func didSettle(session: SessionType.Settled) {
+    func didSettle(session: Session) {
         print("[RESPONDER] WC: Did settle session")
         let settledSessions = client.getSettledSessions()
         let activeSessions = settledSessions.map { session -> ActiveSessionItem in
-            let app = session.peer.metadata
+            let app = session.peer
             return ActiveSessionItem(
                 dappName: app?.name ?? "",
                 dappURL: app?.url ?? "",

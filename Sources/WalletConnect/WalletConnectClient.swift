@@ -4,7 +4,7 @@ import Foundation
 public protocol WalletConnectClientDelegate: AnyObject {
     func didReceive(sessionProposal: SessionProposal)
     func didReceive(sessionRequest: SessionRequest)
-    func didSettle(session: SessionType.Settled)
+    func didSettle(session: Session)
     func didSettle(pairing: PairingType.Settled)
     func didReject(sessionPendingTopic: String, reason: SessionType.Reason)
     func didDelete(sessionTopic: String, reason: SessionType.Reason)
@@ -79,7 +79,8 @@ public final class WalletConnectClient {
         sessionEngine.approve(proposal: proposal.proposal, accounts: accounts) { [unowned self] result in
             switch result {
             case .success(let settledSession):
-                self.delegate?.didSettle(session: settledSession)
+                let session = Session(topic: settledSession.topic, peer: settledSession.peer.metadata)
+                self.delegate?.didSettle(session: session)
             case .failure(let error):
                 print(error)
             }
@@ -87,13 +88,9 @@ public final class WalletConnectClient {
     }
     
     // for responder to reject a session proposal
-    public func reject(proposal: SessionType.Proposal, reason: SessionType.Reason) {
-        sessionEngine.reject(proposal: proposal, reason: reason)
+    public func reject(proposal: SessionProposal, reason: SessionType.Reason) {
+        sessionEngine.reject(proposal: proposal.proposal, reason: reason)
     }
-    
-    // FIXME!!!
-//    public func approve(proposal: SessionProposal, accounts: [String]) {}
-    public func reject(proposal: SessionProposal, reason: SessionType.Reason) {}
     
     // TODO: Upgrade and update methods.
     
@@ -142,7 +139,8 @@ public final class WalletConnectClient {
             self.sessionEngine.proposeSession(settledPairing: settledPairing, permissions: permissions)
         }
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
-            self.delegate?.didSettle(session: settledSession)
+            let session = Session(topic: settledSession.topic, peer: settledSession.peer.metadata)
+            self.delegate?.didSettle(session: session)
         }
         sessionEngine.onSessionRejected = { [unowned self] pendingTopic, reason in
             self.delegate?.didReject(sessionPendingTopic: pendingTopic, reason: reason)

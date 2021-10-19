@@ -135,7 +135,7 @@ extension ProposerViewController: WalletConnectClientDelegate {
         print("[PROPOSER] WC: Did receive session request")
     }
     
-    func didSettle(session: SessionType.Settled) {
+    func didSettle(session: Session) {
         print("[PROPOSER] WC: Did settle session")
     }
     
