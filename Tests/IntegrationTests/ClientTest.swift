@@ -4,7 +4,7 @@ import XCTest
 @testable import WalletConnect
 
 final class ClientTests: XCTestCase {
-    let url = URL(string: "wss://staging.walletconnect.org")!
+    let url = URL(string: "wss://staging.walletconnect.org")! // TODO: Change to new URL
     var proposer: ClientDelegate!
     var responder: ClientDelegate!
     override func setUp() {
@@ -13,8 +13,11 @@ final class ClientTests: XCTestCase {
     }
 
     static func makeClientDelegate(isController: Bool, url: URL) -> ClientDelegate {
-        let options = WalletClientOptions(apiKey: "", name: "", isController: isController, metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil), relayURL: url)
-        let client = WalletConnectClient(options: options)
+        let client = WalletConnectClient(
+            metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil),
+            apiKey: "",
+            isController: isController,
+            relayURL: url)
         client.pairingEngine.sequencesStore = PairingDictionaryStore(logger: MuteLogger())
         client.sessionEngine.sequencesStore = SessionDictionaryStore(logger: MuteLogger())
         return ClientDelegate(client: client)
@@ -144,7 +147,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     var client: WalletConnectClient
     var onSessionSettled: ((SessionType.Settled)->())?
     var onPairingSettled: ((PairingType.Settled)->())?
-    var onSessionProposal: ((SessionType.Proposal)->())?
+    var onSessionProposal: ((SessionProposal)->())?
     var onSessionRequest: ((SessionRequest)->())?
     var onSessionRejected: ((String, SessionType.Reason)->())?
     var onSessionDelete: (()->())?
@@ -163,7 +166,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didSettle(pairing: PairingType.Settled) {
         onPairingSettled?(pairing)
     }
-    func didReceive(sessionProposal: SessionType.Proposal) {
+    func didReceive(sessionProposal: SessionProposal) {
         onSessionProposal?(sessionProposal)
     }
     func didReceive(sessionRequest: SessionRequest) {

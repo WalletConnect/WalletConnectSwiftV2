@@ -10,16 +10,6 @@ public protocol WalletConnectClientDelegate: AnyObject {
     func didDelete(sessionTopic: String, reason: SessionType.Reason)
 }
 
-public struct SessionProposal {
-    public let proposer: AppMetadata
-    public let permissions: SessionPermissions
-}
-
-public struct SessionPermissions {
-    public let blockchains: [String]
-    public let methods: [String]
-}
-
 public final class WalletConnectClient {
     private let metadata: AppMetadata
     public weak var delegate: WalletConnectClientDelegate?
@@ -85,8 +75,8 @@ public final class WalletConnectClient {
     }
     
     // for responder to approve a session proposal
-    public func approve(proposal: SessionType.Proposal, accounts: [String]) {
-        sessionEngine.approve(proposal: proposal, accounts: accounts) { [unowned self] result in
+    public func approve(proposal: SessionProposal, accounts: [String]) {
+        sessionEngine.approve(proposal: proposal.proposal, accounts: accounts) { [unowned self] result in
             switch result {
             case .success(let settledSession):
                 self.delegate?.didSettle(session: settledSession)
@@ -102,7 +92,7 @@ public final class WalletConnectClient {
     }
     
     // FIXME!!!
-    public func approve(proposal: SessionProposal, accounts: [String]) {}
+//    public func approve(proposal: SessionProposal, accounts: [String]) {}
     public func reject(proposal: SessionProposal, reason: SessionType.Reason) {}
     
     // TODO: Upgrade and update methods.
@@ -124,8 +114,12 @@ public final class WalletConnectClient {
         sessionEngine.delete(topic: topic, reason: reason)
     }
     
-    public func getSettledSessions() -> [SessionType.Settled] {
-        return sessionEngine.sequencesStore.getSettled()
+    public func getSettledSessions() -> [Session] {
+        let settledSessions = sessionEngine.sequencesStore.getSettled()
+        let sessions = settledSessions.map {
+            Session(topic: $0.topic, peer: $0.peer.metadata)
+        }
+        return sessions
     }
     
     public func getSettledPairings() -> [PairingType.Settled] {
@@ -167,8 +161,8 @@ public final class WalletConnectClient {
             proposer: proposal.proposer.metadata,
             permissions: SessionPermissions(
                 blockchains: proposal.permissions.blockchain.chains,
-                methods: proposal.permissions.jsonrpc.methods
-            )
+                methods: proposal.permissions.jsonrpc.methods),
+            proposal: proposal
         )
         delegate?.didReceive(sessionProposal: sessionProposal)
     }
