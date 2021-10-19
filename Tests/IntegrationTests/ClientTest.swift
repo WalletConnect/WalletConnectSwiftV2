@@ -116,7 +116,8 @@ final class ClientTests: XCTestCase {
             self.proposer.client.request(params: requestParams) { result in
                 switch result {
                 case .success(let jsonRpcResponse):
-                    XCTAssertEqual(jsonRpcResponse.result, responseParams)
+                    let response = try! jsonRpcResponse.result.get(String.self)
+                    XCTAssertEqual(response, responseParams)
                     responseExpectation.fulfill()
                 case .failure(_):
                     XCTFail()

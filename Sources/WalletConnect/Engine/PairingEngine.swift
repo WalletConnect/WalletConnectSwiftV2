@@ -81,7 +81,7 @@ final class PairingEngine {
             switch result {
             case .success:
                 self?.wcSubscriber.removeSubscription(topic: proposal.topic)
-                print("Success on wc_pairingApprove")
+                self?.logger.debug("Success on wc_pairingApprove")
                 completion(.success(settledPairing))
             case .failure(let error):
                 completion(.failure(error))
@@ -155,7 +155,6 @@ final class PairingEngine {
             }
         }
     }
-    let engineId = UUID().uuidString
 
     private func handlePairingPayload(_ payload: PairingType.PayloadParams, for topic: String, requestId: Int64) {
         logger.debug("Will handle pairing payload")
@@ -172,7 +171,6 @@ final class PairingEngine {
             crypto.set(agreementKeys: pairingAgreementKeys, topic: sessionProposal.topic)
         }
         let response = JSONRPCResponse<Bool>(id: requestId, result: true)
-        print("pairing engine id \(engineId)")
         relayer.respond(topic: topic, payload: response) { [weak self] in
             self?.onSessionProposal?(sessionProposal)
         }

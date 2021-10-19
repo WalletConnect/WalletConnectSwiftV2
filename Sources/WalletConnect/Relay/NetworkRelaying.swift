@@ -34,7 +34,10 @@ class WakuNetworkRelay: NetworkRelaying {
         requestAcknowledgePublisherSubject.eraseToAnyPublisher()
     }
     private let requestAcknowledgePublisherSubject = PassthroughSubject<JSONRPCResponse<Bool>, Never>()
-    init(transport: JSONRPCTransporting) {
+    let logger: BaseLogger
+    init(transport: JSONRPCTransporting,
+         logger: BaseLogger) {
+        self.logger = logger
         self.transport = transport
         setUpBindings()
     }
@@ -43,12 +46,12 @@ class WakuNetworkRelay: NetworkRelaying {
         let params = RelayJSONRPC.PublishParams(topic: topic, message: payload, ttl: defaultTtl)
         let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.rawValue, params: params)
         let requestJson = try! request.json()
-        Logger.debug("Publishing Payload on Topic: \(topic)")
+        logger.debug("waku: Publishing Payload on Topic: \(topic)")
         var cancellable: AnyCancellable!
-        transport.send(requestJson) { error in
+        transport.send(requestJson) { [weak self] error in
             if let error = error {
-                Logger.debug("Failed to Publish Payload")
-                Logger.error(error)
+                self?.logger.debug("Failed to Publish Payload")
+                self?.logger.error(error)
                 cancellable.cancel()
                 completion(error)
             } else {
@@ -65,14 +68,14 @@ class WakuNetworkRelay: NetworkRelaying {
     }
     
     @discardableResult func subscribe(topic: String, completion: @escaping (Error?) -> ()) -> Int64 {
-        Logger.debug("Subscribing on Topic: \(topic)")
+        logger.debug("waku: Subscribing on Topic: \(topic)")
         let params = RelayJSONRPC.SubscribeParams(topic: topic)
         let request = JSONRPCRequest(method: RelayJSONRPC.Method.subscribe.rawValue, params: params)
         let requestJson = try! request.json()
         var cancellable: AnyCancellable!
-        transport.send(requestJson) { error in
+        transport.send(requestJson) { [weak self] error in
             if let error = error {
-                Logger.error("Failed to Subscribe on Topic \(error)")
+                self?.logger.error("Failed to Subscribe on Topic \(error)")
                 cancellable.cancel()
                 completion(error)
             } else {
@@ -94,19 +97,19 @@ class WakuNetworkRelay: NetworkRelaying {
             completion(WalletConnectError.subscriptionIdNotFound)
             return nil
         }
-        Logger.debug("Unsubscribing on Topic: \(topic)")
+        logger.debug("waku: Unsubscribing on Topic: \(topic)")
         let params = RelayJSONRPC.UnsubscribeParams(id: subscriptionId, topic: topic)
         let request = JSONRPCRequest(method: RelayJSONRPC.Method.unsubscribe.rawValue, params: params)
         let requestJson = try! request.json()
         var cancellable: AnyCancellable!
-        transport.send(requestJson) { error in
+        transport.send(requestJson) { [weak self] error in
             if let error = error {
-                Logger.debug("Failed to Unsubscribe on Topic")
-                Logger.error(error)
+                self?.logger.debug("Failed to Unsubscribe on Topic")
+                self?.logger.error(error)
                 cancellable.cancel()
                 completion(error)
             } else {
-                self.concurrentQueue.async(flags: .barrier) { [weak self] in
+                self?.concurrentQueue.async(flags: .barrier) {
                     self?.subscriptions[topic] = nil
                 }
                 completion(nil)
@@ -140,9 +143,9 @@ class WakuNetworkRelay: NetworkRelaying {
         } else if let response = tryDecode(SubscriptionResponse.self, from: payload) {
             subscriptionResponsePublisherSubject.send(response)
         } else if let response = tryDecode(JSONRPCError.self, from: payload) {
-            Logger.error("Received error message from network, code: \(response.code), message: \(response.message)")
+            logger.error("Received error message from network, code: \(response.code), message: \(response.message)")
         } else {
-            Logger.error("Unexpected response from network")
+            logger.error("Unexpected response from network")
         }
     }
     
@@ -158,10 +161,10 @@ class WakuNetworkRelay: NetworkRelaying {
     private func acknowledgeSubscription(requestId: Int64) {
         let response = JSONRPCResponse(id: requestId, result: true)
         let responseJson = try! response.json()
-        transport.send(responseJson) { error in
+        transport.send(responseJson) { [weak self] error in
             if let error = error {
-                Logger.debug("Failed to Respond for request id: \(requestId)")
-                Logger.error(error)
+                self?.logger.debug("Failed to Respond for request id: \(requestId)")
+                self?.logger.error(error)
             }
         }
     }

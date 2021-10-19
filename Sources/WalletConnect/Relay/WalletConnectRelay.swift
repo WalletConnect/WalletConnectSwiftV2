@@ -44,13 +44,16 @@ class WalletConnectRelay: WalletConnectRelaying {
         wcResponsePublisherSubject.eraseToAnyPublisher()
     }
     private let wcResponsePublisherSubject = PassthroughSubject<WCResponse, Never>()
+    let logger: BaseLogger
     
     init(networkRelayer: NetworkRelaying,
          jsonRpcSerialiser: JSONRPCSerialising = JSONRPCSerialiser(),
-         crypto: Crypto) {
+         crypto: Crypto,
+         logger: BaseLogger) {
         self.networkRelayer = networkRelayer
         self.jsonRpcSerialiser = jsonRpcSerialiser
         self.crypto = crypto
+        self.logger = logger
         setUpPublishers()
     }
 
@@ -60,51 +63,51 @@ class WalletConnectRelay: WalletConnectRelaying {
             networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
                 guard let self = self else {return}
                 if let error = error {
-                    Logger.error(error)
+                    self.logger.error(error)
                 } else {
-                    let value = AnyCodable(true)
-                    completion(.success(JSONRPCResponse<AnyCodable>(id: 0, result: value)))
-//                    var cancellable: AnyCancellable!
-//                    cancellable = self.wcResponsePublisher
-//                        .filter {$0.topic == topic}
-//                        .sink { (response) in
-//                            cancellable.cancel()
-//                            switch response {
-//                            case .response(let response):
-//                                completion(.success(response.value))
-//                            case .error(let error):
-//                                completion(.failure(error.value))
-//                            }
-//                        }
+//                    let value = AnyCodable(true)
+//                    completion(.success(JSONRPCResponse<AnyCodable>(id: 0, result: value)))
+                    var cancellable: AnyCancellable!
+                    cancellable = self.wcResponsePublisher
+                        .filter {$0.topic == topic}
+                        .sink { (response) in
+                            cancellable.cancel()
+                            switch response {
+                            case .response(let response):
+                                completion(.success(response.value))
+                            case .error(let error):
+                                completion(.failure(error.value))
+                            }
+                        }
                 }
             }
         } catch {
-            Logger.error(error)
+            logger.error(error)
         }
     }
     
     func respond(topic: String, payload: Encodable, completion: @escaping (()->())) {
         let message = try! serialise(topic: topic, jsonRpc: payload)
-        print("Responding....topic: \(topic)")
+        logger.debug("Responding....topic: \(topic)")
         networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
-            print("responded")
+            self?.logger.debug("responded")
             //TODO
             completion()
         }
     }
     
     func subscribe(topic: String)  {
-        networkRelayer.subscribe(topic: topic) { error in
+        networkRelayer.subscribe(topic: topic) { [weak self] error in
             if let error = error {
-                Logger.error(error)
+                self?.logger.error(error)
             }
         }
     }
 
     func unsubscribe(topic: String) {
-        networkRelayer.unsubscribe(topic: topic) { error in
+        networkRelayer.unsubscribe(topic: topic) { [weak self] error in
             if let error = error {
-                Logger.error(error)
+                self?.logger.error(error)
             }
         }
     }
@@ -142,7 +145,7 @@ class WalletConnectRelay: WalletConnectRelaying {
             }
             return deserialisedJsonRpcRequest
         } catch {
-            Logger.error(error)
+            logger.error(error)
             return nil
         }
     }

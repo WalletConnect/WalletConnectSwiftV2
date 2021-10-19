@@ -13,11 +13,8 @@ final class SessionEngine {
     var onSessionRejected: ((String, SessionType.Reason)->())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
     private var publishers = [AnyCancellable]()
-<<<<<<< HEAD
+
     private let logger: BaseLogger
-=======
-    let engineId = UUID().uuidString
->>>>>>> 73e84b9 (savepoint)
 
     init(relay: WalletConnectRelaying,
          crypto: Crypto,
@@ -38,13 +35,7 @@ final class SessionEngine {
     }
     
     func approve(proposal: SessionType.Proposal, accounts: [String], completion: @escaping (Result<SessionType.Settled, Error>) -> Void) {
-<<<<<<< HEAD
         logger.debug("Approve session")
-=======
-        Logger.debug("Approve session")
-        print("approve in engine \(engineId)")
-
->>>>>>> 73e84b9 (savepoint)
         let privateKey = Crypto.X25519.generatePrivateKey()
         let selfPublicKey = privateKey.publicKey.toHexString()
         
@@ -124,13 +115,7 @@ final class SessionEngine {
             logger.debug("Could not generate topic")
             return
         }
-<<<<<<< HEAD
         logger.debug("Propose Session on topic: \(pendingSessionTopic)")
-=======
-        print("proposeSession in engine \(engineId)")
-
-        Logger.debug("Propose Session on topic: \(pendingSessionTopic)")
->>>>>>> 73e84b9 (savepoint)
         let privateKey = Crypto.X25519.generatePrivateKey()
         let publicKey = privateKey.publicKey.toHexString()
         crypto.set(privateKey: privateKey)
@@ -147,7 +132,7 @@ final class SessionEngine {
         relayer.publish(topic: settledPairing.topic, payload: pairingPayloadRequest) { [unowned self] result in
             switch result {
             case .success:
-                logger.debug("Session Proposal success response -  pub \(privateKey.publicKey.toHexString())- in engine \(engineId)")
+                logger.debug("Session Proposal success response -  pub \(privateKey.publicKey.toHexString())")
                 let pairingAgreementKeys = crypto.getAgreementKeys(for: settledPairing.topic)!
                 crypto.set(agreementKeys: pairingAgreementKeys, topic: proposal.topic)
             case .failure(let error):
@@ -300,7 +285,7 @@ final class SessionEngine {
             return
         }
         let selfPublicKey = Data(hex: pendingSession.`self`.publicKey)
-        print("handleSessionApprove in engine \(engineId)")
+        logger.debug("handleSessionApprove")
         let privateKey = try! crypto.getPrivateKey(for: selfPublicKey)!
         let peerPublicKey = Data(hex: approveParams.responder.publicKey)
         let agreementKeys = try! Crypto.X25519.generateAgreementKeys(peerPublicKey: peerPublicKey, privateKey: privateKey)
