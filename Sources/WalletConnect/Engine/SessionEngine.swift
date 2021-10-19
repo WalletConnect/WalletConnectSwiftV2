@@ -258,7 +258,7 @@ final class SessionEngine {
     }
     
     private func respond(error: WalletConnectError, requestId: Int64, topic: String) {
-        let errorResponse = JSONRPCError(code: error.code, message: error.message)
+        let errorResponse = JSONRPCError(code: error.code, message: error.localizedDescription)
         _ = try? relayer.publish(topic: topic, payload: errorResponse) { [weak self] result in
             switch result {
             case .success():
@@ -271,15 +271,15 @@ final class SessionEngine {
 
     private func validatePayload(_ sessionRequest: SessionRequest) throws {
         guard case .settled(let settledSession) = sequencesStore.get(topic: sessionRequest.topic) else {
-                  throw WalletConnectError.noSequenceForTopic
+            throw WalletConnectError.internal(.noSequenceForTopic)
               }
         if let chainId = sessionRequest.chainId {
             guard settledSession.permissions.blockchain.chains.contains(chainId) else {
-                throw WalletConnectError.unAuthorizedTargetChain
+                throw WalletConnectError.unauthrorized(.unauthorizedJsonRpcMethod)
             }
         }
         guard settledSession.permissions.jsonrpc.methods.contains(sessionRequest.request.method) else {
-            throw WalletConnectError.unAuthorizedJsonRpcMethod
+            throw WalletConnectError.unauthrorized(.unauthorizedJsonRpcMethod)
         }
     }
     

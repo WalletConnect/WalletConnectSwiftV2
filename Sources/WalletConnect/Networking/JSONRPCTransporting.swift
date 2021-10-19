@@ -24,6 +24,9 @@ final class JSONRPCTransport: NSObject, JSONRPCTransporting {
         socket.onMessageReceived = { [weak self] in
             self?.onMessage?($0)
         }
+        socket.onMessageError = { error in
+            print(error)
+        }
         return socket
     }()
     
@@ -32,9 +35,9 @@ final class JSONRPCTransport: NSObject, JSONRPCTransporting {
         socket.connect(on: url)
     }
 
-    func send(_ string: String, completion: @escaping (Error?)->())  {
+    func send(_ string: String, completion: @escaping (Error?) -> Void) {
         DispatchQueue.global().async {
-            self.socket.send(string)
+            self.socket.send(string, completionHandler: completion)
         }
     }
     
