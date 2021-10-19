@@ -38,9 +38,8 @@ class WalletConnectRelayTests: XCTestCase {
         waitForExpectations(timeout: 0.001, handler: nil)
     }
     
-    func testRequestCompletesWithSuccessfulResponse() {
+    func testHexEncodedRequestCompletesWithSuccessfulResponse() {
         let responseExpectation = expectation(description: "should complete with response")
-        
         let topic = "93293932"
         let request = getWCSessionPayloadRequest()
         let sessionPayloadResponse = getWCSessionPayloadResponse()
@@ -55,6 +54,10 @@ class WalletConnectRelayTests: XCTestCase {
         waitForExpectations(timeout: 0.01, handler: nil)
     }
     
+    func testEncryptedRequestCompletesWithSuccessfulResponse() {
+        
+    }
+    
     func testRequestCompletesWithError() {
         
     }
@@ -62,7 +65,9 @@ class WalletConnectRelayTests: XCTestCase {
     func testRespondCompletesWithoutError() {
         
     }
-    
+}
+
+extension WalletConnectRelayTests {
     func getWCSessionPayloadResponse() -> JSONRPCResponse<AnyCodable> {
         let result = AnyCodable("")
         return JSONRPCResponse<AnyCodable>(id: 123456, result: result)
@@ -79,7 +84,6 @@ class WalletConnectRelayTests: XCTestCase {
 
 class MockedNetworkRelayer: NetworkRelaying {
     var onConnect: (() -> ())?
-    
     var onMessage: ((String, String) -> ())?
     var error: Error?
     func publish(topic: String, payload: String, completion: @escaping ((Error?) -> ())) -> Int64 {

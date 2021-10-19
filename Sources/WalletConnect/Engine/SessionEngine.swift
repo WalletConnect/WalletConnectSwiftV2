@@ -203,7 +203,7 @@ final class SessionEngine {
         wcSubscriber.onRequestSubscription = { [unowned self] subscriptionPayload in
             switch subscriptionPayload.clientSynchJsonRpc.params {
             case .sessionApprove(let approveParams):
-                self.handleSessionApprove(approveParams, topic: subscriptionPayload.topic)
+                self.handleSessionApprove(approveParams, topic: subscriptionPayload.topic, requestId: subscriptionPayload.clientSynchJsonRpc.id)
             case .sessionReject(let rejectParams):
                 handleSessionReject(rejectParams, topic: subscriptionPayload.topic)
             case .sessionUpdate(_):
@@ -278,7 +278,7 @@ final class SessionEngine {
         }
     }
     
-    private func handleSessionApprove(_ approveParams: SessionType.ApproveParams, topic: String) {
+    private func handleSessionApprove(_ approveParams: SessionType.ApproveParams, topic: String, requestId: Int64) {
         logger.debug("Responder Client approved session on topic: \(topic)")
         guard case let .pending(pendingSession) = sequencesStore.get(topic: topic) else {
                   logger.error("Could not find pending session for topic: \(topic)")
@@ -305,10 +305,13 @@ final class SessionEngine {
             permissions: sessionPermissions,
             expiry: approveParams.expiry,
             state: approveParams.state)
-        
         sequencesStore.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledSession))
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
+        let wcResponse = JSONRPCResponse<Bool>(id: requestId, result: true)
+        relayer.respond(topic: topic, payload: wcResponse) { error in
+            print(error)
+        }
         onSessionApproved?(settledSession)
     }
     

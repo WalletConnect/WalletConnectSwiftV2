@@ -29,6 +29,7 @@ final class ClientTests: XCTestCase {
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
+        
         _ = try! responder.client.pair(uri: uri)
         responder.onPairingSettled = { _ in
             responderSettlesPairingExpectation.fulfill()

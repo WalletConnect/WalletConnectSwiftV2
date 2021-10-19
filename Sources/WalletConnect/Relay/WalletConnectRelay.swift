@@ -67,11 +67,10 @@ class WalletConnectRelay: WalletConnectRelaying {
                 } else {
                     var cancellable: AnyCancellable!
                     cancellable = self.wcResponsePublisher
-                        .filter {
-                            $0.topic == topic
-                        }
+                        .filter {$0.topic == topic}
                         .sink { (response) in
                             cancellable.cancel()
+                            self.logger.debug("WC Relay - received response on topic: \(topic)")
                             switch response {
                             case .response(let response):
                                 completion(.success(response.value))

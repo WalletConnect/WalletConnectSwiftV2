@@ -33,7 +33,6 @@ class WCSubscriber: WCSubscribing {
     }
     
     func removeSubscription(topic: String) {
-        logger.debug("Removing subscription for topic: \(topic)")
         topics.removeAll {$0 == topic}
         relay.unsubscribe(topic: topic)
     }
