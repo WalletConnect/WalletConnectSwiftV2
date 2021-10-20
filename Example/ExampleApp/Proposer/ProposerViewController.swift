@@ -4,17 +4,17 @@ import WalletConnect
 final class ProposerViewController: UIViewController {
     
     let client: WalletConnectClient = {
-        let options = WalletClientOptions(
-            apiKey: "",
+        let metadata = AppMetadata(
             name: "Example Proposer",
-            isController: false,
-            metadata: AppMetadata(
-                name: "Example Dapp",
-                description: "a description",
-                url: "wallet.connect",
-                icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"]),
-            relayURL: URL(string: "wss://relay.walletconnect.org")!)
-        return WalletConnectClient(options: options)
+            description: "a description",
+            url: "wallet.connect",
+            icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])
+        return WalletConnectClient(
+            metadata: metadata,
+            apiKey: "",
+            isController: true,
+            relayURL: URL(string: "wss://relay.walletconnect.org")!
+        )
     }()
     
     var activeItems: [ActiveSessionItem] = []
@@ -127,7 +127,7 @@ extension ProposerViewController: WalletConnectClientDelegate {
         
     }
     
-    func didReceive(sessionProposal: SessionType.Proposal) {
+    func didReceive(sessionProposal: SessionProposal) {
         print("[PROPOSER] WC: Did receive session proposal")
     }
     
@@ -135,7 +135,7 @@ extension ProposerViewController: WalletConnectClientDelegate {
         print("[PROPOSER] WC: Did receive session request")
     }
     
-    func didSettle(session: SessionType.Settled) {
+    func didSettle(session: Session) {
         print("[PROPOSER] WC: Did settle session")
     }
     

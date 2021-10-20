@@ -1,6 +1,15 @@
 
 import Foundation
 
+public protocol WalletConnectClientDelegate: AnyObject {
+    func didReceive(sessionProposal: SessionProposal)
+    func didReceive(sessionRequest: SessionRequest)
+    func didSettle(session: Session)
+    func didSettle(pairing: PairingType.Settled)
+    func didReject(sessionPendingTopic: String, reason: SessionType.Reason)
+    func didDelete(sessionTopic: String, reason: SessionType.Reason)
+}
+
 public final class WalletConnectClient {
     private let metadata: AppMetadata
     public weak var delegate: WalletConnectClientDelegate?
@@ -14,16 +23,16 @@ public final class WalletConnectClient {
     private let secureStorage = SecureStorage()
     
     // MARK: - Public interface
-    public init(options: WalletClientOptions) {
-        self.isController = options.isController
-        self.metadata = options.metadata
-        self.relay = Relay(transport: JSONRPCTransport(url: options.relayURL), crypto: crypto, logger: logger)
+    public init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL) {
+        self.metadata = metadata
+        self.isController = isController
+        self.relay = Relay(transport: JSONRPCTransport(url: relayURL), crypto: crypto, logger: logger)
         let sessionSequencesStore = SessionUserDefaultsStore(logger: logger)
         let pairingSequencesStore = PairingUserDefaultsStore(logger: logger)
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
         setUpEnginesCallbacks()
-        secureStorage.setAPIKey(options.apiKey)
+        secureStorage.setAPIKey(apiKey)
     }
     
     // for proposer to propose a session to a responder
@@ -65,22 +74,25 @@ public final class WalletConnectClient {
         }
     }
     
-    // for either to disconnect a session
-    public func disconnect(topic: String, reason: SessionType.Reason) {
-        sessionEngine.delete(topic: topic, reason: reason)
-    }
-    
     // for responder to approve a session proposal
-    public func approve(proposal: SessionType.Proposal, accounts: [String]) {
-        sessionEngine.approve(proposal: proposal, accounts: accounts) { [unowned self] result in
+    public func approve(proposal: SessionProposal, accounts: [String]) {
+        sessionEngine.approve(proposal: proposal.proposal, accounts: accounts) { [unowned self] result in
             switch result {
             case .success(let settledSession):
-                self.delegate?.didSettle(session: settledSession)
+                let session = Session(topic: settledSession.topic, peer: settledSession.peer.metadata)
+                self.delegate?.didSettle(session: session)
             case .failure(let error):
                 print(error)
             }
         }
     }
+    
+    // for responder to reject a session proposal
+    public func reject(proposal: SessionProposal, reason: SessionType.Reason) {
+        sessionEngine.reject(proposal: proposal.proposal, reason: reason)
+    }
+    
+    // TODO: Upgrade and update methods.
     
     // for proposer to request JSON-RPC
     public func request(params: SessionType.PayloadRequestParams, completion: @escaping (Result<JSONRPCResponse<String>, Error>) -> ()) {
@@ -92,13 +104,19 @@ public final class WalletConnectClient {
         sessionEngine.respond(topic: topic, response: response)
     }
     
-    // for responder to reject a session proposal
-    public func reject(proposal: SessionType.Proposal, reason: SessionType.Reason) {
-        sessionEngine.reject(proposal: proposal, reason: reason)
+    // TODO: Ping and notification methods
+    
+    // for either to disconnect a session
+    public func disconnect(topic: String, reason: SessionType.Reason) {
+        sessionEngine.delete(topic: topic, reason: reason)
     }
     
-    public func getSettledSessions() -> [SessionType.Settled] {
-        return sessionEngine.sequencesStore.getSettled()
+    public func getSettledSessions() -> [Session] {
+        let settledSessions = sessionEngine.sequencesStore.getSettled()
+        let sessions = settledSessions.map {
+            Session(topic: $0.topic, peer: $0.peer.metadata)
+        }
+        return sessions
     }
     
     public func getSettledPairings() -> [PairingType.Settled] {
@@ -109,7 +127,7 @@ public final class WalletConnectClient {
     
     private func setUpEnginesCallbacks() {
         pairingEngine.onSessionProposal = { [unowned self] proposal in
-            self.delegate?.didReceive(sessionProposal: proposal)
+            self.proposeSession(proposal: proposal)
         }
         pairingEngine.onPairingApproved = { [unowned self] settledPairing, pendingTopic in
             self.delegate?.didSettle(pairing: settledPairing)
@@ -121,7 +139,8 @@ public final class WalletConnectClient {
             self.sessionEngine.proposeSession(settledPairing: settledPairing, permissions: permissions)
         }
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
-            self.delegate?.didSettle(session: settledSession)
+            let session = Session(topic: settledSession.topic, peer: settledSession.peer.metadata)
+            self.delegate?.didSettle(session: session)
         }
         sessionEngine.onSessionRejected = { [unowned self] pendingTopic, reason in
             self.delegate?.didReject(sessionPendingTopic: pendingTopic, reason: reason)
@@ -134,15 +153,17 @@ public final class WalletConnectClient {
             
         }
     }
-}
-
-public protocol WalletConnectClientDelegate: AnyObject {
-    func didReceive(sessionProposal: SessionType.Proposal)
-    func didReceive(sessionRequest: SessionRequest)
-    func didSettle(session: SessionType.Settled)
-    func didSettle(pairing: PairingType.Settled)
-    func didReject(sessionPendingTopic: String, reason: SessionType.Reason)
-    func didDelete(sessionTopic: String, reason: SessionType.Reason)
+    
+    private func proposeSession(proposal: SessionType.Proposal) {
+        let sessionProposal = SessionProposal(
+            proposer: proposal.proposer.metadata,
+            permissions: SessionPermissions(
+                blockchains: proposal.permissions.blockchain.chains,
+                methods: proposal.permissions.jsonrpc.methods),
+            proposal: proposal
+        )
+        delegate?.didReceive(sessionProposal: sessionProposal)
+    }
 }
 
 public struct ConnectParams {

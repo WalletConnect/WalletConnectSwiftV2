@@ -4,21 +4,21 @@ import WalletConnect
 final class ResponderViewController: UIViewController {
 
     let client: WalletConnectClient = {
-        let options = WalletClientOptions(
+        let metadata = AppMetadata(
+            name: "Example Wallet",
+            description: "wallet description",
+            url: "example.wallet",
+            icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])
+        return WalletConnectClient(
+            metadata: metadata,
             apiKey: "",
-            name: "Example Responder",
             isController: true,
-            metadata: AppMetadata(
-                name: "Example Wallet",
-                description: "wallet description",
-                url: "example.wallet",
-                icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"]),
-            relayURL: URL(string: "wss://relay.walletconnect.org")!)
-        return WalletConnectClient(options: options)
+            relayURL: URL(string: "wss://relay.walletconnect.org")!
+        )
     }()
     
     var sessionItems: [ActiveSessionItem] = []
-    var currentProposal: SessionType.Proposal?
+    var currentProposal: SessionProposal?
     
     private let responderView: ResponderView = {
         ResponderView()
@@ -135,16 +135,16 @@ extension ResponderViewController: WalletConnectClientDelegate {
         
     }
     
-    func didReceive(sessionProposal: SessionType.Proposal) {
+    func didReceive(sessionProposal: SessionProposal) {
         print("[RESPONDER] WC: Did receive session proposal")
-        let appMetadata = sessionProposal.proposer.metadata
+        let appMetadata = sessionProposal.proposer
         let info = SessionInfo(
             name: appMetadata.name ?? "",
             descriptionText: appMetadata.description ?? "",
             dappURL: appMetadata.url ?? "",
             iconURL: appMetadata.icons?.first ?? "",
-            chains: sessionProposal.permissions.blockchain.chains,
-            methods: sessionProposal.permissions.jsonrpc.methods)
+            chains: sessionProposal.permissions.blockchains,
+            methods: sessionProposal.permissions.methods)
         currentProposal = sessionProposal
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread
             self.showSessionProposal(info)
@@ -155,11 +155,11 @@ extension ResponderViewController: WalletConnectClientDelegate {
         print("[RESPONDER] WC: Did receive session request")
     }
     
-    func didSettle(session: SessionType.Settled) {
+    func didSettle(session: Session) {
         print("[RESPONDER] WC: Did settle session")
         let settledSessions = client.getSettledSessions()
         let activeSessions = settledSessions.map { session -> ActiveSessionItem in
-            let app = session.peer.metadata
+            let app = session.peer
             return ActiveSessionItem(
                 dappName: app?.name ?? "",
                 dappURL: app?.url ?? "",
