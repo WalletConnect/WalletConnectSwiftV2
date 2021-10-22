@@ -125,7 +125,12 @@ class WalletConnectRelay: WalletConnectRelaying {
     private func manageSubscription(_ topic: String, _ message: String) {
         if let deserialisedJsonRpcRequest: ClientSynchJSONRPC = tryDeserialise(topic: topic, message: message) {
             let payload = WCRequestSubscriptionPayload(topic: topic, clientSynchJsonRpc: deserialisedJsonRpcRequest)
-            clientSynchJsonRpcPublisherSubject.send(payload)
+            if payload.clientSynchJsonRpc.method == .pairingPayload {
+                //called twice
+                clientSynchJsonRpcPublisherSubject.send(payload)
+            } else {
+                clientSynchJsonRpcPublisherSubject.send(payload)
+            }
         } else if let deserialisedJsonRpcResponse: JSONRPCResponse<AnyCodable> = tryDeserialise(topic: topic, message: message) {
             wcResponsePublisherSubject.send(.response((topic, deserialisedJsonRpcResponse)))
         } else if let deserialisedJsonRpcError: JSONRPCError = tryDeserialise(topic: topic, message: message) {

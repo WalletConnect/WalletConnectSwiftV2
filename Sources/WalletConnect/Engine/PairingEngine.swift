@@ -147,8 +147,9 @@ final class PairingEngine {
             case .pairingUpgrade(_):
                 fatalError("Not Implemented")
             case .pairingDelete(let deleteParams):
-                handlePairingDelete(deleteParams, topic: subscriptionPayload.topic)
+                handlePairingDelete(deleteParams, topic: subscriptionPayload.topic, requestId: subscriptionPayload.clientSynchJsonRpc.id)
             case .pairingPayload(let pairingPayload):
+            //    called twice
                 self.handlePairingPayload(pairingPayload, for: subscriptionPayload.topic, requestId: subscriptionPayload.clientSynchJsonRpc.id)
             default:
                 fatalError("not expected method type")
@@ -172,16 +173,21 @@ final class PairingEngine {
         }
         let response = JSONRPCResponse<Bool>(id: requestId, result: true)
         relayer.respond(topic: topic, payload: response) { [weak self] error in
+            //this is called twice
             self?.onSessionProposal?(sessionProposal)
         }
     }
     
-    private func handlePairingDelete(_ deleteParams: PairingType.DeleteParams, topic: String) {
+    private func handlePairingDelete(_ deleteParams: PairingType.DeleteParams, topic: String, requestId: Int64) {
         logger.debug("-------------------------------------")
         logger.debug("Paired client removed pairing - reason: \(deleteParams.reason.message), code: \(deleteParams.reason.code)")
         logger.debug("-------------------------------------")
         sequencesStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
+        let response = JSONRPCResponse<Bool>(id: requestId, result: true)
+        relayer.respond(topic: topic, payload: response) { error in
+            //todo
+        }
     }
     
     private func handlePairingApprove(approveParams: PairingType.ApproveParams, pendingTopic: String, reqestId: Int64) {

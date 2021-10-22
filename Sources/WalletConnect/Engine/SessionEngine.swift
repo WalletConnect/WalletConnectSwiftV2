@@ -161,7 +161,7 @@ final class SessionEngine {
         }
     }
     
-    func respond(topic: String, response: JSONRPCResponse<AnyCodable>) {
+    func respondSessionPayload(topic: String, response: JSONRPCResponse<AnyCodable>) {
         guard let _ = sequencesStore.get(topic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return

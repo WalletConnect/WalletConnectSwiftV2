@@ -118,7 +118,7 @@ public final class WalletConnectClient {
     
     // for responder to respond JSON-RPC
     public func respond(topic: String, response: JSONRPCResponse<AnyCodable>) {
-        sessionEngine.respond(topic: topic, response: response)
+        sessionEngine.respondSessionPayload(topic: topic, response: response)
     }
     
     // TODO: Ping and notification methods

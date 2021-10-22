@@ -28,18 +28,28 @@ class WCSubscriber: WCSubscribing {
 
     func setSubscription(topic: String) {
         logger.debug("Setting Subscription...")
-        topics.append(topic)
+        concurrentQueue.sync {
+            topics.append(topic)
+        }
         relay.subscribe(topic: topic)
     }
     
+    func getTopics() -> [String] {
+        concurrentQueue.sync {
+            return topics
+        }
+    }
+    
     func removeSubscription(topic: String) {
-        topics.removeAll {$0 == topic}
+        concurrentQueue.sync {
+            topics.removeAll {$0 == topic}
+        }
         relay.unsubscribe(topic: topic)
     }
     
     private func setSubscribingForPayloads() {
         relay.clientSynchJsonRpcPublisher
-            .filter {[weak self] in self?.topics.contains($0.topic) ?? false}
+            .filter {[weak self] in self?.getTopics().contains($0.topic) ?? false}
             .sink { [weak self] subscriptionPayload in
                 self?.onRequestSubscription?(subscriptionPayload)
             }.store(in: &publishers)
