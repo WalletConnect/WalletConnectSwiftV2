@@ -126,12 +126,18 @@ class WakuNetworkRelay: NetworkRelaying {
 
     private func setUpBindings() {
         transport.onMessage = { [weak self] payload in
-            self?.handlePayloadMessage(payload)
+            
+            if !self!.history.contains(payload) {
+                self!.history.append(payload)
+                self?.handlePayloadMessage(payload)
+            }
         }
         transport.onConnect = { [unowned self] in
             self.onConnect?()
         }
     }
+    
+    var history = [String]()
     
     private func handlePayloadMessage(_ payload: String) {
         if let request = tryDecode(SubscriptionRequest.self, from: payload),

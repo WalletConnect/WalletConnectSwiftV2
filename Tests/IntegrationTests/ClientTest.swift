@@ -62,7 +62,7 @@ final class ClientTests: XCTestCase {
 //            XCTAssertEqual(account, sessionSettled.state.accounts[0])
             proposerSettlesSessionExpectation.fulfill()
         }
-        waitForExpectations(timeout: 3.0, handler: nil)
+        waitForExpectations(timeout: 8.0, handler: nil)
     }
 
     func testResponderRejectsSession() {
@@ -78,7 +78,7 @@ final class ClientTests: XCTestCase {
             XCTAssertEqual(reason.code, WalletConnectError.internal(.notApproved).code)
             sessionRejectExpectation.fulfill()
         }
-        waitForExpectations(timeout: 2.0, handler: nil)
+        waitForExpectations(timeout: 10.0, handler: nil)
     }
     
     func testDeleteSession() {
@@ -96,7 +96,7 @@ final class ClientTests: XCTestCase {
         responder.onSessionDelete = {
             sessionDeleteExpectation.fulfill()
         }
-        waitForExpectations(timeout: 3.0, handler: nil)
+        waitForExpectations(timeout: 8.0, handler: nil)
     }
     
     func testProposerRequestSessionPayload() {
@@ -133,7 +133,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.respond(topic: sessionRequest.topic, response: jsonrpcResponse)
             requestExpectation.fulfill()
         }
-        waitForExpectations(timeout: 3.0, handler: nil)
+        waitForExpectations(timeout: 8.0, handler: nil)
     }
 }
 

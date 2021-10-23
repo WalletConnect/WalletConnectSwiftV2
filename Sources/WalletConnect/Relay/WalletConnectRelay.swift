@@ -117,12 +117,18 @@ class WalletConnectRelay: WalletConnectRelaying {
         networkRelayer.onConnect = {
             self.transportConnectionPublisherSubject.send()
         }
-        networkRelayer.onMessage = { [weak self] topic, message in
-            self?.manageSubscription(topic, message)
+        networkRelayer.onMessage = { [unowned self] topic, message in
+            if self.history.contains(message) {
+                return
+            }
+            self.history.append(message)
+            self.manageSubscription(topic, message)
         }
     }
-    
+    var history = [String]()
+
     private func manageSubscription(_ topic: String, _ message: String) {
+
         if let deserialisedJsonRpcRequest: ClientSynchJSONRPC = tryDeserialise(topic: topic, message: message) {
             let payload = WCRequestSubscriptionPayload(topic: topic, clientSynchJsonRpc: deserialisedJsonRpcRequest)
             if payload.clientSynchJsonRpc.method == .pairingPayload {
