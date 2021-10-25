@@ -1,18 +1,11 @@
 import XCTest
 @testable import WalletConnect
 
-final class PairingParamsUriTests: XCTestCase {
-    func testInitFromUriAndConvertToUri() {
-        let uriParameters = PairingType.UriParameters(stubURI)!
-        let uriConverted = uriParameters.absoluteString()!
-        XCTAssertEqual(stubURI, uriConverted)
-    }
-}
-
 fileprivate let stubTopic = "8097df5f14871126866252c1b7479a14aefb980188fc35ec97d130d24bd887c8"
 fileprivate let stubPubKey = "19c5ecc857963976fabb98ed6a3e0a6ab6b0d65c018b6e25fbdcd3a164def868"
+fileprivate let stubProtocol = "%7B%22protocol%22%3A%22waku%22%7D"
 
-fileprivate let stubURI = "wc:8097df5f14871126866252c1b7479a14aefb980188fc35ec97d130d24bd887c8@2?controller=false&publicKey=19c5ecc857963976fabb98ed6a3e0a6ab6b0d65c018b6e25fbdcd3a164def868&relay=%7B%22protocol%22%3A%22waku%22%7D"
+fileprivate let stubURI = "wc:\(stubTopic)@2?controller=false&publicKey=\(stubPubKey)&relay=\(stubProtocol)"
 
 final class WalletConnectURITests: XCTestCase {
     
@@ -67,7 +60,7 @@ final class WalletConnectURITests: XCTestCase {
     }
     
     func testInitFailsNoRelayParam() {
-        let inputURIString = stubURI.replacingOccurrences(of: "&relay=%7B%22protocol%22%3A%22waku%22%7D", with: "")
+        let inputURIString = stubURI.replacingOccurrences(of: "&relay=\(stubProtocol)", with: "")
         let uri = WalletConnectURI(string: inputURIString)
         XCTAssertNil(uri)
     }
