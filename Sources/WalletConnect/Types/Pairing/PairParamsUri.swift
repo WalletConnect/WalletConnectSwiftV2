@@ -9,13 +9,6 @@ struct WalletConnectURI: Equatable {
     let isController: Bool
     let relay: RelayProtocolOptions
     
-    var absoluteString: String {
-        guard let relay = try? relay.json().addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) else {
-            return ""
-        }
-        return "wc:\(topic)@\(version)?controller=\(isController)&publicKey=\(publicKey)&relay=\(relay)"
-    }
-    
     init(topic: String, publicKey: String, isController: Bool, relay: RelayProtocolOptions) {
         self.version = "2"
         self.topic = topic
@@ -48,6 +41,10 @@ struct WalletConnectURI: Equatable {
         self.publicKey = publicKey
         self.isController = isController
         self.relay = relay
+    }
+    
+    var absoluteString: String {
+        return "wc:\(topic)@\(version)?controller=\(isController)&publicKey=\(publicKey)&relay=\(relay.asPercentEncodedString())"
     }
 }
 

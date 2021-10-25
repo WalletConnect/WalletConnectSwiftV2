@@ -9,6 +9,9 @@ final class PairingParamsUriTests: XCTestCase {
     }
 }
 
+fileprivate let stubTopic = "8097df5f14871126866252c1b7479a14aefb980188fc35ec97d130d24bd887c8"
+fileprivate let stubPubKey = "19c5ecc857963976fabb98ed6a3e0a6ab6b0d65c018b6e25fbdcd3a164def868"
+
 fileprivate let stubURI = "wc:8097df5f14871126866252c1b7479a14aefb980188fc35ec97d130d24bd887c8@2?controller=false&publicKey=19c5ecc857963976fabb98ed6a3e0a6ab6b0d65c018b6e25fbdcd3a164def868&relay=%7B%22protocol%22%3A%22waku%22%7D"
 
 final class WalletConnectURITests: XCTestCase {
@@ -37,5 +40,35 @@ final class WalletConnectURITests: XCTestCase {
         let uri = WalletConnectURI(string: inputURIString)
         let outputURIString = uri?.absoluteString
         XCTAssertEqual(expectedString, outputURIString)
+    }
+    
+    func testInitFailsBadScheme() {
+        let inputURIString = stubURI.replacingOccurrences(of: "wc:", with: "")
+        let uri = WalletConnectURI(string: inputURIString)
+        XCTAssertNil(uri)
+    }
+    
+    func testInitFailsMalformedURL() {
+        let inputURIString = "wc://<"
+        let uri = WalletConnectURI(string: inputURIString)
+        XCTAssertNil(uri)
+    }
+    
+    func testInitFailsNoPublicKeyParam() {
+        let inputURIString = stubURI.replacingOccurrences(of: "&publicKey=\(stubPubKey)", with: "")
+        let uri = WalletConnectURI(string: inputURIString)
+        XCTAssertNil(uri)
+    }
+    
+    func testInitFailsNoControllerParam() {
+        let inputURIString = stubURI.replacingOccurrences(of: "controller=false&", with: "")
+        let uri = WalletConnectURI(string: inputURIString)
+        XCTAssertNil(uri)
+    }
+    
+    func testInitFailsNoRelayParam() {
+        let inputURIString = stubURI.replacingOccurrences(of: "&relay=%7B%22protocol%22%3A%22waku%22%7D", with: "")
+        let uri = WalletConnectURI(string: inputURIString)
+        XCTAssertNil(uri)
     }
 }
