@@ -3,7 +3,7 @@
 import Foundation
 
 class BaseLogger {
-    var suffix: String
+    let suffix: String
     init(suffix: String = "") {
         self.suffix = suffix
     }
@@ -17,10 +17,6 @@ class BaseLogger {
 }
 
 class ConsoleLogger: BaseLogger {
-    
-    override init(suffix: String = "") {
-        super.init(suffix: suffix)
-    }
     
     override func debug(_ items: Any...) {
         #if DEBUG

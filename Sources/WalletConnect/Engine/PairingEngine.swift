@@ -149,7 +149,6 @@ final class PairingEngine {
             case .pairingDelete(let deleteParams):
                 handlePairingDelete(deleteParams, topic: subscriptionPayload.topic, requestId: subscriptionPayload.clientSynchJsonRpc.id)
             case .pairingPayload(let pairingPayload):
-            //    called twice
                 self.handlePairingPayload(pairingPayload, for: subscriptionPayload.topic, requestId: subscriptionPayload.clientSynchJsonRpc.id)
             default:
                 fatalError("not expected method type")
@@ -173,7 +172,6 @@ final class PairingEngine {
         }
         let response = JSONRPCResponse<Bool>(id: requestId, result: true)
         relayer.respond(topic: topic, payload: response) { [weak self] error in
-            //this is called twice
             self?.onSessionProposal?(sessionProposal)
         }
     }
