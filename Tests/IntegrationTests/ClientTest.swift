@@ -8,18 +8,20 @@ final class ClientTests: XCTestCase {
     var proposer: ClientDelegate!
     var responder: ClientDelegate!
     override func setUp() {
-        proposer = Self.makeClientDelegate(isController: false, url: url)
-        responder = Self.makeClientDelegate(isController: true, url: url)
+        proposer = Self.makeClientDelegate(isController: false, url: url, prefix: "🍏P")
+        responder = Self.makeClientDelegate(isController: true, url: url, prefix: "🍎R")
     }
 
-    static func makeClientDelegate(isController: Bool, url: URL) -> ClientDelegate {
+    static func makeClientDelegate(isController: Bool, url: URL, prefix: String) -> ClientDelegate {
+        let logger = ConsoleLogger(suffix: prefix)
         let client = WalletConnectClient(
             metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil),
             apiKey: "",
             isController: isController,
-            relayURL: url)
-        client.pairingEngine.sequencesStore = PairingDictionaryStore(logger: MuteLogger())
-        client.sessionEngine.sequencesStore = SessionDictionaryStore(logger: MuteLogger())
+            relayURL: url,
+        logger: logger)
+        client.pairingEngine.sequencesStore = PairingDictionaryStore(logger: logger)
+        client.sessionEngine.sequencesStore = SessionDictionaryStore(logger: logger)
         return ClientDelegate(client: client)
     }
     

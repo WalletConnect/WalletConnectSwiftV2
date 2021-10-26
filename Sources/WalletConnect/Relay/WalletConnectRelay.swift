@@ -113,17 +113,20 @@ class WalletConnectRelay: WalletConnectRelaying {
     }
     
     //MARK: - Private
-    
+    let serialQueue = DispatchQueue(label: UUID().uuidString)
     private func setUpPublishers() {
         networkRelayer.onConnect = { [weak self] in
             self?.transportConnectionPublisherSubject.send()
         }
         networkRelayer.onMessage = { [unowned self] topic, message in
-            if self.history.contains(message) {
-                return
+            serialQueue.sync {
+                if self.history.contains(message) {
+                    print("duplicate: \(message)")
+                    return
+                }
+                self.history.append(message)
+                self.manageSubscription(topic, message)
             }
-            self.history.append(message)
-            self.manageSubscription(topic, message)
         }
     }
 
