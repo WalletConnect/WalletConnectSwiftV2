@@ -80,7 +80,7 @@ public final class WalletConnectClient {
         if !approved {
             throw WalletConnectError.internal(.unauthorizedMatchingController)
         }
-        pairingEngine.respond(to: proposal) { [unowned self] result in
+        pairingEngine.pair(proposal) { [unowned self] result in
             switch result {
             case .success(let settledPairing):
                 logger.debug("Pairing Success")

@@ -126,18 +126,12 @@ class WakuNetworkRelay: NetworkRelaying {
 
     private func setUpBindings() {
         transport.onMessage = { [weak self] payload in
-            
-            if !self!.history.contains(payload) {
-                self!.history.append(payload)
-                self?.handlePayloadMessage(payload)
-            }
+            self?.handlePayloadMessage(payload)
         }
         transport.onConnect = { [unowned self] in
             self.onConnect?()
         }
     }
-    
-    var history = [String]()
     
     private func handlePayloadMessage(_ payload: String) {
         if let request = tryDecode(SubscriptionRequest.self, from: payload),
@@ -149,7 +143,7 @@ class WakuNetworkRelay: NetworkRelaying {
         } else if let response = tryDecode(SubscriptionResponse.self, from: payload) {
             subscriptionResponsePublisherSubject.send(response)
         } else if let response = tryDecode(JSONRPCError.self, from: payload) {
-            logger.error("Received error message from network, code: \(response.code), message: \(response.message)")
+            logger.error("Received error message from waku network, code: \(response.code), message: \(response.message)")
         } else {
             logger.error("Unexpected response from network")
         }

@@ -28,6 +28,7 @@ class WalletConnectRelay: WalletConnectRelaying {
     private var networkRelayer: NetworkRelaying
     private let jsonRpcSerialiser: JSONRPCSerialising
     private let crypto: Crypto
+    var history = [String]()
     
     var transportConnectionPublisher: AnyPublisher<Void, Never> {
         transportConnectionPublisherSubject.eraseToAnyPublisher()
@@ -114,8 +115,8 @@ class WalletConnectRelay: WalletConnectRelaying {
     //MARK: - Private
     
     private func setUpPublishers() {
-        networkRelayer.onConnect = {
-            self.transportConnectionPublisherSubject.send()
+        networkRelayer.onConnect = { [weak self] in
+            self?.transportConnectionPublisherSubject.send()
         }
         networkRelayer.onMessage = { [unowned self] topic, message in
             if self.history.contains(message) {
@@ -125,14 +126,11 @@ class WalletConnectRelay: WalletConnectRelaying {
             self.manageSubscription(topic, message)
         }
     }
-    var history = [String]()
 
     private func manageSubscription(_ topic: String, _ message: String) {
-
         if let deserialisedJsonRpcRequest: ClientSynchJSONRPC = tryDeserialise(topic: topic, message: message) {
             let payload = WCRequestSubscriptionPayload(topic: topic, clientSynchJsonRpc: deserialisedJsonRpcRequest)
             if payload.clientSynchJsonRpc.method == .pairingPayload {
-                //called twice
                 clientSynchJsonRpcPublisherSubject.send(payload)
             } else {
                 clientSynchJsonRpcPublisherSubject.send(payload)
