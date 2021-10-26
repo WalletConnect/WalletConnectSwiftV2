@@ -132,7 +132,7 @@ final class SessionEngine {
         relayer.publish(topic: settledPairing.topic, payload: pairingPayloadRequest) { [unowned self] result in
             switch result {
             case .success:
-                logger.debug("Session Proposal response received -  pub \(privateKey.publicKey.toHexString())")
+                logger.debug("Session Proposal response received")
                 let pairingAgreementKeys = crypto.getAgreementKeys(for: settledPairing.topic)!
                 crypto.set(agreementKeys: pairingAgreementKeys, topic: proposal.topic)
             case .failure(let error):
@@ -154,9 +154,9 @@ final class SessionEngine {
             switch result {
             case .success(let response):
                 completion(.success(response))
-                self?.logger.debug("Sent Session Payload")
+                self?.logger.debug("Did receive session payload response")
             case .failure(let error):
-                self?.logger.debug("Could not send session payload, error: \(error)")
+                self?.logger.debug("error: \(error)")
             }
         }
     }
