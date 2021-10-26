@@ -61,6 +61,7 @@ class WalletConnectRelay: WalletConnectRelaying {
     func publish(topic: String, payload: Encodable, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCError>)->())) {
         do {
             let message = try serialise(topic: topic, jsonRpc: payload)
+            history.append(message)
             networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
                 guard let self = self else {return}
                 if let error = error {
@@ -88,6 +89,7 @@ class WalletConnectRelay: WalletConnectRelaying {
     
     func respond(topic: String, payload: Encodable, completion: @escaping ((Error?)->())) {
         let message = try! serialise(topic: topic, jsonRpc: payload)
+        history.append(message)
         logger.debug("Responding....topic: \(topic)")
         networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
             self?.logger.debug("responded")
@@ -123,13 +125,14 @@ class WalletConnectRelay: WalletConnectRelaying {
                 if self.history.contains(message) {
                     print("duplicate: \(message)")
                     return
+                } else {
+                    self.history.append(message)
+                    self.manageSubscription(topic, message)
                 }
-                self.history.append(message)
-                self.manageSubscription(topic, message)
             }
         }
     }
-
+    
     private func manageSubscription(_ topic: String, _ message: String) {
         if let deserialisedJsonRpcRequest: ClientSynchJSONRPC = tryDeserialise(topic: topic, message: message) {
             let payload = WCRequestSubscriptionPayload(topic: topic, clientSynchJsonRpc: deserialisedJsonRpcRequest)

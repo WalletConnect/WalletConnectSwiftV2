@@ -41,7 +41,6 @@ class WakuNetworkRelay: NetworkRelaying {
         self.transport = transport
         setUpBindings()
     }
-    
     @discardableResult func publish(topic: String, payload: String, completion: @escaping ((Error?) -> ())) -> Int64 {
         let params = RelayJSONRPC.PublishParams(topic: topic, message: payload, ttl: defaultTtl)
         let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.rawValue, params: params)

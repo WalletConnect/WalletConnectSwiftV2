@@ -81,7 +81,7 @@ final class PairingEngine {
             switch result {
             case .success:
                 self?.wcSubscriber.removeSubscription(topic: proposal.topic)
-                self?.logger.debug("Success on wc_pairingApprove")
+                self?.logger.debug("Success on wc_pairingApprove - settled topic - \(settledTopic)")
                 completion(.success(settledPairing))
             case .failure(let error):
                 completion(.failure(error))
@@ -172,7 +172,7 @@ final class PairingEngine {
         }
         let response = JSONRPCResponse<Bool>(id: requestId, result: true)
         relayer.respond(topic: topic, payload: response) { [weak self] error in
-            self?.onSessionProposal?(sessionProposal)
+          //  self?.onSessionProposal?(sessionProposal)
         }
     }
     
@@ -220,7 +220,7 @@ final class PairingEngine {
         wcSubscriber.removeSubscription(topic: proposal.topic)
         let response = JSONRPCResponse<Bool>(id: reqestId, result: true)
         relayer.respond(topic: proposal.topic, payload: response) { [weak self] error in
-            self?.onPairingApproved?(settledPairing, pendingTopic)
+           // self?.onPairingApproved?(settledPairing, pendingTopic)
         }
     }
     
