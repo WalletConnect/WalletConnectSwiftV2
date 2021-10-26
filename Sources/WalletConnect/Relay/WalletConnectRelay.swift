@@ -171,13 +171,13 @@ class WalletConnectRelay: WalletConnectRelaying {
     
     private func deserialiseJsonRpc(topic: String, message: String) throws -> Result<JSONRPCResponse<AnyCodable>, JSONRPCError> {
         guard let agreementKeys = crypto.getAgreementKeys(for: topic) else {
-            throw WalletConnectError.keyNotFound
+            throw WalletConnectError.internal(.keyNotFound)
         }
         if let jsonrpcResponse: JSONRPCResponse<AnyCodable> = try? jsonRpcSerialiser.deserialise(message: message, symmetricKey: agreementKeys.sharedSecret) {
             return .success(jsonrpcResponse)
         } else if let jsonrpcError: JSONRPCError = try? jsonRpcSerialiser.deserialise(message: message, symmetricKey: agreementKeys.sharedSecret) {
             return .failure(jsonrpcError)
         }
-        throw WalletConnectError.deserialisationFailed
+        throw WalletConnectError.internal(.deserialisationFailed)
     }
 }
