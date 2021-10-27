@@ -24,18 +24,8 @@ public final class WalletConnectClient {
     
     // MARK: - Public interface
 
-    public init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL) {
-        self.metadata = metadata
-        self.isController = isController
-        let wakuRelay = WakuNetworkRelay(transport: JSONRPCTransport(url: relayURL), logger: logger)
-        self.relay = WalletConnectRelay(networkRelayer: wakuRelay, crypto: crypto, logger: logger)
-        let sessionSequencesStore = SessionDictionaryStore(logger: logger)
-        let pairingSequencesStore = PairingDictionaryStore(logger: logger)
-        self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
-        self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
-
-        setUpEnginesCallbacks()
-        secureStorage.setAPIKey(apiKey)
+    public convenience init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL) {
+        self.init(metadata: metadata, apiKey: apiKey, isController: isController, relayURL: relayURL, logger: MuteLogger())
     }
     
     init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL, logger: BaseLogger = MuteLogger()) {
@@ -47,7 +37,6 @@ public final class WalletConnectClient {
         let pairingSequencesStore = PairingUserDefaultsStore(logger: logger)
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
-
         setUpEnginesCallbacks()
         secureStorage.setAPIKey(apiKey)
     }
