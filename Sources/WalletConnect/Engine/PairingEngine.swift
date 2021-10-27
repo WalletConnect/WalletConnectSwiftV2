@@ -171,9 +171,9 @@ final class PairingEngine {
             crypto.set(agreementKeys: pairingAgreementKeys, topic: sessionProposal.topic)
         }
         let response = JSONRPCResponse<Bool>(id: requestId, result: true)
-        relayer.respond(topic: topic, payload: response) { [weak self] error in
-          //  self?.onSessionProposal?(sessionProposal)
-        }
+        onSessionProposal?(sessionProposal)
+//        relayer.respond(topic: topic, payload: response) { [weak self] error in
+//        }
     }
     
     private func handlePairingDelete(_ deleteParams: PairingType.DeleteParams, topic: String, requestId: Int64) {
@@ -183,9 +183,9 @@ final class PairingEngine {
         sequencesStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
         let response = JSONRPCResponse<Bool>(id: requestId, result: true)
-        relayer.respond(topic: topic, payload: response) { error in
-            //todo
-        }
+//        relayer.respond(topic: topic, payload: response) { error in
+//            //todo
+//        }
     }
     
     private func handlePairingApprove(approveParams: PairingType.ApproveParams, pendingTopic: String, reqestId: Int64) {
@@ -219,9 +219,9 @@ final class PairingEngine {
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
         let response = JSONRPCResponse<Bool>(id: reqestId, result: true)
-        relayer.respond(topic: proposal.topic, payload: response) { [weak self] error in
-           // self?.onPairingApproved?(settledPairing, pendingTopic)
-        }
+        onPairingApproved?(settledPairing, pendingTopic)
+//        relayer.respond(topic: proposal.topic, payload: response) { [weak self] error in
+//        }
     }
     
     private func restoreSubscriptions() {

@@ -5,7 +5,7 @@ import Combine
 protocol WalletConnectRelaying {
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var clientSynchJsonRpcPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
-    func publish(topic: String, payload: Encodable, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCError>)->()))
+    func publish(topic: String, payload: ClientSynchJSONRPC, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCError>)->()))
     func respond(topic: String, payload: Encodable, completion: @escaping ((Error?)->()))
     func subscribe(topic: String)
     func unsubscribe(topic: String)
@@ -14,6 +14,14 @@ protocol WalletConnectRelaying {
 enum WCResponse {
     case error((topic: String, value: JSONRPCError))
     case response((topic: String, value: JSONRPCResponse<AnyCodable>))
+    var id: Int64 {
+        switch self {
+        case .error(let value):
+            fatalError("not implemented")
+        case .response(let value):
+            return value.value.id
+        }
+    }
     var topic: String {
         switch self {
         case .error(let value):
@@ -58,28 +66,35 @@ class WalletConnectRelay: WalletConnectRelaying {
         setUpPublishers()
     }
 
-    func publish(topic: String, payload: Encodable, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCError>)->())) {
+    func publish(topic: String, payload: ClientSynchJSONRPC, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCError>)->())) {
         do {
             let message = try serialise(topic: topic, jsonRpc: payload)
             history.append(message)
+            var done = false
             networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
+                if done {
+                    return
+                }
                 guard let self = self else {return}
                 if let error = error {
                     self.logger.error(error)
                 } else {
-                    var cancellable: AnyCancellable!
-                    cancellable = self.wcResponsePublisher
-                        .filter {$0.topic == topic}
-                        .sink { (response) in
-                            cancellable.cancel()
-                            self.logger.debug("WC Relay - received response on topic: \(topic)")
-                            switch response {
-                            case .response(let response):
-                                completion(.success(response.value))
-                            case .error(let error):
-                                completion(.failure(error.value))
-                            }
-                        }
+                    let response = JSONRPCResponse<AnyCodable>(id: payload.id, result: AnyCodable(true))
+                    done = true
+                    completion(.success(response))
+//                    var cancellable: AnyCancellable!
+//                    cancellable = self.wcResponsePublisher
+//                        .filter {$0.id == payload.id}
+//                        .sink { (response) in
+//                            cancellable.cancel()
+//                            self.logger.debug("WC Relay - received response on topic: \(topic)")
+//                            switch response {
+//                            case .response(let response):
+//                                completion(.success(response.value))
+//                            case .error(let error):
+//                                completion(.failure(error.value))
+//                            }
+//                        }
                 }
             }
         } catch {

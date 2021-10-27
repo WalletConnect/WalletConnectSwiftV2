@@ -40,7 +40,7 @@ final class ClientTests: XCTestCase {
         proposer.onPairingSettled = { pairing in
             proposerSettlesPairingExpectation.fulfill()
         }
-        waitForExpectations(timeout: 2.0, handler: nil)
+        waitForExpectations(timeout: 3.0, handler: nil)
     }
 
     func testNewSession() {

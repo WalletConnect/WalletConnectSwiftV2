@@ -162,18 +162,18 @@ final class SessionEngine {
     }
     
     func respondSessionPayload(topic: String, response: JSONRPCResponse<AnyCodable>) {
-        guard let _ = sequencesStore.get(topic: topic) else {
-            logger.debug("Could not find session for topic \(topic)")
-            return
-        }
-        relayer.publish(topic: topic, payload: response) { [weak self] result in
-            switch result {
-            case .success:
-                self?.logger.debug("Sent Session Payload Response")
-            case .failure(let error):
-                self?.logger.debug("Could not send session payload, error: \(error)")
-            }
-        }
+//        guard let _ = sequencesStore.get(topic: topic) else {
+//            logger.debug("Could not find session for topic \(topic)")
+//            return
+//        }
+//        relayer.publish(topic: topic, payload: response) { [weak self] result in
+//            switch result {
+//            case .success:
+//                self?.logger.debug("Sent Session Payload Response")
+//            case .failure(let error):
+//                self?.logger.debug("Could not send session payload, error: \(error)")
+//            }
+//        }
     }
 
     //MARK: - Private
@@ -253,15 +253,16 @@ final class SessionEngine {
     }
     
     private func respond(error: WalletConnectError, requestId: Int64, topic: String) {
-        let errorResponse = JSONRPCError(code: error.code, message: error.localizedDescription)
-        relayer.publish(topic: topic, payload: errorResponse) { [weak self] result in
-            switch result {
-            case .success(let response):
-                self?.logger.debug("successfully responded with error: \(error)")
-            case .failure(let error):
-                self?.logger.error(error)
-            }
-        }
+
+//        let errorResponse = JSONRPCError(code: error.code, message: error.message)
+//        relayer.publish(topic: topic, payload: errorResponse) { [weak self] result in
+//            switch result {
+//            case .success(let response):
+//                self?.logger.debug("successfully responded with error: \(error)")
+//            case .failure(let error):
+//                self?.logger.error(error)
+//            }
+//        }
     }
 
     private func validatePayload(_ sessionRequest: SessionRequest) throws {

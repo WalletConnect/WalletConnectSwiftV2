@@ -53,8 +53,6 @@ class WakuNetworkRelay: NetworkRelaying {
                 self?.logger.error(error)
                 cancellable.cancel()
                 completion(error)
-            } else {
-                completion(nil)
             }
         }
         cancellable = requestAcknowledgePublisher
