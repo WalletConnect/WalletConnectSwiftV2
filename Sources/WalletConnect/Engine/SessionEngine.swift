@@ -71,7 +71,7 @@ final class SessionEngine {
             expiry: expiry,
             state: sessionState)
         let approvalPayload = ClientSynchJSONRPC(method: .sessionApprove, params: .sessionApprove(approveParams))
-        relayer.publish(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
+        relayer.request(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
             switch result {
             case .success:
                 self?.crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
@@ -90,7 +90,7 @@ final class SessionEngine {
     func reject(proposal: SessionType.Proposal, reason: SessionType.Reason) {
         let rejectParams = SessionType.RejectParams(reason: reason)
         let rejectPayload = ClientSynchJSONRPC(method: .sessionReject, params: .sessionReject(rejectParams))
-        _ = try? relayer.publish(topic: proposal.topic, payload: rejectPayload) { [weak self] result in
+        _ = try? relayer.request(topic: proposal.topic, payload: rejectPayload) { [weak self] result in
             self?.logger.debug("Reject result: \(result)")
         }
     }
@@ -102,7 +102,7 @@ final class SessionEngine {
         let clientSynchParams = ClientSynchJSONRPC.Params.sessionDelete(SessionType.DeleteParams(reason: reason))
         let request = ClientSynchJSONRPC(method: .sessionDelete, params: clientSynchParams)
         do {
-            _ = try relayer.publish(topic: topic, payload: request) { [weak self] result in
+            _ = try relayer.request(topic: topic, payload: request) { [weak self] result in
                 self?.logger.debug("Session Delete result: \(result)")
             }
         }  catch {
@@ -129,7 +129,7 @@ final class SessionEngine {
         let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: proposal)
         let pairingPayloadParams = PairingType.PayloadParams(request: request)
         let pairingPayloadRequest = ClientSynchJSONRPC(method: .pairingPayload, params: .pairingPayload(pairingPayloadParams))
-        relayer.publish(topic: settledPairing.topic, payload: pairingPayloadRequest) { [unowned self] result in
+        relayer.request(topic: settledPairing.topic, payload: pairingPayloadRequest) { [unowned self] result in
             switch result {
             case .success:
                 logger.debug("Session Proposal response received")
@@ -150,7 +150,7 @@ final class SessionEngine {
         let sessionPayloadParams = SessionType.PayloadParams(request: request, chainId: params.chainId)
         let sessionPayloadRequest = ClientSynchJSONRPC(method: .sessionPayload, params: .sessionPayload(sessionPayloadParams))
 
-        relayer.publish(topic: params.topic, payload: sessionPayloadRequest) { [weak self] result in
+        relayer.request(topic: params.topic, payload: sessionPayloadRequest) { [weak self] result in
             switch result {
             case .success(let response):
                 completion(.success(response))

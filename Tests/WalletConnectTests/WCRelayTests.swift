@@ -44,7 +44,7 @@ class WalletConnectRelayTests: XCTestCase {
         let request = getWCSessionPayloadRequest()
         let sessionPayloadResponse = getWCSessionPayloadResponse()
         serialiser.deserialised = sessionPayloadResponse
-        wcRelay.publish(topic: topic, payload: request) { result in
+        wcRelay.request(topic: topic, payload: request) { result in
             responseExpectation.fulfill()
             XCTAssertEqual(result, .success(sessionPayloadResponse))
         }

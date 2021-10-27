@@ -77,7 +77,7 @@ final class PairingEngine {
             state: nil) // FIXME: State
         let approvalPayload = ClientSynchJSONRPC(method: .pairingApprove, params: .pairingApprove(approveParams))
         
-        relayer.publish(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
+        relayer.request(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
             switch result {
             case .success:
                 self?.wcSubscriber.removeSubscription(topic: proposal.topic)
