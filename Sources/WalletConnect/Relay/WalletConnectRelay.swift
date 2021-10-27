@@ -72,29 +72,25 @@ class WalletConnectRelay: WalletConnectRelaying {
             history.append(message)
             var done = false
             networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
-                if done {
-                    return
-                }
                 guard let self = self else {return}
                 if let error = error {
                     self.logger.error(error)
                 } else {
-                    let response = JSONRPCResponse<AnyCodable>(id: payload.id, result: AnyCodable(true))
-                    done = true
-                    completion(.success(response))
-//                    var cancellable: AnyCancellable!
-//                    cancellable = self.wcResponsePublisher
-//                        .filter {$0.id == payload.id}
-//                        .sink { (response) in
-//                            cancellable.cancel()
-//                            self.logger.debug("WC Relay - received response on topic: \(topic)")
-//                            switch response {
-//                            case .response(let response):
-//                                completion(.success(response.value))
-//                            case .error(let error):
-//                                completion(.failure(error.value))
-//                            }
-//                        }
+//                    let response = JSONRPCResponse<AnyCodable>(id: payload.id, result: AnyCodable(true))
+//                    completion(.success(response))
+                    var cancellable: AnyCancellable!
+                    cancellable = self.wcResponsePublisher
+                        .filter {$0.id == payload.id}
+                        .sink { (response) in
+                            cancellable.cancel()
+                            self.logger.debug("WC Relay - received response on topic: \(topic)")
+                            switch response {
+                            case .response(let response):
+                                completion(.success(response.value))
+                            case .error(let error):
+                                completion(.failure(error.value))
+                            }
+                        }
                 }
             }
         } catch {

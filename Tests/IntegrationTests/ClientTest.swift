@@ -136,7 +136,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.respond(topic: sessionRequest.topic, response: jsonrpcResponse)
             requestExpectation.fulfill()
         }
-        waitForExpectations(timeout: 3.0, handler: nil)
+        waitForExpectations(timeout: 4.0, handler: nil)
     }
 }
 
