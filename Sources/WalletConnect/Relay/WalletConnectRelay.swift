@@ -70,7 +70,6 @@ class WalletConnectRelay: WalletConnectRelaying {
         do {
             let message = try serialise(topic: topic, jsonRpc: payload)
             history.append(message)
-            var done = false
             networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
                 guard let self = self else {return}
                 if let error = error {
