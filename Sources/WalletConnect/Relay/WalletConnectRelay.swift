@@ -75,8 +75,6 @@ class WalletConnectRelay: WalletConnectRelaying {
                 if let error = error {
                     self.logger.error(error)
                 } else {
-//                    let response = JSONRPCResponse<AnyCodable>(id: payload.id, result: AnyCodable(true))
-//                    completion(.success(response))
                     var cancellable: AnyCancellable!
                     cancellable = self.wcResponsePublisher
                         .filter {$0.id == payload.id}
@@ -102,8 +100,6 @@ class WalletConnectRelay: WalletConnectRelaying {
         history.append(message)
         logger.debug("Responding....topic: \(topic)")
         networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
-            self?.logger.debug("responded")
-            //TODO
             completion(error)
         }
     }
