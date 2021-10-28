@@ -7,3 +7,14 @@ protocol GenericPasswordConvertible {
 }
 
 extension Curve25519.KeyAgreement.PrivateKey: GenericPasswordConvertible {}
+
+extension Data: GenericPasswordConvertible {
+    
+    init<D>(rawRepresentation data: D) throws where D : ContiguousBytes {
+        self = data.withUnsafeBytes { Data($0) }
+    }
+    
+    var rawRepresentation: Data {
+        self
+    }
+}

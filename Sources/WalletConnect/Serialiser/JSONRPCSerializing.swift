@@ -8,7 +8,7 @@ protocol JSONRPCSerialising {
     func tryDeserialise<T: Codable>(topic: String, message: String) -> T?
     func deserialiseJsonRpc(topic: String, message: String) throws -> Result<JSONRPCResponse<AnyCodable>, JSONRPCError>
     
-//    var codec: Codec {get}
+    var codec: Codec {get}
     func serialise(json: String, agreementKeys: Crypto.X25519.AgreementKeys) throws -> String
     func deserialise<T: Codable>(message: String, symmetricKey: Data) throws -> T
 }
@@ -61,8 +61,6 @@ class JSONRPCSerialiser: JSONRPCSerialising {
         }
         throw WalletConnectError.internal(.deserialisationFailed)
     }
-    
-    // original methods
     
     func deserialise<T: Codable>(message: String, symmetricKey: Data) throws -> T {
         let JSONRPCData = try decrypt(message: message, symmetricKey: symmetricKey)

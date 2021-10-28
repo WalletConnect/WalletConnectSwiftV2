@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import CryptoKit // TODO: Try to remove this dependency
 
 final class PairingEngine {
     private let wcSubscriber: WCSubscribing

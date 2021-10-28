@@ -16,8 +16,7 @@ class WalletConnectRelayTests: XCTestCase {
         let logger = ConsoleLogger()
         serialiser = MockedJSONRPCSerialiser()
         networkRelayer = MockedNetworkRelayer()
-        crypto = Crypto(keychain: DictionaryKeychain())
-        wcRelay = WalletConnectRelay(networkRelayer: networkRelayer, jsonRpcSerialiser: serialiser, crypto: crypto, logger: logger)
+        wcRelay = WalletConnectRelay(networkRelayer: networkRelayer, jsonRpcSerialiser: serialiser, logger: logger)
     }
 
     override func tearDown() {
@@ -33,7 +32,6 @@ class WalletConnectRelayTests: XCTestCase {
             requestExpectation.fulfill()
         }.store(in: &publishers)
         serialiser.deserialised = SerialiserTestData.pairingApproveJSONRPCRequest
-        crypto.set(agreementKeys: Crypto.X25519.AgreementKeys(sharedSecret: Data(), publicKey: Data()), topic: topic)
         networkRelayer.onMessage?(topic, testPayload)
         waitForExpectations(timeout: 0.001, handler: nil)
     }
@@ -44,6 +42,7 @@ class WalletConnectRelayTests: XCTestCase {
         let request = getWCSessionPayloadRequest()
         let sessionPayloadResponse = getWCSessionPayloadResponse()
         serialiser.deserialised = sessionPayloadResponse
+        serialiser.serialised = try! sessionPayloadResponse.json().toHexEncodedString()
         wcRelay.request(topic: topic, payload: request) { result in
             responseExpectation.fulfill()
             XCTAssertEqual(result, .success(sessionPayloadResponse))

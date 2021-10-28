@@ -10,7 +10,7 @@ final class JSONRPCSerialiserTests: XCTestCase {
     var codec: MockedCodec!
     override func setUp() {
         codec = MockedCodec()
-        self.serialiser = JSONRPCSerialiser(codec: codec)
+        self.serialiser = JSONRPCSerialiser(crypto: Crypto(keychain: KeychainStorageMock()), codec: codec)
     }
     
     override func tearDown() {

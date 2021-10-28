@@ -65,7 +65,6 @@ class WalletConnectRelay: WalletConnectRelaying {
 
     func request(topic: String, payload: ClientSynchJSONRPC, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCError>)->())) {
         do {
-//            let message = try serialise(topic: topic, jsonRpc: payload)
             let message = try jsonRpcSerialiser.serialise(topic: topic, encodable: payload)
             history.append(message)
             networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
@@ -94,7 +93,6 @@ class WalletConnectRelay: WalletConnectRelaying {
     }
     
     func respond(topic: String, payload: Encodable, completion: @escaping ((Error?)->())) {
-//        let message = try! serialise(topic: topic, jsonRpc: payload)
         let message = try! jsonRpcSerialiser.serialise(topic: topic, encodable: payload)
         history.append(message)
         logger.debug("Responding....topic: \(topic)")
@@ -154,43 +152,4 @@ class WalletConnectRelay: WalletConnectRelaying {
             wcResponsePublisherSubject.send(.error((topic, deserialisedJsonRpcError)))
         }
     }
-    
-//    private func tryDeserialise<T: Codable>(topic: String, message: String) -> T? {
-//        do {
-//            let deserialisedJsonRpcRequest: T
-//            if let agreementKeys = crypto.getAgreementKeys(for: topic) {
-//                deserialisedJsonRpcRequest = try jsonRpcSerialiser.deserialise(message: message, symmetricKey: agreementKeys.sharedSecret)
-//            } else {
-//                let jsonData = Data(hex: message)
-//                deserialisedJsonRpcRequest = try JSONDecoder().decode(T.self, from: jsonData)
-//            }
-//            return deserialisedJsonRpcRequest
-//        } catch {
-//            logger.debug("Type \(T.self) does not match the payload")
-//            return nil
-//        }
-//    }
-//
-//    private func serialise(topic: String, jsonRpc: Encodable) throws -> String {
-//        let messageJson = try jsonRpc.json()
-//        var message: String
-//        if let agreementKeys = crypto.getAgreementKeys(for: topic) {
-//            message = try jsonRpcSerialiser.serialise(json: messageJson, agreementKeys: agreementKeys)
-//        } else {
-//            message = messageJson.toHexEncodedString(uppercase: false)
-//        }
-//        return message
-//    }
-//
-//    private func deserialiseJsonRpc(topic: String, message: String) throws -> Result<JSONRPCResponse<AnyCodable>, JSONRPCError> {
-//        guard let agreementKeys = crypto.getAgreementKeys(for: topic) else {
-//            throw WalletConnectError.internal(.keyNotFound)
-//        }
-//        if let jsonrpcResponse: JSONRPCResponse<AnyCodable> = try? jsonRpcSerialiser.deserialise(message: message, symmetricKey: agreementKeys.sharedSecret) {
-//            return .success(jsonrpcResponse)
-//        } else if let jsonrpcError: JSONRPCError = try? jsonRpcSerialiser.deserialise(message: message, symmetricKey: agreementKeys.sharedSecret) {
-//            return .failure(jsonrpcError)
-//        }
-//        throw WalletConnectError.internal(.deserialisationFailed)
-//    }
 }

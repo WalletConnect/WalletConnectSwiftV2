@@ -4,8 +4,23 @@ import Foundation
 @testable import WalletConnect
 
 class MockedJSONRPCSerialiser: JSONRPCSerialising {
+    
+    func serialise(topic: String, encodable: Encodable) throws -> String {
+        try serialise(json: try encodable.json(), agreementKeys: Crypto.X25519.AgreementKeys(sharedSecret: Data(), publicKey: Data()))
+    }
+    func tryDeserialise<T: Codable>(topic: String, message: String) -> T? {
+        try? deserialise(message: message, symmetricKey: Data())
+    }
+    func deserialiseJsonRpc(topic: String, message: String) throws -> Result<JSONRPCResponse<AnyCodable>, JSONRPCError> {
+        .success(try deserialise(message: message, symmetricKey: Data()))
+    }
+    
     func deserialise<T>(message: String, symmetricKey: Data) throws -> T where T : Codable {
-        return deserialised as! T
+        if let deserialisedModel = deserialised as? T {
+            return deserialisedModel
+        } else {
+            throw NSError.mock()
+        }
     }
     
     var codec: Codec
