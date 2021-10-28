@@ -3,17 +3,66 @@
 import Foundation
 
 protocol JSONRPCSerialising {
-    var codec: Codec {get}
+    
+    func serialise(topic: String, encodable: Encodable) throws -> String
+    func tryDeserialise<T: Codable>(topic: String, message: String) -> T?
+    func deserialiseJsonRpc(topic: String, message: String) throws -> Result<JSONRPCResponse<AnyCodable>, JSONRPCError>
+    
+//    var codec: Codec {get}
     func serialise(json: String, agreementKeys: Crypto.X25519.AgreementKeys) throws -> String
     func deserialise<T: Codable>(message: String, symmetricKey: Data) throws -> T
 }
 
 class JSONRPCSerialiser: JSONRPCSerialising {
-    var codec: Codec
     
-    init(codec: Codec = AES_256_CBC_HMAC_SHA256_Codec()) {
+    private let crypto: Crypto
+    let codec: Codec
+    
+    init(crypto: Crypto, codec: Codec = AES_256_CBC_HMAC_SHA256_Codec()) {
+        self.crypto = crypto
         self.codec = codec
     }
+    
+    func serialise(topic: String, encodable: Encodable) throws -> String {
+        let messageJson = try encodable.json()
+        var message: String
+        if let agreementKeys = crypto.getAgreementKeys(for: topic) {
+            message = try serialise(json: messageJson, agreementKeys: agreementKeys)
+        } else {
+            message = messageJson.toHexEncodedString(uppercase: false)
+        }
+        return message
+    }
+    
+    func tryDeserialise<T: Codable>(topic: String, message: String) -> T? {
+        do {
+            let deserialisedJsonRpcRequest: T
+            if let agreementKeys = crypto.getAgreementKeys(for: topic) {
+                deserialisedJsonRpcRequest = try deserialise(message: message, symmetricKey: agreementKeys.sharedSecret)
+            } else {
+                let jsonData = Data(hex: message)
+                deserialisedJsonRpcRequest = try JSONDecoder().decode(T.self, from: jsonData)
+            }
+            return deserialisedJsonRpcRequest
+        } catch {
+//            logger.debug("Type \(T.self) does not match the payload")
+            return nil
+        }
+    }
+    
+    func deserialiseJsonRpc(topic: String, message: String) throws -> Result<JSONRPCResponse<AnyCodable>, JSONRPCError> {
+        guard let agreementKeys = crypto.getAgreementKeys(for: topic) else {
+            throw WalletConnectError.internal(.keyNotFound)
+        }
+        if let jsonrpcResponse: JSONRPCResponse<AnyCodable> = try? deserialise(message: message, symmetricKey: agreementKeys.sharedSecret) {
+            return .success(jsonrpcResponse)
+        } else if let jsonrpcError: JSONRPCError = try? deserialise(message: message, symmetricKey: agreementKeys.sharedSecret) {
+            return .failure(jsonrpcError)
+        }
+        throw WalletConnectError.internal(.deserialisationFailed)
+    }
+    
+    // original methods
     
     func deserialise<T: Codable>(message: String, symmetricKey: Data) throws -> T {
         let JSONRPCData = try decrypt(message: message, symmetricKey: symmetricKey)
