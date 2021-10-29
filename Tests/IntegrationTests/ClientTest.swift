@@ -4,7 +4,7 @@ import XCTest
 @testable import WalletConnect
 
 final class ClientTests: XCTestCase {
-    let url = URL(string: "wss://relay.walletconnect.com")! // TODO: Change to new URL
+    let url = URL(string: "wss://staging.walletconnect.org")! // TODO: Change to new URL
     var proposer: ClientDelegate!
     var responder: ClientDelegate!
     override func setUp() {
