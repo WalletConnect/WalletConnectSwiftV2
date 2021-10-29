@@ -100,7 +100,7 @@ final class PairingEngine {
         let relay = RelayProtocolOptions(protocol: "waku", params: nil)
         crypto.set(privateKey: privateKey)
         let proposer = PairingType.Proposer(publicKey: publicKey, controller: isController)
-        let uri = PairingType.UriParameters(topic: topic, publicKey: publicKey, controller: isController, relay: relay).absoluteString()!
+        let uri = WalletConnectURI(topic: topic, publicKey: publicKey, isController: isController, relay: relay).absoluteString
         let signalParams = PairingType.Signal.Params(uri: uri)
         let signal = PairingType.Signal(params: signalParams)
         let permissions = getDefaultPermissions()

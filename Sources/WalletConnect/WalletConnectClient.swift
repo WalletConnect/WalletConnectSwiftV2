@@ -64,8 +64,8 @@ public final class WalletConnectClient {
     // for responder to receive a session proposal from a proposer
     public func pair(uri: String) throws {
         print("start pair")
-        guard let pairingURI = PairingType.UriParameters(uri) else {
-            throw WalletConnectError.internal(.pairingParamsURIInitialization)
+        guard let pairingURI = WalletConnectURI(string: uri) else {
+            throw WalletConnectError.internal(.malformedPairingURI)
         }
         let proposal = PairingType.Proposal.createFromURI(pairingURI)
         let approved = proposal.proposer.controller != isController

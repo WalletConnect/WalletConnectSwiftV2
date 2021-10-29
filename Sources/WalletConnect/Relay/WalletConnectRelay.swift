@@ -97,8 +97,6 @@ class WalletConnectRelay: WalletConnectRelaying {
         history.append(message)
         logger.debug("Responding....topic: \(topic)")
         networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
-            self?.logger.debug("responded")
-            //TODO
             completion(error)
         }
     }

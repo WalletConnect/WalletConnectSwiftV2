@@ -17,7 +17,7 @@ enum WalletConnectError: Error {
     
     enum InternalReason {
         case notApproved
-        case pairingParamsURIInitialization
+        case malformedPairingURI
         case unauthorizedMatchingController
         case noSequenceForTopic
         case pairingProposalGenerationFailed
@@ -63,7 +63,7 @@ extension WalletConnectError.InternalReason: CustomStringConvertible {
     var code: Int {
         switch self {
         case .notApproved: return 1601
-        case .pairingParamsURIInitialization: return 0000000
+        case .malformedPairingURI: return 0000000
         case .unauthorizedMatchingController: return 0000000
         case .noSequenceForTopic: return 0000000
         case .pairingProposalGenerationFailed: return 0000000
@@ -78,8 +78,8 @@ extension WalletConnectError.InternalReason: CustomStringConvertible {
         switch self {
         case .notApproved:
             return "Session not approved"
-        case .pairingParamsURIInitialization:
-            return "PairingParamsUriInitialization"
+        case .malformedPairingURI:
+            return "Pairing URI string is invalid."
         case .unauthorizedMatchingController:
             return "unauthorizedMatchingController"
         case .noSequenceForTopic:

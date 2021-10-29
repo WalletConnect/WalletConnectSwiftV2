@@ -44,8 +44,8 @@ class WalletConnectRelayTests: XCTestCase {
         serialiser.deserialised = sessionPayloadResponse
         serialiser.serialised = try! sessionPayloadResponse.json().toHexEncodedString()
         wcRelay.request(topic: topic, payload: request) { result in
-            responseExpectation.fulfill()
             XCTAssertEqual(result, .success(sessionPayloadResponse))
+            responseExpectation.fulfill()
         }
         let response = try! sessionPayloadResponse.json().toHexEncodedString(uppercase: false)
         networkRelayer.error = nil
@@ -54,15 +54,25 @@ class WalletConnectRelayTests: XCTestCase {
     }
     
     func testEncryptedRequestCompletesWithSuccessfulResponse() {
-        
+        let responseExpectation = expectation(description: "should complete with response")
+        let topic = "fefc3dc39cacbc562ed58f92b296e2d65a6b07ef08992b93db5b3cb86280635a"
+        let request = getWCSessionPayloadRequest()
+        let sessionPayloadResponse = getWCSessionPayloadResponse()
+        crypto.set(agreementKeys: Crypto.X25519.AgreementKeys(sharedSecret: Data(), publicKey: Data()), topic: topic)
+        serialiser.deserialised = sessionPayloadResponse
+        serialiser.serialised = "encrypted_message"
+        wcRelay.request(topic: topic, payload: request) { result in
+            XCTAssertEqual(result, .success(sessionPayloadResponse))
+            responseExpectation.fulfill()
+        }
+        let response = try! sessionPayloadResponse.json().toHexEncodedString(uppercase: false)
+        networkRelayer.error = nil
+        networkRelayer.onMessage?(topic, response)
+        waitForExpectations(timeout: 0.01, handler: nil)
     }
     
     func testRequestCompletesWithError() {
-        
-    }
-    
-    func testRespondCompletesWithoutError() {
-        
+        //todo
     }
 }
 
@@ -79,23 +89,9 @@ extension WalletConnectRelayTests {
         let wcRequest = ClientSynchJSONRPC(id: wcRequestId, method: ClientSynchJSONRPC.Method.sessionPayload, params: params)
         return wcRequest
     }
-}
-
-class MockedNetworkRelayer: NetworkRelaying {
-    var onConnect: (() -> ())?
-    var onMessage: ((String, String) -> ())?
-    var error: Error?
-    func publish(topic: String, payload: String, completion: @escaping ((Error?) -> ())) -> Int64 {
-        completion(error)
-        return 0
-    }
     
-    func subscribe(topic: String, completion: @escaping (Error?) -> ()) -> Int64 {
-        return 0
-    }
-    
-    func unsubscribe(topic: String, completion: @escaping ((Error?) -> ())) -> Int64? {
-        return 0
+    func getErrorResponse() -> JSONRPCResponse<JSONRPCError> {
+        return JSONRPCResponse(id: 123, result: JSONRPCError(code: 1, message: "error"))
     }
 }
 
