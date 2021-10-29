@@ -111,6 +111,9 @@ public final class WalletConnectClient {
     }
     
     public func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
+        pairingEngine.ping(topic: topic) { result in
+            completion(result)
+        }
         sessionEngine.ping(topic: topic) { result in
             completion(result)
         }

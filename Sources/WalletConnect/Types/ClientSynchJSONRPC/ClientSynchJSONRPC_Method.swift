@@ -9,6 +9,7 @@ extension ClientSynchJSONRPC {
         case pairingUpgrade = "wc_pairingUpgrade"
         case pairingDelete = "wc_pairingDelete"
         case pairingPayload = "wc_pairingPayload"
+        case pairingPing = "wc_pairingPing"
         case sessionPropose = "wc_sessionPropose"
         case sessionApprove = "wc_sessionApprove"
         case sessionReject = "wc_sessionReject"

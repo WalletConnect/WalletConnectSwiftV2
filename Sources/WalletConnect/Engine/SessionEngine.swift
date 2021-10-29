@@ -142,6 +142,10 @@ final class SessionEngine {
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
+        guard let _ = sequencesStore.get(topic: topic) else {
+            logger.debug("Could not find session to ping for topic \(topic)")
+            return
+        }
         let request = ClientSynchJSONRPC(method: .sessionPing, params: .sessionPing(SessionType.PingParams()))
         relayer.request(topic: topic, payload: request) { [unowned self] result in
             switch result {

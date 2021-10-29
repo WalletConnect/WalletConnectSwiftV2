@@ -45,6 +45,9 @@ struct ClientSynchJSONRPC: Codable {
         case .pairingPayload:
             let paramsValue = try container.decode(PairingType.PayloadParams.self, forKey: .params)
             params = .pairingPayload(paramsValue)
+        case .pairingPing:
+            let paramsValue = try container.decode(PairingType.PingParams.self, forKey: .params)
+            params = .pairingPing(paramsValue)
         case .sessionPropose:
             let paramsValue = try container.decode(SessionType.ProposeParams.self, forKey: .params)
             params = .sessionPropose(paramsValue)
@@ -89,6 +92,8 @@ struct ClientSynchJSONRPC: Codable {
         case .pairingDelete(let params):
             try container.encode(params, forKey: .params)
         case .pairingPayload(let params):
+            try container.encode(params, forKey: .params)
+        case .pairingPing(let params):
             try container.encode(params, forKey: .params)
         case .sessionPropose(let params):
             try container.encode(params, forKey: .params)

@@ -30,7 +30,6 @@ final class ClientTests: XCTestCase {
         let responderSettlesPairingExpectation = expectation(description: "Responder settles pairing")
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
         let connectParams = ConnectParams(permissions: permissions)
-        Thread.sleep(forTimeInterval: 0.3)
         let uri = try! proposer.client.connect(params: connectParams)!
         
         _ = try! responder.client.pair(uri: uri)
@@ -137,6 +136,22 @@ final class ClientTests: XCTestCase {
             requestExpectation.fulfill()
         }
         waitForExpectations(timeout: 4.0, handler: nil)
+    }
+    
+    func testPairingPing() {
+        let proposerReceivesPingResponseExpectation = expectation(description: "Proposer receives ping response")
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        
+        _ = try! responder.client.pair(uri: uri)
+        proposer.onPairingSettled = { [unowned self] pairing in
+            proposer.client.ping(topic: pairing.topic) { response in
+                XCTAssertTrue(response.isSuccess)
+                proposerReceivesPingResponseExpectation.fulfill()
+            }
+        }
+        waitForExpectations(timeout: 3.0, handler: nil)
     }
     
     
