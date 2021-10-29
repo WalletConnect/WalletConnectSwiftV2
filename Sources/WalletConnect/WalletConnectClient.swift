@@ -110,7 +110,13 @@ public final class WalletConnectClient {
         sessionEngine.respondSessionPayload(topic: topic, response: response)
     }
     
-    // TODO: Ping and notification methods
+    public func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
+        sessionEngine.ping(topic: topic) { result in
+            completion(result)
+        }
+    }
+    
+    // TODO: notification method
     
     // for either to disconnect a session
     public func disconnect(topic: String, reason: SessionType.Reason) {
@@ -156,7 +162,6 @@ public final class WalletConnectClient {
         }
         sessionEngine.onSessionDelete = { [unowned self] topic, reason in
             self.delegate?.didDelete(sessionTopic: topic, reason: reason)
-            
         }
     }
     

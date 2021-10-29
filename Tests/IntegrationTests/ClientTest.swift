@@ -4,7 +4,7 @@ import XCTest
 @testable import WalletConnect
 
 final class ClientTests: XCTestCase {
-    let url = URL(string: "wss://staging.walletconnect.org")! // TODO: Change to new URL
+    let url = URL(string: "wss://relay.walletconnect.com")! // TODO: Change to new URL
     var proposer: ClientDelegate!
     var responder: ClientDelegate!
     override func setUp() {
@@ -138,6 +138,26 @@ final class ClientTests: XCTestCase {
         }
         waitForExpectations(timeout: 4.0, handler: nil)
     }
+    
+    
+    func testSessionPing() {
+        let proposerReceivesPingResponseExpectation = expectation(description: "Proposer receives ping response")
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        try! responder.client.pair(uri: uri)
+        responder.onSessionProposal = { [unowned self] proposal in
+            self.responder.client.approve(proposal: proposal, accounts: [])
+        }
+        proposer.onSessionSettled = { [unowned self] sessionSettled in
+            self.proposer.client.ping(topic: sessionSettled.topic) { response in
+                XCTAssertTrue(response.isSuccess)
+                proposerReceivesPingResponseExpectation.fulfill()
+            }
+        }
+        waitForExpectations(timeout: 4.0, handler: nil)
+    }
+
 }
 
 public struct EthSendTransaction: Codable, Equatable {

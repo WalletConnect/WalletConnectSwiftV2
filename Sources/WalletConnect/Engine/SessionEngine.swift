@@ -141,6 +141,19 @@ final class SessionEngine {
         }
     }
     
+    func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
+        let request = ClientSynchJSONRPC(method: .sessionPing, params: .sessionPing(SessionType.PingParams()))
+        relayer.request(topic: topic, payload: request) { [unowned self] result in
+            switch result {
+            case .success(_):
+                logger.debug("Did receive ping response")
+                completion(.success(()))
+            case .failure(let error):
+                logger.debug("error: \(error)")
+            }
+        }
+    }
+    
     func request(params: SessionType.PayloadRequestParams, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, Error>)->())) {
         guard let _ = sequencesStore.get(topic: params.topic) else {
             logger.debug("Could not find session for topic \(params.topic)")
