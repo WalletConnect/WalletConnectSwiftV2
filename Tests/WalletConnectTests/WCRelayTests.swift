@@ -58,7 +58,6 @@ class WalletConnectRelayTests: XCTestCase {
         let topic = "fefc3dc39cacbc562ed58f92b296e2d65a6b07ef08992b93db5b3cb86280635a"
         let request = getWCSessionPayloadRequest()
         let sessionPayloadResponse = getWCSessionPayloadResponse()
-        crypto.set(agreementKeys: Crypto.X25519.AgreementKeys(sharedSecret: Data(), publicKey: Data()), topic: topic)
         serialiser.deserialised = sessionPayloadResponse
         serialiser.serialised = "encrypted_message"
         wcRelay.request(topic: topic, payload: request) { result in
