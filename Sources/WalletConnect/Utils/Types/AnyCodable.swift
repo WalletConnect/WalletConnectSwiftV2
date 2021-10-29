@@ -109,6 +109,11 @@ extension AnyCodable: Decodable, Encodable {
 
 extension AnyCodable: Equatable {
     public static func == (lhs: AnyCodable, rhs: AnyCodable) -> Bool {
+        if let lString = try? lhs.get(String.self),
+           let rString = try? rhs.get(String.self),
+           lString == rString {
+            return true
+        }
         fatalError("Not implemented")
     }
 }

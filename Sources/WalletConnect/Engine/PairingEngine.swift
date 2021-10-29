@@ -3,7 +3,7 @@ import Combine
 
 final class PairingEngine {
     private let wcSubscriber: WCSubscribing
-    private let relayer: Relaying
+    private let relayer: WalletConnectRelaying
     private let crypto: Crypto
     private var isController: Bool
     var sequencesStore: PairingSequencesStore
@@ -13,7 +13,7 @@ final class PairingEngine {
     private var publishers = [AnyCancellable]()
     private let logger: BaseLogger
     
-    init(relay: Relaying,
+    init(relay: WalletConnectRelaying,
          crypto: Crypto,
          subscriber: WCSubscribing,
          sequencesStore: PairingSequencesStore,
@@ -31,7 +31,7 @@ final class PairingEngine {
         restoreSubscriptions()
     }
     
-    func respond(to proposal: PairingType.Proposal, completion: @escaping (Result<PairingType.Settled, Error>) -> Void) {
+    func pair(_ proposal: PairingType.Proposal, completion: @escaping (Result<PairingType.Settled, Error>) -> Void) {
         let privateKey = Crypto.X25519.generatePrivateKey()
         let selfPublicKey = privateKey.publicKey.toHexString()
         
@@ -77,11 +77,11 @@ final class PairingEngine {
             state: nil) // FIXME: State
         let approvalPayload = ClientSynchJSONRPC(method: .pairingApprove, params: .pairingApprove(approveParams))
         
-        _ = try? relayer.publish(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
+        relayer.request(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
             switch result {
             case .success:
                 self?.wcSubscriber.removeSubscription(topic: proposal.topic)
-                print("Success on wc_pairingApprove")
+                self?.logger.debug("Success on wc_pairingApprove - settled topic - \(settledTopic)")
                 completion(.success(settledPairing))
             case .failure(let error):
                 completion(.failure(error))
@@ -139,7 +139,7 @@ final class PairingEngine {
         wcSubscriber.onRequestSubscription = { [unowned self] subscriptionPayload in
             switch subscriptionPayload.clientSynchJsonRpc.params {
             case .pairingApprove(let approveParams):
-                handlePairingApprove(approveParams: approveParams, pendingTopic: subscriptionPayload.topic)
+                handlePairingApprove(approveParams: approveParams, pendingTopic: subscriptionPayload.topic, reqestId: subscriptionPayload.clientSynchJsonRpc.id)
             case .pairingReject(_):
                 fatalError("Not Implemented")
             case .pairingUpdate(_):
@@ -147,16 +147,16 @@ final class PairingEngine {
             case .pairingUpgrade(_):
                 fatalError("Not Implemented")
             case .pairingDelete(let deleteParams):
-                handlePairingDelete(deleteParams, topic: subscriptionPayload.topic)
+                handlePairingDelete(deleteParams, topic: subscriptionPayload.topic, requestId: subscriptionPayload.clientSynchJsonRpc.id)
             case .pairingPayload(let pairingPayload):
-                self.handlePairingPayload(pairingPayload, for: subscriptionPayload.topic)
+                self.handlePairingPayload(pairingPayload, for: subscriptionPayload.topic, requestId: subscriptionPayload.clientSynchJsonRpc.id)
             default:
                 fatalError("not expected method type")
             }
         }
     }
-    
-    private func handlePairingPayload(_ payload: PairingType.PayloadParams, for topic: String) {
+
+    private func handlePairingPayload(_ payload: PairingType.PayloadParams, for topic: String, requestId: Int64) {
         logger.debug("Will handle pairing payload")
         guard let _ = sequencesStore.get(topic: topic) else {
             logger.error("Pairing for the topic: \(topic) does not exist")
@@ -170,18 +170,25 @@ final class PairingEngine {
         if let pairingAgreementKeys = crypto.getAgreementKeys(for: sessionProposal.signal.params.topic) {
             crypto.set(agreementKeys: pairingAgreementKeys, topic: sessionProposal.topic)
         }
-        onSessionProposal?(sessionProposal)
+        let response = JSONRPCResponse<Bool>(id: requestId, result: true)
+        relayer.respond(topic: topic, payload: response) { [weak self] error in
+            self?.onSessionProposal?(sessionProposal)
+        }
     }
     
-    private func handlePairingDelete(_ deleteParams: PairingType.DeleteParams, topic: String) {
+    private func handlePairingDelete(_ deleteParams: PairingType.DeleteParams, topic: String, requestId: Int64) {
         logger.debug("-------------------------------------")
         logger.debug("Paired client removed pairing - reason: \(deleteParams.reason.message), code: \(deleteParams.reason.code)")
         logger.debug("-------------------------------------")
         sequencesStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
+        let response = JSONRPCResponse<Bool>(id: requestId, result: true)
+//        relayer.respond(topic: topic, payload: response) { error in
+//            //todo
+//        }
     }
     
-    private func handlePairingApprove(approveParams: PairingType.ApproveParams, pendingTopic: String) {
+    private func handlePairingApprove(approveParams: PairingType.ApproveParams, pendingTopic: String, reqestId: Int64) {
         logger.debug("Responder Client approved pairing on topic: \(pendingTopic)")
         guard case let .pending(pairingPending) = sequencesStore.get(topic: pendingTopic) else {
                   logger.debug("Could not find pending pairing associated with topic \(pendingTopic)")
@@ -211,7 +218,10 @@ final class PairingEngine {
         sequencesStore.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledPairing))
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
-        onPairingApproved?(settledPairing, pendingTopic)
+        let response = JSONRPCResponse<Bool>(id: reqestId, result: true)
+        relayer.respond(topic: proposal.topic, payload: response) { [weak self] error in
+            self?.onPairingApproved?(settledPairing, pendingTopic)
+        }
     }
     
     private func restoreSubscriptions() {

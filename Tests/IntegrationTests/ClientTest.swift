@@ -8,18 +8,20 @@ final class ClientTests: XCTestCase {
     var proposer: ClientDelegate!
     var responder: ClientDelegate!
     override func setUp() {
-        proposer = Self.makeClientDelegate(isController: false, url: url)
-        responder = Self.makeClientDelegate(isController: true, url: url)
+        proposer = Self.makeClientDelegate(isController: false, url: url, prefix: "🍏P")
+        responder = Self.makeClientDelegate(isController: true, url: url, prefix: "🍎R")
     }
 
-    static func makeClientDelegate(isController: Bool, url: URL) -> ClientDelegate {
+    static func makeClientDelegate(isController: Bool, url: URL, prefix: String) -> ClientDelegate {
+        let logger = ConsoleLogger(suffix: prefix)
         let client = WalletConnectClient(
             metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil),
             apiKey: "",
             isController: isController,
-            relayURL: url)
-        client.pairingEngine.sequencesStore = PairingDictionaryStore(logger: MuteLogger())
-        client.sessionEngine.sequencesStore = SessionDictionaryStore(logger: MuteLogger())
+            relayURL: url,
+        logger: logger)
+        client.pairingEngine.sequencesStore = PairingDictionaryStore(logger: logger)
+        client.sessionEngine.sequencesStore = SessionDictionaryStore(logger: logger)
         return ClientDelegate(client: client)
     }
     
@@ -28,7 +30,9 @@ final class ClientTests: XCTestCase {
         let responderSettlesPairingExpectation = expectation(description: "Responder settles pairing")
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
         let connectParams = ConnectParams(permissions: permissions)
+        Thread.sleep(forTimeInterval: 0.3)
         let uri = try! proposer.client.connect(params: connectParams)!
+        
         _ = try! responder.client.pair(uri: uri)
         responder.onPairingSettled = { _ in
             responderSettlesPairingExpectation.fulfill()
@@ -36,7 +40,7 @@ final class ClientTests: XCTestCase {
         proposer.onPairingSettled = { pairing in
             proposerSettlesPairingExpectation.fulfill()
         }
-        waitForExpectations(timeout: 2.0, handler: nil)
+        waitForExpectations(timeout: 3.0, handler: nil)
     }
 
     func testNewSession() {
@@ -47,7 +51,7 @@ final class ClientTests: XCTestCase {
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
-        _ = try! responder.client.pair(uri: uri)
+        try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [account])
         }
@@ -63,7 +67,7 @@ final class ClientTests: XCTestCase {
         }
         waitForExpectations(timeout: 3.0, handler: nil)
     }
-    
+
     func testResponderRejectsSession() {
         let sessionRejectExpectation = expectation(description: "Responded is notified on session rejection")
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
@@ -77,7 +81,7 @@ final class ClientTests: XCTestCase {
             XCTAssertEqual(reason.code, WalletConnectError.internal(.notApproved).code)
             sessionRejectExpectation.fulfill()
         }
-        waitForExpectations(timeout: 2.0, handler: nil)
+        waitForExpectations(timeout: 3.0, handler: nil)
     }
     
     func testDeleteSession() {
@@ -116,7 +120,8 @@ final class ClientTests: XCTestCase {
             self.proposer.client.request(params: requestParams) { result in
                 switch result {
                 case .success(let jsonRpcResponse):
-                    XCTAssertEqual(jsonRpcResponse.result, responseParams)
+                    let response = try! jsonRpcResponse.result.get(String.self)
+                    XCTAssertEqual(response, responseParams)
                     responseExpectation.fulfill()
                 case .failure(_):
                     XCTFail()
@@ -131,7 +136,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.respond(topic: sessionRequest.topic, response: jsonrpcResponse)
             requestExpectation.fulfill()
         }
-        waitForExpectations(timeout: 3.0, handler: nil)
+        waitForExpectations(timeout: 4.0, handler: nil)
     }
 }
 

@@ -16,17 +16,23 @@ public final class WalletConnectClient {
     private let isController: Bool
     let pairingEngine: PairingEngine
     let sessionEngine: SessionEngine
-    private let relay: Relay
+    private let relay: WalletConnectRelaying
     private let crypto = Crypto()
     private var sessionPermissions: [String: SessionType.Permissions] = [:]
     var logger: BaseLogger = ConsoleLogger()
     private let secureStorage = SecureStorage()
     
     // MARK: - Public interface
-    public init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL) {
+
+    public convenience init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL) {
+        self.init(metadata: metadata, apiKey: apiKey, isController: isController, relayURL: relayURL, logger: MuteLogger())
+    }
+    
+    init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL, logger: BaseLogger = MuteLogger()) {
         self.metadata = metadata
         self.isController = isController
-        self.relay = Relay(transport: JSONRPCTransport(url: relayURL), crypto: crypto, logger: logger)
+        let wakuRelay = WakuNetworkRelay(transport: JSONRPCTransport(url: relayURL), logger: logger)
+        self.relay = WalletConnectRelay(networkRelayer: wakuRelay, crypto: crypto, logger: logger)
         let sessionSequencesStore = SessionUserDefaultsStore(logger: logger)
         let pairingSequencesStore = PairingUserDefaultsStore(logger: logger)
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
@@ -63,10 +69,10 @@ public final class WalletConnectClient {
         if !approved {
             throw WalletConnectError.internal(.unauthorizedMatchingController)
         }
-        pairingEngine.respond(to: proposal) { [unowned self] result in
+        pairingEngine.pair(proposal) { [unowned self] result in
             switch result {
             case .success(let settledPairing):
-                print("Pairing Success")
+                logger.debug("Pairing Success")
                 self.delegate?.didSettle(pairing: settledPairing)
             case .failure(let error):
                 print("Pairing Failure: \(error)")
@@ -95,13 +101,13 @@ public final class WalletConnectClient {
     // TODO: Upgrade and update methods.
     
     // for proposer to request JSON-RPC
-    public func request(params: SessionType.PayloadRequestParams, completion: @escaping (Result<JSONRPCResponse<String>, Error>) -> ()) {
+    public func request(params: SessionType.PayloadRequestParams, completion: @escaping (Result<JSONRPCResponse<AnyCodable>, Error>) -> ()) {
         sessionEngine.request(params: params, completion: completion)
     }
     
     // for responder to respond JSON-RPC
     public func respond(topic: String, response: JSONRPCResponse<AnyCodable>) {
-        sessionEngine.respond(topic: topic, response: response)
+        sessionEngine.respondSessionPayload(topic: topic, response: response)
     }
     
     // TODO: Ping and notification methods

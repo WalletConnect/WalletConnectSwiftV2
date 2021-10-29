@@ -2,7 +2,7 @@
 
 import Foundation
 
-struct JSONRPCError: Error, Codable {
+struct JSONRPCError: Error, Codable, Equatable {
     let code: Int
     let message: String
 }
@@ -33,7 +33,7 @@ public struct JSONRPCRequest<T: Codable&Equatable>: Codable, Equatable {
     }
 }
 
-public struct JSONRPCResponse<T: Codable>: Codable {
+public struct JSONRPCResponse<T: Codable&Equatable>: Codable, Equatable {
     public let jsonrpc = "2.0"
     public let id: Int64
     public let result: T

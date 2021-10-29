@@ -32,3 +32,5 @@ extension NetworkError {
         return true
     }
 }
+
+extension String: Error {}

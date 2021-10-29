@@ -4,7 +4,7 @@ import Combine
 final class SessionEngine {
     var sequencesStore: SessionSequencesStore
     private let wcSubscriber: WCSubscribing
-    private let relayer: Relaying
+    private let relayer: WalletConnectRelaying
     private let crypto: Crypto
     private var isController: Bool
     private var metadata: AppMetadata
@@ -13,9 +13,10 @@ final class SessionEngine {
     var onSessionRejected: ((String, SessionType.Reason)->())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
     private var publishers = [AnyCancellable]()
+
     private let logger: BaseLogger
 
-    init(relay: Relaying,
+    init(relay: WalletConnectRelaying,
          crypto: Crypto,
          subscriber: WCSubscribing,
          sequencesStore: SessionSequencesStore,
@@ -70,7 +71,7 @@ final class SessionEngine {
             expiry: expiry,
             state: sessionState)
         let approvalPayload = ClientSynchJSONRPC(method: .sessionApprove, params: .sessionApprove(approveParams))
-        _ = try? relayer.publish(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
+        relayer.request(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
             switch result {
             case .success:
                 self?.crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
@@ -89,7 +90,7 @@ final class SessionEngine {
     func reject(proposal: SessionType.Proposal, reason: SessionType.Reason) {
         let rejectParams = SessionType.RejectParams(reason: reason)
         let rejectPayload = ClientSynchJSONRPC(method: .sessionReject, params: .sessionReject(rejectParams))
-        _ = try? relayer.publish(topic: proposal.topic, payload: rejectPayload) { [weak self] result in
+        _ = try? relayer.request(topic: proposal.topic, payload: rejectPayload) { [weak self] result in
             self?.logger.debug("Reject result: \(result)")
         }
     }
@@ -101,7 +102,7 @@ final class SessionEngine {
         let clientSynchParams = ClientSynchJSONRPC.Params.sessionDelete(SessionType.DeleteParams(reason: reason))
         let request = ClientSynchJSONRPC(method: .sessionDelete, params: clientSynchParams)
         do {
-            _ = try relayer.publish(topic: topic, payload: request) { [weak self] result in
+            _ = try relayer.request(topic: topic, payload: request) { [weak self] result in
                 self?.logger.debug("Session Delete result: \(result)")
             }
         }  catch {
@@ -128,10 +129,10 @@ final class SessionEngine {
         let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: proposal)
         let pairingPayloadParams = PairingType.PayloadParams(request: request)
         let pairingPayloadRequest = ClientSynchJSONRPC(method: .pairingPayload, params: .pairingPayload(pairingPayloadParams))
-        _ = try? relayer.publish(topic: settledPairing.topic, payload: pairingPayloadRequest) { [unowned self] result in
+        relayer.request(topic: settledPairing.topic, payload: pairingPayloadRequest) { [unowned self] result in
             switch result {
             case .success:
-                logger.debug("Sent Session Proposal")
+                logger.debug("Session Proposal response received")
                 let pairingAgreementKeys = crypto.getAgreementKeys(for: settledPairing.topic)!
                 crypto.set(agreementKeys: pairingAgreementKeys, topic: proposal.topic)
             case .failure(let error):
@@ -140,7 +141,7 @@ final class SessionEngine {
         }
     }
     
-    func request(params: SessionType.PayloadRequestParams, completion: @escaping ((Result<JSONRPCResponse<String>, Error>)->())) {
+    func request(params: SessionType.PayloadRequestParams, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, Error>)->())) {
         guard let _ = sequencesStore.get(topic: params.topic) else {
             logger.debug("Could not find session for topic \(params.topic)")
             return
@@ -148,38 +149,32 @@ final class SessionEngine {
         let request = SessionType.PayloadParams.Request(method: params.method, params: AnyCodable(params.params))
         let sessionPayloadParams = SessionType.PayloadParams(request: request, chainId: params.chainId)
         let sessionPayloadRequest = ClientSynchJSONRPC(method: .sessionPayload, params: .sessionPayload(sessionPayloadParams))
-        var cancellable: AnyCancellable!
-        cancellable = relayer.wcResponsePublisher
-            .filter {$0.id == sessionPayloadRequest.id}
-            .sink { (wcPayloadResponse) in
-                cancellable.cancel()
-                completion(.success((wcPayloadResponse)))
-            }
-        _ = try? relayer.publish(topic: params.topic, payload: sessionPayloadRequest) { [weak self] result in
+
+        relayer.request(topic: params.topic, payload: sessionPayloadRequest) { [weak self] result in
             switch result {
-            case .success:
-                self?.logger.debug("Sent Session Payload")
+            case .success(let response):
+                completion(.success(response))
+                self?.logger.debug("Did receive session payload response")
             case .failure(let error):
-                self?.logger.debug("Could not send session payload, error: \(error)")
-                cancellable.cancel()
+                self?.logger.debug("error: \(error)")
             }
         }
     }
     
-    func respond(topic: String, response: JSONRPCResponse<AnyCodable>) {
+    func respondSessionPayload(topic: String, response: JSONRPCResponse<AnyCodable>) {
         guard let _ = sequencesStore.get(topic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
-        _ = try? relayer.publish(topic: topic, payload: response) { [weak self] result in
-            switch result {
-            case .success:
-                self?.logger.debug("Sent Session Payload Response")
-            case .failure(let error):
+        relayer.respond(topic: topic, payload: response) { [weak self] error in
+            if error != nil {
                 self?.logger.debug("Could not send session payload, error: \(error)")
+            } else {
+                self?.logger.debug("Sent Session Payload Response")
             }
         }
     }
+    
 
     //MARK: - Private
 
@@ -208,7 +203,7 @@ final class SessionEngine {
         wcSubscriber.onRequestSubscription = { [unowned self] subscriptionPayload in
             switch subscriptionPayload.clientSynchJsonRpc.params {
             case .sessionApprove(let approveParams):
-                self.handleSessionApprove(approveParams, topic: subscriptionPayload.topic)
+                self.handleSessionApprove(approveParams, topic: subscriptionPayload.topic, requestId: subscriptionPayload.clientSynchJsonRpc.id)
             case .sessionReject(let rejectParams):
                 handleSessionReject(rejectParams, topic: subscriptionPayload.topic)
             case .sessionUpdate(_):
@@ -258,13 +253,12 @@ final class SessionEngine {
     }
     
     private func respond(error: WalletConnectError, requestId: Int64, topic: String) {
-        let errorResponse = JSONRPCError(code: error.code, message: error.localizedDescription)
-        _ = try? relayer.publish(topic: topic, payload: errorResponse) { [weak self] result in
-            switch result {
-            case .success():
-                self?.logger.debug("successfully responded with error: \(error)")
-            case .failure(let error):
-                self?.logger.error(error)
+        let errorResponse = JSONRPCError(code: error.code, message: error.description)
+        relayer.respond(topic: topic, payload: errorResponse) { [weak self] responseError in
+            if let responseError = responseError {
+                self?.logger.error("Could not respond with error: \(responseError)")
+            } else {
+                self?.logger.debug("successfully responded with error")
             }
         }
     }
@@ -283,13 +277,14 @@ final class SessionEngine {
         }
     }
     
-    private func handleSessionApprove(_ approveParams: SessionType.ApproveParams, topic: String) {
+    private func handleSessionApprove(_ approveParams: SessionType.ApproveParams, topic: String, requestId: Int64) {
         logger.debug("Responder Client approved session on topic: \(topic)")
         guard case let .pending(pendingSession) = sequencesStore.get(topic: topic) else {
                   logger.error("Could not find pending session for topic: \(topic)")
             return
         }
         let selfPublicKey = Data(hex: pendingSession.`self`.publicKey)
+        logger.debug("handleSessionApprove")
         let privateKey = try! crypto.getPrivateKey(for: selfPublicKey)!
         let peerPublicKey = Data(hex: approveParams.responder.publicKey)
         let agreementKeys = try! Crypto.X25519.generateAgreementKeys(peerPublicKey: peerPublicKey, privateKey: privateKey)
@@ -309,10 +304,13 @@ final class SessionEngine {
             permissions: sessionPermissions,
             expiry: approveParams.expiry,
             state: approveParams.state)
-        
         sequencesStore.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledSession))
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
+        let wcResponse = JSONRPCResponse<Bool>(id: requestId, result: true)
+        relayer.respond(topic: topic, payload: wcResponse) { error in
+            print(error)
+        }
         onSessionApproved?(settledSession)
     }
     

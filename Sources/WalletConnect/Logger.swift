@@ -3,6 +3,10 @@
 import Foundation
 
 class BaseLogger {
+    var suffix: String
+    init(suffix: String = "") {
+        self.suffix = suffix
+    }
     func debug(_ items: Any...) {
         fatalError("Logging Subclass shoud implement the method")
     }
@@ -13,10 +17,15 @@ class BaseLogger {
 }
 
 class ConsoleLogger: BaseLogger {
+    
+    override init(suffix: String = "") {
+        super.init(suffix: suffix)
+    }
+    
     override func debug(_ items: Any...) {
         #if DEBUG
         items.forEach {
-            Swift.print($0)
+            Swift.print("\(suffix) \($0)")
         }
         #endif
     }
@@ -24,7 +33,7 @@ class ConsoleLogger: BaseLogger {
     override func error(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line ) {
         #if DEBUG
         items.forEach {
-            Swift.print("Error in File: \(file), Function: \(function), Line: \(line) - \($0)")
+            Swift.print("\(suffix) Error in File: \(file), Function: \(function), Line: \(line) - \($0)")
         }
         #endif
     }

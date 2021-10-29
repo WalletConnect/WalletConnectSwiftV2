@@ -1,20 +1,22 @@
 
+
 import Foundation
 import XCTest
 @testable import WalletConnect
 
 class PairingEngineTests: XCTestCase {
     var engine: PairingEngine!
-    var relay: MockedRelay!
+    var relay: MockedWCRelay!
     var crypto: Crypto!
     var subscriber: MockedSubscriber!
     
     override func setUp() {
         crypto = Crypto(keychain: DictionaryKeychain())
-        relay = MockedRelay()
+        relay = MockedWCRelay()
         subscriber = MockedSubscriber()
         let meta = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
-        engine = PairingEngine(relay: relay, crypto: crypto, subscriber: subscriber, sequencesStore: PairingDictionaryStore(logger: MuteLogger()), isController: false, metadata: meta, logger: MuteLogger())
+        let logger = MuteLogger()
+        engine = PairingEngine(relay: relay, crypto: crypto, subscriber: subscriber, sequencesStore: PairingDictionaryStore(logger: logger), isController: false, metadata: meta, logger: logger)
     }
 
     override func tearDown() {
@@ -27,12 +29,12 @@ class PairingEngineTests: XCTestCase {
         let topic = "1234"
         let proposalExpectation = expectation(description: "on session proposal is called after pairing payload")
         engine.sequencesStore.create(topic: topic, sequenceState: sequencePendingState)
-        let subscriptionPayload = WCRequestSubscriptionPayload(topic: topic, subscriptionId: "", clientSynchJsonRpc: sessionProposal)
+        let subscriptionPayload = WCRequestSubscriptionPayload(topic: topic, clientSynchJsonRpc: sessionProposal)
         engine.onSessionProposal = { (_) in
             proposalExpectation.fulfill()
         }
         subscriber.onRequestSubscription?(subscriptionPayload)
-        waitForExpectations(timeout: 0.001, handler: nil)
+        waitForExpectations(timeout: 0.01, handler: nil)
     }
 }
 

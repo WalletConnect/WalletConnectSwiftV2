@@ -3,45 +3,40 @@ import Foundation
 import Combine
 @testable import WalletConnect
 
-class MockedRelay: Relaying {
+class MockedWCRelay: WalletConnectRelaying {
+    
     var transportConnectionPublisher: AnyPublisher<Void, Never> {
         transportConnectionPublisherSubject.eraseToAnyPublisher()
     }
     private let transportConnectionPublisherSubject = PassthroughSubject<Void, Never>()
     
-    var wcResponsePublisher: AnyPublisher<JSONRPCResponse<String>, Never> {
-        wcResponsePublisherSubject.eraseToAnyPublisher()
-    }
-    private let wcResponsePublisherSubject = PassthroughSubject<JSONRPCResponse<String>, Never>()
-    
     private let clientSynchJsonRpcPublisherSubject = PassthroughSubject<WCRequestSubscriptionPayload, Never>()
     var clientSynchJsonRpcPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {
         clientSynchJsonRpcPublisherSubject.eraseToAnyPublisher()
     }
-    var subscribeCompletionId: String = ""
     var didCallSubscribe = false
     var didCallUnsubscribe = false
     var didCallPublish = false
-    func publish(topic: String, payload: Encodable, completion: @escaping ((Result<Void, Error>) -> ())) throws -> Int64 {
+    var error: Error? = nil
+
+    func request(topic: String, payload: ClientSynchJSONRPC, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCError>) -> ())) {
         didCallPublish = true
-        return 0
     }
     
-    func subscribe(topic: String, completion: @escaping ((Result<String, Error>) -> ())) throws -> Int64 {
+    func respond(topic: String, payload: Encodable, completion: @escaping ((Error?) -> ())) {
+        completion(error)
+    }
+    
+    func subscribe(topic: String) {
         didCallSubscribe = true
-        completion(.success(subscribeCompletionId))
-        return 0
     }
     
-    func unsubscribe(topic: String, id: String, completion: @escaping ((Result<Void, Error>) -> ())) throws -> Int64 {
+    func unsubscribe(topic: String) {
         didCallUnsubscribe = true
-        completion(.success(()))
-        return 0
     }
     
-    func sendSubscriptionPayloadOn(topic: String, subscriptionId: String) {
+    func sendSubscriptionPayloadOn(topic: String) {
         let payload = WCRequestSubscriptionPayload(topic: topic,
-                                            subscriptionId: subscriptionId,
                                             clientSynchJsonRpc: SerialiserTestData.pairingApproveJSONRPCRequest)
         clientSynchJsonRpcPublisherSubject.send(payload)
     }
