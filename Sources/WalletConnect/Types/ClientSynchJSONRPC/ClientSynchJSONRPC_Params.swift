@@ -9,6 +9,7 @@ extension ClientSynchJSONRPC {
         case pairingUpgrade(PairingType.UpgradeParams)
         case pairingDelete(PairingType.DeleteParams)
         case pairingPayload(PairingType.PayloadParams)
+        case pairingPing(PairingType.PingParams)
         // sessionPropose method exists exclusively within a pairing payload
         case sessionPropose(SessionType.ProposeParams)
         case sessionApprove(SessionType.ApproveParams)
@@ -17,6 +18,7 @@ extension ClientSynchJSONRPC {
         case sessionUpgrade(SessionType.UpgradeParams)
         case sessionDelete(SessionType.DeleteParams)
         case sessionPayload(SessionType.PayloadParams)
+        case sessionPing(SessionType.PingParams)
 
         static func == (lhs: Params, rhs: Params) -> Bool {
             switch (lhs, rhs) {
@@ -45,6 +47,8 @@ extension ClientSynchJSONRPC {
             case (.sessionDelete(let lhsParam), sessionDelete(let rhsParam)):
                 return lhsParam == rhsParam
             case (.sessionPayload(let lhsParam), sessionPayload(let rhsParam)):
+                return lhsParam == rhsParam
+            case (.sessionPing(let lhsParam), sessionPing(let rhsParam)):
                 return lhsParam == rhsParam
             default:
                 return false

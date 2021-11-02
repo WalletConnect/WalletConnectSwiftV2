@@ -141,6 +141,23 @@ final class SessionEngine {
         }
     }
     
+    func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
+        guard let _ = sequencesStore.get(topic: topic) else {
+            logger.debug("Could not find session to ping for topic \(topic)")
+            return
+        }
+        let request = ClientSynchJSONRPC(method: .sessionPing, params: .sessionPing(SessionType.PingParams()))
+        relayer.request(topic: topic, payload: request) { [unowned self] result in
+            switch result {
+            case .success(_):
+                logger.debug("Did receive ping response")
+                completion(.success(()))
+            case .failure(let error):
+                logger.debug("error: \(error)")
+            }
+        }
+    }
+    
     func request(params: SessionType.PayloadRequestParams, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, Error>)->())) {
         guard let _ = sequencesStore.get(topic: params.topic) else {
             logger.debug("Could not find session for topic \(params.topic)")
@@ -201,22 +218,33 @@ final class SessionEngine {
     
     private func setUpWCRequestHandling() {
         wcSubscriber.onRequestSubscription = { [unowned self] subscriptionPayload in
+            let requestId = subscriptionPayload.clientSynchJsonRpc.id
+            let topic = subscriptionPayload.topic
             switch subscriptionPayload.clientSynchJsonRpc.params {
             case .sessionApprove(let approveParams):
-                self.handleSessionApprove(approveParams, topic: subscriptionPayload.topic, requestId: subscriptionPayload.clientSynchJsonRpc.id)
+                self.handleSessionApprove(approveParams, topic: topic, requestId: requestId)
             case .sessionReject(let rejectParams):
-                handleSessionReject(rejectParams, topic: subscriptionPayload.topic)
+                handleSessionReject(rejectParams, topic: topic)
             case .sessionUpdate(_):
                 fatalError("Not implemented")
             case .sessionUpgrade(_):
                 fatalError("Not implemented")
             case .sessionDelete(let deleteParams):
-                handleSessionDelete(deleteParams, topic: subscriptionPayload.topic)
+                handleSessionDelete(deleteParams, topic: topic)
             case .sessionPayload(let sessionPayloadParams):
-                self.handleSessionPayload(payloadParams: sessionPayloadParams, topic: subscriptionPayload.topic, requestId: subscriptionPayload.clientSynchJsonRpc.id)
+                self.handleSessionPayload(payloadParams: sessionPayloadParams, topic: topic, requestId: requestId)
+            case .sessionPing(_):
+                self.handleSessionPing(topic: topic, requestId: requestId)
             default:
                 fatalError("unexpected method type")
             }
+        }
+    }
+    
+    private func handleSessionPing(topic: String, requestId: Int64) {
+        let response = JSONRPCResponse<Bool>(id: requestId, result: true)
+        relayer.respond(topic: topic, payload: response) { error in
+            //todo
         }
     }
     

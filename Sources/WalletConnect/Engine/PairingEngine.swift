@@ -111,6 +111,23 @@ final class PairingEngine {
         wcSubscriber.setSubscription(topic: topic)
         return pending
     }
+    
+    func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
+        guard let _ = sequencesStore.get(topic: topic) else {
+            logger.debug("Could not find pairing to ping for topic \(topic)")
+            return
+        }
+        let request = ClientSynchJSONRPC(method: .pairingPing, params: .pairingPing(PairingType.PingParams()))
+        relayer.request(topic: topic, payload: request) { [unowned self] result in
+            switch result {
+            case .success(_):
+                logger.debug("Did receive ping response")
+                completion(.success(()))
+            case .failure(let error):
+                logger.debug("error: \(error)")
+            }
+        }
+    }
 
     //MARK: - Private
     
@@ -137,9 +154,11 @@ final class PairingEngine {
     
     private func setUpWCRequestHandling() {
         wcSubscriber.onRequestSubscription = { [unowned self] subscriptionPayload in
+            let requestId = subscriptionPayload.clientSynchJsonRpc.id
+            let topic = subscriptionPayload.topic
             switch subscriptionPayload.clientSynchJsonRpc.params {
             case .pairingApprove(let approveParams):
-                handlePairingApprove(approveParams: approveParams, pendingTopic: subscriptionPayload.topic, reqestId: subscriptionPayload.clientSynchJsonRpc.id)
+                handlePairingApprove(approveParams: approveParams, pendingTopic: topic, reqestId: requestId)
             case .pairingReject(_):
                 fatalError("Not Implemented")
             case .pairingUpdate(_):
@@ -147,12 +166,21 @@ final class PairingEngine {
             case .pairingUpgrade(_):
                 fatalError("Not Implemented")
             case .pairingDelete(let deleteParams):
-                handlePairingDelete(deleteParams, topic: subscriptionPayload.topic, requestId: subscriptionPayload.clientSynchJsonRpc.id)
+                handlePairingDelete(deleteParams, topic: topic, requestId: requestId)
             case .pairingPayload(let pairingPayload):
-                self.handlePairingPayload(pairingPayload, for: subscriptionPayload.topic, requestId: subscriptionPayload.clientSynchJsonRpc.id)
+                self.handlePairingPayload(pairingPayload, for: topic, requestId: requestId)
+            case .pairingPing(_):
+                self.handlePairingPing(topic: topic, requestId: requestId)
             default:
                 fatalError("not expected method type")
             }
+        }
+    }
+    
+    private func handlePairingPing(topic: String, requestId: Int64) {
+        let response = JSONRPCResponse<Bool>(id: requestId, result: true)
+        relayer.respond(topic: topic, payload: response) { error in
+            //todo
         }
     }
 
