@@ -29,7 +29,7 @@ Sessions are always proposed by the `Proposer` client so `Responder` client need
 class ClientDelegate: WalletConnectClientDelegate {
 ...
     func didReceive(sessionProposal: SessionType.Proposal) {
-        client.approve(proposal: proposal)
+        client.approve(proposal: proposal, accounts: [String])
     }
 ...
 ```
@@ -39,6 +39,7 @@ or
         client.reject(proposal: proposal, reason: Reason)
     }
 ```
+NOTE: addresses provided in `accounts` array should follow [CAPI10](https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-10.md) semantics.
 #### Handle Delegate methods
 ```Swift
     func didSettle(session: SessionType.Settled) {
