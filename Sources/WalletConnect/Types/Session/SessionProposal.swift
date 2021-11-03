@@ -18,10 +18,10 @@ extension SessionType {
     }
     
     public struct Permissions: Codable, Equatable {
-        public let blockchain: Blockchain
-        public let jsonrpc: JSONRPC
+        public private(set) var blockchain: Blockchain
+        public private(set) var jsonrpc: JSONRPC
         let notifications: Notifications?
-        let controller: Controller?
+        var controller: Controller?
         
         internal init(blockchain: SessionType.Blockchain, jsonrpc: SessionType.JSONRPC, notifications: SessionType.Notifications? = nil, controller: Controller? = nil) {
             self.blockchain = blockchain
@@ -36,20 +36,25 @@ extension SessionType {
             self.notifications = nil
             self.controller = nil
         }
+        
+        mutating func upgrade(with sessionPermissions: SessionPermissions) {
+            blockchain.chains.formUnion(sessionPermissions.blockchains)
+            jsonrpc.methods.formUnion(sessionPermissions.methods)
+        }
     }
     
     public struct Blockchain: Codable, Equatable {
-        public let chains: [String]
+        fileprivate(set) var chains: Set<String>
         
-        public init(chains: [String]) {
+        public init(chains: Set<String>) {
             self.chains = chains
         }
     }
     
     public struct JSONRPC: Codable, Equatable {
-        public let methods: [String]
+        fileprivate(set) var methods: Set<String>
         
-        public init(methods: [String]) {
+        init(methods: Set<String>) {
             self.methods = methods
         }
     }

@@ -39,7 +39,6 @@ class UserDefaultsStore<T: Codable> {
         do {
             let encoded = try JSONEncoder().encode(sequenceState)
             defaults.set(encoded, forKey: topic)
-            defaults.dictionaryRepresentation()
         } catch {
             logger.error(error)
         }
