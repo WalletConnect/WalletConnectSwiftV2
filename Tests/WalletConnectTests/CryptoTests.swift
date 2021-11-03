@@ -7,7 +7,7 @@ class CryptoTests: XCTestCase {
     var crypto: Crypto!
 
     override func setUp() {
-        crypto = Crypto(keychain: DictionaryKeychain())
+        crypto = Crypto(keychain: KeychainStorageMock())
     }
 
     override func tearDown() {

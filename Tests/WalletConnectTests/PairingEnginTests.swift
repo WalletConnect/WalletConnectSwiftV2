@@ -11,7 +11,7 @@ class PairingEngineTests: XCTestCase {
     var subscriber: MockedSubscriber!
     
     override func setUp() {
-        crypto = Crypto(keychain: DictionaryKeychain())
+        crypto = Crypto(keychain: KeychainStorageMock())
         relay = MockedWCRelay()
         subscriber = MockedSubscriber()
         let meta = AppMetadata(name: nil, description: nil, url: nil, icons: nil)

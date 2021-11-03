@@ -17,7 +17,7 @@ public final class WalletConnectClient {
     let pairingEngine: PairingEngine
     let sessionEngine: SessionEngine
     private let relay: WalletConnectRelaying
-    private let crypto = Crypto()
+    private let crypto: Crypto
     private var sessionPermissions: [String: SessionType.Permissions] = [:]
     var logger: BaseLogger = ConsoleLogger()
     private let secureStorage = SecureStorage()
@@ -28,11 +28,14 @@ public final class WalletConnectClient {
         self.init(metadata: metadata, apiKey: apiKey, isController: isController, relayURL: relayURL, logger: MuteLogger())
     }
     
-    init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL, logger: BaseLogger = MuteLogger()) {
+    init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL, logger: BaseLogger = MuteLogger(), keychain: KeychainStorage = KeychainStorage()) {
         self.metadata = metadata
         self.isController = isController
+//        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
+        self.crypto = Crypto(keychain: keychain)
         let wakuRelay = WakuNetworkRelay(transport: JSONRPCTransport(url: relayURL), logger: logger)
-        self.relay = WalletConnectRelay(networkRelayer: wakuRelay, crypto: crypto, logger: logger)
+        let serialiser = JSONRPCSerialiser(crypto: crypto)
+        self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger)
         let sessionSequencesStore = SessionUserDefaultsStore(logger: logger)
         let pairingSequencesStore = PairingUserDefaultsStore(logger: logger)
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
