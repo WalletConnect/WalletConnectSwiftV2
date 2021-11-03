@@ -22,7 +22,7 @@ final class JSONRPCSerialiserTests: XCTestCase {
                                                     publicKey: SerialiserTestData.publicKey,
                                                     mac: SerialiserTestData.mac,
                                                     cipherText: SerialiserTestData.cipherText)
-        let serialisedMessage = try! serialiser.serialise(json: SerialiserTestData.pairingApproveJSON, agreementKeys: SerialiserTestData.emptyAgreementKeys)
+        let serialisedMessage = try! serialiser.encrypt(json: SerialiserTestData.pairingApproveJSON, agreementKeys: SerialiserTestData.emptyAgreementKeys)
         let serialisedMessageSample = SerialiserTestData.serialisedMessage
         XCTAssertEqual(serialisedMessage, serialisedMessageSample)
     }
