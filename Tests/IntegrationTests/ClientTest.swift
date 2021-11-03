@@ -173,7 +173,7 @@ final class ClientTests: XCTestCase {
         waitForExpectations(timeout: 4.0, handler: nil)
     }
     
-    func testSessionUpgrade() {
+    func testSuccessfulSessionUpgrade() {
         let proposerSessionUpgradeExpectation = expectation(description: "Proposer upgrades session on responder request")
         let responderSessionUpgradeExpectation = expectation(description: "Responder upgrades session on proposer response")
         let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
@@ -200,7 +200,6 @@ final class ClientTests: XCTestCase {
         }
         waitForExpectations(timeout: 3.0, handler: nil)
     }
-
 }
 
 public struct EthSendTransaction: Codable, Equatable {

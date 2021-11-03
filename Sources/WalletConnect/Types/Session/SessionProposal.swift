@@ -54,7 +54,7 @@ extension SessionType {
     public struct JSONRPC: Codable, Equatable {
         fileprivate(set) var methods: Set<String>
         
-        init(methods: Set<String>) {
+        public init(methods: Set<String>) {
             self.methods = methods
         }
     }

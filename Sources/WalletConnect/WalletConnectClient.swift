@@ -14,7 +14,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
 public final class WalletConnectClient {
     private let metadata: AppMetadata
     public weak var delegate: WalletConnectClientDelegate?
-    let isController: Bool
+    private let isController: Bool
     let pairingEngine: PairingEngine
     let sessionEngine: SessionEngine
     private let relay: WalletConnectRelaying
