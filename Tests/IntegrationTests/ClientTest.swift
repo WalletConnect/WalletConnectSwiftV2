@@ -203,9 +203,9 @@ final class ClientTests: XCTestCase {
     }
     
     func testSessionUpgradeFailsOnNonControllerRequest() {
-        let proposerSessionUpgradeExpectation = expectation(description: "Proposer upgrades session on responder request")
+        let proposerSessionUpgradeExpectation = expectation(description: "Proposer upgrades session")
         proposerSessionUpgradeExpectation.isInverted = true
-        let responderSessionUpgradeExpectation = expectation(description: "Responder upgrades session on proposer response")
+        let responderSessionUpgradeExpectation = expectation(description: "Responder upgrades session")
         responderSessionUpgradeExpectation.isInverted = true
         let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
