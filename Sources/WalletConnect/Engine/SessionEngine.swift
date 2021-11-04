@@ -374,8 +374,8 @@ final class SessionEngine {
     }
     
     private func respond(error: WalletConnectError, requestId: Int64, topic: String) {
-        let jsonrpcError = JSONRPCError(code: error.code, message: error.description)
-        let response = JSONRPCResponse<JSONRPCError>(id: requestId, result: jsonrpcError)
+        let jsonrpcError = JSONRPCErrorResponse.Error(code: error.code, message: error.description)
+        let response = JSONRPCErrorResponse(id: requestId, error: jsonrpcError)
         relayer.respond(topic: topic, payload: response) { [weak self] responseError in
             if let responseError = responseError {
                 self?.logger.error("Could not respond with error: \(responseError)")

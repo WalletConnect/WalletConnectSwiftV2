@@ -5,14 +5,14 @@ import Combine
 protocol WalletConnectRelaying {
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var clientSynchJsonRpcPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
-    func request(topic: String, payload: ClientSynchJSONRPC, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCResponse<JSONRPCError>>)->()))
+    func request(topic: String, payload: ClientSynchJSONRPC, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->()))
     func respond(topic: String, payload: Encodable, completion: @escaping ((Error?)->()))
     func subscribe(topic: String)
     func unsubscribe(topic: String)
 }
 
 enum WCResponse {
-    case error((topic: String, value: JSONRPCResponse<JSONRPCError>))
+    case error((topic: String, value: JSONRPCErrorResponse))
     case response((topic: String, value: JSONRPCResponse<AnyCodable>))
     var id: Int64 {
         switch self {
@@ -63,7 +63,7 @@ class WalletConnectRelay: WalletConnectRelaying {
         setUpPublishers()
     }
 
-    func request(topic: String, payload: ClientSynchJSONRPC, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCResponse<JSONRPCError>>)->())) {
+    func request(topic: String, payload: ClientSynchJSONRPC, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())) {
         do {
             let message = try jsonRpcSerialiser.serialise(topic: topic, encodable: payload)
             history.append(message)
@@ -146,7 +146,7 @@ class WalletConnectRelay: WalletConnectRelaying {
             }
         } else if let deserialisedJsonRpcResponse: JSONRPCResponse<AnyCodable> = jsonRpcSerialiser.tryDeserialise(topic: topic, message: message) {
             wcResponsePublisherSubject.send(.response((topic, deserialisedJsonRpcResponse)))
-        } else if let deserialisedJsonRpcError: JSONRPCError = jsonRpcSerialiser.tryDeserialise(topic: topic, message: message) {
+        } else if let deserialisedJsonRpcError: JSONRPCErrorResponse = jsonRpcSerialiser.tryDeserialise(topic: topic, message: message) {
             wcResponsePublisherSubject.send(.error((topic, deserialisedJsonRpcError)))
         }
     }

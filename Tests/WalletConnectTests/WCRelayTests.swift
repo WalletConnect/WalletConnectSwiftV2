@@ -88,10 +88,6 @@ extension WalletConnectRelayTests {
         let wcRequest = ClientSynchJSONRPC(id: wcRequestId, method: ClientSynchJSONRPC.Method.sessionPayload, params: params)
         return wcRequest
     }
-    
-    func getErrorResponse() -> JSONRPCResponse<JSONRPCError> {
-        return JSONRPCResponse(id: 123, result: JSONRPCError(code: 1, message: "error"))
-    }
 }
 
 fileprivate let testPayload =

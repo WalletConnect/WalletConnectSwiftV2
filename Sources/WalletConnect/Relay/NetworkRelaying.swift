@@ -139,8 +139,8 @@ class WakuNetworkRelay: NetworkRelaying {
             requestAcknowledgePublisherSubject.send(response)
         } else if let response = tryDecode(SubscriptionResponse.self, from: payload) {
             subscriptionResponsePublisherSubject.send(response)
-        } else if let response = tryDecode(JSONRPCError.self, from: payload) {
-            logger.error("Received error message from waku network, code: \(response.code), message: \(response.message)")
+        } else if let response = tryDecode(JSONRPCErrorResponse.self, from: payload) {
+            logger.error("Received error message from waku network, code: \(response.error.code), message: \(response.error.message)")
         } else {
             logger.error("Unexpected response from network")
         }
