@@ -5,19 +5,19 @@ import Combine
 protocol WalletConnectRelaying {
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var clientSynchJsonRpcPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
-    func request(topic: String, payload: ClientSynchJSONRPC, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCError>)->()))
+    func request(topic: String, payload: ClientSynchJSONRPC, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCResponse<JSONRPCError>>)->()))
     func respond(topic: String, payload: Encodable, completion: @escaping ((Error?)->()))
     func subscribe(topic: String)
     func unsubscribe(topic: String)
 }
 
 enum WCResponse {
-    case error((topic: String, value: JSONRPCError))
+    case error((topic: String, value: JSONRPCResponse<JSONRPCError>))
     case response((topic: String, value: JSONRPCResponse<AnyCodable>))
     var id: Int64 {
         switch self {
         case .error(let value):
-            fatalError("not implemented")
+            return value.value.id
         case .response(let value):
             return value.value.id
         }
@@ -63,7 +63,7 @@ class WalletConnectRelay: WalletConnectRelaying {
         setUpPublishers()
     }
 
-    func request(topic: String, payload: ClientSynchJSONRPC, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCError>)->())) {
+    func request(topic: String, payload: ClientSynchJSONRPC, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCResponse<JSONRPCError>>)->())) {
         do {
             let message = try jsonRpcSerialiser.serialise(topic: topic, encodable: payload)
             history.append(message)

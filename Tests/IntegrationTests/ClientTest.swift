@@ -202,6 +202,32 @@ final class ClientTests: XCTestCase {
         waitForExpectations(timeout: 3.0, handler: nil)
     }
     
+    func testSessionUpgradeFailsOnNonControllerRequest() {
+        let proposerSessionUpgradeExpectation = expectation(description: "Proposer upgrades session on responder request")
+        proposerSessionUpgradeExpectation.isInverted = true
+        let responderSessionUpgradeExpectation = expectation(description: "Responder upgrades session on proposer response")
+        responderSessionUpgradeExpectation.isInverted = true
+        let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let upgradePermissions = SessionPermissions(blockchains: ["eip155:42"], methods: ["eth_sendTransaction"])
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        try! responder.client.pair(uri: uri)
+        responder.onSessionProposal = { [unowned self] proposal in
+            self.responder.client.approve(proposal: proposal, accounts: [account])
+        }
+        proposer.onSessionSettled = { [unowned self] sessionSettled in
+            proposer.client.upgrade(topic: sessionSettled.topic, permissions: upgradePermissions)
+        }
+        proposer.onSessionUpgrade = { topic, permissions in
+            proposerSessionUpgradeExpectation.fulfill()
+        }
+        responder.onSessionUpgrade = { topic, permissions in
+            responderSessionUpgradeExpectation.fulfill()
+        }
+        waitForExpectations(timeout: 3.0, handler: nil)
+    }
+    
     func testSuccessfulSessionUpdate() {
         let proposerSessionUpdateExpectation = expectation(description: "Proposer updates session on responder request")
         let responderSessionUpdateExpectation = expectation(description: "Responder updates session on proposer response")

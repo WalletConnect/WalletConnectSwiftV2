@@ -19,7 +19,7 @@ class MockedWCRelay: WalletConnectRelaying {
     var didCallPublish = false
     var error: Error? = nil
 
-    func request(topic: String, payload: ClientSynchJSONRPC, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCError>) -> ())) {
+    func request(topic: String, payload: ClientSynchJSONRPC, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCResponse<JSONRPCError>>) -> ())) {
         didCallPublish = true
     }
     

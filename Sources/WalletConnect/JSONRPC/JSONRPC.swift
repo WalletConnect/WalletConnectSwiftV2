@@ -2,10 +2,12 @@
 
 import Foundation
 
-struct JSONRPCError: Error, Codable, Equatable {
+struct JSONRPCError: Codable, Equatable {
     let code: Int
     let message: String
 }
+
+extension JSONRPCResponse: Error where T == JSONRPCError {}
 
 public struct JSONRPCRequest<T: Codable&Equatable>: Codable, Equatable {
     
