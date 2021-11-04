@@ -4,7 +4,7 @@ import Foundation
 extension SessionType {
     typealias SuccessResponse = SessionType.ApproveParams
     struct State: Codable, Equatable {
-        let accounts: [String]
+        var accounts: Set<String>
     }
     
     public struct Participant: Codable, Equatable {

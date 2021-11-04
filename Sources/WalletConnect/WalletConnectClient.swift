@@ -9,6 +9,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     func didReject(sessionPendingTopic: String, reason: SessionType.Reason)
     func didDelete(sessionTopic: String, reason: SessionType.Reason)
     func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions)
+    func didUpdate(sessionTopic: String, accounts: Set<String>)
 }
 
 public final class WalletConnectClient {
@@ -82,7 +83,7 @@ public final class WalletConnectClient {
     }
     
     // for responder to approve a session proposal
-    public func approve(proposal: SessionProposal, accounts: [String]) {
+    public func approve(proposal: SessionProposal, accounts: Set<String>) {
         sessionEngine.approve(proposal: proposal.proposal, accounts: accounts) { [unowned self] result in
             switch result {
             case .success(let settledSession):
@@ -99,10 +100,13 @@ public final class WalletConnectClient {
         sessionEngine.reject(proposal: proposal.proposal, reason: reason)
     }
     
+    public func update(topic: String, accounts: Set<String>) {
+        sessionEngine.update(topic: topic, accounts: accounts)
+    }
+    
     public func upgrade(topic: String, permissions: SessionPermissions) {
         sessionEngine.upgrade(topic: topic, permissions: permissions)
     }
-    // TODO: Update methods.
     
     // for proposer to request JSON-RPC
     public func request(params: SessionType.PayloadRequestParams, completion: @escaping (Result<JSONRPCResponse<AnyCodable>, Error>) -> ()) {
@@ -175,6 +179,9 @@ public final class WalletConnectClient {
         }
         sessionEngine.onSessionUpgrade = { [unowned self] topic, permissions in
             delegate?.didUpgrade(sessionTopic: topic, permissions: permissions)
+        }
+        sessionEngine.onSessionUpdate = { [unowned self] topic, accounts in
+            delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
         }
     }
     
