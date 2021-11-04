@@ -12,6 +12,7 @@ final class SessionEngine {
     var onSessionPayloadRequest: ((SessionRequest)->())?
     var onSessionRejected: ((String, SessionType.Reason)->())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
+    var onSessionUpgrade: ((String, SessionType.Permissions)->())?
     private var publishers = [AnyCancellable]()
 
     private let logger: BaseLogger
@@ -54,12 +55,17 @@ final class SessionEngine {
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
         let sessionState: SessionType.State = SessionType.State(accounts: accounts)
         let expiry = Int(Date().timeIntervalSince1970) + proposal.ttl
+        let proposal = pendingSession.proposal
+        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : selfPublicKey
+        let controller = Controller(publicKey: controllerKey)
+        let proposedPermissions = pendingSession.proposal.permissions
+        let sessionPermissions = SessionType.Permissions(blockchain: proposedPermissions.blockchain, jsonrpc: proposedPermissions.jsonrpc, notifications: proposedPermissions.notifications, controller: controller)
         let settledSession = SessionType.Settled(
             topic: settledTopic,
             relay: proposal.relay,
             self: SessionType.Participant(publicKey: selfPublicKey, metadata: metadata),
             peer: SessionType.Participant(publicKey: proposal.proposer.publicKey, metadata: proposal.proposer.metadata),
-            permissions: pendingSession.proposal.permissions,
+            permissions: sessionPermissions,
             expiry: expiry,
             state: sessionState)
         
@@ -192,6 +198,27 @@ final class SessionEngine {
         }
     }
     
+    func upgrade(topic: String, permissions: SessionPermissions) {
+        guard case var .settled(session) = sequencesStore.get(topic: topic) else {
+            logger.debug("Could not find session for topic \(topic)")
+            return
+        }
+        session.permissions.upgrade(with: permissions)
+        let params = SessionType.UpgradeParams(permissions: session.permissions)
+        let request = ClientSynchJSONRPC(method: .sessionUpgrade, params: .sessionUpgrade(params))
+        relayer.request(topic: topic, payload: request) { [unowned self] result in
+            switch result {
+            case .success(_):
+                sequencesStore.update(topic: topic, newTopic: nil, sequenceState: .settled(session))
+                onSessionUpgrade?(session.topic, session.permissions)
+            case .failure(_):
+                return
+                //TODO
+            }
+        }
+        
+    }
+    
 
     //MARK: - Private
 
@@ -222,22 +249,46 @@ final class SessionEngine {
             let topic = subscriptionPayload.topic
             switch subscriptionPayload.clientSynchJsonRpc.params {
             case .sessionApprove(let approveParams):
-                self.handleSessionApprove(approveParams, topic: topic, requestId: requestId)
+                handleSessionApprove(approveParams, topic: topic, requestId: requestId)
             case .sessionReject(let rejectParams):
                 handleSessionReject(rejectParams, topic: topic)
             case .sessionUpdate(_):
                 fatalError("Not implemented")
-            case .sessionUpgrade(_):
-                fatalError("Not implemented")
+            case .sessionUpgrade(let upgradeParams):
+                handleSessionUpgrade(topic: topic, upgradeParams: upgradeParams, requestId: requestId)
             case .sessionDelete(let deleteParams):
                 handleSessionDelete(deleteParams, topic: topic)
             case .sessionPayload(let sessionPayloadParams):
-                self.handleSessionPayload(payloadParams: sessionPayloadParams, topic: topic, requestId: requestId)
+                handleSessionPayload(payloadParams: sessionPayloadParams, topic: topic, requestId: requestId)
             case .sessionPing(_):
-                self.handleSessionPing(topic: topic, requestId: requestId)
+                handleSessionPing(topic: topic, requestId: requestId)
             default:
                 fatalError("unexpected method type")
             }
+        }
+    }
+    
+    private func handleSessionUpgrade(topic: String, upgradeParams: SessionType.UpgradeParams, requestId: Int64) {
+        guard case .settled(var session) = sequencesStore.get(topic: topic) else {
+            logger.debug("Could not find session for topic \(topic)")
+            return
+        }
+        guard let controller = session.permissions.controller,
+        session.peer.publicKey == controller.publicKey else {
+            let error = WalletConnectError.unauthrorized(.unauthorizedUpgradeRequest)
+            logger.error(error)
+            respond(error: error, requestId: requestId, topic: topic)
+            return
+        }
+        session.permissions = upgradeParams.permissions
+        let response = JSONRPCResponse<Bool>(id: requestId, result: true)
+        relayer.respond(topic: topic, payload: response) { [unowned self] error in
+            if let error = error {
+                logger.error(error)
+                return
+            }
+            sequencesStore.update(topic: topic, newTopic: nil, sequenceState: .settled(session))
+            onSessionUpgrade?(session.topic, session.permissions)
         }
     }
     
@@ -294,7 +345,7 @@ final class SessionEngine {
     private func validatePayload(_ sessionRequest: SessionRequest) throws {
         guard case .settled(let settledSession) = sequencesStore.get(topic: sessionRequest.topic) else {
             throw WalletConnectError.internal(.noSequenceForTopic)
-              }
+        }
         if let chainId = sessionRequest.chainId {
             guard settledSession.permissions.blockchain.chains.contains(chainId) else {
                 throw WalletConnectError.unauthrorized(.unauthorizedJsonRpcMethod)
@@ -319,7 +370,7 @@ final class SessionEngine {
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
         crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         let proposal = pendingSession.proposal
-        let controllerKey = proposal.proposer.controller ? selfPublicKey.toHexString() : proposal.proposer.publicKey
+        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : approveParams.responder.publicKey
         let controller = Controller(publicKey: controllerKey)
         let proposedPermissions = pendingSession.proposal.permissions
         let sessionPermissions = SessionType.Permissions(blockchain: proposedPermissions.blockchain, jsonrpc: proposedPermissions.jsonrpc, notifications: proposedPermissions.notifications, controller: controller)

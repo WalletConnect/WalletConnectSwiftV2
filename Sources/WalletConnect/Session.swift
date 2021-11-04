@@ -11,7 +11,11 @@ public struct SessionProposal {
     internal let proposal: SessionType.Proposal
 }
 
-public struct SessionPermissions {
-    public let blockchains: [String]
-    public let methods: [String]
+public struct SessionPermissions: Equatable {
+    public let blockchains: Set<String>
+    public let methods: Set<String>
+    public init(blockchains: Set<String>, methods: Set<String>) {
+        self.blockchains = blockchains
+        self.methods = methods
+    }
 }

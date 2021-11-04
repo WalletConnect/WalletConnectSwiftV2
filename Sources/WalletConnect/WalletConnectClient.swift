@@ -8,6 +8,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     func didSettle(pairing: PairingType.Settled)
     func didReject(sessionPendingTopic: String, reason: SessionType.Reason)
     func didDelete(sessionTopic: String, reason: SessionType.Reason)
+    func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions)
 }
 
 public final class WalletConnectClient {
@@ -101,7 +102,10 @@ public final class WalletConnectClient {
         sessionEngine.reject(proposal: proposal.proposal, reason: reason)
     }
     
-    // TODO: Upgrade and update methods.
+    public func upgrade(topic: String, permissions: SessionPermissions) {
+        sessionEngine.upgrade(topic: topic, permissions: permissions)
+    }
+    // TODO: Update methods.
     
     // for proposer to request JSON-RPC
     public func request(params: SessionType.PayloadRequestParams, completion: @escaping (Result<JSONRPCResponse<AnyCodable>, Error>) -> ()) {
@@ -171,6 +175,9 @@ public final class WalletConnectClient {
         }
         sessionEngine.onSessionDelete = { [unowned self] topic, reason in
             self.delegate?.didDelete(sessionTopic: topic, reason: reason)
+        }
+        sessionEngine.onSessionUpgrade = { [unowned self] topic, permissions in
+            delegate?.didUpgrade(sessionTopic: topic, permissions: permissions)
         }
     }
     

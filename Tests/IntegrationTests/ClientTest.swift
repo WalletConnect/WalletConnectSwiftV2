@@ -173,7 +173,34 @@ final class ClientTests: XCTestCase {
         }
         waitForExpectations(timeout: 4.0, handler: nil)
     }
-
+    
+    func testSuccessfulSessionUpgrade() {
+        let proposerSessionUpgradeExpectation = expectation(description: "Proposer upgrades session on responder request")
+        let responderSessionUpgradeExpectation = expectation(description: "Responder upgrades session on proposer response")
+        let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let upgradePermissions = SessionPermissions(blockchains: ["eip155:42"], methods: ["eth_sendTransaction"])
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        try! responder.client.pair(uri: uri)
+        responder.onSessionProposal = { [unowned self] proposal in
+            self.responder.client.approve(proposal: proposal, accounts: [account])
+        }
+        responder.onSessionSettled = { [unowned self] sessionSettled in
+            responder.client.upgrade(topic: sessionSettled.topic, permissions: upgradePermissions)
+        }
+        proposer.onSessionUpgrade = { topic, permissions in
+            XCTAssertTrue(permissions.blockchain.chains.isSuperset(of: upgradePermissions.blockchains))
+            XCTAssertTrue(permissions.jsonrpc.methods.isSuperset(of: upgradePermissions.methods))
+            proposerSessionUpgradeExpectation.fulfill()
+        }
+        responder.onSessionUpgrade = { topic, permissions in
+            XCTAssertTrue(permissions.blockchain.chains.isSuperset(of: upgradePermissions.blockchains))
+            XCTAssertTrue(permissions.jsonrpc.methods.isSuperset(of: upgradePermissions.methods))
+            responderSessionUpgradeExpectation.fulfill()
+        }
+        waitForExpectations(timeout: 3.0, handler: nil)
+    }
 }
 
 public struct EthSendTransaction: Codable, Equatable {
@@ -194,6 +221,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     var onSessionRequest: ((SessionRequest)->())?
     var onSessionRejected: ((String, SessionType.Reason)->())?
     var onSessionDelete: (()->())?
+    var onSessionUpgrade: ((String, SessionType.Permissions)->())?
 
     internal init(client: WalletConnectClient) {
         self.client = client
@@ -217,6 +245,9 @@ class ClientDelegate: WalletConnectClientDelegate {
     }
     func didDelete(sessionTopic: String, reason: SessionType.Reason) {
         onSessionDelete?()
+    }
+    func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions) {
+        onSessionUpgrade?(sessionTopic, permissions)
     }
 }
 

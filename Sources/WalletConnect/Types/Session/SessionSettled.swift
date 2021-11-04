@@ -7,7 +7,7 @@ extension SessionType {
         let relay: RelayProtocolOptions
         let `self`: Participant
         public let peer: Participant
-        let permissions: Permissions
+        var permissions: Permissions
         let expiry: Int
         let state: State
     }

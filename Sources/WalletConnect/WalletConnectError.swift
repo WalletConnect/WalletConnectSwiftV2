@@ -29,6 +29,7 @@ enum WalletConnectError: Error {
     enum UnauthorizedReason {
         case unauthorizedTargetChain
         case unauthorizedJsonRpcMethod
+        case unauthorizedUpgradeRequest
     }
 }
 
@@ -102,6 +103,7 @@ extension WalletConnectError.UnauthorizedReason: CustomStringConvertible {
         switch self {
         case .unauthorizedTargetChain: return 3000
         case .unauthorizedJsonRpcMethod: return 3001
+        case .unauthorizedUpgradeRequest: return 3004
         }
     }
     
@@ -111,6 +113,8 @@ extension WalletConnectError.UnauthorizedReason: CustomStringConvertible {
             return "Unauthorized Target ChainId Requested"
         case .unauthorizedJsonRpcMethod:
             return "Unauthorized JSON-RPC Method Requested"
+        case .unauthorizedUpgradeRequest:
+            return "Non-Controller Client is not authorized to upgrade session"
         }
     }
 }
