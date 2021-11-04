@@ -201,6 +201,32 @@ final class ClientTests: XCTestCase {
         }
         waitForExpectations(timeout: 3.0, handler: nil)
     }
+    
+    func testSuccessfulSessionUpdate() {
+        let proposerSessionUpdateExpectation = expectation(description: "Proposer updates session on responder request")
+        let responderSessionUpdateExpectation = expectation(description: "Responder updates session on proposer response")
+        let account = "eip155:42:0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
+        let updateAccounts: Set<String> = ["eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb"]
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        try! responder.client.pair(uri: uri)
+        responder.onSessionProposal = { [unowned self] proposal in
+            self.responder.client.approve(proposal: proposal, accounts: [account])
+        }
+        responder.onSessionSettled = { [unowned self] sessionSettled in
+            responder.client.update(topic: sessionSettled.topic, accounts: updateAccounts)
+        }
+        responder.onSessionUpdate = { _, accounts in
+            XCTAssertEqual(accounts, updateAccounts.union([account]))
+            responderSessionUpdateExpectation.fulfill()
+        }
+        proposer.onSessionUpdate = { _, accounts in
+            XCTAssertEqual(accounts, updateAccounts.union([account]))
+            proposerSessionUpdateExpectation.fulfill()
+        }
+        waitForExpectations(timeout: 3.0, handler: nil)
+    }
 }
 
 public struct EthSendTransaction: Codable, Equatable {
@@ -222,6 +248,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     var onSessionRejected: ((String, SessionType.Reason)->())?
     var onSessionDelete: (()->())?
     var onSessionUpgrade: ((String, SessionType.Permissions)->())?
+    var onSessionUpdate: ((String, Set<String>)->())?
 
     internal init(client: WalletConnectClient) {
         self.client = client
@@ -248,6 +275,9 @@ class ClientDelegate: WalletConnectClientDelegate {
     }
     func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions) {
         onSessionUpgrade?(sessionTopic, permissions)
+    }
+    func didUpdate(sessionTopic: String, accounts: Set<String>) {
+        onSessionUpdate?(sessionTopic, accounts)
     }
 }
 

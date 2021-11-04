@@ -9,6 +9,6 @@ extension SessionType {
         public let peer: Participant
         var permissions: Permissions
         let expiry: Int
-        let state: State
+        var state: State
     }
 }

@@ -13,6 +13,7 @@ final class SessionEngine {
     var onSessionRejected: ((String, SessionType.Reason)->())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
     var onSessionUpgrade: ((String, SessionType.Permissions)->())?
+    var onSessionUpdate: ((String, Set<String>)->())?
     private var publishers = [AnyCancellable]()
 
     private let logger: BaseLogger
@@ -35,7 +36,7 @@ final class SessionEngine {
         restoreSubscriptions()
     }
     
-    func approve(proposal: SessionType.Proposal, accounts: [String], completion: @escaping (Result<SessionType.Settled, Error>) -> Void) {
+    func approve(proposal: SessionType.Proposal, accounts: Set<String>, completion: @escaping (Result<SessionType.Settled, Error>) -> Void) {
         logger.debug("Approve session")
         let privateKey = Crypto.X25519.generatePrivateKey()
         let selfPublicKey = privateKey.publicKey.toHexString()
@@ -198,6 +199,25 @@ final class SessionEngine {
         }
     }
     
+    func update(topic: String, accounts: Set<String>) {
+        guard case var .settled(session) = sequencesStore.get(topic: topic) else {
+            logger.debug("Could not find session for topic \(topic)")
+            return
+        }
+        session.state.accounts.formUnion(accounts)
+        let params = ClientSynchJSONRPC.Params.sessionUpdate(SessionType.UpdateParams(state: SessionType.State(accounts: session.state.accounts)))
+        let request = ClientSynchJSONRPC(method: .sessionUpdate, params: params)
+        relayer.request(topic: topic, payload: request) { [unowned self] result in
+            switch result {
+            case .success(_):
+                sequencesStore.update(topic: topic, newTopic: nil, sequenceState: .settled(session))
+                onSessionUpdate?(topic, session.state.accounts)
+            case .failure(_):
+                break
+            }
+        }
+    }
+    
     func upgrade(topic: String, permissions: SessionPermissions) {
         guard case var .settled(session) = sequencesStore.get(topic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
@@ -216,9 +236,7 @@ final class SessionEngine {
                 //TODO
             }
         }
-        
     }
-    
 
     //MARK: - Private
 
@@ -252,8 +270,8 @@ final class SessionEngine {
                 handleSessionApprove(approveParams, topic: topic, requestId: requestId)
             case .sessionReject(let rejectParams):
                 handleSessionReject(rejectParams, topic: topic)
-            case .sessionUpdate(_):
-                fatalError("Not implemented")
+            case .sessionUpdate(let updateParams):
+                handleSessionUpdate(topic: topic, updateParams: updateParams, requestId: requestId)
             case .sessionUpgrade(let upgradeParams):
                 handleSessionUpgrade(topic: topic, upgradeParams: upgradeParams, requestId: requestId)
             case .sessionDelete(let deleteParams):
@@ -264,6 +282,30 @@ final class SessionEngine {
                 handleSessionPing(topic: topic, requestId: requestId)
             default:
                 fatalError("unexpected method type")
+            }
+        }
+    }
+    
+    private func handleSessionUpdate(topic: String, updateParams: SessionType.UpdateParams, requestId: Int64) {
+        guard case .settled(var session) = sequencesStore.get(topic: topic) else {
+            logger.debug("Could not find session for topic \(topic)")
+            return
+        }
+        guard let controller = session.permissions.controller,
+        session.peer.publicKey == controller.publicKey else {
+            let error = WalletConnectError.unauthrorized(.unauthorizedUpgradeRequest)
+            logger.error(error)
+            respond(error: error, requestId: requestId, topic: topic)
+            return
+        }
+        let response = JSONRPCResponse<Bool>(id: requestId, result: true)
+        relayer.respond(topic: topic, payload: response) { [unowned self] error in
+            if let error = error {
+                logger.error(error)
+            } else {
+                session.state = updateParams.state
+                sequencesStore.update(topic: topic, newTopic: nil, sequenceState: .settled(session))
+                onSessionUpdate?(topic, session.state.accounts)
             }
         }
     }
@@ -285,10 +327,10 @@ final class SessionEngine {
         relayer.respond(topic: topic, payload: response) { [unowned self] error in
             if let error = error {
                 logger.error(error)
-                return
+            } else {
+                sequencesStore.update(topic: topic, newTopic: nil, sequenceState: .settled(session))
+                onSessionUpgrade?(session.topic, session.permissions)
             }
-            sequencesStore.update(topic: topic, newTopic: nil, sequenceState: .settled(session))
-            onSessionUpgrade?(session.topic, session.permissions)
         }
     }
     
