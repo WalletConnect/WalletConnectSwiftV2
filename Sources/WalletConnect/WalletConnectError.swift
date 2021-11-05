@@ -26,7 +26,7 @@ enum WalletConnectError: Error {
         case deserialisationFailed
     }
     
-    enum UnauthorizedReason {
+    public enum UnauthorizedReason {
         case unauthorizedTargetChain
         case unauthorizedJsonRpcMethod
         case unauthorizedUpgradeRequest

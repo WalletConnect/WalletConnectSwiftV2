@@ -2,6 +2,6 @@
 import Foundation
 
 
-public struct Controller: Codable, Equatable {
+struct Controller: Codable, Equatable {
     let publicKey: String
 }
