@@ -67,6 +67,37 @@ final class ClientTests: XCTestCase {
         }
         waitForExpectations(timeout: 3.0, handler: nil)
     }
+    
+    func testNewSessionOnExistingPairing() {
+        let proposerSettlesSessionExpectation = expectation(description: "Proposer settles session")
+        proposerSettlesSessionExpectation.expectedFulfillmentCount = 2
+        let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
+        responderSettlesSessionExpectation.expectedFulfillmentCount = 2
+        var pairingTopic: String!
+        var initiatedSecondSession = false
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        try! responder.client.pair(uri: uri)
+        proposer.onPairingSettled = { pairing in
+            pairingTopic = pairing.topic
+        }
+        responder.onSessionProposal = { [unowned self] proposal in
+            self.responder.client.approve(proposal: proposal, accounts: [])
+        }
+        responder.onSessionSettled = { sessionSettled in
+            responderSettlesSessionExpectation.fulfill()
+        }
+        proposer.onSessionSettled = { [unowned self] sessionSettled in
+            proposerSettlesSessionExpectation.fulfill()
+            if !initiatedSecondSession {
+                let params = ConnectParams(permissions: SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: [])), topic: pairingTopic)
+                let _ = try! proposer.client.connect(params: params)
+                initiatedSecondSession = true
+            }
+        }
+        waitForExpectations(timeout: 3.0, handler: nil)
+    }
 
     func testResponderRejectsSession() {
         let sessionRejectExpectation = expectation(description: "Responded is notified on session rejection")
@@ -264,48 +295,6 @@ public struct EthSendTransaction: Codable, Equatable {
     public let nonce: String
 }
 
-
-class ClientDelegate: WalletConnectClientDelegate {
-    var client: WalletConnectClient
-    var onSessionSettled: ((Session)->())?
-    var onPairingSettled: ((PairingType.Settled)->())?
-    var onSessionProposal: ((SessionProposal)->())?
-    var onSessionRequest: ((SessionRequest)->())?
-    var onSessionRejected: ((String, SessionType.Reason)->())?
-    var onSessionDelete: (()->())?
-    var onSessionUpgrade: ((String, SessionType.Permissions)->())?
-    var onSessionUpdate: ((String, Set<String>)->())?
-
-    internal init(client: WalletConnectClient) {
-        self.client = client
-        client.delegate = self
-    }
-    
-    func didReject(sessionPendingTopic: String, reason: SessionType.Reason) {
-        onSessionRejected?(sessionPendingTopic, reason)
-    }
-    func didSettle(session: Session) {
-        onSessionSettled?(session)
-    }
-    func didSettle(pairing: PairingType.Settled) {
-        onPairingSettled?(pairing)
-    }
-    func didReceive(sessionProposal: SessionProposal) {
-        onSessionProposal?(sessionProposal)
-    }
-    func didReceive(sessionRequest: SessionRequest) {
-        onSessionRequest?(sessionRequest)
-    }
-    func didDelete(sessionTopic: String, reason: SessionType.Reason) {
-        onSessionDelete?()
-    }
-    func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions) {
-        onSessionUpgrade?(sessionTopic, permissions)
-    }
-    func didUpdate(sessionTopic: String, accounts: Set<String>) {
-        onSessionUpdate?(sessionTopic, accounts)
-    }
-}
 
 fileprivate let ethSendTransaction = """
    {

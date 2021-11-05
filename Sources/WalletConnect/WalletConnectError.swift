@@ -15,7 +15,7 @@ enum WalletConnectError: Error {
     // 5000 (CAIP-25)
     // 9000 (Unknown)
     
-    enum InternalReason {
+    enum InternalReason: Error {
         case notApproved
         case malformedPairingURI
         case unauthorizedMatchingController
@@ -26,7 +26,7 @@ enum WalletConnectError: Error {
         case deserialisationFailed
     }
     
-    public enum UnauthorizedReason {
+    public enum UnauthorizedReason: Error {
         case unauthorizedTargetChain
         case unauthorizedJsonRpcMethod
         case unauthorizedUpgradeRequest
