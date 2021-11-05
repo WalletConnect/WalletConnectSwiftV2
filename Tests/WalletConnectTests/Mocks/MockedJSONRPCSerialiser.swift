@@ -19,7 +19,7 @@ class MockedJSONRPCSerialiser: JSONRPCSerialising {
     func tryDeserialise<T: Codable>(topic: String, message: String) -> T? {
         try? deserialise(message: message, symmetricKey: Data())
     }
-    func deserialiseJsonRpc(topic: String, message: String) throws -> Result<JSONRPCResponse<AnyCodable>, JSONRPCError> {
+    func deserialiseJsonRpc(topic: String, message: String) throws -> Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse> {
         .success(try deserialise(message: message, symmetricKey: Data()))
     }
     
