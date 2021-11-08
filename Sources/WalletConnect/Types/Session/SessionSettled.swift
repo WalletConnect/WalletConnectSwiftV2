@@ -10,5 +10,9 @@ extension SessionType {
         var permissions: Permissions
         let expiry: Int
         var state: State
+        var isController: Bool {
+            guard let controller = permissions.controller else {return false}
+            return self.`self`.publicKey == controller.publicKey
+        }
     }
 }
