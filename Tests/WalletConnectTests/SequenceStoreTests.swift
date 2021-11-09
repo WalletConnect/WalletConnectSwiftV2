@@ -1,7 +1,7 @@
 import XCTest
 @testable import WalletConnect
 
-fileprivate struct ExpirableSequenceStub: ExpirableSequence, Equatable {
+struct ExpirableSequenceStub: ExpirableSequence, Equatable {
     let topic: String
     let expiryDate: Date
 }
