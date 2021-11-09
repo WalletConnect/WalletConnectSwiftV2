@@ -1,14 +1,14 @@
 import XCTest
 @testable import WalletConnect
 
-struct WCSequenceStub: WCSequence, Equatable {
+fileprivate struct ExpirableSequenceStub: ExpirableSequence, Equatable {
     let topic: String
     let expiryDate: Date
 }
 
 final class SequenceStoreTests: XCTestCase {
     
-    var sut: SequenceStore<WCSequenceStub>!
+    var sut: SequenceStore<ExpirableSequenceStub>!
     
     var storageFake: RuntimeKeyValueStorage!
     
@@ -19,7 +19,7 @@ final class SequenceStoreTests: XCTestCase {
     override func setUp() {
         timeTraveler = TimeTraveler()
         storageFake = RuntimeKeyValueStorage()
-        sut = SequenceStore<WCSequenceStub>(storage: storageFake, dateInitializer: timeTraveler.generateDate)
+        sut = SequenceStore<ExpirableSequenceStub>(storage: storageFake, dateInitializer: timeTraveler.generateDate)
         sut.onSequenceExpiration = { _ in
             XCTFail("Unexpected expiration call")
         }
@@ -31,12 +31,14 @@ final class SequenceStoreTests: XCTestCase {
         sut = nil
     }
     
-    private func stubSequence(expiry: TimeInterval? = nil) -> WCSequenceStub {
-        WCSequenceStub(
+    private func stubSequence(expiry: TimeInterval? = nil) -> ExpirableSequenceStub {
+        ExpirableSequenceStub(
             topic: String.generateTopic()!,
             expiryDate: timeTraveler.referenceDate.addingTimeInterval(expiry ?? defaultTime)
         )
     }
+    
+    // MARK: - CRUD Tests
     
     func testRoundTrip() {
         let sequence = stubSequence()
@@ -46,7 +48,7 @@ final class SequenceStoreTests: XCTestCase {
     }
     
     func testGetAll() {
-        let sequenceArray = (1...10).map { _ -> WCSequenceStub in
+        let sequenceArray = (1...10).map { _ -> ExpirableSequenceStub in
             let sequence = stubSequence()
             try? sut.setSequence(sequence)
             return sequence
@@ -76,6 +78,8 @@ final class SequenceStoreTests: XCTestCase {
         let retrieved = try? sut.getSequence(forTopic: sequence.topic)
         XCTAssertNil(retrieved)
     }
+    
+    // MARK: - Expiration Tests
     
     func testExpiration() {
         let sequence = stubSequence()

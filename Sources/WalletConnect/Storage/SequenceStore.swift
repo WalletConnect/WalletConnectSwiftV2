@@ -4,11 +4,11 @@ protocol Expirable {
     var expiryDate: Date { get }
 }
 
-protocol WCSequence: Codable, Expirable {
+protocol ExpirableSequence: Codable, Expirable {
     var topic: String { get }
 }
 
-final class SequenceStore<T> where T: WCSequence {
+final class SequenceStore<T> where T: ExpirableSequence {
 
     var onSequenceExpiration: ((String) -> Void)?
     
@@ -28,27 +28,13 @@ final class SequenceStore<T> where T: WCSequence {
     func getSequence(forTopic topic: String) throws -> T? {
         guard let data = storage.object(forKey: topic) as? Data else { return nil }
         let sequence = try JSONDecoder().decode(T.self, from: data)
-
-        let now = dateInitializer()
-        if now >= sequence.expiryDate {
-            storage.removeObject(forKey: topic)
-            onSequenceExpiration?(topic)
-            return nil
-        }
-        return sequence
+        return verifyExpiry(on: sequence)
     }
 
     func getAll() -> [T] {
         return storage.dictionaryRepresentation().compactMap {
             if let data = $0.value as? Data, let sequence = try? JSONDecoder().decode(T.self, from: data) {
-
-                let now = dateInitializer()
-                if now >= sequence.expiryDate {
-                    storage.removeObject(forKey: $0.key)
-                    onSequenceExpiration?($0.key)
-                    return nil
-                }
-                return sequence
+                return verifyExpiry(on: sequence)
             }
             return nil
         }
@@ -61,5 +47,15 @@ final class SequenceStore<T> where T: WCSequence {
 
     func delete(forTopic topic: String) {
         storage.removeObject(forKey: topic)
+    }
+    
+    private func verifyExpiry(on sequence: T) -> T? {
+        let now = dateInitializer()
+        if now >= sequence.expiryDate {
+            storage.removeObject(forKey: sequence.topic)
+            onSequenceExpiration?(sequence.topic)
+            return nil
+        }
+        return sequence
     }
 }

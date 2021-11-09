@@ -10,6 +10,7 @@ protocol KeyValueStorage {
 
 extension UserDefaults: KeyValueStorage {}
 
+// TODO: Move to test target
 final class RuntimeKeyValueStorage: KeyValueStorage {
 
     private var storage: [String : Any] = [:]
