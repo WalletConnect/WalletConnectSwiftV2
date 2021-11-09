@@ -285,7 +285,7 @@ final class ClientTests: XCTestCase {
         waitForExpectations(timeout: 3.0, handler: nil)
     }
     
-    func testSessionNotification() {
+    func testSessionNotificationSucceeds() {
         let proposerReceivesNotificationExpectation = expectation(description: "Proposer receives notification")
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []), notifications: SessionType.Notifications(types: ["type1"]))
         let connectParams = ConnectParams(permissions: permissions)
@@ -302,7 +302,30 @@ final class ClientTests: XCTestCase {
             XCTAssertEqual(notification, notificationParams)
             proposerReceivesNotificationExpectation.fulfill()
         }
-        waitForExpectations(timeout: 4.0, handler: nil)
+        waitForExpectations(timeout: 3.0, handler: nil)
+    }
+    
+    func testSessionNotificationFails() {
+        let proposerReceivesNotificationExpectation = expectation(description: "Proposer receives notification")
+        proposerReceivesNotificationExpectation.isInverted = true
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []), notifications: SessionType.Notifications(types: ["type1"]))
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        try! responder.client.pair(uri: uri)
+        let notificationParams = SessionType.NotificationParams(type: "type2", data: AnyCodable("notification_data"))
+        responder.onSessionProposal = { [unowned self] proposal in
+            self.responder.client.approve(proposal: proposal, accounts: [])
+        }
+        proposer.onSessionSettled = { [unowned self] session in
+            proposer.client.notify(topic: session.topic, params: notificationParams) { error in
+                XCTAssertNotNil(error)
+            }
+        }
+        responder.onNotificationReceived = { notification, _ in
+            XCTFail()
+            proposerReceivesNotificationExpectation.fulfill()
+        }
+        waitForExpectations(timeout: 2.0, handler: nil)
     }
 }
 
