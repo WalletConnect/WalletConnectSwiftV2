@@ -275,11 +275,11 @@ final class ClientTests: XCTestCase {
             responder.client.update(topic: sessionSettled.topic, accounts: updateAccounts)
         }
         responder.onSessionUpdate = { _, accounts in
-            XCTAssertEqual(accounts, updateAccounts.union([account]))
+            XCTAssertEqual(accounts, updateAccounts)
             responderSessionUpdateExpectation.fulfill()
         }
         proposer.onSessionUpdate = { _, accounts in
-            XCTAssertEqual(accounts, updateAccounts.union([account]))
+            XCTAssertEqual(accounts, updateAccounts)
             proposerSessionUpdateExpectation.fulfill()
         }
         waitForExpectations(timeout: 3.0, handler: nil)

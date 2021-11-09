@@ -205,7 +205,7 @@ final class SessionEngine {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
-        session.state.accounts.formUnion(accounts)
+        session.state.accounts = accounts
         let params = ClientSynchJSONRPC.Params.sessionUpdate(SessionType.UpdateParams(state: SessionType.State(accounts: session.state.accounts)))
         let request = ClientSynchJSONRPC(method: .sessionUpdate, params: params)
         relayer.request(topic: topic, payload: request) { [unowned self] result in
