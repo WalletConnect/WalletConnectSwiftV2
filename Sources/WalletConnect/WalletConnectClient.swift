@@ -49,10 +49,12 @@ public final class WalletConnectClient {
     // for proposer to propose a session to a responder
     public func connect(params: ConnectParams) throws -> String? {
         logger.debug("Connecting Application")
-        if let topic = params.pairing?.topic,
-           let pairing = pairingEngine.sequencesStore.get(topic: topic) {
-            logger.debug("Connecting with existing pairing")
-            fatalError("not implemented")
+        if let topic = params.pairing?.topic {
+            guard case .settled(let settledPairing) = pairingEngine.sequencesStore.get(topic: topic) else {
+                throw WalletConnectError.InternalReason.noSequenceForTopic
+            }
+            logger.debug("Proposing session on existing pairing")
+            sessionEngine.proposeSession(settledPairing: settledPairing, permissions: params.permissions)
             return nil
         } else {
             guard let pending = pairingEngine.propose(params) else {
