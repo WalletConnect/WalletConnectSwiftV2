@@ -1,10 +1,11 @@
 
 import Foundation
 
+
 public protocol WalletConnectClientDelegate: AnyObject {
     func didReceive(sessionProposal: SessionProposal)
     func didReceive(sessionRequest: SessionRequest)
-    func didReceive(notificationType: String, data: AnyCodable, sessionTopic: String)
+    func didReceive(notification: Notification, sessionTopic: String)
     func didSettle(session: Session)
     func didSettle(pairing: PairingType.Settled)
     func didReject(sessionPendingTopic: String, reason: SessionType.Reason)
@@ -191,8 +192,8 @@ public final class WalletConnectClient {
         sessionEngine.onSessionUpdate = { [unowned self] topic, accounts in
             delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
         }
-        sessionEngine.onNotificationReceived = { [unowned self] topic, notificationParams in
-            delegate?.didReceive(notificationType: notificationParams.type, data: notificationParams.data, sessionTopic: topic)
+        sessionEngine.onNotificationReceived = { [unowned self] topic, notification in
+            delegate?.didReceive(notification: notification, sessionTopic: topic)
         }
     }
     

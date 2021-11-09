@@ -284,6 +284,26 @@ final class ClientTests: XCTestCase {
         }
         waitForExpectations(timeout: 3.0, handler: nil)
     }
+    
+    func testSessionNotification() {
+        let proposerReceivesNotificationExpectation = expectation(description: "Proposer receives notification")
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []), notifications: SessionType.Notifications(types: ["type1"]))
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        try! responder.client.pair(uri: uri)
+        let notificationParams = SessionType.NotificationParams(type: "type1", data: AnyCodable("notification_data"))
+        responder.onSessionProposal = { [unowned self] proposal in
+            self.responder.client.approve(proposal: proposal, accounts: [])
+        }
+        responder.onSessionSettled = { [unowned self] session in
+            responder.client.notify(topic: session.topic, params: notificationParams)
+        }
+        proposer.onNotificationReceived = { notification, _ in
+            XCTAssertEqual(notification, notificationParams)
+            proposerReceivesNotificationExpectation.fulfill()
+        }
+        waitForExpectations(timeout: 4.0, handler: nil)
+    }
 }
 
 public struct EthSendTransaction: Codable, Equatable {
