@@ -137,8 +137,8 @@ public final class WalletConnectClient {
         }
     }
     
-    public func notify(topic: String, params: SessionType.NotificationParams) {
-        sessionEngine.notify(topic: topic, params: params)
+    public func notify(topic: String, params: SessionType.NotificationParams, completion: ((Error?)->())?) {
+        sessionEngine.notify(topic: topic, params: params, completion: completion)
     }
     
     // for either to disconnect a session

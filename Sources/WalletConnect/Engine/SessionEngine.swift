@@ -239,7 +239,7 @@ final class SessionEngine {
         }
     }
     
-    func notify(topic: String, params: SessionType.NotificationParams) {
+    func notify(topic: String, params: SessionType.NotificationParams, completion: ((Error?)->())?) {
         guard case .settled(let settledSession) = sequencesStore.get(topic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
@@ -250,15 +250,14 @@ final class SessionEngine {
             relayer.request(topic: topic, payload: request) {  result in
                 switch result {
                 case .success(_):
-                    //TODO
-                    return
-                case .failure(_):
-                    return
-                    //TODO
+                    completion?(nil)
+                case .failure(let error):
+                    completion?(error)
                 }
             }
         } catch let error as WalletConnectError {
             logger.error(error)
+            completion?(error)
         } catch {}
     }
 

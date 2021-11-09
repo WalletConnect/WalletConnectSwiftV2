@@ -296,7 +296,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
         responder.onSessionSettled = { [unowned self] session in
-            responder.client.notify(topic: session.topic, params: notificationParams)
+            responder.client.notify(topic: session.topic, params: notificationParams, completion: nil)
         }
         proposer.onNotificationReceived = { notification, _ in
             XCTAssertEqual(notification, notificationParams)
