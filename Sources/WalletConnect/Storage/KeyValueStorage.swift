@@ -14,24 +14,35 @@ extension UserDefaults: KeyValueStorage {}
 final class RuntimeKeyValueStorage: KeyValueStorage {
 
     private var storage: [String : Any] = [:]
+    private let queue = DispatchQueue(label: "com.walletconnect.sdk.runtimestorage")
 
     func set(_ value: Any?, forKey defaultName: String) {
-        storage[defaultName] = value
+        queue.sync {
+            storage[defaultName] = value
+        }
     }
 
     func object(forKey defaultName: String) -> Any? {
-        return storage[defaultName]
+        queue.sync {
+            return storage[defaultName]
+        }
     }
 
     func data(forKey defaultName: String) -> Data? {
-        return storage[defaultName] as? Data
+        queue.sync {
+            return storage[defaultName] as? Data
+        }
     }
 
     func removeObject(forKey defaultName: String) {
-        storage[defaultName] = nil
+        queue.sync {
+            storage[defaultName] = nil
+        }
     }
 
     func dictionaryRepresentation() -> [String : Any] {
-        return storage
+        queue.sync {
+            return storage
+        }
     }
 }
