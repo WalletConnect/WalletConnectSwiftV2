@@ -103,9 +103,8 @@ final class PairingEngine {
             case .success(_):
                 pairing.state?.metadata = appMetadata
                 sequencesStore.update(topic: topic, newTopic: nil, sequenceState: .settled(pairing))
-                return
-            case .failure(_):
-                break
+            case .failure(let error):
+                logger.error(error)
             }
         }
     }
