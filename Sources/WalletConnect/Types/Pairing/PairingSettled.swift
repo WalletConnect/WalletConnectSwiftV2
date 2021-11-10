@@ -9,6 +9,6 @@ extension PairingType {
         public let peer: Participant
         let permissions: Permissions
         let expiry: Int
-        let state: State?
+        var state: State?
     }
 }
