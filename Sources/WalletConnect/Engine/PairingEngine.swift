@@ -32,7 +32,7 @@ final class PairingEngine {
         restoreSubscriptions()
     }
     
-    func pair(_ proposal: PairingType.Proposal, completion: @escaping (Result<PairingType.Settled, Error>) -> Void) {
+    func approve(_ proposal: PairingType.Proposal, completion: @escaping (Result<PairingType.Settled, Error>) -> Void) {
         let privateKey = Crypto.X25519.generatePrivateKey()
         let selfPublicKey = privateKey.publicKey.toHexString()
         
@@ -91,14 +91,19 @@ final class PairingEngine {
         }
     }
     
-    func update(topic: String) {
+    private func update(topic: String) {
+        guard case .settled(var pairing) = sequencesStore.get(topic: topic) else {
+            logger.debug("Could not find pairing for topic \(topic)")
+            return
+        }
         let params = ClientSynchJSONRPC.Params.pairingUpdate(PairingType.UpdateParams(state: PairingType.State(metadata: appMetadata)))
         let request = ClientSynchJSONRPC(method: .pairingUpdate, params: params)
         relayer.request(topic: topic, payload: request) { [unowned self] result in
             switch result {
             case .success(_):
+                pairing.state?.metadata = appMetadata
+                sequencesStore.update(topic: topic, newTopic: nil, sequenceState: .settled(pairing))
                 return
-//                sequencesStore.update(topic: topic, newTopic: nil, sequenceState: .settled(session))
             case .failure(_):
                 break
             }
@@ -121,7 +126,7 @@ final class PairingEngine {
         let signal = PairingType.Signal(params: signalParams)
         let permissions = getDefaultPermissions()
         let proposal = PairingType.Proposal(topic: topic, relay: relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
-        let `self` = PairingType.Participant(publicKey: publicKey, metadata: appMetadata)
+        let `self` = PairingType.Participant(publicKey: publicKey)
         let pending = PairingType.Pending(status: .proposed, topic: topic, relay: relay, self: `self`, proposal: proposal)
         sequencesStore.create(topic: topic, sequenceState: .pending(pending))
         wcSubscriber.setSubscription(topic: topic)
@@ -275,7 +280,7 @@ final class PairingEngine {
             topic: settledTopic,
             relay: approveParams.relay,
             self: PairingType.Participant(publicKey: selfPublicKey.toHexString()),
-            peer: PairingType.Participant(publicKey: approveParams.responder.publicKey, metadata: approveParams.responder.metadata),
+            peer: PairingType.Participant(publicKey: approveParams.responder.publicKey),
             permissions: PairingType.Permissions(
                 jsonrpc: proposal.permissions.jsonrpc,
                 controller: controller),
