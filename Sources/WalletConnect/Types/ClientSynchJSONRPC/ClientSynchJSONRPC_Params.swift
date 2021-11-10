@@ -19,6 +19,7 @@ extension ClientSynchJSONRPC {
         case sessionDelete(SessionType.DeleteParams)
         case sessionPayload(SessionType.PayloadParams)
         case sessionPing(SessionType.PingParams)
+        case sessionNotification(SessionType.NotificationParams)
 
         static func == (lhs: Params, rhs: Params) -> Bool {
             switch (lhs, rhs) {
@@ -49,6 +50,8 @@ extension ClientSynchJSONRPC {
             case (.sessionPayload(let lhsParam), sessionPayload(let rhsParam)):
                 return lhsParam == rhsParam
             case (.sessionPing(let lhsParam), sessionPing(let rhsParam)):
+                return lhsParam == rhsParam
+            case (.sessionNotification(let lhsParam), sessionNotification(let rhsParam)):
                 return lhsParam == rhsParam
             default:
                 return false

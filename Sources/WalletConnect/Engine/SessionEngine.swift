@@ -14,6 +14,7 @@ final class SessionEngine {
     var onSessionDelete: ((String, SessionType.Reason)->())?
     var onSessionUpgrade: ((String, SessionType.Permissions)->())?
     var onSessionUpdate: ((String, Set<String>)->())?
+    var onNotificationReceived: ((String, SessionType.NotificationParams)->())?
     private var publishers = [AnyCancellable]()
 
     private let logger: BaseLogger
@@ -204,7 +205,7 @@ final class SessionEngine {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
-        session.state.accounts.formUnion(accounts)
+        session.state.accounts = accounts
         let params = ClientSynchJSONRPC.Params.sessionUpdate(SessionType.UpdateParams(state: SessionType.State(accounts: session.state.accounts)))
         let request = ClientSynchJSONRPC(method: .sessionUpdate, params: params)
         relayer.request(topic: topic, payload: request) { [unowned self] result in
@@ -236,6 +237,28 @@ final class SessionEngine {
                 //TODO
             }
         }
+    }
+    
+    func notify(topic: String, params: SessionType.NotificationParams, completion: ((Error?)->())?) {
+        guard case .settled(let settledSession) = sequencesStore.get(topic: topic) else {
+            logger.debug("Could not find session for topic \(topic)")
+            return
+        }
+        do {
+            try validateNotification(session: settledSession, params: params)
+            let request = ClientSynchJSONRPC(method: .sessionNotification, params: .sessionNotification(params))
+            relayer.request(topic: topic, payload: request) {  result in
+                switch result {
+                case .success(_):
+                    completion?(nil)
+                case .failure(let error):
+                    completion?(error)
+                }
+            }
+        } catch let error as WalletConnectError {
+            logger.error(error)
+            completion?(error)
+        } catch {}
     }
 
     //MARK: - Private
@@ -280,8 +303,42 @@ final class SessionEngine {
                 handleSessionPayload(payloadParams: sessionPayloadParams, topic: topic, requestId: requestId)
             case .sessionPing(_):
                 handleSessionPing(topic: topic, requestId: requestId)
+            case .sessionNotification(let notificationParams):
+                handleSessionNotification(topic: topic, notificationParams: notificationParams, requestId: requestId)
             default:
                 fatalError("unexpected method type")
+            }
+        }
+    }
+    
+    private func handleSessionNotification(topic: String, notificationParams: SessionType.NotificationParams, requestId: Int64) {
+        guard case .settled(var session) = sequencesStore.get(topic: topic) else {
+            return
+        }
+        do {
+            try validateNotification(session: session, params: notificationParams)
+            let response = JSONRPCResponse<Bool>(id: requestId, result: true)
+            relayer.respond(topic: topic, payload: response) { [unowned self] error in
+                if let error = error {
+                    logger.error(error)
+                } else {
+                    onNotificationReceived?(topic, notificationParams)
+                }
+            }
+        } catch let error as WalletConnectError {
+            logger.error(error)
+            respond(error: error, requestId: requestId, topic: topic)
+            //on unauthorized notification received?
+        } catch {}
+    }
+    
+    private func validateNotification(session: SessionType.Settled, params: SessionType.NotificationParams) throws {
+        if session.isController {
+            return
+        } else {
+            guard let notifications = session.permissions.notifications,
+                  notifications.types.contains(params.type) else {
+                throw WalletConnectError.unauthrorized(.unauthorizedNotificationType)
             }
         }
     }
@@ -293,7 +350,7 @@ final class SessionEngine {
         }
         guard let controller = session.permissions.controller,
         session.peer.publicKey == controller.publicKey else {
-            let error = WalletConnectError.unauthrorized(.unauthorizedUpgradeRequest)
+            let error = WalletConnectError.unauthrorized(.unauthorizedUpdateRequest)
             logger.error(error)
             respond(error: error, requestId: requestId, topic: topic)
             return

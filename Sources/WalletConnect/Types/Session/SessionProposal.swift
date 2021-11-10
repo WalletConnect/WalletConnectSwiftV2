@@ -30,10 +30,10 @@ extension SessionType {
             self.controller = controller
         }
         
-        public init(blockchain: SessionType.Blockchain, jsonrpc: SessionType.JSONRPC) {
+        public init(blockchain: SessionType.Blockchain, jsonrpc: SessionType.JSONRPC, notifications: SessionType.Notifications) {
             self.blockchain = blockchain
             self.jsonrpc = jsonrpc
-            self.notifications = nil
+            self.notifications = notifications
             self.controller = nil
         }
         
@@ -59,7 +59,10 @@ extension SessionType {
         }
     }
     
-    struct Notifications: Codable, Equatable {
+    public struct Notifications: Codable, Equatable {
         let types: [String]
+        public init(types: [String]) {
+            self.types = types
+        }
     }
 }

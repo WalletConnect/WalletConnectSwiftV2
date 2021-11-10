@@ -18,5 +18,6 @@ extension ClientSynchJSONRPC {
         case sessionDelete = "wc_sessionDelete"
         case sessionPayload = "wc_sessionPayload"
         case sessionPing = "wc_sessionPing"
+        case sessionNotification = "wc_sessionNotification"
     }
 }

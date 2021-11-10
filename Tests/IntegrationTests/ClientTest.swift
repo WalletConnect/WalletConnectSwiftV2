@@ -275,14 +275,57 @@ final class ClientTests: XCTestCase {
             responder.client.update(topic: sessionSettled.topic, accounts: updateAccounts)
         }
         responder.onSessionUpdate = { _, accounts in
-            XCTAssertEqual(accounts, updateAccounts.union([account]))
+            XCTAssertEqual(accounts, updateAccounts)
             responderSessionUpdateExpectation.fulfill()
         }
         proposer.onSessionUpdate = { _, accounts in
-            XCTAssertEqual(accounts, updateAccounts.union([account]))
+            XCTAssertEqual(accounts, updateAccounts)
             proposerSessionUpdateExpectation.fulfill()
         }
         waitForExpectations(timeout: 3.0, handler: nil)
+    }
+    
+    func testSessionNotificationSucceeds() {
+        let proposerReceivesNotificationExpectation = expectation(description: "Proposer receives notification")
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []), notifications: SessionType.Notifications(types: ["type1"]))
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        try! responder.client.pair(uri: uri)
+        let notificationParams = SessionType.NotificationParams(type: "type1", data: AnyCodable("notification_data"))
+        responder.onSessionProposal = { [unowned self] proposal in
+            self.responder.client.approve(proposal: proposal, accounts: [])
+        }
+        responder.onSessionSettled = { [unowned self] session in
+            responder.client.notify(topic: session.topic, params: notificationParams, completion: nil)
+        }
+        proposer.onNotificationReceived = { notification, _ in
+            XCTAssertEqual(notification, notificationParams)
+            proposerReceivesNotificationExpectation.fulfill()
+        }
+        waitForExpectations(timeout: 3.0, handler: nil)
+    }
+    
+    func testSessionNotificationFails() {
+        let proposerReceivesNotificationExpectation = expectation(description: "Proposer receives notification")
+        proposerReceivesNotificationExpectation.isInverted = true
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []), notifications: SessionType.Notifications(types: ["type1"]))
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        try! responder.client.pair(uri: uri)
+        let notificationParams = SessionType.NotificationParams(type: "type2", data: AnyCodable("notification_data"))
+        responder.onSessionProposal = { [unowned self] proposal in
+            self.responder.client.approve(proposal: proposal, accounts: [])
+        }
+        proposer.onSessionSettled = { [unowned self] session in
+            proposer.client.notify(topic: session.topic, params: notificationParams) { error in
+                XCTAssertNotNil(error)
+            }
+        }
+        responder.onNotificationReceived = { notification, _ in
+            XCTFail()
+            proposerReceivesNotificationExpectation.fulfill()
+        }
+        waitForExpectations(timeout: 2.0, handler: nil)
     }
 }
 
