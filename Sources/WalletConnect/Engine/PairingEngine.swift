@@ -9,7 +9,8 @@ final class PairingEngine {
     var sequencesStore: PairingSequencesStore
     var onSessionProposal: ((SessionType.Proposal)->())?
     var onPairingApproved: ((PairingType.Settled, String)->())?
-    private var metadata: AppMetadata
+    var onPairingUpdate: ((String, AppMetadata)->())?
+    private var appMetadata: AppMetadata
     private var publishers = [AnyCancellable]()
     private let logger: BaseLogger
     
@@ -23,7 +24,7 @@ final class PairingEngine {
         self.relayer = relay
         self.crypto = crypto
         self.wcSubscriber = subscriber
-        self.metadata = metadata
+        self.appMetadata = metadata
         self.sequencesStore = sequencesStore
         self.isController = isController
         self.logger = logger
@@ -31,7 +32,7 @@ final class PairingEngine {
         restoreSubscriptions()
     }
     
-    func pair(_ proposal: PairingType.Proposal, completion: @escaping (Result<PairingType.Settled, Error>) -> Void) {
+    func approve(_ proposal: PairingType.Proposal, completion: @escaping (Result<PairingType.Settled, Error>) -> Void) {
         let privateKey = Crypto.X25519.generatePrivateKey()
         let selfPublicKey = privateKey.publicKey.toHexString()
         
@@ -49,7 +50,7 @@ final class PairingEngine {
             peerPublicKey: Data(hex: proposal.proposer.publicKey),
             privateKey: privateKey)
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
-        let selfParticipant = PairingType.Participant(publicKey: selfPublicKey, metadata: metadata)
+        let selfParticipant = PairingType.Participant(publicKey: selfPublicKey)
         let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : selfPublicKey
         let settledPairing = PairingType.Settled(
             topic: settledTopic,
@@ -82,9 +83,28 @@ final class PairingEngine {
             case .success:
                 self?.wcSubscriber.removeSubscription(topic: proposal.topic)
                 self?.logger.debug("Success on wc_pairingApprove - settled topic - \(settledTopic)")
+                self?.update(topic: settledTopic)
                 completion(.success(settledPairing))
             case .failure(let error):
                 completion(.failure(error))
+            }
+        }
+    }
+    
+    private func update(topic: String) {
+        guard case .settled(var pairing) = sequencesStore.get(topic: topic) else {
+            logger.debug("Could not find pairing for topic \(topic)")
+            return
+        }
+        let params = ClientSynchJSONRPC.Params.pairingUpdate(PairingType.UpdateParams(state: PairingType.State(metadata: appMetadata)))
+        let request = ClientSynchJSONRPC(method: .pairingUpdate, params: params)
+        relayer.request(topic: topic, payload: request) { [unowned self] result in
+            switch result {
+            case .success(_):
+                pairing.state?.metadata = appMetadata
+                sequencesStore.update(topic: topic, newTopic: nil, sequenceState: .settled(pairing))
+            case .failure(let error):
+                logger.error(error)
             }
         }
     }
@@ -105,7 +125,7 @@ final class PairingEngine {
         let signal = PairingType.Signal(params: signalParams)
         let permissions = getDefaultPermissions()
         let proposal = PairingType.Proposal(topic: topic, relay: relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
-        let `self` = PairingType.Participant(publicKey: publicKey, metadata: metadata)
+        let `self` = PairingType.Participant(publicKey: publicKey)
         let pending = PairingType.Pending(status: .proposed, topic: topic, relay: relay, self: `self`, proposal: proposal)
         sequencesStore.create(topic: topic, sequenceState: .pending(pending))
         wcSubscriber.setSubscription(topic: topic)
@@ -161,8 +181,8 @@ final class PairingEngine {
                 handlePairingApprove(approveParams: approveParams, pendingTopic: topic, reqestId: requestId)
             case .pairingReject(_):
                 fatalError("Not Implemented")
-            case .pairingUpdate(_):
-                fatalError("Not Implemented")
+            case .pairingUpdate(let updateParams):
+                handlePairingUpdate(params: updateParams, topic: topic, requestId: requestId)
             case .pairingUpgrade(_):
                 fatalError("Not Implemented")
             case .pairingDelete(let deleteParams):
@@ -173,6 +193,29 @@ final class PairingEngine {
                 self.handlePairingPing(topic: topic, requestId: requestId)
             default:
                 fatalError("not expected method type")
+            }
+        }
+    }
+    
+    private func handlePairingUpdate(params:  PairingType.UpdateParams,topic: String, requestId: Int64) {
+        guard case .settled(var pairing) = sequencesStore.get(topic: topic) else {
+            logger.debug("Could not find pairing for topic \(topic)")
+            return
+        }
+        guard pairing.peer.publicKey == pairing.permissions.controller.publicKey else {
+            let error = WalletConnectError.unauthrorized(.unauthorizedUpdateRequest)
+            logger.error(error)
+            respond(error: error, requestId: requestId, topic: topic)
+            return
+        }
+        let response = JSONRPCResponse<Bool>(id: requestId, result: true)
+        relayer.respond(topic: topic, payload: response) { [unowned self] error in
+            if let error = error {
+                logger.error(error)
+            } else {
+                pairing.state = params.state
+                sequencesStore.update(topic: topic, newTopic: nil, sequenceState: .settled(pairing))
+                onPairingUpdate?(topic, params.state.metadata)
             }
         }
     }
@@ -229,14 +272,14 @@ final class PairingEngine {
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
         crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         let proposal = pairingPending.proposal
-        let controllerKey = proposal.proposer.controller ? selfPublicKey.toHexString() : proposal.proposer.publicKey
+        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : peerPublicKey.toHexString()
         let controller = Controller(publicKey: controllerKey)
    
         let settledPairing = PairingType.Settled(
             topic: settledTopic,
             relay: approveParams.relay,
             self: PairingType.Participant(publicKey: selfPublicKey.toHexString()),
-            peer: PairingType.Participant(publicKey: approveParams.responder.publicKey, metadata: approveParams.responder.metadata),
+            peer: PairingType.Participant(publicKey: approveParams.responder.publicKey),
             permissions: PairingType.Permissions(
                 jsonrpc: proposal.permissions.jsonrpc,
                 controller: controller),
@@ -258,5 +301,17 @@ final class PairingEngine {
                 let topics = sequencesStore.getAll().map{$0.topic}
                 topics.forEach{self.wcSubscriber.setSubscription(topic: $0)}
             }.store(in: &publishers)
+    }
+    
+    private func respond(error: WalletConnectError, requestId: Int64, topic: String) {
+        let jsonrpcError = JSONRPCErrorResponse.Error(code: error.code, message: error.description)
+        let response = JSONRPCErrorResponse(id: requestId, error: jsonrpcError)
+        relayer.respond(topic: topic, payload: response) { [weak self] responseError in
+            if let responseError = responseError {
+                self?.logger.error("Could not respond with error: \(responseError)")
+            } else {
+                self?.logger.debug("successfully responded with error")
+            }
+        }
     }
 }

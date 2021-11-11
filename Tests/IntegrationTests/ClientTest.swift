@@ -327,6 +327,19 @@ final class ClientTests: XCTestCase {
         }
         waitForExpectations(timeout: 2.0, handler: nil)
     }
+    
+    func testPairingUpdate() {
+        let proposerReceivesPairingUpdateExpectation = expectation(description: "Proposer receives pairing update")
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        _ = try! responder.client.pair(uri: uri)
+        proposer.onPairingUpdate = { _, appMetadata in
+            XCTAssertNotNil(appMetadata)
+            proposerReceivesPairingUpdateExpectation.fulfill()
+        }
+        waitForExpectations(timeout: 3.0, handler: nil)
+    }
 }
 
 public struct EthSendTransaction: Codable, Equatable {
