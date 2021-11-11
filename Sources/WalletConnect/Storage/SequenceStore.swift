@@ -19,6 +19,10 @@ final class SequenceStore<T> where T: ExpirableSequence {
         self.storage = storage
         self.dateInitializer = dateInitializer
     }
+    
+    func hasSequence(forTopic topic: String) -> Bool {
+        (try? getSequence(forTopic: topic)) != nil
+    }
 
     func setSequence(_ sequence: T) throws {
         let encoded = try JSONEncoder().encode(sequence)
