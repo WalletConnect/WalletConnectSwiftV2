@@ -12,6 +12,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     func didDelete(sessionTopic: String, reason: SessionType.Reason)
     func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions)
     func didUpdate(sessionTopic: String, accounts: Set<String>)
+    func didUpdate(pairingTopic: String, appMetadata: AppMetadata)
 }
 
 public final class WalletConnectClient {
@@ -78,7 +79,7 @@ public final class WalletConnectClient {
         if !approved {
             throw WalletConnectError.internal(.unauthorizedMatchingController)
         }
-        pairingEngine.pair(proposal) { [unowned self] result in
+        pairingEngine.approve(proposal) { [unowned self] result in
             switch result {
             case .success(let settledPairing):
                 logger.debug("Pairing Success")
@@ -162,29 +163,29 @@ public final class WalletConnectClient {
     
     private func setUpEnginesCallbacks() {
         pairingEngine.onSessionProposal = { [unowned self] proposal in
-            self.proposeSession(proposal: proposal)
+            proposeSession(proposal: proposal)
         }
         pairingEngine.onPairingApproved = { [unowned self] settledPairing, pendingTopic in
-            self.delegate?.didSettle(pairing: settledPairing)
+            delegate?.didSettle(pairing: settledPairing)
             guard let permissions = sessionPermissions[pendingTopic] else {
                 logger.debug("Cound not find permissions for pending topic: \(pendingTopic)")
                 return
             }
             sessionPermissions[pendingTopic] = nil
-            self.sessionEngine.proposeSession(settledPairing: settledPairing, permissions: permissions)
+            sessionEngine.proposeSession(settledPairing: settledPairing, permissions: permissions)
         }
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
             let session = Session(topic: settledSession.topic, peer: settledSession.peer.metadata)
-            self.delegate?.didSettle(session: session)
+            delegate?.didSettle(session: session)
         }
         sessionEngine.onSessionRejected = { [unowned self] pendingTopic, reason in
-            self.delegate?.didReject(sessionPendingTopic: pendingTopic, reason: reason)
+            delegate?.didReject(sessionPendingTopic: pendingTopic, reason: reason)
         }
         sessionEngine.onSessionPayloadRequest = { [unowned self] sessionRequest in
-            self.delegate?.didReceive(sessionRequest: sessionRequest)
+            delegate?.didReceive(sessionRequest: sessionRequest)
         }
         sessionEngine.onSessionDelete = { [unowned self] topic, reason in
-            self.delegate?.didDelete(sessionTopic: topic, reason: reason)
+            delegate?.didDelete(sessionTopic: topic, reason: reason)
         }
         sessionEngine.onSessionUpgrade = { [unowned self] topic, permissions in
             delegate?.didUpgrade(sessionTopic: topic, permissions: permissions)
@@ -194,6 +195,9 @@ public final class WalletConnectClient {
         }
         sessionEngine.onNotificationReceived = { [unowned self] topic, notification in
             delegate?.didReceive(notification: notification, sessionTopic: topic)
+        }
+        pairingEngine.onPairingUpdate = { [unowned self] topic, appMetadata in
+            delegate?.didUpdate(pairingTopic: topic, appMetadata: appMetadata)
         }
     }
     
