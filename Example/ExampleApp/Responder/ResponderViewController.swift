@@ -130,6 +130,11 @@ extension ResponderViewController: SessionViewControllerDelegate {
 }
 
 extension ResponderViewController: WalletConnectClientDelegate {
+    
+    func didSettle(pairing: Pairing) {
+
+    }
+    
     func didReceive(sessionProposal: SessionProposal) {
         print("[RESPONDER] WC: Did receive session proposal")
         let appMetadata = sessionProposal.proposer
@@ -176,9 +181,9 @@ extension ResponderViewController: WalletConnectClientDelegate {
         let activeSessions = settledSessions.map { session -> ActiveSessionItem in
             let app = session.peer
             return ActiveSessionItem(
-                dappName: app?.name ?? "",
-                dappURL: app?.url ?? "",
-                iconURL: app?.icons?.first ?? "",
+                dappName: app.name ?? "",
+                dappURL: app.url ?? "",
+                iconURL: app.icons?.first ?? "",
                 topic: session.topic)
         }
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread

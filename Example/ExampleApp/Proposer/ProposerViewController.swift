@@ -126,6 +126,10 @@ extension ProposerViewController: UITableViewDataSource, UITableViewDelegate {
 
 extension ProposerViewController: WalletConnectClientDelegate {
 
+    func didSettle(pairing: Pairing) {
+
+    }
+
     func didReceive(sessionProposal: SessionProposal) {
         print("[PROPOSER] WC: Did receive session proposal")
     }
@@ -162,7 +166,7 @@ extension ProposerViewController: WalletConnectClientDelegate {
         print("[PROPOSER] WC: Did settle pairing")
         let settledPairings = client.getSettledPairings()
         let activePairings = settledPairings.map { pairing -> ActiveSessionItem in
-            let app = pairing.metadata
+            let app = pairing.peer
             return ActiveSessionItem(
                 dappName: app?.name ?? "",
                 dappURL: app?.url ?? "",

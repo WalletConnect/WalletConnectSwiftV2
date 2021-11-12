@@ -9,6 +9,6 @@ extension SessionType {
     
     public struct Participant: Codable, Equatable {
         let publicKey: String
-        public let metadata: AppMetadata?
+        public let metadata: AppMetadata
     }
 }
