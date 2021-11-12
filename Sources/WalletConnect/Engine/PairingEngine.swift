@@ -46,7 +46,7 @@ final class PairingEngine {
         let pending = PairingSequence.Pending(
             proposal: proposal,
             status: .responded)
-        var pairingSequence = PairingSequence(
+        let pairingSequence = PairingSequence(
             topic: proposal.topic,
             relay: proposal.relay,
             selfParticipant: PairingType.Participant(publicKey: selfPublicKey),

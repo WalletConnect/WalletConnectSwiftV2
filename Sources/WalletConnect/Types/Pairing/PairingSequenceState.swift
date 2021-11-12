@@ -2,6 +2,8 @@
 import Foundation
 
 extension PairingType {
+    
+    // TODO: Evaluate if this type can be removed (fully replaced by PairingSequence) after session engine refactor.
     enum SequenceState: Codable, Equatable {
         case settled(Settled)
         case pending(Pending)
