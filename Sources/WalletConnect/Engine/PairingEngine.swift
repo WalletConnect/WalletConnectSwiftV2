@@ -33,6 +33,12 @@ final class PairingEngine {
         restoreSubscriptions()
     }
     
+    func getSettledPairings() -> [Pairing] {
+        sequencesStore.getAll()
+            .filter { $0.isSettled }
+            .map { Pairing(topic: $0.topic, peer: $0.settled?.state?.metadata) }
+    }
+    
     func approve(_ proposal: PairingType.Proposal, completion: @escaping (Result<Pairing, Error>) -> Void) {
         let privateKey = Crypto.X25519.generatePrivateKey()
         let selfPublicKey = privateKey.publicKey.toHexString()

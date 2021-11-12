@@ -156,9 +156,8 @@ public final class WalletConnectClient {
         return sessions
     }
     
-    public func getSettledPairings() -> [PairingType.Settled] {
-//        pairingEngine.sequencesStore.getSettled()
-        fatalError()
+    public func getSettledPairings() -> [Pairing] {
+        pairingEngine.getSettledPairings()
     }
     
     //MARK: - Private

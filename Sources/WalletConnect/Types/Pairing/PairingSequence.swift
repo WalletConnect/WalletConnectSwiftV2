@@ -1,11 +1,12 @@
 import Foundation
 
 struct PairingSequence: ExpirableSequence {
+    
     let topic: String
     let relay: RelayProtocolOptions
     let selfParticipant: PairingType.Participant
     let expiryDate: Date
-    var sequenceState: Either<Pending, Settled>
+    private var sequenceState: Either<Pending, Settled>
 
     var pending: Pending? {
         get {
@@ -29,6 +30,23 @@ struct PairingSequence: ExpirableSequence {
         }
     }
     
+    var isSettled: Bool {
+        settled != nil
+    }
+}
+
+extension PairingSequence {
+    
+    init(topic: String, relay: RelayProtocolOptions, selfParticipant: PairingType.Participant, expiryDate: Date, pendingState: Pending) {
+        self.init(topic: topic, relay: relay, selfParticipant: selfParticipant, expiryDate: expiryDate, sequenceState: .left(pendingState))
+    }
+    
+    init(topic: String, relay: RelayProtocolOptions, selfParticipant: PairingType.Participant, expiryDate: Date, settledState: Settled) {
+        self.init(topic: topic, relay: relay, selfParticipant: selfParticipant, expiryDate: expiryDate, sequenceState: .right(settledState))
+    }
+}
+    
+extension PairingSequence {
     
     struct Pending: Codable {
         let proposal: PairingType.Proposal
@@ -44,25 +62,4 @@ struct PairingSequence: ExpirableSequence {
             peer.publicKey == permissions.controller.publicKey
         }
     }
-    
-    init(topic: String, relay: RelayProtocolOptions, selfParticipant: PairingType.Participant, expiryDate: Date, pendingState: Pending) {
-        self.init(topic: topic, relay: relay, selfParticipant: selfParticipant, expiryDate: expiryDate, sequenceState: .left(pendingState))
-    }
-    
-    init(topic: String, relay: RelayProtocolOptions, selfParticipant: PairingType.Participant, expiryDate: Date, settledState: Settled) {
-        self.init(topic: topic, relay: relay, selfParticipant: selfParticipant, expiryDate: expiryDate, sequenceState: .right(settledState))
-    }
-    
-    private init(topic: String, relay: RelayProtocolOptions, selfParticipant: PairingType.Participant, expiryDate: Date, sequenceState: Either<PairingSequence.Pending, PairingSequence.Settled>) {
-        self.topic = topic
-        self.relay = relay
-        self.selfParticipant = selfParticipant
-        self.expiryDate = expiryDate
-        self.sequenceState = sequenceState
-    }
-}
-
-public struct Pairing {
-    public let topic: String
-    public let peer: AppMetadata? // TODO: Remove optional, there's always a peer
 }
