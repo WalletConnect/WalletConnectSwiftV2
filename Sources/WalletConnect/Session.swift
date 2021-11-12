@@ -6,10 +6,7 @@ public struct Session {
 public struct SessionProposal {
     public let proposer: AppMetadata
     public let permissions: SessionPermissions
-
-    public var topic: String {
-        return proposal.topic
-    }
+    
     // TODO: Refactor internal objects to manage only needed data
     internal let proposal: SessionType.Proposal
 }
