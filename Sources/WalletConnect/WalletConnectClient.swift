@@ -42,7 +42,6 @@ public final class WalletConnectClient {
         let serialiser = JSONRPCSerialiser(crypto: crypto)
         self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger)
         let sessionSequencesStore = SessionUserDefaultsStore(logger: logger)
-//        let pairingSequencesStore = PairingUserDefaultsStore(logger: logger)
         let pairingSequencesStore = SequenceStore<PairingSequence>(storage: keyValueStore)
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
@@ -54,9 +53,6 @@ public final class WalletConnectClient {
     public func connect(params: ConnectParams) throws -> String? {
         logger.debug("Connecting Application")
         if let topic = params.pairing?.topic {
-//            guard case .settled(let settledPairing) = pairingEngine.sequencesStore.get(topic: topic) else {
-//                throw WalletConnectError.InternalReason.noSequenceForTopic
-//            }
             guard let pairing = try? pairingEngine.sequencesStore.getSequence(forTopic: topic), pairing.settled != nil else {
                 throw WalletConnectError.InternalReason.noSequenceForTopic
             }

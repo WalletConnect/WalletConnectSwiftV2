@@ -22,7 +22,6 @@ final class ClientTests: XCTestCase {
             logger: logger,
             keyValueStore: RuntimeKeyValueStorage(),
             keychain: KeychainStorage(keychainService: KeychainServiceFake()))
-//        client.pairingEngine.sequencesStore = PairingDictionaryStore(logger: logger)
         client.sessionEngine.sequencesStore = SessionDictionaryStore(logger: logger)
         return ClientDelegate(client: client)
     }
@@ -303,7 +302,7 @@ final class ClientTests: XCTestCase {
             XCTAssertEqual(notification, notificationParams)
             proposerReceivesNotificationExpectation.fulfill()
         }
-        waitForExpectations(timeout: 3.0, handler: nil)
+        waitForExpectations(timeout: 13.0, handler: nil)
     }
     
     func testSessionNotificationFails() {
