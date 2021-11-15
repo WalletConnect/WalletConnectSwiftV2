@@ -16,7 +16,7 @@ class WalletConnectRelayTests: XCTestCase {
         let logger = ConsoleLogger()
         serialiser = MockedJSONRPCSerialiser()
         networkRelayer = MockedNetworkRelayer()
-        wcRelay = WalletConnectRelay(networkRelayer: networkRelayer, jsonRpcSerialiser: serialiser, logger: logger)
+        wcRelay = WalletConnectRelay(networkRelayer: networkRelayer, jsonRpcSerialiser: serialiser, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
 
     override func tearDown() {

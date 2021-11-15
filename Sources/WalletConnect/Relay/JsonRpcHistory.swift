@@ -7,23 +7,11 @@ struct JsonRpcRecord: Codable {
     let topic: String
     let chainId: String?
     let request: Request
-    var response: Response?
+    var response: JsonRpcResponseTypes?
     
     struct Request: Codable {
         let method: String
         let params: AnyCodable
-    }
-    enum Response: Codable {
-        var id: Int64 {
-            switch self {
-            case .error(let value):
-                return value.id
-            case .response(let value):
-                return value.id
-            }
-        }
-        case error(JSONRPCErrorResponse)
-        case response(JSONRPCResponse<AnyCodable>)
     }
 }
 
@@ -54,7 +42,7 @@ class JsonRpcHistory {
         storage.delete(forKey: getKey(for: id))
     }
     
-    func resolve(response: JsonRpcRecord.Response) throws {
+    func resolve(response: JsonRpcResponseTypes) throws {
         guard var record = try? storage.get(key: getKey(for: response.id)) else { return }
         if record.response != nil {
             throw WalletConnectError.internal(.jsonRpcDuplicateDetected)
