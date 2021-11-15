@@ -5,9 +5,9 @@ import Foundation
 struct JsonRpcRecord: Codable {
     let id: Int64
     let topic: String
-    let chainId: String
+    let chainId: String?
     let request: Request
-    let response: Response?
+    var response: Response?
     
     struct Request: Codable {
         let method: String
@@ -17,9 +17,9 @@ struct JsonRpcRecord: Codable {
         var id: Int64 {
             switch self {
             case .error(let value):
-                return value.value.id
+                return value.id
             case .response(let value):
-                return value.value.id
+                return value.id
             }
         }
         case error(JSONRPCErrorResponse)
@@ -29,48 +29,53 @@ struct JsonRpcRecord: Codable {
 
 
 class JsonRpcHistory {
-    let storage: KeyValueStorage<JsonRpcRecord>
+    let storage: KeyValueStore<JsonRpcRecord>
     let logger: BaseLogger
     
     init(logger: BaseLogger, storage: KeyValueStorage) {
         self.logger = logger
-        self.storage = storage
+        self.storage = KeyValueStore<JsonRpcRecord>(defaults: storage)
     }
     
     func get(id: Int64) -> JsonRpcRecord? {
-        try? storage.get(key: String(id))
+        try? storage.get(key: getKey(for: id))
     }
     
-    func set(topic: String, request: JSONRPCRequest<AnyCodable>) throws {
-        if try? recordsStorage.get(key: request.id) ! {
-            
+    func set(topic: String, request: JSONRPCRequest<AnyCodable>, chainId: String) throws {
+        guard !exist(id: request.id) else {
+            throw WalletConnectError.internal(.jsonRpcDuplicateDetected)
         }
         logger.debug("Setting JSON-RPC request history record")
-        recordsStorage.set(<#T##item: JsonRpcRecord##JsonRpcRecord#>, forKey: <#T##String#>)
+        let record = JsonRpcRecord(id: request.id, topic: topic, chainId: chainId, request: JsonRpcRecord.Request(method: request.method, params: request.params), response: nil)
+        try storage.set(record, forKey: getKey(for: request.id))
     }
     
-    func delete(dopic: String, id: Int) {
-        
+    func delete(id: Int64) {
+        storage.delete(forKey: getKey(for: id))
     }
     
-    func resolve(response: JsonRpcRecord.Response) throw {
-        guard let record = try? storage.get(key: String(response.id)) else { return }
+    func resolve(response: JsonRpcRecord.Response) throws {
+        guard var record = try? storage.get(key: getKey(for: response.id)) else { return }
         if record.response != nil {
-            throw duplicate detected
+            throw WalletConnectError.internal(.jsonRpcDuplicateDetected)
         } else {
             record.response = response
+            try storage.set(record, forKey: getKey(for: record.id))
         }
     }
     
     func exist(id: Int64) -> Bool {
-        return (try? storage.get(key: String(id))) != nil
+        return (try? storage.get(key: getKey(for: id))) != nil
+    }
+    
+    private func getKey(for id: Int64) -> String {
+        return "wc_json_rpc_record_\(id)"
     }
 }
 
 
 
-final class KeyValueStorage<T> where T: Codable {
-
+final class KeyValueStore<T> where T: Codable {
     private let defaults: KeyValueStorage
 
     init(defaults: KeyValueStorage) {
