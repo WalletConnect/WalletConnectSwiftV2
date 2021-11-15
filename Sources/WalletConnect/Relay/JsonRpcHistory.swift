@@ -32,9 +32,9 @@ class JsonRpcHistory {
     let storage: KeyValueStore<JsonRpcRecord>
     let logger: BaseLogger
     
-    init(logger: BaseLogger, storage: KeyValueStorage) {
+    init(logger: BaseLogger, keyValueStorage: KeyValueStorage) {
         self.logger = logger
-        self.storage = KeyValueStore<JsonRpcRecord>(defaults: storage)
+        self.storage = KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage)
     }
     
     func get(id: Int64) -> JsonRpcRecord? {

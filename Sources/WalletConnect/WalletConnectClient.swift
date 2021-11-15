@@ -29,18 +29,19 @@ public final class WalletConnectClient {
     
     // MARK: - Public interface
 
-    public convenience init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL) {
-        self.init(metadata: metadata, apiKey: apiKey, isController: isController, relayURL: relayURL, logger: MuteLogger(), keyValueStore: UserDefaults.standard)
+
+    public convenience init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL, keyValueStore: KeyValueStorage) {
+        self.init(metadata: metadata, apiKey: apiKey, isController: isController, relayURL: relayURL, logger: MuteLogger(), keyValueStore: keyValueStore)
     }
     
-    init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL, logger: BaseLogger = MuteLogger(), keyValueStore: KeyValueStorage, keychain: KeychainStorage = KeychainStorage()) {
+    init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL, logger: BaseLogger = MuteLogger(), keychain: KeychainStorage = KeychainStorage(), keyValueStore: KeyValueStorage) {
         self.metadata = metadata
         self.isController = isController
 //        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
         self.crypto = Crypto(keychain: keychain)
         let wakuRelay = WakuNetworkRelay(transport: JSONRPCTransport(url: relayURL), logger: logger)
         let serialiser = JSONRPCSerialiser(crypto: crypto)
-        self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger)
+        self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, keyValueStorage: keyValueStore)
         let sessionSequencesStore = SessionUserDefaultsStore(logger: logger)
         let pairingSequencesStore = SequenceStore<PairingSequence>(storage: keyValueStore)
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)

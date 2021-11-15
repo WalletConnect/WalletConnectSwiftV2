@@ -35,7 +35,7 @@ enum WCResponse {
 class WalletConnectRelay: WalletConnectRelaying {
     private var networkRelayer: NetworkRelaying
     private let jsonRpcSerialiser: JSONRPCSerialising
-    var history = [String]()
+    private let jsonRpcHistory: JsonRpcHistory
     
     var transportConnectionPublisher: AnyPublisher<Void, Never> {
         transportConnectionPublisherSubject.eraseToAnyPublisher()
@@ -56,17 +56,19 @@ class WalletConnectRelay: WalletConnectRelaying {
     
     init(networkRelayer: NetworkRelaying,
          jsonRpcSerialiser: JSONRPCSerialising,
-         logger: BaseLogger) {
+         logger: BaseLogger,
+         keyValueStorage: KeyValueStorage) {
         self.networkRelayer = networkRelayer
         self.jsonRpcSerialiser = jsonRpcSerialiser
         self.logger = logger
+        self.jsonRpcHistory = JsonRpcHistory(logger: logger, keyValueStorage: RuntimeKeyValueStorage())
         setUpPublishers()
     }
 
     func request(topic: String, payload: ClientSynchJSONRPC, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())) {
         do {
+            try jsonRpcHistory.set(topic: topic, request: payload.jsonRpcRequestRepresentation(), chainId: "") //todo - chain id
             let message = try jsonRpcSerialiser.serialise(topic: topic, encodable: payload)
-            history.append(message)
             networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
                 guard let self = self else {return}
                 if let error = error {
@@ -93,10 +95,14 @@ class WalletConnectRelay: WalletConnectRelaying {
     }
     
     func respond(topic: String, payload: Encodable, completion: @escaping ((Error?)->())) {
-        let message = try! jsonRpcSerialiser.serialise(topic: topic, encodable: payload)
-        history.append(message)
-        logger.debug("Responding....topic: \(topic)")
-        networkRelayer.publish(topic: topic, payload: message) { error in
+        do {
+            try jsonRpcHistory.resolve(response: <#T##JsonRpcRecord.Response#>)
+            let message = try jsonRpcSerialiser.serialise(topic: topic, encodable: payload)
+            logger.debug("Responding....topic: \(topic)")
+            networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
+                completion(error)
+            }
+        } catch {
             completion(error)
         }
     }
@@ -118,36 +124,38 @@ class WalletConnectRelay: WalletConnectRelaying {
     }
     
     //MARK: - Private
-    let serialQueue = DispatchQueue(label: UUID().uuidString)
     private func setUpPublishers() {
         networkRelayer.onConnect = { [weak self] in
             self?.transportConnectionPublisherSubject.send()
         }
         networkRelayer.onMessage = { [unowned self] topic, message in
-            serialQueue.sync {
-                if self.history.contains(message) {
-                    print("duplicate: \(message)")
-                    return
-                } else {
-                    self.history.append(message)
-                    self.manageSubscription(topic, message)
-                }
-            }
+            manageSubscription(topic, message)
         }
     }
     
     private func manageSubscription(_ topic: String, _ message: String) {
         if let deserialisedJsonRpcRequest: ClientSynchJSONRPC = jsonRpcSerialiser.tryDeserialise(topic: topic, message: message) {
-            let payload = WCRequestSubscriptionPayload(topic: topic, clientSynchJsonRpc: deserialisedJsonRpcRequest)
-            if payload.clientSynchJsonRpc.method == .pairingPayload {
+            do {
+                try jsonRpcHistory.set(topic: topic, request: deserialisedJsonRpcRequest.jsonRpcRequestRepresentation(), chainId: "") // fix chain id
+                let payload = WCRequestSubscriptionPayload(topic: topic, clientSynchJsonRpc: deserialisedJsonRpcRequest)
                 clientSynchJsonRpcPublisherSubject.send(payload)
-            } else {
-                clientSynchJsonRpcPublisherSubject.send(payload)
+            } catch {
+                logger.error(error)
             }
         } else if let deserialisedJsonRpcResponse: JSONRPCResponse<AnyCodable> = jsonRpcSerialiser.tryDeserialise(topic: topic, message: message) {
-            wcResponsePublisherSubject.send(.response((topic, deserialisedJsonRpcResponse)))
+            do {
+                try jsonRpcHistory.resolve(response: JsonRpcRecord.Response.response(deserialisedJsonRpcResponse))
+                wcResponsePublisherSubject.send(.response((topic, deserialisedJsonRpcResponse)))
+            } catch {
+                logger.error(error)
+            }
         } else if let deserialisedJsonRpcError: JSONRPCErrorResponse = jsonRpcSerialiser.tryDeserialise(topic: topic, message: message) {
-            wcResponsePublisherSubject.send(.error((topic, deserialisedJsonRpcError)))
+            do {
+                try jsonRpcHistory.resolve(response: JsonRpcRecord.Response.error(deserialisedJsonRpcError))
+                wcResponsePublisherSubject.send(.error((topic, deserialisedJsonRpcError)))
+            } catch {
+                logger.error(error)
+            }
         }
     }
 }

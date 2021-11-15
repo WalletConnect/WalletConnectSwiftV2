@@ -1,6 +1,6 @@
 import Foundation
 
-protocol KeyValueStorage {
+public protocol KeyValueStorage {
     func set(_ value: Any?, forKey defaultName: String)
     func object(forKey defaultName: String) -> Any?
     func data(forKey defaultName: String) -> Data?

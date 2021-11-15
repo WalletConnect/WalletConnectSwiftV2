@@ -8,13 +8,9 @@ import CryptoKit
 final class JsonRpcHistoryTests: XCTestCase {
     
     var sut: JsonRpcHistory!
-    
-    var fakeKeychain: KeychainServiceFake!
-    
-    let defaultIdentifier = "key"
-    
+            
     override func setUp() {
-        sut = JsonRpcHistory(logger: MuteLogger(), storage: RuntimeKeyValueStorage())
+        sut = JsonRpcHistory(logger: MuteLogger(), keyValueStorage: RuntimeKeyValueStorage())
     }
     
     override func tearDown() {

@@ -14,6 +14,10 @@ struct ClientSynchJSONRPC: Codable {
         case params
     }
     
+    func jsonRpcRequestRepresentation() -> JSONRPCRequest<AnyCodable> {
+        return JSONRPCRequest<AnyCodable>(id: id, method: method.rawValue, params: AnyCodable(params))
+    }
+    
     internal init(id: Int64 = generateId(), jsonrpc: String = "2.0", method: Method, params: Params) {
         self.id = id
         self.jsonrpc = jsonrpc
