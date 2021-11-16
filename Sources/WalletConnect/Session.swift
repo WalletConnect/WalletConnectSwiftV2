@@ -1,6 +1,7 @@
 public struct Session {
     public let topic: String
-    public let peer: AppMetadata? // TODO: Remove optional, there's always a peer
+    public let peer: AppMetadata
+    public let permissions: SessionPermissions
 }
 
 public struct SessionProposal {

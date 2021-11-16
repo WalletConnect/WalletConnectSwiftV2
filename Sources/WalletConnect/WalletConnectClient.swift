@@ -96,7 +96,7 @@ public final class WalletConnectClient {
         sessionEngine.approve(proposal: proposal.proposal, accounts: accounts) { [unowned self] result in
             switch result {
             case .success(let settledSession):
-                let session = Session(topic: settledSession.topic, peer: settledSession.peer.metadata)
+                let session = Session(topic: settledSession.topic, peer: settledSession.peer.metadata, permissions: proposal.permissions)
                 self.delegate?.didSettle(session: session)
             case .failure(let error):
                 print(error)
@@ -151,7 +151,7 @@ public final class WalletConnectClient {
     public func getSettledSessions() -> [Session] {
         let settledSessions = sessionEngine.sequencesStore.getSettled()
         let sessions = settledSessions.map {
-            Session(topic: $0.topic, peer: $0.peer.metadata)
+            Session(topic: $0.topic, peer: $0.peer.metadata, permissions: .init(blockchains: $0.permissions.blockchain.chains, methods: $0.permissions.jsonrpc.methods))
         }
         return sessions
     }
@@ -176,7 +176,8 @@ public final class WalletConnectClient {
             sessionEngine.proposeSession(settledPairing: settledPairing, permissions: permissions, relay: relayOptions)
         }
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
-            let session = Session(topic: settledSession.topic, peer: settledSession.peer.metadata)
+            let permissions = SessionPermissions.init(blockchains: settledSession.permissions.blockchain.chains, methods: settledSession.permissions.jsonrpc.methods)
+            let session = Session(topic: settledSession.topic, peer: settledSession.peer.metadata, permissions: permissions)
             delegate?.didSettle(session: session)
         }
         sessionEngine.onSessionRejected = { [unowned self] pendingTopic, reason in
