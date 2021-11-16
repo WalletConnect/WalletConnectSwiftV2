@@ -4,7 +4,7 @@ import Foundation
 protocol JsonRpcHistoryRecording {
     func get(id: Int64) -> JsonRpcRecord?
     func set(topic: String, request: ClientSynchJSONRPC, chainId: String) throws
-    func delete(id: Int64)
+    func delete(topic: String)
     func resolve(response: JsonRpcResponseTypes) throws
     func exist(id: Int64) -> Bool
 }
@@ -31,8 +31,12 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
         try storage.set(record, forKey: getKey(for: request.id))
     }
     
-    func delete(id: Int64) {
-        storage.delete(forKey: getKey(for: id))
+    func delete(topic: String) {
+        storage.getAll().forEach { record in
+            if record.topic == topic {
+                storage.delete(forKey: getKey(for: record.id))
+            }
+        }
     }
     
     func resolve(response: JsonRpcResponseTypes) throws {

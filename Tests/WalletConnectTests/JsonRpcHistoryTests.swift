@@ -59,11 +59,13 @@ final class JsonRpcHistoryTests: XCTestCase {
     func testDelete() {
         let recordinput = testJsonRpcRecordInput
         try! sut.set(topic: recordinput.topic, request: recordinput.request, chainId: recordinput.chainId)
-        sut.delete(id: recordinput.request.id)
+        XCTAssertNotNil(sut.get(id: recordinput.request.id))
+        sut.delete(topic: testTopic)
         XCTAssertNil(sut.get(id: recordinput.request.id))
     }
 }
 
+private let testTopic = "test_topic"
 private var testJsonRpcRecordInput: (topic: String, request: ClientSynchJSONRPC, chainId: String) {
-    return (topic: "", request: SerialiserTestData.pairingApproveJSONRPCRequest, chainId: "")
+    return (topic: testTopic, request: SerialiserTestData.pairingApproveJSONRPCRequest, chainId: "")
 }

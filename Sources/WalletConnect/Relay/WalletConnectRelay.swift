@@ -119,6 +119,8 @@ class WalletConnectRelay: WalletConnectRelaying {
         networkRelayer.unsubscribe(topic: topic) { [weak self] error in
             if let error = error {
                 self?.logger.error(error)
+            } else {
+                self?.jsonRpcHistory.delete(topic: topic)
             }
         }
     }
