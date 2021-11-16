@@ -3,7 +3,7 @@ import Foundation
 
 protocol JsonRpcHistoryRecording {
     func get(id: Int64) -> JsonRpcRecord?
-    func set(topic: String, request: ClientSynchJSONRPC, chainId: String) throws
+    func set(topic: String, request: ClientSynchJSONRPC) throws
     func delete(topic: String)
     func resolve(response: JsonRpcResponseTypes) throws
     func exist(id: Int64) -> Bool
@@ -22,12 +22,12 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
         try? storage.get(key: getKey(for: id))
     }
     
-    func set(topic: String, request: ClientSynchJSONRPC, chainId: String) throws {
+    func set(topic: String, request: ClientSynchJSONRPC) throws {
         guard !exist(id: request.id) else {
             throw WalletConnectError.internal(.jsonRpcDuplicateDetected)
         }
         logger.debug("Setting JSON-RPC request history record")
-        let record = JsonRpcRecord(id: request.id, topic: topic, chainId: chainId, request: JsonRpcRecord.Request(method: request.method, params: request.params), response: nil)
+        let record = JsonRpcRecord(id: request.id, topic: topic, request: JsonRpcRecord.Request(method: request.method, params: request.params), response: nil)
         try storage.set(record, forKey: getKey(for: request.id))
     }
     
