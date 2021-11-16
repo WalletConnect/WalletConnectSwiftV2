@@ -67,7 +67,7 @@ class WalletConnectRelay: WalletConnectRelaying {
 
     func request(topic: String, payload: ClientSynchJSONRPC, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())) {
         do {
-            try jsonRpcHistory.set(topic: topic, request: payload.jsonRpcRequestRepresentation(), chainId: "") //todo - chain id
+            try jsonRpcHistory.set(topic: topic, request: payload, chainId: "") //todo - chain id
             let message = try jsonRpcSerialiser.serialise(topic: topic, encodable: payload)
             networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
                 guard let self = self else {return}
@@ -136,7 +136,7 @@ class WalletConnectRelay: WalletConnectRelaying {
     private func manageSubscription(_ topic: String, _ message: String) {
         if let deserialisedJsonRpcRequest: ClientSynchJSONRPC = jsonRpcSerialiser.tryDeserialise(topic: topic, message: message) {
             do {
-                try jsonRpcHistory.set(topic: topic, request: deserialisedJsonRpcRequest.jsonRpcRequestRepresentation(), chainId: "") // fix chain id
+                try jsonRpcHistory.set(topic: topic, request: deserialisedJsonRpcRequest, chainId: "") // fix chain id
                 let payload = WCRequestSubscriptionPayload(topic: topic, clientSynchJsonRpc: deserialisedJsonRpcRequest)
                 clientSynchJsonRpcPublisherSubject.send(payload)
             } catch {

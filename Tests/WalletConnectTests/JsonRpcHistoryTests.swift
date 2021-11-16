@@ -64,8 +64,6 @@ final class JsonRpcHistoryTests: XCTestCase {
     }
 }
 
-private var testJsonRpcRecordInput: (topic: String, request: JSONRPCRequest<AnyCodable>, chainId: String) {
-    let params = SessionType.UpdateParams(state: SessionType.State(accounts: ["0xDMT"]))
-    let request = JSONRPCRequest<AnyCodable>(method: "wc_sessionUpdate", params: AnyCodable(params))
-    return (topic: "123", request: request, chainId: "eip155-1")
+private var testJsonRpcRecordInput: (topic: String, request: ClientSynchJSONRPC, chainId: String) {
+    return (topic: "", request: SerialiserTestData.pairingApproveJSONRPCRequest, chainId: "")
 }

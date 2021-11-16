@@ -57,13 +57,5 @@ extension ClientSynchJSONRPC {
                 return false
             }
         }
-        
-        init(from decoder: Decoder) throws {
-            fatalError("forbidden")
-        }
-        
-        func encode(to encoder: Encoder) throws {
-            fatalError("forbidden")
-        }
     }
 }
