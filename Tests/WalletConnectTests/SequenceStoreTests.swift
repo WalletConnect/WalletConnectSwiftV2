@@ -75,7 +75,7 @@ final class SequenceStoreTests: XCTestCase {
     func testDelete() {
         let sequence = stubSequence()
         try? sut.setSequence(sequence)
-        sut.delete(forTopic: sequence.topic)
+        sut.delete(topic: sequence.topic)
         let retrieved = try? sut.getSequence(forTopic: sequence.topic)
         XCTAssertFalse(sut.hasSequence(forTopic: sequence.topic))
         XCTAssertNil(retrieved)

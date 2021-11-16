@@ -260,7 +260,7 @@ final class PairingEngine {
         logger.debug("-------------------------------------")
         logger.debug("Paired client removed pairing - reason: \(deleteParams.reason.message), code: \(deleteParams.reason.code)")
         logger.debug("-------------------------------------")
-        sequencesStore.delete(forTopic: topic)
+        sequencesStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
         let response = JSONRPCResponse<Bool>(id: requestId, result: true)
 //        relayer.respond(topic: topic, payload: response) { error in
