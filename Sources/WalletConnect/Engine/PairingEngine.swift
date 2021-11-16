@@ -211,7 +211,7 @@ final class PairingEngine {
             logger.debug("Could not find pairing for topic \(topic)")
             return
         }
-        guard pairing.settled?.peerIsController == true else {
+        guard pairing.peerIsController else {
             let error = WalletConnectError.unauthrorized(.unauthorizedUpdateRequest)
             logger.error(error)
             respond(error: error, requestId: requestId, topic: topic)

@@ -33,6 +33,10 @@ struct PairingSequence: ExpirableSequence {
     var isSettled: Bool {
         settled != nil
     }
+    
+    var peerIsController: Bool {
+        isSettled && settled?.peer.publicKey == settled?.permissions.controller.publicKey
+    }
 }
 
 extension PairingSequence {
@@ -57,9 +61,5 @@ extension PairingSequence {
         let peer: PairingType.Participant
         let permissions: PairingType.Permissions
         var state: PairingType.State?
-        
-        var peerIsController: Bool {
-            peer.publicKey == permissions.controller.publicKey
-        }
     }
 }
