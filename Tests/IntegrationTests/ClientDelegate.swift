@@ -12,7 +12,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     var onSessionDelete: (()->())?
     var onSessionUpgrade: ((String, SessionType.Permissions)->())?
     var onSessionUpdate: ((String, Set<String>)->())?
-    var onNotificationReceived: ((WalletConnect.Notification, String)->())?
+    var onNotificationReceived: ((SessionNotification, String)->())?
     var onPairingUpdate: ((String, AppMetadata)->())?
     
     internal init(client: WalletConnectClient) {
@@ -44,7 +44,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didUpdate(sessionTopic: String, accounts: Set<String>) {
         onSessionUpdate?(sessionTopic, accounts)
     }
-    func didReceive(notification: WalletConnect.Notification, sessionTopic: String) {
+    func didReceive(notification: SessionNotification, sessionTopic: String) {
         onNotificationReceived?(notification, sessionTopic)
     }
     func didUpdate(pairingTopic: String, appMetadata: AppMetadata) {
