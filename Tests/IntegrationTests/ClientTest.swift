@@ -4,9 +4,13 @@ import XCTest
 @testable import WalletConnect
 
 final class ClientTests: XCTestCase {
+    
+    let defaultTimeout: TimeInterval = 5.0
+    
     let url = URL(string: "wss://staging.walletconnect.org")! // TODO: Change to new URL
     var proposer: ClientDelegate!
     var responder: ClientDelegate!
+    
     override func setUp() {
         proposer = Self.makeClientDelegate(isController: false, url: url, prefix: "🍏P")
         responder = Self.makeClientDelegate(isController: true, url: url, prefix: "🍎R")
@@ -20,8 +24,8 @@ final class ClientTests: XCTestCase {
             isController: isController,
             relayURL: url,
             logger: logger,
+            keyValueStore: RuntimeKeyValueStorage(),
             keychain: KeychainStorage(keychainService: KeychainServiceFake()))
-        client.pairingEngine.sequencesStore = PairingDictionaryStore(logger: logger)
         client.sessionEngine.sequencesStore = SessionDictionaryStore(logger: logger)
         return ClientDelegate(client: client)
     }
@@ -40,7 +44,7 @@ final class ClientTests: XCTestCase {
         proposer.onPairingSettled = { pairing in
             proposerSettlesPairingExpectation.fulfill()
         }
-        waitForExpectations(timeout: 3.0, handler: nil)
+        waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testNewSession() {
@@ -65,7 +69,7 @@ final class ClientTests: XCTestCase {
 //            XCTAssertEqual(account, sessionSettled.state.accounts[0])
             proposerSettlesSessionExpectation.fulfill()
         }
-        waitForExpectations(timeout: 3.0, handler: nil)
+        waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
     func testNewSessionOnExistingPairing() {
@@ -96,7 +100,7 @@ final class ClientTests: XCTestCase {
                 initiatedSecondSession = true
             }
         }
-        waitForExpectations(timeout: 3.0, handler: nil)
+        waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testResponderRejectsSession() {
@@ -112,7 +116,7 @@ final class ClientTests: XCTestCase {
             XCTAssertEqual(reason.code, WalletConnectError.internal(.notApproved).code)
             sessionRejectExpectation.fulfill()
         }
-        waitForExpectations(timeout: 3.0, handler: nil)
+        waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
     func testDeleteSession() {
@@ -130,7 +134,7 @@ final class ClientTests: XCTestCase {
         responder.onSessionDelete = {
             sessionDeleteExpectation.fulfill()
         }
-        waitForExpectations(timeout: 3.0, handler: nil)
+        waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
     func testProposerRequestSessionPayload() {
@@ -167,7 +171,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.respond(topic: sessionRequest.topic, response: jsonrpcResponse)
             requestExpectation.fulfill()
         }
-        waitForExpectations(timeout: 4.0, handler: nil)
+        waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
     func testPairingPing() {
@@ -183,7 +187,7 @@ final class ClientTests: XCTestCase {
                 proposerReceivesPingResponseExpectation.fulfill()
             }
         }
-        waitForExpectations(timeout: 3.0, handler: nil)
+        waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
     
@@ -202,7 +206,7 @@ final class ClientTests: XCTestCase {
                 proposerReceivesPingResponseExpectation.fulfill()
             }
         }
-        waitForExpectations(timeout: 4.0, handler: nil)
+        waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
     func testSuccessfulSessionUpgrade() {
@@ -230,7 +234,7 @@ final class ClientTests: XCTestCase {
             XCTAssertTrue(permissions.jsonrpc.methods.isSuperset(of: upgradePermissions.methods))
             responderSessionUpgradeExpectation.fulfill()
         }
-        waitForExpectations(timeout: 3.0, handler: nil)
+        waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
     func testSessionUpgradeFailsOnNonControllerRequest() {
@@ -282,7 +286,7 @@ final class ClientTests: XCTestCase {
             XCTAssertEqual(accounts, updateAccounts)
             proposerSessionUpdateExpectation.fulfill()
         }
-        waitForExpectations(timeout: 3.0, handler: nil)
+        waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
     func testSessionNotificationSucceeds() {
@@ -302,7 +306,7 @@ final class ClientTests: XCTestCase {
             XCTAssertEqual(notification, notificationParams)
             proposerReceivesNotificationExpectation.fulfill()
         }
-        waitForExpectations(timeout: 3.0, handler: nil)
+        waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
     func testSessionNotificationFails() {
@@ -325,7 +329,7 @@ final class ClientTests: XCTestCase {
             XCTFail()
             proposerReceivesNotificationExpectation.fulfill()
         }
-        waitForExpectations(timeout: 2.0, handler: nil)
+        waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
     func testPairingUpdate() {
@@ -338,7 +342,7 @@ final class ClientTests: XCTestCase {
             XCTAssertNotNil(appMetadata)
             proposerReceivesPairingUpdateExpectation.fulfill()
         }
-        waitForExpectations(timeout: 3.0, handler: nil)
+        waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 }
 

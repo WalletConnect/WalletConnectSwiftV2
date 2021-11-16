@@ -19,6 +19,10 @@ final class SequenceStore<T> where T: ExpirableSequence {
         self.storage = storage
         self.dateInitializer = dateInitializer
     }
+    
+    func hasSequence(forTopic topic: String) -> Bool {
+        (try? getSequence(forTopic: topic)) != nil
+    }
 
     func setSequence(_ sequence: T) throws {
         let encoded = try JSONEncoder().encode(sequence)
@@ -45,7 +49,7 @@ final class SequenceStore<T> where T: ExpirableSequence {
         try setSequence(sequence)
     }
 
-    func delete(forTopic topic: String) {
+    func delete(topic: String) {
         storage.removeObject(forKey: topic)
     }
     

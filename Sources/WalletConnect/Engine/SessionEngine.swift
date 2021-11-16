@@ -115,7 +115,7 @@ final class SessionEngine {
         }
     }
     
-    func proposeSession(settledPairing: PairingType.Settled, permissions: SessionType.Permissions) {
+    func proposeSession(settledPairing: Pairing, permissions: SessionType.Permissions, relay: RelayProtocolOptions) {
         guard let pendingSessionTopic = generateTopic() else {
             logger.debug("Could not generate topic")
             return
@@ -126,9 +126,9 @@ final class SessionEngine {
         crypto.set(privateKey: privateKey)
         let proposer = SessionType.Proposer(publicKey: publicKey, controller: isController, metadata: metadata)
         let signal = SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: settledPairing.topic))
-        let proposal = SessionType.Proposal(topic: pendingSessionTopic, relay: settledPairing.relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
+        let proposal = SessionType.Proposal(topic: pendingSessionTopic, relay: relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
         let selfParticipant = SessionType.Participant(publicKey: publicKey, metadata: metadata)
-        let pending = SessionType.Pending(status: .proposed, topic: pendingSessionTopic, relay: settledPairing.relay, self: selfParticipant, proposal: proposal)
+        let pending = SessionType.Pending(status: .proposed, topic: pendingSessionTopic, relay: relay, self: selfParticipant, proposal: proposal)
         sequencesStore.create(topic: pendingSessionTopic, sequenceState: .pending(pending))
         wcSubscriber.setSubscription(topic: pendingSessionTopic)
         let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: proposal)
