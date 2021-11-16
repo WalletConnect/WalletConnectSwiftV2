@@ -35,7 +35,7 @@ enum JsonRpcResponseTypes: Codable {
 class WalletConnectRelay: WalletConnectRelaying {
     private var networkRelayer: NetworkRelaying
     private let jsonRpcSerialiser: JSONRPCSerialising
-    private let jsonRpcHistory: JsonRpcHistory
+    private let jsonRpcHistory: JsonRpcHistoryRecording
     
     var transportConnectionPublisher: AnyPublisher<Void, Never> {
         transportConnectionPublisherSubject.eraseToAnyPublisher()
@@ -57,11 +57,11 @@ class WalletConnectRelay: WalletConnectRelaying {
     init(networkRelayer: NetworkRelaying,
          jsonRpcSerialiser: JSONRPCSerialising,
          logger: BaseLogger,
-         keyValueStorage: KeyValueStorage) {
+         jsonRpcHistory: JsonRpcHistoryRecording) {
         self.networkRelayer = networkRelayer
         self.jsonRpcSerialiser = jsonRpcSerialiser
         self.logger = logger
-        self.jsonRpcHistory = JsonRpcHistory(logger: logger, keyValueStorage: RuntimeKeyValueStorage())
+        self.jsonRpcHistory = jsonRpcHistory
         setUpPublishers()
     }
 
@@ -135,13 +135,7 @@ class WalletConnectRelay: WalletConnectRelaying {
     
     private func manageSubscription(_ topic: String, _ message: String) {
         if let deserialisedJsonRpcRequest: ClientSynchJSONRPC = jsonRpcSerialiser.tryDeserialise(topic: topic, message: message) {
-            do {
-                try jsonRpcHistory.set(topic: topic, request: deserialisedJsonRpcRequest, chainId: "") // fix chain id
-                let payload = WCRequestSubscriptionPayload(topic: topic, clientSynchJsonRpc: deserialisedJsonRpcRequest)
-                clientSynchJsonRpcPublisherSubject.send(payload)
-            } catch {
-                logger.error(error)
-            }
+            manageWCRequest(topic: topic, request: deserialisedJsonRpcRequest)
         } else if let deserialisedJsonRpcResponse: JSONRPCResponse<AnyCodable> = jsonRpcSerialiser.tryDeserialise(topic: topic, message: message) {
             do {
                 try jsonRpcHistory.resolve(response: JsonRpcResponseTypes.response(deserialisedJsonRpcResponse))
@@ -156,6 +150,16 @@ class WalletConnectRelay: WalletConnectRelaying {
             } catch {
                 logger.error(error)
             }
+        }
+    }
+    
+    private func manageWCRequest(topic: String, request: ClientSynchJSONRPC) {
+        do {
+            try jsonRpcHistory.set(topic: topic, request: request, chainId: "") // fix chain id
+            let payload = WCRequestSubscriptionPayload(topic: topic, clientSynchJsonRpc: request)
+            clientSynchJsonRpcPublisherSubject.send(payload)
+        } catch {
+            logger.error(error)
         }
     }
 }

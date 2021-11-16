@@ -1,7 +1,15 @@
 
 import Foundation
 
-class JsonRpcHistory {
+protocol JsonRpcHistoryRecording {
+    func get(id: Int64) -> JsonRpcRecord?
+    func set(topic: String, request: ClientSynchJSONRPC, chainId: String) throws
+    func delete(id: Int64)
+    func resolve(response: JsonRpcResponseTypes) throws
+    func exist(id: Int64) -> Bool
+}
+
+class JsonRpcHistory: JsonRpcHistoryRecording {
     let storage: KeyValueStore<JsonRpcRecord>
     let logger: BaseLogger
     
