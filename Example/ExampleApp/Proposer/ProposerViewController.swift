@@ -58,7 +58,10 @@ final class ProposerViewController: UIViewController {
         let connectParams = ConnectParams(
             permissions: SessionType.Permissions(
                 blockchain: SessionType.Blockchain(chains: ["a chain"]),
-                jsonrpc: SessionType.JSONRPC(methods: ["a method"])))
+                jsonrpc: SessionType.JSONRPC(methods: ["a method"]),
+                notifications: SessionType.Notifications(types: [])
+            )
+        )
         
         do {
             if let uri = try client.connect(params: connectParams) {
@@ -122,11 +125,7 @@ extension ProposerViewController: UITableViewDataSource, UITableViewDelegate {
 }
 
 extension ProposerViewController: WalletConnectClientDelegate {
-    
-    func didDelete(sessionTopic: String, reason: SessionType.Reason) {
-        
-    }
-    
+
     func didReceive(sessionProposal: SessionProposal) {
         print("[PROPOSER] WC: Did receive session proposal")
     }
@@ -134,7 +133,27 @@ extension ProposerViewController: WalletConnectClientDelegate {
     func didReceive(sessionRequest: SessionRequest) {
         print("[PROPOSER] WC: Did receive session request")
     }
-    
+
+    func didReceive(notification: SessionNotification, sessionTopic: String) {
+
+    }
+
+    func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions) {
+
+    }
+
+    func didUpdate(sessionTopic: String, accounts: Set<String>) {
+
+    }
+
+    func didUpdate(pairingTopic: String, appMetadata: AppMetadata) {
+
+    }
+
+    func didDelete(sessionTopic: String, reason: SessionType.Reason) {
+
+    }
+
     func didSettle(session: Session) {
         print("[PROPOSER] WC: Did settle session")
     }
@@ -143,7 +162,7 @@ extension ProposerViewController: WalletConnectClientDelegate {
         print("[PROPOSER] WC: Did settle pairing")
         let settledPairings = client.getSettledPairings()
         let activePairings = settledPairings.map { pairing -> ActiveSessionItem in
-            let app = pairing.peer.metadata
+            let app = pairing.metadata
             return ActiveSessionItem(
                 dappName: app?.name ?? "",
                 dappURL: app?.url ?? "",

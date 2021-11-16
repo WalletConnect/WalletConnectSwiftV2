@@ -96,7 +96,7 @@ class WalletConnectRelay: WalletConnectRelaying {
         let message = try! jsonRpcSerialiser.serialise(topic: topic, encodable: payload)
         history.append(message)
         logger.debug("Responding....topic: \(topic)")
-        networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
+        networkRelayer.publish(topic: topic, payload: message) { error in
             completion(error)
         }
     }
