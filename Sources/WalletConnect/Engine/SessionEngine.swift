@@ -98,7 +98,7 @@ final class SessionEngine {
     func reject(proposal: SessionType.Proposal, reason: SessionType.Reason) {
         let rejectParams = SessionType.RejectParams(reason: reason)
         let rejectPayload = ClientSynchJSONRPC(method: .sessionReject, params: .sessionReject(rejectParams))
-        _ = try? relayer.request(topic: proposal.topic, payload: rejectPayload) { [weak self] result in
+        _ = relayer.request(topic: proposal.topic, payload: rejectPayload) { [weak self] result in
             self?.logger.debug("Reject result: \(result)")
         }
     }
@@ -109,12 +109,9 @@ final class SessionEngine {
         wcSubscriber.removeSubscription(topic: topic)
         let clientSynchParams = ClientSynchJSONRPC.Params.sessionDelete(SessionType.DeleteParams(reason: reason))
         let request = ClientSynchJSONRPC(method: .sessionDelete, params: clientSynchParams)
-        do {
-            _ = try relayer.request(topic: topic, payload: request) { [weak self] result in
-                self?.logger.debug("Session Delete result: \(result)")
-            }
-        }  catch {
-            logger.error(error)
+
+        _ = relayer.request(topic: topic, payload: request) { [weak self] result in
+            self?.logger.debug("Session Delete result: \(result)")
         }
     }
     
@@ -192,8 +189,8 @@ final class SessionEngine {
             return
         }
         relayer.respond(topic: topic, payload: response) { [weak self] error in
-            if error != nil {
-                self?.logger.debug("Could not send session payload, error: \(error)")
+            if let error = error {
+                self?.logger.debug("Could not send session payload, error: \(error.localizedDescription)")
             } else {
                 self?.logger.debug("Sent Session Payload Response")
             }
@@ -312,7 +309,7 @@ final class SessionEngine {
     }
     
     private func handleSessionNotification(topic: String, notificationParams: SessionType.NotificationParams, requestId: Int64) {
-        guard case .settled(var session) = sequencesStore.get(topic: topic) else {
+        guard case .settled(let session) = sequencesStore.get(topic: topic) else {
             return
         }
         do {
@@ -488,7 +485,9 @@ final class SessionEngine {
         wcSubscriber.removeSubscription(topic: proposal.topic)
         let wcResponse = JSONRPCResponse<Bool>(id: requestId, result: true)
         relayer.respond(topic: topic, payload: wcResponse) { error in
-            print(error)
+            if let error = error {
+                print(error.localizedDescription)
+            }
         }
         onSessionApproved?(settledSession)
     }

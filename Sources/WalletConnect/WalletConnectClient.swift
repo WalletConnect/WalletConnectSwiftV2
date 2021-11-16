@@ -5,7 +5,7 @@ import Foundation
 public protocol WalletConnectClientDelegate: AnyObject {
     func didReceive(sessionProposal: SessionProposal)
     func didReceive(sessionRequest: SessionRequest)
-    func didReceive(notification: Notification, sessionTopic: String)
+    func didReceive(notification: SessionNotification, sessionTopic: String)
     func didSettle(session: Session)
     func didSettle(pairing: PairingType.Settled)
     func didReject(sessionPendingTopic: String, reason: SessionType.Reason)

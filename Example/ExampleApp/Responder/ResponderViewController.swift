@@ -130,11 +130,6 @@ extension ResponderViewController: SessionViewControllerDelegate {
 }
 
 extension ResponderViewController: WalletConnectClientDelegate {
-    
-    func didDelete(sessionTopic: String, reason: SessionType.Reason) {
-        
-    }
-    
     func didReceive(sessionProposal: SessionProposal) {
         print("[RESPONDER] WC: Did receive session proposal")
         let appMetadata = sessionProposal.proposer
@@ -143,8 +138,8 @@ extension ResponderViewController: WalletConnectClientDelegate {
             descriptionText: appMetadata.description ?? "",
             dappURL: appMetadata.url ?? "",
             iconURL: appMetadata.icons?.first ?? "",
-            chains: sessionProposal.permissions.blockchains,
-            methods: sessionProposal.permissions.methods)
+            chains: Array(sessionProposal.permissions.blockchains),
+            methods: Array(sessionProposal.permissions.methods))
         currentProposal = sessionProposal
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread
             self.showSessionProposal(info)
@@ -154,7 +149,27 @@ extension ResponderViewController: WalletConnectClientDelegate {
     func didReceive(sessionRequest: SessionRequest) {
         print("[RESPONDER] WC: Did receive session request")
     }
-    
+
+    func didReceive(notification: SessionNotification, sessionTopic: String) {
+
+    }
+
+    func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions) {
+
+    }
+
+    func didUpdate(sessionTopic: String, accounts: Set<String>) {
+
+    }
+
+    func didUpdate(pairingTopic: String, appMetadata: AppMetadata) {
+
+    }
+
+    func didDelete(sessionTopic: String, reason: SessionType.Reason) {
+
+    }
+
     func didSettle(session: Session) {
         print("[RESPONDER] WC: Did settle session")
         let settledSessions = client.getSettledSessions()

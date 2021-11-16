@@ -1,6 +1,6 @@
 
 import Foundation
-public typealias Notification = SessionType.NotificationParams
+public typealias SessionNotification = SessionType.NotificationParams
 
 extension SessionType {
     public struct NotificationParams: Codable, Equatable {

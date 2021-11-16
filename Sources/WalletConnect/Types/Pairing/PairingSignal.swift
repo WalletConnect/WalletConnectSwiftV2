@@ -6,7 +6,7 @@ extension PairingType {
         struct Params: Codable, Equatable {
             let uri: String
         }
-        let type = "uri"
+        var type = "uri"
         let params: Params
     }
 }

@@ -10,5 +10,9 @@ extension PairingType {
         let permissions: Permissions
         let expiry: Int
         var state: State?
+
+        public var metadata: AppMetadata? {
+            return state?.metadata
+        }
     }
 }

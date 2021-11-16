@@ -253,7 +253,7 @@ final class PairingEngine {
         logger.debug("-------------------------------------")
         sequencesStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
-        let response = JSONRPCResponse<Bool>(id: requestId, result: true)
+        _ = JSONRPCResponse<Bool>(id: requestId, result: true)
 //        relayer.respond(topic: topic, payload: response) { error in
 //            //todo
 //        }
