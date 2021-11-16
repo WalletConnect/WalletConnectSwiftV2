@@ -260,7 +260,7 @@ final class ClientTests: XCTestCase {
         responder.onSessionUpgrade = { topic, permissions in
             responderSessionUpgradeExpectation.fulfill()
         }
-        waitForExpectations(timeout: defaultTimeout, handler: nil)
+        waitForExpectations(timeout: 3.0, handler: nil)
     }
     
     func testSuccessfulSessionUpdate() {
