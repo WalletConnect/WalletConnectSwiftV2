@@ -188,15 +188,9 @@ final class SessionEngine {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
-<<<<<<< HEAD
-        relayer.respond(topic: topic, payload: response) { [weak self] error in
+        relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Could not send session payload, error: \(error.localizedDescription)")
-=======
-        relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [weak self] error in
-            if error != nil {
-                self?.logger.debug("Could not send session payload, error: \(error)")
->>>>>>> 26c9a66 (savepoint)
             } else {
                 self?.logger.debug("Sent Session Payload Response")
             }
@@ -490,7 +484,7 @@ final class SessionEngine {
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
-        relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { error in
+        relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [unowned self] error in
             if let error = error {
                 logger.error(error)
             }
