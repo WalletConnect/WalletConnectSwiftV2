@@ -22,6 +22,14 @@ enum JsonRpcResponseTypes: Codable {
             return value.id
         }
     }
+    var value: Codable {
+        switch self {
+        case .error(let value):
+            return value
+        case .response(let value):
+            return value
+        }
+    }
 }
 
 class WalletConnectRelay: WalletConnectRelaying {
@@ -89,7 +97,7 @@ class WalletConnectRelay: WalletConnectRelaying {
     func respond(topic: String, response: JsonRpcResponseTypes, completion: @escaping ((Error?)->())) {
         do {
             try jsonRpcHistory.resolve(response: response)
-            let message = try jsonRpcSerialiser.serialise(topic: topic, encodable: response)
+            let message = try jsonRpcSerialiser.serialise(topic: topic, encodable: response.value)
             logger.debug("Responding....topic: \(topic)")
             networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
                 completion(error)
