@@ -11,7 +11,7 @@ struct JsonRpcRecord: Codable {
     
     struct Request: Codable {
         let method: String
-        let params: AnyCodable
+//        let params: Codable
     }
 }
 
@@ -34,7 +34,7 @@ class JsonRpcHistory {
             throw WalletConnectError.internal(.jsonRpcDuplicateDetected)
         }
         logger.debug("Setting JSON-RPC request history record")
-        let record = JsonRpcRecord(id: request.id, topic: topic, chainId: chainId, request: JsonRpcRecord.Request(method: request.method, params: request.params), response: nil)
+        let record = JsonRpcRecord(id: request.id, topic: topic, chainId: chainId, request: JsonRpcRecord.Request(method: request.method), response: nil)
         try storage.set(record, forKey: getKey(for: request.id))
     }
     

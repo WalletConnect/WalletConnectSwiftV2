@@ -24,8 +24,8 @@ final class ClientTests: XCTestCase {
             isController: isController,
             relayURL: url,
             logger: logger,
-            keyValueStore: RuntimeKeyValueStorage(),
-            keychain: KeychainStorage(keychainService: KeychainServiceFake()))
+            keychain: KeychainStorage(keychainService: KeychainServiceFake()), keyValueStore: RuntimeKeyValueStorage())
+        client.pairingEngine.sequencesStore = PairingDictionaryStore(logger: logger)
         client.sessionEngine.sequencesStore = SessionDictionaryStore(logger: logger)
         return ClientDelegate(client: client)
     }
@@ -44,7 +44,11 @@ final class ClientTests: XCTestCase {
         proposer.onPairingSettled = { pairing in
             proposerSettlesPairingExpectation.fulfill()
         }
+<<<<<<< HEAD
         waitForExpectations(timeout: defaultTimeout, handler: nil)
+=======
+        waitForExpectations(timeout: 6.0, handler: nil)
+>>>>>>> f68920e (savepoint)
     }
 
     func testNewSession() {

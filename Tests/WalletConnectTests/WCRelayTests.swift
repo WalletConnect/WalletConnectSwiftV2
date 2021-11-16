@@ -33,7 +33,7 @@ class WalletConnectRelayTests: XCTestCase {
         }.store(in: &publishers)
         serialiser.deserialised = SerialiserTestData.pairingApproveJSONRPCRequest
         networkRelayer.onMessage?(topic, testPayload)
-        waitForExpectations(timeout: 0.001, handler: nil)
+        waitForExpectations(timeout: 1.001, handler: nil)
     }
     
     func testHexEncodedRequestCompletesWithSuccessfulResponse() {

@@ -14,8 +14,41 @@ struct ClientSynchJSONRPC: Codable {
         case params
     }
     
-    func jsonRpcRequestRepresentation() -> JSONRPCRequest<AnyCodable> {
-        return JSONRPCRequest<AnyCodable>(id: id, method: method.rawValue, params: AnyCodable(params))
+    private var paramValue: Codable {
+        switch params {
+        case let .pairingApprove(params):
+            return params
+        case let .pairingReject(params):
+            return params
+        case let .pairingUpdate(params):
+            return params
+        case let .pairingUpgrade(params):
+            return params
+        case let .pairingDelete(params):
+            return params
+        case let .pairingPayload(params):
+            return params
+        case let .pairingPing(params):
+            return params
+        case let .sessionPropose(params):
+            return params
+        case let .sessionApprove(params):
+            return params
+        case let .sessionReject(params):
+            return params
+        case let .sessionUpdate(params):
+            return params
+        case let .sessionUpgrade(params):
+            return params
+        case let .sessionDelete(params):
+            return params
+        case let .sessionPayload(params):
+            return params
+        case let .sessionPing(params):
+            return params
+        case let .sessionNotification(params):
+            return params
+        }
     }
     
     internal init(id: Int64 = generateId(), jsonrpc: String = "2.0", method: Method, params: Params) {
@@ -121,6 +154,10 @@ struct ClientSynchJSONRPC: Codable {
         case .sessionNotification(let params):
             try container.encode(params, forKey: .params)
         }
+    }
+    
+    func jsonRpcRequestRepresentation() -> JSONRPCRequest<AnyCodable> {
+        return JSONRPCRequest<AnyCodable>(id: id, method: method.rawValue, params: AnyCodable(paramValue))
     }
     
     private static func generateId() -> Int64 {
