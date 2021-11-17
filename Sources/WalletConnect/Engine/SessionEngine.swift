@@ -2,7 +2,8 @@ import Foundation
 import Combine
 
 final class SessionEngine {
-    var sequencesStore: SessionSequencesStore
+//    var sequencesStore: SessionSequencesStore
+    var sequencesStore: SequenceStore<SessionSequence>
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
     private let crypto: Crypto
@@ -22,7 +23,7 @@ final class SessionEngine {
     init(relay: WalletConnectRelaying,
          crypto: Crypto,
          subscriber: WCSubscribing,
-         sequencesStore: SessionSequencesStore,
+         sequencesStore: SequenceStore<SessionSequence>,
          isController: Bool,
          metadata: AppMetadata,
          logger: BaseLogger) {
@@ -37,18 +38,31 @@ final class SessionEngine {
         restoreSubscriptions()
     }
     
-    func approve(proposal: SessionType.Proposal, accounts: Set<String>, completion: @escaping (Result<SessionType.Settled, Error>) -> Void) {
+    func approve(proposal: SessionType.Proposal, accounts: Set<String>, completion: @escaping (Result<Session, Error>) -> Void) {
         logger.debug("Approve session")
         let privateKey = Crypto.X25519.generatePrivateKey()
         let selfPublicKey = privateKey.publicKey.toHexString()
         
-        let pendingSession = SessionType.Pending(status: .responded,
-                                                 topic: proposal.topic,
-                                                 relay: proposal.relay,
-                                                 self: SessionType.Participant(publicKey: selfPublicKey, metadata: metadata),
-                                                 proposal: proposal)
+//        let pendingSession = SessionType.Pending(status: .responded,
+//                                                 topic: proposal.topic,
+//                                                 relay: proposal.relay,
+//                                                 self: SessionType.Participant(publicKey: selfPublicKey, metadata: metadata),
+//                                                 proposal: proposal)
+//
+//        sequencesStore.create(topic: proposal.topic, sequenceState: .pending(pendingSession))
+//        wcSubscriber.setSubscription(topic: proposal.topic)
         
-        sequencesStore.create(topic: proposal.topic, sequenceState: .pending(pendingSession))
+        let pending = SessionSequence.Pending(
+            status: .responded,
+            proposal: proposal)
+        let sessionSequence = SessionSequence(
+            topic: proposal.topic,
+            relay: proposal.relay,
+            selfParticipant: SessionType.Participant(publicKey: selfPublicKey, metadata: metadata),
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
+            pendingState: pending)
+        
+        try? sequencesStore.setSequence(sessionSequence)
         wcSubscriber.setSubscription(topic: proposal.topic)
         
         let agreementKeys = try! Crypto.X25519.generateAgreementKeys(
@@ -57,19 +71,31 @@ final class SessionEngine {
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
         let sessionState: SessionType.State = SessionType.State(accounts: accounts)
         let expiry = Int(Date().timeIntervalSince1970) + proposal.ttl
-        let proposal = pendingSession.proposal
+//        let proposal = pendingSession.proposal
         let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : selfPublicKey
         let controller = Controller(publicKey: controllerKey)
-        let proposedPermissions = pendingSession.proposal.permissions
+//        let proposedPermissions = pendingSession.proposal.permissions
+        let proposedPermissions = proposal.permissions
         let sessionPermissions = SessionType.Permissions(blockchain: proposedPermissions.blockchain, jsonrpc: proposedPermissions.jsonrpc, notifications: proposedPermissions.notifications, controller: controller)
-        let settledSession = SessionType.Settled(
-            topic: settledTopic,
-            relay: proposal.relay,
-            self: SessionType.Participant(publicKey: selfPublicKey, metadata: metadata),
+//        let settledSession = SessionType.Settled(
+//            topic: settledTopic,
+//            relay: proposal.relay,
+//            self: SessionType.Participant(publicKey: selfPublicKey, metadata: metadata),
+//            peer: SessionType.Participant(publicKey: proposal.proposer.publicKey, metadata: proposal.proposer.metadata),
+//            permissions: sessionPermissions,
+//            expiry: expiry,
+//            state: sessionState)
+        
+        let settled = SessionSequence.Settled(
             peer: SessionType.Participant(publicKey: proposal.proposer.publicKey, metadata: proposal.proposer.metadata),
             permissions: sessionPermissions,
-            expiry: expiry,
             state: sessionState)
+        let settledSession = SessionSequence(
+            topic: settledTopic,
+            relay: proposal.relay,
+            selfParticipant: SessionType.Participant(publicKey: selfPublicKey, metadata: metadata),
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(proposal.ttl)),
+            settledState: settled)
         
         let approveParams = SessionType.ApproveParams(
             relay: proposal.relay,
@@ -79,15 +105,24 @@ final class SessionEngine {
             expiry: expiry,
             state: sessionState)
         let approvalPayload = ClientSynchJSONRPC(method: .sessionApprove, params: .sessionApprove(approveParams))
+        
         relayer.request(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
             switch result {
             case .success:
                 self?.crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
                 self?.crypto.set(privateKey: privateKey)
-                self?.sequencesStore.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledSession))
+                try? self?.sequencesStore.update(sequence: settledSession, onTopic: proposal.topic)
+//                self?.sequencesStore.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledSession))
+                self?.wcSubscriber.removeSubscription(topic: proposal.topic)
                 self?.wcSubscriber.setSubscription(topic: settledTopic)
                 self?.logger.debug("Success on wc_sessionApprove, published on topic: \(proposal.topic), settled topic: \(settledTopic)")
-                completion(.success(settledSession))
+                let sessionSuccess = Session(
+                    topic: settledTopic,
+                    peer: proposal.proposer.metadata,
+                    permissions: SessionPermissions(
+                        blockchains: sessionPermissions.blockchain.chains,
+                        methods: sessionPermissions.jsonrpc.methods))
+                completion(.success(sessionSuccess))
             case .failure(let error):
                 self?.logger.error(error)
                 completion(.failure(error))
@@ -128,9 +163,20 @@ final class SessionEngine {
         let signal = SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: settledPairing.topic))
         let proposal = SessionType.Proposal(topic: pendingSessionTopic, relay: relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
         let selfParticipant = SessionType.Participant(publicKey: publicKey, metadata: metadata)
-        let pending = SessionType.Pending(status: .proposed, topic: pendingSessionTopic, relay: relay, self: selfParticipant, proposal: proposal)
-        sequencesStore.create(topic: pendingSessionTopic, sequenceState: .pending(pending))
+//        let pending = SessionType.Pending(status: .proposed, topic: pendingSessionTopic, relay: relay, self: selfParticipant, proposal: proposal)
+        
+//        sequencesStore.create(topic: pendingSessionTopic, sequenceState: .pending(pending))
+//        wcSubscriber.setSubscription(topic: pendingSessionTopic)
+        
+        let pendingSession = SessionSequence(
+            topic: pendingSessionTopic,
+            relay: relay,
+            selfParticipant: selfParticipant,
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
+            pendingState: SessionSequence.Pending(status: .proposed, proposal: proposal))
+        try? sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: pendingSessionTopic)
+        
         let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: proposal)
         let pairingPayloadParams = PairingType.PayloadParams(request: request)
         let pairingPayloadRequest = ClientSynchJSONRPC(method: .pairingPayload, params: .pairingPayload(pairingPayloadParams))
@@ -147,7 +193,11 @@ final class SessionEngine {
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
-        guard let _ = sequencesStore.get(topic: topic) else {
+//        guard let _ = sequencesStore.get(topic: topic) else {
+//            logger.debug("Could not find session to ping for topic \(topic)")
+//            return
+//        }
+        guard sequencesStore.hasSequence(forTopic: topic) else {
             logger.debug("Could not find session to ping for topic \(topic)")
             return
         }
@@ -164,7 +214,8 @@ final class SessionEngine {
     }
     
     func request(params: SessionType.PayloadRequestParams, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, Error>)->())) {
-        guard let _ = sequencesStore.get(topic: params.topic) else {
+//        guard let _ = sequencesStore.get(topic: params.topic) else {
+        guard sequencesStore.hasSequence(forTopic: params.topic) else {
             logger.debug("Could not find session for topic \(params.topic)")
             return
         }
@@ -184,7 +235,8 @@ final class SessionEngine {
     }
     
     func respondSessionPayload(topic: String, response: JSONRPCResponse<AnyCodable>) {
-        guard let _ = sequencesStore.get(topic: topic) else {
+//        guard let _ = sequencesStore.get(topic: topic) else {
+        guard sequencesStore.hasSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }

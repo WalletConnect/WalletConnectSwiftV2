@@ -11,6 +11,17 @@ struct SessionSequence: ExpirableSequence {
 
 extension SessionSequence {
     
+    init(topic: String, relay: RelayProtocolOptions, selfParticipant: SessionType.Participant, expiryDate: Date, pendingState: Pending) {
+        self.init(topic: topic, relay: relay, selfParticipant: selfParticipant, expiryDate: expiryDate, sequenceState: .left(pendingState))
+    }
+    
+    init(topic: String, relay: RelayProtocolOptions, selfParticipant: SessionType.Participant, expiryDate: Date, settledState: Settled) {
+        self.init(topic: topic, relay: relay, selfParticipant: selfParticipant, expiryDate: expiryDate, sequenceState: .right(settledState))
+    }
+}
+
+extension SessionSequence {
+    
     struct Pending: Codable {
         let status: SessionType.Pending.PendingStatus
         let proposal: SessionType.Proposal
