@@ -30,7 +30,7 @@ public final class WalletConnectClient {
     // MARK: - Public interface
 
 
-    public convenience init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL, keyValueStore: KeyValueStorage) {
+    public convenience init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL, keyValueStore: KeyValueStorage = UserDefaults.standard) {
         self.init(metadata: metadata, apiKey: apiKey, isController: isController, relayURL: relayURL, logger: MuteLogger(), keyValueStore: keyValueStore)
     }
     
