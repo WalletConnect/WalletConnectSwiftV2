@@ -42,6 +42,16 @@ struct SessionSequence: ExpirableSequence {
     var peerIsController: Bool {
         isSettled && settled?.peer.publicKey == settled?.permissions.controller?.publicKey
     }
+    
+    func hasPermission(forChain chainId: String) -> Bool {
+        guard let settled = settled else { return false }
+        return settled.permissions.blockchain.chains.contains(chainId)
+    }
+    
+    func hasPermission(forMethod method: String) -> Bool {
+        guard let settled = settled else { return false }
+        return settled.permissions.jsonrpc.methods.contains(method)
+    }
 }
 
 extension SessionSequence {

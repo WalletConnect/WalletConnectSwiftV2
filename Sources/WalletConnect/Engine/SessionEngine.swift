@@ -34,6 +34,7 @@ final class SessionEngine {
         self.isController = isController
         self.logger = logger
         setUpWCRequestHandling()
+        setupExpirationHandling()
         restoreSubscriptions()
     }
     
@@ -246,19 +247,18 @@ final class SessionEngine {
     }
     
     func upgrade(topic: String, permissions: SessionPermissions) {
-        // TODO: check for settled session
-        guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
+        guard var session = try? sequencesStore.getSequence(forTopic: topic), let settled = session.settled else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
         session.settled?.permissions.upgrade(with: permissions)
-        let params = SessionType.UpgradeParams(permissions: session.settled!.permissions) // TODO: remove force-unwrap
+        let params = SessionType.UpgradeParams(permissions: settled.permissions)
         let request = ClientSynchJSONRPC(method: .sessionUpgrade, params: .sessionUpgrade(params))
         relayer.request(topic: topic, payload: request) { [unowned self] result in
             switch result {
             case .success(_):
                 try? sequencesStore.update(sequence: session, onTopic: topic)
-                onSessionUpgrade?(session.topic, session.settled!.permissions) // TODO: remove force-unwrap
+                onSessionUpgrade?(session.topic, settled.permissions)
             case .failure(_):
                 return
                 //TODO
@@ -358,7 +358,6 @@ final class SessionEngine {
     }
     
     private func handleSessionUpdate(topic: String, updateParams: SessionType.UpdateParams, requestId: Int64) {
-        // TODO: check for settled session
         guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
@@ -460,12 +459,11 @@ final class SessionEngine {
             throw WalletConnectError.internal(.noSequenceForTopic)
         }
         if let chainId = sessionRequest.chainId {
-            // improve here
-            guard session.settled?.permissions.blockchain.chains.contains(chainId) == true else {
+            guard session.hasPermission(forChain: chainId) else {
                 throw WalletConnectError.unauthrorized(.unauthorizedJsonRpcMethod)
             }
         }
-        guard session.settled?.permissions.jsonrpc.methods.contains(sessionRequest.request.method) == true else {
+        guard session.hasPermission(forMethod: sessionRequest.request.method) else {
             throw WalletConnectError.unauthrorized(.unauthorizedJsonRpcMethod)
         }
     }
@@ -517,6 +515,12 @@ final class SessionEngine {
                 blockchains: sessionPermissions.blockchain.chains,
                 methods: sessionPermissions.jsonrpc.methods))
         onSessionApproved?(approvedSession)
+    }
+    
+    private func setupExpirationHandling() {
+        sequencesStore.onSequenceExpiration = { topic in
+            // TODO
+        }
     }
     
     private func restoreSubscriptions() {
