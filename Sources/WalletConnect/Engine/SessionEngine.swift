@@ -2,7 +2,6 @@ import Foundation
 import Combine
 
 final class SessionEngine {
-//    var sequencesStore: SessionSequencesStore
     var sequencesStore: SequenceStore<SessionSequence>
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
@@ -51,15 +50,6 @@ final class SessionEngine {
         let privateKey = Crypto.X25519.generatePrivateKey()
         let selfPublicKey = privateKey.publicKey.toHexString()
         
-//        let pendingSession = SessionType.Pending(status: .responded,
-//                                                 topic: proposal.topic,
-//                                                 relay: proposal.relay,
-//                                                 self: SessionType.Participant(publicKey: selfPublicKey, metadata: metadata),
-//                                                 proposal: proposal)
-//
-//        sequencesStore.create(topic: proposal.topic, sequenceState: .pending(pendingSession))
-//        wcSubscriber.setSubscription(topic: proposal.topic)
-        
         let pending = SessionSequence.Pending(
             status: .responded,
             proposal: proposal)
@@ -79,20 +69,10 @@ final class SessionEngine {
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
         let sessionState: SessionType.State = SessionType.State(accounts: accounts)
         let expiry = Int(Date().timeIntervalSince1970) + proposal.ttl
-//        let proposal = pendingSession.proposal
         let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : selfPublicKey
         let controller = Controller(publicKey: controllerKey)
-//        let proposedPermissions = pendingSession.proposal.permissions
         let proposedPermissions = proposal.permissions
         let sessionPermissions = SessionType.Permissions(blockchain: proposedPermissions.blockchain, jsonrpc: proposedPermissions.jsonrpc, notifications: proposedPermissions.notifications, controller: controller)
-//        let settledSession = SessionType.Settled(
-//            topic: settledTopic,
-//            relay: proposal.relay,
-//            self: SessionType.Participant(publicKey: selfPublicKey, metadata: metadata),
-//            peer: SessionType.Participant(publicKey: proposal.proposer.publicKey, metadata: proposal.proposer.metadata),
-//            permissions: sessionPermissions,
-//            expiry: expiry,
-//            state: sessionState)
         
         let settled = SessionSequence.Settled(
             peer: SessionType.Participant(publicKey: proposal.proposer.publicKey, metadata: proposal.proposer.metadata),
@@ -120,7 +100,6 @@ final class SessionEngine {
                 self?.crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
                 self?.crypto.set(privateKey: privateKey)
                 try? self?.sequencesStore.update(sequence: settledSession, onTopic: proposal.topic)
-//                self?.sequencesStore.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledSession))
                 self?.wcSubscriber.removeSubscription(topic: proposal.topic)
                 self?.wcSubscriber.setSubscription(topic: settledTopic)
                 self?.logger.debug("Success on wc_sessionApprove, published on topic: \(proposal.topic), settled topic: \(settledTopic)")
@@ -171,10 +150,6 @@ final class SessionEngine {
         let signal = SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: settledPairing.topic))
         let proposal = SessionType.Proposal(topic: pendingSessionTopic, relay: relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
         let selfParticipant = SessionType.Participant(publicKey: publicKey, metadata: metadata)
-//        let pending = SessionType.Pending(status: .proposed, topic: pendingSessionTopic, relay: relay, self: selfParticipant, proposal: proposal)
-        
-//        sequencesStore.create(topic: pendingSessionTopic, sequenceState: .pending(pending))
-//        wcSubscriber.setSubscription(topic: pendingSessionTopic)
         
         let pendingSession = SessionSequence(
             topic: pendingSessionTopic,
@@ -201,10 +176,6 @@ final class SessionEngine {
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
-//        guard let _ = sequencesStore.get(topic: topic) else {
-//            logger.debug("Could not find session to ping for topic \(topic)")
-//            return
-//        }
         guard sequencesStore.hasSequence(forTopic: topic) else {
             logger.debug("Could not find session to ping for topic \(topic)")
             return
@@ -222,7 +193,6 @@ final class SessionEngine {
     }
     
     func request(params: SessionType.PayloadRequestParams, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, Error>)->())) {
-//        guard let _ = sequencesStore.get(topic: params.topic) else {
         guard sequencesStore.hasSequence(forTopic: params.topic) else {
             logger.debug("Could not find session for topic \(params.topic)")
             return
@@ -243,7 +213,6 @@ final class SessionEngine {
     }
     
     func respondSessionPayload(topic: String, response: JSONRPCResponse<AnyCodable>) {
-//        guard let _ = sequencesStore.get(topic: topic) else {
         guard sequencesStore.hasSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
@@ -258,23 +227,16 @@ final class SessionEngine {
     }
     
     func update(topic: String, accounts: Set<String>) {
-//        guard case var .settled(session) = sequencesStore.get(topic: topic) else {
-//            logger.debug("Could not find session for topic \(topic)")
-//            return
-//        }
         guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
-//        session.state.accounts = accounts
-//        let params = ClientSynchJSONRPC.Params.sessionUpdate(SessionType.UpdateParams(state: SessionType.State(accounts: session.state.accounts)))
         session.settled?.state.accounts = accounts
         let params = ClientSynchJSONRPC.Params.sessionUpdate(SessionType.UpdateParams(state: SessionType.State(accounts: accounts)))
         let request = ClientSynchJSONRPC(method: .sessionUpdate, params: params)
         relayer.request(topic: topic, payload: request) { [unowned self] result in
             switch result {
             case .success(_):
-//                sequencesStore.update(topic: topic, newTopic: nil, sequenceState: .settled(session))
                 try? sequencesStore.update(sequence: session, onTopic: topic)
                 onSessionUpdate?(topic, accounts)
             case .failure(_):
@@ -284,24 +246,17 @@ final class SessionEngine {
     }
     
     func upgrade(topic: String, permissions: SessionPermissions) {
-//        guard case var .settled(session) = sequencesStore.get(topic: topic) else {
-//            logger.debug("Could not find session for topic \(topic)")
-//            return
-//        }
         // TODO: check for settled session
         guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
-//        session.permissions.upgrade(with: permissions)
         session.settled?.permissions.upgrade(with: permissions)
         let params = SessionType.UpgradeParams(permissions: session.settled!.permissions) // TODO: remove force-unwrap
         let request = ClientSynchJSONRPC(method: .sessionUpgrade, params: .sessionUpgrade(params))
         relayer.request(topic: topic, payload: request) { [unowned self] result in
             switch result {
             case .success(_):
-//                sequencesStore.update(topic: topic, newTopic: nil, sequenceState: .settled(session))
-//                onSessionUpgrade?(session.topic, session.permissions)
                 try? sequencesStore.update(sequence: session, onTopic: topic)
                 onSessionUpgrade?(session.topic, session.settled!.permissions) // TODO: remove force-unwrap
             case .failure(_):
@@ -312,10 +267,6 @@ final class SessionEngine {
     }
     
     func notify(topic: String, params: SessionType.NotificationParams, completion: ((Error?)->())?) {
-//        guard case .settled(let settledSession) = sequencesStore.get(topic: topic) else {
-//            logger.debug("Could not find session for topic \(topic)")
-//            return
-//        }
         guard let session = try? sequencesStore.getSequence(forTopic: topic), session.isSettled else {
             logger.debug("Could not find session for topic \(topic)")
             return
@@ -342,19 +293,6 @@ final class SessionEngine {
     private func getDefaultTTL() -> Int {
         7 * Time.day
     }
-    
-//    private func generateTopic() -> String? {
-//        var keyData = Data(count: 32)
-//        let result = keyData.withUnsafeMutableBytes {
-//            SecRandomCopyBytes(kSecRandomDefault, 32, $0.baseAddress!)
-//        }
-//        if result == errSecSuccess {
-//            return keyData.toHexString()
-//        } else {
-//            logger.debug("Problem generating random bytes")
-//            return nil
-//        }
-//    }
     
     private func getDefaultPermissions() -> PairingType.ProposedPermissions {
         PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [PairingType.PayloadMethods.sessionPropose.rawValue]))
@@ -388,9 +326,6 @@ final class SessionEngine {
     }
     
     private func handleSessionNotification(topic: String, notificationParams: SessionType.NotificationParams, requestId: Int64) {
-//        guard case .settled(let session) = sequencesStore.get(topic: topic) else {
-//            return
-//        }
         guard let session = try? sequencesStore.getSequence(forTopic: topic), session.isSettled else {
             return
         }
@@ -411,17 +346,6 @@ final class SessionEngine {
         } catch {}
     }
     
-//    private func validateNotification(session: SessionType.Settled, params: SessionType.NotificationParams) throws {
-//        if session.isController {
-//            return
-//        } else {
-//            guard let notifications = session.permissions.notifications,
-//                  notifications.types.contains(params.type) else {
-//                throw WalletConnectError.unauthrorized(.unauthorizedNotificationType)
-//            }
-//        }
-//    }
-    
     private func validateNotification(session: SessionSequence, params: SessionType.NotificationParams) throws {
         if session.isController {
             return
@@ -434,17 +358,11 @@ final class SessionEngine {
     }
     
     private func handleSessionUpdate(topic: String, updateParams: SessionType.UpdateParams, requestId: Int64) {
-//        guard case .settled(var session) = sequencesStore.get(topic: topic) else {
-//            logger.debug("Could not find session for topic \(topic)")
-//            return
-//        }
         // TODO: check for settled session
         guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
-//        guard let controller = session.permissions.controller,
-//        session.peer.publicKey == controller.publicKey else {
         guard session.peerIsController else {
             let error = WalletConnectError.unauthrorized(.unauthorizedUpdateRequest)
             logger.error(error)
@@ -456,9 +374,6 @@ final class SessionEngine {
             if let error = error {
                 logger.error(error)
             } else {
-//                session.state = updateParams.state
-//                sequencesStore.update(topic: topic, newTopic: nil, sequenceState: .settled(session))
-//                onSessionUpdate?(topic, session.state.accounts)
                 session.settled?.state = updateParams.state
                 try? sequencesStore.update(sequence: session, onTopic: topic)
                 onSessionUpdate?(topic, updateParams.state.accounts)
@@ -467,31 +382,22 @@ final class SessionEngine {
     }
     
     private func handleSessionUpgrade(topic: String, upgradeParams: SessionType.UpgradeParams, requestId: Int64) {
-//        guard case .settled(var session) = sequencesStore.get(topic: topic) else {
-//            logger.debug("Could not find session for topic \(topic)")
-//            return
-//        }
         guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
-//        guard let controller = session.permissions.controller,
-//        session.peer.publicKey == controller.publicKey else {
         guard session.peerIsController else {
             let error = WalletConnectError.unauthrorized(.unauthorizedUpgradeRequest)
             logger.error(error)
             respond(error: error, requestId: requestId, topic: topic)
             return
         }
-//        session.permissions = upgradeParams.permissions
         session.settled?.permissions = upgradeParams.permissions
         let response = JSONRPCResponse<Bool>(id: requestId, result: true)
         relayer.respond(topic: topic, payload: response) { [unowned self] error in
             if let error = error {
                 logger.error(error)
             } else {
-//                sequencesStore.update(topic: topic, newTopic: nil, sequenceState: .settled(session))
-//                onSessionUpgrade?(session.topic, session.permissions)
                 try? sequencesStore.update(sequence: session, onTopic: topic)
                 onSessionUpgrade?(session.topic, upgradeParams.permissions)
             }
@@ -506,10 +412,6 @@ final class SessionEngine {
     }
     
     private func handleSessionDelete(_ deleteParams: SessionType.DeleteParams, topic: String) {
-//        guard let _ = sequencesStore.get(topic: topic) else {
-//            logger.debug("Could not find session for topic \(topic)")
-//            return
-//        }
         guard sequencesStore.hasSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
@@ -520,10 +422,6 @@ final class SessionEngine {
     }
     
     private func handleSessionReject(_ rejectParams: SessionType.RejectParams, topic: String) {
-//        guard let _ = sequencesStore.get(topic: topic) else {
-//            logger.debug("Could not find session for topic \(topic)")
-//            return
-//        }
         guard sequencesStore.hasSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
@@ -558,24 +456,15 @@ final class SessionEngine {
     }
 
     private func validatePayload(_ sessionRequest: SessionRequest) throws {
-//        guard case .settled(let settledSession) = sequencesStore.get(topic: sessionRequest.topic) else {
-//            throw WalletConnectError.internal(.noSequenceForTopic)
-//        }
         guard let session = try? sequencesStore.getSequence(forTopic: sessionRequest.topic) else {
             throw WalletConnectError.internal(.noSequenceForTopic)
         }
         if let chainId = sessionRequest.chainId {
-//            guard settledSession.permissions.blockchain.chains.contains(chainId) else {
-//                throw WalletConnectError.unauthrorized(.unauthorizedJsonRpcMethod)
-//            }
             // improve here
             guard session.settled?.permissions.blockchain.chains.contains(chainId) == true else {
                 throw WalletConnectError.unauthrorized(.unauthorizedJsonRpcMethod)
             }
         }
-//        guard settledSession.permissions.jsonrpc.methods.contains(sessionRequest.request.method) else {
-//            throw WalletConnectError.unauthrorized(.unauthorizedJsonRpcMethod)
-//        }
         guard session.settled?.permissions.jsonrpc.methods.contains(sessionRequest.request.method) == true else {
             throw WalletConnectError.unauthrorized(.unauthorizedJsonRpcMethod)
         }
@@ -583,16 +472,11 @@ final class SessionEngine {
     
     private func handleSessionApprove(_ approveParams: SessionType.ApproveParams, topic: String, requestId: Int64) {
         logger.debug("Responder Client approved session on topic: \(topic)")
-//        guard case let .pending(pendingSession) = sequencesStore.get(topic: topic) else {
-//                  logger.error("Could not find pending session for topic: \(topic)")
-//            return
-//        }
         guard let session = try? sequencesStore.getSequence(forTopic: topic), let pendingSession = session.pending else {
             logger.error("Could not find pending session for topic: \(topic)")
             return
         }
         
-//        let selfPublicKey = Data(hex: pendingSession.`self`.publicKey)
         let selfPublicKey = Data(hex: session.selfParticipant.publicKey)
         logger.debug("handleSessionApprove")
         let privateKey = try! crypto.getPrivateKey(for: selfPublicKey)!
@@ -605,16 +489,6 @@ final class SessionEngine {
         let controller = Controller(publicKey: controllerKey)
         let proposedPermissions = pendingSession.proposal.permissions
         let sessionPermissions = SessionType.Permissions(blockchain: proposedPermissions.blockchain, jsonrpc: proposedPermissions.jsonrpc, notifications: proposedPermissions.notifications, controller: controller)
-        
-//        let settledSession = SessionType.Settled(
-//            topic: settledTopic,
-//            relay: approveParams.relay,
-//            self: SessionType.Participant(publicKey: selfPublicKey.toHexString(), metadata: metadata),
-//            peer: SessionType.Participant(publicKey: approveParams.responder.publicKey, metadata: approveParams.responder.metadata),
-//            permissions: sessionPermissions,
-//            expiry: approveParams.expiry,
-//            state: approveParams.state)
-//        sequencesStore.update(topic: proposal.topic, newTopic: settledTopic, sequenceState: .settled(settledSession))
         
         let peer = SessionType.Participant(publicKey: approveParams.responder.publicKey, metadata: approveParams.responder.metadata)
         let settledSession = SessionSequence(
