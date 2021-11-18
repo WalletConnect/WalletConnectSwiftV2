@@ -13,7 +13,7 @@ final class ResponderViewController: UIViewController {
             metadata: metadata,
             apiKey: "",
             isController: true,
-            relayURL: URL(string: "wss://relay.walletconnect.org")!
+            relayHost: "relay.walletconnect.org"
         )
     }()
     
