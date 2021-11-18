@@ -29,17 +29,17 @@ public final class WalletConnectClient {
     
     // MARK: - Public interface
 
-
     public convenience init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL, keyValueStore: KeyValueStorage = UserDefaults.standard) {
         self.init(metadata: metadata, apiKey: apiKey, isController: isController, relayURL: relayURL, logger: MuteLogger(), keyValueStore: keyValueStore)
     }
     
-    init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL, logger: BaseLogger = MuteLogger(), keychain: KeychainStorage = KeychainStorage(), keyValueStore: KeyValueStorage) {
+    init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, logger: BaseLogger = MuteLogger(), keychain: KeychainStorage = KeychainStorage(), keyValueStore: KeyValueStorage) {
         self.metadata = metadata
         self.isController = isController
 //        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
         self.crypto = Crypto(keychain: keychain)
-        let wakuRelay = WakuNetworkRelay(transport: JSONRPCTransport(url: relayURL), logger: logger)
+        let relayUrl = Self.makeRelayUrl(host: relayHost, apiKey: apiKey)
+        let wakuRelay = WakuNetworkRelay(transport: JSONRPCTransport(url: relayUrl), logger: logger)
         let serialiser = JSONRPCSerialiser(crypto: crypto)
         self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore))
         let sessionSequencesStore = SessionUserDefaultsStore(logger: logger)
@@ -213,6 +213,14 @@ public final class WalletConnectClient {
             proposal: proposal
         )
         delegate?.didReceive(sessionProposal: sessionProposal)
+    }
+    
+    private static func makeRelayUrl(host: String, apiKey: String) -> URL {
+        var components = URLComponents()
+        components.scheme = "wss"
+        components.host = host
+        components.queryItems = [URLQueryItem(name: "apiKey", value: apiKey)]
+        return components.url!
     }
 }
 
