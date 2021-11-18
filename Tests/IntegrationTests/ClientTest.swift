@@ -24,8 +24,7 @@ final class ClientTests: XCTestCase {
             isController: isController,
             relayURL: url,
             logger: logger,
-            keyValueStore: RuntimeKeyValueStorage(),
-            keychain: KeychainStorage(keychainService: KeychainServiceFake()))
+            keychain: KeychainStorage(keychainService: KeychainServiceFake()), keyValueStore: RuntimeKeyValueStorage())
         client.sessionEngine.sequencesStore = SessionDictionaryStore(logger: logger)
         return ClientDelegate(client: client)
     }
