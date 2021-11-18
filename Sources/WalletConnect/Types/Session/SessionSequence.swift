@@ -7,6 +7,41 @@ struct SessionSequence: ExpirableSequence {
     let selfParticipant: SessionType.Participant
     let expiryDate: Date
     private var sequenceState: Either<Pending, Settled>
+    
+    var pending: Pending? {
+        get {
+            sequenceState.left
+        }
+        set {
+            if let pending = newValue {
+                sequenceState = .left(pending)
+            }
+        }
+    }
+    
+    var settled: Settled? {
+        get {
+            sequenceState.right
+        }
+        set {
+            if let settled = newValue {
+                sequenceState = .right(settled)
+            }
+        }
+    }
+    
+    var isSettled: Bool {
+        settled != nil
+    }
+    
+    var isController: Bool {
+        guard let controller = settled?.permissions.controller else { return false }
+        return selfParticipant.publicKey == controller.publicKey
+    }
+    
+    var peerIsController: Bool {
+        isSettled && settled?.peer.publicKey == settled?.permissions.controller?.publicKey
+    }
 }
 
 extension SessionSequence {
@@ -29,7 +64,7 @@ extension SessionSequence {
     
     struct Settled: Codable {
         let peer: SessionType.Participant
-        let permissions: SessionType.Permissions
-        let state: SessionType.State
+        var permissions: SessionType.Permissions
+        var state: SessionType.State
     }
 }

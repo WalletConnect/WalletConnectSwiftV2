@@ -15,7 +15,8 @@ class SessionEngineTests: XCTestCase {
         subscriber = MockedSubscriber()
         let meta = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
         let logger = MuteLogger()
-        engine = SessionEngine(relay: relay, crypto: crypto, subscriber: subscriber, sequencesStore: SessionDictionaryStore(logger: logger), isController: false, metadata: meta, logger: logger)
+        let store = SequenceStore<SessionSequence>(storage: RuntimeKeyValueStorage())
+        engine = SessionEngine(relay: relay, crypto: crypto, subscriber: subscriber, sequencesStore: store, isController: false, metadata: meta, logger: logger)
     }
 
     override func tearDown() {
