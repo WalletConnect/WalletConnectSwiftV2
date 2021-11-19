@@ -118,7 +118,8 @@ extension ResponderViewController: SessionViewControllerDelegate {
         print("[RESPONDER] Approving session...")
         let proposal = currentProposal!
         currentProposal = nil
-        client.approve(proposal: proposal, accounts: [])
+        client.approve(proposal: proposal, accounts: []) { _ in
+        }
     }
     
     func didRejectSession() {
@@ -196,7 +197,7 @@ extension ResponderViewController: WalletConnectClientDelegate {
         print("[RESPONDER] WC: Did settle pairing")
     }
     
-    func didReject(sessionPendingTopic: String, reason: SessionType.Reason) {
+    func didReject(pendingSessionTopic: String, reason: SessionType.Reason) {
         print("[RESPONDER] WC: Did reject session")
     }
 }

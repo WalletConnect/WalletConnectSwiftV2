@@ -181,7 +181,7 @@ extension ProposerViewController: WalletConnectClientDelegate {
         }
     }
     
-    func didReject(sessionPendingTopic: String, reason: SessionType.Reason) {
+    func didReject(pendingSessionTopic: String, reason: SessionType.Reason) {
         print("[PROPOSER] WC: Did reject session")
     }
 }
