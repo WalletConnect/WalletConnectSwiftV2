@@ -14,10 +14,12 @@ final class SequenceStore<T> where T: ExpirableSequence {
     
     private let storage: KeyValueStorage
     private let dateInitializer: () -> Date
+    private let keyPrefix: String
 
-    init(storage: KeyValueStorage, dateInitializer: @escaping () -> Date = Date.init) {
+    init(storage: KeyValueStorage, keyPrefix: String? = nil, dateInitializer: @escaping () -> Date = Date.init) {
         self.storage = storage
         self.dateInitializer = dateInitializer
+        self.keyPrefix = keyPrefix ?? ""
     }
     
     func hasSequence(forTopic topic: String) -> Bool {
@@ -61,5 +63,9 @@ final class SequenceStore<T> where T: ExpirableSequence {
             return nil
         }
         return sequence
+    }
+    
+    private func getKey(for topic: String) -> String {
+        return "\(keyPrefix)_\(topic)"
     }
 }
