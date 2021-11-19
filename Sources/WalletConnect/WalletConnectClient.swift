@@ -5,14 +5,22 @@ import Foundation
 public protocol WalletConnectClientDelegate: AnyObject {
     func didReceive(sessionProposal: SessionProposal)
     func didReceive(sessionRequest: SessionRequest)
-    func didReceive(notification: SessionNotification, sessionTopic: String)
-    func didSettle(session: Session)
-    func didSettle(pairing: Pairing)
-    func didReject(sessionPendingTopic: String, reason: SessionType.Reason)
     func didDelete(sessionTopic: String, reason: SessionType.Reason)
     func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions)
     func didUpdate(sessionTopic: String, accounts: Set<String>)
-    func didUpdate(pairingTopic: String, appMetadata: AppMetadata)
+    func didSettle(session: Session) //Optional
+    func didSettle(pairing: Pairing) //Optional
+    func didReceive(notification: SessionNotification, sessionTopic: String) //Optional
+    func didReject(pendingSessionTopic: String, reason: SessionType.Reason) //Optional
+    func didUpdate(pairingTopic: String, appMetadata: AppMetadata) //Optional
+}
+
+extension WalletConnectClientDelegate {
+    func didSettle(session: Session) {}
+    func didSettle(pairing: Pairing) {}
+    func didReceive(notification: SessionNotification, sessionTopic: String) {}
+    func didReject(pendingSessionTopic: String, reason: SessionType.Reason) {}
+    func didUpdate(pairingTopic: String, appMetadata: AppMetadata) {}
 }
 
 public final class WalletConnectClient {
@@ -94,13 +102,15 @@ public final class WalletConnectClient {
     }
     
     // for responder to approve a session proposal
-    public func approve(proposal: SessionProposal, accounts: Set<String>) {
+    public func approve(proposal: SessionProposal, accounts: Set<String>, completion: @escaping (Result<Session, Error>) -> ()) {
         sessionEngine.approve(proposal: proposal.proposal, accounts: accounts) { [unowned self] result in
             switch result {
             case .success(let settledSession):
                 let session = Session(topic: settledSession.topic, peer: settledSession.peer, permissions: proposal.permissions)
                 self.delegate?.didSettle(session: session)
+                completion(.success(session))
             case .failure(let error):
+                completion(.failure(error))
                 print(error)
             }
         }
@@ -179,7 +189,7 @@ public final class WalletConnectClient {
             delegate?.didSettle(session: session)
         }
         sessionEngine.onSessionRejected = { [unowned self] pendingTopic, reason in
-            delegate?.didReject(sessionPendingTopic: pendingTopic, reason: reason)
+            delegate?.didReject(pendingSessionTopic: pendingTopic, reason: reason)
         }
         sessionEngine.onSessionPayloadRequest = { [unowned self] sessionRequest in
             delegate?.didReceive(sessionRequest: sessionRequest)
