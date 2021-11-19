@@ -188,12 +188,8 @@ final class PairingEngine {
             switch subscriptionPayload.clientSynchJsonRpc.params {
             case .pairingApprove(let approveParams):
                 handlePairingApprove(approveParams: approveParams, pendingTopic: topic, requestId: requestId)
-            case .pairingReject(_):
-                fatalError("Not Implemented")
             case .pairingUpdate(let updateParams):
                 handlePairingUpdate(params: updateParams, topic: topic, requestId: requestId)
-            case .pairingUpgrade(_):
-                fatalError("Not Implemented")
             case .pairingDelete(let deleteParams):
                 handlePairingDelete(deleteParams, topic: topic, requestId: requestId)
             case .pairingPayload(let pairingPayload):
@@ -201,7 +197,7 @@ final class PairingEngine {
             case .pairingPing(_):
                 self.handlePairingPing(topic: topic, requestId: requestId)
             default:
-                fatalError("not expected method type")
+                logger.warn("Warning: Pairing Engine - Unexpected method type received from subscriber")
             }
         }
     }

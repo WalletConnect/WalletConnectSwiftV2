@@ -142,6 +142,8 @@ class WalletConnectRelay: WalletConnectRelaying {
             handleJsonRpcResponse(response: deserialisedJsonRpcResponse)
         } else if let deserialisedJsonRpcError: JSONRPCErrorResponse = jsonRpcSerialiser.tryDeserialise(topic: topic, message: message) {
             handleJsonRpcErrorResponse(response: deserialisedJsonRpcError)
+        } else {
+            logger.warn("Warning: WalletConnect Relay - Received unknown object type from networking relay")
         }
     }
     

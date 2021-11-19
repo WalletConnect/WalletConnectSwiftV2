@@ -303,7 +303,7 @@ final class SessionEngine {
             case .sessionNotification(let notificationParams):
                 handleSessionNotification(topic: topic, notificationParams: notificationParams, requestId: requestId)
             default:
-                fatalError("unexpected method type")
+                logger.warn("Warning: Session Engine - Unexpected method type received from subscriber")
             }
         }
     }
