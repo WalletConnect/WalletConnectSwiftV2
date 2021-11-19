@@ -16,7 +16,7 @@ class WalletConnectRelayTests: XCTestCase {
         let logger = ConsoleLogger()
         serialiser = MockedJSONRPCSerialiser()
         networkRelayer = MockedNetworkRelayer()
-        wcRelay = WalletConnectRelay(networkRelayer: networkRelayer, jsonRpcSerialiser: serialiser, logger: logger)
+        wcRelay = WalletConnectRelay(networkRelayer: networkRelayer, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: RuntimeKeyValueStorage()))
     }
 
     override func tearDown() {
@@ -33,7 +33,7 @@ class WalletConnectRelayTests: XCTestCase {
         }.store(in: &publishers)
         serialiser.deserialised = SerialiserTestData.pairingApproveJSONRPCRequest
         networkRelayer.onMessage?(topic, testPayload)
-        waitForExpectations(timeout: 0.001, handler: nil)
+        waitForExpectations(timeout: 1.001, handler: nil)
     }
     
     func testHexEncodedRequestCompletesWithSuccessfulResponse() {

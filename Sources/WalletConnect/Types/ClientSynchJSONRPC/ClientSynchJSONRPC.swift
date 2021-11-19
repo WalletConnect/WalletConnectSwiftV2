@@ -13,7 +13,7 @@ struct ClientSynchJSONRPC: Codable {
         case method
         case params
     }
-    
+
     internal init(id: Int64 = generateId(), jsonrpc: String = "2.0", method: Method, params: Params) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -118,7 +118,7 @@ struct ClientSynchJSONRPC: Codable {
             try container.encode(params, forKey: .params)
         }
     }
-    
+
     private static func generateId() -> Int64 {
         return Int64(Date().timeIntervalSince1970 * 1000)*1000 + Int64.random(in: 0..<1000)
     }

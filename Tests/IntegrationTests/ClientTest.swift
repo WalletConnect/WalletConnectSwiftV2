@@ -24,8 +24,8 @@ final class ClientTests: XCTestCase {
             isController: isController,
             relayURL: url,
             logger: logger,
-            keyValueStore: RuntimeKeyValueStorage(),
-            keychain: KeychainStorage(keychainService: KeychainServiceFake()))
+            keychain: KeychainStorage(keychainService: KeychainServiceFake()),
+            keyValueStore: RuntimeKeyValueStorage())
         return ClientDelegate(client: client)
     }
     

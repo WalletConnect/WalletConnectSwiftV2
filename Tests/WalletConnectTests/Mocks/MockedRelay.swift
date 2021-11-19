@@ -23,7 +23,7 @@ class MockedWCRelay: WalletConnectRelaying {
         didCallPublish = true
     }
     
-    func respond(topic: String, payload: Encodable, completion: @escaping ((Error?) -> ())) {
+    func respond(topic: String, response: JsonRpcResponseTypes, completion: @escaping ((Error?) -> ())) {
         completion(error)
     }
     

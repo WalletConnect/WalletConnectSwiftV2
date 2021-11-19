@@ -24,6 +24,7 @@ enum WalletConnectError: Error {
         case subscriptionIdNotFound
         case keyNotFound
         case deserialisationFailed
+        case jsonRpcDuplicateDetected
     }
     
     public enum UnauthorizedReason: Error {
@@ -73,6 +74,7 @@ extension WalletConnectError.InternalReason: CustomStringConvertible {
         case .subscriptionIdNotFound: return 00
         case .keyNotFound: return 00
         case .deserialisationFailed: return 00
+        case .jsonRpcDuplicateDetected: return 0
         }
     }
     
@@ -95,6 +97,8 @@ extension WalletConnectError.InternalReason: CustomStringConvertible {
             return "Key Not Found"
         case .deserialisationFailed:
             return "Deserialisation Failed"
+        case .jsonRpcDuplicateDetected:
+            return "Json Rpc Duplicate Detected"
         }
     }
 }
