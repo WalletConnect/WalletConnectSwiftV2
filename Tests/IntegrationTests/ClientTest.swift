@@ -7,7 +7,7 @@ final class ClientTests: XCTestCase {
     
     let defaultTimeout: TimeInterval = 5.0
     
-    let relayHost = "relay.walletconnect.org"
+    let relayHost = "staging.walletconnect.org"
     let apiKey = ""
     var proposer: ClientDelegate!
     var responder: ClientDelegate!
