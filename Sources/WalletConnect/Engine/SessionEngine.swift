@@ -251,14 +251,18 @@ final class SessionEngine {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
-        session.settled?.permissions.upgrade(with: permissions)
-        let params = SessionType.UpgradeParams(permissions: settled.permissions)
+//        session.settled?.permissions.upgrade(with: permissions)
+        session.upgrade(permissions)
+        guard let newPermissions = session.settled?.permissions else {
+            return
+        }
+        let params = SessionType.UpgradeParams(permissions: newPermissions)
         let request = ClientSynchJSONRPC(method: .sessionUpgrade, params: .sessionUpgrade(params))
         relayer.request(topic: topic, payload: request) { [unowned self] result in
             switch result {
             case .success(_):
                 try? sequencesStore.update(sequence: session, onTopic: topic)
-                onSessionUpgrade?(session.topic, settled.permissions)
+                onSessionUpgrade?(session.topic, newPermissions)
             case .failure(_):
                 return
                 //TODO
@@ -391,14 +395,20 @@ final class SessionEngine {
             respond(error: error, requestId: requestId, topic: topic)
             return
         }
-        session.settled?.permissions = upgradeParams.permissions
+        let permissions = SessionPermissions(
+            blockchains: upgradeParams.permissions.blockchain.chains,
+            methods: upgradeParams.permissions.jsonrpc.methods)
+        session.upgrade(permissions)
+        guard let newPermissions = session.settled?.permissions else {
+            return
+        }
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
         relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [unowned self] error in
             if let error = error {
                 logger.error(error)
             } else {
                 try? sequencesStore.update(sequence: session, onTopic: topic)
-                onSessionUpgrade?(session.topic, upgradeParams.permissions)
+                onSessionUpgrade?(session.topic, newPermissions)
             }
         }
     }
