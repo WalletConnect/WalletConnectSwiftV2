@@ -213,12 +213,12 @@ final class SessionEngine {
         }
     }
     
-    func respondSessionPayload(topic: String, response: JSONRPCResponse<AnyCodable>) {
+    func respondSessionPayload(topic: String, response: JsonRpcResponseTypes) {
         guard sequencesStore.hasSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
-        relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [weak self] error in
+        relayer.respond(topic: topic, response: response) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Could not send session payload, error: \(error.localizedDescription)")
             } else {

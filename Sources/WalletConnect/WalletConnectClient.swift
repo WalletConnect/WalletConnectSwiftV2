@@ -135,7 +135,7 @@ public final class WalletConnectClient {
     }
     
     // for responder to respond JSON-RPC
-    public func respond(topic: String, response: JSONRPCResponse<AnyCodable>) {
+    public func respond(topic: String, response: JsonRpcResponseTypes) {
         sessionEngine.respondSessionPayload(topic: topic, response: response)
     }
     

@@ -18,7 +18,7 @@ final class ClientTests: XCTestCase {
     }
 
     static func makeClientDelegate(isController: Bool, relayHost: String, prefix: String, apiKey: String) -> ClientDelegate {
-        let logger = ConsoleLogger(suffix: prefix)
+        let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let client = WalletConnectClient(
             metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil),
             apiKey: apiKey,
@@ -57,7 +57,7 @@ final class ClientTests: XCTestCase {
         let uri = try! proposer.client.connect(params: connectParams)!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [account])
+            self.responder.client.approve(proposal: proposal, accounts: [account]){_ in}
         }
         responder.onSessionSettled = { sessionSettled in
             // FIXME: Commented assertion
@@ -87,7 +87,7 @@ final class ClientTests: XCTestCase {
             pairingTopic = pairing.topic
         }
         responder.onSessionProposal = { [unowned self] proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [])
+            self.responder.client.approve(proposal: proposal, accounts: []){_ in}
         }
         responder.onSessionSettled = { sessionSettled in
             responderSettlesSessionExpectation.fulfill()
@@ -104,7 +104,7 @@ final class ClientTests: XCTestCase {
     }
 
     func testResponderRejectsSession() {
-        let sessionRejectExpectation = expectation(description: "Responded is notified on session rejection")
+        let sessionRejectExpectation = expectation(description: "Proposer is notified on session rejection")
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
@@ -126,7 +126,7 @@ final class ClientTests: XCTestCase {
         let uri = try! proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [])
+            self.responder.client.approve(proposal: proposal, accounts: []){_ in}
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
             self.proposer.client.disconnect(topic: settledSession.topic, reason: SessionType.Reason(code: 5900, message: "User disconnected session"))
@@ -148,7 +148,7 @@ final class ClientTests: XCTestCase {
         let uri = try! proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [])
+            self.responder.client.approve(proposal: proposal, accounts: []){_ in}
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
             let requestParams = SessionType.PayloadRequestParams(topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
@@ -168,7 +168,7 @@ final class ClientTests: XCTestCase {
             let ethSendTrancastionParams = try! sessionRequest.request.params.get([EthSendTransaction].self)
             XCTAssertEqual(ethSendTrancastionParams, params)
             let jsonrpcResponse = JSONRPCResponse<AnyCodable>(id: sessionRequest.request.id, result: AnyCodable(responseParams))
-            self.responder.client.respond(topic: sessionRequest.topic, response: jsonrpcResponse)
+            self.responder.client.respond(topic: sessionRequest.topic, response: .response(jsonrpcResponse))
             requestExpectation.fulfill()
         }
         waitForExpectations(timeout: defaultTimeout, handler: nil)
@@ -198,7 +198,7 @@ final class ClientTests: XCTestCase {
         let uri = try! proposer.client.connect(params: connectParams)!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [])
+            self.responder.client.approve(proposal: proposal, accounts: []){_ in}
         }
         proposer.onSessionSettled = { [unowned self] sessionSettled in
             self.proposer.client.ping(topic: sessionSettled.topic) { response in
@@ -219,7 +219,7 @@ final class ClientTests: XCTestCase {
         let uri = try! proposer.client.connect(params: connectParams)!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [account])
+            self.responder.client.approve(proposal: proposal, accounts: [account]){_ in}
         }
         responder.onSessionSettled = { [unowned self] sessionSettled in
             responder.client.upgrade(topic: sessionSettled.topic, permissions: upgradePermissions)
@@ -249,7 +249,7 @@ final class ClientTests: XCTestCase {
         let uri = try! proposer.client.connect(params: connectParams)!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [account])
+            self.responder.client.approve(proposal: proposal, accounts: [account]){_ in}
         }
         proposer.onSessionSettled = { [unowned self] sessionSettled in
             proposer.client.upgrade(topic: sessionSettled.topic, permissions: upgradePermissions)
@@ -273,7 +273,7 @@ final class ClientTests: XCTestCase {
         let uri = try! proposer.client.connect(params: connectParams)!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [account])
+            self.responder.client.approve(proposal: proposal, accounts: [account]){_ in}
         }
         responder.onSessionSettled = { [unowned self] sessionSettled in
             responder.client.update(topic: sessionSettled.topic, accounts: updateAccounts)
@@ -297,7 +297,7 @@ final class ClientTests: XCTestCase {
         try! responder.client.pair(uri: uri)
         let notificationParams = SessionType.NotificationParams(type: "type1", data: AnyCodable("notification_data"))
         responder.onSessionProposal = { [unowned self] proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [])
+            self.responder.client.approve(proposal: proposal, accounts: []){_ in}
         }
         responder.onSessionSettled = { [unowned self] session in
             responder.client.notify(topic: session.topic, params: notificationParams, completion: nil)
@@ -318,7 +318,7 @@ final class ClientTests: XCTestCase {
         try! responder.client.pair(uri: uri)
         let notificationParams = SessionType.NotificationParams(type: "type2", data: AnyCodable("notification_data"))
         responder.onSessionProposal = { [unowned self] proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [])
+            self.responder.client.approve(proposal: proposal, accounts: []){_ in}
         }
         proposer.onSessionSettled = { [unowned self] session in
             proposer.client.notify(topic: session.topic, params: notificationParams) { error in
