@@ -14,11 +14,11 @@ class WCSubscriber: WCSubscribing {
     private let concurrentQueue = DispatchQueue(label: "wc subscriber queue: \(UUID().uuidString)",
                                                 attributes: .concurrent)
     private var publishers = [AnyCancellable]()
-    private let logger: BaseLogger
+    private let logger: ConsoleLogger
     var topics: [String] = []
 
     init(relay: WalletConnectRelaying,
-         logger: BaseLogger) {
+         logger: ConsoleLogger) {
         self.relay = relay
         self.logger = logger
         setSubscribingForPayloads()

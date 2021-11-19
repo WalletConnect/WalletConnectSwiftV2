@@ -52,11 +52,11 @@ class WalletConnectRelay: WalletConnectRelaying {
         wcResponsePublisherSubject.eraseToAnyPublisher()
     }
     private let wcResponsePublisherSubject = PassthroughSubject<JsonRpcResponseTypes, Never>()
-    let logger: BaseLogger
+    let logger: ConsoleLogger
     
     init(networkRelayer: NetworkRelaying,
          jsonRpcSerialiser: JSONRPCSerialising,
-         logger: BaseLogger,
+         logger: ConsoleLogger,
          jsonRpcHistory: JsonRpcHistoryRecording) {
         self.networkRelayer = networkRelayer
         self.jsonRpcSerialiser = jsonRpcSerialiser

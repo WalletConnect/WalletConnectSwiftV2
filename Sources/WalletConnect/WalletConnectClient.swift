@@ -24,18 +24,19 @@ public final class WalletConnectClient {
     private let relay: WalletConnectRelaying
     private let crypto: Crypto
     private var sessionPermissions: [String: SessionType.Permissions] = [:]
-    var logger: BaseLogger = ConsoleLogger()
+    public let logger: ConsoleLogger
     private let secureStorage = SecureStorage()
     
     // MARK: - Public interface
 
     public convenience init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, keyValueStore: KeyValueStorage = UserDefaults.standard) {
-        self.init(metadata: metadata, apiKey: apiKey, isController: isController, relayHost: relayHost, logger: MuteLogger(), keyValueStore: keyValueStore)
+        self.init(metadata: metadata, apiKey: apiKey, isController: isController, relayHost: relayHost, keyValueStore: keyValueStore)
     }
     
-    init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, logger: BaseLogger = MuteLogger(), keychain: KeychainStorage = KeychainStorage(), keyValueStore: KeyValueStorage) {
+    init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, logger: ConsoleLogger = ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage = KeychainStorage(), keyValueStore: KeyValueStorage) {
         self.metadata = metadata
         self.isController = isController
+        self.logger = logger
 //        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
         self.crypto = Crypto(keychain: keychain)
         let relayUrl = WakuNetworkRelay.makeRelayUrl(host: relayHost, apiKey: apiKey)

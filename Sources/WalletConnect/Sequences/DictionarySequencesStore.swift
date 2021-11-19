@@ -30,9 +30,9 @@ class SessionDictionaryStore: DictionaryStore<SessionType.SequenceState>, Sessio
 class DictionaryStore<T> {
     private let serialQueue = DispatchQueue(label: "sequence queue: \(UUID().uuidString)")
     private var sequences = [String: T]()
-    private let logger: BaseLogger
+    private let logger: ConsoleLogger
 
-    init(logger: BaseLogger) {
+    init(logger: ConsoleLogger) {
         self.logger = logger
     }
     

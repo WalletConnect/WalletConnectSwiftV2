@@ -29,9 +29,9 @@ class SessionUserDefaultsStore: UserDefaultsStore<SessionType.SequenceState>, Se
 
 class UserDefaultsStore<T: Codable> {
     private var defaults = UserDefaults.standard
-    private let logger: BaseLogger
+    private let logger: ConsoleLogger
 
-    init(logger: BaseLogger) {
+    init(logger: ConsoleLogger) {
         self.logger = logger
     }
     

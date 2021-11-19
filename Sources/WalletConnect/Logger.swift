@@ -2,58 +2,48 @@
 
 import Foundation
 
-class BaseLogger {
-    var suffix: String
-    init(suffix: String = "") {
-        self.suffix = suffix
+
+public class ConsoleLogger {
+    private var loggingLevel: LoggingLevel
+    private var suffix: String
+    
+    public func setLogging(level: LoggingLevel) {
+        self.loggingLevel = level
     }
+
+    init(suffix: String? = nil, loggingLevel: LoggingLevel = .warn) {
+        self.suffix = suffix ?? ""
+        self.loggingLevel = loggingLevel
+    }
+    
     func debug(_ items: Any...) {
-        fatalError("Logging Subclass shoud implement the method")
+        if loggingLevel >= .debug {
+            items.forEach {
+                Swift.print("\(suffix) \($0)")
+            }
+        }
     }
     
     func error(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line ) {
-        fatalError("Logging Subclass shoud implement the method")
+        if loggingLevel >= .error {
+            items.forEach {
+                Swift.print("\(suffix) Error in File: \(file), Function: \(function), Line: \(line) - \($0)")
+            }
+        }
     }
     
     func warn(_ items: Any...) {
-        fatalError("Logging Subclass shoud implement the method")
-    }
-    
-}
-
-class ConsoleLogger: BaseLogger {
-    
-    override init(suffix: String = "") {
-        super.init(suffix: suffix)
-    }
-    
-    override func debug(_ items: Any...) {
-        #if DEBUG
-        items.forEach {
-            Swift.print("\(suffix) \($0)")
+        if loggingLevel >= .warn {
+            items.forEach {
+                Swift.print("\(suffix) ⚠️ \($0)")
+            }
         }
-        #endif
-    }
-    
-    override func error(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line ) {
-        #if DEBUG
-        items.forEach {
-            Swift.print("\(suffix) Error in File: \(file), Function: \(function), Line: \(line) - \($0)")
-        }
-        #endif
-    }
-    
-    override func warn(_ items: Any...) {
-        #if DEBUG
-        items.forEach {
-            Swift.print("\(suffix) ⚠️ \($0)")
-        }
-        #endif
     }
 }
 
-class MuteLogger: BaseLogger {
-    override func debug(_ items: Any...) {}
-    override func error(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line ) {}
-    override func warn(_ items: Any...) {}
+public enum LoggingLevel: Comparable {
+    case off
+    case error
+    case warn
+    case debug
 }
