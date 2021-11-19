@@ -24,10 +24,10 @@ public class ConsoleLogger {
         }
     }
     
-    func error(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line ) {
-        if loggingLevel >= .error {
+    func info(_ items: Any...) {
+        if loggingLevel >= .info {
             items.forEach {
-                Swift.print("\(suffix) Error in File: \(file), Function: \(function), Line: \(line) - \($0)")
+                Swift.print("\(suffix) \($0)")
             }
         }
     }
@@ -39,11 +39,20 @@ public class ConsoleLogger {
             }
         }
     }
+    
+    func error(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line ) {
+        if loggingLevel >= .error {
+            items.forEach {
+                Swift.print("\(suffix) Error in File: \(file), Function: \(function), Line: \(line) - \($0)")
+            }
+        }
+    }
 }
 
 public enum LoggingLevel: Comparable {
     case off
     case error
     case warn
+    case info
     case debug
 }
