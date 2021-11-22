@@ -34,9 +34,9 @@ class WakuNetworkRelay: NetworkRelaying {
         requestAcknowledgePublisherSubject.eraseToAnyPublisher()
     }
     private let requestAcknowledgePublisherSubject = PassthroughSubject<JSONRPCResponse<Bool>, Never>()
-    let logger: BaseLogger
+    let logger: ConsoleLogger
     init(transport: JSONRPCTransporting,
-         logger: BaseLogger) {
+         logger: ConsoleLogger) {
         self.logger = logger
         self.transport = transport
         setUpBindings()

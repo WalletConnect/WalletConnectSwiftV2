@@ -11,9 +11,9 @@ protocol JsonRpcHistoryRecording {
 
 class JsonRpcHistory: JsonRpcHistoryRecording {
     let storage: KeyValueStore<JsonRpcRecord>
-    let logger: BaseLogger
+    let logger: ConsoleLogger
     
-    init(logger: BaseLogger, keyValueStorage: KeyValueStorage) {
+    init(logger: ConsoleLogger, keyValueStorage: KeyValueStorage) {
         self.logger = logger
         self.storage = KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage)
     }

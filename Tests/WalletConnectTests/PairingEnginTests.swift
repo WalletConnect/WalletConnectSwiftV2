@@ -15,7 +15,7 @@ class PairingEngineTests: XCTestCase {
         relay = MockedWCRelay()
         subscriber = MockedSubscriber()
         let meta = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
-        let logger = MuteLogger()
+        let logger = ConsoleLogger()
         let store = SequenceStore<PairingSequence>(storage: RuntimeKeyValueStorage())
         engine = PairingEngine(relay: relay, crypto: crypto, subscriber: subscriber, sequencesStore: store, isController: false, metadata: meta, logger: logger)
     }

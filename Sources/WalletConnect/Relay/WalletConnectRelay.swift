@@ -52,11 +52,11 @@ class WalletConnectRelay: WalletConnectRelaying {
         wcResponsePublisherSubject.eraseToAnyPublisher()
     }
     private let wcResponsePublisherSubject = PassthroughSubject<JsonRpcResponseTypes, Never>()
-    let logger: BaseLogger
+    let logger: ConsoleLogger
     
     init(networkRelayer: NetworkRelaying,
          jsonRpcSerialiser: JSONRPCSerialising,
-         logger: BaseLogger,
+         logger: ConsoleLogger,
          jsonRpcHistory: JsonRpcHistoryRecording) {
         self.networkRelayer = networkRelayer
         self.jsonRpcSerialiser = jsonRpcSerialiser
@@ -89,6 +89,8 @@ class WalletConnectRelay: WalletConnectRelaying {
                         }
                 }
             }
+        } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
+            logger.info("Info: Json Rpc Duplicate Detected")
         } catch {
             logger.error(error)
         }
@@ -102,6 +104,8 @@ class WalletConnectRelay: WalletConnectRelaying {
             networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
                 completion(error)
             }
+        } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
+            logger.info("Info: Json Rpc Duplicate Detected")
         } catch {
             completion(error)
         }
@@ -142,6 +146,8 @@ class WalletConnectRelay: WalletConnectRelaying {
             handleJsonRpcResponse(response: deserialisedJsonRpcResponse)
         } else if let deserialisedJsonRpcError: JSONRPCErrorResponse = jsonRpcSerialiser.tryDeserialise(topic: topic, message: message) {
             handleJsonRpcErrorResponse(response: deserialisedJsonRpcError)
+        } else {
+            logger.warn("Warning: WalletConnect Relay - Received unknown object type from networking relay")
         }
     }
     
@@ -150,6 +156,8 @@ class WalletConnectRelay: WalletConnectRelaying {
             try jsonRpcHistory.set(topic: topic, request: request)
             let payload = WCRequestSubscriptionPayload(topic: topic, clientSynchJsonRpc: request)
             clientSynchJsonRpcPublisherSubject.send(payload)
+        } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
+            logger.info("Info: Json Rpc Duplicate Detected")
         } catch {
             logger.error(error)
         }
@@ -159,8 +167,8 @@ class WalletConnectRelay: WalletConnectRelaying {
         do {
             try jsonRpcHistory.resolve(response: JsonRpcResponseTypes.response(response))
             wcResponsePublisherSubject.send(.response(response))
-        } catch {
-            logger.error(error)
+        } catch  {
+            logger.info("Info: \(error.localizedDescription)")
         }
     }
     
@@ -169,7 +177,7 @@ class WalletConnectRelay: WalletConnectRelaying {
             try jsonRpcHistory.resolve(response: JsonRpcResponseTypes.error(response))
             wcResponsePublisherSubject.send(.error(response))
         } catch {
-            logger.error(error)
+            logger.info("Info: \(error.localizedDescription)")
         }
     }
 }
