@@ -197,7 +197,7 @@ final class PairingEngine {
             case .pairingPing(_):
                 self.handlePairingPing(topic: topic, requestId: requestId)
             default:
-                logger.warn("Warning: Pairing Engine - Unexpected method type received from subscriber")
+                logger.warn("Warning: Pairing Engine - Unexpected method type: \(subscriptionPayload.clientSynchJsonRpc.method) received from subscriber")
             }
         }
     }
