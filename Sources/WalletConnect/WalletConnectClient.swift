@@ -38,7 +38,7 @@ public final class WalletConnectClient {
         self.isController = isController
 //        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
         self.crypto = Crypto(keychain: keychain)
-        let relayUrl = Self.makeRelayUrl(host: relayHost, apiKey: apiKey)
+        let relayUrl = WakuNetworkRelay.makeRelayUrl(host: relayHost, apiKey: apiKey)
         let wakuRelay = WakuNetworkRelay(transport: JSONRPCTransport(url: relayUrl), logger: logger)
         let serialiser = JSONRPCSerialiser(crypto: crypto)
         self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore))
@@ -213,14 +213,6 @@ public final class WalletConnectClient {
             proposal: proposal
         )
         delegate?.didReceive(sessionProposal: sessionProposal)
-    }
-    
-    private static func makeRelayUrl(host: String, apiKey: String) -> URL {
-        var components = URLComponents()
-        components.scheme = "wss"
-        components.host = host
-        components.queryItems = [URLQueryItem(name: "apiKey", value: apiKey)]
-        return components.url!
     }
 }
 
