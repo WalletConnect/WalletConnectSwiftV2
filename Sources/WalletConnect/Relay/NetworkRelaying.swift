@@ -34,9 +34,9 @@ class WakuNetworkRelay: NetworkRelaying {
         requestAcknowledgePublisherSubject.eraseToAnyPublisher()
     }
     private let requestAcknowledgePublisherSubject = PassthroughSubject<JSONRPCResponse<Bool>, Never>()
-    let logger: BaseLogger
+    let logger: ConsoleLogger
     init(transport: JSONRPCTransporting,
-         logger: BaseLogger) {
+         logger: ConsoleLogger) {
         self.logger = logger
         self.transport = transport
         setUpBindings()
@@ -46,19 +46,19 @@ class WakuNetworkRelay: NetworkRelaying {
         let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.rawValue, params: params)
         let requestJson = try! request.json()
         logger.debug("waku: Publishing Payload on Topic: \(topic)")
-        var cancellable: AnyCancellable!
+        var cancellable: AnyCancellable?
         transport.send(requestJson) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to Publish Payload")
                 self?.logger.error(error)
-                cancellable.cancel()
+                cancellable?.cancel()
                 completion(error)
             }
         }
         cancellable = requestAcknowledgePublisher
             .filter {$0.id == request.id}
             .sink { (subscriptionResponse) in
-            cancellable.cancel()
+            cancellable?.cancel()
                 completion(nil)
         }
         return request.id
@@ -69,11 +69,11 @@ class WakuNetworkRelay: NetworkRelaying {
         let params = RelayJSONRPC.SubscribeParams(topic: topic)
         let request = JSONRPCRequest(method: RelayJSONRPC.Method.subscribe.rawValue, params: params)
         let requestJson = try! request.json()
-        var cancellable: AnyCancellable!
+        var cancellable: AnyCancellable?
         transport.send(requestJson) { [weak self] error in
             if let error = error {
                 self?.logger.error("Failed to Subscribe on Topic \(error)")
-                cancellable.cancel()
+                cancellable?.cancel()
                 completion(error)
             } else {
                 completion(nil)
@@ -82,7 +82,7 @@ class WakuNetworkRelay: NetworkRelaying {
         cancellable = subscriptionResponsePublisher
             .filter {$0.id == request.id}
             .sink { [weak self] (subscriptionResponse) in
-            cancellable.cancel()
+            cancellable?.cancel()
                 self?.subscriptions[topic] = subscriptionResponse.result
                 completion(nil)
         }
@@ -98,12 +98,12 @@ class WakuNetworkRelay: NetworkRelaying {
         let params = RelayJSONRPC.UnsubscribeParams(id: subscriptionId, topic: topic)
         let request = JSONRPCRequest(method: RelayJSONRPC.Method.unsubscribe.rawValue, params: params)
         let requestJson = try! request.json()
-        var cancellable: AnyCancellable!
+        var cancellable: AnyCancellable?
         transport.send(requestJson) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to Unsubscribe on Topic")
                 self?.logger.error(error)
-                cancellable.cancel()
+                cancellable?.cancel()
                 completion(error)
             } else {
                 self?.concurrentQueue.async(flags: .barrier) {
@@ -115,7 +115,7 @@ class WakuNetworkRelay: NetworkRelaying {
         cancellable = requestAcknowledgePublisher
             .filter {$0.id == request.id}
             .sink { (subscriptionResponse) in
-                cancellable.cancel()
+                cancellable?.cancel()
                 completion(nil)
             }
         return request.id
@@ -164,5 +164,13 @@ class WakuNetworkRelay: NetworkRelaying {
                 self?.logger.error(error)
             }
         }
+    }
+    
+    static func makeRelayUrl(host: String, apiKey: String) -> URL {
+        var components = URLComponents()
+        components.scheme = "wss"
+        components.host = host
+        components.queryItems = [URLQueryItem(name: "apiKey", value: apiKey)]
+        return components.url!
     }
 }

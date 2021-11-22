@@ -17,7 +17,7 @@ final class SessionEngine {
     var onNotificationReceived: ((String, SessionType.NotificationParams)->())?
     private var publishers = [AnyCancellable]()
 
-    private let logger: BaseLogger
+    private let logger: ConsoleLogger
 
     init(relay: WalletConnectRelaying,
          crypto: Crypto,
@@ -25,7 +25,7 @@ final class SessionEngine {
          sequencesStore: SequenceStore<SessionSequence>,
          isController: Bool,
          metadata: AppMetadata,
-         logger: BaseLogger) {
+         logger: ConsoleLogger) {
         self.relayer = relay
         self.crypto = crypto
         self.metadata = metadata
@@ -324,7 +324,7 @@ final class SessionEngine {
             case .sessionNotification(let notificationParams):
                 handleSessionNotification(topic: topic, notificationParams: notificationParams, requestId: requestId)
             default:
-                fatalError("unexpected method type")
+                logger.warn("Warning: Session Engine - Unexpected method type: \(subscriptionPayload.clientSynchJsonRpc.method) received from subscriber")
             }
         }
     }

@@ -24,22 +24,23 @@ public final class WalletConnectClient {
     private let relay: WalletConnectRelaying
     private let crypto: Crypto
     private var sessionPermissions: [String: SessionType.Permissions] = [:]
-    var logger: BaseLogger = ConsoleLogger()
+    public let logger: ConsoleLogger
     private let secureStorage = SecureStorage()
     
     // MARK: - Public interface
 
-
-    public convenience init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL, keyValueStore: KeyValueStorage = UserDefaults.standard) {
-        self.init(metadata: metadata, apiKey: apiKey, isController: isController, relayURL: relayURL, logger: MuteLogger(), keyValueStore: keyValueStore)
+    public convenience init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, keyValueStore: KeyValueStorage = UserDefaults.standard) {
+        self.init(metadata: metadata, apiKey: apiKey, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keyValueStore: keyValueStore)
     }
     
-    init(metadata: AppMetadata, apiKey: String, isController: Bool, relayURL: URL, logger: BaseLogger = MuteLogger(), keychain: KeychainStorage = KeychainStorage(), keyValueStore: KeyValueStorage) {
+    init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, logger: ConsoleLogger, keychain: KeychainStorage = KeychainStorage(), keyValueStore: KeyValueStorage) {
         self.metadata = metadata
         self.isController = isController
+        self.logger = logger
 //        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
         self.crypto = Crypto(keychain: keychain)
-        let wakuRelay = WakuNetworkRelay(transport: JSONRPCTransport(url: relayURL), logger: logger)
+        let relayUrl = WakuNetworkRelay.makeRelayUrl(host: relayHost, apiKey: apiKey)
+        let wakuRelay = WakuNetworkRelay(transport: JSONRPCTransport(url: relayUrl), logger: logger)
         let serialiser = JSONRPCSerialiser(crypto: crypto)
         let sessionSequencesStore = SequenceStore<SessionSequence>(storage: keyValueStore)
         self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore))

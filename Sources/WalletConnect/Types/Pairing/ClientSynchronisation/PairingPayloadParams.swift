@@ -13,15 +13,3 @@ extension PairingType.PayloadParams {
         let params: SessionType.ProposeParams
     }
 }
-
-extension PairingType.PayloadParams.Request {
-    enum Params: Codable, Equatable {
-        init(from decoder: Decoder) throws {
-            fatalError("not implemented")
-        }
-        
-        func encode(to encoder: Encoder) throws {
-            fatalError("not implemented")
-        }
-    }
-}

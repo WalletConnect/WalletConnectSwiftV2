@@ -11,7 +11,7 @@ class WakuRelayTests: XCTestCase {
 
     override func setUp() {
         transport = MockedJSONRPCTransport()
-        let logger = MuteLogger()
+        let logger = ConsoleLogger()
         wakuRelay = WakuNetworkRelay(transport: transport, logger: logger)
     }
 
