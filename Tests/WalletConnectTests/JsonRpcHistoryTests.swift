@@ -10,7 +10,7 @@ final class JsonRpcHistoryTests: XCTestCase {
     var sut: JsonRpcHistory!
             
     override func setUp() {
-        sut = JsonRpcHistory(logger: ConsoleLogger(), keyValueStorage: RuntimeKeyValueStorage())
+        sut = JsonRpcHistory(logger: ConsoleLogger(), keyValueStorage: RuntimeKeyValueStorage(), clientName: nil)
     }
     
     override func tearDown() {

@@ -28,11 +28,11 @@ final class SequenceStore<T> where T: ExpirableSequence {
 
     func setSequence(_ sequence: T) throws {
         let encoded = try JSONEncoder().encode(sequence)
-        storage.set(encoded, forKey: sequence.topic)
+        storage.set(encoded, forKey: getKey(for: sequence.topic))
     }
 
     func getSequence(forTopic topic: String) throws -> T? {
-        guard let data = storage.object(forKey: topic) as? Data else { return nil }
+        guard let data = storage.object(forKey: getKey(for: topic)) as? Data else { return nil }
         let sequence = try JSONDecoder().decode(T.self, from: data)
         return verifyExpiry(on: sequence)
     }
@@ -47,18 +47,18 @@ final class SequenceStore<T> where T: ExpirableSequence {
     }
 
     func update(sequence: T, onTopic topic: String) throws {
-        storage.removeObject(forKey: topic)
+        storage.removeObject(forKey: getKey(for: topic))
         try setSequence(sequence)
     }
 
     func delete(topic: String) {
-        storage.removeObject(forKey: topic)
+        storage.removeObject(forKey: getKey(for: topic))
     }
     
     private func verifyExpiry(on sequence: T) -> T? {
         let now = dateInitializer()
         if now >= sequence.expiryDate {
-            storage.removeObject(forKey: sequence.topic)
+            storage.removeObject(forKey: getKey(for: sequence.topic))
             onSequenceExpiration?(sequence.topic)
             return nil
         }

@@ -8,11 +8,11 @@ public protocol WalletConnectClientDelegate: AnyObject {
     func didDelete(sessionTopic: String, reason: SessionType.Reason)
     func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions)
     func didUpdate(sessionTopic: String, accounts: Set<String>)
-    func didSettle(session: Session) //Optional
-    func didSettle(pairing: Pairing) //Optional
-    func didReceive(notification: SessionNotification, sessionTopic: String) //Optional
-    func didReject(pendingSessionTopic: String, reason: SessionType.Reason) //Optional
-    func didUpdate(pairingTopic: String, appMetadata: AppMetadata) //Optional
+    func didSettle(session: Session)
+    func didSettle(pairing: Pairing)
+    func didReceive(notification: SessionNotification, sessionTopic: String)
+    func didReject(pendingSessionTopic: String, reason: SessionType.Reason)
+    func didUpdate(pairingTopic: String, appMetadata: AppMetadata)
 }
 
 extension WalletConnectClientDelegate {
@@ -51,7 +51,7 @@ public final class WalletConnectClient {
         let wakuRelay = WakuNetworkRelay(transport: JSONRPCTransport(url: relayUrl), logger: logger)
         let serialiser = JSONRPCSerialiser(crypto: crypto)
         let sessionSequencesStore = SequenceStore<SessionSequence>(storage: keyValueStore)
-        self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore))
+        self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore, clientName: clientName))
         let pairingSequencesStore = SequenceStore<PairingSequence>(storage: keyValueStore, keyPrefix: clientName)
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)

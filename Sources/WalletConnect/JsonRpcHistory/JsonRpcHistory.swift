@@ -12,10 +12,12 @@ protocol JsonRpcHistoryRecording {
 class JsonRpcHistory: JsonRpcHistoryRecording {
     let storage: KeyValueStore<JsonRpcRecord>
     let logger: ConsoleLogger
+    let clientName: String
     
-    init(logger: ConsoleLogger, keyValueStorage: KeyValueStorage) {
+    init(logger: ConsoleLogger, keyValueStorage: KeyValueStorage, clientName: String?) {
         self.logger = logger
         self.storage = KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage)
+        self.clientName = clientName ?? ""
     }
     
     func get(id: Int64) -> JsonRpcRecord? {
@@ -54,6 +56,7 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
     }
     
     private func getKey(for id: Int64) -> String {
-        return "wc_json_rpc_record_\(id)"
+        let prefix = "\(clientName)_wc_json_rpc_record_"
+        return "\(prefix)\(id)"
     }
 }
