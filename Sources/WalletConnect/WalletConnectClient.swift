@@ -42,8 +42,8 @@ public final class WalletConnectClient {
         let relayUrl = WakuNetworkRelay.makeRelayUrl(host: relayHost, apiKey: apiKey)
         let wakuRelay = WakuNetworkRelay(transport: JSONRPCTransport(url: relayUrl), logger: logger)
         let serialiser = JSONRPCSerialiser(crypto: crypto)
+        let sessionSequencesStore = SequenceStore<SessionSequence>(storage: keyValueStore)
         self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore))
-        let sessionSequencesStore = SessionUserDefaultsStore(logger: logger)
         let pairingSequencesStore = SequenceStore<PairingSequence>(storage: keyValueStore)
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
@@ -98,7 +98,7 @@ public final class WalletConnectClient {
         sessionEngine.approve(proposal: proposal.proposal, accounts: accounts) { [unowned self] result in
             switch result {
             case .success(let settledSession):
-                let session = Session(topic: settledSession.topic, peer: settledSession.peer.metadata, permissions: proposal.permissions)
+                let session = Session(topic: settledSession.topic, peer: settledSession.peer, permissions: proposal.permissions)
                 self.delegate?.didSettle(session: session)
             case .failure(let error):
                 print(error)
@@ -134,7 +134,7 @@ public final class WalletConnectClient {
             pairingEngine.ping(topic: topic) { result in
                 completion(result)
             }
-        } else if sessionEngine.sequencesStore.get(topic: topic) != nil {
+        } else if sessionEngine.sequencesStore.hasSequence(forTopic: topic) {
             sessionEngine.ping(topic: topic) { result in
                 completion(result)
             }
@@ -151,11 +151,7 @@ public final class WalletConnectClient {
     }
     
     public func getSettledSessions() -> [Session] {
-        let settledSessions = sessionEngine.sequencesStore.getSettled()
-        let sessions = settledSessions.map {
-            Session(topic: $0.topic, peer: $0.peer.metadata, permissions: .init(blockchains: $0.permissions.blockchain.chains, methods: $0.permissions.jsonrpc.methods))
-        }
-        return sessions
+        sessionEngine.getSettledSessions()
     }
     
     public func getSettledPairings() -> [Pairing] {
@@ -178,8 +174,8 @@ public final class WalletConnectClient {
             sessionEngine.proposeSession(settledPairing: settledPairing, permissions: permissions, relay: relayOptions)
         }
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
-            let permissions = SessionPermissions.init(blockchains: settledSession.permissions.blockchain.chains, methods: settledSession.permissions.jsonrpc.methods)
-            let session = Session(topic: settledSession.topic, peer: settledSession.peer.metadata, permissions: permissions)
+            let permissions = SessionPermissions.init(blockchains: settledSession.permissions.blockchains, methods: settledSession.permissions.methods)
+            let session = Session(topic: settledSession.topic, peer: settledSession.peer, permissions: permissions)
             delegate?.didSettle(session: session)
         }
         sessionEngine.onSessionRejected = { [unowned self] pendingTopic, reason in
