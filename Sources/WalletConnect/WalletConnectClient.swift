@@ -50,7 +50,7 @@ public final class WalletConnectClient {
         let relayUrl = WakuNetworkRelay.makeRelayUrl(host: relayHost, apiKey: apiKey)
         let wakuRelay = WakuNetworkRelay(transport: JSONRPCTransport(url: relayUrl), logger: logger)
         let serialiser = JSONRPCSerialiser(crypto: crypto)
-        let sessionSequencesStore = SequenceStore<SessionSequence>(storage: keyValueStore)
+        let sessionSequencesStore = SequenceStore<SessionSequence>(storage: keyValueStore, keyPrefix: clientName)
         self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore, clientName: clientName))
         let pairingSequencesStore = SequenceStore<PairingSequence>(storage: keyValueStore, keyPrefix: clientName)
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
