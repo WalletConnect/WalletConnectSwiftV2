@@ -123,7 +123,7 @@ final class PairingEngine {
         }
     }
     
-    func propose(_ params: ConnectParams) -> PairingType.Pending? {
+    func propose() -> PairingType.Pending? {
         logger.debug("Propose Pairing")
         guard let topic = String.generateTopic() else {
             logger.debug("Could not generate topic")
