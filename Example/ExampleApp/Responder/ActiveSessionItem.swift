@@ -4,37 +4,3 @@ struct ActiveSessionItem {
     let iconURL: String
     let topic: String
 }
-
-extension ActiveSessionItem {
-    
-    static func mockList() -> [ActiveSessionItem] {
-        [mockPancakeSwap(), mockUniswap(), mockSushiSwap()]
-    }
-    
-    static func mockPancakeSwap() -> ActiveSessionItem {
-        ActiveSessionItem(
-            dappName: "PancakeSwap",
-            dappURL: "pancakeswap.finance",
-            iconURL: "https://pancakeswap.finance/logo.png",
-            topic: ""
-        )
-    }
-    
-    static func mockUniswap() -> ActiveSessionItem {
-        ActiveSessionItem(
-            dappName: "Uniswap",
-            dappURL: "app.uniswap.org",
-            iconURL: "https://s2.coinmarketcap.com/static/img/coins/64x64/7083.png",
-            topic: ""
-        )
-    }
-    
-    static func mockSushiSwap() -> ActiveSessionItem {
-        ActiveSessionItem(
-            dappName: "Sushi Swap",
-            dappURL: "app.sushi.com",
-            iconURL: "https://s2.coinmarketcap.com/static/img/coins/64x64/6758.png",
-            topic: ""
-        )
-    }
-}
