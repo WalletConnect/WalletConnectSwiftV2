@@ -63,7 +63,7 @@ public final class WalletConnectClient {
             sessionEngine.proposeSession(settledPairing: Pairing(topic: pairing.topic, peer: nil), permissions: params.permissions, relay: pairing.relay)
             return nil
         } else {
-            guard let pending = pairingEngine.propose(params) else {
+            guard let pending = pairingEngine.propose() else {
                 throw WalletConnectError.internal(.pairingProposalGenerationFailed)
             }
             sessionPermissions[pending.topic] = params.permissions
