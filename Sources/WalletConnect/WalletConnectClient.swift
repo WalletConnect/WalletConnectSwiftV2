@@ -37,8 +37,8 @@ public final class WalletConnectClient {
     
     // MARK: - Public interface
 
-    public convenience init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, keyValueStore: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
-        self.init(metadata: metadata, apiKey: apiKey, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keyValueStore: keyValueStore, clientName: clientName)
+    public convenience init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
+        self.init(metadata: metadata, apiKey: apiKey, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keyValueStore: keyValueStorage, clientName: clientName)
     }
     
     init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, logger: ConsoleLogger, keychain: KeychainStorage = KeychainStorage(), keyValueStore: KeyValueStorage, clientName: String? = nil) {
