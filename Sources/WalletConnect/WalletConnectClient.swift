@@ -1,6 +1,8 @@
 
 import Foundation
-
+#if !os(macOS)
+import UIKit
+#endif
 
 public protocol WalletConnectClientDelegate: AnyObject {
     func didReceive(sessionProposal: SessionProposal)
@@ -57,6 +59,11 @@ public final class WalletConnectClient {
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
         setUpEnginesCallbacks()
         secureStorage.setAPIKey(apiKey)
+        subscribeNotificationCenter()
+    }
+    
+    deinit {
+        unsubscribeNotificationCenter()
     }
     
     // for proposer to propose a session to a responder
@@ -220,6 +227,31 @@ public final class WalletConnectClient {
             proposal: proposal
         )
         delegate?.didReceive(sessionProposal: sessionProposal)
+    }
+    
+    private func subscribeNotificationCenter() {
+        // TODO: use notification center variable / check for UIKit
+#if !os(macOS)
+        NotificationCenter.default.addObserver(self, selector: #selector(appDidEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+#endif
+    }
+    
+    private func unsubscribeNotificationCenter() {
+#if !os(macOS)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
+#endif
+    }
+    
+    @objc
+    private func appWillEnterForeground() {
+        print("did become active")
+    }
+    
+    @objc
+    private func appDidEnterBackground() {
+        print("did enter background")
     }
 }
 
