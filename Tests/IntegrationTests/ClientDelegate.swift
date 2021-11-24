@@ -20,8 +20,8 @@ class ClientDelegate: WalletConnectClientDelegate {
         client.delegate = self
     }
     
-    func didReject(sessionPendingTopic: String, reason: SessionType.Reason) {
-        onSessionRejected?(sessionPendingTopic, reason)
+    func didReject(pendingSessionTopic: String, reason: SessionType.Reason) {
+        onSessionRejected?(pendingSessionTopic, reason)
     }
     func didSettle(session: Session) {
         onSessionSettled?(session)

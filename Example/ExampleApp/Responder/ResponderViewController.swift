@@ -37,8 +37,8 @@ final class ResponderViewController: UIViewController {
         
         responderView.tableView.dataSource = self
         responderView.tableView.delegate = self
-        sessionItems = ActiveSessionItem.mockList()
-        
+        let settledSessions = client.getSettledSessions()
+        sessionItems = getActiveSessionItem(for: settledSessions)
         client.delegate = self
     }
     
@@ -118,7 +118,8 @@ extension ResponderViewController: SessionViewControllerDelegate {
         print("[RESPONDER] Approving session...")
         let proposal = currentProposal!
         currentProposal = nil
-        client.approve(proposal: proposal, accounts: [])
+        client.approve(proposal: proposal, accounts: []) { _ in
+        }
     }
     
     func didRejectSession() {
@@ -178,7 +179,15 @@ extension ResponderViewController: WalletConnectClientDelegate {
     func didSettle(session: Session) {
         print("[RESPONDER] WC: Did settle session")
         let settledSessions = client.getSettledSessions()
-        let activeSessions = settledSessions.map { session -> ActiveSessionItem in
+        let activeSessions = getActiveSessionItem(for: settledSessions)
+        DispatchQueue.main.async { // FIXME: Delegate being called from background thread
+            self.sessionItems = activeSessions
+            self.responderView.tableView.reloadData()
+        }
+    }
+    
+    private func getActiveSessionItem(for settledSessions: [Session]) -> [ActiveSessionItem] {
+        return settledSessions.map { session -> ActiveSessionItem in
             let app = session.peer
             return ActiveSessionItem(
                 dappName: app.name ?? "",
@@ -186,17 +195,13 @@ extension ResponderViewController: WalletConnectClientDelegate {
                 iconURL: app.icons?.first ?? "",
                 topic: session.topic)
         }
-        DispatchQueue.main.async { // FIXME: Delegate being called from background thread
-            self.sessionItems = activeSessions
-            self.responderView.tableView.reloadData()
-        }
     }
     
     func didSettle(pairing: PairingType.Settled) {
         print("[RESPONDER] WC: Did settle pairing")
     }
     
-    func didReject(sessionPendingTopic: String, reason: SessionType.Reason) {
+    func didReject(pendingSessionTopic: String, reason: SessionType.Reason) {
         print("[RESPONDER] WC: Did reject session")
     }
 }

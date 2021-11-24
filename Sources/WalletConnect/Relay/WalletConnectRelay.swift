@@ -11,7 +11,7 @@ protocol WalletConnectRelaying {
     func unsubscribe(topic: String)
 }
 
-enum JsonRpcResponseTypes: Codable {
+public enum JsonRpcResponseTypes: Codable {
     case error(JSONRPCErrorResponse)
     case response(JSONRPCResponse<AnyCodable>)
     var id: Int64 {

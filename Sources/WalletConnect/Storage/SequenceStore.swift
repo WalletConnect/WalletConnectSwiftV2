@@ -14,10 +14,12 @@ final class SequenceStore<T> where T: ExpirableSequence {
     
     private let storage: KeyValueStorage
     private let dateInitializer: () -> Date
+    private let keyPrefix: String
 
-    init(storage: KeyValueStorage, dateInitializer: @escaping () -> Date = Date.init) {
+    init(storage: KeyValueStorage, keyPrefix: String? = nil, dateInitializer: @escaping () -> Date = Date.init) {
         self.storage = storage
         self.dateInitializer = dateInitializer
+        self.keyPrefix = keyPrefix ?? ""
     }
     
     func hasSequence(forTopic topic: String) -> Bool {
@@ -26,11 +28,11 @@ final class SequenceStore<T> where T: ExpirableSequence {
 
     func setSequence(_ sequence: T) throws {
         let encoded = try JSONEncoder().encode(sequence)
-        storage.set(encoded, forKey: sequence.topic)
+        storage.set(encoded, forKey: getKey(for: sequence.topic))
     }
 
     func getSequence(forTopic topic: String) throws -> T? {
-        guard let data = storage.object(forKey: topic) as? Data else { return nil }
+        guard let data = storage.object(forKey: getKey(for: topic)) as? Data else { return nil }
         let sequence = try JSONDecoder().decode(T.self, from: data)
         return verifyExpiry(on: sequence)
     }
@@ -45,21 +47,25 @@ final class SequenceStore<T> where T: ExpirableSequence {
     }
 
     func update(sequence: T, onTopic topic: String) throws {
-        storage.removeObject(forKey: topic)
+        storage.removeObject(forKey: getKey(for: topic))
         try setSequence(sequence)
     }
 
     func delete(topic: String) {
-        storage.removeObject(forKey: topic)
+        storage.removeObject(forKey: getKey(for: topic))
     }
     
     private func verifyExpiry(on sequence: T) -> T? {
         let now = dateInitializer()
         if now >= sequence.expiryDate {
-            storage.removeObject(forKey: sequence.topic)
+            storage.removeObject(forKey: getKey(for: sequence.topic))
             onSequenceExpiration?(sequence.topic)
             return nil
         }
         return sequence
+    }
+    
+    private func getKey(for topic: String) -> String {
+        return "\(keyPrefix)_\(topic)"
     }
 }

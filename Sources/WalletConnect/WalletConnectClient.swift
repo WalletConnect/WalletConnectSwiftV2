@@ -5,14 +5,22 @@ import Foundation
 public protocol WalletConnectClientDelegate: AnyObject {
     func didReceive(sessionProposal: SessionProposal)
     func didReceive(sessionRequest: SessionRequest)
-    func didReceive(notification: SessionNotification, sessionTopic: String)
-    func didSettle(session: Session)
-    func didSettle(pairing: Pairing)
-    func didReject(sessionPendingTopic: String, reason: SessionType.Reason)
     func didDelete(sessionTopic: String, reason: SessionType.Reason)
     func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions)
     func didUpdate(sessionTopic: String, accounts: Set<String>)
+    func didSettle(session: Session)
+    func didSettle(pairing: Pairing)
+    func didReceive(notification: SessionNotification, sessionTopic: String)
+    func didReject(pendingSessionTopic: String, reason: SessionType.Reason)
     func didUpdate(pairingTopic: String, appMetadata: AppMetadata)
+}
+
+extension WalletConnectClientDelegate {
+    func didSettle(session: Session) {}
+    func didSettle(pairing: Pairing) {}
+    func didReceive(notification: SessionNotification, sessionTopic: String) {}
+    func didReject(pendingSessionTopic: String, reason: SessionType.Reason) {}
+    func didUpdate(pairingTopic: String, appMetadata: AppMetadata) {}
 }
 
 public final class WalletConnectClient {
@@ -29,11 +37,11 @@ public final class WalletConnectClient {
     
     // MARK: - Public interface
 
-    public convenience init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, keyValueStore: KeyValueStorage = UserDefaults.standard) {
-        self.init(metadata: metadata, apiKey: apiKey, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keyValueStore: keyValueStore)
+    public convenience init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
+        self.init(metadata: metadata, apiKey: apiKey, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keyValueStore: keyValueStorage, clientName: clientName)
     }
     
-    init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, logger: ConsoleLogger, keychain: KeychainStorage = KeychainStorage(), keyValueStore: KeyValueStorage) {
+    init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, logger: ConsoleLogger, keychain: KeychainStorage = KeychainStorage(), keyValueStore: KeyValueStorage, clientName: String? = nil) {
         self.metadata = metadata
         self.isController = isController
         self.logger = logger
@@ -42,9 +50,9 @@ public final class WalletConnectClient {
         let relayUrl = WakuNetworkRelay.makeRelayUrl(host: relayHost, apiKey: apiKey)
         let wakuRelay = WakuNetworkRelay(transport: JSONRPCTransport(url: relayUrl), logger: logger)
         let serialiser = JSONRPCSerialiser(crypto: crypto)
-        let sessionSequencesStore = SequenceStore<SessionSequence>(storage: keyValueStore)
-        self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore))
-        let pairingSequencesStore = SequenceStore<PairingSequence>(storage: keyValueStore)
+        let sessionSequencesStore = SequenceStore<SessionSequence>(storage: keyValueStore, keyPrefix: clientName)
+        self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore, clientName: clientName))
+        let pairingSequencesStore = SequenceStore<PairingSequence>(storage: keyValueStore, keyPrefix: clientName)
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
         setUpEnginesCallbacks()
@@ -94,13 +102,15 @@ public final class WalletConnectClient {
     }
     
     // for responder to approve a session proposal
-    public func approve(proposal: SessionProposal, accounts: Set<String>) {
+    public func approve(proposal: SessionProposal, accounts: Set<String>, completion: @escaping (Result<Session, Error>) -> ()) {
         sessionEngine.approve(proposal: proposal.proposal, accounts: accounts) { [unowned self] result in
             switch result {
             case .success(let settledSession):
                 let session = Session(topic: settledSession.topic, peer: settledSession.peer, permissions: proposal.permissions)
                 self.delegate?.didSettle(session: session)
+                completion(.success(session))
             case .failure(let error):
+                completion(.failure(error))
                 print(error)
             }
         }
@@ -125,7 +135,7 @@ public final class WalletConnectClient {
     }
     
     // for responder to respond JSON-RPC
-    public func respond(topic: String, response: JSONRPCResponse<AnyCodable>) {
+    public func respond(topic: String, response: JsonRpcResponseTypes) {
         sessionEngine.respondSessionPayload(topic: topic, response: response)
     }
     
@@ -179,7 +189,7 @@ public final class WalletConnectClient {
             delegate?.didSettle(session: session)
         }
         sessionEngine.onSessionRejected = { [unowned self] pendingTopic, reason in
-            delegate?.didReject(sessionPendingTopic: pendingTopic, reason: reason)
+            delegate?.didReject(pendingSessionTopic: pendingTopic, reason: reason)
         }
         sessionEngine.onSessionPayloadRequest = { [unowned self] sessionRequest in
             delegate?.didReceive(sessionRequest: sessionRequest)
