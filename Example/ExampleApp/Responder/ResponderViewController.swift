@@ -119,7 +119,8 @@ extension ResponderViewController: SessionViewControllerDelegate {
         print("[RESPONDER] Approving session...")
         let proposal = currentProposal!
         currentProposal = nil
-        client.approve(proposal: proposal, accounts: []) { _ in
+        let accounts = proposal.permissions.blockchains.map {$0+":0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"}
+        client.approve(proposal: proposal, accounts: Set(accounts)) { _ in
         }
     }
     
