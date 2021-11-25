@@ -13,7 +13,7 @@ final class KeychainStorage: KeychainStorageProtocol {
     
     private let secItem: KeychainServiceProtocol
     
-    init(keychainService: KeychainServiceProtocol = KeychainServiceWrapper(), uniqueIdentifier: String?) {
+    init(keychainService: KeychainServiceProtocol = KeychainServiceWrapper(), uniqueIdentifier: String? = nil) {
         self.secItem = keychainService
         service = "com.walletconnect.sdk.\(uniqueIdentifier ?? "")"
     }
