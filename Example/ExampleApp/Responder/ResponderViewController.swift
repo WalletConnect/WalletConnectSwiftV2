@@ -65,6 +65,19 @@ final class ResponderViewController: UIViewController {
         present(proposalViewController, animated: true)
     }
     
+    private func showSessionRequest(_ sessionRequest: SessionRequest) {
+        let requestVC = RequestViewController(sessionRequest)
+        requestVC.onSign = { [weak self] in
+            let result = "0xa3f20717a250c2b0b729b7e5becbff67fdaef7e0699da4de7ca5895b02a170a12d887fd3b17bfdce3481f10bea41f45ba9f709d39ce8325427b57afcfc994cee1b"
+            let response = JSONRPCResponse<AnyCodable>(id: sessionRequest.request.id, result: AnyCodable(result))
+            self?.client.respond(topic: sessionRequest.topic, response: .response(response))
+        }
+        requestVC.onReject = { [weak self] in
+            self?.client.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.request.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
+        }
+        present(requestVC, animated: true)
+    }
+    
     private func pairClient(uri: String) {
         print("[RESPONDER] Pairing to: \(uri)")
         do {
@@ -135,7 +148,7 @@ extension ResponderViewController: SessionViewControllerDelegate {
 extension ResponderViewController: WalletConnectClientDelegate {
     
     func didSettle(pairing: Pairing) {
-
+        
     }
     
     func didReceive(sessionProposal: SessionProposal) {
@@ -155,7 +168,11 @@ extension ResponderViewController: WalletConnectClientDelegate {
     }
     
     func didReceive(sessionRequest: SessionRequest) {
+        DispatchQueue.main.async { [weak self] in
+            self?.showSessionRequest(sessionRequest)
+        }
         print("[RESPONDER] WC: Did receive session request")
+        
     }
 
     func didReceive(notification: SessionNotification, sessionTopic: String) {

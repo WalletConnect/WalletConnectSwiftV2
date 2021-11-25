@@ -22,6 +22,7 @@
 		76744CF526FDFB6B00B77ED9 /* ResponderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF426FDFB6B00B77ED9 /* ResponderView.swift */; };
 		76744CF726FE4D5400B77ED9 /* ActiveSessionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */; };
 		76744CF926FE4D7400B77ED9 /* ActiveSessionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */; };
+		8460DCFC274F98A10081F94C /* RequestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8460DCFB274F98A10081F94C /* RequestViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 		76744CF426FDFB6B00B77ED9 /* ResponderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponderView.swift; sourceTree = "<group>"; };
 		76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionItem.swift; sourceTree = "<group>"; };
 		76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionCell.swift; sourceTree = "<group>"; };
+		8460DCFB274F98A10081F94C /* RequestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +69,7 @@
 				76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */,
 				764E1D5926F8DF1B00A1FB15 /* ScannerViewController.swift */,
 				761C64A426FCB08B004239D1 /* Session */,
+				8460DCFD274F98A90081F94C /* Requst */,
 			);
 			path = Responder;
 			sourceTree = "<group>";
@@ -129,6 +132,14 @@
 				764E1D5426F8DAC800A1FB15 /* Package.swift */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		8460DCFD274F98A90081F94C /* Requst */ = {
+			isa = PBXGroup;
+			children = (
+				8460DCFB274F98A10081F94C /* RequestViewController.swift */,
+			);
+			path = Requst;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -204,6 +215,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				761C64A326FB83CE004239D1 /* SessionView.swift in Sources */,
+				8460DCFC274F98A10081F94C /* RequestViewController.swift in Sources */,
 				76744CF526FDFB6B00B77ED9 /* ResponderView.swift in Sources */,
 				761C649A26FB7ABB004239D1 /* ProposerViewController.swift in Sources */,
 				76744CF926FE4D7400B77ED9 /* ActiveSessionCell.swift in Sources */,

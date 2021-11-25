@@ -1,0 +1,157 @@
+
+import Foundation
+import UIKit
+import WalletConnect
+
+class RequestViewController: UIViewController {
+    var onSign: (()->())?
+    var onReject: (()->())?
+    let sessionRequest: SessionRequest
+    private let requestView = {
+        RequestView()
+    }()
+    init(_ sessionRequest: SessionRequest) {
+        self.sessionRequest = sessionRequest
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    override func loadView() {
+        view = requestView
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        requestView.approveButton.addTarget(self, action: #selector(signAction), for: .touchUpInside)
+        requestView.rejectButton.addTarget(self, action: #selector(rejectAction), for: .touchUpInside)
+        let method = sessionRequest.request.method
+        requestView.nameLabel.text = method
+        var paramsDescription = ""
+        if method == "personal_sign" {
+            paramsDescription = try! sessionRequest.request.params.get([String].self).description
+        }
+        requestView.descriptionLabel.text = paramsDescription
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    @objc
+    private func signAction() {
+        onSign?()
+        dismiss(animated: true)
+    }
+    
+    @objc
+    private func rejectAction() {
+        onReject?()
+        dismiss(animated: true)
+    }
+}
+
+final class RequestView: UIView {
+    
+    let iconView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+        imageView.backgroundColor = .systemFill
+        imageView.layer.cornerRadius = 32
+        return imageView
+    }()
+    
+    let nameLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 17.0, weight: .heavy)
+        return label
+    }()
+    
+    let descriptionLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.preferredFont(forTextStyle: .subheadline)
+        label.textColor = .secondaryLabel
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        return label
+    }()
+    
+    let approveButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Sign", for: .normal)
+        button.backgroundColor = .systemBlue
+        button.tintColor = .white
+        button.layer.cornerRadius = 8
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 17.0, weight: .semibold)
+        return button
+    }()
+    
+    let rejectButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Reject", for: .normal)
+        button.backgroundColor = .systemRed
+        button.tintColor = .white
+        button.layer.cornerRadius = 8
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 17.0, weight: .semibold)
+        return button
+    }()
+    
+    let headerStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 16
+        stackView.alignment = .center
+        return stackView
+    }()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        backgroundColor = .systemBackground
+        
+        addSubview(iconView)
+        addSubview(headerStackView)
+        addSubview(approveButton)
+        addSubview(rejectButton)
+        headerStackView.addArrangedSubview(nameLabel)
+        headerStackView.addArrangedSubview(descriptionLabel)
+        
+        subviews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
+        
+        NSLayoutConstraint.activate([
+            iconView.topAnchor.constraint(equalTo: topAnchor, constant: 64),
+            iconView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            iconView.widthAnchor.constraint(equalToConstant: 64),
+            iconView.heightAnchor.constraint(equalToConstant: 64),
+            
+            headerStackView.topAnchor.constraint(equalTo: iconView.bottomAnchor, constant: 32),
+            headerStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
+            headerStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
+    
+            
+            approveButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            approveButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            approveButton.heightAnchor.constraint(equalToConstant: 44),
+            
+            rejectButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            rejectButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            rejectButton.heightAnchor.constraint(equalToConstant: 44),
+            
+            approveButton.widthAnchor.constraint(equalTo: rejectButton.widthAnchor),
+            rejectButton.leadingAnchor.constraint(equalTo: approveButton.trailingAnchor, constant: 16),
+        ])
+    }
+    
+    func loadImage(at url: String) {
+        guard let iconURL = URL(string: url) else { return }
+        DispatchQueue.global().async {
+            if let imageData = try? Data(contentsOf: iconURL) {
+                DispatchQueue.main.async { [weak self] in
+                    self?.iconView.image = UIImage(data: imageData)
+                }
+            }
+        }
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
