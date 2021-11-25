@@ -8,7 +8,7 @@ final class SecureStorage {
     
     private let api = "api-key"
     
-    init(keychain: KeychainStorageProtocol = KeychainStorage(),
+    init(keychain: KeychainStorageProtocol,
          dispatchQueue: DispatchQueue = DispatchQueue(label: "com.walletconnect.keychain.queue", qos: .default)) {
         self.keychain = keychain
         self.queue = dispatchQueue

@@ -9,12 +9,13 @@ protocol KeychainStorageProtocol {
 
 final class KeychainStorage: KeychainStorageProtocol {
     
-    let service = "com.walletconnect.sdk"
+    private let service: String
     
     private let secItem: KeychainServiceProtocol
     
-    init(keychainService: KeychainServiceProtocol = KeychainServiceWrapper()) {
+    init(keychainService: KeychainServiceProtocol = KeychainServiceWrapper(), uniqueIdentifier: String?) {
         self.secItem = keychainService
+        service = "com.walletconnect.sdk.\(uniqueIdentifier ?? "")"
     }
     
     func add<T>(_ item: T, forKey key: String) throws where T : GenericPasswordConvertible {
