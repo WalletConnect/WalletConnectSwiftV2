@@ -1,6 +1,5 @@
-// 
-
 import Foundation
+import Network
 
 protocol JSONRPCTransporting {
     var onConnect: (()->())? {get set}
@@ -17,6 +16,8 @@ final class JSONRPCTransport: NSObject, JSONRPCTransporting {
     var onMessage: ((String) -> ())?
     
     private let queue = OperationQueue()
+    private let monitor = NWPathMonitor()
+    private let monitorQueue = DispatchQueue(label: "com.walletconnect.sdk.network.monitor")
     
     private let url: URL
     
@@ -36,6 +37,7 @@ final class JSONRPCTransport: NSObject, JSONRPCTransporting {
         self.url = url
         super.init()
         socket.connect(on: url)
+        startNetworkMonitoring()
     }
 
     func send(_ string: String, completion: @escaping (Error?) -> Void) {
@@ -52,6 +54,18 @@ final class JSONRPCTransport: NSObject, JSONRPCTransporting {
     
     func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) {
         socket.disconnect(with: closeCode)
+        onDisconnect?()
+    }
+    
+    private func startNetworkMonitoring() {
+        monitor.pathUpdateHandler = { [weak self] path in
+            if path.status == .satisfied {
+                self?.connect()
+            } else {
+                self?.disconnect(closeCode: .goingAway)
+            }
+        }
+        monitor.start(queue: monitorQueue)
     }
 }
 
