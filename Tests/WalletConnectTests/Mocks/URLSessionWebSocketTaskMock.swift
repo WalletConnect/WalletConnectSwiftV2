@@ -22,7 +22,7 @@ final class URLSessionWebSocketTaskMock: URLSessionWebSocketTaskProtocol {
         didCallResume = true
     }
     
-    func cancel() {
+    func cancel(with closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         didCallCancel = true
     }
     

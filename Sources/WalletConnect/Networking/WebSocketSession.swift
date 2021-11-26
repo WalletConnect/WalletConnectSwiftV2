@@ -24,7 +24,7 @@ final class WebSocketSession: NSObject {
         webSocketTask?.resume()
     }
     
-    func disconnect(with closeCode: URLSessionWebSocketTask.CloseCode) {
+    func disconnect(with closeCode: URLSessionWebSocketTask.CloseCode = .normalClosure) {
         webSocketTask?.cancel(with: closeCode, reason: nil)
         webSocketTask = nil
     }
