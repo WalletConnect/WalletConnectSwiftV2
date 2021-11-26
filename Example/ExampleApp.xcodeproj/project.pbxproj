@@ -68,7 +68,7 @@
 				76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */,
 				76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */,
 				764E1D5926F8DF1B00A1FB15 /* ScannerViewController.swift */,
-				761C64A426FCB08B004239D1 /* Session */,
+				761C64A426FCB08B004239D1 /* SessionProposal */,
 				8460DCFD274F98A90081F94C /* Requst */,
 			);
 			path = Responder;
@@ -83,14 +83,14 @@
 			path = Proposer;
 			sourceTree = "<group>";
 		};
-		761C64A426FCB08B004239D1 /* Session */ = {
+		761C64A426FCB08B004239D1 /* SessionProposal */ = {
 			isa = PBXGroup;
 			children = (
 				761C649D26FB7FD7004239D1 /* SessionViewController.swift */,
 				761C64A226FB83CE004239D1 /* SessionView.swift */,
 				761C64A526FCB0AA004239D1 /* SessionInfo.swift */,
 			);
-			path = Session;
+			path = SessionProposal;
 			sourceTree = "<group>";
 		};
 		764E1D3326F8D3FC00A1FB15 = {
