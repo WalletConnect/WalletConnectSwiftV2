@@ -17,7 +17,7 @@ final class ResponderViewController: UIViewController {
             clientName: "responder"
         )
     }()
-    
+    let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
     var sessionItems: [ActiveSessionItem] = []
     var currentProposal: SessionProposal?
     
@@ -147,7 +147,7 @@ extension ResponderViewController: SessionViewControllerDelegate {
         print("[RESPONDER] Approving session...")
         let proposal = currentProposal!
         currentProposal = nil
-        let accounts = proposal.permissions.blockchains.map {$0+":0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"}
+        let accounts = proposal.permissions.blockchains.map {$0+":\(account)"}
         client.approve(proposal: proposal, accounts: Set(accounts)) { [weak self] _ in
             self?.reloadActiveSessions()
         }
