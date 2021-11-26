@@ -23,6 +23,8 @@
 		76744CF726FE4D5400B77ED9 /* ActiveSessionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */; };
 		76744CF926FE4D7400B77ED9 /* ActiveSessionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */; };
 		8460DCFC274F98A10081F94C /* RequestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8460DCFB274F98A10081F94C /* RequestViewController.swift */; };
+		8460DD002750D6F50081F94C /* SessionDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8460DCFF2750D6F50081F94C /* SessionDetailsViewController.swift */; };
+		8460DD022750D7020081F94C /* SessionDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8460DD012750D7020081F94C /* SessionDetailsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,6 +48,8 @@
 		76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionItem.swift; sourceTree = "<group>"; };
 		76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionCell.swift; sourceTree = "<group>"; };
 		8460DCFB274F98A10081F94C /* RequestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestViewController.swift; sourceTree = "<group>"; };
+		8460DCFF2750D6F50081F94C /* SessionDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailsViewController.swift; sourceTree = "<group>"; };
+		8460DD012750D7020081F94C /* SessionDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,6 +120,7 @@
 			children = (
 				764E1D3F26F8D3FC00A1FB15 /* AppDelegate.swift */,
 				764E1D4126F8D3FC00A1FB15 /* SceneDelegate.swift */,
+				8460DCFE2750D6DF0081F94C /* SessionDetails */,
 				761C64A026FB8387004239D1 /* Responder */,
 				761C64A126FB838D004239D1 /* Proposer */,
 				764E1D4826F8D3FE00A1FB15 /* Assets.xcassets */,
@@ -140,6 +145,15 @@
 				8460DCFB274F98A10081F94C /* RequestViewController.swift */,
 			);
 			path = Requst;
+			sourceTree = "<group>";
+		};
+		8460DCFE2750D6DF0081F94C /* SessionDetails */ = {
+			isa = PBXGroup;
+			children = (
+				8460DCFF2750D6F50081F94C /* SessionDetailsViewController.swift */,
+				8460DD012750D7020081F94C /* SessionDetailsView.swift */,
+			);
+			path = SessionDetails;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -218,6 +232,7 @@
 				8460DCFC274F98A10081F94C /* RequestViewController.swift in Sources */,
 				76744CF526FDFB6B00B77ED9 /* ResponderView.swift in Sources */,
 				761C649A26FB7ABB004239D1 /* ProposerViewController.swift in Sources */,
+				8460DD002750D6F50081F94C /* SessionDetailsViewController.swift in Sources */,
 				76744CF926FE4D7400B77ED9 /* ActiveSessionCell.swift in Sources */,
 				764E1D4026F8D3FC00A1FB15 /* AppDelegate.swift in Sources */,
 				761C649C26FB7B7F004239D1 /* ResponderViewController.swift in Sources */,
@@ -225,6 +240,7 @@
 				761C649E26FB7FD7004239D1 /* SessionViewController.swift in Sources */,
 				76744CF726FE4D5400B77ED9 /* ActiveSessionItem.swift in Sources */,
 				764E1D4226F8D3FC00A1FB15 /* SceneDelegate.swift in Sources */,
+				8460DD022750D7020081F94C /* SessionDetailsView.swift in Sources */,
 				7603D74D2703429A00DD27A2 /* ProposerView.swift in Sources */,
 				764E1D5A26F8DF1B00A1FB15 /* ScannerViewController.swift in Sources */,
 			);

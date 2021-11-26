@@ -1,6 +1,6 @@
 import UIKit
 
-final class SessionView: UIView {
+final class SessionDetailsView: UIView {
     
     let iconView: UIImageView = {
         let imageView = UIImageView()
@@ -31,27 +31,7 @@ final class SessionView: UIView {
         label.textColor = .tertiaryLabel
         return label
     }()
-    
-    let approveButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Approve", for: .normal)
-        button.backgroundColor = .systemBlue
-        button.tintColor = .white
-        button.layer.cornerRadius = 8
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 17.0, weight: .semibold)
-        return button
-    }()
-    
-    let rejectButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Reject", for: .normal)
-        button.backgroundColor = .systemRed
-        button.tintColor = .white
-        button.layer.cornerRadius = 8
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 17.0, weight: .semibold)
-        return button
-    }()
-    
+
     let headerStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
@@ -84,8 +64,6 @@ final class SessionView: UIView {
         addSubview(headerStackView)
         addSubview(chainsStackView)
         addSubview(methodsStackView)
-        addSubview(approveButton)
-        addSubview(rejectButton)
         headerStackView.addArrangedSubview(nameLabel)
         headerStackView.addArrangedSubview(urlLabel)
         headerStackView.addArrangedSubview(descriptionLabel)
@@ -109,17 +87,6 @@ final class SessionView: UIView {
             methodsStackView.topAnchor.constraint(equalTo: chainsStackView.bottomAnchor, constant: 24),
             methodsStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
             methodsStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
-            
-            approveButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            approveButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            approveButton.heightAnchor.constraint(equalToConstant: 44),
-            
-            rejectButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            rejectButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            rejectButton.heightAnchor.constraint(equalToConstant: 44),
-            
-            approveButton.widthAnchor.constraint(equalTo: rejectButton.widthAnchor),
-            rejectButton.leadingAnchor.constraint(equalTo: approveButton.trailingAnchor, constant: 16),
         ])
     }
     
@@ -159,28 +126,3 @@ final class SessionView: UIView {
     }
 }
 
-final class ListItem: UIView {
-    
-    private let label: UILabel = {
-        let label = UILabel()
-        label.textColor = .secondaryLabel
-        return label
-    }()
-    
-    init(text: String) {
-        super.init(frame: .zero)
-        label.text = text
-        label.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(label)
-        NSLayoutConstraint.activate([
-            label.topAnchor.constraint(equalTo: topAnchor),
-            label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            label.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            label.bottomAnchor.constraint(equalTo: bottomAnchor)
-        ])
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}

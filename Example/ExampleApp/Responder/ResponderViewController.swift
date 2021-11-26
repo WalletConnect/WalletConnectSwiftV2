@@ -65,6 +65,17 @@ final class ResponderViewController: UIViewController {
         present(proposalViewController, animated: true)
     }
     
+    private func showSessionDetailsViewController(_ session: Session) {
+        let sessionInfo = SessionInfo(name: session.peer.name ?? "",
+                                      descriptionText: session.peer.description ?? "",
+                                      dappURL: session.peer.description ?? "",
+                                      iconURL: session.peer.icons?.first ?? "",
+                                      chains: Array(session.permissions.blockchains),
+                                      methods: Array(session.permissions.methods))
+        let vc = SessionDetailsViewController(sessionInfo)
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
     private func showSessionRequest(_ sessionRequest: SessionRequest) {
         let requestVC = RequestViewController(sessionRequest)
         requestVC.onSign = { [weak self] in
@@ -116,6 +127,10 @@ extension ResponderViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("did select row \(indexPath)")
+        let itemTopic = sessionItems[indexPath.row].topic
+        if let session = client.getSettledSessions().first{$0.topic == itemTopic} {
+            showSessionDetailsViewController(session)
+        }
     }
 }
 
