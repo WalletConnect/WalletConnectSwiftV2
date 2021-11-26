@@ -133,7 +133,8 @@ extension ResponderViewController: SessionViewControllerDelegate {
         let proposal = currentProposal!
         currentProposal = nil
         let accounts = proposal.permissions.blockchains.map {$0+":0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"}
-        client.approve(proposal: proposal, accounts: Set(accounts)) { _ in
+        client.approve(proposal: proposal, accounts: Set(accounts)) { [weak self] _ in
+            self?.reloadActiveSessions()
         }
     }
     
@@ -146,10 +147,6 @@ extension ResponderViewController: SessionViewControllerDelegate {
 }
 
 extension ResponderViewController: WalletConnectClientDelegate {
-    
-    func didSettle(pairing: Pairing) {
-        
-    }
     
     func didReceive(sessionProposal: SessionProposal) {
         print("[RESPONDER] WC: Did receive session proposal")
@@ -174,7 +171,7 @@ extension ResponderViewController: WalletConnectClientDelegate {
         print("[RESPONDER] WC: Did receive session request")
         
     }
-
+    
     func didReceive(notification: SessionNotification, sessionTopic: String) {
 
     }
@@ -186,23 +183,9 @@ extension ResponderViewController: WalletConnectClientDelegate {
     func didUpdate(sessionTopic: String, accounts: Set<String>) {
 
     }
-
-    func didUpdate(pairingTopic: String, appMetadata: AppMetadata) {
-
-    }
-
+    
     func didDelete(sessionTopic: String, reason: SessionType.Reason) {
-
-    }
-
-    func didSettle(session: Session) {
-        print("[RESPONDER] WC: Did settle session")
-        let settledSessions = client.getSettledSessions()
-        let activeSessions = getActiveSessionItem(for: settledSessions)
-        DispatchQueue.main.async { // FIXME: Delegate being called from background thread
-            self.sessionItems = activeSessions
-            self.responderView.tableView.reloadData()
-        }
+        reloadActiveSessions()
     }
     
     private func getActiveSessionItem(for settledSessions: [Session]) -> [ActiveSessionItem] {
@@ -216,12 +199,13 @@ extension ResponderViewController: WalletConnectClientDelegate {
         }
     }
     
-    func didSettle(pairing: PairingType.Settled) {
-        print("[RESPONDER] WC: Did settle pairing")
-    }
-    
-    func didReject(pendingSessionTopic: String, reason: SessionType.Reason) {
-        print("[RESPONDER] WC: Did reject session")
+    private func reloadActiveSessions() {
+        let settledSessions = client.getSettledSessions()
+        let activeSessions = getActiveSessionItem(for: settledSessions)
+        DispatchQueue.main.async { // FIXME: Delegate being called from background thread
+            self.sessionItems = activeSessions
+            self.responderView.tableView.reloadData()
+        }
     }
 }
 

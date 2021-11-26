@@ -15,7 +15,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     func didUpdate(pairingTopic: String, appMetadata: AppMetadata)
 }
 
-extension WalletConnectClientDelegate {
+public extension WalletConnectClientDelegate {
     func didSettle(session: Session) {}
     func didSettle(pairing: Pairing) {}
     func didReceive(notification: SessionNotification, sessionTopic: String) {}
