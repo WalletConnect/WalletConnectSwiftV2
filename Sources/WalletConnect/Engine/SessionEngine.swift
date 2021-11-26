@@ -193,7 +193,7 @@ final class SessionEngine {
         }
     }
     
-    func request(params: SessionType.PayloadRequestParams, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, Error>)->())) {
+    func request(params: SessionType.PayloadRequestParams, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())) {
         guard sequencesStore.hasSequence(forTopic: params.topic) else {
             logger.debug("Could not find session for topic \(params.topic)")
             return
@@ -201,7 +201,6 @@ final class SessionEngine {
         let request = SessionType.PayloadParams.Request(method: params.method, params: AnyCodable(params.params))
         let sessionPayloadParams = SessionType.PayloadParams(request: request, chainId: params.chainId)
         let sessionPayloadRequest = ClientSynchJSONRPC(method: .sessionPayload, params: .sessionPayload(sessionPayloadParams))
-
         relayer.request(topic: params.topic, payload: sessionPayloadRequest) { [weak self] result in
             switch result {
             case .success(let response):
@@ -209,6 +208,7 @@ final class SessionEngine {
                 self?.logger.debug("Did receive session payload response")
             case .failure(let error):
                 self?.logger.debug("error: \(error)")
+                completion(.failure(error))
             }
         }
     }
