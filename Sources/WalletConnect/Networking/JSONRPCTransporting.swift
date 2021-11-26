@@ -7,7 +7,7 @@ protocol JSONRPCTransporting {
     var onDisconnect: (()->())? {get set}
     var onMessage: ((String) -> ())? {get set}
     func send(_ string: String, completion: @escaping (Error?)->())
-    func disconnect()
+    func disconnect(closeCode: URLSessionWebSocketTask.CloseCode)
 }
 
 final class JSONRPCTransport: NSObject, JSONRPCTransporting {
@@ -45,11 +45,13 @@ final class JSONRPCTransport: NSObject, JSONRPCTransporting {
     }
     
     func connect() {
-        socket.connect(on: url)
+        if !socket.isConnected {
+            socket.connect(on: url)
+        }
     }
     
-    func disconnect() {
-        socket.disconnect()
+    func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) {
+        socket.disconnect(with: closeCode)
     }
 }
 

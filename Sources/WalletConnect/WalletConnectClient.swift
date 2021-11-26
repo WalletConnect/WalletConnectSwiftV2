@@ -232,10 +232,17 @@ public final class WalletConnectClient {
     }
     
     private func subscribeNotificationCenter() {
-        // TODO: use notification center variable
 #if os(iOS)
-        NotificationCenter.default.addObserver(self, selector: #selector(appDidEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appDidEnterBackground),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appWillEnterForeground),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil)
 #endif
     }
     
@@ -248,14 +255,12 @@ public final class WalletConnectClient {
     
     @objc
     private func appWillEnterForeground() {
-        print("did enter foreground")
         transport.connect()
     }
     
     @objc
     private func appDidEnterBackground() {
-        print("did enter background")
-        transport.disconnect()
+        transport.disconnect(closeCode: .goingAway)
     }
 }
 
