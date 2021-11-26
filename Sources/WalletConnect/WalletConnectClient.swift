@@ -1,6 +1,6 @@
 
 import Foundation
-#if !os(macOS)
+#if os(iOS)
 import UIKit
 #endif
 
@@ -36,6 +36,7 @@ public final class WalletConnectClient {
     private var sessionPermissions: [String: SessionType.Permissions] = [:]
     public let logger: ConsoleLogger
     private let secureStorage = SecureStorage()
+    private let transport: JSONRPCTransport
     
     // MARK: - Public interface
 
@@ -50,7 +51,8 @@ public final class WalletConnectClient {
 //        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
         self.crypto = Crypto(keychain: keychain)
         let relayUrl = WakuNetworkRelay.makeRelayUrl(host: relayHost, apiKey: apiKey)
-        let wakuRelay = WakuNetworkRelay(transport: JSONRPCTransport(url: relayUrl), logger: logger)
+        self.transport = JSONRPCTransport(url: relayUrl)
+        let wakuRelay = WakuNetworkRelay(transport: transport, logger: logger)
         let serialiser = JSONRPCSerialiser(crypto: crypto)
         let sessionSequencesStore = SequenceStore<SessionSequence>(storage: keyValueStore, keyPrefix: clientName)
         self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore, clientName: clientName))
@@ -230,15 +232,15 @@ public final class WalletConnectClient {
     }
     
     private func subscribeNotificationCenter() {
-        // TODO: use notification center variable / check for UIKit
-#if !os(macOS)
+        // TODO: use notification center variable
+#if os(iOS)
         NotificationCenter.default.addObserver(self, selector: #selector(appDidEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
 #endif
     }
     
     private func unsubscribeNotificationCenter() {
-#if !os(macOS)
+#if os(iOS)
         NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
 #endif
@@ -246,12 +248,14 @@ public final class WalletConnectClient {
     
     @objc
     private func appWillEnterForeground() {
-        print("did become active")
+        print("did enter foreground")
+        transport.connect()
     }
     
     @objc
     private func appDidEnterBackground() {
         print("did enter background")
+        transport.disconnect()
     }
 }
 

@@ -18,6 +18,8 @@ final class JSONRPCTransport: NSObject, JSONRPCTransporting {
     
     private let queue = OperationQueue()
     
+    private let url: URL
+    
     private lazy var socket: WebSocketSession = {
         let urlSession = URLSession(configuration: .default, delegate: self, delegateQueue: queue)
         let socket = WebSocketSession(session: urlSession)
@@ -31,6 +33,7 @@ final class JSONRPCTransport: NSObject, JSONRPCTransporting {
     }()
     
     init(url: URL) {
+        self.url = url
         super.init()
         socket.connect(on: url)
     }
@@ -39,6 +42,10 @@ final class JSONRPCTransport: NSObject, JSONRPCTransporting {
         DispatchQueue.global().async {
             self.socket.send(string, completionHandler: completion)
         }
+    }
+    
+    func connect() {
+        socket.connect(on: url)
     }
     
     func disconnect() {
