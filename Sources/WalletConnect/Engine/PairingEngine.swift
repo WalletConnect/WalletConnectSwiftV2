@@ -6,7 +6,7 @@ final class PairingEngine {
     private let relayer: WalletConnectRelaying
     private let crypto: Crypto
     private var isController: Bool
-    var sequencesStore: SequenceStore<PairingSequence>
+    private var sequencesStore: SequenceStore<PairingSequence>
     var onSessionProposal: ((SessionType.Proposal)->())?
     var onPairingApproved: ((Pairing, String, RelayProtocolOptions)->())?
     var onPairingUpdate: ((String, AppMetadata)->())?
@@ -33,10 +33,50 @@ final class PairingEngine {
         restoreSubscriptions()
     }
     
+    func hasPairing(for topic: String) -> Bool {
+        return sequencesStore.hasSequence(forTopic: topic)
+    }
+    
+    func getSettledPairing(for topic: String) -> PairingSequence? {
+        guard let pairing = try? sequencesStore.getSequence(forTopic: topic), pairing.isSettled else { return nil }
+        return pairing
+    }
+    
     func getSettledPairings() -> [Pairing] {
         sequencesStore.getAll()
             .filter { $0.isSettled }
             .map { Pairing(topic: $0.topic, peer: $0.settled?.state?.metadata) }
+    }
+    
+    func propose() -> PairingType.Pending? {
+        logger.debug("Propose Pairing")
+        guard let topic = String.generateTopic() else {
+            logger.debug("Could not generate topic")
+            return nil
+        }
+        let privateKey = Crypto.X25519.generatePrivateKey()
+        let publicKey = privateKey.publicKey.toHexString()
+        let relay = RelayProtocolOptions(protocol: "waku", params: nil)
+        crypto.set(privateKey: privateKey)
+        let proposer = PairingType.Proposer(publicKey: publicKey, controller: isController)
+        let uri = WalletConnectURI(topic: topic, publicKey: publicKey, isController: isController, relay: relay).absoluteString
+        let signalParams = PairingType.Signal.Params(uri: uri)
+        let signal = PairingType.Signal(params: signalParams)
+        let permissions = getDefaultPermissions()
+        let proposal = PairingType.Proposal(topic: topic, relay: relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
+        let `self` = PairingType.Participant(publicKey: publicKey)
+        let pending = PairingType.Pending(status: .proposed, topic: topic, relay: relay, self: `self`, proposal: proposal)
+        
+        let pendingPairing = PairingSequence(
+            topic: topic,
+            relay: relay,
+            selfParticipant: `self`,
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
+            pendingState: PairingSequence.Pending(proposal: proposal, status: .proposed))
+        try? sequencesStore.setSequence(pendingPairing)
+        
+        wcSubscriber.setSubscription(topic: topic)
+        return pending
     }
     
     func approve(_ proposal: PairingType.Proposal, completion: @escaping (Result<Pairing, Error>) -> Void) {
@@ -121,37 +161,6 @@ final class PairingEngine {
                 logger.error(error)
             }
         }
-    }
-    
-    func propose() -> PairingType.Pending? {
-        logger.debug("Propose Pairing")
-        guard let topic = String.generateTopic() else {
-            logger.debug("Could not generate topic")
-            return nil
-        }
-        let privateKey = Crypto.X25519.generatePrivateKey()
-        let publicKey = privateKey.publicKey.toHexString()
-        let relay = RelayProtocolOptions(protocol: "waku", params: nil)
-        crypto.set(privateKey: privateKey)
-        let proposer = PairingType.Proposer(publicKey: publicKey, controller: isController)
-        let uri = WalletConnectURI(topic: topic, publicKey: publicKey, isController: isController, relay: relay).absoluteString
-        let signalParams = PairingType.Signal.Params(uri: uri)
-        let signal = PairingType.Signal(params: signalParams)
-        let permissions = getDefaultPermissions()
-        let proposal = PairingType.Proposal(topic: topic, relay: relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
-        let `self` = PairingType.Participant(publicKey: publicKey)
-        let pending = PairingType.Pending(status: .proposed, topic: topic, relay: relay, self: `self`, proposal: proposal)
-        
-        let pendingPairing = PairingSequence(
-            topic: topic,
-            relay: relay,
-            selfParticipant: `self`,
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
-            pendingState: PairingSequence.Pending(proposal: proposal, status: .proposed))
-        try? sequencesStore.setSequence(pendingPairing)
-        
-        wcSubscriber.setSubscription(topic: topic)
-        return pending
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {

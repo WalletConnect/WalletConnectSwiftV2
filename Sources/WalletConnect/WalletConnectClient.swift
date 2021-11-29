@@ -73,7 +73,10 @@ public final class WalletConnectClient {
     public func connect(params: ConnectParams) throws -> String? {
         logger.debug("Connecting Application")
         if let topic = params.pairing?.topic {
-            guard let pairing = try? pairingEngine.sequencesStore.getSequence(forTopic: topic), pairing.settled != nil else {
+//            guard let pairing = try? pairingEngine.sequencesStore.getSequence(forTopic: topic), pairing.settled != nil else {
+//                throw WalletConnectError.InternalReason.noSequenceForTopic
+//            }
+            guard let pairing = pairingEngine.getSettledPairing(for: topic) else {
                 throw WalletConnectError.InternalReason.noSequenceForTopic
             }
             logger.debug("Proposing session on existing pairing")
@@ -150,7 +153,7 @@ public final class WalletConnectClient {
     }
     
     public func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
-        if pairingEngine.sequencesStore.hasSequence(forTopic: topic) {
+        if pairingEngine.hasPairing(for: topic) {
             pairingEngine.ping(topic: topic) { result in
                 completion(result)
             }
