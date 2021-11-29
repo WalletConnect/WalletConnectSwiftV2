@@ -12,12 +12,12 @@ protocol JsonRpcHistoryRecording {
 class JsonRpcHistory: JsonRpcHistoryRecording {
     let storage: KeyValueStore<JsonRpcRecord>
     let logger: ConsoleLogger
-    let clientName: String
+    let identifier: String
     
-    init(logger: ConsoleLogger, keyValueStorage: KeyValueStorage, clientName: String?) {
+    init(logger: ConsoleLogger, keyValueStorage: KeyValueStorage, uniqueIdentifier: String? = nil) {
         self.logger = logger
         self.storage = KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage)
-        self.clientName = clientName ?? ""
+        self.identifier = "com.walletconnect.sdk.\(uniqueIdentifier ?? "")"
     }
     
     func get(id: Int64) -> JsonRpcRecord? {
@@ -56,7 +56,7 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
     }
     
     private func getKey(for id: Int64) -> String {
-        let prefix = "\(clientName)_wc_json_rpc_record_"
+        let prefix = "\(identifier).wc_json_rpc_record."
         return "\(prefix)\(id)"
     }
 }

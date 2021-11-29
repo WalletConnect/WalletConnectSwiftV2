@@ -13,10 +13,11 @@ final class ResponderViewController: UIViewController {
             metadata: metadata,
             apiKey: "",
             isController: true,
-            relayHost: "relay.walletconnect.org"
+            relayHost: "relay.walletconnect.org",
+            clientName: "responder"
         )
     }()
-    
+    let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
     var sessionItems: [ActiveSessionItem] = []
     var currentProposal: SessionProposal?
     
@@ -64,6 +65,30 @@ final class ResponderViewController: UIViewController {
         present(proposalViewController, animated: true)
     }
     
+    private func showSessionDetailsViewController(_ session: Session) {
+        let sessionInfo = SessionInfo(name: session.peer.name ?? "",
+                                      descriptionText: session.peer.description ?? "",
+                                      dappURL: session.peer.description ?? "",
+                                      iconURL: session.peer.icons?.first ?? "",
+                                      chains: Array(session.permissions.blockchains),
+                                      methods: Array(session.permissions.methods))
+        let vc = SessionDetailsViewController(sessionInfo)
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    private func showSessionRequest(_ sessionRequest: SessionRequest) {
+        let requestVC = RequestViewController(sessionRequest)
+        requestVC.onSign = { [weak self] in
+            let result = "0xa3f20717a250c2b0b729b7e5becbff67fdaef7e0699da4de7ca5895b02a170a12d887fd3b17bfdce3481f10bea41f45ba9f709d39ce8325427b57afcfc994cee1b"
+            let response = JSONRPCResponse<AnyCodable>(id: sessionRequest.request.id, result: AnyCodable(result))
+            self?.client.respond(topic: sessionRequest.topic, response: .response(response))
+        }
+        requestVC.onReject = { [weak self] in
+            self?.client.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.request.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
+        }
+        present(requestVC, animated: true)
+    }
+    
     private func pairClient(uri: String) {
         print("[RESPONDER] Pairing to: \(uri)")
         do {
@@ -102,6 +127,10 @@ extension ResponderViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("did select row \(indexPath)")
+        let itemTopic = sessionItems[indexPath.row].topic
+        if let session = client.getSettledSessions().first{$0.topic == itemTopic} {
+            showSessionDetailsViewController(session)
+        }
     }
 }
 
@@ -118,7 +147,9 @@ extension ResponderViewController: SessionViewControllerDelegate {
         print("[RESPONDER] Approving session...")
         let proposal = currentProposal!
         currentProposal = nil
-        client.approve(proposal: proposal, accounts: []) { _ in
+        let accounts = proposal.permissions.blockchains.map {$0+":\(account)"}
+        client.approve(proposal: proposal, accounts: Set(accounts)) { [weak self] _ in
+            self?.reloadActiveSessions()
         }
     }
     
@@ -131,10 +162,6 @@ extension ResponderViewController: SessionViewControllerDelegate {
 }
 
 extension ResponderViewController: WalletConnectClientDelegate {
-    
-    func didSettle(pairing: Pairing) {
-
-    }
     
     func didReceive(sessionProposal: SessionProposal) {
         print("[RESPONDER] WC: Did receive session proposal")
@@ -153,9 +180,13 @@ extension ResponderViewController: WalletConnectClientDelegate {
     }
     
     func didReceive(sessionRequest: SessionRequest) {
+        DispatchQueue.main.async { [weak self] in
+            self?.showSessionRequest(sessionRequest)
+        }
         print("[RESPONDER] WC: Did receive session request")
+        
     }
-
+    
     func didReceive(notification: SessionNotification, sessionTopic: String) {
 
     }
@@ -167,23 +198,9 @@ extension ResponderViewController: WalletConnectClientDelegate {
     func didUpdate(sessionTopic: String, accounts: Set<String>) {
 
     }
-
-    func didUpdate(pairingTopic: String, appMetadata: AppMetadata) {
-
-    }
-
+    
     func didDelete(sessionTopic: String, reason: SessionType.Reason) {
-
-    }
-
-    func didSettle(session: Session) {
-        print("[RESPONDER] WC: Did settle session")
-        let settledSessions = client.getSettledSessions()
-        let activeSessions = getActiveSessionItem(for: settledSessions)
-        DispatchQueue.main.async { // FIXME: Delegate being called from background thread
-            self.sessionItems = activeSessions
-            self.responderView.tableView.reloadData()
-        }
+        reloadActiveSessions()
     }
     
     private func getActiveSessionItem(for settledSessions: [Session]) -> [ActiveSessionItem] {
@@ -197,12 +214,13 @@ extension ResponderViewController: WalletConnectClientDelegate {
         }
     }
     
-    func didSettle(pairing: PairingType.Settled) {
-        print("[RESPONDER] WC: Did settle pairing")
-    }
-    
-    func didReject(pendingSessionTopic: String, reason: SessionType.Reason) {
-        print("[RESPONDER] WC: Did reject session")
+    private func reloadActiveSessions() {
+        let settledSessions = client.getSettledSessions()
+        let activeSessions = getActiveSessionItem(for: settledSessions)
+        DispatchQueue.main.async { // FIXME: Delegate being called from background thread
+            self.sessionItems = activeSessions
+            self.responderView.tableView.reloadData()
+        }
     }
 }
 

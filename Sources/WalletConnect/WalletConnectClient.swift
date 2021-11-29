@@ -17,7 +17,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     func didUpdate(pairingTopic: String, appMetadata: AppMetadata)
 }
 
-extension WalletConnectClientDelegate {
+public extension WalletConnectClientDelegate {
     func didSettle(session: Session) {}
     func didSettle(pairing: Pairing) {}
     func didReceive(notification: SessionNotification, sessionTopic: String) {}
@@ -35,28 +35,29 @@ public final class WalletConnectClient {
     private let crypto: Crypto
     private var sessionPermissions: [String: SessionType.Permissions] = [:]
     public let logger: ConsoleLogger
-    private let secureStorage = SecureStorage()
     private let transport: JSONRPCTransport
+    private let secureStorage: SecureStorage
     
     // MARK: - Public interface
 
     public convenience init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
-        self.init(metadata: metadata, apiKey: apiKey, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keyValueStore: keyValueStorage, clientName: clientName)
+        self.init(metadata: metadata, apiKey: apiKey, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStore: keyValueStorage, clientName: clientName)
     }
     
-    init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, logger: ConsoleLogger, keychain: KeychainStorage = KeychainStorage(), keyValueStore: KeyValueStorage, clientName: String? = nil) {
+    init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, logger: ConsoleLogger, keychain: KeychainStorage, keyValueStore: KeyValueStorage, clientName: String? = nil) {
         self.metadata = metadata
         self.isController = isController
         self.logger = logger
 //        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
         self.crypto = Crypto(keychain: keychain)
+        self.secureStorage = SecureStorage(keychain: keychain)
         let relayUrl = WakuNetworkRelay.makeRelayUrl(host: relayHost, apiKey: apiKey)
         self.transport = JSONRPCTransport(url: relayUrl)
         let wakuRelay = WakuNetworkRelay(transport: transport, logger: logger)
         let serialiser = JSONRPCSerialiser(crypto: crypto)
-        let sessionSequencesStore = SequenceStore<SessionSequence>(storage: keyValueStore, keyPrefix: clientName)
-        self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore, clientName: clientName))
-        let pairingSequencesStore = SequenceStore<PairingSequence>(storage: keyValueStore, keyPrefix: clientName)
+        let sessionSequencesStore = SequenceStore<SessionSequence>(storage: keyValueStore, uniqueIdentifier: clientName)
+        self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore, uniqueIdentifier: clientName))
+        let pairingSequencesStore = SequenceStore<PairingSequence>(storage: keyValueStore, uniqueIdentifier: clientName)
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
         setUpEnginesCallbacks()
@@ -80,7 +81,7 @@ public final class WalletConnectClient {
             sessionEngine.proposeSession(settledPairing: Pairing(topic: pairing.topic, peer: nil), permissions: params.permissions, relay: pairing.relay)
             return nil
         } else {
-            guard let pending = pairingEngine.propose(params) else {
+            guard let pending = pairingEngine.propose() else {
                 throw WalletConnectError.internal(.pairingProposalGenerationFailed)
             }
             sessionPermissions[pending.topic] = params.permissions
@@ -139,7 +140,7 @@ public final class WalletConnectClient {
     }
     
     // for proposer to request JSON-RPC
-    public func request(params: SessionType.PayloadRequestParams, completion: @escaping (Result<JSONRPCResponse<AnyCodable>, Error>) -> ()) {
+    public func request(params: SessionType.PayloadRequestParams, completion: @escaping (Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ()) {
         sessionEngine.request(params: params, completion: completion)
     }
     

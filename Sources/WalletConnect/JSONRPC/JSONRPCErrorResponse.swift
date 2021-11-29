@@ -16,8 +16,13 @@ public struct JSONRPCErrorResponse: Error, Equatable, Codable {
         self.id = id
         self.error = error
     }
+    
     public struct Error: Codable, Equatable {
         let code: Int
         let message: String
+        public init(code: Int, message: String) {
+            self.code = code
+            self.message = message
+        }
     }
 }
