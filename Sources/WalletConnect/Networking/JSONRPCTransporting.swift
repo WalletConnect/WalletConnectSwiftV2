@@ -1,13 +1,12 @@
-// 
-
 import Foundation
+import Network
 
 protocol JSONRPCTransporting {
     var onConnect: (()->())? {get set}
     var onDisconnect: (()->())? {get set}
     var onMessage: ((String) -> ())? {get set}
     func send(_ string: String, completion: @escaping (Error?)->())
-    func disconnect()
+    func disconnect(closeCode: URLSessionWebSocketTask.CloseCode)
 }
 
 final class JSONRPCTransport: NSObject, JSONRPCTransporting {
@@ -17,6 +16,10 @@ final class JSONRPCTransport: NSObject, JSONRPCTransporting {
     var onMessage: ((String) -> ())?
     
     private let queue = OperationQueue()
+    private let monitor = NWPathMonitor()
+    private let monitorQueue = DispatchQueue(label: "com.walletconnect.sdk.network.monitor")
+    
+    private let url: URL
     
     private lazy var socket: WebSocketSession = {
         let urlSession = URLSession(configuration: .default, delegate: self, delegateQueue: queue)
@@ -31,8 +34,10 @@ final class JSONRPCTransport: NSObject, JSONRPCTransporting {
     }()
     
     init(url: URL) {
+        self.url = url
         super.init()
         socket.connect(on: url)
+        startNetworkMonitoring()
     }
 
     func send(_ string: String, completion: @escaping (Error?) -> Void) {
@@ -41,8 +46,26 @@ final class JSONRPCTransport: NSObject, JSONRPCTransporting {
         }
     }
     
-    func disconnect() {
-        socket.disconnect()
+    func connect() {
+        if !socket.isConnected {
+            socket.connect(on: url)
+        }
+    }
+    
+    func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) {
+        socket.disconnect(with: closeCode)
+        onDisconnect?()
+    }
+    
+    private func startNetworkMonitoring() {
+        monitor.pathUpdateHandler = { [weak self] path in
+            if path.status == .satisfied {
+                self?.connect()
+            } else {
+                self?.disconnect(closeCode: .goingAway)
+            }
+        }
+        monitor.start(queue: monitorQueue)
     }
 }
 

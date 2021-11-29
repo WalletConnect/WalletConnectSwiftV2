@@ -12,7 +12,7 @@ extension URLSession: URLSessionProtocol {
 
 protocol URLSessionWebSocketTaskProtocol {
     func resume()
-    func cancel()
+    func cancel(with closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?)
     func send(_ message: URLSessionWebSocketTask.Message, completionHandler: @escaping (Error?) -> Void)
     func receive(completionHandler: @escaping (Result<URLSessionWebSocketTask.Message, Error>) -> Void)
 }

@@ -1,6 +1,8 @@
 
 import Foundation
-
+#if os(iOS)
+import UIKit
+#endif
 
 public protocol WalletConnectClientDelegate: AnyObject {
     func didReceive(sessionProposal: SessionProposal)
@@ -33,6 +35,7 @@ public final class WalletConnectClient {
     private let crypto: Crypto
     private var sessionPermissions: [String: SessionType.Permissions] = [:]
     public let logger: ConsoleLogger
+    private let transport: JSONRPCTransport
     private let secureStorage: SecureStorage
     
     // MARK: - Public interface
@@ -49,7 +52,8 @@ public final class WalletConnectClient {
         self.crypto = Crypto(keychain: keychain)
         self.secureStorage = SecureStorage(keychain: keychain)
         let relayUrl = WakuNetworkRelay.makeRelayUrl(host: relayHost, apiKey: apiKey)
-        let wakuRelay = WakuNetworkRelay(transport: JSONRPCTransport(url: relayUrl), logger: logger)
+        self.transport = JSONRPCTransport(url: relayUrl)
+        let wakuRelay = WakuNetworkRelay(transport: transport, logger: logger)
         let serialiser = JSONRPCSerialiser(crypto: crypto)
         let sessionSequencesStore = SequenceStore<SessionSequence>(storage: keyValueStore, uniqueIdentifier: clientName)
         self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore, uniqueIdentifier: clientName))
@@ -58,6 +62,11 @@ public final class WalletConnectClient {
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
         setUpEnginesCallbacks()
         secureStorage.setAPIKey(apiKey)
+        subscribeNotificationCenter()
+    }
+    
+    deinit {
+        unsubscribeNotificationCenter()
     }
     
     // for proposer to propose a session to a responder
@@ -221,6 +230,38 @@ public final class WalletConnectClient {
             proposal: proposal
         )
         delegate?.didReceive(sessionProposal: sessionProposal)
+    }
+    
+    private func subscribeNotificationCenter() {
+#if os(iOS)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appDidEnterBackground),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appWillEnterForeground),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil)
+#endif
+    }
+    
+    private func unsubscribeNotificationCenter() {
+#if os(iOS)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
+#endif
+    }
+    
+    @objc
+    private func appWillEnterForeground() {
+        transport.connect()
+    }
+    
+    @objc
+    private func appDidEnterBackground() {
+        transport.disconnect(closeCode: .goingAway)
     }
 }
 

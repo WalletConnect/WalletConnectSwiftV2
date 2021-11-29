@@ -11,6 +11,5 @@ class MockedJSONRPCTransport: JSONRPCTransporting {
     func send(_ string: String, completion: @escaping (Error?) -> ()) {
         sent = true
     }
-    
-    func disconnect() {}
+    func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) {}
 }
