@@ -198,7 +198,7 @@ final class SessionEngine {
             logger.debug("Could not find session for topic \(params.topic)")
             return
         }
-        let request = SessionType.PayloadParams.Request(method: params.method, params: AnyCodable(params.params))
+        let request = SessionType.PayloadParams.Request(method: params.method, params: params.params)
         let sessionPayloadParams = SessionType.PayloadParams(request: request, chainId: params.chainId)
         let sessionPayloadRequest = ClientSynchJSONRPC(method: .sessionPayload, params: .sessionPayload(sessionPayloadParams))
 

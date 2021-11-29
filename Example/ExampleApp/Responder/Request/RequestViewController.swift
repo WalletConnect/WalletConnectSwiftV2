@@ -1,6 +1,55 @@
-import UIKit
 
-final class SessionView: UIView {
+import Foundation
+import UIKit
+import WalletConnect
+
+class RequestViewController: UIViewController {
+    var onSign: (()->())?
+    var onReject: (()->())?
+    let sessionRequest: SessionRequest
+    private let requestView = {
+        RequestView()
+    }()
+    init(_ sessionRequest: SessionRequest) {
+        self.sessionRequest = sessionRequest
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    override func loadView() {
+        view = requestView
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        requestView.approveButton.addTarget(self, action: #selector(signAction), for: .touchUpInside)
+        requestView.rejectButton.addTarget(self, action: #selector(rejectAction), for: .touchUpInside)
+        let method = sessionRequest.request.method
+        requestView.nameLabel.text = method
+        var paramsDescription = ""
+        if method == "personal_sign" {
+            paramsDescription = try! sessionRequest.request.params.get([String].self).description
+        }
+        requestView.descriptionLabel.text = paramsDescription
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    @objc
+    private func signAction() {
+        onSign?()
+        dismiss(animated: true)
+    }
+    
+    @objc
+    private func rejectAction() {
+        onReject?()
+        dismiss(animated: true)
+    }
+}
+
+final class RequestView: UIView {
     
     let iconView: UIImageView = {
         let imageView = UIImageView()
@@ -25,16 +74,9 @@ final class SessionView: UIView {
         return label
     }()
     
-    let urlLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.boldSystemFont(ofSize: 14.0)
-        label.textColor = .tertiaryLabel
-        return label
-    }()
-    
     let approveButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Approve", for: .normal)
+        button.setTitle("Sign", for: .normal)
         button.backgroundColor = .systemBlue
         button.tintColor = .white
         button.layer.cornerRadius = 8
@@ -60,34 +102,15 @@ final class SessionView: UIView {
         return stackView
     }()
     
-    let chainsStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.spacing = 10
-        stackView.alignment = .leading
-        return stackView
-    }()
-    
-    let methodsStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.spacing = 10
-        stackView.alignment = .leading
-        return stackView
-    }()
-    
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .systemBackground
         
         addSubview(iconView)
         addSubview(headerStackView)
-        addSubview(chainsStackView)
-        addSubview(methodsStackView)
         addSubview(approveButton)
         addSubview(rejectButton)
         headerStackView.addArrangedSubview(nameLabel)
-        headerStackView.addArrangedSubview(urlLabel)
         headerStackView.addArrangedSubview(descriptionLabel)
         
         subviews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
@@ -101,14 +124,7 @@ final class SessionView: UIView {
             headerStackView.topAnchor.constraint(equalTo: iconView.bottomAnchor, constant: 32),
             headerStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
             headerStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
-            
-            chainsStackView.topAnchor.constraint(equalTo: headerStackView.bottomAnchor, constant: 24),
-            chainsStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
-            chainsStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
-            
-            methodsStackView.topAnchor.constraint(equalTo: chainsStackView.bottomAnchor, constant: 24),
-            methodsStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
-            methodsStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
+    
             
             approveButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -16),
             approveButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
@@ -134,53 +150,8 @@ final class SessionView: UIView {
         }
     }
     
-    func list(chains: [String]) {
-        let label = UILabel()
-        label.text = "Chains"
-        label.font = UIFont.systemFont(ofSize: 17.0, weight: .heavy)
-        chainsStackView.addArrangedSubview(label)
-        chains.forEach {
-            chainsStackView.addArrangedSubview(ListItem(text: $0))
-        }
-    }
-    
-    func list(methods: [String]) {
-        let label = UILabel()
-        label.text = "Methods"
-        label.font = UIFont.systemFont(ofSize: 17.0, weight: .heavy)
-        methodsStackView.addArrangedSubview(label)
-        methods.forEach {
-            methodsStackView.addArrangedSubview(ListItem(text: $0))
-        }
-    }
-    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 }
 
-fileprivate final class ListItem: UIView {
-    
-    private let label: UILabel = {
-        let label = UILabel()
-        label.textColor = .secondaryLabel
-        return label
-    }()
-    
-    init(text: String) {
-        super.init(frame: .zero)
-        label.text = text
-        label.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(label)
-        NSLayoutConstraint.activate([
-            label.topAnchor.constraint(equalTo: topAnchor),
-            label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            label.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            label.bottomAnchor.constraint(equalTo: bottomAnchor)
-        ])
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
