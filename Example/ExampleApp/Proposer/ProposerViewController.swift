@@ -12,7 +12,7 @@ final class ProposerViewController: UIViewController {
         return WalletConnectClient(
             metadata: metadata,
             apiKey: "",
-            isController: true,
+            isController: false,
             relayHost: "relay.walletconnect.org",
             clientName: "proposer"
         )
