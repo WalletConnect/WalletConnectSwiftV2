@@ -73,7 +73,7 @@
 				76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */,
 				764E1D5926F8DF1B00A1FB15 /* ScannerViewController.swift */,
 				761C64A426FCB08B004239D1 /* SessionProposal */,
-				8460DCFD274F98A90081F94C /* Requst */,
+				8460DCFD274F98A90081F94C /* Request */,
 			);
 			path = Responder;
 			sourceTree = "<group>";
@@ -139,12 +139,12 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		8460DCFD274F98A90081F94C /* Requst */ = {
+		8460DCFD274F98A90081F94C /* Request */ = {
 			isa = PBXGroup;
 			children = (
 				8460DCFB274F98A10081F94C /* RequestViewController.swift */,
 			);
-			path = Requst;
+			path = Request;
 			sourceTree = "<group>";
 		};
 		8460DCFE2750D6DF0081F94C /* SessionDetails */ = {
