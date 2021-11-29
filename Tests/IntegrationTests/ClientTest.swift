@@ -174,6 +174,38 @@ final class ClientTests: XCTestCase {
         waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
+    
+    func testSessionPayloadFailureResponse() {
+        let failureResponseExpectation = expectation(description: "Proposer receives failure response")
+        let method = "eth_sendTransaction"
+        let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]
+        let error = JSONRPCErrorResponse.Error(code: 0, message: "error_message")
+        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: [method]))
+        let connectParams = ConnectParams(permissions: permissions)
+        let uri = try! proposer.client.connect(params: connectParams)!
+        _ = try! responder.client.pair(uri: uri)
+        responder.onSessionProposal = {[unowned self]  proposal in
+            self.responder.client.approve(proposal: proposal, accounts: []){_ in}
+        }
+        proposer.onSessionSettled = {[unowned self]  settledSession in
+            let requestParams = SessionType.PayloadRequestParams(topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
+            self.proposer.client.request(params: requestParams) { result in
+                switch result {
+                case .success(_):
+                    XCTFail()
+                case .failure(let errorResponse):
+                    XCTAssertEqual(error, errorResponse.error)
+                    failureResponseExpectation.fulfill()
+                }
+            }
+        }
+        responder.onSessionRequest = {[unowned self]  sessionRequest in
+            let jsonrpcErrorResponse = JSONRPCErrorResponse(id: sessionRequest.request.id, error: error)
+            self.responder.client.respond(topic: sessionRequest.topic, response: .error(jsonrpcErrorResponse))
+        }
+        waitForExpectations(timeout: defaultTimeout, handler: nil)
+    }
+    
     func testPairingPing() {
         let proposerReceivesPingResponseExpectation = expectation(description: "Proposer receives ping response")
         let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
