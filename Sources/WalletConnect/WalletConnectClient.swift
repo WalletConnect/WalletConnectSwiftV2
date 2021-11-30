@@ -29,11 +29,10 @@ public final class WalletConnectClient {
     private let metadata: AppMetadata
     public weak var delegate: WalletConnectClientDelegate?
     private let isController: Bool
-    let pairingEngine: PairingEngine
-    let sessionEngine: SessionEngine
+    private let pairingEngine: PairingEngine
+    private let sessionEngine: SessionEngine
     private let relay: WalletConnectRelaying
     private let crypto: Crypto
-    private var sessionPermissions: [String: SessionType.Permissions] = [:]
     public let logger: ConsoleLogger
     private let transport: JSONRPCTransport
     private let secureStorage: SecureStorage
@@ -73,9 +72,6 @@ public final class WalletConnectClient {
     public func connect(params: ConnectParams) throws -> String? {
         logger.debug("Connecting Application")
         if let topic = params.pairing?.topic {
-//            guard let pairing = try? pairingEngine.sequencesStore.getSequence(forTopic: topic), pairing.settled != nil else {
-//                throw WalletConnectError.InternalReason.noSequenceForTopic
-//            }
             guard let pairing = pairingEngine.getSettledPairing(for: topic) else {
                 throw WalletConnectError.InternalReason.noSequenceForTopic
             }
@@ -84,11 +80,10 @@ public final class WalletConnectClient {
             sessionEngine.proposeSession(settledPairing: Pairing(topic: pairing.topic, peer: nil), permissions: params.permissions, relay: pairing.relay)
             return nil
         } else {
-            guard let pending = pairingEngine.propose() else {
+            guard let pairingURI = pairingEngine.propose(permissions: params.permissions) else {
                 throw WalletConnectError.internal(.pairingProposalGenerationFailed)
             }
-            sessionPermissions[pending.topic] = params.permissions
-            return pending.proposal.signal.params.uri
+            return pairingURI
         }
     }
     
@@ -187,13 +182,8 @@ public final class WalletConnectClient {
         pairingEngine.onSessionProposal = { [unowned self] proposal in
             proposeSession(proposal: proposal)
         }
-        pairingEngine.onPairingApproved = { [unowned self] settledPairing, pendingTopic, relayOptions in
+        pairingEngine.onPairingApproved = { [unowned self] settledPairing, permissions, relayOptions in
             delegate?.didSettle(pairing: settledPairing)
-            guard let permissions = sessionPermissions[pendingTopic] else {
-                logger.debug("Cound not find permissions for pending topic: \(pendingTopic)")
-                return
-            }
-            sessionPermissions[pendingTopic] = nil
             sessionEngine.proposeSession(settledPairing: settledPairing, permissions: permissions, relay: relayOptions)
         }
         sessionEngine.onSessionApproved = { [unowned self] settledSession in

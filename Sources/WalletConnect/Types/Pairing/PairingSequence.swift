@@ -37,6 +37,14 @@ struct PairingSequence: ExpirableSequence {
     var peerIsController: Bool {
         isSettled && settled?.peer.publicKey == settled?.permissions.controller.publicKey
     }
+    
+    static var timeToLivePending: Int {
+        Time.day
+    }
+    
+    static var timeToLiveSettled: Int {
+        Time.day * 30
+    }
 }
 
 extension PairingSequence {

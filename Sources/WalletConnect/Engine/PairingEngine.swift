@@ -2,17 +2,20 @@ import Foundation
 import Combine
 
 final class PairingEngine {
+    
+    var onSessionProposal: ((SessionType.Proposal)->())?
+    var onPairingApproved: ((Pairing, SessionType.Permissions, RelayProtocolOptions)->())?
+    var onPairingUpdate: ((String, AppMetadata)->())?
+    
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
     private let crypto: Crypto
     private var isController: Bool
     private var sequencesStore: SequenceStore<PairingSequence>
-    var onSessionProposal: ((SessionType.Proposal)->())?
-    var onPairingApproved: ((Pairing, String, RelayProtocolOptions)->())?
-    var onPairingUpdate: ((String, AppMetadata)->())?
     private var appMetadata: AppMetadata
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogger
+    private var sessionPermissions: [String: SessionType.Permissions] = [:]
     
     init(relay: WalletConnectRelaying,
          crypto: Crypto,
@@ -48,35 +51,41 @@ final class PairingEngine {
             .map { Pairing(topic: $0.topic, peer: $0.settled?.state?.metadata) }
     }
     
-    func propose() -> PairingType.Pending? {
-        logger.debug("Propose Pairing")
+    func propose(permissions: SessionType.Permissions) -> String? {
         guard let topic = String.generateTopic() else {
             logger.debug("Could not generate topic")
             return nil
         }
+        
         let privateKey = Crypto.X25519.generatePrivateKey()
         let publicKey = privateKey.publicKey.toHexString()
+        
         let relay = RelayProtocolOptions(protocol: "waku", params: nil)
-        crypto.set(privateKey: privateKey)
-        let proposer = PairingType.Proposer(publicKey: publicKey, controller: isController)
         let uri = WalletConnectURI(topic: topic, publicKey: publicKey, isController: isController, relay: relay).absoluteString
-        let signalParams = PairingType.Signal.Params(uri: uri)
-        let signal = PairingType.Signal(params: signalParams)
-        let permissions = getDefaultPermissions()
-        let proposal = PairingType.Proposal(topic: topic, relay: relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
+        let timeToLive = PairingSequence.timeToLivePending
+        
+        let proposal = PairingType.Proposal(
+            topic: topic,
+            relay: relay,
+            proposer: PairingType.Proposer(publicKey: publicKey, controller: isController),
+            signal: PairingType.Signal(uri: uri),
+            permissions: PairingType.ProposedPermissions.default,
+            ttl: timeToLive)
+        
         let `self` = PairingType.Participant(publicKey: publicKey)
-        let pending = PairingType.Pending(status: .proposed, topic: topic, relay: relay, self: `self`, proposal: proposal)
         
         let pendingPairing = PairingSequence(
             topic: topic,
             relay: relay,
             selfParticipant: `self`,
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLive)),
             pendingState: PairingSequence.Pending(proposal: proposal, status: .proposed))
-        try? sequencesStore.setSequence(pendingPairing)
         
+        crypto.set(privateKey: privateKey)
+        try? sequencesStore.setSequence(pendingPairing)
         wcSubscriber.setSubscription(topic: topic)
-        return pending
+        sessionPermissions[topic] = permissions
+        return uri
     }
     
     func approve(_ proposal: PairingType.Proposal, completion: @escaping (Result<Pairing, Error>) -> Void) {
@@ -131,6 +140,7 @@ final class PairingEngine {
             state: nil) // FIXME: State
         let approvalPayload = ClientSynchJSONRPC(method: .pairingApprove, params: .pairingApprove(approveParams))
         
+        // completion comes on topic A
         relayer.request(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
             switch result {
             case .success:
@@ -182,13 +192,13 @@ final class PairingEngine {
 
     //MARK: - Private
     
-    private func getDefaultTTL() -> Int {
-        30 * Time.day
-    }
+//    private func getDefaultTTL() -> Int {
+//        30 * Time.day
+//    }
     
-    private func getDefaultPermissions() -> PairingType.ProposedPermissions {
-        PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [PairingType.PayloadMethods.sessionPropose.rawValue]))
-    }
+//    private func getDefaultPermissions() -> PairingType.ProposedPermissions {
+//        PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [PairingType.PayloadMethods.sessionPropose.rawValue]))
+//    }
     
     private func setUpWCRequestHandling() {
         wcSubscriber.onRequestSubscription = { [unowned self] subscriptionPayload in
@@ -308,7 +318,12 @@ final class PairingEngine {
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
         relayer.respond(topic: proposal.topic, response: JsonRpcResponseTypes.response(response)) { [weak self] error in
             let pairing = Pairing(topic: settledPairing.topic, peer: nil) // FIXME: peer?
-            self?.onPairingApproved?(pairing, pendingTopic, settledPairing.relay)
+            guard let permissions = self?.sessionPermissions[pendingTopic] else {
+                self?.logger.debug("Cound not find permissions for pending topic: \(pendingTopic)")
+                return
+            }
+            self?.sessionPermissions[pendingTopic] = nil
+            self?.onPairingApproved?(pairing, permissions, settledPairing.relay)
         }
     }
     
