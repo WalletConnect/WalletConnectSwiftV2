@@ -3,12 +3,37 @@
 import Foundation
 import CryptoKit
 
-class Crypto {
+// TODO: Come up with better naming conventions
+protocol CryptoStorageProtocol {
+    func set(privateKey: Curve25519.KeyAgreement.PrivateKey) throws
+    func getPrivateKey(for publicKey: Curve25519.KeyAgreement.PublicKey) throws -> Curve25519.KeyAgreement.PrivateKey?
+    
+    func set(privateKey: Crypto.X25519.PrivateKey)
+    func set(agreementKeys: Crypto.X25519.AgreementKeys, topic: String)
+    func getPrivateKey(for publicKey: Data) throws -> Crypto.X25519.PrivateKey?
+    func getAgreementKeys(for topic: String) -> Crypto.X25519.AgreementKeys?
+    
+//    func deletePrivateKey(for publicKey: Data)
+//    func deleteAgreementKeys(for topic: String)
+}
+
+class Crypto: CryptoStorageProtocol {
     
     private var keychain: KeychainStorageProtocol
     
     init(keychain: KeychainStorageProtocol) {
         self.keychain = keychain
+    }
+    
+    func set(privateKey: Curve25519.KeyAgreement.PrivateKey) throws {
+        try keychain.add(privateKey.rawRepresentation, forKey: privateKey.publicKey.rawRepresentation.toHexString())
+    }
+    
+    func getPrivateKey(for publicKey: Curve25519.KeyAgreement.PublicKey) throws -> Curve25519.KeyAgreement.PrivateKey? {
+        guard let privateKeyData = try? keychain.read(key: publicKey.rawRepresentation.toHexString()) as Data else {
+            return nil
+        }
+        return try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: privateKeyData)
     }
     
     func set(privateKey: X25519.PrivateKey) {
@@ -47,5 +72,59 @@ class Crypto {
         let sharedSecret = concatinatedAgreementKeys.subdata(in: 0..<32)
         let publicKey = concatinatedAgreementKeys.subdata(in: 32..<64)
         return (sharedSecret, publicKey)
+    }
+}
+
+
+
+extension Crypto.X25519 {
+    
+    struct PrivateKey: Equatable {
+        
+        private let privateKey: Curve25519.KeyAgreement.PrivateKey
+        
+        var raw: Data {
+            return privateKey.rawRepresentation
+        }
+        var publicKey: Data {
+            return privateKey.publicKey.rawRepresentation
+        }
+        
+        init(){
+            privateKey = Curve25519.KeyAgreement.PrivateKey()
+        }
+        
+        init(raw: Data) throws {
+            privateKey = try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: raw)
+        }
+        
+        static func == (lhs: Crypto.X25519.PrivateKey, rhs: Crypto.X25519.PrivateKey) -> Bool {
+            lhs.raw == rhs.raw
+        }
+    }
+    
+    struct AgreementKeys: Equatable {
+        let sharedSecret: Data
+        let publicKey: Data
+    }
+}
+
+
+
+extension Crypto {
+    
+    enum X25519 {
+        
+        static func generatePrivateKey() -> Crypto.X25519.PrivateKey {
+            Crypto.X25519.PrivateKey()
+        }
+        
+        static func generateAgreementKeys(peerPublicKey: Data, privateKey: Crypto.X25519.PrivateKey, sharedInfo: Data = Data()) throws -> Crypto.X25519.AgreementKeys {
+            let cryptoKitPrivateKey = try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: privateKey.raw)
+            let peerPublicKey = try Curve25519.KeyAgreement.PublicKey(rawRepresentation: peerPublicKey)
+            let sharedSecret = try cryptoKitPrivateKey.sharedSecretFromKeyAgreement(with: peerPublicKey)
+            let rawSharedSecret = sharedSecret.withUnsafeBytes { return Data(Array($0)) }
+            return AgreementKeys(sharedSecret: rawSharedSecret, publicKey: privateKey.publicKey)
+        }
     }
 }

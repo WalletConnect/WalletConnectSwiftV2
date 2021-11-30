@@ -1,27 +1,66 @@
 import XCTest
 @testable import WalletConnect
 
+import CryptoKit
+
+final class CryptoStorageProtocolMock: CryptoStorageProtocol {
+    
+    func set(privateKey: Curve25519.KeyAgreement.PrivateKey) throws {
+        fatalError()
+    }
+    
+    func getPrivateKey(for publicKey: Curve25519.KeyAgreement.PublicKey) throws -> Curve25519.KeyAgreement.PrivateKey? {
+        fatalError()
+    }
+    
+    func set(privateKey: Crypto.X25519.PrivateKey) {
+        fatalError()
+    }
+    
+    func set(agreementKeys: Crypto.X25519.AgreementKeys, topic: String) {
+        fatalError()
+    }
+    
+    func getPrivateKey(for publicKey: Data) throws -> Crypto.X25519.PrivateKey? {
+        fatalError()
+    }
+    
+    func getAgreementKeys(for topic: String) -> Crypto.X25519.AgreementKeys? {
+        fatalError()
+    }
+    
+    
+}
+
 class PairingEngineTests: XCTestCase {
     
     var engine: PairingEngine!
+    
     var relay: MockedWCRelay!
-    var crypto: Crypto!
+    var cryptoMock: CryptoStorageProtocol!
     var subscriber: MockedSubscriber!
     
     override func setUp() {
-        crypto = Crypto(keychain: KeychainStorageMock())
+        cryptoMock = CryptoStorageProtocolMock()//Crypto(keychain: KeychainStorageMock())
         relay = MockedWCRelay()
         subscriber = MockedSubscriber()
         let meta = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
         let logger = ConsoleLogger()
         let store = SequenceStore<PairingSequence>(storage: RuntimeKeyValueStorage())
-        engine = PairingEngine(relay: relay, crypto: crypto, subscriber: subscriber, sequencesStore: store, isController: false, metadata: meta, logger: logger)
+        engine = PairingEngine(
+            relay: relay,
+            crypto: cryptoMock,
+            subscriber: subscriber,
+            sequencesStore: store,
+            isController: false,
+            metadata: meta,
+            logger: logger)
     }
 
     override func tearDown() {
         relay = nil
         engine = nil
-        crypto = nil
+        cryptoMock = nil
     }
     
     func testPropose() {

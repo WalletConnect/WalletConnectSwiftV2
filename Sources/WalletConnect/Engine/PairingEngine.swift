@@ -9,7 +9,7 @@ final class PairingEngine {
     
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
-    private let crypto: Crypto
+    private let crypto: CryptoStorageProtocol
     private var isController: Bool
     private var sequencesStore: SequenceStore<PairingSequence>
     private var appMetadata: AppMetadata
@@ -18,7 +18,7 @@ final class PairingEngine {
     private var sessionPermissions: [String: SessionType.Permissions] = [:]
     
     init(relay: WalletConnectRelaying,
-         crypto: Crypto,
+         crypto: CryptoStorageProtocol,
          subscriber: WCSubscribing,
          sequencesStore: SequenceStore<PairingSequence>,
          isController: Bool,
@@ -155,6 +155,25 @@ final class PairingEngine {
         }
     }
     
+    func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
+        guard sequencesStore.hasSequence(forTopic: topic) else {
+            logger.debug("Could not find pairing to ping for topic \(topic)")
+            return
+        }
+        let request = ClientSynchJSONRPC(method: .pairingPing, params: .pairingPing(PairingType.PingParams()))
+        relayer.request(topic: topic, payload: request) { [unowned self] result in
+            switch result {
+            case .success(_):
+                logger.debug("Did receive ping response")
+                completion(.success(()))
+            case .failure(let error):
+                logger.debug("error: \(error)")
+            }
+        }
+    }
+    
+    //MARK: - Private
+    
     private func update(topic: String) {
         guard var pairing = try? sequencesStore.getSequence(forTopic: topic) else {
             logger.debug("Could not find pairing for topic \(topic)")
@@ -172,25 +191,6 @@ final class PairingEngine {
             }
         }
     }
-    
-    func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
-        guard sequencesStore.hasSequence(forTopic: topic) else {
-            logger.debug("Could not find pairing to ping for topic \(topic)")
-            return
-        }
-        let request = ClientSynchJSONRPC(method: .pairingPing, params: .pairingPing(PairingType.PingParams()))
-        relayer.request(topic: topic, payload: request) { [unowned self] result in
-            switch result {
-            case .success(_):
-                logger.debug("Did receive ping response")
-                completion(.success(()))
-            case .failure(let error):
-                logger.debug("error: \(error)")
-            }
-        }
-    }
-
-    //MARK: - Private
     
 //    private func getDefaultTTL() -> Int {
 //        30 * Time.day
