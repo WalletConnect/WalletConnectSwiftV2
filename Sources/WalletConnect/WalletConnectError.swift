@@ -25,6 +25,7 @@ enum WalletConnectError: Error {
         case keyNotFound
         case deserialisationFailed
         case jsonRpcDuplicateDetected
+        case pairWithExistingPairingForbidden
     }
     
     public enum UnauthorizedReason: Error {
@@ -75,6 +76,7 @@ extension WalletConnectError.InternalReason: CustomStringConvertible {
         case .keyNotFound: return 00
         case .deserialisationFailed: return 00
         case .jsonRpcDuplicateDetected: return 0
+        case .pairWithExistingPairingForbidden: return 0
         }
     }
     
@@ -99,6 +101,8 @@ extension WalletConnectError.InternalReason: CustomStringConvertible {
             return "Deserialisation Failed"
         case .jsonRpcDuplicateDetected:
             return "Json Rpc Duplicate Detected"
+        case .pairWithExistingPairingForbidden:
+            return "Pair With Existing Pairing Is Forbidden"
         }
     }
 }

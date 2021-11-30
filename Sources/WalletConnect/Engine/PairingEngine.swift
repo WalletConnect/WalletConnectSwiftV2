@@ -78,7 +78,7 @@ final class PairingEngine {
             settledState: settled)
         
         wcSubscriber.setSubscription(topic: settledTopic)
-        try? sequencesStore.update(sequence: settledPairing, onTopic: proposal.topic)
+        try? sequencesStore.setSequence(settledPairing)
         
         crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         crypto.set(privateKey: privateKey)
