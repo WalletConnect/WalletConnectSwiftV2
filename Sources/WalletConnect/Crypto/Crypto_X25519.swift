@@ -4,9 +4,7 @@ import Foundation
 import CryptoKit
 
 extension Crypto {
-    
     enum X25519 {
-        
         static func generatePrivateKey() -> Crypto.X25519.PrivateKey {
             Crypto.X25519.PrivateKey()
         }

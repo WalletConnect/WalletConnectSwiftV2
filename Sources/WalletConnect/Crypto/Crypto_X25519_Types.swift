@@ -4,9 +4,7 @@ import Foundation
 import CryptoKit
 
 extension Crypto.X25519 {
-    
     struct PrivateKey: Equatable {
-        
         private let privateKey: Curve25519.KeyAgreement.PrivateKey
         
         var raw: Data {
