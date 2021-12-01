@@ -30,6 +30,7 @@ final class PairingEngine {
         self.logger = logger
         setUpWCRequestHandling()
         setupExpirationHandling()
+        removeRespondedPendingPairings()
         restoreSubscriptions()
     }
     
@@ -69,7 +70,8 @@ final class PairingEngine {
             permissions: PairingType.Permissions(
                 jsonrpc: proposal.permissions.jsonrpc,
                 controller: Controller(publicKey: controllerKey)),
-            state: nil) // FIXME: State
+            state: nil,
+            status: .preSettled) // FIXME: State
         let settledPairing = PairingSequence(
             topic: settledTopic,
             relay: proposal.relay,
@@ -78,7 +80,7 @@ final class PairingEngine {
             settledState: settled)
         
         wcSubscriber.setSubscription(topic: settledTopic)
-        try? sequencesStore.update(sequence: settledPairing, onTopic: proposal.topic)
+        try? sequencesStore.setSequence(settledPairing)
         
         crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         crypto.set(privateKey: privateKey)
@@ -116,7 +118,7 @@ final class PairingEngine {
             switch result {
             case .success(_):
                 pairing.settled?.state?.metadata = appMetadata
-                try? sequencesStore.update(sequence: pairing, onTopic: topic)
+                try? sequencesStore.setSequence(pairing)
             case .failure(let error):
                 logger.error(error)
             }
@@ -187,7 +189,7 @@ final class PairingEngine {
             let topic = subscriptionPayload.topic
             switch subscriptionPayload.clientSynchJsonRpc.params {
             case .pairingApprove(let approveParams):
-                handlePairingApprove(approveParams: approveParams, pendingTopic: topic, requestId: requestId)
+                handlePairingApprove(approveParams: approveParams, pendingPairingTopic: topic, requestId: requestId)
             case .pairingUpdate(let updateParams):
                 handlePairingUpdate(params: updateParams, topic: topic, requestId: requestId)
             case .pairingDelete(let deleteParams):
@@ -219,7 +221,7 @@ final class PairingEngine {
                 logger.error(error)
             } else {
                 pairing.settled?.state = params.state
-                try? sequencesStore.update(sequence: pairing, onTopic: topic)
+                try? sequencesStore.setSequence(pairing)
                 onPairingUpdate?(topic, params.state.metadata)
             }
         }
@@ -264,13 +266,12 @@ final class PairingEngine {
 //        }
     }
     
-    private func handlePairingApprove(approveParams: PairingType.ApproveParams, pendingTopic: String, requestId: Int64) {
-        logger.debug("Responder Client approved pairing on topic: \(pendingTopic)")
-        guard let pairing = try? sequencesStore.getSequence(forTopic: pendingTopic), let pairingPending = pairing.pending else {
+    private func handlePairingApprove(approveParams: PairingType.ApproveParams, pendingPairingTopic: String, requestId: Int64) {
+        logger.debug("Responder Client approved pairing on topic: \(pendingPairingTopic)")
+        guard let pendingPairing = try? sequencesStore.getSequence(forTopic: pendingPairingTopic), let pairingPending = pendingPairing.pending else {
             return
         }
-        
-        let selfPublicKey = Data(hex: pairing.selfParticipant.publicKey)
+        let selfPublicKey = Data(hex: pendingPairing.selfParticipant.publicKey)
         let privateKey = try! crypto.getPrivateKey(for: selfPublicKey)!
         let peerPublicKey = Data(hex: approveParams.responder.publicKey)
         let agreementKeys = try! Crypto.X25519.generateAgreementKeys(peerPublicKey: peerPublicKey, privateKey: privateKey)
@@ -291,24 +292,34 @@ final class PairingEngine {
                 permissions: PairingType.Permissions(
                     jsonrpc: proposal.permissions.jsonrpc,
                     controller: controller),
-                state: approveParams.state))
-        try? sequencesStore.update(sequence: settledPairing, onTopic: proposal.topic)
-        
+                state: approveParams.state,
+                status: .acknowledged))
+        try? sequencesStore.setSequence(settledPairing)
+        sequencesStore.delete(topic: pendingPairingTopic)
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
         relayer.respond(topic: proposal.topic, response: JsonRpcResponseTypes.response(response)) { [weak self] error in
             let pairing = Pairing(topic: settledPairing.topic, peer: nil) // FIXME: peer?
-            self?.onPairingApproved?(pairing, pendingTopic, settledPairing.relay)
+            self?.onPairingApproved?(pairing, pendingPairingTopic, settledPairing.relay)
         }
     }
     
     private func restoreSubscriptions() {
         relayer.transportConnectionPublisher
             .sink { [unowned self] (_) in
-                let topics = sequencesStore.getAll().map{$0.topic}
+                let topics = sequencesStore.getAll()
+                    .map{$0.topic}
                 topics.forEach{self.wcSubscriber.setSubscription(topic: $0)}
             }.store(in: &publishers)
+    }
+    
+    private func removeRespondedPendingPairings() {
+        sequencesStore.getAll().forEach {
+            if $0.pending?.status == .responded {
+                sequencesStore.delete(topic: $0.topic)
+            }
+        }
     }
     
     private func setupExpirationHandling() {

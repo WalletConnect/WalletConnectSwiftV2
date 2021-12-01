@@ -11,7 +11,7 @@ protocol WCSubscribing: AnyObject {
 class WCSubscriber: WCSubscribing {
     private var relay: WalletConnectRelaying
     var onRequestSubscription: ((WCRequestSubscriptionPayload)->())?
-    private let concurrentQueue = DispatchQueue(label: "wc subscriber queue: \(UUID().uuidString)",
+    private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.wc_subscriber",
                                                 attributes: .concurrent)
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogger

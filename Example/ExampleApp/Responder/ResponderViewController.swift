@@ -32,7 +32,6 @@ final class ResponderViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Wallet"
-        
         responderView.scanButton.addTarget(self, action: #selector(showScanner), for: .touchUpInside)
         responderView.pasteButton.addTarget(self, action: #selector(showTextInput), for: .touchUpInside)
         
