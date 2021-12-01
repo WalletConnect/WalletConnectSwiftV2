@@ -1,7 +1,6 @@
 import Foundation
 
 struct PairingSequence: ExpirableSequence {
-    
     let topic: String
     let relay: RelayProtocolOptions
     let selfParticipant: PairingType.Participant
@@ -58,8 +57,7 @@ extension PairingSequence {
     }
 }
     
-extension PairingSequence {
-    
+extension PairingSequence {    
     struct Pending: Codable {
         let proposal: PairingType.Proposal
         let status: PairingType.Pending.PendingStatus
@@ -69,5 +67,6 @@ extension PairingSequence {
         let peer: PairingType.Participant
         let permissions: PairingType.Permissions
         var state: PairingType.State?
+        let status: PairingType.Settled.SettledStatus
     }
 }

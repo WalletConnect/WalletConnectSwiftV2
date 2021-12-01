@@ -480,10 +480,13 @@ final class SessionEngine {
     
     private func handleSessionApprove(_ approveParams: SessionType.ApproveParams, topic: String, requestId: Int64) {
         logger.debug("Responder Client approved session on topic: \(topic)")
-        guard let session = try? sequencesStore.getSequence(forTopic: topic), let pendingSession = session.pending else {
-            logger.error("Could not find pending session for topic: \(topic)")
-            return
-        }
+        logger.debug("isController: \(isController)")
+        guard !isController,
+              let session = try? sequencesStore.getSequence(forTopic: topic),
+              let pendingSession = session.pending else {
+                  logger.error("Could not find pending session for topic: \(topic)")
+                  return
+              }
         
         let selfPublicKey = Data(hex: session.selfParticipant.publicKey)
         logger.debug("handleSessionApprove")

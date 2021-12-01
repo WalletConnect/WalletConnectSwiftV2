@@ -17,7 +17,7 @@ class WakuNetworkRelay: NetworkRelaying {
     private typealias SubscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>
     private typealias SubscriptionResponse = JSONRPCResponse<String>
     private typealias RequestAcknowledgement = JSONRPCResponse<Bool>
-    private let concurrentQueue = DispatchQueue(label: "waku relay queue: \(UUID().uuidString)",
+    private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.waku.relay",
                                                 attributes: .concurrent)
     var onConnect: (() -> ())?
     
