@@ -102,7 +102,7 @@ extension WalletConnectError.InternalReason: CustomStringConvertible {
         case .jsonRpcDuplicateDetected:
             return "Json Rpc Duplicate Detected"
         case .pairWithExistingPairingForbidden:
-            return "Pair With Existing Pairing Is Forbidden"
+            return "Pairing for uri already exist - Action Forbidden"
         }
     }
 }

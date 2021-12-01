@@ -46,11 +46,6 @@ final class SequenceStore<T> where T: ExpirableSequence {
         }
     }
 
-    func update(sequence: T) throws {
-        storage.removeObject(forKey: getKey(for: sequence.topic))
-        try setSequence(sequence)
-    }
-    
     //TODO - to be removed after session engine refactor
     func update(sequence: T, onTopic topic: String) throws {
         storage.removeObject(forKey: getKey(for: topic))

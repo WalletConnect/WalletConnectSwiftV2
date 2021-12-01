@@ -30,6 +30,7 @@ final class PairingEngine {
         self.logger = logger
         setUpWCRequestHandling()
         setupExpirationHandling()
+        removeRespondedPendingPairings()
         restoreSubscriptions()
     }
     
@@ -117,7 +118,7 @@ final class PairingEngine {
             switch result {
             case .success(_):
                 pairing.settled?.state?.metadata = appMetadata
-                try? sequencesStore.update(sequence: pairing)
+                try? sequencesStore.setSequence(pairing)
             case .failure(let error):
                 logger.error(error)
             }
@@ -220,7 +221,7 @@ final class PairingEngine {
                 logger.error(error)
             } else {
                 pairing.settled?.state = params.state
-                try? sequencesStore.update(sequence: pairing)
+                try? sequencesStore.setSequence(pairing)
                 onPairingUpdate?(topic, params.state.metadata)
             }
         }
@@ -267,7 +268,7 @@ final class PairingEngine {
     
     private func handlePairingApprove(approveParams: PairingType.ApproveParams, pendingPairingTopic: String, requestId: Int64) {
         logger.debug("Responder Client approved pairing on topic: \(pendingPairingTopic)")
-        guard var pendingPairing = try? sequencesStore.getSequence(forTopic: pendingPairingTopic), let pairingPending = pendingPairing.pending else {
+        guard let pendingPairing = try? sequencesStore.getSequence(forTopic: pendingPairingTopic), let pairingPending = pendingPairing.pending else {
             return
         }
         let selfPublicKey = Data(hex: pendingPairing.selfParticipant.publicKey)
@@ -308,10 +309,17 @@ final class PairingEngine {
         relayer.transportConnectionPublisher
             .sink { [unowned self] (_) in
                 let topics = sequencesStore.getAll()
-                    .filter{$0.pending?.status == .proposed || $0.settled}
                     .map{$0.topic}
                 topics.forEach{self.wcSubscriber.setSubscription(topic: $0)}
             }.store(in: &publishers)
+    }
+    
+    private func removeRespondedPendingPairings() {
+        sequencesStore.getAll().forEach {
+            if $0.pending?.status == .responded {
+                sequencesStore.delete(topic: $0.topic)
+            }
+        }
     }
     
     private func setupExpirationHandling() {

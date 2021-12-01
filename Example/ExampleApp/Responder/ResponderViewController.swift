@@ -32,7 +32,6 @@ final class ResponderViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Wallet"
-        client.logger.setLogging(level: .debug)
         responderView.scanButton.addTarget(self, action: #selector(showScanner), for: .touchUpInside)
         responderView.pasteButton.addTarget(self, action: #selector(showTextInput), for: .touchUpInside)
         
@@ -137,9 +136,7 @@ extension ResponderViewController: UITableViewDataSource, UITableViewDelegate {
 extension ResponderViewController: ScannerViewControllerDelegate {
     
     func didScan(_ code: String) {
-        DispatchQueue.global().async { [weak self] in
-            self?.pairClient(uri: code)
-        }
+        pairClient(uri: code)
     }
 }
 
