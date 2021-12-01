@@ -3,6 +3,7 @@ import XCTest
 
 struct ExpirableSequenceStub: ExpirableSequence, Equatable {
     let topic: String
+    let publicKey: String
     let expiryDate: Date
 }
 
@@ -20,7 +21,7 @@ final class SequenceStoreTests: XCTestCase {
         timeTraveler = TimeTraveler()
         storageFake = RuntimeKeyValueStorage()
         sut = SequenceStore<ExpirableSequenceStub>(storage: storageFake, dateInitializer: timeTraveler.generateDate)
-        sut.onSequenceExpiration = { _ in
+        sut.onSequenceExpiration = { _, _ in
             XCTFail("Unexpected expiration call")
         }
     }
@@ -34,6 +35,7 @@ final class SequenceStoreTests: XCTestCase {
     private func stubSequence(expiry: TimeInterval? = nil) -> ExpirableSequenceStub {
         ExpirableSequenceStub(
             topic: String.generateTopic()!,
+            publicKey: "0x",
             expiryDate: timeTraveler.referenceDate.addingTimeInterval(expiry ?? defaultTime)
         )
     }
@@ -86,7 +88,7 @@ final class SequenceStoreTests: XCTestCase {
     func testHasSequenceExpiration() {
         let sequence = stubSequence()
         var expiredTopic: String? = nil
-        sut.onSequenceExpiration = { expiredTopic = $0 }
+        sut.onSequenceExpiration = { topic, _ in expiredTopic = topic }
         
         try? sut.setSequence(sequence)
         timeTraveler.travel(by: defaultTime)
@@ -98,7 +100,7 @@ final class SequenceStoreTests: XCTestCase {
     func testGetSequenceExpiration() {
         let sequence = stubSequence()
         var expiredTopic: String? = nil
-        sut.onSequenceExpiration = { expiredTopic = $0 }
+        sut.onSequenceExpiration = { topic, _ in expiredTopic = topic }
         
         try? sut.setSequence(sequence)
         timeTraveler.travel(by: defaultTime)
@@ -111,7 +113,7 @@ final class SequenceStoreTests: XCTestCase {
     func testGetAllExpiration() {
         let sequenceCount = 10
         var expiredCount = 0
-        sut.onSequenceExpiration = { _ in expiredCount += 1 }
+        sut.onSequenceExpiration = { _, _ in expiredCount += 1 }
         (1...sequenceCount).forEach { _ in
             let sequence = stubSequence()
             try? sut.setSequence(sequence)
@@ -126,7 +128,7 @@ final class SequenceStoreTests: XCTestCase {
     
     func testGetAllPartialExpiration() {
         var expiredCount = 0
-        sut.onSequenceExpiration = { _ in expiredCount += 1 }
+        sut.onSequenceExpiration = { _, _ in expiredCount += 1 }
         let persistentCount = 5
         let expirableCount = 3
         (1...persistentCount).forEach { _ in

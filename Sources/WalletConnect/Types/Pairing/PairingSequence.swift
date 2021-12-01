@@ -6,6 +6,10 @@ struct PairingSequence: ExpirableSequence {
     let selfParticipant: PairingType.Participant
     let expiryDate: Date
     private var sequenceState: Either<Pending, Settled>
+    
+    var publicKey: String {
+        selfParticipant.publicKey
+    }
 
     var pending: Pending? {
         get {

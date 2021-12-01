@@ -194,14 +194,6 @@ final class PairingEngine {
         }
     }
     
-//    private func getDefaultTTL() -> Int {
-//        30 * Time.day
-//    }
-    
-//    private func getDefaultPermissions() -> PairingType.ProposedPermissions {
-//        PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [PairingType.PayloadMethods.sessionPropose.rawValue]))
-//    }
-    
     private func setUpWCRequestHandling() {
         wcSubscriber.onRequestSubscription = { [unowned self] subscriptionPayload in
             let requestId = subscriptionPayload.clientSynchJsonRpc.id
@@ -347,8 +339,9 @@ final class PairingEngine {
     }
     
     private func setupExpirationHandling() {
-        sequencesStore.onSequenceExpiration = { topic in
-            // TODO
+        sequencesStore.onSequenceExpiration = { [weak self] topic, publicKey in
+            self?.crypto.deletePrivateKey(for: publicKey)
+            self?.crypto.deleteAgreementKeys(for: topic)
         }
     }
     

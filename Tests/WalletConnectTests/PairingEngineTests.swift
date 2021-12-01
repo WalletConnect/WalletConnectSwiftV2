@@ -1,47 +1,17 @@
 import XCTest
 @testable import WalletConnect
 
-import CryptoKit
-
-final class CryptoStorageProtocolMock: CryptoStorageProtocol {
-    
-    func set(privateKey: Curve25519.KeyAgreement.PrivateKey) throws {
-        fatalError()
-    }
-    
-    func getPrivateKey(for publicKey: Curve25519.KeyAgreement.PublicKey) throws -> Curve25519.KeyAgreement.PrivateKey? {
-        fatalError()
-    }
-    
-    func set(privateKey: Crypto.X25519.PrivateKey) {
-        fatalError()
-    }
-    
-    func set(agreementKeys: Crypto.X25519.AgreementKeys, topic: String) {
-        fatalError()
-    }
-    
-    func getPrivateKey(for publicKey: Data) throws -> Crypto.X25519.PrivateKey? {
-        fatalError()
-    }
-    
-    func getAgreementKeys(for topic: String) -> Crypto.X25519.AgreementKeys? {
-        fatalError()
-    }
-    
-    
-}
-
+// TODO: Mock all dependencies and write tests
 class PairingEngineTests: XCTestCase {
     
     var engine: PairingEngine!
     
     var relay: MockedWCRelay!
-    var cryptoMock: CryptoStorageProtocol!
+    var cryptoMock: Crypto!
     var subscriber: MockedSubscriber!
     
     override func setUp() {
-        cryptoMock = CryptoStorageProtocolMock()//Crypto(keychain: KeychainStorageMock())
+        cryptoMock = Crypto(keychain: KeychainStorageMock())
         relay = MockedWCRelay()
         subscriber = MockedSubscriber()
         let meta = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
@@ -61,14 +31,6 @@ class PairingEngineTests: XCTestCase {
         relay = nil
         engine = nil
         cryptoMock = nil
-    }
-    
-    func testPropose() {
-        
-    }
-    
-    func testApprove() {
-        
     }
     
 //    func testNotifyOnSessionProposal() {

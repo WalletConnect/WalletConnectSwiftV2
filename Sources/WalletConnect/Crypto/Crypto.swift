@@ -5,16 +5,12 @@ import CryptoKit
 
 // TODO: Come up with better naming conventions
 protocol CryptoStorageProtocol {
-    func set(privateKey: Curve25519.KeyAgreement.PrivateKey) throws
-    func getPrivateKey(for publicKey: Curve25519.KeyAgreement.PublicKey) throws -> Curve25519.KeyAgreement.PrivateKey?
-    
     func set(privateKey: Crypto.X25519.PrivateKey)
     func set(agreementKeys: Crypto.X25519.AgreementKeys, topic: String)
     func getPrivateKey(for publicKey: Data) throws -> Crypto.X25519.PrivateKey?
     func getAgreementKeys(for topic: String) -> Crypto.X25519.AgreementKeys?
-    
-//    func deletePrivateKey(for publicKey: Data)
-//    func deleteAgreementKeys(for topic: String)
+    func deletePrivateKey(for publicKey: String)
+    func deleteAgreementKeys(for topic: String)
 }
 
 class Crypto: CryptoStorageProtocol {
@@ -23,17 +19,6 @@ class Crypto: CryptoStorageProtocol {
     
     init(keychain: KeychainStorageProtocol) {
         self.keychain = keychain
-    }
-    
-    func set(privateKey: Curve25519.KeyAgreement.PrivateKey) throws {
-        try keychain.add(privateKey.rawRepresentation, forKey: privateKey.publicKey.rawRepresentation.toHexString())
-    }
-    
-    func getPrivateKey(for publicKey: Curve25519.KeyAgreement.PublicKey) throws -> Curve25519.KeyAgreement.PrivateKey? {
-        guard let privateKeyData = try? keychain.read(key: publicKey.rawRepresentation.toHexString()) as Data else {
-            return nil
-        }
-        return try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: privateKeyData)
     }
     
     func set(privateKey: X25519.PrivateKey) {
@@ -66,6 +51,22 @@ class Crypto: CryptoStorageProtocol {
         }
         let (sharedSecret, publicKey) = split(concatinatedAgreementKeys: agreement)
         return Crypto.X25519.AgreementKeys(sharedSecret: sharedSecret, publicKey: publicKey)
+    }
+    
+    func deletePrivateKey(for publicKey: String) {
+        do {
+            try keychain.delete(key: publicKey)
+        } catch {
+            print("Error deleting private key: \(error)")
+        }
+    }
+    
+    func deleteAgreementKeys(for topic: String) {
+        do {
+            try keychain.delete(key: topic)
+        } catch {
+            print("Error deleting agreement key: \(error)")
+        }
     }
     
     private func split(concatinatedAgreementKeys: Data) -> (Data, Data) {

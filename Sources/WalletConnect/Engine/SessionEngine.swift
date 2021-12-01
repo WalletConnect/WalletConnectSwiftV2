@@ -531,8 +531,9 @@ final class SessionEngine {
     }
     
     private func setupExpirationHandling() {
-        sequencesStore.onSequenceExpiration = { topic in
-            // TODO
+        sequencesStore.onSequenceExpiration = { [weak self] topic, publicKey in
+            self?.crypto.deletePrivateKey(for: publicKey)
+            self?.crypto.deleteAgreementKeys(for: topic)
         }
     }
     
