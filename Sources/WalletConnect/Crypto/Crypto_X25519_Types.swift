@@ -32,4 +32,3 @@ extension Crypto.X25519 {
         let publicKey: Data
     }
 }
-

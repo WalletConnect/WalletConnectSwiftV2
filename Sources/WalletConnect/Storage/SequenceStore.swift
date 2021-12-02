@@ -6,11 +6,12 @@ protocol Expirable {
 
 protocol ExpirableSequence: Codable, Expirable {
     var topic: String { get }
+    var publicKey: String { get }
 }
 
 final class SequenceStore<T> where T: ExpirableSequence {
 
-    var onSequenceExpiration: ((String) -> Void)?
+    var onSequenceExpiration: ((_ topic: String, _ pubKey: String) -> Void)?
     
     private let storage: KeyValueStorage
     private let dateInitializer: () -> Date
@@ -59,7 +60,7 @@ final class SequenceStore<T> where T: ExpirableSequence {
         let now = dateInitializer()
         if now >= sequence.expiryDate {
             storage.removeObject(forKey: getKey(for: sequence.topic))
-            onSequenceExpiration?(sequence.topic)
+            onSequenceExpiration?(sequence.topic, sequence.publicKey)
             return nil
         }
         return sequence

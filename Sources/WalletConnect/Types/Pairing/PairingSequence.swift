@@ -6,6 +6,10 @@ struct PairingSequence: ExpirableSequence {
     let selfParticipant: PairingType.Participant
     let expiryDate: Date
     private var sequenceState: Either<Pending, Settled>
+    
+    var publicKey: String {
+        selfParticipant.publicKey
+    }
 
     var pending: Pending? {
         get {
@@ -35,6 +39,14 @@ struct PairingSequence: ExpirableSequence {
     
     var peerIsController: Bool {
         isSettled && settled?.peer.publicKey == settled?.permissions.controller.publicKey
+    }
+    
+    static var timeToLivePending: Int {
+        Time.day
+    }
+    
+    static var timeToLiveSettled: Int {
+        Time.day * 30
     }
 }
 

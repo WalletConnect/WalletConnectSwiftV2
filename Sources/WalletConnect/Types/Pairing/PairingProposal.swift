@@ -18,6 +18,10 @@ extension PairingType {
     
     struct ProposedPermissions: Codable, Equatable {
         let jsonrpc: JSONRPC
+        
+        static var `default`: ProposedPermissions {
+            PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [PairingType.PayloadMethods.sessionPropose.rawValue]))
+        }
     }
     
     struct Permissions: Codable, Equatable {
@@ -43,7 +47,7 @@ extension PairingType.Proposal {
             proposer: PairingType.Proposer(
                 publicKey: uri.publicKey,
                 controller: uri.isController),
-            signal: PairingType.Signal(params: PairingType.Signal.Params(uri: uri.absoluteString)),
+            signal: PairingType.Signal(uri: uri.absoluteString),
             permissions: PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [PairingType.PayloadMethods.sessionPropose.rawValue])),
             ttl: PairingType.defaultTTL
         )

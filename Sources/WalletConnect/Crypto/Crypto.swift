@@ -3,7 +3,17 @@
 import Foundation
 import CryptoKit
 
-class Crypto {
+// TODO: Come up with better naming conventions
+protocol CryptoStorageProtocol {
+    func set(privateKey: Crypto.X25519.PrivateKey)
+    func set(agreementKeys: Crypto.X25519.AgreementKeys, topic: String)
+    func getPrivateKey(for publicKey: Data) throws -> Crypto.X25519.PrivateKey?
+    func getAgreementKeys(for topic: String) -> Crypto.X25519.AgreementKeys?
+    func deletePrivateKey(for publicKey: String)
+    func deleteAgreementKeys(for topic: String)
+}
+
+class Crypto: CryptoStorageProtocol {
     
     private var keychain: KeychainStorageProtocol
     
@@ -41,6 +51,22 @@ class Crypto {
         }
         let (sharedSecret, publicKey) = split(concatinatedAgreementKeys: agreement)
         return Crypto.X25519.AgreementKeys(sharedSecret: sharedSecret, publicKey: publicKey)
+    }
+    
+    func deletePrivateKey(for publicKey: String) {
+        do {
+            try keychain.delete(key: publicKey)
+        } catch {
+            print("Error deleting private key: \(error)")
+        }
+    }
+    
+    func deleteAgreementKeys(for topic: String) {
+        do {
+            try keychain.delete(key: topic)
+        } catch {
+            print("Error deleting agreement key: \(error)")
+        }
     }
     
     private func split(concatinatedAgreementKeys: Data) -> (Data, Data) {
