@@ -66,6 +66,6 @@ final class JsonRpcHistoryTests: XCTestCase {
 }
 
 private let testTopic = "test_topic"
-private var testJsonRpcRecordInput: (topic: String, request: ClientSynchJSONRPC) {
+private var testJsonRpcRecordInput: (topic: String, request: WCRequest) {
     return (topic: testTopic, request: SerialiserTestData.pairingApproveJSONRPCRequest)
 }

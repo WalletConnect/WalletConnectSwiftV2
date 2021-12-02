@@ -28,7 +28,7 @@ class WalletConnectRelayTests: XCTestCase {
     func testNotifiesOnEncryptedWCJsonRpcRequest() {
         let requestExpectation = expectation(description: "notifies with request")
         let topic = "fefc3dc39cacbc562ed58f92b296e2d65a6b07ef08992b93db5b3cb86280635a"
-        wcRelay.clientSynchJsonRpcPublisher.sink { (request) in
+        wcRelay.wcRequestPublisher.sink { (request) in
             requestExpectation.fulfill()
         }.store(in: &publishers)
         serialiser.deserialised = SerialiserTestData.pairingApproveJSONRPCRequest
@@ -81,11 +81,11 @@ extension WalletConnectRelayTests {
         return JSONRPCResponse<AnyCodable>(id: 123456, result: result)
     }
     
-    func getWCSessionPayloadRequest() -> ClientSynchJSONRPC {
+    func getWCSessionPayloadRequest() -> WCRequest {
         let wcRequestId: Int64 = 123456
         let sessionPayloadParams = SessionType.PayloadParams(request: SessionType.PayloadParams.Request(method: "method", params: AnyCodable("params")), chainId: "")
-        let params = ClientSynchJSONRPC.Params.sessionPayload(sessionPayloadParams)
-        let wcRequest = ClientSynchJSONRPC(id: wcRequestId, method: ClientSynchJSONRPC.Method.sessionPayload, params: params)
+        let params = WCRequest.Params.sessionPayload(sessionPayloadParams)
+        let wcRequest = WCRequest(id: wcRequestId, method: WCRequest.Method.sessionPayload, params: params)
         return wcRequest
     }
 }

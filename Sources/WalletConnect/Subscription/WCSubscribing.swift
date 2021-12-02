@@ -48,7 +48,7 @@ class WCSubscriber: WCSubscribing {
     }
     
     private func setSubscribingForPayloads() {
-        relay.clientSynchJsonRpcPublisher
+        relay.wcRequestPublisher
             .filter {[weak self] in self?.getTopics().contains($0.topic) ?? false}
             .sink { [weak self] subscriptionPayload in
                 self?.onRequestSubscription?(subscriptionPayload)

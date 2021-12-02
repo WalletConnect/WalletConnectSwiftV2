@@ -30,7 +30,7 @@ final class JSONRPCSerialiserTests: XCTestCase {
     func testDeserialise() {
         let serialisedMessageSample = SerialiserTestData.serialisedMessage
         codec.decodedJson = SerialiserTestData.pairingApproveJSON
-        let deserialisedJSONRPC: ClientSynchJSONRPC = try! serialiser.deserialise(message: serialisedMessageSample, symmetricKey: Data(hex: ""))
+        let deserialisedJSONRPC: WCRequest = try! serialiser.deserialise(message: serialisedMessageSample, symmetricKey: Data(hex: ""))
         XCTAssertEqual(deserialisedJSONRPC.params, SerialiserTestData.pairingApproveJSONRPCRequest.params)
     }
 }

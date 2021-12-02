@@ -9,8 +9,8 @@ struct JsonRpcRecord: Codable {
     var response: JsonRpcResponseTypes?
     
     struct Request: Codable {
-        let method: ClientSynchJSONRPC.Method
-        let params: ClientSynchJSONRPC.Params
+        let method: WCRequest.Method
+        let params: WCRequest.Params
     }
 }
 

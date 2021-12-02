@@ -140,7 +140,7 @@ final class PairingEngine {
             responder: selfParticipant,
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
             state: nil) // FIXME: State
-        let approvalPayload = ClientSynchJSONRPC(method: .pairingApprove, params: .pairingApprove(approveParams))
+        let approvalPayload = WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
         
         // completion comes on topic A
         relayer.request(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
@@ -164,7 +164,7 @@ final class PairingEngine {
             logger.debug("Could not find pairing to ping for topic \(topic)")
             return
         }
-        let request = ClientSynchJSONRPC(method: .pairingPing, params: .pairingPing(PairingType.PingParams()))
+        let request = WCRequest(method: .pairingPing, params: .pairingPing(PairingType.PingParams()))
         relayer.request(topic: topic, payload: request) { [unowned self] result in
             switch result {
             case .success(_):
@@ -183,8 +183,8 @@ final class PairingEngine {
             logger.debug("Could not find pairing for topic \(topic)")
             return
         }
-        let params = ClientSynchJSONRPC.Params.pairingUpdate(PairingType.UpdateParams(state: PairingType.State(metadata: appMetadata)))
-        let request = ClientSynchJSONRPC(method: .pairingUpdate, params: params)
+        let params = WCRequest.Params.pairingUpdate(PairingType.UpdateParams(state: PairingType.State(metadata: appMetadata)))
+        let request = WCRequest(method: .pairingUpdate, params: params)
         relayer.request(topic: topic, payload: request) { [unowned self] result in
             switch result {
             case .success(_):
@@ -198,9 +198,9 @@ final class PairingEngine {
     
     private func setUpWCRequestHandling() {
         wcSubscriber.onRequestSubscription = { [unowned self] subscriptionPayload in
-            let requestId = subscriptionPayload.clientSynchJsonRpc.id
+            let requestId = subscriptionPayload.wcRequest.id
             let topic = subscriptionPayload.topic
-            switch subscriptionPayload.clientSynchJsonRpc.params {
+            switch subscriptionPayload.wcRequest.params {
             case .pairingApprove(let approveParams):
                 handlePairingApprove(approveParams: approveParams, pendingPairingTopic: topic, requestId: requestId)
             case .pairingUpdate(let updateParams):
@@ -210,7 +210,7 @@ final class PairingEngine {
             case .pairingPing(_):
                 self.handlePairingPing(topic: topic, requestId: requestId)
             default:
-                logger.warn("Warning: Pairing Engine - Unexpected method type: \(subscriptionPayload.clientSynchJsonRpc.method) received from subscriber")
+                logger.warn("Warning: Pairing Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
             }
         }
     }
