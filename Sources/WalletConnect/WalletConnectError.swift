@@ -68,15 +68,15 @@ extension WalletConnectError.InternalReason: CustomStringConvertible {
     var code: Int {
         switch self {
         case .notApproved: return 1601
-        case .malformedPairingURI: return 0000000
-        case .unauthorizedMatchingController: return 0000000
-        case .noSequenceForTopic: return 0000000
-        case .pairingProposalGenerationFailed: return 0000000
-        case .subscriptionIdNotFound: return 00
-        case .keyNotFound: return 00
-        case .deserialisationFailed: return 00
-        case .jsonRpcDuplicateDetected: return 0
-        case .pairWithExistingPairingForbidden: return 0
+        case .malformedPairingURI: return 1001
+        case .unauthorizedMatchingController: return 1002
+        case .noSequenceForTopic: return 1003
+        case .pairingProposalGenerationFailed: return 1004
+        case .subscriptionIdNotFound: return 1005
+        case .keyNotFound: return 1006
+        case .deserialisationFailed: return 1007
+        case .jsonRpcDuplicateDetected: return 1008
+        case .pairWithExistingPairingForbidden: return 1009
         }
     }
     
