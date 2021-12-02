@@ -17,6 +17,7 @@ final class PairingEngine {
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogger
     private var sessionPermissions: [String: SessionType.Permissions] = [:]
+    private let topicInitializer: () -> String?
     
     init(relay: WalletConnectRelaying,
          crypto: CryptoStorageProtocol,
@@ -24,7 +25,8 @@ final class PairingEngine {
          sequencesStore: PairingSequenceStorage,
          isController: Bool,
          metadata: AppMetadata,
-         logger: ConsoleLogger) {
+         logger: ConsoleLogger,
+         topicGenerator: @escaping () -> String? = String.generateTopic) {
         self.relayer = relay
         self.crypto = crypto
         self.wcSubscriber = subscriber
@@ -32,6 +34,7 @@ final class PairingEngine {
         self.sequencesStore = sequencesStore
         self.isController = isController
         self.logger = logger
+        self.topicInitializer = topicGenerator
         setUpWCRequestHandling()
         setupExpirationHandling()
         removeRespondedPendingPairings()
@@ -53,8 +56,8 @@ final class PairingEngine {
             .map { Pairing(topic: $0.topic, peer: $0.settled?.state?.metadata) }
     }
     
-    func propose(permissions: SessionType.Permissions) -> String? {
-        guard let topic = String.generateTopic() else {
+    func propose(permissions: SessionType.Permissions) -> WalletConnectURI? {
+        guard let topic = topicInitializer() else {
             logger.debug("Could not generate topic")
             return nil
         }
@@ -63,14 +66,14 @@ final class PairingEngine {
         let publicKey = privateKey.publicKey.toHexString()
         
         let relay = RelayProtocolOptions(protocol: "waku", params: nil)
-        let uri = WalletConnectURI(topic: topic, publicKey: publicKey, isController: isController, relay: relay).absoluteString
+        let uri = WalletConnectURI(topic: topic, publicKey: publicKey, isController: isController, relay: relay)
         let timeToLive = PairingSequence.timeToLivePending
         
         let proposal = PairingType.Proposal(
             topic: topic,
             relay: relay,
             proposer: PairingType.Proposer(publicKey: publicKey, controller: isController),
-            signal: PairingType.Signal(uri: uri),
+            signal: PairingType.Signal(uri: uri.absoluteString),
             permissions: PairingType.ProposedPermissions.default,
             ttl: timeToLive)
         

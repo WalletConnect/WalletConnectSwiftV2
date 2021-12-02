@@ -3,6 +3,7 @@ import Foundation
 @testable import WalletConnect
 
 class MockedSubscriber: WCSubscribing {
+    
     var subscriptions: [String: String] = [:]
     var onRequestSubscription: ((WCRequestSubscriptionPayload)->())?
     
@@ -16,5 +17,12 @@ class MockedSubscriber: WCSubscribing {
     
     func removeSubscription(topic: String) {
         subscriptions[topic] = nil
+    }
+}
+
+extension MockedSubscriber {
+    
+    func didSubscribe(to topic: String) -> Bool {
+        subscriptions[topic] != nil
     }
 }

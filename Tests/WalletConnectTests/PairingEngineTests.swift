@@ -1,61 +1,72 @@
 import XCTest
 @testable import WalletConnect
 
-final class PairingSequenceStorageMock: PairingSequenceStorage {
-    
-    var onSequenceExpiration: ((String, String) -> Void)?
-    
-    func hasSequence(forTopic topic: String) -> Bool {
-        fatalError()
-    }
-    
-    func setSequence(_ sequence: PairingSequence) {
-        fatalError()
-    }
-    
-    func getSequence(forTopic topic: String) throws -> PairingSequence? {
-        fatalError()
-    }
-    
-    func getAll() -> [PairingSequence] {
-        fatalError()
-    }
-    
-    func delete(topic: String) {
-        fatalError()
+fileprivate extension SessionType.Permissions {
+    static func stub() -> SessionType.Permissions {
+        SessionType.Permissions(
+            blockchain: SessionType.Blockchain(chains: []),
+            jsonrpc: SessionType.JSONRPC(methods: []),
+            notifications: SessionType.Notifications(types: [])
+        )
     }
 }
 
-// TODO: Mock all dependencies and write tests
+final class TopicGenerator {
+    
+    let topic: String
+    
+    init(topic: String = String.generateTopic()!) {
+        self.topic = topic
+    }
+    
+    func getTopic() -> String? {
+        return topic
+    }
+}
+
 class PairingEngineTests: XCTestCase {
     
     var engine: PairingEngine!
     
     var relay: MockedWCRelay!
-    var cryptoMock: Crypto!
-    var subscriber: MockedSubscriber!
+    var cryptoMock: CryptoStorageProtocolMock!
+    var subscriberMock: MockedSubscriber!
+    var storageMock: PairingSequenceStorageMock!
+    
+    var topicGenerator: TopicGenerator!
     
     override func setUp() {
-        cryptoMock = Crypto(keychain: KeychainStorageMock())
+        cryptoMock = CryptoStorageProtocolMock()
         relay = MockedWCRelay()
-        subscriber = MockedSubscriber()
+        subscriberMock = MockedSubscriber()
         let meta = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
         let logger = ConsoleLogger()
-        let store = PairingSequenceStorageMock()
+        storageMock = PairingSequenceStorageMock()
+        topicGenerator = TopicGenerator()
         engine = PairingEngine(
             relay: relay,
             crypto: cryptoMock,
-            subscriber: subscriber,
-            sequencesStore: store,
+            subscriber: subscriberMock,
+            sequencesStore: storageMock,
             isController: false,
             metadata: meta,
-            logger: logger)
+            logger: logger,
+            topicGenerator: topicGenerator.getTopic)
     }
 
     override func tearDown() {
         relay = nil
         engine = nil
         cryptoMock = nil
+    }
+    
+    func testPropose() {
+        let topicA = topicGenerator.topic
+        let uri = engine.propose(permissions: SessionType.Permissions.stub())!
+        
+        XCTAssert(cryptoMock.hasPrivateKey(for: uri.publicKey))
+        XCTAssert(storageMock.hasSequence(forTopic: topicA)) // TODO: check for pending state
+        XCTAssert(subscriberMock.didSubscribe(to: topicA))
     }
     
 //    func testNotifyOnSessionProposal() {
