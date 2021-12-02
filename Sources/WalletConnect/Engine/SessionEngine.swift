@@ -248,12 +248,14 @@ final class SessionEngine {
     }
     
     func upgrade(topic: String, permissions: SessionPermissions) {
-        guard var session = try? sequencesStore.getSequence(forTopic: topic), let settled = session.settled else {
+        guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
         session.upgrade(permissions)
-        let newPermissions = settled.permissions
+        guard let newPermissions = session.settled?.permissions else {
+            return
+        }
         let params = SessionType.UpgradeParams(permissions: newPermissions)
         let request = ClientSynchJSONRPC(method: .sessionUpgrade, params: .sessionUpgrade(params))
         relayer.request(topic: topic, payload: request) { [unowned self] result in
