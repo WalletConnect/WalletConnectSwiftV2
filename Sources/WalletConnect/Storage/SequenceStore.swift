@@ -26,9 +26,10 @@ final class SequenceStore<T> where T: ExpirableSequence {
     func hasSequence(forTopic topic: String) -> Bool {
         (try? getSequence(forTopic: topic)) != nil
     }
-
-    func setSequence(_ sequence: T) throws {
-        let encoded = try JSONEncoder().encode(sequence)
+    
+    //  This force-unwrap is safe because Expirable Sequances are JSON Encodable
+    func setSequence(_ sequence: T) {
+        let encoded = try! JSONEncoder().encode(sequence)
         storage.set(encoded, forKey: getKey(for: sequence.topic))
     }
 
@@ -47,11 +48,6 @@ final class SequenceStore<T> where T: ExpirableSequence {
         }
     }
 
-    //TODO - to be removed after session engine refactor
-    func update(sequence: T, onTopic topic: String) throws {
-        storage.removeObject(forKey: getKey(for: topic))
-        try setSequence(sequence)
-    }
     func delete(topic: String) {
         storage.removeObject(forKey: getKey(for: topic))
     }

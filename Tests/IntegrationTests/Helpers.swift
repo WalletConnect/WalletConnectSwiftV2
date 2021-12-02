@@ -22,7 +22,7 @@ extension Result {
     }
 }
 
-extension ClientSynchJSONRPC {
+extension WCRequest {
     
     var isPairingApprove: Bool {
         if case .pairingApprove = self.params { return true }

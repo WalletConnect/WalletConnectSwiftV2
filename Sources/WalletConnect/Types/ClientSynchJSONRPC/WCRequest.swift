@@ -1,7 +1,7 @@
 
 import Foundation
 
-struct ClientSynchJSONRPC: Codable {
+struct WCRequest: Codable {
     let id: Int64
     let jsonrpc: String
     let method: Method

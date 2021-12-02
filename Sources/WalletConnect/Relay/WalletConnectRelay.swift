@@ -4,8 +4,8 @@ import Combine
 
 protocol WalletConnectRelaying {
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
-    var clientSynchJsonRpcPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
-    func request(topic: String, payload: ClientSynchJSONRPC, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->()))
+    var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
+    func request(topic: String, payload: WCRequest, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->()))
     func respond(topic: String, response: JsonRpcResponseTypes, completion: @escaping ((Error?)->()))
     func subscribe(topic: String)
     func unsubscribe(topic: String)
@@ -43,10 +43,10 @@ class WalletConnectRelay: WalletConnectRelaying {
     private let transportConnectionPublisherSubject = PassthroughSubject<Void, Never>()
     
     //rename to request publisher
-    var clientSynchJsonRpcPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {
-        clientSynchJsonRpcPublisherSubject.eraseToAnyPublisher()
+    var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {
+        wcRequestPublisherSubject.eraseToAnyPublisher()
     }
-    private let clientSynchJsonRpcPublisherSubject = PassthroughSubject<WCRequestSubscriptionPayload, Never>()
+    private let wcRequestPublisherSubject = PassthroughSubject<WCRequestSubscriptionPayload, Never>()
     
     private var wcResponsePublisher: AnyPublisher<JsonRpcResponseTypes, Never> {
         wcResponsePublisherSubject.eraseToAnyPublisher()
@@ -65,7 +65,7 @@ class WalletConnectRelay: WalletConnectRelaying {
         setUpPublishers()
     }
 
-    func request(topic: String, payload: ClientSynchJSONRPC, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())) {
+    func request(topic: String, payload: WCRequest, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())) {
         do {
             try jsonRpcHistory.set(topic: topic, request: payload)
             let message = try jsonRpcSerialiser.serialise(topic: topic, encodable: payload)
@@ -140,7 +140,7 @@ class WalletConnectRelay: WalletConnectRelaying {
     }
     
     private func manageSubscription(_ topic: String, _ message: String) {
-        if let deserialisedJsonRpcRequest: ClientSynchJSONRPC = jsonRpcSerialiser.tryDeserialise(topic: topic, message: message) {
+        if let deserialisedJsonRpcRequest: WCRequest = jsonRpcSerialiser.tryDeserialise(topic: topic, message: message) {
             handleWCRequest(topic: topic, request: deserialisedJsonRpcRequest)
         } else if let deserialisedJsonRpcResponse: JSONRPCResponse<AnyCodable> = jsonRpcSerialiser.tryDeserialise(topic: topic, message: message) {
             handleJsonRpcResponse(response: deserialisedJsonRpcResponse)
@@ -151,11 +151,11 @@ class WalletConnectRelay: WalletConnectRelaying {
         }
     }
     
-    private func handleWCRequest(topic: String, request: ClientSynchJSONRPC) {
+    private func handleWCRequest(topic: String, request: WCRequest) {
         do {
             try jsonRpcHistory.set(topic: topic, request: request)
-            let payload = WCRequestSubscriptionPayload(topic: topic, clientSynchJsonRpc: request)
-            clientSynchJsonRpcPublisherSubject.send(payload)
+            let payload = WCRequestSubscriptionPayload(topic: topic, wcRequest: request)
+            wcRequestPublisherSubject.send(payload)
         } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
             logger.info("Info: Json Rpc Duplicate Detected")
         } catch {

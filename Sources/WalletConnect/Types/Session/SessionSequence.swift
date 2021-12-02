@@ -60,6 +60,10 @@ struct SessionSequence: ExpirableSequence {
     mutating func upgrade(_ permissions: SessionPermissions) {
         settled?.permissions.upgrade(with: permissions)
     }
+    
+    mutating func update(_ accounts: Set<String>) {
+        settled?.state.accounts = accounts
+    }
 }
 
 extension SessionSequence {

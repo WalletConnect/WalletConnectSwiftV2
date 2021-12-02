@@ -71,6 +71,6 @@ extension PairingSequence {
         let peer: PairingType.Participant
         let permissions: PairingType.Permissions
         var state: PairingType.State?
-        let status: PairingType.Settled.SettledStatus
+        var status: PairingType.Settled.SettledStatus
     }
 }

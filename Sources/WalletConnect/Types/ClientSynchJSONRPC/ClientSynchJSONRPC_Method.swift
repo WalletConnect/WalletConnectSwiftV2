@@ -1,7 +1,7 @@
 
 import Foundation
 
-extension ClientSynchJSONRPC {
+extension WCRequest {
     enum Method: String, Codable {
         case pairingApprove = "wc_pairingApprove"
         case pairingReject = "wc_pairingReject"

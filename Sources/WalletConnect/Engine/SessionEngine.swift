@@ -61,7 +61,7 @@ final class SessionEngine {
             expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
             pendingState: pending)
         
-        try? sequencesStore.setSequence(sessionSequence)
+        sequencesStore.setSequence(sessionSequence)
         wcSubscriber.setSubscription(topic: proposal.topic)
         
         let agreementKeys = try! Crypto.X25519.generateAgreementKeys(
@@ -93,14 +93,15 @@ final class SessionEngine {
                 metadata: metadata),
             expiry: expiry,
             state: sessionState)
-        let approvalPayload = ClientSynchJSONRPC(method: .sessionApprove, params: .sessionApprove(approveParams))
+        let approvalPayload = WCRequest(method: .sessionApprove, params: .sessionApprove(approveParams))
         
         relayer.request(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
             switch result {
             case .success:
                 self?.crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
                 self?.crypto.set(privateKey: privateKey)
-                try? self?.sequencesStore.update(sequence: settledSession, onTopic: proposal.topic)
+                self?.sequencesStore.setSequence(settledSession)
+                self?.sequencesStore.delete(topic: proposal.topic)
                 self?.wcSubscriber.removeSubscription(topic: proposal.topic)
                 self?.wcSubscriber.setSubscription(topic: settledTopic)
                 self?.logger.debug("Success on wc_sessionApprove, published on topic: \(proposal.topic), settled topic: \(settledTopic)")
@@ -120,7 +121,7 @@ final class SessionEngine {
     
     func reject(proposal: SessionType.Proposal, reason: SessionType.Reason) {
         let rejectParams = SessionType.RejectParams(reason: reason)
-        let rejectPayload = ClientSynchJSONRPC(method: .sessionReject, params: .sessionReject(rejectParams))
+        let rejectPayload = WCRequest(method: .sessionReject, params: .sessionReject(rejectParams))
         _ = relayer.request(topic: proposal.topic, payload: rejectPayload) { [weak self] result in
             self?.logger.debug("Reject result: \(result)")
         }
@@ -130,8 +131,8 @@ final class SessionEngine {
         logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
         sequencesStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
-        let clientSynchParams = ClientSynchJSONRPC.Params.sessionDelete(SessionType.DeleteParams(reason: reason))
-        let request = ClientSynchJSONRPC(method: .sessionDelete, params: clientSynchParams)
+        let params = WCRequest.Params.sessionDelete(SessionType.DeleteParams(reason: reason))
+        let request = WCRequest(method: .sessionDelete, params: params)
 
         _ = relayer.request(topic: topic, payload: request) { [weak self] result in
             self?.logger.debug("Session Delete result: \(result)")
@@ -158,12 +159,12 @@ final class SessionEngine {
             selfParticipant: selfParticipant,
             expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
             pendingState: SessionSequence.Pending(status: .proposed, proposal: proposal))
-        try? sequencesStore.setSequence(pendingSession)
+        sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: pendingSessionTopic)
         
         let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: proposal)
         let pairingPayloadParams = PairingType.PayloadParams(request: request)
-        let pairingPayloadRequest = ClientSynchJSONRPC(method: .pairingPayload, params: .pairingPayload(pairingPayloadParams))
+        let pairingPayloadRequest = WCRequest(method: .pairingPayload, params: .pairingPayload(pairingPayloadParams))
         relayer.request(topic: settledPairing.topic, payload: pairingPayloadRequest) { [unowned self] result in
             switch result {
             case .success:
@@ -181,7 +182,7 @@ final class SessionEngine {
             logger.debug("Could not find session to ping for topic \(topic)")
             return
         }
-        let request = ClientSynchJSONRPC(method: .sessionPing, params: .sessionPing(SessionType.PingParams()))
+        let request = WCRequest(method: .sessionPing, params: .sessionPing(SessionType.PingParams()))
         relayer.request(topic: topic, payload: request) { [unowned self] result in
             switch result {
             case .success(_):
@@ -200,7 +201,7 @@ final class SessionEngine {
         }
         let request = SessionType.PayloadParams.Request(method: params.method, params: params.params)
         let sessionPayloadParams = SessionType.PayloadParams(request: request, chainId: params.chainId)
-        let sessionPayloadRequest = ClientSynchJSONRPC(method: .sessionPayload, params: .sessionPayload(sessionPayloadParams))
+        let sessionPayloadRequest = WCRequest(method: .sessionPayload, params: .sessionPayload(sessionPayloadParams))
         relayer.request(topic: params.topic, payload: sessionPayloadRequest) { [weak self] result in
             switch result {
             case .success(let response):
@@ -232,13 +233,13 @@ final class SessionEngine {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
-        session.settled?.state.accounts = accounts
-        let params = ClientSynchJSONRPC.Params.sessionUpdate(SessionType.UpdateParams(state: SessionType.State(accounts: accounts)))
-        let request = ClientSynchJSONRPC(method: .sessionUpdate, params: params)
+        session.update(accounts)
+        let params = WCRequest.Params.sessionUpdate(SessionType.UpdateParams(state: SessionType.State(accounts: accounts)))
+        let request = WCRequest(method: .sessionUpdate, params: params)
         relayer.request(topic: topic, payload: request) { [unowned self] result in
             switch result {
             case .success(_):
-                try? sequencesStore.update(sequence: session, onTopic: topic)
+                sequencesStore.setSequence(session)
                 onSessionUpdate?(topic, accounts)
             case .failure(_):
                 break
@@ -247,21 +248,20 @@ final class SessionEngine {
     }
     
     func upgrade(topic: String, permissions: SessionPermissions) {
-        guard var session = try? sequencesStore.getSequence(forTopic: topic), let settled = session.settled else {
+        guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
-//        session.settled?.permissions.upgrade(with: permissions)
         session.upgrade(permissions)
         guard let newPermissions = session.settled?.permissions else {
             return
         }
         let params = SessionType.UpgradeParams(permissions: newPermissions)
-        let request = ClientSynchJSONRPC(method: .sessionUpgrade, params: .sessionUpgrade(params))
+        let request = WCRequest(method: .sessionUpgrade, params: .sessionUpgrade(params))
         relayer.request(topic: topic, payload: request) { [unowned self] result in
             switch result {
             case .success(_):
-                try? sequencesStore.update(sequence: session, onTopic: topic)
+                sequencesStore.setSequence(session)
                 onSessionUpgrade?(session.topic, newPermissions)
             case .failure(_):
                 return
@@ -277,7 +277,7 @@ final class SessionEngine {
         }
         do {
             try validateNotification(session: session, params: params)
-            let request = ClientSynchJSONRPC(method: .sessionNotification, params: .sessionNotification(params))
+            let request = WCRequest(method: .sessionNotification, params: .sessionNotification(params))
             relayer.request(topic: topic, payload: request) {  result in
                 switch result {
                 case .success(_):
@@ -304,9 +304,9 @@ final class SessionEngine {
     
     private func setUpWCRequestHandling() {
         wcSubscriber.onRequestSubscription = { [unowned self] subscriptionPayload in
-            let requestId = subscriptionPayload.clientSynchJsonRpc.id
+            let requestId = subscriptionPayload.wcRequest.id
             let topic = subscriptionPayload.topic
-            switch subscriptionPayload.clientSynchJsonRpc.params {
+            switch subscriptionPayload.wcRequest.params {
             case .sessionApprove(let approveParams):
                 handleSessionApprove(approveParams, topic: topic, requestId: requestId)
             case .sessionReject(let rejectParams):
@@ -324,7 +324,7 @@ final class SessionEngine {
             case .sessionNotification(let notificationParams):
                 handleSessionNotification(topic: topic, notificationParams: notificationParams, requestId: requestId)
             default:
-                logger.warn("Warning: Session Engine - Unexpected method type: \(subscriptionPayload.clientSynchJsonRpc.method) received from subscriber")
+                logger.warn("Warning: Session Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
             }
         }
     }
@@ -378,7 +378,7 @@ final class SessionEngine {
                 logger.error(error)
             } else {
                 session.settled?.state = updateParams.state
-                try? sequencesStore.update(sequence: session, onTopic: topic)
+                sequencesStore.setSequence(session)
                 onSessionUpdate?(topic, updateParams.state.accounts)
             }
         }
@@ -407,7 +407,7 @@ final class SessionEngine {
             if let error = error {
                 logger.error(error)
             } else {
-                try? sequencesStore.update(sequence: session, onTopic: topic)
+                try? sequencesStore.setSequence(session)
                 onSessionUpgrade?(session.topic, newPermissions)
             }
         }
@@ -481,13 +481,15 @@ final class SessionEngine {
     private func handleSessionApprove(_ approveParams: SessionType.ApproveParams, topic: String, requestId: Int64) {
         logger.debug("Responder Client approved session on topic: \(topic)")
         logger.debug("isController: \(isController)")
-        guard !isController,
-              let session = try? sequencesStore.getSequence(forTopic: topic),
+        guard !isController else {
+            logger.warn("Warning: Session Engine - Unexpected handleSessionApprove method call by non Controller client")
+            return
+        }
+        guard let session = try? sequencesStore.getSequence(forTopic: topic),
               let pendingSession = session.pending else {
                   logger.error("Could not find pending session for topic: \(topic)")
                   return
               }
-        
         let selfPublicKey = Data(hex: session.selfParticipant.publicKey)
         logger.debug("handleSessionApprove")
         let privateKey = try! crypto.getPrivateKey(for: selfPublicKey)!
@@ -511,7 +513,8 @@ final class SessionEngine {
                 peer: peer,
                 permissions: sessionPermissions,
                 state: approveParams.state))
-        try? sequencesStore.update(sequence: settledSession, onTopic: proposal.topic)
+        sequencesStore.delete(topic: proposal.topic)
+        sequencesStore.setSequence(settledSession)
         
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
