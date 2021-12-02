@@ -61,7 +61,7 @@ final class SessionEngine {
             expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
             pendingState: pending)
         
-        try? sequencesStore.setSequence(sessionSequence)
+        sequencesStore.setSequence(sessionSequence)
         wcSubscriber.setSubscription(topic: proposal.topic)
         
         let agreementKeys = try! Crypto.X25519.generateAgreementKeys(
@@ -100,7 +100,8 @@ final class SessionEngine {
             case .success:
                 self?.crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
                 self?.crypto.set(privateKey: privateKey)
-                try? self?.sequencesStore.update(sequence: settledSession, onTopic: proposal.topic)
+                self?.sequencesStore.setSequence(settledSession)
+                self?.sequencesStore.delete(topic: proposal.topic)
                 self?.wcSubscriber.removeSubscription(topic: proposal.topic)
                 self?.wcSubscriber.setSubscription(topic: settledTopic)
                 self?.logger.debug("Success on wc_sessionApprove, published on topic: \(proposal.topic), settled topic: \(settledTopic)")
@@ -158,7 +159,7 @@ final class SessionEngine {
             selfParticipant: selfParticipant,
             expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
             pendingState: SessionSequence.Pending(status: .proposed, proposal: proposal))
-        try? sequencesStore.setSequence(pendingSession)
+        sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: pendingSessionTopic)
         
         let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: proposal)
@@ -232,13 +233,13 @@ final class SessionEngine {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
-        session.settled?.state.accounts = accounts
+        session.update(accounts)
         let params = ClientSynchJSONRPC.Params.sessionUpdate(SessionType.UpdateParams(state: SessionType.State(accounts: accounts)))
         let request = ClientSynchJSONRPC(method: .sessionUpdate, params: params)
         relayer.request(topic: topic, payload: request) { [unowned self] result in
             switch result {
             case .success(_):
-                try? sequencesStore.update(sequence: session, onTopic: topic)
+                sequencesStore.setSequence(session)
                 onSessionUpdate?(topic, accounts)
             case .failure(_):
                 break
@@ -251,17 +252,14 @@ final class SessionEngine {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
-//        session.settled?.permissions.upgrade(with: permissions)
         session.upgrade(permissions)
-        guard let newPermissions = session.settled?.permissions else {
-            return
-        }
+        let newPermissions = settled.permissions
         let params = SessionType.UpgradeParams(permissions: newPermissions)
         let request = ClientSynchJSONRPC(method: .sessionUpgrade, params: .sessionUpgrade(params))
         relayer.request(topic: topic, payload: request) { [unowned self] result in
             switch result {
             case .success(_):
-                try? sequencesStore.update(sequence: session, onTopic: topic)
+                sequencesStore.setSequence(session)
                 onSessionUpgrade?(session.topic, newPermissions)
             case .failure(_):
                 return
@@ -378,7 +376,7 @@ final class SessionEngine {
                 logger.error(error)
             } else {
                 session.settled?.state = updateParams.state
-                try? sequencesStore.update(sequence: session, onTopic: topic)
+                sequencesStore.setSequence(session)
                 onSessionUpdate?(topic, updateParams.state.accounts)
             }
         }
@@ -407,7 +405,7 @@ final class SessionEngine {
             if let error = error {
                 logger.error(error)
             } else {
-                try? sequencesStore.update(sequence: session, onTopic: topic)
+                try? sequencesStore.setSequence(session)
                 onSessionUpgrade?(session.topic, newPermissions)
             }
         }
@@ -511,7 +509,8 @@ final class SessionEngine {
                 peer: peer,
                 permissions: sessionPermissions,
                 state: approveParams.state))
-        try? sequencesStore.update(sequence: settledSession, onTopic: proposal.topic)
+        sequencesStore.delete(topic: proposal.topic)
+        sequencesStore.setSequence(settledSession)
         
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
