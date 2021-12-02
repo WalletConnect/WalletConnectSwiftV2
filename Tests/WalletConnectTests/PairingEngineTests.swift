@@ -1,6 +1,31 @@
 import XCTest
 @testable import WalletConnect
 
+final class PairingSequenceStorageMock: PairingSequenceStorage {
+    
+    var onSequenceExpiration: ((String, String) -> Void)?
+    
+    func hasSequence(forTopic topic: String) -> Bool {
+        fatalError()
+    }
+    
+    func setSequence(_ sequence: PairingSequence) {
+        fatalError()
+    }
+    
+    func getSequence(forTopic topic: String) throws -> PairingSequence? {
+        fatalError()
+    }
+    
+    func getAll() -> [PairingSequence] {
+        fatalError()
+    }
+    
+    func delete(topic: String) {
+        fatalError()
+    }
+}
+
 // TODO: Mock all dependencies and write tests
 class PairingEngineTests: XCTestCase {
     
@@ -16,7 +41,7 @@ class PairingEngineTests: XCTestCase {
         subscriber = MockedSubscriber()
         let meta = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
         let logger = ConsoleLogger()
-        let store = SequenceStore<PairingSequence>(storage: RuntimeKeyValueStorage())
+        let store = PairingSequenceStorageMock()
         engine = PairingEngine(
             relay: relay,
             crypto: cryptoMock,

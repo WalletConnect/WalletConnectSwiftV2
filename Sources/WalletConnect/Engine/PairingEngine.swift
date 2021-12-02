@@ -11,7 +11,8 @@ final class PairingEngine {
     private let relayer: WalletConnectRelaying
     private let crypto: CryptoStorageProtocol
     private var isController: Bool
-    private var sequencesStore: SequenceStore<PairingSequence>
+//    private var sequencesStore: SequenceStore<PairingSequence>
+    private var sequencesStore: PairingSequenceStorage
     private var appMetadata: AppMetadata
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogger
@@ -20,7 +21,7 @@ final class PairingEngine {
     init(relay: WalletConnectRelaying,
          crypto: CryptoStorageProtocol,
          subscriber: WCSubscribing,
-         sequencesStore: SequenceStore<PairingSequence>,
+         sequencesStore: PairingSequenceStorage,
          isController: Bool,
          metadata: AppMetadata,
          logger: ConsoleLogger) {
