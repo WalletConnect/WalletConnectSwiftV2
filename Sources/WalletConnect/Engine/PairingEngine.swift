@@ -11,7 +11,6 @@ final class PairingEngine {
     private let relayer: WalletConnectRelaying
     private let crypto: CryptoStorageProtocol
     private var isController: Bool
-//    private var sequencesStore: SequenceStore<PairingSequence>
     private var sequencesStore: PairingSequenceStorage
     private var appMetadata: AppMetadata
     private var publishers = [AnyCancellable]()
@@ -69,7 +68,7 @@ final class PairingEngine {
         let uri = WalletConnectURI(topic: topic, publicKey: publicKey, isController: isController, relay: relay)
         let timeToLive = PairingSequence.timeToLivePending
         
-        let proposal = PairingType.Proposal(
+        let proposal = PairingProposal(
             topic: topic,
             relay: relay,
             proposer: PairingType.Proposer(publicKey: publicKey, controller: isController),
@@ -93,8 +92,16 @@ final class PairingEngine {
         return uri
     }
     
-    func approve(_ proposal: PairingType.Proposal, completion: @escaping (Result<Pairing, Error>) -> Void) {
-        let privateKey = Crypto.X25519.generatePrivateKey()
+    func approve(_ pairingURI: WalletConnectURI, completion: @escaping (Result<Pairing, Error>) -> Void) throws {
+        let proposal = PairingProposal.createFromURI(pairingURI)
+        guard proposal.proposer.controller != isController else {
+            throw WalletConnectError.internal(.unauthorizedMatchingController)
+        }
+        guard !hasPairing(for: proposal.topic) else {
+            throw WalletConnectError.internal(.pairWithExistingPairingForbidden)
+        }
+        
+        let privateKey = crypto.generatePrivateKey()
         let selfPublicKey = privateKey.publicKey.toHexString()
         
         let pending = PairingSequence.Pending(
@@ -156,6 +163,7 @@ final class PairingEngine {
                 settledPairing.settled?.status = .acknowledged
                 self?.sequencesStore.setSequence(settledPairing)
                 let pairingSuccess = Pairing(topic: settledTopic, peer: nil) // FIXME: peer?
+                self?.logger.debug("Pairing Success")
                 completion(.success(pairingSuccess))
             case .failure(let error):
                 completion(.failure(error))

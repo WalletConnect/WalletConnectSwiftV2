@@ -16,11 +16,12 @@ class MockedWCRelay: WalletConnectRelaying {
     }
     var didCallSubscribe = false
     var didCallUnsubscribe = false
-    var didCallPublish = false
     var error: Error? = nil
+    
+    private(set) var requests: [(topic: String, request: WCRequest)] = []
 
     func request(topic: String, payload: WCRequest, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ())) {
-        didCallPublish = true
+        requests.append((topic, payload))
     }
     
     func respond(topic: String, response: JsonRpcResponseTypes, completion: @escaping ((Error?) -> ())) {

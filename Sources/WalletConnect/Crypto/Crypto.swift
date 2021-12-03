@@ -5,6 +5,7 @@ import CryptoKit
 
 // TODO: Come up with better naming conventions
 protocol CryptoStorageProtocol {
+    func generatePrivateKey() -> Crypto.X25519.PrivateKey
     func set(privateKey: Crypto.X25519.PrivateKey)
     func set(agreementKeys: Crypto.X25519.AgreementKeys, topic: String)
     func getPrivateKey(for publicKey: Data) throws -> Crypto.X25519.PrivateKey?
@@ -19,6 +20,10 @@ class Crypto: CryptoStorageProtocol {
     
     init(keychain: KeychainStorageProtocol) {
         self.keychain = keychain
+    }
+    
+    func generatePrivateKey() -> Crypto.X25519.PrivateKey {
+        Crypto.X25519.PrivateKey()
     }
     
     func set(privateKey: X25519.PrivateKey) {

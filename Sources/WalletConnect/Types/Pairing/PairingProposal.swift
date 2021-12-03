@@ -1,6 +1,29 @@
 
 import Foundation
 
+struct PairingProposal: Codable {
+    
+    let topic: String
+    let relay: RelayProtocolOptions
+    let proposer: PairingType.Proposer
+    let signal: PairingType.Signal
+    let permissions: PairingType.ProposedPermissions
+    let ttl: Int
+    
+    static func createFromURI(_ uri: WalletConnectURI) -> PairingProposal {
+        PairingProposal(
+            topic: uri.topic,
+            relay: uri.relay,
+            proposer: PairingType.Proposer(
+                publicKey: uri.publicKey,
+                controller: uri.isController),
+            signal: PairingType.Signal(uri: uri.absoluteString),
+            permissions: PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [PairingType.PayloadMethods.sessionPropose.rawValue])),
+            ttl: PairingType.defaultTTL
+        )
+    }
+}
+
 extension PairingType {
     struct Proposal: Codable, Equatable {
         let topic: String
@@ -35,21 +58,5 @@ extension PairingType {
     
     enum PayloadMethods: String, Codable, Equatable {
         case sessionPropose = "wc_sessionPropose"
-    }
-}
-
-extension PairingType.Proposal {
-    
-    static func createFromURI(_ uri: WalletConnectURI) -> PairingType.Proposal {
-        PairingType.Proposal(
-            topic: uri.topic,
-            relay: uri.relay,
-            proposer: PairingType.Proposer(
-                publicKey: uri.publicKey,
-                controller: uri.isController),
-            signal: PairingType.Signal(uri: uri.absoluteString),
-            permissions: PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [PairingType.PayloadMethods.sessionPropose.rawValue])),
-            ttl: PairingType.defaultTTL
-        )
     }
 }

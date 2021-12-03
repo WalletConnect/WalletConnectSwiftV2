@@ -92,22 +92,13 @@ public final class WalletConnectClient {
     
     // for responder to receive a session proposal from a proposer
     public func pair(uri: String) throws {
+        guard let pairingURI = WalletConnectURI(string: uri) else {
+            throw WalletConnectError.internal(.malformedPairingURI)
+        }
         try pairingQueue.sync {
-            guard let pairingURI = WalletConnectURI(string: uri) else {
-                throw WalletConnectError.internal(.malformedPairingURI)
-            }
-            let proposal = PairingType.Proposal.createFromURI(pairingURI)
-            let approved = proposal.proposer.controller != isController
-            guard approved else {
-                throw WalletConnectError.internal(.unauthorizedMatchingController)
-            }
-            guard !pairingEngine.hasPairing(for: proposal.topic) else {
-                throw WalletConnectError.internal(.pairWithExistingPairingForbidden)
-            }
-            pairingEngine.approve(proposal) { [unowned self] result in
+            try pairingEngine.approve(pairingURI) { [unowned self] result in
                 switch result {
                 case .success(let settledPairing):
-                    logger.debug("Pairing Success")
                     self.delegate?.didSettle(pairing: settledPairing)
                 case .failure(let error):
                     print("Pairing Failure: \(error)")

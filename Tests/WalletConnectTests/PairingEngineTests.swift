@@ -11,6 +11,28 @@ fileprivate extension SessionType.Permissions {
     }
 }
 
+import CryptoKit
+
+extension WalletConnectURI {
+    
+    static func stub(isController: Bool = false) -> WalletConnectURI {
+        WalletConnectURI(
+            topic: String.generateTopic()!,
+            publicKey: Curve25519.KeyAgreement.PrivateKey().publicKey.rawRepresentation.toHexString(),
+            isController: isController,
+            relay: RelayProtocolOptions(protocol: "", params: nil)
+        )
+    }
+}
+
+fileprivate extension WCRequest {
+    
+    var approveParams: PairingType.ApproveParams? {
+        guard case .pairingApprove(let approveParams) = self.params else { return nil }
+        return approveParams
+    }
+}
+
 final class TopicGenerator {
     
     let topic: String
@@ -28,7 +50,7 @@ class PairingEngineTests: XCTestCase {
     
     var engine: PairingEngine!
     
-    var relay: MockedWCRelay!
+    var relayMock: MockedWCRelay!
     var cryptoMock: CryptoStorageProtocolMock!
     var subscriberMock: MockedSubscriber!
     var storageMock: PairingSequenceStorageMock!
@@ -37,36 +59,79 @@ class PairingEngineTests: XCTestCase {
     
     override func setUp() {
         cryptoMock = CryptoStorageProtocolMock()
-        relay = MockedWCRelay()
+        relayMock = MockedWCRelay()
         subscriberMock = MockedSubscriber()
-        let meta = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
-        let logger = ConsoleLogger()
         storageMock = PairingSequenceStorageMock()
         topicGenerator = TopicGenerator()
-        engine = PairingEngine(
-            relay: relay,
-            crypto: cryptoMock,
-            subscriber: subscriberMock,
-            sequencesStore: storageMock,
-            isController: false,
-            metadata: meta,
-            logger: logger,
-            topicGenerator: topicGenerator.getTopic)
     }
 
     override func tearDown() {
-        relay = nil
+        relayMock = nil
         engine = nil
         cryptoMock = nil
     }
     
+    func setupEngine(isController: Bool) {
+        let meta = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
+        let logger = ConsoleLogger()
+        engine = PairingEngine(
+            relay: relayMock,
+            crypto: cryptoMock,
+            subscriber: subscriberMock,
+            sequencesStore: storageMock,
+            isController: isController,
+            metadata: meta,
+            logger: logger,
+            topicGenerator: topicGenerator.getTopic)
+    }
+    
     func testPropose() {
+        setupEngine(isController: false)
+        
         let topicA = topicGenerator.topic
         let uri = engine.propose(permissions: SessionType.Permissions.stub())!
         
         XCTAssert(cryptoMock.hasPrivateKey(for: uri.publicKey))
         XCTAssert(storageMock.hasSequence(forTopic: topicA)) // TODO: check for pending state
-        XCTAssert(subscriberMock.didSubscribe(to: topicA))
+        XCTAssert(subscriberMock.didSubscribe(to: topicA), "Proposer must subscribe to topic A to listen for approval message.")
+    }
+    
+
+    func deriveTopic(publicKey: String, privateKey: Crypto.X25519.PrivateKey) -> String {
+        try! Crypto.X25519.generateAgreementKeys(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
+    }
+    
+    func testApprove() throws {
+        setupEngine(isController: true)
+        
+        let uri = WalletConnectURI.stub()
+        let topicA = uri.topic
+        let topicB = deriveTopic(publicKey: uri.publicKey, privateKey: cryptoMock.privateKeyStub)
+
+        try engine.approve(uri) { _ in }
+
+        guard let publishTopic = relayMock.requests.first?.topic, let approval = relayMock.requests.first?.request.approveParams else {
+            XCTFail("Responder must publish an approval request."); return
+        }
+
+        XCTAssert(subscriberMock.didSubscribe(to: topicA), "Responder must subscribe to topic A to listen for approval request acknowledgement.")
+        XCTAssert(subscriberMock.didSubscribe(to: topicB))
+        XCTAssert(cryptoMock.hasPrivateKey(for: approval.responder.publicKey))
+        XCTAssert(cryptoMock.hasAgreementKeys(for: topicB))
+        XCTAssert(storageMock.hasSequence(forTopic: topicB))
+        XCTAssertEqual(publishTopic, topicA)
+    }
+    
+    func testApproveMultipleCallsThrottleOnSameURI() {
+        setupEngine(isController: true)
+        let uri = WalletConnectURI.stub()
+        for i in 1...10 {
+            if i == 1 {
+                XCTAssertNoThrow(try engine.approve(uri) { _ in })
+            } else {
+                XCTAssertThrowsError(try engine.approve(uri) { _ in })
+            }
+        }
     }
     
 //    func testNotifyOnSessionProposal() {
