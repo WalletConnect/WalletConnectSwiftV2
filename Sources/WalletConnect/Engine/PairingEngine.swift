@@ -61,7 +61,7 @@ final class PairingEngine {
             return nil
         }
         
-        let privateKey = Crypto.X25519.generatePrivateKey()
+        let privateKey = crypto.generatePrivateKey()
         let publicKey = privateKey.publicKey.toHexString()
         
         let relay = RelayProtocolOptions(protocol: "waku", params: nil)
@@ -209,7 +209,7 @@ final class PairingEngine {
     }
     
     private func setUpWCRequestHandling() {
-        wcSubscriber.onRequestSubscription = { [unowned self] subscriptionPayload in
+        wcSubscriber.onReceivePayload = { [unowned self] subscriptionPayload in
             let requestId = subscriptionPayload.wcRequest.id
             let topic = subscriptionPayload.topic
             switch subscriptionPayload.wcRequest.params {

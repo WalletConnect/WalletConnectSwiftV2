@@ -3,26 +3,35 @@ import Foundation
 @testable import WalletConnect
 
 class MockedSubscriber: WCSubscribing {
-    
-    var subscriptions: [String: String] = [:]
-    var onRequestSubscription: ((WCRequestSubscriptionPayload)->())?
-    
+
+    var onReceivePayload: ((WCRequestSubscriptionPayload)->())?
+
+    private(set) var subscriptions: [String] = []
+    private(set) var unsubscriptions: [String] = []
+
     func setSubscription(topic: String) {
-        subscriptions[topic] = UUID().uuidString
+        subscriptions.append(topic)
     }
-    
+
     func getSubscription(topic: String) -> String? {
         fatalError()
     }
-    
+
     func removeSubscription(topic: String) {
-        subscriptions[topic] = nil
+        if subscriptions.contains(topic) {
+            unsubscriptions.append(topic)
+        }
+        subscriptions.removeAll { $0 == topic }
     }
 }
 
 extension MockedSubscriber {
-    
+
     func didSubscribe(to topic: String) -> Bool {
-        subscriptions[topic] != nil
+        subscriptions.contains { $0 == topic }
+    }
+    
+    func didUnsubscribe(to topic: String) -> Bool {
+        unsubscriptions.contains { $0 == topic }
     }
 }

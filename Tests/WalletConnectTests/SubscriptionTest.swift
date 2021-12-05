@@ -36,7 +36,7 @@ class WCSubscriberTest: XCTestCase {
         let subscriptionExpectation = expectation(description: "onSubscription callback executed")
         let topic = "1234"
         subscriber.setSubscription(topic: topic)
-        subscriber.onRequestSubscription = { _ in
+        subscriber.onReceivePayload = { _ in
             subscriptionExpectation.fulfill()
         }
         Thread.sleep(forTimeInterval: 0.01)
@@ -48,7 +48,7 @@ class WCSubscriberTest: XCTestCase {
         let topic = "1234"
         subscriber.setSubscription(topic: topic)
         var onPayloadCalled = false
-        subscriber.onRequestSubscription = { _ in
+        subscriber.onReceivePayload = { _ in
             onPayloadCalled = true
         }
         relay.sendSubscriptionPayloadOn(topic: "434241")

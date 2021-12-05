@@ -3,14 +3,16 @@ import Foundation
 import Combine
 
 protocol WCSubscribing: AnyObject {
-    var onRequestSubscription: ((WCRequestSubscriptionPayload)->())? {get set}
+    var onReceivePayload: ((WCRequestSubscriptionPayload)->())? {get set}
     func setSubscription(topic: String)
     func removeSubscription(topic: String)
 }
 
 class WCSubscriber: WCSubscribing {
+    
+    var onReceivePayload: ((WCRequestSubscriptionPayload)->())?
+    
     private var relay: WalletConnectRelaying
-    var onRequestSubscription: ((WCRequestSubscriptionPayload)->())?
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.wc_subscriber",
                                                 attributes: .concurrent)
     private var publishers = [AnyCancellable]()
@@ -51,7 +53,7 @@ class WCSubscriber: WCSubscribing {
         relay.wcRequestPublisher
             .filter {[weak self] in self?.getTopics().contains($0.topic) ?? false}
             .sink { [weak self] subscriptionPayload in
-                self?.onRequestSubscription?(subscriptionPayload)
+                self?.onReceivePayload?(subscriptionPayload)
             }.store(in: &publishers)
     }
 }

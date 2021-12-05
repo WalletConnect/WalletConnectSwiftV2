@@ -118,7 +118,7 @@ class PairingEngineTests: XCTestCase {
         XCTAssert(subscriberMock.didSubscribe(to: topicB))
         XCTAssert(cryptoMock.hasPrivateKey(for: approval.responder.publicKey))
         XCTAssert(cryptoMock.hasAgreementKeys(for: topicB))
-        XCTAssert(storageMock.hasSequence(forTopic: topicB))
+        XCTAssert(storageMock.hasSequence(forTopic: topicB)) // check for pre-settled
         XCTAssertEqual(publishTopic, topicA)
     }
     
@@ -132,6 +132,35 @@ class PairingEngineTests: XCTestCase {
                 XCTAssertThrowsError(try engine.approve(uri) { _ in })
             }
         }
+    }
+    
+    // TODO: approve acknowledgement tests for success and failure
+    
+    func testReceiveApprovalResponse() {
+        setupEngine(isController: false)
+        
+        let responderPubKey = Crypto.X25519.PrivateKey().publicKey.rawRepresentation.toHexString()
+        let topicB = deriveTopic(publicKey: responderPubKey, privateKey: cryptoMock.privateKeyStub)
+        let uri = engine.propose(permissions: SessionType.Permissions.stub())!
+        let topicA = uri.topic
+        
+        let approveParams = PairingType.ApproveParams(
+            relay: RelayProtocolOptions(protocol: "", params: nil),
+            responder: PairingType.Participant(publicKey: responderPubKey),
+            expiry: Time.day,
+            state: nil)
+        let request = WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
+        let payload = WCRequestSubscriptionPayload(topic: topicA, wcRequest: request)
+        
+        subscriberMock.onReceivePayload?(payload)
+        
+        XCTAssert(subscriberMock.didUnsubscribe(to: topicA))
+        XCTAssert(subscriberMock.didSubscribe(to: topicB))
+        XCTAssert(cryptoMock.hasPrivateKey(for: uri.publicKey))
+        XCTAssert(cryptoMock.hasAgreementKeys(for: topicB))
+        XCTAssert(storageMock.hasSequence(forTopic: topicB)) // check state
+        XCTAssertFalse(storageMock.hasSequence(forTopic: topicA))
+        // TODO: assert JSON-RPC respond
     }
     
 //    func testNotifyOnSessionProposal() {
@@ -152,7 +181,3 @@ fileprivate let sessionProposal = WCRequest(id: 0,
                                                      jsonrpc: "2.0",
                                                      method: WCRequest.Method.pairingPayload,
                                                      params: WCRequest.Params.pairingPayload(PairingType.PayloadParams(request: PairingType.PayloadParams.Request(method: .sessionPropose, params: SessionType.ProposeParams(topic: "", relay: RelayProtocolOptions(protocol: "", params: []), proposer: SessionType.Proposer(publicKey: "", controller: false, metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil)), signal: SessionType.Signal(method: "", params: SessionType.Signal.Params(topic: "")), permissions: SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []), notifications: SessionType.Notifications(types: [])), ttl: 100)))))
-
-//fileprivate let sequencePendingState = PairingType.SequenceState.pending(PairingType.Pending(status: PairingType.Pending.PendingStatus(rawValue: "proposed")!, topic: "1234", relay: RelayProtocolOptions(protocol: "", params: nil), self: PairingType.Participant(publicKey: ""), proposal: PairingType.Proposal(topic: "", relay: RelayProtocolOptions(protocol: "", params: nil), proposer: PairingType.Proposer(publicKey: "", controller: false), signal: PairingType.Signal(params: PairingType.Signal.Params(uri: "")), permissions: PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [])), ttl: 100)))
-//
-//fileprivate let pendingPairing = PairingSequence(topic: "1234", relay: RelayProtocolOptions(protocol: "", params: nil), selfParticipant: PairingType.Participant(publicKey: ""), expiryDate: Date(timeIntervalSinceNow: 10), pendingState: PairingSequence.Pending(proposal: PairingType.Proposal(topic: "", relay: RelayProtocolOptions(protocol: "", params: nil), proposer: PairingType.Proposer(publicKey: "", controller: false), signal: PairingType.Signal(params: PairingType.Signal.Params(uri: "")), permissions: PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [])), ttl: 100), status: .proposed))
