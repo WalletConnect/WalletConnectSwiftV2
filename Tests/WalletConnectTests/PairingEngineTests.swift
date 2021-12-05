@@ -139,6 +139,7 @@ class PairingEngineTests: XCTestCase {
     func testReceiveApprovalResponse() {
         setupEngine(isController: false)
         
+        var approvedPairing: Pairing?
         let responderPubKey = Crypto.X25519.PrivateKey().publicKey.rawRepresentation.toHexString()
         let topicB = deriveTopic(publicKey: responderPubKey, privateKey: cryptoMock.privateKeyStub)
         let uri = engine.propose(permissions: SessionType.Permissions.stub())!
@@ -152,15 +153,19 @@ class PairingEngineTests: XCTestCase {
         let request = WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
         let payload = WCRequestSubscriptionPayload(topic: topicA, wcRequest: request)
         
+        engine.onPairingApproved = { pairing, _, _ in
+            approvedPairing = pairing
+        }
         subscriberMock.onReceivePayload?(payload)
         
         XCTAssert(subscriberMock.didUnsubscribe(to: topicA))
         XCTAssert(subscriberMock.didSubscribe(to: topicB))
         XCTAssert(cryptoMock.hasPrivateKey(for: uri.publicKey))
         XCTAssert(cryptoMock.hasAgreementKeys(for: topicB))
-        XCTAssert(storageMock.hasSequence(forTopic: topicB)) // check state
+        XCTAssert(storageMock.hasSequence(forTopic: topicB)) // TODO: check state
         XCTAssertFalse(storageMock.hasSequence(forTopic: topicA))
-        // TODO: assert JSON-RPC respond
+        XCTAssertNotNil(approvedPairing)
+        XCTAssertEqual(approvedPairing?.topic, topicB)
     }
     
 //    func testNotifyOnSessionProposal() {

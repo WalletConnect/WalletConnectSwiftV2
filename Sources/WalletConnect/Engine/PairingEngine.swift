@@ -309,15 +309,19 @@ final class PairingEngine {
         sequencesStore.delete(topic: pendingPairingTopic)
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
+        
+        let pairing = Pairing(topic: settledPairing.topic, peer: nil) // FIXME: peer?
+        guard let permissions = sessionPermissions[pendingPairingTopic] else {
+            logger.debug("Cound not find permissions for pending topic: \(pendingPairingTopic)")
+            return
+        }
+        sessionPermissions[pendingPairingTopic] = nil
+        onPairingApproved?(pairing, permissions, settledPairing.relay)
+        
+        // TODO: Move JSON-RPC responding to networking layer
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
         relayer.respond(topic: proposal.topic, response: JsonRpcResponseTypes.response(response)) { [weak self] error in
-            let pairing = Pairing(topic: settledPairing.topic, peer: nil) // FIXME: peer?
-            guard let permissions = self?.sessionPermissions[pendingPairingTopic] else {
-                self?.logger.debug("Cound not find permissions for pending topic: \(pendingPairingTopic)")
-                return
-            }
-            self?.sessionPermissions[pendingPairingTopic] = nil
-            self?.onPairingApproved?(pairing, permissions, settledPairing.relay)
+            self?.logger.error("Could not respond with error: \(error)")
         }
     }
     
