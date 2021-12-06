@@ -63,7 +63,7 @@ extension PairingSequence {
     
 extension PairingSequence {    
     struct Pending: Codable {
-        let proposal: PairingType.Proposal
+        let proposal: PairingProposal
         let status: PairingType.Pending.PendingStatus
     }
 

@@ -303,7 +303,7 @@ final class SessionEngine {
     }
     
     private func setUpWCRequestHandling() {
-        wcSubscriber.onRequestSubscription = { [unowned self] subscriptionPayload in
+        wcSubscriber.onReceivePayload = { [unowned self] subscriptionPayload in
             let requestId = subscriptionPayload.wcRequest.id
             let topic = subscriptionPayload.topic
             switch subscriptionPayload.wcRequest.params {

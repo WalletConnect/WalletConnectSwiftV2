@@ -58,7 +58,8 @@ public final class WalletConnectClient {
         let serialiser = JSONRPCSerialiser(crypto: crypto)
         let sessionSequencesStore = SequenceStore<SessionSequence>(storage: keyValueStore, uniqueIdentifier: clientName)
         self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore, uniqueIdentifier: clientName))
-        let pairingSequencesStore = SequenceStore<PairingSequence>(storage: keyValueStore, uniqueIdentifier: clientName)
+//        let pairingSequencesStore = SequenceStore<PairingSequence>(storage: keyValueStore, uniqueIdentifier: clientName)
+        let pairingSequencesStore = PairingStorage(storage: SequenceStore<PairingSequence>(storage: keyValueStore, uniqueIdentifier: clientName))
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
         setUpEnginesCallbacks()
@@ -85,28 +86,19 @@ public final class WalletConnectClient {
             guard let pairingURI = pairingEngine.propose(permissions: params.permissions) else {
                 throw WalletConnectError.internal(.pairingProposalGenerationFailed)
             }
-            return pairingURI
+            return pairingURI.absoluteString
         }
     }
     
     // for responder to receive a session proposal from a proposer
     public func pair(uri: String) throws {
+        guard let pairingURI = WalletConnectURI(string: uri) else {
+            throw WalletConnectError.internal(.malformedPairingURI)
+        }
         try pairingQueue.sync {
-            guard let pairingURI = WalletConnectURI(string: uri) else {
-                throw WalletConnectError.internal(.malformedPairingURI)
-            }
-            let proposal = PairingType.Proposal.createFromURI(pairingURI)
-            let approved = proposal.proposer.controller != isController
-            guard approved else {
-                throw WalletConnectError.internal(.unauthorizedMatchingController)
-            }
-            guard !pairingEngine.hasPairing(for: proposal.topic) else {
-                throw WalletConnectError.internal(.pairWithExistingPairingForbidden)
-            }
-            pairingEngine.approve(proposal) { [unowned self] result in
+            try pairingEngine.approve(pairingURI) { [unowned self] result in
                 switch result {
                 case .success(let settledPairing):
-                    logger.debug("Pairing Success")
                     self.delegate?.didSettle(pairing: settledPairing)
                 case .failure(let error):
                     print("Pairing Failure: \(error)")

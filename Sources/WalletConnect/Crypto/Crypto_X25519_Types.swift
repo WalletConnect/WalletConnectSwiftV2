@@ -30,5 +30,9 @@ extension Crypto.X25519 {
     struct AgreementKeys: Equatable {
         let sharedSecret: Data
         let publicKey: Data
+        
+        func derivedTopic() -> String {
+            sharedSecret.sha256().toHexString()
+        }
     }
 }
