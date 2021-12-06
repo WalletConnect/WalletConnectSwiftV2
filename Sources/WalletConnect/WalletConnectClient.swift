@@ -56,10 +56,9 @@ public final class WalletConnectClient {
         self.transport = JSONRPCTransport(url: relayUrl)
         let wakuRelay = WakuNetworkRelay(transport: transport, logger: logger)
         let serialiser = JSONRPCSerialiser(crypto: crypto)
-        let sessionSequencesStore = SequenceStore<SessionSequence>(storage: keyValueStore, uniqueIdentifier: clientName)
         self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore, uniqueIdentifier: clientName))
-//        let pairingSequencesStore = SequenceStore<PairingSequence>(storage: keyValueStore, uniqueIdentifier: clientName)
         let pairingSequencesStore = PairingStorage(storage: SequenceStore<PairingSequence>(storage: keyValueStore, uniqueIdentifier: clientName))
+        let sessionSequencesStore = SessionStorage(storage: SequenceStore<SessionSequence>(storage: keyValueStore, uniqueIdentifier: clientName))
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
         setUpEnginesCallbacks()
@@ -150,7 +149,7 @@ public final class WalletConnectClient {
             pairingEngine.ping(topic: topic) { result in
                 completion(result)
             }
-        } else if sessionEngine.sequencesStore.hasSequence(forTopic: topic) {
+        } else if sessionEngine.hasSession(for: topic) {
             sessionEngine.ping(topic: topic) { result in
                 completion(result)
             }
