@@ -321,7 +321,9 @@ final class PairingEngine {
         // TODO: Move JSON-RPC responding to networking layer
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
         relayer.respond(topic: proposal.topic, response: JsonRpcResponseTypes.response(response)) { [weak self] error in
-            self?.logger.error("Could not respond with error: \(error)")
+            if let error = error {
+                self?.logger.error("Could not respond with error: \(error)")
+            }
         }
     }
     

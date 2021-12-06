@@ -11,20 +11,6 @@ fileprivate extension SessionType.Permissions {
     }
 }
 
-import CryptoKit
-
-extension WalletConnectURI {
-    
-    static func stub(isController: Bool = false) -> WalletConnectURI {
-        WalletConnectURI(
-            topic: String.generateTopic()!,
-            publicKey: Curve25519.KeyAgreement.PrivateKey().publicKey.rawRepresentation.toHexString(),
-            isController: isController,
-            relay: RelayProtocolOptions(protocol: "", params: nil)
-        )
-    }
-}
-
 fileprivate extension WCRequest {
     
     var approveParams: PairingType.ApproveParams? {
@@ -33,17 +19,8 @@ fileprivate extension WCRequest {
     }
 }
 
-final class TopicGenerator {
-    
-    let topic: String
-    
-    init(topic: String = String.generateTopic()!) {
-        self.topic = topic
-    }
-    
-    func getTopic() -> String? {
-        return topic
-    }
+fileprivate func deriveTopic(publicKey: String, privateKey: Crypto.X25519.PrivateKey) -> String {
+    try! Crypto.X25519.generateAgreementKeys(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
 }
 
 class PairingEngineTests: XCTestCase {
@@ -51,24 +28,27 @@ class PairingEngineTests: XCTestCase {
     var engine: PairingEngine!
     
     var relayMock: MockedWCRelay!
-    var cryptoMock: CryptoStorageProtocolMock!
     var subscriberMock: MockedSubscriber!
     var storageMock: PairingSequenceStorageMock!
+    var cryptoMock: CryptoStorageProtocolMock!
     
     var topicGenerator: TopicGenerator!
     
     override func setUp() {
-        cryptoMock = CryptoStorageProtocolMock()
         relayMock = MockedWCRelay()
         subscriberMock = MockedSubscriber()
         storageMock = PairingSequenceStorageMock()
+        cryptoMock = CryptoStorageProtocolMock()
         topicGenerator = TopicGenerator()
     }
 
     override func tearDown() {
         relayMock = nil
-        engine = nil
+        subscriberMock = nil
+        storageMock = nil
         cryptoMock = nil
+        topicGenerator = nil
+        engine = nil
     }
     
     func setupEngine(isController: Bool) {
@@ -96,11 +76,6 @@ class PairingEngineTests: XCTestCase {
         XCTAssert(subscriberMock.didSubscribe(to: topicA), "Proposer must subscribe to topic A to listen for approval message.")
     }
     
-
-    func deriveTopic(publicKey: String, privateKey: Crypto.X25519.PrivateKey) -> String {
-        try! Crypto.X25519.generateAgreementKeys(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
-    }
-    
     func testApprove() throws {
         setupEngine(isController: true)
         
@@ -118,7 +93,7 @@ class PairingEngineTests: XCTestCase {
         XCTAssert(subscriberMock.didSubscribe(to: topicB))
         XCTAssert(cryptoMock.hasPrivateKey(for: approval.responder.publicKey))
         XCTAssert(cryptoMock.hasAgreementKeys(for: topicB))
-        XCTAssert(storageMock.hasSequence(forTopic: topicB)) // check for pre-settled
+        XCTAssert(storageMock.hasSequence(forTopic: topicB)) // TODO: check for pre-settled state
         XCTAssertEqual(publishTopic, topicA)
     }
     
@@ -162,7 +137,7 @@ class PairingEngineTests: XCTestCase {
         XCTAssert(subscriberMock.didSubscribe(to: topicB))
         XCTAssert(cryptoMock.hasPrivateKey(for: uri.publicKey))
         XCTAssert(cryptoMock.hasAgreementKeys(for: topicB))
-        XCTAssert(storageMock.hasSequence(forTopic: topicB)) // TODO: check state
+        XCTAssert(storageMock.hasSequence(forTopic: topicB)) // TODO: check for state
         XCTAssertFalse(storageMock.hasSequence(forTopic: topicA))
         XCTAssertNotNil(approvedPairing)
         XCTAssertEqual(approvedPairing?.topic, topicB)
