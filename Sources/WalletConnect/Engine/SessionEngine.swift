@@ -11,17 +11,15 @@ final class SessionEngine {
     var onSessionDelete: ((String, SessionType.Reason)->())?
     var onNotificationReceived: ((String, SessionType.NotificationParams)->())?
     
-//    private let sequencesStore: SequenceStore<SessionSequence>
     private let sequencesStore: SessionSequenceStorage
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
     private let crypto: CryptoStorageProtocol
     private var isController: Bool
     private var metadata: AppMetadata
-    
     private var publishers = [AnyCancellable]()
-
     private let logger: ConsoleLogger
+    private let topicInitializer: () -> String?
 
     init(relay: WalletConnectRelaying,
          crypto: CryptoStorageProtocol,
@@ -29,7 +27,8 @@ final class SessionEngine {
          sequencesStore: SessionSequenceStorage,
          isController: Bool,
          metadata: AppMetadata,
-         logger: ConsoleLogger) {
+         logger: ConsoleLogger,
+         topicGenerator: @escaping () -> String? = String.generateTopic) {
         self.relayer = relay
         self.crypto = crypto
         self.metadata = metadata
@@ -37,6 +36,7 @@ final class SessionEngine {
         self.sequencesStore = sequencesStore
         self.isController = isController
         self.logger = logger
+        self.topicInitializer = topicGenerator
         setUpWCRequestHandling()
         setupExpirationHandling()
         restoreSubscriptions()
@@ -55,17 +55,26 @@ final class SessionEngine {
     }
     
     func proposeSession(settledPairing: Pairing, permissions: SessionType.Permissions, relay: RelayProtocolOptions) {
-        guard let pendingSessionTopic = String.generateTopic() else {
+        guard let pendingSessionTopic = topicInitializer() else {
             logger.debug("Could not generate topic")
             return
         }
         logger.debug("Propose Session on topic: \(pendingSessionTopic)")
-        let privateKey = Crypto.X25519.generatePrivateKey()
+        
+        let privateKey = crypto.generatePrivateKey()
         let publicKey = privateKey.publicKey.toHexString()
-        crypto.set(privateKey: privateKey)
+        
         let proposer = SessionType.Proposer(publicKey: publicKey, controller: isController, metadata: metadata)
         let signal = SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: settledPairing.topic))
-        let proposal = SessionType.Proposal(topic: pendingSessionTopic, relay: relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
+        
+        let proposal = SessionType.Proposal(
+            topic: pendingSessionTopic,
+            relay: relay,
+            proposer: proposer,
+            signal: signal,
+            permissions: permissions,
+            ttl: getDefaultTTL())
+        
         let selfParticipant = SessionType.Participant(publicKey: publicKey, metadata: metadata)
         
         let pendingSession = SessionSequence(
@@ -74,6 +83,8 @@ final class SessionEngine {
             selfParticipant: selfParticipant,
             expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
             pendingState: SessionSequence.Pending(status: .proposed, proposal: proposal))
+        
+        crypto.set(privateKey: privateKey)
         sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: pendingSessionTopic)
         
