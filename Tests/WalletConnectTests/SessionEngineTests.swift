@@ -1,6 +1,7 @@
 import XCTest
 @testable import WalletConnect
 
+// TODO: Move common helper methods to a shared folder
 fileprivate extension Pairing {
     
     static func stub() -> Pairing {
@@ -25,6 +26,15 @@ fileprivate extension WCRequest {
         guard case .pairingPayload(let payload) = self.params else { return nil }
         return payload.request.params
     }
+    
+    var approveParams: SessionType.ApproveParams? {
+        guard case .sessionApprove(let approveParams) = self.params else { return nil }
+        return approveParams
+    }
+}
+
+fileprivate func deriveTopic(publicKey: String, privateKey: Crypto.X25519.PrivateKey) -> String {
+    try! Crypto.X25519.generateAgreementKeys(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
 }
 
 final class SessionEngineTests: XCTestCase {
@@ -38,6 +48,9 @@ final class SessionEngineTests: XCTestCase {
     
     var topicGenerator: TopicGenerator!
     
+    var isController: Bool!
+    var metadata: AppMetadata!
+    
     override func setUp() {
         relayMock = MockedWCRelay()
         subscriberMock = MockedSubscriber()
@@ -45,15 +58,16 @@ final class SessionEngineTests: XCTestCase {
         cryptoMock = CryptoStorageProtocolMock()
         topicGenerator = TopicGenerator()
         
-        let meta = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
+        metadata = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
+        isController = false
         let logger = ConsoleLogger()
         engine = SessionEngine(
             relay: relayMock,
             crypto: cryptoMock,
             subscriber: subscriberMock,
             sequencesStore: storageMock,
-            isController: false,
-            metadata: meta,
+            isController: isController,
+            metadata: metadata,
             logger: logger,
             topicGenerator: topicGenerator.getTopic)
     }
@@ -90,8 +104,35 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testApprove() {
+        let proposerPubKey = Crypto.X25519.PrivateKey().publicKey.toHexString()
+        let topicB = String.generateTopic()!
+        let topicC = String.generateTopic()!
+        let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
         
+        let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: isController, metadata: metadata)
+        let proposal = SessionType.Proposal(
+            topic: topicC,
+            relay: RelayProtocolOptions(protocol: "", params: nil),
+            proposer: proposer,
+            signal: SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: topicB)),
+            permissions: SessionType.Permissions.stub(),
+            ttl: SessionSequence.timeToLivePending)
+            
+        engine.approve(proposal: proposal, accounts: []) { _ in }
+        
+        guard let publishTopic = relayMock.requests.first?.topic, let approval = relayMock.requests.first?.request.approveParams else {
+            XCTFail("Responder must publish an approval request."); return
+        }
+        
+        XCTAssert(subscriberMock.didSubscribe(to: topicC))
+        XCTAssert(subscriberMock.didSubscribe(to: topicD))
+        XCTAssert(cryptoMock.hasPrivateKey(for: approval.responder.publicKey))
+        XCTAssert(cryptoMock.hasAgreementKeys(for: topicD))
+        XCTAssert(storageMock.hasSequence(forTopic: topicD)) // TODO: check state
+        XCTAssertEqual(publishTopic, topicC)
     }
+    
+    // TODO: approve acknowledgement tests for success and failure
     
     func testReceiveApprovalResponse() {
         

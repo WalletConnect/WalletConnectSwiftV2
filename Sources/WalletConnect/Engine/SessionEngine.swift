@@ -73,7 +73,7 @@ final class SessionEngine {
             proposer: proposer,
             signal: signal,
             permissions: permissions,
-            ttl: getDefaultTTL())
+            ttl: SessionSequence.timeToLivePending)
         
         let selfParticipant = SessionType.Participant(publicKey: publicKey, metadata: metadata)
         
@@ -105,7 +105,7 @@ final class SessionEngine {
     
     func approve(proposal: SessionType.Proposal, accounts: Set<String>, completion: @escaping (Result<Session, Error>) -> Void) {
         logger.debug("Approve session")
-        let privateKey = Crypto.X25519.generatePrivateKey()
+        let privateKey = crypto.generatePrivateKey()
         let selfPublicKey = privateKey.publicKey.toHexString()
         
         let pending = SessionSequence.Pending(
@@ -152,15 +152,16 @@ final class SessionEngine {
             state: sessionState)
         let approvalPayload = WCRequest(method: .sessionApprove, params: .sessionApprove(approveParams))
         
+        crypto.set(privateKey: privateKey)
+        crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
+        sequencesStore.setSequence(settledSession)
+        sequencesStore.delete(topic: proposal.topic)
+        wcSubscriber.setSubscription(topic: settledTopic)
+        
         relayer.request(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
             switch result {
             case .success:
-                self?.crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
-                self?.crypto.set(privateKey: privateKey)
-                self?.sequencesStore.setSequence(settledSession)
-                self?.sequencesStore.delete(topic: proposal.topic)
                 self?.wcSubscriber.removeSubscription(topic: proposal.topic)
-                self?.wcSubscriber.setSubscription(topic: settledTopic)
                 self?.logger.debug("Success on wc_sessionApprove, published on topic: \(proposal.topic), settled topic: \(settledTopic)")
                 let sessionSuccess = Session(
                     topic: settledTopic,
@@ -312,10 +313,6 @@ final class SessionEngine {
     }
 
     //MARK: - Private
-
-    private func getDefaultTTL() -> Int {
-        7 * Time.day
-    }
     
     private func getDefaultPermissions() -> PairingType.ProposedPermissions {
         PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [PairingType.PayloadMethods.sessionPropose.rawValue]))
