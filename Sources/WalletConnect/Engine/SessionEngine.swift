@@ -534,12 +534,7 @@ final class SessionEngine {
         
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
-        let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
-        relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [unowned self] error in
-            if let error = error {
-                logger.error(error)
-            }
-        }
+        
         let approvedSession = Session(
             topic: settledTopic,
             peer: peer.metadata,
@@ -547,6 +542,13 @@ final class SessionEngine {
                 blockchains: sessionPermissions.blockchain.chains,
                 methods: sessionPermissions.jsonrpc.methods))
         onSessionApproved?(approvedSession)
+        
+        let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
+        relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [unowned self] error in
+            if let error = error {
+                logger.error(error)
+            }
+        }
     }
     
     private func setupExpirationHandling() {
