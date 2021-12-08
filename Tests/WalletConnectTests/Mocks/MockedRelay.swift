@@ -5,6 +5,8 @@ import Combine
 
 class MockedWCRelay: WalletConnectRelaying {
     
+    var onPairingApproveResponse: ((String) -> Void)?
+    
     var transportConnectionPublisher: AnyPublisher<Void, Never> {
         transportConnectionPublisherSubject.eraseToAnyPublisher()
     }

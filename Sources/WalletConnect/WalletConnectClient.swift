@@ -95,14 +95,7 @@ public final class WalletConnectClient {
             throw WalletConnectError.internal(.malformedPairingURI)
         }
         try pairingQueue.sync {
-            try pairingEngine.approve(pairingURI) { [unowned self] result in
-                switch result {
-                case .success(let settledPairing):
-                    self.delegate?.didSettle(pairing: settledPairing)
-                case .failure(let error):
-                    print("Pairing Failure: \(error)")
-                }
-            }
+            try pairingEngine.approve(pairingURI)
         }
     }
     

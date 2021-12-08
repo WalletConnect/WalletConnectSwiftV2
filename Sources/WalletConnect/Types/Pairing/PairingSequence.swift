@@ -61,10 +61,21 @@ extension PairingSequence {
     }
 }
     
-extension PairingSequence {    
+extension PairingSequence {
+    
     struct Pending: Codable {
         let proposal: PairingProposal
-        let status: PairingType.Pending.PendingStatus
+        let status: Status
+        
+        var isResponded: Bool {
+            guard case .responded = status else { return false }
+            return true
+        }
+        
+        enum Status: Codable {
+            case proposed
+            case responded(String)
+        }
     }
 
     struct Settled: Codable {

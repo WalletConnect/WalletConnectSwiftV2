@@ -83,7 +83,7 @@ final class PairingEngineTests: XCTestCase {
         let topicA = uri.topic
         let topicB = deriveTopic(publicKey: uri.publicKey, privateKey: cryptoMock.privateKeyStub)
 
-        try engine.approve(uri) { _ in }
+        try engine.approve(uri)
 
         guard let publishTopic = relayMock.requests.first?.topic, let approval = relayMock.requests.first?.request.approveParams else {
             XCTFail("Responder must publish an approval request."); return
@@ -103,18 +103,30 @@ final class PairingEngineTests: XCTestCase {
         let uri = WalletConnectURI.stub()
         for i in 1...10 {
             if i == 1 {
-                XCTAssertNoThrow(try engine.approve(uri) { _ in })
+                XCTAssertNoThrow(try engine.approve(uri))
             } else {
-                XCTAssertThrowsError(try engine.approve(uri) { _ in })
+                XCTAssertThrowsError(try engine.approve(uri))
             }
         }
     }
     
-    func testApproveAcknowledgement() {
+    func testApproveAcknowledgement() throws {
+        setupEngine(isController: true)
         
+        let uri = WalletConnectURI.stub()
+        let topicA = uri.topic
+        let topicB = deriveTopic(publicKey: uri.publicKey, privateKey: cryptoMock.privateKeyStub)
+        var acknowledgedPairing: Pairing?
+        engine.onApprovalAcknowledgement = { acknowledgedPairing = $0 }
+
+        try engine.approve(uri)
+        relayMock.onPairingApproveResponse?(topicA)
+        
+        XCTAssert(storageMock.hasAcknowledgedPairing(on: topicB), "Settled pairing must advance to acknowledged state.")
+        XCTAssertFalse(storageMock.hasSequence(forTopic: topicA), "Pending pairing must be deleted.")
+        XCTAssert(subscriberMock.didUnsubscribe(to: topicA), "Responder must unsubscribe from topic A after approval acknowledgement.")
+        XCTAssertEqual(acknowledgedPairing?.topic, topicB, "The acknowledged pairing must be settled on topic B.")
     }
-    
-    // TODO: approve acknowledgement tests for success and failure
     
     func testReceiveApprovalResponse() {
         setupEngine(isController: false)
