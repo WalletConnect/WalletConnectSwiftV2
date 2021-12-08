@@ -157,7 +157,6 @@ final class PairingEngine {
             state: nil) // FIXME: State
         let approvalPayload = WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
         
-        // completion comes on topic A
         relayer.request(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
             switch result {
             case .success:

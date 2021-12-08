@@ -97,10 +97,10 @@ class WalletConnectRelay: WalletConnectRelaying {
                                 default:
                                     break
                                 }
-//                                completion(.success(response))
+                                completion(.success(response))
                             case .error(let error):
                                 self.logger.debug("Request error: \(error)")
-//                                completion(.failure(error))
+                                completion(.failure(error))
                             }
                         }
                 }
