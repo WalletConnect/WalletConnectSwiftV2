@@ -26,3 +26,14 @@ final class PairingSequenceStorageMock: PairingSequenceStorage {
         pairings[topic] = nil
     }
 }
+
+extension PairingSequenceStorageMock {
+    
+    func hasPendingRespondedPairing(on topic: String) -> Bool {
+        pairings[topic]?.pending?.status == .responded
+    }
+    
+    func hasPreSettledPairing(on topic: String) -> Bool {
+        pairings[topic]?.settled?.status == .preSettled
+    }
+}

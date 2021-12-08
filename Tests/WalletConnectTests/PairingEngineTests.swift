@@ -90,11 +90,12 @@ final class PairingEngineTests: XCTestCase {
         }
 
         XCTAssert(subscriberMock.didSubscribe(to: topicA), "Responder must subscribe to topic A to listen for approval request acknowledgement.")
-        XCTAssert(subscriberMock.didSubscribe(to: topicB))
-        XCTAssert(cryptoMock.hasPrivateKey(for: approval.responder.publicKey))
-        XCTAssert(cryptoMock.hasAgreementKeys(for: topicB))
-        XCTAssert(storageMock.hasSequence(forTopic: topicB)) // TODO: check for pre-settled state
-        XCTAssertEqual(publishTopic, topicA)
+        XCTAssert(subscriberMock.didSubscribe(to: topicB), "Responder must subscribe to topic B to settle the pairing sequence optimistically.")
+        XCTAssert(cryptoMock.hasPrivateKey(for: approval.responder.publicKey), "Responder must store the private key matching the public key sent to its peer.")
+        XCTAssert(cryptoMock.hasAgreementKeys(for: topicB), "Responder must derive and store the shared secret used to encrypt communication over topic B.")
+        XCTAssert(storageMock.hasPendingRespondedPairing(on: topicA), "The engine must store a pending pairing on responded state.")
+        XCTAssert(storageMock.hasPreSettledPairing(on: topicB), "The engine must optimistically store a settled pairing on pre-settled state.")
+        XCTAssertEqual(publishTopic, topicA, "The approval request must be published over topic A.")
     }
     
     func testApproveMultipleCallsThrottleOnSameURI() {
@@ -107,6 +108,10 @@ final class PairingEngineTests: XCTestCase {
                 XCTAssertThrowsError(try engine.approve(uri) { _ in })
             }
         }
+    }
+    
+    func testApproveAcknowledgement() {
+        
     }
     
     // TODO: approve acknowledgement tests for success and failure
