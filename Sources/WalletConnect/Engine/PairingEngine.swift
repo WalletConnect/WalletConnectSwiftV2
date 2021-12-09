@@ -201,6 +201,7 @@ final class PairingEngine {
         
         let pairing = Pairing(topic: settledPairing.topic, peer: nil)
         onApprovalAcknowledgement?(pairing)
+        update(topic: settledPairing.topic)
     }
     
     private func update(topic: String) {

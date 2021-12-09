@@ -176,6 +176,9 @@ public final class WalletConnectClient {
             delegate?.didSettle(pairing: settledPairing)
             sessionEngine.proposeSession(settledPairing: settledPairing, permissions: permissions, relay: relayOptions)
         }
+        pairingEngine.onApprovalAcknowledgement = { [weak self] settledPairing in
+            self?.delegate?.didSettle(pairing: settledPairing)
+        }
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
             let permissions = SessionPermissions.init(blockchains: settledSession.permissions.blockchains, methods: settledSession.permissions.methods)
             let session = Session(topic: settledSession.topic, peer: settledSession.peer, permissions: permissions)
