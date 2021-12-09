@@ -2,6 +2,7 @@
 import Foundation
 import Combine
 import XCTest
+import WalletConnectUtils
 @testable import WalletConnect
 
 class WalletConnectRelayTests: XCTestCase {
@@ -13,7 +14,7 @@ class WalletConnectRelayTests: XCTestCase {
     private var publishers = [AnyCancellable]()
 
     override func setUp() {
-        let logger = ConsoleLogger()
+        let logger = ConsoleLoggerMock()
         serialiser = MockedJSONRPCSerialiser()
         networkRelayer = MockedNetworkRelayer()
         wcRelay = WalletConnectRelay(networkRelayer: networkRelayer, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: RuntimeKeyValueStorage()))

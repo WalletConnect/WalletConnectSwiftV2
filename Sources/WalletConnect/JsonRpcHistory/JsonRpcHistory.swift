@@ -1,5 +1,6 @@
 
 import Foundation
+import Iridium
 
 protocol JsonRpcHistoryRecording {
     func get(id: Int64) -> JsonRpcRecord?
@@ -11,10 +12,10 @@ protocol JsonRpcHistoryRecording {
 
 class JsonRpcHistory: JsonRpcHistoryRecording {
     let storage: KeyValueStore<JsonRpcRecord>
-    let logger: ConsoleLogger
+    let logger: ConsoleLogging
     let identifier: String
     
-    init(logger: ConsoleLogger, keyValueStorage: KeyValueStorage, uniqueIdentifier: String? = nil) {
+    init(logger: ConsoleLogging, keyValueStorage: KeyValueStorage, uniqueIdentifier: String? = nil) {
         self.logger = logger
         self.storage = KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage)
         self.identifier = "com.walletconnect.sdk.\(uniqueIdentifier ?? "")"

@@ -6,8 +6,26 @@
         "repositoryURL": "https://github.com/krzyzanowskim/CryptoSwift.git",
         "state": {
           "branch": null,
-          "revision": "8d4f6384e0a8cc41f2005247241dd553963a492a",
-          "version": "1.4.1"
+          "revision": "4b0565384d3c4c588af09e660535b2c7c9bf5b39",
+          "version": "1.4.2"
+        }
+      },
+      {
+        "package": "Iridium",
+        "repositoryURL": "https://github.com/llbartekll/iridium.git",
+        "state": {
+          "branch": "main",
+          "revision": "08f7f69747e51f7107c9b71f90c689044e7fd1ac",
+          "version": null
+        }
+      },
+      {
+        "package": "WalletConnectUtils",
+        "repositoryURL": "https://github.com/llbartekll/WalletConnectSwiftUtils",
+        "state": {
+          "branch": "main",
+          "revision": "027f06e28883b0a9eff05c5ec7b95b67bb92c44e",
+          "version": null
         }
       }
     ]

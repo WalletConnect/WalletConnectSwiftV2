@@ -1,6 +1,7 @@
 // 
 
 import Foundation
+import WalletConnectUtils
 @testable import WalletConnect
 
 class MockedJSONRPCSerialiser: JSONRPCSerialising {
