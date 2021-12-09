@@ -23,7 +23,7 @@ fileprivate func deriveTopic(publicKey: String, privateKey: Crypto.X25519.Privat
     try! Crypto.X25519.generateAgreementKeys(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
 }
 
-class PairingEngineTests: XCTestCase {
+final class PairingEngineTests: XCTestCase {
     
     var engine: PairingEngine!
     

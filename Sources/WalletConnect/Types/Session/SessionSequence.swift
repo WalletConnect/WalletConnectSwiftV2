@@ -47,6 +47,14 @@ struct SessionSequence: ExpirableSequence {
         isSettled && settled?.peer.publicKey == settled?.permissions.controller?.publicKey
     }
     
+    static var timeToLivePending: Int {
+        Time.day
+    }
+    
+    static var timeToLiveSettled: Int {
+        Time.day * 7
+    }
+    
     func hasPermission(forChain chainId: String) -> Bool {
         guard let settled = settled else { return false }
         return settled.permissions.blockchain.chains.contains(chainId)

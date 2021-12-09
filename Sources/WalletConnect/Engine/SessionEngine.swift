@@ -2,30 +2,33 @@ import Foundation
 import Combine
 
 final class SessionEngine {
-    var sequencesStore: SequenceStore<SessionSequence>
+    
+    var onSessionPayloadRequest: ((SessionRequest)->())?
+    var onSessionApproved: ((Session)->())?
+    var onSessionRejected: ((String, SessionType.Reason)->())?
+    var onSessionUpdate: ((String, Set<String>)->())?
+    var onSessionUpgrade: ((String, SessionType.Permissions)->())?
+    var onSessionDelete: ((String, SessionType.Reason)->())?
+    var onNotificationReceived: ((String, SessionType.NotificationParams)->())?
+    
+    private let sequencesStore: SessionSequenceStorage
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
-    private let crypto: Crypto
+    private let crypto: CryptoStorageProtocol
     private var isController: Bool
     private var metadata: AppMetadata
-    var onSessionApproved: ((Session)->())?
-    var onSessionPayloadRequest: ((SessionRequest)->())?
-    var onSessionRejected: ((String, SessionType.Reason)->())?
-    var onSessionDelete: ((String, SessionType.Reason)->())?
-    var onSessionUpgrade: ((String, SessionType.Permissions)->())?
-    var onSessionUpdate: ((String, Set<String>)->())?
-    var onNotificationReceived: ((String, SessionType.NotificationParams)->())?
     private var publishers = [AnyCancellable]()
-
     private let logger: ConsoleLogger
+    private let topicInitializer: () -> String?
 
     init(relay: WalletConnectRelaying,
-         crypto: Crypto,
+         crypto: CryptoStorageProtocol,
          subscriber: WCSubscribing,
-         sequencesStore: SequenceStore<SessionSequence>,
+         sequencesStore: SessionSequenceStorage,
          isController: Bool,
          metadata: AppMetadata,
-         logger: ConsoleLogger) {
+         logger: ConsoleLogger,
+         topicGenerator: @escaping () -> String? = String.generateTopic) {
         self.relayer = relay
         self.crypto = crypto
         self.metadata = metadata
@@ -33,9 +36,14 @@ final class SessionEngine {
         self.sequencesStore = sequencesStore
         self.isController = isController
         self.logger = logger
+        self.topicInitializer = topicGenerator
         setUpWCRequestHandling()
         setupExpirationHandling()
         restoreSubscriptions()
+    }
+    
+    func hasSession(for topic: String) -> Bool {
+        return sequencesStore.hasSequence(forTopic: topic)
     }
     
     func getSettledSessions() -> [Session] {
@@ -46,9 +54,58 @@ final class SessionEngine {
         }
     }
     
+    func proposeSession(settledPairing: Pairing, permissions: SessionType.Permissions, relay: RelayProtocolOptions) {
+        guard let pendingSessionTopic = topicInitializer() else {
+            logger.debug("Could not generate topic")
+            return
+        }
+        logger.debug("Propose Session on topic: \(pendingSessionTopic)")
+        
+        let privateKey = crypto.generatePrivateKey()
+        let publicKey = privateKey.publicKey.toHexString()
+        
+        let proposer = SessionType.Proposer(publicKey: publicKey, controller: isController, metadata: metadata)
+        let signal = SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: settledPairing.topic))
+        
+        let proposal = SessionType.Proposal(
+            topic: pendingSessionTopic,
+            relay: relay,
+            proposer: proposer,
+            signal: signal,
+            permissions: permissions,
+            ttl: SessionSequence.timeToLivePending)
+        
+        let selfParticipant = SessionType.Participant(publicKey: publicKey, metadata: metadata)
+        
+        let pendingSession = SessionSequence(
+            topic: pendingSessionTopic,
+            relay: relay,
+            selfParticipant: selfParticipant,
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
+            pendingState: SessionSequence.Pending(status: .proposed, proposal: proposal))
+        
+        crypto.set(privateKey: privateKey)
+        sequencesStore.setSequence(pendingSession)
+        wcSubscriber.setSubscription(topic: pendingSessionTopic)
+        
+        let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: proposal)
+        let pairingPayloadParams = PairingType.PayloadParams(request: request)
+        let pairingPayloadRequest = WCRequest(method: .pairingPayload, params: .pairingPayload(pairingPayloadParams))
+        relayer.request(topic: settledPairing.topic, payload: pairingPayloadRequest) { [unowned self] result in
+            switch result {
+            case .success:
+                logger.debug("Session Proposal response received")
+                let pairingAgreementKeys = crypto.getAgreementKeys(for: settledPairing.topic)!
+                crypto.set(agreementKeys: pairingAgreementKeys, topic: proposal.topic)
+            case .failure(let error):
+                logger.debug("Could not send session proposal error: \(error)")
+            }
+        }
+    }
+    
     func approve(proposal: SessionType.Proposal, accounts: Set<String>, completion: @escaping (Result<Session, Error>) -> Void) {
         logger.debug("Approve session")
-        let privateKey = Crypto.X25519.generatePrivateKey()
+        let privateKey = crypto.generatePrivateKey()
         let selfPublicKey = privateKey.publicKey.toHexString()
         
         let pending = SessionSequence.Pending(
@@ -95,15 +152,16 @@ final class SessionEngine {
             state: sessionState)
         let approvalPayload = WCRequest(method: .sessionApprove, params: .sessionApprove(approveParams))
         
+        crypto.set(privateKey: privateKey)
+        crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
+        sequencesStore.setSequence(settledSession)
+        sequencesStore.delete(topic: proposal.topic)
+        wcSubscriber.setSubscription(topic: settledTopic)
+        
         relayer.request(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
             switch result {
             case .success:
-                self?.crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
-                self?.crypto.set(privateKey: privateKey)
-                self?.sequencesStore.setSequence(settledSession)
-                self?.sequencesStore.delete(topic: proposal.topic)
                 self?.wcSubscriber.removeSubscription(topic: proposal.topic)
-                self?.wcSubscriber.setSubscription(topic: settledTopic)
                 self?.logger.debug("Success on wc_sessionApprove, published on topic: \(proposal.topic), settled topic: \(settledTopic)")
                 let sessionSuccess = Session(
                     topic: settledTopic,
@@ -136,44 +194,6 @@ final class SessionEngine {
 
         _ = relayer.request(topic: topic, payload: request) { [weak self] result in
             self?.logger.debug("Session Delete result: \(result)")
-        }
-    }
-    
-    func proposeSession(settledPairing: Pairing, permissions: SessionType.Permissions, relay: RelayProtocolOptions) {
-        guard let pendingSessionTopic = String.generateTopic() else {
-            logger.debug("Could not generate topic")
-            return
-        }
-        logger.debug("Propose Session on topic: \(pendingSessionTopic)")
-        let privateKey = Crypto.X25519.generatePrivateKey()
-        let publicKey = privateKey.publicKey.toHexString()
-        crypto.set(privateKey: privateKey)
-        let proposer = SessionType.Proposer(publicKey: publicKey, controller: isController, metadata: metadata)
-        let signal = SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: settledPairing.topic))
-        let proposal = SessionType.Proposal(topic: pendingSessionTopic, relay: relay, proposer: proposer, signal: signal, permissions: permissions, ttl: getDefaultTTL())
-        let selfParticipant = SessionType.Participant(publicKey: publicKey, metadata: metadata)
-        
-        let pendingSession = SessionSequence(
-            topic: pendingSessionTopic,
-            relay: relay,
-            selfParticipant: selfParticipant,
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
-            pendingState: SessionSequence.Pending(status: .proposed, proposal: proposal))
-        sequencesStore.setSequence(pendingSession)
-        wcSubscriber.setSubscription(topic: pendingSessionTopic)
-        
-        let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: proposal)
-        let pairingPayloadParams = PairingType.PayloadParams(request: request)
-        let pairingPayloadRequest = WCRequest(method: .pairingPayload, params: .pairingPayload(pairingPayloadParams))
-        relayer.request(topic: settledPairing.topic, payload: pairingPayloadRequest) { [unowned self] result in
-            switch result {
-            case .success:
-                logger.debug("Session Proposal response received")
-                let pairingAgreementKeys = crypto.getAgreementKeys(for: settledPairing.topic)!
-                crypto.set(agreementKeys: pairingAgreementKeys, topic: proposal.topic)
-            case .failure(let error):
-                logger.debug("Could not send session proposal error: \(error)")
-            }
         }
     }
     
@@ -293,10 +313,6 @@ final class SessionEngine {
     }
 
     //MARK: - Private
-
-    private func getDefaultTTL() -> Int {
-        7 * Time.day
-    }
     
     private func getDefaultPermissions() -> PairingType.ProposedPermissions {
         PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [PairingType.PayloadMethods.sessionPropose.rawValue]))
@@ -518,12 +534,7 @@ final class SessionEngine {
         
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
-        let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
-        relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [unowned self] error in
-            if let error = error {
-                logger.error(error)
-            }
-        }
+        
         let approvedSession = Session(
             topic: settledTopic,
             peer: peer.metadata,
@@ -531,6 +542,13 @@ final class SessionEngine {
                 blockchains: sessionPermissions.blockchain.chains,
                 methods: sessionPermissions.jsonrpc.methods))
         onSessionApproved?(approvedSession)
+        
+        let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
+        relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [unowned self] error in
+            if let error = error {
+                logger.error(error)
+            }
+        }
     }
     
     private func setupExpirationHandling() {

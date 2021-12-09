@@ -10,8 +10,8 @@ final class PairingEngine {
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
     private let crypto: CryptoStorageProtocol
-    private var isController: Bool
-    private var sequencesStore: PairingSequenceStorage
+    private let isController: Bool
+    private let sequencesStore: PairingSequenceStorage
     private var appMetadata: AppMetadata
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogger

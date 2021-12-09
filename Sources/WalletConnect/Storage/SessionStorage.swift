@@ -1,22 +1,22 @@
-protocol PairingSequenceStorage: AnyObject {
+protocol SessionSequenceStorage: AnyObject {
     var onSequenceExpiration: ((_ topic: String, _ pubKey: String) -> Void)? { get set }
     func hasSequence(forTopic topic: String) -> Bool
-    func setSequence(_ sequence: PairingSequence)
-    func getSequence(forTopic topic: String) throws -> PairingSequence?
-    func getAll() -> [PairingSequence]
+    func setSequence(_ sequence: SessionSequence)
+    func getSequence(forTopic topic: String) throws -> SessionSequence?
+    func getAll() -> [SessionSequence]
     func delete(topic: String)
 }
 
-final class PairingStorage: PairingSequenceStorage {
+final class SessionStorage: SessionSequenceStorage {
     
     var onSequenceExpiration: ((String, String) -> Void)? {
         get { storage.onSequenceExpiration }
         set { storage.onSequenceExpiration = newValue }
     }
     
-    private let storage: SequenceStore<PairingSequence>
+    private let storage: SequenceStore<SessionSequence>
     
-    init(storage: SequenceStore<PairingSequence>) {
+    init(storage: SequenceStore<SessionSequence>) {
         self.storage = storage
     }
     
@@ -24,15 +24,15 @@ final class PairingStorage: PairingSequenceStorage {
         storage.hasSequence(forTopic: topic)
     }
     
-    func setSequence(_ sequence: PairingSequence) {
+    func setSequence(_ sequence: SessionSequence) {
         storage.setSequence(sequence)
     }
     
-    func getSequence(forTopic topic: String) throws -> PairingSequence? {
+    func getSequence(forTopic topic: String) throws -> SessionSequence? {
         try storage.getSequence(forTopic: topic)
     }
     
-    func getAll() -> [PairingSequence] {
+    func getAll() -> [SessionSequence] {
         storage.getAll()
     }
     
