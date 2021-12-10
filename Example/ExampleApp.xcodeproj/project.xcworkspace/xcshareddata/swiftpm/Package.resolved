@@ -9,24 +9,6 @@
           "revision": "4b0565384d3c4c588af09e660535b2c7c9bf5b39",
           "version": "1.4.2"
         }
-      },
-      {
-        "package": "Iridium",
-        "repositoryURL": "https://github.com/llbartekll/iridium.git",
-        "state": {
-          "branch": "main",
-          "revision": "4747052ab5da2b2c8f31d34e9222fc73fbf198af",
-          "version": null
-        }
-      },
-      {
-        "package": "WalletConnectUtils",
-        "repositoryURL": "https://github.com/llbartekll/WalletConnectSwiftUtils",
-        "state": {
-          "branch": "main",
-          "revision": "a15f7b35f72570efeaa527d326f17cab1f9cefba",
-          "version": null
-        }
       }
     ]
   },

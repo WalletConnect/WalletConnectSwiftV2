@@ -12,15 +12,20 @@ let package = Package(
         .library(
             name: "WalletConnect",
             targets: ["WalletConnect"]),
+        .library(
+            name: "Iridium",
+            targets: ["Iridium"]),
     ],
     dependencies: [
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .upToNextMinor(from: "1.4.1")),
-        .package(name: "Iridium", url: "https://github.com/llbartekll/iridium.git", .branch("main")),
     ],
     targets: [
         .target(
             name: "WalletConnect",
             dependencies: ["CryptoSwift", "Iridium"]),
+        .target(
+            name: "Iridium",
+            dependencies: []),
         .testTarget(
             name: "WalletConnectTests",
             dependencies: ["WalletConnect"]),
