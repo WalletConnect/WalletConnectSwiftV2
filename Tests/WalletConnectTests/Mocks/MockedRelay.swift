@@ -1,6 +1,7 @@
 
 import Foundation
 import Combine
+import WalletConnectUtils
 @testable import WalletConnect
 
 class MockedWCRelay: WalletConnectRelaying {

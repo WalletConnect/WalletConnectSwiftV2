@@ -1,5 +1,5 @@
 import Foundation
-@testable import WalletConnect
+@testable import Iridium
 
 final class URLSessionWebSocketTaskMock: URLSessionWebSocketTaskProtocol {
     

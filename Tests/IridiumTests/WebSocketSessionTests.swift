@@ -1,5 +1,5 @@
 import XCTest
-@testable import WalletConnect
+@testable import Iridium
 
 final class WebSocketSessionTests: XCTestCase {
     

@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import WalletConnectUtils
 
 final class PairingEngine {
     
@@ -15,7 +16,7 @@ final class PairingEngine {
     private let sequencesStore: PairingSequenceStorage
     private var appMetadata: AppMetadata
     private var publishers = [AnyCancellable]()
-    private let logger: ConsoleLogger
+    private let logger: ConsoleLogging
     private var sessionPermissions: [String: SessionType.Permissions] = [:]
     private let topicInitializer: () -> String?
     
@@ -25,7 +26,7 @@ final class PairingEngine {
          sequencesStore: PairingSequenceStorage,
          isController: Bool,
          metadata: AppMetadata,
-         logger: ConsoleLogger,
+         logger: ConsoleLogging,
          topicGenerator: @escaping () -> String? = String.generateTopic) {
         self.relayer = relay
         self.crypto = crypto

@@ -8,11 +8,17 @@ Swift implementation of WalletConnect v.2 protocol for native iOS applications.
 ## Usage
 ### Responder
 Responder client is usually a wallet.
-##### Instantiate Client
+##### Instantiate a Client
+You usually want to have a single instance of a client in you app.
 ```Swift
-let url = URL(string: "wss://relay.walletconnect.org")!
-let options = WalletClientOptions(apiKey: String, name: String, isController: true, metadata: AppMetadata(name: String?, description: String?, url: String?, icons: [String]?), relayURL: url)
-let client = WalletConnectClient(options: options)
+        let metadata = AppMetadata(name: String?,
+                                   description: String?,
+                                   url: String?,
+                                   icons: [String]?)
+        let client = WalletConnectClient(metadata: AppMetadata,
+                            apiKey: String,
+                            isController: Bool,
+                            relayHost: String)
 ```
 The `controller` client will always be the "wallet" which is exposing blockchain accounts to a "dapp" and therefore is also in charge of signing.
 
@@ -28,24 +34,21 @@ Sessions are always proposed by the `Proposer` client so `Responder` client need
 ```Swift
 class ClientDelegate: WalletConnectClientDelegate {
 ...
-    func didReceive(sessionProposal: SessionType.Proposal) {
-        client.approve(proposal: proposal, accounts: [String])
+    func didReceive(sessionProposal: SessionProposal) {
+        client.approve(proposal: proposal, accounts: [String]) { result in ... }
     }
 ...
 ```
 or 
 ```Swift
-    func didReceive(sessionProposal: SessionType.Proposal) {
+    func didReceive(sessionProposal: SessionProposal) {
         client.reject(proposal: proposal, reason: Reason)
     }
 ```
 NOTE: addresses provided in `accounts` array should follow [CAPI10](https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-10.md) semantics.
 #### Handle Delegate methods
 ```Swift
-    func didSettle(session: SessionType.Settled) {
-        // handle settled session
-    }
-    func didReceive(sessionProposal: SessionType.Proposal) {
+    func didReceive(sessionProposal: SessionProposal) {
         // handle session proposal
     }
     func didReceive(sessionRequest: SessionRequest) {
@@ -64,7 +67,7 @@ Request parameters can be type casted based on request method as below:
 
 ```Swift
             let jsonrpcResponse = JSONRPCResponse<AnyCodable>(id: request.id, result: AnyCodable(responseParams))
-            client.respond(topic: sessionRequest.topic, response: jsonrpcResponse)
+            client.respond(topic: sessionRequest.topic, response: .response(jsonrpcResponse))
 ```
 
 ## Installation

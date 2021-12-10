@@ -1,9 +1,11 @@
 
-
+import WalletConnectUtils
 import Foundation
 import Combine
 import XCTest
-@testable import WalletConnect
+@testable import Iridium
+
+extension ConsoleLogger: ConsoleLogging {}
 
 class WakuRelayTests: XCTestCase {
     var wakuRelay: WakuNetworkRelay!

@@ -1,7 +1,7 @@
 // 
 
 import Foundation
-@testable import WalletConnect
+@testable import Iridium
 
 class MockedJSONRPCTransport: JSONRPCTransporting {
     var onConnect: (() -> ())?
@@ -11,5 +11,6 @@ class MockedJSONRPCTransport: JSONRPCTransporting {
     func send(_ string: String, completion: @escaping (Error?) -> ()) {
         sent = true
     }
+    func connect() {}
     func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) {}
 }

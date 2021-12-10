@@ -12,6 +12,9 @@ let package = Package(
         .library(
             name: "WalletConnect",
             targets: ["WalletConnect"]),
+//        .library(
+//            name: "Iridium",
+//            targets: ["Iridium"]),
     ],
     dependencies: [
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .upToNextMinor(from: "1.4.1")),
@@ -19,13 +22,24 @@ let package = Package(
     targets: [
         .target(
             name: "WalletConnect",
-            dependencies: ["CryptoSwift"]),
+            dependencies: ["CryptoSwift", "Iridium", "WalletConnectUtils"],
+            path: "Sources/WalletConnect"),
+        .target(
+            name: "Iridium",
+            dependencies: ["WalletConnectUtils"],
+            path: "Sources/Iridium"),
+        .target(
+            name: "WalletConnectUtils",
+            dependencies: []),
         .testTarget(
             name: "WalletConnectTests",
             dependencies: ["WalletConnect"]),
         .testTarget(
             name: "IntegrationTests",
             dependencies: ["WalletConnect"]),
+        .testTarget(
+            name: "IridiumTests",
+            dependencies: ["Iridium", "WalletConnectUtils"]),
     ],
     swiftLanguageVersions: [.v5]
 )

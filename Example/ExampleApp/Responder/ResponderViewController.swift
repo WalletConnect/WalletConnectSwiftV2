@@ -1,5 +1,6 @@
 import UIKit
 import WalletConnect
+import WalletConnectUtils
 
 final class ResponderViewController: UIViewController {
 
