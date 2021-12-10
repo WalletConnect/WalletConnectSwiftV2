@@ -37,6 +37,9 @@ let package = Package(
         .testTarget(
             name: "IntegrationTests",
             dependencies: ["WalletConnect"]),
+        .testTarget(
+            name: "IridiumTests",
+            dependencies: ["Iridium", "WalletConnectUtils"]),
     ],
     swiftLanguageVersions: [.v5]
 )
