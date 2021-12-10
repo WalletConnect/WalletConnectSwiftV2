@@ -12,9 +12,9 @@ let package = Package(
         .library(
             name: "WalletConnect",
             targets: ["WalletConnect"]),
-        .library(
-            name: "Iridium",
-            targets: ["Iridium"]),
+//        .library(
+//            name: "Iridium",
+//            targets: ["Iridium"]),
     ],
     dependencies: [
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .upToNextMinor(from: "1.4.1")),
