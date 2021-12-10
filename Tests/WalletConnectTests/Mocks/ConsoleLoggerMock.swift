@@ -3,7 +3,7 @@ import Foundation
 @testable import WalletConnect
 
 struct ConsoleLoggerMock: ConsoleLogging {
-    func error(_ items: Any..., file: String, function: String, line: Int) {
+    func error(_ items: Any...) {
     }
     
     func debug(_ items: Any...) {

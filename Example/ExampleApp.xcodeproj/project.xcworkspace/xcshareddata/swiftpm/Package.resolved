@@ -15,7 +15,7 @@
         "repositoryURL": "https://github.com/llbartekll/iridium.git",
         "state": {
           "branch": "main",
-          "revision": "08f7f69747e51f7107c9b71f90c689044e7fd1ac",
+          "revision": "4747052ab5da2b2c8f31d34e9222fc73fbf198af",
           "version": null
         }
       },
@@ -24,7 +24,7 @@
         "repositoryURL": "https://github.com/llbartekll/WalletConnectSwiftUtils",
         "state": {
           "branch": "main",
-          "revision": "027f06e28883b0a9eff05c5ec7b95b67bb92c44e",
+          "revision": "a15f7b35f72570efeaa527d326f17cab1f9cefba",
           "version": null
         }
       }
