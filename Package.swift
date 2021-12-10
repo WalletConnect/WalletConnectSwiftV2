@@ -22,10 +22,12 @@ let package = Package(
     targets: [
         .target(
             name: "WalletConnect",
-            dependencies: ["CryptoSwift", "Iridium"]),
+            dependencies: ["CryptoSwift", "Iridium"],
+            path: "Sources/WalletConnect"),
         .target(
             name: "Iridium",
-            dependencies: []),
+            dependencies: [],
+            path: "Sources/Iridium"),
         .testTarget(
             name: "WalletConnectTests",
             dependencies: ["WalletConnect"]),
