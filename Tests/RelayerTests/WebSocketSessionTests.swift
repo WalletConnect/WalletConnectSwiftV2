@@ -1,5 +1,5 @@
 import XCTest
-@testable import Iridium
+@testable import Relayer
 
 final class WebSocketSessionTests: XCTestCase {
     

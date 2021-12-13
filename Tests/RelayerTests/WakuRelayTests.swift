@@ -3,7 +3,7 @@ import WalletConnectUtils
 import Foundation
 import Combine
 import XCTest
-@testable import Iridium
+@testable import Relayer
 
 extension ConsoleLogger: ConsoleLogging {}
 

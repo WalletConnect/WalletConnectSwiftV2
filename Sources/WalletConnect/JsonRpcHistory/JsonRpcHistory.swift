@@ -1,6 +1,6 @@
 
 import Foundation
-import Iridium
+import Relayer
 
 protocol JsonRpcHistoryRecording {
     func get(id: Int64) -> JsonRpcRecord?

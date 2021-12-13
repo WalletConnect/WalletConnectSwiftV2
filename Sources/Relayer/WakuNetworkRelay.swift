@@ -97,7 +97,7 @@ public final class WakuNetworkRelay {
     @discardableResult public func unsubscribe(topic: String, completion: @escaping ((Error?) -> ())) -> Int64? {
         guard let subscriptionId = subscriptions[topic] else {
 //            completion(WalletConnectError.internal(.subscriptionIdNotFound))
-            //TODO - complete with iridium error
+            //TODO - complete with Relayer error
             return nil
         }
         logger.debug("waku: Unsubscribing on Topic: \(topic)")

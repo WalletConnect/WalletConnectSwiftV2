@@ -1,6 +1,6 @@
 
 import Foundation
-import Iridium
+import Relayer
 import WalletConnectUtils
 #if os(iOS)
 import UIKit
