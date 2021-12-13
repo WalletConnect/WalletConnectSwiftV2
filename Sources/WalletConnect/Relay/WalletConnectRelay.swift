@@ -3,7 +3,8 @@ import Foundation
 import Combine
 import WalletConnectUtils
 
-protocol WalletConnectRelaying {
+protocol WalletConnectRelaying: AnyObject {
+    var onPairingApproveResponse: ((String) -> Void)? {get set}
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
     func request(topic: String, payload: WCRequest, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->()))
@@ -34,6 +35,9 @@ public enum JsonRpcResponseTypes: Codable {
 }
 
 class WalletConnectRelay: WalletConnectRelaying {
+    
+    var onPairingApproveResponse: ((String) -> Void)?
+    
     private var networkRelayer: NetworkRelaying
     private let jsonRpcSerialiser: JSONRPCSerialising
     private let jsonRpcHistory: JsonRpcHistoryRecording
@@ -83,8 +87,20 @@ class WalletConnectRelay: WalletConnectRelaying {
                             self.logger.debug("WC Relay - received response on topic: \(topic)")
                             switch response {
                             case .response(let response):
+                                // FIXME: This is a workaround to remove the completion block from the engine
+                                switch payload.method {
+                                case .pairingApprove:
+                                    self.onPairingApproveResponse?(topic)
+                                case .pairingPing:
+                                    break
+                                case .pairingUpdate:
+                                    break
+                                default:
+                                    break
+                                }
                                 completion(.success(response))
                             case .error(let error):
+                                self.logger.debug("Request error: \(error)")
                                 completion(.failure(error))
                             }
                         }

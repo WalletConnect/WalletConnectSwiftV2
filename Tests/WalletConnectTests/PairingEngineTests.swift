@@ -72,8 +72,8 @@ final class PairingEngineTests: XCTestCase {
         let topicA = topicGenerator.topic
         let uri = engine.propose(permissions: SessionType.Permissions.stub())!
         
-        XCTAssert(cryptoMock.hasPrivateKey(for: uri.publicKey))
-        XCTAssert(storageMock.hasSequence(forTopic: topicA)) // TODO: check for pending state
+        XCTAssert(cryptoMock.hasPrivateKey(for: uri.publicKey), "Proposer must store the private key matching the public key sent through the URI.")
+        XCTAssert(storageMock.hasPendingProposedPairing(on: topicA), "The engine must store a pending pairing on proposed state.")
         XCTAssert(subscriberMock.didSubscribe(to: topicA), "Proposer must subscribe to topic A to listen for approval message.")
     }
     
@@ -84,18 +84,19 @@ final class PairingEngineTests: XCTestCase {
         let topicA = uri.topic
         let topicB = deriveTopic(publicKey: uri.publicKey, privateKey: cryptoMock.privateKeyStub)
 
-        try engine.approve(uri) { _ in }
+        try engine.approve(uri)
 
         guard let publishTopic = relayMock.requests.first?.topic, let approval = relayMock.requests.first?.request.approveParams else {
             XCTFail("Responder must publish an approval request."); return
         }
 
         XCTAssert(subscriberMock.didSubscribe(to: topicA), "Responder must subscribe to topic A to listen for approval request acknowledgement.")
-        XCTAssert(subscriberMock.didSubscribe(to: topicB))
-        XCTAssert(cryptoMock.hasPrivateKey(for: approval.responder.publicKey))
-        XCTAssert(cryptoMock.hasAgreementKeys(for: topicB))
-        XCTAssert(storageMock.hasSequence(forTopic: topicB)) // TODO: check for pre-settled state
-        XCTAssertEqual(publishTopic, topicA)
+        XCTAssert(subscriberMock.didSubscribe(to: topicB), "Responder must subscribe to topic B to settle the pairing sequence optimistically.")
+        XCTAssert(cryptoMock.hasPrivateKey(for: approval.responder.publicKey), "Responder must store the private key matching the public key sent to its peer.")
+        XCTAssert(cryptoMock.hasAgreementKeys(for: topicB), "Responder must derive and store the shared secret used to encrypt communication over topic B.")
+        XCTAssert(storageMock.hasPendingRespondedPairing(on: topicA), "The engine must store a pending pairing on responded state.")
+        XCTAssert(storageMock.hasPreSettledPairing(on: topicB), "The engine must optimistically store a settled pairing on pre-settled state.")
+        XCTAssertEqual(publishTopic, topicA, "The approval request must be published over topic A.")
     }
     
     func testApproveMultipleCallsThrottleOnSameURI() {
@@ -103,14 +104,31 @@ final class PairingEngineTests: XCTestCase {
         let uri = WalletConnectURI.stub()
         for i in 1...10 {
             if i == 1 {
-                XCTAssertNoThrow(try engine.approve(uri) { _ in })
+                XCTAssertNoThrow(try engine.approve(uri))
             } else {
-                XCTAssertThrowsError(try engine.approve(uri) { _ in })
+                XCTAssertThrowsError(try engine.approve(uri))
             }
         }
     }
     
-    // TODO: approve acknowledgement tests for success and failure
+    func testApproveAcknowledgement() throws {
+        setupEngine(isController: true)
+        
+        let uri = WalletConnectURI.stub()
+        let topicA = uri.topic
+        let topicB = deriveTopic(publicKey: uri.publicKey, privateKey: cryptoMock.privateKeyStub)
+        var acknowledgedPairing: Pairing?
+        engine.onApprovalAcknowledgement = { acknowledgedPairing = $0 }
+
+        try engine.approve(uri)
+        relayMock.onPairingApproveResponse?(topicA)
+        
+        XCTAssert(storageMock.hasAcknowledgedPairing(on: topicB), "Settled pairing must advance to acknowledged state.")
+        XCTAssertFalse(storageMock.hasSequence(forTopic: topicA), "Pending pairing must be deleted.")
+        XCTAssert(subscriberMock.didUnsubscribe(to: topicA), "Responder must unsubscribe from topic A after approval acknowledgement.")
+        XCTAssertEqual(acknowledgedPairing?.topic, topicB, "The acknowledged pairing must be settled on topic B.")
+        // TODO: Assert update call
+    }
     
     func testReceiveApprovalResponse() {
         setupEngine(isController: false)
@@ -134,14 +152,14 @@ final class PairingEngineTests: XCTestCase {
         }
         subscriberMock.onReceivePayload?(payload)
         
-        XCTAssert(subscriberMock.didUnsubscribe(to: topicA))
-        XCTAssert(subscriberMock.didSubscribe(to: topicB))
-        XCTAssert(cryptoMock.hasPrivateKey(for: uri.publicKey))
-        XCTAssert(cryptoMock.hasAgreementKeys(for: topicB))
-        XCTAssert(storageMock.hasSequence(forTopic: topicB)) // TODO: check for state
-        XCTAssertFalse(storageMock.hasSequence(forTopic: topicA))
-        XCTAssertNotNil(approvedPairing)
-        XCTAssertEqual(approvedPairing?.topic, topicB)
+        XCTAssert(subscriberMock.didUnsubscribe(to: topicA), "Proposer must unsubscribe from topic A after approval acknowledgement.")
+        XCTAssert(subscriberMock.didSubscribe(to: topicB), "Proposer must subscribe to topic B to settle for communication with the peer.")
+        XCTAssert(cryptoMock.hasPrivateKey(for: uri.publicKey), "Proposer must keep its private key after settlement.")
+        XCTAssert(cryptoMock.hasAgreementKeys(for: topicB), "Proposer must derive and store the shared secret used to communicate over topic B.")
+        XCTAssert(storageMock.hasAcknowledgedPairing(on: topicB), "The acknowledged pairing must be settled on topic B.")
+        XCTAssertFalse(storageMock.hasSequence(forTopic: topicA), "The engine must clean any stored pairing on topic A.")
+        XCTAssertNotNil(approvedPairing, "The engine should callback the approved pairing after settlement.")
+        XCTAssertEqual(approvedPairing?.topic, topicB, "The approved pairing must settle on topic B.")
     }
     
 //    func testNotifyOnSessionProposal() {

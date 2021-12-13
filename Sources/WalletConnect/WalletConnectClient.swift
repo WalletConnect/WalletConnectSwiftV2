@@ -99,14 +99,7 @@ public final class WalletConnectClient {
             throw WalletConnectError.internal(.malformedPairingURI)
         }
         try pairingQueue.sync {
-            try pairingEngine.approve(pairingURI) { [unowned self] result in
-                switch result {
-                case .success(let settledPairing):
-                    self.delegate?.didSettle(pairing: settledPairing)
-                case .failure(let error):
-                    print("Pairing Failure: \(error)")
-                }
-            }
+            try pairingEngine.approve(pairingURI)
         }
     }
     
@@ -186,6 +179,9 @@ public final class WalletConnectClient {
         pairingEngine.onPairingApproved = { [unowned self] settledPairing, permissions, relayOptions in
             delegate?.didSettle(pairing: settledPairing)
             sessionEngine.proposeSession(settledPairing: settledPairing, permissions: permissions, relay: relayOptions)
+        }
+        pairingEngine.onApprovalAcknowledgement = { [weak self] settledPairing in
+            self?.delegate?.didSettle(pairing: settledPairing)
         }
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
             let permissions = SessionPermissions.init(blockchains: settledSession.permissions.blockchains, methods: settledSession.permissions.methods)
