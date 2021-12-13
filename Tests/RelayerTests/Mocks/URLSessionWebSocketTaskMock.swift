@@ -1,5 +1,5 @@
 import Foundation
-@testable import Iridium
+@testable import Relayer
 
 final class URLSessionWebSocketTaskMock: URLSessionWebSocketTaskProtocol {
     

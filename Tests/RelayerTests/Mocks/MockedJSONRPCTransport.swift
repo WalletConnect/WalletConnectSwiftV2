@@ -1,7 +1,7 @@
 // 
 
 import Foundation
-@testable import Iridium
+@testable import Relayer
 
 class MockedJSONRPCTransport: JSONRPCTransporting {
     var onConnect: (() -> ())?
