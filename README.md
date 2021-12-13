@@ -80,3 +80,8 @@ dependencies: [
 ```
 ## Example App
 open `Example/ExampleApp.xcodeproj`
+
+## License
+
+Apache 2.0
+
