@@ -80,5 +80,3 @@ dependencies: [
 ```
 ## Example App
 open `Example/ExampleApp.xcodeproj`
-## License
-LGPL-3.0
