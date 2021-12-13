@@ -19,13 +19,24 @@ let package = Package(
     targets: [
         .target(
             name: "WalletConnect",
-            dependencies: ["CryptoSwift"]),
+            dependencies: ["CryptoSwift", "Relayer", "WalletConnectUtils"],
+            path: "Sources/WalletConnect"),
+        .target(
+            name: "Relayer",
+            dependencies: ["WalletConnectUtils"],
+            path: "Sources/Relayer"),
+        .target(
+            name: "WalletConnectUtils",
+            dependencies: []),
         .testTarget(
             name: "WalletConnectTests",
             dependencies: ["WalletConnect"]),
         .testTarget(
             name: "IntegrationTests",
             dependencies: ["WalletConnect"]),
+        .testTarget(
+            name: "RelayerTests",
+            dependencies: ["Relayer", "WalletConnectUtils"]),
     ],
     swiftLanguageVersions: [.v5]
 )

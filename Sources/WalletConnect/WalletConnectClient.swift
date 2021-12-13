@@ -1,8 +1,13 @@
 
 import Foundation
+import Relayer
+import WalletConnectUtils
 #if os(iOS)
 import UIKit
 #endif
+
+extension ConsoleLogger: ConsoleLogging {}
+extension WakuNetworkRelay: NetworkRelaying {}
 
 public protocol WalletConnectClientDelegate: AnyObject {
     func didReceive(sessionProposal: SessionProposal)
@@ -32,9 +37,9 @@ public final class WalletConnectClient {
     private let pairingEngine: PairingEngine
     private let sessionEngine: SessionEngine
     private let relay: WalletConnectRelaying
+    private let wakuRelay: NetworkRelaying
     private let crypto: Crypto
-    public let logger: ConsoleLogger
-    private let transport: JSONRPCTransport
+    public let logger: ConsoleLogging
     private let secureStorage: SecureStorage
     private let pairingQueue = DispatchQueue(label: "com.walletconnect.sdk.client.pairing", qos: .userInitiated)
 
@@ -45,7 +50,7 @@ public final class WalletConnectClient {
         self.init(metadata: metadata, apiKey: apiKey, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStore: keyValueStorage, clientName: clientName)
     }
     
-    init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, logger: ConsoleLogger, keychain: KeychainStorage, keyValueStore: KeyValueStorage, clientName: String? = nil) {
+    init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, logger: ConsoleLogging, keychain: KeychainStorage, keyValueStore: KeyValueStorage, clientName: String? = nil) {
         self.metadata = metadata
         self.isController = isController
         self.logger = logger
@@ -53,8 +58,7 @@ public final class WalletConnectClient {
         self.crypto = Crypto(keychain: keychain)
         self.secureStorage = SecureStorage(keychain: keychain)
         let relayUrl = WakuNetworkRelay.makeRelayUrl(host: relayHost, apiKey: apiKey)
-        self.transport = JSONRPCTransport(url: relayUrl)
-        let wakuRelay = WakuNetworkRelay(transport: transport, logger: logger)
+        self.wakuRelay = WakuNetworkRelay(logger: logger, url: relayUrl)
         let serialiser = JSONRPCSerialiser(crypto: crypto)
         self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore, uniqueIdentifier: clientName))
         let pairingSequencesStore = PairingStorage(storage: SequenceStore<PairingSequence>(storage: keyValueStore, uniqueIdentifier: clientName))
@@ -246,12 +250,12 @@ public final class WalletConnectClient {
     
     @objc
     private func appWillEnterForeground() {
-        transport.connect()
+        wakuRelay.connect()
     }
     
     @objc
     private func appDidEnterBackground() {
-        transport.disconnect(closeCode: .goingAway)
+        wakuRelay.disconnect(closeCode: .goingAway)
     }
 }
 

@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import WalletConnectUtils
 
 final class SessionEngine {
     
@@ -18,7 +19,7 @@ final class SessionEngine {
     private var isController: Bool
     private var metadata: AppMetadata
     private var publishers = [AnyCancellable]()
-    private let logger: ConsoleLogger
+    private let logger: ConsoleLogging
     private let topicInitializer: () -> String?
 
     init(relay: WalletConnectRelaying,
@@ -27,7 +28,7 @@ final class SessionEngine {
          sequencesStore: SessionSequenceStorage,
          isController: Bool,
          metadata: AppMetadata,
-         logger: ConsoleLogger,
+         logger: ConsoleLogging,
          topicGenerator: @escaping () -> String? = String.generateTopic) {
         self.relayer = relay
         self.crypto = crypto

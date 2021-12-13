@@ -1,5 +1,5 @@
 import XCTest
-@testable import WalletConnect
+@testable import Relayer
 
 final class WebSocketSessionTests: XCTestCase {
     

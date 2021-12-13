@@ -1,6 +1,7 @@
 
 import Foundation
 import Combine
+import WalletConnectUtils
 
 protocol WalletConnectRelaying {
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
@@ -52,11 +53,11 @@ class WalletConnectRelay: WalletConnectRelaying {
         wcResponsePublisherSubject.eraseToAnyPublisher()
     }
     private let wcResponsePublisherSubject = PassthroughSubject<JsonRpcResponseTypes, Never>()
-    let logger: ConsoleLogger
+    let logger: ConsoleLogging
     
     init(networkRelayer: NetworkRelaying,
          jsonRpcSerialiser: JSONRPCSerialising,
-         logger: ConsoleLogger,
+         logger: ConsoleLogging,
          jsonRpcHistory: JsonRpcHistoryRecording) {
         self.networkRelayer = networkRelayer
         self.jsonRpcSerialiser = jsonRpcSerialiser

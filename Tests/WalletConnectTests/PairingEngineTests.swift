@@ -1,5 +1,6 @@
 import XCTest
 @testable import WalletConnect
+import WalletConnectUtils
 
 fileprivate extension SessionType.Permissions {
     static func stub() -> SessionType.Permissions {
@@ -53,7 +54,7 @@ final class PairingEngineTests: XCTestCase {
     
     func setupEngine(isController: Bool) {
         let meta = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
-        let logger = ConsoleLogger()
+        let logger = ConsoleLoggerMock()
         engine = PairingEngine(
             relay: relayMock,
             crypto: cryptoMock,

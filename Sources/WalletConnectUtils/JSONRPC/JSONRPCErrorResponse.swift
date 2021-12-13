@@ -18,8 +18,8 @@ public struct JSONRPCErrorResponse: Error, Equatable, Codable {
     }
     
     public struct Error: Codable, Equatable {
-        let code: Int
-        let message: String
+        public let code: Int
+        public let message: String
         public init(code: Int, message: String) {
             self.code = code
             self.message = message

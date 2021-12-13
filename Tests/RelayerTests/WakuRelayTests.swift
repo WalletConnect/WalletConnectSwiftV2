@@ -1,9 +1,11 @@
 
-
+import WalletConnectUtils
 import Foundation
 import Combine
 import XCTest
-@testable import WalletConnect
+@testable import Relayer
+
+extension ConsoleLogger: ConsoleLogging {}
 
 class WakuRelayTests: XCTestCase {
     var wakuRelay: WakuNetworkRelay!

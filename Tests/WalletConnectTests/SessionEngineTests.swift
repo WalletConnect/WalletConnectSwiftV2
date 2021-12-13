@@ -60,7 +60,7 @@ final class SessionEngineTests: XCTestCase {
         
         metadata = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
         isController = false
-        let logger = ConsoleLogger()
+        let logger = ConsoleLoggerMock()
         engine = SessionEngine(
             relay: relayMock,
             crypto: cryptoMock,
