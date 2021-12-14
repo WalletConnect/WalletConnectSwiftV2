@@ -172,11 +172,11 @@ public final class WakuNetworkRelay {
         }
     }
     
-    static public func makeRelayUrl(host: String, apiKey: String) -> URL {
+    static public func makeRelayUrl(host: String, projectId: String) -> URL {
         var components = URLComponents()
         components.scheme = "wss"
         components.host = host
-        components.queryItems = [URLQueryItem(name: "apiKey", value: apiKey)]
+        components.queryItems = [URLQueryItem(name: "projectId", value: projectId)]
         return components.url!
     }
 }

@@ -12,7 +12,7 @@ final class ResponderViewController: UIViewController {
             icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])
         return WalletConnectClient(
             metadata: metadata,
-            apiKey: "",
+            projectId: "",
             isController: true,
             relayHost: "relay.walletconnect.org",
             clientName: "responder"
