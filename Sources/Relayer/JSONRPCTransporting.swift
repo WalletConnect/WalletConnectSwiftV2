@@ -69,6 +69,18 @@ final class JSONRPCTransport: NSObject, JSONRPCTransporting {
         monitor.start(queue: monitorQueue)
     }
 }
+//
+//class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
+//    func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
+//        print("Web Socket did connect")
+//        onConnect?()
+//    }
+//    
+//    func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
+//        print("Web Socket did disconnect")
+//        onDisconnect?()
+//    }
+//}
 
 extension JSONRPCTransport: URLSessionWebSocketDelegate {
     
