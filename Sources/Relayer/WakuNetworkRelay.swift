@@ -13,7 +13,7 @@ public final class WakuNetworkRelay {
     public var onConnect: (() -> ())?
     
     public var onMessage: ((String, String) -> ())?
-    private var transport: JSONRPCTransporting
+    private var transport: Dispatching
     var subscriptions: [String: String] = [:]
     private let defaultTtl = 6*Time.hour
 
@@ -27,7 +27,7 @@ public final class WakuNetworkRelay {
     private let requestAcknowledgePublisherSubject = PassthroughSubject<JSONRPCResponse<Bool>, Never>()
     private let logger: ConsoleLogging
     
-    init(transport: JSONRPCTransporting,
+    init(transport: Dispatching,
          logger: ConsoleLogging) {
         self.logger = logger
         self.transport = transport
@@ -35,7 +35,7 @@ public final class WakuNetworkRelay {
     }
     
     public convenience init(logger: ConsoleLogging, url: URL) {
-        self.init(transport: JSONRPCTransport(url: url), logger: logger)
+        self.init(transport: Dispatcher(url: url), logger: logger)
     }
     
     public func connect() {

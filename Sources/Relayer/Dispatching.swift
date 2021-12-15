@@ -1,6 +1,6 @@
 import Foundation
 
-protocol JSONRPCTransporting {
+protocol Dispatching {
     var onConnect: (()->())? {get set}
     var onDisconnect: (()->())? {get set}
     var onMessage: ((String) -> ())? {get set}
@@ -10,8 +10,7 @@ protocol JSONRPCTransporting {
 }
 
 
-final class JSONRPCTransport: NSObject, JSONRPCTransporting {
-    
+final class Dispatcher: NSObject, Dispatching {
     var onConnect: (() -> ())?
     var onDisconnect: (() -> ())?
     var onMessage: ((String) -> ())?
@@ -71,7 +70,7 @@ final class JSONRPCTransport: NSObject, JSONRPCTransporting {
 }
 
 
-extension JSONRPCTransport: URLSessionWebSocketDelegate {
+extension Dispatcher: URLSessionWebSocketDelegate {
     
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
         print("Web Socket did connect")
