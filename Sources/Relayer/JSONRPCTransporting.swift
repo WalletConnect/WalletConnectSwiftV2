@@ -1,5 +1,4 @@
 import Foundation
-import Network
 
 protocol JSONRPCTransporting {
     var onConnect: (()->())? {get set}
@@ -9,7 +8,6 @@ protocol JSONRPCTransporting {
     func connect()
     func disconnect(closeCode: URLSessionWebSocketTask.CloseCode)
 }
-
 
 
 final class JSONRPCTransport: NSObject, JSONRPCTransporting {
