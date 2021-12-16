@@ -90,6 +90,7 @@ extension SessionSequence {
     struct Pending: Codable {
         let status: SessionType.Pending.PendingStatus
         let proposal: SessionType.Proposal
+        let outcomeTopic: String?
     }
     
     struct Settled: Codable {

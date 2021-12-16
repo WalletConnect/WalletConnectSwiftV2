@@ -109,10 +109,10 @@ public final class WalletConnectClient {
             switch result {
             case .success(let settledSession):
                 let session = Session(topic: settledSession.topic, peer: settledSession.peer, permissions: proposal.permissions)
-                self.delegate?.didSettle(session: session)
-                completion(.success(session))
+//                self.delegate?.didSettle(session: session)
+//                completion(.success(session))
             case .failure(let error):
-                completion(.failure(error))
+//                completion(.failure(error))
                 print(error)
             }
         }
@@ -187,6 +187,9 @@ public final class WalletConnectClient {
             let permissions = SessionPermissions.init(blockchains: settledSession.permissions.blockchains, methods: settledSession.permissions.methods)
             let session = Session(topic: settledSession.topic, peer: settledSession.peer, permissions: permissions)
             delegate?.didSettle(session: session)
+        }
+        sessionEngine.onApprovalAcknowledgement = { [weak self] session in
+            self?.delegate?.didSettle(session: session)
         }
         sessionEngine.onSessionRejected = { [unowned self] pendingTopic, reason in
             delegate?.didReject(pendingSessionTopic: pendingTopic, reason: reason)

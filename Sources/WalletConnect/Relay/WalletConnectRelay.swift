@@ -190,7 +190,7 @@ class WalletConnectRelay: WalletConnectRelaying {
                 requestMethod: record.request.method,
                 requestParams: record.request.params,
                 result: .success(response))
-//            wcResponsePublisherSubject.send(.response(response))
+            wcResponsePublisherSubject.send(.response(response))
             onResponse?(wcResponse)
         } catch  {
             logger.info("Info: \(error.localizedDescription)")
@@ -205,7 +205,7 @@ class WalletConnectRelay: WalletConnectRelaying {
                 requestMethod: record.request.method,
                 requestParams: record.request.params,
                 result: .failure(response))
-//            wcResponsePublisherSubject.send(.error(response))
+            wcResponsePublisherSubject.send(.error(response))
             onResponse?(wcResponse)
         } catch {
             logger.info("Info: \(error.localizedDescription)")

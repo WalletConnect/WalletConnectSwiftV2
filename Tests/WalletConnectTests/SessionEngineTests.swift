@@ -161,11 +161,88 @@ final class SessionEngineTests: XCTestCase {
         XCTAssert(subscriberMock.didSubscribe(to: topicD))
         XCTAssert(cryptoMock.hasPrivateKey(for: approval.responder.publicKey))
         XCTAssert(cryptoMock.hasAgreementKeys(for: topicD))
+        XCTAssert(storageMock.hasSequence(forTopic: topicC)) // TODO: check state
         XCTAssert(storageMock.hasSequence(forTopic: topicD)) // TODO: check state
         XCTAssertEqual(publishTopic, topicC)
     }
     
-    // TODO: approve acknowledgement tests for success and failure
+    func testApprovalAcknowledgementSuccess() {
+        let proposerPubKey = Crypto.X25519.PrivateKey().publicKey.toHexString()
+        let topicB = String.generateTopic()!
+        let topicC = String.generateTopic()!
+        let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
+        
+        let agreementKeys = Crypto.X25519.AgreementKeys(sharedSecret: Data(), publicKey: Data())
+        cryptoMock.set(agreementKeys: agreementKeys, topic: topicC)
+        
+        let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: isController, metadata: metadata)
+        let proposal = SessionType.Proposal(
+            topic: topicC,
+            relay: RelayProtocolOptions(protocol: "", params: nil),
+            proposer: proposer,
+            signal: SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: topicB)),
+            permissions: SessionType.Permissions.stub(),
+            ttl: SessionSequence.timeToLivePending)
+            
+        engine.approve(proposal: proposal, accounts: []) { _ in }
+        
+        guard let publishTopic = relayMock.requests.first?.topic, let request = relayMock.requests.first?.request else {
+            XCTFail("Responder must publish an approval request."); return
+        }
+        let success = JSONRPCResponse<AnyCodable>(id: request.id, result: AnyCodable(true))
+        let response = WCResponse(
+            topic: publishTopic,
+            requestMethod: request.method,
+            requestParams: request.params,
+            result: .success(success))
+        relayMock.onResponse?(response)
+    
+        XCTAssertFalse(cryptoMock.hasAgreementKeys(for: topicC))
+        XCTAssertFalse(storageMock.hasSequence(forTopic: topicC)) // TODO: Check state
+        XCTAssert(subscriberMock.didUnsubscribe(to: topicC))
+    }
+    
+    func testApprovalAcknowledgementFailure() {
+        let proposerPubKey = Crypto.X25519.PrivateKey().publicKey.toHexString()
+        let selfPubKey = cryptoMock.privateKeyStub.publicKey.toHexString()
+        let topicB = String.generateTopic()!
+        let topicC = String.generateTopic()!
+        let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
+        
+        let agreementKeys = Crypto.X25519.AgreementKeys(sharedSecret: Data(), publicKey: Data())
+        cryptoMock.set(agreementKeys: agreementKeys, topic: topicC)
+        
+        let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: isController, metadata: metadata)
+        let proposal = SessionType.Proposal(
+            topic: topicC,
+            relay: RelayProtocolOptions(protocol: "", params: nil),
+            proposer: proposer,
+            signal: SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: topicB)),
+            permissions: SessionType.Permissions.stub(),
+            ttl: SessionSequence.timeToLivePending)
+            
+        engine.approve(proposal: proposal, accounts: []) { _ in }
+        
+        guard let publishTopic = relayMock.requests.first?.topic, let request = relayMock.requests.first?.request else {
+            XCTFail("Responder must publish an approval request."); return
+        }
+        let error = JSONRPCErrorResponse(id: request.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))
+        let response = WCResponse(
+            topic: publishTopic,
+            requestMethod: request.method,
+            requestParams: request.params,
+            result: .failure(error))
+        relayMock.onResponse?(response)
+        
+        XCTAssertFalse(cryptoMock.hasPrivateKey(for: selfPubKey))
+        XCTAssertFalse(cryptoMock.hasAgreementKeys(for: topicC))
+        XCTAssertFalse(cryptoMock.hasAgreementKeys(for: topicD))
+        XCTAssertFalse(storageMock.hasSequence(forTopic: topicC)) // TODO: Check state
+        XCTAssertFalse(storageMock.hasSequence(forTopic: topicD))
+        XCTAssert(subscriberMock.didUnsubscribe(to: topicC))
+        XCTAssert(subscriberMock.didUnsubscribe(to: topicD))
+        // TODO: assert session settlement callback
+    }
     
     func testReceiveApprovalResponse() {
         
@@ -187,6 +264,9 @@ final class SessionEngineTests: XCTestCase {
         let request = WCRequest(method: .sessionApprove, params: .sessionApprove(approveParams))
         let payload = WCRequestSubscriptionPayload(topic: topicC, wcRequest: request)
         let pairing = Pairing.stub()
+        
+        let agreementKeys = Crypto.X25519.AgreementKeys(sharedSecret: Data(), publicKey: Data())
+        cryptoMock.set(agreementKeys: agreementKeys, topic: pairing.topic)
         
         engine.proposeSession(settledPairing: pairing, permissions: permissions, relay: relayOptions)
         engine.onSessionApproved = { session in
