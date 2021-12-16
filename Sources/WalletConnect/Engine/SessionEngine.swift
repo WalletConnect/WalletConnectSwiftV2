@@ -92,6 +92,8 @@ final class SessionEngine {
         crypto.set(privateKey: privateKey)
         sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: pendingSessionTopic)
+        let pairingAgreementKeys = crypto.getAgreementKeys(for: settledPairing.topic)!
+        crypto.set(agreementKeys: pairingAgreementKeys, topic: proposal.topic)
         
         let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: proposal)
         let pairingPayloadParams = PairingType.PayloadParams(request: request)
@@ -100,8 +102,8 @@ final class SessionEngine {
             switch result {
             case .success:
                 logger.debug("Session Proposal response received")
-                let pairingAgreementKeys = crypto.getAgreementKeys(for: settledPairing.topic)!
-                crypto.set(agreementKeys: pairingAgreementKeys, topic: proposal.topic)
+//                let pairingAgreementKeys = crypto.getAgreementKeys(for: settledPairing.topic)!
+//                crypto.set(agreementKeys: pairingAgreementKeys, topic: proposal.topic)
             case .failure(let error):
                 logger.debug("Could not send session proposal error: \(error)")
             }
@@ -573,11 +575,35 @@ final class SessionEngine {
     
     private func handleReponse(_ response: WCResponse) {
         switch response.requestParams {
+        case .pairingPayload(let payloadParams):
+            let proposeParams = payloadParams.request.params
+            handleProposeResponse(topic: response.topic, proposeParams: proposeParams, result: response.result)
         case .sessionApprove(let approveParams):
             break
         default:
             break
         }
+    }
+    
+    // received through topic B (pairing payload)
+    // need proposal info on error
+    private func handleProposeResponse(topic: String, proposeParams: SessionType.Proposal, result: Result<JSONRPCResponse<AnyCodable>, Error>) {
+        // SUCCESS:
+        switch result {
+        case .success:
+            break
+        case .failure:
+            wcSubscriber.removeSubscription(topic: proposeParams.topic)
+            crypto.deletePrivateKey(for: proposeParams.proposer.publicKey)
+            crypto.deleteAgreementKeys(for: topic)
+            sequencesStore.delete(topic: proposeParams.topic)
+        }
+        
+        // ERROR:
+        // unsubscribe topic C
+        // delete pending session topic C
+        // delete private key of pending session
+        // delete agreement keys topic C
     }
     
     private func handleApproveResponse() {

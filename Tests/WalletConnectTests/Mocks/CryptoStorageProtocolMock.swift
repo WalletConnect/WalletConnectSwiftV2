@@ -26,15 +26,15 @@ final class CryptoStorageProtocolMock: CryptoStorageProtocol {
     }
     
     func getAgreementKeys(for topic: String) -> Crypto.X25519.AgreementKeys? {
-        fatalError()
+        agreementKeys[topic]
     }
     
     func deletePrivateKey(for publicKey: String) {
-        
+        privateKeys[publicKey] = nil
     }
     
     func deleteAgreementKeys(for topic: String) {
-        
+        agreementKeys[topic] = nil
     }
 }
 
