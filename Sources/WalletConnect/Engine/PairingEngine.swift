@@ -44,6 +44,9 @@ final class PairingEngine {
         relayer.onPairingApproveResponse = { [weak self] in
             try? self?.acknowledgeApproval(pendingTopic: $0)
         }
+        relayer.onResponse = { [weak self] in
+            print($0.topic)
+        }
     }
     
     func hasPairing(for topic: String) -> Bool {
@@ -331,7 +334,6 @@ final class PairingEngine {
             return
         }
         sessionPermissions[pendingPairingTopic] = nil
-        onPairingApproved?(pairing, permissions, settledPairing.relay)
         
         // TODO: Move JSON-RPC responding to networking layer
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
@@ -340,6 +342,8 @@ final class PairingEngine {
                 self?.logger.error("Could not respond with error: \(error)")
             }
         }
+        
+        onPairingApproved?(pairing, permissions, settledPairing.relay)
     }
     
     private func removeRespondedPendingPairings() {
