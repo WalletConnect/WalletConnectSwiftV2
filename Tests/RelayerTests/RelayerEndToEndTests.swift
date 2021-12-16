@@ -32,35 +32,40 @@ final class RelayTests: XCTestCase {
         let relayB = makeRelayer()
 
         let randomTopic = String.randomTopic()
-        let payload = "payload"
+        let payloadA = "A"
+        let payloadB = "B"
+        var subscriptionATopic: String!
+        var subscriptionBTopic: String!
+        var subscriptionAPayload: String!
+        var subscriptionBPayload: String!
 
         let expectation = expectation(description: "publish payloads send and receive successfuly")
         expectation.expectedFulfillmentCount = 2
         
-        relayA.onMessage = { topic, message in
-            XCTAssertEqual(randomTopic, topic)
+        relayA.onMessage = { topic, payload in
+            (subscriptionATopic, subscriptionAPayload) = (topic, payload)
             expectation.fulfill()
         }
-        
-        relayB.onMessage = { topic, message in
-            XCTAssertEqual(randomTopic, topic)
+        relayB.onMessage = { topic, payload in
+            (subscriptionBTopic, subscriptionBPayload) = (topic, payload)
             expectation.fulfill()
         }
-        
-        [relayA, relayB].forEach { relay in
-            relay.subscribe(topic: randomTopic) { error in
-                XCTAssertNil(error)
-            }
-            
-        }
-        
-        relayA.publish(topic: randomTopic, payload: payload) { error in
+        relayA.publish(topic: randomTopic, payload: payloadA) { error in
             XCTAssertNil(error)
         }
-        relayB.publish(topic: randomTopic, payload: payload) { error in
+        relayB.publish(topic: randomTopic, payload: payloadB) { error in
             XCTAssertNil(error)
         }
-
+        relayA.subscribe(topic: randomTopic) { error in
+            XCTAssertNil(error)
+        }
+        relayB.subscribe(topic: randomTopic) { error in
+            XCTAssertNil(error)
+        }
         waitForExpectations(timeout: defaultTimeout, handler: nil)
+        XCTAssertEqual(subscriptionATopic, randomTopic)
+        XCTAssertEqual(subscriptionBTopic, randomTopic)
+        XCTAssertEqual(subscriptionBPayload, payloadA)
+        XCTAssertEqual(subscriptionAPayload, payloadB)
     }
 }
