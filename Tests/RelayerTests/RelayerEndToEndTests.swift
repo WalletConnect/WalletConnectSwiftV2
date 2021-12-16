@@ -62,6 +62,7 @@ final class RelayTests: XCTestCase {
         relayB.subscribe(topic: randomTopic) { error in
             XCTAssertNil(error)
         }
+        
         waitForExpectations(timeout: defaultTimeout, handler: nil)
         XCTAssertEqual(subscriptionATopic, randomTopic)
         XCTAssertEqual(subscriptionBTopic, randomTopic)
