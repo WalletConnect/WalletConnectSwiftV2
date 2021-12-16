@@ -41,6 +41,10 @@ final class SessionEngine {
         setUpWCRequestHandling()
         setupExpirationHandling()
         restoreSubscriptions()
+        
+        relayer.onResponse = { [weak self] in
+            self?.handleReponse($0)
+        }
     }
     
     func hasSession(for topic: String) -> Bool {
@@ -565,5 +569,26 @@ final class SessionEngine {
                 let topics = sequencesStore.getAll().map{$0.topic}
                 topics.forEach{self.wcSubscriber.setSubscription(topic: $0)}
             }.store(in: &publishers)
+    }
+    
+    private func handleReponse(_ response: WCResponse) {
+        switch response.requestParams {
+        case .sessionApprove(let approveParams):
+            break
+        default:
+            break
+        }
+    }
+    
+    private func handleApproveResponse() {
+        // SUCCESS:
+                
+        // ERROR:
+        // delete private key of session
+        // delete agreement keys on topic D
+        // unsubscribe topic C
+        // unsubscribe topic D
+        // delete pending session topic C
+        // delete presettled session topic D
     }
 }

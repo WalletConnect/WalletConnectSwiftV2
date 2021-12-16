@@ -6,7 +6,7 @@ protocol JsonRpcHistoryRecording {
     func get(id: Int64) -> JsonRpcRecord?
     func set(topic: String, request: WCRequest) throws
     func delete(topic: String)
-    func resolve(response: JsonRpcResponseTypes) throws
+    func resolve(response: JsonRpcResponseTypes) throws -> JsonRpcRecord
     func exist(id: Int64) -> Bool
 }
 
@@ -42,13 +42,16 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
         }
     }
     
-    func resolve(response: JsonRpcResponseTypes) throws {
-        guard var record = try? storage.get(key: getKey(for: response.id)) else { return }
+    func resolve(response: JsonRpcResponseTypes) throws -> JsonRpcRecord {
+        guard var record = try? storage.get(key: getKey(for: response.id)) else {
+            throw WalletConnectError.internal(.noJsonRpcRequestMatchingResponse)
+        }
         if record.response != nil {
             throw WalletConnectError.internal(.jsonRpcDuplicateDetected)
         } else {
             record.response = response
             try storage.set(record, forKey: getKey(for: record.id))
+            return record
         }
     }
     
