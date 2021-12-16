@@ -3,13 +3,13 @@ import Foundation
 import Combine
 import XCTest
 import WalletConnectUtils
+import TestingUtils
 @testable import Relayer
 
 final class RelayTests: XCTestCase {
     
     let url = URL(string: "wss://staging.walletconnect.org")!
     private var publishers = [AnyCancellable]()
-    let defaultTimeout: TimeInterval = 2.0
     
     func makeRelayer() -> WakuNetworkRelay {
         let logger = ConsoleLogger()
@@ -31,7 +31,7 @@ final class RelayTests: XCTestCase {
         let relayA = makeRelayer()
         let relayB = makeRelayer()
 
-        let randomTopic = "String.randomTopic()"
+        let randomTopic = String.randomTopic()
         let payload = "payload"
 
         let expectation = expectation(description: "publish payloads send and receive successfuly")
@@ -51,6 +51,7 @@ final class RelayTests: XCTestCase {
             relay.subscribe(topic: randomTopic) { error in
                 XCTAssertNil(error)
             }
+            
         }
         
         relayA.publish(topic: randomTopic, payload: payload) { error in
