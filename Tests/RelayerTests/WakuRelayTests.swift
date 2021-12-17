@@ -5,8 +5,6 @@ import Combine
 import XCTest
 @testable import Relayer
 
-extension ConsoleLogger: ConsoleLogging {}
-
 class WakuRelayTests: XCTestCase {
     var wakuRelay: WakuNetworkRelay!
     var dispatcher: MockedJSONRPCTransport!

@@ -1,5 +1,4 @@
 
-
 import Foundation
 
 struct JsonRpcRecord: Codable {
@@ -9,8 +8,8 @@ struct JsonRpcRecord: Codable {
     var response: JsonRpcResponseTypes?
     
     struct Request: Codable {
-        let method: WCRequest.Method
-        let params: WCRequest.Params
+        let method: String
+        let params: AnyCodable
     }
 }
 

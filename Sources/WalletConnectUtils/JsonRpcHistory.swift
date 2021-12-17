@@ -3,13 +3,16 @@ import Foundation
 
 protocol JsonRpcHistoryRecording {
     func get(id: Int64) -> JsonRpcRecord?
-    func set(topic: String, request: WCRequest) throws
+    func set(topic: String, request: JSONRPCRequest<AnyCodable>) throws
     func delete(topic: String)
     func resolve(response: JsonRpcResponseTypes) throws
     func exist(id: Int64) -> Bool
 }
 
 class JsonRpcHistory: JsonRpcHistoryRecording {
+    enum RecordingError: Error {
+        case jsonRpcDuplicateDetected
+    }
     let storage: KeyValueStore<JsonRpcRecord>
     let logger: ConsoleLogging
     let identifier: String
@@ -24,9 +27,9 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
         try? storage.get(key: getKey(for: id))
     }
     
-    func set(topic: String, request: WCRequest) throws {
+    func set(topic: String, request: JSONRPCRequest<AnyCodable>) throws {
         guard !exist(id: request.id) else {
-            throw WalletConnectError.internal(.jsonRpcDuplicateDetected)
+            throw RecordingError.jsonRpcDuplicateDetected
         }
         logger.debug("Setting JSON-RPC request history record")
         let record = JsonRpcRecord(id: request.id, topic: topic, request: JsonRpcRecord.Request(method: request.method, params: request.params), response: nil)
@@ -44,7 +47,7 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
     func resolve(response: JsonRpcResponseTypes) throws {
         guard var record = try? storage.get(key: getKey(for: response.id)) else { return }
         if record.response != nil {
-            throw WalletConnectError.internal(.jsonRpcDuplicateDetected)
+            throw RecordingError.jsonRpcDuplicateDetected
         } else {
             record.response = response
             try storage.set(record, forKey: getKey(for: record.id))
