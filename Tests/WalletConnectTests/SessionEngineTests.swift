@@ -151,7 +151,7 @@ final class SessionEngineTests: XCTestCase {
             permissions: SessionType.Permissions.stub(),
             ttl: SessionSequence.timeToLivePending)
             
-        engine.approve(proposal: proposal, accounts: []) { _ in }
+        engine.approve(proposal: proposal, accounts: [])
         
         guard let publishTopic = relayMock.requests.first?.topic, let approval = relayMock.requests.first?.request.approveParams else {
             XCTFail("Responder must publish an approval request."); return
@@ -184,7 +184,7 @@ final class SessionEngineTests: XCTestCase {
             permissions: SessionType.Permissions.stub(),
             ttl: SessionSequence.timeToLivePending)
             
-        engine.approve(proposal: proposal, accounts: []) { _ in }
+        engine.approve(proposal: proposal, accounts: [])
         
         guard let publishTopic = relayMock.requests.first?.topic, let request = relayMock.requests.first?.request else {
             XCTFail("Responder must publish an approval request."); return
@@ -221,7 +221,7 @@ final class SessionEngineTests: XCTestCase {
             permissions: SessionType.Permissions.stub(),
             ttl: SessionSequence.timeToLivePending)
             
-        engine.approve(proposal: proposal, accounts: []) { _ in }
+        engine.approve(proposal: proposal, accounts: [])
         
         guard let publishTopic = relayMock.requests.first?.topic, let request = relayMock.requests.first?.request else {
             XCTFail("Responder must publish an approval request."); return
