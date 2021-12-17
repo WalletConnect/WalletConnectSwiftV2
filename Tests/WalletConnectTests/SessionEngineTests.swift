@@ -245,15 +245,15 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testReceiveApprovalResponse() {
-        
+
         var approvedSession: Session?
-        
+
         let privateKeyStub = cryptoMock.privateKeyStub
         let proposerPubKey = privateKeyStub.publicKey.toHexString()
         let responderPubKey = Crypto.X25519.PrivateKey().publicKey.rawRepresentation.toHexString()
         let topicC = topicGenerator.topic
         let topicD = deriveTopic(publicKey: responderPubKey, privateKey: privateKeyStub)
-        
+
         let permissions = SessionType.Permissions.stub()
         let relayOptions = RelayProtocolOptions(protocol: "", params: nil)
         let approveParams = SessionType.ApproveParams(
@@ -264,16 +264,16 @@ final class SessionEngineTests: XCTestCase {
         let request = WCRequest(method: .sessionApprove, params: .sessionApprove(approveParams))
         let payload = WCRequestSubscriptionPayload(topic: topicC, wcRequest: request)
         let pairing = Pairing.stub()
-        
+
         let agreementKeys = Crypto.X25519.AgreementKeys(sharedSecret: Data(), publicKey: Data())
         cryptoMock.set(agreementKeys: agreementKeys, topic: pairing.topic)
-        
+
         engine.proposeSession(settledPairing: pairing, permissions: permissions, relay: relayOptions)
         engine.onSessionApproved = { session in
             approvedSession = session
         }
         subscriberMock.onReceivePayload?(payload)
-        
+
         XCTAssert(subscriberMock.didUnsubscribe(to: topicC)) // FIXME: Actually, only on acknowledgement
         XCTAssert(subscriberMock.didSubscribe(to: topicD))
         XCTAssert(cryptoMock.hasPrivateKey(for: proposerPubKey))

@@ -1,7 +1,24 @@
 import Foundation
+import CryptoKit
 @testable import WalletConnect
 
 final class CryptoStorageProtocolMock: CryptoStorageProtocol {
+    
+    private(set) var _privateKeys: [String: Curve25519.KeyAgreement.PrivateKey] = [:]
+    
+    func makePrivateKey() -> Curve25519.KeyAgreement.PrivateKey {
+        defer { privateKeyStub = Crypto.X25519.PrivateKey() }
+        return privateKeyStub.privateKey
+    }
+    
+    func set(privateKey: Curve25519.KeyAgreement.PrivateKey) throws {
+        _privateKeys[privateKey.publicKey.rawRepresentation.toHexString()] = privateKey
+    }
+    
+    func getPrivateKey(for publicKey: Curve25519.KeyAgreement.PublicKey) throws -> Curve25519.KeyAgreement.PrivateKey? {
+        _privateKeys[publicKey.rawRepresentation.toHexString()]
+    }
+    
     
     var privateKeyStub = Crypto.X25519.PrivateKey()
     
@@ -31,6 +48,7 @@ final class CryptoStorageProtocolMock: CryptoStorageProtocol {
     
     func deletePrivateKey(for publicKey: String) {
         privateKeys[publicKey] = nil
+        _privateKeys[publicKey] = nil
     }
     
     func deleteAgreementKeys(for topic: String) {
@@ -40,7 +58,11 @@ final class CryptoStorageProtocolMock: CryptoStorageProtocol {
 
 extension CryptoStorageProtocolMock {
     
-    func hasPrivateKey(for publicKey: String) -> Bool {
+    func hasPrivateKey(for publicKeyHex: String) -> Bool {
+        _privateKeys[publicKeyHex] != nil
+    }
+    
+    func hasLegacyPrivateKey(for publicKey: String) -> Bool {
         privateKeys[publicKey] != nil
     }
     

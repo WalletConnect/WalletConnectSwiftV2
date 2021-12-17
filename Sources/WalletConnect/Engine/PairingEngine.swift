@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import WalletConnectUtils
+import CryptoKit
 
 final class PairingEngine {
     
@@ -72,8 +73,8 @@ final class PairingEngine {
             return nil
         }
         
-        let privateKey = crypto.generatePrivateKey()
-        let publicKey = privateKey.publicKey.toHexString()
+        let privateKey = crypto.makePrivateKey()
+        let publicKey = privateKey.publicKey.rawRepresentation.toHexString()
         
         let relay = RelayProtocolOptions(protocol: "waku", params: nil)
         let uri = WalletConnectURI(topic: topic, publicKey: publicKey, isController: isController, relay: relay)
@@ -96,7 +97,7 @@ final class PairingEngine {
             expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLive)),
             pendingState: PairingSequence.Pending(proposal: proposal, status: .proposed))
         
-        crypto.set(privateKey: privateKey)
+        try! crypto.set(privateKey: privateKey) // TODO: Handle error
         sequencesStore.setSequence(pendingPairing)
         wcSubscriber.setSubscription(topic: topic)
         sessionPermissions[topic] = permissions
@@ -112,10 +113,10 @@ final class PairingEngine {
             throw WalletConnectError.internal(.pairWithExistingPairingForbidden)
         }
         
-        let privateKey = crypto.generatePrivateKey()
-        let selfPublicKey = privateKey.publicKey.toHexString()
+        let privateKey = crypto.makePrivateKey()
+        let selfPublicKey = privateKey.publicKey.rawRepresentation.toHexString()
         
-        let agreementKeys = try! Crypto.X25519.generateAgreementKeys(
+        let agreementKeys = try! Crypto.generateAgreementKeys(
             peerPublicKey: Data(hex: proposal.proposer.publicKey),
             privateKey: privateKey)
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
@@ -153,7 +154,7 @@ final class PairingEngine {
         sequencesStore.setSequence(settledPairing)
         
         crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
-        crypto.set(privateKey: privateKey)
+        try? crypto.set(privateKey: privateKey) // TODO: Handle error
         
         // publish approve on topic A
         let approveParams = PairingType.ApproveParams(
@@ -303,9 +304,10 @@ final class PairingEngine {
             return
         }
         let selfPublicKey = Data(hex: pendingPairing.selfParticipant.publicKey)
-        let privateKey = try! crypto.getPrivateKey(for: selfPublicKey)!
+        let pubKey = try! Curve25519.KeyAgreement.PublicKey(rawRepresentation: selfPublicKey)
+        let privateKey = try! crypto.getPrivateKey(for: pubKey)!
         let peerPublicKey = Data(hex: approveParams.responder.publicKey)
-        let agreementKeys = try! Crypto.X25519.generateAgreementKeys(peerPublicKey: peerPublicKey, privateKey: privateKey)
+        let agreementKeys = try! Crypto.generateAgreementKeys(peerPublicKey: peerPublicKey, privateKey: privateKey)
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
         crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         let proposal = pairingPending.proposal

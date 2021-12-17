@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import WalletConnectUtils
+import CryptoKit
 
 final class SessionEngine {
     
@@ -67,8 +68,8 @@ final class SessionEngine {
         }
         logger.debug("Propose Session on topic: \(pendingSessionTopic)")
         
-        let privateKey = crypto.generatePrivateKey()
-        let publicKey = privateKey.publicKey.toHexString()
+        let privateKey = crypto.makePrivateKey()
+        let publicKey = privateKey.publicKey.rawRepresentation.toHexString()
         
         let proposer = SessionType.Proposer(publicKey: publicKey, controller: isController, metadata: metadata)
         let signal = SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: settledPairing.topic))
@@ -90,7 +91,7 @@ final class SessionEngine {
             expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
             pendingState: SessionSequence.Pending(status: .proposed, proposal: proposal, outcomeTopic: nil))
         
-        crypto.set(privateKey: privateKey)
+        try! crypto.set(privateKey: privateKey)
         sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: pendingSessionTopic)
         let pairingAgreementKeys = crypto.getAgreementKeys(for: settledPairing.topic)!
@@ -111,10 +112,10 @@ final class SessionEngine {
     
     func approve(proposal: SessionType.Proposal, accounts: Set<String>) {
         logger.debug("Approve session")
-        let privateKey = crypto.generatePrivateKey()
-        let selfPublicKey = privateKey.publicKey.toHexString()
+        let privateKey = crypto.makePrivateKey()
+        let selfPublicKey = privateKey.publicKey.rawRepresentation.toHexString()
         
-        let agreementKeys = try! Crypto.X25519.generateAgreementKeys(
+        let agreementKeys = try! Crypto.generateAgreementKeys(
             peerPublicKey: Data(hex: proposal.proposer.publicKey),
             privateKey: privateKey)
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
@@ -160,7 +161,7 @@ final class SessionEngine {
         sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: proposal.topic)
         
-        crypto.set(privateKey: privateKey)
+        try! crypto.set(privateKey: privateKey)
         crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         sequencesStore.setSequence(settledSession)
         wcSubscriber.setSubscription(topic: settledTopic)
@@ -505,10 +506,11 @@ final class SessionEngine {
                   return
               }
         let selfPublicKey = Data(hex: session.selfParticipant.publicKey)
+        let pubKey = try! Curve25519.KeyAgreement.PublicKey(rawRepresentation: selfPublicKey)
         logger.debug("handleSessionApprove")
-        let privateKey = try! crypto.getPrivateKey(for: selfPublicKey)!
+        let privateKey = try! crypto.getPrivateKey(for: pubKey)!
         let peerPublicKey = Data(hex: approveParams.responder.publicKey)
-        let agreementKeys = try! Crypto.X25519.generateAgreementKeys(peerPublicKey: peerPublicKey, privateKey: privateKey)
+        let agreementKeys = try! Crypto.generateAgreementKeys(peerPublicKey: peerPublicKey, privateKey: privateKey)
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
         crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         let proposal = pendingSession.proposal
