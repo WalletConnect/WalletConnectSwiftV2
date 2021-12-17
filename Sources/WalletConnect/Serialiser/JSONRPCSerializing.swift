@@ -48,7 +48,7 @@ class JSONRPCSerialiser: JSONRPCSerialising {
         return try JSONDecoder().decode(T.self, from: JSONRPCData)
     }
     
-    func encrypt(json: String, agreementKeys: Crypto.X25519.AgreementKeys) throws -> String {
+    func encrypt(json: String, agreementKeys: AgreementKeys) throws -> String {
         let payload = try codec.encode(plainText: json, agreementKeys: agreementKeys)
         let iv = payload.iv.toHexString()
         let publicKey = payload.publicKey.toHexString()

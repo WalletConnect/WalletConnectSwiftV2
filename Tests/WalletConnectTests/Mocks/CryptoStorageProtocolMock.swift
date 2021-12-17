@@ -25,7 +25,7 @@ final class CryptoStorageProtocolMock: CryptoStorageProtocol {
 //    var privateKeyStub = Crypto.X25519.PrivateKey()
     
 //    private(set) var privateKeys: [String: Crypto.X25519.PrivateKey] = [:]
-    private(set) var agreementKeys: [String: Crypto.X25519.AgreementKeys] = [:]
+    private(set) var agreementKeys: [String: AgreementKeys] = [:]
     
 //    func generatePrivateKey() -> Crypto.X25519.PrivateKey {
 //        defer { privateKeyStub = Crypto.X25519.PrivateKey() }
@@ -36,7 +36,7 @@ final class CryptoStorageProtocolMock: CryptoStorageProtocol {
 //        privateKeys[privateKey.publicKey.toHexString()] = privateKey
 //    }
     
-    func set(agreementKeys: Crypto.X25519.AgreementKeys, topic: String) {
+    func set(agreementKeys: AgreementKeys, topic: String) {
         self.agreementKeys[topic] = agreementKeys
     }
     
@@ -44,7 +44,7 @@ final class CryptoStorageProtocolMock: CryptoStorageProtocol {
 //        privateKeys[publicKey.toHexString()]
 //    }
     
-    func getAgreementKeys(for topic: String) -> Crypto.X25519.AgreementKeys? {
+    func getAgreementKeys(for topic: String) -> AgreementKeys? {
         agreementKeys[topic]
     }
     
