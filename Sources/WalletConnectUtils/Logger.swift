@@ -1,7 +1,5 @@
-// 
 
 import Foundation
-
 
 public protocol ConsoleLogging {
     func debug(_ items: Any...)
@@ -9,7 +7,6 @@ public protocol ConsoleLogging {
     func warn(_ items: Any...)
     func error(_ items: Any...)
 }
-
 
 public class ConsoleLogger: ConsoleLogging {
     private var loggingLevel: LoggingLevel

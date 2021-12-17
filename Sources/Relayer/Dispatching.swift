@@ -82,12 +82,3 @@ extension Dispatcher: URLSessionWebSocketDelegate {
         onDisconnect?()
     }
 }
-//class Dispatcher {
-//    func dispatch(_ string: String) {
-//
-//    }
-//
-//    private func dispatchAllFrames() {
-//
-//    }
-//}
