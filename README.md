@@ -16,7 +16,7 @@ You usually want to have a single instance of a client in you app.
                                    url: String?,
                                    icons: [String]?)
         let client = WalletConnectClient(metadata: AppMetadata,
-                            apiKey: String,
+                            projectId: String,
                             isController: Bool,
                             relayHost: String)
 ```

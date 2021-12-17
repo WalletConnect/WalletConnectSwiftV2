@@ -41,18 +41,18 @@ public final class WalletConnectClient {
     
     // MARK: - Public interface
 
-    public convenience init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
-        self.init(metadata: metadata, apiKey: apiKey, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStore: keyValueStorage, clientName: clientName)
+    public convenience init(metadata: AppMetadata, projectId: String, isController: Bool, relayHost: String, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
+        self.init(metadata: metadata, projectId: projectId, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStore: keyValueStorage, clientName: clientName)
     }
     
-    init(metadata: AppMetadata, apiKey: String, isController: Bool, relayHost: String, logger: ConsoleLogger, keychain: KeychainStorage, keyValueStore: KeyValueStorage, clientName: String? = nil) {
+    init(metadata: AppMetadata, projectId: String, isController: Bool, relayHost: String, logger: ConsoleLogger, keychain: KeychainStorage, keyValueStore: KeyValueStorage, clientName: String? = nil) {
         self.metadata = metadata
         self.isController = isController
         self.logger = logger
 //        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
         self.crypto = Crypto(keychain: keychain)
         self.secureStorage = SecureStorage(keychain: keychain)
-        let relayUrl = WakuNetworkRelay.makeRelayUrl(host: relayHost, apiKey: apiKey)
+        let relayUrl = WakuNetworkRelay.makeRelayUrl(host: relayHost, projectId: projectId)
         self.transport = JSONRPCTransport(url: relayUrl)
         let wakuRelay = WakuNetworkRelay(transport: transport, logger: logger)
         let serialiser = JSONRPCSerialiser(crypto: crypto)
@@ -63,7 +63,6 @@ public final class WalletConnectClient {
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
         setUpEnginesCallbacks()
-        secureStorage.setAPIKey(apiKey)
         subscribeNotificationCenter()
     }
     

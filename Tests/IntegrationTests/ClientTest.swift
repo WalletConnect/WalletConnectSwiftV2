@@ -8,20 +8,20 @@ final class ClientTests: XCTestCase {
     let defaultTimeout: TimeInterval = 5.0
     
     let relayHost = "staging.walletconnect.org"
-    let apiKey = ""
+    let projectId = ""
     var proposer: ClientDelegate!
     var responder: ClientDelegate!
     
     override func setUp() {
-        proposer = Self.makeClientDelegate(isController: false, relayHost: relayHost, prefix: "🍏P", apiKey: apiKey)
-        responder = Self.makeClientDelegate(isController: true, relayHost: relayHost, prefix: "🍎R", apiKey: apiKey)
+        proposer = Self.makeClientDelegate(isController: false, relayHost: relayHost, prefix: "🍏P", projectId: projectId)
+        responder = Self.makeClientDelegate(isController: true, relayHost: relayHost, prefix: "🍎R", projectId: projectId)
     }
 
-    static func makeClientDelegate(isController: Bool, relayHost: String, prefix: String, apiKey: String) -> ClientDelegate {
+    static func makeClientDelegate(isController: Bool, relayHost: String, prefix: String, projectId: String) -> ClientDelegate {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let client = WalletConnectClient(
             metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil),
-            apiKey: apiKey,
+            projectId: projectId,
             isController: isController,
             relayHost: relayHost,
             logger: logger,
