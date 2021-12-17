@@ -5,7 +5,7 @@ import Foundation
 public enum JsonRpcResponseTypes: Codable {
     case error(JSONRPCErrorResponse)
     case response(JSONRPCResponse<AnyCodable>)
-    var id: Int64 {
+    public var id: Int64 {
         switch self {
         case .error(let value):
             return value.id
@@ -13,7 +13,7 @@ public enum JsonRpcResponseTypes: Codable {
             return value.id
         }
     }
-    var value: Codable {
+    public var value: Codable {
         switch self {
         case .error(let value):
             return value

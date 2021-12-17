@@ -1,5 +1,6 @@
 
 import Foundation
+import WalletConnectUtils
 
 protocol JsonRpcHistoryRecording {
     func get(id: Int64) -> JsonRpcRecord?

@@ -1,6 +1,7 @@
 
 
 import Foundation
+import WalletConnectUtils
 
 struct JsonRpcRecord: Codable {
     let id: Int64
