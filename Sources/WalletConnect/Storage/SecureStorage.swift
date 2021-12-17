@@ -14,15 +14,6 @@ final class SecureStorage {
         self.queue = dispatchQueue
     }
     
-    func setAPIKey(_ apiKey: String) {
-        removeValue(forKey: api)
-        set(apiKey, forKey: api)
-    }
-    
-    func getAPIKey() -> String? {
-        get(key: api)
-    }
-    
     func set<T>(_ value: T, forKey key: String) where T : GenericPasswordConvertible {
         queue.async { [weak self] in
             try? self?.keychain.add(value, forKey: key)
