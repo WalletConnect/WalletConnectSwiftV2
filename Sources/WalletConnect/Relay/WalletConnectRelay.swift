@@ -3,6 +3,13 @@ import Foundation
 import Combine
 import WalletConnectUtils
 
+struct WCResponse {
+    let topic: String
+    let requestMethod: WCRequest.Method
+    let requestParams: WCRequest.Params
+    let result: Result<JSONRPCResponse<AnyCodable>, Error>
+}
+
 protocol WalletConnectRelaying: AnyObject {
     var onResponse: ((WCResponse) -> Void)? {get set}
     var onPairingApproveResponse: ((String) -> Void)? {get set}
@@ -211,11 +218,4 @@ class WalletConnectRelay: WalletConnectRelaying {
             logger.info("Info: \(error.localizedDescription)")
         }
     }
-}
-
-struct WCResponse {
-    let topic: String
-    let requestMethod: WCRequest.Method
-    let requestParams: WCRequest.Params
-    let result: Result<JSONRPCResponse<AnyCodable>, Error>
 }

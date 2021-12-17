@@ -44,9 +44,11 @@ final class PairingEngine {
         relayer.onPairingApproveResponse = { [weak self] in
             try? self?.acknowledgeApproval(pendingTopic: $0)
         }
-        relayer.onResponse = { [weak self] in
-            print($0.topic)
-        }
+        
+        // TODO: Bind on response
+//        relayer.onResponse = { [weak self] in
+//            print($0.topic)
+//        }
     }
     
     func hasPairing(for topic: String) -> Bool {

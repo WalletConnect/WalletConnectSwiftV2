@@ -109,7 +109,7 @@ final class SessionEngine {
         }
     }
     
-    func approve(proposal: SessionType.Proposal, accounts: Set<String>, completion: @escaping (Result<Session, Error>) -> Void) {
+    func approve(proposal: SessionType.Proposal, accounts: Set<String>) {
         logger.debug("Approve session")
         let privateKey = crypto.generatePrivateKey()
         let selfPublicKey = privateKey.publicKey.toHexString()
@@ -163,24 +163,14 @@ final class SessionEngine {
         crypto.set(privateKey: privateKey)
         crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         sequencesStore.setSequence(settledSession)
-//        sequencesStore.delete(topic: proposal.topic)
         wcSubscriber.setSubscription(topic: settledTopic)
         
         relayer.request(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
             switch result {
             case .success:
-//                self?.wcSubscriber.removeSubscription(topic: proposal.topic)
                 self?.logger.debug("Success on wc_sessionApprove, published on topic: \(proposal.topic), settled topic: \(settledTopic)")
-//                let sessionSuccess = Session(
-//                    topic: settledTopic,
-//                    peer: proposal.proposer.metadata,
-//                    permissions: SessionPermissions(
-//                        blockchains: sessionPermissions.blockchain.chains,
-//                        methods: sessionPermissions.jsonrpc.methods))
-//                completion(.success(sessionSuccess))
             case .failure(let error):
                 self?.logger.error(error)
-//                completion(.failure(error))
             }
         }
     }

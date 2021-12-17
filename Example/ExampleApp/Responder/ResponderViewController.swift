@@ -148,9 +148,7 @@ extension ResponderViewController: SessionViewControllerDelegate {
         let proposal = currentProposal!
         currentProposal = nil
         let accounts = proposal.permissions.blockchains.map {$0+":\(account)"}
-        client.approve(proposal: proposal, accounts: Set(accounts)) { [weak self] _ in
-            self?.reloadActiveSessions()
-        }
+        client.approve(proposal: proposal, accounts: Set(accounts))
     }
     
     func didRejectSession() {
@@ -177,6 +175,10 @@ extension ResponderViewController: WalletConnectClientDelegate {
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread
             self.showSessionProposal(info)
         }
+    }
+    
+    func didSettle(session: Session) {
+        reloadActiveSessions()
     }
     
     func didReceive(sessionRequest: SessionRequest) {
