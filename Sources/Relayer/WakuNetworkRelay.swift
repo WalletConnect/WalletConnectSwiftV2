@@ -15,7 +15,7 @@ public final class WakuNetworkRelay {
     public var onMessage: ((String, String) -> ())?
     private var transport: Dispatching
     var subscriptions: [String: String] = [:]
-    private let defaultTtl = 6*Time.hour
+    let defaultTtl = 6*Time.hour
 
     private var subscriptionResponsePublisher: AnyPublisher<JSONRPCResponse<String>, Never> {
         subscriptionResponsePublisherSubject.eraseToAnyPublisher()

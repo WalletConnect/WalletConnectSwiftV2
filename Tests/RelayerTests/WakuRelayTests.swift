@@ -9,17 +9,17 @@ extension ConsoleLogger: ConsoleLogging {}
 
 class WakuRelayTests: XCTestCase {
     var wakuRelay: WakuNetworkRelay!
-    var transport: MockedJSONRPCTransport!
+    var dispatcher: MockedJSONRPCTransport!
 
     override func setUp() {
-        transport = MockedJSONRPCTransport()
+        dispatcher = MockedJSONRPCTransport()
         let logger = ConsoleLogger()
-        wakuRelay = WakuNetworkRelay(transport: transport, logger: logger)
+        wakuRelay = WakuNetworkRelay(transport: dispatcher, logger: logger)
     }
 
     override func tearDown() {
         wakuRelay = nil
-        transport = nil
+        dispatcher = nil
     }
     
     func testNotifyOnSubscriptionRequest() {
@@ -34,7 +34,7 @@ class WakuRelayTests: XCTestCase {
             XCTAssertEqual(subscriptionTopic, topic)
             subscriptionExpectation.fulfill()
         }
-        transport.onMessage?(try! subscriptionRequest.json())
+        dispatcher.onMessage?(try! subscriptionRequest.json())
         waitForExpectations(timeout: 0.001, handler: nil)
     }
     
@@ -47,7 +47,7 @@ class WakuRelayTests: XCTestCase {
         }
         let subscriptionId = "sub-id"
         let subscribeResponse = JSONRPCResponse<String>(id: requestId, result: subscriptionId)
-        transport.onMessage?(try! subscribeResponse.json())
+        dispatcher.onMessage?(try! subscribeResponse.json())
         waitForExpectations(timeout: 0.001, handler: nil)
     }
     
@@ -58,7 +58,7 @@ class WakuRelayTests: XCTestCase {
             XCTAssertNil(error)
         }
         let response = try! JSONRPCResponse<Bool>(id: requestId, result: true).json()
-        transport.onMessage?(response)
+        dispatcher.onMessage?(response)
         waitForExpectations(timeout: 0.001, handler: nil)
     }
     
@@ -71,25 +71,59 @@ class WakuRelayTests: XCTestCase {
             acknowledgeExpectation.fulfill()
         }
         let response = try! JSONRPCResponse<Bool>(id: requestId!, result: true).json()
-        transport.onMessage?(response)
+        dispatcher.onMessage?(response)
         waitForExpectations(timeout: 0.001, handler: nil)
     }
     
+    func testIncommmingRequestDeliveredOnce() {
+        let expectation = expectation(description: "Request duplicate not delivered")
+        let subscriptionParams = RelayJSONRPC.SubscriptionParams(id: "sub_id", data: RelayJSONRPC.SubscriptionData(topic: "topic", message: "message"))
+        let subscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>(id: 12345, method: RelayJSONRPC.Method.subscription.rawValue, params: subscriptionParams)
+        wakuRelay.onMessage = { _, _ in
+            expectation.fulfill()
+        }
+        dispatcher.onMessage?(try! subscriptionRequest.json())
+        dispatcher.onMessage?(try! subscriptionRequest.json())
+        waitForExpectations(timeout: 0.001, handler: nil)
+    }
+    
+//    func testReboundedRequestNotDelivered() {
+//        let expectation = expectation(description: "Rebounded request not delivered")
+//        expectation.isInverted = true
+//        let topic = "1234"
+//        let payload = "payload"
+//        let requestId = wakuRelay.publish(topic: topic, payload: payload) { _ in }
+//        
+//        let subscriptionId = "sub-id"
+//        let subscriptionParams = RelayJSONRPC.SubscriptionParams(id: subscriptionId, data: RelayJSONRPC.SubscriptionData(topic: topic, message: payload))
+//        let subscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>(id: 12345, method: RelayJSONRPC.Method.subscription.rawValue, params: subscriptionParams)
+//
+//        
+//        
+//        
+//        wakuRelay.onMessage = { _, _ in
+//            XCTFail()
+//            expectation.fulfill()
+//        }
+//        dispatcher.onMessage?(try! publishRequest.json())
+//        waitForExpectations(timeout: 0.1, handler: nil)
+//    }
+    
     func testSendOnPublish() {
         wakuRelay.publish(topic: "", payload: "") {_ in }
-        XCTAssertTrue(transport.sent)
+        XCTAssertTrue(dispatcher.sent)
     }
     
     func testSendOnSubscribe() {
         wakuRelay.subscribe(topic: "") {_ in }
-        XCTAssertTrue(transport.sent)
+        XCTAssertTrue(dispatcher.sent)
     }
     
     func testSendOnUnsubscribe() {
         let topic = "123"
         wakuRelay.subscriptions[topic] = ""
         wakuRelay.unsubscribe(topic: topic) {_ in }
-        XCTAssertTrue(transport.sent)
+        XCTAssertTrue(dispatcher.sent)
     }
 }
 
