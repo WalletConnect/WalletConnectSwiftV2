@@ -34,9 +34,11 @@ fileprivate extension WCRequest {
     }
 }
 
-fileprivate func deriveTopic(publicKey: String, privateKey: Crypto.X25519.PrivateKey) -> String {
-    try! Crypto.X25519.generateAgreementKeys(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
-}
+//fileprivate func deriveTopic(publicKey: String, privateKey: Crypto.X25519.PrivateKey) -> String {
+//    try! Crypto.X25519.generateAgreementKeys(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
+//}
+
+import CryptoKit
 
 final class SessionEngineTests: XCTestCase {
     
@@ -137,7 +139,7 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testApprove() {
-        let proposerPubKey = Crypto.X25519.PrivateKey().publicKey.toHexString()
+        let proposerPubKey = Curve25519.KeyAgreement.PrivateKey().publicKey.rawRepresentation.toHexString()
         let topicB = String.generateTopic()!
         let topicC = String.generateTopic()!
         let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
@@ -167,7 +169,7 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testApprovalAcknowledgementSuccess() {
-        let proposerPubKey = Crypto.X25519.PrivateKey().publicKey.toHexString()
+        let proposerPubKey = Curve25519.KeyAgreement.PrivateKey().publicKey.rawRepresentation.toHexString()
         let topicB = String.generateTopic()!
         let topicC = String.generateTopic()!
         let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
@@ -203,8 +205,8 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testApprovalAcknowledgementFailure() {
-        let proposerPubKey = Crypto.X25519.PrivateKey().publicKey.toHexString()
-        let selfPubKey = cryptoMock.privateKeyStub.publicKey.toHexString()
+        let proposerPubKey = Curve25519.KeyAgreement.PrivateKey().publicKey.rawRepresentation.toHexString()
+        let selfPubKey = cryptoMock.privateKeyStub.publicKey.rawRepresentation.toHexString()
         let topicB = String.generateTopic()!
         let topicC = String.generateTopic()!
         let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
@@ -249,8 +251,8 @@ final class SessionEngineTests: XCTestCase {
         var approvedSession: Session?
 
         let privateKeyStub = cryptoMock.privateKeyStub
-        let proposerPubKey = privateKeyStub.publicKey.toHexString()
-        let responderPubKey = Crypto.X25519.PrivateKey().publicKey.rawRepresentation.toHexString()
+        let proposerPubKey = privateKeyStub.publicKey.rawRepresentation.toHexString()
+        let responderPubKey = Curve25519.KeyAgreement.PrivateKey().publicKey.rawRepresentation.toHexString()
         let topicC = topicGenerator.topic
         let topicD = deriveTopic(publicKey: responderPubKey, privateKey: privateKeyStub)
 
