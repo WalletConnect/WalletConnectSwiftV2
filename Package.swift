@@ -39,7 +39,7 @@ let package = Package(
             dependencies: ["Relayer", "WalletConnectUtils", "TestingUtils"]),
         .target(
             name: "TestingUtils",
-            dependencies: [],
+            dependencies: ["WalletConnectUtils"],
             path: "Tests/TestingUtils"),
     ],
     swiftLanguageVersions: [.v5]
