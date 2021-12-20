@@ -1,7 +1,6 @@
 
 import Foundation
 import WalletConnectUtils
-@testable import WalletConnect
 
 public struct ConsoleLoggerMock: ConsoleLogging {
     public init() {}
