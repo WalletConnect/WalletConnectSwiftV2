@@ -26,4 +26,8 @@ public struct JSONRPCRequest<T: Codable&Equatable>: Codable, Equatable {
     public static func generateId() -> Int64 {
         return Int64(Date().timeIntervalSince1970 * 1000)*1000 + Int64.random(in: 0..<1000)
     }
+    
+    public func anyCodableParamsRepresentation() -> JSONRPCRequest<AnyCodable> {
+        return JSONRPCRequest<AnyCodable>(id: id, method: method, params: AnyCodable(params))
+    }
 }

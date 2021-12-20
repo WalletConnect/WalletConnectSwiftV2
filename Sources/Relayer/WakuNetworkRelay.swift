@@ -59,6 +59,7 @@ public final class WakuNetworkRelay {
         let requestJson = try! request.json()
         logger.debug("waku: Publishing Payload on Topic: \(topic)")
         var cancellable: AnyCancellable?
+        try? jsonRpcHistory.set(topic: topic, request: request.anyCodableParamsRepresentation())
         transport.send(requestJson) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to Publish Payload")
