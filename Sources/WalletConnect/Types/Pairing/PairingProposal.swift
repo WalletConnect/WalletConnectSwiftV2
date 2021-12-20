@@ -18,8 +18,8 @@ struct PairingProposal: Codable {
                 publicKey: uri.publicKey,
                 controller: uri.isController),
             signal: PairingType.Signal(uri: uri.absoluteString),
-            permissions: PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [PairingType.PayloadMethods.sessionPropose.rawValue])),
-            ttl: PairingType.defaultTTL
+            permissions: PairingType.ProposedPermissions.default,
+            ttl: PairingSequence.timeToLiveSettled
         )
     }
 }

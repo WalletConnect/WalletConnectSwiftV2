@@ -95,7 +95,7 @@ final class SessionEngine {
         sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: pendingSessionTopic)
         let pairingAgreementKeys = crypto.getAgreementKeys(for: settledPairing.topic)!
-        crypto.set(agreementKeys: pairingAgreementKeys, topic: proposal.topic)
+        try! crypto.set(agreementKeys: pairingAgreementKeys, topic: proposal.topic)
         
         let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: proposal)
         let pairingPayloadParams = PairingType.PayloadParams(request: request)
@@ -162,7 +162,7 @@ final class SessionEngine {
         wcSubscriber.setSubscription(topic: proposal.topic)
         
         try! crypto.set(privateKey: privateKey)
-        crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
+        try! crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         sequencesStore.setSequence(settledSession)
         wcSubscriber.setSubscription(topic: settledTopic)
         
@@ -512,7 +512,7 @@ final class SessionEngine {
         let peerPublicKey = Data(hex: approveParams.responder.publicKey)
         let agreementKeys = try! Crypto.generateAgreementKeys(peerPublicKey: peerPublicKey, privateKey: privateKey)
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
-        crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
+        try! crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         let proposal = pendingSession.proposal
         let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : approveParams.responder.publicKey
         let controller = Controller(publicKey: controllerKey)

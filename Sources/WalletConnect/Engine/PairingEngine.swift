@@ -74,30 +74,13 @@ final class PairingEngine {
         }
         
         let privateKey = crypto.makePrivateKey()
-        let publicKey = privateKey.publicKey.rawRepresentation.toHexString()
+        try! crypto.set(privateKey: privateKey) // TODO: Handle error
+        let publicKey = privateKey.publicKey.hexRepresentation
         
         let relay = RelayProtocolOptions(protocol: "waku", params: nil)
         let uri = WalletConnectURI(topic: topic, publicKey: publicKey, isController: isController, relay: relay)
-        let timeToLive = PairingSequence.timeToLivePending
+        let pendingPairing = PairingSequence.makeProposed(uri: uri)
         
-        let proposal = PairingProposal(
-            topic: topic,
-            relay: relay,
-            proposer: PairingType.Proposer(publicKey: publicKey, controller: isController),
-            signal: PairingType.Signal(uri: uri.absoluteString),
-            permissions: PairingType.ProposedPermissions.default,
-            ttl: timeToLive)
-        
-        let `self` = PairingType.Participant(publicKey: publicKey)
-        
-        let pendingPairing = PairingSequence(
-            topic: topic,
-            relay: relay,
-            selfParticipant: `self`,
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLive)),
-            pendingState: PairingSequence.Pending(proposal: proposal, status: .proposed))
-        
-        try! crypto.set(privateKey: privateKey) // TODO: Handle error
         sequencesStore.setSequence(pendingPairing)
         wcSubscriber.setSubscription(topic: topic)
         sessionPermissions[topic] = permissions
@@ -153,7 +136,7 @@ final class PairingEngine {
         wcSubscriber.setSubscription(topic: settledTopic)
         sequencesStore.setSequence(settledPairing)
         
-        crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
+        try? crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         try? crypto.set(privateKey: privateKey) // TODO: Handle error
         
         // publish approve on topic A
@@ -290,7 +273,7 @@ final class PairingEngine {
         }
         let sessionProposal = payload.request.params
         if let pairingAgreementKeys = crypto.getAgreementKeys(for: sessionProposal.signal.params.topic) {
-            crypto.set(agreementKeys: pairingAgreementKeys, topic: sessionProposal.topic)
+            try? crypto.set(agreementKeys: pairingAgreementKeys, topic: sessionProposal.topic)
         }
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
         relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [weak self] error in
@@ -309,7 +292,7 @@ final class PairingEngine {
         let peerPublicKey = Data(hex: approveParams.responder.publicKey)
         let agreementKeys = try! Crypto.generateAgreementKeys(peerPublicKey: peerPublicKey, privateKey: privateKey)
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
-        crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
+        try? crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         let proposal = pairingPending.proposal
         let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : peerPublicKey.toHexString()
         let controller = Controller(publicKey: controllerKey)

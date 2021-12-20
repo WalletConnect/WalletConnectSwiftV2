@@ -3,13 +3,28 @@
 import Foundation
 import CryptoKit
 
+struct AgreementKeys: Equatable {
+    let sharedSecret: Data
+    let publicKey: Data
+    
+    func derivedTopic() -> String {
+        sharedSecret.sha256().toHexString()
+    }
+}
+
+extension Curve25519.KeyAgreement.PublicKey {
+    
+    var hexRepresentation: String {
+        rawRepresentation.toHexString()
+    }
+}
+
 // TODO: Come up with better naming conventions
 protocol CryptoStorageProtocol {
     func makePrivateKey() -> Curve25519.KeyAgreement.PrivateKey
     func set(privateKey: Curve25519.KeyAgreement.PrivateKey) throws
     func getPrivateKey(for publicKey: Curve25519.KeyAgreement.PublicKey) throws -> Curve25519.KeyAgreement.PrivateKey?
-    
-    func set(agreementKeys: AgreementKeys, topic: String)
+    func set(agreementKeys: AgreementKeys, topic: String) throws
     func getAgreementKeys(for topic: String) -> AgreementKeys?
     func deletePrivateKey(for publicKey: String)
     func deleteAgreementKeys(for topic: String)
@@ -38,13 +53,9 @@ class Crypto: CryptoStorageProtocol {
         return try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: privateKeyData)
     }
     
-    func set(agreementKeys: AgreementKeys, topic: String) {
+    func set(agreementKeys: AgreementKeys, topic: String) throws {
         let agreement = agreementKeys.sharedSecret + agreementKeys.publicKey
-        do {
-            try keychain.add(agreement, forKey: topic)
-        } catch {
-            print("Error adding agreement keys: \(error)")
-        }
+        try keychain.add(agreement, forKey: topic)
     }
     
     func getAgreementKeys(for topic: String) -> AgreementKeys? {
@@ -54,6 +65,23 @@ class Crypto: CryptoStorageProtocol {
         let (sharedSecret, publicKey) = split(concatinatedAgreementKeys: agreement)
         return AgreementKeys(sharedSecret: sharedSecret, publicKey: publicKey)
     }
+    
+//    func _set(agreementKeys: AgreementKeys, topic: String) {
+//        let agreement = agreementKeys.sharedSecret + agreementKeys.publicKey
+//        do {
+//            try keychain.add(agreement, forKey: topic)
+//        } catch {
+//            print("Error adding agreement keys: \(error)")
+//        }
+//    }
+//    
+//    func _getAgreementKeys(for topic: String) -> AgreementKeys? {
+//        guard let agreement = try? keychain.read(key: topic) as Data else {
+//            return nil
+//        }
+//        let (sharedSecret, publicKey) = split(concatinatedAgreementKeys: agreement)
+//        return AgreementKeys(sharedSecret: sharedSecret, publicKey: publicKey)
+//    }
     
     func deletePrivateKey(for publicKey: String) {
         do {
@@ -77,19 +105,6 @@ class Crypto: CryptoStorageProtocol {
         return (sharedSecret, publicKey)
     }
 }
-
-
-
-struct AgreementKeys: Equatable {
-    let sharedSecret: Data
-    let publicKey: Data
-    
-    func derivedTopic() -> String {
-        sharedSecret.sha256().toHexString()
-    }
-}
-
-
 
 extension Crypto {
     

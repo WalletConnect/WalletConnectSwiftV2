@@ -41,6 +41,10 @@ struct PairingSequence: ExpirableSequence {
         isSettled && settled?.peer.publicKey == settled?.permissions.controller.publicKey
     }
     
+    static var timeToLiveProposed: Int {
+        Time.hour
+    }
+    
     static var timeToLivePending: Int {
         Time.day
     }
@@ -58,6 +62,17 @@ extension PairingSequence {
     
     init(topic: String, relay: RelayProtocolOptions, selfParticipant: PairingType.Participant, expiryDate: Date, settledState: Settled) {
         self.init(topic: topic, relay: relay, selfParticipant: selfParticipant, expiryDate: expiryDate, sequenceState: .right(settledState))
+    }
+    
+    static func makeProposed(uri: WalletConnectURI) -> PairingSequence {
+        let proposal = PairingProposal.createFromURI(uri)
+        PairingSequence(
+            topic: proposal.topic,
+            relay: proposal.relay,
+            selfParticipant: PairingType.Participant(publicKey: proposal.proposer.publicKey),
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveProposed)),
+            pendingState: Pending(proposal: proposal, status: .proposed)
+        )
     }
 }
     
