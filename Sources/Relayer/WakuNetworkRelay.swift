@@ -11,7 +11,7 @@ public final class WakuNetworkRelay {
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.waku.relay",
                                                 attributes: .concurrent)
     public var onConnect: (() -> ())?
-    let jsonRpcHistory: JsonRpcHistoryRecording
+    let jsonRpcSubscriptionsHistory: JsonRpcHistory<RelayJSONRPC.SubscriptionParams>
     public var onMessage: ((String, String) -> ())?
     private var transport: Dispatching
     var subscriptions: [String: String] = [:]
@@ -29,10 +29,11 @@ public final class WakuNetworkRelay {
     
     init(transport: Dispatching,
          logger: ConsoleLogging,
-         jsonRpcHistory: JsonRpcHistoryRecording) {
+         keyValueStorage: KeyValueStorage,
+         uniqueIdentifier: String?) {
         self.logger = logger
         self.transport = transport
-        self.jsonRpcHistory = jsonRpcHistory
+        self.jsonRpcSubscriptionsHistory = JsonRpcHistory<RelayJSONRPC.SubscriptionParams>(logger: logger, keyValueStorage: keyValueStorage, uniqueIdentifier: uniqueIdentifier)
         setUpBindings()
     }
     
@@ -42,7 +43,8 @@ public final class WakuNetworkRelay {
                             uniqueIdentifier: String?) {
         self.init(transport: Dispatcher(url: url),
                   logger: logger,
-                  jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: keyValueStorage, uniqueIdentifier: uniqueIdentifier))
+                  keyValueStorage: keyValueStorage,
+                  uniqueIdentifier: uniqueIdentifier)
     }
     
     public func connect() {
@@ -59,7 +61,6 @@ public final class WakuNetworkRelay {
         let requestJson = try! request.json()
         logger.debug("waku: Publishing Payload on Topic: \(topic)")
         var cancellable: AnyCancellable?
-        try? jsonRpcHistory.set(topic: topic, request: request.anyCodableParamsRepresentation())
         transport.send(requestJson) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to Publish Payload")
@@ -147,8 +148,13 @@ public final class WakuNetworkRelay {
     private func handlePayloadMessage(_ payload: String) {
         if let request = tryDecode(SubscriptionRequest.self, from: payload),
            request.method == RelayJSONRPC.Method.subscription.rawValue {
-            onMessage?(request.params.data.topic, request.params.data.message)
-            acknowledgeSubscription(requestId: request.id)
+            do {
+                try jsonRpcSubscriptionsHistory.set(topic: request.params.data.topic, request: request)
+                onMessage?(request.params.data.topic, request.params.data.message)
+                acknowledgeSubscription(requestId: request.id)
+            } catch {
+                logger.info("Relayer Info: Json Rpc Duplicate Detected")
+            }
         } else if let response = tryDecode(RequestAcknowledgement.self, from: payload) {
             requestAcknowledgePublisherSubject.send(response)
         } else if let response = tryDecode(SubscriptionResponse.self, from: payload) {
@@ -172,6 +178,7 @@ public final class WakuNetworkRelay {
     private func acknowledgeSubscription(requestId: Int64) {
         let response = JSONRPCResponse(id: requestId, result: true)
         let responseJson = try! response.json()
+        jsonRpcSubscriptionsHistory.resolve(response: .response(response))
         transport.send(responseJson) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to Respond for request id: \(requestId)")

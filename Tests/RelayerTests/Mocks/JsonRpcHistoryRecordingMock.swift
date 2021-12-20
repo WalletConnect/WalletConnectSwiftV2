@@ -1,6 +1,7 @@
 
 import Foundation
 import WalletConnectUtils
+@testable import Relayer
 
 class JsonRpcHistoryRecordingMock: JsonRpcHistoryRecording {
     func get(id: Int64) -> JsonRpcRecord? {
