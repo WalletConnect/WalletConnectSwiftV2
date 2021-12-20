@@ -14,7 +14,7 @@ final class RelayTests: XCTestCase {
     func makeRelayer() -> WakuNetworkRelay {
         let logger = ConsoleLogger()
         let dispatcher = Dispatcher(url: url)
-        return WakuNetworkRelay(transport: dispatcher, logger: logger)
+        return WakuNetworkRelay(transport: dispatcher, logger: logger, jsonRpcHistory: JsonRpcHistoryRecordingMock())
     }
     
     func testSubscribe() {

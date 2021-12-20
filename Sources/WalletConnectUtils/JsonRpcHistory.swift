@@ -1,7 +1,7 @@
 
 import Foundation
 
-protocol JsonRpcHistoryRecording {
+public protocol JsonRpcHistoryRecording {
     func get(id: Int64) -> JsonRpcRecord?
     func set(topic: String, request: JSONRPCRequest<AnyCodable>) throws
     func delete(topic: String)
@@ -9,7 +9,7 @@ protocol JsonRpcHistoryRecording {
     func exist(id: Int64) -> Bool
 }
 
-class JsonRpcHistory: JsonRpcHistoryRecording {
+public class JsonRpcHistory: JsonRpcHistoryRecording {
     enum RecordingError: Error {
         case jsonRpcDuplicateDetected
     }
@@ -17,17 +17,17 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
     let logger: ConsoleLogging
     let identifier: String
     
-    init(logger: ConsoleLogging, keyValueStorage: KeyValueStorage, uniqueIdentifier: String? = nil) {
+    public init(logger: ConsoleLogging, keyValueStorage: KeyValueStorage, uniqueIdentifier: String? = nil) {
         self.logger = logger
         self.storage = KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage)
         self.identifier = "com.walletconnect.sdk.\(uniqueIdentifier ?? "")"
     }
     
-    func get(id: Int64) -> JsonRpcRecord? {
+    public func get(id: Int64) -> JsonRpcRecord? {
         try? storage.get(key: getKey(for: id))
     }
     
-    func set(topic: String, request: JSONRPCRequest<AnyCodable>) throws {
+    public func set(topic: String, request: JSONRPCRequest<AnyCodable>) throws {
         guard !exist(id: request.id) else {
             throw RecordingError.jsonRpcDuplicateDetected
         }
@@ -36,7 +36,7 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
         try storage.set(record, forKey: getKey(for: request.id))
     }
     
-    func delete(topic: String) {
+    public func delete(topic: String) {
         storage.getAll().forEach { record in
             if record.topic == topic {
                 storage.delete(forKey: getKey(for: record.id))
@@ -44,7 +44,7 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
         }
     }
     
-    func resolve(response: JsonRpcResponseTypes) throws {
+    public func resolve(response: JsonRpcResponseTypes) throws {
         guard var record = try? storage.get(key: getKey(for: response.id)) else { return }
         if record.response != nil {
             throw RecordingError.jsonRpcDuplicateDetected
@@ -54,7 +54,7 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
         }
     }
     
-    func exist(id: Int64) -> Bool {
+    public func exist(id: Int64) -> Bool {
         return (try? storage.get(key: getKey(for: id))) != nil
     }
     

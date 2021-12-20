@@ -11,7 +11,7 @@ public final class WakuNetworkRelay {
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.waku.relay",
                                                 attributes: .concurrent)
     public var onConnect: (() -> ())?
-    
+    let jsonRpcHistory: JsonRpcHistoryRecording
     public var onMessage: ((String, String) -> ())?
     private var transport: Dispatching
     var subscriptions: [String: String] = [:]
@@ -28,14 +28,21 @@ public final class WakuNetworkRelay {
     private let logger: ConsoleLogging
     
     init(transport: Dispatching,
-         logger: ConsoleLogging) {
+         logger: ConsoleLogging,
+         jsonRpcHistory: JsonRpcHistoryRecording) {
         self.logger = logger
         self.transport = transport
+        self.jsonRpcHistory = jsonRpcHistory
         setUpBindings()
     }
     
-    public convenience init(logger: ConsoleLogging, url: URL) {
-        self.init(transport: Dispatcher(url: url), logger: logger)
+    public convenience init(logger: ConsoleLogging,
+                            url: URL,
+                            keyValueStorage: KeyValueStorage,
+                            uniqueIdentifier: String?) {
+        self.init(transport: Dispatcher(url: url),
+                  logger: logger,
+                  jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: keyValueStorage, uniqueIdentifier: uniqueIdentifier))
     }
     
     public func connect() {

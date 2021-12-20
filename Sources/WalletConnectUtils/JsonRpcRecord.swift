@@ -1,7 +1,7 @@
 
 import Foundation
 
-struct JsonRpcRecord: Codable {
+public struct JsonRpcRecord: Codable {
     let id: Int64
     let topic: String
     let request: Request
