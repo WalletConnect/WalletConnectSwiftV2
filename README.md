@@ -75,7 +75,7 @@ Request parameters can be type casted based on request method as below:
 Add .package(url:_:) to your Package.swift:
 ```Swift
 dependencies: [
-    .package(url: "https://github.com/WalletConnect-Labs/WalletConnectSwiftV2", .branch("main")),
+    .package(url: "https://github.com/WalletConnect/WalletConnectSwiftV2", .branch("main")),
 ],
 ```
 ## Example App
