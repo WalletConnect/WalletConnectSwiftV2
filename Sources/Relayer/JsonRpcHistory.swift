@@ -3,7 +3,7 @@ import Foundation
 import WalletConnectUtils
 
 
-class JsonRpcHistory<T, U> where T: Codable&Equatable , U: Codable&Equatable{
+class JsonRpcHistory<T> where T: Codable&Equatable {
     enum RecordingError: Error {
         case jsonRpcDuplicateDetected
     }
