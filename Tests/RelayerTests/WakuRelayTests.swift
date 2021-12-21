@@ -12,7 +12,7 @@ class WakuRelayTests: XCTestCase {
     override func setUp() {
         dispatcher = MockedJSONRPCTransport()
         let logger = ConsoleLogger()
-        wakuRelay = WakuNetworkRelay(transport: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), uniqueIdentifier: nil)
+        wakuRelay = WakuNetworkRelay(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), uniqueIdentifier: "")
     }
 
     override func tearDown() {

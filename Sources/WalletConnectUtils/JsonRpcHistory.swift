@@ -1,27 +1,25 @@
 
 import Foundation
-import WalletConnectUtils
 
-
-class JsonRpcHistory<T> where T: Codable&Equatable {
+public class JsonRpcHistory<T> where T: Codable&Equatable {
     enum RecordingError: Error {
         case jsonRpcDuplicateDetected
     }
-    let storage: KeyValueStore<JsonRpcRecord>
-    let logger: ConsoleLogging
-    let identifier: String
+    private let storage: KeyValueStore<JsonRpcRecord>
+    private let logger: ConsoleLogging
+    private let identifier: String
     
-    init(logger: ConsoleLogging, keyValueStorage: KeyValueStorage, uniqueIdentifier: String? = nil) {
+    public init(logger: ConsoleLogging, keyValueStorage: KeyValueStorage, identifier: String) {
         self.logger = logger
         self.storage = KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage)
-        self.identifier = "com.walletconnect.sdk.\(uniqueIdentifier ?? "")"
+        self.identifier = identifier
     }
     
-    func get(id: Int64) -> JsonRpcRecord? {
+    public func get(id: Int64) -> JsonRpcRecord? {
         try? storage.get(key: getKey(for: id))
     }
     
-    func set(topic: String, request: JSONRPCRequest<T>) throws {
+    public func set(topic: String, request: JSONRPCRequest<T>) throws {
         guard !exist(id: request.id) else {
             throw RecordingError.jsonRpcDuplicateDetected
         }
@@ -30,7 +28,7 @@ class JsonRpcHistory<T> where T: Codable&Equatable {
         try storage.set(record, forKey: getKey(for: request.id))
     }
     
-    func delete(topic: String) {
+    public func delete(topic: String) {
         storage.getAll().forEach { record in
             if record.topic == topic {
                 storage.delete(forKey: getKey(for: record.id))
@@ -38,7 +36,7 @@ class JsonRpcHistory<T> where T: Codable&Equatable {
         }
     }
     
-    func resolve(response: JsonRpcResponseTypes) throws {
+    public func resolve(response: JsonRpcResponseTypes) throws {
         guard var record = try? storage.get(key: getKey(for: response.id)) else { return }
         if record.response != nil {
             throw RecordingError.jsonRpcDuplicateDetected
@@ -48,12 +46,11 @@ class JsonRpcHistory<T> where T: Codable&Equatable {
         }
     }
     
-    func exist(id: Int64) -> Bool {
+    public func exist(id: Int64) -> Bool {
         return (try? storage.get(key: getKey(for: id))) != nil
     }
     
     private func getKey(for id: Int64) -> String {
-        let prefix = "\(identifier).wc_json_rpc_record."
-        return "\(prefix)\(id)"
+        return "com.walletconnect.sdk.\(identifier).\(id)"
     }
 }

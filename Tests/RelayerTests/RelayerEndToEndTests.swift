@@ -14,7 +14,7 @@ final class RelayerEndToEndTests: XCTestCase {
     func makeRelayer() -> WakuNetworkRelay {
         let logger = ConsoleLogger()
         let dispatcher = Dispatcher(url: url)
-        return WakuNetworkRelay(transport: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), uniqueIdentifier: nil)
+        return WakuNetworkRelay(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), uniqueIdentifier: "")
     }
     
     func testSubscribe() {

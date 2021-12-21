@@ -5,15 +5,18 @@ import WalletConnectUtils
 
 
 public final class WakuNetworkRelay {
+    enum RelyerError: Error {
+        case subscriptionIdNotFound
+    }
     private typealias SubscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>
     private typealias SubscriptionResponse = JSONRPCResponse<String>
     private typealias RequestAcknowledgement = JSONRPCResponse<Bool>
-    private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.waku.relay",
+    private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.relayer",
                                                 attributes: .concurrent)
     public var onConnect: (() -> ())?
     let jsonRpcSubscriptionsHistory: JsonRpcHistory<RelayJSONRPC.SubscriptionParams>
     public var onMessage: ((String, String) -> ())?
-    private var transport: Dispatching
+    private var dispatcher: Dispatching
     var subscriptions: [String: String] = [:]
     let defaultTtl = 6*Time.hour
 
@@ -27,32 +30,33 @@ public final class WakuNetworkRelay {
     private let requestAcknowledgePublisherSubject = PassthroughSubject<JSONRPCResponse<Bool>, Never>()
     private let logger: ConsoleLogging
     
-    init(transport: Dispatching,
+    init(dispatcher: Dispatching,
          logger: ConsoleLogging,
          keyValueStorage: KeyValueStorage,
-         uniqueIdentifier: String?) {
+         uniqueIdentifier: String) {
         self.logger = logger
-        self.transport = transport
-        self.jsonRpcSubscriptionsHistory = JsonRpcHistory<RelayJSONRPC.SubscriptionParams>(logger: logger, keyValueStorage: keyValueStorage, uniqueIdentifier: uniqueIdentifier)
+        self.dispatcher = dispatcher
+        let historyIdentifier = "\(uniqueIdentifier).relayer.subscription_json_rpc_record"
+        self.jsonRpcSubscriptionsHistory = JsonRpcHistory<RelayJSONRPC.SubscriptionParams>(logger: logger, keyValueStorage: keyValueStorage, identifier: historyIdentifier)
         setUpBindings()
     }
     
     public convenience init(logger: ConsoleLogging,
                             url: URL,
                             keyValueStorage: KeyValueStorage,
-                            uniqueIdentifier: String?) {
-        self.init(transport: Dispatcher(url: url),
+                            uniqueIdentifier: String) {
+        self.init(dispatcher: Dispatcher(url: url),
                   logger: logger,
                   keyValueStorage: keyValueStorage,
                   uniqueIdentifier: uniqueIdentifier)
     }
     
     public func connect() {
-        transport.connect()
+        dispatcher.connect()
     }
     
     public func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) {
-        transport.disconnect(closeCode: closeCode)
+        dispatcher.disconnect(closeCode: closeCode)
     }
     
     @discardableResult public func publish(topic: String, payload: String, completion: @escaping ((Error?) -> ())) -> Int64 {
@@ -61,10 +65,9 @@ public final class WakuNetworkRelay {
         let requestJson = try! request.json()
         logger.debug("waku: Publishing Payload on Topic: \(topic)")
         var cancellable: AnyCancellable?
-        transport.send(requestJson) { [weak self] error in
+        dispatcher.send(requestJson) { [weak self] error in
             if let error = error {
-                self?.logger.debug("Failed to Publish Payload")
-                self?.logger.error(error)
+                self?.logger.debug("Failed to Publish Payload, error: \(error)")
                 cancellable?.cancel()
                 completion(error)
             }
@@ -84,9 +87,9 @@ public final class WakuNetworkRelay {
         let request = JSONRPCRequest(method: RelayJSONRPC.Method.subscribe.rawValue, params: params)
         let requestJson = try! request.json()
         var cancellable: AnyCancellable?
-        transport.send(requestJson) { [weak self] error in
+        dispatcher.send(requestJson) { [weak self] error in
             if let error = error {
-                self?.logger.error("Failed to Subscribe on Topic \(error)")
+                self?.logger.debug("Failed to Subscribe on Topic \(error)")
                 cancellable?.cancel()
                 completion(error)
             } else {
@@ -105,8 +108,7 @@ public final class WakuNetworkRelay {
     
     @discardableResult public func unsubscribe(topic: String, completion: @escaping ((Error?) -> ())) -> Int64? {
         guard let subscriptionId = subscriptions[topic] else {
-//            completion(WalletConnectError.internal(.subscriptionIdNotFound))
-            //TODO - complete with Relayer error
+            completion(RelyerError.subscriptionIdNotFound)
             return nil
         }
         logger.debug("waku: Unsubscribing on Topic: \(topic)")
@@ -114,10 +116,10 @@ public final class WakuNetworkRelay {
         let request = JSONRPCRequest(method: RelayJSONRPC.Method.unsubscribe.rawValue, params: params)
         let requestJson = try! request.json()
         var cancellable: AnyCancellable?
-        transport.send(requestJson) { [weak self] error in
+        jsonRpcSubscriptionsHistory.delete(topic: topic)
+        dispatcher.send(requestJson) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to Unsubscribe on Topic")
-                self?.logger.error(error)
                 cancellable?.cancel()
                 completion(error)
             } else {
@@ -137,10 +139,10 @@ public final class WakuNetworkRelay {
     }
 
     private func setUpBindings() {
-        transport.onMessage = { [weak self] payload in
+        dispatcher.onMessage = { [weak self] payload in
             self?.handlePayloadMessage(payload)
         }
-        transport.onConnect = { [unowned self] in
+        dispatcher.onConnect = { [unowned self] in
             self.onConnect?()
         }
     }
@@ -179,10 +181,9 @@ public final class WakuNetworkRelay {
         let response = JSONRPCResponse(id: requestId, result: AnyCodable(true))
         let responseJson = try! response.json()
         try? jsonRpcSubscriptionsHistory.resolve(response: JsonRpcResponseTypes.response(response))
-        transport.send(responseJson) { [weak self] error in
+        dispatcher.send(responseJson) { [weak self] error in
             if let error = error {
-                self?.logger.debug("Failed to Respond for request id: \(requestId)")
-                self?.logger.error(error)
+                self?.logger.debug("Failed to Respond for request id: \(requestId), error: \(error)")
             }
         }
     }
