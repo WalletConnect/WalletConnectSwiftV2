@@ -34,7 +34,9 @@ class CryptoTests: XCTestCase {
     func testSetGetAgreementKeys() {
         let topic = "topic"
         XCTAssertNil(crypto.getAgreementKeys(for: topic))
-        let agreementKeys = AgreementKeys(sharedSecret: CryptoTestData.expectedSharedSecret, publicKey: CryptoTestData._publicKeyA)
+        let agreementKeys = AgreementKeys(
+            sharedSecret: CryptoTestData.expectedSharedSecret,
+            publicKey: try! Curve25519.KeyAgreement.PublicKey(rawRepresentation: CryptoTestData._publicKeyA))
         try? crypto.set(agreementKeys: agreementKeys, topic: topic)
         let derivedAgreementKeys = crypto.getAgreementKeys(for: topic)
         XCTAssertEqual(agreementKeys, derivedAgreementKeys)

@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 struct PairingSequence: ExpirableSequence {
     let topic: String
@@ -64,9 +65,9 @@ extension PairingSequence {
         self.init(topic: topic, relay: relay, selfParticipant: selfParticipant, expiryDate: expiryDate, sequenceState: .right(settledState))
     }
     
-    static func makeProposed(uri: WalletConnectURI) -> PairingSequence {
+    static func buildProposedFromURI(_ uri: WalletConnectURI) -> PairingSequence {
         let proposal = PairingProposal.createFromURI(uri)
-        PairingSequence(
+        return PairingSequence(
             topic: proposal.topic,
             relay: proposal.relay,
             selfParticipant: PairingType.Participant(publicKey: proposal.proposer.publicKey),
@@ -74,6 +75,20 @@ extension PairingSequence {
             pendingState: Pending(proposal: proposal, status: .proposed)
         )
     }
+    
+////    static func buildRespondedFromProposal(_ proposal: PairingProposal, publicKey: Curve25519.KeyAgreement.PublicKey) -> PairingSequence {
+//    static func buildRespondedFromProposal(_ proposal: PairingProposal, agreementKeys: AgreementKeys) -> PairingSequence {
+//        PairingSequence(
+//            topic: proposal.topic,
+//            relay: proposal.relay,
+//            selfParticipant: PairingType.Participant(publicKey: <#T##String#>),
+//            expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
+//            pendingState: Pending(
+//                proposal: proposal,
+//                status: .responded(<#T##String#>)
+//            )
+//        )
+//    }
 }
     
 extension PairingSequence {

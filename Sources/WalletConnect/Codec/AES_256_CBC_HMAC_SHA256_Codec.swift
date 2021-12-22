@@ -20,10 +20,10 @@ class AES_256_CBC_HMAC_SHA256_Codec: Codec {
         let (encryptionKey, authenticationKey) = getKeyPair(from: agreementKeys.sharedSecret)
         let plainTextData = try data(string: plainText)
         let (cipherText, iv) = try encrypt(key: encryptionKey, data: plainTextData)
-        let dataToMac = iv + agreementKeys.publicKey + cipherText
+        let dataToMac = iv + agreementKeys.publicKey.rawRepresentation + cipherText
         let hmac = try hmacAuthenticator.generateAuthenticationDigest(for: dataToMac, using: authenticationKey)
         return EncryptionPayload(iv: iv,
-                                 publicKey: agreementKeys.publicKey,
+                                 publicKey: agreementKeys.publicKey.rawRepresentation,
                                  mac: hmac,
                                  cipherText: cipherText)
     }

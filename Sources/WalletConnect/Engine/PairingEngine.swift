@@ -79,7 +79,7 @@ final class PairingEngine {
         
         let relay = RelayProtocolOptions(protocol: "waku", params: nil)
         let uri = WalletConnectURI(topic: topic, publicKey: publicKey, isController: isController, relay: relay)
-        let pendingPairing = PairingSequence.makeProposed(uri: uri)
+        let pendingPairing = PairingSequence.buildProposedFromURI(uri)
         
         sequencesStore.setSequence(pendingPairing)
         wcSubscriber.setSubscription(topic: topic)
@@ -97,24 +97,26 @@ final class PairingEngine {
         }
         
         let privateKey = crypto.makePrivateKey()
-        let selfPublicKey = privateKey.publicKey.rawRepresentation.toHexString()
+        try? crypto.set(privateKey: privateKey) // TODO: Handle error
+        let selfPublicKey = privateKey.publicKey.hexRepresentation
         
         let agreementKeys = try! Crypto.generateAgreementKeys(
             peerPublicKey: Data(hex: proposal.proposer.publicKey),
             privateKey: privateKey)
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
+        
         let selfParticipant = PairingType.Participant(publicKey: selfPublicKey)
+        
         let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : selfPublicKey
         
-        let pending = PairingSequence.Pending(
-            proposal: proposal,
-            status: .responded(settledTopic))
         let pendingPairing = PairingSequence(
             topic: proposal.topic,
             relay: proposal.relay,
-            selfParticipant: PairingType.Participant(publicKey: selfPublicKey),
+            selfParticipant: selfParticipant,
             expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
-            pendingState: pending)
+            pendingState: PairingSequence.Pending(
+                proposal: proposal,
+                status: .responded(settledTopic)))
         
         let settled = PairingSequence.Settled(
             peer: PairingType.Participant(publicKey: proposal.proposer.publicKey),
@@ -122,7 +124,7 @@ final class PairingEngine {
                 jsonrpc: proposal.permissions.jsonrpc,
                 controller: Controller(publicKey: controllerKey)),
             state: nil,
-            status: .preSettled) // FIXME: State
+            status: .preSettled)
         let settledPairing = PairingSequence(
             topic: settledTopic,
             relay: proposal.relay,
@@ -137,7 +139,7 @@ final class PairingEngine {
         sequencesStore.setSequence(settledPairing)
         
         try? crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
-        try? crypto.set(privateKey: privateKey) // TODO: Handle error
+        
         
         // publish approve on topic A
         let approveParams = PairingType.ApproveParams(

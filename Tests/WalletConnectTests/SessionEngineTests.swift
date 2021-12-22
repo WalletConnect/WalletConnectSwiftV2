@@ -34,6 +34,13 @@ fileprivate extension WCRequest {
     }
 }
 
+extension AgreementKeys {
+    
+    static func stub() -> AgreementKeys {
+        AgreementKeys(sharedSecret: Data(), publicKey: Curve25519.KeyAgreement.PrivateKey().publicKey)
+    }
+}
+
 //fileprivate func deriveTopic(publicKey: String, privateKey: Crypto.X25519.PrivateKey) -> String {
 //    try! Crypto.X25519.generateAgreementKeys(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
 //}
@@ -90,7 +97,7 @@ final class SessionEngineTests: XCTestCase {
         let topicB = pairing.topic
         let topicC = topicGenerator.topic
         
-        let agreementKeys = AgreementKeys(sharedSecret: Data(), publicKey: Data())
+        let agreementKeys = AgreementKeys.stub()
         cryptoMock.set(agreementKeys: agreementKeys, topic: topicB)
         let permissions = SessionType.Permissions.stub()
         let relayOptions = RelayProtocolOptions(protocol: "", params: nil)
@@ -115,7 +122,7 @@ final class SessionEngineTests: XCTestCase {
         let topicB = pairing.topic
         let topicC = topicGenerator.topic
         
-        let agreementKeys = AgreementKeys(sharedSecret: Data(), publicKey: Data())
+        let agreementKeys = AgreementKeys.stub()
         cryptoMock.set(agreementKeys: agreementKeys, topic: topicB)
         let permissions = SessionType.Permissions.stub()
         let relayOptions = RelayProtocolOptions(protocol: "", params: nil)
@@ -174,7 +181,7 @@ final class SessionEngineTests: XCTestCase {
         let topicC = String.generateTopic()!
         let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
         
-        let agreementKeys = AgreementKeys(sharedSecret: Data(), publicKey: Data())
+        let agreementKeys = AgreementKeys.stub()
         cryptoMock.set(agreementKeys: agreementKeys, topic: topicC)
         
         let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: isController, metadata: metadata)
@@ -211,7 +218,7 @@ final class SessionEngineTests: XCTestCase {
         let topicC = String.generateTopic()!
         let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
         
-        let agreementKeys = AgreementKeys(sharedSecret: Data(), publicKey: Data())
+        let agreementKeys = AgreementKeys.stub()
         cryptoMock.set(agreementKeys: agreementKeys, topic: topicC)
         
         let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: isController, metadata: metadata)
@@ -267,7 +274,7 @@ final class SessionEngineTests: XCTestCase {
         let payload = WCRequestSubscriptionPayload(topic: topicC, wcRequest: request)
         let pairing = Pairing.stub()
 
-        let agreementKeys = AgreementKeys(sharedSecret: Data(), publicKey: Data())
+        let agreementKeys = AgreementKeys.stub()
         cryptoMock.set(agreementKeys: agreementKeys, topic: pairing.topic)
 
         engine.proposeSession(settledPairing: pairing, permissions: permissions, relay: relayOptions)

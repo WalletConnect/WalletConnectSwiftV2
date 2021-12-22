@@ -5,7 +5,8 @@ import CryptoKit
 
 struct AgreementKeys: Equatable {
     let sharedSecret: Data
-    let publicKey: Data
+//    let publicKey: Data
+    let publicKey: Curve25519.KeyAgreement.PublicKey
     
     func derivedTopic() -> String {
         sharedSecret.sha256().toHexString()
@@ -16,6 +17,13 @@ extension Curve25519.KeyAgreement.PublicKey {
     
     var hexRepresentation: String {
         rawRepresentation.toHexString()
+    }
+}
+
+extension Curve25519.KeyAgreement.PublicKey: Equatable {
+    
+    public static func == (lhs: Curve25519.KeyAgreement.PublicKey, rhs: Curve25519.KeyAgreement.PublicKey) -> Bool {
+        lhs.rawRepresentation == rhs.rawRepresentation
     }
 }
 
@@ -54,7 +62,8 @@ class Crypto: CryptoStorageProtocol {
     }
     
     func set(agreementKeys: AgreementKeys, topic: String) throws {
-        let agreement = agreementKeys.sharedSecret + agreementKeys.publicKey
+//        let agreement = agreementKeys.sharedSecret + agreementKeys.publicKey
+        let agreement = agreementKeys.sharedSecret + agreementKeys.publicKey.rawRepresentation
         try keychain.add(agreement, forKey: topic)
     }
     
@@ -63,7 +72,7 @@ class Crypto: CryptoStorageProtocol {
             return nil
         }
         let (sharedSecret, publicKey) = split(concatinatedAgreementKeys: agreement)
-        return AgreementKeys(sharedSecret: sharedSecret, publicKey: publicKey)
+        return AgreementKeys(sharedSecret: sharedSecret, publicKey: try! Curve25519.KeyAgreement.PublicKey(rawRepresentation: publicKey))
     }
     
 //    func _set(agreementKeys: AgreementKeys, topic: String) {
@@ -112,6 +121,6 @@ extension Crypto {
         let peerPublicKey = try Curve25519.KeyAgreement.PublicKey(rawRepresentation: peerPublicKey)
         let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: peerPublicKey)
         let rawSharedSecret = sharedSecret.withUnsafeBytes { return Data(Array($0)) }
-        return AgreementKeys(sharedSecret: rawSharedSecret, publicKey: privateKey.publicKey.rawRepresentation)
+        return AgreementKeys(sharedSecret: rawSharedSecret, publicKey: privateKey.publicKey)
     }
 }
