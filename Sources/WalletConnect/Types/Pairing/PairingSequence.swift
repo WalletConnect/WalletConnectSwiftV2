@@ -76,19 +76,36 @@ extension PairingSequence {
         )
     }
     
-////    static func buildRespondedFromProposal(_ proposal: PairingProposal, publicKey: Curve25519.KeyAgreement.PublicKey) -> PairingSequence {
-//    static func buildRespondedFromProposal(_ proposal: PairingProposal, agreementKeys: AgreementKeys) -> PairingSequence {
-//        PairingSequence(
-//            topic: proposal.topic,
-//            relay: proposal.relay,
-//            selfParticipant: PairingType.Participant(publicKey: <#T##String#>),
-//            expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
-//            pendingState: Pending(
-//                proposal: proposal,
-//                status: .responded(<#T##String#>)
-//            )
-//        )
-//    }
+    static func buildRespondedFromProposal(_ proposal: PairingProposal, agreementKeys: AgreementKeys) -> PairingSequence {
+        PairingSequence(
+            topic: proposal.topic,
+            relay: proposal.relay,
+            selfParticipant: PairingType.Participant(publicKey: agreementKeys.publicKey.hexRepresentation),
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
+            pendingState: Pending(
+                proposal: proposal,
+                status: .responded(agreementKeys.derivedTopic())
+            )
+        )
+    }
+    
+    static func buildPreSettledFromProposal(_ proposal: PairingProposal, agreementKeys: AgreementKeys) -> PairingSequence {
+        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : agreementKeys.publicKey.hexRepresentation
+        return PairingSequence(
+            topic: agreementKeys.derivedTopic(),
+            relay: proposal.relay,
+            selfParticipant: PairingType.Participant(publicKey: agreementKeys.publicKey.hexRepresentation),
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(proposal.ttl)),
+            settledState: Settled(
+                peer: PairingType.Participant(publicKey: proposal.proposer.publicKey),
+                permissions: PairingType.Permissions(
+                    jsonrpc: proposal.permissions.jsonrpc,
+                    controller: Controller(publicKey: controllerKey)),
+                state: nil,
+                status: .preSettled
+            )
+        )
+    }
 }
     
 extension PairingSequence {

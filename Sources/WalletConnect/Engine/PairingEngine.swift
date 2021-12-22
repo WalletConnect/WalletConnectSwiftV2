@@ -103,45 +103,19 @@ final class PairingEngine {
         let agreementKeys = try! Crypto.generateAgreementKeys(
             peerPublicKey: Data(hex: proposal.proposer.publicKey),
             privateKey: privateKey)
-        let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
         
-        let selfParticipant = PairingType.Participant(publicKey: selfPublicKey)
-        
-        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : selfPublicKey
-        
-        let pendingPairing = PairingSequence(
-            topic: proposal.topic,
-            relay: proposal.relay,
-            selfParticipant: selfParticipant,
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
-            pendingState: PairingSequence.Pending(
-                proposal: proposal,
-                status: .responded(settledTopic)))
-        
-        let settled = PairingSequence.Settled(
-            peer: PairingType.Participant(publicKey: proposal.proposer.publicKey),
-            permissions: PairingType.Permissions(
-                jsonrpc: proposal.permissions.jsonrpc,
-                controller: Controller(publicKey: controllerKey)),
-            state: nil,
-            status: .preSettled)
-        let settledPairing = PairingSequence(
-            topic: settledTopic,
-            relay: proposal.relay,
-            selfParticipant: selfParticipant,
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(proposal.ttl)),
-            settledState: settled)
+        let settledTopic = agreementKeys.derivedTopic()
+        let pendingPairing = PairingSequence.buildRespondedFromProposal(proposal, agreementKeys: agreementKeys)
+        let settledPairing = PairingSequence.buildPreSettledFromProposal(proposal, agreementKeys: agreementKeys)
         
         wcSubscriber.setSubscription(topic: proposal.topic)
         sequencesStore.setSequence(pendingPairing)
-        
         wcSubscriber.setSubscription(topic: settledTopic)
         sequencesStore.setSequence(settledPairing)
         
         try? crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         
-        
-        // publish approve on topic A
+        let selfParticipant = PairingType.Participant(publicKey: selfPublicKey)
         let approveParams = PairingType.ApproveParams(
             relay: proposal.relay,
             responder: selfParticipant,
