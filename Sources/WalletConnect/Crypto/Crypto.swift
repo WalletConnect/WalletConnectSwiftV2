@@ -5,7 +5,6 @@ import CryptoKit
 
 struct AgreementKeys: Equatable {
     let sharedSecret: Data
-//    let publicKey: Data
     let publicKey: Curve25519.KeyAgreement.PublicKey
     
     func derivedTopic() -> String {

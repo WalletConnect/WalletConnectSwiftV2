@@ -47,6 +47,10 @@ struct SessionSequence: ExpirableSequence {
         isSettled && settled?.peer.publicKey == settled?.permissions.controller?.publicKey
     }
     
+    static var timeToLiveProposed: Int {
+        Time.hour
+    }
+    
     static var timeToLivePending: Int {
         Time.day
     }
@@ -83,6 +87,74 @@ extension SessionSequence {
     init(topic: String, relay: RelayProtocolOptions, selfParticipant: SessionType.Participant, expiryDate: Date, settledState: Settled) {
         self.init(topic: topic, relay: relay, selfParticipant: selfParticipant, expiryDate: expiryDate, sequenceState: .right(settledState))
     }
+    
+    static func buildProposedFromProposal(_ proposal: SessionType.Proposal) -> SessionSequence {
+        SessionSequence(
+            topic: proposal.topic,
+            relay: proposal.relay,
+            selfParticipant: SessionType.Participant(publicKey: proposal.proposer.publicKey, metadata: proposal.proposer.metadata),
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveProposed)),
+            pendingState: Pending(
+                status: .proposed,
+                proposal: proposal,
+                outcomeTopic: nil
+            )
+        )
+    }
+    
+    static func buildRespondedFromProposal(_ proposal: SessionType.Proposal, agreementKeys: AgreementKeys, metadata: AppMetadata) -> SessionSequence {
+        SessionSequence(
+            topic: proposal.topic,
+            relay: proposal.relay,
+            selfParticipant: SessionType.Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata),
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
+            pendingState: Pending(
+                status: .responded,
+                proposal: proposal,
+                outcomeTopic: agreementKeys.derivedTopic()
+            )
+        )
+    }
+    
+    static func buildPreSettledFromProposal(_ proposal: SessionType.Proposal, agreementKeys: AgreementKeys, metadata: AppMetadata, accounts: Set<String>) -> SessionSequence {
+        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : agreementKeys.publicKey.hexRepresentation
+        return SessionSequence(
+            topic: agreementKeys.derivedTopic(),
+            relay: proposal.relay,
+            selfParticipant: SessionType.Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata),
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(proposal.ttl)),
+            settledState: Settled(
+                peer: SessionType.Participant(publicKey: proposal.proposer.publicKey, metadata: proposal.proposer.metadata),
+                permissions: SessionType.Permissions(
+                    blockchain: proposal.permissions.blockchain,
+                    jsonrpc: proposal.permissions.jsonrpc,
+                    notifications: proposal.permissions.notifications,
+                    controller: Controller(publicKey: controllerKey)),
+                state: SessionType.State(accounts: accounts),
+                status: .acknowledged
+            )
+        )
+    }
+    
+    static func buildAcknowledgedFromApproval(_ approveParams: SessionType.ApproveParams, proposal: SessionType.Proposal, agreementKeys: AgreementKeys, metadata: AppMetadata) -> SessionSequence {
+        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : approveParams.responder.publicKey
+        return SessionSequence(
+            topic: agreementKeys.derivedTopic(),
+            relay: approveParams.relay,
+            selfParticipant: SessionType.Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata),
+            expiryDate: Date(timeIntervalSince1970: TimeInterval(approveParams.expiry)),
+            settledState: Settled(
+                peer: SessionType.Participant(publicKey: approveParams.responder.publicKey, metadata: approveParams.responder.metadata),
+                permissions: SessionType.Permissions(
+                    blockchain: proposal.permissions.blockchain,
+                    jsonrpc: proposal.permissions.jsonrpc,
+                    notifications: proposal.permissions.notifications,
+                    controller: Controller(publicKey: controllerKey)),
+                state: approveParams.state,
+                status: .acknowledged
+            )
+        )
+    }
 }
 
 extension SessionSequence {
@@ -97,5 +169,11 @@ extension SessionSequence {
         let peer: SessionType.Participant
         var permissions: SessionType.Permissions
         var state: SessionType.State
+        var status: Status
+        
+        enum Status: Codable {
+            case preSettled
+            case acknowledged
+        }
     }
 }

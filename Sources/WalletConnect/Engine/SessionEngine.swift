@@ -69,29 +69,19 @@ final class SessionEngine {
         logger.debug("Propose Session on topic: \(pendingSessionTopic)")
         
         let privateKey = crypto.makePrivateKey()
+        try! crypto.set(privateKey: privateKey) // TODO: Handle error
         let publicKey = privateKey.publicKey.rawRepresentation.toHexString()
-        
-        let proposer = SessionType.Proposer(publicKey: publicKey, controller: isController, metadata: metadata)
-        let signal = SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: settledPairing.topic))
         
         let proposal = SessionType.Proposal(
             topic: pendingSessionTopic,
             relay: relay,
-            proposer: proposer,
-            signal: signal,
+            proposer: SessionType.Proposer(publicKey: publicKey, controller: isController, metadata: metadata),
+            signal: SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: settledPairing.topic)),
             permissions: permissions,
             ttl: SessionSequence.timeToLivePending)
         
-        let selfParticipant = SessionType.Participant(publicKey: publicKey, metadata: metadata)
+        let pendingSession = SessionSequence.buildProposedFromProposal(proposal)
         
-        let pendingSession = SessionSequence(
-            topic: pendingSessionTopic,
-            relay: relay,
-            selfParticipant: selfParticipant,
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
-            pendingState: SessionSequence.Pending(status: .proposed, proposal: proposal, outcomeTopic: nil))
-        
-        try! crypto.set(privateKey: privateKey)
         sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: pendingSessionTopic)
         let pairingAgreementKeys = crypto.getAgreementKeys(for: settledPairing.topic)!
@@ -110,6 +100,7 @@ final class SessionEngine {
         }
     }
     
+    // TODO: Check matching controller
     func approve(proposal: SessionType.Proposal, accounts: Set<String>) {
         logger.debug("Approve session")
         let privateKey = crypto.makePrivateKey()
@@ -118,44 +109,18 @@ final class SessionEngine {
         let agreementKeys = try! Crypto.generateAgreementKeys(
             peerPublicKey: Data(hex: proposal.proposer.publicKey),
             privateKey: privateKey)
-        let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
         
-        let pending = SessionSequence.Pending(
-            status: .responded,
-            proposal: proposal,
-            outcomeTopic: settledTopic)
-        let pendingSession = SessionSequence(
-            topic: proposal.topic,
-            relay: proposal.relay,
-            selfParticipant: SessionType.Participant(publicKey: selfPublicKey, metadata: metadata),
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
-            pendingState: pending)
-        
-        let sessionState: SessionType.State = SessionType.State(accounts: accounts)
-        let expiry = Int(Date().timeIntervalSince1970) + proposal.ttl
-        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : selfPublicKey
-        let controller = Controller(publicKey: controllerKey)
-        let proposedPermissions = proposal.permissions
-        let sessionPermissions = SessionType.Permissions(blockchain: proposedPermissions.blockchain, jsonrpc: proposedPermissions.jsonrpc, notifications: proposedPermissions.notifications, controller: controller)
-        
-        let settled = SessionSequence.Settled(
-            peer: SessionType.Participant(publicKey: proposal.proposer.publicKey, metadata: proposal.proposer.metadata),
-            permissions: sessionPermissions,
-            state: sessionState)
-        let settledSession = SessionSequence(
-            topic: settledTopic,
-            relay: proposal.relay,
-            selfParticipant: SessionType.Participant(publicKey: selfPublicKey, metadata: metadata),
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(proposal.ttl)),
-            settledState: settled)
+        let settledTopic = agreementKeys.derivedTopic()
+        let pendingSession = SessionSequence.buildRespondedFromProposal(proposal, agreementKeys: agreementKeys, metadata: metadata)
+        let settledSession = SessionSequence.buildPreSettledFromProposal(proposal, agreementKeys: agreementKeys, metadata: metadata, accounts: accounts)
         
         let approveParams = SessionType.ApproveParams(
             relay: proposal.relay,
             responder: SessionType.Participant(
                 publicKey: selfPublicKey,
                 metadata: metadata),
-            expiry: expiry,
-            state: sessionState)
+            expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
+            state: SessionType.State(accounts: accounts))
         let approvalPayload = WCRequest(method: .sessionApprove, params: .sessionApprove(approveParams))
         
         sequencesStore.setSequence(pendingSession)
@@ -505,42 +470,31 @@ final class SessionEngine {
                   logger.error("Could not find pending session for topic: \(topic)")
                   return
               }
-        let selfPublicKey = Data(hex: session.selfParticipant.publicKey)
-        let pubKey = try! Curve25519.KeyAgreement.PublicKey(rawRepresentation: selfPublicKey)
         logger.debug("handleSessionApprove")
+        
+        let pubKey = try! Curve25519.KeyAgreement.PublicKey(rawRepresentation: Data(hex: session.selfParticipant.publicKey))
         let privateKey = try! crypto.getPrivateKey(for: pubKey)!
         let peerPublicKey = Data(hex: approveParams.responder.publicKey)
         let agreementKeys = try! Crypto.generateAgreementKeys(peerPublicKey: peerPublicKey, privateKey: privateKey)
-        let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
+        let settledTopic = agreementKeys.derivedTopic()
         try! crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
-        let proposal = pendingSession.proposal
-        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : approveParams.responder.publicKey
-        let controller = Controller(publicKey: controllerKey)
-        let proposedPermissions = pendingSession.proposal.permissions
-        let sessionPermissions = SessionType.Permissions(blockchain: proposedPermissions.blockchain, jsonrpc: proposedPermissions.jsonrpc, notifications: proposedPermissions.notifications, controller: controller)
         
-        let peer = SessionType.Participant(publicKey: approveParams.responder.publicKey, metadata: approveParams.responder.metadata)
-        let settledSession = SessionSequence(
-            topic: settledTopic,
-            relay: approveParams.relay,
-            selfParticipant: SessionType.Participant(publicKey: selfPublicKey.toHexString(), metadata: metadata),
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(approveParams.expiry)),
-            settledState: SessionSequence.Settled(
-                peer: peer,
-                permissions: sessionPermissions,
-                state: approveParams.state))
+        let proposal = pendingSession.proposal
+        let settledSession = SessionSequence.buildAcknowledgedFromApproval(approveParams, proposal: proposal, agreementKeys: agreementKeys, metadata: metadata)
+        
         sequencesStore.delete(topic: proposal.topic)
         sequencesStore.setSequence(settledSession)
         
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
         
+        let peer = SessionType.Participant(publicKey: approveParams.responder.publicKey, metadata: approveParams.responder.metadata)
         let approvedSession = Session(
             topic: settledTopic,
             peer: peer.metadata,
             permissions: SessionPermissions(
-                blockchains: sessionPermissions.blockchain.chains,
-                methods: sessionPermissions.jsonrpc.methods))
+                blockchains: pendingSession.proposal.permissions.blockchain.chains,
+                methods: pendingSession.proposal.permissions.jsonrpc.methods))
         onSessionApproved?(approvedSession)
         
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
