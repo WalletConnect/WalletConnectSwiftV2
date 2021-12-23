@@ -13,7 +13,10 @@ final class RelayerEndToEndTests: XCTestCase {
     
     func makeRelayer() -> WakuNetworkRelay {
         let logger = ConsoleLogger()
-        let dispatcher = Dispatcher(url: url)
+        let socketConnectionObserver = SocketConnectionObserver()
+        let urlSession = URLSession(configuration: .default, delegate: socketConnectionObserver, delegateQueue: OperationQueue())
+        let socket = WebSocketSession(session: urlSession)
+        let dispatcher = Dispatcher(url: url, socket: socket, socketConnectionObserver: socketConnectionObserver)
         return WakuNetworkRelay(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), uniqueIdentifier: "")
     }
     

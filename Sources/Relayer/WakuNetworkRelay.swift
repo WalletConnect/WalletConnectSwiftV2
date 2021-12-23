@@ -45,7 +45,11 @@ public final class WakuNetworkRelay {
                             url: URL,
                             keyValueStorage: KeyValueStorage,
                             uniqueIdentifier: String) {
-        self.init(dispatcher: Dispatcher(url: url),
+        let socketConnectionObserver = SocketConnectionObserver()
+        let urlSession = URLSession(configuration: .default, delegate: socketConnectionObserver, delegateQueue: OperationQueue())
+        let socket = WebSocketSession(session: urlSession)
+        let dispatcher = Dispatcher(url: url, socket: socket, socketConnectionObserver: socketConnectionObserver)
+        self.init(dispatcher: dispatcher,
                   logger: logger,
                   keyValueStorage: keyValueStorage,
                   uniqueIdentifier: uniqueIdentifier)
