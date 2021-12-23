@@ -78,6 +78,8 @@ struct SessionSequence: ExpirableSequence {
     }
 }
 
+// MARK: - Initialization
+
 extension SessionSequence {
     
     init(topic: String, relay: RelayProtocolOptions, selfParticipant: SessionType.Participant, expiryDate: Date, pendingState: Pending) {
@@ -88,7 +90,7 @@ extension SessionSequence {
         self.init(topic: topic, relay: relay, selfParticipant: selfParticipant, expiryDate: expiryDate, sequenceState: .right(settledState))
     }
     
-    static func buildProposedFromProposal(_ proposal: SessionType.Proposal) -> SessionSequence {
+    static func buildProposed(proposal: SessionType.Proposal) -> SessionSequence {
         SessionSequence(
             topic: proposal.topic,
             relay: proposal.relay,
@@ -102,7 +104,7 @@ extension SessionSequence {
         )
     }
     
-    static func buildRespondedFromProposal(_ proposal: SessionType.Proposal, agreementKeys: AgreementKeys, metadata: AppMetadata) -> SessionSequence {
+    static func buildResponded(proposal: SessionType.Proposal, agreementKeys: AgreementKeys, metadata: AppMetadata) -> SessionSequence {
         SessionSequence(
             topic: proposal.topic,
             relay: proposal.relay,
@@ -116,7 +118,7 @@ extension SessionSequence {
         )
     }
     
-    static func buildPreSettledFromProposal(_ proposal: SessionType.Proposal, agreementKeys: AgreementKeys, metadata: AppMetadata, accounts: Set<String>) -> SessionSequence {
+    static func buildPreSettled(proposal: SessionType.Proposal, agreementKeys: AgreementKeys, metadata: AppMetadata, accounts: Set<String>) -> SessionSequence {
         let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : agreementKeys.publicKey.hexRepresentation
         return SessionSequence(
             topic: agreementKeys.derivedTopic(),
@@ -136,7 +138,7 @@ extension SessionSequence {
         )
     }
     
-    static func buildAcknowledgedFromApproval(_ approveParams: SessionType.ApproveParams, proposal: SessionType.Proposal, agreementKeys: AgreementKeys, metadata: AppMetadata) -> SessionSequence {
+    static func buildAcknowledged(approval approveParams: SessionType.ApproveParams, proposal: SessionType.Proposal, agreementKeys: AgreementKeys, metadata: AppMetadata) -> SessionSequence {
         let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : approveParams.responder.publicKey
         return SessionSequence(
             topic: agreementKeys.derivedTopic(),

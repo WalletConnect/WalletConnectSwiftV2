@@ -67,7 +67,7 @@ extension PairingSequence {
         self.init(topic: topic, relay: relay, selfParticipant: selfParticipant, expiryDate: expiryDate, sequenceState: .right(settledState))
     }
     
-    static func buildProposedFromURI(_ uri: WalletConnectURI) -> PairingSequence {
+    static func buildProposed(uri: WalletConnectURI) -> PairingSequence {
         let proposal = PairingProposal.createFromURI(uri)
         return PairingSequence(
             topic: proposal.topic,
@@ -78,7 +78,7 @@ extension PairingSequence {
         )
     }
     
-    static func buildRespondedFromProposal(_ proposal: PairingProposal, agreementKeys: AgreementKeys) -> PairingSequence {
+    static func buildResponded(proposal: PairingProposal, agreementKeys: AgreementKeys) -> PairingSequence {
         PairingSequence(
             topic: proposal.topic,
             relay: proposal.relay,
@@ -91,7 +91,7 @@ extension PairingSequence {
         )
     }
     
-    static func buildPreSettledFromProposal(_ proposal: PairingProposal, agreementKeys: AgreementKeys) -> PairingSequence {
+    static func buildPreSettled(proposal: PairingProposal, agreementKeys: AgreementKeys) -> PairingSequence {
         let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : agreementKeys.publicKey.hexRepresentation
         return PairingSequence(
             topic: agreementKeys.derivedTopic(),
@@ -109,7 +109,7 @@ extension PairingSequence {
         )
     }
     
-    static func buildAcknowledgedFromApproval(_ approveParams: PairingType.ApproveParams, proposal: PairingProposal, agreementKeys: AgreementKeys) -> PairingSequence {
+    static func buildAcknowledged(approval approveParams: PairingType.ApproveParams, proposal: PairingProposal, agreementKeys: AgreementKeys) -> PairingSequence {
         let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : approveParams.responder.publicKey
         return PairingSequence(
             topic: agreementKeys.derivedTopic(),

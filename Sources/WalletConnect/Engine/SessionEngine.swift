@@ -80,7 +80,7 @@ final class SessionEngine {
             permissions: permissions,
             ttl: SessionSequence.timeToLivePending)
         
-        let pendingSession = SessionSequence.buildProposedFromProposal(proposal)
+        let pendingSession = SessionSequence.buildProposed(proposal: proposal)
         
         sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: pendingSessionTopic)
@@ -111,8 +111,8 @@ final class SessionEngine {
             privateKey: privateKey)
         
         let settledTopic = agreementKeys.derivedTopic()
-        let pendingSession = SessionSequence.buildRespondedFromProposal(proposal, agreementKeys: agreementKeys, metadata: metadata)
-        let settledSession = SessionSequence.buildPreSettledFromProposal(proposal, agreementKeys: agreementKeys, metadata: metadata, accounts: accounts)
+        let pendingSession = SessionSequence.buildResponded(proposal: proposal, agreementKeys: agreementKeys, metadata: metadata)
+        let settledSession = SessionSequence.buildPreSettled(proposal: proposal, agreementKeys: agreementKeys, metadata: metadata, accounts: accounts)
         
         let approveParams = SessionType.ApproveParams(
             relay: proposal.relay,
@@ -480,7 +480,7 @@ final class SessionEngine {
         try! crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         
         let proposal = pendingSession.proposal
-        let settledSession = SessionSequence.buildAcknowledgedFromApproval(approveParams, proposal: proposal, agreementKeys: agreementKeys, metadata: metadata)
+        let settledSession = SessionSequence.buildAcknowledged(approval: approveParams, proposal: proposal, agreementKeys: agreementKeys, metadata: metadata)
         
         sequencesStore.delete(topic: proposal.topic)
         sequencesStore.setSequence(settledSession)

@@ -79,7 +79,7 @@ final class PairingEngine {
         
         let relay = RelayProtocolOptions(protocol: "waku", params: nil)
         let uri = WalletConnectURI(topic: topic, publicKey: publicKey, isController: isController, relay: relay)
-        let pendingPairing = PairingSequence.buildProposedFromURI(uri)
+        let pendingPairing = PairingSequence.buildProposed(uri: uri)
         
         sequencesStore.setSequence(pendingPairing)
         wcSubscriber.setSubscription(topic: topic)
@@ -105,8 +105,8 @@ final class PairingEngine {
             privateKey: privateKey)
         
         let settledTopic = agreementKeys.derivedTopic()
-        let pendingPairing = PairingSequence.buildRespondedFromProposal(proposal, agreementKeys: agreementKeys)
-        let settledPairing = PairingSequence.buildPreSettledFromProposal(proposal, agreementKeys: agreementKeys)
+        let pendingPairing = PairingSequence.buildResponded(proposal: proposal, agreementKeys: agreementKeys)
+        let settledPairing = PairingSequence.buildPreSettled(proposal: proposal, agreementKeys: agreementKeys)
         
         wcSubscriber.setSubscription(topic: proposal.topic)
         sequencesStore.setSequence(pendingPairing)
@@ -271,7 +271,7 @@ final class PairingEngine {
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
         try? crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         let proposal = pairingPending.proposal
-        let settledPairing = PairingSequence.buildAcknowledgedFromApproval(approveParams, proposal: proposal, agreementKeys: agreementKeys)
+        let settledPairing = PairingSequence.buildAcknowledged(approval: approveParams, proposal: proposal, agreementKeys: agreementKeys)
         
         sequencesStore.setSequence(settledPairing)
         sequencesStore.delete(topic: pendingPairingTopic)

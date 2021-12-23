@@ -61,7 +61,6 @@ class Crypto: CryptoStorageProtocol {
     }
     
     func set(agreementKeys: AgreementKeys, topic: String) throws {
-//        let agreement = agreementKeys.sharedSecret + agreementKeys.publicKey
         let agreement = agreementKeys.sharedSecret + agreementKeys.publicKey.rawRepresentation
         try keychain.add(agreement, forKey: topic)
     }
@@ -73,23 +72,6 @@ class Crypto: CryptoStorageProtocol {
         let (sharedSecret, publicKey) = split(concatinatedAgreementKeys: agreement)
         return AgreementKeys(sharedSecret: sharedSecret, publicKey: try! Curve25519.KeyAgreement.PublicKey(rawRepresentation: publicKey))
     }
-    
-//    func _set(agreementKeys: AgreementKeys, topic: String) {
-//        let agreement = agreementKeys.sharedSecret + agreementKeys.publicKey
-//        do {
-//            try keychain.add(agreement, forKey: topic)
-//        } catch {
-//            print("Error adding agreement keys: \(error)")
-//        }
-//    }
-//    
-//    func _getAgreementKeys(for topic: String) -> AgreementKeys? {
-//        guard let agreement = try? keychain.read(key: topic) as Data else {
-//            return nil
-//        }
-//        let (sharedSecret, publicKey) = split(concatinatedAgreementKeys: agreement)
-//        return AgreementKeys(sharedSecret: sharedSecret, publicKey: publicKey)
-//    }
     
     func deletePrivateKey(for publicKey: String) {
         do {
