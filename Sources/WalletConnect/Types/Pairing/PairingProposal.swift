@@ -5,47 +5,57 @@ struct PairingProposal: Codable {
     
     let topic: String
     let relay: RelayProtocolOptions
-    let proposer: PairingType.Proposer
-    let signal: PairingType.Signal
-    let permissions: PairingType.ProposedPermissions
+    let proposer: PairingProposer
+    let signal: PairingSignal
+    let permissions: ProposedPermissions
     let ttl: Int
     
     static func createFromURI(_ uri: WalletConnectURI) -> PairingProposal {
         PairingProposal(
             topic: uri.topic,
             relay: uri.relay,
-            proposer: PairingType.Proposer(
+            proposer: PairingProposer(
                 publicKey: uri.publicKey,
                 controller: uri.isController),
-            signal: PairingType.Signal(uri: uri.absoluteString),
-            permissions: PairingType.ProposedPermissions.default,
+            signal: PairingSignal(uri: uri.absoluteString),
+            permissions: ProposedPermissions.default,
             ttl: PairingSequence.timeToLiveSettled
         )
     }
 }
 
+struct PairingSignal: Codable, Equatable {
+    let type: String
+    let params: Params
+    
+    init(uri: String) {
+        self.type = "uri"
+        self.params = Params(uri: uri)
+    }
+    
+    struct Params: Codable, Equatable {
+        let uri: String
+    }
+}
+
+struct PairingProposer: Codable, Equatable {
+    let publicKey: String
+    let controller: Bool
+}
+
+struct ProposedPermissions: Codable, Equatable {
+    let jsonrpc: PairingType.JSONRPC
+    
+    static var `default`: ProposedPermissions {
+        ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [PairingType.PayloadMethods.sessionPropose.rawValue]))
+    }
+}
+
+struct PairingState: Codable, Equatable {
+    var metadata: AppMetadata
+}
+
 extension PairingType {
-    struct Proposal: Codable, Equatable {
-        let topic: String
-        let relay: RelayProtocolOptions
-        let proposer: Proposer
-        let signal: Signal
-        let permissions: ProposedPermissions
-        let ttl: Int
-    }
-    
-    struct Proposer: Codable, Equatable {
-        let publicKey: String
-        let controller: Bool
-    }
-    
-    struct ProposedPermissions: Codable, Equatable {
-        let jsonrpc: JSONRPC
-        
-        static var `default`: ProposedPermissions {
-            PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [PairingType.PayloadMethods.sessionPropose.rawValue]))
-        }
-    }
     
     struct Permissions: Codable, Equatable {
         let jsonrpc: JSONRPC

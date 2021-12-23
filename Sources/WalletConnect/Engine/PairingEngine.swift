@@ -115,8 +115,8 @@ final class PairingEngine {
         
         try? crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         
-        let selfParticipant = PairingType.Participant(publicKey: selfPublicKey)
-        let approveParams = PairingType.ApproveParams(
+        let selfParticipant = Participant(publicKey: selfPublicKey)
+        let approveParams = PairingApproval(
             relay: proposal.relay,
             responder: selfParticipant,
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
@@ -175,7 +175,7 @@ final class PairingEngine {
             logger.debug("Could not find pairing for topic \(topic)")
             return
         }
-        let params = WCRequest.Params.pairingUpdate(PairingType.UpdateParams(state: PairingType.State(metadata: appMetadata)))
+        let params = WCRequest.Params.pairingUpdate(PairingType.UpdateParams(state: PairingState(metadata: appMetadata)))
         let request = WCRequest(method: .pairingUpdate, params: params)
         relayer.request(topic: topic, payload: request) { [unowned self] result in
             switch result {
@@ -257,7 +257,7 @@ final class PairingEngine {
         }
     }
     
-    private func handlePairingApprove(approveParams: PairingType.ApproveParams, pendingPairingTopic: String, requestId: Int64) {
+    private func handlePairingApprove(approveParams: PairingApproval, pendingPairingTopic: String, requestId: Int64) {
         logger.debug("Responder Client approved pairing on topic: \(pendingPairingTopic)")
         guard let pendingPairing = try? sequencesStore.getSequence(forTopic: pendingPairingTopic), let pairingPending = pendingPairing.pending else {
             return

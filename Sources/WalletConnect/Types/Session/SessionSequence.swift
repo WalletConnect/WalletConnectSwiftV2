@@ -78,6 +78,32 @@ struct SessionSequence: ExpirableSequence {
     }
 }
 
+extension SessionSequence {
+    
+    struct Pending: Codable {
+        let status: Status
+        let proposal: SessionType.Proposal
+        let outcomeTopic: String?
+        
+        enum Status: Codable {
+            case proposed
+            case responded
+        }
+    }
+    
+    struct Settled: Codable {
+        let peer: SessionType.Participant
+        var permissions: SessionType.Permissions
+        var state: SessionType.State
+        var status: Status
+        
+        enum Status: Codable {
+            case preSettled
+            case acknowledged
+        }
+    }
+}
+
 // MARK: - Initialization
 
 extension SessionSequence {
@@ -156,26 +182,5 @@ extension SessionSequence {
                 status: .acknowledged
             )
         )
-    }
-}
-
-extension SessionSequence {
-    
-    struct Pending: Codable {
-        let status: SessionType.Pending.PendingStatus
-        let proposal: SessionType.Proposal
-        let outcomeTopic: String?
-    }
-    
-    struct Settled: Codable {
-        let peer: SessionType.Participant
-        var permissions: SessionType.Permissions
-        var state: SessionType.State
-        var status: Status
-        
-        enum Status: Codable {
-            case preSettled
-            case acknowledged
-        }
     }
 }

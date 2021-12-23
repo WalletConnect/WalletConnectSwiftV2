@@ -278,10 +278,6 @@ final class SessionEngine {
 
     //MARK: - Private
     
-    private func getDefaultPermissions() -> PairingType.ProposedPermissions {
-        PairingType.ProposedPermissions(jsonrpc: PairingType.JSONRPC(methods: [PairingType.PayloadMethods.sessionPropose.rawValue]))
-    }
-    
     private func setUpWCRequestHandling() {
         wcSubscriber.onReceivePayload = { [unowned self] subscriptionPayload in
             let requestId = subscriptionPayload.wcRequest.id

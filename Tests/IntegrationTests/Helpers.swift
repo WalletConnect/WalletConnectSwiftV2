@@ -30,11 +30,11 @@ extension WCRequest {
     }
 }
 
-extension PairingType.ApproveParams {
+extension PairingApproval {
     
-    static func stub() -> PairingType.ApproveParams {
+    static func stub() -> PairingApproval {
         let options = RelayProtocolOptions(protocol: "", params: nil)
-        let participant = PairingType.Participant(publicKey: "")
-        return PairingType.ApproveParams(relay: options, responder: participant, expiry: 0, state: nil)
+        let participant = Participant(publicKey: "")
+        return PairingApproval(relay: options, responder: participant, expiry: 0, state: nil)
     }
 }

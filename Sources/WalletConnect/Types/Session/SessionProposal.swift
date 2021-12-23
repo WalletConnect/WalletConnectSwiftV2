@@ -17,6 +17,14 @@ extension SessionType {
         public let metadata: AppMetadata
     }
     
+    struct Signal: Codable, Equatable {
+        struct Params: Codable, Equatable {
+            let topic: String
+        }
+        let method: String
+        let params: Params
+    }
+    
     public struct Permissions: Codable, Equatable {
         public private(set) var blockchain: Blockchain
         public private(set) var jsonrpc: JSONRPC

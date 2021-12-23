@@ -14,7 +14,7 @@ fileprivate extension SessionType.Permissions {
 
 fileprivate extension WCRequest {
     
-    var approveParams: PairingType.ApproveParams? {
+    var approveParams: PairingApproval? {
         guard case .pairingApprove(let approveParams) = self.params else { return nil }
         return approveParams
     }
@@ -145,9 +145,9 @@ final class PairingEngineTests: XCTestCase {
         let uri = engine.propose(permissions: SessionType.Permissions.stub())!
         let topicA = uri.topic
         
-        let approveParams = PairingType.ApproveParams(
+        let approveParams = PairingApproval(
             relay: RelayProtocolOptions(protocol: "", params: nil),
-            responder: PairingType.Participant(publicKey: responderPubKey),
+            responder: Participant(publicKey: responderPubKey),
             expiry: Time.day,
             state: nil)
         let request = WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
@@ -182,8 +182,3 @@ final class PairingEngineTests: XCTestCase {
 //        waitForExpectations(timeout: 0.01, handler: nil)
 //    }
 }
-
-fileprivate let sessionProposal = WCRequest(id: 0,
-                                                     jsonrpc: "2.0",
-                                                     method: WCRequest.Method.pairingPayload,
-                                                     params: WCRequest.Params.pairingPayload(PairingType.PayloadParams(request: PairingType.PayloadParams.Request(method: .sessionPropose, params: SessionType.ProposeParams(topic: "", relay: RelayProtocolOptions(protocol: "", params: []), proposer: SessionType.Proposer(publicKey: "", controller: false, metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil)), signal: SessionType.Signal(method: "", params: SessionType.Signal.Params(topic: "")), permissions: SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []), notifications: SessionType.Notifications(types: [])), ttl: 100)))))
