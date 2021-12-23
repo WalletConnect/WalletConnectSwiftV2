@@ -166,6 +166,7 @@ final class PairingEngineTests: XCTestCase {
         XCTAssertFalse(storageMock.hasSequence(forTopic: topicA), "The engine must clean any stored pairing on topic A.")
         XCTAssertNotNil(approvedPairing, "The engine should callback the approved pairing after settlement.")
         XCTAssertEqual(approvedPairing?.topic, topicB, "The approved pairing must settle on topic B.")
+        // TODO: Check if expiry time is correct
     }
     
 //    func testNotifyOnSessionProposal() {

@@ -55,6 +55,8 @@ struct PairingSequence: ExpirableSequence {
     }
 }
 
+// MARK: - Initialization
+
 extension PairingSequence {
     
     init(topic: String, relay: RelayProtocolOptions, selfParticipant: PairingType.Participant, expiryDate: Date, pendingState: Pending) {
@@ -103,6 +105,24 @@ extension PairingSequence {
                     controller: Controller(publicKey: controllerKey)),
                 state: nil,
                 status: .preSettled
+            )
+        )
+    }
+    
+    static func buildAcknowledgedFromApproval(_ approveParams: PairingType.ApproveParams, proposal: PairingProposal, agreementKeys: AgreementKeys) -> PairingSequence {
+        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : approveParams.responder.publicKey
+        return PairingSequence(
+            topic: agreementKeys.derivedTopic(),
+            relay: approveParams.relay , // Is it safe to just accept the approval params blindly?
+            selfParticipant: PairingType.Participant(publicKey: agreementKeys.publicKey.hexRepresentation),
+            expiryDate: Date(timeIntervalSince1970: TimeInterval(approveParams.expiry)),
+            settledState: Settled(
+                peer: PairingType.Participant(publicKey: approveParams.responder.publicKey),
+                permissions: PairingType.Permissions(
+                    jsonrpc: proposal.permissions.jsonrpc,
+                    controller: Controller(publicKey: controllerKey)),
+                state: approveParams.state,
+                status: .acknowledged
             )
         )
     }

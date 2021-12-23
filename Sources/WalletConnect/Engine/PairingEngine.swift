@@ -120,7 +120,7 @@ final class PairingEngine {
             relay: proposal.relay,
             responder: selfParticipant,
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
-            state: nil) // FIXME: State
+            state: nil) // Should this be removed?
         let approvalPayload = WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
         
         relayer.request(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
@@ -267,25 +267,12 @@ final class PairingEngine {
         let privateKey = try! crypto.getPrivateKey(for: pubKey)!
         let peerPublicKey = Data(hex: approveParams.responder.publicKey)
         let agreementKeys = try! Crypto.generateAgreementKeys(peerPublicKey: peerPublicKey, privateKey: privateKey)
+        
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
         try? crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         let proposal = pairingPending.proposal
-        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : peerPublicKey.toHexString()
-        let controller = Controller(publicKey: controllerKey)
+        let settledPairing = PairingSequence.buildAcknowledgedFromApproval(approveParams, proposal: proposal, agreementKeys: agreementKeys)
         
-        let peer = PairingType.Participant(publicKey: approveParams.responder.publicKey)
-        let settledPairing = PairingSequence(
-            topic: settledTopic,
-            relay: approveParams.relay,
-            selfParticipant: PairingType.Participant(publicKey: selfPublicKey.toHexString()),
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(approveParams.expiry)),
-            settledState: PairingSequence.Settled(
-                peer: peer,
-                permissions: PairingType.Permissions(
-                    jsonrpc: proposal.permissions.jsonrpc,
-                    controller: controller),
-                state: approveParams.state,
-                status: .acknowledged))
         sequencesStore.setSequence(settledPairing)
         sequencesStore.delete(topic: pendingPairingTopic)
         wcSubscriber.setSubscription(topic: settledTopic)
