@@ -6,9 +6,6 @@ import WalletConnectUtils
 import UIKit
 #endif
 
-extension ConsoleLogger: ConsoleLogging {}
-extension WakuNetworkRelay: NetworkRelaying {}
-
 public protocol WalletConnectClientDelegate: AnyObject {
     func didReceive(sessionProposal: SessionProposal)
     func didReceive(sessionRequest: SessionRequest)
