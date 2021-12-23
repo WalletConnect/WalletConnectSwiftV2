@@ -3,7 +3,7 @@
 import Foundation
 @testable import Relayer
 
-class MockedJSONRPCTransport: Dispatching {
+class DispatcherMock: Dispatching {
     var onConnect: (() -> ())?
     var onDisconnect: (() -> ())?
     var onMessage: ((String) -> ())?
