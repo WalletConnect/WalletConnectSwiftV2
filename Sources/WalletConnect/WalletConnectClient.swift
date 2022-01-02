@@ -82,7 +82,6 @@ public final class WalletConnectClient {
                 throw WalletConnectError.InternalReason.noSequenceForTopic
             }
             logger.debug("Proposing session on existing pairing")
-//            let permissions = SessionP
             let permissions = SessionPermissions(permissions: params.permissions)
             sessionEngine.proposeSession(settledPairing: Pairing(topic: pairing.topic, peer: nil), permissions: permissions, relay: pairing.relay)
             return nil

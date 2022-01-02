@@ -15,9 +15,9 @@ import WalletConnectUtils
 fileprivate extension SessionPermissions {
     static func stub() -> SessionPermissions {
         SessionPermissions(
-            blockchain: SessionType.Blockchain(chains: []),
-            jsonrpc: SessionType.JSONRPC(methods: []),
-            notifications: SessionType.Notifications(types: [])
+            blockchain: Blockchain(chains: []),
+            jsonrpc: JSONRPC(methods: []),
+            notifications: Notifications(types: [])
         )
     }
 }
