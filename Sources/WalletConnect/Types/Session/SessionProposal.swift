@@ -1,15 +1,31 @@
 
 import Foundation
 
+struct SessionState: Codable, Equatable {
+    var accounts: Set<String>
+}
+
+struct SessionProposal: Codable, Equatable {
+    let topic: String
+    let relay: RelayProtocolOptions
+    let proposer: SessionType.Proposer
+    let signal: SessionType.Signal
+    let permissions: SessionType.Permissions
+    let ttl: Int
+}
+
+//extension Session {
+//    struct Proposaal: Codable, Equatable {
+//        let topic: String
+//        let relay: RelayProtocolOptions
+//        let proposer: SessionType.Proposer
+//        let signal: SessionType.Signal
+//        let permissions: SessionType.Permissions
+//        let ttl: Int
+//    }
+//}
+
 extension SessionType {
-    public struct Proposal: Codable, Equatable {
-        public let topic: String
-        let relay: RelayProtocolOptions
-        public let proposer: Proposer
-        let signal: Signal
-        public let permissions: Permissions
-        public let ttl: Int
-    }
     
     public struct Proposer: Codable, Equatable {
         let publicKey: String
@@ -29,7 +45,7 @@ extension SessionType {
         public private(set) var blockchain: Blockchain
         public private(set) var jsonrpc: JSONRPC
         let notifications: Notifications?
-        var controller: Controller?
+        let controller: Controller?
         
         internal init(blockchain: SessionType.Blockchain, jsonrpc: SessionType.JSONRPC, notifications: SessionType.Notifications? = nil, controller: Controller? = nil) {
             self.blockchain = blockchain
@@ -45,7 +61,7 @@ extension SessionType {
             self.controller = nil
         }
         
-        mutating func upgrade(with sessionPermissions: SessionPermissions) {
+        mutating func upgrade(with sessionPermissions: Session.Permissions) {
             blockchain.chains.formUnion(sessionPermissions.blockchains)
             jsonrpc.methods.formUnion(sessionPermissions.methods)
         }

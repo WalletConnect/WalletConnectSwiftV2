@@ -23,7 +23,7 @@ fileprivate extension SessionType.Permissions {
 
 fileprivate extension WCRequest {
     
-    var sessionProposal: SessionType.Proposal? {
+    var sessionProposal: SessionProposal? {
         guard case .pairingPayload(let payload) = self.params else { return nil }
         return payload.request.params
     }
@@ -152,7 +152,7 @@ final class SessionEngineTests: XCTestCase {
         let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
         
         let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: isController, metadata: metadata)
-        let proposal = SessionType.Proposal(
+        let proposal = SessionProposal(
             topic: topicC,
             relay: RelayProtocolOptions(protocol: "", params: nil),
             proposer: proposer,
@@ -185,7 +185,7 @@ final class SessionEngineTests: XCTestCase {
         cryptoMock.set(agreementKeys: agreementKeys, topic: topicC)
         
         let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: isController, metadata: metadata)
-        let proposal = SessionType.Proposal(
+        let proposal = SessionProposal(
             topic: topicC,
             relay: RelayProtocolOptions(protocol: "", params: nil),
             proposer: proposer,
@@ -222,7 +222,7 @@ final class SessionEngineTests: XCTestCase {
         cryptoMock.set(agreementKeys: agreementKeys, topic: topicC)
         
         let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: isController, metadata: metadata)
-        let proposal = SessionType.Proposal(
+        let proposal = SessionProposal(
             topic: topicC,
             relay: RelayProtocolOptions(protocol: "", params: nil),
             proposer: proposer,
@@ -267,9 +267,9 @@ final class SessionEngineTests: XCTestCase {
         let relayOptions = RelayProtocolOptions(protocol: "", params: nil)
         let approveParams = SessionType.ApproveParams(
             relay: relayOptions,
-            responder: SessionType.Participant(publicKey: responderPubKey, metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil)),
+            responder: Participant(publicKey: responderPubKey, metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil)),
             expiry: Time.day,
-            state: SessionType.State(accounts: []))
+            state: SessionState(accounts: []))
         let request = WCRequest(method: .sessionApprove, params: .sessionApprove(approveParams))
         let payload = WCRequestSubscriptionPayload(topic: topicC, wcRequest: request)
         let pairing = Pairing.stub()

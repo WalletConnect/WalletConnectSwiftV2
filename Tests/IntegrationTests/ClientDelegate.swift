@@ -6,7 +6,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     var client: WalletConnectClient
     var onSessionSettled: ((Session)->())?
     var onPairingSettled: ((Pairing)->())?
-    var onSessionProposal: ((SessionProposal)->())?
+    var onSessionProposal: ((Session.Proposal)->())?
     var onSessionRequest: ((SessionRequest)->())?
     var onSessionRejected: ((String, SessionType.Reason)->())?
     var onSessionDelete: (()->())?
@@ -29,7 +29,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didSettle(pairing: Pairing) {
         onPairingSettled?(pairing)
     }
-    func didReceive(sessionProposal: SessionProposal) {
+    func didReceive(sessionProposal: Session.Proposal) {
         onSessionProposal?(sessionProposal)
     }
     func didReceive(sessionRequest: SessionRequest) {

@@ -10,7 +10,7 @@ extension ConsoleLogger: ConsoleLogging {}
 extension WakuNetworkRelay: NetworkRelaying {}
 
 public protocol WalletConnectClientDelegate: AnyObject {
-    func didReceive(sessionProposal: SessionProposal)
+    func didReceive(sessionProposal: Session.Proposal)
     func didReceive(sessionRequest: SessionRequest)
     func didDelete(sessionTopic: String, reason: SessionType.Reason)
     func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions)
@@ -104,12 +104,12 @@ public final class WalletConnectClient {
     }
     
     // for responder to approve a session proposal
-    public func approve(proposal: SessionProposal, accounts: Set<String>) {
+    public func approve(proposal: Session.Proposal, accounts: Set<String>) {
         sessionEngine.approve(proposal: proposal.proposal, accounts: accounts)
     }
     
     // for responder to reject a session proposal
-    public func reject(proposal: SessionProposal, reason: SessionType.Reason) {
+    public func reject(proposal: Session.Proposal, reason: SessionType.Reason) {
         sessionEngine.reject(proposal: proposal.proposal, reason: reason)
     }
     
@@ -117,7 +117,7 @@ public final class WalletConnectClient {
         sessionEngine.update(topic: topic, accounts: accounts)
     }
     
-    public func upgrade(topic: String, permissions: SessionPermissions) {
+    public func upgrade(topic: String, permissions: Session.Permissions) {
         sessionEngine.upgrade(topic: topic, permissions: permissions)
     }
     
@@ -174,7 +174,7 @@ public final class WalletConnectClient {
             self?.delegate?.didSettle(pairing: settledPairing)
         }
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
-            let permissions = SessionPermissions.init(blockchains: settledSession.permissions.blockchains, methods: settledSession.permissions.methods)
+            let permissions = Session.Permissions.init(blockchains: settledSession.permissions.blockchains, methods: settledSession.permissions.methods)
             let session = Session(topic: settledSession.topic, peer: settledSession.peer, permissions: permissions)
             delegate?.didSettle(session: session)
         }
@@ -204,10 +204,10 @@ public final class WalletConnectClient {
         }
     }
     
-    private func proposeSession(proposal: SessionType.Proposal) {
-        let sessionProposal = SessionProposal(
+    private func proposeSession(proposal: SessionProposal) {
+        let sessionProposal = Session.Proposal(
             proposer: proposal.proposer.metadata,
-            permissions: SessionPermissions(
+            permissions: Session.Permissions(
                 blockchains: proposal.permissions.blockchain.chains,
                 methods: proposal.permissions.jsonrpc.methods),
             proposal: proposal

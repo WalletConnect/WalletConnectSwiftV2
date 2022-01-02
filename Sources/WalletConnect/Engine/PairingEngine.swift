@@ -6,7 +6,7 @@ import CryptoKit
 final class PairingEngine {
     
     var onApprovalAcknowledgement: ((Pairing) -> Void)?
-    var onSessionProposal: ((SessionType.Proposal)->())?
+    var onSessionProposal: ((SessionProposal)->())?
     var onPairingApproved: ((Pairing, SessionType.Permissions, RelayProtocolOptions)->())?
     var onPairingUpdate: ((String, AppMetadata)->())?
     

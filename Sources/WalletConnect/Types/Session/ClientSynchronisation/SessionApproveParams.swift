@@ -6,6 +6,6 @@ extension SessionType {
         let relay: RelayProtocolOptions
         let responder: Participant
         let expiry: Int
-        let state: State
+        let state: SessionState
     }
 }

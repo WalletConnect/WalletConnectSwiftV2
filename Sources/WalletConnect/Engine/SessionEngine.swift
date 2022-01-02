@@ -56,8 +56,8 @@ final class SessionEngine {
     func getSettledSessions() -> [Session] {
         sequencesStore.getAll().compactMap {
             guard let settled = $0.settled else { return nil }
-            let permissions = SessionPermissions(blockchains: settled.permissions.blockchain.chains, methods: settled.permissions.jsonrpc.methods)
-            return Session(topic: $0.topic, peer: settled.peer.metadata, permissions: permissions)
+            let permissions = Session.Permissions(blockchains: settled.permissions.blockchain.chains, methods: settled.permissions.jsonrpc.methods)
+            return Session(topic: $0.topic, peer: settled.peer.metadata!, permissions: permissions)
         }
     }
     
@@ -72,7 +72,7 @@ final class SessionEngine {
         try! crypto.set(privateKey: privateKey) // TODO: Handle error
         let publicKey = privateKey.publicKey.rawRepresentation.toHexString()
         
-        let proposal = SessionType.Proposal(
+        let proposal = SessionProposal(
             topic: pendingSessionTopic,
             relay: relay,
             proposer: SessionType.Proposer(publicKey: publicKey, controller: isController, metadata: metadata),
@@ -101,7 +101,7 @@ final class SessionEngine {
     }
     
     // TODO: Check matching controller
-    func approve(proposal: SessionType.Proposal, accounts: Set<String>) {
+    func approve(proposal: SessionProposal, accounts: Set<String>) {
         logger.debug("Approve session")
         let privateKey = crypto.makePrivateKey()
         let selfPublicKey = privateKey.publicKey.rawRepresentation.toHexString()
@@ -116,11 +116,11 @@ final class SessionEngine {
         
         let approveParams = SessionType.ApproveParams(
             relay: proposal.relay,
-            responder: SessionType.Participant(
+            responder: Participant(
                 publicKey: selfPublicKey,
                 metadata: metadata),
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
-            state: SessionType.State(accounts: accounts))
+            state: SessionState(accounts: accounts))
         let approvalPayload = WCRequest(method: .sessionApprove, params: .sessionApprove(approveParams))
         
         sequencesStore.setSequence(pendingSession)
@@ -141,7 +141,7 @@ final class SessionEngine {
         }
     }
     
-    func reject(proposal: SessionType.Proposal, reason: SessionType.Reason) {
+    func reject(proposal: SessionProposal, reason: SessionType.Reason) {
         let rejectParams = SessionType.RejectParams(reason: reason)
         let rejectPayload = WCRequest(method: .sessionReject, params: .sessionReject(rejectParams))
         _ = relayer.request(topic: proposal.topic, payload: rejectPayload) { [weak self] result in
@@ -218,7 +218,7 @@ final class SessionEngine {
             return
         }
         session.update(accounts)
-        let params = WCRequest.Params.sessionUpdate(SessionType.UpdateParams(state: SessionType.State(accounts: accounts)))
+        let params = WCRequest.Params.sessionUpdate(SessionType.UpdateParams(state: SessionState(accounts: accounts)))
         let request = WCRequest(method: .sessionUpdate, params: params)
         relayer.request(topic: topic, payload: request) { [unowned self] result in
             switch result {
@@ -231,7 +231,7 @@ final class SessionEngine {
         }
     }
     
-    func upgrade(topic: String, permissions: SessionPermissions) {
+    func upgrade(topic: String, permissions: Session.Permissions) {
         guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
@@ -371,7 +371,7 @@ final class SessionEngine {
             respond(error: error, requestId: requestId, topic: topic)
             return
         }
-        let permissions = SessionPermissions(
+        let permissions = Session.Permissions(
             blockchains: upgradeParams.permissions.blockchain.chains,
             methods: upgradeParams.permissions.jsonrpc.methods)
         session.upgrade(permissions)
@@ -484,11 +484,11 @@ final class SessionEngine {
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
         
-        let peer = SessionType.Participant(publicKey: approveParams.responder.publicKey, metadata: approveParams.responder.metadata)
+//        let peer = Participant(publicKey: approveParams.responder.publicKey, metadata: approveParams.responder.metadata)
         let approvedSession = Session(
             topic: settledTopic,
-            peer: peer.metadata,
-            permissions: SessionPermissions(
+            peer: approveParams.responder.metadata!,
+            permissions: Session.Permissions(
                 blockchains: pendingSession.proposal.permissions.blockchain.chains,
                 methods: pendingSession.proposal.permissions.jsonrpc.methods))
         onSessionApproved?(approvedSession)
@@ -528,7 +528,7 @@ final class SessionEngine {
         }
     }
     
-    private func handleProposeResponse(topic: String, proposeParams: SessionType.Proposal, result: Result<JSONRPCResponse<AnyCodable>, Error>) {
+    private func handleProposeResponse(topic: String, proposeParams: SessionProposal, result: Result<JSONRPCResponse<AnyCodable>, Error>) {
         switch result {
         case .success:
             break
@@ -556,7 +556,7 @@ final class SessionEngine {
             let sessionSuccess = Session(
                 topic: settledTopic,
                 peer: proposal.proposer.metadata,
-                permissions: SessionPermissions(
+                permissions: Session.Permissions(
                     blockchains: proposal.permissions.blockchain.chains,
                     methods: proposal.permissions.jsonrpc.methods))
             onApprovalAcknowledgement?(sessionSuccess)
