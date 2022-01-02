@@ -20,7 +20,7 @@ final class ResponderViewController: UIViewController {
     }()
     let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
     var sessionItems: [ActiveSessionItem] = []
-    var currentProposal: SessionProposal?
+    var currentProposal: Session.Proposal?
     
     private let responderView: ResponderView = {
         ResponderView()
@@ -161,7 +161,7 @@ extension ResponderViewController: SessionViewControllerDelegate {
 
 extension ResponderViewController: WalletConnectClientDelegate {
     
-    func didReceive(sessionProposal: SessionProposal) {
+    func didReceive(sessionProposal: Session.Proposal) {
         print("[RESPONDER] WC: Did receive session proposal")
         let appMetadata = sessionProposal.proposer
         let info = SessionInfo(
@@ -193,7 +193,7 @@ extension ResponderViewController: WalletConnectClientDelegate {
 
     }
 
-    func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions) {
+    func didUpgrade(sessionTopic: String, permissions: Session.Permissions) {
 
     }
 

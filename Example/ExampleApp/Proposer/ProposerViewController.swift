@@ -57,10 +57,10 @@ final class ProposerViewController: UIViewController {
     private func connect() {
         print("[PROPOSER] Connecting to a pairing...")
         let connectParams = ConnectParams(
-            permissions: SessionType.Permissions(
-                blockchain: SessionType.Blockchain(chains: ["a chain"]),
-                jsonrpc: SessionType.JSONRPC(methods: ["a method"]),
-                notifications: SessionType.Notifications(types: [])
+            permissions: Session.Permissions(
+                blockchains: ["a chain"],
+                methods: ["a method"],
+                notifications: []
             )
         )
         
@@ -127,11 +127,7 @@ extension ProposerViewController: UITableViewDataSource, UITableViewDelegate {
 
 extension ProposerViewController: WalletConnectClientDelegate {
 
-    func didSettle(pairing: Pairing) {
-
-    }
-
-    func didReceive(sessionProposal: SessionProposal) {
+    func didReceive(sessionProposal: Session.Proposal) {
         print("[PROPOSER] WC: Did receive session proposal")
     }
     
@@ -143,7 +139,7 @@ extension ProposerViewController: WalletConnectClientDelegate {
 
     }
 
-    func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions) {
+    func didUpgrade(sessionTopic: String, permissions: Session.Permissions) {
 
     }
 
@@ -163,7 +159,7 @@ extension ProposerViewController: WalletConnectClientDelegate {
         print("[PROPOSER] WC: Did settle session")
     }
     
-    func didSettle(pairing: PairingType.Settled) {
+    func didSettle(pairing: Pairing) {
         print("[PROPOSER] WC: Did settle pairing")
         let settledPairings = client.getSettledPairings()
         let activePairings = settledPairings.map { pairing -> ActiveSessionItem in
