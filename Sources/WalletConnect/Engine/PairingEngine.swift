@@ -7,7 +7,7 @@ final class PairingEngine {
     
     var onApprovalAcknowledgement: ((Pairing) -> Void)?
     var onSessionProposal: ((SessionProposal)->())?
-    var onPairingApproved: ((Pairing, SessionType.Permissions, RelayProtocolOptions)->())?
+    var onPairingApproved: ((Pairing, SessionPermissions, RelayProtocolOptions)->())?
     var onPairingUpdate: ((String, AppMetadata)->())?
     
     private let wcSubscriber: WCSubscribing
@@ -18,7 +18,7 @@ final class PairingEngine {
     private var appMetadata: AppMetadata
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
-    private var sessionPermissions: [String: SessionType.Permissions] = [:]
+    private var sessionPermissions: [String: SessionPermissions] = [:]
     private let topicInitializer: () -> String?
     
     init(relay: WalletConnectRelaying,
@@ -67,7 +67,7 @@ final class PairingEngine {
             .map { Pairing(topic: $0.topic, peer: $0.settled?.state?.metadata) }
     }
     
-    func propose(permissions: SessionType.Permissions) -> WalletConnectURI? {
+    func propose(permissions: SessionPermissions) -> WalletConnectURI? {
         guard let topic = topicInitializer() else {
             logger.debug("Could not generate topic")
             return nil

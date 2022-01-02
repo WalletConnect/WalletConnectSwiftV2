@@ -2,9 +2,19 @@ import XCTest
 @testable import WalletConnect
 import WalletConnectUtils
 
-fileprivate extension SessionType.Permissions {
-    static func stub() -> SessionType.Permissions {
-        SessionType.Permissions(
+//fileprivate extension SessionType.Permissions {
+//    static func stub() -> SessionType.Permissions {
+//        SessionType.Permissions(
+//            blockchain: SessionType.Blockchain(chains: []),
+//            jsonrpc: SessionType.JSONRPC(methods: []),
+//            notifications: SessionType.Notifications(types: [])
+//        )
+//    }
+//}
+
+fileprivate extension SessionPermissions {
+    static func stub() -> SessionPermissions {
+        SessionPermissions(
             blockchain: SessionType.Blockchain(chains: []),
             jsonrpc: SessionType.JSONRPC(methods: []),
             notifications: SessionType.Notifications(types: [])
@@ -76,7 +86,7 @@ final class PairingEngineTests: XCTestCase {
         setupEngine(isController: false)
         
         let topicA = topicGenerator.topic
-        let uri = engine.propose(permissions: SessionType.Permissions.stub())!
+        let uri = engine.propose(permissions: SessionPermissions.stub())!
         
         XCTAssert(cryptoMock.hasPrivateKey(for: uri.publicKey), "Proposer must store the private key matching the public key sent through the URI.")
         XCTAssert(storageMock.hasPendingProposedPairing(on: topicA), "The engine must store a pending pairing on proposed state.")
@@ -142,7 +152,7 @@ final class PairingEngineTests: XCTestCase {
         var approvedPairing: Pairing?
         let responderPubKey = Curve25519.KeyAgreement.PrivateKey().publicKey.rawRepresentation.toHexString()
         let topicB = deriveTopic(publicKey: responderPubKey, privateKey: cryptoMock.privateKeyStub)
-        let uri = engine.propose(permissions: SessionType.Permissions.stub())!
+        let uri = engine.propose(permissions: SessionPermissions.stub())!
         let topicA = uri.topic
         
         let approveParams = PairingApproval(

@@ -10,7 +10,7 @@ final class SessionEngine {
     var onApprovalAcknowledgement: ((Session) -> Void)?
     var onSessionRejected: ((String, SessionType.Reason)->())?
     var onSessionUpdate: ((String, Set<String>)->())?
-    var onSessionUpgrade: ((String, SessionType.Permissions)->())?
+    var onSessionUpgrade: ((String, SessionPermissions)->())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
     var onNotificationReceived: ((String, SessionType.NotificationParams)->())?
     
@@ -61,7 +61,7 @@ final class SessionEngine {
         }
     }
     
-    func proposeSession(settledPairing: Pairing, permissions: SessionType.Permissions, relay: RelayProtocolOptions) {
+    func proposeSession(settledPairing: Pairing, permissions: SessionPermissions, relay: RelayProtocolOptions) {
         guard let pendingSessionTopic = topicInitializer() else {
             logger.debug("Could not generate topic")
             return

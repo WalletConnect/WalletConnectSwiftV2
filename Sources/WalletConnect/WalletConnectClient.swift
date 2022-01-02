@@ -13,7 +13,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     func didReceive(sessionProposal: Session.Proposal)
     func didReceive(sessionRequest: SessionRequest)
     func didDelete(sessionTopic: String, reason: SessionType.Reason)
-    func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions)
+    func didUpgrade(sessionTopic: String, permissions: Session.Permissions)
     func didUpdate(sessionTopic: String, accounts: Set<String>)
     func didSettle(session: Session)
     func didSettle(pairing: Pairing)
@@ -82,11 +82,13 @@ public final class WalletConnectClient {
                 throw WalletConnectError.InternalReason.noSequenceForTopic
             }
             logger.debug("Proposing session on existing pairing")
-            
-            sessionEngine.proposeSession(settledPairing: Pairing(topic: pairing.topic, peer: nil), permissions: params.permissions, relay: pairing.relay)
+//            let permissions = SessionP
+            let permissions = SessionPermissions(permissions: params.permissions)
+            sessionEngine.proposeSession(settledPairing: Pairing(topic: pairing.topic, peer: nil), permissions: permissions, relay: pairing.relay)
             return nil
         } else {
-            guard let pairingURI = pairingEngine.propose(permissions: params.permissions) else {
+            let permissions = SessionPermissions(permissions: params.permissions)
+            guard let pairingURI = pairingEngine.propose(permissions: permissions) else {
                 throw WalletConnectError.internal(.pairingProposalGenerationFailed)
             }
             return pairingURI.absoluteString
@@ -191,7 +193,8 @@ public final class WalletConnectClient {
             delegate?.didDelete(sessionTopic: topic, reason: reason)
         }
         sessionEngine.onSessionUpgrade = { [unowned self] topic, permissions in
-            delegate?.didUpgrade(sessionTopic: topic, permissions: permissions)
+            let upgradedPermissions = Session.Permissions(permissions: permissions)
+            delegate?.didUpgrade(sessionTopic: topic, permissions: upgradedPermissions)
         }
         sessionEngine.onSessionUpdate = { [unowned self] topic, accounts in
             delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
@@ -249,10 +252,10 @@ public final class WalletConnectClient {
 }
 
 public struct ConnectParams {
-    let permissions: SessionType.Permissions
+    let permissions: Session.Permissions
     let pairing: ParamsPairing?
     
-    public init(permissions: SessionType.Permissions, topic: String? = nil) {
+    public init(permissions: Session.Permissions, topic: String? = nil) {
         self.permissions = permissions
         if let topic = topic {
             self.pairing = ParamsPairing(topic: topic)

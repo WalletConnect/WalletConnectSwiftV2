@@ -10,10 +10,20 @@ fileprivate extension Pairing {
     }
 }
 
-fileprivate extension SessionType.Permissions {
-    
-    static func stub() -> SessionType.Permissions {
-        SessionType.Permissions(
+//fileprivate extension SessionType.Permissions {
+//
+//    static func stub() -> SessionType.Permissions {
+//        SessionType.Permissions(
+//            blockchain: SessionType.Blockchain(chains: []),
+//            jsonrpc: SessionType.JSONRPC(methods: []),
+//            notifications: SessionType.Notifications(types: [])
+//        )
+//    }
+//}
+
+fileprivate extension SessionPermissions {
+    static func stub() -> SessionPermissions {
+        SessionPermissions(
             blockchain: SessionType.Blockchain(chains: []),
             jsonrpc: SessionType.JSONRPC(methods: []),
             notifications: SessionType.Notifications(types: [])
@@ -99,7 +109,7 @@ final class SessionEngineTests: XCTestCase {
         
         let agreementKeys = AgreementKeys.stub()
         cryptoMock.set(agreementKeys: agreementKeys, topic: topicB)
-        let permissions = SessionType.Permissions.stub()
+        let permissions = SessionPermissions.stub()
         let relayOptions = RelayProtocolOptions(protocol: "", params: nil)
         engine.proposeSession(settledPairing: pairing, permissions: permissions, relay: relayOptions)
         
@@ -124,7 +134,7 @@ final class SessionEngineTests: XCTestCase {
         
         let agreementKeys = AgreementKeys.stub()
         cryptoMock.set(agreementKeys: agreementKeys, topic: topicB)
-        let permissions = SessionType.Permissions.stub()
+        let permissions = SessionPermissions.stub()
         let relayOptions = RelayProtocolOptions(protocol: "", params: nil)
         engine.proposeSession(settledPairing: pairing, permissions: permissions, relay: relayOptions)
         
@@ -157,7 +167,7 @@ final class SessionEngineTests: XCTestCase {
             relay: RelayProtocolOptions(protocol: "", params: nil),
             proposer: proposer,
             signal: SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: topicB)),
-            permissions: SessionType.Permissions.stub(),
+            permissions: SessionPermissions.stub(),
             ttl: SessionSequence.timeToLivePending)
             
         engine.approve(proposal: proposal, accounts: [])
@@ -190,7 +200,7 @@ final class SessionEngineTests: XCTestCase {
             relay: RelayProtocolOptions(protocol: "", params: nil),
             proposer: proposer,
             signal: SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: topicB)),
-            permissions: SessionType.Permissions.stub(),
+            permissions: SessionPermissions.stub(),
             ttl: SessionSequence.timeToLivePending)
             
         engine.approve(proposal: proposal, accounts: [])
@@ -227,7 +237,7 @@ final class SessionEngineTests: XCTestCase {
             relay: RelayProtocolOptions(protocol: "", params: nil),
             proposer: proposer,
             signal: SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: topicB)),
-            permissions: SessionType.Permissions.stub(),
+            permissions: SessionPermissions.stub(),
             ttl: SessionSequence.timeToLivePending)
             
         engine.approve(proposal: proposal, accounts: [])
@@ -263,7 +273,7 @@ final class SessionEngineTests: XCTestCase {
         let topicC = topicGenerator.topic
         let topicD = deriveTopic(publicKey: responderPubKey, privateKey: privateKeyStub)
 
-        let permissions = SessionType.Permissions.stub()
+        let permissions = SessionPermissions.stub()
         let relayOptions = RelayProtocolOptions(protocol: "", params: nil)
         let approveParams = SessionType.ApproveParams(
             relay: relayOptions,

@@ -4,6 +4,12 @@ import XCTest
 import WalletConnectUtils
 @testable import WalletConnect
 
+fileprivate extension Session.Permissions {
+    static func stub(methods: Set<String> = [], notifications: [String] = []) -> Session.Permissions {
+        Session.Permissions(blockchains: [], methods: methods, notifications: notifications)
+    }
+}
+
 final class ClientTests: XCTestCase {
     
     let defaultTimeout: TimeInterval = 5.0
@@ -34,7 +40,7 @@ final class ClientTests: XCTestCase {
     func testNewPairingWithoutSession() {
         let proposerSettlesPairingExpectation = expectation(description: "Proposer settles pairing")
         let responderSettlesPairingExpectation = expectation(description: "Responder settles pairing")
-        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let permissions = Session.Permissions.stub()
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
         
@@ -53,7 +59,7 @@ final class ClientTests: XCTestCase {
         let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
         let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
         
-        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let permissions = Session.Permissions.stub()
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
         try! responder.client.pair(uri: uri)
@@ -107,7 +113,7 @@ final class ClientTests: XCTestCase {
 
     func testResponderRejectsSession() {
         let sessionRejectExpectation = expectation(description: "Proposer is notified on session rejection")
-        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let permissions = Session.Permissions.stub()
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri)
@@ -123,7 +129,7 @@ final class ClientTests: XCTestCase {
     
     func testDeleteSession() {
         let sessionDeleteExpectation = expectation(description: "Responder is notified on session deletion")
-        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let permissions = Session.Permissions.stub()
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri)
@@ -145,7 +151,7 @@ final class ClientTests: XCTestCase {
         let method = "eth_sendTransaction"
         let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]
         let responseParams = "0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c"
-        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: [method]))
+        let permissions = Session.Permissions.stub(methods: [method])
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri)
@@ -182,7 +188,7 @@ final class ClientTests: XCTestCase {
         let method = "eth_sendTransaction"
         let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]
         let error = JSONRPCErrorResponse.Error(code: 0, message: "error_message")
-        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: [method]))
+        let permissions = Session.Permissions.stub(methods: [method])
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri)
@@ -210,7 +216,7 @@ final class ClientTests: XCTestCase {
     
     func testPairingPing() {
         let proposerReceivesPingResponseExpectation = expectation(description: "Proposer receives ping response")
-        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let permissions = Session.Permissions.stub()
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
         
@@ -227,7 +233,7 @@ final class ClientTests: XCTestCase {
     
     func testSessionPing() {
         let proposerReceivesPingResponseExpectation = expectation(description: "Proposer receives ping response")
-        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let permissions = Session.Permissions.stub()
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
         try! responder.client.pair(uri: uri)
@@ -247,7 +253,7 @@ final class ClientTests: XCTestCase {
         let proposerSessionUpgradeExpectation = expectation(description: "Proposer upgrades session on responder request")
         let responderSessionUpgradeExpectation = expectation(description: "Responder upgrades session on proposer response")
         let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
-        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let permissions = Session.Permissions.stub()
         let upgradePermissions = Session.Permissions(blockchains: ["eip155:42"], methods: ["eth_sendTransaction"])
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
@@ -259,13 +265,13 @@ final class ClientTests: XCTestCase {
             responder.client.upgrade(topic: sessionSettled.topic, permissions: upgradePermissions)
         }
         proposer.onSessionUpgrade = { topic, permissions in
-            XCTAssertTrue(permissions.blockchain.chains.isSuperset(of: upgradePermissions.blockchains))
-            XCTAssertTrue(permissions.jsonrpc.methods.isSuperset(of: upgradePermissions.methods))
+            XCTAssertTrue(permissions.blockchains.isSuperset(of: upgradePermissions.blockchains))
+            XCTAssertTrue(permissions.methods.isSuperset(of: upgradePermissions.methods))
             proposerSessionUpgradeExpectation.fulfill()
         }
         responder.onSessionUpgrade = { topic, permissions in
-            XCTAssertTrue(permissions.blockchain.chains.isSuperset(of: upgradePermissions.blockchains))
-            XCTAssertTrue(permissions.jsonrpc.methods.isSuperset(of: upgradePermissions.methods))
+            XCTAssertTrue(permissions.blockchains.isSuperset(of: upgradePermissions.blockchains))
+            XCTAssertTrue(permissions.methods.isSuperset(of: upgradePermissions.methods))
             responderSessionUpgradeExpectation.fulfill()
         }
         waitForExpectations(timeout: defaultTimeout, handler: nil)
@@ -277,7 +283,7 @@ final class ClientTests: XCTestCase {
         let responderSessionUpgradeExpectation = expectation(description: "Responder upgrades session")
         responderSessionUpgradeExpectation.isInverted = true
         let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
-        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let permissions = Session.Permissions.stub()
         let upgradePermissions = Session.Permissions(blockchains: ["eip155:42"], methods: ["eth_sendTransaction"])
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
@@ -302,7 +308,7 @@ final class ClientTests: XCTestCase {
         let responderSessionUpdateExpectation = expectation(description: "Responder updates session on proposer response")
         let account = "eip155:42:0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
         let updateAccounts: Set<String> = ["eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb"]
-        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let permissions = Session.Permissions.stub()
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
         try! responder.client.pair(uri: uri)
@@ -325,7 +331,7 @@ final class ClientTests: XCTestCase {
     
     func testSessionNotificationSucceeds() {
         let proposerReceivesNotificationExpectation = expectation(description: "Proposer receives notification")
-        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []), notifications: SessionType.Notifications(types: ["type1"]))
+        let permissions = Session.Permissions.stub(notifications: ["type1"])
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
         try! responder.client.pair(uri: uri)
@@ -346,7 +352,7 @@ final class ClientTests: XCTestCase {
     func testSessionNotificationFails() {
         let proposerReceivesNotificationExpectation = expectation(description: "Proposer receives notification")
         proposerReceivesNotificationExpectation.isInverted = true
-        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []), notifications: SessionType.Notifications(types: ["type1"]))
+        let permissions = Session.Permissions.stub(notifications: ["type1"])
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
         try! responder.client.pair(uri: uri)
@@ -368,7 +374,7 @@ final class ClientTests: XCTestCase {
     
     func testPairingUpdate() {
         let proposerReceivesPairingUpdateExpectation = expectation(description: "Proposer receives pairing update")
-        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
+        let permissions = Session.Permissions.stub()
         let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(params: connectParams)!
         _ = try! responder.client.pair(uri: uri)

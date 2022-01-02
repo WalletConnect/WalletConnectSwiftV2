@@ -93,7 +93,7 @@ extension SessionSequence {
     
     struct Settled: Codable {
         let peer: Participant
-        var permissions: SessionType.Permissions
+        var permissions: SessionPermissions
         var state: SessionState
         var status: Status
         
@@ -153,7 +153,7 @@ extension SessionSequence {
             expiryDate: Date(timeIntervalSinceNow: TimeInterval(proposal.ttl)),
             settledState: Settled(
                 peer: Participant(publicKey: proposal.proposer.publicKey, metadata: proposal.proposer.metadata),
-                permissions: SessionType.Permissions(
+                permissions: SessionPermissions(
                     blockchain: proposal.permissions.blockchain,
                     jsonrpc: proposal.permissions.jsonrpc,
                     notifications: proposal.permissions.notifications,
@@ -173,7 +173,7 @@ extension SessionSequence {
             expiryDate: Date(timeIntervalSince1970: TimeInterval(approveParams.expiry)),
             settledState: Settled(
                 peer: Participant(publicKey: approveParams.responder.publicKey, metadata: approveParams.responder.metadata),
-                permissions: SessionType.Permissions(
+                permissions: SessionPermissions(
                     blockchain: proposal.permissions.blockchain,
                     jsonrpc: proposal.permissions.jsonrpc,
                     notifications: proposal.permissions.notifications,
