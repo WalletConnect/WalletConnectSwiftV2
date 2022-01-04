@@ -1,5 +1,6 @@
 
 import Foundation
+import WalletConnectUtils
 
 extension SessionType {
     public struct PayloadParams: Codable, Equatable {

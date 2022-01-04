@@ -2,6 +2,7 @@
 
 import Foundation
 import XCTest
+import TestingUtils
 @testable import WalletConnect
 
 class WCSubscriberTest: XCTestCase {

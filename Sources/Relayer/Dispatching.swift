@@ -1,7 +1,6 @@
 import Foundation
-import Network
 
-protocol JSONRPCTransporting {
+protocol Dispatching {
     var onConnect: (()->())? {get set}
     var onDisconnect: (()->())? {get set}
     var onMessage: ((String) -> ())? {get set}
@@ -10,15 +9,14 @@ protocol JSONRPCTransporting {
     func disconnect(closeCode: URLSessionWebSocketTask.CloseCode)
 }
 
-final class JSONRPCTransport: NSObject, JSONRPCTransporting {
-    
+
+final class Dispatcher: NSObject, Dispatching {
     var onConnect: (() -> ())?
     var onDisconnect: (() -> ())?
     var onMessage: ((String) -> ())?
     
     private let queue = OperationQueue()
-    private let monitor = NWPathMonitor()
-    private let monitorQueue = DispatchQueue(label: "com.walletconnect.sdk.network.monitor")
+    private var networkMonitor: NetworkMonitoring
     
     private let url: URL
     
@@ -34,11 +32,13 @@ final class JSONRPCTransport: NSObject, JSONRPCTransporting {
         return socket
     }()
     
-    init(url: URL) {
+    init(url: URL,
+         networkMonitor: NetworkMonitoring = NetworkMonitor()) {
         self.url = url
+        self.networkMonitor = networkMonitor
         super.init()
         socket.connect(on: url)
-        startNetworkMonitoring()
+        setUpNetworkMonitoring()
     }
 
     func send(_ string: String, completion: @escaping (Error?) -> Void) {
@@ -58,19 +58,19 @@ final class JSONRPCTransport: NSObject, JSONRPCTransporting {
         onDisconnect?()
     }
     
-    private func startNetworkMonitoring() {
-        monitor.pathUpdateHandler = { [weak self] path in
-            if path.status == .satisfied {
-                self?.connect()
-            } else {
-                self?.disconnect(closeCode: .goingAway)
-            }
+    private func setUpNetworkMonitoring() {
+        networkMonitor.onSatisfied = { [weak self] in
+            self?.connect()
         }
-        monitor.start(queue: monitorQueue)
+        networkMonitor.onUnsatisfied = { [weak self] in
+            self?.disconnect(closeCode: .goingAway)
+        }
+        networkMonitor.startMonitoring()
     }
 }
 
-extension JSONRPCTransport: URLSessionWebSocketDelegate {
+
+extension Dispatcher: URLSessionWebSocketDelegate {
     
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
         print("Web Socket did connect")

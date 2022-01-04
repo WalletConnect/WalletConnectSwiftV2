@@ -2,6 +2,7 @@
 import Foundation
 import XCTest
 import WalletConnectUtils
+import TestingUtils
 @testable import WalletConnect
 
 final class ClientTests: XCTestCase {
