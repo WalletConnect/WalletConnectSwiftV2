@@ -46,10 +46,13 @@ final class DispatcherTests: XCTestCase {
     }
     
     func testOnMessage() {
-        webSocketSession.onMessageReceived?("message")
+        let expectation = expectation(description: "on message")
         sut.onMessage = { message in
             XCTAssertNotNil(message)
+            expectation.fulfill()
         }
+        webSocketSession.onMessageReceived?("message")
+        waitForExpectations(timeout: 0.001)
     }
     
     func testOnConnect() {
