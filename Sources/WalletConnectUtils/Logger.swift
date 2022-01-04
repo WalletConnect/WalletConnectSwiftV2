@@ -6,6 +6,7 @@ public protocol ConsoleLogging {
     func info(_ items: Any...)
     func warn(_ items: Any...)
     func error(_ items: Any...)
+    func setLogging(level: LoggingLevel)
 }
 
 public class ConsoleLogger: ConsoleLogging {

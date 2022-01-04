@@ -7,10 +7,10 @@ import XCTest
 
 class WakuRelayTests: XCTestCase {
     var wakuRelay: WakuNetworkRelay!
-    var dispatcher: MockedJSONRPCTransport!
+    var dispatcher: DispatcherMock!
 
     override func setUp() {
-        dispatcher = MockedJSONRPCTransport()
+        dispatcher = DispatcherMock()
         let logger = ConsoleLogger()
         wakuRelay = WakuNetworkRelay(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), uniqueIdentifier: "")
     }
