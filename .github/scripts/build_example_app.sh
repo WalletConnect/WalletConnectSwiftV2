@@ -1,5 +1,6 @@
 #!/bin/bash
 
+bundle exec fastlane gym 
 set -eo pipefail
 xcodebuild  -project Example/ExampleApp.xcodeproj \
 -scheme ExampleApp

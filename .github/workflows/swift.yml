@@ -17,5 +17,6 @@ jobs:
       with:
         xcode-version: '13.1'
     - name: Build Example App
-      run: exec ./.github/scripts/build_example_app.sh
+      working-directory: ./Example
+      run: fastlane test_app
 
