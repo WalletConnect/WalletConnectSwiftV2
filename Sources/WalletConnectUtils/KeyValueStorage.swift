@@ -11,36 +11,39 @@ public protocol KeyValueStorage {
 extension UserDefaults: KeyValueStorage {}
 
 // TODO: Move to test target
-final class RuntimeKeyValueStorage: KeyValueStorage {
-
+public final class RuntimeKeyValueStorage: KeyValueStorage {
     private var storage: [String : Any] = [:]
     private let queue = DispatchQueue(label: "com.walletconnect.sdk.runtimestorage")
+    
+    public init(storage: [String : Any] = [:]) {
+        self.storage = storage
+    }
 
-    func set(_ value: Any?, forKey defaultName: String) {
+    public func set(_ value: Any?, forKey defaultName: String) {
         queue.sync {
             storage[defaultName] = value
         }
     }
 
-    func object(forKey defaultName: String) -> Any? {
+    public func object(forKey defaultName: String) -> Any? {
         queue.sync {
             return storage[defaultName]
         }
     }
 
-    func data(forKey defaultName: String) -> Data? {
+    public func data(forKey defaultName: String) -> Data? {
         queue.sync {
             return storage[defaultName] as? Data
         }
     }
 
-    func removeObject(forKey defaultName: String) {
+    public func removeObject(forKey defaultName: String) {
         queue.sync {
             storage[defaultName] = nil
         }
     }
 
-    func dictionaryRepresentation() -> [String : Any] {
+    public func dictionaryRepresentation() -> [String : Any] {
         queue.sync {
             return storage
         }

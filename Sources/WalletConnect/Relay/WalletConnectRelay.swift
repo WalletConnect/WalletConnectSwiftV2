@@ -21,27 +21,6 @@ protocol WalletConnectRelaying: AnyObject {
     func unsubscribe(topic: String)
 }
 
-public enum JsonRpcResponseTypes: Codable {
-    case error(JSONRPCErrorResponse)
-    case response(JSONRPCResponse<AnyCodable>)
-    var id: Int64 {
-        switch self {
-        case .error(let value):
-            return value.id
-        case .response(let value):
-            return value.id
-        }
-    }
-    var value: Codable {
-        switch self {
-        case .error(let value):
-            return value
-        case .response(let value):
-            return value
-        }
-    }
-}
-
 class WalletConnectRelay: WalletConnectRelaying {
     
     var onResponse: ((WCResponse) -> Void)?

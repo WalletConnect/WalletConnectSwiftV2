@@ -1,25 +1,25 @@
 
 import Foundation
 
-final class KeyValueStore<T> where T: Codable {
+public final class KeyValueStore<T> where T: Codable {
     private let defaults: KeyValueStorage
 
-    init(defaults: KeyValueStorage) {
+    public init(defaults: KeyValueStorage) {
         self.defaults = defaults
     }
 
-    func set(_ item: T, forKey key: String) throws {
+    public func set(_ item: T, forKey key: String) throws {
         let encoded = try JSONEncoder().encode(item)
         defaults.set(encoded, forKey: key)
     }
 
-    func get(key: String) throws -> T? {
+    public func get(key: String) throws -> T? {
         guard let data = defaults.object(forKey: key) as? Data else { return nil }
         let item = try JSONDecoder().decode(T.self, from: data)
         return item
     }
 
-    func getAll() -> [T] {
+    public func getAll() -> [T] {
         return defaults.dictionaryRepresentation().compactMap {
             if let data = $0.value as? Data,
                let item = try? JSONDecoder().decode(T.self, from: data) {
@@ -29,7 +29,7 @@ final class KeyValueStore<T> where T: Codable {
         }
     }
 
-    func delete(forKey key: String) {
+    public func delete(forKey key: String) {
         defaults.removeObject(forKey: key)
     }
 }

@@ -1,6 +1,7 @@
 
 import Foundation
 import Combine
+import WalletConnectUtils
 
 protocol WCSubscribing: AnyObject {
     var onReceivePayload: ((WCRequestSubscriptionPayload)->())? {get set}

@@ -1,5 +1,6 @@
 import XCTest
 import WalletConnectUtils
+import TestingUtils
 @testable import WalletConnect
 
 // TODO: Move common helper methods to a shared folder

@@ -1,5 +1,6 @@
 import XCTest
 @testable import WalletConnect
+import TestingUtils
 import WalletConnectUtils
 
 //fileprivate extension SessionType.Permissions {

@@ -22,10 +22,21 @@
 		76744CF526FDFB6B00B77ED9 /* ResponderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF426FDFB6B00B77ED9 /* ResponderView.swift */; };
 		76744CF726FE4D5400B77ED9 /* ActiveSessionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */; };
 		76744CF926FE4D7400B77ED9 /* ActiveSessionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */; };
+		845B30EF27859686002E4094 /* ExampleAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845B30EE27859686002E4094 /* ExampleAppTests.swift */; };
 		8460DCFC274F98A10081F94C /* RequestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8460DCFB274F98A10081F94C /* RequestViewController.swift */; };
 		8460DD002750D6F50081F94C /* SessionDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8460DCFF2750D6F50081F94C /* SessionDetailsViewController.swift */; };
 		8460DD022750D7020081F94C /* SessionDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8460DD012750D7020081F94C /* SessionDetailsView.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		845B30F027859686002E4094 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 764E1D3426F8D3FC00A1FB15 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 764E1D3B26F8D3FC00A1FB15;
+			remoteInfo = ExampleApp;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		7603D74C2703429A00DD27A2 /* ProposerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProposerView.swift; sourceTree = "<group>"; };
@@ -47,6 +58,8 @@
 		76744CF426FDFB6B00B77ED9 /* ResponderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponderView.swift; sourceTree = "<group>"; };
 		76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionItem.swift; sourceTree = "<group>"; };
 		76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionCell.swift; sourceTree = "<group>"; };
+		845B30EC27859686002E4094 /* ExampleAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ExampleAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		845B30EE27859686002E4094 /* ExampleAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleAppTests.swift; sourceTree = "<group>"; };
 		8460DCFB274F98A10081F94C /* RequestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestViewController.swift; sourceTree = "<group>"; };
 		8460DCFF2750D6F50081F94C /* SessionDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailsViewController.swift; sourceTree = "<group>"; };
 		8460DD012750D7020081F94C /* SessionDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailsView.swift; sourceTree = "<group>"; };
@@ -58,6 +71,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				764E1D5826F8DBAB00A1FB15 /* WalletConnect in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		845B30E927859686002E4094 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -101,6 +121,7 @@
 			isa = PBXGroup;
 			children = (
 				764E1D3E26F8D3FC00A1FB15 /* ExampleApp */,
+				845B30ED27859686002E4094 /* ExampleAppTests */,
 				764E1D3D26F8D3FC00A1FB15 /* Products */,
 				764E1D5326F8DAC800A1FB15 /* Frameworks */,
 				764E1D5626F8DB6000A1FB15 /* WalletConnectSwiftV2 */,
@@ -111,6 +132,7 @@
 			isa = PBXGroup;
 			children = (
 				764E1D3C26F8D3FC00A1FB15 /* ExampleApp.app */,
+				845B30EC27859686002E4094 /* ExampleAppTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -137,6 +159,14 @@
 				764E1D5426F8DAC800A1FB15 /* Package.swift */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		845B30ED27859686002E4094 /* ExampleAppTests */ = {
+			isa = PBXGroup;
+			children = (
+				845B30EE27859686002E4094 /* ExampleAppTests.swift */,
+			);
+			path = ExampleAppTests;
 			sourceTree = "<group>";
 		};
 		8460DCFD274F98A90081F94C /* Request */ = {
@@ -179,17 +209,39 @@
 			productReference = 764E1D3C26F8D3FC00A1FB15 /* ExampleApp.app */;
 			productType = "com.apple.product-type.application";
 		};
+		845B30EB27859686002E4094 /* ExampleAppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 845B30F227859686002E4094 /* Build configuration list for PBXNativeTarget "ExampleAppTests" */;
+			buildPhases = (
+				845B30E827859686002E4094 /* Sources */,
+				845B30E927859686002E4094 /* Frameworks */,
+				845B30EA27859686002E4094 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				845B30F127859686002E4094 /* PBXTargetDependency */,
+			);
+			name = ExampleAppTests;
+			productName = ExampleAppTests;
+			productReference = 845B30EC27859686002E4094 /* ExampleAppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		764E1D3426F8D3FC00A1FB15 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1250;
+				LastSwiftUpdateCheck = 1320;
 				LastUpgradeCheck = 1250;
 				TargetAttributes = {
 					764E1D3B26F8D3FC00A1FB15 = {
 						CreatedOnToolsVersion = 12.5.1;
+					};
+					845B30EB27859686002E4094 = {
+						CreatedOnToolsVersion = 13.2;
+						TestTargetID = 764E1D3B26F8D3FC00A1FB15;
 					};
 				};
 			};
@@ -207,6 +259,7 @@
 			projectRoot = "";
 			targets = (
 				764E1D3B26F8D3FC00A1FB15 /* ExampleApp */,
+				845B30EB27859686002E4094 /* ExampleAppTests */,
 			);
 		};
 /* End PBXProject section */
@@ -218,6 +271,13 @@
 			files = (
 				764E1D4C26F8D3FE00A1FB15 /* LaunchScreen.storyboard in Resources */,
 				764E1D4926F8D3FE00A1FB15 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		845B30EA27859686002E4094 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -246,7 +306,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		845B30E827859686002E4094 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				845B30EF27859686002E4094 /* ExampleAppTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		845B30F127859686002E4094 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 764E1D3B26F8D3FC00A1FB15 /* ExampleApp */;
+			targetProxy = 845B30F027859686002E4094 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		764E1D4A26F8D3FE00A1FB15 /* LaunchScreen.storyboard */ = {
@@ -311,7 +387,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -366,7 +442,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -381,6 +457,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = W5R8AG9K22;
@@ -393,6 +470,7 @@
 				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.example;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -403,6 +481,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = W5R8AG9K22;
@@ -415,8 +494,49 @@
 				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.example;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		845B30F327859686002E4094 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = W5R8AG9K22;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = walletconnect.ExampleAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ExampleApp.app/ExampleApp";
+			};
+			name = Debug;
+		};
+		845B30F427859686002E4094 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = W5R8AG9K22;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = walletconnect.ExampleAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ExampleApp.app/ExampleApp";
 			};
 			name = Release;
 		};
@@ -437,6 +557,15 @@
 			buildConfigurations = (
 				764E1D5126F8D3FE00A1FB15 /* Debug */,
 				764E1D5226F8D3FE00A1FB15 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		845B30F227859686002E4094 /* Build configuration list for PBXNativeTarget "ExampleAppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				845B30F327859686002E4094 /* Debug */,
+				845B30F427859686002E4094 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
