@@ -13,7 +13,7 @@ class MockedCodec: Codec {
         self.hmacAuthenticator = hmacAuthenticator
     }
 
-    func encode(plainText: String, agreementKeys: Crypto.X25519.AgreementKeys) throws -> EncryptionPayload {
+    func encode(plainText: String, agreementKeys: AgreementKeys) throws -> EncryptionPayload {
         return encryptionPayload
     }
     

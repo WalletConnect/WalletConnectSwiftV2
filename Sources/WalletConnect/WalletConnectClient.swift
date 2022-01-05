@@ -10,10 +10,10 @@ extension ConsoleLogger: ConsoleLogging {}
 extension WakuNetworkRelay: NetworkRelaying {}
 
 public protocol WalletConnectClientDelegate: AnyObject {
-    func didReceive(sessionProposal: SessionProposal)
+    func didReceive(sessionProposal: Session.Proposal)
     func didReceive(sessionRequest: SessionRequest)
     func didDelete(sessionTopic: String, reason: SessionType.Reason)
-    func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions)
+    func didUpgrade(sessionTopic: String, permissions: Session.Permissions)
     func didUpdate(sessionTopic: String, accounts: Set<String>)
     func didSettle(session: Session)
     func didSettle(pairing: Pairing)
@@ -81,11 +81,12 @@ public final class WalletConnectClient {
                 throw WalletConnectError.InternalReason.noSequenceForTopic
             }
             logger.debug("Proposing session on existing pairing")
-            
-            sessionEngine.proposeSession(settledPairing: Pairing(topic: pairing.topic, peer: nil), permissions: params.permissions, relay: pairing.relay)
+            let permissions = SessionPermissions(permissions: params.permissions)
+            sessionEngine.proposeSession(settledPairing: Pairing(topic: pairing.topic, peer: nil), permissions: permissions, relay: pairing.relay)
             return nil
         } else {
-            guard let pairingURI = pairingEngine.propose(permissions: params.permissions) else {
+            let permissions = SessionPermissions(permissions: params.permissions)
+            guard let pairingURI = pairingEngine.propose(permissions: permissions) else {
                 throw WalletConnectError.internal(.pairingProposalGenerationFailed)
             }
             return pairingURI.absoluteString
@@ -103,22 +104,12 @@ public final class WalletConnectClient {
     }
     
     // for responder to approve a session proposal
-    public func approve(proposal: SessionProposal, accounts: Set<String>, completion: @escaping (Result<Session, Error>) -> ()) {
-        sessionEngine.approve(proposal: proposal.proposal, accounts: accounts) { [unowned self] result in
-            switch result {
-            case .success(let settledSession):
-                let session = Session(topic: settledSession.topic, peer: settledSession.peer, permissions: proposal.permissions)
-                self.delegate?.didSettle(session: session)
-                completion(.success(session))
-            case .failure(let error):
-                completion(.failure(error))
-                print(error)
-            }
-        }
+    public func approve(proposal: Session.Proposal, accounts: Set<String>) {
+        sessionEngine.approve(proposal: proposal.proposal, accounts: accounts)
     }
     
     // for responder to reject a session proposal
-    public func reject(proposal: SessionProposal, reason: SessionType.Reason) {
+    public func reject(proposal: Session.Proposal, reason: SessionType.Reason) {
         sessionEngine.reject(proposal: proposal.proposal, reason: reason)
     }
     
@@ -126,7 +117,7 @@ public final class WalletConnectClient {
         sessionEngine.update(topic: topic, accounts: accounts)
     }
     
-    public func upgrade(topic: String, permissions: SessionPermissions) {
+    public func upgrade(topic: String, permissions: Session.Permissions) {
         sessionEngine.upgrade(topic: topic, permissions: permissions)
     }
     
@@ -183,9 +174,12 @@ public final class WalletConnectClient {
             self?.delegate?.didSettle(pairing: settledPairing)
         }
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
-            let permissions = SessionPermissions.init(blockchains: settledSession.permissions.blockchains, methods: settledSession.permissions.methods)
+            let permissions = Session.Permissions.init(blockchains: settledSession.permissions.blockchains, methods: settledSession.permissions.methods)
             let session = Session(topic: settledSession.topic, peer: settledSession.peer, permissions: permissions)
             delegate?.didSettle(session: session)
+        }
+        sessionEngine.onApprovalAcknowledgement = { [weak self] session in
+            self?.delegate?.didSettle(session: session)
         }
         sessionEngine.onSessionRejected = { [unowned self] pendingTopic, reason in
             delegate?.didReject(pendingSessionTopic: pendingTopic, reason: reason)
@@ -197,7 +191,8 @@ public final class WalletConnectClient {
             delegate?.didDelete(sessionTopic: topic, reason: reason)
         }
         sessionEngine.onSessionUpgrade = { [unowned self] topic, permissions in
-            delegate?.didUpgrade(sessionTopic: topic, permissions: permissions)
+            let upgradedPermissions = Session.Permissions(permissions: permissions)
+            delegate?.didUpgrade(sessionTopic: topic, permissions: upgradedPermissions)
         }
         sessionEngine.onSessionUpdate = { [unowned self] topic, accounts in
             delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
@@ -210,10 +205,10 @@ public final class WalletConnectClient {
         }
     }
     
-    private func proposeSession(proposal: SessionType.Proposal) {
-        let sessionProposal = SessionProposal(
+    private func proposeSession(proposal: SessionProposal) {
+        let sessionProposal = Session.Proposal(
             proposer: proposal.proposer.metadata,
-            permissions: SessionPermissions(
+            permissions: Session.Permissions(
                 blockchains: proposal.permissions.blockchain.chains,
                 methods: proposal.permissions.jsonrpc.methods),
             proposal: proposal
@@ -255,10 +250,10 @@ public final class WalletConnectClient {
 }
 
 public struct ConnectParams {
-    let permissions: SessionType.Permissions
+    let permissions: Session.Permissions
     let pairing: ParamsPairing?
     
-    public init(permissions: SessionType.Permissions, topic: String? = nil) {
+    public init(permissions: Session.Permissions, topic: String? = nil) {
         self.permissions = permissions
         if let topic = topic {
             self.pairing = ParamsPairing(topic: topic)

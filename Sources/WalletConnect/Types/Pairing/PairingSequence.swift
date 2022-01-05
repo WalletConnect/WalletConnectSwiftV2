@@ -1,9 +1,10 @@
 import Foundation
+import CryptoKit
 
 struct PairingSequence: ExpirableSequence {
     let topic: String
     let relay: RelayProtocolOptions
-    let selfParticipant: PairingType.Participant
+    let selfParticipant: Participant
     let expiryDate: Date
     private var sequenceState: Either<Pending, Settled>
     
@@ -41,6 +42,10 @@ struct PairingSequence: ExpirableSequence {
         isSettled && settled?.peer.publicKey == settled?.permissions.controller.publicKey
     }
     
+    static var timeToLiveProposed: Int {
+        Time.hour
+    }
+    
     static var timeToLivePending: Int {
         Time.day
     }
@@ -50,17 +55,6 @@ struct PairingSequence: ExpirableSequence {
     }
 }
 
-extension PairingSequence {
-    
-    init(topic: String, relay: RelayProtocolOptions, selfParticipant: PairingType.Participant, expiryDate: Date, pendingState: Pending) {
-        self.init(topic: topic, relay: relay, selfParticipant: selfParticipant, expiryDate: expiryDate, sequenceState: .left(pendingState))
-    }
-    
-    init(topic: String, relay: RelayProtocolOptions, selfParticipant: PairingType.Participant, expiryDate: Date, settledState: Settled) {
-        self.init(topic: topic, relay: relay, selfParticipant: selfParticipant, expiryDate: expiryDate, sequenceState: .right(settledState))
-    }
-}
-    
 extension PairingSequence {
     
     struct Pending: Codable {
@@ -79,9 +73,87 @@ extension PairingSequence {
     }
 
     struct Settled: Codable {
-        let peer: PairingType.Participant
+        let peer: Participant
         let permissions: PairingType.Permissions
-        var state: PairingType.State?
-        var status: PairingType.Settled.SettledStatus
+        var state: PairingState?
+        var status: Status
+        
+        enum Status: Codable {
+            case preSettled
+            case acknowledged
+        }
+    }
+}
+
+// MARK: - Initialization
+
+extension PairingSequence {
+    
+    init(topic: String, relay: RelayProtocolOptions, selfParticipant: Participant, expiryDate: Date, pendingState: Pending) {
+        self.init(topic: topic, relay: relay, selfParticipant: selfParticipant, expiryDate: expiryDate, sequenceState: .left(pendingState))
+    }
+    
+    init(topic: String, relay: RelayProtocolOptions, selfParticipant: Participant, expiryDate: Date, settledState: Settled) {
+        self.init(topic: topic, relay: relay, selfParticipant: selfParticipant, expiryDate: expiryDate, sequenceState: .right(settledState))
+    }
+    
+    static func buildProposed(uri: WalletConnectURI) -> PairingSequence {
+        let proposal = PairingProposal.createFromURI(uri)
+        return PairingSequence(
+            topic: proposal.topic,
+            relay: proposal.relay,
+            selfParticipant: Participant(publicKey: proposal.proposer.publicKey),
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveProposed)),
+            pendingState: Pending(proposal: proposal, status: .proposed)
+        )
+    }
+    
+    static func buildResponded(proposal: PairingProposal, agreementKeys: AgreementKeys) -> PairingSequence {
+        PairingSequence(
+            topic: proposal.topic,
+            relay: proposal.relay,
+            selfParticipant: Participant(publicKey: agreementKeys.publicKey.hexRepresentation),
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
+            pendingState: Pending(
+                proposal: proposal,
+                status: .responded(agreementKeys.derivedTopic())
+            )
+        )
+    }
+    
+    static func buildPreSettled(proposal: PairingProposal, agreementKeys: AgreementKeys) -> PairingSequence {
+        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : agreementKeys.publicKey.hexRepresentation
+        return PairingSequence(
+            topic: agreementKeys.derivedTopic(),
+            relay: proposal.relay,
+            selfParticipant: Participant(publicKey: agreementKeys.publicKey.hexRepresentation),
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(proposal.ttl)),
+            settledState: Settled(
+                peer: Participant(publicKey: proposal.proposer.publicKey),
+                permissions: PairingType.Permissions(
+                    jsonrpc: proposal.permissions.jsonrpc,
+                    controller: Controller(publicKey: controllerKey)),
+                state: nil,
+                status: .preSettled
+            )
+        )
+    }
+    
+    static func buildAcknowledged(approval approveParams: PairingApproval, proposal: PairingProposal, agreementKeys: AgreementKeys) -> PairingSequence {
+        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : approveParams.responder.publicKey
+        return PairingSequence(
+            topic: agreementKeys.derivedTopic(),
+            relay: approveParams.relay , // Is it safe to just accept the approval params blindly?
+            selfParticipant: Participant(publicKey: agreementKeys.publicKey.hexRepresentation),
+            expiryDate: Date(timeIntervalSince1970: TimeInterval(approveParams.expiry)),
+            settledState: Settled(
+                peer: Participant(publicKey: approveParams.responder.publicKey),
+                permissions: PairingType.Permissions(
+                    jsonrpc: proposal.permissions.jsonrpc,
+                    controller: Controller(publicKey: controllerKey)),
+                state: approveParams.state,
+                status: .acknowledged
+            )
+        )
     }
 }

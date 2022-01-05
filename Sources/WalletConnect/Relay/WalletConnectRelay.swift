@@ -3,7 +3,15 @@ import Foundation
 import Combine
 import WalletConnectUtils
 
+struct WCResponse {
+    let topic: String
+    let requestMethod: WCRequest.Method
+    let requestParams: WCRequest.Params
+    let result: Result<JSONRPCResponse<AnyCodable>, Error>
+}
+
 protocol WalletConnectRelaying: AnyObject {
+    var onResponse: ((WCResponse) -> Void)? {get set}
     var onPairingApproveResponse: ((String) -> Void)? {get set}
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
@@ -36,6 +44,7 @@ public enum JsonRpcResponseTypes: Codable {
 
 class WalletConnectRelay: WalletConnectRelaying {
     
+    var onResponse: ((WCResponse) -> Void)?
     var onPairingApproveResponse: ((String) -> Void)?
     
     private var networkRelayer: NetworkRelaying
@@ -182,8 +191,14 @@ class WalletConnectRelay: WalletConnectRelaying {
     
     private func handleJsonRpcResponse(response: JSONRPCResponse<AnyCodable>) {
         do {
-            try jsonRpcHistory.resolve(response: JsonRpcResponseTypes.response(response))
+            let record = try jsonRpcHistory.resolve(response: JsonRpcResponseTypes.response(response))
+            let wcResponse = WCResponse(
+                topic: record.topic,
+                requestMethod: record.request.method,
+                requestParams: record.request.params,
+                result: .success(response))
             wcResponsePublisherSubject.send(.response(response))
+            onResponse?(wcResponse)
         } catch  {
             logger.info("Info: \(error.localizedDescription)")
         }
@@ -191,8 +206,14 @@ class WalletConnectRelay: WalletConnectRelaying {
     
     private func handleJsonRpcErrorResponse(response: JSONRPCErrorResponse) {
         do {
-            try jsonRpcHistory.resolve(response: JsonRpcResponseTypes.error(response))
+            let record = try jsonRpcHistory.resolve(response: JsonRpcResponseTypes.error(response))
+            let wcResponse = WCResponse(
+                topic: record.topic,
+                requestMethod: record.request.method,
+                requestParams: record.request.params,
+                result: .failure(response))
             wcResponsePublisherSubject.send(.error(response))
+            onResponse?(wcResponse)
         } catch {
             logger.info("Info: \(error.localizedDescription)")
         }

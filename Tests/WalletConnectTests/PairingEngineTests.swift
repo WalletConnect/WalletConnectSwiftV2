@@ -2,26 +2,42 @@ import XCTest
 @testable import WalletConnect
 import WalletConnectUtils
 
-fileprivate extension SessionType.Permissions {
-    static func stub() -> SessionType.Permissions {
-        SessionType.Permissions(
-            blockchain: SessionType.Blockchain(chains: []),
-            jsonrpc: SessionType.JSONRPC(methods: []),
-            notifications: SessionType.Notifications(types: [])
+//fileprivate extension SessionType.Permissions {
+//    static func stub() -> SessionType.Permissions {
+//        SessionType.Permissions(
+//            blockchain: SessionType.Blockchain(chains: []),
+//            jsonrpc: SessionType.JSONRPC(methods: []),
+//            notifications: SessionType.Notifications(types: [])
+//        )
+//    }
+//}
+
+fileprivate extension SessionPermissions {
+    static func stub() -> SessionPermissions {
+        SessionPermissions(
+            blockchain: Blockchain(chains: []),
+            jsonrpc: JSONRPC(methods: []),
+            notifications: Notifications(types: [])
         )
     }
 }
 
 fileprivate extension WCRequest {
     
-    var approveParams: PairingType.ApproveParams? {
+    var approveParams: PairingApproval? {
         guard case .pairingApprove(let approveParams) = self.params else { return nil }
         return approveParams
     }
 }
 
-fileprivate func deriveTopic(publicKey: String, privateKey: Crypto.X25519.PrivateKey) -> String {
-    try! Crypto.X25519.generateAgreementKeys(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
+//fileprivate func deriveTopic(publicKey: String, privateKey: Crypto.X25519.PrivateKey) -> String {
+//    try! Crypto.X25519.generateAgreementKeys(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
+//}
+
+import CryptoKit
+
+func deriveTopic(publicKey: String, privateKey: Curve25519.KeyAgreement.PrivateKey) -> String {
+    try! Crypto.generateAgreementKeys(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
 }
 
 final class PairingEngineTests: XCTestCase {
@@ -70,7 +86,7 @@ final class PairingEngineTests: XCTestCase {
         setupEngine(isController: false)
         
         let topicA = topicGenerator.topic
-        let uri = engine.propose(permissions: SessionType.Permissions.stub())!
+        let uri = engine.propose(permissions: SessionPermissions.stub())!
         
         XCTAssert(cryptoMock.hasPrivateKey(for: uri.publicKey), "Proposer must store the private key matching the public key sent through the URI.")
         XCTAssert(storageMock.hasPendingProposedPairing(on: topicA), "The engine must store a pending pairing on proposed state.")
@@ -134,14 +150,14 @@ final class PairingEngineTests: XCTestCase {
         setupEngine(isController: false)
         
         var approvedPairing: Pairing?
-        let responderPubKey = Crypto.X25519.PrivateKey().publicKey.rawRepresentation.toHexString()
+        let responderPubKey = Curve25519.KeyAgreement.PrivateKey().publicKey.rawRepresentation.toHexString()
         let topicB = deriveTopic(publicKey: responderPubKey, privateKey: cryptoMock.privateKeyStub)
-        let uri = engine.propose(permissions: SessionType.Permissions.stub())!
+        let uri = engine.propose(permissions: SessionPermissions.stub())!
         let topicA = uri.topic
         
-        let approveParams = PairingType.ApproveParams(
+        let approveParams = PairingApproval(
             relay: RelayProtocolOptions(protocol: "", params: nil),
-            responder: PairingType.Participant(publicKey: responderPubKey),
+            responder: Participant(publicKey: responderPubKey),
             expiry: Time.day,
             state: nil)
         let request = WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
@@ -160,6 +176,7 @@ final class PairingEngineTests: XCTestCase {
         XCTAssertFalse(storageMock.hasSequence(forTopic: topicA), "The engine must clean any stored pairing on topic A.")
         XCTAssertNotNil(approvedPairing, "The engine should callback the approved pairing after settlement.")
         XCTAssertEqual(approvedPairing?.topic, topicB, "The approved pairing must settle on topic B.")
+        // TODO: Check if expiry time is correct
     }
     
 //    func testNotifyOnSessionProposal() {
@@ -175,8 +192,3 @@ final class PairingEngineTests: XCTestCase {
 //        waitForExpectations(timeout: 0.01, handler: nil)
 //    }
 }
-
-fileprivate let sessionProposal = WCRequest(id: 0,
-                                                     jsonrpc: "2.0",
-                                                     method: WCRequest.Method.pairingPayload,
-                                                     params: WCRequest.Params.pairingPayload(PairingType.PayloadParams(request: PairingType.PayloadParams.Request(method: .sessionPropose, params: SessionType.ProposeParams(topic: "", relay: RelayProtocolOptions(protocol: "", params: []), proposer: SessionType.Proposer(publicKey: "", controller: false, metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil)), signal: SessionType.Signal(method: "", params: SessionType.Signal.Params(topic: "")), permissions: SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []), notifications: SessionType.Notifications(types: [])), ttl: 100)))))

@@ -2,9 +2,10 @@
 
 import Foundation
 @testable import WalletConnect
+import CryptoKit
 
 enum SerialiserTestData {
-    static let emptyAgreementKeys = Crypto.X25519.AgreementKeys(sharedSecret: Data(hex: ""), publicKey: Data(hex: ""))
+    static let emptyAgreementKeys = AgreementKeys(sharedSecret: Data(hex: ""), publicKey: Curve25519.KeyAgreement.PrivateKey().publicKey)
     static let iv = Data(hex: "f0d00d4274a7e9711e4e0f21820b8877")
     static let publicKey = Data(hex: "45c59ad0c053925072f4503a39fe579ca8b7b8fa6bf0c7297e6db8f6585ee77f")
     static let mac = Data(hex: "fc6d3106fa827043279f9db08cd2e29a988c7272fa3cfdb739163bb9606822c7")
@@ -15,10 +16,10 @@ enum SerialiserTestData {
                                                                  jsonrpc: "2.0",
                                                                  method: WCRequest.Method.pairingApprove,
                                                                  params: WCRequest.Params.pairingApprove(
-                                                                    PairingType.ApproveParams(relay: RelayProtocolOptions(protocol: "waku",
-                                                                                                                     params: nil), responder: PairingType.Participant(publicKey: "be9225978b6287a02d259ee0d9d1bcb683082d8386b7fb14b58ac95b93b2ef43"),
+                                                                    PairingApproval(relay: RelayProtocolOptions(protocol: "waku",
+                                                                                                                     params: nil), responder: Participant(publicKey: "be9225978b6287a02d259ee0d9d1bcb683082d8386b7fb14b58ac95b93b2ef43"),
                                                                                          expiry: 1632742217,
-                                                                                         state: PairingType.State(metadata: AppMetadata(name: "iOS",
+                                                                                         state: PairingState(metadata: AppMetadata(name: "iOS",
                                                                                                                                    description: nil,
                                                                                                                                    url: nil,
                                                                                                                                    icons: nil)))))

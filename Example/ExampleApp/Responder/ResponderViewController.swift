@@ -20,7 +20,7 @@ final class ResponderViewController: UIViewController {
     }()
     let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
     var sessionItems: [ActiveSessionItem] = []
-    var currentProposal: SessionProposal?
+    var currentProposal: Session.Proposal?
     
     private let responderView: ResponderView = {
         ResponderView()
@@ -148,9 +148,7 @@ extension ResponderViewController: SessionViewControllerDelegate {
         let proposal = currentProposal!
         currentProposal = nil
         let accounts = proposal.permissions.blockchains.map {$0+":\(account)"}
-        client.approve(proposal: proposal, accounts: Set(accounts)) { [weak self] _ in
-            self?.reloadActiveSessions()
-        }
+        client.approve(proposal: proposal, accounts: Set(accounts))
     }
     
     func didRejectSession() {
@@ -163,7 +161,7 @@ extension ResponderViewController: SessionViewControllerDelegate {
 
 extension ResponderViewController: WalletConnectClientDelegate {
     
-    func didReceive(sessionProposal: SessionProposal) {
+    func didReceive(sessionProposal: Session.Proposal) {
         print("[RESPONDER] WC: Did receive session proposal")
         let appMetadata = sessionProposal.proposer
         let info = SessionInfo(
@@ -179,6 +177,10 @@ extension ResponderViewController: WalletConnectClientDelegate {
         }
     }
     
+    func didSettle(session: Session) {
+        reloadActiveSessions()
+    }
+    
     func didReceive(sessionRequest: SessionRequest) {
         DispatchQueue.main.async { [weak self] in
             self?.showSessionRequest(sessionRequest)
@@ -191,7 +193,7 @@ extension ResponderViewController: WalletConnectClientDelegate {
 
     }
 
-    func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions) {
+    func didUpgrade(sessionTopic: String, permissions: Session.Permissions) {
 
     }
 

@@ -3,7 +3,7 @@ import Foundation
 
 extension WCRequest {
     enum Params: Codable, Equatable {
-        case pairingApprove(PairingType.ApproveParams)
+        case pairingApprove(PairingApproval)
         case pairingReject(PairingType.RejectParams)
         case pairingUpdate(PairingType.UpdateParams)
         case pairingUpgrade(PairingType.UpgradeParams)

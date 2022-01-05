@@ -28,7 +28,7 @@ struct WCRequest: Codable {
         method = try container.decode(Method.self, forKey: .method)
         switch method {
         case .pairingApprove:
-            let paramsValue = try container.decode(PairingType.ApproveParams.self, forKey: .params)
+            let paramsValue = try container.decode(PairingApproval.self, forKey: .params)
             params = .pairingApprove(paramsValue)
         case .pairingReject:
             let paramsValue = try container.decode(PairingType.RejectParams.self, forKey: .params)

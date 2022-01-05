@@ -6,11 +6,11 @@ class ClientDelegate: WalletConnectClientDelegate {
     var client: WalletConnectClient
     var onSessionSettled: ((Session)->())?
     var onPairingSettled: ((Pairing)->())?
-    var onSessionProposal: ((SessionProposal)->())?
+    var onSessionProposal: ((Session.Proposal)->())?
     var onSessionRequest: ((SessionRequest)->())?
     var onSessionRejected: ((String, SessionType.Reason)->())?
     var onSessionDelete: (()->())?
-    var onSessionUpgrade: ((String, SessionType.Permissions)->())?
+    var onSessionUpgrade: ((String, Session.Permissions)->())?
     var onSessionUpdate: ((String, Set<String>)->())?
     var onNotificationReceived: ((SessionNotification, String)->())?
     var onPairingUpdate: ((String, AppMetadata)->())?
@@ -29,7 +29,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didSettle(pairing: Pairing) {
         onPairingSettled?(pairing)
     }
-    func didReceive(sessionProposal: SessionProposal) {
+    func didReceive(sessionProposal: Session.Proposal) {
         onSessionProposal?(sessionProposal)
     }
     func didReceive(sessionRequest: SessionRequest) {
@@ -38,7 +38,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didDelete(sessionTopic: String, reason: SessionType.Reason) {
         onSessionDelete?()
     }
-    func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions) {
+    func didUpgrade(sessionTopic: String, permissions: Session.Permissions) {
         onSessionUpgrade?(sessionTopic, permissions)
     }
     func didUpdate(sessionTopic: String, accounts: Set<String>) {

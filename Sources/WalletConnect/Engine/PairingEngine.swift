@@ -1,12 +1,13 @@
 import Foundation
 import Combine
 import WalletConnectUtils
+import CryptoKit
 
 final class PairingEngine {
     
     var onApprovalAcknowledgement: ((Pairing) -> Void)?
-    var onSessionProposal: ((SessionType.Proposal)->())?
-    var onPairingApproved: ((Pairing, SessionType.Permissions, RelayProtocolOptions)->())?
+    var onSessionProposal: ((SessionProposal)->())?
+    var onPairingApproved: ((Pairing, SessionPermissions, RelayProtocolOptions)->())?
     var onPairingUpdate: ((String, AppMetadata)->())?
     
     private let wcSubscriber: WCSubscribing
@@ -17,7 +18,7 @@ final class PairingEngine {
     private var appMetadata: AppMetadata
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
-    private var sessionPermissions: [String: SessionType.Permissions] = [:]
+    private var sessionPermissions: [String: SessionPermissions] = [:]
     private let topicInitializer: () -> String?
     
     init(relay: WalletConnectRelaying,
@@ -44,6 +45,11 @@ final class PairingEngine {
         relayer.onPairingApproveResponse = { [weak self] in
             try? self?.acknowledgeApproval(pendingTopic: $0)
         }
+        
+        // TODO: Bind on response
+//        relayer.onResponse = { [weak self] in
+//            print($0.topic)
+//        }
     }
     
     func hasPairing(for topic: String) -> Bool {
@@ -61,37 +67,20 @@ final class PairingEngine {
             .map { Pairing(topic: $0.topic, peer: $0.settled?.state?.metadata) }
     }
     
-    func propose(permissions: SessionType.Permissions) -> WalletConnectURI? {
+    func propose(permissions: SessionPermissions) -> WalletConnectURI? {
         guard let topic = topicInitializer() else {
             logger.debug("Could not generate topic")
             return nil
         }
         
-        let privateKey = crypto.generatePrivateKey()
-        let publicKey = privateKey.publicKey.toHexString()
+        let privateKey = crypto.makePrivateKey()
+        try! crypto.set(privateKey: privateKey) // TODO: Handle error
+        let publicKey = privateKey.publicKey.hexRepresentation
         
         let relay = RelayProtocolOptions(protocol: "waku", params: nil)
         let uri = WalletConnectURI(topic: topic, publicKey: publicKey, isController: isController, relay: relay)
-        let timeToLive = PairingSequence.timeToLivePending
+        let pendingPairing = PairingSequence.buildProposed(uri: uri)
         
-        let proposal = PairingProposal(
-            topic: topic,
-            relay: relay,
-            proposer: PairingType.Proposer(publicKey: publicKey, controller: isController),
-            signal: PairingType.Signal(uri: uri.absoluteString),
-            permissions: PairingType.ProposedPermissions.default,
-            ttl: timeToLive)
-        
-        let `self` = PairingType.Participant(publicKey: publicKey)
-        
-        let pendingPairing = PairingSequence(
-            topic: topic,
-            relay: relay,
-            selfParticipant: `self`,
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLive)),
-            pendingState: PairingSequence.Pending(proposal: proposal, status: .proposed))
-        
-        crypto.set(privateKey: privateKey)
         sequencesStore.setSequence(pendingPairing)
         wcSubscriber.setSubscription(topic: topic)
         sessionPermissions[topic] = permissions
@@ -107,55 +96,31 @@ final class PairingEngine {
             throw WalletConnectError.internal(.pairWithExistingPairingForbidden)
         }
         
-        let privateKey = crypto.generatePrivateKey()
-        let selfPublicKey = privateKey.publicKey.toHexString()
+        let privateKey = crypto.makePrivateKey()
+        try? crypto.set(privateKey: privateKey) // TODO: Handle error
+        let selfPublicKey = privateKey.publicKey.hexRepresentation
         
-        let agreementKeys = try! Crypto.X25519.generateAgreementKeys(
+        let agreementKeys = try! Crypto.generateAgreementKeys(
             peerPublicKey: Data(hex: proposal.proposer.publicKey),
             privateKey: privateKey)
-        let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
-        let selfParticipant = PairingType.Participant(publicKey: selfPublicKey)
-        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : selfPublicKey
         
-        let pending = PairingSequence.Pending(
-            proposal: proposal,
-            status: .responded(settledTopic))
-        let pendingPairing = PairingSequence(
-            topic: proposal.topic,
-            relay: proposal.relay,
-            selfParticipant: PairingType.Participant(publicKey: selfPublicKey),
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
-            pendingState: pending)
-        
-        let settled = PairingSequence.Settled(
-            peer: PairingType.Participant(publicKey: proposal.proposer.publicKey),
-            permissions: PairingType.Permissions(
-                jsonrpc: proposal.permissions.jsonrpc,
-                controller: Controller(publicKey: controllerKey)),
-            state: nil,
-            status: .preSettled) // FIXME: State
-        let settledPairing = PairingSequence(
-            topic: settledTopic,
-            relay: proposal.relay,
-            selfParticipant: selfParticipant,
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(proposal.ttl)),
-            settledState: settled)
+        let settledTopic = agreementKeys.derivedTopic()
+        let pendingPairing = PairingSequence.buildResponded(proposal: proposal, agreementKeys: agreementKeys)
+        let settledPairing = PairingSequence.buildPreSettled(proposal: proposal, agreementKeys: agreementKeys)
         
         wcSubscriber.setSubscription(topic: proposal.topic)
         sequencesStore.setSequence(pendingPairing)
-        
         wcSubscriber.setSubscription(topic: settledTopic)
         sequencesStore.setSequence(settledPairing)
         
-        crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
-        crypto.set(privateKey: privateKey)
+        try? crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         
-        // publish approve on topic A
-        let approveParams = PairingType.ApproveParams(
+        let selfParticipant = Participant(publicKey: selfPublicKey)
+        let approveParams = PairingApproval(
             relay: proposal.relay,
             responder: selfParticipant,
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
-            state: nil) // FIXME: State
+            state: nil) // Should this be removed?
         let approvalPayload = WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
         
         relayer.request(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
@@ -210,7 +175,7 @@ final class PairingEngine {
             logger.debug("Could not find pairing for topic \(topic)")
             return
         }
-        let params = WCRequest.Params.pairingUpdate(PairingType.UpdateParams(state: PairingType.State(metadata: appMetadata)))
+        let params = WCRequest.Params.pairingUpdate(PairingType.UpdateParams(state: PairingState(metadata: appMetadata)))
         let request = WCRequest(method: .pairingUpdate, params: params)
         relayer.request(topic: topic, payload: request) { [unowned self] result in
             switch result {
@@ -284,7 +249,7 @@ final class PairingEngine {
         }
         let sessionProposal = payload.request.params
         if let pairingAgreementKeys = crypto.getAgreementKeys(for: sessionProposal.signal.params.topic) {
-            crypto.set(agreementKeys: pairingAgreementKeys, topic: sessionProposal.topic)
+            try? crypto.set(agreementKeys: pairingAgreementKeys, topic: sessionProposal.topic)
         }
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
         relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [weak self] error in
@@ -292,34 +257,22 @@ final class PairingEngine {
         }
     }
     
-    private func handlePairingApprove(approveParams: PairingType.ApproveParams, pendingPairingTopic: String, requestId: Int64) {
+    private func handlePairingApprove(approveParams: PairingApproval, pendingPairingTopic: String, requestId: Int64) {
         logger.debug("Responder Client approved pairing on topic: \(pendingPairingTopic)")
         guard let pendingPairing = try? sequencesStore.getSequence(forTopic: pendingPairingTopic), let pairingPending = pendingPairing.pending else {
             return
         }
         let selfPublicKey = Data(hex: pendingPairing.selfParticipant.publicKey)
-        let privateKey = try! crypto.getPrivateKey(for: selfPublicKey)!
+        let pubKey = try! Curve25519.KeyAgreement.PublicKey(rawRepresentation: selfPublicKey)
+        let privateKey = try! crypto.getPrivateKey(for: pubKey)!
         let peerPublicKey = Data(hex: approveParams.responder.publicKey)
-        let agreementKeys = try! Crypto.X25519.generateAgreementKeys(peerPublicKey: peerPublicKey, privateKey: privateKey)
-        let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
-        crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
-        let proposal = pairingPending.proposal
-        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : peerPublicKey.toHexString()
-        let controller = Controller(publicKey: controllerKey)
+        let agreementKeys = try! Crypto.generateAgreementKeys(peerPublicKey: peerPublicKey, privateKey: privateKey)
         
-        let peer = PairingType.Participant(publicKey: approveParams.responder.publicKey)
-        let settledPairing = PairingSequence(
-            topic: settledTopic,
-            relay: approveParams.relay,
-            selfParticipant: PairingType.Participant(publicKey: selfPublicKey.toHexString()),
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(approveParams.expiry)),
-            settledState: PairingSequence.Settled(
-                peer: peer,
-                permissions: PairingType.Permissions(
-                    jsonrpc: proposal.permissions.jsonrpc,
-                    controller: controller),
-                state: approveParams.state,
-                status: .acknowledged))
+        let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
+        try? crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
+        let proposal = pairingPending.proposal
+        let settledPairing = PairingSequence.buildAcknowledged(approval: approveParams, proposal: proposal, agreementKeys: agreementKeys)
+        
         sequencesStore.setSequence(settledPairing)
         sequencesStore.delete(topic: pendingPairingTopic)
         wcSubscriber.setSubscription(topic: settledTopic)
@@ -331,7 +284,6 @@ final class PairingEngine {
             return
         }
         sessionPermissions[pendingPairingTopic] = nil
-        onPairingApproved?(pairing, permissions, settledPairing.relay)
         
         // TODO: Move JSON-RPC responding to networking layer
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
@@ -340,6 +292,8 @@ final class PairingEngine {
                 self?.logger.error("Could not respond with error: \(error)")
             }
         }
+        
+        onPairingApproved?(pairing, permissions, settledPairing.relay)
     }
     
     private func removeRespondedPendingPairings() {
