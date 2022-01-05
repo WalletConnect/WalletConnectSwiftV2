@@ -1,0 +1,9 @@
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Test Example App"
+  lane :test_app do
+    scan(xcargs: "-allowProvisioningUpdates")
+  end
+end
