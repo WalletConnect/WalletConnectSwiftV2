@@ -1,7 +1,6 @@
 import Foundation
 import Combine
 import WalletConnectUtils
-import CryptoKit
 
 final class SessionEngine {
     
@@ -468,7 +467,7 @@ final class SessionEngine {
               }
         logger.debug("handleSessionApprove")
         
-        let pubKey = try! Curve25519.KeyAgreement.PublicKey(rawRepresentation: Data(hex: session.selfParticipant.publicKey))
+        let pubKey = try! AgreementPublicKey(rawRepresentation: Data(hex: session.selfParticipant.publicKey))
         let privateKey = try! crypto.getPrivateKey(for: pubKey)!
         let peerPublicKey = Data(hex: approveParams.responder.publicKey)
         let agreementKeys = try! Crypto.generateAgreementKeys(peerPublicKey: peerPublicKey, privateKey: privateKey)

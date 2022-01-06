@@ -1,5 +1,4 @@
 import Foundation
-import CryptoKit
 
 struct PairingSequence: ExpirableSequence {
     let topic: String

@@ -1,7 +1,6 @@
 import Foundation
 import Combine
 import WalletConnectUtils
-import CryptoKit
 
 final class PairingEngine {
     
@@ -262,8 +261,9 @@ final class PairingEngine {
         guard let pendingPairing = try? sequencesStore.getSequence(forTopic: pendingPairingTopic), let pairingPending = pendingPairing.pending else {
             return
         }
+        // Move this block to crypto
         let selfPublicKey = Data(hex: pendingPairing.selfParticipant.publicKey)
-        let pubKey = try! Curve25519.KeyAgreement.PublicKey(rawRepresentation: selfPublicKey)
+        let pubKey = try! AgreementPublicKey(rawRepresentation: selfPublicKey)
         let privateKey = try! crypto.getPrivateKey(for: pubKey)!
         let peerPublicKey = Data(hex: approveParams.responder.publicKey)
         let agreementKeys = try! Crypto.generateAgreementKeys(peerPublicKey: peerPublicKey, privateKey: privateKey)

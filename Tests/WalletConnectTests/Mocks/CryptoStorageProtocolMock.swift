@@ -1,24 +1,23 @@
 import Foundation
-import CryptoKit
 @testable import WalletConnect
 
 final class CryptoStorageProtocolMock: CryptoStorageProtocol {
     
-    var privateKeyStub = Curve25519.KeyAgreement.PrivateKey()
+    var privateKeyStub = AgreementPrivateKey()
     
-    private(set) var privateKeys: [String: Curve25519.KeyAgreement.PrivateKey] = [:]
+    private(set) var privateKeys: [String: AgreementPrivateKey] = [:]
     private(set) var agreementKeys: [String: AgreementKeys] = [:]
     
-    func makePrivateKey() -> Curve25519.KeyAgreement.PrivateKey {
-        defer { privateKeyStub = Curve25519.KeyAgreement.PrivateKey() }
+    func makePrivateKey() -> AgreementPrivateKey {
+        defer { privateKeyStub = AgreementPrivateKey() }
         return privateKeyStub
     }
     
-    func set(privateKey: Curve25519.KeyAgreement.PrivateKey) throws {
+    func set(privateKey: AgreementPrivateKey) throws {
         privateKeys[privateKey.publicKey.rawRepresentation.toHexString()] = privateKey
     }
     
-    func getPrivateKey(for publicKey: Curve25519.KeyAgreement.PublicKey) throws -> Curve25519.KeyAgreement.PrivateKey? {
+    func getPrivateKey(for publicKey: AgreementPublicKey) throws -> AgreementPrivateKey? {
         privateKeys[publicKey.rawRepresentation.toHexString()]
     }
     

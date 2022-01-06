@@ -1,7 +1,6 @@
 
 import Foundation
 import XCTest
-import CryptoKit
 import TestingUtils
 import WalletConnectUtils
 @testable import WalletConnect

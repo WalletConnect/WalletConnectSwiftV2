@@ -35,9 +35,7 @@ fileprivate extension WCRequest {
 //    try! Crypto.X25519.generateAgreementKeys(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
 //}
 
-import CryptoKit
-
-func deriveTopic(publicKey: String, privateKey: Curve25519.KeyAgreement.PrivateKey) -> String {
+func deriveTopic(publicKey: String, privateKey: AgreementPrivateKey) -> String {
     try! Crypto.generateAgreementKeys(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
 }
 
@@ -151,7 +149,7 @@ final class PairingEngineTests: XCTestCase {
         setupEngine(isController: false)
         
         var approvedPairing: Pairing?
-        let responderPubKey = Curve25519.KeyAgreement.PrivateKey().publicKey.rawRepresentation.toHexString()
+        let responderPubKey = AgreementPrivateKey().publicKey.rawRepresentation.toHexString()
         let topicB = deriveTopic(publicKey: responderPubKey, privateKey: cryptoMock.privateKeyStub)
         let uri = engine.propose(permissions: SessionPermissions.stub())!
         let topicA = uri.topic

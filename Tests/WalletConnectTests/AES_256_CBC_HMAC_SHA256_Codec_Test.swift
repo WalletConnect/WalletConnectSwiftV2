@@ -1,7 +1,6 @@
 
 import Foundation
 import XCTest
-import CryptoKit
 @testable import WalletConnect
 
 class AES_256_CBC_HMAC_SHA256_Codec_Test: XCTestCase {
@@ -9,7 +8,7 @@ class AES_256_CBC_HMAC_SHA256_Codec_Test: XCTestCase {
     var codec: AES_256_CBC_HMAC_SHA256_Codec!
     let agreementKeys = AgreementKeys(
         sharedSecret: Data(hex: "404D635166546A576E5A7234753777217A25432A462D4A614E645267556B5870"),
-        publicKey: try! Curve25519.KeyAgreement.PublicKey(rawRepresentation: Data(hex: "763979244226452948404d6251655468576d5a7134743777217a25432a462d4a")))
+        publicKey: try! AgreementPublicKey(rawRepresentation: Data(hex: "763979244226452948404d6251655468576d5a7134743777217a25432a462d4a")))
 
     override func setUp() {
         codec = AES_256_CBC_HMAC_SHA256_Codec()
