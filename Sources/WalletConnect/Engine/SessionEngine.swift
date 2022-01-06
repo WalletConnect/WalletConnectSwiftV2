@@ -67,14 +67,12 @@ final class SessionEngine {
         }
         logger.debug("Propose Session on topic: \(pendingSessionTopic)")
         
-        let privateKey = crypto.makePrivateKey()
-        try! crypto.set(privateKey: privateKey) // TODO: Handle error
-        let publicKey = privateKey.publicKey.rawRepresentation.toHexString()
+        let publicKey = try! crypto.createX25519KeyPair()
         
         let proposal = SessionProposal(
             topic: pendingSessionTopic,
             relay: relay,
-            proposer: SessionType.Proposer(publicKey: publicKey, controller: isController, metadata: metadata),
+            proposer: SessionType.Proposer(publicKey: publicKey.hexRepresentation, controller: isController, metadata: metadata),
             signal: SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: settledPairing.topic)),
             permissions: permissions,
             ttl: SessionSequence.timeToLivePending)
@@ -102,12 +100,9 @@ final class SessionEngine {
     // TODO: Check matching controller
     func approve(proposal: SessionProposal, accounts: Set<String>) {
         logger.debug("Approve session")
-        let privateKey = crypto.makePrivateKey()
-        let selfPublicKey = privateKey.publicKey.rawRepresentation.toHexString()
         
-        let agreementKeys = try! Crypto.generateAgreementKeys(
-            peerPublicKey: Data(hex: proposal.proposer.publicKey),
-            privateKey: privateKey)
+        let selfPublicKey = try! crypto.createX25519KeyPair()
+        let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposal.proposer.publicKey)
         
         let settledTopic = agreementKeys.derivedTopic()
         let pendingSession = SessionSequence.buildResponded(proposal: proposal, agreementKeys: agreementKeys, metadata: metadata)
@@ -116,7 +111,7 @@ final class SessionEngine {
         let approveParams = SessionType.ApproveParams(
             relay: proposal.relay,
             responder: Participant(
-                publicKey: selfPublicKey,
+                publicKey: selfPublicKey.hexRepresentation,
                 metadata: metadata),
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
             state: SessionState(accounts: accounts))
@@ -125,7 +120,6 @@ final class SessionEngine {
         sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: proposal.topic)
         
-        try! crypto.set(privateKey: privateKey)
         try! crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         sequencesStore.setSequence(settledSession)
         wcSubscriber.setSubscription(topic: settledTopic)
@@ -468,10 +462,10 @@ final class SessionEngine {
         logger.debug("handleSessionApprove")
         
         let pubKey = try! AgreementPublicKey(rawRepresentation: Data(hex: session.selfParticipant.publicKey))
-        let privateKey = try! crypto.getPrivateKey(for: pubKey)!
-        let peerPublicKey = Data(hex: approveParams.responder.publicKey)
-        let agreementKeys = try! Crypto.generateAgreementKeys(peerPublicKey: peerPublicKey, privateKey: privateKey)
+        let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: approveParams.responder.publicKey)
+        
         let settledTopic = agreementKeys.derivedTopic()
+        
         try! crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         
         let proposal = pendingSession.proposal
@@ -483,7 +477,6 @@ final class SessionEngine {
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
         
-//        let peer = Participant(publicKey: approveParams.responder.publicKey, metadata: approveParams.responder.metadata)
         let approvedSession = Session(
             topic: settledTopic,
             peer: approveParams.responder.metadata!,

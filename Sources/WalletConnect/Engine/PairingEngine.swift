@@ -72,12 +72,10 @@ final class PairingEngine {
             return nil
         }
         
-        let privateKey = crypto.makePrivateKey()
-        try! crypto.set(privateKey: privateKey) // TODO: Handle error
-        let publicKey = privateKey.publicKey.hexRepresentation
+        let publicKey = try! crypto.createX25519KeyPair()
         
         let relay = RelayProtocolOptions(protocol: "waku", params: nil)
-        let uri = WalletConnectURI(topic: topic, publicKey: publicKey, isController: isController, relay: relay)
+        let uri = WalletConnectURI(topic: topic, publicKey: publicKey.hexRepresentation, isController: isController, relay: relay)
         let pendingPairing = PairingSequence.buildProposed(uri: uri)
         
         sequencesStore.setSequence(pendingPairing)
@@ -95,13 +93,8 @@ final class PairingEngine {
             throw WalletConnectError.internal(.pairWithExistingPairingForbidden)
         }
         
-        let privateKey = crypto.makePrivateKey()
-        try? crypto.set(privateKey: privateKey) // TODO: Handle error
-        let selfPublicKey = privateKey.publicKey.hexRepresentation
-        
-        let agreementKeys = try! Crypto.generateAgreementKeys(
-            peerPublicKey: Data(hex: proposal.proposer.publicKey),
-            privateKey: privateKey)
+        let selfPublicKey = try! crypto.createX25519KeyPair()
+        let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposal.proposer.publicKey)
         
         let settledTopic = agreementKeys.derivedTopic()
         let pendingPairing = PairingSequence.buildResponded(proposal: proposal, agreementKeys: agreementKeys)
@@ -114,7 +107,7 @@ final class PairingEngine {
         
         try? crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         
-        let selfParticipant = Participant(publicKey: selfPublicKey)
+        let selfParticipant = Participant(publicKey: selfPublicKey.hexRepresentation)
         let approveParams = PairingApproval(
             relay: proposal.relay,
             responder: selfParticipant,
@@ -261,12 +254,12 @@ final class PairingEngine {
         guard let pendingPairing = try? sequencesStore.getSequence(forTopic: pendingPairingTopic), let pairingPending = pendingPairing.pending else {
             return
         }
-        // Move this block to crypto
+        
+        // TODO: make a codable pub key
         let selfPublicKey = Data(hex: pendingPairing.selfParticipant.publicKey)
         let pubKey = try! AgreementPublicKey(rawRepresentation: selfPublicKey)
-        let privateKey = try! crypto.getPrivateKey(for: pubKey)!
-        let peerPublicKey = Data(hex: approveParams.responder.publicKey)
-        let agreementKeys = try! Crypto.generateAgreementKeys(peerPublicKey: peerPublicKey, privateKey: privateKey)
+        
+        let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: approveParams.responder.publicKey)
         
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
         try? crypto.set(agreementKeys: agreementKeys, topic: settledTopic)

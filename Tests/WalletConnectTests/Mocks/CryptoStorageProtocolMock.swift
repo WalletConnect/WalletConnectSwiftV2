@@ -3,6 +3,24 @@ import Foundation
 
 final class CryptoStorageProtocolMock: CryptoStorageProtocol {
     
+    func createX25519KeyPair() throws -> AgreementPublicKey {
+        defer { privateKeyStub = AgreementPrivateKey() }
+        try set(privateKey: privateKeyStub)
+        return privateKeyStub.publicKey
+    }
+    
+    func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementKeys {
+        // TODO: Fix mock
+        guard let privateKey = try getPrivateKey(for: selfPublicKey) else {
+            fatalError() // TODO: handle error
+        }
+        let peerPublicKey = try AgreementPublicKey(rawRepresentation: Data(hex: hexRepresentation))
+        let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: peerPublicKey)
+        let rawSecret = sharedSecret.withUnsafeBytes { return Data(Array($0)) }
+        return AgreementKeys(sharedSecret: rawSecret, publicKey: privateKey.publicKey)
+    }
+    
+    
     var privateKeyStub = AgreementPrivateKey()
     
     private(set) var privateKeys: [String: AgreementPrivateKey] = [:]

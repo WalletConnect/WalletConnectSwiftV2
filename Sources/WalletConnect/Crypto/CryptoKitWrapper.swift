@@ -1,24 +1,19 @@
 import Foundation
 import CryptoKit
 
-//protocol AgreementPublicKey {
-////    init<D>(rawRepresentation data: D) throws where D: ContiguousBytes
-//    var rawRepresentation: Data { get }
-//}
-//
-//protocol AgreementPrivateKey {
-//    var publicKey: AgreementPublicKey { get }
-//}
-//
-//extension Curve25519.KeyAgreement.PublicKey: AgreementPublicKey {}
-//
-//extension Curve25519.KeyAgreement.PrivateKey: AgreementPrivateKey {
-//    var publicKey: AgreementPublicKey {
-//        self.publicKey
-//    }
-//}
+extension Curve25519.KeyAgreement.PublicKey {
+    
+    var hexRepresentation: String {
+        rawRepresentation.toHexString()
+    }
+}
 
-
+extension Curve25519.KeyAgreement.PublicKey: Equatable {
+    
+    public static func == (lhs: Curve25519.KeyAgreement.PublicKey, rhs: Curve25519.KeyAgreement.PublicKey) -> Bool {
+        lhs.rawRepresentation == rhs.rawRepresentation
+    }
+}
 
 struct AgreementPublicKey: Equatable {
     
