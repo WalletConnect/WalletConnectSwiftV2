@@ -10,6 +10,7 @@ final class ResponderViewController: UIViewController {
             description: "wallet description",
             url: "example.wallet",
             icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])
+        WalletConnectClient(metadata: <#T##AppMetadata#>, projectId: <#T##String#>, isController: <#T##Bool#>, relayHost: <#T##String#>, keyValueStorage: <#T##KeyValueStorage#>, clientName: <#T##String?#>)
         return WalletConnectClient(
             metadata: metadata,
             projectId: "",

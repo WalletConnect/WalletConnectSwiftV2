@@ -6,6 +6,10 @@ import WalletConnectUtils
 import UIKit
 #endif
 
+extension ConsoleLogger: ConsoleLogging {}
+extension WakuNetworkRelay: NetworkRelaying {}
+
+/// A protocol that defines methods that WalletConnectClient instance call on it's delegate to handle sequences level events
 public protocol WalletConnectClientDelegate: AnyObject {
     func didReceive(sessionProposal: Session.Proposal)
     func didReceive(sessionRequest: SessionRequest)
@@ -14,7 +18,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     func didUpdate(sessionTopic: String, accounts: Set<String>)
     func didSettle(session: Session)
     func didSettle(pairing: Pairing)
-    func didReceive(notification: SessionNotification, sessionTopic: String)
+    func didReceive(notification: SessionNotification, sessionTopic : String)
     func didReject(pendingSessionTopic: String, reason: SessionType.Reason)
     func didUpdate(pairingTopic: String, appMetadata: AppMetadata)
 }
@@ -27,6 +31,11 @@ public extension WalletConnectClientDelegate {
     func didUpdate(pairingTopic: String, appMetadata: AppMetadata) {}
 }
 
+/// An Object that expose public API to provide interactions with WalletConnect SDK
+///
+/// ```swift
+/// WalletConnectClient(metadata: <#T##AppMetadata#>, projectId: <#T##String#>, isController: <#T##Bool#>, relayHost: <#T##String#>, keyValueStorage: <#T##KeyValueStorage#>, clientName: <#T##String?#>)
+/// ```
 public final class WalletConnectClient {
     private let metadata: AppMetadata
     public weak var delegate: WalletConnectClientDelegate?
@@ -43,7 +52,7 @@ public final class WalletConnectClient {
     // MARK: - Initializers
 
     /// Initializes and returns newly created WalletConnect Client Instance.
-    /// WalletConnect Client is not a singleton but once you create an instance, you should never deinitialise it.
+    /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialise it. Usually only one instance of a client in an app is required.
     /// - Parameters:
     ///   - metadata: describes your application and will define pairing appearance in a web browser.
     ///   - projectId: an optional parameter used to access the public WalletConnect infrastructure. Go to `www.walletconnect.com` for info.
@@ -118,7 +127,7 @@ public final class WalletConnectClient {
     
     /// For the responder to approve a session proposal.
     /// - Parameters:
-    ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate function ``WalletConnectClientDelegate/didReceive(sessionProposal: Session.Proposal)``
+    ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate function: `didReceive(sessionProposal: Session.Proposal)`
     ///   - accounts: A Set of accounts that the dapp will be allowed to request methods executions on.
     public func approve(proposal: Session.Proposal, accounts: Set<String>) {
         sessionEngine.approve(proposal: proposal.proposal, accounts: accounts)
@@ -189,15 +198,20 @@ public final class WalletConnectClient {
         sessionEngine.notify(topic: topic, params: params, completion: completion)
     }
     
-    // for either to disconnect a session
+    /// For the proposer and responder to terminate a session
+    /// - Parameters:
+    ///   - topic: Session topic that you want to delete
+    ///   - reason: Reason of session deletion
     public func disconnect(topic: String, reason: SessionType.Reason) {
         sessionEngine.delete(topic: topic, reason: reason)
     }
     
+    /// - Returns: All settled sessions that are active
     public func getSettledSessions() -> [Session] {
         sessionEngine.getSettledSessions()
     }
     
+    /// - Returns: All settled pairings that are active
     public func getSettledPairings() -> [Pairing] {
         pairingEngine.getSettledPairings()
     }
