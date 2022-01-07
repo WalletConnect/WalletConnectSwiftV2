@@ -254,7 +254,7 @@ final class PairingEngine {
             return
         }
         
-        let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: pairing.pubKey, peerPublicKey: approveParams.responder.publicKey)
+        let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: try! pairing.getPublicKey(), peerPublicKey: approveParams.responder.publicKey)
         
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
         try? crypto.setAgreementSecret(agreementKeys, topic: settledTopic)

@@ -75,8 +75,13 @@ extension Crypto {
     
     func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret {
         guard let privateKey = try getPrivateKey(for: selfPublicKey) else {
-            fatalError() // TODO: handle error
+            print("Key Agreement Error: Private key not found for public key: \(selfPublicKey.hexRepresentation)")
+            throw WalletConnectError.internal(.keyNotFound)
         }
+        return try Crypto.generateAgreementSecret(from: privateKey, peerPublicKey: hexRepresentation)
+    }
+    
+    static func generateAgreementSecret(from privateKey: AgreementPrivateKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret {
         let peerPublicKey = try AgreementPublicKey(rawRepresentation: Data(hex: hexRepresentation))
         let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: peerPublicKey)
         let rawSecret = sharedSecret.withUnsafeBytes { return Data(Array($0)) }

@@ -461,7 +461,7 @@ final class SessionEngine {
               }
         logger.debug("handleSessionApprove")
         
-        let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: session.pubKey, peerPublicKey: approveParams.responder.publicKey)
+        let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: try! session.getPublicKey(), peerPublicKey: approveParams.responder.publicKey)
         
         let settledTopic = agreementKeys.derivedTopic()
         

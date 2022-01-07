@@ -1,6 +1,13 @@
 import XCTest
 @testable import WalletConnect
 
+fileprivate extension Error {
+    var isKeyNotFoundError: Bool {
+        guard case .internal(.keyNotFound) = self as? WalletConnectError else { return false }
+        return true
+    }
+}
+
 class CryptoTests: XCTestCase {
     
     var crypto: Crypto!
@@ -58,12 +65,37 @@ class CryptoTests: XCTestCase {
         XCTAssertNil(try crypto.getAgreementSecret(for: topic))
     }
     
-    func testX25519Agreement() throws {
+    func testGenerateX25519Agreement() throws {
         let privateKeyA = try AgreementPrivateKey(rawRepresentation: CryptoTestData._privateKeyA)
         let privateKeyB = try AgreementPrivateKey(rawRepresentation: CryptoTestData._privateKeyB)
-        let agreementKeysA = try Crypto.generateAgreementSecret(peerPublicKey: privateKeyB.publicKey.rawRepresentation, privateKey: privateKeyA)
-        let agreementKeysB = try Crypto.generateAgreementSecret(peerPublicKey: privateKeyA.publicKey.rawRepresentation, privateKey: privateKeyB)
-        XCTAssertEqual(agreementKeysA.sharedSecret, agreementKeysB.sharedSecret)
-        XCTAssertEqual(agreementKeysA.sharedSecret, CryptoTestData.expectedSharedSecret)
+        let agreementSecretA = try Crypto.generateAgreementSecret(from: privateKeyA, peerPublicKey: privateKeyB.publicKey.hexRepresentation)
+        let agreementSecretB = try Crypto.generateAgreementSecret(from: privateKeyB, peerPublicKey: privateKeyA.publicKey.hexRepresentation)
+        XCTAssertEqual(agreementSecretA.sharedSecret, agreementSecretB.sharedSecret)
+        XCTAssertEqual(agreementSecretA.sharedSecret, CryptoTestData.expectedSharedSecret)
+    }
+    
+    func testGenerateX25519AgreementRandomKeys() throws {
+        let privateKeyA = AgreementPrivateKey()
+        let privateKeyB = AgreementPrivateKey()
+        let agreementSecretA = try Crypto.generateAgreementSecret(from: privateKeyA, peerPublicKey: privateKeyB.publicKey.hexRepresentation)
+        let agreementSecretB = try Crypto.generateAgreementSecret(from: privateKeyB, peerPublicKey: privateKeyA.publicKey.hexRepresentation)
+        XCTAssertEqual(agreementSecretA.sharedSecret, agreementSecretB.sharedSecret)
+    }
+    
+    func testPerformKeyAgreement() throws {
+        let privateKeySelf = AgreementPrivateKey()
+        let privateKeyPeer = AgreementPrivateKey()
+        let peerSecret = try Crypto.generateAgreementSecret(from: privateKeyPeer, peerPublicKey: privateKeySelf.publicKey.hexRepresentation)
+        try crypto.setPrivateKey(privateKeySelf)
+        let selfSecret = try crypto.performKeyAgreement(selfPublicKey: privateKeySelf.publicKey, peerPublicKey: privateKeyPeer.publicKey.hexRepresentation)
+        XCTAssertEqual(selfSecret.sharedSecret, peerSecret.sharedSecret)
+    }
+    
+    func testPerformKeyAgreementFailure() {
+        let publicKeySelf = AgreementPrivateKey().publicKey
+        let publicKeyPeer = AgreementPrivateKey().publicKey.hexRepresentation
+        XCTAssertThrowsError(try crypto.performKeyAgreement(selfPublicKey: publicKeySelf, peerPublicKey: publicKeyPeer)) { error in
+            XCTAssert(error.isKeyNotFoundError)
+        }
     }
 }

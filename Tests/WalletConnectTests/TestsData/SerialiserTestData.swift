@@ -2,7 +2,6 @@
 
 import Foundation
 @testable import WalletConnect
-import CryptoKit
 
 enum SerialiserTestData {
     static let emptyAgreementSecret = AgreementSecret(sharedSecret: Data(hex: ""), publicKey: AgreementPrivateKey().publicKey)

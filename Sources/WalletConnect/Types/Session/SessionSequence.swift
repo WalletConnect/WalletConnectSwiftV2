@@ -12,8 +12,8 @@ struct SessionSequence: ExpirableSequence {
         selfParticipant.publicKey
     }
     
-    var pubKey: AgreementPublicKey {
-        return try! AgreementPublicKey(rawRepresentation: Data(hex: selfParticipant.publicKey))
+    func getPublicKey() throws -> AgreementPublicKey {
+        try AgreementPublicKey(rawRepresentation: Data(hex: selfParticipant.publicKey))
     }
     
     var pending: Pending? {
