@@ -1,6 +1,6 @@
 import Foundation
-import CryptoKit
 
+// Maybe AgreementSecret?
 struct AgreementKeys: Equatable {
     let sharedSecret: Data
 //    let publicKey: Curve25519.KeyAgreement.PublicKey
@@ -15,9 +15,9 @@ struct AgreementKeys: Equatable {
 protocol CryptoStorageProtocol {
     func makePrivateKey() -> AgreementPrivateKey
     func createX25519KeyPair() throws -> AgreementPublicKey
-    func set(privateKey: AgreementPrivateKey) throws
+    func setPrivateKey(_ privateKey: AgreementPrivateKey) throws
     func getPrivateKey(for publicKey: AgreementPublicKey) throws -> AgreementPrivateKey?
-    func set(agreementKeys: AgreementKeys, topic: String) throws
+    func setAgreementKeys(_ agreementKeys: AgreementKeys, topic: String) throws
     func getAgreementKeys(for topic: String) -> AgreementKeys?
     func deletePrivateKey(for publicKey: String)
     func deleteAgreementKeys(for topic: String)
@@ -39,11 +39,11 @@ class Crypto: CryptoStorageProtocol {
     
     func createX25519KeyPair() throws -> AgreementPublicKey {
         let privateKey = AgreementPrivateKey()
-        try set(privateKey: privateKey)
+        try setPrivateKey(privateKey)
         return privateKey.publicKey
     }
     
-    func set(privateKey: AgreementPrivateKey) throws {
+    func setPrivateKey(_ privateKey: AgreementPrivateKey) throws {
         try keychain.add(privateKey.rawRepresentation, forKey: privateKey.publicKey.rawRepresentation.toHexString())
     }
     
@@ -54,7 +54,7 @@ class Crypto: CryptoStorageProtocol {
         return try AgreementPrivateKey(rawRepresentation: privateKeyData)
     }
     
-    func set(agreementKeys: AgreementKeys, topic: String) throws {
+    func setAgreementKeys(_ agreementKeys: AgreementKeys, topic: String) throws {
         let agreement = agreementKeys.sharedSecret + agreementKeys.publicKey.rawRepresentation
         try keychain.add(agreement, forKey: topic)
     }

@@ -105,7 +105,7 @@ final class PairingEngine {
         wcSubscriber.setSubscription(topic: settledTopic)
         sequencesStore.setSequence(settledPairing)
         
-        try? crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
+        try? crypto.setAgreementKeys(agreementKeys, topic: settledTopic)
         
         let approveParams = PairingApproval(
             relay: proposal.relay,
@@ -240,7 +240,7 @@ final class PairingEngine {
         }
         let sessionProposal = payload.request.params
         if let pairingAgreementKeys = crypto.getAgreementKeys(for: sessionProposal.signal.params.topic) {
-            try? crypto.set(agreementKeys: pairingAgreementKeys, topic: sessionProposal.topic)
+            try? crypto.setAgreementKeys(pairingAgreementKeys, topic: sessionProposal.topic)
         }
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
         relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [weak self] error in
@@ -257,7 +257,7 @@ final class PairingEngine {
         let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: pairing.pubKey, peerPublicKey: approveParams.responder.publicKey)
         
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
-        try? crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
+        try? crypto.setAgreementKeys(agreementKeys, topic: settledTopic)
         let proposal = pendingPairing.proposal
         let settledPairing = PairingSequence.buildAcknowledged(approval: approveParams, proposal: proposal, agreementKeys: agreementKeys)
         

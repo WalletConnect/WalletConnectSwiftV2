@@ -5,7 +5,7 @@ final class CryptoStorageProtocolMock: CryptoStorageProtocol {
     
     func createX25519KeyPair() throws -> AgreementPublicKey {
         defer { privateKeyStub = AgreementPrivateKey() }
-        try set(privateKey: privateKeyStub)
+        try setPrivateKey(privateKeyStub)
         return privateKeyStub.publicKey
     }
     
@@ -31,7 +31,7 @@ final class CryptoStorageProtocolMock: CryptoStorageProtocol {
         return privateKeyStub
     }
     
-    func set(privateKey: AgreementPrivateKey) throws {
+    func setPrivateKey(_ privateKey: AgreementPrivateKey) throws {
         privateKeys[privateKey.publicKey.rawRepresentation.toHexString()] = privateKey
     }
     
@@ -39,7 +39,7 @@ final class CryptoStorageProtocolMock: CryptoStorageProtocol {
         privateKeys[publicKey.rawRepresentation.toHexString()]
     }
     
-    func set(agreementKeys: AgreementKeys, topic: String) {
+    func setAgreementKeys(_ agreementKeys: AgreementKeys, topic: String) {
         self.agreementKeys[topic] = agreementKeys
     }
     

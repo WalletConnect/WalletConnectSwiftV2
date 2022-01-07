@@ -82,7 +82,7 @@ final class SessionEngine {
         sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: pendingSessionTopic)
         let pairingAgreementKeys = crypto.getAgreementKeys(for: settledPairing.topic)!
-        try! crypto.set(agreementKeys: pairingAgreementKeys, topic: proposal.topic)
+        try! crypto.setAgreementKeys(pairingAgreementKeys, topic: proposal.topic)
         
         let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: proposal)
         let pairingPayloadParams = PairingType.PayloadParams(request: request)
@@ -120,7 +120,7 @@ final class SessionEngine {
         sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: proposal.topic)
         
-        try! crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
+        try! crypto.setAgreementKeys(agreementKeys, topic: settledTopic)
         sequencesStore.setSequence(settledSession)
         wcSubscriber.setSubscription(topic: settledTopic)
         
@@ -465,7 +465,7 @@ final class SessionEngine {
         
         let settledTopic = agreementKeys.derivedTopic()
         
-        try! crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
+        try! crypto.setAgreementKeys(agreementKeys, topic: settledTopic)
         
         let proposal = pendingSession.proposal
         let settledSession = SessionSequence.buildAcknowledged(approval: approveParams, proposal: proposal, agreementKeys: agreementKeys, metadata: metadata)

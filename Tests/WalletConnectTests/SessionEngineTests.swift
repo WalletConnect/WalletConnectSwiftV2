@@ -107,7 +107,7 @@ final class SessionEngineTests: XCTestCase {
         let topicC = topicGenerator.topic
         
         let agreementKeys = AgreementKeys.stub()
-        cryptoMock.set(agreementKeys: agreementKeys, topic: topicB)
+        cryptoMock.setAgreementKeys(agreementKeys, topic: topicB)
         let permissions = SessionPermissions.stub()
         let relayOptions = RelayProtocolOptions(protocol: "", params: nil)
         engine.proposeSession(settledPairing: pairing, permissions: permissions, relay: relayOptions)
@@ -132,7 +132,7 @@ final class SessionEngineTests: XCTestCase {
         let topicC = topicGenerator.topic
         
         let agreementKeys = AgreementKeys.stub()
-        cryptoMock.set(agreementKeys: agreementKeys, topic: topicB)
+        cryptoMock.setAgreementKeys(agreementKeys, topic: topicB)
         let permissions = SessionPermissions.stub()
         let relayOptions = RelayProtocolOptions(protocol: "", params: nil)
         engine.proposeSession(settledPairing: pairing, permissions: permissions, relay: relayOptions)
@@ -191,7 +191,7 @@ final class SessionEngineTests: XCTestCase {
         let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
         
         let agreementKeys = AgreementKeys.stub()
-        cryptoMock.set(agreementKeys: agreementKeys, topic: topicC)
+        cryptoMock.setAgreementKeys(agreementKeys, topic: topicC)
         
         let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: isController, metadata: metadata)
         let proposal = SessionProposal(
@@ -228,7 +228,7 @@ final class SessionEngineTests: XCTestCase {
         let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
         
         let agreementKeys = AgreementKeys.stub()
-        cryptoMock.set(agreementKeys: agreementKeys, topic: topicC)
+        cryptoMock.setAgreementKeys(agreementKeys, topic: topicC)
         
         let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: isController, metadata: metadata)
         let proposal = SessionProposal(
@@ -284,7 +284,7 @@ final class SessionEngineTests: XCTestCase {
         let pairing = Pairing.stub()
 
         let agreementKeys = AgreementKeys.stub()
-        cryptoMock.set(agreementKeys: agreementKeys, topic: pairing.topic)
+        cryptoMock.setAgreementKeys(agreementKeys, topic: pairing.topic)
 
         engine.proposeSession(settledPairing: pairing, permissions: permissions, relay: relayOptions)
         engine.onSessionApproved = { session in
