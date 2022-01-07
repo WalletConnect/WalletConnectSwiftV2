@@ -42,8 +42,7 @@ final class ClientTests: XCTestCase {
         let proposerSettlesPairingExpectation = expectation(description: "Proposer settles pairing")
         let responderSettlesPairingExpectation = expectation(description: "Responder settles pairing")
         let permissions = Session.Permissions.stub()
-        let connectParams = ConnectParams(permissions: permissions)
-        let uri = try! proposer.client.connect(params: connectParams)!
+        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         
         _ = try! responder.client.pair(uri: uri)
         responder.onPairingSettled = { _ in
@@ -61,8 +60,7 @@ final class ClientTests: XCTestCase {
         let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
         
         let permissions = Session.Permissions.stub()
-        let connectParams = ConnectParams(permissions: permissions)
-        let uri = try! proposer.client.connect(params: connectParams)!
+        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [account])
@@ -115,8 +113,7 @@ final class ClientTests: XCTestCase {
     func testResponderRejectsSession() {
         let sessionRejectExpectation = expectation(description: "Proposer is notified on session rejection")
         let permissions = Session.Permissions.stub()
-        let connectParams = ConnectParams(permissions: permissions)
-        let uri = try! proposer.client.connect(params: connectParams)!
+        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self] proposal in
             self.responder.client.reject(proposal: proposal, reason: SessionType.Reason(code: WalletConnectError.internal(.notApproved).code, message: WalletConnectError.internal(.notApproved).description))
@@ -131,8 +128,7 @@ final class ClientTests: XCTestCase {
     func testDeleteSession() {
         let sessionDeleteExpectation = expectation(description: "Responder is notified on session deletion")
         let permissions = Session.Permissions.stub()
-        let connectParams = ConnectParams(permissions: permissions)
-        let uri = try! proposer.client.connect(params: connectParams)!
+        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
@@ -153,8 +149,7 @@ final class ClientTests: XCTestCase {
         let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]
         let responseParams = "0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c"
         let permissions = Session.Permissions.stub(methods: [method])
-        let connectParams = ConnectParams(permissions: permissions)
-        let uri = try! proposer.client.connect(params: connectParams)!
+        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
@@ -190,8 +185,7 @@ final class ClientTests: XCTestCase {
         let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]
         let error = JSONRPCErrorResponse.Error(code: 0, message: "error_message")
         let permissions = Session.Permissions.stub(methods: [method])
-        let connectParams = ConnectParams(permissions: permissions)
-        let uri = try! proposer.client.connect(params: connectParams)!
+        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
@@ -219,7 +213,7 @@ final class ClientTests: XCTestCase {
         let proposerReceivesPingResponseExpectation = expectation(description: "Proposer receives ping response")
         let permissions = Session.Permissions.stub()
         let connectParams = ConnectParams(permissions: permissions)
-        let uri = try! proposer.client.connect(params: connectParams)!
+        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         
         _ = try! responder.client.pair(uri: uri)
         proposer.onPairingSettled = { [unowned self] pairing in
@@ -235,8 +229,7 @@ final class ClientTests: XCTestCase {
     func testSessionPing() {
         let proposerReceivesPingResponseExpectation = expectation(description: "Proposer receives ping response")
         let permissions = Session.Permissions.stub()
-        let connectParams = ConnectParams(permissions: permissions)
-        let uri = try! proposer.client.connect(params: connectParams)!
+        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
@@ -256,8 +249,7 @@ final class ClientTests: XCTestCase {
         let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
         let permissions = Session.Permissions.stub()
         let upgradePermissions = Session.Permissions(blockchains: ["eip155:42"], methods: ["eth_sendTransaction"])
-        let connectParams = ConnectParams(permissions: permissions)
-        let uri = try! proposer.client.connect(params: connectParams)!
+        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [account])
@@ -286,8 +278,7 @@ final class ClientTests: XCTestCase {
         let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
         let permissions = Session.Permissions.stub()
         let upgradePermissions = Session.Permissions(blockchains: ["eip155:42"], methods: ["eth_sendTransaction"])
-        let connectParams = ConnectParams(permissions: permissions)
-        let uri = try! proposer.client.connect(params: connectParams)!
+        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [account])
@@ -310,8 +301,7 @@ final class ClientTests: XCTestCase {
         let account = "eip155:42:0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
         let updateAccounts: Set<String> = ["eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb"]
         let permissions = Session.Permissions.stub()
-        let connectParams = ConnectParams(permissions: permissions)
-        let uri = try! proposer.client.connect(params: connectParams)!
+        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [account])
@@ -333,8 +323,7 @@ final class ClientTests: XCTestCase {
     func testSessionNotificationSucceeds() {
         let proposerReceivesNotificationExpectation = expectation(description: "Proposer receives notification")
         let permissions = Session.Permissions.stub(notifications: ["type1"])
-        let connectParams = ConnectParams(permissions: permissions)
-        let uri = try! proposer.client.connect(params: connectParams)!
+        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         try! responder.client.pair(uri: uri)
         let notificationParams = SessionType.NotificationParams(type: "type1", data: AnyCodable("notification_data"))
         responder.onSessionProposal = { [unowned self] proposal in
@@ -354,8 +343,7 @@ final class ClientTests: XCTestCase {
         let proposerReceivesNotificationExpectation = expectation(description: "Proposer receives notification")
         proposerReceivesNotificationExpectation.isInverted = true
         let permissions = Session.Permissions.stub(notifications: ["type1"])
-        let connectParams = ConnectParams(permissions: permissions)
-        let uri = try! proposer.client.connect(params: connectParams)!
+        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         try! responder.client.pair(uri: uri)
         let notificationParams = SessionType.NotificationParams(type: "type2", data: AnyCodable("notification_data"))
         responder.onSessionProposal = { [unowned self] proposal in
@@ -376,8 +364,7 @@ final class ClientTests: XCTestCase {
     func testPairingUpdate() {
         let proposerReceivesPairingUpdateExpectation = expectation(description: "Proposer receives pairing update")
         let permissions = Session.Permissions.stub()
-        let connectParams = ConnectParams(permissions: permissions)
-        let uri = try! proposer.client.connect(params: connectParams)!
+        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         _ = try! responder.client.pair(uri: uri)
         proposer.onPairingUpdate = { _, appMetadata in
             XCTAssertNotNil(appMetadata)

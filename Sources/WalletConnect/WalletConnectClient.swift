@@ -40,9 +40,17 @@ public final class WalletConnectClient {
     private let secureStorage: SecureStorage
     private let pairingQueue = DispatchQueue(label: "com.walletconnect.sdk.client.pairing", qos: .userInitiated)
 
-    
-    // MARK: - Public interface
+    // MARK: - Initializers
 
+    /// Initializes and returns newly created WalletConnect Client Instance.
+    /// WalletConnect Client is not a singleton but once you create an instance, you should never deinitialise it.
+    /// - Parameters:
+    ///   - metadata: describes your application and will define pairing appearance in a web browser.
+    ///   - projectId: an optional parameter used to access the public WalletConnect infrastructure. Go to `www.walletconnect.com` for info.
+    ///   - isController: the peer that controls communication permissions for allowed chains, notification types and JSON-RPC request methods. Always true for a wallet.
+    ///   - relayHost: proxy server host that your application will use to connect to Waku Network. If you register your project at `www.walletconnect.com` you can use `relay.walletconnect.com`
+    ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults but if for some reasons you want to provide your own storage you can inject it here.
+    ///   - clientName: if your app requires more than one client you are required to call them with different names to distinguish logs source and prefix storage keys.
     public convenience init(metadata: AppMetadata, projectId: String, isController: Bool, relayHost: String, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
         self.init(metadata: metadata, projectId: projectId, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStore: keyValueStorage, clientName: clientName)
     }
@@ -70,19 +78,25 @@ public final class WalletConnectClient {
         unsubscribeNotificationCenter()
     }
     
-    // for proposer to propose a session to a responder
-    public func connect(params: ConnectParams) throws -> String? {
+    // MARK: - Public interface
+
+    /// For proposer to propose a session to a responder.
+    /// Function will create pending pairing sequence or propose a session on existing pairing. When peer client approves pairing, session will be proposed automatically by your client.
+    /// - Parameter sessionPermissions: Session permissions that will be requested from responder.
+    /// - Parameter topic: Optional parameter - use it if you already have an established pairing with peer client.
+    /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
+    public func connect(sessionPermissions: Session.Permissions, topic: String? = nil) throws -> String? {
         logger.debug("Connecting Application")
-        if let topic = params.pairing?.topic {
+        if let topic = topic {
             guard let pairing = pairingEngine.getSettledPairing(for: topic) else {
                 throw WalletConnectError.InternalReason.noSequenceForTopic
             }
             logger.debug("Proposing session on existing pairing")
-            let permissions = SessionPermissions(permissions: params.permissions)
+            let permissions = SessionPermissions(permissions: sessionPermissions)
             sessionEngine.proposeSession(settledPairing: Pairing(topic: pairing.topic, peer: nil), permissions: permissions, relay: pairing.relay)
             return nil
         } else {
-            let permissions = SessionPermissions(permissions: params.permissions)
+            let permissions = SessionPermissions(permissions: sessionPermissions)
             guard let pairingURI = pairingEngine.propose(permissions: permissions) else {
                 throw WalletConnectError.internal(.pairingProposalGenerationFailed)
             }
@@ -91,6 +105,8 @@ public final class WalletConnectClient {
     }
     
     // for responder to receive a session proposal from a proposer
+    /// <#Description#>
+    /// - Parameter uri: <#uri description#>
     public func pair(uri: String) throws {
         guard let pairingURI = WalletConnectURI(string: uri) else {
             throw WalletConnectError.internal(.malformedPairingURI)
@@ -248,19 +264,13 @@ public final class WalletConnectClient {
 
 public struct ConnectParams {
     let permissions: Session.Permissions
-    let pairing: ParamsPairing?
+    let topic: String?
     
     public init(permissions: Session.Permissions, topic: String? = nil) {
         self.permissions = permissions
-        if let topic = topic {
-            self.pairing = ParamsPairing(topic: topic)
-        } else {
-            self.pairing = nil
-        }
+        self.topic = topic
     }
-    public struct ParamsPairing {
-        let topic: String
-    }
+
 }
 
 public struct SessionRequest: Codable, Equatable {
