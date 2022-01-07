@@ -80,9 +80,9 @@ public final class WalletConnectClient {
     
     // MARK: - Public interface
 
-    /// For proposer to propose a session to a responder.
-    /// Function will create pending pairing sequence or propose a session on existing pairing. When peer client approves pairing, session will be proposed automatically by your client.
-    /// - Parameter sessionPermissions: Session permissions that will be requested from responder.
+    /// For the Proposer to propose a session to a responder.
+    /// Function will create pending pairing sequence or propose a session on existing pairing. When responder client approves pairing, session is be proposed automatically by your client.
+    /// - Parameter sessionPermissions: The session permissions the responder will be requested for.
     /// - Parameter topic: Optional parameter - use it if you already have an established pairing with peer client.
     /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
     public func connect(sessionPermissions: Session.Permissions, topic: String? = nil) throws -> String? {
@@ -104,9 +104,9 @@ public final class WalletConnectClient {
         }
     }
     
-    // for responder to receive a session proposal from a proposer
-    /// <#Description#>
-    /// - Parameter uri: <#uri description#>
+    /// For responder to receive a session proposal from a proposer
+    /// Responder should call this function in order to accept peer's pairing proposal and be able to subscribe for future session proposals.
+    /// - Parameter uri: Pairing URI that is commonly presented as a QR code by a dapp.
     public func pair(uri: String) throws {
         guard let pairingURI = WalletConnectURI(string: uri) else {
             throw WalletConnectError.internal(.malformedPairingURI)
@@ -116,34 +116,58 @@ public final class WalletConnectClient {
         }
     }
     
-    // for responder to approve a session proposal
+    /// For the responder to approve a session proposal.
+    /// - Parameters:
+    ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate function ``WalletConnectClientDelegate/didReceive(sessionProposal: Session.Proposal)``
+    ///   - accounts: A Set of accounts that the dapp will be allowed to request methods executions on.
     public func approve(proposal: Session.Proposal, accounts: Set<String>) {
         sessionEngine.approve(proposal: proposal.proposal, accounts: accounts)
     }
     
-    // for responder to reject a session proposal
+    /// For the responder to reject a session proposal.
+    /// - Parameters:
+    ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate.
+    ///   - reason: Reason why the session proposal was rejected.
     public func reject(proposal: Session.Proposal, reason: SessionType.Reason) {
         sessionEngine.reject(proposal: proposal.proposal, reason: reason)
     }
     
+    /// For the responder to update the accounts
+    /// - Parameters:
+    ///   - topic: Topic of the session that is intended to be updated.
+    ///   - accounts: Set of accounts that will be allowed to be used by the session after the update.
     public func update(topic: String, accounts: Set<String>) {
         sessionEngine.update(topic: topic, accounts: accounts)
     }
     
+    /// For the responder to upgrade session permissions
+    /// - Parameters:
+    ///   - topic: Topic of the session that is intended to be upgraded.
+    ///   - permissions: Sets of permissions that will be combined with existing ones.
     public func upgrade(topic: String, permissions: Session.Permissions) {
         sessionEngine.upgrade(topic: topic, permissions: permissions)
     }
     
-    // for proposer to request JSON-RPC
+    /// For the proposer to send JSON-RPC requests to responding peer.
+    /// - Parameters:
+    ///   - params: Parameters defining request and related session
+    ///   - completion: completion block will provide response from responding client
     public func request(params: SessionType.PayloadRequestParams, completion: @escaping (Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ()) {
         sessionEngine.request(params: params, completion: completion)
     }
     
-    // for responder to respond JSON-RPC
+    /// For the responder to respond on peer's JSON-RPC Request
+    /// - Parameters:
+    ///   - topic: Topic of the session for which the request was received.
+    ///   - response: Your JSON RPC response or an error.
     public func respond(topic: String, response: JsonRpcResponseTypes) {
         sessionEngine.respondSessionPayload(topic: topic, response: response)
     }
     
+    /// Ping method allows to check if client's peer is online and is subscribing for your sequence topic
+    /// - Parameters:
+    ///   - topic: Topic of the sequence, it can be a pairing or a session topic.
+    ///   - completion: Result will be success on response or error on timeout. -- TODO: timeout
     public func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
         if pairingEngine.hasPairing(for: topic) {
             pairingEngine.ping(topic: topic) { result in
@@ -156,6 +180,11 @@ public final class WalletConnectClient {
         }
     }
     
+    /// For the proposer and responder to send a notification.
+    /// - Parameters:
+    ///   - topic: Session topic
+    ///   - params: Notification Parameters
+    ///   - completion: calls a handler upon completion
     public func notify(topic: String, params: SessionType.NotificationParams, completion: ((Error?)->())?) {
         sessionEngine.notify(topic: topic, params: params, completion: completion)
     }
@@ -260,17 +289,6 @@ public final class WalletConnectClient {
     private func appDidEnterBackground() {
         wakuRelay.disconnect(closeCode: .goingAway)
     }
-}
-
-public struct ConnectParams {
-    let permissions: Session.Permissions
-    let topic: String?
-    
-    public init(permissions: Session.Permissions, topic: String? = nil) {
-        self.permissions = permissions
-        self.topic = topic
-    }
-
 }
 
 public struct SessionRequest: Codable, Equatable {
