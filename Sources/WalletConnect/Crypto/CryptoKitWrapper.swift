@@ -50,7 +50,7 @@ extension AgreementPublicKey: Codable {
     }
 }
 
-struct AgreementPrivateKey: Equatable {
+struct AgreementPrivateKey: GenericPasswordConvertible, Equatable {
 
     private let key: Curve25519.KeyAgreement.PrivateKey
     

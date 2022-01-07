@@ -239,7 +239,7 @@ final class PairingEngine {
             return
         }
         let sessionProposal = payload.request.params
-        if let pairingAgreementSecret = crypto.getAgreementSecret(for: sessionProposal.signal.params.topic) {
+        if let pairingAgreementSecret = try? crypto.getAgreementSecret(for: sessionProposal.signal.params.topic) {
             try? crypto.setAgreementSecret(pairingAgreementSecret, topic: sessionProposal.topic)
         }
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))

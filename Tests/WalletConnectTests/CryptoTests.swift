@@ -37,32 +37,30 @@ class CryptoTests: XCTestCase {
         XCTAssertNil(try crypto.getPrivateKey(for: publicKey))
     }
     
-    func testAgreementSecretRoundTrip() {
+    func testAgreementSecretRoundTrip() throws {
         let topic = "topic"
-        XCTAssertNil(crypto.getAgreementSecret(for: topic))
+        XCTAssertNil(try crypto.getAgreementSecret(for: topic))
         let agreementKeys = AgreementSecret(
             sharedSecret: CryptoTestData.expectedSharedSecret,
             publicKey: try! AgreementPublicKey(rawRepresentation: CryptoTestData._publicKeyA))
         try? crypto.setAgreementSecret(agreementKeys, topic: topic)
-        let storedAgreementSecret = crypto.getAgreementSecret(for: topic)
+        let storedAgreementSecret = try crypto.getAgreementSecret(for: topic)
         XCTAssertEqual(agreementKeys, storedAgreementSecret)
     }
     
-    func testDeleteAgreementSecret() {
+    func testDeleteAgreementSecret() throws {
         let topic = "topic"
         let agreementKeys = AgreementSecret(
             sharedSecret: CryptoTestData.expectedSharedSecret,
             publicKey: try! AgreementPublicKey(rawRepresentation: CryptoTestData._publicKeyA))
         try? crypto.setAgreementSecret(agreementKeys, topic: topic)
         crypto.deleteAgreementSecret(for: topic)
-        XCTAssertNil(crypto.getAgreementSecret(for: topic))
+        XCTAssertNil(try crypto.getAgreementSecret(for: topic))
     }
     
     func testX25519Agreement() throws {
         let privateKeyA = try AgreementPrivateKey(rawRepresentation: CryptoTestData._privateKeyA)
         let privateKeyB = try AgreementPrivateKey(rawRepresentation: CryptoTestData._privateKeyB)
-//        let privateKeyA = AgreementPrivateKey()
-//        let privateKeyB = AgreementPrivateKey()
         let agreementKeysA = try Crypto.generateAgreementSecret(peerPublicKey: privateKeyB.publicKey.rawRepresentation, privateKey: privateKeyA)
         let agreementKeysB = try Crypto.generateAgreementSecret(peerPublicKey: privateKeyA.publicKey.rawRepresentation, privateKey: privateKeyB)
         XCTAssertEqual(agreementKeysA.sharedSecret, agreementKeysB.sharedSecret)

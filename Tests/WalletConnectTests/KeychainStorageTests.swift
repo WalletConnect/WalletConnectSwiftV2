@@ -2,6 +2,8 @@ import XCTest
 import CryptoKit
 @testable import WalletConnect
 
+extension Curve25519.KeyAgreement.PrivateKey: GenericPasswordConvertible {}
+
 final class KeychainStorageTests: XCTestCase {
     
     var sut: KeychainStorage!
@@ -49,7 +51,7 @@ final class KeychainStorageTests: XCTestCase {
         do {
             try sut.add(privateKey, forKey: defaultIdentifier)
             let retrievedKey: Curve25519.KeyAgreement.PrivateKey = try sut.read(key: defaultIdentifier)
-            XCTAssertEqual(privateKey.rawRepresentation, retrievedKey.rawRepresentation)
+            XCTAssertEqual(privateKey, retrievedKey)
         } catch {
             XCTFail()
         }
@@ -84,7 +86,7 @@ final class KeychainStorageTests: XCTestCase {
             try sut.add(privateKeyA, forKey: defaultIdentifier)
             try sut.update(privateKeyB, forKey: defaultIdentifier)
             let retrievedKey: Curve25519.KeyAgreement.PrivateKey = try sut.read(key: defaultIdentifier)
-            XCTAssertEqual(privateKeyB.rawRepresentation, retrievedKey.rawRepresentation)
+            XCTAssertEqual(privateKeyB, retrievedKey)
         } catch {
             XCTFail()
         }

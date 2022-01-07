@@ -81,7 +81,7 @@ final class SessionEngine {
         
         sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: pendingSessionTopic)
-        let pairingAgreementSecret = crypto.getAgreementSecret(for: settledPairing.topic)!
+        let pairingAgreementSecret = try! crypto.getAgreementSecret(for: settledPairing.topic)!
         try! crypto.setAgreementSecret(pairingAgreementSecret, topic: proposal.topic)
         
         let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: proposal)
