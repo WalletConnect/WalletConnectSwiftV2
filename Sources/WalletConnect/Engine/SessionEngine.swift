@@ -81,8 +81,8 @@ final class SessionEngine {
         
         sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: pendingSessionTopic)
-        let pairingAgreementKeys = crypto.getAgreementKeys(for: settledPairing.topic)!
-        try! crypto.setAgreementKeys(pairingAgreementKeys, topic: proposal.topic)
+        let pairingAgreementSecret = crypto.getAgreementSecret(for: settledPairing.topic)!
+        try! crypto.setAgreementSecret(pairingAgreementSecret, topic: proposal.topic)
         
         let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: proposal)
         let pairingPayloadParams = PairingType.PayloadParams(request: request)
@@ -120,7 +120,7 @@ final class SessionEngine {
         sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: proposal.topic)
         
-        try! crypto.setAgreementKeys(agreementKeys, topic: settledTopic)
+        try! crypto.setAgreementSecret(agreementKeys, topic: settledTopic)
         sequencesStore.setSequence(settledSession)
         wcSubscriber.setSubscription(topic: settledTopic)
         
@@ -465,7 +465,7 @@ final class SessionEngine {
         
         let settledTopic = agreementKeys.derivedTopic()
         
-        try! crypto.setAgreementKeys(agreementKeys, topic: settledTopic)
+        try! crypto.setAgreementSecret(agreementKeys, topic: settledTopic)
         
         let proposal = pendingSession.proposal
         let settledSession = SessionSequence.buildAcknowledged(approval: approveParams, proposal: proposal, agreementKeys: agreementKeys, metadata: metadata)
@@ -495,7 +495,7 @@ final class SessionEngine {
     private func setupExpirationHandling() {
         sequencesStore.onSequenceExpiration = { [weak self] topic, publicKey in
             self?.crypto.deletePrivateKey(for: publicKey)
-            self?.crypto.deleteAgreementKeys(for: topic)
+            self?.crypto.deleteAgreementSecret(for: topic)
         }
     }
     
@@ -526,7 +526,7 @@ final class SessionEngine {
         case .failure:
             wcSubscriber.removeSubscription(topic: proposeParams.topic)
             crypto.deletePrivateKey(for: proposeParams.proposer.publicKey)
-            crypto.deleteAgreementKeys(for: topic)
+            crypto.deleteAgreementSecret(for: topic)
             sequencesStore.delete(topic: proposeParams.topic)
         }
     }
@@ -541,7 +541,7 @@ final class SessionEngine {
         }
         switch result {
         case .success:
-            crypto.deleteAgreementKeys(for: topic)
+            crypto.deleteAgreementSecret(for: topic)
             wcSubscriber.removeSubscription(topic: topic)
             sequencesStore.delete(topic: topic)
             let sessionSuccess = Session(
@@ -556,8 +556,8 @@ final class SessionEngine {
             wcSubscriber.removeSubscription(topic: settledTopic)
             sequencesStore.delete(topic: topic)
             sequencesStore.delete(topic: settledTopic)
-            crypto.deleteAgreementKeys(for: topic)
-            crypto.deleteAgreementKeys(for: settledTopic)
+            crypto.deleteAgreementSecret(for: topic)
+            crypto.deleteAgreementSecret(for: settledTopic)
             crypto.deletePrivateKey(for: pendingSession.publicKey)
         }
     }

@@ -5,7 +5,7 @@ import Foundation
 import CryptoKit
 
 enum SerialiserTestData {
-    static let emptyAgreementKeys = AgreementKeys(sharedSecret: Data(hex: ""), publicKey: AgreementPrivateKey().publicKey)
+    static let emptyAgreementSecret = AgreementSecret(sharedSecret: Data(hex: ""), publicKey: AgreementPrivateKey().publicKey)
     static let iv = Data(hex: "f0d00d4274a7e9711e4e0f21820b8877")
     static let publicKey = Data(hex: "45c59ad0c053925072f4503a39fe579ca8b7b8fa6bf0c7297e6db8f6585ee77f")
     static let mac = Data(hex: "fc6d3106fa827043279f9db08cd2e29a988c7272fa3cfdb739163bb9606822c7")

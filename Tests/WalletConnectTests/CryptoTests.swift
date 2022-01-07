@@ -37,25 +37,25 @@ class CryptoTests: XCTestCase {
         XCTAssertNil(try crypto.getPrivateKey(for: publicKey))
     }
     
-    func testAgreementKeysRoundTrip() {
+    func testAgreementSecretRoundTrip() {
         let topic = "topic"
-        XCTAssertNil(crypto.getAgreementKeys(for: topic))
-        let agreementKeys = AgreementKeys(
+        XCTAssertNil(crypto.getAgreementSecret(for: topic))
+        let agreementKeys = AgreementSecret(
             sharedSecret: CryptoTestData.expectedSharedSecret,
             publicKey: try! AgreementPublicKey(rawRepresentation: CryptoTestData._publicKeyA))
-        try? crypto.setAgreementKeys(agreementKeys, topic: topic)
-        let storedAgreementKeys = crypto.getAgreementKeys(for: topic)
-        XCTAssertEqual(agreementKeys, storedAgreementKeys)
+        try? crypto.setAgreementSecret(agreementKeys, topic: topic)
+        let storedAgreementSecret = crypto.getAgreementSecret(for: topic)
+        XCTAssertEqual(agreementKeys, storedAgreementSecret)
     }
     
     func testDeleteAgreementSecret() {
         let topic = "topic"
-        let agreementKeys = AgreementKeys(
+        let agreementKeys = AgreementSecret(
             sharedSecret: CryptoTestData.expectedSharedSecret,
             publicKey: try! AgreementPublicKey(rawRepresentation: CryptoTestData._publicKeyA))
-        try? crypto.setAgreementKeys(agreementKeys, topic: topic)
-        crypto.deleteAgreementKeys(for: topic)
-        XCTAssertNil(crypto.getAgreementKeys(for: topic))
+        try? crypto.setAgreementSecret(agreementKeys, topic: topic)
+        crypto.deleteAgreementSecret(for: topic)
+        XCTAssertNil(crypto.getAgreementSecret(for: topic))
     }
     
     func testX25519Agreement() throws {
@@ -63,8 +63,8 @@ class CryptoTests: XCTestCase {
         let privateKeyB = try AgreementPrivateKey(rawRepresentation: CryptoTestData._privateKeyB)
 //        let privateKeyA = AgreementPrivateKey()
 //        let privateKeyB = AgreementPrivateKey()
-        let agreementKeysA = try Crypto.generateAgreementKeys(peerPublicKey: privateKeyB.publicKey.rawRepresentation, privateKey: privateKeyA)
-        let agreementKeysB = try Crypto.generateAgreementKeys(peerPublicKey: privateKeyA.publicKey.rawRepresentation, privateKey: privateKeyB)
+        let agreementKeysA = try Crypto.generateAgreementSecret(peerPublicKey: privateKeyB.publicKey.rawRepresentation, privateKey: privateKeyA)
+        let agreementKeysB = try Crypto.generateAgreementSecret(peerPublicKey: privateKeyA.publicKey.rawRepresentation, privateKey: privateKeyB)
         XCTAssertEqual(agreementKeysA.sharedSecret, agreementKeysB.sharedSecret)
         XCTAssertEqual(agreementKeysA.sharedSecret, CryptoTestData.expectedSharedSecret)
     }

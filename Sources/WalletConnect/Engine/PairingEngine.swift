@@ -105,7 +105,7 @@ final class PairingEngine {
         wcSubscriber.setSubscription(topic: settledTopic)
         sequencesStore.setSequence(settledPairing)
         
-        try? crypto.setAgreementKeys(agreementKeys, topic: settledTopic)
+        try? crypto.setAgreementSecret(agreementKeys, topic: settledTopic)
         
         let approveParams = PairingApproval(
             relay: proposal.relay,
@@ -239,8 +239,8 @@ final class PairingEngine {
             return
         }
         let sessionProposal = payload.request.params
-        if let pairingAgreementKeys = crypto.getAgreementKeys(for: sessionProposal.signal.params.topic) {
-            try? crypto.setAgreementKeys(pairingAgreementKeys, topic: sessionProposal.topic)
+        if let pairingAgreementSecret = crypto.getAgreementSecret(for: sessionProposal.signal.params.topic) {
+            try? crypto.setAgreementSecret(pairingAgreementSecret, topic: sessionProposal.topic)
         }
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
         relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [weak self] error in
@@ -257,7 +257,7 @@ final class PairingEngine {
         let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: pairing.pubKey, peerPublicKey: approveParams.responder.publicKey)
         
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
-        try? crypto.setAgreementKeys(agreementKeys, topic: settledTopic)
+        try? crypto.setAgreementSecret(agreementKeys, topic: settledTopic)
         let proposal = pendingPairing.proposal
         let settledPairing = PairingSequence.buildAcknowledged(approval: approveParams, proposal: proposal, agreementKeys: agreementKeys)
         
@@ -303,7 +303,7 @@ final class PairingEngine {
     private func setupExpirationHandling() {
         sequencesStore.onSequenceExpiration = { [weak self] topic, publicKey in
             self?.crypto.deletePrivateKey(for: publicKey)
-            self?.crypto.deleteAgreementKeys(for: topic)
+            self?.crypto.deleteAgreementSecret(for: topic)
         }
     }
     

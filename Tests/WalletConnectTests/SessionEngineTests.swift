@@ -45,15 +45,15 @@ fileprivate extension WCRequest {
     }
 }
 
-extension AgreementKeys {
+extension AgreementSecret {
     
-    static func stub() -> AgreementKeys {
-        AgreementKeys(sharedSecret: Data(), publicKey: AgreementPrivateKey().publicKey)
+    static func stub() -> AgreementSecret {
+        AgreementSecret(sharedSecret: Data(), publicKey: AgreementPrivateKey().publicKey)
     }
 }
 
 //fileprivate func deriveTopic(publicKey: String, privateKey: Crypto.X25519.PrivateKey) -> String {
-//    try! Crypto.X25519.generateAgreementKeys(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
+//    try! Crypto.X25519.generateAgreementSecret(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
 //}
 
 final class SessionEngineTests: XCTestCase {
@@ -106,8 +106,8 @@ final class SessionEngineTests: XCTestCase {
         let topicB = pairing.topic
         let topicC = topicGenerator.topic
         
-        let agreementKeys = AgreementKeys.stub()
-        cryptoMock.setAgreementKeys(agreementKeys, topic: topicB)
+        let agreementKeys = AgreementSecret.stub()
+        cryptoMock.setAgreementSecret(agreementKeys, topic: topicB)
         let permissions = SessionPermissions.stub()
         let relayOptions = RelayProtocolOptions(protocol: "", params: nil)
         engine.proposeSession(settledPairing: pairing, permissions: permissions, relay: relayOptions)
@@ -118,7 +118,7 @@ final class SessionEngineTests: XCTestCase {
         
         XCTAssert(subscriberMock.didSubscribe(to: topicC), "Proposer must subscribe to topic C to listen for approval message.")
         XCTAssert(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must store the private key matching the public key sent through the proposal.")
-        XCTAssert(cryptoMock.hasAgreementKeys(for: topicB))
+        XCTAssert(cryptoMock.hasAgreementSecret(for: topicB))
         XCTAssert(storageMock.hasPendingProposedPairing(on: topicC), "The engine must store a pending session on proposed state.")
         
         XCTAssertEqual(publishTopic, topicB)
@@ -131,8 +131,8 @@ final class SessionEngineTests: XCTestCase {
         let topicB = pairing.topic
         let topicC = topicGenerator.topic
         
-        let agreementKeys = AgreementKeys.stub()
-        cryptoMock.setAgreementKeys(agreementKeys, topic: topicB)
+        let agreementKeys = AgreementSecret.stub()
+        cryptoMock.setAgreementSecret(agreementKeys, topic: topicB)
         let permissions = SessionPermissions.stub()
         let relayOptions = RelayProtocolOptions(protocol: "", params: nil)
         engine.proposeSession(settledPairing: pairing, permissions: permissions, relay: relayOptions)
@@ -150,7 +150,7 @@ final class SessionEngineTests: XCTestCase {
         
         XCTAssert(subscriberMock.didUnsubscribe(to: topicC))
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: request.sessionProposal?.proposer.publicKey ?? ""))
-        XCTAssertFalse(cryptoMock.hasAgreementKeys(for: topicB))
+        XCTAssertFalse(cryptoMock.hasAgreementSecret(for: topicB))
         XCTAssertFalse(storageMock.hasSequence(forTopic: topicC))
     }
     
@@ -178,7 +178,7 @@ final class SessionEngineTests: XCTestCase {
         XCTAssert(subscriberMock.didSubscribe(to: topicC))
         XCTAssert(subscriberMock.didSubscribe(to: topicD))
         XCTAssert(cryptoMock.hasPrivateKey(for: approval.responder.publicKey))
-        XCTAssert(cryptoMock.hasAgreementKeys(for: topicD))
+        XCTAssert(cryptoMock.hasAgreementSecret(for: topicD))
         XCTAssert(storageMock.hasSequence(forTopic: topicC)) // TODO: check state
         XCTAssert(storageMock.hasSequence(forTopic: topicD)) // TODO: check state
         XCTAssertEqual(publishTopic, topicC)
@@ -190,8 +190,8 @@ final class SessionEngineTests: XCTestCase {
         let topicC = String.generateTopic()!
         let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
         
-        let agreementKeys = AgreementKeys.stub()
-        cryptoMock.setAgreementKeys(agreementKeys, topic: topicC)
+        let agreementKeys = AgreementSecret.stub()
+        cryptoMock.setAgreementSecret(agreementKeys, topic: topicC)
         
         let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: isController, metadata: metadata)
         let proposal = SessionProposal(
@@ -215,7 +215,7 @@ final class SessionEngineTests: XCTestCase {
             result: .success(success))
         relayMock.onResponse?(response)
     
-        XCTAssertFalse(cryptoMock.hasAgreementKeys(for: topicC))
+        XCTAssertFalse(cryptoMock.hasAgreementSecret(for: topicC))
         XCTAssertFalse(storageMock.hasSequence(forTopic: topicC)) // TODO: Check state
         XCTAssert(subscriberMock.didUnsubscribe(to: topicC))
     }
@@ -227,8 +227,8 @@ final class SessionEngineTests: XCTestCase {
         let topicC = String.generateTopic()!
         let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
         
-        let agreementKeys = AgreementKeys.stub()
-        cryptoMock.setAgreementKeys(agreementKeys, topic: topicC)
+        let agreementKeys = AgreementSecret.stub()
+        cryptoMock.setAgreementSecret(agreementKeys, topic: topicC)
         
         let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: isController, metadata: metadata)
         let proposal = SessionProposal(
@@ -253,8 +253,8 @@ final class SessionEngineTests: XCTestCase {
         relayMock.onResponse?(response)
         
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: selfPubKey))
-        XCTAssertFalse(cryptoMock.hasAgreementKeys(for: topicC))
-        XCTAssertFalse(cryptoMock.hasAgreementKeys(for: topicD))
+        XCTAssertFalse(cryptoMock.hasAgreementSecret(for: topicC))
+        XCTAssertFalse(cryptoMock.hasAgreementSecret(for: topicD))
         XCTAssertFalse(storageMock.hasSequence(forTopic: topicC)) // TODO: Check state
         XCTAssertFalse(storageMock.hasSequence(forTopic: topicD))
         XCTAssert(subscriberMock.didUnsubscribe(to: topicC))
@@ -283,8 +283,8 @@ final class SessionEngineTests: XCTestCase {
         let payload = WCRequestSubscriptionPayload(topic: topicC, wcRequest: request)
         let pairing = Pairing.stub()
 
-        let agreementKeys = AgreementKeys.stub()
-        cryptoMock.setAgreementKeys(agreementKeys, topic: pairing.topic)
+        let agreementKeys = AgreementSecret.stub()
+        cryptoMock.setAgreementSecret(agreementKeys, topic: pairing.topic)
 
         engine.proposeSession(settledPairing: pairing, permissions: permissions, relay: relayOptions)
         engine.onSessionApproved = { session in
@@ -295,7 +295,7 @@ final class SessionEngineTests: XCTestCase {
         XCTAssert(subscriberMock.didUnsubscribe(to: topicC)) // FIXME: Actually, only on acknowledgement
         XCTAssert(subscriberMock.didSubscribe(to: topicD))
         XCTAssert(cryptoMock.hasPrivateKey(for: proposerPubKey))
-        XCTAssert(cryptoMock.hasAgreementKeys(for: topicD))
+        XCTAssert(cryptoMock.hasAgreementSecret(for: topicD))
         XCTAssert(storageMock.hasSequence(forTopic: topicD)) // TODO: check for state
         XCTAssertNotNil(approvedSession)
         XCTAssertEqual(approvedSession?.topic, topicD)

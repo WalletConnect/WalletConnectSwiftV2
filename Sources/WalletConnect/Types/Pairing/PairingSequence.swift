@@ -111,7 +111,7 @@ extension PairingSequence {
         )
     }
     
-    static func buildResponded(proposal: PairingProposal, agreementKeys: AgreementKeys) -> PairingSequence {
+    static func buildResponded(proposal: PairingProposal, agreementKeys: AgreementSecret) -> PairingSequence {
         PairingSequence(
             topic: proposal.topic,
             relay: proposal.relay,
@@ -124,7 +124,7 @@ extension PairingSequence {
         )
     }
     
-    static func buildPreSettled(proposal: PairingProposal, agreementKeys: AgreementKeys) -> PairingSequence {
+    static func buildPreSettled(proposal: PairingProposal, agreementKeys: AgreementSecret) -> PairingSequence {
         let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : agreementKeys.publicKey.hexRepresentation
         return PairingSequence(
             topic: agreementKeys.derivedTopic(),
@@ -142,7 +142,7 @@ extension PairingSequence {
         )
     }
     
-    static func buildAcknowledged(approval approveParams: PairingApproval, proposal: PairingProposal, agreementKeys: AgreementKeys) -> PairingSequence {
+    static func buildAcknowledged(approval approveParams: PairingApproval, proposal: PairingProposal, agreementKeys: AgreementSecret) -> PairingSequence {
         let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : approveParams.responder.publicKey
         return PairingSequence(
             topic: agreementKeys.derivedTopic(),

@@ -9,7 +9,7 @@ final class CryptoStorageProtocolMock: CryptoStorageProtocol {
         return privateKeyStub.publicKey
     }
     
-    func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementKeys {
+    func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret {
         // TODO: Fix mock
         guard let privateKey = try getPrivateKey(for: selfPublicKey) else {
             fatalError() // TODO: handle error
@@ -17,14 +17,14 @@ final class CryptoStorageProtocolMock: CryptoStorageProtocol {
         let peerPublicKey = try AgreementPublicKey(rawRepresentation: Data(hex: hexRepresentation))
         let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: peerPublicKey)
         let rawSecret = sharedSecret.withUnsafeBytes { return Data(Array($0)) }
-        return AgreementKeys(sharedSecret: rawSecret, publicKey: privateKey.publicKey)
+        return AgreementSecret(sharedSecret: rawSecret, publicKey: privateKey.publicKey)
     }
     
     
     var privateKeyStub = AgreementPrivateKey()
     
     private(set) var privateKeys: [String: AgreementPrivateKey] = [:]
-    private(set) var agreementKeys: [String: AgreementKeys] = [:]
+    private(set) var agreementKeys: [String: AgreementSecret] = [:]
     
     func makePrivateKey() -> AgreementPrivateKey {
         defer { privateKeyStub = AgreementPrivateKey() }
@@ -39,11 +39,11 @@ final class CryptoStorageProtocolMock: CryptoStorageProtocol {
         privateKeys[publicKey.rawRepresentation.toHexString()]
     }
     
-    func setAgreementKeys(_ agreementKeys: AgreementKeys, topic: String) {
+    func setAgreementSecret(_ agreementKeys: AgreementSecret, topic: String) {
         self.agreementKeys[topic] = agreementKeys
     }
     
-    func getAgreementKeys(for topic: String) -> AgreementKeys? {
+    func getAgreementSecret(for topic: String) -> AgreementSecret? {
         agreementKeys[topic]
     }
     
@@ -51,7 +51,7 @@ final class CryptoStorageProtocolMock: CryptoStorageProtocol {
         privateKeys[publicKey] = nil
     }
     
-    func deleteAgreementKeys(for topic: String) {
+    func deleteAgreementSecret(for topic: String) {
         agreementKeys[topic] = nil
     }
 }
@@ -62,7 +62,7 @@ extension CryptoStorageProtocolMock {
         privateKeys[publicKeyHex] != nil
     }
     
-    func hasAgreementKeys(for topic: String) -> Bool {
+    func hasAgreementSecret(for topic: String) -> Bool {
         agreementKeys[topic] != nil
     }
 }

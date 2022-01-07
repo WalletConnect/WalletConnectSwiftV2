@@ -19,7 +19,7 @@ class JSONRPCSerialiser: JSONRPCSerialising {
     func serialise(topic: String, encodable: Encodable) throws -> String {
         let messageJson = try encodable.json()
         var message: String
-        if let agreementKeys = crypto.getAgreementKeys(for: topic) {
+        if let agreementKeys = crypto.getAgreementSecret(for: topic) {
             message = try encrypt(json: messageJson, agreementKeys: agreementKeys)
         } else {
             message = messageJson.toHexEncodedString(uppercase: false)
@@ -30,7 +30,7 @@ class JSONRPCSerialiser: JSONRPCSerialising {
     func tryDeserialise<T: Codable>(topic: String, message: String) -> T? {
         do {
             let deserialisedJsonRpcRequest: T
-            if let agreementKeys = crypto.getAgreementKeys(for: topic) {
+            if let agreementKeys = crypto.getAgreementSecret(for: topic) {
                 deserialisedJsonRpcRequest = try deserialise(message: message, symmetricKey: agreementKeys.sharedSecret)
             } else {
                 let jsonData = Data(hex: message)
@@ -48,7 +48,7 @@ class JSONRPCSerialiser: JSONRPCSerialising {
         return try JSONDecoder().decode(T.self, from: JSONRPCData)
     }
     
-    func encrypt(json: String, agreementKeys: AgreementKeys) throws -> String {
+    func encrypt(json: String, agreementKeys: AgreementSecret) throws -> String {
         let payload = try codec.encode(plainText: json, agreementKeys: agreementKeys)
         let iv = payload.iv.toHexString()
         let publicKey = payload.publicKey.toHexString()

@@ -15,7 +15,7 @@ class MockedJSONRPCSerialiser: JSONRPCSerialising {
     }
     
     func serialise(topic: String, encodable: Encodable) throws -> String {
-        try serialise(json: try encodable.json(), agreementKeys: AgreementKeys(sharedSecret: Data(), publicKey: AgreementPrivateKey().publicKey))
+        try serialise(json: try encodable.json(), agreementKeys: AgreementSecret(sharedSecret: Data(), publicKey: AgreementPrivateKey().publicKey))
     }
     func tryDeserialise<T: Codable>(topic: String, message: String) -> T? {
         try? deserialise(message: message, symmetricKey: Data())
@@ -32,7 +32,7 @@ class MockedJSONRPCSerialiser: JSONRPCSerialising {
         }
     }
     
-    func serialise(json: String, agreementKeys: AgreementKeys) throws -> String {
+    func serialise(json: String, agreementKeys: AgreementSecret) throws -> String {
         return serialised
     }
 
