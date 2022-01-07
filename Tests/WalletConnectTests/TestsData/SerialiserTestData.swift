@@ -17,7 +17,7 @@ enum SerialiserTestData {
                                                                  method: WCRequest.Method.pairingApprove,
                                                                  params: WCRequest.Params.pairingApprove(
                                                                     PairingApproval(relay: RelayProtocolOptions(protocol: "waku",
-                                                                                                                     params: nil), responder: Participant(publicKey: "be9225978b6287a02d259ee0d9d1bcb683082d8386b7fb14b58ac95b93b2ef43"),
+                                                                                                                     params: nil), responder: PairingParticipant(publicKey: "be9225978b6287a02d259ee0d9d1bcb683082d8386b7fb14b58ac95b93b2ef43"),
                                                                                          expiry: 1632742217,
                                                                                          state: PairingState(metadata: AppMetadata(name: "iOS",
                                                                                                                                    description: nil,

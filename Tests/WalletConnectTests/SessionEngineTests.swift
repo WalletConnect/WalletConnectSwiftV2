@@ -276,7 +276,7 @@ final class SessionEngineTests: XCTestCase {
         let relayOptions = RelayProtocolOptions(protocol: "", params: nil)
         let approveParams = SessionType.ApproveParams(
             relay: relayOptions,
-            responder: Participant(publicKey: responderPubKey, metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil)),
+            responder: SessionParticipant(publicKey: responderPubKey, metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil)),
             expiry: Time.day,
             state: SessionState(accounts: []))
         let request = WCRequest(method: .sessionApprove, params: .sessionApprove(approveParams))

@@ -110,7 +110,7 @@ final class SessionEngine {
         
         let approveParams = SessionType.ApproveParams(
             relay: proposal.relay,
-            responder: Participant(
+            responder: SessionParticipant(
                 publicKey: selfPublicKey.hexRepresentation,
                 metadata: metadata),
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
@@ -461,8 +461,7 @@ final class SessionEngine {
               }
         logger.debug("handleSessionApprove")
         
-        let pubKey = try! AgreementPublicKey(rawRepresentation: Data(hex: session.selfParticipant.publicKey))
-        let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: approveParams.responder.publicKey)
+        let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: session.pubKey, peerPublicKey: approveParams.responder.publicKey)
         
         let settledTopic = agreementKeys.derivedTopic()
         
@@ -479,7 +478,7 @@ final class SessionEngine {
         
         let approvedSession = Session(
             topic: settledTopic,
-            peer: approveParams.responder.metadata!,
+            peer: approveParams.responder.metadata,
             permissions: Session.Permissions(
                 blockchains: pendingSession.proposal.permissions.blockchain.chains,
                 methods: pendingSession.proposal.permissions.jsonrpc.methods))

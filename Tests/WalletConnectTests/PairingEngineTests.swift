@@ -156,7 +156,7 @@ final class PairingEngineTests: XCTestCase {
         
         let approveParams = PairingApproval(
             relay: RelayProtocolOptions(protocol: "", params: nil),
-            responder: Participant(publicKey: responderPubKey),
+            responder: PairingParticipant(publicKey: responderPubKey),
             expiry: Time.day,
             state: nil)
         let request = WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))

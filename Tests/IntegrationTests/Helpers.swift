@@ -13,7 +13,7 @@ extension PairingApproval {
     
     static func stub() -> PairingApproval {
         let options = RelayProtocolOptions(protocol: "", params: nil)
-        let participant = Participant(publicKey: "")
+        let participant = PairingParticipant(publicKey: "")
         return PairingApproval(relay: options, responder: participant, expiry: 0, state: nil)
     }
 }

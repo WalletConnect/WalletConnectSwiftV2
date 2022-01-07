@@ -54,17 +54,6 @@ class Crypto: CryptoStorageProtocol {
         return try AgreementPrivateKey(rawRepresentation: privateKeyData)
     }
     
-    func set(privateKey: Curve25519.KeyAgreement.PrivateKey) throws {
-        try keychain.add(privateKey.rawRepresentation, forKey: privateKey.publicKey.rawRepresentation.toHexString())
-    }
-
-    func getPrivateKey(for publicKey: Curve25519.KeyAgreement.PublicKey) throws -> Curve25519.KeyAgreement.PrivateKey? {
-        guard let privateKeyData = try? keychain.read(key: publicKey.rawRepresentation.toHexString()) as Data else {
-            return nil
-        }
-        return try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: privateKeyData)
-    }
-    
     func set(agreementKeys: AgreementKeys, topic: String) throws {
         let agreement = agreementKeys.sharedSecret + agreementKeys.publicKey.rawRepresentation
         try keychain.add(agreement, forKey: topic)
@@ -75,7 +64,6 @@ class Crypto: CryptoStorageProtocol {
             return nil
         }
         let (sharedSecret, publicKey) = split(concatinatedAgreementKeys: agreement)
-//        return AgreementKeys(sharedSecret: sharedSecret, publicKey: try! Curve25519.KeyAgreement.PublicKey(rawRepresentation: publicKey))
         return AgreementKeys(sharedSecret: sharedSecret, publicKey: try! AgreementPublicKey(rawRepresentation: publicKey))
     }
     

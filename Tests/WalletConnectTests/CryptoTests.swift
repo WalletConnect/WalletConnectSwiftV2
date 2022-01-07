@@ -1,15 +1,5 @@
-
-import Foundation
 import XCTest
-import CryptoKit
 @testable import WalletConnect
-
-extension Curve25519.KeyAgreement.PrivateKey: Equatable {
-    
-    public static func == (lhs: Curve25519.KeyAgreement.PrivateKey, rhs: Curve25519.KeyAgreement.PrivateKey) -> Bool {
-        lhs.rawRepresentation == rhs.rawRepresentation
-    }
-}
 
 class CryptoTests: XCTestCase {
     var crypto: Crypto!
@@ -23,7 +13,7 @@ class CryptoTests: XCTestCase {
     }
     
     func testSetGetPrivateKey() {
-        let privateKey = try! Curve25519.KeyAgreement.PrivateKey(rawRepresentation: CryptoTestData._publicKeyA)
+        let privateKey = try! AgreementPrivateKey(rawRepresentation: CryptoTestData._publicKeyA)
         let publicKey = privateKey.publicKey
         XCTAssertNil(try! crypto.getPrivateKey(for: publicKey))
         try! crypto.set(privateKey: privateKey)

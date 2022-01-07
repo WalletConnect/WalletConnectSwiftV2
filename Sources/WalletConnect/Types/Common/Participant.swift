@@ -1,10 +1,25 @@
-// TODO: need different for pair and session
+
 struct Participant: Codable, Equatable {
     let publicKey: String
+//    let publicKey: AgreementPublicKey
     let metadata: AppMetadata?
     
     init(publicKey: String, metadata: AppMetadata? = nil) {
         self.publicKey = publicKey
         self.metadata = metadata
     }
+    
+//    init(publicKey: AgreementPublicKey, metadata: AppMetadata? = nil) {
+//        self.publicKey = publicKey
+//        self.metadata = metadata
+//    }
+}
+
+struct PairingParticipant: Codable, Equatable {
+    let publicKey: String
+}
+
+struct SessionParticipant: Codable, Equatable {
+    let publicKey: String
+    let metadata: AppMetadata
 }

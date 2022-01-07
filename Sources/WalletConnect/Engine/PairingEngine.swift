@@ -107,10 +107,9 @@ final class PairingEngine {
         
         try? crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
         
-        let selfParticipant = Participant(publicKey: selfPublicKey.hexRepresentation)
         let approveParams = PairingApproval(
             relay: proposal.relay,
-            responder: selfParticipant,
+            responder: PairingParticipant(publicKey: selfPublicKey.hexRepresentation),
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
             state: nil) // Should this be removed?
         let approvalPayload = WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
@@ -251,19 +250,15 @@ final class PairingEngine {
     
     private func handlePairingApprove(approveParams: PairingApproval, pendingPairingTopic: String, requestId: Int64) {
         logger.debug("Responder Client approved pairing on topic: \(pendingPairingTopic)")
-        guard let pendingPairing = try? sequencesStore.getSequence(forTopic: pendingPairingTopic), let pairingPending = pendingPairing.pending else {
+        guard let pairing = try? sequencesStore.getSequence(forTopic: pendingPairingTopic), let pendingPairing = pairing.pending else {
             return
         }
         
-        // TODO: make a codable pub key
-        let selfPublicKey = Data(hex: pendingPairing.selfParticipant.publicKey)
-        let pubKey = try! AgreementPublicKey(rawRepresentation: selfPublicKey)
-        
-        let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: approveParams.responder.publicKey)
+        let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: pairing.pubKey, peerPublicKey: approveParams.responder.publicKey)
         
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
         try? crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
-        let proposal = pairingPending.proposal
+        let proposal = pendingPairing.proposal
         let settledPairing = PairingSequence.buildAcknowledged(approval: approveParams, proposal: proposal, agreementKeys: agreementKeys)
         
         sequencesStore.setSequence(settledPairing)
@@ -271,7 +266,6 @@ final class PairingEngine {
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
         
-        let pairing = Pairing(topic: settledPairing.topic, peer: nil) // FIXME: peer?
         guard let permissions = sessionPermissions[pendingPairingTopic] else {
             logger.debug("Cound not find permissions for pending topic: \(pendingPairingTopic)")
             return
@@ -286,7 +280,7 @@ final class PairingEngine {
             }
         }
         
-        onPairingApproved?(pairing, permissions, settledPairing.relay)
+        onPairingApproved?(Pairing(topic: settledPairing.topic, peer: nil), permissions, settledPairing.relay)
     }
     
     private func removeRespondedPendingPairings() {

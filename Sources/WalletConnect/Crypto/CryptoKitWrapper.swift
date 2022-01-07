@@ -1,16 +1,16 @@
 import Foundation
 import CryptoKit
 
-extension Curve25519.KeyAgreement.PublicKey {
-    
-    var hexRepresentation: String {
-        rawRepresentation.toHexString()
-    }
-}
-
 extension Curve25519.KeyAgreement.PublicKey: Equatable {
     
     public static func == (lhs: Curve25519.KeyAgreement.PublicKey, rhs: Curve25519.KeyAgreement.PublicKey) -> Bool {
+        lhs.rawRepresentation == rhs.rawRepresentation
+    }
+}
+
+extension Curve25519.KeyAgreement.PrivateKey: Equatable {
+    
+    public static func == (lhs: Curve25519.KeyAgreement.PrivateKey, rhs: Curve25519.KeyAgreement.PrivateKey) -> Bool {
         lhs.rawRepresentation == rhs.rawRepresentation
     }
 }
@@ -36,7 +36,21 @@ struct AgreementPublicKey: Equatable {
     }
 }
 
-struct AgreementPrivateKey {
+extension AgreementPublicKey: Codable {
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(key.rawRepresentation)
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let buffer = try container.decode(Data.self)
+        try self.init(rawRepresentation: buffer)
+    }
+}
+
+struct AgreementPrivateKey: Equatable {
 
     private let key: Curve25519.KeyAgreement.PrivateKey
     
