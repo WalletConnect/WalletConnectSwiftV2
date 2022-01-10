@@ -1,9 +1,15 @@
-// 
 
 import Foundation
 
+public protocol ConsoleLogging {
+    func debug(_ items: Any...)
+    func info(_ items: Any...)
+    func warn(_ items: Any...)
+    func error(_ items: Any...)
+    func setLogging(level: LoggingLevel)
+}
 
-public class ConsoleLogger {
+public class ConsoleLogger: ConsoleLogging {
     private var loggingLevel: LoggingLevel
     private var suffix: String
     

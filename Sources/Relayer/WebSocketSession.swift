@@ -1,7 +1,16 @@
 import Foundation
 
-final class WebSocketSession: NSObject {
-    
+protocol WebSocketSessionProtocol {
+    var onMessageReceived: ((String) -> ())? {get set}
+    var onMessageError: ((Error) -> ())? {get set}
+    var isConnected: Bool {get}
+    func connect(on url: URL)
+    func disconnect(with closeCode: URLSessionWebSocketTask.CloseCode)
+    func send(_ message: String, completionHandler: @escaping ((Error?) -> Void))
+}
+
+
+final class WebSocketSession: NSObject, WebSocketSessionProtocol {
     var onMessageReceived: ((String) -> ())?
     var onMessageError: ((Error) -> ())?
     

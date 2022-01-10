@@ -30,13 +30,17 @@ let package = Package(
             dependencies: []),
         .testTarget(
             name: "WalletConnectTests",
-            dependencies: ["WalletConnect"]),
+            dependencies: ["WalletConnect", "TestingUtils"]),
         .testTarget(
             name: "IntegrationTests",
-            dependencies: ["WalletConnect"]),
+            dependencies: ["WalletConnect", "TestingUtils"]),
         .testTarget(
             name: "RelayerTests",
-            dependencies: ["Relayer", "WalletConnectUtils"]),
+            dependencies: ["Relayer", "WalletConnectUtils", "TestingUtils"]),
+        .target(
+            name: "TestingUtils",
+            dependencies: ["WalletConnectUtils"],
+            path: "Tests/TestingUtils"),
     ],
     swiftLanguageVersions: [.v5]
 )

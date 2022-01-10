@@ -6,9 +6,6 @@ import WalletConnectUtils
 import UIKit
 #endif
 
-extension ConsoleLogger: ConsoleLogging {}
-extension WakuNetworkRelay: NetworkRelaying {}
-
 public protocol WalletConnectClientDelegate: AnyObject {
     func didReceive(sessionProposal: Session.Proposal)
     func didReceive(sessionRequest: SessionRequest)
@@ -58,7 +55,7 @@ public final class WalletConnectClient {
         self.crypto = Crypto(keychain: keychain)
         self.secureStorage = SecureStorage(keychain: keychain)
         let relayUrl = WakuNetworkRelay.makeRelayUrl(host: relayHost, projectId: projectId)
-        self.wakuRelay = WakuNetworkRelay(logger: logger, url: relayUrl)
+        self.wakuRelay = WakuNetworkRelay(logger: logger, url: relayUrl, keyValueStorage: keyValueStore, uniqueIdentifier: clientName ?? "")
         let serialiser = JSONRPCSerialiser(crypto: crypto)
         self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore, uniqueIdentifier: clientName))
         let pairingSequencesStore = PairingStorage(storage: SequenceStore<PairingSequence>(storage: keyValueStore, uniqueIdentifier: clientName))

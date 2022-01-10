@@ -1,6 +1,6 @@
 
 import Foundation
-import Relayer
+import WalletConnectUtils
 
 protocol JsonRpcHistoryRecording {
     func get(id: Int64) -> JsonRpcRecord?

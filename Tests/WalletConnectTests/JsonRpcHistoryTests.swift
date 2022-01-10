@@ -2,12 +2,13 @@
 import Foundation
 import XCTest
 import CryptoKit
+import TestingUtils
 import WalletConnectUtils
 @testable import WalletConnect
 
 final class JsonRpcHistoryTests: XCTestCase {
     
-    var sut: JsonRpcHistory!
+    var sut: WalletConnect.JsonRpcHistory!
             
     override func setUp() {
         sut = JsonRpcHistory(logger: ConsoleLoggerMock(), keyValueStorage: RuntimeKeyValueStorage())

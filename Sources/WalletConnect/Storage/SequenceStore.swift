@@ -1,4 +1,5 @@
 import Foundation
+import WalletConnectUtils
 
 protocol Expirable {
     var expiryDate: Date { get }

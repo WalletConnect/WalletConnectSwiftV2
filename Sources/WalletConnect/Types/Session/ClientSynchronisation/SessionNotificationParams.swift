@@ -1,5 +1,7 @@
 
 import Foundation
+import WalletConnectUtils
+
 public typealias SessionNotification = SessionType.NotificationParams
 
 extension SessionType {
