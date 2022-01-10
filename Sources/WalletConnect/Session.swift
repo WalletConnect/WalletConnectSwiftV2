@@ -1,3 +1,7 @@
+
+/**
+ A representation of an active session connection.
+ */
 public struct Session {
     public let topic: String
     public let peer: AppMetadata

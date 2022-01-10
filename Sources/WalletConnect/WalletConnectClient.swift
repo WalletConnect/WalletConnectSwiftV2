@@ -6,43 +6,44 @@ import WalletConnectUtils
 import UIKit
 #endif
 
-public protocol WalletConnectClientDelegate: AnyObject {
-    func didReceive(sessionProposal: Session.Proposal)
-    func didReceive(sessionRequest: SessionRequest)
-    func didDelete(sessionTopic: String, reason: SessionType.Reason)
-    func didUpgrade(sessionTopic: String, permissions: Session.Permissions)
-    func didUpdate(sessionTopic: String, accounts: Set<String>)
-    func didSettle(session: Session)
-    func didSettle(pairing: Pairing)
-    func didReceive(notification: SessionNotification, sessionTopic: String)
-    func didReject(pendingSessionTopic: String, reason: SessionType.Reason)
-    func didUpdate(pairingTopic: String, appMetadata: AppMetadata)
-}
-
-public extension WalletConnectClientDelegate {
-    func didSettle(session: Session) {}
-    func didSettle(pairing: Pairing) {}
-    func didReceive(notification: SessionNotification, sessionTopic: String) {}
-    func didReject(pendingSessionTopic: String, reason: SessionType.Reason) {}
-    func didUpdate(pairingTopic: String, appMetadata: AppMetadata) {}
-}
-
+/// An Object that expose public API to provide interactions with WalletConnect SDK
+///
+/// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialise it. Usually only one instance of a client is required in the application.
+///
+/// ```swift
+/// let metadata = AppMetadata(name: String?, description: String?, url: String?, icons: [String]?)
+/// let client = WalletConnectClient(metadata: AppMetadata, projectId: String, isController: Bool, relayHost: String)
+/// ```
+///
+/// - Parameters:
+///     - delegate: The object that acts as the delegate of WalletConnect Client
+///     - logger: An object for logging messages
 public final class WalletConnectClient {
-    private let metadata: AppMetadata
     public weak var delegate: WalletConnectClientDelegate?
+    public let logger: ConsoleLogging
+    private let metadata: AppMetadata
     private let isController: Bool
     private let pairingEngine: PairingEngine
     private let sessionEngine: SessionEngine
     private let relay: WalletConnectRelaying
     private let wakuRelay: NetworkRelaying
     private let crypto: Crypto
-    public let logger: ConsoleLogging
     private let secureStorage: SecureStorage
     private let pairingQueue = DispatchQueue(label: "com.walletconnect.sdk.client.pairing", qos: .userInitiated)
 
-    
-    // MARK: - Public interface
+    // MARK: - Initializers
 
+    /// Initializes and returns newly created WalletConnect Client Instance. Establishes a network connection with the relay
+    ///
+    /// - Parameters:
+    ///   - metadata: describes your application and will define pairing appearance in a web browser.
+    ///   - projectId: an optional parameter used to access the public WalletConnect infrastructure. Go to `www.walletconnect.com` for info.
+    ///   - isController: the peer that controls communication permissions for allowed chains, notification types and JSON-RPC request methods. Always true for a wallet.
+    ///   - relayHost: proxy server host that your application will use to connect to Waku Network. If you register your project at `www.walletconnect.com` you can use `relay.walletconnect.com`
+    ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults but if for some reasons you want to provide your own storage you can inject it here.
+    ///   - clientName: if your app requires more than one client you are required to call them with different names to distinguish logs source and prefix storage keys.
+    ///
+    /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialise it. Usually only one instance of a client is required in the application.
     public convenience init(metadata: AppMetadata, projectId: String, isController: Bool, relayHost: String, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
         self.init(metadata: metadata, projectId: projectId, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStore: keyValueStorage, clientName: clientName)
     }
@@ -70,19 +71,25 @@ public final class WalletConnectClient {
         unsubscribeNotificationCenter()
     }
     
-    // for proposer to propose a session to a responder
-    public func connect(params: ConnectParams) throws -> String? {
+    // MARK: - Public interface
+
+    /// For the Proposer to propose a session to a responder.
+    /// Function will create pending pairing sequence or propose a session on existing pairing. When responder client approves pairing, session is be proposed automatically by your client.
+    /// - Parameter sessionPermissions: The session permissions the responder will be requested for.
+    /// - Parameter topic: Optional parameter - use it if you already have an established pairing with peer client.
+    /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
+    public func connect(sessionPermissions: Session.Permissions, topic: String? = nil) throws -> String? {
         logger.debug("Connecting Application")
-        if let topic = params.pairing?.topic {
+        if let topic = topic {
             guard let pairing = pairingEngine.getSettledPairing(for: topic) else {
                 throw WalletConnectError.InternalReason.noSequenceForTopic
             }
             logger.debug("Proposing session on existing pairing")
-            let permissions = SessionPermissions(permissions: params.permissions)
+            let permissions = SessionPermissions(permissions: sessionPermissions)
             sessionEngine.proposeSession(settledPairing: Pairing(topic: pairing.topic, peer: nil), permissions: permissions, relay: pairing.relay)
             return nil
         } else {
-            let permissions = SessionPermissions(permissions: params.permissions)
+            let permissions = SessionPermissions(permissions: sessionPermissions)
             guard let pairingURI = pairingEngine.propose(permissions: permissions) else {
                 throw WalletConnectError.internal(.pairingProposalGenerationFailed)
             }
@@ -90,7 +97,13 @@ public final class WalletConnectClient {
         }
     }
     
-    // for responder to receive a session proposal from a proposer
+    /// For responder to receive a session proposal from a proposer
+    /// Responder should call this function in order to accept peer's pairing proposal and be able to subscribe for future session proposals.
+    /// - Parameter uri: Pairing URI that is commonly presented as a QR code by a dapp.
+    ///
+    /// Should Error:
+    /// - When URI is invalid format or missing params
+    /// - When topic is already in use
     public func pair(uri: String) throws {
         guard let pairingURI = WalletConnectURI(string: uri) else {
             throw WalletConnectError.internal(.malformedPairingURI)
@@ -100,34 +113,64 @@ public final class WalletConnectClient {
         }
     }
     
-    // for responder to approve a session proposal
+    /// For the responder to approve a session proposal.
+    /// - Parameters:
+    ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate function: `didReceive(sessionProposal: Session.Proposal)`
+    ///   - accounts: A Set of accounts that the dapp will be allowed to request methods executions on.
     public func approve(proposal: Session.Proposal, accounts: Set<String>) {
         sessionEngine.approve(proposal: proposal.proposal, accounts: accounts)
     }
     
-    // for responder to reject a session proposal
+    /// For the responder to reject a session proposal.
+    /// - Parameters:
+    ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate.
+    ///   - reason: Reason why the session proposal was rejected.
     public func reject(proposal: Session.Proposal, reason: SessionType.Reason) {
         sessionEngine.reject(proposal: proposal.proposal, reason: reason)
     }
     
+    /// For the responder to update the accounts
+    /// - Parameters:
+    ///   - topic: Topic of the session that is intended to be updated.
+    ///   - accounts: Set of accounts that will be allowed to be used by the session after the update.
     public func update(topic: String, accounts: Set<String>) {
         sessionEngine.update(topic: topic, accounts: accounts)
     }
     
+    /// For the responder to upgrade session permissions
+    /// - Parameters:
+    ///   - topic: Topic of the session that is intended to be upgraded.
+    ///   - permissions: Sets of permissions that will be combined with existing ones.
     public func upgrade(topic: String, permissions: Session.Permissions) {
         sessionEngine.upgrade(topic: topic, permissions: permissions)
     }
     
-    // for proposer to request JSON-RPC
+    /// For the proposer to send JSON-RPC requests to responding peer.
+    /// - Parameters:
+    ///   - params: Parameters defining request and related session
+    ///   - completion: completion block will provide response from responding client
     public func request(params: SessionType.PayloadRequestParams, completion: @escaping (Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ()) {
         sessionEngine.request(params: params, completion: completion)
     }
     
-    // for responder to respond JSON-RPC
+    /// For the responder to respond on pending peer's session JSON-RPC Request
+    /// - Parameters:
+    ///   - topic: Topic of the session for which the request was received.
+    ///   - response: Your JSON RPC response or an error.
     public func respond(topic: String, response: JsonRpcResponseTypes) {
         sessionEngine.respondSessionPayload(topic: topic, response: response)
     }
     
+    /// Ping method allows to check if client's peer is online and is subscribing for your sequence topic
+    ///
+    ///  Should Error:
+    ///  - When the session topic is not found
+    ///  - When the response is neither result or error
+    ///  - When the peer fails to respond within timeout
+    ///
+    /// - Parameters:
+    ///   - topic: Topic of the sequence, it can be a pairing or a session topic.
+    ///   - completion: Result will be success on response or error on timeout. -- TODO: timeout
     public func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
         if pairingEngine.hasPairing(for: topic) {
             pairingEngine.ping(topic: topic) { result in
@@ -140,19 +183,40 @@ public final class WalletConnectClient {
         }
     }
     
+    /// For the proposer and responder to emits a notification event on the peer for an existing session
+    ///
+    /// When:  a client wants to emit an event to its peer client (eg. chain changed or tx replaced)
+    ///
+    /// Should Error:
+    /// - When the session topic is not found
+    /// - When the notification params are invalid
+
+    /// - Parameters:
+    ///   - topic: Session topic
+    ///   - params: Notification Parameters
+    ///   - completion: calls a handler upon completion
     public func notify(topic: String, params: SessionType.NotificationParams, completion: ((Error?)->())?) {
         sessionEngine.notify(topic: topic, params: params, completion: completion)
     }
     
-    // for either to disconnect a session
+    /// For the proposer and responder to terminate a session
+    ///
+    /// Should Error:
+    /// - When the session topic is not found
+
+    /// - Parameters:
+    ///   - topic: Session topic that you want to delete
+    ///   - reason: Reason of session deletion
     public func disconnect(topic: String, reason: SessionType.Reason) {
         sessionEngine.delete(topic: topic, reason: reason)
     }
     
+    /// - Returns: All settled sessions that are active
     public func getSettledSessions() -> [Session] {
         sessionEngine.getSettledSessions()
     }
     
+    /// - Returns: All settled pairings that are active
     public func getSettledPairings() -> [Pairing] {
         pairingEngine.getSettledPairings()
     }
@@ -243,23 +307,6 @@ public final class WalletConnectClient {
     @objc
     private func appDidEnterBackground() {
         wakuRelay.disconnect(closeCode: .goingAway)
-    }
-}
-
-public struct ConnectParams {
-    let permissions: Session.Permissions
-    let pairing: ParamsPairing?
-    
-    public init(permissions: Session.Permissions, topic: String? = nil) {
-        self.permissions = permissions
-        if let topic = topic {
-            self.pairing = ParamsPairing(topic: topic)
-        } else {
-            self.pairing = nil
-        }
-    }
-    public struct ParamsPairing {
-        let topic: String
     }
 }
 
