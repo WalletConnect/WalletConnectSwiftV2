@@ -212,7 +212,6 @@ final class ClientTests: XCTestCase {
     func testPairingPing() {
         let proposerReceivesPingResponseExpectation = expectation(description: "Proposer receives ping response")
         let permissions = Session.Permissions.stub()
-        let connectParams = ConnectParams(permissions: permissions)
         let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         
         _ = try! responder.client.pair(uri: uri)

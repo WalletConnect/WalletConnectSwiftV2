@@ -6,9 +6,6 @@ import WalletConnectUtils
 import UIKit
 #endif
 
-extension ConsoleLogger: ConsoleLogging {}
-extension WakuNetworkRelay: NetworkRelaying {}
-
 /// An Object that expose public API to provide interactions with WalletConnect SDK
 ///
 /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialise it. Usually only one instance of a client is required in the application.
