@@ -9,50 +9,35 @@ import UIKit
 extension ConsoleLogger: ConsoleLogging {}
 extension WakuNetworkRelay: NetworkRelaying {}
 
-/// A protocol that defines methods that WalletConnectClient instance call on it's delegate to handle sequences level events
-public protocol WalletConnectClientDelegate: AnyObject {
-    func didReceive(sessionProposal: Session.Proposal)
-    func didReceive(sessionRequest: SessionRequest)
-    func didDelete(sessionTopic: String, reason: SessionType.Reason)
-    func didUpgrade(sessionTopic: String, permissions: Session.Permissions)
-    func didUpdate(sessionTopic: String, accounts: Set<String>)
-    func didSettle(session: Session)
-    func didSettle(pairing: Pairing)
-    func didReceive(notification: SessionNotification, sessionTopic : String)
-    func didReject(pendingSessionTopic: String, reason: SessionType.Reason)
-    func didUpdate(pairingTopic: String, appMetadata: AppMetadata)
-}
-
-public extension WalletConnectClientDelegate {
-    func didSettle(session: Session) {}
-    func didSettle(pairing: Pairing) {}
-    func didReceive(notification: SessionNotification, sessionTopic: String) {}
-    func didReject(pendingSessionTopic: String, reason: SessionType.Reason) {}
-    func didUpdate(pairingTopic: String, appMetadata: AppMetadata) {}
-}
-
 /// An Object that expose public API to provide interactions with WalletConnect SDK
 ///
+/// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialise it. Usually only one instance of a client is required in the application.
+///
 /// ```swift
-/// WalletConnectClient(metadata: <#T##AppMetadata#>, projectId: <#T##String#>, isController: <#T##Bool#>, relayHost: <#T##String#>, keyValueStorage: <#T##KeyValueStorage#>, clientName: <#T##String?#>)
+/// let metadata = AppMetadata(name: String?, description: String?, url: String?, icons: [String]?)
+/// let client = WalletConnectClient(metadata: AppMetadata, projectId: String, isController: Bool, relayHost: String)
 /// ```
+///
+/// - Parameters:
+///     - delegate: The object that acts as the delegate of WalletConnect Client
+///     - logger: An object for logging messages
 public final class WalletConnectClient {
-    private let metadata: AppMetadata
     public weak var delegate: WalletConnectClientDelegate?
+    public let logger: ConsoleLogging
+    private let metadata: AppMetadata
     private let isController: Bool
     private let pairingEngine: PairingEngine
     private let sessionEngine: SessionEngine
     private let relay: WalletConnectRelaying
     private let wakuRelay: NetworkRelaying
     private let crypto: Crypto
-    public let logger: ConsoleLogging
     private let secureStorage: SecureStorage
     private let pairingQueue = DispatchQueue(label: "com.walletconnect.sdk.client.pairing", qos: .userInitiated)
 
     // MARK: - Initializers
 
-    /// Initializes and returns newly created WalletConnect Client Instance.
-    /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialise it. Usually only one instance of a client in an app is required.
+    /// Initializes and returns newly created WalletConnect Client Instance. Establishes a network connection with the relay
+    ///
     /// - Parameters:
     ///   - metadata: describes your application and will define pairing appearance in a web browser.
     ///   - projectId: an optional parameter used to access the public WalletConnect infrastructure. Go to `www.walletconnect.com` for info.
@@ -60,6 +45,8 @@ public final class WalletConnectClient {
     ///   - relayHost: proxy server host that your application will use to connect to Waku Network. If you register your project at `www.walletconnect.com` you can use `relay.walletconnect.com`
     ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults but if for some reasons you want to provide your own storage you can inject it here.
     ///   - clientName: if your app requires more than one client you are required to call them with different names to distinguish logs source and prefix storage keys.
+    ///
+    /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialise it. Usually only one instance of a client is required in the application.
     public convenience init(metadata: AppMetadata, projectId: String, isController: Bool, relayHost: String, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
         self.init(metadata: metadata, projectId: projectId, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStore: keyValueStorage, clientName: clientName)
     }
@@ -116,6 +103,10 @@ public final class WalletConnectClient {
     /// For responder to receive a session proposal from a proposer
     /// Responder should call this function in order to accept peer's pairing proposal and be able to subscribe for future session proposals.
     /// - Parameter uri: Pairing URI that is commonly presented as a QR code by a dapp.
+    ///
+    /// Should Error:
+    /// - When URI is invalid format or missing params
+    /// - When topic is already in use
     public func pair(uri: String) throws {
         guard let pairingURI = WalletConnectURI(string: uri) else {
             throw WalletConnectError.internal(.malformedPairingURI)
@@ -165,7 +156,7 @@ public final class WalletConnectClient {
         sessionEngine.request(params: params, completion: completion)
     }
     
-    /// For the responder to respond on peer's JSON-RPC Request
+    /// For the responder to respond on pending peer's session JSON-RPC Request
     /// - Parameters:
     ///   - topic: Topic of the session for which the request was received.
     ///   - response: Your JSON RPC response or an error.
@@ -174,6 +165,12 @@ public final class WalletConnectClient {
     }
     
     /// Ping method allows to check if client's peer is online and is subscribing for your sequence topic
+    ///
+    ///  Should Error:
+    ///  - When the session topic is not found
+    ///  - When the response is neither result or error
+    ///  - When the peer fails to respond within timeout
+    ///
     /// - Parameters:
     ///   - topic: Topic of the sequence, it can be a pairing or a session topic.
     ///   - completion: Result will be success on response or error on timeout. -- TODO: timeout
@@ -189,7 +186,14 @@ public final class WalletConnectClient {
         }
     }
     
-    /// For the proposer and responder to send a notification.
+    /// For the proposer and responder to emits a notification event on the peer for an existing session
+    ///
+    /// When:  a client wants to emit an event to its peer client (eg. chain changed or tx replaced)
+    ///
+    /// Should Error:
+    /// - When the session topic is not found
+    /// - When the notification params are invalid
+
     /// - Parameters:
     ///   - topic: Session topic
     ///   - params: Notification Parameters
@@ -199,6 +203,10 @@ public final class WalletConnectClient {
     }
     
     /// For the proposer and responder to terminate a session
+    ///
+    /// Should Error:
+    /// - When the session topic is not found
+
     /// - Parameters:
     ///   - topic: Session topic that you want to delete
     ///   - reason: Reason of session deletion

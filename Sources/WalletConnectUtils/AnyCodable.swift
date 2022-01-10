@@ -1,5 +1,12 @@
 import Foundation
 
+
+/// An Object that allows to encode and decode `Any` type
+///
+/// ```Swift
+///        let anyCodable = AnyCodable("")
+///        let string = try! anyCodable.get(String.self)
+/// ```
 public struct AnyCodable {
     
     private let value: Any
@@ -17,6 +24,8 @@ public struct AnyCodable {
         }
     }
     
+    /// Derives object of expected type from AnyCodable. Throws if encapsulated object type does not match type provided in function parameter.
+    /// - Returns: derived object of required type
     public func get<T: Codable>(_ type: T.Type) throws -> T {
         let valueData = try JSONSerialization.data(withJSONObject: value, options: [.fragmentsAllowed])
         return try JSONDecoder().decode(type, from: valueData)
@@ -42,7 +51,6 @@ extension AnyCodable: Decodable, Encodable {
     }
     
     public init(from decoder: Decoder) throws {
-        
         if let container = try? decoder.container(keyedBy: CodingKeys.self) {
             var result = [String: Any]()
             try container.allKeys.forEach { (key) throws in
