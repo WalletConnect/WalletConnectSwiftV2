@@ -3,16 +3,6 @@ import XCTest
 import TestingUtils
 import WalletConnectUtils
 
-//fileprivate extension SessionType.Permissions {
-//    static func stub() -> SessionType.Permissions {
-//        SessionType.Permissions(
-//            blockchain: SessionType.Blockchain(chains: []),
-//            jsonrpc: SessionType.JSONRPC(methods: []),
-//            notifications: SessionType.Notifications(types: [])
-//        )
-//    }
-//}
-
 fileprivate extension SessionPermissions {
     static func stub() -> SessionPermissions {
         SessionPermissions(
@@ -31,12 +21,8 @@ fileprivate extension WCRequest {
     }
 }
 
-//fileprivate func deriveTopic(publicKey: String, privateKey: Crypto.X25519.PrivateKey) -> String {
-//    try! Crypto.X25519.generateAgreementSecret(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
-//}
-
 func deriveTopic(publicKey: String, privateKey: AgreementPrivateKey) -> String {
-    try! Crypto.generateAgreementSecret(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
+    try! Crypto.generateAgreementSecret(from: privateKey, peerPublicKey: publicKey).derivedTopic()
 }
 
 final class PairingEngineTests: XCTestCase {
@@ -149,7 +135,7 @@ final class PairingEngineTests: XCTestCase {
         setupEngine(isController: false)
         
         var approvedPairing: Pairing?
-        let responderPubKey = AgreementPrivateKey().publicKey.rawRepresentation.toHexString()
+        let responderPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let topicB = deriveTopic(publicKey: responderPubKey, privateKey: cryptoMock.privateKeyStub)
         let uri = engine.propose(permissions: SessionPermissions.stub())!
         let topicA = uri.topic

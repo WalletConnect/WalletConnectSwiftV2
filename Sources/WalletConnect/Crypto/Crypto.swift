@@ -69,9 +69,6 @@ class Crypto: CryptoStorageProtocol {
             print("Error deleting agreement key: \(error)")
         }
     }
-}
-
-extension Crypto {
     
     func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret {
         guard let privateKey = try getPrivateKey(for: selfPublicKey) else {
@@ -86,12 +83,5 @@ extension Crypto {
         let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: peerPublicKey)
         let rawSecret = sharedSecret.withUnsafeBytes { return Data(Array($0)) }
         return AgreementSecret(sharedSecret: rawSecret, publicKey: privateKey.publicKey)
-    }
-    
-    static func generateAgreementSecret(peerPublicKey: Data, privateKey: AgreementPrivateKey, sharedInfo: Data = Data()) throws -> AgreementSecret {
-        let peerPublicKey = try AgreementPublicKey(rawRepresentation: peerPublicKey)
-        let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: peerPublicKey)
-        let rawSharedSecret = sharedSecret.withUnsafeBytes { return Data(Array($0)) }
-        return AgreementSecret(sharedSecret: rawSharedSecret, publicKey: privateKey.publicKey)
     }
 }

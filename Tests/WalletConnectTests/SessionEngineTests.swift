@@ -11,17 +11,6 @@ fileprivate extension Pairing {
     }
 }
 
-//fileprivate extension SessionType.Permissions {
-//
-//    static func stub() -> SessionType.Permissions {
-//        SessionType.Permissions(
-//            blockchain: SessionType.Blockchain(chains: []),
-//            jsonrpc: SessionType.JSONRPC(methods: []),
-//            notifications: SessionType.Notifications(types: [])
-//        )
-//    }
-//}
-
 fileprivate extension SessionPermissions {
     static func stub() -> SessionPermissions {
         SessionPermissions(
@@ -44,17 +33,6 @@ fileprivate extension WCRequest {
         return approveParams
     }
 }
-
-extension AgreementSecret {
-    
-    static func stub() -> AgreementSecret {
-        AgreementSecret(sharedSecret: Data(), publicKey: AgreementPrivateKey().publicKey)
-    }
-}
-
-//fileprivate func deriveTopic(publicKey: String, privateKey: Crypto.X25519.PrivateKey) -> String {
-//    try! Crypto.X25519.generateAgreementSecret(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
-//}
 
 final class SessionEngineTests: XCTestCase {
     
@@ -155,7 +133,7 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testApprove() {
-        let proposerPubKey = AgreementPrivateKey().publicKey.rawRepresentation.toHexString()
+        let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let topicB = String.generateTopic()!
         let topicC = String.generateTopic()!
         let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
@@ -185,7 +163,7 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testApprovalAcknowledgementSuccess() {
-        let proposerPubKey = AgreementPrivateKey().publicKey.rawRepresentation.toHexString()
+        let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let topicB = String.generateTopic()!
         let topicC = String.generateTopic()!
         let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
@@ -221,8 +199,8 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testApprovalAcknowledgementFailure() {
-        let proposerPubKey = AgreementPrivateKey().publicKey.rawRepresentation.toHexString()
-        let selfPubKey = cryptoMock.privateKeyStub.publicKey.rawRepresentation.toHexString()
+        let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
+        let selfPubKey = cryptoMock.privateKeyStub.publicKey.hexRepresentation
         let topicB = String.generateTopic()!
         let topicC = String.generateTopic()!
         let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
@@ -267,8 +245,8 @@ final class SessionEngineTests: XCTestCase {
         var approvedSession: Session?
 
         let privateKeyStub = cryptoMock.privateKeyStub
-        let proposerPubKey = privateKeyStub.publicKey.rawRepresentation.toHexString()
-        let responderPubKey = AgreementPrivateKey().publicKey.rawRepresentation.toHexString()
+        let proposerPubKey = privateKeyStub.publicKey.hexRepresentation
+        let responderPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let topicC = topicGenerator.topic
         let topicD = deriveTopic(publicKey: responderPubKey, privateKey: privateKeyStub)
 

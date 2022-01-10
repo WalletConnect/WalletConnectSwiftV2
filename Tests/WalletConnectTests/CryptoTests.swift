@@ -47,9 +47,7 @@ class CryptoTests: XCTestCase {
     func testAgreementSecretRoundTrip() throws {
         let topic = "topic"
         XCTAssertNil(try crypto.getAgreementSecret(for: topic))
-        let agreementKeys = AgreementSecret(
-            sharedSecret: CryptoTestData.expectedSharedSecret,
-            publicKey: try! AgreementPublicKey(rawRepresentation: CryptoTestData._publicKeyA))
+        let agreementKeys = AgreementSecret.stub()
         try? crypto.setAgreementSecret(agreementKeys, topic: topic)
         let storedAgreementSecret = try crypto.getAgreementSecret(for: topic)
         XCTAssertEqual(agreementKeys, storedAgreementSecret)
@@ -57,9 +55,7 @@ class CryptoTests: XCTestCase {
     
     func testDeleteAgreementSecret() throws {
         let topic = "topic"
-        let agreementKeys = AgreementSecret(
-            sharedSecret: CryptoTestData.expectedSharedSecret,
-            publicKey: try! AgreementPublicKey(rawRepresentation: CryptoTestData._publicKeyA))
+        let agreementKeys = AgreementSecret.stub()
         try? crypto.setAgreementSecret(agreementKeys, topic: topic)
         crypto.deleteAgreementSecret(for: topic)
         XCTAssertNil(try crypto.getAgreementSecret(for: topic))
