@@ -1,19 +1,21 @@
 import Foundation
 import CryptoKit
 
+// MARK: - CryptoKit extensions
+
 extension Curve25519.KeyAgreement.PublicKey: Equatable {
-    
     public static func == (lhs: Curve25519.KeyAgreement.PublicKey, rhs: Curve25519.KeyAgreement.PublicKey) -> Bool {
         lhs.rawRepresentation == rhs.rawRepresentation
     }
 }
 
 extension Curve25519.KeyAgreement.PrivateKey: Equatable {
-    
     public static func == (lhs: Curve25519.KeyAgreement.PrivateKey, rhs: Curve25519.KeyAgreement.PrivateKey) -> Bool {
         lhs.rawRepresentation == rhs.rawRepresentation
     }
 }
+
+// MARK: - Public Key
 
 struct AgreementPublicKey: Equatable {
     
@@ -49,6 +51,8 @@ extension AgreementPublicKey: Codable {
         try self.init(rawRepresentation: buffer)
     }
 }
+
+// MARK: - Private Key
 
 struct AgreementPrivateKey: GenericPasswordConvertible, Equatable {
 
