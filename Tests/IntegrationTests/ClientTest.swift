@@ -155,7 +155,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
-            let requestParams = SessionType.PayloadRequestParams(topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
+            let requestParams = Request(topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
             self.proposer.client.request(params: requestParams) { result in
                 switch result {
                 case .success(let jsonRpcResponse):
@@ -191,7 +191,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
-            let requestParams = SessionType.PayloadRequestParams(topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
+            let requestParams = Request(topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
             self.proposer.client.request(params: requestParams) { result in
                 switch result {
                 case .success(_):

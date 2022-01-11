@@ -149,7 +149,7 @@ public final class WalletConnectClient {
     /// - Parameters:
     ///   - params: Parameters defining request and related session
     ///   - completion: completion block will provide response from responding client
-    public func request(params: SessionType.PayloadRequestParams, completion: @escaping (Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ()) {
+    public func request(params: Request, completion: @escaping (Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ()) {
         sessionEngine.request(params: params, completion: completion)
     }
     

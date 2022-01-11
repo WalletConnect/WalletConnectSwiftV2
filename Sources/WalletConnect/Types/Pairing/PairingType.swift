@@ -1,4 +1,4 @@
 
 import Foundation
 
-public enum PairingType {}
+enum PairingType {}

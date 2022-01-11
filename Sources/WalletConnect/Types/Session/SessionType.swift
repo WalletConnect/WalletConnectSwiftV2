@@ -1,4 +1,4 @@
 
 import Foundation
 
-public enum SessionType {}
+enum SessionType {}

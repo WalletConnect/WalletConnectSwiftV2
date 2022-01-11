@@ -171,7 +171,7 @@ final class SessionEngine {
         }
     }
     
-    func request(params: SessionType.PayloadRequestParams, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())) {
+    func request(params: Request, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())) {
         guard sequencesStore.hasSequence(forTopic: params.topic) else {
             logger.debug("Could not find session for topic \(params.topic)")
             return
