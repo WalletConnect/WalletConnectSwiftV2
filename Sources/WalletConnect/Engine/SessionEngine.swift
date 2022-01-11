@@ -134,19 +134,19 @@ final class SessionEngine {
         }
     }
     
-    func reject(proposal: SessionProposal, reason: SessionType.Reason) {
-        let rejectParams = SessionType.RejectParams(reason: reason)
+    func reject(proposal: SessionProposal, reason: Reason) {
+        let rejectParams = SessionType.RejectParams(reason: reason.toInternal())
         let rejectPayload = WCRequest(method: .sessionReject, params: .sessionReject(rejectParams))
         _ = relayer.request(topic: proposal.topic, payload: rejectPayload) { [weak self] result in
             self?.logger.debug("Reject result: \(result)")
         }
     }
     
-    func delete(topic: String, reason: SessionType.Reason) {
+    func delete(topic: String, reason: Reason) {
         logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
         sequencesStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
-        let params = WCRequest.Params.sessionDelete(SessionType.DeleteParams(reason: reason))
+        let params = WCRequest.Params.sessionDelete(SessionType.DeleteParams(reason: reason.toInternal()))
         let request = WCRequest(method: .sessionDelete, params: params)
 
         _ = relayer.request(topic: topic, payload: request) { [weak self] result in

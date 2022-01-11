@@ -125,7 +125,7 @@ public final class WalletConnectClient {
     /// - Parameters:
     ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate.
     ///   - reason: Reason why the session proposal was rejected.
-    public func reject(proposal: Session.Proposal, reason: SessionType.Reason) {
+    public func reject(proposal: Session.Proposal, reason: Reason) {
         sessionEngine.reject(proposal: proposal.proposal, reason: reason)
     }
     
@@ -207,7 +207,7 @@ public final class WalletConnectClient {
     /// - Parameters:
     ///   - topic: Session topic that you want to delete
     ///   - reason: Reason of session deletion
-    public func disconnect(topic: String, reason: SessionType.Reason) {
+    public func disconnect(topic: String, reason: Reason) {
         sessionEngine.delete(topic: topic, reason: reason)
     }
     
@@ -243,13 +243,13 @@ public final class WalletConnectClient {
             self?.delegate?.didSettle(session: session)
         }
         sessionEngine.onSessionRejected = { [unowned self] pendingTopic, reason in
-            delegate?.didReject(pendingSessionTopic: pendingTopic, reason: reason)
+            delegate?.didReject(pendingSessionTopic: pendingTopic, reason: reason.toPublic())
         }
         sessionEngine.onSessionPayloadRequest = { [unowned self] sessionRequest in
             delegate?.didReceive(sessionRequest: sessionRequest)
         }
         sessionEngine.onSessionDelete = { [unowned self] topic, reason in
-            delegate?.didDelete(sessionTopic: topic, reason: reason)
+            delegate?.didDelete(sessionTopic: topic, reason: reason.toPublic())
         }
         sessionEngine.onSessionUpgrade = { [unowned self] topic, permissions in
             let upgradedPermissions = Session.Permissions(permissions: permissions)

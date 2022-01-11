@@ -16,10 +16,10 @@ struct SessionProposal: Codable, Equatable {
 
 extension SessionType {
     
-    public struct Proposer: Codable, Equatable {
+    struct Proposer: Codable, Equatable {
         let publicKey: String
         let controller: Bool
-        public let metadata: AppMetadata
+        let metadata: AppMetadata
     }
     
     struct Signal: Codable, Equatable {
