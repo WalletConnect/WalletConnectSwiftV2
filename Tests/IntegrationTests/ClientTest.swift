@@ -116,7 +116,7 @@ final class ClientTests: XCTestCase {
         let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self] proposal in
-            self.responder.client.reject(proposal: proposal, reason: SessionType.Reason(code: WalletConnectError.internal(.notApproved).code, message: WalletConnectError.internal(.notApproved).description))
+            self.responder.client.reject(proposal: proposal, reason: Reason(code: WalletConnectError.internal(.notApproved).code, message: WalletConnectError.internal(.notApproved).description))
         }
         proposer.onSessionRejected = { _, reason in
             XCTAssertEqual(reason.code, WalletConnectError.internal(.notApproved).code)
@@ -134,7 +134,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
-            self.proposer.client.disconnect(topic: settledSession.topic, reason: SessionType.Reason(code: 5900, message: "User disconnected session"))
+            self.proposer.client.disconnect(topic: settledSession.topic, reason: Reason(code: 5900, message: "User disconnected session"))
         }
         responder.onSessionDelete = {
             sessionDeleteExpectation.fulfill()
@@ -324,7 +324,7 @@ final class ClientTests: XCTestCase {
         let permissions = Session.Permissions.stub(notifications: ["type1"])
         let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         try! responder.client.pair(uri: uri)
-        let notificationParams = SessionType.NotificationParams(type: "type1", data: AnyCodable("notification_data"))
+        let notificationParams = Session.Notification(type: "type1", data: AnyCodable("notification_data"))
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
@@ -344,7 +344,7 @@ final class ClientTests: XCTestCase {
         let permissions = Session.Permissions.stub(notifications: ["type1"])
         let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         try! responder.client.pair(uri: uri)
-        let notificationParams = SessionType.NotificationParams(type: "type2", data: AnyCodable("notification_data"))
+        let notificationParams = Session.Notification(type: "type2", data: AnyCodable("notification_data"))
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
         }

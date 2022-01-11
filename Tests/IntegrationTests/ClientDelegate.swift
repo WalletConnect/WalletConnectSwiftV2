@@ -8,11 +8,11 @@ class ClientDelegate: WalletConnectClientDelegate {
     var onPairingSettled: ((Pairing)->())?
     var onSessionProposal: ((Session.Proposal)->())?
     var onSessionRequest: ((SessionRequest)->())?
-    var onSessionRejected: ((String, SessionType.Reason)->())?
+    var onSessionRejected: ((String, Reason)->())?
     var onSessionDelete: (()->())?
     var onSessionUpgrade: ((String, Session.Permissions)->())?
     var onSessionUpdate: ((String, Set<String>)->())?
-    var onNotificationReceived: ((SessionNotification, String)->())?
+    var onNotificationReceived: ((Session.Notification, String)->())?
     var onPairingUpdate: ((String, AppMetadata)->())?
     
     internal init(client: WalletConnectClient) {
@@ -20,7 +20,7 @@ class ClientDelegate: WalletConnectClientDelegate {
         client.delegate = self
     }
     
-    func didReject(pendingSessionTopic: String, reason: SessionType.Reason) {
+    func didReject(pendingSessionTopic: String, reason: Reason) {
         onSessionRejected?(pendingSessionTopic, reason)
     }
     func didSettle(session: Session) {
@@ -35,7 +35,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didReceive(sessionRequest: SessionRequest) {
         onSessionRequest?(sessionRequest)
     }
-    func didDelete(sessionTopic: String, reason: SessionType.Reason) {
+    func didDelete(sessionTopic: String, reason: Reason) {
         onSessionDelete?()
     }
     func didUpgrade(sessionTopic: String, permissions: Session.Permissions) {
@@ -44,7 +44,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didUpdate(sessionTopic: String, accounts: Set<String>) {
         onSessionUpdate?(sessionTopic, accounts)
     }
-    func didReceive(notification: SessionNotification, sessionTopic: String) {
+    func didReceive(notification: Session.Notification, sessionTopic: String) {
         onNotificationReceived?(notification, sessionTopic)
     }
     func didUpdate(pairingTopic: String, appMetadata: AppMetadata) {

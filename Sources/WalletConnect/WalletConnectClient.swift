@@ -195,7 +195,7 @@ public final class WalletConnectClient {
     ///   - topic: Session topic
     ///   - params: Notification Parameters
     ///   - completion: calls a handler upon completion
-    public func notify(topic: String, params: SessionType.NotificationParams, completion: ((Error?)->())?) {
+    public func notify(topic: String, params: Session.Notification, completion: ((Error?)->())?) {
         sessionEngine.notify(topic: topic, params: params, completion: completion)
     }
     

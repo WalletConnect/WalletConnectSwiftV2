@@ -11,7 +11,7 @@ final class SessionEngine {
     var onSessionUpdate: ((String, Set<String>)->())?
     var onSessionUpgrade: ((String, SessionPermissions)->())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
-    var onNotificationReceived: ((String, SessionType.NotificationParams)->())?
+    var onNotificationReceived: ((String, Session.Notification)->())?
     
     private let sequencesStore: SessionSequenceStorage
     private let wcSubscriber: WCSubscribing
@@ -247,12 +247,13 @@ final class SessionEngine {
         }
     }
     
-    func notify(topic: String, params: SessionType.NotificationParams, completion: ((Error?)->())?) {
+    func notify(topic: String, params: Session.Notification, completion: ((Error?)->())?) {
         guard let session = try? sequencesStore.getSequence(forTopic: topic), session.isSettled else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
         do {
+            let params = SessionType.NotificationParams(type: params.type, data: params.data)
             try validateNotification(session: session, params: params)
             let request = WCRequest(method: .sessionNotification, params: .sessionNotification(params))
             relayer.request(topic: topic, payload: request) {  result in
@@ -309,7 +310,8 @@ final class SessionEngine {
                 if let error = error {
                     logger.error(error)
                 } else {
-                    onNotificationReceived?(topic, notificationParams)
+                    let notification = Session.Notification(type: notificationParams.type, data: notificationParams.data)
+                    onNotificationReceived?(topic, notification)
                 }
             }
         } catch let error as WalletConnectError {

@@ -42,7 +42,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     func didSettle(pairing: Pairing)
     
     /// Tells the delegate that sotification has been received.
-    func didReceive(notification: SessionNotification, sessionTopic : String)
+    func didReceive(notification: Session.Notification, sessionTopic : String)
     
     /// Tells the delegate that peer client has rejected a session proposal.
     ///
@@ -57,7 +57,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
 
 public extension WalletConnectClientDelegate {
     func didSettle(pairing: Pairing) {}
-    func didReceive(notification: SessionNotification, sessionTopic: String) {}
+    func didReceive(notification: Session.Notification, sessionTopic: String) {}
     func didReject(pendingSessionTopic: String, reason: Reason) {}
     func didUpdate(pairingTopic: String, appMetadata: AppMetadata) {}
 }

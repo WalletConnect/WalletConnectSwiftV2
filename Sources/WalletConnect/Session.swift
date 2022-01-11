@@ -1,3 +1,4 @@
+import WalletConnectUtils
 
 /**
  A representation of an active session connection.
@@ -36,4 +37,8 @@ extension Session {
         }
     }
 
+    public struct Notification: Equatable {
+        public let type: String
+        public let data: AnyCodable
+    }
 }
