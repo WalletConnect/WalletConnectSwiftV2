@@ -4,7 +4,7 @@ import WalletConnectUtils
 
 final class SessionEngine {
     
-    var onSessionPayloadRequest: ((SessionRequest)->())?
+    var onSessionPayloadRequest: ((Request)->())?
     var onSessionApproved: ((Session)->())?
     var onApprovalAcknowledgement: ((Session) -> Void)?
     var onSessionRejected: ((String, SessionType.Reason)->())?
@@ -413,10 +413,15 @@ final class SessionEngine {
     
     private func handleSessionPayload(payloadParams: SessionType.PayloadParams, topic: String, requestId: Int64) {
         let jsonRpcRequest = JSONRPCRequest<AnyCodable>(id: requestId, method: payloadParams.request.method, params: payloadParams.request.params)
-        let sessionRequest = SessionRequest(topic: topic, request: jsonRpcRequest, chainId: payloadParams.chainId)
+        let request = Request(
+            id: jsonRpcRequest.id,
+            topic: topic,
+            method: jsonRpcRequest.method,
+            params: jsonRpcRequest.params,
+            chainId: payloadParams.chainId)
         do {
-            try validatePayload(sessionRequest)
-            onSessionPayloadRequest?(sessionRequest)
+            try validatePayload(request)
+            onSessionPayloadRequest?(request)
         } catch let error as WalletConnectError {
             logger.error(error)
             respond(error: error, requestId: jsonRpcRequest.id, topic: topic)
@@ -435,7 +440,7 @@ final class SessionEngine {
         }
     }
 
-    private func validatePayload(_ sessionRequest: SessionRequest) throws {
+    private func validatePayload(_ sessionRequest: Request) throws {
         guard let session = try? sequencesStore.getSequence(forTopic: sessionRequest.topic) else {
             throw WalletConnectError.internal(.noSequenceForTopic)
         }
@@ -444,7 +449,7 @@ final class SessionEngine {
                 throw WalletConnectError.unauthrorized(.unauthorizedJsonRpcMethod)
             }
         }
-        guard session.hasPermission(forMethod: sessionRequest.request.method) else {
+        guard session.hasPermission(forMethod: sessionRequest.method) else {
             throw WalletConnectError.unauthrorized(.unauthorizedJsonRpcMethod)
         }
     }

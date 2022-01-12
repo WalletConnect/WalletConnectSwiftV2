@@ -14,7 +14,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     /// In most cases that function is supposed to be called on wallet client.
     /// - Parameters:
     ///     - sessionRequest: Object containing request received from peer client.
-    func didReceive(sessionRequest: SessionRequest)
+    func didReceive(sessionRequest: Request)
     
     /// Tells the delegate that the peer client has terminated the session.
     ///

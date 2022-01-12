@@ -309,9 +309,3 @@ public final class WalletConnectClient {
         wakuRelay.disconnect(closeCode: .goingAway)
     }
 }
-
-public struct SessionRequest: Codable, Equatable {
-    public let topic: String
-    public let request: JSONRPCRequest<AnyCodable>
-    public let chainId: String?
-}

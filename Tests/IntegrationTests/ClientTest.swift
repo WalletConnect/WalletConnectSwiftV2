@@ -155,7 +155,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
-            let requestParams = Request(topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
+            let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
             self.proposer.client.request(params: requestParams) { result in
                 switch result {
                 case .success(let jsonRpcResponse):
@@ -168,10 +168,10 @@ final class ClientTests: XCTestCase {
             }
         }
         responder.onSessionRequest = {[unowned self]  sessionRequest in
-            XCTAssertEqual(sessionRequest.request.method, method)
-            let ethSendTrancastionParams = try! sessionRequest.request.params.get([EthSendTransaction].self)
+            XCTAssertEqual(sessionRequest.method, method)
+            let ethSendTrancastionParams = try! sessionRequest.params.get([EthSendTransaction].self)
             XCTAssertEqual(ethSendTrancastionParams, params)
-            let jsonrpcResponse = JSONRPCResponse<AnyCodable>(id: sessionRequest.request.id, result: AnyCodable(responseParams))
+            let jsonrpcResponse = JSONRPCResponse<AnyCodable>(id: sessionRequest.id, result: AnyCodable(responseParams))
             self.responder.client.respond(topic: sessionRequest.topic, response: .response(jsonrpcResponse))
             requestExpectation.fulfill()
         }
@@ -191,7 +191,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
-            let requestParams = Request(topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
+            let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
             self.proposer.client.request(params: requestParams) { result in
                 switch result {
                 case .success(_):
@@ -203,7 +203,7 @@ final class ClientTests: XCTestCase {
             }
         }
         responder.onSessionRequest = {[unowned self]  sessionRequest in
-            let jsonrpcErrorResponse = JSONRPCErrorResponse(id: sessionRequest.request.id, error: error)
+            let jsonrpcErrorResponse = JSONRPCErrorResponse(id: sessionRequest.id, error: error)
             self.responder.client.respond(topic: sessionRequest.topic, response: .error(jsonrpcErrorResponse))
         }
         waitForExpectations(timeout: defaultTimeout, handler: nil)
