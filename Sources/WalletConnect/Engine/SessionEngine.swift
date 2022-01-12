@@ -4,14 +4,14 @@ import WalletConnectUtils
 
 final class SessionEngine {
     
-    var onSessionPayloadRequest: ((SessionRequest)->())?
+    var onSessionPayloadRequest: ((Request)->())?
     var onSessionApproved: ((Session)->())?
     var onApprovalAcknowledgement: ((Session) -> Void)?
     var onSessionRejected: ((String, SessionType.Reason)->())?
     var onSessionUpdate: ((String, Set<String>)->())?
     var onSessionUpgrade: ((String, SessionPermissions)->())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
-    var onNotificationReceived: ((String, SessionType.NotificationParams)->())?
+    var onNotificationReceived: ((String, Session.Notification)->())?
     
     private let sequencesStore: SessionSequenceStorage
     private let wcSubscriber: WCSubscribing
@@ -134,19 +134,19 @@ final class SessionEngine {
         }
     }
     
-    func reject(proposal: SessionProposal, reason: SessionType.Reason) {
-        let rejectParams = SessionType.RejectParams(reason: reason)
+    func reject(proposal: SessionProposal, reason: Reason) {
+        let rejectParams = SessionType.RejectParams(reason: reason.toInternal())
         let rejectPayload = WCRequest(method: .sessionReject, params: .sessionReject(rejectParams))
         _ = relayer.request(topic: proposal.topic, payload: rejectPayload) { [weak self] result in
             self?.logger.debug("Reject result: \(result)")
         }
     }
     
-    func delete(topic: String, reason: SessionType.Reason) {
+    func delete(topic: String, reason: Reason) {
         logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
         sequencesStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
-        let params = WCRequest.Params.sessionDelete(SessionType.DeleteParams(reason: reason))
+        let params = WCRequest.Params.sessionDelete(SessionType.DeleteParams(reason: reason.toInternal()))
         let request = WCRequest(method: .sessionDelete, params: params)
 
         _ = relayer.request(topic: topic, payload: request) { [weak self] result in
@@ -171,7 +171,7 @@ final class SessionEngine {
         }
     }
     
-    func request(params: SessionType.PayloadRequestParams, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())) {
+    func request(params: Request, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())) {
         guard sequencesStore.hasSequence(forTopic: params.topic) else {
             logger.debug("Could not find session for topic \(params.topic)")
             return
@@ -247,12 +247,13 @@ final class SessionEngine {
         }
     }
     
-    func notify(topic: String, params: SessionType.NotificationParams, completion: ((Error?)->())?) {
+    func notify(topic: String, params: Session.Notification, completion: ((Error?)->())?) {
         guard let session = try? sequencesStore.getSequence(forTopic: topic), session.isSettled else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
         do {
+            let params = SessionType.NotificationParams(type: params.type, data: params.data)
             try validateNotification(session: session, params: params)
             let request = WCRequest(method: .sessionNotification, params: .sessionNotification(params))
             relayer.request(topic: topic, payload: request) {  result in
@@ -309,7 +310,8 @@ final class SessionEngine {
                 if let error = error {
                     logger.error(error)
                 } else {
-                    onNotificationReceived?(topic, notificationParams)
+                    let notification = Session.Notification(type: notificationParams.type, data: notificationParams.data)
+                    onNotificationReceived?(topic, notification)
                 }
             }
         } catch let error as WalletConnectError {
@@ -411,10 +413,15 @@ final class SessionEngine {
     
     private func handleSessionPayload(payloadParams: SessionType.PayloadParams, topic: String, requestId: Int64) {
         let jsonRpcRequest = JSONRPCRequest<AnyCodable>(id: requestId, method: payloadParams.request.method, params: payloadParams.request.params)
-        let sessionRequest = SessionRequest(topic: topic, request: jsonRpcRequest, chainId: payloadParams.chainId)
+        let request = Request(
+            id: jsonRpcRequest.id,
+            topic: topic,
+            method: jsonRpcRequest.method,
+            params: jsonRpcRequest.params,
+            chainId: payloadParams.chainId)
         do {
-            try validatePayload(sessionRequest)
-            onSessionPayloadRequest?(sessionRequest)
+            try validatePayload(request)
+            onSessionPayloadRequest?(request)
         } catch let error as WalletConnectError {
             logger.error(error)
             respond(error: error, requestId: jsonRpcRequest.id, topic: topic)
@@ -433,7 +440,7 @@ final class SessionEngine {
         }
     }
 
-    private func validatePayload(_ sessionRequest: SessionRequest) throws {
+    private func validatePayload(_ sessionRequest: Request) throws {
         guard let session = try? sequencesStore.getSequence(forTopic: sessionRequest.topic) else {
             throw WalletConnectError.internal(.noSequenceForTopic)
         }
@@ -442,7 +449,7 @@ final class SessionEngine {
                 throw WalletConnectError.unauthrorized(.unauthorizedJsonRpcMethod)
             }
         }
-        guard session.hasPermission(forMethod: sessionRequest.request.method) else {
+        guard session.hasPermission(forMethod: sessionRequest.method) else {
             throw WalletConnectError.unauthrorized(.unauthorizedJsonRpcMethod)
         }
     }

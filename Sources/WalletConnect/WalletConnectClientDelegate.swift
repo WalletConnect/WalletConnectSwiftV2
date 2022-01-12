@@ -14,12 +14,12 @@ public protocol WalletConnectClientDelegate: AnyObject {
     /// In most cases that function is supposed to be called on wallet client.
     /// - Parameters:
     ///     - sessionRequest: Object containing request received from peer client.
-    func didReceive(sessionRequest: SessionRequest)
+    func didReceive(sessionRequest: Request)
     
     /// Tells the delegate that the peer client has terminated the session.
     ///
     /// Function can be executed on any type of the client.
-    func didDelete(sessionTopic: String, reason: SessionType.Reason)
+    func didDelete(sessionTopic: String, reason: Reason)
     
     /// Tells the delegate that session permissions has been upgraded.
     ///
@@ -42,12 +42,12 @@ public protocol WalletConnectClientDelegate: AnyObject {
     func didSettle(pairing: Pairing)
     
     /// Tells the delegate that sotification has been received.
-    func didReceive(notification: SessionNotification, sessionTopic : String)
+    func didReceive(notification: Session.Notification, sessionTopic : String)
     
     /// Tells the delegate that peer client has rejected a session proposal.
     ///
     /// Function will be executed on proposer client only.
-    func didReject(pendingSessionTopic: String, reason: SessionType.Reason)
+    func didReject(pendingSessionTopic: String, reason: Reason)
     
     /// Tells the delegate that peer has updated metadata for pairing.
     ///
@@ -57,7 +57,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
 
 public extension WalletConnectClientDelegate {
     func didSettle(pairing: Pairing) {}
-    func didReceive(notification: SessionNotification, sessionTopic: String) {}
-    func didReject(pendingSessionTopic: String, reason: SessionType.Reason) {}
+    func didReceive(notification: Session.Notification, sessionTopic: String) {}
+    func didReject(pendingSessionTopic: String, reason: Reason) {}
     func didUpdate(pairingTopic: String, appMetadata: AppMetadata) {}
 }

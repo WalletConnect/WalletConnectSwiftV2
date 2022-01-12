@@ -142,7 +142,7 @@ extension PairingSequence {
         )
     }
     
-    static func buildAcknowledged(approval approveParams: PairingApproval, proposal: PairingProposal, agreementKeys: AgreementSecret) -> PairingSequence {
+    static func buildAcknowledged(approval approveParams: PairingType.ApprovalParams, proposal: PairingProposal, agreementKeys: AgreementSecret) -> PairingSequence {
         let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : approveParams.responder.publicKey
         return PairingSequence(
             topic: agreementKeys.derivedTopic(),

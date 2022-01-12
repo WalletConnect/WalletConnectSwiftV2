@@ -116,7 +116,7 @@ final class ClientTests: XCTestCase {
         let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self] proposal in
-            self.responder.client.reject(proposal: proposal, reason: SessionType.Reason(code: WalletConnectError.internal(.notApproved).code, message: WalletConnectError.internal(.notApproved).description))
+            self.responder.client.reject(proposal: proposal, reason: Reason(code: WalletConnectError.internal(.notApproved).code, message: WalletConnectError.internal(.notApproved).description))
         }
         proposer.onSessionRejected = { _, reason in
             XCTAssertEqual(reason.code, WalletConnectError.internal(.notApproved).code)
@@ -134,7 +134,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
-            self.proposer.client.disconnect(topic: settledSession.topic, reason: SessionType.Reason(code: 5900, message: "User disconnected session"))
+            self.proposer.client.disconnect(topic: settledSession.topic, reason: Reason(code: 5900, message: "User disconnected session"))
         }
         responder.onSessionDelete = {
             sessionDeleteExpectation.fulfill()
@@ -155,7 +155,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
-            let requestParams = SessionType.PayloadRequestParams(topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
+            let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
             self.proposer.client.request(params: requestParams) { result in
                 switch result {
                 case .success(let jsonRpcResponse):
@@ -168,10 +168,10 @@ final class ClientTests: XCTestCase {
             }
         }
         responder.onSessionRequest = {[unowned self]  sessionRequest in
-            XCTAssertEqual(sessionRequest.request.method, method)
-            let ethSendTrancastionParams = try! sessionRequest.request.params.get([EthSendTransaction].self)
+            XCTAssertEqual(sessionRequest.method, method)
+            let ethSendTrancastionParams = try! sessionRequest.params.get([EthSendTransaction].self)
             XCTAssertEqual(ethSendTrancastionParams, params)
-            let jsonrpcResponse = JSONRPCResponse<AnyCodable>(id: sessionRequest.request.id, result: AnyCodable(responseParams))
+            let jsonrpcResponse = JSONRPCResponse<AnyCodable>(id: sessionRequest.id, result: AnyCodable(responseParams))
             self.responder.client.respond(topic: sessionRequest.topic, response: .response(jsonrpcResponse))
             requestExpectation.fulfill()
         }
@@ -191,7 +191,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
-            let requestParams = SessionType.PayloadRequestParams(topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
+            let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
             self.proposer.client.request(params: requestParams) { result in
                 switch result {
                 case .success(_):
@@ -203,7 +203,7 @@ final class ClientTests: XCTestCase {
             }
         }
         responder.onSessionRequest = {[unowned self]  sessionRequest in
-            let jsonrpcErrorResponse = JSONRPCErrorResponse(id: sessionRequest.request.id, error: error)
+            let jsonrpcErrorResponse = JSONRPCErrorResponse(id: sessionRequest.id, error: error)
             self.responder.client.respond(topic: sessionRequest.topic, response: .error(jsonrpcErrorResponse))
         }
         waitForExpectations(timeout: defaultTimeout, handler: nil)
@@ -324,7 +324,7 @@ final class ClientTests: XCTestCase {
         let permissions = Session.Permissions.stub(notifications: ["type1"])
         let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         try! responder.client.pair(uri: uri)
-        let notificationParams = SessionType.NotificationParams(type: "type1", data: AnyCodable("notification_data"))
+        let notificationParams = Session.Notification(type: "type1", data: AnyCodable("notification_data"))
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
@@ -344,7 +344,7 @@ final class ClientTests: XCTestCase {
         let permissions = Session.Permissions.stub(notifications: ["type1"])
         let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         try! responder.client.pair(uri: uri)
-        let notificationParams = SessionType.NotificationParams(type: "type2", data: AnyCodable("notification_data"))
+        let notificationParams = Session.Notification(type: "type2", data: AnyCodable("notification_data"))
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
