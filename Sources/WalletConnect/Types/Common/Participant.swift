@@ -1,4 +1,3 @@
-// TODO: need different for pair and session
 struct Participant: Codable, Equatable {
     let publicKey: String
     let metadata: AppMetadata?
@@ -7,4 +6,13 @@ struct Participant: Codable, Equatable {
         self.publicKey = publicKey
         self.metadata = metadata
     }
+}
+
+struct PairingParticipant: Codable, Equatable {
+    let publicKey: String
+}
+
+struct SessionParticipant: Codable, Equatable {
+    let publicKey: String
+    let metadata: AppMetadata
 }

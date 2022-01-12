@@ -1,7 +1,6 @@
 import Foundation
 import Combine
 import WalletConnectUtils
-import CryptoKit
 
 final class PairingEngine {
     
@@ -73,12 +72,10 @@ final class PairingEngine {
             return nil
         }
         
-        let privateKey = crypto.makePrivateKey()
-        try! crypto.set(privateKey: privateKey) // TODO: Handle error
-        let publicKey = privateKey.publicKey.hexRepresentation
+        let publicKey = try! crypto.createX25519KeyPair()
         
         let relay = RelayProtocolOptions(protocol: "waku", params: nil)
-        let uri = WalletConnectURI(topic: topic, publicKey: publicKey, isController: isController, relay: relay)
+        let uri = WalletConnectURI(topic: topic, publicKey: publicKey.hexRepresentation, isController: isController, relay: relay)
         let pendingPairing = PairingSequence.buildProposed(uri: uri)
         
         sequencesStore.setSequence(pendingPairing)
@@ -96,13 +93,8 @@ final class PairingEngine {
             throw WalletConnectError.internal(.pairWithExistingPairingForbidden)
         }
         
-        let privateKey = crypto.makePrivateKey()
-        try? crypto.set(privateKey: privateKey) // TODO: Handle error
-        let selfPublicKey = privateKey.publicKey.hexRepresentation
-        
-        let agreementKeys = try! Crypto.generateAgreementKeys(
-            peerPublicKey: Data(hex: proposal.proposer.publicKey),
-            privateKey: privateKey)
+        let selfPublicKey = try! crypto.createX25519KeyPair()
+        let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposal.proposer.publicKey)
         
         let settledTopic = agreementKeys.derivedTopic()
         let pendingPairing = PairingSequence.buildResponded(proposal: proposal, agreementKeys: agreementKeys)
@@ -113,12 +105,11 @@ final class PairingEngine {
         wcSubscriber.setSubscription(topic: settledTopic)
         sequencesStore.setSequence(settledPairing)
         
-        try? crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
+        try? crypto.setAgreementSecret(agreementKeys, topic: settledTopic)
         
-        let selfParticipant = Participant(publicKey: selfPublicKey)
         let approveParams = PairingApproval(
             relay: proposal.relay,
-            responder: selfParticipant,
+            responder: PairingParticipant(publicKey: selfPublicKey.hexRepresentation),
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
             state: nil) // Should this be removed?
         let approvalPayload = WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
@@ -248,8 +239,8 @@ final class PairingEngine {
             return
         }
         let sessionProposal = payload.request.params
-        if let pairingAgreementKeys = crypto.getAgreementKeys(for: sessionProposal.signal.params.topic) {
-            try? crypto.set(agreementKeys: pairingAgreementKeys, topic: sessionProposal.topic)
+        if let pairingAgreementSecret = try? crypto.getAgreementSecret(for: sessionProposal.signal.params.topic) {
+            try? crypto.setAgreementSecret(pairingAgreementSecret, topic: sessionProposal.topic)
         }
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
         relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [weak self] error in
@@ -259,18 +250,15 @@ final class PairingEngine {
     
     private func handlePairingApprove(approveParams: PairingApproval, pendingPairingTopic: String, requestId: Int64) {
         logger.debug("Responder Client approved pairing on topic: \(pendingPairingTopic)")
-        guard let pendingPairing = try? sequencesStore.getSequence(forTopic: pendingPairingTopic), let pairingPending = pendingPairing.pending else {
+        guard let pairing = try? sequencesStore.getSequence(forTopic: pendingPairingTopic), let pendingPairing = pairing.pending else {
             return
         }
-        let selfPublicKey = Data(hex: pendingPairing.selfParticipant.publicKey)
-        let pubKey = try! Curve25519.KeyAgreement.PublicKey(rawRepresentation: selfPublicKey)
-        let privateKey = try! crypto.getPrivateKey(for: pubKey)!
-        let peerPublicKey = Data(hex: approveParams.responder.publicKey)
-        let agreementKeys = try! Crypto.generateAgreementKeys(peerPublicKey: peerPublicKey, privateKey: privateKey)
+        
+        let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: try! pairing.getPublicKey(), peerPublicKey: approveParams.responder.publicKey)
         
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
-        try? crypto.set(agreementKeys: agreementKeys, topic: settledTopic)
-        let proposal = pairingPending.proposal
+        try? crypto.setAgreementSecret(agreementKeys, topic: settledTopic)
+        let proposal = pendingPairing.proposal
         let settledPairing = PairingSequence.buildAcknowledged(approval: approveParams, proposal: proposal, agreementKeys: agreementKeys)
         
         sequencesStore.setSequence(settledPairing)
@@ -278,7 +266,6 @@ final class PairingEngine {
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
         
-        let pairing = Pairing(topic: settledPairing.topic, peer: nil) // FIXME: peer?
         guard let permissions = sessionPermissions[pendingPairingTopic] else {
             logger.debug("Cound not find permissions for pending topic: \(pendingPairingTopic)")
             return
@@ -293,7 +280,7 @@ final class PairingEngine {
             }
         }
         
-        onPairingApproved?(pairing, permissions, settledPairing.relay)
+        onPairingApproved?(Pairing(topic: settledPairing.topic, peer: nil), permissions, settledPairing.relay)
     }
     
     private func removeRespondedPendingPairings() {
@@ -316,7 +303,7 @@ final class PairingEngine {
     private func setupExpirationHandling() {
         sequencesStore.onSequenceExpiration = { [weak self] topic, publicKey in
             self?.crypto.deletePrivateKey(for: publicKey)
-            self?.crypto.deleteAgreementKeys(for: topic)
+            self?.crypto.deleteAgreementSecret(for: topic)
         }
     }
     

@@ -3,16 +3,6 @@ import XCTest
 import TestingUtils
 import WalletConnectUtils
 
-//fileprivate extension SessionType.Permissions {
-//    static func stub() -> SessionType.Permissions {
-//        SessionType.Permissions(
-//            blockchain: SessionType.Blockchain(chains: []),
-//            jsonrpc: SessionType.JSONRPC(methods: []),
-//            notifications: SessionType.Notifications(types: [])
-//        )
-//    }
-//}
-
 fileprivate extension SessionPermissions {
     static func stub() -> SessionPermissions {
         SessionPermissions(
@@ -31,14 +21,8 @@ fileprivate extension WCRequest {
     }
 }
 
-//fileprivate func deriveTopic(publicKey: String, privateKey: Crypto.X25519.PrivateKey) -> String {
-//    try! Crypto.X25519.generateAgreementKeys(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
-//}
-
-import CryptoKit
-
-func deriveTopic(publicKey: String, privateKey: Curve25519.KeyAgreement.PrivateKey) -> String {
-    try! Crypto.generateAgreementKeys(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
+func deriveTopic(publicKey: String, privateKey: AgreementPrivateKey) -> String {
+    try! Crypto.generateAgreementSecret(from: privateKey, peerPublicKey: publicKey).derivedTopic()
 }
 
 final class PairingEngineTests: XCTestCase {
@@ -110,7 +94,7 @@ final class PairingEngineTests: XCTestCase {
         XCTAssert(subscriberMock.didSubscribe(to: topicA), "Responder must subscribe to topic A to listen for approval request acknowledgement.")
         XCTAssert(subscriberMock.didSubscribe(to: topicB), "Responder must subscribe to topic B to settle the pairing sequence optimistically.")
         XCTAssert(cryptoMock.hasPrivateKey(for: approval.responder.publicKey), "Responder must store the private key matching the public key sent to its peer.")
-        XCTAssert(cryptoMock.hasAgreementKeys(for: topicB), "Responder must derive and store the shared secret used to encrypt communication over topic B.")
+        XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must derive and store the shared secret used to encrypt communication over topic B.")
         XCTAssert(storageMock.hasPendingRespondedPairing(on: topicA), "The engine must store a pending pairing on responded state.")
         XCTAssert(storageMock.hasPreSettledPairing(on: topicB), "The engine must optimistically store a settled pairing on pre-settled state.")
         XCTAssertEqual(publishTopic, topicA, "The approval request must be published over topic A.")
@@ -151,14 +135,14 @@ final class PairingEngineTests: XCTestCase {
         setupEngine(isController: false)
         
         var approvedPairing: Pairing?
-        let responderPubKey = Curve25519.KeyAgreement.PrivateKey().publicKey.rawRepresentation.toHexString()
+        let responderPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let topicB = deriveTopic(publicKey: responderPubKey, privateKey: cryptoMock.privateKeyStub)
         let uri = engine.propose(permissions: SessionPermissions.stub())!
         let topicA = uri.topic
         
         let approveParams = PairingApproval(
             relay: RelayProtocolOptions(protocol: "", params: nil),
-            responder: Participant(publicKey: responderPubKey),
+            responder: PairingParticipant(publicKey: responderPubKey),
             expiry: Time.day,
             state: nil)
         let request = WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
@@ -172,7 +156,7 @@ final class PairingEngineTests: XCTestCase {
         XCTAssert(subscriberMock.didUnsubscribe(to: topicA), "Proposer must unsubscribe from topic A after approval acknowledgement.")
         XCTAssert(subscriberMock.didSubscribe(to: topicB), "Proposer must subscribe to topic B to settle for communication with the peer.")
         XCTAssert(cryptoMock.hasPrivateKey(for: uri.publicKey), "Proposer must keep its private key after settlement.")
-        XCTAssert(cryptoMock.hasAgreementKeys(for: topicB), "Proposer must derive and store the shared secret used to communicate over topic B.")
+        XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Proposer must derive and store the shared secret used to communicate over topic B.")
         XCTAssert(storageMock.hasAcknowledgedPairing(on: topicB), "The acknowledged pairing must be settled on topic B.")
         XCTAssertFalse(storageMock.hasSequence(forTopic: topicA), "The engine must clean any stored pairing on topic A.")
         XCTAssertNotNil(approvedPairing, "The engine should callback the approved pairing after settlement.")

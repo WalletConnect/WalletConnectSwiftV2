@@ -1,40 +1,15 @@
-// 
-
 import Foundation
-import CryptoKit
-
-struct AgreementKeys: Equatable {
-    let sharedSecret: Data
-    let publicKey: Curve25519.KeyAgreement.PublicKey
-    
-    func derivedTopic() -> String {
-        sharedSecret.sha256().toHexString()
-    }
-}
-
-extension Curve25519.KeyAgreement.PublicKey {
-    
-    var hexRepresentation: String {
-        rawRepresentation.toHexString()
-    }
-}
-
-extension Curve25519.KeyAgreement.PublicKey: Equatable {
-    
-    public static func == (lhs: Curve25519.KeyAgreement.PublicKey, rhs: Curve25519.KeyAgreement.PublicKey) -> Bool {
-        lhs.rawRepresentation == rhs.rawRepresentation
-    }
-}
 
 // TODO: Come up with better naming conventions
 protocol CryptoStorageProtocol {
-    func makePrivateKey() -> Curve25519.KeyAgreement.PrivateKey
-    func set(privateKey: Curve25519.KeyAgreement.PrivateKey) throws
-    func getPrivateKey(for publicKey: Curve25519.KeyAgreement.PublicKey) throws -> Curve25519.KeyAgreement.PrivateKey?
-    func set(agreementKeys: AgreementKeys, topic: String) throws
-    func getAgreementKeys(for topic: String) -> AgreementKeys?
+    func createX25519KeyPair() throws -> AgreementPublicKey
+    func setPrivateKey(_ privateKey: AgreementPrivateKey) throws
+    func setAgreementSecret(_ agreementSecret: AgreementSecret, topic: String) throws
+    func getPrivateKey(for publicKey: AgreementPublicKey) throws -> AgreementPrivateKey?
+    func getAgreementSecret(for topic: String) throws -> AgreementSecret?
     func deletePrivateKey(for publicKey: String)
-    func deleteAgreementKeys(for topic: String)
+    func deleteAgreementSecret(for topic: String)
+    func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret
 }
 
 class Crypto: CryptoStorageProtocol {
@@ -45,32 +20,38 @@ class Crypto: CryptoStorageProtocol {
         self.keychain = keychain
     }
     
-    func makePrivateKey() -> Curve25519.KeyAgreement.PrivateKey {
-        Curve25519.KeyAgreement.PrivateKey() // TODO: Store private key when creating
+    func createX25519KeyPair() throws -> AgreementPublicKey {
+        let privateKey = AgreementPrivateKey()
+        try setPrivateKey(privateKey)
+        return privateKey.publicKey
     }
     
-    func set(privateKey: Curve25519.KeyAgreement.PrivateKey) throws {
-        try keychain.add(privateKey.rawRepresentation, forKey: privateKey.publicKey.rawRepresentation.toHexString())
+    func setPrivateKey(_ privateKey: AgreementPrivateKey) throws {
+        try keychain.add(privateKey, forKey: privateKey.publicKey.hexRepresentation)
     }
-
-    func getPrivateKey(for publicKey: Curve25519.KeyAgreement.PublicKey) throws -> Curve25519.KeyAgreement.PrivateKey? {
-        guard let privateKeyData = try? keychain.read(key: publicKey.rawRepresentation.toHexString()) as Data else {
+    
+    func setAgreementSecret(_ agreementSecret: AgreementSecret, topic: String) throws {
+        try keychain.add(agreementSecret, forKey: topic)
+    }
+    
+    func getPrivateKey(for publicKey: AgreementPublicKey) throws -> AgreementPrivateKey? {
+        do {
+            return try keychain.read(key: publicKey.hexRepresentation) as AgreementPrivateKey
+        } catch let error where (error as? KeychainError)?.status == errSecItemNotFound {
             return nil
+        } catch {
+            throw error
         }
-        return try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: privateKeyData)
     }
     
-    func set(agreementKeys: AgreementKeys, topic: String) throws {
-        let agreement = agreementKeys.sharedSecret + agreementKeys.publicKey.rawRepresentation
-        try keychain.add(agreement, forKey: topic)
-    }
-    
-    func getAgreementKeys(for topic: String) -> AgreementKeys? {
-        guard let agreement = try? keychain.read(key: topic) as Data else {
+    func getAgreementSecret(for topic: String) throws -> AgreementSecret? {
+        do {
+            return try keychain.read(key: topic) as AgreementSecret
+        } catch let error where (error as? KeychainError)?.status == errSecItemNotFound {
             return nil
+        } catch {
+            throw error
         }
-        let (sharedSecret, publicKey) = split(concatinatedAgreementKeys: agreement)
-        return AgreementKeys(sharedSecret: sharedSecret, publicKey: try! Curve25519.KeyAgreement.PublicKey(rawRepresentation: publicKey))
     }
     
     func deletePrivateKey(for publicKey: String) {
@@ -81,7 +62,7 @@ class Crypto: CryptoStorageProtocol {
         }
     }
     
-    func deleteAgreementKeys(for topic: String) {
+    func deleteAgreementSecret(for topic: String) {
         do {
             try keychain.delete(key: topic)
         } catch {
@@ -89,19 +70,18 @@ class Crypto: CryptoStorageProtocol {
         }
     }
     
-    private func split(concatinatedAgreementKeys: Data) -> (Data, Data) {
-        let sharedSecret = concatinatedAgreementKeys.subdata(in: 0..<32)
-        let publicKey = concatinatedAgreementKeys.subdata(in: 32..<64)
-        return (sharedSecret, publicKey)
+    func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret {
+        guard let privateKey = try getPrivateKey(for: selfPublicKey) else {
+            print("Key Agreement Error: Private key not found for public key: \(selfPublicKey.hexRepresentation)")
+            throw WalletConnectError.internal(.keyNotFound)
+        }
+        return try Crypto.generateAgreementSecret(from: privateKey, peerPublicKey: hexRepresentation)
     }
-}
-
-extension Crypto {
     
-    static func generateAgreementKeys(peerPublicKey: Data, privateKey: Curve25519.KeyAgreement.PrivateKey, sharedInfo: Data = Data()) throws -> AgreementKeys {
-        let peerPublicKey = try Curve25519.KeyAgreement.PublicKey(rawRepresentation: peerPublicKey)
+    static func generateAgreementSecret(from privateKey: AgreementPrivateKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret {
+        let peerPublicKey = try AgreementPublicKey(rawRepresentation: Data(hex: hexRepresentation))
         let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: peerPublicKey)
-        let rawSharedSecret = sharedSecret.withUnsafeBytes { return Data(Array($0)) }
-        return AgreementKeys(sharedSecret: rawSharedSecret, publicKey: privateKey.publicKey)
+        let rawSecret = sharedSecret.withUnsafeBytes { return Data(Array($0)) }
+        return AgreementSecret(sharedSecret: rawSecret, publicKey: privateKey.publicKey)
     }
 }

@@ -12,6 +12,10 @@ struct SessionSequence: ExpirableSequence {
         selfParticipant.publicKey
     }
     
+    func getPublicKey() throws -> AgreementPublicKey {
+        try AgreementPublicKey(rawRepresentation: Data(hex: selfParticipant.publicKey))
+    }
+    
     var pending: Pending? {
         get {
             sequenceState.left
@@ -130,7 +134,7 @@ extension SessionSequence {
         )
     }
     
-    static func buildResponded(proposal: SessionProposal, agreementKeys: AgreementKeys, metadata: AppMetadata) -> SessionSequence {
+    static func buildResponded(proposal: SessionProposal, agreementKeys: AgreementSecret, metadata: AppMetadata) -> SessionSequence {
         SessionSequence(
             topic: proposal.topic,
             relay: proposal.relay,
@@ -144,7 +148,7 @@ extension SessionSequence {
         )
     }
     
-    static func buildPreSettled(proposal: SessionProposal, agreementKeys: AgreementKeys, metadata: AppMetadata, accounts: Set<String>) -> SessionSequence {
+    static func buildPreSettled(proposal: SessionProposal, agreementKeys: AgreementSecret, metadata: AppMetadata, accounts: Set<String>) -> SessionSequence {
         let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : agreementKeys.publicKey.hexRepresentation
         return SessionSequence(
             topic: agreementKeys.derivedTopic(),
@@ -164,7 +168,7 @@ extension SessionSequence {
         )
     }
     
-    static func buildAcknowledged(approval approveParams: SessionType.ApproveParams, proposal: SessionProposal, agreementKeys: AgreementKeys, metadata: AppMetadata) -> SessionSequence {
+    static func buildAcknowledged(approval approveParams: SessionType.ApproveParams, proposal: SessionProposal, agreementKeys: AgreementSecret, metadata: AppMetadata) -> SessionSequence {
         let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : approveParams.responder.publicKey
         return SessionSequence(
             topic: agreementKeys.derivedTopic(),
