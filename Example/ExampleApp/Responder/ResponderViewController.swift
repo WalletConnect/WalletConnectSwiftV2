@@ -76,15 +76,15 @@ final class ResponderViewController: UIViewController {
         navigationController?.pushViewController(vc, animated: true)
     }
     
-    private func showSessionRequest(_ sessionRequest: SessionRequest) {
+    private func showSessionRequest(_ sessionRequest: Request) {
         let requestVC = RequestViewController(sessionRequest)
         requestVC.onSign = { [weak self] in
             let result = "0xa3f20717a250c2b0b729b7e5becbff67fdaef7e0699da4de7ca5895b02a170a12d887fd3b17bfdce3481f10bea41f45ba9f709d39ce8325427b57afcfc994cee1b"
-            let response = JSONRPCResponse<AnyCodable>(id: sessionRequest.request.id, result: AnyCodable(result))
+            let response = JSONRPCResponse<AnyCodable>(id: sessionRequest.id, result: AnyCodable(result))
             self?.client.respond(topic: sessionRequest.topic, response: .response(response))
         }
         requestVC.onReject = { [weak self] in
-            self?.client.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.request.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
+            self?.client.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
         }
         present(requestVC, animated: true)
     }
@@ -115,7 +115,7 @@ extension ResponderViewController: UITableViewDataSource, UITableViewDelegate {
         if editingStyle == .delete {
             let item = sessionItems[indexPath.row]
 //            let deleteParams = SessionType.DeleteParams(topic: item.topic, reason: SessionType.Reason(code: 0, message: "disconnect"))
-            client.disconnect(topic: item.topic, reason: SessionType.Reason(code: 0, message: "disconnect"))
+            client.disconnect(topic: item.topic, reason: Reason(code: 0, message: "disconnect"))
             sessionItems.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .automatic)
         }
@@ -155,7 +155,7 @@ extension ResponderViewController: SessionViewControllerDelegate {
         print("did reject session")
         let proposal = currentProposal!
         currentProposal = nil
-        client.reject(proposal: proposal, reason: SessionType.Reason(code: 0, message: "reject"))
+        client.reject(proposal: proposal, reason: Reason(code: 0, message: "reject"))
     }
 }
 
@@ -181,7 +181,7 @@ extension ResponderViewController: WalletConnectClientDelegate {
         reloadActiveSessions()
     }
     
-    func didReceive(sessionRequest: SessionRequest) {
+    func didReceive(sessionRequest: Request) {
         DispatchQueue.main.async { [weak self] in
             self?.showSessionRequest(sessionRequest)
         }
@@ -189,7 +189,7 @@ extension ResponderViewController: WalletConnectClientDelegate {
         
     }
     
-    func didReceive(notification: SessionNotification, sessionTopic: String) {
+    func didReceive(notification: Session.Notification, sessionTopic: String) {
 
     }
 
@@ -201,7 +201,7 @@ extension ResponderViewController: WalletConnectClientDelegate {
 
     }
     
-    func didDelete(sessionTopic: String, reason: SessionType.Reason) {
+    func didDelete(sessionTopic: String, reason: Reason) {
         reloadActiveSessions()
     }
     

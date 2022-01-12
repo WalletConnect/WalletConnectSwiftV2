@@ -56,16 +56,13 @@ final class ProposerViewController: UIViewController {
     @objc
     private func connect() {
         print("[PROPOSER] Connecting to a pairing...")
-        let connectParams = ConnectParams(
-            permissions: Session.Permissions(
-                blockchains: ["a chain"],
-                methods: ["a method"],
-                notifications: []
-            )
+        let permissions = Session.Permissions(
+            blockchains: ["a chain"],
+            methods: ["a method"],
+            notifications: []
         )
-        
         do {
-            if let uri = try client.connect(params: connectParams) {
+            if let uri = try client.connect(sessionPermissions: permissions) {
                 showQRCode(uriString: uri)
             }
         } catch {
@@ -131,11 +128,11 @@ extension ProposerViewController: WalletConnectClientDelegate {
         print("[PROPOSER] WC: Did receive session proposal")
     }
     
-    func didReceive(sessionRequest: SessionRequest) {
+    func didReceive(sessionRequest: Request) {
         print("[PROPOSER] WC: Did receive session request")
     }
 
-    func didReceive(notification: SessionNotification, sessionTopic: String) {
+    func didReceive(notification: Session.Notification, sessionTopic: String) {
 
     }
 
@@ -151,7 +148,7 @@ extension ProposerViewController: WalletConnectClientDelegate {
 
     }
 
-    func didDelete(sessionTopic: String, reason: SessionType.Reason) {
+    func didDelete(sessionTopic: String, reason: Reason) {
 
     }
 
@@ -178,7 +175,7 @@ extension ProposerViewController: WalletConnectClientDelegate {
         }
     }
     
-    func didReject(pendingSessionTopic: String, reason: SessionType.Reason) {
+    func didReject(pendingSessionTopic: String, reason: Reason) {
         print("[PROPOSER] WC: Did reject session")
     }
 }

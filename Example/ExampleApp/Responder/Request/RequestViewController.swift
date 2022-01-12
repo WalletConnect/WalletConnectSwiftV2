@@ -6,11 +6,11 @@ import WalletConnect
 class RequestViewController: UIViewController {
     var onSign: (()->())?
     var onReject: (()->())?
-    let sessionRequest: SessionRequest
+    let sessionRequest: Request
     private let requestView = {
         RequestView()
     }()
-    init(_ sessionRequest: SessionRequest) {
+    init(_ sessionRequest: Request) {
         self.sessionRequest = sessionRequest
         super.init(nibName: nil, bundle: nil)
     }
@@ -23,11 +23,11 @@ class RequestViewController: UIViewController {
         super.viewDidLoad()
         requestView.approveButton.addTarget(self, action: #selector(signAction), for: .touchUpInside)
         requestView.rejectButton.addTarget(self, action: #selector(rejectAction), for: .touchUpInside)
-        let method = sessionRequest.request.method
+        let method = sessionRequest.method
         requestView.nameLabel.text = method
         var paramsDescription = ""
         if method == "personal_sign" {
-            paramsDescription = try! sessionRequest.request.params.get([String].self).description
+            paramsDescription = try! sessionRequest.params.get([String].self).description
         }
         requestView.descriptionLabel.text = paramsDescription
     }
