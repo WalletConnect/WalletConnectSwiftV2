@@ -54,19 +54,6 @@ final class SessionEngineTests: XCTestCase {
         storageMock = SessionSequenceStorageMock()
         cryptoMock = CryptoStorageProtocolMock()
         topicGenerator = TopicGenerator()
-        
-        metadata = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
-        isController = false
-        let logger = ConsoleLoggerMock()
-        engine = SessionEngine(
-            relay: relayMock,
-            crypto: cryptoMock,
-            subscriber: subscriberMock,
-            sequencesStore: storageMock,
-            isController: isController,
-            metadata: metadata,
-            logger: logger,
-            topicGenerator: topicGenerator.getTopic)
     }
 
     override func tearDown() {
@@ -78,7 +65,24 @@ final class SessionEngineTests: XCTestCase {
         engine = nil
     }
     
+    func setupEngine(isController: Bool) {
+        metadata = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
+        self.isController = isController
+        let logger = ConsoleLoggerMock()
+        engine = SessionEngine(
+            relay: relayMock,
+            crypto: cryptoMock,
+            subscriber: subscriberMock,
+            sequencesStore: storageMock,
+            isController: isController,
+            metadata: metadata,
+            logger: logger,
+            topicGenerator: topicGenerator.getTopic)
+    }
+    
     func testPropose() {
+        setupEngine(isController: false)
+        
         let pairing = Pairing.stub()
         
         let topicB = pairing.topic
@@ -104,6 +108,7 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testProposeResponseFailure() {
+        setupEngine(isController: false)
         let pairing = Pairing.stub()
         
         let topicB = pairing.topic
@@ -133,6 +138,7 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testApprove() {
+        setupEngine(isController: true)
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let topicB = String.generateTopic()!
         let topicC = String.generateTopic()!
@@ -163,6 +169,8 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testApprovalAcknowledgementSuccess() {
+        setupEngine(isController: true)
+        
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let topicB = String.generateTopic()!
         let topicC = String.generateTopic()!
@@ -199,6 +207,8 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testApprovalAcknowledgementFailure() {
+        setupEngine(isController: true)
+        
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let selfPubKey = cryptoMock.privateKeyStub.publicKey.hexRepresentation
         let topicB = String.generateTopic()!
@@ -241,6 +251,7 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testReceiveApprovalResponse() {
+        setupEngine(isController: false)
 
         var approvedSession: Session?
 
@@ -278,4 +289,18 @@ final class SessionEngineTests: XCTestCase {
         XCTAssertNotNil(approvedSession)
         XCTAssertEqual(approvedSession?.topic, topicD)
     }
+    
+    // MARK: - Update call tests
+    
+//    func testUpdate() {
+//        setupEngine(isController: true)
+//    }
+//    
+//    func testUpdateErrorIfNonController() {
+//        setupEngine(isController: false)
+//    }
+//    
+//    func testUpdateErrorSequenceNotFound() {
+//        setupEngine(isController: true)
+//    }
 }
