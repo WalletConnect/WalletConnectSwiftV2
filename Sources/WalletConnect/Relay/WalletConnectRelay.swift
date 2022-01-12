@@ -12,7 +12,6 @@ struct WCResponse {
 
 protocol WalletConnectRelaying: AnyObject {
     var onResponse: ((WCResponse) -> Void)? {get set}
-    var onPairingApproveResponse: ((String) -> Void)? {get set}
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
     func request(topic: String, payload: WCRequest, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->()))
@@ -24,7 +23,6 @@ protocol WalletConnectRelaying: AnyObject {
 class WalletConnectRelay: WalletConnectRelaying {
     
     var onResponse: ((WCResponse) -> Void)?
-    var onPairingApproveResponse: ((String) -> Void)?
     
     private var networkRelayer: NetworkRelaying
     private let jsonRpcSerialiser: JSONRPCSerialising
@@ -75,17 +73,6 @@ class WalletConnectRelay: WalletConnectRelaying {
                             self.logger.debug("WC Relay - received response on topic: \(topic)")
                             switch response {
                             case .response(let response):
-                                // FIXME: This is a workaround to remove the completion block from the engine
-                                switch payload.method {
-                                case .pairingApprove:
-                                    self.onPairingApproveResponse?(topic)
-                                case .pairingPing:
-                                    break
-                                case .pairingUpdate:
-                                    break
-                                default:
-                                    break
-                                }
                                 completion(.success(response))
                             case .error(let error):
                                 self.logger.debug("Request error: \(error)")
