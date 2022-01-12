@@ -107,7 +107,7 @@ final class PairingEngine {
         
         try? crypto.setAgreementSecret(agreementKeys, topic: settledTopic)
         
-        let approveParams = PairingApproval(
+        let approveParams = PairingType.ApprovalParams(
             relay: proposal.relay,
             responder: PairingParticipant(publicKey: selfPublicKey.hexRepresentation),
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
@@ -248,7 +248,7 @@ final class PairingEngine {
         }
     }
     
-    private func handlePairingApprove(approveParams: PairingApproval, pendingPairingTopic: String, requestId: Int64) {
+    private func handlePairingApprove(approveParams: PairingType.ApprovalParams, pendingPairingTopic: String, requestId: Int64) {
         logger.debug("Responder Client approved pairing on topic: \(pendingPairingTopic)")
         guard let pairing = try? sequencesStore.getSequence(forTopic: pendingPairingTopic), let pendingPairing = pairing.pending else {
             return

@@ -15,7 +15,7 @@ fileprivate extension SessionPermissions {
 
 fileprivate extension WCRequest {
     
-    var approveParams: PairingApproval? {
+    var approveParams: PairingType.ApprovalParams? {
         guard case .pairingApprove(let approveParams) = self.params else { return nil }
         return approveParams
     }
@@ -140,7 +140,7 @@ final class PairingEngineTests: XCTestCase {
         let uri = engine.propose(permissions: SessionPermissions.stub())!
         let topicA = uri.topic
         
-        let approveParams = PairingApproval(
+        let approveParams = PairingType.ApprovalParams(
             relay: RelayProtocolOptions(protocol: "", params: nil),
             responder: PairingParticipant(publicKey: responderPubKey),
             expiry: Time.day,
