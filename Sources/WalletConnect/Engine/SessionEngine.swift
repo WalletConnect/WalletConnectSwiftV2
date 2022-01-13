@@ -205,23 +205,17 @@ final class SessionEngine {
         }
     }
     
-    func update(topic: String, accounts: Set<String>) {
-        guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
-            logger.debug("Could not find session for topic \(topic)")
-            return
+    // TODO: Validate accounts
+    func update(topic: String, accounts: Set<String>) throws {
+        var session = try sequencesStore.getSequence(forTopic: topic)
+        if !isController || session.settled?.status != .acknowledged {
+            throw WalletConnectError.unauthrorized(.unauthorizedUpdateRequest)
         }
         session.update(accounts)
+        sequencesStore.setSequence(session)
         let params = WCRequest.Params.sessionUpdate(SessionType.UpdateParams(state: SessionState(accounts: accounts)))
         let request = WCRequest(method: .sessionUpdate, params: params)
-        relayer.request(topic: topic, payload: request) { [unowned self] result in
-            switch result {
-            case .success(_):
-                sequencesStore.setSequence(session)
-                onSessionUpdate?(topic, accounts)
-            case .failure(_):
-                break
-            }
-        }
+        relayer.request(topic: topic, payload: request)
     }
     
     func upgrade(topic: String, permissions: Session.Permissions) {
@@ -566,6 +560,18 @@ final class SessionEngine {
             crypto.deleteAgreementSecret(for: topic)
             crypto.deleteAgreementSecret(for: settledTopic)
             crypto.deletePrivateKey(for: pendingSession.publicKey)
+        }
+    }
+    
+    private func handleUpdateResponse(topic: String, result: Result<JSONRPCResponse<AnyCodable>, Error>) {
+        guard let session = try? sequencesStore.getSequence(forTopic: topic), let accounts = session.settled?.state.accounts else {
+            return
+        }
+        switch result {
+        case .success:
+            onSessionUpdate?(topic, accounts)
+        case .failure:
+            logger.error("Peer failed to update state.")
         }
     }
 }

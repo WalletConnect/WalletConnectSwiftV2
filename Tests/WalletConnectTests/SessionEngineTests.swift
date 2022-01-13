@@ -292,15 +292,88 @@ final class SessionEngineTests: XCTestCase {
     
     // MARK: - Update call tests
     
-//    func testUpdate() {
-//        setupEngine(isController: true)
-//    }
-//    
-//    func testUpdateErrorIfNonController() {
-//        setupEngine(isController: false)
-//    }
-//    
-//    func testUpdateErrorSequenceNotFound() {
-//        setupEngine(isController: true)
-//    }
+    func testUpdate() throws {
+        setupEngine(isController: true)
+        let session = SessionSequence.stubSettled()
+        storageMock.setSequence(session)
+        try engine.update(topic: session.topic, accounts: [""]) // TODO: Need account validation
+        XCTAssertTrue(relayMock.didCallRequest)
+    }
+    
+    func testUpdateErrorIfNonController() {
+        setupEngine(isController: false)
+        let session = SessionSequence.stubSettled()
+        storageMock.setSequence(session)
+        XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: []), "Update must fail if called by a non-controller.")
+    }
+    
+    func testUpdateErrorSessionNotFound() {
+        setupEngine(isController: true)
+        XCTAssertThrowsError(try engine.update(topic: "", accounts: []), "Update must fail if there is no session matching the target topic.")
+    }
+    
+    func testUpdateErrorSessionNotSettled() {
+        setupEngine(isController: true)
+        let session = SessionSequence.stubPreSettled()
+        storageMock.setSequence(session)
+        XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: []), "Update must fail if session is not on settled state.")
+    }
+    
+    // TODO: Update acknowledgement tests
+}
+
+extension SessionSequence {
+    
+    static func stubPreSettled() -> SessionSequence {
+        SessionSequence(
+            topic: String.generateTopic()!,
+            relay: RelayProtocolOptions.stub(),
+            selfParticipant: Participant.stub(),
+            expiryDate: Date.distantFuture,
+            settledState: Settled(
+                peer: Participant.stub(),
+                permissions: SessionPermissions.stub(),
+                state: SessionState(accounts: []),
+                status: .preSettled
+            )
+        )
+    }
+    
+    static func stubSettled() -> SessionSequence {
+        SessionSequence(
+            topic: String.generateTopic()!,
+            relay: RelayProtocolOptions.stub(),
+            selfParticipant: Participant.stub(),
+            expiryDate: Date.distantFuture,
+            settledState: Settled(
+                peer: Participant.stub(),
+                permissions: SessionPermissions.stub(),
+                state: SessionState(accounts: []),
+                status: .acknowledged
+            )
+        )
+    }
+}
+
+extension RelayProtocolOptions {
+    static func stub() -> RelayProtocolOptions {
+        RelayProtocolOptions(protocol: "", params: nil)
+    }
+}
+
+extension Participant {
+    static func stub() -> Participant {
+        Participant(publicKey: AgreementPrivateKey().publicKey.hexRepresentation, metadata: AppMetadata.stub())
+    }
+}
+
+extension AppMetadata {
+    static func stub() -> AppMetadata {
+        AppMetadata(
+            name: "Wallet Connect",
+            description: "A protocol to connect blockchain wallets to dapps.",
+            url: "https://walletconnect.com/",
+            icons: []
+        )
+    }
 }

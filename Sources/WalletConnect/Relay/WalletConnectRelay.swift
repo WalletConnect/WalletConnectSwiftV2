@@ -15,10 +15,16 @@ protocol WalletConnectRelaying: AnyObject {
     var onPairingApproveResponse: ((String) -> Void)? {get set}
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
-    func request(topic: String, payload: WCRequest, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->()))
+    func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
     func respond(topic: String, response: JsonRpcResponseTypes, completion: @escaping ((Error?)->()))
     func subscribe(topic: String)
     func unsubscribe(topic: String)
+}
+
+extension WalletConnectRelaying {
+    func request(topic: String, payload: WCRequest) {
+        request(topic: topic, payload: payload, completion: nil)
+    }
 }
 
 class WalletConnectRelay: WalletConnectRelaying {
@@ -58,7 +64,7 @@ class WalletConnectRelay: WalletConnectRelaying {
         setUpPublishers()
     }
 
-    func request(topic: String, payload: WCRequest, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())) {
+    func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?) {
         do {
             try jsonRpcHistory.set(topic: topic, request: payload)
             let message = try jsonRpcSerialiser.serialise(topic: topic, encodable: payload)
@@ -86,10 +92,10 @@ class WalletConnectRelay: WalletConnectRelaying {
                                 default:
                                     break
                                 }
-                                completion(.success(response))
+                                completion?(.success(response))
                             case .error(let error):
                                 self.logger.debug("Request error: \(error)")
-                                completion(.failure(error))
+                                completion?(.failure(error))
                             }
                         }
                 }
