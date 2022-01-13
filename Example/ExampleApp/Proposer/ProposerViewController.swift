@@ -11,9 +11,9 @@ final class ProposerViewController: UIViewController {
             icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])
         return WalletConnectClient(
             metadata: metadata,
-            projectId: "",
-            isController: false,
-            relayHost: "relay.walletconnect.org",
+            projectId: "52af113ee0c1e1a20f4995730196c13e",
+            isController: true,
+            relayHost: "relay.dev.walletconnect.com",
             clientName: "proposer"
         )
     }()
