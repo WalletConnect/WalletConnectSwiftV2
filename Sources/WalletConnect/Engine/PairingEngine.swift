@@ -41,14 +41,9 @@ final class PairingEngine {
         removeRespondedPendingPairings()
         restoreSubscriptions()
         
-        relayer.onPairingApproveResponse = { [weak self] in
-            try? self?.acknowledgeApproval(pendingTopic: $0)
+        relayer.onResponse = { [weak self] in
+            self?.handleReponse($0)
         }
-        
-        // TODO: Bind on response
-//        relayer.onResponse = { [weak self] in
-//            print($0.topic)
-//        }
     }
     
     func hasPairing(for topic: String) -> Bool {
@@ -316,6 +311,15 @@ final class PairingEngine {
             } else {
                 self?.logger.debug("successfully responded with error")
             }
+        }
+    }
+    
+    private func handleReponse(_ response: WCResponse) {
+        switch response.requestParams {
+        case .pairingApprove:
+            try? acknowledgeApproval(pendingTopic: response.topic)
+        default:
+            break
         }
     }
 }
