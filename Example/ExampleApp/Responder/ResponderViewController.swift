@@ -254,10 +254,8 @@ extension ResponderViewController: WalletConnectClientDelegate {
             let (r, s, v) = (signedTx.r, signedTx.s, signedTx.v)
             let result = r.hex() + s.hex().dropFirst(2) + String(v.quantity, radix: 16)
             return AnyCodable(result)
-        } else {
-            print("TODO")
         }
-        fatalError()
+        fatalError("not implemented")
     }
     
     func signHash(_ message: String) -> Bytes {
@@ -268,7 +266,6 @@ extension ResponderViewController: WalletConnectClientDelegate {
         let dataToHash: Bytes = .init(hex: prefixedMessageData.toHexString())
         return SHA3(variant: .keccak256).calculate(for: dataToHash)
     }
-
 }
     
 extension EthereumTransaction {
