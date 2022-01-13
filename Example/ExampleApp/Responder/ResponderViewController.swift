@@ -228,8 +228,6 @@ extension ResponderViewController: WalletConnectClientDelegate {
         }
     }
     
-
-    
     func signEth(request: Request) -> AnyCodable {
         let method = request.method
         if method == "personal_sign" {
