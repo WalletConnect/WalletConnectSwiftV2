@@ -232,8 +232,7 @@ extension ResponderViewController: WalletConnectClientDelegate {
     
     func signEth(request: Request) -> AnyCodable {
         let method = request.method
-        if method == "eth_sendTransaction" {
-        } else if method == "personal_sign" {
+        if method == "personal_sign" {
             let params = try! request.params.get([String].self)
             let messageToSign = params[0]
             let signHash = signHash(messageToSign)
@@ -246,11 +245,17 @@ extension ResponderViewController: WalletConnectClientDelegate {
             let messageToSign = params[1]
             let signHash = signHash(messageToSign)
             let (v, r, s) = try! self.privateKey.sign(hash: signHash)
-            let result = r.toHexString() + s.toHexString() + String(v + 27, radix: 16)
+            let result = "0x" + r.toHexString() + s.toHexString() + String(v + 27, radix: 16)
             return AnyCodable(result)
-            
         } else if method == "eth_sendTransaction" {
-
+            let params = try! request.params.get([EthereumTransaction].self)
+            var transaction = params[0]
+            transaction.gas = EthereumQuantity(quantity: BigUInt("1234"))
+            print(transaction.description)
+            let signedTx = try! transaction.sign(with: self.privateKey, chainId: 4)
+            let (r, s, v) = (signedTx.r, signedTx.s, signedTx.v)
+            let result = r.hex() + s.hex().dropFirst(2) + String(v.quantity, radix: 16)
+            return AnyCodable(result)
         } else {
             print("TODO")
         }
@@ -265,33 +270,19 @@ extension ResponderViewController: WalletConnectClientDelegate {
         let dataToHash: Bytes = .init(hex: prefixedMessageData.toHexString())
         return SHA3(variant: .keccak256).calculate(for: dataToHash)
     }
-}
 
-//struct EthSignTypedData: Codable {
-//    case address(String)
-//    case message(Payload)
-//}
-//
-//extension EthSignTypedData {
-//    struct Payload: Codable {
-//        let types: Types
-//        let primaryType: String
-//        let domain: Domain
-//        let message: Message
-//    }
-//
-//    struct Types: Codable {
-//        let EIP712Domain: [EIP712Domain]
-//        let Person: Person
-//        let Mail: Mail
-//    }
-//
-//    struct EIP712Domain: Codable {
-//        let name: String
-//        let type: String
-//    }
-//
-//    struct Domain: Codable {
-//
-//    }
-//}
+}
+    
+extension EthereumTransaction {
+    var description: String {
+        return """
+        from: \(String(describing: from!.hex(eip55: true)))
+        to: \(String(describing: to!.hex(eip55: true))),
+        value: \(String(describing: value!.hex())),
+        gasPrice: \(String(describing: gasPrice?.hex())),
+        gas: \(String(describing: gas?.hex())),
+        data: \(data.hex()),
+        nonce: \(String(describing: nonce?.hex()))
+        """
+    }
+}
