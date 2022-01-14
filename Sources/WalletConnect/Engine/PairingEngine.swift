@@ -41,7 +41,7 @@ final class PairingEngine {
         removeRespondedPendingPairings()
         restoreSubscriptions()
         
-        relayer.onResponse = { [weak self] in
+        relayer.onPairingResponse = { [weak self] in
             self?.handleReponse($0)
         }
     }
