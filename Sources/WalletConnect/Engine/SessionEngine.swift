@@ -22,6 +22,7 @@ final class SessionEngine {
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
     private let topicInitializer: () -> String?
+    let sessionPayloadsJsonRpcHistory: WalletConnectUtils.JsonRpcHistory<AnyCodable>
 
     init(relay: WalletConnectRelaying,
          crypto: CryptoStorageProtocol,
@@ -30,7 +31,8 @@ final class SessionEngine {
          isController: Bool,
          metadata: AppMetadata,
          logger: ConsoleLogging,
-         topicGenerator: @escaping () -> String? = String.generateTopic) {
+         topicGenerator: @escaping () -> String? = String.generateTopic,
+         sessionPayloadsJsonRpcHistory: WalletConnectUtils.JsonRpcHistory<AnyCodable>) {
         self.relayer = relay
         self.crypto = crypto
         self.metadata = metadata
@@ -39,6 +41,7 @@ final class SessionEngine {
         self.isController = isController
         self.logger = logger
         self.topicInitializer = topicGenerator
+        self.sessionPayloadsJsonRpcHistory = sessionPayloadsJsonRpcHistory
         setUpWCRequestHandling()
         setupExpirationHandling()
         restoreSubscriptions()
@@ -179,6 +182,11 @@ final class SessionEngine {
         let request = SessionType.PayloadParams.Request(method: params.method, params: params.params)
         let sessionPayloadParams = SessionType.PayloadParams(request: request, chainId: params.chainId)
         let sessionPayloadRequest = WCRequest(method: .sessionPayload, params: .sessionPayload(sessionPayloadParams))
+        
+        
+        let recordRequest = JSONRPCRequest(id: sessionPayloadRequest.id, method: params.method, params: params.params)
+        try? sessionPayloadsJsonRpcHistory.set(topic: params.topic, request: recordRequest, chainId: params.chainId)
+        
         relayer.request(topic: params.topic, payload: sessionPayloadRequest) { [weak self] result in
             switch result {
             case .success(let response):
@@ -419,6 +427,8 @@ final class SessionEngine {
             method: jsonRpcRequest.method,
             params: jsonRpcRequest.params,
             chainId: payloadParams.chainId)
+        
+        try? sessionPayloadsJsonRpcHistory.set(topic: topic, request: jsonRpcRequest, chainId: payloadParams.chainId)
         do {
             try validatePayload(request)
             onSessionPayloadRequest?(request)

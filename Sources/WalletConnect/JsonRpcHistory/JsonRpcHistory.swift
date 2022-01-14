@@ -9,7 +9,7 @@ protocol JsonRpcHistoryRecording {
     func resolve(response: JsonRpcResponseTypes) throws -> JsonRpcRecord
     func exist(id: Int64) -> Bool
 }
-
+//TODO -remove and use jsonrpc history only from utils
 class JsonRpcHistory: JsonRpcHistoryRecording {
     let storage: KeyValueStore<JsonRpcRecord>
     let logger: ConsoleLogging
@@ -17,7 +17,7 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
     
     init(logger: ConsoleLogging, keyValueStorage: KeyValueStorage, uniqueIdentifier: String? = nil) {
         self.logger = logger
-        self.storage = KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage)
+        self.storage = KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: "")
         self.identifier = "com.walletconnect.sdk.\(uniqueIdentifier ?? "")"
     }
     

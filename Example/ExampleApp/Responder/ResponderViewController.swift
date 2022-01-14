@@ -77,11 +77,11 @@ final class ResponderViewController: UIViewController {
         let requestVC = RequestViewController(sessionRequest)
         requestVC.onSign = { [unowned self] in
             let result = signEth(request: sessionRequest)
-            let response = JSONRPCResponse<AnyCodable>(id: sessionRequest.id, result: result)
+            let response = JSONRPCResponse<AnyCodable>(id: sessionRequest.id!, result: result)
             client.respond(topic: sessionRequest.topic, response: .response(response))
         }
         requestVC.onReject = { [weak self] in
-            self?.client.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
+            self?.client.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.id!, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
         }
         present(requestVC, animated: true)
     }
@@ -167,7 +167,7 @@ extension ResponderViewController: WalletConnectClientDelegate {
             dappURL: appMetadata.url ?? "",
             iconURL: appMetadata.icons?.first ?? "",
             chains: Array(sessionProposal.permissions.blockchains),
-            methods: Array(sessionProposal.permissions.methods))
+            methods: Array(sessionProposal.permissions.methods), pendingRequests: [])
         currentProposal = sessionProposal
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread
             self.showSessionProposal(info)

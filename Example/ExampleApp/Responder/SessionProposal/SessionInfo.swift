@@ -5,4 +5,5 @@ struct SessionInfo {
     let iconURL: String
     let chains: [String]
     let methods: [String]
+    let pendingRequests: [String]
 }

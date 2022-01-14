@@ -10,12 +10,14 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
     private let client: WalletConnectClient
     private let session: Session
     init(_ session: Session, _ client: WalletConnectClient) {
+        let pendingRequests = client.getPendingRequests().map{$0.method}
         self.sessionInfo = SessionInfo(name: session.peer.name ?? "",
-                                           descriptionText: session.peer.description ?? "",
-                                           dappURL: session.peer.description ?? "",
-                                           iconURL: session.peer.icons?.first ?? "",
-                                           chains: Array(session.permissions.blockchains),
-                                           methods: Array(session.permissions.methods))
+                                       descriptionText: session.peer.description ?? "",
+                                       dappURL: session.peer.description ?? "",
+                                       iconURL: session.peer.icons?.first ?? "",
+                                       chains: Array(session.permissions.blockchains),
+                                       methods: Array(session.permissions.methods),
+                                       pendingRequests: pendingRequests)
         self.client = client
         self.session = session
         super.init(nibName: nil, bundle: nil)
@@ -65,7 +67,7 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
         } else if section == 1 {
             return sessionInfo.methods.count
         } else {
-            return 0
+            return sessionInfo.pendingRequests.count
         }
     }
     
@@ -76,7 +78,7 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
         } else if indexPath.section == 1 {
             cell.textLabel?.text = sessionInfo.methods[indexPath.row]
         } else {
-           // cell.textLabel?.text = sessionInfo.pendingRequests[indexPath.row]
+            cell.textLabel?.text = sessionInfo.pendingRequests[indexPath.row]
         }
         return cell
     }

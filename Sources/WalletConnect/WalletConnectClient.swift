@@ -6,6 +6,14 @@ import WalletConnectUtils
 import UIKit
 #endif
 
+
+
+enum StorageDomainIdentifiers {
+    static func sessionPayloadsJsonRpcHistory(clientName: String) -> String {
+        return "com.walletconnect.sdk.\(clientName).jsonRpcHistory.sessionPayloads"
+    }
+}
+
 /// An Object that expose public API to provide interactions with WalletConnect SDK
 ///
 /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialise it. Usually only one instance of a client is required in the application.
@@ -30,7 +38,7 @@ public final class WalletConnectClient {
     private let crypto: Crypto
     private let secureStorage: SecureStorage
     private let pairingQueue = DispatchQueue(label: "com.walletconnect.sdk.client.pairing", qos: .userInitiated)
-
+    
     // MARK: - Initializers
 
     /// Initializes and returns newly created WalletConnect Client Instance. Establishes a network connection with the relay
@@ -62,7 +70,9 @@ public final class WalletConnectClient {
         let pairingSequencesStore = PairingStorage(storage: SequenceStore<PairingSequence>(storage: keyValueStore, uniqueIdentifier: clientName))
         let sessionSequencesStore = SessionStorage(storage: SequenceStore<SessionSequence>(storage: keyValueStore, uniqueIdentifier: clientName))
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
-        self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
+        let sessionPayloadsJsonRpcHistoryIdentifier = StorageDomainIdentifiers.sessionPayloadsJsonRpcHistory(clientName: clientName ?? "")
+        let sessionPayloadsJsonRpcHistory = WalletConnectUtils.JsonRpcHistory<AnyCodable>(logger: logger, keyValueStorage: keyValueStore, identifier: sessionPayloadsJsonRpcHistoryIdentifier)
+        self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger, sessionPayloadsJsonRpcHistory: sessionPayloadsJsonRpcHistory)
         setUpEnginesCallbacks()
         subscribeNotificationCenter()
     }
@@ -221,7 +231,13 @@ public final class WalletConnectClient {
         pairingEngine.getSettledPairings()
     }
     
-    //MARK: - Private
+    public func getPendingRequests() -> [Request] {
+        sessionEngine.sessionPayloadsJsonRpcHistory.getPending().compactMap {
+            return Request(id: $0.id, topic: $0.topic, method: $0.request.method, params: $0.request.params, chainId: $0.chainId)
+        }
+    }
+    
+    // MARK: - Private
     
     private func setUpEnginesCallbacks() {
         pairingEngine.onSessionProposal = { [unowned self] proposal in
