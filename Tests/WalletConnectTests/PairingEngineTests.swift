@@ -87,6 +87,7 @@ final class PairingEngineTests: XCTestCase {
 
         try engine.approve(uri)
 
+        // The concept of "publish" should only be known by the relayer
         guard let publishTopic = relayMock.requests.first?.topic, let approval = relayMock.requests.first?.request.approveParams else {
             XCTFail("Responder must publish an approval request."); return
         }

@@ -102,14 +102,13 @@ final class PairingEngine {
         
         try? crypto.setAgreementSecret(agreementKeys, topic: settledTopic)
         
-        let approveParams = PairingType.ApprovalParams(
+        let approval = PairingType.ApprovalParams(
             relay: proposal.relay,
             responder: PairingParticipant(publicKey: selfPublicKey.hexRepresentation),
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
             state: nil) // Should this be removed?
-        let approvalPayload = WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
         
-        relayer.request(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
+        relayer.request(.wcPairingApprove(approval), onTopic: proposal.topic) { [weak self] result in
             switch result {
             case .success:
                 self?.logger.debug("Success on wc_pairingApprove - settled topic - \(settledTopic)")
@@ -118,6 +117,16 @@ final class PairingEngine {
                 break
             }
         }
+//        let approveRequest = WCRequest.wcPairingApprove(approval)
+//        relayer.request(topic: proposal.topic, payload: approveRequest) { [weak self] result in
+//            switch result {
+//            case .success:
+//                self?.logger.debug("Success on wc_pairingApprove - settled topic - \(settledTopic)")
+//                self?.logger.debug("Pairing Success")
+//            case .failure:
+//                break
+//            }
+//        }
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {

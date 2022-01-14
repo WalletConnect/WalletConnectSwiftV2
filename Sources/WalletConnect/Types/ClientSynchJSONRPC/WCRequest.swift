@@ -1,6 +1,24 @@
 
 import Foundation
 
+enum WCMethod {
+    case wcPairingApprove(_ approveParams: PairingType.ApprovalParams)
+    
+    func asRequest() -> WCRequest {
+        switch self {
+        case .wcPairingApprove(let approveParams):
+            return WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
+        }
+    }
+}
+
+extension WCRequest {
+    
+//    static func wcPairingApprove(_ approveParams: PairingType.ApprovalParams) -> WCRequest {
+//        WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
+//    }
+}
+
 struct WCRequest: Codable {
     let id: Int64
     let jsonrpc: String
@@ -14,12 +32,19 @@ struct WCRequest: Codable {
         case params
     }
 
-    internal init(id: Int64 = generateId(), jsonrpc: String = "2.0", method: Method, params: Params) {
+    internal init(method: Method, params: Params, id: Int64 = generateId(), jsonrpc: String = "2.0") {
         self.id = id
         self.jsonrpc = jsonrpc
         self.method = method
         self.params = params
     }
+    
+//    internal init(method: Method, params: Params) {
+//        self.id = Self.generateId()
+//        self.jsonrpc = "2.0"
+//        self.method = method
+//        self.params = params
+//    }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -123,4 +148,84 @@ struct WCRequest: Codable {
         return Int64(Date().timeIntervalSince1970 * 1000)*1000 + Int64.random(in: 0..<1000)
     }
 
+}
+
+extension WCRequest {
+    enum Method: String, Codable {
+        case pairingApprove = "wc_pairingApprove"
+        case pairingReject = "wc_pairingReject"
+        case pairingUpdate = "wc_pairingUpdate"
+        case pairingUpgrade = "wc_pairingUpgrade"
+        case pairingDelete = "wc_pairingDelete"
+        case pairingPayload = "wc_pairingPayload"
+        case pairingPing = "wc_pairingPing"
+        case sessionPropose = "wc_sessionPropose"
+        case sessionApprove = "wc_sessionApprove"
+        case sessionReject = "wc_sessionReject"
+        case sessionUpdate = "wc_sessionUpdate"
+        case sessionUpgrade = "wc_sessionUpgrade"
+        case sessionDelete = "wc_sessionDelete"
+        case sessionPayload = "wc_sessionPayload"
+        case sessionPing = "wc_sessionPing"
+        case sessionNotification = "wc_sessionNotification"
+    }
+}
+
+extension WCRequest {
+    enum Params: Codable, Equatable {
+        case pairingApprove(PairingType.ApprovalParams)
+        case pairingReject(PairingType.RejectParams)
+        case pairingUpdate(PairingType.UpdateParams)
+        case pairingUpgrade(PairingType.UpgradeParams)
+        case pairingDelete(PairingType.DeleteParams)
+        case pairingPayload(PairingType.PayloadParams)
+        case pairingPing(PairingType.PingParams)
+        // sessionPropose method exists exclusively within a pairing payload
+        case sessionPropose(SessionType.ProposeParams)
+        case sessionApprove(SessionType.ApproveParams)
+        case sessionReject(SessionType.RejectParams)
+        case sessionUpdate(SessionType.UpdateParams)
+        case sessionUpgrade(SessionType.UpgradeParams)
+        case sessionDelete(SessionType.DeleteParams)
+        case sessionPayload(SessionType.PayloadParams)
+        case sessionPing(SessionType.PingParams)
+        case sessionNotification(SessionType.NotificationParams)
+
+        static func == (lhs: Params, rhs: Params) -> Bool {
+            switch (lhs, rhs) {
+            case (.pairingApprove(let lhsParam), .pairingApprove(let rhsParam)):
+                return lhsParam == rhsParam
+            case (.pairingReject(let lhsParam), pairingReject(let rhsParam)):
+                return lhsParam == rhsParam
+            case (.pairingUpdate(let lhsParam), pairingUpdate(let rhsParam)):
+                return lhsParam == rhsParam
+            case (.pairingUpgrade(let lhsParam), pairingUpgrade(let rhsParam)):
+                return lhsParam == rhsParam
+            case (.pairingDelete(let lhsParam), pairingDelete(let rhsParam)):
+                return lhsParam == rhsParam
+            case (.pairingPayload(let lhsParam), pairingPayload(let rhsParam)):
+                return lhsParam == rhsParam
+            case (.sessionPropose(let lhsParam), sessionPropose(let rhsParam)):
+                return lhsParam == rhsParam
+            case (.sessionApprove(let lhsParam), sessionApprove(let rhsParam)):
+                return lhsParam == rhsParam
+            case (.sessionReject(let lhsParam), sessionReject(let rhsParam)):
+                return lhsParam == rhsParam
+            case (.sessionUpdate(let lhsParam), sessionUpdate(let rhsParam)):
+                return lhsParam == rhsParam
+            case (.sessionUpgrade(let lhsParam), sessionUpgrade(let rhsParam)):
+                return lhsParam == rhsParam
+            case (.sessionDelete(let lhsParam), sessionDelete(let rhsParam)):
+                return lhsParam == rhsParam
+            case (.sessionPayload(let lhsParam), sessionPayload(let rhsParam)):
+                return lhsParam == rhsParam
+            case (.sessionPing(let lhsParam), sessionPing(let rhsParam)):
+                return lhsParam == rhsParam
+            case (.sessionNotification(let lhsParam), sessionNotification(let rhsParam)):
+                return lhsParam == rhsParam
+            default:
+                return false
+            }
+        }
+    }
 }
