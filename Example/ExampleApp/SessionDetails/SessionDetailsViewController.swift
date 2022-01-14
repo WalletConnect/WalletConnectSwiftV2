@@ -1,7 +1,7 @@
 import UIKit
 import WalletConnect
 
-final class SessionDetailsViewController: UIViewController {
+final class SessionDetailsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
         
     private let sessiondetailsView = {
         SessionDetailsView()
@@ -29,6 +29,9 @@ final class SessionDetailsViewController: UIViewController {
         show(sessionInfo)
         super.viewDidLoad()
         sessiondetailsView.pingButton.addTarget(self, action: #selector(ping), for: .touchUpInside)
+        sessiondetailsView.tableView.delegate = self
+        sessiondetailsView.tableView.dataSource = self
+        sessiondetailsView.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
     }
     
     override func loadView() {
@@ -40,8 +43,6 @@ final class SessionDetailsViewController: UIViewController {
         sessiondetailsView.descriptionLabel.text = sessionInfo.descriptionText
         sessiondetailsView.urlLabel.text = sessionInfo.dappURL
         sessiondetailsView.loadImage(at: sessionInfo.iconURL)
-        sessiondetailsView.list(chains: sessionInfo.chains)
-        sessiondetailsView.list(methods: sessionInfo.methods)
     }
     
     @objc
@@ -55,22 +56,42 @@ final class SessionDetailsViewController: UIViewController {
             }
         }
     }
+    
+    //MARK: - Table View
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if section == 0 {
+            return sessionInfo.chains.count
+        } else if section == 1 {
+            return sessionInfo.methods.count
+        } else {
+            return 0
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        if indexPath.section == 0 {
+            cell.textLabel?.text = sessionInfo.chains[indexPath.row]
+        } else if indexPath.section == 1 {
+            cell.textLabel?.text = sessionInfo.methods[indexPath.row]
+        } else {
+           // cell.textLabel?.text = sessionInfo.pendingRequests[indexPath.row]
+        }
+        return cell
+    }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 3
+    }
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        if section == 0 {
+            return "Chains"
+        } else if section == 1 {
+            return "Methods"
+        } else {
+            return "Pending Requests"
+        }
+    }
 }
-
-
-//class SessionDetailsViewControlle: UITableViewController {
-//    
-//    override func numberOfSections(in tableView: UITableView) -> Int {
-//        return 3
-//    }
-//    
-//    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-//        if section == 0 {
-//            return "Chains"
-//        } else if section == 1 {
-//            return "Methods"
-//        } else {
-//            return "Pending Requests"
-//        }
-//    }
-//}
