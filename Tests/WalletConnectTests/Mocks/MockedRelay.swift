@@ -6,6 +6,7 @@ import WalletConnectUtils
 
 class MockedWCRelay: WalletConnectRelaying {
     
+    var onPairingResponse: ((WCResponse) -> Void)?
     var onResponse: ((WCResponse) -> Void)?
     
     var onPairingApproveResponse: ((String) -> Void)?

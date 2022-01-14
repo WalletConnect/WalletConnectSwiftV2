@@ -11,6 +11,7 @@ struct WCResponse {
 }
 
 protocol WalletConnectRelaying: AnyObject {
+    var onPairingResponse: ((WCResponse) -> Void)? {get set} // Temporary workaround
     var onResponse: ((WCResponse) -> Void)? {get set}
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
@@ -23,6 +24,7 @@ protocol WalletConnectRelaying: AnyObject {
 
 class WalletConnectRelay: WalletConnectRelaying {
     
+    var onPairingResponse: ((WCResponse) -> Void)?
     var onResponse: ((WCResponse) -> Void)?
     
     private var networkRelayer: NetworkRelaying
@@ -169,6 +171,7 @@ class WalletConnectRelay: WalletConnectRelaying {
                 requestParams: record.request.params,
                 result: .success(response))
             wcResponsePublisherSubject.send(.response(response))
+            onPairingResponse?(wcResponse)
             onResponse?(wcResponse)
         } catch  {
             logger.info("Info: \(error.localizedDescription)")
@@ -184,6 +187,7 @@ class WalletConnectRelay: WalletConnectRelaying {
                 requestParams: record.request.params,
                 result: .failure(response))
             wcResponsePublisherSubject.send(.error(response))
+            onPairingResponse?(wcResponse)
             onResponse?(wcResponse)
         } catch {
             logger.info("Info: \(error.localizedDescription)")
