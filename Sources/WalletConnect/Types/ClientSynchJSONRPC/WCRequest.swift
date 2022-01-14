@@ -2,21 +2,20 @@
 import Foundation
 
 enum WCMethod {
-    case wcPairingApprove(_ approveParams: PairingType.ApprovalParams)
+    case wcPairingApprove(PairingType.ApprovalParams)
+    case wcPairingUpdate(PairingType.UpdateParams)
+    case wcPairingPing
     
     func asRequest() -> WCRequest {
         switch self {
         case .wcPairingApprove(let approveParams):
             return WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
+        case .wcPairingUpdate(let updateParams):
+            return WCRequest(method: .pairingUpdate, params: .pairingUpdate(updateParams))
+        case .wcPairingPing:
+            return WCRequest(method: .pairingPing, params: .pairingPing(PairingType.PingParams()))
         }
     }
-}
-
-extension WCRequest {
-    
-//    static func wcPairingApprove(_ approveParams: PairingType.ApprovalParams) -> WCRequest {
-//        WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
-//    }
 }
 
 struct WCRequest: Codable {
@@ -39,13 +38,6 @@ struct WCRequest: Codable {
         self.params = params
     }
     
-//    internal init(method: Method, params: Params) {
-//        self.id = Self.generateId()
-//        self.jsonrpc = "2.0"
-//        self.method = method
-//        self.params = params
-//    }
-
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(Int64.self, forKey: .id)

@@ -22,6 +22,12 @@ protocol WalletConnectRelaying: AnyObject {
     func unsubscribe(topic: String)
 }
 
+extension WalletConnectRelaying {
+    func request(_ wcMethod: WCMethod, onTopic topic: String) {
+        request(wcMethod, onTopic: topic, completion: nil)
+    }
+}
+
 class WalletConnectRelay: WalletConnectRelaying {
     
     var onPairingResponse: ((WCResponse) -> Void)?
