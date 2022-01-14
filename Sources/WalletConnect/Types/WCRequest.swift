@@ -1,22 +1,4 @@
-
 import Foundation
-
-enum WCMethod {
-    case wcPairingApprove(PairingType.ApprovalParams)
-    case wcPairingUpdate(PairingType.UpdateParams)
-    case wcPairingPing
-    
-    func asRequest() -> WCRequest {
-        switch self {
-        case .wcPairingApprove(let approveParams):
-            return WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
-        case .wcPairingUpdate(let updateParams):
-            return WCRequest(method: .pairingUpdate, params: .pairingUpdate(updateParams))
-        case .wcPairingPing:
-            return WCRequest(method: .pairingPing, params: .pairingPing(PairingType.PingParams()))
-        }
-    }
-}
 
 struct WCRequest: Codable {
     let id: Int64
