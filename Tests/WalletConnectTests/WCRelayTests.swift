@@ -87,7 +87,7 @@ extension WalletConnectRelayTests {
         let wcRequestId: Int64 = 123456
         let sessionPayloadParams = SessionType.PayloadParams(request: SessionType.PayloadParams.Request(method: "method", params: AnyCodable("params")), chainId: "")
         let params = WCRequest.Params.sessionPayload(sessionPayloadParams)
-        let wcRequest = WCRequest(id: wcRequestId, method: WCRequest.Method.sessionPayload, params: params)
+        let wcRequest = WCRequest(method: WCRequest.Method.sessionPayload, params: params, id: wcRequestId)
         return wcRequest
     }
 }

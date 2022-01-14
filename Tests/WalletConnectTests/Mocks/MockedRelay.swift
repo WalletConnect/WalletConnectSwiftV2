@@ -6,6 +6,7 @@ import WalletConnectUtils
 
 class MockedWCRelay: WalletConnectRelaying {
     
+    var onPairingResponse: ((WCResponse) -> Void)?
     var onResponse: ((WCResponse) -> Void)?
     
     var onPairingApproveResponse: ((String) -> Void)?
@@ -25,7 +26,11 @@ class MockedWCRelay: WalletConnectRelaying {
     var error: Error? = nil
     
     private(set) var requests: [(topic: String, request: WCRequest)] = []
-
+    
+    func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ())?) {
+        request(topic: topic, payload: wcMethod.asRequest(), completion: completion)
+    }
+    
     func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ())?) {
         didCallRequest = true
         requests.append((topic, payload))

@@ -11,23 +11,25 @@ struct WCResponse {
 }
 
 protocol WalletConnectRelaying: AnyObject {
+    var onPairingResponse: ((WCResponse) -> Void)? {get set} // Temporary workaround
     var onResponse: ((WCResponse) -> Void)? {get set}
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
-    func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
+    func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
     func respond(topic: String, response: JsonRpcResponseTypes, completion: @escaping ((Error?)->()))
     func subscribe(topic: String)
     func unsubscribe(topic: String)
 }
 
 extension WalletConnectRelaying {
-    func request(topic: String, payload: WCRequest) {
-        request(topic: topic, payload: payload, completion: nil)
+    func request(_ wcMethod: WCMethod, onTopic topic: String) {
+        request(wcMethod, onTopic: topic, completion: nil)
     }
 }
 
 class WalletConnectRelay: WalletConnectRelaying {
     
+    var onPairingResponse: ((WCResponse) -> Void)?
     var onResponse: ((WCResponse) -> Void)?
     
     private var networkRelayer: NetworkRelaying
@@ -61,7 +63,11 @@ class WalletConnectRelay: WalletConnectRelaying {
         self.jsonRpcHistory = jsonRpcHistory
         setUpPublishers()
     }
-
+    
+    func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ())?) {
+        request(topic: topic, payload: wcMethod.asRequest(), completion: completion)
+    }
+    
     func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?) {
         do {
             try jsonRpcHistory.set(topic: topic, request: payload)
@@ -79,7 +85,7 @@ class WalletConnectRelay: WalletConnectRelaying {
                             self.logger.debug("WC Relay - received response on topic: \(topic)")
                             switch response {
                             case .response(let response):
-                                completion(.success(response))
+                                completion?(.success(response))
                             case .error(let error):
                                 self.logger.debug("Request error: \(error)")
                                 completion?(.failure(error))
@@ -170,6 +176,7 @@ class WalletConnectRelay: WalletConnectRelaying {
                 requestParams: record.request.params,
                 result: .success(response))
             wcResponsePublisherSubject.send(.response(response))
+            onPairingResponse?(wcResponse)
             onResponse?(wcResponse)
         } catch  {
             logger.info("Info: \(error.localizedDescription)")
@@ -185,6 +192,7 @@ class WalletConnectRelay: WalletConnectRelaying {
                 requestParams: record.request.params,
                 result: .failure(response))
             wcResponsePublisherSubject.send(.error(response))
+            onPairingResponse?(wcResponse)
             onResponse?(wcResponse)
         } catch {
             logger.info("Info: \(error.localizedDescription)")
