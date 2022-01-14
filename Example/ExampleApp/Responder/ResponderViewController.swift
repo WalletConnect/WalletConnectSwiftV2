@@ -16,7 +16,7 @@ final class ResponderViewController: UIViewController {
             metadata: metadata,
             projectId: "52af113ee0c1e1a20f4995730196c13e",
             isController: true,
-            relayHost: "relay.dev.walletconnect.com",
+            relayHost: "relay.dev.walletconnect.com", //use with dapp at https://canary.react-app.walletconnect.com/
             clientName: "responder"
         )
     }()
@@ -69,13 +69,7 @@ final class ResponderViewController: UIViewController {
     }
     
     private func showSessionDetailsViewController(_ session: Session) {
-        let sessionInfo = SessionInfo(name: session.peer.name ?? "",
-                                      descriptionText: session.peer.description ?? "",
-                                      dappURL: session.peer.description ?? "",
-                                      iconURL: session.peer.icons?.first ?? "",
-                                      chains: Array(session.permissions.blockchains),
-                                      methods: Array(session.permissions.methods))
-        let vc = SessionDetailsViewController(sessionInfo)
+        let vc = SessionDetailsViewController(session, client)
         navigationController?.pushViewController(vc, animated: true)
     }
     

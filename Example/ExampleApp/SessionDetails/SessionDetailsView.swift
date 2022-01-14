@@ -56,6 +56,15 @@ final class SessionDetailsView: UIView {
         return stackView
     }()
     
+    let pingButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Ping", for: .normal)
+        button.backgroundColor = .systemBlue
+        button.tintColor = .white
+        button.layer.cornerRadius = 8
+        return button
+    }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .systemBackground
@@ -67,6 +76,7 @@ final class SessionDetailsView: UIView {
         headerStackView.addArrangedSubview(nameLabel)
         headerStackView.addArrangedSubview(urlLabel)
         headerStackView.addArrangedSubview(descriptionLabel)
+        addSubview(pingButton)
         
         subviews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
         
@@ -87,6 +97,11 @@ final class SessionDetailsView: UIView {
             methodsStackView.topAnchor.constraint(equalTo: chainsStackView.bottomAnchor, constant: 24),
             methodsStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
             methodsStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
+            
+            pingButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            pingButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            pingButton.heightAnchor.constraint(equalToConstant: 44),
+            pingButton.widthAnchor.constraint(equalToConstant: 64),
         ])
     }
     

@@ -1,4 +1,5 @@
 import UIKit
+import WalletConnect
 
 final class SessionDetailsViewController: UIViewController {
         
@@ -6,9 +7,17 @@ final class SessionDetailsViewController: UIViewController {
         SessionDetailsView()
     }()
     private let sessionInfo: SessionInfo
-    
-    init(_ sessionInfo: SessionInfo) {
-        self.sessionInfo = sessionInfo
+    private let client: WalletConnectClient
+    private let session: Session
+    init(_ session: Session, _ client: WalletConnectClient) {
+        self.sessionInfo = SessionInfo(name: session.peer.name ?? "",
+                                           descriptionText: session.peer.description ?? "",
+                                           dappURL: session.peer.description ?? "",
+                                           iconURL: session.peer.icons?.first ?? "",
+                                           chains: Array(session.permissions.blockchains),
+                                           methods: Array(session.permissions.methods))
+        self.client = client
+        self.session = session
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -19,6 +28,7 @@ final class SessionDetailsViewController: UIViewController {
     override func viewDidLoad() {
         show(sessionInfo)
         super.viewDidLoad()
+        sessiondetailsView.pingButton.addTarget(self, action: #selector(ping), for: .touchUpInside)
     }
     
     override func loadView() {
@@ -33,4 +43,34 @@ final class SessionDetailsViewController: UIViewController {
         sessiondetailsView.list(chains: sessionInfo.chains)
         sessiondetailsView.list(methods: sessionInfo.methods)
     }
+    
+    @objc
+    private func ping() {
+        client.ping(topic: session.topic) { result in
+            switch result {
+            case .success():
+                print("received ping response")
+            case .failure(let error):
+                print(error)
+            }
+        }
+    }
 }
+
+
+//class SessionDetailsViewControlle: UITableViewController {
+//    
+//    override func numberOfSections(in tableView: UITableView) -> Int {
+//        return 3
+//    }
+//    
+//    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+//        if section == 0 {
+//            return "Chains"
+//        } else if section == 1 {
+//            return "Methods"
+//        } else {
+//            return "Pending Requests"
+//        }
+//    }
+//}
