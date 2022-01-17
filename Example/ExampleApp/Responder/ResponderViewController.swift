@@ -20,10 +20,9 @@ final class ResponderViewController: UIViewController {
             clientName: "responder"
         )
     }()
-    lazy  var account = privateKey.address.hex(eip55: true)
+    lazy  var account = Signer.privateKey.address.hex(eip55: true)
     var sessionItems: [ActiveSessionItem] = []
     var currentProposal: Session.Proposal?
-    let privateKey: EthereumPrivateKey = try! EthereumPrivateKey(hexPrivateKey: "0xe56da0e170b5e09a8bb8f1b693392c7d56c3739a9c75740fbc558a2877868540")
     
     private let responderView: ResponderView = {
         ResponderView()
@@ -76,14 +75,23 @@ final class ResponderViewController: UIViewController {
     private func showSessionRequest(_ sessionRequest: Request) {
         let requestVC = RequestViewController(sessionRequest)
         requestVC.onSign = { [unowned self] in
-            let result = signEth(request: sessionRequest)
+            let result = Signer.signEth(request: sessionRequest)
             let response = JSONRPCResponse<AnyCodable>(id: sessionRequest.id!, result: result)
             client.respond(topic: sessionRequest.topic, response: .response(response))
+            reloadSessionDetailsIfNeeded()
         }
-        requestVC.onReject = { [weak self] in
-            self?.client.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.id!, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
+        requestVC.onReject = { [unowned self] in
+            client.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.id!, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
+            reloadSessionDetailsIfNeeded()
         }
+        reloadSessionDetailsIfNeeded()
         present(requestVC, animated: true)
+    }
+    
+    func reloadSessionDetailsIfNeeded() {
+        if let sessionDetailsViewController = navigationController?.viewControllers.first(where: {$0 is SessionDetailsViewController}) as? SessionDetailsViewController {
+            sessionDetailsViewController.reloadTable()
+        }
     }
     
     private func pairClient(uri: String) {
@@ -220,58 +228,5 @@ extension ResponderViewController: WalletConnectClientDelegate {
             self.sessionItems = activeSessions
             self.responderView.tableView.reloadData()
         }
-    }
-    
-    func signEth(request: Request) -> AnyCodable {
-        let method = request.method
-        if method == "personal_sign" {
-            let params = try! request.params.get([String].self)
-            let messageToSign = params[0]
-            let signHash = signHash(messageToSign)
-            let (v, r, s) = try! self.privateKey.sign(hash: signHash)
-            let result = "0x" + r.toHexString() + s.toHexString() + String(v + 27, radix: 16)
-            return AnyCodable(result)
-        } else if method == "eth_signTypedData" {
-            let params = try! request.params.get([String].self)
-            print(params)
-            let messageToSign = params[1]
-            let signHash = signHash(messageToSign)
-            let (v, r, s) = try! self.privateKey.sign(hash: signHash)
-            let result = "0x" + r.toHexString() + s.toHexString() + String(v + 27, radix: 16)
-            return AnyCodable(result)
-        } else if method == "eth_sendTransaction" {
-            let params = try! request.params.get([EthereumTransaction].self)
-            var transaction = params[0]
-            transaction.gas = EthereumQuantity(quantity: BigUInt("1234"))
-            print(transaction.description)
-            let signedTx = try! transaction.sign(with: self.privateKey, chainId: 4)
-            let (r, s, v) = (signedTx.r, signedTx.s, signedTx.v)
-            let result = r.hex() + s.hex().dropFirst(2) + String(v.quantity, radix: 16)
-            return AnyCodable(result)
-        }
-        fatalError("not implemented")
-    }
-    
-    func signHash(_ message: String) -> Bytes {
-        let prefix = "\u{19}Ethereum Signed Message:\n"
-        let messageData = Data(hex: message)
-        let prefixData = (prefix + String(messageData.count)).data(using: .utf8)!
-        let prefixedMessageData = prefixData + messageData
-        let dataToHash: Bytes = .init(hex: prefixedMessageData.toHexString())
-        return SHA3(variant: .keccak256).calculate(for: dataToHash)
-    }
-}
-    
-extension EthereumTransaction {
-    var description: String {
-        return """
-        from: \(String(describing: from!.hex(eip55: true)))
-        to: \(String(describing: to!.hex(eip55: true))),
-        value: \(String(describing: value!.hex())),
-        gasPrice: \(String(describing: gasPrice?.hex())),
-        gas: \(String(describing: gas?.hex())),
-        data: \(data.hex()),
-        nonce: \(String(describing: nonce?.hex()))
-        """
     }
 }

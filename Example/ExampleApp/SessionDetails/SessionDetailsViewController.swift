@@ -1,12 +1,12 @@
 import UIKit
 import WalletConnect
+import WalletConnectUtils
 
 final class SessionDetailsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-        
     private let sessiondetailsView = {
         SessionDetailsView()
     }()
-    private let sessionInfo: SessionInfo
+    private var sessionInfo: SessionInfo
     private let client: WalletConnectClient
     private let session: Session
     init(_ session: Session, _ client: WalletConnectClient) {
@@ -95,5 +95,39 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
         } else {
             return "Pending Requests"
         }
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if indexPath.section == 2 {
+            let pendingRequests = client.getPendingRequests()
+            showSessionRequest(pendingRequests[indexPath.row])
+        }
+    }
+    
+    private func showSessionRequest(_ sessionRequest: Request) {
+        let requestVC = RequestViewController(sessionRequest)
+        requestVC.onSign = { [unowned self] in
+            let result = Signer.signEth(request: sessionRequest)
+            let response = JSONRPCResponse<AnyCodable>(id: sessionRequest.id!, result: result)
+            client.respond(topic: sessionRequest.topic, response: .response(response))
+            reloadTable()
+        }
+        requestVC.onReject = { [unowned self] in
+            client.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.id!, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
+            reloadTable()
+        }
+        present(requestVC, animated: true)
+    }
+    
+    func reloadTable() {
+        let pendingRequests = client.getPendingRequests().map{$0.method}
+        self.sessionInfo = SessionInfo(name: session.peer.name ?? "",
+                                       descriptionText: session.peer.description ?? "",
+                                       dappURL: session.peer.description ?? "",
+                                       iconURL: session.peer.icons?.first ?? "",
+                                       chains: Array(session.permissions.blockchains),
+                                       methods: Array(session.permissions.methods),
+                                       pendingRequests: pendingRequests)
+        sessiondetailsView.tableView.reloadData()
     }
 }
