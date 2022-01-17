@@ -4,7 +4,7 @@ import WalletConnectUtils
 
 protocol JsonRpcHistoryRecording {
     func get(id: Int64) -> JsonRpcRecord?
-    func set(topic: String, request: WCRequest) throws
+    func set(topic: String, request: WCRequest, chainId: String) throws
     func delete(topic: String)
     func resolve(response: JsonRpcResponseTypes) throws -> JsonRpcRecord
     func exist(id: Int64) -> Bool
@@ -25,12 +25,12 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
         try? storage.get(key: getKey(for: id))
     }
     
-    func set(topic: String, request: WCRequest) throws {
+    func set(topic: String, request: WCRequest, chainId: String) throws {
         guard !exist(id: request.id) else {
             throw WalletConnectError.internal(.jsonRpcDuplicateDetected)
         }
         logger.debug("Setting JSON-RPC request history record - ID: \(request.id)")
-        let record = JsonRpcRecord(id: request.id, topic: topic, request: JsonRpcRecord.Request(method: request.method, params: request.params), response: nil)
+        let record = JsonRpcRecord(id: request.id, topic: topic, request: JsonRpcRecord.Request(method: request.method, params: request.params), response: nil, chainId: chainId)
         try storage.set(record, forKey: getKey(for: request.id))
     }
     
@@ -63,5 +63,9 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
     private func getKey(for id: Int64) -> String {
         let prefix = "\(identifier).wc_json_rpc_record."
         return "\(prefix)\(id)"
+    }
+    
+    public func getPending() -> [JsonRpcRecord] {
+        storage.getAll().filter{$0.response == nil}
     }
 }

@@ -60,7 +60,7 @@ class WalletConnectRelay: WalletConnectRelaying {
 
     func request(topic: String, payload: WCRequest, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())) {
         do {
-            try jsonRpcHistory.set(topic: topic, request: payload)
+            try jsonRpcHistory.set(topic: topic, request: payload, chainId: <#String#>)
             let message = try jsonRpcSerialiser.serialise(topic: topic, encodable: payload)
             networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
                 guard let self = self else {return}
@@ -158,7 +158,7 @@ class WalletConnectRelay: WalletConnectRelaying {
     
     private func handleWCRequest(topic: String, request: WCRequest) {
         do {
-            try jsonRpcHistory.set(topic: topic, request: request)
+            try jsonRpcHistory.set(topic: topic, request: request, chainId: <#String#>)
             let payload = WCRequestSubscriptionPayload(topic: topic, wcRequest: request)
             wcRequestPublisherSubject.send(payload)
         } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {

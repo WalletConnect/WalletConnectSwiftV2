@@ -12,11 +12,11 @@ public final class KeyValueStore<T> where T: Codable {
 
     public func set(_ item: T, forKey key: String) throws {
         let encoded = try JSONEncoder().encode(item)
-        defaults.set(encoded, forKey: getContextPrefixKey(for: key))
+        defaults.set(encoded, forKey: getContextPrefixedKey(for: key))
     }
 
     public func get(key: String) throws -> T? {
-        guard let data = defaults.object(forKey: getContextPrefixKey(for: key)) as? Data else { return nil }
+        guard let data = defaults.object(forKey: getContextPrefixedKey(for: key)) as? Data else { return nil }
         let item = try JSONDecoder().decode(T.self, from: data)
         return item
     }
@@ -33,10 +33,10 @@ public final class KeyValueStore<T> where T: Codable {
     }
 
     public func delete(forKey key: String) {
-        defaults.removeObject(forKey: getContextPrefixKey(for: key))
+        defaults.removeObject(forKey: getContextPrefixedKey(for: key))
     }
     
-    private func getContextPrefixKey(for key: String) -> String {
+    private func getContextPrefixedKey(for key: String) -> String {
         return "\(prefix).\(key)"
     }
 }
