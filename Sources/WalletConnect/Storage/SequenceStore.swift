@@ -42,6 +42,7 @@ final class SequenceStore<T> where T: ExpirableSequence {
 
     func getAll() -> [T] {
         return storage.dictionaryRepresentation().compactMap {
+            guard $0.key.hasPrefix(identifier) else {return nil}
             if let data = $0.value as? Data, let sequence = try? JSONDecoder().decode(T.self, from: data) {
                 return verifyExpiry(on: sequence)
             }
