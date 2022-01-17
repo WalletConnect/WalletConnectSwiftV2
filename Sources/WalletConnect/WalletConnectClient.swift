@@ -66,7 +66,7 @@ public final class WalletConnectClient {
         let relayUrl = WakuNetworkRelay.makeRelayUrl(host: relayHost, projectId: projectId)
         self.wakuRelay = WakuNetworkRelay(logger: logger, url: relayUrl, keyValueStorage: keyValueStore, uniqueIdentifier: clientName ?? "")
         let serialiser = JSONRPCSerialiser(crypto: crypto)
-        self.history = JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore, identifier: clientName)
+        self.history = JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore, uniqueIdentifier: clientName)
         self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: history)
         let pairingSequencesStore = PairingStorage(storage: SequenceStore<PairingSequence>(storage: keyValueStore, uniqueIdentifier: clientName))
         let sessionSequencesStore = SessionStorage(storage: SequenceStore<SessionSequence>(storage: keyValueStore, uniqueIdentifier: clientName))
@@ -233,10 +233,10 @@ public final class WalletConnectClient {
     
     public func getPendingRequests() -> [Request] {
         history.getPending()
-            .filter{$0.request.method == "sessionPayload"}
+            .filter{$0.request.method == .sessionPayload}
             .compactMap {
-                let payloadParams = try! $0.request.params.get(SessionType.PayloadParams.self)
-                return Request(id: $0.id, topic: $0.topic, method: payloadParams.request.method, params: payloadParams.request.params, chainId: payloadParams.chainId)
+                guard case let .sessionPayload(payloadRequest) = $0.request.params else {return nil}
+                return Request(id: $0.id, topic: $0.topic, method: payloadRequest.request.method, params: payloadRequest.request.params, chainId: payloadRequest.chainId)
             }
     }
     

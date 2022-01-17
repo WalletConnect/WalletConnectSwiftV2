@@ -4,7 +4,7 @@ import WalletConnectUtils
 
 protocol JsonRpcHistoryRecording {
     func get(id: Int64) -> JsonRpcRecord?
-    func set(topic: String, request: WCRequest, chainId: String) throws
+    func set(topic: String, request: WCRequest, chainId: String?) throws
     func delete(topic: String)
     func resolve(response: JsonRpcResponseTypes) throws -> JsonRpcRecord
     func exist(id: Int64) -> Bool
@@ -25,7 +25,7 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
         try? storage.get(key: getKey(for: id))
     }
     
-    func set(topic: String, request: WCRequest, chainId: String) throws {
+    func set(topic: String, request: WCRequest, chainId: String?) throws {
         guard !exist(id: request.id) else {
             throw WalletConnectError.internal(.jsonRpcDuplicateDetected)
         }
