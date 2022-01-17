@@ -2,6 +2,7 @@
 import Foundation
 import UIKit
 import WalletConnect
+import Web3
 
 class RequestViewController: UIViewController {
     var onSign: (()->())?
@@ -23,13 +24,8 @@ class RequestViewController: UIViewController {
         super.viewDidLoad()
         requestView.approveButton.addTarget(self, action: #selector(signAction), for: .touchUpInside)
         requestView.rejectButton.addTarget(self, action: #selector(rejectAction), for: .touchUpInside)
-        let method = sessionRequest.method
-        requestView.nameLabel.text = method
-        var paramsDescription = ""
-        if method == "personal_sign" {
-            paramsDescription = try! sessionRequest.params.get([String].self).description
-        }
-        requestView.descriptionLabel.text = paramsDescription
+        requestView.nameLabel.text = sessionRequest.method
+        requestView.descriptionLabel.text = getParamsDescription()
     }
     
     required init?(coder: NSCoder) {
@@ -46,6 +42,19 @@ class RequestViewController: UIViewController {
     private func rejectAction() {
         onReject?()
         dismiss(animated: true)
+    }
+    
+    private func getParamsDescription() -> String {
+        let method = sessionRequest.method
+        if method == "personal_sign" {
+            return try! sessionRequest.params.get([String].self).description
+        } else if method == "eth_signTypedData" {
+            return try! sessionRequest.params.get([String].self).description
+        } else if method == "eth_sendTransaction" {
+            let params = try! sessionRequest.params.get([EthereumTransaction].self)
+            return params[0].description
+        }
+        fatalError("not implemented")
     }
 }
 

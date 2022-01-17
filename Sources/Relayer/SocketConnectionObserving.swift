@@ -6,7 +6,7 @@ protocol SocketConnectionObserving {
     var onDisconnect: (()->())? {get set}
 }
 
-class SocketConnectionObserver: NSObject, URLSessionDelegate, SocketConnectionObserving {
+class SocketConnectionObserver: NSObject, URLSessionWebSocketDelegate, SocketConnectionObserving {
     var onConnect: (()->())?
     var onDisconnect: (()->())?
 
