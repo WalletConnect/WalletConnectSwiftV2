@@ -108,12 +108,12 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
         let requestVC = RequestViewController(sessionRequest)
         requestVC.onSign = { [unowned self] in
             let result = Signer.signEth(request: sessionRequest)
-            let response = JSONRPCResponse<AnyCodable>(id: sessionRequest.id!, result: result)
+            let response = JSONRPCResponse<AnyCodable>(id: sessionRequest.id, result: result)
             client.respond(topic: sessionRequest.topic, response: .response(response))
             reloadTable()
         }
         requestVC.onReject = { [unowned self] in
-            client.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.id!, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
+            client.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
             reloadTable()
         }
         present(requestVC, animated: true)

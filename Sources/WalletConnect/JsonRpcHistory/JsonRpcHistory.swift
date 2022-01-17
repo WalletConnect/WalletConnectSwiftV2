@@ -25,7 +25,7 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
         try? storage.get(key: getKey(for: id))
     }
     
-    func set(topic: String, request: WCRequest, chainId: String?) throws {
+    func set(topic: String, request: WCRequest, chainId: String? = nil) throws {
         guard !exist(id: request.id) else {
             throw WalletConnectError.internal(.jsonRpcDuplicateDetected)
         }

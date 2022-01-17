@@ -178,7 +178,7 @@ final class SessionEngine {
         }
         let request = SessionType.PayloadParams.Request(method: params.method, params: params.params)
         let sessionPayloadParams = SessionType.PayloadParams(request: request, chainId: params.chainId)
-        let sessionPayloadRequest = WCRequest(method: .sessionPayload, params: .sessionPayload(sessionPayloadParams))
+        let sessionPayloadRequest = WCRequest(id: params.id, method: .sessionPayload, params: .sessionPayload(sessionPayloadParams))
         relayer.request(topic: params.topic, payload: sessionPayloadRequest) { [weak self] result in
             switch result {
             case .success(let response):
