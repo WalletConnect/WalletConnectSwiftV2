@@ -6,13 +6,6 @@ import WalletConnectUtils
 import UIKit
 #endif
 
-
-enum StorageDomainIdentifiers {
-    static func sessionPayloadsJsonRpcHistory(clientName: String) -> String {
-        return "com.walletconnect.sdk.\(clientName).jsonRpcHistory.sessionPayloads"
-    }
-}
-
 /// An Object that expose public API to provide interactions with WalletConnect SDK
 ///
 /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialise it. Usually only one instance of a client is required in the application.
@@ -53,10 +46,10 @@ public final class WalletConnectClient {
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialise it. Usually only one instance of a client is required in the application.
     public convenience init(metadata: AppMetadata, projectId: String, isController: Bool, relayHost: String, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
-        self.init(metadata: metadata, projectId: projectId, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStore: keyValueStorage, clientName: clientName)
+        self.init(metadata: metadata, projectId: projectId, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStorage: keyValueStorage, clientName: clientName)
     }
     
-    init(metadata: AppMetadata, projectId: String, isController: Bool, relayHost: String, logger: ConsoleLogging, keychain: KeychainStorage, keyValueStore: KeyValueStorage, clientName: String? = nil) {
+    init(metadata: AppMetadata, projectId: String, isController: Bool, relayHost: String, logger: ConsoleLogging, keychain: KeychainStorage, keyValueStorage: KeyValueStorage, clientName: String? = nil) {
         self.metadata = metadata
         self.isController = isController
         self.logger = logger
@@ -64,12 +57,12 @@ public final class WalletConnectClient {
         self.crypto = Crypto(keychain: keychain)
         self.secureStorage = SecureStorage(keychain: keychain)
         let relayUrl = WakuNetworkRelay.makeRelayUrl(host: relayHost, projectId: projectId)
-        self.wakuRelay = WakuNetworkRelay(logger: logger, url: relayUrl, keyValueStorage: keyValueStore, uniqueIdentifier: clientName ?? "")
+        self.wakuRelay = WakuNetworkRelay(logger: logger, url: relayUrl, keyValueStorage: keyValueStorage, uniqueIdentifier: clientName ?? "")
         let serialiser = JSONRPCSerialiser(crypto: crypto)
-        self.history = JsonRpcHistory(logger: logger, keyValueStorage: keyValueStore, uniqueIdentifier: clientName)
+        self.history = JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory(clientName: clientName ?? "_")))
         self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: history)
-        let pairingSequencesStore = PairingStorage(storage: SequenceStore<PairingSequence>(storage: keyValueStore, uniqueIdentifier: clientName))
-        let sessionSequencesStore = SessionStorage(storage: SequenceStore<SessionSequence>(storage: keyValueStore, uniqueIdentifier: clientName))
+        let pairingSequencesStore = PairingStorage(storage: SequenceStore<PairingSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings(clientName: clientName ?? "_")))
+        let sessionSequencesStore = SessionStorage(storage: SequenceStore<SessionSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions(clientName: clientName ?? "_")))
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
 
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)

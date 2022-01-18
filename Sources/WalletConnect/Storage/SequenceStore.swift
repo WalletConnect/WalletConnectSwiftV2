@@ -18,10 +18,10 @@ final class SequenceStore<T> where T: ExpirableSequence {
     private let dateInitializer: () -> Date
     private let identifier: String
 
-    init(storage: KeyValueStorage, uniqueIdentifier: String? = nil, dateInitializer: @escaping () -> Date = Date.init) {
+    init(storage: KeyValueStorage, identifier: String, dateInitializer: @escaping () -> Date = Date.init) {
         self.storage = storage
         self.dateInitializer = dateInitializer
-        self.identifier = "com.walletconnect.sdk.\(uniqueIdentifier ?? "")"
+        self.identifier = identifier
     }
     
     func hasSequence(forTopic topic: String) -> Bool {

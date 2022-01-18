@@ -13,16 +13,14 @@ protocol JsonRpcHistoryRecording {
 class JsonRpcHistory: JsonRpcHistoryRecording {
     let storage: KeyValueStore<JsonRpcRecord>
     let logger: ConsoleLogging
-    let identifier: String
     
-    init(logger: ConsoleLogging, keyValueStorage: KeyValueStorage, uniqueIdentifier: String? = nil) {
+    init(logger: ConsoleLogging, keyValueStore: KeyValueStore<JsonRpcRecord>) {
         self.logger = logger
-        self.storage = KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: "")
-        self.identifier = "com.walletconnect.sdk.\(uniqueIdentifier ?? "")"
+        self.storage = keyValueStore
     }
     
     func get(id: Int64) -> JsonRpcRecord? {
-        try? storage.get(key: getKey(for: id))
+        try? storage.get(key: "\(id)")
     }
     
     func set(topic: String, request: WCRequest, chainId: String? = nil) throws {
@@ -31,38 +29,33 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
         }
         logger.debug("Setting JSON-RPC request history record - ID: \(request.id)")
         let record = JsonRpcRecord(id: request.id, topic: topic, request: JsonRpcRecord.Request(method: request.method, params: request.params), response: nil, chainId: chainId)
-        try storage.set(record, forKey: getKey(for: request.id))
+        try storage.set(record, forKey: "\(request.id)")
     }
     
     func delete(topic: String) {
         storage.getAll().forEach { record in
             if record.topic == topic {
-                storage.delete(forKey: getKey(for: record.id))
+                storage.delete(forKey: "\(record.id)")
             }
         }
     }
     
     func resolve(response: JsonRpcResponseTypes) throws -> JsonRpcRecord {
         logger.debug("Resolving JSON-RPC response - ID: \(response.id)")
-        guard var record = try? storage.get(key: getKey(for: response.id)) else {
+        guard var record = try? storage.get(key: "\(response.id)") else {
             throw WalletConnectError.internal(.noJsonRpcRequestMatchingResponse)
         }
         if record.response != nil {
             throw WalletConnectError.internal(.jsonRpcDuplicateDetected)
         } else {
             record.response = response
-            try storage.set(record, forKey: getKey(for: record.id))
+            try storage.set(record, forKey: "\(record.id)")
             return record
         }
     }
     
     func exist(id: Int64) -> Bool {
-        return (try? storage.get(key: getKey(for: id))) != nil
-    }
-    
-    private func getKey(for id: Int64) -> String {
-        let prefix = "\(identifier).wc_json_rpc_record."
-        return "\(prefix)\(id)"
+        return (try? storage.get(key: "\(id)")) != nil
     }
     
     public func getPending() -> [JsonRpcRecord] {

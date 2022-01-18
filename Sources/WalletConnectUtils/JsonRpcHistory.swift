@@ -9,9 +9,9 @@ public class JsonRpcHistory<T> where T: Codable&Equatable {
     private let storage: KeyValueStore<JsonRpcRecord>
     private let logger: ConsoleLogging
 
-    public init(logger: ConsoleLogging, keyValueStorage: KeyValueStorage, identifier: String?) {
+    public init(logger: ConsoleLogging, keyValueStore: KeyValueStore<JsonRpcRecord>) {
         self.logger = logger
-        self.storage = KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: identifier ?? "")
+        self.storage = keyValueStore
     }
     
     public func get(id: Int64) -> JsonRpcRecord? {

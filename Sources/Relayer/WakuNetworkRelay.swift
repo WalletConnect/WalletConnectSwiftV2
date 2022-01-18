@@ -36,8 +36,8 @@ public final class WakuNetworkRelay {
          uniqueIdentifier: String) {
         self.logger = logger
         self.dispatcher = dispatcher
-        let historyIdentifier = "\(uniqueIdentifier).relayer.subscription_json_rpc_record"
-        self.jsonRpcSubscriptionsHistory = JsonRpcHistory<RelayJSONRPC.SubscriptionParams>(logger: logger, keyValueStorage: keyValueStorage, identifier: historyIdentifier)
+        let historyIdentifier = "com.walletconnect.sdk.\(uniqueIdentifier).relayer.subscription_json_rpc_record"
+        self.jsonRpcSubscriptionsHistory = JsonRpcHistory<RelayJSONRPC.SubscriptionParams>(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: historyIdentifier))
         setUpBindings()
     }
     
