@@ -3,6 +3,19 @@
 import Foundation
 
 extension String {
+    
+    static func conformsToCAIP2(_ string: String) -> Bool {
+        let namespaceRegex = "^[-a-z0-9]{3,8}$"
+        let referenceRegex = "^[-a-zA-Z0-9]{1,32}$"
+        let splits = string.split(separator: ":", omittingEmptySubsequences: false)
+        guard splits.count == 2 else { return false }
+        let namespace = splits[0]
+        let reference = splits[1]
+        let isNamespaceValid = (namespace.range(of: namespaceRegex, options: .regularExpression) != nil)
+        let isReferenceValid = (reference.range(of: referenceRegex, options: .regularExpression) != nil)
+        return isNamespaceValid && isReferenceValid
+    }
+    
     static func generateTopic() -> String? {
         var keyData = Data(count: 32)
         let result = keyData.withUnsafeMutableBytes {
