@@ -78,37 +78,34 @@ final class ClientTests: XCTestCase {
         waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
-    // FIXME: Broken test!!
-//    func testNewSessionOnExistingPairing() {
-//        let proposerSettlesSessionExpectation = expectation(description: "Proposer settles session")
-//        proposerSettlesSessionExpectation.expectedFulfillmentCount = 2
-//        let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
-//        responderSettlesSessionExpectation.expectedFulfillmentCount = 2
-//        var pairingTopic: String!
-//        var initiatedSecondSession = false
-//        let permissions = SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []))
-//        let connectParams = ConnectParams(permissions: permissions)
-//        let uri = try! proposer.client.connect(params: connectParams)!
-//        try! responder.client.pair(uri: uri)
-//        proposer.onPairingSettled = { pairing in
-//            pairingTopic = pairing.topic
-//        }
-//        responder.onSessionProposal = { [unowned self] proposal in
-//            self.responder.client.approve(proposal: proposal, accounts: []){_ in}
-//        }
-//        responder.onSessionSettled = { sessionSettled in
-//            responderSettlesSessionExpectation.fulfill()
-//        }
-//        proposer.onSessionSettled = { [unowned self] sessionSettled in
-//            proposerSettlesSessionExpectation.fulfill()
-//            if !initiatedSecondSession {
-//                let params = ConnectParams(permissions: SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: [])), topic: pairingTopic)
-//                let _ = try! proposer.client.connect(params: params)
-//                initiatedSecondSession = true
-//            }
-//        }
-//        waitForExpectations(timeout: defaultTimeout, handler: nil)
-//    }
+    func testNewSessionOnExistingPairing() {
+        let proposerSettlesSessionExpectation = expectation(description: "Proposer settles session")
+        proposerSettlesSessionExpectation.expectedFulfillmentCount = 2
+        let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
+        responderSettlesSessionExpectation.expectedFulfillmentCount = 2
+        var pairingTopic: String!
+        var initiatedSecondSession = false
+        let permissions = Session.Permissions.stub()
+        let uri = try! proposer.client.connect(sessionPermissions: permissions, topic: nil)!
+        try! responder.client.pair(uri: uri)
+        proposer.onPairingSettled = { pairing in
+            pairingTopic = pairing.topic
+        }
+        responder.onSessionProposal = { [unowned self] proposal in
+            responder.client.approve(proposal: proposal, accounts: [])
+        }
+        responder.onSessionSettled = { sessionSettled in
+            responderSettlesSessionExpectation.fulfill()
+        }
+        proposer.onSessionSettled = { [unowned self] sessionSettled in
+            proposerSettlesSessionExpectation.fulfill()
+            if !initiatedSecondSession {
+                let _ = try! proposer.client.connect(sessionPermissions: permissions, topic: pairingTopic)
+                initiatedSecondSession = true
+            }
+        }
+        waitForExpectations(timeout: defaultTimeout, handler: nil)
+    }
 
     func testResponderRejectsSession() {
         let sessionRejectExpectation = expectation(description: "Proposer is notified on session rejection")
