@@ -120,7 +120,7 @@ public final class WakuNetworkRelay {
         let request = JSONRPCRequest(method: RelayJSONRPC.Method.unsubscribe.rawValue, params: params)
         let requestJson = try! request.json()
         var cancellable: AnyCancellable?
-//        jsonRpcSubscriptionsHistory.delete(topic: topic)
+        jsonRpcSubscriptionsHistory.delete(topic: topic)
         dispatcher.send(requestJson) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to Unsubscribe on Topic")
@@ -155,7 +155,7 @@ public final class WakuNetworkRelay {
         if let request = tryDecode(SubscriptionRequest.self, from: payload),
            request.method == RelayJSONRPC.Method.subscription.rawValue {
             do {
-//                try jsonRpcSubscriptionsHistory.set(topic: request.params.data.topic, request: request)
+                try jsonRpcSubscriptionsHistory.set(topic: request.params.data.topic, request: request)
                 onMessage?(request.params.data.topic, request.params.data.message)
                 acknowledgeSubscription(requestId: request.id)
             } catch {
@@ -184,7 +184,7 @@ public final class WakuNetworkRelay {
     private func acknowledgeSubscription(requestId: Int64) {
         let response = JSONRPCResponse(id: requestId, result: AnyCodable(true))
         let responseJson = try! response.json()
-//        try? jsonRpcSubscriptionsHistory.resolve(response: JsonRpcResponseTypes.response(response))
+        try? jsonRpcSubscriptionsHistory.resolve(response: JsonRpcResponseTypes.response(response))
         dispatcher.send(responseJson) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to Respond for request id: \(requestId), error: \(error)")
