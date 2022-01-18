@@ -26,7 +26,11 @@ class MockedWCRelay: WalletConnectRelaying {
     
     private(set) var requests: [(topic: String, request: WCRequest)] = []
 
-    func request(topic: String, payload: WCRequest, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ())) {
+    func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ())?) {
+        request(topic: topic, payload: wcMethod.asRequest(), completion: completion)
+    }
+    
+    func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ())?) {
         requests.append((topic, payload))
     }
     

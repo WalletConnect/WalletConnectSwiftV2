@@ -15,10 +15,16 @@ protocol WalletConnectRelaying: AnyObject {
     var onResponse: ((WCResponse) -> Void)? {get set}
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
-    func request(topic: String, payload: WCRequest, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->()))
+    func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
     func respond(topic: String, response: JsonRpcResponseTypes, completion: @escaping ((Error?)->()))
     func subscribe(topic: String)
     func unsubscribe(topic: String)
+}
+
+extension WalletConnectRelaying {
+    func request(_ wcMethod: WCMethod, onTopic topic: String) {
+        request(wcMethod, onTopic: topic, completion: nil)
+    }
 }
 
 class WalletConnectRelay: WalletConnectRelaying {
@@ -57,8 +63,12 @@ class WalletConnectRelay: WalletConnectRelaying {
         self.jsonRpcHistory = jsonRpcHistory
         setUpPublishers()
     }
-
-    func request(topic: String, payload: WCRequest, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())) {
+    
+    func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ())?) {
+        request(topic: topic, payload: wcMethod.asRequest(), completion: completion)
+    }
+    
+    func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?) {
         do {
             try jsonRpcHistory.set(topic: topic, request: payload)
             let message = try jsonRpcSerialiser.serialise(topic: topic, encodable: payload)
@@ -75,10 +85,10 @@ class WalletConnectRelay: WalletConnectRelaying {
                             self.logger.debug("WC Relay - received response on topic: \(topic)")
                             switch response {
                             case .response(let response):
-                                completion(.success(response))
+                                completion?(.success(response))
                             case .error(let error):
                                 self.logger.debug("Request error: \(error)")
-                                completion(.failure(error))
+                                completion?(.failure(error))
                             }
                         }
                 }
