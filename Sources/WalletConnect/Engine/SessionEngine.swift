@@ -492,11 +492,11 @@ final class SessionEngine {
         
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
         relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [unowned self] error in
-            onSessionApproved?(approvedSession)
             if let error = error {
                 logger.error(error)
             }
         }
+        onSessionApproved?(approvedSession)
     }
     
     private func setupExpirationHandling() {

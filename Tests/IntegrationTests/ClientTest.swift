@@ -95,11 +95,9 @@ final class ClientTests: XCTestCase {
             responder.client.approve(proposal: proposal, accounts: [])
         }
         responder.onSessionSettled = { sessionSettled in
-            print("GGGGGGGGGGGG")
             responderSettlesSessionExpectation.fulfill()
         }
         proposer.onSessionSettled = { [unowned self] sessionSettled in
-            print("UUUUUUUUUUUU")
             proposerSettlesSessionExpectation.fulfill()
             if !initiatedSecondSession {
                 let _ = try! proposer.client.connect(sessionPermissions: permissions, topic: pairingTopic)

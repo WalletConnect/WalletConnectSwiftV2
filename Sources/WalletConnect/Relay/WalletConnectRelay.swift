@@ -181,7 +181,6 @@ class WalletConnectRelay: WalletConnectRelaying {
             onResponse?(wcResponse)
         } catch  {
             logger.info("Info: \(error.localizedDescription)")
-            logger.info("‼️‼️response \(response.id)")
         }
     }
     
@@ -197,8 +196,6 @@ class WalletConnectRelay: WalletConnectRelaying {
             onResponse?(wcResponse)
         } catch {
             logger.info("Info: \(error.localizedDescription)")
-            logger.info("‼️‼️errror \(response.id)")
-
         }
     }
     
