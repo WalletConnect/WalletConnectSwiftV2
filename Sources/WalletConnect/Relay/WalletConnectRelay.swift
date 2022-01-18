@@ -62,6 +62,7 @@ class WalletConnectRelay: WalletConnectRelaying {
         do {
             try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
             let message = try jsonRpcSerialiser.serialise(topic: topic, encodable: payload)
+            logger.info("‼️‼️request id: \(payload.id) method: \(payload.method)")
             networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
                 guard let self = self else {return}
                 if let error = error {
@@ -180,6 +181,7 @@ class WalletConnectRelay: WalletConnectRelaying {
             onResponse?(wcResponse)
         } catch  {
             logger.info("Info: \(error.localizedDescription)")
+            logger.info("‼️‼️response \(response.id)")
         }
     }
     
@@ -195,6 +197,8 @@ class WalletConnectRelay: WalletConnectRelaying {
             onResponse?(wcResponse)
         } catch {
             logger.info("Info: \(error.localizedDescription)")
+            logger.info("‼️‼️errror \(response.id)")
+
         }
     }
     

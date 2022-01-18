@@ -489,10 +489,10 @@ final class SessionEngine {
             permissions: Session.Permissions(
                 blockchains: pendingSession.proposal.permissions.blockchain.chains,
                 methods: pendingSession.proposal.permissions.jsonrpc.methods))
-        onSessionApproved?(approvedSession)
         
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
         relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [unowned self] error in
+            onSessionApproved?(approvedSession)
             if let error = error {
                 logger.error(error)
             }
