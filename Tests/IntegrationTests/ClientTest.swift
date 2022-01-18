@@ -34,7 +34,7 @@ final class ClientTests: XCTestCase {
             relayHost: relayHost,
             logger: logger,
             keychain: KeychainStorage(keychainService: KeychainServiceFake()),
-            keyValueStore: RuntimeKeyValueStorage())
+            keyValueStorage: RuntimeKeyValueStorage())
         return ClientDelegate(client: client)
     }
     
