@@ -12,8 +12,8 @@ struct WCRequest: Codable {
         case method
         case params
     }
-
-    internal init(method: Method, params: Params, id: Int64 = generateId(), jsonrpc: String = "2.0") {
+    
+    internal init(id: Int64 = generateId(), jsonrpc: String = "2.0", method: Method, params: Params) {
         self.id = id
         self.jsonrpc = jsonrpc
         self.method = method
