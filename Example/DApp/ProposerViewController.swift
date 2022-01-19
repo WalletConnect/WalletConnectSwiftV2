@@ -18,7 +18,7 @@ final class ProposerViewController: UIViewController {
         )
     }()
     
-    var activeItems: [ActiveSessionItem] = []
+    var activeItems: [ActivePairingItem] = []
     private var currentURI: String?
     
     private let proposerView: ProposerView = {
@@ -159,9 +159,9 @@ extension ProposerViewController: WalletConnectClientDelegate {
     func didSettle(pairing: Pairing) {
         print("[PROPOSER] WC: Did settle pairing")
         let settledPairings = client.getSettledPairings()
-        let activePairings = settledPairings.map { pairing -> ActiveSessionItem in
+        let activePairings = settledPairings.map { pairing -> ActivePairingItem in
             let app = pairing.peer
-            return ActiveSessionItem(
+            return ActivePairingItem(
                 dappName: app?.name ?? "",
                 dappURL: app?.url ?? "",
                 iconURL: app?.icons?.first ?? "",

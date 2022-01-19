@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7603D74D2703429A00DD27A2 /* ProposerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7603D74C2703429A00DD27A2 /* ProposerView.swift */; };
-		761C649A26FB7ABB004239D1 /* ProposerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761C649926FB7ABB004239D1 /* ProposerViewController.swift */; };
 		761C649C26FB7B7F004239D1 /* ResponderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761C649B26FB7B7F004239D1 /* ResponderViewController.swift */; };
 		761C649E26FB7FD7004239D1 /* SessionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761C649D26FB7FD7004239D1 /* SessionViewController.swift */; };
 		761C64A326FB83CE004239D1 /* SessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761C64A226FB83CE004239D1 /* SessionView.swift */; };
@@ -28,6 +26,17 @@
 		8460DCFC274F98A10081F94C /* RequestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8460DCFB274F98A10081F94C /* RequestViewController.swift */; };
 		8460DD002750D6F50081F94C /* SessionDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8460DCFF2750D6F50081F94C /* SessionDetailsViewController.swift */; };
 		8460DD022750D7020081F94C /* SessionDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8460DD012750D7020081F94C /* SessionDetailsView.swift */; };
+		84CE641F27981DED00142511 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE641E27981DED00142511 /* AppDelegate.swift */; };
+		84CE642127981DED00142511 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE642027981DED00142511 /* SceneDelegate.swift */; };
+		84CE642327981DED00142511 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE642227981DED00142511 /* ViewController.swift */; };
+		84CE642827981DF000142511 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 84CE642727981DF000142511 /* Assets.xcassets */; };
+		84CE642B27981DF000142511 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 84CE642927981DF000142511 /* LaunchScreen.storyboard */; };
+		84CE6430279820F600142511 /* ProposerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761C649926FB7ABB004239D1 /* ProposerViewController.swift */; };
+		84CE6431279820F600142511 /* ProposerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7603D74C2703429A00DD27A2 /* ProposerView.swift */; };
+		84CE64352798222E00142511 /* ActiveSessionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE64332798222400142511 /* ActiveSessionCell.swift */; };
+		84CE64372798224900142511 /* ActivePairingItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE64362798224900142511 /* ActivePairingItem.swift */; };
+		84CE64392798228D00142511 /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = 84CE64382798228D00142511 /* Web3 */; };
+		84CE643B2798229100142511 /* WalletConnect in Frameworks */ = {isa = PBXBuildFile; productRef = 84CE643A2798229100142511 /* WalletConnect */; };
 		84F568C2279582D200D0A289 /* Signer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C1279582D200D0A289 /* Signer.swift */; };
 		84F568C42795832A00D0A289 /* EthereumTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C32795832A00D0A289 /* EthereumTransaction.swift */; };
 /* End PBXBuildFile section */
@@ -68,6 +77,15 @@
 		8460DCFB274F98A10081F94C /* RequestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestViewController.swift; sourceTree = "<group>"; };
 		8460DCFF2750D6F50081F94C /* SessionDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailsViewController.swift; sourceTree = "<group>"; };
 		8460DD012750D7020081F94C /* SessionDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailsView.swift; sourceTree = "<group>"; };
+		84CE641C27981DED00142511 /* DApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		84CE641E27981DED00142511 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		84CE642027981DED00142511 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		84CE642227981DED00142511 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		84CE642727981DF000142511 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		84CE642A27981DF000142511 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		84CE642C27981DF000142511 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		84CE64332798222400142511 /* ActiveSessionCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ActiveSessionCell.swift; path = DApp/ActiveSessionCell.swift; sourceTree = SOURCE_ROOT; };
+		84CE64362798224900142511 /* ActivePairingItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivePairingItem.swift; sourceTree = "<group>"; };
 		84F568C1279582D200D0A289 /* Signer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Signer.swift; sourceTree = "<group>"; };
 		84F568C32795832A00D0A289 /* EthereumTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthereumTransaction.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -89,6 +107,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		84CE641927981DED00142511 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				84CE643B2798229100142511 /* WalletConnect in Frameworks */,
+				84CE64392798228D00142511 /* Web3 in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -100,22 +127,11 @@
 				84F568C1279582D200D0A289 /* Signer.swift */,
 				84494387278D9C1B00CC26BB /* UIAlertController.swift */,
 				76744CF426FDFB6B00B77ED9 /* ResponderView.swift */,
-				76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */,
-				76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */,
 				764E1D5926F8DF1B00A1FB15 /* ScannerViewController.swift */,
 				761C64A426FCB08B004239D1 /* SessionProposal */,
 				8460DCFD274F98A90081F94C /* Request */,
 			);
 			path = Responder;
-			sourceTree = "<group>";
-		};
-		761C64A126FB838D004239D1 /* Proposer */ = {
-			isa = PBXGroup;
-			children = (
-				761C649926FB7ABB004239D1 /* ProposerViewController.swift */,
-				7603D74C2703429A00DD27A2 /* ProposerView.swift */,
-			);
-			path = Proposer;
 			sourceTree = "<group>";
 		};
 		761C64A426FCB08B004239D1 /* SessionProposal */ = {
@@ -133,6 +149,7 @@
 			children = (
 				764E1D3E26F8D3FC00A1FB15 /* ExampleApp */,
 				845B30ED27859686002E4094 /* ExampleAppTests */,
+				84CE641D27981DED00142511 /* DApp */,
 				764E1D3D26F8D3FC00A1FB15 /* Products */,
 				764E1D5326F8DAC800A1FB15 /* Frameworks */,
 				764E1D5626F8DB6000A1FB15 /* WalletConnectSwiftV2 */,
@@ -144,6 +161,7 @@
 			children = (
 				764E1D3C26F8D3FC00A1FB15 /* ExampleApp.app */,
 				845B30EC27859686002E4094 /* ExampleAppTests.xctest */,
+				84CE641C27981DED00142511 /* DApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -153,9 +171,10 @@
 			children = (
 				764E1D3F26F8D3FC00A1FB15 /* AppDelegate.swift */,
 				764E1D4126F8D3FC00A1FB15 /* SceneDelegate.swift */,
+				76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */,
+				76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */,
 				8460DCFE2750D6DF0081F94C /* SessionDetails */,
 				761C64A026FB8387004239D1 /* Responder */,
-				761C64A126FB838D004239D1 /* Proposer */,
 				764E1D4826F8D3FE00A1FB15 /* Assets.xcassets */,
 				764E1D4A26F8D3FE00A1FB15 /* LaunchScreen.storyboard */,
 				764E1D4D26F8D3FE00A1FB15 /* Info.plist */,
@@ -195,6 +214,23 @@
 				8460DD012750D7020081F94C /* SessionDetailsView.swift */,
 			);
 			path = SessionDetails;
+			sourceTree = "<group>";
+		};
+		84CE641D27981DED00142511 /* DApp */ = {
+			isa = PBXGroup;
+			children = (
+				84CE64362798224900142511 /* ActivePairingItem.swift */,
+				84CE64332798222400142511 /* ActiveSessionCell.swift */,
+				84CE641E27981DED00142511 /* AppDelegate.swift */,
+				84CE642027981DED00142511 /* SceneDelegate.swift */,
+				84CE642227981DED00142511 /* ViewController.swift */,
+				761C649926FB7ABB004239D1 /* ProposerViewController.swift */,
+				7603D74C2703429A00DD27A2 /* ProposerView.swift */,
+				84CE642727981DF000142511 /* Assets.xcassets */,
+				84CE642927981DF000142511 /* LaunchScreen.storyboard */,
+				84CE642C27981DF000142511 /* Info.plist */,
+			);
+			path = DApp;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -239,6 +275,27 @@
 			productReference = 845B30EC27859686002E4094 /* ExampleAppTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		84CE641B27981DED00142511 /* DApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 84CE642F27981DF000142511 /* Build configuration list for PBXNativeTarget "DApp" */;
+			buildPhases = (
+				84CE641827981DED00142511 /* Sources */,
+				84CE641927981DED00142511 /* Frameworks */,
+				84CE641A27981DED00142511 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DApp;
+			packageProductDependencies = (
+				84CE64382798228D00142511 /* Web3 */,
+				84CE643A2798229100142511 /* WalletConnect */,
+			);
+			productName = DApp;
+			productReference = 84CE641C27981DED00142511 /* DApp.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -254,6 +311,9 @@
 					845B30EB27859686002E4094 = {
 						CreatedOnToolsVersion = 13.2;
 						TestTargetID = 764E1D3B26F8D3FC00A1FB15;
+					};
+					84CE641B27981DED00142511 = {
+						CreatedOnToolsVersion = 13.2;
 					};
 				};
 			};
@@ -275,6 +335,7 @@
 			targets = (
 				764E1D3B26F8D3FC00A1FB15 /* ExampleApp */,
 				845B30EB27859686002E4094 /* ExampleAppTests */,
+				84CE641B27981DED00142511 /* DApp */,
 			);
 		};
 /* End PBXProject section */
@@ -296,6 +357,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		84CE641A27981DED00142511 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				84CE642B27981DF000142511 /* LaunchScreen.storyboard in Resources */,
+				84CE642827981DF000142511 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -306,7 +376,6 @@
 				761C64A326FB83CE004239D1 /* SessionView.swift in Sources */,
 				8460DCFC274F98A10081F94C /* RequestViewController.swift in Sources */,
 				76744CF526FDFB6B00B77ED9 /* ResponderView.swift in Sources */,
-				761C649A26FB7ABB004239D1 /* ProposerViewController.swift in Sources */,
 				8460DD002750D6F50081F94C /* SessionDetailsViewController.swift in Sources */,
 				76744CF926FE4D7400B77ED9 /* ActiveSessionCell.swift in Sources */,
 				764E1D4026F8D3FC00A1FB15 /* AppDelegate.swift in Sources */,
@@ -317,7 +386,6 @@
 				764E1D4226F8D3FC00A1FB15 /* SceneDelegate.swift in Sources */,
 				84F568C2279582D200D0A289 /* Signer.swift in Sources */,
 				8460DD022750D7020081F94C /* SessionDetailsView.swift in Sources */,
-				7603D74D2703429A00DD27A2 /* ProposerView.swift in Sources */,
 				764E1D5A26F8DF1B00A1FB15 /* ScannerViewController.swift in Sources */,
 				84494388278D9C1B00CC26BB /* UIAlertController.swift in Sources */,
 				84F568C42795832A00D0A289 /* EthereumTransaction.swift in Sources */,
@@ -329,6 +397,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				845B30EF27859686002E4094 /* ExampleAppTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		84CE641827981DED00142511 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				84CE6430279820F600142511 /* ProposerViewController.swift in Sources */,
+				84CE642327981DED00142511 /* ViewController.swift in Sources */,
+				84CE641F27981DED00142511 /* AppDelegate.swift in Sources */,
+				84CE642127981DED00142511 /* SceneDelegate.swift in Sources */,
+				84CE64352798222E00142511 /* ActiveSessionCell.swift in Sources */,
+				84CE6431279820F600142511 /* ProposerView.swift in Sources */,
+				84CE64372798224900142511 /* ActivePairingItem.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -347,6 +429,14 @@
 			isa = PBXVariantGroup;
 			children = (
 				764E1D4B26F8D3FE00A1FB15 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		84CE642927981DF000142511 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				84CE642A27981DF000142511 /* Base */,
 			);
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
@@ -558,6 +648,66 @@
 			};
 			name = Release;
 		};
+		84CE642D27981DF000142511 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = W5R8AG9K22;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DApp/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.DApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		84CE642E27981DF000142511 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = W5R8AG9K22;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DApp/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.DApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -588,6 +738,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		84CE642F27981DF000142511 /* Build configuration list for PBXNativeTarget "DApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				84CE642D27981DF000142511 /* Debug */,
+				84CE642E27981DF000142511 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -610,6 +769,15 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8449439F278EC49700CC26BB /* XCRemoteSwiftPackageReference "Web3" */;
 			productName = Web3;
+		};
+		84CE64382798228D00142511 /* Web3 */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8449439F278EC49700CC26BB /* XCRemoteSwiftPackageReference "Web3" */;
+			productName = Web3;
+		};
+		84CE643A2798229100142511 /* WalletConnect */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = WalletConnect;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
