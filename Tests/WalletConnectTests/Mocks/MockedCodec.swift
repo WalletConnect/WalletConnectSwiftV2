@@ -4,12 +4,12 @@ import Foundation
 @testable import WalletConnect
 
 class MockedCodec: Codec {
-    var hmacAuthenticator: HMACAutenticating
+    var hmacAuthenticator: HMACAuthenticating
     
     var encryptionPayload: EncryptionPayload!
     var decodedJson: String!
     
-    init(hmacAuthenticator: HMACAutenticating = HMACAutenticator()) {
+    init(hmacAuthenticator: HMACAuthenticating = HMACAuthenticator()) {
         self.hmacAuthenticator = hmacAuthenticator
     }
 

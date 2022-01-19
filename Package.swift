@@ -14,12 +14,12 @@ let package = Package(
             targets: ["WalletConnect"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .upToNextMinor(from: "1.4.1")),
+
     ],
     targets: [
         .target(
             name: "WalletConnect",
-            dependencies: ["CryptoSwift", "Relayer", "WalletConnectUtils"],
+            dependencies: ["Relayer", "WalletConnectUtils"],
             path: "Sources/WalletConnect"),
         .target(
             name: "Relayer",
