@@ -41,14 +41,9 @@ final class PairingEngine {
         removeRespondedPendingPairings()
         restoreSubscriptions()
         
-        relayer.onPairingApproveResponse = { [weak self] in
-            try? self?.acknowledgeApproval(pendingTopic: $0)
+        relayer.onPairingResponse = { [weak self] in
+            self?.handleReponse($0)
         }
-        
-        // TODO: Bind on response
-//        relayer.onResponse = { [weak self] in
-//            print($0.topic)
-//        }
     }
     
     func hasPairing(for topic: String) -> Bool {
@@ -107,22 +102,13 @@ final class PairingEngine {
         
         try? crypto.setAgreementSecret(agreementKeys, topic: settledTopic)
         
-        let approveParams = PairingType.ApprovalParams(
+        let approval = PairingType.ApprovalParams(
             relay: proposal.relay,
             responder: PairingParticipant(publicKey: selfPublicKey.hexRepresentation),
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
             state: nil) // Should this be removed?
-        let approvalPayload = WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
         
-        relayer.request(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
-            switch result {
-            case .success:
-                self?.logger.debug("Success on wc_pairingApprove - settled topic - \(settledTopic)")
-                self?.logger.debug("Pairing Success")
-            case .failure:
-                break
-            }
-        }
+        relayer.request(.wcPairingApprove(approval), onTopic: proposal.topic)
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
@@ -130,8 +116,7 @@ final class PairingEngine {
             logger.debug("Could not find pairing to ping for topic \(topic)")
             return
         }
-        let request = WCRequest(method: .pairingPing, params: .pairingPing(PairingType.PingParams()))
-        relayer.request(topic: topic, payload: request) { [unowned self] result in
+        relayer.request(.wcPairingPing, onTopic: topic) { [unowned self] result in
             switch result {
             case .success(_):
                 logger.debug("Did receive ping response")
@@ -159,6 +144,8 @@ final class PairingEngine {
         let pairing = Pairing(topic: settledPairing.topic, peer: nil)
         onApprovalAcknowledgement?(pairing)
         update(topic: settledPairing.topic)
+        logger.debug("Success on wc_pairingApprove - settled topic - \(settledTopic)")
+        logger.debug("Pairing Success")
     }
     
     private func update(topic: String) {
@@ -166,9 +153,7 @@ final class PairingEngine {
             logger.debug("Could not find pairing for topic \(topic)")
             return
         }
-        let params = WCRequest.Params.pairingUpdate(PairingType.UpdateParams(state: PairingState(metadata: appMetadata)))
-        let request = WCRequest(method: .pairingUpdate, params: params)
-        relayer.request(topic: topic, payload: request) { [unowned self] result in
+        relayer.request(.wcPairingUpdate(PairingType.UpdateParams(state: PairingState(metadata: appMetadata))), onTopic: topic) { [unowned self] result in
             switch result {
             case .success(_):
                 pairing.settled?.state?.metadata = appMetadata
@@ -316,6 +301,15 @@ final class PairingEngine {
             } else {
                 self?.logger.debug("successfully responded with error")
             }
+        }
+    }
+    
+    private func handleReponse(_ response: WCResponse) {
+        switch response.requestParams {
+        case .pairingApprove:
+            try? acknowledgeApproval(pendingTopic: response.topic)
+        default:
+            break
         }
     }
 }

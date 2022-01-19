@@ -86,8 +86,7 @@ final class SessionEngine {
         
         let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: proposal)
         let pairingPayloadParams = PairingType.PayloadParams(request: request)
-        let pairingPayloadRequest = WCRequest(method: .pairingPayload, params: .pairingPayload(pairingPayloadParams))
-        relayer.request(topic: settledPairing.topic, payload: pairingPayloadRequest) { [unowned self] result in
+        relayer.request(.wcPairingPayload(pairingPayloadParams), onTopic: settledPairing.topic) { [unowned self] result in
             switch result {
             case .success:
                 logger.debug("Session Proposal response received")
@@ -108,14 +107,13 @@ final class SessionEngine {
         let pendingSession = SessionSequence.buildResponded(proposal: proposal, agreementKeys: agreementKeys, metadata: metadata)
         let settledSession = SessionSequence.buildPreSettled(proposal: proposal, agreementKeys: agreementKeys, metadata: metadata, accounts: accounts)
         
-        let approveParams = SessionType.ApproveParams(
+        let approval = SessionType.ApproveParams(
             relay: proposal.relay,
             responder: SessionParticipant(
                 publicKey: selfPublicKey.hexRepresentation,
                 metadata: metadata),
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
             state: SessionState(accounts: accounts))
-        let approvalPayload = WCRequest(method: .sessionApprove, params: .sessionApprove(approveParams))
         
         sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: proposal.topic)
@@ -124,7 +122,7 @@ final class SessionEngine {
         sequencesStore.setSequence(settledSession)
         wcSubscriber.setSubscription(topic: settledTopic)
         
-        relayer.request(topic: proposal.topic, payload: approvalPayload) { [weak self] result in
+        relayer.request(.wcSessionApprove(approval), onTopic: proposal.topic) { [weak self] result in
             switch result {
             case .success:
                 self?.logger.debug("Success on wc_sessionApprove, published on topic: \(proposal.topic), settled topic: \(settledTopic)")
@@ -136,8 +134,7 @@ final class SessionEngine {
     
     func reject(proposal: SessionProposal, reason: Reason) {
         let rejectParams = SessionType.RejectParams(reason: reason.toInternal())
-        let rejectPayload = WCRequest(method: .sessionReject, params: .sessionReject(rejectParams))
-        _ = relayer.request(topic: proposal.topic, payload: rejectPayload) { [weak self] result in
+        relayer.request(.wcSessionReject(rejectParams), onTopic: proposal.topic) { [weak self] result in
             self?.logger.debug("Reject result: \(result)")
         }
     }
@@ -146,10 +143,7 @@ final class SessionEngine {
         logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
         sequencesStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
-        let params = WCRequest.Params.sessionDelete(SessionType.DeleteParams(reason: reason.toInternal()))
-        let request = WCRequest(method: .sessionDelete, params: params)
-
-        _ = relayer.request(topic: topic, payload: request) { [weak self] result in
+        relayer.request(.wcSessionDelete(SessionType.DeleteParams(reason: reason.toInternal())), onTopic: topic) { [weak self] result in
             self?.logger.debug("Session Delete result: \(result)")
         }
     }
@@ -159,8 +153,7 @@ final class SessionEngine {
             logger.debug("Could not find session to ping for topic \(topic)")
             return
         }
-        let request = WCRequest(method: .sessionPing, params: .sessionPing(SessionType.PingParams()))
-        relayer.request(topic: topic, payload: request) { [unowned self] result in
+        relayer.request(.wcSessionPing, onTopic: topic) { [unowned self] result in
             switch result {
             case .success(_):
                 logger.debug("Did receive ping response")
@@ -211,9 +204,7 @@ final class SessionEngine {
             return
         }
         session.update(accounts)
-        let params = WCRequest.Params.sessionUpdate(SessionType.UpdateParams(state: SessionState(accounts: accounts)))
-        let request = WCRequest(method: .sessionUpdate, params: params)
-        relayer.request(topic: topic, payload: request) { [unowned self] result in
+        relayer.request(.wcSessionUpdate(SessionType.UpdateParams(state: SessionState(accounts: accounts))), onTopic: topic) { [unowned self] result in
             switch result {
             case .success(_):
                 sequencesStore.setSequence(session)
@@ -233,9 +224,7 @@ final class SessionEngine {
         guard let newPermissions = session.settled?.permissions else {
             return
         }
-        let params = SessionType.UpgradeParams(permissions: newPermissions)
-        let request = WCRequest(method: .sessionUpgrade, params: .sessionUpgrade(params))
-        relayer.request(topic: topic, payload: request) { [unowned self] result in
+        relayer.request(.wcSessionUpgrade(SessionType.UpgradeParams(permissions: newPermissions)), onTopic: topic) { [unowned self] result in
             switch result {
             case .success(_):
                 sequencesStore.setSequence(session)
@@ -255,8 +244,7 @@ final class SessionEngine {
         do {
             let params = SessionType.NotificationParams(type: params.type, data: params.data)
             try validateNotification(session: session, params: params)
-            let request = WCRequest(method: .sessionNotification, params: .sessionNotification(params))
-            relayer.request(topic: topic, payload: request) {  result in
+            relayer.request(.wcSessionNotification(params), onTopic: topic) { result in
                 switch result {
                 case .success(_):
                     completion?(nil)
