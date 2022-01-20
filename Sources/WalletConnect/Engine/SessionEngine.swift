@@ -200,7 +200,11 @@ final class SessionEngine {
     // TODO: Validate accounts
     func update(topic: String, accounts: Set<String>) throws {
         var session = try sequencesStore.getSequence(forTopic: topic)
-        // Add accounts validation
+        for account in accounts {
+            if !String.conformsToCAIP10(account) {
+                throw WalletConnectError.internal(.notApproved) // TODO: Use a suitable error cases
+            }
+        }
         if !isController || session.settled?.status != .acknowledged {
             throw WalletConnectError.unauthrorized(.unauthorizedUpdateRequest)
         }
@@ -314,12 +318,17 @@ final class SessionEngine {
         }
     }
     
-    // TODO: Use protocol reason codes
+    // TODO: Use standard protocol reason codes when responding
     private func handleSessionUpdate(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {
         let topic = payload.topic
         let requestId = payload.wcRequest.id
         
-        // TODO: Validate accounts
+        for account in updateParams.state.accounts {
+            if !String.conformsToCAIP10(account) {
+                relayer.respondError(for: payload, reason: Reason(code: 0, message: "invalid accounts"))
+                return
+            }
+        }
         guard var session = try? sequencesStore.getSequence(forTopic: topic), session.isSettled else {
             relayer.respondError(for: payload, reason: Reason(code: 0, message: "session not found"))
             return

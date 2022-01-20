@@ -296,7 +296,7 @@ final class SessionEngineTests: XCTestCase {
         setupEngine(isController: true)
         let session = SessionSequence.stubSettled()
         storageMock.setSequence(session)
-        try engine.update(topic: session.topic, accounts: [""]) // TODO: Need account validation
+        try engine.update(topic: session.topic, accounts: ["std:0:0"])
         XCTAssertTrue(relayMock.didCallRequest)
     }
     
@@ -304,19 +304,19 @@ final class SessionEngineTests: XCTestCase {
         setupEngine(isController: false)
         let session = SessionSequence.stubSettled()
         storageMock.setSequence(session)
-        XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: []), "Update must fail if called by a non-controller.")
+        XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: ["std:0:0"]), "Update must fail if called by a non-controller.")
     }
     
     func testUpdateErrorSessionNotFound() {
         setupEngine(isController: true)
-        XCTAssertThrowsError(try engine.update(topic: "", accounts: []), "Update must fail if there is no session matching the target topic.")
+        XCTAssertThrowsError(try engine.update(topic: "", accounts: ["std:0:0"]), "Update must fail if there is no session matching the target topic.")
     }
     
     func testUpdateErrorSessionNotSettled() {
         setupEngine(isController: true)
         let session = SessionSequence.stubPreSettled()
         storageMock.setSequence(session)
-        XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: []), "Update must fail if session is not on settled state.")
+        XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: ["std:0:0"]), "Update must fail if session is not on settled state.")
     }
     
     // TODO: Update acknowledgement tests
