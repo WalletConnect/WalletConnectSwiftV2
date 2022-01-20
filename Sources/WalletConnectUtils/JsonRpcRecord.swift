@@ -1,16 +1,16 @@
 
 import Foundation
-import WalletConnectUtils
 
 public struct JsonRpcRecord: Codable {
-    let id: Int64
-    let topic: String
-    let request: Request
-    var response: JsonRpcResponseTypes?
+    public let id: Int64
+    public let topic: String
+    public let request: Request
+    public var response: JsonRpcResponseTypes?
+    public let chainId: String?
     
-    struct Request: Codable {
-        let method: String
-        let params: AnyCodable
+    public struct Request: Codable {
+        public let method: String
+        public let params: AnyCodable
     }
 }
 

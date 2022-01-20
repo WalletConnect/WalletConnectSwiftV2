@@ -18,7 +18,7 @@ class WalletConnectRelayTests: XCTestCase {
         let logger = ConsoleLoggerMock()
         serialiser = MockedJSONRPCSerialiser()
         networkRelayer = MockedNetworkRelayer()
-        wcRelay = WalletConnectRelay(networkRelayer: networkRelayer, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStorage: RuntimeKeyValueStorage()))
+        wcRelay = WalletConnectRelay(networkRelayer: networkRelayer, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<WalletConnect.JsonRpcRecord>(defaults: RuntimeKeyValueStorage(), identifier: "")))
     }
 
     override func tearDown() {
@@ -87,7 +87,7 @@ extension WalletConnectRelayTests {
         let wcRequestId: Int64 = 123456
         let sessionPayloadParams = SessionType.PayloadParams(request: SessionType.PayloadParams.Request(method: "method", params: AnyCodable("params")), chainId: "")
         let params = WCRequest.Params.sessionPayload(sessionPayloadParams)
-        let wcRequest = WCRequest(method: WCRequest.Method.sessionPayload, params: params, id: wcRequestId)
+        let wcRequest = WCRequest(id: wcRequestId, method: WCRequest.Method.sessionPayload, params: params)
         return wcRequest
     }
 }

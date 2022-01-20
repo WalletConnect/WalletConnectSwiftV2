@@ -171,7 +171,8 @@ final class SessionEngine {
         }
         let request = SessionType.PayloadParams.Request(method: params.method, params: params.params)
         let sessionPayloadParams = SessionType.PayloadParams(request: request, chainId: params.chainId)
-        relayer.request(.wcSessionPayload(sessionPayloadParams), onTopic: params.topic) { [weak self] result in
+        let sessionPayloadRequest = WCRequest(id: params.id, method: .sessionPayload, params: .sessionPayload(sessionPayloadParams))
+        relayer.request(topic: params.topic, payload: sessionPayloadRequest) { [weak self] result in
             switch result {
             case .success(let response):
                 completion(.success(response))
@@ -485,7 +486,6 @@ final class SessionEngine {
             permissions: Session.Permissions(
                 blockchains: pendingSession.proposal.permissions.blockchain.chains,
                 methods: pendingSession.proposal.permissions.jsonrpc.methods))
-        onSessionApproved?(approvedSession)
         
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
         relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [unowned self] error in
@@ -493,6 +493,7 @@ final class SessionEngine {
                 logger.error(error)
             }
         }
+        onSessionApproved?(approvedSession)
     }
     
     private func setupExpirationHandling() {
