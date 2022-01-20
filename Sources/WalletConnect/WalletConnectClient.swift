@@ -224,6 +224,7 @@ public final class WalletConnectClient {
         pairingEngine.getSettledPairings()
     }
     
+    /// - Returns: Pending requests received with wc_sessionPayload
     public func getPendingRequests() -> [Request] {
         history.getPending()
             .filter{$0.request.method == .sessionPayload}

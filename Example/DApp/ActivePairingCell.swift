@@ -1,6 +1,6 @@
 import UIKit
 
-final class ActiveSessionCell: UITableViewCell {
+final class ActivePairingCell: UITableViewCell {
     
     var item: ActivePairingItem? {
         didSet {
@@ -59,8 +59,8 @@ final class ActiveSessionCell: UITableViewCell {
     }
     
     private func show(_ item: ActivePairingItem) {
-        titleLabel.text = item.dappName
-        subtitleLabel.text = item.dappURL
+        titleLabel.text = item.peerName
+        subtitleLabel.text = item.peerURL
         iconView.image = nil
         guard let iconURL = URL(string: item.iconURL) else { return }
         DispatchQueue.global().async {

@@ -1,6 +1,6 @@
 struct ActivePairingItem {
-    let dappName: String
-    let dappURL: String
+    let peerName: String
+    let peerURL: String
     let iconURL: String
     let topic: String
 }

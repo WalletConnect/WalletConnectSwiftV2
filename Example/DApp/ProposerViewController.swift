@@ -39,18 +39,11 @@ final class ProposerViewController: UIViewController {
             target: self,
             action: #selector(connect)
         )
-        
-        proposerView.copyButton.addTarget(self, action: #selector(copyURI), for: .touchUpInside)
-        proposerView.copyButton.isHidden = true
-        
         proposerView.tableView.dataSource = self
         proposerView.tableView.delegate = self
         
         client.delegate = self
-    }
-    
-    @objc func copyURI() {
-        UIPasteboard.general.string = currentURI
+        client.logger.setLogging(level: .debug)
     }
     
     @objc
@@ -63,35 +56,20 @@ final class ProposerViewController: UIViewController {
         )
         do {
             if let uri = try client.connect(sessionPermissions: permissions) {
-                showQRCode(uriString: uri)
+                showConnectScreen(uriString: uri)
             }
         } catch {
             print("[PROPOSER] Pairing connect error: \(error)")
         }
     }
     
-    private func showQRCode(uriString: String) {
-        currentURI = uriString
-        DispatchQueue.global().async { [weak self] in
-            if let qrImage = self?.generateQRCode(from: uriString) {
-                DispatchQueue.main.async {
-                    self?.proposerView.qrCodeView.image = qrImage
-                    self?.proposerView.copyButton.isHidden = false
-                }
-            }
+    private func showConnectScreen(uriString: String) {
+        DispatchQueue.main.async { [unowned self] in
+            let vc = ConnectViewController(uri: uriString)
+            present(vc, animated: true, completion: nil)
         }
     }
-    
-    private func generateQRCode(from string: String) -> UIImage? {
-        let data = string.data(using: .ascii)
-        if let filter = CIFilter(name: "CIQRCodeGenerator") {
-            filter.setValue(data, forKey: "inputMessage")
-            if let output = filter.outputImage {
-                return UIImage(ciImage: output)
-            }
-        }
-        return nil
-    }
+
 }
 
 extension ProposerViewController: UITableViewDataSource, UITableViewDelegate {
@@ -101,13 +79,15 @@ extension ProposerViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "sessionCell", for: indexPath) as! ActiveSessionCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "sessionCell", for: indexPath) as! ActivePairingCell
         cell.item = activeItems[indexPath.row]
         return cell
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
+            let item = activeItems[indexPath.row]
+            client.disconnect(topic: item.topic, reason: Reason(code: 0, message: "disconnect"))
             activeItems.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .automatic)
         }
@@ -160,18 +140,16 @@ extension ProposerViewController: WalletConnectClientDelegate {
         print("[PROPOSER] WC: Did settle pairing")
         let settledPairings = client.getSettledPairings()
         let activePairings = settledPairings.map { pairing -> ActivePairingItem in
-            let app = pairing.peer
+            let peer = pairing.peer
             return ActivePairingItem(
-                dappName: app?.name ?? "",
-                dappURL: app?.url ?? "",
-                iconURL: app?.icons?.first ?? "",
+                peerName: peer?.name ?? "",
+                peerURL: peer?.url ?? "",
+                iconURL: peer?.icons?.first ?? "",
                 topic: pairing.topic)
         }
         DispatchQueue.main.async {
             self.activeItems = activePairings
             self.proposerView.tableView.reloadData()
-            self.proposerView.qrCodeView.image = nil
-            self.proposerView.copyButton.isHidden = true
         }
     }
     

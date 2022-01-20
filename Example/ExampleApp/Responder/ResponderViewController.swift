@@ -43,6 +43,7 @@ final class ResponderViewController: UIViewController {
         let settledSessions = client.getSettledSessions()
         sessionItems = getActiveSessionItem(for: settledSessions)
         client.delegate = self
+        client.logger.setLogging(level: .debug)
     }
     
     @objc
@@ -119,7 +120,6 @@ extension ResponderViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let item = sessionItems[indexPath.row]
-//            let deleteParams = SessionType.DeleteParams(topic: item.topic, reason: SessionType.Reason(code: 0, message: "disconnect"))
             client.disconnect(topic: item.topic, reason: Reason(code: 0, message: "disconnect"))
             sessionItems.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .automatic)
