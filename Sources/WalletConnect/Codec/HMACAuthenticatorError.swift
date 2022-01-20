@@ -2,6 +2,6 @@
 
 import Foundation
 
-enum HMACAutenticatorError: Error {
+enum HMACAuthenticatorError: Error {
     case invalidAuthenticationCode
 }
