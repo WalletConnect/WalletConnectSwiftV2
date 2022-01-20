@@ -40,6 +40,10 @@ class MockedWCRelay: WalletConnectRelaying {
         completion(error)
     }
     
+    func respondError(for payload: WCRequestSubscriptionPayload, reason: Reason) {
+        
+    }
+    
     func subscribe(topic: String) {
         didCallSubscribe = true
     }

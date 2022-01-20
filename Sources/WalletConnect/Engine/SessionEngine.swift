@@ -200,15 +200,13 @@ final class SessionEngine {
     // TODO: Validate accounts
     func update(topic: String, accounts: Set<String>) throws {
         var session = try sequencesStore.getSequence(forTopic: topic)
+        // Add accounts validation
         if !isController || session.settled?.status != .acknowledged {
             throw WalletConnectError.unauthrorized(.unauthorizedUpdateRequest)
         }
         session.update(accounts)
-        
         sequencesStore.setSequence(session)
-        let params = WCRequest.Params.sessionUpdate(SessionType.UpdateParams(state: SessionState(accounts: accounts)))
-        
-        relayer.request(.wcSessionUpdate(SessionType.UpdateParams(state: SessionState(accounts: accounts))), onTopic: topic)
+        relayer.request(.wcSessionUpdate(SessionType.UpdateParams(accounts: accounts)), onTopic: topic)
     }
     
     func upgrade(topic: String, permissions: Session.Permissions) {
@@ -266,7 +264,7 @@ final class SessionEngine {
             case .sessionReject(let rejectParams):
                 handleSessionReject(rejectParams, topic: topic)
             case .sessionUpdate(let updateParams):
-                handleSessionUpdate(topic: topic, updateParams: updateParams, requestId: requestId)
+                handleSessionUpdate(payload: subscriptionPayload, updateParams: updateParams)
             case .sessionUpgrade(let upgradeParams):
                 handleSessionUpgrade(topic: topic, upgradeParams: upgradeParams, requestId: requestId)
             case .sessionDelete(let deleteParams):
@@ -316,24 +314,29 @@ final class SessionEngine {
         }
     }
     
-    private func handleSessionUpdate(topic: String, updateParams: SessionType.UpdateParams, requestId: Int64) {
-        guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
-            logger.debug("Could not find session for topic \(topic)")
+    // TODO: Use protocol reason codes
+    private func handleSessionUpdate(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {
+        let topic = payload.topic
+        let requestId = payload.wcRequest.id
+        
+        // TODO: Validate accounts
+        guard var session = try? sequencesStore.getSequence(forTopic: topic), session.isSettled else {
+            relayer.respondError(for: payload, reason: Reason(code: 0, message: "session not found"))
             return
         }
-        guard session.peerIsController else {
-            let error = WalletConnectError.unauthrorized(.unauthorizedUpdateRequest)
-            logger.error(error)
-            respond(error: error, requestId: requestId, topic: topic)
+        guard !isController, session.peerIsController else {
+            relayer.respondError(for: payload, reason: Reason(code: 0, message: "unauthorized update"))
             return
         }
+        
+        session.settled?.state = updateParams.state
+        sequencesStore.setSequence(session)
+        
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
         relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [unowned self] error in
             if let error = error {
                 logger.error(error)
             } else {
-                session.settled?.state = updateParams.state
-                sequencesStore.setSequence(session)
                 onSessionUpdate?(topic, updateParams.state.accounts)
             }
         }
