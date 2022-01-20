@@ -3,48 +3,66 @@ import Foundation
 
 final class CryptoStorageProtocolMock: CryptoStorageProtocol {
     
-    var privateKeyStub = Crypto.X25519.PrivateKey()
+    func createX25519KeyPair() throws -> AgreementPublicKey {
+        defer { privateKeyStub = AgreementPrivateKey() }
+        try setPrivateKey(privateKeyStub)
+        return privateKeyStub.publicKey
+    }
     
-    private(set) var privateKeys: [String: Crypto.X25519.PrivateKey] = [:]
-    private(set) var agreementKeys: [String: Crypto.X25519.AgreementKeys] = [:]
+    func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret {
+        // TODO: Fix mock
+        guard let privateKey = try getPrivateKey(for: selfPublicKey) else {
+            fatalError() // TODO: handle error
+        }
+        let peerPublicKey = try AgreementPublicKey(rawRepresentation: Data(hex: hexRepresentation))
+        let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: peerPublicKey)
+        let rawSecret = sharedSecret.withUnsafeBytes { return Data(Array($0)) }
+        return AgreementSecret(sharedSecret: rawSecret, publicKey: privateKey.publicKey)
+    }
     
-    func generatePrivateKey() -> Crypto.X25519.PrivateKey {
-        defer { privateKeyStub = Crypto.X25519.PrivateKey() }
+    
+    var privateKeyStub = AgreementPrivateKey()
+    
+    private(set) var privateKeys: [String: AgreementPrivateKey] = [:]
+    private(set) var agreementKeys: [String: AgreementSecret] = [:]
+    
+    func makePrivateKey() -> AgreementPrivateKey {
+        defer { privateKeyStub = AgreementPrivateKey() }
         return privateKeyStub
     }
     
-    func set(privateKey: Crypto.X25519.PrivateKey) {
-        privateKeys[privateKey.publicKey.toHexString()] = privateKey
+    func setPrivateKey(_ privateKey: AgreementPrivateKey) throws {
+        privateKeys[privateKey.publicKey.rawRepresentation.toHexString()] = privateKey
     }
     
-    func set(agreementKeys: Crypto.X25519.AgreementKeys, topic: String) {
+    func getPrivateKey(for publicKey: AgreementPublicKey) throws -> AgreementPrivateKey? {
+        privateKeys[publicKey.rawRepresentation.toHexString()]
+    }
+    
+    func setAgreementSecret(_ agreementKeys: AgreementSecret, topic: String) {
         self.agreementKeys[topic] = agreementKeys
     }
     
-    func getPrivateKey(for publicKey: Data) throws -> Crypto.X25519.PrivateKey? {
-        privateKeys[publicKey.toHexString()]
-    }
-    
-    func getAgreementKeys(for topic: String) -> Crypto.X25519.AgreementKeys? {
-        fatalError()
+    func getAgreementSecret(for topic: String) -> AgreementSecret? {
+        agreementKeys[topic]
     }
     
     func deletePrivateKey(for publicKey: String) {
-        
+        privateKeys[publicKey] = nil
     }
     
-    func deleteAgreementKeys(for topic: String) {
-        
+    func deleteAgreementSecret(for topic: String) {
+        agreementKeys[topic] = nil
     }
 }
 
 extension CryptoStorageProtocolMock {
     
-    func hasPrivateKey(for publicKey: String) -> Bool {
-        privateKeys[publicKey] != nil
+    func hasPrivateKey(for publicKeyHex: String) -> Bool {
+        privateKeys[publicKeyHex] != nil
     }
     
-    func hasAgreementKeys(for topic: String) -> Bool {
+    func hasAgreementSecret(for topic: String) -> Bool {
         agreementKeys[topic] != nil
     }
 }

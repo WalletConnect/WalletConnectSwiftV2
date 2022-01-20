@@ -1,5 +1,8 @@
 import UIKit
 import WalletConnect
+import WalletConnectUtils
+import Web3
+import CryptoSwift
 
 final class ResponderViewController: UIViewController {
 
@@ -11,15 +14,15 @@ final class ResponderViewController: UIViewController {
             icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])
         return WalletConnectClient(
             metadata: metadata,
-            projectId: "",
+            projectId: "52af113ee0c1e1a20f4995730196c13e",
             isController: true,
-            relayHost: "relay.walletconnect.org",
+            relayHost: "relay.dev.walletconnect.com", //use with dapp at https://canary.react-app.walletconnect.com/
             clientName: "responder"
         )
     }()
-    let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
+    lazy  var account = Signer.privateKey.address.hex(eip55: true)
     var sessionItems: [ActiveSessionItem] = []
-    var currentProposal: SessionProposal?
+    var currentProposal: Session.Proposal?
     
     private let responderView: ResponderView = {
         ResponderView()
@@ -65,27 +68,30 @@ final class ResponderViewController: UIViewController {
     }
     
     private func showSessionDetailsViewController(_ session: Session) {
-        let sessionInfo = SessionInfo(name: session.peer.name ?? "",
-                                      descriptionText: session.peer.description ?? "",
-                                      dappURL: session.peer.description ?? "",
-                                      iconURL: session.peer.icons?.first ?? "",
-                                      chains: Array(session.permissions.blockchains),
-                                      methods: Array(session.permissions.methods))
-        let vc = SessionDetailsViewController(sessionInfo)
+        let vc = SessionDetailsViewController(session, client)
         navigationController?.pushViewController(vc, animated: true)
     }
     
-    private func showSessionRequest(_ sessionRequest: SessionRequest) {
+    private func showSessionRequest(_ sessionRequest: Request) {
         let requestVC = RequestViewController(sessionRequest)
-        requestVC.onSign = { [weak self] in
-            let result = "0xa3f20717a250c2b0b729b7e5becbff67fdaef7e0699da4de7ca5895b02a170a12d887fd3b17bfdce3481f10bea41f45ba9f709d39ce8325427b57afcfc994cee1b"
-            let response = JSONRPCResponse<AnyCodable>(id: sessionRequest.request.id, result: AnyCodable(result))
-            self?.client.respond(topic: sessionRequest.topic, response: .response(response))
+        requestVC.onSign = { [unowned self] in
+            let result = Signer.signEth(request: sessionRequest)
+            let response = JSONRPCResponse<AnyCodable>(id: sessionRequest.id, result: result)
+            client.respond(topic: sessionRequest.topic, response: .response(response))
+            reloadSessionDetailsIfNeeded()
         }
-        requestVC.onReject = { [weak self] in
-            self?.client.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.request.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
+        requestVC.onReject = { [unowned self] in
+            client.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
+            reloadSessionDetailsIfNeeded()
         }
+        reloadSessionDetailsIfNeeded()
         present(requestVC, animated: true)
+    }
+    
+    func reloadSessionDetailsIfNeeded() {
+        if let sessionDetailsViewController = navigationController?.viewControllers.first(where: {$0 is SessionDetailsViewController}) as? SessionDetailsViewController {
+            sessionDetailsViewController.reloadTable()
+        }
     }
     
     private func pairClient(uri: String) {
@@ -114,7 +120,7 @@ extension ResponderViewController: UITableViewDataSource, UITableViewDelegate {
         if editingStyle == .delete {
             let item = sessionItems[indexPath.row]
 //            let deleteParams = SessionType.DeleteParams(topic: item.topic, reason: SessionType.Reason(code: 0, message: "disconnect"))
-            client.disconnect(topic: item.topic, reason: SessionType.Reason(code: 0, message: "disconnect"))
+            client.disconnect(topic: item.topic, reason: Reason(code: 0, message: "disconnect"))
             sessionItems.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .automatic)
         }
@@ -147,22 +153,20 @@ extension ResponderViewController: SessionViewControllerDelegate {
         let proposal = currentProposal!
         currentProposal = nil
         let accounts = proposal.permissions.blockchains.map {$0+":\(account)"}
-        client.approve(proposal: proposal, accounts: Set(accounts)) { [weak self] _ in
-            self?.reloadActiveSessions()
-        }
+        client.approve(proposal: proposal, accounts: Set(accounts))
     }
     
     func didRejectSession() {
         print("did reject session")
         let proposal = currentProposal!
         currentProposal = nil
-        client.reject(proposal: proposal, reason: SessionType.Reason(code: 0, message: "reject"))
+        client.reject(proposal: proposal, reason: Reason(code: 0, message: "reject"))
     }
 }
 
 extension ResponderViewController: WalletConnectClientDelegate {
     
-    func didReceive(sessionProposal: SessionProposal) {
+    func didReceive(sessionProposal: Session.Proposal) {
         print("[RESPONDER] WC: Did receive session proposal")
         let appMetadata = sessionProposal.proposer
         let info = SessionInfo(
@@ -171,14 +175,18 @@ extension ResponderViewController: WalletConnectClientDelegate {
             dappURL: appMetadata.url ?? "",
             iconURL: appMetadata.icons?.first ?? "",
             chains: Array(sessionProposal.permissions.blockchains),
-            methods: Array(sessionProposal.permissions.methods))
+            methods: Array(sessionProposal.permissions.methods), pendingRequests: [])
         currentProposal = sessionProposal
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread
             self.showSessionProposal(info)
         }
     }
     
-    func didReceive(sessionRequest: SessionRequest) {
+    func didSettle(session: Session) {
+        reloadActiveSessions()
+    }
+    
+    func didReceive(sessionRequest: Request) {
         DispatchQueue.main.async { [weak self] in
             self?.showSessionRequest(sessionRequest)
         }
@@ -186,11 +194,11 @@ extension ResponderViewController: WalletConnectClientDelegate {
         
     }
     
-    func didReceive(notification: SessionNotification, sessionTopic: String) {
+    func didReceive(notification: Session.Notification, sessionTopic: String) {
 
     }
 
-    func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions) {
+    func didUpgrade(sessionTopic: String, permissions: Session.Permissions) {
 
     }
 
@@ -198,7 +206,7 @@ extension ResponderViewController: WalletConnectClientDelegate {
 
     }
     
-    func didDelete(sessionTopic: String, reason: SessionType.Reason) {
+    func didDelete(sessionTopic: String, reason: Reason) {
         reloadActiveSessions()
     }
     
@@ -220,25 +228,5 @@ extension ResponderViewController: WalletConnectClientDelegate {
             self.sessionItems = activeSessions
             self.responderView.tableView.reloadData()
         }
-    }
-}
-
-extension UIAlertController {
-    
-    static func createInputAlert(confirmHandler: @escaping (String) -> Void) -> UIAlertController {
-        let alert = UIAlertController(title: "Paste URI", message: "Enter a WalletConnect URI to connect.", preferredStyle: .alert)
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
-        let confirmAction = UIAlertAction(title: "Connect", style: .default) { _ in
-            if let input = alert.textFields?.first?.text, !input.isEmpty {
-                confirmHandler(input)
-            }
-        }
-        alert.addTextField { textField in
-            textField.placeholder = "wc://a14aefb980188fc35ec9..."
-        }
-        alert.addAction(cancelAction)
-        alert.addAction(confirmAction)
-        alert.preferredAction = confirmAction
-        return alert
     }
 }

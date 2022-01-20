@@ -1,6 +1,7 @@
 
 import Foundation
 import Combine
+import WalletConnectUtils
 
 protocol WCSubscribing: AnyObject {
     var onReceivePayload: ((WCRequestSubscriptionPayload)->())? {get set}
@@ -16,11 +17,11 @@ class WCSubscriber: WCSubscribing {
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.wc_subscriber",
                                                 attributes: .concurrent)
     private var publishers = [AnyCancellable]()
-    private let logger: ConsoleLogger
+    private let logger: ConsoleLogging
     var topics: [String] = []
 
     init(relay: WalletConnectRelaying,
-         logger: ConsoleLogger) {
+         logger: ConsoleLogging) {
         self.relay = relay
         self.logger = logger
         setSubscribingForPayloads()

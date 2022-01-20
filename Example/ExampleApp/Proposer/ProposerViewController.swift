@@ -11,9 +11,9 @@ final class ProposerViewController: UIViewController {
             icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])
         return WalletConnectClient(
             metadata: metadata,
-            projectId: "",
+            projectId: "52af113ee0c1e1a20f4995730196c13e",
             isController: false,
-            relayHost: "relay.walletconnect.org",
+            relayHost: "relay.dev.walletconnect.com",
             clientName: "proposer"
         )
     }()
@@ -56,16 +56,13 @@ final class ProposerViewController: UIViewController {
     @objc
     private func connect() {
         print("[PROPOSER] Connecting to a pairing...")
-        let connectParams = ConnectParams(
-            permissions: SessionType.Permissions(
-                blockchain: SessionType.Blockchain(chains: ["a chain"]),
-                jsonrpc: SessionType.JSONRPC(methods: ["a method"]),
-                notifications: SessionType.Notifications(types: [])
-            )
+        let permissions = Session.Permissions(
+            blockchains: ["a chain"],
+            methods: ["a method"],
+            notifications: []
         )
-        
         do {
-            if let uri = try client.connect(params: connectParams) {
+            if let uri = try client.connect(sessionPermissions: permissions) {
                 showQRCode(uriString: uri)
             }
         } catch {
@@ -127,23 +124,19 @@ extension ProposerViewController: UITableViewDataSource, UITableViewDelegate {
 
 extension ProposerViewController: WalletConnectClientDelegate {
 
-    func didSettle(pairing: Pairing) {
-
-    }
-
-    func didReceive(sessionProposal: SessionProposal) {
+    func didReceive(sessionProposal: Session.Proposal) {
         print("[PROPOSER] WC: Did receive session proposal")
     }
     
-    func didReceive(sessionRequest: SessionRequest) {
+    func didReceive(sessionRequest: Request) {
         print("[PROPOSER] WC: Did receive session request")
     }
 
-    func didReceive(notification: SessionNotification, sessionTopic: String) {
+    func didReceive(notification: Session.Notification, sessionTopic: String) {
 
     }
 
-    func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions) {
+    func didUpgrade(sessionTopic: String, permissions: Session.Permissions) {
 
     }
 
@@ -155,7 +148,7 @@ extension ProposerViewController: WalletConnectClientDelegate {
 
     }
 
-    func didDelete(sessionTopic: String, reason: SessionType.Reason) {
+    func didDelete(sessionTopic: String, reason: Reason) {
 
     }
 
@@ -163,7 +156,7 @@ extension ProposerViewController: WalletConnectClientDelegate {
         print("[PROPOSER] WC: Did settle session")
     }
     
-    func didSettle(pairing: PairingType.Settled) {
+    func didSettle(pairing: Pairing) {
         print("[PROPOSER] WC: Did settle pairing")
         let settledPairings = client.getSettledPairings()
         let activePairings = settledPairings.map { pairing -> ActiveSessionItem in
@@ -182,7 +175,7 @@ extension ProposerViewController: WalletConnectClientDelegate {
         }
     }
     
-    func didReject(pendingSessionTopic: String, reason: SessionType.Reason) {
+    func didReject(pendingSessionTopic: String, reason: Reason) {
         print("[PROPOSER] WC: Did reject session")
     }
 }

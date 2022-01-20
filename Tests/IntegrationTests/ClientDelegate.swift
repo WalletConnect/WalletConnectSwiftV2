@@ -6,13 +6,13 @@ class ClientDelegate: WalletConnectClientDelegate {
     var client: WalletConnectClient
     var onSessionSettled: ((Session)->())?
     var onPairingSettled: ((Pairing)->())?
-    var onSessionProposal: ((SessionProposal)->())?
-    var onSessionRequest: ((SessionRequest)->())?
-    var onSessionRejected: ((String, SessionType.Reason)->())?
+    var onSessionProposal: ((Session.Proposal)->())?
+    var onSessionRequest: ((Request)->())?
+    var onSessionRejected: ((String, Reason)->())?
     var onSessionDelete: (()->())?
-    var onSessionUpgrade: ((String, SessionType.Permissions)->())?
+    var onSessionUpgrade: ((String, Session.Permissions)->())?
     var onSessionUpdate: ((String, Set<String>)->())?
-    var onNotificationReceived: ((SessionNotification, String)->())?
+    var onNotificationReceived: ((Session.Notification, String)->())?
     var onPairingUpdate: ((String, AppMetadata)->())?
     
     internal init(client: WalletConnectClient) {
@@ -20,7 +20,7 @@ class ClientDelegate: WalletConnectClientDelegate {
         client.delegate = self
     }
     
-    func didReject(pendingSessionTopic: String, reason: SessionType.Reason) {
+    func didReject(pendingSessionTopic: String, reason: Reason) {
         onSessionRejected?(pendingSessionTopic, reason)
     }
     func didSettle(session: Session) {
@@ -29,22 +29,22 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didSettle(pairing: Pairing) {
         onPairingSettled?(pairing)
     }
-    func didReceive(sessionProposal: SessionProposal) {
+    func didReceive(sessionProposal: Session.Proposal) {
         onSessionProposal?(sessionProposal)
     }
-    func didReceive(sessionRequest: SessionRequest) {
+    func didReceive(sessionRequest: Request) {
         onSessionRequest?(sessionRequest)
     }
-    func didDelete(sessionTopic: String, reason: SessionType.Reason) {
+    func didDelete(sessionTopic: String, reason: Reason) {
         onSessionDelete?()
     }
-    func didUpgrade(sessionTopic: String, permissions: SessionType.Permissions) {
+    func didUpgrade(sessionTopic: String, permissions: Session.Permissions) {
         onSessionUpgrade?(sessionTopic, permissions)
     }
     func didUpdate(sessionTopic: String, accounts: Set<String>) {
         onSessionUpdate?(sessionTopic, accounts)
     }
-    func didReceive(notification: SessionNotification, sessionTopic: String) {
+    func didReceive(notification: Session.Notification, sessionTopic: String) {
         onNotificationReceived?(notification, sessionTopic)
     }
     func didUpdate(pairingTopic: String, appMetadata: AppMetadata) {

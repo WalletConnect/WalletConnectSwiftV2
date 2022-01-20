@@ -18,4 +18,10 @@ class MockedNetworkRelayer: NetworkRelaying {
     func unsubscribe(topic: String, completion: @escaping ((Error?) -> ())) -> Int64? {
         return 0
     }
+    func connect() {
+    }
+    
+    func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) {
+    }
+    
 }

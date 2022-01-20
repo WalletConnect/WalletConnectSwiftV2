@@ -2,6 +2,7 @@
 
 import Foundation
 import XCTest
+import TestingUtils
 @testable import WalletConnect
 
 class WCSubscriberTest: XCTestCase {
@@ -9,7 +10,7 @@ class WCSubscriberTest: XCTestCase {
     var subscriber: WCSubscriber!
     override func setUp() {
         relay = MockedWCRelay()
-        subscriber = WCSubscriber(relay: relay, logger: ConsoleLogger())
+        subscriber = WCSubscriber(relay: relay, logger: ConsoleLoggerMock())
     }
 
     override func tearDown() {

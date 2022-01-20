@@ -1,27 +1,6 @@
+
 import Foundation
 @testable import WalletConnect
-
-let defaultTimeout: TimeInterval = 5.0
-
-extension String {
-    static func randomTopic() -> String {
-        "\(UUID().uuidString)\(UUID().uuidString)".replacingOccurrences(of: "-", with: "").lowercased()
-    }
-}
-
-extension Result {
-    
-    var isSuccess: Bool {
-        if case .success = self { return true }
-        return false
-    }
-    
-    var isFailure: Bool {
-        if case .failure = self { return true }
-        return false
-    }
-}
-
 extension WCRequest {
     
     var isPairingApprove: Bool {
@@ -30,11 +9,11 @@ extension WCRequest {
     }
 }
 
-extension PairingType.ApproveParams {
+extension PairingType.ApprovalParams {
     
-    static func stub() -> PairingType.ApproveParams {
+    static func stub() -> PairingType.ApprovalParams {
         let options = RelayProtocolOptions(protocol: "", params: nil)
-        let participant = PairingType.Participant(publicKey: "")
-        return PairingType.ApproveParams(relay: options, responder: participant, expiry: 0, state: nil)
+        let participant = PairingParticipant(publicKey: "")
+        return PairingType.ApprovalParams(relay: options, responder: participant, expiry: 0, state: nil)
     }
 }

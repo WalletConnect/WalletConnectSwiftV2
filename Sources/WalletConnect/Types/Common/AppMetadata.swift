@@ -1,6 +1,7 @@
 
 import Foundation
 
+/// App metadata object that describes application metadata.
 public struct AppMetadata: Codable, Equatable {
     public init(name: String?, description: String?, url: String?, icons: [String]?) {
         self.name = name

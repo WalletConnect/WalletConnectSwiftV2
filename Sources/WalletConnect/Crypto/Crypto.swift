@@ -1,17 +1,15 @@
-// 
-
 import Foundation
-import CryptoKit
 
 // TODO: Come up with better naming conventions
 protocol CryptoStorageProtocol {
-    func generatePrivateKey() -> Crypto.X25519.PrivateKey
-    func set(privateKey: Crypto.X25519.PrivateKey)
-    func set(agreementKeys: Crypto.X25519.AgreementKeys, topic: String)
-    func getPrivateKey(for publicKey: Data) throws -> Crypto.X25519.PrivateKey?
-    func getAgreementKeys(for topic: String) -> Crypto.X25519.AgreementKeys?
+    func createX25519KeyPair() throws -> AgreementPublicKey
+    func setPrivateKey(_ privateKey: AgreementPrivateKey) throws
+    func setAgreementSecret(_ agreementSecret: AgreementSecret, topic: String) throws
+    func getPrivateKey(for publicKey: AgreementPublicKey) throws -> AgreementPrivateKey?
+    func getAgreementSecret(for topic: String) throws -> AgreementSecret?
     func deletePrivateKey(for publicKey: String)
-    func deleteAgreementKeys(for topic: String)
+    func deleteAgreementSecret(for topic: String)
+    func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret
 }
 
 class Crypto: CryptoStorageProtocol {
@@ -22,40 +20,38 @@ class Crypto: CryptoStorageProtocol {
         self.keychain = keychain
     }
     
-    func generatePrivateKey() -> Crypto.X25519.PrivateKey {
-        Crypto.X25519.PrivateKey()
+    func createX25519KeyPair() throws -> AgreementPublicKey {
+        let privateKey = AgreementPrivateKey()
+        try setPrivateKey(privateKey)
+        return privateKey.publicKey
     }
     
-    func set(privateKey: X25519.PrivateKey) {
+    func setPrivateKey(_ privateKey: AgreementPrivateKey) throws {
+        try keychain.add(privateKey, forKey: privateKey.publicKey.hexRepresentation)
+    }
+    
+    func setAgreementSecret(_ agreementSecret: AgreementSecret, topic: String) throws {
+        try keychain.add(agreementSecret, forKey: topic)
+    }
+    
+    func getPrivateKey(for publicKey: AgreementPublicKey) throws -> AgreementPrivateKey? {
         do {
-            try keychain.add(privateKey.raw, forKey: privateKey.publicKey.toHexString())
+            return try keychain.read(key: publicKey.hexRepresentation) as AgreementPrivateKey
+        } catch let error where (error as? KeychainError)?.status == errSecItemNotFound {
+            return nil
         } catch {
-            print("Error adding private key: \(error)")
+            throw error
         }
     }
     
-    func set(agreementKeys: Crypto.X25519.AgreementKeys, topic: String) {
-        let agreement = agreementKeys.sharedSecret + agreementKeys.publicKey
+    func getAgreementSecret(for topic: String) throws -> AgreementSecret? {
         do {
-            try keychain.add(agreement, forKey: topic)
+            return try keychain.read(key: topic) as AgreementSecret
+        } catch let error where (error as? KeychainError)?.status == errSecItemNotFound {
+            return nil
         } catch {
-            print("Error adding agreement keys: \(error)")
+            throw error
         }
-    }
-    
-    func getPrivateKey(for publicKey: Data) throws -> Crypto.X25519.PrivateKey? {
-        guard let privateKeyData = try? keychain.read(key: publicKey.toHexString()) as Data else {
-            return nil
-        }
-        return try Crypto.X25519.PrivateKey(raw: privateKeyData)
-    }
-    
-    func getAgreementKeys(for topic: String) -> Crypto.X25519.AgreementKeys? {
-        guard let agreement = try? keychain.read(key: topic) as Data else {
-            return nil
-        }
-        let (sharedSecret, publicKey) = split(concatinatedAgreementKeys: agreement)
-        return Crypto.X25519.AgreementKeys(sharedSecret: sharedSecret, publicKey: publicKey)
     }
     
     func deletePrivateKey(for publicKey: String) {
@@ -66,7 +62,7 @@ class Crypto: CryptoStorageProtocol {
         }
     }
     
-    func deleteAgreementKeys(for topic: String) {
+    func deleteAgreementSecret(for topic: String) {
         do {
             try keychain.delete(key: topic)
         } catch {
@@ -74,9 +70,18 @@ class Crypto: CryptoStorageProtocol {
         }
     }
     
-    private func split(concatinatedAgreementKeys: Data) -> (Data, Data) {
-        let sharedSecret = concatinatedAgreementKeys.subdata(in: 0..<32)
-        let publicKey = concatinatedAgreementKeys.subdata(in: 32..<64)
-        return (sharedSecret, publicKey)
+    func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret {
+        guard let privateKey = try getPrivateKey(for: selfPublicKey) else {
+            print("Key Agreement Error: Private key not found for public key: \(selfPublicKey.hexRepresentation)")
+            throw WalletConnectError.internal(.keyNotFound)
+        }
+        return try Crypto.generateAgreementSecret(from: privateKey, peerPublicKey: hexRepresentation)
+    }
+    
+    static func generateAgreementSecret(from privateKey: AgreementPrivateKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret {
+        let peerPublicKey = try AgreementPublicKey(rawRepresentation: Data(hex: hexRepresentation))
+        let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: peerPublicKey)
+        let rawSecret = sharedSecret.withUnsafeBytes { return Data(Array($0)) }
+        return AgreementSecret(sharedSecret: rawSecret, publicKey: privateKey.publicKey)
     }
 }

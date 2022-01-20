@@ -5,6 +5,9 @@ Swift implementation of WalletConnect v.2 protocol for native iOS applications.
 - XCode 13
 - Swift 5
 
+## Documentation
+In order to build documentation in XCode go to Product -> Build Documentation
+
 ## Usage
 ### Responder
 Responder client is usually a wallet.

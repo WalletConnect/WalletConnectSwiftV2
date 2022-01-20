@@ -1,4 +1,5 @@
 import XCTest
+import WalletConnectUtils
 @testable import WalletConnect
 
 struct ExpirableSequenceStub: ExpirableSequence, Equatable {
@@ -20,7 +21,7 @@ final class SequenceStoreTests: XCTestCase {
     override func setUp() {
         timeTraveler = TimeTraveler()
         storageFake = RuntimeKeyValueStorage()
-        sut = SequenceStore<ExpirableSequenceStub>(storage: storageFake, dateInitializer: timeTraveler.generateDate)
+        sut = SequenceStore<ExpirableSequenceStub>(storage: storageFake, identifier: "", dateInitializer: timeTraveler.generateDate)
         sut.onSequenceExpiration = { _, _ in
             XCTFail("Unexpected expiration call")
         }

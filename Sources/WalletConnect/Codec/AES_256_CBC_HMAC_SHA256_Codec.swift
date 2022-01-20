@@ -1,29 +1,29 @@
 // 
 
 import Foundation
-import CryptoSwift
+import CryptoKit
 
 protocol Codec {
-    var hmacAuthenticator: HMACAutenticating {get}
-    func encode(plainText: String, agreementKeys: Crypto.X25519.AgreementKeys) throws -> EncryptionPayload
+    var hmacAuthenticator: HMACAuthenticating {get}
+    func encode(plainText: String, agreementKeys: AgreementSecret) throws -> EncryptionPayload
     func decode(payload: EncryptionPayload, sharedSecret: Data) throws -> String
 }
 
 class AES_256_CBC_HMAC_SHA256_Codec: Codec {
-    let hmacAuthenticator: HMACAutenticating
+    let hmacAuthenticator: HMACAuthenticating
     
-    init(hmacAuthenticator: HMACAutenticating = HMACAutenticator()) {
+    init(hmacAuthenticator: HMACAuthenticating = HMACAuthenticator()) {
         self.hmacAuthenticator = hmacAuthenticator
     }
     
-    func encode(plainText: String, agreementKeys: Crypto.X25519.AgreementKeys) throws -> EncryptionPayload {
+    func encode(plainText: String, agreementKeys: AgreementSecret) throws -> EncryptionPayload {
         let (encryptionKey, authenticationKey) = getKeyPair(from: agreementKeys.sharedSecret)
         let plainTextData = try data(string: plainText)
         let (cipherText, iv) = try encrypt(key: encryptionKey, data: plainTextData)
-        let dataToMac = iv + agreementKeys.publicKey + cipherText
+        let dataToMac = iv + agreementKeys.publicKey.rawRepresentation + cipherText
         let hmac = try hmacAuthenticator.generateAuthenticationDigest(for: dataToMac, using: authenticationKey)
         return EncryptionPayload(iv: iv,
-                                 publicKey: agreementKeys.publicKey,
+                                 publicKey: agreementKeys.publicKey.rawRepresentation,
                                  mac: hmac,
                                  cipherText: cipherText)
     }
@@ -38,16 +38,16 @@ class AES_256_CBC_HMAC_SHA256_Codec: Codec {
     }
 
     private func encrypt(key: Data, data: Data) throws -> (cipherText: Data, iv: Data) {
-        let iv = AES.randomIV(AES.blockSize)
-        let cipher = try AES(key: key.bytes, blockMode: CBC(iv: iv))
-        let cipherText = try cipher.encrypt(data.bytes)
-        return (Data(cipherText), Data(iv))
+        let iv = AES.randomIV()
+        let symKey = SymmetricKey(data: key)
+        let cipherText = try AES.CBC.encrypt(data, using: symKey, iv: iv)
+        return (cipherText, iv)
     }
 
     private func decrypt(key: Data, data: Data, iv: Data) throws -> Data {
-        let cipher = try AES(key: key.bytes, blockMode: CBC(iv: iv.bytes))
-        let plainText = try cipher.decrypt(data.bytes)
-        return Data(plainText)
+        let symKey = SymmetricKey(data: key)
+        let plainText = try AES.CBC.decrypt(data, using: symKey, iv: iv)
+        return plainText
     }
 
     private func data(string: String) throws -> Data {

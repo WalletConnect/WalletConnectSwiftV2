@@ -20,7 +20,7 @@ extension UITabBarController {
         let proposerController = UINavigationController(rootViewController: ProposerViewController())
         proposerController.tabBarItem = UITabBarItem(title: "Dapp", image: UIImage(systemName: "appclip"), selectedImage: nil)
         let tabBarController = UITabBarController()
-        tabBarController.viewControllers = [responderController, proposerController]
+        tabBarController.viewControllers = [responderController]
         return tabBarController
     }
 }

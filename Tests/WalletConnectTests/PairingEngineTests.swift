@@ -1,29 +1,31 @@
 import XCTest
 @testable import WalletConnect
+import TestingUtils
+import WalletConnectUtils
 
-fileprivate extension SessionType.Permissions {
-    static func stub() -> SessionType.Permissions {
-        SessionType.Permissions(
-            blockchain: SessionType.Blockchain(chains: []),
-            jsonrpc: SessionType.JSONRPC(methods: []),
-            notifications: SessionType.Notifications(types: [])
+fileprivate extension SessionPermissions {
+    static func stub() -> SessionPermissions {
+        SessionPermissions(
+            blockchain: Blockchain(chains: []),
+            jsonrpc: JSONRPC(methods: []),
+            notifications: Notifications(types: [])
         )
     }
 }
 
 fileprivate extension WCRequest {
     
-    var approveParams: PairingType.ApproveParams? {
+    var approveParams: PairingType.ApprovalParams? {
         guard case .pairingApprove(let approveParams) = self.params else { return nil }
         return approveParams
     }
 }
 
-fileprivate func deriveTopic(publicKey: String, privateKey: Crypto.X25519.PrivateKey) -> String {
-    try! Crypto.X25519.generateAgreementKeys(peerPublicKey: Data(hex: publicKey), privateKey: privateKey).derivedTopic()
+func deriveTopic(publicKey: String, privateKey: AgreementPrivateKey) -> String {
+    try! Crypto.generateAgreementSecret(from: privateKey, peerPublicKey: publicKey).derivedTopic()
 }
 
-class PairingEngineTests: XCTestCase {
+final class PairingEngineTests: XCTestCase {
     
     var engine: PairingEngine!
     
@@ -53,7 +55,7 @@ class PairingEngineTests: XCTestCase {
     
     func setupEngine(isController: Bool) {
         let meta = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
-        let logger = ConsoleLogger()
+        let logger = ConsoleLoggerMock()
         engine = PairingEngine(
             relay: relayMock,
             crypto: cryptoMock,
@@ -69,10 +71,10 @@ class PairingEngineTests: XCTestCase {
         setupEngine(isController: false)
         
         let topicA = topicGenerator.topic
-        let uri = engine.propose(permissions: SessionType.Permissions.stub())!
+        let uri = engine.propose(permissions: SessionPermissions.stub())!
         
-        XCTAssert(cryptoMock.hasPrivateKey(for: uri.publicKey))
-        XCTAssert(storageMock.hasSequence(forTopic: topicA)) // TODO: check for pending state
+        XCTAssert(cryptoMock.hasPrivateKey(for: uri.publicKey), "Proposer must store the private key matching the public key sent through the URI.")
+        XCTAssert(storageMock.hasPendingProposedPairing(on: topicA), "The engine must store a pending pairing on proposed state.")
         XCTAssert(subscriberMock.didSubscribe(to: topicA), "Proposer must subscribe to topic A to listen for approval message.")
     }
     
@@ -83,18 +85,20 @@ class PairingEngineTests: XCTestCase {
         let topicA = uri.topic
         let topicB = deriveTopic(publicKey: uri.publicKey, privateKey: cryptoMock.privateKeyStub)
 
-        try engine.approve(uri) { _ in }
+        try engine.approve(uri)
 
+        // The concept of "publish" should only be known by the relayer
         guard let publishTopic = relayMock.requests.first?.topic, let approval = relayMock.requests.first?.request.approveParams else {
             XCTFail("Responder must publish an approval request."); return
         }
 
         XCTAssert(subscriberMock.didSubscribe(to: topicA), "Responder must subscribe to topic A to listen for approval request acknowledgement.")
-        XCTAssert(subscriberMock.didSubscribe(to: topicB))
-        XCTAssert(cryptoMock.hasPrivateKey(for: approval.responder.publicKey))
-        XCTAssert(cryptoMock.hasAgreementKeys(for: topicB))
-        XCTAssert(storageMock.hasSequence(forTopic: topicB)) // TODO: check for pre-settled state
-        XCTAssertEqual(publishTopic, topicA)
+        XCTAssert(subscriberMock.didSubscribe(to: topicB), "Responder must subscribe to topic B to settle the pairing sequence optimistically.")
+        XCTAssert(cryptoMock.hasPrivateKey(for: approval.responder.publicKey), "Responder must store the private key matching the public key sent to its peer.")
+        XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must derive and store the shared secret used to encrypt communication over topic B.")
+        XCTAssert(storageMock.hasPendingRespondedPairing(on: topicA), "The engine must store a pending pairing on responded state.")
+        XCTAssert(storageMock.hasPreSettledPairing(on: topicB), "The engine must optimistically store a settled pairing on pre-settled state.")
+        XCTAssertEqual(publishTopic, topicA, "The approval request must be published over topic A.")
     }
     
     func testApproveMultipleCallsThrottleOnSameURI() {
@@ -102,27 +106,46 @@ class PairingEngineTests: XCTestCase {
         let uri = WalletConnectURI.stub()
         for i in 1...10 {
             if i == 1 {
-                XCTAssertNoThrow(try engine.approve(uri) { _ in })
+                XCTAssertNoThrow(try engine.approve(uri))
             } else {
-                XCTAssertThrowsError(try engine.approve(uri) { _ in })
+                XCTAssertThrowsError(try engine.approve(uri))
             }
         }
     }
     
-    // TODO: approve acknowledgement tests for success and failure
+    func testApproveAcknowledgement() throws {
+        setupEngine(isController: true)
+        
+        let uri = WalletConnectURI.stub()
+        let topicA = uri.topic
+        let topicB = deriveTopic(publicKey: uri.publicKey, privateKey: cryptoMock.privateKeyStub)
+        var acknowledgedPairing: Pairing?
+        engine.onApprovalAcknowledgement = { acknowledgedPairing = $0 }
+
+        try engine.approve(uri)
+        let success = JSONRPCResponse<AnyCodable>(id: 0, result: AnyCodable(true))
+        let response = WCResponse(topic: topicA, requestMethod: .pairingApprove, requestParams: .pairingApprove(PairingType.ApprovalParams(relay: RelayProtocolOptions(protocol: "", params: nil), responder: PairingParticipant(publicKey: ""), expiry: 0, state: nil)), result: .success(success))
+        relayMock.onPairingResponse?(response)
+        
+        XCTAssert(storageMock.hasAcknowledgedPairing(on: topicB), "Settled pairing must advance to acknowledged state.")
+        XCTAssertFalse(storageMock.hasSequence(forTopic: topicA), "Pending pairing must be deleted.")
+        XCTAssert(subscriberMock.didUnsubscribe(to: topicA), "Responder must unsubscribe from topic A after approval acknowledgement.")
+        XCTAssertEqual(acknowledgedPairing?.topic, topicB, "The acknowledged pairing must be settled on topic B.")
+        // TODO: Assert update call
+    }
     
     func testReceiveApprovalResponse() {
         setupEngine(isController: false)
         
         var approvedPairing: Pairing?
-        let responderPubKey = Crypto.X25519.PrivateKey().publicKey.rawRepresentation.toHexString()
+        let responderPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let topicB = deriveTopic(publicKey: responderPubKey, privateKey: cryptoMock.privateKeyStub)
-        let uri = engine.propose(permissions: SessionType.Permissions.stub())!
+        let uri = engine.propose(permissions: SessionPermissions.stub())!
         let topicA = uri.topic
         
-        let approveParams = PairingType.ApproveParams(
+        let approveParams = PairingType.ApprovalParams(
             relay: RelayProtocolOptions(protocol: "", params: nil),
-            responder: PairingType.Participant(publicKey: responderPubKey),
+            responder: PairingParticipant(publicKey: responderPubKey),
             expiry: Time.day,
             state: nil)
         let request = WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
@@ -133,14 +156,15 @@ class PairingEngineTests: XCTestCase {
         }
         subscriberMock.onReceivePayload?(payload)
         
-        XCTAssert(subscriberMock.didUnsubscribe(to: topicA))
-        XCTAssert(subscriberMock.didSubscribe(to: topicB))
-        XCTAssert(cryptoMock.hasPrivateKey(for: uri.publicKey))
-        XCTAssert(cryptoMock.hasAgreementKeys(for: topicB))
-        XCTAssert(storageMock.hasSequence(forTopic: topicB)) // TODO: check for state
-        XCTAssertFalse(storageMock.hasSequence(forTopic: topicA))
-        XCTAssertNotNil(approvedPairing)
-        XCTAssertEqual(approvedPairing?.topic, topicB)
+        XCTAssert(subscriberMock.didUnsubscribe(to: topicA), "Proposer must unsubscribe from topic A after approval acknowledgement.")
+        XCTAssert(subscriberMock.didSubscribe(to: topicB), "Proposer must subscribe to topic B to settle for communication with the peer.")
+        XCTAssert(cryptoMock.hasPrivateKey(for: uri.publicKey), "Proposer must keep its private key after settlement.")
+        XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Proposer must derive and store the shared secret used to communicate over topic B.")
+        XCTAssert(storageMock.hasAcknowledgedPairing(on: topicB), "The acknowledged pairing must be settled on topic B.")
+        XCTAssertFalse(storageMock.hasSequence(forTopic: topicA), "The engine must clean any stored pairing on topic A.")
+        XCTAssertNotNil(approvedPairing, "The engine should callback the approved pairing after settlement.")
+        XCTAssertEqual(approvedPairing?.topic, topicB, "The approved pairing must settle on topic B.")
+        // TODO: Check if expiry time is correct
     }
     
 //    func testNotifyOnSessionProposal() {
@@ -156,8 +180,3 @@ class PairingEngineTests: XCTestCase {
 //        waitForExpectations(timeout: 0.01, handler: nil)
 //    }
 }
-
-fileprivate let sessionProposal = WCRequest(id: 0,
-                                                     jsonrpc: "2.0",
-                                                     method: WCRequest.Method.pairingPayload,
-                                                     params: WCRequest.Params.pairingPayload(PairingType.PayloadParams(request: PairingType.PayloadParams.Request(method: .sessionPropose, params: SessionType.ProposeParams(topic: "", relay: RelayProtocolOptions(protocol: "", params: []), proposer: SessionType.Proposer(publicKey: "", controller: false, metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil)), signal: SessionType.Signal(method: "", params: SessionType.Signal.Params(topic: "")), permissions: SessionType.Permissions(blockchain: SessionType.Blockchain(chains: []), jsonrpc: SessionType.JSONRPC(methods: []), notifications: SessionType.Notifications(types: [])), ttl: 100)))))
