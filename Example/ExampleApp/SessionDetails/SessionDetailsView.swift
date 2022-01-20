@@ -40,21 +40,17 @@ final class SessionDetailsView: UIView {
         return stackView
     }()
     
-    let chainsStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.spacing = 10
-        stackView.alignment = .leading
-        return stackView
+  
+    let pingButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Ping", for: .normal)
+        button.backgroundColor = .systemBlue
+        button.tintColor = .white
+        button.layer.cornerRadius = 8
+        return button
     }()
     
-    let methodsStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.spacing = 10
-        stackView.alignment = .leading
-        return stackView
-    }()
+    let tableView = UITableView()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -62,11 +58,12 @@ final class SessionDetailsView: UIView {
         
         addSubview(iconView)
         addSubview(headerStackView)
-        addSubview(chainsStackView)
-        addSubview(methodsStackView)
+        addSubview(tableView)
+
         headerStackView.addArrangedSubview(nameLabel)
         headerStackView.addArrangedSubview(urlLabel)
         headerStackView.addArrangedSubview(descriptionLabel)
+        addSubview(pingButton)
         
         subviews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
         
@@ -80,13 +77,15 @@ final class SessionDetailsView: UIView {
             headerStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
             headerStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
             
-            chainsStackView.topAnchor.constraint(equalTo: headerStackView.bottomAnchor, constant: 24),
-            chainsStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
-            chainsStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
-            
-            methodsStackView.topAnchor.constraint(equalTo: chainsStackView.bottomAnchor, constant: 24),
-            methodsStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
-            methodsStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
+            tableView.topAnchor.constraint(equalTo: headerStackView.bottomAnchor, constant: 0),
+            tableView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 0),
+            tableView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 0),
+            tableView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
+
+            pingButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            pingButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            pingButton.heightAnchor.constraint(equalToConstant: 44),
+            pingButton.widthAnchor.constraint(equalToConstant: 64),
         ])
     }
     
@@ -98,26 +97,6 @@ final class SessionDetailsView: UIView {
                     self?.iconView.image = UIImage(data: imageData)
                 }
             }
-        }
-    }
-    
-    func list(chains: [String]) {
-        let label = UILabel()
-        label.text = "Chains"
-        label.font = UIFont.systemFont(ofSize: 17.0, weight: .heavy)
-        chainsStackView.addArrangedSubview(label)
-        chains.forEach {
-            chainsStackView.addArrangedSubview(ListItem(text: $0))
-        }
-    }
-    
-    func list(methods: [String]) {
-        let label = UILabel()
-        label.text = "Methods"
-        label.font = UIFont.systemFont(ofSize: 17.0, weight: .heavy)
-        methodsStackView.addArrangedSubview(label)
-        methods.forEach {
-            methodsStackView.addArrangedSubview(ListItem(text: $0))
         }
     }
     

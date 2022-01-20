@@ -16,6 +16,7 @@ protocol WalletConnectRelaying: AnyObject {
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
     func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
+    func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?) 
     func respond(topic: String, response: JsonRpcResponseTypes, completion: @escaping ((Error?)->()))
     func subscribe(topic: String)
     func unsubscribe(topic: String)
@@ -70,7 +71,7 @@ class WalletConnectRelay: WalletConnectRelaying {
     
     func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?) {
         do {
-            try jsonRpcHistory.set(topic: topic, request: payload)
+            try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
             let message = try jsonRpcSerialiser.serialise(topic: topic, encodable: payload)
             networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
                 guard let self = self else {return}
@@ -157,7 +158,7 @@ class WalletConnectRelay: WalletConnectRelaying {
     
     private func handleWCRequest(topic: String, request: WCRequest) {
         do {
-            try jsonRpcHistory.set(topic: topic, request: request)
+            try jsonRpcHistory.set(topic: topic, request: request, chainId: getChainId(request))
             let payload = WCRequestSubscriptionPayload(topic: topic, wcRequest: request)
             wcRequestPublisherSubject.send(payload)
         } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
@@ -197,5 +198,10 @@ class WalletConnectRelay: WalletConnectRelaying {
         } catch {
             logger.info("Info: \(error.localizedDescription)")
         }
+    }
+    
+    func getChainId(_ request: WCRequest) -> String? {
+        guard case let .sessionPayload(payload) = request.params else {return nil}
+        return payload.chainId
     }
 }
