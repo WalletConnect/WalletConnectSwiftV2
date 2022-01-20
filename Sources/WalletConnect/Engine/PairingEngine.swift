@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import WalletConnectUtils
 
+
 final class PairingEngine {
     
     var onApprovalAcknowledgement: ((Pairing) -> Void)?
@@ -163,7 +164,7 @@ final class PairingEngine {
             }
         }
     }
-    
+
     private func setUpWCRequestHandling() {
         wcSubscriber.onReceivePayload = { [unowned self] subscriptionPayload in
             let requestId = subscriptionPayload.wcRequest.id
