@@ -34,6 +34,63 @@ fileprivate extension WCRequest {
     }
 }
 
+// TODO: Move stub extensions to helper files
+extension RelayProtocolOptions {
+    static func stub() -> RelayProtocolOptions {
+        RelayProtocolOptions(protocol: "", params: nil)
+    }
+}
+
+extension Participant {
+    static func stub() -> Participant {
+        Participant(publicKey: AgreementPrivateKey().publicKey.hexRepresentation, metadata: AppMetadata.stub())
+    }
+}
+
+extension AppMetadata {
+    static func stub() -> AppMetadata {
+        AppMetadata(
+            name: "Wallet Connect",
+            description: "A protocol to connect blockchain wallets to dapps.",
+            url: "https://walletconnect.com/",
+            icons: []
+        )
+    }
+}
+
+extension SessionSequence {
+    
+    static func stubPreSettled() -> SessionSequence {
+        SessionSequence(
+            topic: String.generateTopic()!,
+            relay: RelayProtocolOptions.stub(),
+            selfParticipant: Participant.stub(),
+            expiryDate: Date.distantFuture,
+            settledState: Settled(
+                peer: Participant.stub(),
+                permissions: SessionPermissions.stub(),
+                state: SessionState(accounts: []),
+                status: .preSettled
+            )
+        )
+    }
+    
+    static func stubSettled() -> SessionSequence {
+        SessionSequence(
+            topic: String.generateTopic()!,
+            relay: RelayProtocolOptions.stub(),
+            selfParticipant: Participant.stub(),
+            expiryDate: Date.distantFuture,
+            settledState: Settled(
+                peer: Participant.stub(),
+                permissions: SessionPermissions.stub(),
+                state: SessionState(accounts: []),
+                status: .acknowledged
+            )
+        )
+    }
+}
+
 final class SessionEngineTests: XCTestCase {
     
     var engine: SessionEngine!
@@ -300,6 +357,13 @@ final class SessionEngineTests: XCTestCase {
         XCTAssertTrue(relayMock.didCallRequest)
     }
     
+    func testUpdateErrorInvalidAccount() {
+        setupEngine(isController: true)
+        let session = SessionSequence.stubSettled()
+        storageMock.setSequence(session)
+        XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: ["err"]))
+    }
+    
     func testUpdateErrorIfNonController() {
         setupEngine(isController: false)
         let session = SessionSequence.stubSettled()
@@ -320,60 +384,4 @@ final class SessionEngineTests: XCTestCase {
     }
     
     // TODO: Update acknowledgement tests
-}
-
-extension SessionSequence {
-    
-    static func stubPreSettled() -> SessionSequence {
-        SessionSequence(
-            topic: String.generateTopic()!,
-            relay: RelayProtocolOptions.stub(),
-            selfParticipant: Participant.stub(),
-            expiryDate: Date.distantFuture,
-            settledState: Settled(
-                peer: Participant.stub(),
-                permissions: SessionPermissions.stub(),
-                state: SessionState(accounts: []),
-                status: .preSettled
-            )
-        )
-    }
-    
-    static func stubSettled() -> SessionSequence {
-        SessionSequence(
-            topic: String.generateTopic()!,
-            relay: RelayProtocolOptions.stub(),
-            selfParticipant: Participant.stub(),
-            expiryDate: Date.distantFuture,
-            settledState: Settled(
-                peer: Participant.stub(),
-                permissions: SessionPermissions.stub(),
-                state: SessionState(accounts: []),
-                status: .acknowledged
-            )
-        )
-    }
-}
-
-extension RelayProtocolOptions {
-    static func stub() -> RelayProtocolOptions {
-        RelayProtocolOptions(protocol: "", params: nil)
-    }
-}
-
-extension Participant {
-    static func stub() -> Participant {
-        Participant(publicKey: AgreementPrivateKey().publicKey.hexRepresentation, metadata: AppMetadata.stub())
-    }
-}
-
-extension AppMetadata {
-    static func stub() -> AppMetadata {
-        AppMetadata(
-            name: "Wallet Connect",
-            description: "A protocol to connect blockchain wallets to dapps.",
-            url: "https://walletconnect.com/",
-            icons: []
-        )
-    }
 }

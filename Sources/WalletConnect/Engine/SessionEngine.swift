@@ -198,7 +198,6 @@ final class SessionEngine {
         }
     }
     
-    // TODO: Validate accounts
     func update(topic: String, accounts: Set<String>) throws {
         var session = try sequencesStore.getSequence(forTopic: topic)
         for account in accounts {
@@ -518,6 +517,8 @@ final class SessionEngine {
             handleProposeResponse(topic: response.topic, proposeParams: proposeParams, result: response.result)
         case .sessionApprove(let approveParams):
             handleApproveResponse(topic: response.topic, result: response.result)
+        case .sessionUpdate:
+            handleUpdateResponse(topic: response.topic, result: response.result)
         default:
             break
         }
