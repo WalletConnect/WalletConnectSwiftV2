@@ -31,6 +31,7 @@ public final class WalletConnectClient {
     private let secureStorage: SecureStorage
     private let pairingQueue = DispatchQueue(label: "com.walletconnect.sdk.client.pairing", qos: .userInitiated)
     private let history: JsonRpcHistory
+    private var backgroundTaskID: UIBackgroundTaskIdentifier = .invalid
     
     // MARK: - Initializers
 
@@ -68,8 +69,21 @@ public final class WalletConnectClient {
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
         setUpEnginesCallbacks()
         subscribeNotificationCenter()
+        registerBackgroundTask()
     }
     
+    func registerBackgroundTask() {
+        self.backgroundTaskID = UIApplication.shared.beginBackgroundTask (withName: "Finish Network Tasks") { [weak self] in
+            self?.endBackgroundTask()
+        }
+    }
+    
+    func endBackgroundTask() {
+        wakuRelay.disconnect(closeCode: .goingAway)
+        print("Background task ended.")
+        UIApplication.shared.endBackgroundTask(backgroundTaskID)
+        backgroundTaskID = .invalid
+    }
     deinit {
         unsubscribeNotificationCenter()
     }
@@ -293,11 +307,6 @@ public final class WalletConnectClient {
 #if os(iOS)
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(appDidEnterBackground),
-            name: UIApplication.didEnterBackgroundNotification,
-            object: nil)
-        NotificationCenter.default.addObserver(
-            self,
             selector: #selector(appWillEnterForeground),
             name: UIApplication.willEnterForegroundNotification,
             object: nil)
@@ -306,7 +315,6 @@ public final class WalletConnectClient {
     
     private func unsubscribeNotificationCenter() {
 #if os(iOS)
-        NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
 #endif
     }
@@ -314,10 +322,7 @@ public final class WalletConnectClient {
     @objc
     private func appWillEnterForeground() {
         wakuRelay.connect()
+        registerBackgroundTask()
     }
-    
-    @objc
-    private func appDidEnterBackground() {
-        wakuRelay.disconnect(closeCode: .goingAway)
-    }
+
 }
