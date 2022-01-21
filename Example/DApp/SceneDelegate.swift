@@ -1,5 +1,6 @@
 
 import UIKit
+import WalletConnect
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -12,10 +13,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
-        if ClientDelegate.shared.client.getSettledSessions().count == 0 {
-            showSelectChainScreen()
+        if let session = ClientDelegate.shared.client.getSettledSessions().first {
+            showAccountsScreen(session)
         } else {
-            
+            showSelectChainScreen()
         }
     }
 
@@ -31,7 +32,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     func showAccountsScreen(_ session: Session) {
-        window?.rootViewController = UINavigationController(rootViewController: ProposerViewController(session: session))
+        let vc = AccountsViewController(session: session)
+        vc.onDisconnect = { [unowned self]  in
+            showSelectChainScreen()
+        }
+        window?.rootViewController = UINavigationController(rootViewController: vc)
         window?.makeKeyAndVisible()
     }
     

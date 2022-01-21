@@ -5,11 +5,12 @@ struct AccountDetails {
     let methods: [String]
     let account: String
 }
-final class ProposerViewController: UIViewController {
+final class AccountsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate  {
     
     let client = ClientDelegate.shared.client
     let session: Session
-    var activeItems: [AccountDetails] = []
+    var accountsDetails: [AccountDetails] = []
+    var onDisconnect: (()->())?
     
     private let proposerView: ProposerView = {
         ProposerView()
@@ -41,27 +42,41 @@ final class ProposerViewController: UIViewController {
         proposerView.tableView.dataSource = self
         proposerView.tableView.delegate = self
         client.logger.setLogging(level: .debug)
-        session.
+        session.permissions.blockchains.forEach { chain in
+            session.accounts.forEach { account in
+                accountsDetails.append(AccountDetails(chain: chain, methods: Array(session.permissions.methods), account: account))
+            }
+        }
     }
     
     @objc
     private func disconnect() {
         client.disconnect(topic: session.topic, reason: Reason(code: 0, message: "disconnect"))
+        onDisconnect?()
     }
-}
-
-extension ProposerViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        activeItems.count
+        accountsDetails.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "pairingCell", for: indexPath) as! ActivePairingCell
-        cell.item = activeItems[indexPath.row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: "accountCell", for: indexPath)
+        let details = accountsDetails[indexPath.row]
+        cell.textLabel?.text = details.account
+        cell.imageView?.image = UIImage(named: details.chain)
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        showSessionScreen()
     }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 70
+    }
+    
+    func showSessionScreen() {
+        
+    }
+    
 }

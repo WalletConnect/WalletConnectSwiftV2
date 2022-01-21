@@ -2,9 +2,9 @@ import UIKit
 
 final class ProposerView: UIView {
     let tableView: UITableView = {
-        let tableView = UITableView(frame: .zero, style: .insetGrouped)
+        let tableView = UITableView(frame: .zero, style: .plain)
         tableView.backgroundColor = .tertiarySystemBackground
-        tableView.register(ActivePairingCell.self, forCellReuseIdentifier: "pairincCell")
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "accountCell")
         return tableView
     }()
     

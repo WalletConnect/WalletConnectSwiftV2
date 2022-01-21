@@ -31,9 +31,8 @@
 		84CE642327981DED00142511 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE642227981DED00142511 /* ViewController.swift */; };
 		84CE642827981DF000142511 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 84CE642727981DF000142511 /* Assets.xcassets */; };
 		84CE642B27981DF000142511 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 84CE642927981DF000142511 /* LaunchScreen.storyboard */; };
-		84CE6430279820F600142511 /* ProposerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761C649926FB7ABB004239D1 /* ProposerViewController.swift */; };
+		84CE6430279820F600142511 /* AccountsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761C649926FB7ABB004239D1 /* AccountsViewController.swift */; };
 		84CE6431279820F600142511 /* ProposerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7603D74C2703429A00DD27A2 /* ProposerView.swift */; };
-		84CE64352798222E00142511 /* ActivePairingCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE64332798222400142511 /* ActivePairingCell.swift */; };
 		84CE64372798224900142511 /* ActivePairingItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE64362798224900142511 /* ActivePairingItem.swift */; };
 		84CE64392798228D00142511 /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = 84CE64382798228D00142511 /* Web3 */; };
 		84CE643B2798229100142511 /* WalletConnect in Frameworks */ = {isa = PBXBuildFile; productRef = 84CE643A2798229100142511 /* WalletConnect */; };
@@ -56,7 +55,7 @@
 
 /* Begin PBXFileReference section */
 		7603D74C2703429A00DD27A2 /* ProposerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProposerView.swift; sourceTree = "<group>"; };
-		761C649926FB7ABB004239D1 /* ProposerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProposerViewController.swift; sourceTree = "<group>"; };
+		761C649926FB7ABB004239D1 /* AccountsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsViewController.swift; sourceTree = "<group>"; };
 		761C649B26FB7B7F004239D1 /* ResponderViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResponderViewController.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		761C649D26FB7FD7004239D1 /* SessionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionViewController.swift; sourceTree = "<group>"; };
 		761C64A226FB83CE004239D1 /* SessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionView.swift; sourceTree = "<group>"; };
@@ -87,7 +86,6 @@
 		84CE642727981DF000142511 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		84CE642A27981DF000142511 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		84CE642C27981DF000142511 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		84CE64332798222400142511 /* ActivePairingCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ActivePairingCell.swift; path = DApp/ActivePairingCell.swift; sourceTree = SOURCE_ROOT; };
 		84CE64362798224900142511 /* ActivePairingItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivePairingItem.swift; sourceTree = "<group>"; };
 		84CE643C2798322600142511 /* ConnectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectViewController.swift; sourceTree = "<group>"; };
 		84CE6443279AB5AD00142511 /* SelectChainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectChainViewController.swift; sourceTree = "<group>"; };
@@ -226,11 +224,10 @@
 			isa = PBXGroup;
 			children = (
 				84CE64362798224900142511 /* ActivePairingItem.swift */,
-				84CE64332798222400142511 /* ActivePairingCell.swift */,
 				84CE641E27981DED00142511 /* AppDelegate.swift */,
 				84CE642027981DED00142511 /* SceneDelegate.swift */,
 				84CE642227981DED00142511 /* ViewController.swift */,
-				761C649926FB7ABB004239D1 /* ProposerViewController.swift */,
+				761C649926FB7ABB004239D1 /* AccountsViewController.swift */,
 				84CE6445279ABBF300142511 /* ClientDelegate.swift */,
 				84CE6443279AB5AD00142511 /* SelectChainViewController.swift */,
 				84CE643C2798322600142511 /* ConnectViewController.swift */,
@@ -413,12 +410,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84CE6430279820F600142511 /* ProposerViewController.swift in Sources */,
+				84CE6430279820F600142511 /* AccountsViewController.swift in Sources */,
 				84CE6446279ABBF300142511 /* ClientDelegate.swift in Sources */,
 				84CE642327981DED00142511 /* ViewController.swift in Sources */,
 				84CE641F27981DED00142511 /* AppDelegate.swift in Sources */,
 				84CE642127981DED00142511 /* SceneDelegate.swift in Sources */,
-				84CE64352798222E00142511 /* ActivePairingCell.swift in Sources */,
 				84CE6431279820F600142511 /* ProposerView.swift in Sources */,
 				84CE64372798224900142511 /* ActivePairingItem.swift in Sources */,
 				84CE643D2798322600142511 /* ConnectViewController.swift in Sources */,
