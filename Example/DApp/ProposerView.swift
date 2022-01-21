@@ -4,7 +4,7 @@ final class ProposerView: UIView {
     let tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .insetGrouped)
         tableView.backgroundColor = .tertiarySystemBackground
-        tableView.register(ActivePairingCell.self, forCellReuseIdentifier: "sessionCell")
+        tableView.register(ActivePairingCell.self, forCellReuseIdentifier: "pairincCell")
         return tableView
     }()
     

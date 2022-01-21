@@ -38,6 +38,8 @@
 		84CE64392798228D00142511 /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = 84CE64382798228D00142511 /* Web3 */; };
 		84CE643B2798229100142511 /* WalletConnect in Frameworks */ = {isa = PBXBuildFile; productRef = 84CE643A2798229100142511 /* WalletConnect */; };
 		84CE643D2798322600142511 /* ConnectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE643C2798322600142511 /* ConnectViewController.swift */; };
+		84CE6444279AB5AD00142511 /* SelectChainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE6443279AB5AD00142511 /* SelectChainViewController.swift */; };
+		84CE6446279ABBF300142511 /* ClientDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE6445279ABBF300142511 /* ClientDelegate.swift */; };
 		84F568C2279582D200D0A289 /* Signer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C1279582D200D0A289 /* Signer.swift */; };
 		84F568C42795832A00D0A289 /* EthereumTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C32795832A00D0A289 /* EthereumTransaction.swift */; };
 /* End PBXBuildFile section */
@@ -88,6 +90,8 @@
 		84CE64332798222400142511 /* ActivePairingCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ActivePairingCell.swift; path = DApp/ActivePairingCell.swift; sourceTree = SOURCE_ROOT; };
 		84CE64362798224900142511 /* ActivePairingItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivePairingItem.swift; sourceTree = "<group>"; };
 		84CE643C2798322600142511 /* ConnectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectViewController.swift; sourceTree = "<group>"; };
+		84CE6443279AB5AD00142511 /* SelectChainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectChainViewController.swift; sourceTree = "<group>"; };
+		84CE6445279ABBF300142511 /* ClientDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientDelegate.swift; sourceTree = "<group>"; };
 		84F568C1279582D200D0A289 /* Signer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Signer.swift; sourceTree = "<group>"; };
 		84F568C32795832A00D0A289 /* EthereumTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthereumTransaction.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -227,6 +231,8 @@
 				84CE642027981DED00142511 /* SceneDelegate.swift */,
 				84CE642227981DED00142511 /* ViewController.swift */,
 				761C649926FB7ABB004239D1 /* ProposerViewController.swift */,
+				84CE6445279ABBF300142511 /* ClientDelegate.swift */,
+				84CE6443279AB5AD00142511 /* SelectChainViewController.swift */,
 				84CE643C2798322600142511 /* ConnectViewController.swift */,
 				7603D74C2703429A00DD27A2 /* ProposerView.swift */,
 				84CE642727981DF000142511 /* Assets.xcassets */,
@@ -408,6 +414,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				84CE6430279820F600142511 /* ProposerViewController.swift in Sources */,
+				84CE6446279ABBF300142511 /* ClientDelegate.swift in Sources */,
 				84CE642327981DED00142511 /* ViewController.swift in Sources */,
 				84CE641F27981DED00142511 /* AppDelegate.swift in Sources */,
 				84CE642127981DED00142511 /* SceneDelegate.swift in Sources */,
@@ -415,6 +422,7 @@
 				84CE6431279820F600142511 /* ProposerView.swift in Sources */,
 				84CE64372798224900142511 /* ActivePairingItem.swift in Sources */,
 				84CE643D2798322600142511 /* ConnectViewController.swift in Sources */,
+				84CE6444279AB5AD00142511 /* SelectChainViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
