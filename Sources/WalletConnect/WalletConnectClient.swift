@@ -31,8 +31,10 @@ public final class WalletConnectClient {
     private let secureStorage: SecureStorage
     private let pairingQueue = DispatchQueue(label: "com.walletconnect.sdk.client.pairing", qos: .userInitiated)
     private let history: JsonRpcHistory
+#if os(iOS)
     private var backgroundTaskID: UIBackgroundTaskIdentifier = .invalid
-    
+#endif
+
     // MARK: - Initializers
 
     /// Initializes and returns newly created WalletConnect Client Instance. Establishes a network connection with the relay
@@ -73,16 +75,20 @@ public final class WalletConnectClient {
     }
     
     func registerBackgroundTask() {
-        self.backgroundTaskID = UIApplication.shared.beginBackgroundTask (withName: "Finish Network Tasks") { [weak self] in
+#if os(iOS)
+        backgroundTaskID = UIApplication.shared.beginBackgroundTask (withName: "Finish Network Tasks") { [weak self] in
             self?.endBackgroundTask()
         }
+#endif
     }
     
     func endBackgroundTask() {
+#if os(iOS)
         wakuRelay.disconnect(closeCode: .goingAway)
         print("Background task ended.")
         UIApplication.shared.endBackgroundTask(backgroundTaskID)
         backgroundTaskID = .invalid
+#endif
     }
     deinit {
         unsubscribeNotificationCenter()

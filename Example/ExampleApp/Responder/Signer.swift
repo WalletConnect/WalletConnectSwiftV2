@@ -2,7 +2,6 @@ import Web3
 import Foundation
 import WalletConnectUtils
 import WalletConnect
-import CryptoSwift
 
 class Signer {
     static let privateKey: EthereumPrivateKey = try! EthereumPrivateKey(hexPrivateKey: "0xe56da0e170b5e09a8bb8f1b693392c7d56c3739a9c75740fbc558a2877868540")
@@ -12,16 +11,16 @@ class Signer {
         if method == "personal_sign" {
             let params = try! request.params.get([String].self)
             let messageToSign = params[0]
-            let signHash = signHash(messageToSign)
-            let (v, r, s) = try! self.privateKey.sign(hash: signHash)
+            let dataToHash = dataToHash(messageToSign)
+            let (v, r, s) = try! self.privateKey.sign(message: .init(hex: dataToHash.toHexString()))
             let result = "0x" + r.toHexString() + s.toHexString() + String(v + 27, radix: 16)
             return AnyCodable(result)
         } else if method == "eth_signTypedData" {
             let params = try! request.params.get([String].self)
             print(params)
             let messageToSign = params[1]
-            let signHash = signHash(messageToSign)
-            let (v, r, s) = try! self.privateKey.sign(hash: signHash)
+            let dataToHash = dataToHash(messageToSign)
+            let (v, r, s) = try! self.privateKey.sign(message: .init(hex: dataToHash.toHexString()))
             let result = "0x" + r.toHexString() + s.toHexString() + String(v + 27, radix: 16)
             return AnyCodable(result)
         } else if method == "eth_sendTransaction" {
@@ -37,12 +36,12 @@ class Signer {
         fatalError("not implemented")
     }
     
-    private static func signHash(_ message: String) -> Bytes {
+    private static func dataToHash(_ message: String) -> Bytes {
         let prefix = "\u{19}Ethereum Signed Message:\n"
         let messageData = Data(hex: message)
         let prefixData = (prefix + String(messageData.count)).data(using: .utf8)!
         let prefixedMessageData = prefixData + messageData
         let dataToHash: Bytes = .init(hex: prefixedMessageData.toHexString())
-        return SHA3(variant: .keccak256).calculate(for: dataToHash)
+        return dataToHash
     }
 }

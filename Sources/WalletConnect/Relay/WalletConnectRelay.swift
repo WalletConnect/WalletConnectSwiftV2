@@ -103,10 +103,10 @@ class WalletConnectRelay: WalletConnectRelaying {
     
     func respond(topic: String, response: JsonRpcResponseTypes, completion: @escaping ((Error?)->())) {
         do {
-            try jsonRpcHistory.resolve(response: response)
+            _ = try jsonRpcHistory.resolve(response: response)
             let message = try jsonRpcSerialiser.serialise(topic: topic, encodable: response.value)
             logger.debug("Responding....topic: \(topic)")
-            networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
+            networkRelayer.publish(topic: topic, payload: message) { error in
                 completion(error)
             }
         } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {

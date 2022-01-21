@@ -1,24 +1,24 @@
 // 
 
 import Foundation
-import CryptoSwift
+import CryptoKit
 
-protocol HMACAutenticating {
+protocol HMACAuthenticating {
     func validateAuthentication(for data: Data, with mac: Data, using symmetricKey: Data) throws
     func generateAuthenticationDigest(for data: Data, using symmetricKey: Data) throws -> Data
 }
 
-class HMACAutenticator: HMACAutenticating {
+class HMACAuthenticator: HMACAuthenticating {
     func validateAuthentication(for data: Data, with mac: Data, using symmetricKey: Data) throws {
         let newMacDigest = try generateAuthenticationDigest(for: data, using: symmetricKey)
         if mac != newMacDigest {
-            throw HMACAutenticatorError.invalidAuthenticationCode
+            throw HMACAuthenticatorError.invalidAuthenticationCode
         }
     }
     
     func generateAuthenticationDigest(for data: Data, using symmetricKey: Data)  throws -> Data {
-        let algo = HMAC(key: symmetricKey.bytes, variant: .sha256)
-        let digest = try algo.authenticate(data.bytes)
-        return Data(digest)
+        let key = SymmetricKey(data: symmetricKey)
+        let hmac = HMAC<SHA256>.authenticationCode(for: data, using: key)
+        return Data(hmac)
     }
 }

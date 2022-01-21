@@ -44,7 +44,10 @@ final class ProposerViewController: UIViewController {
         
         client.delegate = self
         client.logger.setLogging(level: .debug)
-
+    }
+    
+    @objc func copyURI() {
+        UIPasteboard.general.string = currentURI
     }
     
     @objc
