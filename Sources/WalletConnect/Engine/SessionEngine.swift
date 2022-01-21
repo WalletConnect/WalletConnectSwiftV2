@@ -536,6 +536,7 @@ final class SessionEngine {
         }
         switch result {
         case .success:
+            guard let settledSession = try? sequencesStore.getSequence(forTopic: settledTopic) else {return}
             crypto.deleteAgreementSecret(for: topic)
             wcSubscriber.removeSubscription(topic: topic)
             sequencesStore.delete(topic: topic)
@@ -544,7 +545,7 @@ final class SessionEngine {
                 peer: proposal.proposer.metadata,
                 permissions: Session.Permissions(
                     blockchains: proposal.permissions.blockchain.chains,
-                    methods: proposal.permissions.jsonrpc.methods), accounts: pendingSession.settled!.state.accounts)
+                    methods: proposal.permissions.jsonrpc.methods), accounts: settledSession.settled!.state.accounts)
             onApprovalAcknowledgement?(sessionSuccess)
         case .failure:
             wcSubscriber.removeSubscription(topic: topic)
