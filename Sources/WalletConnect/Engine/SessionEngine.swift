@@ -44,7 +44,7 @@ final class SessionEngine {
         restoreSubscriptions()
         
         relayer.onResponse = { [weak self] in
-            self?.handleReponse($0)
+            self?.handleResponse($0)
         }
     }
     
@@ -366,7 +366,7 @@ final class SessionEngine {
             if let error = error {
                 logger.error(error)
             } else {
-                try? sequencesStore.setSequence(session)
+                sequencesStore.setSequence(session)
                 onSessionUpgrade?(session.topic, newPermissions)
             }
         }
@@ -502,12 +502,12 @@ final class SessionEngine {
             }.store(in: &publishers)
     }
     
-    private func handleReponse(_ response: WCResponse) {
+    private func handleResponse(_ response: WCResponse) {
         switch response.requestParams {
         case .pairingPayload(let payloadParams):
             let proposeParams = payloadParams.request.params
             handleProposeResponse(topic: response.topic, proposeParams: proposeParams, result: response.result)
-        case .sessionApprove(let approveParams):
+        case .sessionApprove:
             handleApproveResponse(topic: response.topic, result: response.result)
         default:
             break

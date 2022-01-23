@@ -184,7 +184,7 @@ public final class WakuNetworkRelay {
     private func acknowledgeSubscription(requestId: Int64) {
         let response = JSONRPCResponse(id: requestId, result: AnyCodable(true))
         let responseJson = try! response.json()
-        try? jsonRpcSubscriptionsHistory.resolve(response: JsonRpcResponseTypes.response(response))
+        _ = try? jsonRpcSubscriptionsHistory.resolve(response: JsonRpcResponseTypes.response(response))
         dispatcher.send(responseJson) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to Respond for request id: \(requestId), error: \(error)")
