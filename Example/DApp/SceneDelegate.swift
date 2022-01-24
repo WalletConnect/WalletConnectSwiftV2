@@ -27,7 +27,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 showAccountsScreen(session)
             }
         }
-        window?.rootViewController = vc
+        window?.rootViewController = UINavigationController(rootViewController: vc) 
         window?.makeKeyAndVisible()
     }
     
