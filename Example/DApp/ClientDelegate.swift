@@ -19,7 +19,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     static var shared: ClientDelegate = ClientDelegate()
     private init() {
         let metadata = AppMetadata(
-            name: "Dapp Example",
+            name: "Swift Dapp",
             description: "a description",
             url: "wallet.connect",
             icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])

@@ -1,6 +1,6 @@
 import UIKit
 
-final class ProposerView: UIView {
+final class AccountsView: UIView {
     let tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
         tableView.backgroundColor = .tertiarySystemBackground

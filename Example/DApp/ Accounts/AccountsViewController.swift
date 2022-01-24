@@ -1,10 +1,12 @@
 import UIKit
 import WalletConnect
+
 struct AccountDetails {
     let chain: String
     let methods: [String]
     let account: String
 }
+
 final class AccountsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate  {
     
     let client = ClientDelegate.shared.client
@@ -12,8 +14,8 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
     var accountsDetails: [AccountDetails] = []
     var onDisconnect: (()->())?
     
-    private let proposerView: ProposerView = {
-        ProposerView()
+    private let accountsView: AccountsView = {
+        AccountsView()
     }()
     
     init(session: Session) {
@@ -26,7 +28,7 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
     }
     
     override func loadView() {
-        view = proposerView
+        view = accountsView
     }
     
     override func viewDidLoad() {
@@ -39,8 +41,8 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
             target: self,
             action: #selector(disconnect)
         )
-        proposerView.tableView.dataSource = self
-        proposerView.tableView.delegate = self
+        accountsView.tableView.dataSource = self
+        accountsView.tableView.delegate = self
         client.logger.setLogging(level: .debug)
         session.accounts.forEach { account in
             let splits = account.split(separator: ":", omittingEmptySubsequences: false)
