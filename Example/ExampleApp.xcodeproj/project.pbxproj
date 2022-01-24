@@ -62,7 +62,7 @@
 		761C649D26FB7FD7004239D1 /* SessionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionViewController.swift; sourceTree = "<group>"; };
 		761C64A226FB83CE004239D1 /* SessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionView.swift; sourceTree = "<group>"; };
 		761C64A526FCB0AA004239D1 /* SessionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionInfo.swift; sourceTree = "<group>"; };
-		764E1D3C26F8D3FC00A1FB15 /* ExampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ExampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		764E1D3C26F8D3FC00A1FB15 /* Wallet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Wallet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		764E1D3F26F8D3FC00A1FB15 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		764E1D4126F8D3FC00A1FB15 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		764E1D4826F8D3FE00A1FB15 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -167,7 +167,7 @@
 		764E1D3D26F8D3FC00A1FB15 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				764E1D3C26F8D3FC00A1FB15 /* ExampleApp.app */,
+				764E1D3C26F8D3FC00A1FB15 /* Wallet.app */,
 				845B30EC27859686002E4094 /* ExampleAppTests.xctest */,
 				84CE641C27981DED00142511 /* DApp.app */,
 			);
@@ -280,9 +280,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		764E1D3B26F8D3FC00A1FB15 /* ExampleApp */ = {
+		764E1D3B26F8D3FC00A1FB15 /* Wallet */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 764E1D5026F8D3FE00A1FB15 /* Build configuration list for PBXNativeTarget "ExampleApp" */;
+			buildConfigurationList = 764E1D5026F8D3FE00A1FB15 /* Build configuration list for PBXNativeTarget "Wallet" */;
 			buildPhases = (
 				764E1D3826F8D3FC00A1FB15 /* Sources */,
 				764E1D3926F8D3FC00A1FB15 /* Frameworks */,
@@ -292,13 +292,13 @@
 			);
 			dependencies = (
 			);
-			name = ExampleApp;
+			name = Wallet;
 			packageProductDependencies = (
 				764E1D5726F8DBAB00A1FB15 /* WalletConnect */,
 				844943A0278EC49700CC26BB /* Web3 */,
 			);
 			productName = ExampleApp;
-			productReference = 764E1D3C26F8D3FC00A1FB15 /* ExampleApp.app */;
+			productReference = 764E1D3C26F8D3FC00A1FB15 /* Wallet.app */;
 			productType = "com.apple.product-type.application";
 		};
 		845B30EB27859686002E4094 /* ExampleAppTests */ = {
@@ -377,7 +377,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				764E1D3B26F8D3FC00A1FB15 /* ExampleApp */,
+				764E1D3B26F8D3FC00A1FB15 /* Wallet */,
 				845B30EB27859686002E4094 /* ExampleAppTests */,
 				84CE641B27981DED00142511 /* DApp */,
 			);
@@ -467,7 +467,7 @@
 /* Begin PBXTargetDependency section */
 		845B30F127859686002E4094 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 764E1D3B26F8D3FC00A1FB15 /* ExampleApp */;
+			target = 764E1D3B26F8D3FC00A1FB15 /* Wallet */;
 			targetProxy = 845B30F027859686002E4094 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -672,7 +672,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ExampleApp.app/ExampleApp";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Wallet.app/Wallet";
 			};
 			name = Debug;
 		};
@@ -692,7 +692,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ExampleApp.app/ExampleApp";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Wallet.app/Wallet";
 			};
 			name = Release;
 		};
@@ -768,7 +768,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		764E1D5026F8D3FE00A1FB15 /* Build configuration list for PBXNativeTarget "ExampleApp" */ = {
+		764E1D5026F8D3FE00A1FB15 /* Build configuration list for PBXNativeTarget "Wallet" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				764E1D5126F8D3FE00A1FB15 /* Debug */,
