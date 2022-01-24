@@ -27,8 +27,8 @@ class SelectChainViewController: UIViewController {
     private func connect() {
         print("[PROPOSER] Connecting to a pairing...")
         let permissions = Session.Permissions(
-            blockchains: ["a chain"],
-            methods: ["a method"],
+            blockchains: ["eip155:1, eip155:137"],
+            methods: ["eth_sendTransaction", "personal_sign", "eth_signTypedData"],
             notifications: []
         )
         do {

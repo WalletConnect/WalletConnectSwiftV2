@@ -38,7 +38,7 @@ class AccountRequestView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .systemBackground
-        
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "method_cell")
         addSubview(iconView)
         addSubview(headerStackView)
         addSubview(tableView)
