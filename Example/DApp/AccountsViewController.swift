@@ -68,15 +68,16 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        showSessionScreen()
+        showAccountRequestScreen()
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 70
     }
     
-    func showSessionScreen() {
-        
+    func showAccountRequestScreen() {
+        let vc = AccountRequestViewController()
+        navigationController?.pushViewController(vc, animated: true)
     }
     
 }

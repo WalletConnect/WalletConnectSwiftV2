@@ -39,6 +39,8 @@
 		84CE643D2798322600142511 /* ConnectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE643C2798322600142511 /* ConnectViewController.swift */; };
 		84CE6444279AB5AD00142511 /* SelectChainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE6443279AB5AD00142511 /* SelectChainViewController.swift */; };
 		84CE6446279ABBF300142511 /* ClientDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE6445279ABBF300142511 /* ClientDelegate.swift */; };
+		84CE6448279AE68600142511 /* AccountRequestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE6447279AE68600142511 /* AccountRequestViewController.swift */; };
+		84CE644B279EA1FA00142511 /* AccountRequestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE644A279EA1FA00142511 /* AccountRequestView.swift */; };
 		84F568C2279582D200D0A289 /* Signer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C1279582D200D0A289 /* Signer.swift */; };
 		84F568C42795832A00D0A289 /* EthereumTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C32795832A00D0A289 /* EthereumTransaction.swift */; };
 /* End PBXBuildFile section */
@@ -90,6 +92,8 @@
 		84CE643C2798322600142511 /* ConnectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectViewController.swift; sourceTree = "<group>"; };
 		84CE6443279AB5AD00142511 /* SelectChainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectChainViewController.swift; sourceTree = "<group>"; };
 		84CE6445279ABBF300142511 /* ClientDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientDelegate.swift; sourceTree = "<group>"; };
+		84CE6447279AE68600142511 /* AccountRequestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountRequestViewController.swift; sourceTree = "<group>"; };
+		84CE644A279EA1FA00142511 /* AccountRequestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountRequestView.swift; sourceTree = "<group>"; };
 		84F568C1279582D200D0A289 /* Signer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Signer.swift; sourceTree = "<group>"; };
 		84F568C32795832A00D0A289 /* EthereumTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthereumTransaction.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -228,6 +232,7 @@
 				84CE642027981DED00142511 /* SceneDelegate.swift */,
 				84CE642227981DED00142511 /* ViewController.swift */,
 				761C649926FB7ABB004239D1 /* AccountsViewController.swift */,
+				84CE6449279EA1E600142511 /* AccountRequest */,
 				84CE6445279ABBF300142511 /* ClientDelegate.swift */,
 				84CE6443279AB5AD00142511 /* SelectChainViewController.swift */,
 				84CE643C2798322600142511 /* ConnectViewController.swift */,
@@ -237,6 +242,15 @@
 				84CE642C27981DF000142511 /* Info.plist */,
 			);
 			path = DApp;
+			sourceTree = "<group>";
+		};
+		84CE6449279EA1E600142511 /* AccountRequest */ = {
+			isa = PBXGroup;
+			children = (
+				84CE6447279AE68600142511 /* AccountRequestViewController.swift */,
+				84CE644A279EA1FA00142511 /* AccountRequestView.swift */,
+			);
+			path = AccountRequest;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -414,7 +428,9 @@
 				84CE6446279ABBF300142511 /* ClientDelegate.swift in Sources */,
 				84CE642327981DED00142511 /* ViewController.swift in Sources */,
 				84CE641F27981DED00142511 /* AppDelegate.swift in Sources */,
+				84CE6448279AE68600142511 /* AccountRequestViewController.swift in Sources */,
 				84CE642127981DED00142511 /* SceneDelegate.swift in Sources */,
+				84CE644B279EA1FA00142511 /* AccountRequestView.swift in Sources */,
 				84CE6431279820F600142511 /* ProposerView.swift in Sources */,
 				84CE64372798224900142511 /* ActivePairingItem.swift in Sources */,
 				84CE643D2798322600142511 /* ConnectViewController.swift in Sources */,
