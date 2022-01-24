@@ -55,7 +55,7 @@ class MockedWCRelay: WalletConnectRelaying {
     
     func sendSubscriptionPayloadOn(topic: String) {
         let payload = WCRequestSubscriptionPayload(topic: topic,
-                                                   wcRequest: SerialiserTestData.pairingApproveJSONRPCRequest)
+                                                   wcRequest: SerializerTestData.pairingApproveJSONRPCRequest)
         wcRequestPublisherSubject.send(payload)
     }
 }
