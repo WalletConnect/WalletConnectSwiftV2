@@ -11,12 +11,12 @@ class AccountRequestView: UIView {
         return imageView
     }()
     
-    let nameLabel: UILabel = {
+    let chainLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 17.0, weight: .heavy)
         return label
     }()
-    let descriptionLabel: UILabel = {
+    let accountLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.preferredFont(forTextStyle: .subheadline)
         label.textColor = .secondaryLabel
@@ -43,16 +43,14 @@ class AccountRequestView: UIView {
         addSubview(headerStackView)
         addSubview(tableView)
 
-        headerStackView.addArrangedSubview(nameLabel)
-        headerStackView.addArrangedSubview(descriptionLabel)
+        headerStackView.addArrangedSubview(chainLabel)
+        headerStackView.addArrangedSubview(accountLabel)
         
         subviews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
         
         NSLayoutConstraint.activate([
             iconView.topAnchor.constraint(equalTo: topAnchor, constant: 64),
             iconView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            iconView.widthAnchor.constraint(equalToConstant: 64),
-            iconView.heightAnchor.constraint(equalToConstant: 64),
             
             headerStackView.topAnchor.constraint(equalTo: iconView.bottomAnchor, constant: 32),
             headerStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),

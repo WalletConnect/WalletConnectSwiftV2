@@ -65,6 +65,7 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
         let details = accountsDetails[indexPath.row]
         cell.textLabel?.text = details.account
         cell.imageView?.image = UIImage(named: details.chain)
+        cell.textLabel?.numberOfLines = 0
         return cell
     }
     
