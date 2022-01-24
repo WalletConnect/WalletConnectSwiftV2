@@ -137,7 +137,11 @@ public final class WalletConnectClient {
     ///   - topic: Topic of the session that is intended to be updated.
     ///   - accounts: Set of accounts that will be allowed to be used by the session after the update.
     public func update(topic: String, accounts: Set<String>) {
-        sessionEngine.update(topic: topic, accounts: accounts)
+        do {
+            try sessionEngine.update(topic: topic, accounts: accounts)
+        } catch {
+            print("Error on session update call: \(error)")
+        }
     }
     
     /// For the responder to upgrade session permissions

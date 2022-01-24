@@ -19,6 +19,10 @@ internal enum SessionType {
     
     struct UpdateParams: Codable, Equatable {
         let state: SessionState
+        
+        init(accounts: Set<String>) {
+            self.state = SessionState(accounts: accounts)
+        }
     }
     
     struct UpgradeParams: Codable, Equatable {

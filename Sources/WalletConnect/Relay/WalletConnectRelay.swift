@@ -18,6 +18,7 @@ protocol WalletConnectRelaying: AnyObject {
     func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
     func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?) 
     func respond(topic: String, response: JsonRpcResponseTypes, completion: @escaping ((Error?)->()))
+    func respondError(for payload: WCRequestSubscriptionPayload, reason: Reason)
     func subscribe(topic: String)
     func unsubscribe(topic: String)
 }
@@ -114,6 +115,11 @@ class WalletConnectRelay: WalletConnectRelaying {
         } catch {
             completion(error)
         }
+    }
+    
+    func respondError(for payload: WCRequestSubscriptionPayload, reason: Reason) {
+        let response = JSONRPCErrorResponse(id: payload.wcRequest.id, error: JSONRPCErrorResponse.Error(code: reason.code, message: reason.message))
+        respond(topic: payload.topic, response: JsonRpcResponseTypes.error(response)) { _ in } // TODO: Move error handling to relayer package
     }
     
     func subscribe(topic: String)  {

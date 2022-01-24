@@ -34,6 +34,63 @@ fileprivate extension WCRequest {
     }
 }
 
+// TODO: Move stub extensions to helper files
+extension RelayProtocolOptions {
+    static func stub() -> RelayProtocolOptions {
+        RelayProtocolOptions(protocol: "", params: nil)
+    }
+}
+
+extension Participant {
+    static func stub() -> Participant {
+        Participant(publicKey: AgreementPrivateKey().publicKey.hexRepresentation, metadata: AppMetadata.stub())
+    }
+}
+
+extension AppMetadata {
+    static func stub() -> AppMetadata {
+        AppMetadata(
+            name: "Wallet Connect",
+            description: "A protocol to connect blockchain wallets to dapps.",
+            url: "https://walletconnect.com/",
+            icons: []
+        )
+    }
+}
+
+extension SessionSequence {
+    
+    static func stubPreSettled() -> SessionSequence {
+        SessionSequence(
+            topic: String.generateTopic()!,
+            relay: RelayProtocolOptions.stub(),
+            selfParticipant: Participant.stub(),
+            expiryDate: Date.distantFuture,
+            settledState: Settled(
+                peer: Participant.stub(),
+                permissions: SessionPermissions.stub(),
+                state: SessionState(accounts: []),
+                status: .preSettled
+            )
+        )
+    }
+    
+    static func stubSettled() -> SessionSequence {
+        SessionSequence(
+            topic: String.generateTopic()!,
+            relay: RelayProtocolOptions.stub(),
+            selfParticipant: Participant.stub(),
+            expiryDate: Date.distantFuture,
+            settledState: Settled(
+                peer: Participant.stub(),
+                permissions: SessionPermissions.stub(),
+                state: SessionState(accounts: []),
+                status: .acknowledged
+            )
+        )
+    }
+}
+
 final class SessionEngineTests: XCTestCase {
     
     var engine: SessionEngine!
@@ -54,19 +111,6 @@ final class SessionEngineTests: XCTestCase {
         storageMock = SessionSequenceStorageMock()
         cryptoMock = CryptoStorageProtocolMock()
         topicGenerator = TopicGenerator()
-        
-        metadata = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
-        isController = false
-        let logger = ConsoleLoggerMock()
-        engine = SessionEngine(
-            relay: relayMock,
-            crypto: cryptoMock,
-            subscriber: subscriberMock,
-            sequencesStore: storageMock,
-            isController: isController,
-            metadata: metadata,
-            logger: logger,
-            topicGenerator: topicGenerator.getTopic)
     }
 
     override func tearDown() {
@@ -78,7 +122,24 @@ final class SessionEngineTests: XCTestCase {
         engine = nil
     }
     
+    func setupEngine(isController: Bool) {
+        metadata = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
+        self.isController = isController
+        let logger = ConsoleLoggerMock()
+        engine = SessionEngine(
+            relay: relayMock,
+            crypto: cryptoMock,
+            subscriber: subscriberMock,
+            sequencesStore: storageMock,
+            isController: isController,
+            metadata: metadata,
+            logger: logger,
+            topicGenerator: topicGenerator.getTopic)
+    }
+    
     func testPropose() {
+        setupEngine(isController: false)
+        
         let pairing = Pairing.stub()
         
         let topicB = pairing.topic
@@ -104,6 +165,7 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testProposeResponseFailure() {
+        setupEngine(isController: false)
         let pairing = Pairing.stub()
         
         let topicB = pairing.topic
@@ -133,6 +195,7 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testApprove() {
+        setupEngine(isController: true)
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let topicB = String.generateTopic()!
         let topicC = String.generateTopic()!
@@ -163,6 +226,8 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testApprovalAcknowledgementSuccess() {
+        setupEngine(isController: true)
+        
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let topicB = String.generateTopic()!
         let topicC = String.generateTopic()!
@@ -199,6 +264,8 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testApprovalAcknowledgementFailure() {
+        setupEngine(isController: true)
+        
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let selfPubKey = cryptoMock.privateKeyStub.publicKey.hexRepresentation
         let topicB = String.generateTopic()!
@@ -241,6 +308,7 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testReceiveApprovalResponse() {
+        setupEngine(isController: false)
 
         var approvedSession: Session?
 
@@ -278,4 +346,42 @@ final class SessionEngineTests: XCTestCase {
         XCTAssertNotNil(approvedSession)
         XCTAssertEqual(approvedSession?.topic, topicD)
     }
+    
+    // MARK: - Update call tests
+    
+    func testUpdate() throws {
+        setupEngine(isController: true)
+        let session = SessionSequence.stubSettled()
+        storageMock.setSequence(session)
+        try engine.update(topic: session.topic, accounts: ["std:0:0"])
+        XCTAssertTrue(relayMock.didCallRequest)
+    }
+    
+    func testUpdateErrorInvalidAccount() {
+        setupEngine(isController: true)
+        let session = SessionSequence.stubSettled()
+        storageMock.setSequence(session)
+        XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: ["err"]))
+    }
+    
+    func testUpdateErrorIfNonController() {
+        setupEngine(isController: false)
+        let session = SessionSequence.stubSettled()
+        storageMock.setSequence(session)
+        XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: ["std:0:0"]), "Update must fail if called by a non-controller.")
+    }
+    
+    func testUpdateErrorSessionNotFound() {
+        setupEngine(isController: true)
+        XCTAssertThrowsError(try engine.update(topic: "", accounts: ["std:0:0"]), "Update must fail if there is no session matching the target topic.")
+    }
+    
+    func testUpdateErrorSessionNotSettled() {
+        setupEngine(isController: true)
+        let session = SessionSequence.stubPreSettled()
+        storageMock.setSequence(session)
+        XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: ["std:0:0"]), "Update must fail if session is not on settled state.")
+    }
+    
+    // TODO: Update acknowledgement tests
 }

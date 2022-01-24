@@ -1,4 +1,5 @@
 @testable import WalletConnect
+import Foundation
 
 final class SessionSequenceStorageMock: SessionSequenceStorage {
     
@@ -14,8 +15,11 @@ final class SessionSequenceStorageMock: SessionSequenceStorage {
         sessions[sequence.topic] = sequence
     }
     
-    func getSequence(forTopic topic: String) throws -> SessionSequence? {
-        sessions[topic]
+    func getSequence(forTopic topic: String) throws -> SessionSequence {
+        guard let session = sessions[topic] else {
+            throw NSError.mock()
+        }
+        return session
     }
     
     func getAll() -> [SessionSequence] {
