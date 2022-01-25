@@ -47,6 +47,7 @@ final class ProposerViewController: UIViewController {
         proposerView.tableView.delegate = self
         
         client.delegate = self
+        client.logger.setLogging(level: .debug)
     }
     
     @objc func copyURI() {

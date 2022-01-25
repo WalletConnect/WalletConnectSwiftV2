@@ -366,7 +366,7 @@ final class SessionEngine {
             if let error = error {
                 logger.error(error)
             } else {
-                try? sequencesStore.setSequence(session)
+                sequencesStore.setSequence(session)
                 onSessionUpgrade?(session.topic, newPermissions)
             }
         }
