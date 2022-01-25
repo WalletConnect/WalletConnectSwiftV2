@@ -325,16 +325,20 @@ final class SessionEngine {
         
         for account in updateParams.state.accounts {
             if !String.conformsToCAIP10(account) {
-                relayer.respondError(for: payload, reason: Reason(code: 0, message: "invalid accounts"))
+                relayer.respondError(for: payload, reason: .invalidUpdateRequest(context: .session))
                 return
             }
         }
         guard var session = try? sequencesStore.getSequence(forTopic: topic), session.isSettled else {
-            relayer.respondError(for: payload, reason: Reason(code: 0, message: "session not found"))
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
         }
-        guard !isController, session.peerIsController else {
-            relayer.respondError(for: payload, reason: Reason(code: 0, message: "unauthorized update"))
+        guard session.peerIsController else {
+            relayer.respondError(for: payload, reason: .unauthorizedUpdateRequest(context: .session))
+            return
+        }
+        guard !isController else {
+            relayer.respondError(for: payload, reason: .unauthorizedMatchingController(isController: isController))
             return
         }
         
