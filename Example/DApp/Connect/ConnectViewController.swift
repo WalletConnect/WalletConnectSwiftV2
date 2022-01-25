@@ -32,6 +32,8 @@ class ConnectViewController: UIViewController {
             }
         }
         connectView.copyButton.addTarget(self, action: #selector(copyURI), for: .touchUpInside)
+        connectView.connectWalletButton.addTarget(self, action: #selector(connectWithExampleWallet), for: .touchUpInside)
+
         connectView.copyButton.isHidden = true
     }
     
@@ -50,5 +52,10 @@ class ConnectViewController: UIViewController {
             }
         }
         return nil
+    }
+    
+    @objc func connectWithExampleWallet() {
+        let url = URL(string: "walletconnectwallet:\(uriString)")!
+        UIApplication.shared.open(url, options: [:]) { _ in }
     }
 }

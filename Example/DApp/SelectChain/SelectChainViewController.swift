@@ -28,6 +28,8 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
     
     override func loadView() {
         view = selectChainView
+        
+
     }
     
     @objc
