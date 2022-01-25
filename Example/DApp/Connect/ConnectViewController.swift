@@ -1,11 +1,11 @@
 
 import Foundation
 import UIKit
-//import WalletConnect
+import WalletConnect
 
-class ConnectViewController: UIViewController {
+class ConnectViewController: UIViewController, UITableViewDataSource {
     let uriString: String
-//    let activePairings: [Pairing] = []
+    let activePairings: [Pairing] = ClientDelegate.shared.client.getSettledPairings()
     
     init(uri: String) {
         self.uriString = uri
@@ -36,9 +36,8 @@ class ConnectViewController: UIViewController {
         }
         connectView.copyButton.addTarget(self, action: #selector(copyURI), for: .touchUpInside)
         connectView.connectWalletButton.addTarget(self, action: #selector(connectWithExampleWallet), for: .touchUpInside)
-//        connectView.tableView.dataSource = self
+        connectView.tableView.dataSource = self
         connectView.copyButton.isHidden = true
-//        activePairings = ClientDelegate.shared.client.getSettledPairings()
     }
     
     
@@ -65,13 +64,13 @@ class ConnectViewController: UIViewController {
         }
     }
     
-//    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-//        activePairings.count
-//    }
-//
-//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        let cell = tableView.dequeueReusableCell(withIdentifier: "pairing_cell", for: indexPath)
-//        cell.textLabel?.text = activePairings[indexPath.row].peer!.name
-//        return cell
-//    }
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        activePairings.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "pairing_cell", for: indexPath)
+        cell.textLabel?.text = activePairings[indexPath.row].peer!.name
+        return cell
+    }
 }

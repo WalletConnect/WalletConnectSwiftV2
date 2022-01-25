@@ -45,22 +45,19 @@ final class ConnectView: UIView {
         addSubview(qrCodeView)
         addSubview(copyButton)
         addSubview(connectWalletButton)
-//        addSubview(tableView)
-//        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "pairing_cell")
+        addSubview(tableView)
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "pairing_cell")
         subviews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
         
         NSLayoutConstraint.activate([
+//
+            tableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 50),
+            tableView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
             
-            segmentedControl.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 64),
-            segmentedControl.centerXAnchor.constraint(equalTo: centerXAnchor),
-            segmentedControl.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.8),
-            
-//            tableView.topAnchor.constraint(equalTo: segmentedControl.bottomAnchor, constant: 26),
-//            tableView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
-//            tableView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor),
-//            tableView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
 
-            qrCodeView.topAnchor.constraint(equalTo: segmentedControl.bottomAnchor, constant: 26),
+            qrCodeView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 50),
             qrCodeView.centerXAnchor.constraint(equalTo: centerXAnchor),
             qrCodeView.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.6),
             qrCodeView.widthAnchor.constraint(equalTo: qrCodeView.heightAnchor),
