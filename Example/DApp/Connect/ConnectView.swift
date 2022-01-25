@@ -3,6 +3,14 @@ import Foundation
 import UIKit
 
 final class ConnectView: UIView {
+    var segmentedControl: UISegmentedControl {
+        let segmentedControl = UISegmentedControl(items: ["Pairings", "New Pairing"])
+//        segmentedControl.selectedSegmentIndex = 0
+        return segmentedControl
+    }
+
+    let tableView = UITableView()
+    
     let qrCodeView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
@@ -33,14 +41,26 @@ final class ConnectView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .systemBackground
+        addSubview(segmentedControl)
         addSubview(qrCodeView)
         addSubview(copyButton)
         addSubview(connectWalletButton)
-        
+//        addSubview(tableView)
+//        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "pairing_cell")
         subviews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
         
         NSLayoutConstraint.activate([
-            qrCodeView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 64),
+            
+            segmentedControl.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 64),
+            segmentedControl.centerXAnchor.constraint(equalTo: centerXAnchor),
+            segmentedControl.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.8),
+            
+//            tableView.topAnchor.constraint(equalTo: segmentedControl.bottomAnchor, constant: 26),
+//            tableView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
+//            tableView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor),
+//            tableView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
+
+            qrCodeView.topAnchor.constraint(equalTo: segmentedControl.bottomAnchor, constant: 26),
             qrCodeView.centerXAnchor.constraint(equalTo: centerXAnchor),
             qrCodeView.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.6),
             qrCodeView.widthAnchor.constraint(equalTo: qrCodeView.heightAnchor),

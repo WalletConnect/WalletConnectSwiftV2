@@ -1,9 +1,12 @@
 
 import Foundation
 import UIKit
+//import WalletConnect
 
 class ConnectViewController: UIViewController {
     let uriString: String
+//    let activePairings: [Pairing] = []
+    
     init(uri: String) {
         self.uriString = uri
         super.init(nibName: nil, bundle: nil)
@@ -33,8 +36,9 @@ class ConnectViewController: UIViewController {
         }
         connectView.copyButton.addTarget(self, action: #selector(copyURI), for: .touchUpInside)
         connectView.connectWalletButton.addTarget(self, action: #selector(connectWithExampleWallet), for: .touchUpInside)
-
+//        connectView.tableView.dataSource = self
         connectView.copyButton.isHidden = true
+//        activePairings = ClientDelegate.shared.client.getSettledPairings()
     }
     
     
@@ -56,6 +60,18 @@ class ConnectViewController: UIViewController {
     
     @objc func connectWithExampleWallet() {
         let url = URL(string: "walletconnectwallet:\(uriString)")!
-        UIApplication.shared.open(url, options: [:]) { _ in }
+        UIApplication.shared.open(url, options: [:]) { [weak self] _ in
+            self?.dismiss(animated: true, completion: nil)
+        }
     }
+    
+//    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+//        activePairings.count
+//    }
+//
+//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+//        let cell = tableView.dequeueReusableCell(withIdentifier: "pairing_cell", for: indexPath)
+//        cell.textLabel?.text = activePairings[indexPath.row].peer!.name
+//        return cell
+//    }
 }
