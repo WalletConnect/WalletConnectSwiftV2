@@ -13,6 +13,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
+        ClientDelegate.shared.onSessionDelete = { [unowned self] in
+            showSelectChainScreen()
+        }
         if let session = ClientDelegate.shared.client.getSettledSessions().first {
             showAccountsScreen(session)
         } else {
@@ -21,23 +24,25 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func showSelectChainScreen() {
-        let vc = SelectChainViewController()
-        vc.onSessionSettled = { [unowned self] session in
-            DispatchQueue.main.async {
+        DispatchQueue.main.async { [unowned self] in
+            let vc = SelectChainViewController()
+            vc.onSessionSettled = { [unowned self] session in
                 showAccountsScreen(session)
             }
+            window?.rootViewController = UINavigationController(rootViewController: vc)
+            window?.makeKeyAndVisible()
         }
-        window?.rootViewController = UINavigationController(rootViewController: vc) 
-        window?.makeKeyAndVisible()
     }
     
     func showAccountsScreen(_ session: Session) {
-        let vc = AccountsViewController(session: session)
-        vc.onDisconnect = { [unowned self]  in
-            showSelectChainScreen()
+        DispatchQueue.main.async { [unowned self] in
+            let vc = AccountsViewController(session: session)
+            vc.onDisconnect = { [unowned self]  in
+                showSelectChainScreen()
+            }
+            window?.rootViewController = UINavigationController(rootViewController: vc)
+            window?.makeKeyAndVisible()
         }
-        window?.rootViewController = UINavigationController(rootViewController: vc)
-        window?.makeKeyAndVisible()
     }
     
 }
