@@ -3,12 +3,6 @@ import Foundation
 import UIKit
 
 final class ConnectView: UIView {
-    var segmentedControl: UISegmentedControl {
-        let segmentedControl = UISegmentedControl(items: ["Pairings", "New Pairing"])
-//        segmentedControl.selectedSegmentIndex = 0
-        return segmentedControl
-    }
-
     let tableView = UITableView()
     
     let qrCodeView: UIImageView = {
@@ -41,7 +35,6 @@ final class ConnectView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .systemBackground
-        addSubview(segmentedControl)
         addSubview(qrCodeView)
         addSubview(copyButton)
         addSubview(connectWalletButton)
@@ -50,8 +43,7 @@ final class ConnectView: UIView {
         subviews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
         
         NSLayoutConstraint.activate([
-//
-            tableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 50),
+            tableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),

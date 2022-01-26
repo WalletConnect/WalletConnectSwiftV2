@@ -16,7 +16,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let urlString: String = url!.absoluteString
         let wcUri = urlString.deletingPrefix("walletconnectwallet:")
         let client = ((window!.rootViewController as! UINavigationController).viewControllers[0] as! ResponderViewController).client
-        try! client.pair(uri: wcUri)
+        try? client.pair(uri: wcUri)
     }
 }
 
