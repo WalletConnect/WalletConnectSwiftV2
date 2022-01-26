@@ -7,7 +7,7 @@ struct JsonRpcRecord: Codable {
     let id: Int64
     let topic: String
     let request: Request
-    var response: JsonRpcResponseTypes?
+    var response: JsonRpcResult?
     let chainId: String?
 
     struct Request: Codable {

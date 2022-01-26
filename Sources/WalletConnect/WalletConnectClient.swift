@@ -180,7 +180,7 @@ public final class WalletConnectClient {
     /// - Parameters:
     ///   - topic: Topic of the session for which the request was received.
     ///   - response: Your JSON RPC response or an error.
-    public func respond(topic: String, response: JsonRpcResponseTypes) {
+    public func respond(topic: String, response: JsonRpcResult) {
         sessionEngine.respondSessionPayload(topic: topic, response: response)
     }
     

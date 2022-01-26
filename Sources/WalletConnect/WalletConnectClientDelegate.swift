@@ -9,12 +9,19 @@ public protocol WalletConnectClientDelegate: AnyObject {
     /// Function is executed on responder client only
     func didReceive(sessionProposal: Session.Proposal)
     
-    /// Tells the delegate that session request has been received
+    /// Tells the delegate that session payload request has been received
     ///
     /// In most cases that function is supposed to be called on wallet client.
     /// - Parameters:
     ///     - sessionRequest: Object containing request received from peer client.
     func didReceive(sessionRequest: Request)
+    
+    /// Tells the delegate that session payload response has been received
+    ///
+    /// In most cases that function is supposed to be called on dApp client.
+    /// - Parameters:
+    ///     - sessionResponse: Object containing response received from peer client.
+    func didReceive(sessionResponse: Response)
     
     /// Tells the delegate that the peer client has terminated the session.
     ///

@@ -50,4 +50,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didUpdate(pairingTopic: String, appMetadata: AppMetadata) {
         onPairingUpdate?(pairingTopic, appMetadata)
     }
+    func didReceive(sessionResponse: Response) {
+        
+    }
 }
