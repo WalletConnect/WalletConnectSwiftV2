@@ -295,30 +295,57 @@ final class SessionEngineTests: XCTestCase {
         XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: ["std:0:0"]), "Update must fail if session is not on settled state.")
     }
     
-    func testUpdateResponse() {
+    // MARK: - Update peer response tests
+    
+    func testUpdatePeer() {
         setupEngine(isController: false)
-        
-        
+        let session = SessionSequence.stubSettled(isPeerController: true)
+        storageMock.setSequence(session)
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic))
+        XCTAssertTrue(relayMock.didRespondSuccess)
     }
     
-    func testUpdateResponseErrorAccountInvalid() {
-        
+    func testUpdatePeerErrorAccountInvalid() {
+        setupEngine(isController: false)
+        let session = SessionSequence.stubSettled(isPeerController: true)
+        storageMock.setSequence(session)
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic, accounts: ["0"]))
+        XCTAssertFalse(relayMock.didRespondSuccess)
+        XCTAssertEqual(relayMock.lastErrorCode, 1003)
     }
     
-    func testUpdateResponseErrorNoSession() {
-        
+    func testUpdatePeerErrorNoSession() {
+        setupEngine(isController: false)
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: ""))
+        XCTAssertFalse(relayMock.didRespondSuccess)
+        XCTAssertEqual(relayMock.lastErrorCode, 1301)
     }
     
-    func testUpdateResponseErrorSessionNotSettled() {
-        
+    func testUpdatePeerErrorSessionNotSettled() {
+        setupEngine(isController: false)
+        let session = SessionSequence.stubPreSettled(isPeerController: true) // Session is not fully settled
+        storageMock.setSequence(session)
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic))
+        XCTAssertFalse(relayMock.didRespondSuccess)
+        XCTAssertEqual(relayMock.lastErrorCode, 3003)
     }
     
-    func testUpdateResponseErrorUnauthorized() {
-        
+    func testUpdatePeerErrorUnauthorized() {
+        setupEngine(isController: false)
+        let session = SessionSequence.stubSettled() // Peer is not a controller
+        storageMock.setSequence(session)
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic))
+        XCTAssertFalse(relayMock.didRespondSuccess)
+        XCTAssertEqual(relayMock.lastErrorCode, 3003)
     }
     
-    func testUpdateResponseErrorMatchingController() {
-        
+    func testUpdatePeerErrorMatchingController() {
+        setupEngine(isController: true) // Update request received by a controller
+        let session = SessionSequence.stubSettled(isPeerController: true)
+        storageMock.setSequence(session)
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic))
+        XCTAssertFalse(relayMock.didRespondSuccess)
+        XCTAssertEqual(relayMock.lastErrorCode, 3005)
     }
     
     // TODO: Update acknowledgement tests

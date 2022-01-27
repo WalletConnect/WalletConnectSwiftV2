@@ -326,7 +326,7 @@ final class SessionEngine {
             }
         }
         let topic = payload.topic
-        guard var session = try? sequencesStore.getSequence(forTopic: topic), session.isSettled else {
+        guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
         }

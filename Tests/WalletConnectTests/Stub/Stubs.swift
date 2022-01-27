@@ -18,11 +18,12 @@ extension Pairing {
 }
 
 extension SessionPermissions {
-    static func stub() -> SessionPermissions {
+    static func stub(controllerKey: String = AgreementPrivateKey().publicKey.hexRepresentation) -> SessionPermissions {
         SessionPermissions(
             blockchain: Blockchain(chains: []),
             jsonrpc: JSONRPC(methods: []),
-            notifications: Notifications(types: [])
+            notifications: Notifications(types: []),
+            controller: Controller(publicKey: controllerKey)
         )
     }
 }
@@ -34,7 +35,14 @@ extension RelayProtocolOptions {
 }
 
 extension Participant {
-    static func stub() -> Participant {
-        Participant(publicKey: AgreementPrivateKey().publicKey.hexRepresentation, metadata: AppMetadata.stub())
+    static func stub(publicKey: String = AgreementPrivateKey().publicKey.hexRepresentation) -> Participant {
+        Participant(publicKey: publicKey, metadata: AppMetadata.stub())
+    }
+}
+
+extension WCRequestSubscriptionPayload {
+    static func stubUpdate(topic: String, accounts: Set<String> = ["std:0:0"]) -> WCRequestSubscriptionPayload {
+        let updateMethod = WCMethod.wcSessionUpdate(SessionType.UpdateParams(accounts: accounts)).asRequest()
+        return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
     }
 }

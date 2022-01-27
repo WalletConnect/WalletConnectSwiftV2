@@ -1,4 +1,5 @@
 import Foundation
+import Network
 
 struct SessionSequence: ExpirableSequence {
     
@@ -39,7 +40,7 @@ struct SessionSequence: ExpirableSequence {
     }
     
     var isSettled: Bool {
-        settled != nil
+        settled?.status == .acknowledged
     }
     
     var isController: Bool {

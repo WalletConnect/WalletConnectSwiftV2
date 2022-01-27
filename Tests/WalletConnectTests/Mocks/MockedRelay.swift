@@ -24,7 +24,7 @@ class MockedWCRelay: WalletConnectRelaying {
     var didCallSubscribe = false
     var didCallUnsubscribe = false
     var didRespondSuccess = false
-    var didRespondError = false
+    var lastErrorCode = -1
     var error: Error? = nil
     
     private(set) var requests: [(topic: String, request: WCRequest)] = []
@@ -47,7 +47,7 @@ class MockedWCRelay: WalletConnectRelaying {
     }
     
     func respondError(for payload: WCRequestSubscriptionPayload, reason: ReasonCode) {
-        didRespondError = true
+        lastErrorCode = reason.code
     }
     
     func subscribe(topic: String) {

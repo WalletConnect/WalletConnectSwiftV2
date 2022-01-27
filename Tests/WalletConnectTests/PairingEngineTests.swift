@@ -3,24 +3,6 @@ import XCTest
 import TestingUtils
 import WalletConnectUtils
 
-fileprivate extension SessionPermissions {
-    static func stub() -> SessionPermissions {
-        SessionPermissions(
-            blockchain: Blockchain(chains: []),
-            jsonrpc: JSONRPC(methods: []),
-            notifications: Notifications(types: [])
-        )
-    }
-}
-
-fileprivate extension WCRequest {
-    
-    var approveParams: PairingType.ApprovalParams? {
-        guard case .pairingApprove(let approveParams) = self.params else { return nil }
-        return approveParams
-    }
-}
-
 func deriveTopic(publicKey: String, privateKey: AgreementPrivateKey) -> String {
     try! Crypto.generateAgreementSecret(from: privateKey, peerPublicKey: publicKey).derivedTopic()
 }
@@ -88,7 +70,7 @@ final class PairingEngineTests: XCTestCase {
         try engine.approve(uri)
 
         // The concept of "publish" should only be known by the relayer
-        guard let publishTopic = relayMock.requests.first?.topic, let approval = relayMock.requests.first?.request.approveParams else {
+        guard let publishTopic = relayMock.requests.first?.topic, let approval = relayMock.requests.first?.request.pairingApproveParams else {
             XCTFail("Responder must publish an approval request."); return
         }
 
