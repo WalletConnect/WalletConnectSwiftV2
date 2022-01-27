@@ -18,6 +18,7 @@ protocol WalletConnectRelaying: AnyObject {
     func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
     func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?) 
     func respond(topic: String, response: JsonRpcResponseTypes, completion: @escaping ((Error?)->()))
+    func respondError(for payload: WCRequestSubscriptionPayload, reason: Reason)
     func subscribe(topic: String)
     func unsubscribe(topic: String)
 }
@@ -34,7 +35,7 @@ class WalletConnectRelay: WalletConnectRelaying {
     var onResponse: ((WCResponse) -> Void)?
     
     private var networkRelayer: NetworkRelaying
-    private let jsonRpcSerialiser: JSONRPCSerialising
+    private let jsonRpcSerializer: JSONRPCSerializing
     private let jsonRpcHistory: JsonRpcHistoryRecording
     
     var transportConnectionPublisher: AnyPublisher<Void, Never> {
@@ -55,11 +56,11 @@ class WalletConnectRelay: WalletConnectRelaying {
     let logger: ConsoleLogging
     
     init(networkRelayer: NetworkRelaying,
-         jsonRpcSerialiser: JSONRPCSerialising,
+         jsonRpcSerializer: JSONRPCSerializing,
          logger: ConsoleLogging,
          jsonRpcHistory: JsonRpcHistoryRecording) {
         self.networkRelayer = networkRelayer
-        self.jsonRpcSerialiser = jsonRpcSerialiser
+        self.jsonRpcSerializer = jsonRpcSerializer
         self.logger = logger
         self.jsonRpcHistory = jsonRpcHistory
         setUpPublishers()
@@ -72,7 +73,7 @@ class WalletConnectRelay: WalletConnectRelaying {
     func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?) {
         do {
             try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
-            let message = try jsonRpcSerialiser.serialise(topic: topic, encodable: payload)
+            let message = try jsonRpcSerializer.serialize(topic: topic, encodable: payload)
             networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
                 guard let self = self else {return}
                 if let error = error {
@@ -104,6 +105,7 @@ class WalletConnectRelay: WalletConnectRelaying {
     func respond(topic: String, response: JsonRpcResponseTypes, completion: @escaping ((Error?)->())) {
         do {
             _ = try jsonRpcHistory.resolve(response: response)
+
             let message = try jsonRpcSerialiser.serialise(topic: topic, encodable: response.value)
             logger.debug("Responding....topic: \(topic)")
             networkRelayer.publish(topic: topic, payload: message) { error in
@@ -114,6 +116,11 @@ class WalletConnectRelay: WalletConnectRelaying {
         } catch {
             completion(error)
         }
+    }
+    
+    func respondError(for payload: WCRequestSubscriptionPayload, reason: Reason) {
+        let response = JSONRPCErrorResponse(id: payload.wcRequest.id, error: JSONRPCErrorResponse.Error(code: reason.code, message: reason.message))
+        respond(topic: payload.topic, response: JsonRpcResponseTypes.error(response)) { _ in } // TODO: Move error handling to relayer package
     }
     
     func subscribe(topic: String)  {
@@ -145,12 +152,12 @@ class WalletConnectRelay: WalletConnectRelaying {
     }
     
     private func manageSubscription(_ topic: String, _ message: String) {
-        if let deserialisedJsonRpcRequest: WCRequest = jsonRpcSerialiser.tryDeserialise(topic: topic, message: message) {
-            handleWCRequest(topic: topic, request: deserialisedJsonRpcRequest)
-        } else if let deserialisedJsonRpcResponse: JSONRPCResponse<AnyCodable> = jsonRpcSerialiser.tryDeserialise(topic: topic, message: message) {
-            handleJsonRpcResponse(response: deserialisedJsonRpcResponse)
-        } else if let deserialisedJsonRpcError: JSONRPCErrorResponse = jsonRpcSerialiser.tryDeserialise(topic: topic, message: message) {
-            handleJsonRpcErrorResponse(response: deserialisedJsonRpcError)
+        if let deserializedJsonRpcRequest: WCRequest = jsonRpcSerializer.tryDeserialize(topic: topic, message: message) {
+            handleWCRequest(topic: topic, request: deserializedJsonRpcRequest)
+        } else if let deserializedJsonRpcResponse: JSONRPCResponse<AnyCodable> = jsonRpcSerializer.tryDeserialize(topic: topic, message: message) {
+            handleJsonRpcResponse(response: deserializedJsonRpcResponse)
+        } else if let deserializedJsonRpcError: JSONRPCErrorResponse = jsonRpcSerializer.tryDeserialize(topic: topic, message: message) {
+            handleJsonRpcErrorResponse(response: deserializedJsonRpcError)
         } else {
             logger.warn("Warning: WalletConnect Relay - Received unknown object type from networking relay")
         }

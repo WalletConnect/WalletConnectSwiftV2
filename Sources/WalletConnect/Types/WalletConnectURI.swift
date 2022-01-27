@@ -1,11 +1,11 @@
 import Foundation
 
-struct WalletConnectURI: Equatable {
+public struct WalletConnectURI: Equatable {
     
-    let topic: String
-    let version: String
-    let publicKey: String
-    let isController: Bool
+    public let topic: String
+    public let version: String
+    public let publicKey: String
+    public let isController: Bool
     let relay: RelayProtocolOptions
     
     init(topic: String, publicKey: String, isController: Bool, relay: RelayProtocolOptions) {
@@ -16,7 +16,7 @@ struct WalletConnectURI: Equatable {
         self.relay = relay
     }
     
-    init?(string: String) {
+    public init?(string: String) {
         guard string.hasPrefix("wc:") else {
             return nil
         }
@@ -41,7 +41,7 @@ struct WalletConnectURI: Equatable {
         self.relay = relay
     }
     
-    var absoluteString: String {
+    public var absoluteString: String {
         return "wc:\(topic)@\(version)?controller=\(isController)&publicKey=\(publicKey)&relay=\(relay.asPercentEncodedString())"
     }
 }
