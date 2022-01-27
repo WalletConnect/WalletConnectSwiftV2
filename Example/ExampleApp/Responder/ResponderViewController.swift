@@ -206,8 +206,15 @@ extension ResponderViewController: WalletConnectClientDelegate {
 
     }
     
+    func didReceive(sessionResponse: Response) {
+        
+    }
+    
     func didDelete(sessionTopic: String, reason: Reason) {
         reloadActiveSessions()
+        DispatchQueue.main.async { [unowned self] in
+            navigationController?.popToRootViewController(animated: true)
+        }
     }
     
     private func getActiveSessionItem(for settledSessions: [Session]) -> [ActiveSessionItem] {

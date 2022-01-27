@@ -16,6 +16,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         ClientDelegate.shared.onSessionDelete = { [unowned self] in
             showSelectChainScreen()
         }
+        ClientDelegate.shared.onSessionResponse = { [unowned self] response in
+            presentResponse(for: response)
+        }
         if let session = ClientDelegate.shared.client.getSettledSessions().first {
             showAccountsScreen(session)
         } else {
@@ -45,5 +48,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
     }
     
+    func presentResponse(for response: Response) {
+        DispatchQueue.main.async { [unowned self] in
+            let vc = UINavigationController(rootViewController: ResponseViewController(response: response))
+            window?.rootViewController?.present(vc, animated: true, completion: nil)
+        }
+    }
 }
 

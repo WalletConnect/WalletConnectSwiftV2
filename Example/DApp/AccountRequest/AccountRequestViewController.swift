@@ -59,7 +59,7 @@ class AccountRequestViewController: UIViewController, UITableViewDelegate, UITab
         
         
         let request = Request(topic: session.topic, method: method, params: requestParams, chainId: chainId)
-        client.request(params: request) { _ in }
+        client.request(params: request) 
         presentConfirmationAlert()
     }
     
