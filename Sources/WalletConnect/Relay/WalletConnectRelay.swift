@@ -121,7 +121,7 @@ class WalletConnectRelay: WalletConnectRelaying {
     
     func respondError(for payload: WCRequestSubscriptionPayload, reason: Reason) {
         let response = JSONRPCErrorResponse(id: payload.wcRequest.id, error: JSONRPCErrorResponse.Error(code: reason.code, message: reason.message))
-        respond(topic: payload.topic, response: JsonRpcResponseTypes.error(response)) { _ in } // TODO: Move error handling to relayer package
+        respond(topic: payload.topic, response: JsonRpcResult.error(response)) { _ in } // TODO: Move error handling to relayer package
     }
     
     func subscribe(topic: String)  {

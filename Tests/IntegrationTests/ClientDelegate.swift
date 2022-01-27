@@ -8,6 +8,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     var onPairingSettled: ((Pairing)->())?
     var onSessionProposal: ((Session.Proposal)->())?
     var onSessionRequest: ((Request)->())?
+    var onSessionResponse: ((Response)->())?
     var onSessionRejected: ((String, Reason)->())?
     var onSessionDelete: (()->())?
     var onSessionUpgrade: ((String, Session.Permissions)->())?
@@ -51,6 +52,6 @@ class ClientDelegate: WalletConnectClientDelegate {
         onPairingUpdate?(pairingTopic, appMetadata)
     }
     func didReceive(sessionResponse: Response) {
-        
+        onSessionResponse?(sessionResponse)
     }
 }
