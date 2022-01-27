@@ -63,7 +63,7 @@
 		761C649D26FB7FD7004239D1 /* SessionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionViewController.swift; sourceTree = "<group>"; };
 		761C64A226FB83CE004239D1 /* SessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionView.swift; sourceTree = "<group>"; };
 		761C64A526FCB0AA004239D1 /* SessionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionInfo.swift; sourceTree = "<group>"; };
-		764E1D3C26F8D3FC00A1FB15 /* Wallet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Wallet.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		764E1D3C26F8D3FC00A1FB15 /* WalletConnect Wallet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "WalletConnect Wallet.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		764E1D3F26F8D3FC00A1FB15 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		764E1D4126F8D3FC00A1FB15 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		764E1D4826F8D3FE00A1FB15 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -171,7 +171,7 @@
 		764E1D3D26F8D3FC00A1FB15 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				764E1D3C26F8D3FC00A1FB15 /* Wallet.app */,
+				764E1D3C26F8D3FC00A1FB15 /* WalletConnect Wallet.app */,
 				845B30EC27859686002E4094 /* ExampleAppTests.xctest */,
 				84CE641C27981DED00142511 /* DApp.app */,
 			);
@@ -303,7 +303,7 @@
 				844943A0278EC49700CC26BB /* Web3 */,
 			);
 			productName = ExampleApp;
-			productReference = 764E1D3C26F8D3FC00A1FB15 /* Wallet.app */;
+			productReference = 764E1D3C26F8D3FC00A1FB15 /* WalletConnect Wallet.app */;
 			productType = "com.apple.product-type.application";
 		};
 		845B30EB27859686002E4094 /* ExampleAppTests */ = {
@@ -622,7 +622,7 @@
 				CODE_SIGN_ENTITLEMENTS = Wallet.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = W5R8AG9K22;
 				INFOPLIST_FILE = ExampleApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -632,7 +632,7 @@
 				);
 				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.example;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "WalletConnect Wallet";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -647,7 +647,7 @@
 				CODE_SIGN_ENTITLEMENTS = Wallet.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = W5R8AG9K22;
 				INFOPLIST_FILE = ExampleApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -657,7 +657,7 @@
 				);
 				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.example;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "WalletConnect Wallet";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -711,7 +711,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = W5R8AG9K22;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DApp/Info.plist;
@@ -743,7 +743,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = W5R8AG9K22;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DApp/Info.plist;

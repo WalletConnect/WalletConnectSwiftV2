@@ -263,6 +263,13 @@ public final class WalletConnectClient {
         }
     }
     
+//    /// <#Description#>
+//    /// - Parameter id: <#id description#>
+//    /// - Returns: <#description#>
+//    public func getSessionRequestRecord(id: Int64) -> [WalletConnectUtils.JsonRpcRecord] {
+//
+//    }
+
     // MARK: - Private
     
     private func setUpEnginesCallbacks() {
