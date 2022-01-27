@@ -3,7 +3,6 @@ import Combine
 import WalletConnectUtils
 
 final class SessionEngine {
-    
     var onSessionPayloadRequest: ((Request)->())?
     var onSessionPayloadResponse: ((Response)->())?
     var onSessionApproved: ((Session)->())?
@@ -165,7 +164,7 @@ final class SessionEngine {
         }
     }
     
-    func request(params: Request, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())) {
+    func request(params: Request) {
         guard sequencesStore.hasSequence(forTopic: params.topic) else {
             logger.debug("Could not find session for topic \(params.topic)")
             return
@@ -175,12 +174,10 @@ final class SessionEngine {
         let sessionPayloadRequest = WCRequest(id: params.id, method: .sessionPayload, params: .sessionPayload(sessionPayloadParams))
         relayer.request(topic: params.topic, payload: sessionPayloadRequest) { [weak self] result in
             switch result {
-            case .success(let response):
-                completion(.success(response))
+            case .success(_):
                 self?.logger.debug("Did receive session payload response")
             case .failure(let error):
                 self?.logger.debug("error: \(error)")
-                completion(.failure(error))
             }
         }
     }

@@ -171,9 +171,8 @@ public final class WalletConnectClient {
     /// For the proposer to send JSON-RPC requests to responding peer.
     /// - Parameters:
     ///   - params: Parameters defining request and related session
-    ///   - completion: completion block will provide response from responding client
-    public func request(params: Request, completion: @escaping (Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ()) {
-        sessionEngine.request(params: params, completion: completion)
+    public func request(params: Request) {
+        sessionEngine.request(params: params)
     }
     
     /// For the responder to respond on pending peer's session JSON-RPC Request
@@ -267,6 +266,9 @@ public final class WalletConnectClient {
         pairingEngine.onApprovalAcknowledgement = { [weak self] settledPairing in
             self?.delegate?.didSettle(pairing: settledPairing)
         }
+        pairingEngine.onPairingUpdate = { [unowned self] topic, appMetadata in
+            delegate?.didUpdate(pairingTopic: topic, appMetadata: appMetadata)
+        }
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
             delegate?.didSettle(session: settledSession)
         }
@@ -292,8 +294,8 @@ public final class WalletConnectClient {
         sessionEngine.onNotificationReceived = { [unowned self] topic, notification in
             delegate?.didReceive(notification: notification, sessionTopic: topic)
         }
-        pairingEngine.onPairingUpdate = { [unowned self] topic, appMetadata in
-            delegate?.didUpdate(pairingTopic: topic, appMetadata: appMetadata)
+        sessionEngine.onSessionPayloadResponse = { [unowned self] response in
+            delegate?.didReceive(sessionResponse: response)
         }
     }
     
