@@ -31,7 +31,10 @@ public final class WalletConnectClient {
     private let secureStorage: SecureStorage
     private let pairingQueue = DispatchQueue(label: "com.walletconnect.sdk.client.pairing", qos: .userInitiated)
     private let history: JsonRpcHistory
-    
+#if os(iOS)
+    private var backgroundTaskID: UIBackgroundTaskIdentifier = .invalid
+#endif
+
     // MARK: - Initializers
 
     /// Initializes and returns newly created WalletConnect Client Instance. Establishes a network connection with the relay
@@ -68,8 +71,25 @@ public final class WalletConnectClient {
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
         setUpEnginesCallbacks()
         subscribeNotificationCenter()
+        registerBackgroundTask()
     }
     
+    func registerBackgroundTask() {
+#if os(iOS)
+        backgroundTaskID = UIApplication.shared.beginBackgroundTask (withName: "Finish Network Tasks") { [weak self] in
+            self?.endBackgroundTask()
+        }
+#endif
+    }
+    
+    func endBackgroundTask() {
+#if os(iOS)
+        wakuRelay.disconnect(closeCode: .goingAway)
+        print("Background task ended.")
+        UIApplication.shared.endBackgroundTask(backgroundTaskID)
+        backgroundTaskID = .invalid
+#endif
+    }
     deinit {
         unsubscribeNotificationCenter()
     }
@@ -228,6 +248,7 @@ public final class WalletConnectClient {
         pairingEngine.getSettledPairings()
     }
     
+    /// - Returns: Pending requests received with wc_sessionPayload
     public func getPendingRequests() -> [Request] {
         history.getPending()
             .filter{$0.request.method == .sessionPayload}
@@ -251,9 +272,7 @@ public final class WalletConnectClient {
             self?.delegate?.didSettle(pairing: settledPairing)
         }
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
-            let permissions = Session.Permissions.init(blockchains: settledSession.permissions.blockchains, methods: settledSession.permissions.methods)
-            let session = Session(topic: settledSession.topic, peer: settledSession.peer, permissions: permissions)
-            delegate?.didSettle(session: session)
+            delegate?.didSettle(session: settledSession)
         }
         sessionEngine.onApprovalAcknowledgement = { [weak self] session in
             self?.delegate?.didSettle(session: session)
@@ -297,11 +316,6 @@ public final class WalletConnectClient {
 #if os(iOS)
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(appDidEnterBackground),
-            name: UIApplication.didEnterBackgroundNotification,
-            object: nil)
-        NotificationCenter.default.addObserver(
-            self,
             selector: #selector(appWillEnterForeground),
             name: UIApplication.willEnterForegroundNotification,
             object: nil)
@@ -310,7 +324,6 @@ public final class WalletConnectClient {
     
     private func unsubscribeNotificationCenter() {
 #if os(iOS)
-        NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
 #endif
     }
@@ -318,10 +331,7 @@ public final class WalletConnectClient {
     @objc
     private func appWillEnterForeground() {
         wakuRelay.connect()
+        registerBackgroundTask()
     }
-    
-    @objc
-    private func appDidEnterBackground() {
-        wakuRelay.disconnect(closeCode: .goingAway)
-    }
+
 }

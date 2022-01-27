@@ -1,7 +1,8 @@
+
+import Foundation
 import UIKit
 
-final class ProposerView: UIView {
-    
+final class ConnectView: UIView {
     let qrCodeView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
@@ -19,20 +20,11 @@ final class ProposerView: UIView {
         return button
     }()
     
-    let tableView: UITableView = {
-        let tableView = UITableView(frame: .zero, style: .insetGrouped)
-        tableView.backgroundColor = .tertiarySystemBackground
-        tableView.register(ActiveSessionCell.self, forCellReuseIdentifier: "sessionCell")
-        return tableView
-    }()
-    
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .systemBackground
-        
         addSubview(qrCodeView)
         addSubview(copyButton)
-        addSubview(tableView)
         
         subviews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
         
@@ -46,11 +38,6 @@ final class ProposerView: UIView {
             copyButton.centerXAnchor.constraint(equalTo: centerXAnchor),
             copyButton.widthAnchor.constraint(equalTo: qrCodeView.widthAnchor),
             copyButton.heightAnchor.constraint(equalToConstant: 44),
-            
-            tableView.topAnchor.constraint(equalTo: copyButton.bottomAnchor, constant: 16),
-            tableView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
         ])
     }
     

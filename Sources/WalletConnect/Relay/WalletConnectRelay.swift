@@ -105,6 +105,7 @@ class WalletConnectRelay: WalletConnectRelaying {
     func respond(topic: String, response: JsonRpcResponseTypes, completion: @escaping ((Error?)->())) {
         do {
             _ = try jsonRpcHistory.resolve(response: response)
+
             let message = try jsonRpcSerializer.serialize(topic: topic, encodable: response.value)
             logger.debug("Responding....topic: \(topic)")
             networkRelayer.publish(topic: topic, payload: message) { error in
