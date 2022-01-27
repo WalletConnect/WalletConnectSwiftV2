@@ -248,13 +248,19 @@ public final class WalletConnectClient {
     }
     
     /// - Returns: Pending requests received with wc_sessionPayload
-    public func getPendingRequests() -> [Request] {
-        history.getPending()
+    /// - Parameter topic: topic representing session for which you want to get pending requests. If nil, you will receive pending requests for all active sessions.
+    public func getPendingRequests(topic: String? = nil) -> [Request] {
+        let pendingRequests: [Request] = history.getPending()
             .filter{$0.request.method == .sessionPayload}
             .compactMap {
                 guard case let .sessionPayload(payloadRequest) = $0.request.params else {return nil}
                 return Request(id: $0.id, topic: $0.topic, method: payloadRequest.request.method, params: payloadRequest.request.params, chainId: payloadRequest.chainId)
             }
+        if let topic = topic {
+            return pendingRequests.filter{$0.topic == topic}
+        } else {
+            return pendingRequests
+        }
     }
     
     // MARK: - Private
