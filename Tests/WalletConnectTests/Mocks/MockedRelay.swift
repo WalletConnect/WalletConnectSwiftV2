@@ -23,6 +23,7 @@ class MockedWCRelay: WalletConnectRelaying {
     var didCallRequest = false
     var didCallSubscribe = false
     var didCallUnsubscribe = false
+    var didRespondSuccess = false
     var didRespondError = false
     var error: Error? = nil
     
@@ -39,6 +40,10 @@ class MockedWCRelay: WalletConnectRelaying {
     
     func respond(topic: String, response: JsonRpcResponseTypes, completion: @escaping ((Error?) -> ())) {
         completion(error)
+    }
+    
+    func respondSuccess(for payload: WCRequestSubscriptionPayload) {
+        didRespondSuccess = true
     }
     
     func respondError(for payload: WCRequestSubscriptionPayload, reason: ReasonCode) {

@@ -318,17 +318,14 @@ final class SessionEngine {
         }
     }
     
-    // TODO: Use standard protocol reason codes when responding
     private func handleSessionUpdate(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {
-        let topic = payload.topic
-        let requestId = payload.wcRequest.id
-        
         for account in updateParams.state.accounts {
             if !String.conformsToCAIP10(account) {
                 relayer.respondError(for: payload, reason: .invalidUpdateRequest(context: .session))
                 return
             }
         }
+        let topic = payload.topic
         guard var session = try? sequencesStore.getSequence(forTopic: topic), session.isSettled else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
@@ -344,15 +341,8 @@ final class SessionEngine {
         
         session.settled?.state = updateParams.state
         sequencesStore.setSequence(session)
-        
-        let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
-        relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [unowned self] error in
-            if let error = error {
-                logger.error(error)
-            } else {
-                onSessionUpdate?(topic, updateParams.state.accounts)
-            }
-        }
+        relayer.respondSuccess(for: payload)
+        onSessionUpdate?(topic, updateParams.state.accounts)
     }
     
     private func handleSessionUpgrade(topic: String, upgradeParams: SessionType.UpgradeParams, requestId: Int64) {
