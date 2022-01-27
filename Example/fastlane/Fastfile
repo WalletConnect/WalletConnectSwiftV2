@@ -9,6 +9,6 @@ platform :ios do
 
   desc "Test Example dapp"
   lane :test_dapp do
-    scan(xcargs: "-allowProvisioningUpdates", scheme: "Dapp")
+    scan(xcargs: "-allowProvisioningUpdates", scheme: "DApp")
   end
 end
