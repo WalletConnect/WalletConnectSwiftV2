@@ -44,7 +44,7 @@ final class SessionEngine {
         restoreSubscriptions()
         
         relayer.onResponse = { [weak self] in
-            self?.handleReponse($0)
+            self?.handleResponse($0)
         }
     }
     
@@ -196,21 +196,19 @@ final class SessionEngine {
         }
     }
     
-    func update(topic: String, accounts: Set<String>) {
-        guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
-            logger.debug("Could not find session for topic \(topic)")
-            return
-        }
-        session.update(accounts)
-        relayer.request(.wcSessionUpdate(SessionType.UpdateParams(state: SessionState(accounts: accounts))), onTopic: topic) { [unowned self] result in
-            switch result {
-            case .success(_):
-                sequencesStore.setSequence(session)
-                onSessionUpdate?(topic, accounts)
-            case .failure(_):
-                break
+    func update(topic: String, accounts: Set<String>) throws {
+        var session = try sequencesStore.getSequence(forTopic: topic)
+        for account in accounts {
+            if !String.conformsToCAIP10(account) {
+                throw WalletConnectError.internal(.notApproved) // TODO: Use a suitable error cases
             }
         }
+        if !isController || session.settled?.status != .acknowledged {
+            throw WalletConnectError.unauthrorized(.unauthorizedUpdateRequest)
+        }
+        session.update(accounts)
+        sequencesStore.setSequence(session)
+        relayer.request(.wcSessionUpdate(SessionType.UpdateParams(accounts: accounts)), onTopic: topic)
     }
     
     func upgrade(topic: String, permissions: Session.Permissions) {
@@ -268,7 +266,7 @@ final class SessionEngine {
             case .sessionReject(let rejectParams):
                 handleSessionReject(rejectParams, topic: topic)
             case .sessionUpdate(let updateParams):
-                handleSessionUpdate(topic: topic, updateParams: updateParams, requestId: requestId)
+                handleSessionUpdate(payload: subscriptionPayload, updateParams: updateParams)
             case .sessionUpgrade(let upgradeParams):
                 handleSessionUpgrade(topic: topic, upgradeParams: upgradeParams, requestId: requestId)
             case .sessionDelete(let deleteParams):
@@ -318,24 +316,34 @@ final class SessionEngine {
         }
     }
     
-    private func handleSessionUpdate(topic: String, updateParams: SessionType.UpdateParams, requestId: Int64) {
-        guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
-            logger.debug("Could not find session for topic \(topic)")
+    // TODO: Use standard protocol reason codes when responding
+    private func handleSessionUpdate(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {
+        let topic = payload.topic
+        let requestId = payload.wcRequest.id
+        
+        for account in updateParams.state.accounts {
+            if !String.conformsToCAIP10(account) {
+                relayer.respondError(for: payload, reason: Reason(code: 0, message: "invalid accounts"))
+                return
+            }
+        }
+        guard var session = try? sequencesStore.getSequence(forTopic: topic), session.isSettled else {
+            relayer.respondError(for: payload, reason: Reason(code: 0, message: "session not found"))
             return
         }
-        guard session.peerIsController else {
-            let error = WalletConnectError.unauthrorized(.unauthorizedUpdateRequest)
-            logger.error(error)
-            respond(error: error, requestId: requestId, topic: topic)
+        guard !isController, session.peerIsController else {
+            relayer.respondError(for: payload, reason: Reason(code: 0, message: "unauthorized update"))
             return
         }
+        
+        session.settled?.state = updateParams.state
+        sequencesStore.setSequence(session)
+        
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
         relayer.respond(topic: topic, response: JsonRpcResult.response(response)) { [unowned self] error in
             if let error = error {
                 logger.error(error)
             } else {
-                session.settled?.state = updateParams.state
-                sequencesStore.setSequence(session)
                 onSessionUpdate?(topic, updateParams.state.accounts)
             }
         }
@@ -500,13 +508,15 @@ final class SessionEngine {
             }.store(in: &publishers)
     }
     
-    private func handleReponse(_ response: WCResponse) {
+    private func handleResponse(_ response: WCResponse) {
         switch response.requestParams {
         case .pairingPayload(let payloadParams):
             let proposeParams = payloadParams.request.params
             handleProposeResponse(topic: response.topic, proposeParams: proposeParams, result: response.result)
         case .sessionApprove(_):
             handleApproveResponse(topic: response.topic, result: response.result)
+        case .sessionUpdate:
+            handleUpdateResponse(topic: response.topic, result: response.result)
         case .sessionPayload(_):
             let response = Response(topic: response.topic, chainId: response.chainId, result: response.result)
             onSessionPayloadResponse?(response)
@@ -556,6 +566,18 @@ final class SessionEngine {
             crypto.deleteAgreementSecret(for: topic)
             crypto.deleteAgreementSecret(for: settledTopic)
             crypto.deletePrivateKey(for: pendingSession.publicKey)
+        }
+    }
+    
+    private func handleUpdateResponse(topic: String, result: JsonRpcResult) {
+        guard let session = try? sequencesStore.getSequence(forTopic: topic), let accounts = session.settled?.state.accounts else {
+            return
+        }
+        switch result {
+        case .response:
+            onSessionUpdate?(topic, accounts)
+        case .error:
+            logger.error("Peer failed to update state.")
         }
     }
 }

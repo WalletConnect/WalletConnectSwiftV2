@@ -33,7 +33,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     /// Function is executed on controller and non-controller client when both communicating peers have successfully upgraded permissions.
     func didUpgrade(sessionTopic: String, permissions: Session.Permissions)
     
-    /// Tells the delegate that extra eccounts has been included in session sequence
+    /// Tells the delegate that extra accounts has been included in session sequence
     ///
     /// Function is executed on controller and non-controller client when both communicating peers have successfully included new accounts requested by the controller client.
     func didUpdate(sessionTopic: String, accounts: Set<String>)
@@ -48,7 +48,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     /// Function is executed on proposer and responder client when both communicating peers have successfully established a pairing.
     func didSettle(pairing: Pairing)
     
-    /// Tells the delegate that sotification has been received.
+    /// Tells the delegate that notification has been received.
     func didReceive(notification: Session.Notification, sessionTopic : String)
     
     /// Tells the delegate that peer client has rejected a session proposal.

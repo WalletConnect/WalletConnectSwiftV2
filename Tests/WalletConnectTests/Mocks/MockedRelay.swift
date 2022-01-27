@@ -20,22 +20,29 @@ class MockedWCRelay: WalletConnectRelaying {
     var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {
         wcRequestPublisherSubject.eraseToAnyPublisher()
     }
+    var didCallRequest = false
     var didCallSubscribe = false
     var didCallUnsubscribe = false
+    var didRespondError = false
     var error: Error? = nil
     
     private(set) var requests: [(topic: String, request: WCRequest)] = []
-
+    
     func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ())?) {
         request(topic: topic, payload: wcMethod.asRequest(), completion: completion)
     }
     
     func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ())?) {
+        didCallRequest = true
         requests.append((topic, payload))
     }
     
     func respond(topic: String, response: JsonRpcResult, completion: @escaping ((Error?) -> ())) {
         completion(error)
+    }
+    
+    func respondError(for payload: WCRequestSubscriptionPayload, reason: Reason) {
+        didRespondError = true
     }
     
     func subscribe(topic: String) {
@@ -48,7 +55,7 @@ class MockedWCRelay: WalletConnectRelaying {
     
     func sendSubscriptionPayloadOn(topic: String) {
         let payload = WCRequestSubscriptionPayload(topic: topic,
-                                                   wcRequest: SerialiserTestData.pairingApproveJSONRPCRequest)
+                                                   wcRequest: SerializerTestData.pairingApproveJSONRPCRequest)
         wcRequestPublisherSubject.send(payload)
     }
 }

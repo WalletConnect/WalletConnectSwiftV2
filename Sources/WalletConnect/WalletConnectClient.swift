@@ -8,7 +8,7 @@ import UIKit
 
 /// An Object that expose public API to provide interactions with WalletConnect SDK
 ///
-/// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialise it. Usually only one instance of a client is required in the application.
+/// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
 ///
 /// ```swift
 /// let metadata = AppMetadata(name: String?, description: String?, url: String?, icons: [String]?)
@@ -47,7 +47,7 @@ public final class WalletConnectClient {
     ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults but if for some reasons you want to provide your own storage you can inject it here.
     ///   - clientName: if your app requires more than one client you are required to call them with different names to distinguish logs source and prefix storage keys.
     ///
-    /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialise it. Usually only one instance of a client is required in the application.
+    /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
     public convenience init(metadata: AppMetadata, projectId: String, isController: Bool, relayHost: String, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
         self.init(metadata: metadata, projectId: projectId, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStorage: keyValueStorage, clientName: clientName)
     }
@@ -61,9 +61,9 @@ public final class WalletConnectClient {
         self.secureStorage = SecureStorage(keychain: keychain)
         let relayUrl = WakuNetworkRelay.makeRelayUrl(host: relayHost, projectId: projectId)
         self.wakuRelay = WakuNetworkRelay(logger: logger, url: relayUrl, keyValueStorage: keyValueStorage, uniqueIdentifier: clientName ?? "")
-        let serialiser = JSONRPCSerialiser(crypto: crypto)
+        let serializer = JSONRPCSerializer(crypto: crypto)
         self.history = JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory(clientName: clientName ?? "_")))
-        self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: history)
+        self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerializer: serializer, logger: logger, jsonRpcHistory: history)
         let pairingSequencesStore = PairingStorage(storage: SequenceStore<PairingSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings(clientName: clientName ?? "_")))
         let sessionSequencesStore = SessionStorage(storage: SequenceStore<SessionSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions(clientName: clientName ?? "_")))
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
@@ -157,7 +157,11 @@ public final class WalletConnectClient {
     ///   - topic: Topic of the session that is intended to be updated.
     ///   - accounts: Set of accounts that will be allowed to be used by the session after the update.
     public func update(topic: String, accounts: Set<String>) {
-        sessionEngine.update(topic: topic, accounts: accounts)
+        do {
+            try sessionEngine.update(topic: topic, accounts: accounts)
+        } catch {
+            print("Error on session update call: \(error)")
+        }
     }
     
     /// For the responder to upgrade session permissions
