@@ -199,7 +199,9 @@ final class SessionEngine {
     }
     
     func update(topic: String, accounts: Set<String>) throws {
-        var session = try sequencesStore.getSequence(forTopic: topic)
+        guard var session = sequencesStore.getSequence(forTopic: topic) else {
+            throw WalletConnectError.internal(.noSequenceForTopic)
+        }
         for account in accounts {
             if !String.conformsToCAIP10(account) {
                 throw WalletConnectError.internal(.notApproved) // TODO: Use a suitable error cases
@@ -214,7 +216,7 @@ final class SessionEngine {
     }
     
     func upgrade(topic: String, permissions: Session.Permissions) {
-        guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
+        guard var session = sequencesStore.getSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
@@ -235,7 +237,7 @@ final class SessionEngine {
     }
     
     func notify(topic: String, params: Session.Notification, completion: ((Error?)->())?) {
-        guard let session = try? sequencesStore.getSequence(forTopic: topic), session.isSettled else {
+        guard let session = sequencesStore.getSequence(forTopic: topic), session.isSettled else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
@@ -286,7 +288,7 @@ final class SessionEngine {
     }
     
     private func handleSessionNotification(topic: String, notificationParams: SessionType.NotificationParams, requestId: Int64) {
-        guard let session = try? sequencesStore.getSequence(forTopic: topic), session.isSettled else {
+        guard let session = sequencesStore.getSequence(forTopic: topic), session.isSettled else {
             return
         }
         do {
@@ -326,7 +328,7 @@ final class SessionEngine {
             }
         }
         let topic = payload.topic
-        guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
+        guard var session = sequencesStore.getSequence(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
         }
@@ -346,7 +348,7 @@ final class SessionEngine {
     }
     
     private func handleSessionUpgrade(topic: String, upgradeParams: SessionType.UpgradeParams, requestId: Int64) {
-        guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
+        guard var session = sequencesStore.getSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
@@ -368,7 +370,7 @@ final class SessionEngine {
             if let error = error {
                 logger.error(error)
             } else {
-                try? sequencesStore.setSequence(session)
+                sequencesStore.setSequence(session)
                 onSessionUpgrade?(session.topic, newPermissions)
             }
         }
@@ -431,7 +433,7 @@ final class SessionEngine {
     }
 
     private func validatePayload(_ sessionRequest: Request) throws {
-        guard let session = try? sequencesStore.getSequence(forTopic: sessionRequest.topic) else {
+        guard let session = sequencesStore.getSequence(forTopic: sessionRequest.topic) else {
             throw WalletConnectError.internal(.noSequenceForTopic)
         }
         if let chainId = sessionRequest.chainId {
@@ -451,7 +453,7 @@ final class SessionEngine {
             logger.warn("Warning: Session Engine - Unexpected handleSessionApprove method call by non Controller client")
             return
         }
-        guard let session = try? sequencesStore.getSequence(forTopic: topic),
+        guard let session = sequencesStore.getSequence(forTopic: topic),
               let pendingSession = session.pending else {
                   logger.error("Could not find pending session for topic: \(topic)")
                   return
@@ -532,7 +534,7 @@ final class SessionEngine {
     
     private func handleApproveResponse(topic: String, result: Result<JSONRPCResponse<AnyCodable>, Error>) {
         guard
-            let pendingSession = try? sequencesStore.getSequence(forTopic: topic),
+            let pendingSession = sequencesStore.getSequence(forTopic: topic),
             let settledTopic = pendingSession.pending?.outcomeTopic,
             let proposal = pendingSession.pending?.proposal
         else {
@@ -562,7 +564,7 @@ final class SessionEngine {
     }
     
     private func handleUpdateResponse(topic: String, result: Result<JSONRPCResponse<AnyCodable>, Error>) {
-        guard let session = try? sequencesStore.getSequence(forTopic: topic), let accounts = session.settled?.state.accounts else {
+        guard let session = sequencesStore.getSequence(forTopic: topic), let accounts = session.settled?.state.accounts else {
             return
         }
         switch result {

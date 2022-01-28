@@ -261,7 +261,7 @@ final class SessionEngineTests: XCTestCase {
     
     // MARK: - Update call tests
     
-    func testUpdate() throws {
+    func testUpdateSuccess() throws {
         setupEngine(isController: true)
         let session = SessionSequence.stubSettled()
         storageMock.setSequence(session)
@@ -297,7 +297,7 @@ final class SessionEngineTests: XCTestCase {
     
     // MARK: - Update peer response tests
     
-    func testUpdatePeer() {
+    func testUpdatePeerSuccess() {
         setupEngine(isController: false)
         let session = SessionSequence.stubSettled(isPeerController: true)
         storageMock.setSequence(session)
