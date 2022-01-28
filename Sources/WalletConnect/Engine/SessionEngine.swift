@@ -217,16 +217,16 @@ final class SessionEngine {
     
     func upgrade(topic: String, permissions: Session.Permissions) throws {
         guard var session = sequencesStore.getSequence(forTopic: topic) else {
-            fatalError()
+            throw WalletConnectError.noSessionMatchingTopic(topic)
         }
         guard session.isSettled else {
-            fatalError()
+            throw WalletConnectError.sessionNotSettled
         }
         guard isController else {
-            fatalError()
+            throw WalletConnectError.unauthorizedNonControllerCall
         }
         guard validatePermissions(permissions) else {
-            fatalError()
+            throw WalletConnectError.invalidPermissions
         }
         session.upgrade(permissions)
         guard let newPermissions = session.settled?.permissions else {

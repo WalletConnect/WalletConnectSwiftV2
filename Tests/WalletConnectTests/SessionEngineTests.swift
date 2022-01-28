@@ -361,18 +361,42 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testUpgradeErrorSessionNotFound() {
-        
+        setupEngine(isController: true)
+        XCTAssertThrowsError(try engine.upgrade(topic: "", permissions: Session.Permissions.stub())) { error in
+            XCTAssertTrue(error.isNoSessionMatchingTopicError)
+        }
     }
     
     func testUpgradeErrorSessionNotSettled() {
-        
+        setupEngine(isController: true)
+        let session = SessionSequence.stubPreSettled()
+        storageMock.setSequence(session)
+        XCTAssertThrowsError(try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub())) { error in
+            XCTAssertTrue(error.isSessionNotSettledError)
+        }
     }
     
     func testUpgradeErrorInvalidPermissions() {
-        
+        setupEngine(isController: true)
+        let session = SessionSequence.stubSettled()
+        storageMock.setSequence(session)
+        XCTAssertThrowsError(try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub(chains: [""]))) { error in
+            XCTAssertTrue(error.isInvalidPermissionsError)
+        }
+        XCTAssertThrowsError(try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub(methods: [""]))) { error in
+            XCTAssertTrue(error.isInvalidPermissionsError)
+        }
+        XCTAssertThrowsError(try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub(notifications: [""]))) { error in
+            XCTAssertTrue(error.isInvalidPermissionsError)
+        }
     }
     
     func testUpgradeErrorCalledByNonController() {
-        
+        setupEngine(isController: false)
+        let session = SessionSequence.stubSettled()
+        storageMock.setSequence(session)
+        XCTAssertThrowsError(try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub())) { error in
+            XCTAssertTrue(error.isUnauthorizedNonControllerCallError)
+        }
     }
 }
