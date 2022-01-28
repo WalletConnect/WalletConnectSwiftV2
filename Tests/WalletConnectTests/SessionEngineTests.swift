@@ -354,10 +354,12 @@ final class SessionEngineTests: XCTestCase {
     
     func testUpgradeSuccess() throws {
         setupEngine(isController: true)
+        let permissions = Session.Permissions.stub()
         let session = SessionSequence.stubSettled()
         storageMock.setSequence(session)
-        try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub())
+        try engine.upgrade(topic: session.topic, permissions: permissions)
         XCTAssertTrue(relayMock.didCallRequest)
+        // TODO: Check permissions on stored session
     }
     
     func testUpgradeErrorSessionNotFound() {

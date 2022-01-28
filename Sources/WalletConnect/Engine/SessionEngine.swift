@@ -229,19 +229,9 @@ final class SessionEngine {
             throw WalletConnectError.invalidPermissions
         }
         session.upgrade(permissions)
-        guard let newPermissions = session.settled?.permissions else {
-            return
-        }
-        relayer.request(.wcSessionUpgrade(SessionType.UpgradeParams(permissions: newPermissions)), onTopic: topic) { [unowned self] result in
-            switch result {
-            case .success(_):
-                sequencesStore.setSequence(session)
-                onSessionUpgrade?(session.topic, newPermissions)
-            case .failure(_):
-                return
-                //TODO
-            }
-        }
+        let newPermissions = session.settled!.permissions // We know session is settled
+        sequencesStore.setSequence(session)
+        relayer.request(.wcSessionUpgrade(SessionType.UpgradeParams(permissions: newPermissions)), onTopic: topic)
     }
     
     private func validatePermissions(_ permissions: Session.Permissions) -> Bool {
@@ -542,6 +532,8 @@ final class SessionEngine {
             handleApproveResponse(topic: response.topic, result: response.result)
         case .sessionUpdate:
             handleUpdateResponse(topic: response.topic, result: response.result)
+        case .sessionUpgrade:
+            handleUpgradeResponse(topic: response.topic, result: response.result)
         default:
             break
         }
@@ -599,6 +591,18 @@ final class SessionEngine {
             onSessionUpdate?(topic, accounts)
         case .failure:
             logger.error("Peer failed to update state.")
+        }
+    }
+    
+    private func handleUpgradeResponse(topic: String, result: Result<JSONRPCResponse<AnyCodable>, Error>) {
+        guard let session = sequencesStore.getSequence(forTopic: topic), let permissions = session.settled?.permissions else {
+            return
+        }
+        switch result {
+        case .success:
+            onSessionUpgrade?(session.topic, permissions)
+        case .failure:
+            logger.error("Peer failed to upgrade permissions.")
         }
     }
 }
