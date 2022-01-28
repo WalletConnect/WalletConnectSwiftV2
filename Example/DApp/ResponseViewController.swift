@@ -24,12 +24,13 @@ class ResponseViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let record = ClientDelegate.shared.client.getSessionRequestRecord(id: response.result.id)!
         switch response.result {
         case  .response(let response):
-            responseView.nameLabel.text = "Received Response"
+            responseView.nameLabel.text = "Received Response\n\(record.request.method)"
             responseView.descriptionLabel.text = try! response.result.get(String.self).description
         case .error(let error):
-            responseView.nameLabel.text = "Received Error"
+            responseView.nameLabel.text = "Received Error\n\(record.request.method)"
             responseView.descriptionLabel.text = error.error.message
         }
         responseView.dismissButton.addTarget(self, action: #selector(dismissSelf), for: .touchUpInside)
@@ -45,6 +46,7 @@ final class ResponseView: UIView {
 
     let nameLabel: UILabel = {
         let label = UILabel()
+        label.numberOfLines = 0
         label.font = UIFont.systemFont(ofSize: 17.0, weight: .heavy)
         return label
     }()

@@ -263,12 +263,14 @@ public final class WalletConnectClient {
         }
     }
     
-//    /// <#Description#>
-//    /// - Parameter id: <#id description#>
-//    /// - Returns: <#description#>
-//    public func getSessionRequestRecord(id: Int64) -> [WalletConnectUtils.JsonRpcRecord] {
-//
-//    }
+    /// - Parameter id: id of a wc_sessionPayload jsonrpc request
+    /// - Returns: json rpc record object for given id or nil if record for give id does not exits
+    public func getSessionRequestRecord(id: Int64) -> WalletConnectUtils.JsonRpcRecord? {
+        guard let record = history.get(id: id),
+              case .sessionPayload(let payload) = record.request.params else {return nil}
+        let request = WalletConnectUtils.JsonRpcRecord.Request(method: payload.request.method, params: payload.request.params)
+        return WalletConnectUtils.JsonRpcRecord(id: record.id, topic: record.topic, request: request, response: record.response, chainId: record.chainId)
+    }
 
     // MARK: - Private
     
