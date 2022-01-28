@@ -5,9 +5,14 @@ enum ReasonCode {
         case session = "session"
     }
     
+    // 0 (Generic)
     case generic(message: String)
+    
+    // 1000 (Internal)
     case invalidUpdateRequest(context: Context)
     case noContextWithTopic(context: Context, topic: String)
+    
+    // 3000 (Unauthorized)
     case unauthorizedUpdateRequest(context: Context)
     case unauthorizedMatchingController(isController: Bool)
     

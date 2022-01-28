@@ -349,4 +349,30 @@ final class SessionEngineTests: XCTestCase {
     }
     
     // TODO: Update acknowledgement tests
+    
+    // MARK: - Upgrade call tests
+    
+    func testUpgradeSuccess() throws {
+        setupEngine(isController: true)
+        let session = SessionSequence.stubSettled()
+        storageMock.setSequence(session)
+        try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub())
+        XCTAssertTrue(relayMock.didCallRequest)
+    }
+    
+    func testUpgradeErrorSessionNotFound() {
+        
+    }
+    
+    func testUpgradeErrorSessionNotSettled() {
+        
+    }
+    
+    func testUpgradeErrorInvalidPermissions() {
+        
+    }
+    
+    func testUpgradeErrorCalledByNonController() {
+        
+    }
 }

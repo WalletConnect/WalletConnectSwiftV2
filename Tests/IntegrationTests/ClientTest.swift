@@ -251,7 +251,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.approve(proposal: proposal, accounts: [account])
         }
         responder.onSessionSettled = { [unowned self] sessionSettled in
-            responder.client.upgrade(topic: sessionSettled.topic, permissions: upgradePermissions)
+            try? responder.client.upgrade(topic: sessionSettled.topic, permissions: upgradePermissions)
         }
         proposer.onSessionUpgrade = { topic, permissions in
             XCTAssertTrue(permissions.blockchains.isSuperset(of: upgradePermissions.blockchains))
@@ -280,7 +280,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.approve(proposal: proposal, accounts: [account])
         }
         proposer.onSessionSettled = { [unowned self] sessionSettled in
-            proposer.client.upgrade(topic: sessionSettled.topic, permissions: upgradePermissions)
+            try? proposer.client.upgrade(topic: sessionSettled.topic, permissions: upgradePermissions)
         }
         proposer.onSessionUpgrade = { topic, permissions in
             proposerSessionUpgradeExpectation.fulfill()

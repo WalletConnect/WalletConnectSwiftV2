@@ -213,10 +213,18 @@ final class SessionEngine {
         relayer.request(.wcSessionUpdate(SessionType.UpdateParams(accounts: accounts)), onTopic: topic)
     }
     
-    func upgrade(topic: String, permissions: Session.Permissions) {
+    func upgrade(topic: String, permissions: Session.Permissions) throws {
         guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
-            logger.debug("Could not find session for topic \(topic)")
-            return
+            fatalError()
+        }
+        guard session.isSettled else {
+            fatalError()
+        }
+        guard isController else {
+            fatalError()
+        }
+        guard validatePermissions(permissions) else {
+            fatalError()
         }
         session.upgrade(permissions)
         guard let newPermissions = session.settled?.permissions else {
@@ -232,6 +240,25 @@ final class SessionEngine {
                 //TODO
             }
         }
+    }
+    
+    private func validatePermissions(_ permissions: Session.Permissions) -> Bool {
+        for chainId in permissions.blockchains {
+            if !String.conformsToCAIP2(chainId) {
+                return false
+            }
+        }
+        for method in permissions.methods {
+            if method.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                return false
+            }
+        }
+        for notification in permissions.notifications {
+            if notification.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                return false
+            }
+        }
+        return true
     }
     
     func notify(topic: String, params: Session.Notification, completion: ((Error?)->())?) {
