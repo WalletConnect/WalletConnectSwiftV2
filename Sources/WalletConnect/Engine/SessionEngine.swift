@@ -216,6 +216,7 @@ final class SessionEngine {
     }
     
     func upgrade(topic: String, permissions: Session.Permissions) throws {
+        let permissions = SessionPermissions(permissions: permissions)
         guard var session = sequencesStore.getSequence(forTopic: topic) else {
             throw WalletConnectError.noSessionMatchingTopic(topic)
         }
@@ -232,25 +233,6 @@ final class SessionEngine {
         let newPermissions = session.settled!.permissions // We know session is settled
         sequencesStore.setSequence(session)
         relayer.request(.wcSessionUpgrade(SessionType.UpgradeParams(permissions: newPermissions)), onTopic: topic)
-    }
-    
-    private func validatePermissions(_ permissions: Session.Permissions) -> Bool {
-        for chainId in permissions.blockchains {
-            if !String.conformsToCAIP2(chainId) {
-                return false
-            }
-        }
-        for method in permissions.methods {
-            if method.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                return false
-            }
-        }
-        for notification in permissions.notifications {
-            if notification.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                return false
-            }
-        }
-        return true
     }
     
     func notify(topic: String, params: Session.Notification, completion: ((Error?)->())?) {
@@ -289,7 +271,7 @@ final class SessionEngine {
             case .sessionUpdate(let updateParams):
                 handleSessionUpdate(payload: subscriptionPayload, updateParams: updateParams)
             case .sessionUpgrade(let upgradeParams):
-                handleSessionUpgrade(topic: topic, upgradeParams: upgradeParams, requestId: requestId)
+                handleSessionUpgrade(payload: subscriptionPayload, upgradeParams: upgradeParams)
             case .sessionDelete(let deleteParams):
                 handleSessionDelete(deleteParams, topic: topic)
             case .sessionPayload(let sessionPayloadParams):
@@ -357,40 +339,34 @@ final class SessionEngine {
             relayer.respondError(for: payload, reason: .unauthorizedMatchingController(isController: isController))
             return
         }
-        
         session.settled?.state = updateParams.state
         sequencesStore.setSequence(session)
         relayer.respondSuccess(for: payload)
         onSessionUpdate?(topic, updateParams.state.accounts)
     }
     
-    private func handleSessionUpgrade(topic: String, upgradeParams: SessionType.UpgradeParams, requestId: Int64) {
-        guard var session = sequencesStore.getSequence(forTopic: topic) else {
-            logger.debug("Could not find session for topic \(topic)")
+    private func handleSessionUpgrade(payload: WCRequestSubscriptionPayload, upgradeParams: SessionType.UpgradeParams) {
+        guard validatePermissions(upgradeParams.permissions) else {
+            relayer.respondError(for: payload, reason: .invalidUpgradeRequest(context: .session))
+            return
+        }
+        guard var session = sequencesStore.getSequence(forTopic: payload.topic) else {
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
             return
         }
         guard session.peerIsController else {
-            let error = WalletConnectError.unauthrorized(.unauthorizedUpgradeRequest)
-            logger.error(error)
-            respond(error: error, requestId: requestId, topic: topic)
+            relayer.respondError(for: payload, reason: .unauthorizedUpgradeRequest(context: .session))
             return
         }
-        let permissions = Session.Permissions(
-            blockchains: upgradeParams.permissions.blockchain.chains,
-            methods: upgradeParams.permissions.jsonrpc.methods)
-        session.upgrade(permissions)
-        guard let newPermissions = session.settled?.permissions else {
+        guard !isController else {
+            relayer.respondError(for: payload, reason: .unauthorizedMatchingController(isController: isController))
             return
         }
-        let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
-        relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [unowned self] error in
-            if let error = error {
-                logger.error(error)
-            } else {
-                sequencesStore.setSequence(session)
-                onSessionUpgrade?(session.topic, newPermissions)
-            }
-        }
+        session.upgrade(upgradeParams.permissions)
+        sequencesStore.setSequence(session)
+        let newPermissions = session.settled!.permissions // We know session is settled
+        relayer.respondSuccess(for: payload)
+        onSessionUpgrade?(session.topic, newPermissions)
     }
     
     private func handleSessionPing(topic: String, requestId: Int64) {
@@ -604,5 +580,26 @@ final class SessionEngine {
         case .failure:
             logger.error("Peer failed to upgrade permissions.")
         }
+    }
+    
+    private func validatePermissions(_ permissions: SessionPermissions) -> Bool {
+        for chainId in permissions.blockchain.chains {
+            if !String.conformsToCAIP2(chainId) {
+                return false
+            }
+        }
+        for method in permissions.jsonrpc.methods {
+            if method.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                return false
+            }
+        }
+        if let notificationTypes = permissions.notifications?.types {
+            for notification in notificationTypes {
+                if notification.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    return false
+                }
+            }
+        }
+        return true
     }
 }
