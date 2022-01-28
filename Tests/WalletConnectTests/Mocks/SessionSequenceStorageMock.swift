@@ -15,11 +15,8 @@ final class SessionSequenceStorageMock: SessionSequenceStorage {
         sessions[sequence.topic] = sequence
     }
     
-    func getSequence(forTopic topic: String) throws -> SessionSequence {
-        guard let session = sessions[topic] else {
-            throw NSError.mock()
-        }
-        return session
+    func getSequence(forTopic topic: String) -> SessionSequence? {
+        return sessions[topic]
     }
     
     func getAll() -> [SessionSequence] {
