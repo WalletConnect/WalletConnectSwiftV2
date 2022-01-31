@@ -5,33 +5,33 @@ import Foundation
 import XCTest
 @testable import WalletConnect
 
-final class JSONRPCSerialiserTests: XCTestCase {
-    var serialiser: JSONRPCSerialiser!
+final class JSONRPCSerializerTests: XCTestCase {
+    var serializer: JSONRPCSerializer!
     var codec: MockedCodec!
     override func setUp() {
         codec = MockedCodec()
-        self.serialiser = JSONRPCSerialiser(crypto: Crypto(keychain: KeychainStorageMock()), codec: codec)
+        self.serializer = JSONRPCSerializer(crypto: Crypto(keychain: KeychainStorageMock()), codec: codec)
     }
     
     override func tearDown() {
-        serialiser = nil
+        serializer = nil
     }
     
-    func testSerialise() {
-        codec.encryptionPayload = EncryptionPayload(iv: SerialiserTestData.iv,
-                                                    publicKey: SerialiserTestData.publicKey,
-                                                    mac: SerialiserTestData.mac,
-                                                    cipherText: SerialiserTestData.cipherText)
-        let serialisedMessage = try! serialiser.encrypt(json: SerialiserTestData.pairingApproveJSON, agreementKeys: SerialiserTestData.emptyAgreementSecret)
-        let serialisedMessageSample = SerialiserTestData.serialisedMessage
-        XCTAssertEqual(serialisedMessage, serialisedMessageSample)
+    func testSerialize() {
+        codec.encryptionPayload = EncryptionPayload(iv: SerializerTestData.iv,
+                                                    publicKey: SerializerTestData.publicKey,
+                                                    mac: SerializerTestData.mac,
+                                                    cipherText: SerializerTestData.cipherText)
+        let serializedMessage = try! serializer.encrypt(json: SerializerTestData.pairingApproveJSON, agreementKeys: SerializerTestData.emptyAgreementSecret)
+        let serializedMessageSample = SerializerTestData.serializedMessage
+        XCTAssertEqual(serializedMessage, serializedMessageSample)
     }
     
-    func testDeserialise() {
-        let serialisedMessageSample = SerialiserTestData.serialisedMessage
-        codec.decodedJson = SerialiserTestData.pairingApproveJSON
-        let deserialisedJSONRPC: WCRequest = try! serialiser.deserialise(message: serialisedMessageSample, symmetricKey: Data(hex: ""))
-        XCTAssertEqual(deserialisedJSONRPC.params, SerialiserTestData.pairingApproveJSONRPCRequest.params)
+    func testDeserialize() {
+        let serializedMessageSample = SerializerTestData.serializedMessage
+        codec.decodedJson = SerializerTestData.pairingApproveJSON
+        let deserializedJSONRPC: WCRequest = try! serializer.deserialize(message: serializedMessageSample, symmetricKey: Data(hex: ""))
+        XCTAssertEqual(deserializedJSONRPC.params, SerializerTestData.pairingApproveJSONRPCRequest.params)
     }
 }
 

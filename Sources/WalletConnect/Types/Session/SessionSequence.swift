@@ -1,5 +1,4 @@
 import Foundation
-import Network
 
 struct SessionSequence: ExpirableSequence {
     

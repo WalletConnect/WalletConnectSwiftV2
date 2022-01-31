@@ -153,15 +153,16 @@ final class ClientTests: XCTestCase {
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
             let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
-            self.proposer.client.request(params: requestParams) { result in
-                switch result {
-                case .success(let jsonRpcResponse):
-                    let response = try! jsonRpcResponse.result.get(String.self)
-                    XCTAssertEqual(response, responseParams)
-                    responseExpectation.fulfill()
-                case .failure(_):
-                    XCTFail()
-                }
+            self.proposer.client.request(params: requestParams)
+        }
+        proposer.onSessionResponse = { response in
+            switch response.result {
+            case .response(let jsonRpcResponse):
+                let response = try! jsonRpcResponse.result.get(String.self)
+                XCTAssertEqual(response, responseParams)
+                responseExpectation.fulfill()
+            case .error(_):
+                XCTFail()
             }
         }
         responder.onSessionRequest = {[unowned self]  sessionRequest in
@@ -189,15 +190,17 @@ final class ClientTests: XCTestCase {
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
             let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
-            self.proposer.client.request(params: requestParams) { result in
-                switch result {
-                case .success(_):
-                    XCTFail()
-                case .failure(let errorResponse):
-                    XCTAssertEqual(error, errorResponse.error)
-                    failureResponseExpectation.fulfill()
-                }
+            self.proposer.client.request(params: requestParams)
+        }
+        proposer.onSessionResponse = { response in
+            switch response.result {
+            case .response(_):
+                XCTFail()
+            case .error(let errorResponse):
+                XCTAssertEqual(error, errorResponse.error)
+                failureResponseExpectation.fulfill()
             }
+
         }
         responder.onSessionRequest = {[unowned self]  sessionRequest in
             let jsonrpcErrorResponse = JSONRPCErrorResponse(id: sessionRequest.id, error: error)

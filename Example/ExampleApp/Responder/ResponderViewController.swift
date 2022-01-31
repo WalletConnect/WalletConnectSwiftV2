@@ -16,8 +16,7 @@ final class ResponderViewController: UIViewController {
             metadata: metadata,
             projectId: "52af113ee0c1e1a20f4995730196c13e",
             isController: true,
-            relayHost: "relay.dev.walletconnect.com", //use with dapp at https://canary.react-app.walletconnect.com/
-            clientName: "responder"
+            relayHost: "relay.dev.walletconnect.com"
         )
     }()
     lazy  var account = Signer.privateKey.address.hex(eip55: true)
@@ -43,6 +42,7 @@ final class ResponderViewController: UIViewController {
         let settledSessions = client.getSettledSessions()
         sessionItems = getActiveSessionItem(for: settledSessions)
         client.delegate = self
+        client.logger.setLogging(level: .debug)
     }
     
     @objc
@@ -119,7 +119,6 @@ extension ResponderViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let item = sessionItems[indexPath.row]
-//            let deleteParams = SessionType.DeleteParams(topic: item.topic, reason: SessionType.Reason(code: 0, message: "disconnect"))
             client.disconnect(topic: item.topic, reason: Reason(code: 0, message: "disconnect"))
             sessionItems.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .automatic)
@@ -194,10 +193,6 @@ extension ResponderViewController: WalletConnectClientDelegate {
         
     }
     
-    func didReceive(notification: Session.Notification, sessionTopic: String) {
-
-    }
-
     func didUpgrade(sessionTopic: String, permissions: Session.Permissions) {
 
     }
@@ -208,6 +203,9 @@ extension ResponderViewController: WalletConnectClientDelegate {
     
     func didDelete(sessionTopic: String, reason: Reason) {
         reloadActiveSessions()
+        DispatchQueue.main.async { [unowned self] in
+            navigationController?.popToRootViewController(animated: true)
+        }
     }
     
     private func getActiveSessionItem(for settledSessions: [Session]) -> [ActiveSessionItem] {

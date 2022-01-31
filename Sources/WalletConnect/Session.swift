@@ -7,6 +7,7 @@ public struct Session {
     public let topic: String
     public let peer: AppMetadata
     public let permissions: Permissions
+    public let accounts: Set<String>
 }
 
 extension Session {

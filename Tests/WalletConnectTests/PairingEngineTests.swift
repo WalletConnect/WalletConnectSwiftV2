@@ -106,7 +106,7 @@ final class PairingEngineTests: XCTestCase {
 
         try engine.approve(uri)
         let success = JSONRPCResponse<AnyCodable>(id: 0, result: AnyCodable(true))
-        let response = WCResponse(topic: topicA, requestMethod: .pairingApprove, requestParams: .pairingApprove(PairingType.ApprovalParams(relay: RelayProtocolOptions(protocol: "", params: nil), responder: PairingParticipant(publicKey: ""), expiry: 0, state: nil)), result: .success(success))
+        let response = WCResponse(topic: topicA, chainId: nil, requestMethod: .pairingApprove, requestParams: .pairingApprove(PairingType.ApprovalParams(relay: RelayProtocolOptions(protocol: "", params: nil), responder: PairingParticipant(publicKey: ""), expiry: 0, state: nil)), result: .response(success))
         relayMock.onPairingResponse?(response)
         
         XCTAssert(storageMock.hasAcknowledgedPairing(on: topicB), "Settled pairing must advance to acknowledged state.")
