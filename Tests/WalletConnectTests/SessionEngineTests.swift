@@ -95,9 +95,10 @@ final class SessionEngineTests: XCTestCase {
         let error = JSONRPCErrorResponse(id: request.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))
         let response = WCResponse(
             topic: publishTopic,
+            chainId: nil,
             requestMethod: request.method,
             requestParams: request.params,
-            result: .failure(error))
+            result: .error(error))
         relayMock.onResponse?(response)
         
         XCTAssert(subscriberMock.didUnsubscribe(to: topicC))
@@ -165,9 +166,10 @@ final class SessionEngineTests: XCTestCase {
         let success = JSONRPCResponse<AnyCodable>(id: request.id, result: AnyCodable(true))
         let response = WCResponse(
             topic: publishTopic,
+            chainId: nil,
             requestMethod: request.method,
             requestParams: request.params,
-            result: .success(success))
+            result: .response(success))
         relayMock.onResponse?(response)
     
         XCTAssertFalse(cryptoMock.hasAgreementSecret(for: topicC))
@@ -204,9 +206,10 @@ final class SessionEngineTests: XCTestCase {
         let error = JSONRPCErrorResponse(id: request.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))
         let response = WCResponse(
             topic: publishTopic,
+            chainId: nil,
             requestMethod: request.method,
             requestParams: request.params,
-            result: .failure(error))
+            result: .error(error))
         relayMock.onResponse?(response)
         
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: selfPubKey))

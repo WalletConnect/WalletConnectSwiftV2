@@ -38,7 +38,7 @@ class MockedWCRelay: WalletConnectRelaying {
         requests.append((topic, payload))
     }
     
-    func respond(topic: String, response: JsonRpcResponseTypes, completion: @escaping ((Error?) -> ())) {
+    func respond(topic: String, response: JsonRpcResult, completion: @escaping ((Error?) -> ())) {
         completion(error)
     }
     
@@ -60,7 +60,7 @@ class MockedWCRelay: WalletConnectRelaying {
     
     func sendSubscriptionPayloadOn(topic: String) {
         let payload = WCRequestSubscriptionPayload(topic: topic,
-                                                   wcRequest: SerialiserTestData.pairingApproveJSONRPCRequest)
+                                                   wcRequest: SerializerTestData.pairingApproveJSONRPCRequest)
         wcRequestPublisherSubject.send(payload)
     }
 }

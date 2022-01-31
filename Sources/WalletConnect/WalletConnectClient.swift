@@ -8,7 +8,7 @@ import UIKit
 
 /// An Object that expose public API to provide interactions with WalletConnect SDK
 ///
-/// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialise it. Usually only one instance of a client is required in the application.
+/// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
 ///
 /// ```swift
 /// let metadata = AppMetadata(name: String?, description: String?, url: String?, icons: [String]?)
@@ -31,7 +31,10 @@ public final class WalletConnectClient {
     private let secureStorage: SecureStorage
     private let pairingQueue = DispatchQueue(label: "com.walletconnect.sdk.client.pairing", qos: .userInitiated)
     private let history: JsonRpcHistory
-    
+#if os(iOS)
+    private var backgroundTaskID: UIBackgroundTaskIdentifier = .invalid
+#endif
+
     // MARK: - Initializers
 
     /// Initializes and returns newly created WalletConnect Client Instance. Establishes a network connection with the relay
@@ -44,7 +47,7 @@ public final class WalletConnectClient {
     ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults but if for some reasons you want to provide your own storage you can inject it here.
     ///   - clientName: if your app requires more than one client you are required to call them with different names to distinguish logs source and prefix storage keys.
     ///
-    /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialise it. Usually only one instance of a client is required in the application.
+    /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
     public convenience init(metadata: AppMetadata, projectId: String, isController: Bool, relayHost: String, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
         self.init(metadata: metadata, projectId: projectId, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStorage: keyValueStorage, clientName: clientName)
     }
@@ -58,9 +61,9 @@ public final class WalletConnectClient {
         self.secureStorage = SecureStorage(keychain: keychain)
         let relayUrl = WakuNetworkRelay.makeRelayUrl(host: relayHost, projectId: projectId)
         self.wakuRelay = WakuNetworkRelay(logger: logger, url: relayUrl, keyValueStorage: keyValueStorage, uniqueIdentifier: clientName ?? "")
-        let serialiser = JSONRPCSerialiser(crypto: crypto)
+        let serializer = JSONRPCSerializer(crypto: crypto)
         self.history = JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory(clientName: clientName ?? "_")))
-        self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: history)
+        self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerializer: serializer, logger: logger, jsonRpcHistory: history)
         let pairingSequencesStore = PairingStorage(storage: SequenceStore<PairingSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings(clientName: clientName ?? "_")))
         let sessionSequencesStore = SessionStorage(storage: SequenceStore<SessionSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions(clientName: clientName ?? "_")))
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
@@ -68,8 +71,25 @@ public final class WalletConnectClient {
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
         setUpEnginesCallbacks()
         subscribeNotificationCenter()
+        registerBackgroundTask()
     }
     
+    func registerBackgroundTask() {
+#if os(iOS)
+        backgroundTaskID = UIApplication.shared.beginBackgroundTask (withName: "Finish Network Tasks") { [weak self] in
+            self?.endBackgroundTask()
+        }
+#endif
+    }
+    
+    func endBackgroundTask() {
+#if os(iOS)
+        wakuRelay.disconnect(closeCode: .goingAway)
+        print("Background task ended.")
+        UIApplication.shared.endBackgroundTask(backgroundTaskID)
+        backgroundTaskID = .invalid
+#endif
+    }
     deinit {
         unsubscribeNotificationCenter()
     }
@@ -155,16 +175,15 @@ public final class WalletConnectClient {
     /// For the proposer to send JSON-RPC requests to responding peer.
     /// - Parameters:
     ///   - params: Parameters defining request and related session
-    ///   - completion: completion block will provide response from responding client
-    public func request(params: Request, completion: @escaping (Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ()) {
-        sessionEngine.request(params: params, completion: completion)
+    public func request(params: Request) {
+        sessionEngine.request(params: params)
     }
     
     /// For the responder to respond on pending peer's session JSON-RPC Request
     /// - Parameters:
     ///   - topic: Topic of the session for which the request was received.
     ///   - response: Your JSON RPC response or an error.
-    public func respond(topic: String, response: JsonRpcResponseTypes) {
+    public func respond(topic: String, response: JsonRpcResult) {
         sessionEngine.respondSessionPayload(topic: topic, response: response)
     }
     
@@ -228,15 +247,31 @@ public final class WalletConnectClient {
         pairingEngine.getSettledPairings()
     }
     
-    public func getPendingRequests() -> [Request] {
-        history.getPending()
+    /// - Returns: Pending requests received with wc_sessionPayload
+    /// - Parameter topic: topic representing session for which you want to get pending requests. If nil, you will receive pending requests for all active sessions.
+    public func getPendingRequests(topic: String? = nil) -> [Request] {
+        let pendingRequests: [Request] = history.getPending()
             .filter{$0.request.method == .sessionPayload}
             .compactMap {
                 guard case let .sessionPayload(payloadRequest) = $0.request.params else {return nil}
                 return Request(id: $0.id, topic: $0.topic, method: payloadRequest.request.method, params: payloadRequest.request.params, chainId: payloadRequest.chainId)
             }
+        if let topic = topic {
+            return pendingRequests.filter{$0.topic == topic}
+        } else {
+            return pendingRequests
+        }
     }
     
+    /// - Parameter id: id of a wc_sessionPayload jsonrpc request
+    /// - Returns: json rpc record object for given id or nil if record for give id does not exits
+    public func getSessionRequestRecord(id: Int64) -> WalletConnectUtils.JsonRpcRecord? {
+        guard let record = history.get(id: id),
+              case .sessionPayload(let payload) = record.request.params else {return nil}
+        let request = WalletConnectUtils.JsonRpcRecord.Request(method: payload.request.method, params: payload.request.params)
+        return WalletConnectUtils.JsonRpcRecord(id: record.id, topic: record.topic, request: request, response: record.response, chainId: record.chainId)
+    }
+
     // MARK: - Private
     
     private func setUpEnginesCallbacks() {
@@ -250,10 +285,11 @@ public final class WalletConnectClient {
         pairingEngine.onApprovalAcknowledgement = { [weak self] settledPairing in
             self?.delegate?.didSettle(pairing: settledPairing)
         }
+        pairingEngine.onPairingUpdate = { [unowned self] topic, appMetadata in
+            delegate?.didUpdate(pairingTopic: topic, appMetadata: appMetadata)
+        }
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
-            let permissions = Session.Permissions.init(blockchains: settledSession.permissions.blockchains, methods: settledSession.permissions.methods)
-            let session = Session(topic: settledSession.topic, peer: settledSession.peer, permissions: permissions)
-            delegate?.didSettle(session: session)
+            delegate?.didSettle(session: settledSession)
         }
         sessionEngine.onApprovalAcknowledgement = { [weak self] session in
             self?.delegate?.didSettle(session: session)
@@ -277,8 +313,8 @@ public final class WalletConnectClient {
         sessionEngine.onNotificationReceived = { [unowned self] topic, notification in
             delegate?.didReceive(notification: notification, sessionTopic: topic)
         }
-        pairingEngine.onPairingUpdate = { [unowned self] topic, appMetadata in
-            delegate?.didUpdate(pairingTopic: topic, appMetadata: appMetadata)
+        sessionEngine.onSessionPayloadResponse = { [unowned self] response in
+            delegate?.didReceive(sessionResponse: response)
         }
     }
     
@@ -297,11 +333,6 @@ public final class WalletConnectClient {
 #if os(iOS)
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(appDidEnterBackground),
-            name: UIApplication.didEnterBackgroundNotification,
-            object: nil)
-        NotificationCenter.default.addObserver(
-            self,
             selector: #selector(appWillEnterForeground),
             name: UIApplication.willEnterForegroundNotification,
             object: nil)
@@ -310,7 +341,6 @@ public final class WalletConnectClient {
     
     private func unsubscribeNotificationCenter() {
 #if os(iOS)
-        NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
 #endif
     }
@@ -318,10 +348,7 @@ public final class WalletConnectClient {
     @objc
     private func appWillEnterForeground() {
         wakuRelay.connect()
+        registerBackgroundTask()
     }
-    
-    @objc
-    private func appDidEnterBackground() {
-        wakuRelay.disconnect(closeCode: .goingAway)
-    }
+
 }

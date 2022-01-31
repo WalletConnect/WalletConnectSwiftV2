@@ -1,12 +1,12 @@
 import Foundation
 
-protocol JSONRPCSerialising {
-    func serialise(topic: String, encodable: Encodable) throws -> String
-    func tryDeserialise<T: Codable>(topic: String, message: String) -> T?
+protocol JSONRPCSerializing {
+    func serialize(topic: String, encodable: Encodable) throws -> String
+    func tryDeserialize<T: Codable>(topic: String, message: String) -> T?
     var codec: Codec {get}
 }
 
-class JSONRPCSerialiser: JSONRPCSerialising {
+class JSONRPCSerializer: JSONRPCSerializing {
     
     private let crypto: Crypto
     let codec: Codec
@@ -16,7 +16,7 @@ class JSONRPCSerialiser: JSONRPCSerialising {
         self.codec = codec
     }
     
-    func serialise(topic: String, encodable: Encodable) throws -> String {
+    func serialize(topic: String, encodable: Encodable) throws -> String {
         let messageJson = try encodable.json()
         var message: String
         if let agreementKeys = try? crypto.getAgreementSecret(for: topic) {
@@ -27,23 +27,23 @@ class JSONRPCSerialiser: JSONRPCSerialising {
         return message
     }
     
-    func tryDeserialise<T: Codable>(topic: String, message: String) -> T? {
+    func tryDeserialize<T: Codable>(topic: String, message: String) -> T? {
         do {
-            let deserialisedJsonRpcRequest: T
+            let deserializedJsonRpcRequest: T
             if let agreementKeys = try? crypto.getAgreementSecret(for: topic) {
-                deserialisedJsonRpcRequest = try deserialise(message: message, symmetricKey: agreementKeys.sharedSecret)
+                deserializedJsonRpcRequest = try deserialize(message: message, symmetricKey: agreementKeys.sharedSecret)
             } else {
                 let jsonData = Data(hex: message)
-                deserialisedJsonRpcRequest = try JSONDecoder().decode(T.self, from: jsonData)
+                deserializedJsonRpcRequest = try JSONDecoder().decode(T.self, from: jsonData)
             }
-            return deserialisedJsonRpcRequest
+            return deserializedJsonRpcRequest
         } catch {
 //            logger.debug("Type \(T.self) does not match the payload")
             return nil
         }
     }
     
-    func deserialise<T: Codable>(message: String, symmetricKey: Data) throws -> T {
+    func deserialize<T: Codable>(message: String, symmetricKey: Data) throws -> T {
         let JSONRPCData = try decrypt(message: message, symmetricKey: symmetricKey)
         return try JSONDecoder().decode(T.self, from: JSONRPCData)
     }
@@ -58,7 +58,7 @@ class JSONRPCSerialiser: JSONRPCSerialising {
     }
     
     private func decrypt(message: String, symmetricKey: Data) throws -> Data {
-        let encryptionPayload = try deserialiseIntoPayload(message: message)
+        let encryptionPayload = try deserializeIntoPayload(message: message)
         let decryptedJSONRPC = try codec.decode(payload: encryptionPayload, sharedSecret: symmetricKey)
         guard let JSONRPCData = decryptedJSONRPC.data(using: .utf8) else {
             throw DataConversionError.stringToDataFailed
@@ -66,10 +66,10 @@ class JSONRPCSerialiser: JSONRPCSerialising {
         return JSONRPCData
     }
     
-    private func deserialiseIntoPayload(message: String) throws -> EncryptionPayload {
+    private func deserializeIntoPayload(message: String) throws -> EncryptionPayload {
         let data = Data(hex: message)
         guard data.count > EncryptionPayload.ivLength + EncryptionPayload.publicKeyLength + EncryptionPayload.macLength else {
-            throw JSONRPCSerialiserError.messageToShort
+            throw JSONRPCSerializerError.messageToShort
         }
         let pubKeyRangeStartIndex = EncryptionPayload.ivLength
         let macStartIndex = pubKeyRangeStartIndex + EncryptionPayload.publicKeyLength

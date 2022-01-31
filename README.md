@@ -6,7 +6,11 @@ Swift implementation of WalletConnect v.2 protocol for native iOS applications.
 - Swift 5
 
 ## Documentation
-In order to build documentation in XCode go to Product -> Build Documentation
+- In order to build API documentation in XCode go to Product -> Build Documentation
+- [Getting started with wallet integration](https://docs.walletconnect.com/2.0/quick-start/wallets/swift)
+- [Beginner guide to WalletConnect v2.0 for iOS Developers](https://medium.com/walletconnect/beginner-guide-to-walletconnect-v2-0-for-swift-developers-4534b0975218)
+- [Protocol Documentation](https://docs.walletconnect.com/2.0/protocol/client-communication)
+- [Glossary](https://docs.walletconnect.com/2.0/protocol/glossary)
 
 ## Usage
 ### Responder
@@ -37,30 +41,30 @@ Sessions are always proposed by the `Proposer` client so `Responder` client need
 ```Swift
 class ClientDelegate: WalletConnectClientDelegate {
 ...
-    func didReceive(sessionProposal: SessionProposal) {
-        client.approve(proposal: proposal, accounts: [String]) { result in ... }
+    func didReceive(sessionProposal: Session.Proposal) {
+        client.approve(proposal: proposal, accounts: [String])
     }
 ...
 ```
 or 
 ```Swift
-    func didReceive(sessionProposal: SessionProposal) {
+    func didReceive(sessionProposal: Session.Proposal) {
         client.reject(proposal: proposal, reason: Reason)
     }
 ```
 NOTE: addresses provided in `accounts` array should follow [CAPI10](https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-10.md) semantics.
 #### Handle Delegate methods
 ```Swift
-    func didReceive(sessionProposal: SessionProposal) {
+    func didReceive(sessionProposal: Session.Proposal) {
         // handle session proposal
     }
-    func didReceive(sessionRequest: SessionRequest) {
+    func didReceive(sessionRequest: Request) {
         // handle session request
     }
 ```
 #### JSON-RPC Payloads
 #### Receive
-You can parse JSON-RPC Requests received from "Requester" in `didReceive(sessionRequest: SessionRequest)` delegate function.
+You can parse JSON-RPC Requests received from "Requester" in `didReceive(sessionRequest: Request)` delegate function.
 
 Request parameters can be type casted based on request method as below:
 ```Swift

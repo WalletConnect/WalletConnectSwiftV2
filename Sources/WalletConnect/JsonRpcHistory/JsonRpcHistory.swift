@@ -6,7 +6,7 @@ protocol JsonRpcHistoryRecording {
     func get(id: Int64) -> JsonRpcRecord?
     func set(topic: String, request: WCRequest, chainId: String?) throws
     func delete(topic: String)
-    func resolve(response: JsonRpcResponseTypes) throws -> JsonRpcRecord
+    func resolve(response: JsonRpcResult) throws -> JsonRpcRecord
     func exist(id: Int64) -> Bool
 }
 //TODO -remove and use jsonrpc history only from utils
@@ -40,7 +40,7 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
         }
     }
     
-    func resolve(response: JsonRpcResponseTypes) throws -> JsonRpcRecord {
+    func resolve(response: JsonRpcResult) throws -> JsonRpcRecord {
         logger.debug("Resolving JSON-RPC response - ID: \(response.id)")
         guard var record = try? storage.get(key: "\(response.id)") else {
             throw WalletConnectError.internal(.noJsonRpcRequestMatchingResponse)
