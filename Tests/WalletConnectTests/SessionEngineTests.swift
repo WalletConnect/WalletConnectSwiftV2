@@ -3,94 +3,6 @@ import WalletConnectUtils
 import TestingUtils
 @testable import WalletConnect
 
-// TODO: Move common helper methods to a shared folder
-fileprivate extension Pairing {
-    
-    static func stub() -> Pairing {
-        Pairing(topic: String.generateTopic()!, peer: nil)
-    }
-}
-
-fileprivate extension SessionPermissions {
-    static func stub() -> SessionPermissions {
-        SessionPermissions(
-            blockchain: Blockchain(chains: []),
-            jsonrpc: JSONRPC(methods: []),
-            notifications: Notifications(types: [])
-        )
-    }
-}
-
-fileprivate extension WCRequest {
-    
-    var sessionProposal: SessionProposal? {
-        guard case .pairingPayload(let payload) = self.params else { return nil }
-        return payload.request.params
-    }
-    
-    var approveParams: SessionType.ApproveParams? {
-        guard case .sessionApprove(let approveParams) = self.params else { return nil }
-        return approveParams
-    }
-}
-
-// TODO: Move stub extensions to helper files
-extension RelayProtocolOptions {
-    static func stub() -> RelayProtocolOptions {
-        RelayProtocolOptions(protocol: "", params: nil)
-    }
-}
-
-extension Participant {
-    static func stub() -> Participant {
-        Participant(publicKey: AgreementPrivateKey().publicKey.hexRepresentation, metadata: AppMetadata.stub())
-    }
-}
-
-extension AppMetadata {
-    static func stub() -> AppMetadata {
-        AppMetadata(
-            name: "Wallet Connect",
-            description: "A protocol to connect blockchain wallets to dapps.",
-            url: "https://walletconnect.com/",
-            icons: []
-        )
-    }
-}
-
-extension SessionSequence {
-    
-    static func stubPreSettled() -> SessionSequence {
-        SessionSequence(
-            topic: String.generateTopic()!,
-            relay: RelayProtocolOptions.stub(),
-            selfParticipant: Participant.stub(),
-            expiryDate: Date.distantFuture,
-            settledState: Settled(
-                peer: Participant.stub(),
-                permissions: SessionPermissions.stub(),
-                state: SessionState(accounts: []),
-                status: .preSettled
-            )
-        )
-    }
-    
-    static func stubSettled() -> SessionSequence {
-        SessionSequence(
-            topic: String.generateTopic()!,
-            relay: RelayProtocolOptions.stub(),
-            selfParticipant: Participant.stub(),
-            expiryDate: Date.distantFuture,
-            settledState: Settled(
-                peer: Participant.stub(),
-                permissions: SessionPermissions.stub(),
-                state: SessionState(accounts: []),
-                status: .acknowledged
-            )
-        )
-    }
-}
-
 final class SessionEngineTests: XCTestCase {
     
     var engine: SessionEngine!
@@ -352,7 +264,7 @@ final class SessionEngineTests: XCTestCase {
     
     // MARK: - Update call tests
     
-    func testUpdate() throws {
+    func testUpdateSuccess() throws {
         setupEngine(isController: true)
         let session = SessionSequence.stubSettled()
         storageMock.setSequence(session)
@@ -384,6 +296,59 @@ final class SessionEngineTests: XCTestCase {
         let session = SessionSequence.stubPreSettled()
         storageMock.setSequence(session)
         XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: ["std:0:0"]), "Update must fail if session is not on settled state.")
+    }
+    
+    // MARK: - Update peer response tests
+    
+    func testUpdatePeerSuccess() {
+        setupEngine(isController: false)
+        let session = SessionSequence.stubSettled(isPeerController: true)
+        storageMock.setSequence(session)
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic))
+        XCTAssertTrue(relayMock.didRespondSuccess)
+    }
+    
+    func testUpdatePeerErrorAccountInvalid() {
+        setupEngine(isController: false)
+        let session = SessionSequence.stubSettled(isPeerController: true)
+        storageMock.setSequence(session)
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic, accounts: ["0"]))
+        XCTAssertFalse(relayMock.didRespondSuccess)
+        XCTAssertEqual(relayMock.lastErrorCode, 1003)
+    }
+    
+    func testUpdatePeerErrorNoSession() {
+        setupEngine(isController: false)
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: ""))
+        XCTAssertFalse(relayMock.didRespondSuccess)
+        XCTAssertEqual(relayMock.lastErrorCode, 1301)
+    }
+    
+    func testUpdatePeerErrorSessionNotSettled() {
+        setupEngine(isController: false)
+        let session = SessionSequence.stubPreSettled(isPeerController: true) // Session is not fully settled
+        storageMock.setSequence(session)
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic))
+        XCTAssertFalse(relayMock.didRespondSuccess)
+        XCTAssertEqual(relayMock.lastErrorCode, 3003)
+    }
+    
+    func testUpdatePeerErrorUnauthorized() {
+        setupEngine(isController: false)
+        let session = SessionSequence.stubSettled() // Peer is not a controller
+        storageMock.setSequence(session)
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic))
+        XCTAssertFalse(relayMock.didRespondSuccess)
+        XCTAssertEqual(relayMock.lastErrorCode, 3003)
+    }
+    
+    func testUpdatePeerErrorMatchingController() {
+        setupEngine(isController: true) // Update request received by a controller
+        let session = SessionSequence.stubSettled(isPeerController: true)
+        storageMock.setSequence(session)
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic))
+        XCTAssertFalse(relayMock.didRespondSuccess)
+        XCTAssertEqual(relayMock.lastErrorCode, 3005)
     }
     
     // TODO: Update acknowledgement tests

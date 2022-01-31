@@ -197,7 +197,9 @@ final class SessionEngine {
     }
     
     func update(topic: String, accounts: Set<String>) throws {
-        var session = try sequencesStore.getSequence(forTopic: topic)
+        guard var session = sequencesStore.getSequence(forTopic: topic) else {
+            throw WalletConnectError.internal(.noSequenceForTopic)
+        }
         for account in accounts {
             if !String.conformsToCAIP10(account) {
                 throw WalletConnectError.internal(.notApproved) // TODO: Use a suitable error cases
@@ -212,7 +214,7 @@ final class SessionEngine {
     }
     
     func upgrade(topic: String, permissions: Session.Permissions) {
-        guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
+        guard var session = sequencesStore.getSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
@@ -233,7 +235,7 @@ final class SessionEngine {
     }
     
     func notify(topic: String, params: Session.Notification, completion: ((Error?)->())?) {
-        guard let session = try? sequencesStore.getSequence(forTopic: topic), session.isSettled else {
+        guard let session = sequencesStore.getSequence(forTopic: topic), session.isSettled else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
@@ -284,7 +286,7 @@ final class SessionEngine {
     }
     
     private func handleSessionNotification(topic: String, notificationParams: SessionType.NotificationParams, requestId: Int64) {
-        guard let session = try? sequencesStore.getSequence(forTopic: topic), session.isSettled else {
+        guard let session = sequencesStore.getSequence(forTopic: topic), session.isSettled else {
             return
         }
         do {
@@ -316,41 +318,35 @@ final class SessionEngine {
         }
     }
     
-    // TODO: Use standard protocol reason codes when responding
     private func handleSessionUpdate(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {
-        let topic = payload.topic
-        let requestId = payload.wcRequest.id
-        
         for account in updateParams.state.accounts {
             if !String.conformsToCAIP10(account) {
-                relayer.respondError(for: payload, reason: Reason(code: 0, message: "invalid accounts"))
+                relayer.respondError(for: payload, reason: .invalidUpdateRequest(context: .session))
                 return
             }
         }
-        guard var session = try? sequencesStore.getSequence(forTopic: topic), session.isSettled else {
-            relayer.respondError(for: payload, reason: Reason(code: 0, message: "session not found"))
+        let topic = payload.topic
+        guard var session = sequencesStore.getSequence(forTopic: topic) else {
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
         }
-        guard !isController, session.peerIsController else {
-            relayer.respondError(for: payload, reason: Reason(code: 0, message: "unauthorized update"))
+        guard session.peerIsController else {
+            relayer.respondError(for: payload, reason: .unauthorizedUpdateRequest(context: .session))
+            return
+        }
+        guard !isController else {
+            relayer.respondError(for: payload, reason: .unauthorizedMatchingController(isController: isController))
             return
         }
         
         session.settled?.state = updateParams.state
         sequencesStore.setSequence(session)
-        
-        let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
-        relayer.respond(topic: topic, response: JsonRpcResult.response(response)) { [unowned self] error in
-            if let error = error {
-                logger.error(error)
-            } else {
-                onSessionUpdate?(topic, updateParams.state.accounts)
-            }
-        }
+        relayer.respondSuccess(for: payload)
+        onSessionUpdate?(topic, updateParams.state.accounts)
     }
     
     private func handleSessionUpgrade(topic: String, upgradeParams: SessionType.UpgradeParams, requestId: Int64) {
-        guard var session = try? sequencesStore.getSequence(forTopic: topic) else {
+        guard var session = sequencesStore.getSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
@@ -435,7 +431,7 @@ final class SessionEngine {
     }
 
     private func validatePayload(_ sessionRequest: Request) throws {
-        guard let session = try? sequencesStore.getSequence(forTopic: sessionRequest.topic) else {
+        guard let session = sequencesStore.getSequence(forTopic: sessionRequest.topic) else {
             throw WalletConnectError.internal(.noSequenceForTopic)
         }
         if let chainId = sessionRequest.chainId {
@@ -455,7 +451,7 @@ final class SessionEngine {
             logger.warn("Warning: Session Engine - Unexpected handleSessionApprove method call by non Controller client")
             return
         }
-        guard let session = try? sequencesStore.getSequence(forTopic: topic),
+        guard let session = sequencesStore.getSequence(forTopic: topic),
               let pendingSession = session.pending else {
                   logger.error("Could not find pending session for topic: \(topic)")
                   return
@@ -539,7 +535,7 @@ final class SessionEngine {
     
     private func handleApproveResponse(topic: String, result: JsonRpcResult) {
         guard
-            let pendingSession = try? sequencesStore.getSequence(forTopic: topic),
+            let pendingSession = sequencesStore.getSequence(forTopic: topic),
             let settledTopic = pendingSession.pending?.outcomeTopic,
             let proposal = pendingSession.pending?.proposal
         else {
@@ -570,7 +566,7 @@ final class SessionEngine {
     }
     
     private func handleUpdateResponse(topic: String, result: JsonRpcResult) {
-        guard let session = try? sequencesStore.getSequence(forTopic: topic), let accounts = session.settled?.state.accounts else {
+        guard let session = sequencesStore.getSequence(forTopic: topic), let accounts = session.settled?.state.accounts else {
             return
         }
         switch result {
