@@ -196,7 +196,7 @@ final class PairingEngine {
             return
         }
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
-        relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [unowned self] error in
+        relayer.respond(topic: topic, response: JsonRpcResult.response(response)) { [unowned self] error in
             if let error = error {
                 logger.error(error)
             } else {
@@ -209,7 +209,7 @@ final class PairingEngine {
     
     private func handlePairingPing(topic: String, requestId: Int64) {
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
-        relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { error in
+        relayer.respond(topic: topic, response: JsonRpcResult.response(response)) { error in
             //todo
         }
     }
@@ -229,7 +229,7 @@ final class PairingEngine {
             try? crypto.setAgreementSecret(pairingAgreementSecret, topic: sessionProposal.topic)
         }
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
-        relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [weak self] error in
+        relayer.respond(topic: topic, response: JsonRpcResult.response(response)) { [weak self] error in
             self?.onSessionProposal?(sessionProposal)
         }
     }
@@ -260,7 +260,7 @@ final class PairingEngine {
         
         // TODO: Move JSON-RPC responding to networking layer
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
-        relayer.respond(topic: proposal.topic, response: JsonRpcResponseTypes.response(response)) { [weak self] error in
+        relayer.respond(topic: proposal.topic, response: JsonRpcResult.response(response)) { [weak self] error in
             if let error = error {
                 self?.logger.error("Could not respond with error: \(error)")
             }

@@ -36,7 +36,7 @@ final class JsonRpcHistoryTests: XCTestCase {
         try! sut.set(topic: recordinput.topic, request: recordinput.request)
         XCTAssertNil(sut.get(id: recordinput.request.id)?.response)
         let jsonRpcResponse = JSONRPCResponse<AnyCodable>(id: recordinput.request.id, result: AnyCodable(""))
-        let response = JsonRpcResponseTypes.response(jsonRpcResponse)
+        let response = JsonRpcResult.response(jsonRpcResponse)
         _ = try! sut.resolve(response: response)
         XCTAssertNotNil(sut.get(id: jsonRpcResponse.id)?.response)
     }
@@ -45,7 +45,7 @@ final class JsonRpcHistoryTests: XCTestCase {
         let recordinput = getTestJsonRpcRecordInput()
         try! sut.set(topic: recordinput.topic, request: recordinput.request)
         let jsonRpcResponse = JSONRPCResponse<AnyCodable>(id: recordinput.request.id, result: AnyCodable(""))
-        let response = JsonRpcResponseTypes.response(jsonRpcResponse)
+        let response = JsonRpcResult.response(jsonRpcResponse)
         _ = try! sut.resolve(response: response)
         XCTAssertThrowsError(try sut.resolve(response: response))
     }
@@ -71,7 +71,7 @@ final class JsonRpcHistoryTests: XCTestCase {
         try! sut.set(topic: recordinput2.topic, request: recordinput2.request)
         XCTAssertEqual(sut.getPending().count, 2)
         let jsonRpcResponse = JSONRPCResponse<AnyCodable>(id: recordinput1.request.id, result: AnyCodable(""))
-        let response = JsonRpcResponseTypes.response(jsonRpcResponse)
+        let response = JsonRpcResult.response(jsonRpcResponse)
         _ = try! sut.resolve(response: response)
         XCTAssertEqual(sut.getPending().count, 1)
     }

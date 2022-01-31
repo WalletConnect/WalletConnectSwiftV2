@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "764E1D3B26F8D3FC00A1FB15"
-               BuildableName = "ExampleApp.app"
+               BuildableName = "Wallet.app"
                BlueprintName = "Wallet"
                ReferencedContainer = "container:ExampleApp.xcodeproj">
             </BuildableReference>
@@ -32,9 +32,19 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "845B30EB27859686002E4094"
+               BlueprintIdentifier = "84CE646C27A2CD6B00142511"
                BuildableName = "WalletTests.xctest"
-               BlueprintName = "ExampleAppTests"
+               BlueprintName = "WalletTests"
+               ReferencedContainer = "container:ExampleApp.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "84CE645D27A2C85B00142511"
+               BuildableName = "DappTests.xctest"
+               BlueprintName = "DappTests"
                ReferencedContainer = "container:ExampleApp.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -55,7 +65,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "764E1D3B26F8D3FC00A1FB15"
-            BuildableName = "ExampleApp.app"
+            BuildableName = "Wallet.app"
             BlueprintName = "Wallet"
             ReferencedContainer = "container:ExampleApp.xcodeproj">
          </BuildableReference>
@@ -72,7 +82,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "764E1D3B26F8D3FC00A1FB15"
-            BuildableName = "ExampleApp.app"
+            BuildableName = "Wallet.app"
             BlueprintName = "Wallet"
             ReferencedContainer = "container:ExampleApp.xcodeproj">
          </BuildableReference>

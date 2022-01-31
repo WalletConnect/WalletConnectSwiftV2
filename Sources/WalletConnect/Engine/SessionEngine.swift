@@ -3,8 +3,8 @@ import Combine
 import WalletConnectUtils
 
 final class SessionEngine {
-    
     var onSessionPayloadRequest: ((Request)->())?
+    var onSessionPayloadResponse: ((Response)->())?
     var onSessionApproved: ((Session)->())?
     var onApprovalAcknowledgement: ((Session) -> Void)?
     var onSessionRejected: ((String, SessionType.Reason)->())?
@@ -164,7 +164,7 @@ final class SessionEngine {
         }
     }
     
-    func request(params: Request, completion: @escaping ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())) {
+    func request(params: Request) {
         guard sequencesStore.hasSequence(forTopic: params.topic) else {
             logger.debug("Could not find session for topic \(params.topic)")
             return
@@ -174,17 +174,15 @@ final class SessionEngine {
         let sessionPayloadRequest = WCRequest(id: params.id, method: .sessionPayload, params: .sessionPayload(sessionPayloadParams))
         relayer.request(topic: params.topic, payload: sessionPayloadRequest) { [weak self] result in
             switch result {
-            case .success(let response):
-                completion(.success(response))
+            case .success(_):
                 self?.logger.debug("Did receive session payload response")
             case .failure(let error):
                 self?.logger.debug("error: \(error)")
-                completion(.failure(error))
             }
         }
     }
     
-    func respondSessionPayload(topic: String, response: JsonRpcResponseTypes) {
+    func respondSessionPayload(topic: String, response: JsonRpcResult) {
         guard sequencesStore.hasSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
@@ -292,7 +290,7 @@ final class SessionEngine {
         do {
             try validateNotification(session: session, params: notificationParams)
             let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
-            relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [unowned self] error in
+            relayer.respond(topic: topic, response: JsonRpcResult.response(response)) { [unowned self] error in
                 if let error = error {
                     logger.error(error)
                 } else {
@@ -342,7 +340,7 @@ final class SessionEngine {
         sequencesStore.setSequence(session)
         
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
-        relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [unowned self] error in
+        relayer.respond(topic: topic, response: JsonRpcResult.response(response)) { [unowned self] error in
             if let error = error {
                 logger.error(error)
             } else {
@@ -370,7 +368,7 @@ final class SessionEngine {
             return
         }
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
-        relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [unowned self] error in
+        relayer.respond(topic: topic, response: JsonRpcResult.response(response)) { [unowned self] error in
             if let error = error {
                 logger.error(error)
             } else {
@@ -427,7 +425,7 @@ final class SessionEngine {
     private func respond(error: WalletConnectError, requestId: Int64, topic: String) {
         let jsonrpcError = JSONRPCErrorResponse.Error(code: error.code, message: error.description)
         let response = JSONRPCErrorResponse(id: requestId, error: jsonrpcError)
-        relayer.respond(topic: topic, response: JsonRpcResponseTypes.error(response)) { [weak self] responseError in
+        relayer.respond(topic: topic, response: JsonRpcResult.error(response)) { [weak self] responseError in
             if let responseError = responseError {
                 self?.logger.error("Could not respond with error: \(responseError)")
             } else {
@@ -487,7 +485,7 @@ final class SessionEngine {
                 methods: pendingSession.proposal.permissions.jsonrpc.methods), accounts: settledSession.settled!.state.accounts)
         
         let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
-        relayer.respond(topic: topic, response: JsonRpcResponseTypes.response(response)) { [unowned self] error in
+        relayer.respond(topic: topic, response: JsonRpcResult.response(response)) { [unowned self] error in
             if let error = error {
                 logger.error(error)
             }
@@ -515,20 +513,23 @@ final class SessionEngine {
         case .pairingPayload(let payloadParams):
             let proposeParams = payloadParams.request.params
             handleProposeResponse(topic: response.topic, proposeParams: proposeParams, result: response.result)
-        case .sessionApprove:
+        case .sessionApprove(_):
             handleApproveResponse(topic: response.topic, result: response.result)
         case .sessionUpdate:
             handleUpdateResponse(topic: response.topic, result: response.result)
+        case .sessionPayload(_):
+            let response = Response(topic: response.topic, chainId: response.chainId, result: response.result)
+            onSessionPayloadResponse?(response)
         default:
             break
         }
     }
     
-    private func handleProposeResponse(topic: String, proposeParams: SessionProposal, result: Result<JSONRPCResponse<AnyCodable>, Error>) {
+    private func handleProposeResponse(topic: String, proposeParams: SessionProposal, result: JsonRpcResult) {
         switch result {
-        case .success:
+        case .response:
             break
-        case .failure:
+        case .error:
             wcSubscriber.removeSubscription(topic: proposeParams.topic)
             crypto.deletePrivateKey(for: proposeParams.proposer.publicKey)
             crypto.deleteAgreementSecret(for: topic)
@@ -536,7 +537,7 @@ final class SessionEngine {
         }
     }
     
-    private func handleApproveResponse(topic: String, result: Result<JSONRPCResponse<AnyCodable>, Error>) {
+    private func handleApproveResponse(topic: String, result: JsonRpcResult) {
         guard
             let pendingSession = try? sequencesStore.getSequence(forTopic: topic),
             let settledTopic = pendingSession.pending?.outcomeTopic,
@@ -545,7 +546,7 @@ final class SessionEngine {
             return
         }
         switch result {
-        case .success:
+        case .response:
             guard let settledSession = try? sequencesStore.getSequence(forTopic: settledTopic) else {return}
             crypto.deleteAgreementSecret(for: topic)
             wcSubscriber.removeSubscription(topic: topic)
@@ -557,7 +558,7 @@ final class SessionEngine {
                     blockchains: proposal.permissions.blockchain.chains,
                     methods: proposal.permissions.jsonrpc.methods), accounts: settledSession.settled!.state.accounts)
             onApprovalAcknowledgement?(sessionSuccess)
-        case .failure:
+        case .error:
             wcSubscriber.removeSubscription(topic: topic)
             wcSubscriber.removeSubscription(topic: settledTopic)
             sequencesStore.delete(topic: topic)
@@ -568,14 +569,14 @@ final class SessionEngine {
         }
     }
     
-    private func handleUpdateResponse(topic: String, result: Result<JSONRPCResponse<AnyCodable>, Error>) {
+    private func handleUpdateResponse(topic: String, result: JsonRpcResult) {
         guard let session = try? sequencesStore.getSequence(forTopic: topic), let accounts = session.settled?.state.accounts else {
             return
         }
         switch result {
-        case .success:
+        case .response:
             onSessionUpdate?(topic, accounts)
-        case .failure:
+        case .error:
             logger.error("Peer failed to update state.")
         }
     }

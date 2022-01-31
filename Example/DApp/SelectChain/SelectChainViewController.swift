@@ -28,6 +28,8 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
     
     override func loadView() {
         view = selectChainView
+        
+
     }
     
     @objc
@@ -49,7 +51,7 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
     
     private func showConnectScreen(uriString: String) {
         DispatchQueue.main.async { [unowned self] in
-            let vc = ConnectViewController(uri: uriString)
+            let vc = UINavigationController(rootViewController: ConnectViewController(uri: uriString))
             present(vc, animated: true, completion: nil)
         }
     }

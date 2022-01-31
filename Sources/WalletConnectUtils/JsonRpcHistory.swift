@@ -35,7 +35,7 @@ public class JsonRpcHistory<T> where T: Codable&Equatable {
         }
     }
     
-    public func resolve(response: JsonRpcResponseTypes) throws -> JsonRpcRecord {
+    public func resolve(response: JsonRpcResult) throws -> JsonRpcRecord {
         logger.debug("Resolving JSON-RPC response - ID: \(response.id)")
         guard var record = try? storage.get(key: "\(response.id)") else {
             throw RecordingError.noJsonRpcRequestMatchingResponse

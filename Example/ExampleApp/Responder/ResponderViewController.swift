@@ -16,8 +16,7 @@ final class ResponderViewController: UIViewController {
             metadata: metadata,
             projectId: "52af113ee0c1e1a20f4995730196c13e",
             isController: true,
-            relayHost: "relay.dev.walletconnect.com", //use with dapp at https://canary.react-app.walletconnect.com/
-            clientName: "responder"
+            relayHost: "relay.dev.walletconnect.com"
         )
     }()
     lazy  var account = Signer.privateKey.address.hex(eip55: true)
@@ -194,10 +193,6 @@ extension ResponderViewController: WalletConnectClientDelegate {
         
     }
     
-    func didReceive(notification: Session.Notification, sessionTopic: String) {
-
-    }
-
     func didUpgrade(sessionTopic: String, permissions: Session.Permissions) {
 
     }
@@ -208,6 +203,9 @@ extension ResponderViewController: WalletConnectClientDelegate {
     
     func didDelete(sessionTopic: String, reason: Reason) {
         reloadActiveSessions()
+        DispatchQueue.main.async { [unowned self] in
+            navigationController?.popToRootViewController(animated: true)
+        }
     }
     
     private func getActiveSessionItem(for settledSessions: [Session]) -> [ActiveSessionItem] {
