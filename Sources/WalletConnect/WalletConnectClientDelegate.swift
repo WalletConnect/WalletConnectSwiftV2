@@ -69,4 +69,5 @@ public extension WalletConnectClientDelegate {
     func didUpdate(pairingTopic: String, appMetadata: AppMetadata) {}
     func didReceive(sessionRequest: Request) {}
     func didReceive(sessionProposal: Session.Proposal) {}
+    func didReceive(sessionResponse: Response) {}
 }
