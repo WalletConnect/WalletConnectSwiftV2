@@ -6,7 +6,7 @@ import Foundation
 enum WalletConnectError: Error {
     
     case noSessionMatchingTopic(String)
-    case sessionNotSettled
+    case sessionNotSettled(String)
     case invalidPermissions
     case unauthorizedNonControllerCall
     
@@ -56,12 +56,18 @@ extension WalletConnectError: CustomStringConvertible {
     
     var localizedDescription: String {
         switch self {
+        case .noSessionMatchingTopic(let topic):
+            return "No session found matching topic \(topic)."
+        case .sessionNotSettled(let topic):
+            return "Session is not settled on topic \(topic)."
+        case .invalidPermissions:
+            return "Permission set is invalid."
+        case .unauthorizedNonControllerCall:
+            return "Method must be called by a controller client."
         case .internal(let reason):
             return reason.description
         case .unauthrorized(let reason):
             return reason.description
-        default:
-            return ""
         }
     }
 }

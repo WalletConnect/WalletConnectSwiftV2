@@ -219,7 +219,7 @@ final class SessionEngine {
             throw WalletConnectError.noSessionMatchingTopic(topic)
         }
         guard session.isSettled else {
-            throw WalletConnectError.sessionNotSettled
+            throw WalletConnectError.sessionNotSettled(topic)
         }
         guard isController else {
             throw WalletConnectError.unauthorizedNonControllerCall
