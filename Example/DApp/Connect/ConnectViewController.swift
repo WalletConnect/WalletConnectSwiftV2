@@ -74,7 +74,7 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
     }
     
     @objc func connectWithExampleWallet() {
-        let url = URL(string: "walletconnectwallet:\(uriString)")!
+        let url = URL(string: "https://walletconnect.com/wc?uri=\(uriString)")!
         UIApplication.shared.open(url, options: [:]) { [weak self] _ in
             self?.dismiss(animated: true, completion: nil)
         }
@@ -102,7 +102,7 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
     }
     
     private func presentConfirmationAlert() {
-        let url = URL(string: "walletconnectwallet:")!
+        let url = URL(string: "https://walletconnect.com/wc?uri=\(uriString)")!
         UIApplication.shared.open(url, options: [:]) { [weak self] _ in
             self?.dismiss(animated: true, completion: nil)
         }
