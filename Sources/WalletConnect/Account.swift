@@ -10,7 +10,7 @@
  [CAIP-2]:https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-2.md
  [CAIP-10]:https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-10.md
  */
-public struct Account {
+public struct Account: Equatable {
     
     /// A blockchain namespace. Usually describes an ecosystem or standard.
     public var namespace: String
@@ -42,11 +42,34 @@ public struct Account {
      This initializer returns nil if the string doesn't represent a valid account id in conformance with
      [CAIP-10](https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-10.md).
      */
-    public init?(string: String) {
+    public init?(_ string: String) {
         guard String.conformsToCAIP10(string) else { return nil }
         let splits = string.split(separator: ":")
         self.namespace = String(splits[0])
         self.reference = String(splits[1])
         self.address = String(splits[2])
+    }
+}
+
+extension Account: LosslessStringConvertible {
+    public var description: String {
+        return absoluteString
+    }
+}
+
+extension Account: Codable {
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let absoluteString = try container.decode(String.self)
+        guard let account = Account(absoluteString) else {
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Malformed CAIP-10 account identifier.")
+        }
+        self = account
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(absoluteString)
     }
 }
