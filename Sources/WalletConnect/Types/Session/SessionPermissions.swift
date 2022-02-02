@@ -38,8 +38,8 @@ struct SessionPermissions: Codable, Equatable {
         self.controller = nil
     }
     
-    mutating func upgrade(with sessionPermissions: Session.Permissions) {
-        blockchain.chains.formUnion(sessionPermissions.blockchains)
-        jsonrpc.methods.formUnion(sessionPermissions.methods)
+    mutating func upgrade(with permissions: SessionPermissions) {
+        blockchain.chains.formUnion(permissions.blockchain.chains)
+        jsonrpc.methods.formUnion(permissions.jsonrpc.methods)
     }
 }

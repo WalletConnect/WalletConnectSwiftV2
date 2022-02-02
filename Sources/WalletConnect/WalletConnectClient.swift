@@ -168,8 +168,8 @@ public final class WalletConnectClient {
     /// - Parameters:
     ///   - topic: Topic of the session that is intended to be upgraded.
     ///   - permissions: Sets of permissions that will be combined with existing ones.
-    public func upgrade(topic: String, permissions: Session.Permissions) {
-        sessionEngine.upgrade(topic: topic, permissions: permissions)
+    public func upgrade(topic: String, permissions: Session.Permissions) throws {
+        try sessionEngine.upgrade(topic: topic, permissions: permissions)
     }
     
     /// For the proposer to send JSON-RPC requests to responding peer.

@@ -73,7 +73,7 @@ struct SessionSequence: ExpirableSequence {
         return settled.permissions.jsonrpc.methods.contains(method)
     }
     
-    mutating func upgrade(_ permissions: Session.Permissions) {
+    mutating func upgrade(_ permissions: SessionPermissions) {
         settled?.permissions.upgrade(with: permissions)
     }
     
