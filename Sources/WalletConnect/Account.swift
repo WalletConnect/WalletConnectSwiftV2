@@ -13,23 +13,13 @@ public struct Account {
     public let address: String
     
     ///
-    public var chainIdentifier: String {
+    public var blockchainIdentifier: String {
         "\(namespace):\(reference)"
     }
     
     ///
     public var absoluteString: String {
         "\(namespace):\(reference):\(address)"
-    }
-    
-    public var isCAIP10Conformant: Bool {
-        return String.conformsToCAIP10(absoluteString)
-    }
-    
-    public init(chainNamespace: String, chainReference: String, address: String) {
-        self.namespace = chainNamespace
-        self.reference = chainReference
-        self.address = address
     }
     
     public init?(string: String) {
