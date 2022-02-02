@@ -17,12 +17,31 @@ extension Pairing {
     }
 }
 
+extension Session.Permissions {
+    static func stub(
+        chains: Set<String> = ["solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ"],
+        methods: Set<String> = ["getGenesisHash"],
+        notifications: [String] = ["msg"]
+    ) -> Session.Permissions {
+        Session.Permissions(
+            blockchains: chains,
+            methods: methods,
+            notifications: notifications
+        )
+    }
+}
+
 extension SessionPermissions {
-    static func stub(controllerKey: String = AgreementPrivateKey().publicKey.hexRepresentation) -> SessionPermissions {
-        SessionPermissions(
-            blockchain: Blockchain(chains: []),
-            jsonrpc: JSONRPC(methods: []),
-            notifications: Notifications(types: []),
+    static func stub(
+        chains: Set<String> = ["eip155:1"],
+        jsonrpc: Set<String> = ["eth_sign"],
+        notifications: [String] = ["a_type"],
+        controllerKey: String = AgreementPrivateKey().publicKey.hexRepresentation
+    ) -> SessionPermissions {
+        return SessionPermissions(
+            blockchain: Blockchain(chains: chains),
+            jsonrpc: JSONRPC(methods: jsonrpc),
+            notifications: Notifications(types: notifications),
             controller: Controller(publicKey: controllerKey)
         )
     }
@@ -44,5 +63,10 @@ extension WCRequestSubscriptionPayload {
     static func stubUpdate(topic: String, accounts: Set<String> = ["std:0:0"]) -> WCRequestSubscriptionPayload {
         let updateMethod = WCMethod.wcSessionUpdate(SessionType.UpdateParams(accounts: accounts)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
+    }
+    
+    static func stubUpgrade(topic: String, permissions: SessionPermissions = SessionPermissions(permissions: Session.Permissions.stub())) -> WCRequestSubscriptionPayload {
+        let upgradeMethod = WCMethod.wcSessionUpgrade(SessionType.UpgradeParams(permissions: permissions)).asRequest()
+        return WCRequestSubscriptionPayload(topic: topic, wcRequest: upgradeMethod)
     }
 }
