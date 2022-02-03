@@ -84,8 +84,7 @@ public final class WalletConnectClient {
     
     func endBackgroundTask() {
 #if os(iOS)
-        wakuRelay.disconnect(closeCode: .goingAway)
-        print("Background task ended.")
+        wakuRelay.disconnect(closeCode: .normalClosure)
         UIApplication.shared.endBackgroundTask(backgroundTaskID)
         backgroundTaskID = .invalid
 #endif
