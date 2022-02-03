@@ -10,7 +10,7 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
     private let client: WalletConnectClient
     private let session: Session
     init(_ session: Session, _ client: WalletConnectClient) {
-        let pendingRequests = client.getPendingRequests().map{$0.method}
+        let pendingRequests = client.getPendingRequests(topic: session.topic).map{$0.method}
         self.sessionInfo = SessionInfo(name: session.peer.name ?? "",
                                        descriptionText: session.peer.description ?? "",
                                        dappURL: session.peer.description ?? "",
@@ -99,7 +99,7 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.section == 2 {
-            let pendingRequests = client.getPendingRequests()
+            let pendingRequests = client.getPendingRequests(topic: session.topic)
             showSessionRequest(pendingRequests[indexPath.row])
         }
     }
@@ -120,7 +120,7 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
     }
     
     func reloadTable() {
-        let pendingRequests = client.getPendingRequests().map{$0.method}
+        let pendingRequests = client.getPendingRequests(topic: session.topic).map{$0.method}
         self.sessionInfo = SessionInfo(name: session.peer.name ?? "",
                                        descriptionText: session.peer.description ?? "",
                                        dappURL: session.peer.description ?? "",

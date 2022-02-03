@@ -3,24 +3,6 @@ import XCTest
 import TestingUtils
 import WalletConnectUtils
 
-fileprivate extension SessionPermissions {
-    static func stub() -> SessionPermissions {
-        SessionPermissions(
-            blockchain: Blockchain(chains: []),
-            jsonrpc: JSONRPC(methods: []),
-            notifications: Notifications(types: [])
-        )
-    }
-}
-
-fileprivate extension WCRequest {
-    
-    var approveParams: PairingType.ApprovalParams? {
-        guard case .pairingApprove(let approveParams) = self.params else { return nil }
-        return approveParams
-    }
-}
-
 func deriveTopic(publicKey: String, privateKey: AgreementPrivateKey) -> String {
     try! Crypto.generateAgreementSecret(from: privateKey, peerPublicKey: publicKey).derivedTopic()
 }
@@ -88,7 +70,7 @@ final class PairingEngineTests: XCTestCase {
         try engine.approve(uri)
 
         // The concept of "publish" should only be known by the relayer
-        guard let publishTopic = relayMock.requests.first?.topic, let approval = relayMock.requests.first?.request.approveParams else {
+        guard let publishTopic = relayMock.requests.first?.topic, let approval = relayMock.requests.first?.request.pairingApproveParams else {
             XCTFail("Responder must publish an approval request."); return
         }
 
@@ -124,7 +106,7 @@ final class PairingEngineTests: XCTestCase {
 
         try engine.approve(uri)
         let success = JSONRPCResponse<AnyCodable>(id: 0, result: AnyCodable(true))
-        let response = WCResponse(topic: topicA, requestMethod: .pairingApprove, requestParams: .pairingApprove(PairingType.ApprovalParams(relay: RelayProtocolOptions(protocol: "", params: nil), responder: PairingParticipant(publicKey: ""), expiry: 0, state: nil)), result: .success(success))
+        let response = WCResponse(topic: topicA, chainId: nil, requestMethod: .pairingApprove, requestParams: .pairingApprove(PairingType.ApprovalParams(relay: RelayProtocolOptions(protocol: "", params: nil), responder: PairingParticipant(publicKey: ""), expiry: 0, state: nil)), result: .response(success))
         relayMock.onPairingResponse?(response)
         
         XCTAssert(storageMock.hasAcknowledgedPairing(on: topicB), "Settled pairing must advance to acknowledged state.")

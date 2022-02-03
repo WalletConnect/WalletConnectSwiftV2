@@ -2,7 +2,7 @@
 import Foundation
 
 
-public enum JsonRpcResponseTypes: Codable {
+public enum JsonRpcResult: Codable {
     case error(JSONRPCErrorResponse)
     case response(JSONRPCResponse<AnyCodable>)
     public var id: Int64 {

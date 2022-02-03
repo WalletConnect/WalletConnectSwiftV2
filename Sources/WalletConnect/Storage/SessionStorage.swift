@@ -2,7 +2,7 @@ protocol SessionSequenceStorage: AnyObject {
     var onSequenceExpiration: ((_ topic: String, _ pubKey: String) -> Void)? { get set }
     func hasSequence(forTopic topic: String) -> Bool
     func setSequence(_ sequence: SessionSequence)
-    func getSequence(forTopic topic: String) throws -> SessionSequence?
+    func getSequence(forTopic topic: String) -> SessionSequence?
     func getAll() -> [SessionSequence]
     func delete(topic: String)
 }
@@ -28,8 +28,8 @@ final class SessionStorage: SessionSequenceStorage {
         storage.setSequence(sequence)
     }
     
-    func getSequence(forTopic topic: String) throws -> SessionSequence? {
-        try storage.getSequence(forTopic: topic)
+    func getSequence(forTopic topic: String) -> SessionSequence? {
+        return try? storage.getSequence(forTopic: topic)
     }
     
     func getAll() -> [SessionSequence] {

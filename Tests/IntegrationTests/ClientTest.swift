@@ -153,15 +153,16 @@ final class ClientTests: XCTestCase {
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
             let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
-            self.proposer.client.request(params: requestParams) { result in
-                switch result {
-                case .success(let jsonRpcResponse):
-                    let response = try! jsonRpcResponse.result.get(String.self)
-                    XCTAssertEqual(response, responseParams)
-                    responseExpectation.fulfill()
-                case .failure(_):
-                    XCTFail()
-                }
+            self.proposer.client.request(params: requestParams)
+        }
+        proposer.onSessionResponse = { response in
+            switch response.result {
+            case .response(let jsonRpcResponse):
+                let response = try! jsonRpcResponse.result.get(String.self)
+                XCTAssertEqual(response, responseParams)
+                responseExpectation.fulfill()
+            case .error(_):
+                XCTFail()
             }
         }
         responder.onSessionRequest = {[unowned self]  sessionRequest in
@@ -189,15 +190,17 @@ final class ClientTests: XCTestCase {
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
             let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
-            self.proposer.client.request(params: requestParams) { result in
-                switch result {
-                case .success(_):
-                    XCTFail()
-                case .failure(let errorResponse):
-                    XCTAssertEqual(error, errorResponse.error)
-                    failureResponseExpectation.fulfill()
-                }
+            self.proposer.client.request(params: requestParams)
+        }
+        proposer.onSessionResponse = { response in
+            switch response.result {
+            case .response(_):
+                XCTFail()
+            case .error(let errorResponse):
+                XCTAssertEqual(error, errorResponse.error)
+                failureResponseExpectation.fulfill()
             }
+
         }
         responder.onSessionRequest = {[unowned self]  sessionRequest in
             let jsonrpcErrorResponse = JSONRPCErrorResponse(id: sessionRequest.id, error: error)
@@ -251,7 +254,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.approve(proposal: proposal, accounts: [account])
         }
         responder.onSessionSettled = { [unowned self] sessionSettled in
-            responder.client.upgrade(topic: sessionSettled.topic, permissions: upgradePermissions)
+            try? responder.client.upgrade(topic: sessionSettled.topic, permissions: upgradePermissions)
         }
         proposer.onSessionUpgrade = { topic, permissions in
             XCTAssertTrue(permissions.blockchains.isSuperset(of: upgradePermissions.blockchains))
@@ -264,31 +267,6 @@ final class ClientTests: XCTestCase {
             responderSessionUpgradeExpectation.fulfill()
         }
         waitForExpectations(timeout: defaultTimeout, handler: nil)
-    }
-    
-    func testSessionUpgradeFailsOnNonControllerRequest() {
-        let proposerSessionUpgradeExpectation = expectation(description: "Proposer upgrades session")
-        proposerSessionUpgradeExpectation.isInverted = true
-        let responderSessionUpgradeExpectation = expectation(description: "Responder upgrades session")
-        responderSessionUpgradeExpectation.isInverted = true
-        let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
-        let permissions = Session.Permissions.stub()
-        let upgradePermissions = Session.Permissions(blockchains: ["eip155:42"], methods: ["eth_sendTransaction"])
-        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
-        try! responder.client.pair(uri: uri)
-        responder.onSessionProposal = { [unowned self] proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [account])
-        }
-        proposer.onSessionSettled = { [unowned self] sessionSettled in
-            proposer.client.upgrade(topic: sessionSettled.topic, permissions: upgradePermissions)
-        }
-        proposer.onSessionUpgrade = { topic, permissions in
-            proposerSessionUpgradeExpectation.fulfill()
-        }
-        responder.onSessionUpgrade = { topic, permissions in
-            responderSessionUpgradeExpectation.fulfill()
-        }
-        waitForExpectations(timeout: 3.0, handler: nil)
     }
     
     func testSuccessfulSessionUpdate() {

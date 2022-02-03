@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "764E1D3B26F8D3FC00A1FB15"
-               BuildableName = "ExampleApp.app"
-               BlueprintName = "ExampleApp"
+               BuildableName = "WalletConnect Wallet.app"
+               BlueprintName = "Wallet"
                ReferencedContainer = "container:ExampleApp.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -32,9 +32,19 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "845B30EB27859686002E4094"
-               BuildableName = "ExampleAppTests.xctest"
-               BlueprintName = "ExampleAppTests"
+               BlueprintIdentifier = "84CE646C27A2CD6B00142511"
+               BuildableName = "WalletTests.xctest"
+               BlueprintName = "WalletTests"
+               ReferencedContainer = "container:ExampleApp.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "84CE645D27A2C85B00142511"
+               BuildableName = "DappTests.xctest"
+               BlueprintName = "DappTests"
                ReferencedContainer = "container:ExampleApp.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -55,8 +65,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "764E1D3B26F8D3FC00A1FB15"
-            BuildableName = "ExampleApp.app"
-            BlueprintName = "ExampleApp"
+            BuildableName = "WalletConnect Wallet.app"
+            BlueprintName = "Wallet"
             ReferencedContainer = "container:ExampleApp.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -72,8 +82,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "764E1D3B26F8D3FC00A1FB15"
-            BuildableName = "ExampleApp.app"
-            BlueprintName = "ExampleApp"
+            BuildableName = "WalletConnect Wallet.app"
+            BlueprintName = "Wallet"
             ReferencedContainer = "container:ExampleApp.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

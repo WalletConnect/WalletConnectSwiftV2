@@ -16,12 +16,8 @@ class Signer {
             let result = "0x" + r.toHexString() + s.toHexString() + String(v + 27, radix: 16)
             return AnyCodable(result)
         } else if method == "eth_signTypedData" {
-            let params = try! request.params.get([String].self)
-            print(params)
-            let messageToSign = params[1]
-            let dataToHash = dataToHash(messageToSign)
-            let (v, r, s) = try! self.privateKey.sign(message: .init(hex: dataToHash.toHexString()))
-            let result = "0x" + r.toHexString() + s.toHexString() + String(v + 27, radix: 16)
+            //TODO
+            let result = "0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c"
             return AnyCodable(result)
         } else if method == "eth_sendTransaction" {
             let params = try! request.params.get([EthereumTransaction].self)

@@ -9,22 +9,22 @@ import WalletConnectUtils
 class WalletConnectRelayTests: XCTestCase {
     var wcRelay: WalletConnectRelay!
     var networkRelayer: MockedNetworkRelayer!
-    var serialiser: MockedJSONRPCSerialiser!
+    var serializer: MockedJSONRPCSerializer!
     var crypto: Crypto!
 
     private var publishers = [AnyCancellable]()
 
     override func setUp() {
         let logger = ConsoleLoggerMock()
-        serialiser = MockedJSONRPCSerialiser()
+        serializer = MockedJSONRPCSerializer()
         networkRelayer = MockedNetworkRelayer()
-        wcRelay = WalletConnectRelay(networkRelayer: networkRelayer, jsonRpcSerialiser: serialiser, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<WalletConnect.JsonRpcRecord>(defaults: RuntimeKeyValueStorage(), identifier: "")))
+        wcRelay = WalletConnectRelay(networkRelayer: networkRelayer, jsonRpcSerializer: serializer, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<WalletConnect.JsonRpcRecord>(defaults: RuntimeKeyValueStorage(), identifier: "")))
     }
 
     override func tearDown() {
         wcRelay = nil
         networkRelayer = nil
-        serialiser = nil
+        serializer = nil
     }
     
     func testNotifiesOnEncryptedWCJsonRpcRequest() {
@@ -33,7 +33,7 @@ class WalletConnectRelayTests: XCTestCase {
         wcRelay.wcRequestPublisher.sink { (request) in
             requestExpectation.fulfill()
         }.store(in: &publishers)
-        serialiser.deserialised = SerialiserTestData.pairingApproveJSONRPCRequest
+        serializer.deserialized = SerializerTestData.pairingApproveJSONRPCRequest
         networkRelayer.onMessage?(topic, testPayload)
         waitForExpectations(timeout: 1.001, handler: nil)
     }
@@ -43,8 +43,8 @@ class WalletConnectRelayTests: XCTestCase {
         let topic = "93293932"
         let request = getWCSessionPayloadRequest()
         let sessionPayloadResponse = getWCSessionPayloadResponse()
-        serialiser.deserialised = sessionPayloadResponse
-        serialiser.serialised = try! sessionPayloadResponse.json().toHexEncodedString()
+        serializer.deserialized = sessionPayloadResponse
+        serializer.serialized = try! sessionPayloadResponse.json().toHexEncodedString()
         wcRelay.request(topic: topic, payload: request) { result in
             XCTAssertEqual(result, .success(sessionPayloadResponse))
             responseExpectation.fulfill()
@@ -60,8 +60,8 @@ class WalletConnectRelayTests: XCTestCase {
         let topic = "fefc3dc39cacbc562ed58f92b296e2d65a6b07ef08992b93db5b3cb86280635a"
         let request = getWCSessionPayloadRequest()
         let sessionPayloadResponse = getWCSessionPayloadResponse()
-        serialiser.deserialised = sessionPayloadResponse
-        serialiser.serialised = "encrypted_message"
+        serializer.deserialized = sessionPayloadResponse
+        serializer.serialized = "encrypted_message"
         wcRelay.request(topic: topic, payload: request) { result in
             XCTAssertEqual(result, .success(sessionPayloadResponse))
             responseExpectation.fulfill()

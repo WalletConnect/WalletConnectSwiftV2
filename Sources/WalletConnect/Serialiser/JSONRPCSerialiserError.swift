@@ -2,6 +2,6 @@
 
 import Foundation
 
-enum JSONRPCSerialiserError: String, Error {
+enum JSONRPCSerializerError: String, Error {
     case messageToShort = "Error: message is too short"
 }

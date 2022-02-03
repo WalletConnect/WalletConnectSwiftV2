@@ -2,18 +2,17 @@
 
 import Foundation
 
+// TODO: Migrate protocol errors to ReasonCode enum over time. Use WalletConnectError for client errors only.
 enum WalletConnectError: Error {
     
-    // 1000 (Internal)
+    case noSessionMatchingTopic(String)
+    case sessionNotSettled(String)
+    case invalidPermissions
+    case unauthorizedNonControllerCall
+    
     case `internal`(_ reason: InternalReason)
 
-    // 2000 (Timeout)
-    // 3000 (Unauthorized)
     case unauthrorized(_ reason: UnauthorizedReason)
-    
-    // 4000 (EIP-1193)
-    // 5000 (CAIP-25)
-    // 9000 (Unknown)
     
     enum InternalReason: Error {
         case notApproved
@@ -50,11 +49,21 @@ extension WalletConnectError: CustomStringConvertible {
             return reason.code
         case .unauthrorized(let reason):
             return reason.code
+        default:
+            return 0
         }
     }
     
     var localizedDescription: String {
         switch self {
+        case .noSessionMatchingTopic(let topic):
+            return "No session found matching topic \(topic)."
+        case .sessionNotSettled(let topic):
+            return "Session is not settled on topic \(topic)."
+        case .invalidPermissions:
+            return "Permission set is invalid."
+        case .unauthorizedNonControllerCall:
+            return "Method must be called by a controller client."
         case .internal(let reason):
             return reason.description
         case .unauthrorized(let reason):
