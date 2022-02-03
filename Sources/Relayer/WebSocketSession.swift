@@ -4,7 +4,7 @@ protocol WebSocketSessionProtocol {
     var onMessageReceived: ((String) -> ())? {get set}
     var onMessageError: ((Error) -> ())? {get set}
     var isConnected: Bool {get}
-    func connect(on url: URL)
+    func connect()
     func disconnect(with closeCode: URLSessionWebSocketTask.CloseCode)
     func send(_ message: String, completionHandler: @escaping ((Error?) -> Void))
 }
@@ -13,7 +13,7 @@ protocol WebSocketSessionProtocol {
 final class WebSocketSession: NSObject, WebSocketSessionProtocol {
     var onMessageReceived: ((String) -> ())?
     var onMessageError: ((Error) -> ())?
-    
+    let url: URL
     var isConnected: Bool {
         webSocketTask != nil
     }
@@ -22,12 +22,13 @@ final class WebSocketSession: NSObject, WebSocketSessionProtocol {
     
     private var webSocketTask: URLSessionWebSocketTaskProtocol?
     
-    init(session: URLSessionProtocol) {
+    init(session: URLSessionProtocol, url: URL) {
         self.session = session
+        self.url = url
         super.init()
     }
     
-    func connect(on url: URL) {
+    func connect() {
         webSocketTask = session.webSocketTask(with: url)
         listen()
         webSocketTask?.resume()
