@@ -6,8 +6,8 @@ protocol Dispatching {
     var onDisconnect: (()->())? {get set}
     var onMessage: ((String) -> ())? {get set}
     func send(_ string: String, completion: @escaping (Error?)->())
-    func connect()
-    func disconnect(closeCode: URLSessionWebSocketTask.CloseCode)
+    func connect() throws
+    func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws
 }
 
 final class Dispatcher: NSObject, Dispatching {
@@ -32,7 +32,6 @@ final class Dispatcher: NSObject, Dispatching {
         setUpWebSocketSession()
         setUpSocketConnectionObserving()
         setUpNetworkMonitoring()
-        socket.connect()
     }
 
     func send(_ string: String, completion: @escaping (Error?) -> Void) {
@@ -44,14 +43,12 @@ final class Dispatcher: NSObject, Dispatching {
         }
     }
     
-    func connect() {
-        //todo handle error
-        try! socketConnectionHandler.handleConnect()
+    func connect() throws {
+        try socketConnectionHandler.handleConnect()
     }
     
-    func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) {
-        //todo handle error
-        try! socketConnectionHandler.handleDisconnect()
+    func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
+        try socketConnectionHandler.handleDisconnect()
     }
     
     private func setUpWebSocketSession() {

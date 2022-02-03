@@ -1,5 +1,7 @@
 
+#if os(iOS)
 import UIKit
+#endif
 import Foundation
 
 protocol SocketConnectionHandler {
@@ -17,12 +19,15 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
     }
     var appStateObserver: AppStateObserving
     let socket: WebSocketSessionProtocol
+#if os(iOS)
     private var backgroundTaskID: UIBackgroundTaskIdentifier = .invalid
-    
+#endif
+
     init(socket: WebSocketSessionProtocol, appStateObserver: AppStateObserving = AppStateObserver()) {
         self.appStateObserver = appStateObserver
         self.socket = socket
         setUpStateObserving()
+        socket.connect()
     }
     
     private func setUpStateObserving() {

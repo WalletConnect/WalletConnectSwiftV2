@@ -33,7 +33,8 @@ public final class WakuNetworkRelay {
     init(dispatcher: Dispatching,
          logger: ConsoleLogging,
          keyValueStorage: KeyValueStorage,
-         uniqueIdentifier: String) {
+         uniqueIdentifier: String,
+         socketConnectionType: SocketConnectionType) {
         self.logger = logger
         self.dispatcher = dispatcher
         let historyIdentifier = "com.walletconnect.sdk.\(uniqueIdentifier).relayer.subscription_json_rpc_record"
@@ -44,7 +45,7 @@ public final class WakuNetworkRelay {
     public convenience init(logger: ConsoleLogging,
                             url: URL,
                             keyValueStorage: KeyValueStorage,
-                            uniqueIdentifier: String) {
+                            uniqueIdentifier: String, socketConnectionType: SocketConnectionType) {
         let socketConnectionObserver = SocketConnectionObserver()
         let urlSession = URLSession(configuration: .default, delegate: socketConnectionObserver, delegateQueue: OperationQueue())
         let socket = WebSocketSession(session: urlSession, url: url)
@@ -53,15 +54,16 @@ public final class WakuNetworkRelay {
         self.init(dispatcher: dispatcher,
                   logger: logger,
                   keyValueStorage: keyValueStorage,
-                  uniqueIdentifier: uniqueIdentifier)
+                  uniqueIdentifier: uniqueIdentifier,
+                  socketConnectionType: socketConnectionType)
     }
     
-    public func connect() {
-        dispatcher.connect()
+    public func connect() throws {
+        try dispatcher.connect()
     }
     
-    public func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) {
-        dispatcher.disconnect(closeCode: closeCode)
+    public func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
+        try dispatcher.disconnect(closeCode: closeCode)
     }
     
     @discardableResult public func publish(topic: String, payload: String, completion: @escaping ((Error?) -> ())) -> Int64 {

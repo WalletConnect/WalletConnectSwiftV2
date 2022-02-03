@@ -1,6 +1,8 @@
 
 import Foundation
+#if os(iOS)
 import UIKit
+#endif
 
 protocol AppStateObserving {
     var onWillEnterForeground: (()->())? {get set}
@@ -42,3 +44,5 @@ class AppStateObserver: AppStateObserving {
     }
     
 }
+
+
