@@ -31,9 +31,6 @@ public final class WalletConnectClient {
     private let secureStorage: SecureStorage
     private let pairingQueue = DispatchQueue(label: "com.walletconnect.sdk.client.pairing", qos: .userInitiated)
     private let history: JsonRpcHistory
-#if os(iOS)
-    private var backgroundTaskID: UIBackgroundTaskIdentifier = .invalid
-#endif
 
     // MARK: - Initializers
 
@@ -70,27 +67,6 @@ public final class WalletConnectClient {
 
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
         setUpEnginesCallbacks()
-        subscribeNotificationCenter()
-        registerBackgroundTask()
-    }
-    
-    func registerBackgroundTask() {
-#if os(iOS)
-        backgroundTaskID = UIApplication.shared.beginBackgroundTask (withName: "Finish Network Tasks") { [weak self] in
-            self?.endBackgroundTask()
-        }
-#endif
-    }
-    
-    func endBackgroundTask() {
-#if os(iOS)
-        wakuRelay.disconnect(closeCode: .normalClosure)
-        UIApplication.shared.endBackgroundTask(backgroundTaskID)
-        backgroundTaskID = .invalid
-#endif
-    }
-    deinit {
-        unsubscribeNotificationCenter()
     }
     
     // MARK: - Public interface
@@ -327,27 +303,4 @@ public final class WalletConnectClient {
         )
         delegate?.didReceive(sessionProposal: sessionProposal)
     }
-    
-    private func subscribeNotificationCenter() {
-#if os(iOS)
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(appWillEnterForeground),
-            name: UIApplication.willEnterForegroundNotification,
-            object: nil)
-#endif
-    }
-    
-    private func unsubscribeNotificationCenter() {
-#if os(iOS)
-        NotificationCenter.default.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
-#endif
-    }
-    
-    @objc
-    private func appWillEnterForeground() {
-        wakuRelay.connect()
-        registerBackgroundTask()
-    }
-
 }

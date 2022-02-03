@@ -26,9 +26,10 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
     }
     
     private func setUpStateObserving() {
-        appStateObserver.onWillEnterBackground = {
-            
+        appStateObserver.onWillEnterBackground = { [unowned self] in
+            registerBackgroundTask()
         }
+        
         appStateObserver.onWillEnterForeground = { [unowned self] in
             socket.connect()
         }

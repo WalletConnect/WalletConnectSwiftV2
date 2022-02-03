@@ -20,14 +20,25 @@ class AppStateObserver: AppStateObserving {
 #if os(iOS)
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(getter: onWillEnterForeground),
+            selector: #selector(appWillEnterForeground),
             name: UIApplication.willEnterForegroundNotification,
             object: nil)
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(getter: onWillEnterBackground),
+            selector: #selector(appWillEnterBackground),
             name: UIApplication.willResignActiveNotification,
             object: nil)
 #endif
     }
+    
+    @objc
+    private func appWillEnterBackground() {
+        onWillEnterBackground?()
+    }
+    
+    @objc
+    private func appWillEnterForeground() {
+        onWillEnterForeground?()
+    }
+    
 }

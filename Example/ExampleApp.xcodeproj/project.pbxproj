@@ -95,7 +95,6 @@
 		8460DCFB274F98A10081F94C /* RequestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestViewController.swift; sourceTree = "<group>"; };
 		8460DCFF2750D6F50081F94C /* SessionDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailsViewController.swift; sourceTree = "<group>"; };
 		8460DD012750D7020081F94C /* SessionDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailsView.swift; sourceTree = "<group>"; };
-		8468599427ABCB4900128D10 /* AutomaticSocketConnectionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomaticSocketConnectionHandler.swift; sourceTree = "<group>"; };
 		84CE641C27981DED00142511 /* DApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		84CE641E27981DED00142511 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		84CE642027981DED00142511 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -183,7 +182,6 @@
 		764E1D3326F8D3FC00A1FB15 = {
 			isa = PBXGroup;
 			children = (
-				8468599427ABCB4900128D10 /* AutomaticSocketConnectionHandler.swift */,
 				84CE6453279FFE1100142511 /* Wallet.entitlements */,
 				764E1D3E26F8D3FC00A1FB15 /* ExampleApp */,
 				84CE641D27981DED00142511 /* DApp */,
