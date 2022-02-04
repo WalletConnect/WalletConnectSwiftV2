@@ -409,18 +409,6 @@ final class SessionEngine {
             relayer.respondError(for: payload, reason: .generic(message: "invalid request")) // TODO: Replace with accurate reason
         } catch {}
     }
-    
-    private func respond(error: WalletConnectError, requestId: Int64, topic: String) {
-        let jsonrpcError = JSONRPCErrorResponse.Error(code: error.code, message: error.description)
-        let response = JSONRPCErrorResponse(id: requestId, error: jsonrpcError)
-        relayer.respond(topic: topic, response: JsonRpcResult.error(response)) { [weak self] responseError in
-            if let responseError = responseError {
-                self?.logger.error("Could not respond with error: \(responseError)")
-            } else {
-                self?.logger.debug("successfully responded with error")
-            }
-        }
-    }
 
     private func validatePayload(_ sessionRequest: Request) throws {
         guard let session = sequencesStore.getSequence(forTopic: sessionRequest.topic) else {
