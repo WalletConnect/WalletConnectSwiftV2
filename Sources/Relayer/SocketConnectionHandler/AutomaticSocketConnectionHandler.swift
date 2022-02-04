@@ -12,16 +12,16 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
     private var appStateObserver: AppStateObserving
     let socket: WebSocketSessionProtocol
     private var networkMonitor: NetworkMonitoring
-#if os(iOS)
-    private var backgroundTaskID: UIBackgroundTaskIdentifier = .invalid
-#endif
+    private let backgroundTaskRegistrar: BackgroundTaskRegistering
 
     init(networkMonitor: NetworkMonitoring = NetworkMonitor(),
          socket: WebSocketSessionProtocol,
-         appStateObserver: AppStateObserving = AppStateObserver()) {
+         appStateObserver: AppStateObserving = AppStateObserver(),
+         backgroundTaskRegistrar: BackgroundTaskRegistering = BackgroundTaskRegistrar()) {
         self.appStateObserver = appStateObserver
         self.socket = socket
         self.networkMonitor = networkMonitor
+        self.backgroundTaskRegistrar = backgroundTaskRegistrar
         setUpStateObserving()
         setUpNetworkMonitoring()
         socket.connect()
@@ -48,19 +48,13 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
     }
     
     func registerBackgroundTask() {
-#if os(iOS)
-        backgroundTaskID = UIApplication.shared.beginBackgroundTask (withName: "Finish Network Tasks") { [weak self] in
-            self?.endBackgroundTask()
+        backgroundTaskRegistrar.register(name: "Finish Network Tasks") { [unowned self] in
+            endBackgroundTask()
         }
-#endif
     }
     
     func endBackgroundTask() {
-#if os(iOS)
         socket.disconnect(with: .normalClosure)
-        UIApplication.shared.endBackgroundTask(backgroundTaskID)
-        backgroundTaskID = .invalid
-#endif
     }
     
     func handleConnect() throws {
@@ -83,9 +77,21 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
 }
 
 protocol BackgroundTaskRegistering {
-    func register(name: String, completion: ()->())
+    func register(name: String, completion: @escaping ()->())
 }
 
-class BackgroundTaskRegistrar {
-    
+class BackgroundTaskRegistrar: BackgroundTaskRegistering {
+#if os(iOS)
+    private var backgroundTaskID: UIBackgroundTaskIdentifier = .invalid
+#endif
+
+    func register(name: String, completion: @escaping () -> ()) {
+#if os(iOS)
+        backgroundTaskID = UIApplication.shared.beginBackgroundTask (withName: name) { [weak self] in
+            UIApplication.shared.endBackgroundTask(backgroundTaskID)
+            backgroundTaskID = .invalid
+            completion()
+        }
+#endif
+    }
 }

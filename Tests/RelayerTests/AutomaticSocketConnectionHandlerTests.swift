@@ -3,23 +3,24 @@ import Foundation
 import XCTest
 @testable import Relayer
 
-class AppStateObserverMock: AppStateObserving {
-    var onWillEnterForeground: (() -> ())?
-    var onWillEnterBackground: (() -> ())?
-}
-
 final class AutomaticSocketConnectionHandlerTests: XCTestCase {
     var sut: AutomaticSocketConnectionHandler!
     var webSocketSession: WebSocketSessionMock!
     var networkMonitor: NetworkMonitoringMock!
     var socketConnectionObserver: SocketConnectionObserverMock!
     var appStateObserver: AppStateObserving!
+    var backgroundTaskRegistrar: BackgroundTaskRegistrarMock!
     override func setUp() {
         webSocketSession = WebSocketSessionMock()
         networkMonitor = NetworkMonitoringMock()
         appStateObserver = AppStateObserverMock()
         socketConnectionObserver = SocketConnectionObserverMock()
-        sut = AutomaticSocketConnectionHandler(networkMonitor: networkMonitor, socket: webSocketSession, appStateObserver: appStateObserver)
+        backgroundTaskRegistrar = BackgroundTaskRegistrarMock()
+        sut = AutomaticSocketConnectionHandler(
+            networkMonitor: networkMonitor,
+            socket: webSocketSession,
+            appStateObserver: appStateObserver,
+        backgroundTaskRegistrar: backgroundTaskRegistrar)
     }
     
     func testDisconnectOnConnectionLoss() {
@@ -51,10 +52,15 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
     }
     
     func testRegisterTaskOnEnterBackground() {
-        
+        XCTAssertNil(backgroundTaskRegistrar.completion)
+        appStateObserver.onWillEnterBackground?()
+        XCTAssertNotNil(backgroundTaskRegistrar.completion)
     }
     
     func testDisconnectOnEndBackgroundTask() {
-        
+        appStateObserver.onWillEnterBackground?()
+        XCTAssertTrue(sut.socket.isConnected)
+        backgroundTaskRegistrar.completion!()
+        XCTAssertFalse(sut.socket.isConnected)
     }
 }
