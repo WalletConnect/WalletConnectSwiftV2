@@ -169,67 +169,20 @@ final class PairingEngine {
         wcSubscriber.onReceivePayload = { [unowned self] subscriptionPayload in
             switch subscriptionPayload.wcRequest.params {
             case .pairingApprove(let approveParams):
-                handlePairingApprove(payload: subscriptionPayload, approveParams: approveParams)
+                wcPairingApprove(subscriptionPayload, approveParams: approveParams)
             case .pairingUpdate(let updateParams):
-                handlePairingUpdate(subscriptionPayload, updateParams: updateParams)
+                wcPairingUpdate(subscriptionPayload, updateParams: updateParams)
             case .pairingPayload(let pairingPayload):
-                self.handlePairingPayload(subscriptionPayload, payloadParams: pairingPayload)
+                wcPairingPayload(subscriptionPayload, payloadParams: pairingPayload)
             case .pairingPing(_):
-                self.handlePairingPing(subscriptionPayload)
+                wcPairingPing(subscriptionPayload)
             default:
                 logger.warn("Warning: Pairing Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
             }
         }
     }
     
-    private func handlePairingUpdate(_ payload: WCRequestSubscriptionPayload, updateParams: PairingType.UpdateParams) {
-        let topic = payload.topic
-        guard var pairing = try? sequencesStore.getSequence(forTopic: topic) else {
-            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .pairing, topic: topic))
-            return
-        }
-        guard pairing.peerIsController else {
-            relayer.respondError(for: payload, reason: .unauthorizedUpdateRequest(context: .pairing))
-            return
-        }
-        
-        pairing.settled?.state = updateParams.state
-        sequencesStore.setSequence(pairing)
-        
-        relayer.respondSuccess(for: payload)
-        onPairingUpdate?(topic, updateParams.state.metadata)
-    }
-    
-    private func handlePairingPing(_ payload: WCRequestSubscriptionPayload) {
-        relayer.respondSuccess(for: payload)
-    }
-
-    private func handlePairingPayload(_ payload: WCRequestSubscriptionPayload, payloadParams: PairingType.PayloadParams) {
-        guard sequencesStore.hasSequence(forTopic: payload.topic) else {
-            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .pairing, topic: payload.topic))
-            return
-        }
-        guard payloadParams.request.method == PairingType.PayloadMethods.sessionPropose else {
-            relayer.respondError(for: payload, reason: .unauthorizedRPCMethod(payloadParams.request.method.rawValue))
-            return
-        }
-        let sessionProposal = payloadParams.request.params
-        do {
-            if let pairingAgreementSecret = try crypto.getAgreementSecret(for: sessionProposal.signal.params.topic) {
-                try crypto.setAgreementSecret(pairingAgreementSecret, topic: sessionProposal.topic)
-            } else {
-                relayer.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
-                return
-            }
-        } catch {
-            relayer.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
-            return
-        }
-        relayer.respondSuccess(for: payload)
-        onSessionProposal?(sessionProposal)
-    }
-    
-    private func handlePairingApprove(payload: WCRequestSubscriptionPayload, approveParams: PairingType.ApprovalParams) {
+    private func wcPairingApprove(_ payload: WCRequestSubscriptionPayload, approveParams: PairingType.ApprovalParams) {
         let pendingPairingTopic = payload.topic
         guard let pairing = try? sequencesStore.getSequence(forTopic: pendingPairingTopic), let pendingPairing = pairing.pending else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .pairing, topic: pendingPairingTopic))
@@ -256,6 +209,53 @@ final class PairingEngine {
         
         relayer.respondSuccess(for: payload)
         onPairingApproved?(Pairing(topic: settledPairing.topic, peer: nil), permissions, settledPairing.relay)
+    }
+    
+    private func wcPairingUpdate(_ payload: WCRequestSubscriptionPayload, updateParams: PairingType.UpdateParams) {
+        let topic = payload.topic
+        guard var pairing = try? sequencesStore.getSequence(forTopic: topic) else {
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .pairing, topic: topic))
+            return
+        }
+        guard pairing.peerIsController else {
+            relayer.respondError(for: payload, reason: .unauthorizedUpdateRequest(context: .pairing))
+            return
+        }
+        
+        pairing.settled?.state = updateParams.state
+        sequencesStore.setSequence(pairing)
+        
+        relayer.respondSuccess(for: payload)
+        onPairingUpdate?(topic, updateParams.state.metadata)
+    }
+    
+    private func wcPairingPayload(_ payload: WCRequestSubscriptionPayload, payloadParams: PairingType.PayloadParams) {
+        guard sequencesStore.hasSequence(forTopic: payload.topic) else {
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .pairing, topic: payload.topic))
+            return
+        }
+        guard payloadParams.request.method == PairingType.PayloadMethods.sessionPropose else {
+            relayer.respondError(for: payload, reason: .unauthorizedRPCMethod(payloadParams.request.method.rawValue))
+            return
+        }
+        let sessionProposal = payloadParams.request.params
+        do {
+            if let pairingAgreementSecret = try crypto.getAgreementSecret(for: sessionProposal.signal.params.topic) {
+                try crypto.setAgreementSecret(pairingAgreementSecret, topic: sessionProposal.topic)
+            } else {
+                relayer.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
+                return
+            }
+        } catch {
+            relayer.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
+            return
+        }
+        relayer.respondSuccess(for: payload)
+        onSessionProposal?(sessionProposal)
+    }
+    
+    private func wcPairingPing(_ payload: WCRequestSubscriptionPayload) {
+        relayer.respondSuccess(for: payload)
     }
     
     private func removeRespondedPendingPairings() {
