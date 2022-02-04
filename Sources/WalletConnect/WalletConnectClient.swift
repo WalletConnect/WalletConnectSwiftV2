@@ -247,10 +247,14 @@ public final class WalletConnectClient {
         return WalletConnectUtils.JsonRpcRecord(id: record.id, topic: record.topic, request: request, response: record.response, chainId: record.chainId)
     }
     
+    /// Connect Web Socket in manual socket connection control
+    /// - Throws: Throws in automatic socket connection control
     public func connectWebSocket() throws {
         try wakuRelay.connect()
     }
     
+    /// Disconnect Web Socket in manual socket connection control
+    /// - Throws: Throws in automatic socket connection control
     public func disconnectWebSocket() throws {
         try wakuRelay.disconnect(closeCode: .normalClosure)
     }

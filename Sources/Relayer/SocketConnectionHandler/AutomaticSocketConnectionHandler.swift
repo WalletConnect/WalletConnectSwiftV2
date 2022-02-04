@@ -4,14 +4,6 @@ import UIKit
 #endif
 import Foundation
 
-protocol SocketConnectionHandler {
-    var appStateObserver: AppStateObserving {get}
-    func handleConnect() throws
-    func handleDisconnect() throws
-    func handleNetworkUnsatisfied()
-    func handleNetworkSatisfied()
-}
-
 class AutomaticSocketConnectionHandler: SocketConnectionHandler {
     enum Error: Swift.Error {
         case manualSocketConnectionForbidden
@@ -60,7 +52,7 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
         throw Error.manualSocketConnectionForbidden
     }
     
-    func handleDisconnect() throws {
+    func handleDisconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
         throw Error.manualSocketDisconnectionForbidden
     }
     

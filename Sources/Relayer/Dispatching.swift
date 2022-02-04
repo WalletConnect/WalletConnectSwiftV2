@@ -48,7 +48,7 @@ final class Dispatcher: NSObject, Dispatching {
     }
     
     func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
-        try socketConnectionHandler.handleDisconnect()
+        try socketConnectionHandler.handleDisconnect(closeCode: closeCode)
     }
     
     private func setUpWebSocketSession() {
