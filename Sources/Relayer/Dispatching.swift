@@ -52,7 +52,7 @@ final class Dispatcher: NSObject, Dispatching {
             self?.onMessage?($0)
         }
         socket.onMessageError = { error in
-            print(error)
+            print("WebSocket Error \(error)")
         }
     }
     

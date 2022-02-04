@@ -46,7 +46,7 @@ public final class WalletConnectClient {
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
     public convenience init(metadata: AppMetadata, projectId: String, isController: Bool, relayHost: String, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil, socketConnectionType: SocketConnectionType = .automatic) {
-        self.init(metadata: metadata, projectId: projectId, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStorage: keyValueStorage, clientName: clientName)
+        self.init(metadata: metadata, projectId: projectId, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStorage: keyValueStorage, clientName: clientName, socketConnectionType: socketConnectionType)
     }
     
     init(metadata: AppMetadata, projectId: String, isController: Bool, relayHost: String, logger: ConsoleLogging, keychain: KeychainStorage, keyValueStorage: KeyValueStorage, clientName: String? = nil, socketConnectionType: SocketConnectionType = .automatic) {

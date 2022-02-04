@@ -1,6 +1,8 @@
 
 import Foundation
+#if os(iOS)
 import UIKit
+#endif
 
 protocol BackgroundTaskRegistering {
     func register(name: String, completion: @escaping ()->())

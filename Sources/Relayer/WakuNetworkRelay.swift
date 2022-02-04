@@ -33,8 +33,7 @@ public final class WakuNetworkRelay {
     init(dispatcher: Dispatching,
          logger: ConsoleLogging,
          keyValueStorage: KeyValueStorage,
-         uniqueIdentifier: String,
-         socketConnectionType: SocketConnectionType) {
+         uniqueIdentifier: String) {
         self.logger = logger
         self.dispatcher = dispatcher
         let historyIdentifier = "com.walletconnect.sdk.\(uniqueIdentifier).relayer.subscription_json_rpc_record"
@@ -49,13 +48,18 @@ public final class WakuNetworkRelay {
         let socketConnectionObserver = SocketConnectionObserver()
         let urlSession = URLSession(configuration: .default, delegate: socketConnectionObserver, delegateQueue: OperationQueue())
         let socket = WebSocketSession(session: urlSession, url: url)
-        let socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket)
+        var socketConnectionHandler: SocketConnectionHandler
+        switch socketConnectionType {
+        case .automatic:
+            socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket)
+        case .manual:
+            socketConnectionHandler = ManualSocketConnectionHandler(socket: socket)
+        }
         let dispatcher = Dispatcher(socket: socket, socketConnectionObserver: socketConnectionObserver, socketConnectionHandler: socketConnectionHandler)
         self.init(dispatcher: dispatcher,
                   logger: logger,
                   keyValueStorage: keyValueStorage,
-                  uniqueIdentifier: uniqueIdentifier,
-                  socketConnectionType: socketConnectionType)
+                  uniqueIdentifier: uniqueIdentifier)
     }
     
     public func connect() throws {
