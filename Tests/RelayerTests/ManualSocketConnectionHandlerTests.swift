@@ -11,23 +11,19 @@ final class ManualSocketConnectionHandlerTests: XCTestCase {
     var socketConnectionObserver: SocketConnectionObserverMock!
     override func setUp() {
         webSocketSession = WebSocketSessionMock()
-        networkMonitor = NetworkMonitoringMock()
-        socketConnectionObserver = SocketConnectionObserverMock()
-//        sut = Dispatcher(networkMonitor: networkMonitor, socket: webSocketSession, socketConnectionObserver: socketConnectionObserver, socketConnectionHandler: ManualSocketConnectionHandler(socket: webSocketSession))
+        sut = ManualSocketConnectionHandler(socket: webSocketSession)
     }
     
-//    func testDisconnectOnConnectionLoss() {
-//        try! sut.connect()
-//        XCTAssertTrue(sut.socket.isConnected)
-//        networkMonitor.onUnsatisfied?()
-//        XCTAssertFalse(sut.socket.isConnected)
-//    }
-//
-//    func testConnectsOnConnectionSatisfied() {
-//        try! sut.disconnect(closeCode: .normalClosure)
-//        XCTAssertFalse(sut.socket.isConnected)
-//        networkMonitor.onSatisfied?()
-//        XCTAssertTrue(sut.socket.isConnected)
-//    }
-//
+    func testHandleDisconnect() {
+        webSocketSession.connect()
+        XCTAssertTrue(webSocketSession.isConnected)
+        try! sut.handleDisconnect(closeCode: .normalClosure)
+        XCTAssertFalse(webSocketSession.isConnected)
+    }
+    
+    func testHandleConnect() {
+        XCTAssertFalse(webSocketSession.isConnected)
+        try! sut.handleConnect()
+        XCTAssertTrue(webSocketSession.isConnected)
+    }
 }
