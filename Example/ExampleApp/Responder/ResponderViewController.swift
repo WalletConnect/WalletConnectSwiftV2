@@ -151,8 +151,8 @@ extension ResponderViewController: SessionViewControllerDelegate {
         print("[RESPONDER] Approving session...")
         let proposal = currentProposal!
         currentProposal = nil
-        let accounts = proposal.permissions.blockchains.map {$0+":\(account)"}
-        client.approve(proposal: proposal, accounts: Set(accounts))
+        let accounts = Set(proposal.permissions.blockchains.compactMap { Account($0+":\(account)") })
+        client.approve(proposal: proposal, accounts: accounts)
     }
     
     func didRejectSession() {
@@ -197,7 +197,7 @@ extension ResponderViewController: WalletConnectClientDelegate {
 
     }
 
-    func didUpdate(sessionTopic: String, accounts: Set<String>) {
+    func didUpdate(sessionTopic: String, accounts: Set<Account>) {
 
     }
     

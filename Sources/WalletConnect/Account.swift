@@ -10,7 +10,7 @@
  [CAIP-2]:https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-2.md
  [CAIP-10]:https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-10.md
  */
-public struct Account: Equatable {
+public struct Account: Equatable, Hashable {
     
     /// A blockchain namespace. Usually describes an ecosystem or standard.
     public var namespace: String
