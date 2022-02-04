@@ -13,6 +13,7 @@ class BackgroundTaskRegistrar: BackgroundTaskRegistering {
 
     func register(name: String, completion: @escaping () -> ()) {
 #if os(iOS)
+        backgroundTaskID = .invalid
         backgroundTaskID = UIApplication.shared.beginBackgroundTask (withName: name) { [unowned self] in
             UIApplication.shared.endBackgroundTask(backgroundTaskID)
             backgroundTaskID = .invalid
