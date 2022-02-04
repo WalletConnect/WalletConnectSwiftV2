@@ -15,12 +15,4 @@ class ManualSocketConnectionHandler: SocketConnectionHandler {
     func handleDisconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
         socket.disconnect(with: closeCode)
     }
-    
-    func handleNetworkUnsatisfied() {
-        return
-    }
-    
-    func handleNetworkSatisfied() {
-        return
-    }
 }

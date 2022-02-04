@@ -12,7 +12,7 @@ final class DispatcherTests: XCTestCase {
         webSocketSession = WebSocketSessionMock()
         networkMonitor = NetworkMonitoringMock()
         socketConnectionObserver = SocketConnectionObserverMock()
-        sut = Dispatcher(networkMonitor: networkMonitor, socket: webSocketSession, socketConnectionObserver: socketConnectionObserver, socketConnectionHandler: ManualSocketConnectionHandler(socket: webSocketSession))
+        sut = Dispatcher(socket: webSocketSession, socketConnectionObserver: socketConnectionObserver, socketConnectionHandler: ManualSocketConnectionHandler(socket: webSocketSession))
     }
 
     func testSendWhileConnected() {

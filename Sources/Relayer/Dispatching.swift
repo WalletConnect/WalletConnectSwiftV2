@@ -15,23 +15,19 @@ final class Dispatcher: NSObject, Dispatching {
     var onDisconnect: (() -> ())?
     var onMessage: ((String) -> ())?
     private var textFramesQueue = Queue<String>()
-    private var networkMonitor: NetworkMonitoring
     var socket: WebSocketSessionProtocol
     var socketConnectionObserver: SocketConnectionObserving
     var socketConnectionHandler: SocketConnectionHandler
     
-    init(networkMonitor: NetworkMonitoring = NetworkMonitor(),
-         socket: WebSocketSessionProtocol,
+    init(socket: WebSocketSessionProtocol,
          socketConnectionObserver: SocketConnectionObserving,
          socketConnectionHandler: SocketConnectionHandler) {
-        self.networkMonitor = networkMonitor
         self.socket = socket
         self.socketConnectionObserver = socketConnectionObserver
         self.socketConnectionHandler = socketConnectionHandler
         super.init()
         setUpWebSocketSession()
         setUpSocketConnectionObserving()
-        setUpNetworkMonitoring()
     }
 
     func send(_ string: String, completion: @escaping (Error?) -> Void) {
@@ -68,16 +64,6 @@ final class Dispatcher: NSObject, Dispatching {
         socketConnectionObserver.onDisconnect = { [weak self] in
             self?.onDisconnect?()
         }
-    }
-    
-    private func setUpNetworkMonitoring() {
-        networkMonitor.onSatisfied = { [weak self] in
-            self?.socketConnectionHandler.handleNetworkSatisfied()
-        }
-        networkMonitor.onUnsatisfied = { [weak self] in
-            self?.socketConnectionHandler.handleNetworkUnsatisfied()
-        }
-        networkMonitor.startMonitoring()
     }
     
     private func dequeuePendingTextFrames() {

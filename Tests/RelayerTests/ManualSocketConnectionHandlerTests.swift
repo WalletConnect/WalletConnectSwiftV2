@@ -5,7 +5,7 @@ import XCTest
 @testable import Relayer
 
 final class ManualSocketConnectionHandlerTests: XCTestCase {
-    var sut: Dispatcher!
+    var sut: ManualSocketConnectionHandler!
     var webSocketSession: WebSocketSessionMock!
     var networkMonitor: NetworkMonitoringMock!
     var socketConnectionObserver: SocketConnectionObserverMock!
@@ -13,7 +13,7 @@ final class ManualSocketConnectionHandlerTests: XCTestCase {
         webSocketSession = WebSocketSessionMock()
         networkMonitor = NetworkMonitoringMock()
         socketConnectionObserver = SocketConnectionObserverMock()
-        sut = Dispatcher(networkMonitor: networkMonitor, socket: webSocketSession, socketConnectionObserver: socketConnectionObserver, socketConnectionHandler: ManualSocketConnectionHandler(socket: webSocketSession))
+//        sut = Dispatcher(networkMonitor: networkMonitor, socket: webSocketSession, socketConnectionObserver: socketConnectionObserver, socketConnectionHandler: ManualSocketConnectionHandler(socket: webSocketSession))
     }
     
 //    func testDisconnectOnConnectionLoss() {
