@@ -167,51 +167,41 @@ final class PairingEngine {
 
     private func setUpWCRequestHandling() {
         wcSubscriber.onReceivePayload = { [unowned self] subscriptionPayload in
-            let requestId = subscriptionPayload.wcRequest.id
-            let topic = subscriptionPayload.topic
             switch subscriptionPayload.wcRequest.params {
             case .pairingApprove(let approveParams):
-                handlePairingApprove(approveParams: approveParams, pendingPairingTopic: topic, requestId: requestId)
+                handlePairingApprove(payload: subscriptionPayload, approveParams: approveParams)
             case .pairingUpdate(let updateParams):
-                handlePairingUpdate(params: updateParams, topic: topic, requestId: requestId)
+                handlePairingUpdate(subscriptionPayload, updateParams: updateParams)
             case .pairingPayload(let pairingPayload):
                 self.handlePairingPayload(subscriptionPayload, payloadParams: pairingPayload)
             case .pairingPing(_):
-                self.handlePairingPing(topic: topic, requestId: requestId)
+                self.handlePairingPing(subscriptionPayload)
             default:
                 logger.warn("Warning: Pairing Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
             }
         }
     }
     
-    private func handlePairingUpdate(params:  PairingType.UpdateParams,topic: String, requestId: Int64) {
+    private func handlePairingUpdate(_ payload: WCRequestSubscriptionPayload, updateParams: PairingType.UpdateParams) {
+        let topic = payload.topic
         guard var pairing = try? sequencesStore.getSequence(forTopic: topic) else {
-            logger.debug("Could not find pairing for topic \(topic)")
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .pairing, topic: topic))
             return
         }
         guard pairing.peerIsController else {
-            let error = WalletConnectError.unauthrorized(.unauthorizedUpdateRequest)
-            logger.error(error)
-            respond(error: error, requestId: requestId, topic: topic)
+            relayer.respondError(for: payload, reason: .unauthorizedUpdateRequest(context: .pairing))
             return
         }
-        let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
-        relayer.respond(topic: topic, response: JsonRpcResult.response(response)) { [unowned self] error in
-            if let error = error {
-                logger.error(error)
-            } else {
-                pairing.settled?.state = params.state
-                sequencesStore.setSequence(pairing)
-                onPairingUpdate?(topic, params.state.metadata)
-            }
-        }
+        
+        pairing.settled?.state = updateParams.state
+        sequencesStore.setSequence(pairing)
+        
+        relayer.respondSuccess(for: payload)
+        onPairingUpdate?(topic, updateParams.state.metadata)
     }
     
-    private func handlePairingPing(topic: String, requestId: Int64) {
-        let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
-        relayer.respond(topic: topic, response: JsonRpcResult.response(response)) { error in
-            //todo
-        }
+    private func handlePairingPing(_ payload: WCRequestSubscriptionPayload) {
+        relayer.respondSuccess(for: payload)
     }
 
     private func handlePairingPayload(_ payload: WCRequestSubscriptionPayload, payloadParams: PairingType.PayloadParams) {
@@ -239,9 +229,10 @@ final class PairingEngine {
         onSessionProposal?(sessionProposal)
     }
     
-    private func handlePairingApprove(approveParams: PairingType.ApprovalParams, pendingPairingTopic: String, requestId: Int64) {
-        logger.debug("Responder Client approved pairing on topic: \(pendingPairingTopic)")
+    private func handlePairingApprove(payload: WCRequestSubscriptionPayload, approveParams: PairingType.ApprovalParams) {
+        let pendingPairingTopic = payload.topic
         guard let pairing = try? sequencesStore.getSequence(forTopic: pendingPairingTopic), let pendingPairing = pairing.pending else {
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .pairing, topic: pendingPairingTopic))
             return
         }
         
@@ -263,14 +254,7 @@ final class PairingEngine {
         }
         sessionPermissions[pendingPairingTopic] = nil
         
-        // TODO: Move JSON-RPC responding to networking layer
-        let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
-        relayer.respond(topic: proposal.topic, response: JsonRpcResult.response(response)) { [weak self] error in
-            if let error = error {
-                self?.logger.error("Could not respond with error: \(error)")
-            }
-        }
-        
+        relayer.respondSuccess(for: payload)
         onPairingApproved?(Pairing(topic: settledPairing.topic, peer: nil), permissions, settledPairing.relay)
     }
     
