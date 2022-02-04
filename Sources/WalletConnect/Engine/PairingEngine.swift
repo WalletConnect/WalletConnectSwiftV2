@@ -175,7 +175,7 @@ final class PairingEngine {
             case .pairingUpdate(let updateParams):
                 handlePairingUpdate(params: updateParams, topic: topic, requestId: requestId)
             case .pairingPayload(let pairingPayload):
-                self.handlePairingPayload(pairingPayload, for: topic, requestId: requestId)
+                self.handlePairingPayload(subscriptionPayload, payloadParams: pairingPayload)
             case .pairingPing(_):
                 self.handlePairingPing(topic: topic, requestId: requestId)
             default:
@@ -214,24 +214,29 @@ final class PairingEngine {
         }
     }
 
-    private func handlePairingPayload(_ payload: PairingType.PayloadParams, for topic: String, requestId: Int64) {
-        logger.debug("Will handle pairing payload")
-        guard sequencesStore.hasSequence(forTopic: topic) else {
-            logger.error("Pairing for the topic: \(topic) does not exist")
+    private func handlePairingPayload(_ payload: WCRequestSubscriptionPayload, payloadParams: PairingType.PayloadParams) {
+        guard sequencesStore.hasSequence(forTopic: payload.topic) else {
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .pairing, topic: payload.topic))
             return
         }
-        guard payload.request.method == PairingType.PayloadMethods.sessionPropose else {
-            logger.error("Forbidden WCPairingPayload method")
+        guard payloadParams.request.method == PairingType.PayloadMethods.sessionPropose else {
+            relayer.respondError(for: payload, reason: .unauthorizedRPCMethod(payloadParams.request.method.rawValue))
             return
         }
-        let sessionProposal = payload.request.params
-        if let pairingAgreementSecret = try? crypto.getAgreementSecret(for: sessionProposal.signal.params.topic) {
-            try? crypto.setAgreementSecret(pairingAgreementSecret, topic: sessionProposal.topic)
+        let sessionProposal = payloadParams.request.params
+        do {
+            if let pairingAgreementSecret = try crypto.getAgreementSecret(for: sessionProposal.signal.params.topic) {
+                try crypto.setAgreementSecret(pairingAgreementSecret, topic: sessionProposal.topic)
+            } else {
+                relayer.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
+                return
+            }
+        } catch {
+            relayer.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
+            return
         }
-        let response = JSONRPCResponse<AnyCodable>(id: requestId, result: AnyCodable(true))
-        relayer.respond(topic: topic, response: JsonRpcResult.response(response)) { [weak self] error in
-            self?.onSessionProposal?(sessionProposal)
-        }
+        relayer.respondSuccess(for: payload)
+        onSessionProposal?(sessionProposal)
     }
     
     private func handlePairingApprove(approveParams: PairingType.ApprovalParams, pendingPairingTopic: String, requestId: Int64) {
