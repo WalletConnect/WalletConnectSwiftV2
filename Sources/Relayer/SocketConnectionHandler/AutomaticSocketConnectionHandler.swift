@@ -9,7 +9,7 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
         case manualSocketConnectionForbidden
         case manualSocketDisconnectionForbidden
     }
-    var appStateObserver: AppStateObserving
+    private var appStateObserver: AppStateObserving
     let socket: WebSocketSessionProtocol
     private var networkMonitor: NetworkMonitoring
 #if os(iOS)
