@@ -12,35 +12,21 @@ final class DispatcherTests: XCTestCase {
         webSocketSession = WebSocketSessionMock()
         networkMonitor = NetworkMonitoringMock()
         socketConnectionObserver = SocketConnectionObserverMock()
-        let url = URL(string: "ws://staging.walletconnect.org")!
-        sut = Dispatcher(url: url, networkMonitor: networkMonitor, socket: webSocketSession, socketConnectionObserver: socketConnectionObserver)
+        sut = Dispatcher(networkMonitor: networkMonitor, socket: webSocketSession, socketConnectionObserver: socketConnectionObserver, socketConnectionHandler: ManualSocketConnectionHandler(socket: webSocketSession))
     }
-    
-    func testDisconnectOnConnectionLoss() {
-        XCTAssertTrue(sut.socket.isConnected)
-        networkMonitor.onUnsatisfied?()
-        XCTAssertFalse(sut.socket.isConnected)
-    }
-    
-    func testConnectsOnConnectionSatisfied() {
-        sut.disconnect(closeCode: .normalClosure)
-        XCTAssertFalse(sut.socket.isConnected)
-        networkMonitor.onSatisfied?()
-        XCTAssertTrue(sut.socket.isConnected)
-    }
-    
+
     func testSendWhileConnected() {
-        sut.connect()
+        try! sut.connect()
         sut.send("1"){_ in}
         XCTAssertEqual(webSocketSession.sendCallCount, 1)
     }
         
     func testTextFramesSentAfterReconnectingSocket() {
-        sut.disconnect(closeCode: .normalClosure)
+        try! sut.disconnect(closeCode: .normalClosure)
         sut.send("1"){_ in}
         sut.send("2"){_ in}
         XCTAssertEqual(webSocketSession.sendCallCount, 0)
-        sut.connect()
+        try! sut.connect()
         socketConnectionObserver.onConnect?()
         XCTAssertEqual(webSocketSession.sendCallCount, 2)
     }

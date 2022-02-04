@@ -15,13 +15,14 @@ final class RelayerEndToEndTests: XCTestCase {
         let logger = ConsoleLogger()
         let socketConnectionObserver = SocketConnectionObserver()
         let urlSession = URLSession(configuration: .default, delegate: socketConnectionObserver, delegateQueue: OperationQueue())
-        let socket = WebSocketSession(session: urlSession)
-        let dispatcher = Dispatcher(url: url, socket: socket, socketConnectionObserver: socketConnectionObserver)
-        return WakuNetworkRelay(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), uniqueIdentifier: "")
+        let socket = WebSocketSession(session: urlSession, url: url)
+        let dispatcher = Dispatcher(socket: socket, socketConnectionObserver: socketConnectionObserver, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket))
+        return WakuNetworkRelay(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), uniqueIdentifier: "", socketConnectionType: .manual)
     }
     
     func testSubscribe() {
         let relayer = makeRelayer()
+        try! relayer.connect()
         let subscribeExpectation = expectation(description: "subscribe call succeeds")
         relayer.subscribe(topic: "qwerty") { error in
             XCTAssertNil(error)
@@ -33,6 +34,8 @@ final class RelayerEndToEndTests: XCTestCase {
     func testEndToEndPayload() {
         let relayA = makeRelayer()
         let relayB = makeRelayer()
+        try! relayA.connect()
+        try! relayB.connect()
 
         let randomTopic = String.randomTopic()
         let payloadA = "A"

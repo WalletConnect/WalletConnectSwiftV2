@@ -23,5 +23,4 @@ class ManualSocketConnectionHandler: SocketConnectionHandler {
     func handleNetworkSatisfied() {
         return
     }
-
 }

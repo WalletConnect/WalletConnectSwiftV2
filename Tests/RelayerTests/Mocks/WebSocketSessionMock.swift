@@ -10,7 +10,7 @@ class WebSocketSessionMock: WebSocketSessionProtocol {
     var sendCallCount: Int = 0
     var isConnected: Bool = false
     
-    func connect(on url: URL) {
+    func connect() {
         isConnected = true
         onConnect?()
     }

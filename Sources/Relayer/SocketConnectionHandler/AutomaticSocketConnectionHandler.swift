@@ -66,3 +66,11 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
         }
     }
 }
+
+protocol BackgroundTaskRegistering {
+    func register(name: String, completion: ()->())
+}
+
+class BackgroundTaskRegistrar {
+    
+}
