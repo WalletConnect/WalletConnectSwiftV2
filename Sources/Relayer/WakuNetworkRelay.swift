@@ -44,7 +44,8 @@ public final class WakuNetworkRelay {
     public convenience init(logger: ConsoleLogging,
                             url: URL,
                             keyValueStorage: KeyValueStorage,
-                            uniqueIdentifier: String, socketConnectionType: SocketConnectionType) {
+                            uniqueIdentifier: String,
+                            socketConnectionType: SocketConnectionType = .automatic) {
         let socketConnectionObserver = SocketConnectionObserver()
         let urlSession = URLSession(configuration: .default, delegate: socketConnectionObserver, delegateQueue: OperationQueue())
         let socket = WebSocketSession(session: urlSession, url: url)
