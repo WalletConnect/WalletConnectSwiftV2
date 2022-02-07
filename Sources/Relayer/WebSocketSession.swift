@@ -72,7 +72,9 @@ final class WebSocketSession: NSObject, WebSocketSessionProtocol, WebSocketConne
         switch message {
         case .string(let text):
             onMessageReceived?(text)
-        default:
+        case .data(let data):
+            print("Transport: Unexpected type of message received: \(data)")
+        @unknown default:
             print("Transport: Unexpected type of message received")
         }
     }
