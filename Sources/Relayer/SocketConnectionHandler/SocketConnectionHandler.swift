@@ -2,7 +2,7 @@
 import Foundation
 
 protocol SocketConnectionHandler {
-    var socket: WebSocketSessionProtocol {get}
+    var socket: WebSocketConnecting {get}
     func handleConnect() throws
     func handleDisconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws
 }

@@ -2,9 +2,9 @@
 import Foundation
 
 class ManualSocketConnectionHandler: SocketConnectionHandler {
-    var socket: WebSocketSessionProtocol
+    var socket: WebSocketConnecting
     
-    init(socket: WebSocketSessionProtocol) {
+    init(socket: WebSocketConnecting) {
         self.socket = socket
     }
 

@@ -10,12 +10,12 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
         case manualSocketDisconnectionForbidden
     }
     private var appStateObserver: AppStateObserving
-    let socket: WebSocketSessionProtocol
+    let socket: WebSocketConnecting
     private var networkMonitor: NetworkMonitoring
     private let backgroundTaskRegistrar: BackgroundTaskRegistering
 
     init(networkMonitor: NetworkMonitoring = NetworkMonitor(),
-         socket: WebSocketSessionProtocol,
+         socket: WebSocketConnecting,
          appStateObserver: AppStateObserving = AppStateObserver(),
          backgroundTaskRegistrar: BackgroundTaskRegistering = BackgroundTaskRegistrar()) {
         self.appStateObserver = appStateObserver

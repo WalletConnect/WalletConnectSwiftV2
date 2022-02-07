@@ -2,7 +2,7 @@
 import Foundation
 @testable import Relayer
 
-class WebSocketSessionMock: WebSocketSessionProtocol {
+class WebSocketSessionMock: WebSocketSessionProtocol, WebSocketConnecting {
     var onConnect: (() -> ())?
     var onDisconnect: (() -> ())?
     var onMessageReceived: ((String) -> ())?

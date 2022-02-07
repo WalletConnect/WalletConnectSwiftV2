@@ -4,13 +4,16 @@ protocol WebSocketSessionProtocol {
     var onMessageReceived: ((String) -> ())? {get set}
     var onMessageError: ((Error) -> ())? {get set}
     var isConnected: Bool {get}
-    func connect()
-    func disconnect(with closeCode: URLSessionWebSocketTask.CloseCode)
     func send(_ message: String, completionHandler: @escaping ((Error?) -> Void))
 }
 
+protocol WebSocketConnecting {
+    var isConnected: Bool {get}
+    func connect()
+    func disconnect(with closeCode: URLSessionWebSocketTask.CloseCode)
+}
 
-final class WebSocketSession: NSObject, WebSocketSessionProtocol {
+final class WebSocketSession: NSObject, WebSocketSessionProtocol, WebSocketConnecting {
     var onMessageReceived: ((String) -> ())?
     var onMessageError: ((Error) -> ())?
     let url: URL
