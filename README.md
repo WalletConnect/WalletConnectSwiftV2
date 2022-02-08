@@ -24,10 +24,8 @@ You usually want to have a single instance of a client in you app.
                                    icons: [String]?)
         let client = WalletConnectClient(metadata: AppMetadata,
                             projectId: String,
-                            isController: Bool,
                             relayHost: String)
 ```
-The `controller` client will always be the "wallet" which is exposing blockchain accounts to a "dapp" and therefore is also in charge of signing.
 
 After instantiation of a client set its delegate.
 #### Pair Clients
