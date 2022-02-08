@@ -4,7 +4,7 @@ import Combine
 import WalletConnectUtils
 
 
-public final class WakuNetworkRelayer {
+public final class Relayer {
     enum RelyerError: Error {
         case subscriptionIdNotFound
     }

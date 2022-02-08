@@ -55,7 +55,7 @@ public final class WalletConnectClient {
 //        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
         self.crypto = Crypto(keychain: keychain)
         self.secureStorage = SecureStorage(keychain: keychain)
-        let relayer = WakuNetworkRelayer(relayHost: relayHost, projectId: projectId, keyValueStorage: keyValueStorage, uniqueIdentifier: clientName ?? "", logger: logger)
+        let relayer = Relayer(relayHost: relayHost, projectId: projectId, keyValueStorage: keyValueStorage, uniqueIdentifier: clientName ?? "", logger: logger)
         let serializer = JSONRPCSerializer(crypto: crypto)
         self.history = JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory(clientName: clientName ?? "_")))
         self.relay = WalletConnectRelay(networkRelayer: relayer, jsonRpcSerializer: serializer, logger: logger, jsonRpcHistory: history)
@@ -77,11 +77,11 @@ public final class WalletConnectClient {
     ///   - clientName: if your app requires more than one client you are required to call them with different names to distinguish logs source and prefix storage keys.
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
-    public convenience init(metadata: AppMetadata, isController: Bool, relayer: WakuNetworkRelayer, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
+    public convenience init(metadata: AppMetadata, isController: Bool, relayer: Relayer, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
         self.init(metadata: metadata, isController: isController, relayer: relayer, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStorage: keyValueStorage, clientName: clientName)
     }
     
-    init(metadata: AppMetadata, isController: Bool, relayer: WakuNetworkRelayer, logger: ConsoleLogging, keychain: KeychainStorage, keyValueStorage: KeyValueStorage, clientName: String? = nil) {
+    init(metadata: AppMetadata, isController: Bool, relayer: Relayer, logger: ConsoleLogging, keychain: KeychainStorage, keyValueStorage: KeyValueStorage, clientName: String? = nil) {
         self.metadata = metadata
         self.isController = isController
         self.logger = logger

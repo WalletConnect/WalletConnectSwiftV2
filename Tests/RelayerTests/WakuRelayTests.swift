@@ -6,13 +6,13 @@ import XCTest
 @testable import Relayer
 
 class WakuRelayTests: XCTestCase {
-    var wakuRelay: WakuNetworkRelayer!
+    var wakuRelay: Relayer!
     var dispatcher: DispatcherMock!
 
     override func setUp() {
         dispatcher = DispatcherMock()
         let logger = ConsoleLogger()
-        wakuRelay = WakuNetworkRelayer(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), uniqueIdentifier: "")
+        wakuRelay = Relayer(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), uniqueIdentifier: "")
     }
 
     override func tearDown() {
