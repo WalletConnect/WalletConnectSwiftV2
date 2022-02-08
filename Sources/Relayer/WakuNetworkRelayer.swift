@@ -4,7 +4,7 @@ import Combine
 import WalletConnectUtils
 
 
-public final class WakuNetworkRelay {
+public final class WakuNetworkRelayer {
     enum RelyerError: Error {
         case subscriptionIdNotFound
     }
@@ -43,8 +43,8 @@ public final class WakuNetworkRelay {
     
     public convenience init(logger: ConsoleLogging,
                             url: URL,
-                            keyValueStorage: KeyValueStorage,
-                            uniqueIdentifier: String,
+                            keyValueStorage: KeyValueStorage = UserDefaults.standard,
+                            uniqueIdentifier: String? = nil,
                             socketConnectionType: SocketConnectionType = .automatic) {
         let socketConnectionObserver = SocketConnectionObserver()
         let urlSession = URLSession(configuration: .default, delegate: socketConnectionObserver, delegateQueue: OperationQueue())
@@ -60,7 +60,7 @@ public final class WakuNetworkRelay {
         self.init(dispatcher: dispatcher,
                   logger: logger,
                   keyValueStorage: keyValueStorage,
-                  uniqueIdentifier: uniqueIdentifier)
+                  uniqueIdentifier: uniqueIdentifier ?? "")
     }
     
     public func connect() throws {

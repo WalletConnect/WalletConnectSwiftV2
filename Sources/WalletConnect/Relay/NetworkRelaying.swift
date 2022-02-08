@@ -2,7 +2,7 @@
 import Foundation
 import Relayer
 
-extension WakuNetworkRelay: NetworkRelaying {}
+extension WakuNetworkRelayer: NetworkRelaying {}
 
 protocol NetworkRelaying {
     var onConnect: (()->())? {get set}

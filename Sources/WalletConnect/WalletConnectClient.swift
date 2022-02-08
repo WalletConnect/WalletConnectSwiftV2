@@ -26,7 +26,6 @@ public final class WalletConnectClient {
     private let pairingEngine: PairingEngine
     private let sessionEngine: SessionEngine
     private let relay: WalletConnectRelaying
-    private let wakuRelay: NetworkRelaying
     private let crypto: Crypto
     private let secureStorage: SecureStorage
     private let pairingQueue = DispatchQueue(label: "com.walletconnect.sdk.client.pairing", qos: .userInitiated)
@@ -56,11 +55,33 @@ public final class WalletConnectClient {
 //        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
         self.crypto = Crypto(keychain: keychain)
         self.secureStorage = SecureStorage(keychain: keychain)
-        let relayUrl = WakuNetworkRelay.makeRelayUrl(host: relayHost, projectId: projectId)
-        self.wakuRelay = WakuNetworkRelay(logger: logger, url: relayUrl, keyValueStorage: keyValueStorage, uniqueIdentifier: clientName ?? "")
+        let relayUrl = WakuNetworkRelayer.makeRelayUrl(host: relayHost, projectId: projectId)
+        let relayer = WakuNetworkRelayer(logger: logger, url: relayUrl, keyValueStorage: keyValueStorage, uniqueIdentifier: clientName ?? "")
         let serializer = JSONRPCSerializer(crypto: crypto)
         self.history = JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory(clientName: clientName ?? "_")))
-        self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerializer: serializer, logger: logger, jsonRpcHistory: history)
+        self.relay = WalletConnectRelay(networkRelayer: relayer, jsonRpcSerializer: serializer, logger: logger, jsonRpcHistory: history)
+        let pairingSequencesStore = PairingStorage(storage: SequenceStore<PairingSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings(clientName: clientName ?? "_")))
+        let sessionSequencesStore = SessionStorage(storage: SequenceStore<SessionSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions(clientName: clientName ?? "_")))
+        self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
+
+        self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
+        setUpEnginesCallbacks()
+    }
+    
+    public convenience init(metadata: AppMetadata, projectId: String, isController: Bool, relayer: WakuNetworkRelayer, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
+        self.init(metadata: metadata, projectId: projectId, isController: isController, relayer: relayer, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStorage: keyValueStorage, clientName: clientName)
+    }
+    
+    init(metadata: AppMetadata, projectId: String, isController: Bool, relayer: WakuNetworkRelayer, logger: ConsoleLogging, keychain: KeychainStorage, keyValueStorage: KeyValueStorage, clientName: String? = nil) {
+        self.metadata = metadata
+        self.isController = isController
+        self.logger = logger
+//        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
+        self.crypto = Crypto(keychain: keychain)
+        self.secureStorage = SecureStorage(keychain: keychain)
+        let serializer = JSONRPCSerializer(crypto: crypto)
+        self.history = JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory(clientName: clientName ?? "_")))
+        self.relay = WalletConnectRelay(networkRelayer: relayer, jsonRpcSerializer: serializer, logger: logger, jsonRpcHistory: history)
         let pairingSequencesStore = PairingStorage(storage: SequenceStore<PairingSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings(clientName: clientName ?? "_")))
         let sessionSequencesStore = SessionStorage(storage: SequenceStore<SessionSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions(clientName: clientName ?? "_")))
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)

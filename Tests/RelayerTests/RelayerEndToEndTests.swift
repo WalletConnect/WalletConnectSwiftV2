@@ -11,13 +11,13 @@ final class RelayerEndToEndTests: XCTestCase {
     let url = URL(string: "wss://staging.walletconnect.org")!
     private var publishers = [AnyCancellable]()
     
-    func makeRelayer() -> WakuNetworkRelay {
+    func makeRelayer(_ uniqueIdentifier: String = "") -> WakuNetworkRelayer {
         let logger = ConsoleLogger()
         let socketConnectionObserver = SocketConnectionObserver()
         let urlSession = URLSession(configuration: .default, delegate: socketConnectionObserver, delegateQueue: OperationQueue())
         let socket = WebSocketSession(session: urlSession, url: url)
         let dispatcher = Dispatcher(socket: socket, socketConnectionObserver: socketConnectionObserver, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket))
-        return WakuNetworkRelay(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), uniqueIdentifier: "")
+        return WakuNetworkRelayer(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), uniqueIdentifier: uniqueIdentifier)
     }
     
     func testSubscribe() {
@@ -32,8 +32,8 @@ final class RelayerEndToEndTests: XCTestCase {
     }
     
     func testEndToEndPayload() {
-        let relayA = makeRelayer()
-        let relayB = makeRelayer()
+        let relayA = makeRelayer("A")
+        let relayB = makeRelayer("B")
         try! relayA.connect()
         try! relayB.connect()
 
