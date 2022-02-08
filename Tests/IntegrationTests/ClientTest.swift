@@ -30,7 +30,6 @@ final class ClientTests: XCTestCase {
         let client = WalletConnectClient(
             metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil),
             projectId: projectId,
-            isController: isController,
             relayHost: relayHost,
             logger: logger,
             keychain: KeychainStorage(keychainService: KeychainServiceFake()),
