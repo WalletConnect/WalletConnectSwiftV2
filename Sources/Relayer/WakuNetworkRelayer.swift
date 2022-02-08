@@ -28,7 +28,7 @@ public final class WakuNetworkRelayer {
         requestAcknowledgePublisherSubject.eraseToAnyPublisher()
     }
     private let requestAcknowledgePublisherSubject = PassthroughSubject<JSONRPCResponse<Bool>, Never>()
-    private let logger: ConsoleLogging
+    let logger: ConsoleLogging
     
     init(dispatcher: Dispatching,
          logger: ConsoleLogging,
@@ -41,13 +41,23 @@ public final class WakuNetworkRelayer {
         setUpBindings()
     }
     
-    public convenience init(logger: ConsoleLogging,
-                            url: URL,
+    /// Instantiates Relayer
+    /// - Parameters:
+    ///   - relayHost: proxy server host that your application will use to connect to Waku Network. If you register your project at `www.walletconnect.com` you can use `relay.walletconnect.com`
+    ///   - projectId: an optional parameter used to access the public WalletConnect infrastructure. Go to `www.walletconnect.com` for info.
+    ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults
+    ///   - uniqueIdentifier: if your app requires more than one relayer instances you are required to call identify them
+    ///   - socketConnectionType: socket connection type
+    ///   - logger: logger instance
+    public convenience init(relayHost: String,
+                            projectId: String,
                             keyValueStorage: KeyValueStorage = UserDefaults.standard,
                             uniqueIdentifier: String? = nil,
-                            socketConnectionType: SocketConnectionType = .automatic) {
+                            socketConnectionType: SocketConnectionType = .automatic,
+                            logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off)) {
         let socketConnectionObserver = SocketConnectionObserver()
         let urlSession = URLSession(configuration: .default, delegate: socketConnectionObserver, delegateQueue: OperationQueue())
+        let url = Self.makeRelayUrl(host: relayHost, projectId: projectId)
         let socket = WebSocketSession(session: urlSession, url: url)
         var socketConnectionHandler: SocketConnectionHandler
         switch socketConnectionType {
@@ -200,7 +210,7 @@ public final class WakuNetworkRelayer {
         }
     }
     
-    static public func makeRelayUrl(host: String, projectId: String) -> URL {
+    static private func makeRelayUrl(host: String, projectId: String) -> URL {
         var components = URLComponents()
         components.scheme = "wss"
         components.host = host
