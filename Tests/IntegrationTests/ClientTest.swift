@@ -115,7 +115,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.reject(proposal: proposal, reason: .disapprovedChains)
         }
         proposer.onSessionRejected = { _, reason in
-            XCTAssertEqual(reason.code, WalletConnectError.internal(.notApproved).code)
+            XCTAssertEqual(reason.code, 5000)
             sessionRejectExpectation.fulfill()
         }
         waitForExpectations(timeout: defaultTimeout, handler: nil)
