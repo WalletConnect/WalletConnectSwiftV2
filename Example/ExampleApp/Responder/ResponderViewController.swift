@@ -15,7 +15,6 @@ final class ResponderViewController: UIViewController {
         return WalletConnectClient(
             metadata: metadata,
             projectId: "52af113ee0c1e1a20f4995730196c13e",
-            isController: true,
             relayHost: "relay.dev.walletconnect.com"
         )
     }()

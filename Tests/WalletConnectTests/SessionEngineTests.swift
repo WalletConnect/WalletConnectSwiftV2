@@ -14,7 +14,6 @@ final class SessionEngineTests: XCTestCase {
     
     var topicGenerator: TopicGenerator!
     
-    var isController: Bool!
     var metadata: AppMetadata!
     
     override func setUp() {
@@ -34,23 +33,21 @@ final class SessionEngineTests: XCTestCase {
         engine = nil
     }
     
-    func setupEngine(isController: Bool) {
+    func setupEngine() {
         metadata = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
-        self.isController = isController
         let logger = ConsoleLoggerMock()
         engine = SessionEngine(
             relay: relayMock,
             crypto: cryptoMock,
             subscriber: subscriberMock,
             sequencesStore: storageMock,
-            isController: isController,
             metadata: metadata,
             logger: logger,
             topicGenerator: topicGenerator.getTopic)
     }
     
     func testPropose() {
-        setupEngine(isController: false)
+        setupEngine()
         
         let pairing = Pairing.stub()
         
@@ -77,7 +74,7 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testProposeResponseFailure() {
-        setupEngine(isController: false)
+        setupEngine()
         let pairing = Pairing.stub()
         
         let topicB = pairing.topic
@@ -108,13 +105,13 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testApprove() {
-        setupEngine(isController: true)
+        setupEngine()
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let topicB = String.generateTopic()!
         let topicC = String.generateTopic()!
         let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
         
-        let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: isController, metadata: metadata)
+        let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: true, metadata: metadata)
         let proposal = SessionProposal(
             topic: topicC,
             relay: RelayProtocolOptions(protocol: "", params: nil),
@@ -139,7 +136,7 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testApprovalAcknowledgementSuccess() {
-        setupEngine(isController: true)
+        setupEngine()
         
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let topicB = String.generateTopic()!
@@ -149,7 +146,7 @@ final class SessionEngineTests: XCTestCase {
         let agreementKeys = AgreementSecret.stub()
         cryptoMock.setAgreementSecret(agreementKeys, topic: topicC)
         
-        let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: isController, metadata: metadata)
+        let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: true, metadata: metadata)
         let proposal = SessionProposal(
             topic: topicC,
             relay: RelayProtocolOptions(protocol: "", params: nil),
@@ -178,7 +175,7 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testApprovalAcknowledgementFailure() {
-        setupEngine(isController: true)
+        setupEngine()
         
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let selfPubKey = cryptoMock.privateKeyStub.publicKey.hexRepresentation
@@ -189,7 +186,7 @@ final class SessionEngineTests: XCTestCase {
         let agreementKeys = AgreementSecret.stub()
         cryptoMock.setAgreementSecret(agreementKeys, topic: topicC)
         
-        let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: isController, metadata: metadata)
+        let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: true, metadata: metadata)
         let proposal = SessionProposal(
             topic: topicC,
             relay: RelayProtocolOptions(protocol: "", params: nil),
@@ -223,7 +220,7 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testReceiveApprovalResponse() {
-        setupEngine(isController: false)
+        setupEngine()
 
         var approvedSession: Session?
 
@@ -265,34 +262,34 @@ final class SessionEngineTests: XCTestCase {
     // MARK: - Update call tests
     
     func testUpdateSuccess() throws {
-        setupEngine(isController: true)
-        let session = SessionSequence.stubSettled()
+        setupEngine()
+        let session = SessionSequence.stubSettled(isSelfController: true)
         storageMock.setSequence(session)
         try engine.update(topic: session.topic, accounts: ["std:0:0"])
         XCTAssertTrue(relayMock.didCallRequest)
     }
     
     func testUpdateErrorInvalidAccount() {
-        setupEngine(isController: true)
-        let session = SessionSequence.stubSettled()
+        setupEngine()
+        let session = SessionSequence.stubSettled(isSelfController: true)
         storageMock.setSequence(session)
         XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: ["err"]))
     }
     
     func testUpdateErrorIfNonController() {
-        setupEngine(isController: false)
-        let session = SessionSequence.stubSettled()
+        setupEngine()
+        let session = SessionSequence.stubSettled(isSelfController: false)
         storageMock.setSequence(session)
         XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: ["std:0:0"]), "Update must fail if called by a non-controller.")
     }
     
     func testUpdateErrorSessionNotFound() {
-        setupEngine(isController: true)
+        setupEngine()
         XCTAssertThrowsError(try engine.update(topic: "", accounts: ["std:0:0"]), "Update must fail if there is no session matching the target topic.")
     }
     
     func testUpdateErrorSessionNotSettled() {
-        setupEngine(isController: true)
+        setupEngine()
         let session = SessionSequence.stubPreSettled()
         storageMock.setSequence(session)
         XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: ["std:0:0"]), "Update must fail if session is not on settled state.")
@@ -301,16 +298,16 @@ final class SessionEngineTests: XCTestCase {
     // MARK: - Update peer response tests
     
     func testUpdatePeerSuccess() {
-        setupEngine(isController: false)
-        let session = SessionSequence.stubSettled(isPeerController: true)
+        setupEngine()
+        let session = SessionSequence.stubSettled(isSelfController: false)
         storageMock.setSequence(session)
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic))
         XCTAssertTrue(relayMock.didRespondSuccess)
     }
     
     func testUpdatePeerErrorAccountInvalid() {
-        setupEngine(isController: false)
-        let session = SessionSequence.stubSettled(isPeerController: true)
+        setupEngine()
+        let session = SessionSequence.stubSettled(isSelfController: false)
         storageMock.setSequence(session)
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic, accounts: ["0"]))
         XCTAssertFalse(relayMock.didRespondSuccess)
@@ -318,14 +315,14 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testUpdatePeerErrorNoSession() {
-        setupEngine(isController: false)
+        setupEngine()
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: ""))
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 1301)
     }
     
     func testUpdatePeerErrorSessionNotSettled() {
-        setupEngine(isController: false)
+        setupEngine()
         let session = SessionSequence.stubPreSettled(isPeerController: true) // Session is not fully settled
         storageMock.setSequence(session)
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic))
@@ -334,31 +331,21 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testUpdatePeerErrorUnauthorized() {
-        setupEngine(isController: false)
-        let session = SessionSequence.stubSettled() // Peer is not a controller
+        setupEngine()
+        let session = SessionSequence.stubSettled(isSelfController: true) // Peer is not a controller
         storageMock.setSequence(session)
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic))
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 3003)
     }
-    
-    func testUpdatePeerErrorMatchingController() {
-        setupEngine(isController: true) // Update request received by a controller
-        let session = SessionSequence.stubSettled(isPeerController: true)
-        storageMock.setSequence(session)
-        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic))
-        XCTAssertFalse(relayMock.didRespondSuccess)
-        XCTAssertEqual(relayMock.lastErrorCode, 3005)
-    }
-    
     // TODO: Update acknowledgement tests
     
     // MARK: - Upgrade call tests
     
     func testUpgradeSuccess() throws {
-        setupEngine(isController: true)
+        setupEngine()
         let permissions = Session.Permissions.stub()
-        let session = SessionSequence.stubSettled()
+        let session = SessionSequence.stubSettled(isSelfController: true)
         storageMock.setSequence(session)
         try engine.upgrade(topic: session.topic, permissions: permissions)
         XCTAssertTrue(relayMock.didCallRequest)
@@ -366,14 +353,14 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testUpgradeErrorSessionNotFound() {
-        setupEngine(isController: true)
+        setupEngine()
         XCTAssertThrowsError(try engine.upgrade(topic: "", permissions: Session.Permissions.stub())) { error in
             XCTAssertTrue(error.isNoSessionMatchingTopicError)
         }
     }
     
     func testUpgradeErrorSessionNotSettled() {
-        setupEngine(isController: true)
+        setupEngine()
         let session = SessionSequence.stubPreSettled()
         storageMock.setSequence(session)
         XCTAssertThrowsError(try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub())) { error in
@@ -382,8 +369,8 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testUpgradeErrorInvalidPermissions() {
-        setupEngine(isController: true)
-        let session = SessionSequence.stubSettled()
+        setupEngine()
+        let session = SessionSequence.stubSettled(isSelfController: true)
         storageMock.setSequence(session)
         XCTAssertThrowsError(try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub(chains: [""]))) { error in
             XCTAssertTrue(error.isInvalidPermissionsError)
@@ -397,8 +384,8 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testUpgradeErrorCalledByNonController() {
-        setupEngine(isController: false)
-        let session = SessionSequence.stubSettled()
+        setupEngine()
+        let session = SessionSequence.stubSettled(isSelfController: false)
         storageMock.setSequence(session)
         XCTAssertThrowsError(try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub())) { error in
             XCTAssertTrue(error.isUnauthorizedNonControllerCallError)
@@ -408,9 +395,9 @@ final class SessionEngineTests: XCTestCase {
     // MARK: - Upgrade peer response tests
     
     func testUpgradePeerSuccess() {
-        setupEngine(isController: false)
+        setupEngine()
         var didCallbackUpgrade = false
-        let session = SessionSequence.stubSettled(isPeerController: true)
+        let session = SessionSequence.stubSettled(isSelfController: false)
         storageMock.setSequence(session)
         engine.onSessionUpgrade = { topic, _ in
             didCallbackUpgrade = true
@@ -422,9 +409,9 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testUpgradePeerErrorInvalidPermissions() {
-        setupEngine(isController: false)
+        setupEngine()
         let invalidPermissions = SessionPermissions.stub(chains: [""])
-        let session = SessionSequence.stubSettled(isPeerController: true)
+        let session = SessionSequence.stubSettled(isSelfController: false)
         storageMock.setSequence(session)
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpgrade(topic: session.topic, permissions: invalidPermissions))
         XCTAssertFalse(relayMock.didRespondSuccess)
@@ -432,14 +419,14 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testUpgradePeerErrorSessionNotFound() {
-        setupEngine(isController: false)
+        setupEngine()
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpgrade(topic: ""))
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 1301)
     }
     
     func testUpgradePeerErrorSessionNotSettled() {
-        setupEngine(isController: false)
+        setupEngine()
         let session = SessionSequence.stubPreSettled(isPeerController: true) // Session is not fully settled
         storageMock.setSequence(session)
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpgrade(topic: session.topic))
@@ -448,21 +435,12 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testUpgradePeerErrorUnauthorized() {
-        setupEngine(isController: false)
-        let session = SessionSequence.stubSettled() // Peer is not a controller
+        setupEngine()
+        let session = SessionSequence.stubSettled(isSelfController: true) // Peer is not a controller
         storageMock.setSequence(session)
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpgrade(topic: session.topic))
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 3004)
-    }
-    
-    func testUpgradePeerErrorMatchingController() {
-        setupEngine(isController: true) // Upgrade request received by a controller
-        let session = SessionSequence.stubSettled(isPeerController: true)
-        storageMock.setSequence(session)
-        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpgrade(topic: session.topic))
-        XCTAssertFalse(relayMock.didRespondSuccess)
-        XCTAssertEqual(relayMock.lastErrorCode, 3005)
     }
     
     // TODO: Upgrade acknowledgement tests

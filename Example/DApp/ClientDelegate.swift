@@ -15,7 +15,7 @@ class ClientDelegate: WalletConnectClientDelegate {
             url: "wallet.connect",
             icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])
         let relayer = Relayer(relayHost: "relay.dev.walletconnect.com", projectId: "52af113ee0c1e1a20f4995730196c13e")
-        self.client = WalletConnectClient(metadata: metadata, isController: false, relayer: relayer)
+        self.client = WalletConnectClient(metadata: metadata, relayer: relayer)
         client.delegate = self
     }
 	

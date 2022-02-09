@@ -12,7 +12,7 @@ import UIKit
 ///
 /// ```swift
 /// let metadata = AppMetadata(name: String?, description: String?, url: String?, icons: [String]?)
-/// let client = WalletConnectClient(metadata: AppMetadata, projectId: String, isController: Bool, relayHost: String)
+/// let client = WalletConnectClient(metadata: AppMetadata, projectId: String, relayHost: String)
 /// ```
 ///
 /// - Parameters:
@@ -22,7 +22,6 @@ public final class WalletConnectClient {
     public weak var delegate: WalletConnectClientDelegate?
     public let logger: ConsoleLogging
     private let metadata: AppMetadata
-    private let isController: Bool
     private let pairingEngine: PairingEngine
     private let sessionEngine: SessionEngine
     private let relay: WalletConnectRelaying
@@ -38,19 +37,17 @@ public final class WalletConnectClient {
     /// - Parameters:
     ///   - metadata: describes your application and will define pairing appearance in a web browser.
     ///   - projectId: an optional parameter used to access the public WalletConnect infrastructure. Go to `www.walletconnect.com` for info.
-    ///   - isController: the peer that controls communication permissions for allowed chains, notification types and JSON-RPC request methods. Always true for a wallet.
     ///   - relayHost: proxy server host that your application will use to connect to Waku Network. If you register your project at `www.walletconnect.com` you can use `relay.walletconnect.com`
     ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults
     ///   - clientName: if your app requires more than one client you are required to call them with different names to distinguish logs source and prefix storage keys.
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
-    public convenience init(metadata: AppMetadata, projectId: String, isController: Bool, relayHost: String, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
-        self.init(metadata: metadata, projectId: projectId, isController: isController, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStorage: keyValueStorage, clientName: clientName)
+    public convenience init(metadata: AppMetadata, projectId: String, relayHost: String, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
+        self.init(metadata: metadata, projectId: projectId, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStorage: keyValueStorage, clientName: clientName)
     }
     
-    init(metadata: AppMetadata, projectId: String, isController: Bool, relayHost: String, logger: ConsoleLogging, keychain: KeychainStorage, keyValueStorage: KeyValueStorage, clientName: String? = nil) {
+    init(metadata: AppMetadata, projectId: String, relayHost: String, logger: ConsoleLogging, keychain: KeychainStorage, keyValueStorage: KeyValueStorage, clientName: String? = nil) {
         self.metadata = metadata
-        self.isController = isController
         self.logger = logger
 //        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
         self.crypto = Crypto(keychain: keychain)
@@ -61,9 +58,9 @@ public final class WalletConnectClient {
         self.relay = WalletConnectRelay(networkRelayer: relayer, jsonRpcSerializer: serializer, logger: logger, jsonRpcHistory: history)
         let pairingSequencesStore = PairingStorage(storage: SequenceStore<PairingSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings(clientName: clientName ?? "_")))
         let sessionSequencesStore = SessionStorage(storage: SequenceStore<SessionSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions(clientName: clientName ?? "_")))
-        self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
+        self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, metadata: metadata, logger: logger)
 
-        self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
+        self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, metadata: metadata, logger: logger)
         setUpEnginesCallbacks()
     }
     
@@ -71,19 +68,17 @@ public final class WalletConnectClient {
     ///
     /// - Parameters:
     ///   - metadata: describes your application and will define pairing appearance in a web browser.
-    ///   - isController: the peer that controls communication permissions for allowed chains, notification types and JSON-RPC request methods. Always true for a wallet.
     ///   - relayer: Relayer instance
     ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults but if for some reasons you want to provide your own storage you can inject it here.
     ///   - clientName: if your app requires more than one client you are required to call them with different names to distinguish logs source and prefix storage keys.
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
-    public convenience init(metadata: AppMetadata, isController: Bool, relayer: Relayer, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
-        self.init(metadata: metadata, isController: isController, relayer: relayer, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStorage: keyValueStorage, clientName: clientName)
+    public convenience init(metadata: AppMetadata, relayer: Relayer, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
+        self.init(metadata: metadata, relayer: relayer, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStorage: keyValueStorage, clientName: clientName)
     }
     
-    init(metadata: AppMetadata, isController: Bool, relayer: Relayer, logger: ConsoleLogging, keychain: KeychainStorage, keyValueStorage: KeyValueStorage, clientName: String? = nil) {
+    init(metadata: AppMetadata, relayer: Relayer, logger: ConsoleLogging, keychain: KeychainStorage, keyValueStorage: KeyValueStorage, clientName: String? = nil) {
         self.metadata = metadata
-        self.isController = isController
         self.logger = logger
 //        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
         self.crypto = Crypto(keychain: keychain)
@@ -93,8 +88,8 @@ public final class WalletConnectClient {
         self.relay = WalletConnectRelay(networkRelayer: relayer, jsonRpcSerializer: serializer, logger: logger, jsonRpcHistory: history)
         let pairingSequencesStore = PairingStorage(storage: SequenceStore<PairingSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings(clientName: clientName ?? "_")))
         let sessionSequencesStore = SessionStorage(storage: SequenceStore<SessionSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions(clientName: clientName ?? "_")))
-        self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
-        self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
+        self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, metadata: metadata, logger: logger)
+        self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, metadata: metadata, logger: logger)
         setUpEnginesCallbacks()
     }
     
