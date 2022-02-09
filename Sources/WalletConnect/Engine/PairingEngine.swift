@@ -13,7 +13,6 @@ final class PairingEngine {
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
     private let crypto: CryptoStorageProtocol
-    private let isController: Bool
     private let sequencesStore: PairingSequenceStorage
     private var appMetadata: AppMetadata
     private var publishers = [AnyCancellable]()
@@ -25,7 +24,6 @@ final class PairingEngine {
          crypto: CryptoStorageProtocol,
          subscriber: WCSubscribing,
          sequencesStore: PairingSequenceStorage,
-         isController: Bool,
          metadata: AppMetadata,
          logger: ConsoleLogging,
          topicGenerator: @escaping () -> String? = String.generateTopic) {
@@ -34,7 +32,6 @@ final class PairingEngine {
         self.wcSubscriber = subscriber
         self.appMetadata = metadata
         self.sequencesStore = sequencesStore
-        self.isController = isController
         self.logger = logger
         self.topicInitializer = topicGenerator
         setUpWCRequestHandling()
@@ -71,7 +68,7 @@ final class PairingEngine {
         let publicKey = try! crypto.createX25519KeyPair()
         
         let relay = RelayProtocolOptions(protocol: "waku", params: nil)
-        let uri = WalletConnectURI(topic: topic, publicKey: publicKey.hexRepresentation, isController: isController, relay: relay)
+        let uri = WalletConnectURI(topic: topic, publicKey: publicKey.hexRepresentation, isController: false, relay: relay)
         let pendingPairing = PairingSequence.buildProposed(uri: uri)
         
         sequencesStore.setSequence(pendingPairing)
@@ -82,7 +79,7 @@ final class PairingEngine {
     
     func approve(_ pairingURI: WalletConnectURI) throws {
         let proposal = PairingProposal.createFromURI(pairingURI)
-        guard proposal.proposer.controller != isController else {
+        guard !proposal.proposer.controller else {
             throw WalletConnectError.internal(.unauthorizedMatchingController)
         }
         guard !hasPairing(for: proposal.topic) else {

@@ -1,14 +1,8 @@
 
 import Foundation
 
-enum StorageDomainIdentifiers {
-    static func jsonRpcHistory(clientName: String) -> String {
-        return "com.walletconnect.sdk.\(clientName).wc_jsonRpcHistoryRecord"
-    }
-    static func pairings(clientName: String) -> String {
-        return "com.walletconnect.sdk.\(clientName).pairingSequences"
-    }
-    static func sessions(clientName: String) -> String {
-        return "com.walletconnect.sdk.\(clientName).sessionSequences"
-    }
+enum StorageDomainIdentifiers: String {
+    case jsonRpcHistory = "com.walletconnect.sdk.wc_jsonRpcHistoryRecord"
+    case pairings = "com.walletconnect.sdk.pairingSequences"
+    case sessions = "com.walletconnect.sdk.sessionSequences"
 }

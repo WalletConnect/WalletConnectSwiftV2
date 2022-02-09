@@ -43,7 +43,6 @@ final class PairingEngineTests: XCTestCase {
             crypto: cryptoMock,
             subscriber: subscriberMock,
             sequencesStore: storageMock,
-            isController: isController,
             metadata: meta,
             logger: logger,
             topicGenerator: topicGenerator.getTopic)
