@@ -12,7 +12,7 @@ class WakuRelayTests: XCTestCase {
     override func setUp() {
         dispatcher = DispatcherMock()
         let logger = ConsoleLogger()
-        wakuRelay = Relayer(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), uniqueIdentifier: "")
+        wakuRelay = Relayer(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
 
     override func tearDown() {
