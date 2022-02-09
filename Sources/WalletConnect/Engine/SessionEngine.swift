@@ -202,7 +202,7 @@ final class SessionEngine {
                 throw WalletConnectError.internal(.notApproved) // TODO: Use a suitable error cases
             }
         }
-        if !session.isController || session.settled?.status != .acknowledged {
+        if !session.selfIsController || session.settled?.status != .acknowledged {
             throw WalletConnectError.unauthrorized(.unauthorizedUpdateRequest)
         }
         session.update(accounts)
@@ -218,7 +218,7 @@ final class SessionEngine {
         guard session.isSettled else {
             throw WalletConnectError.sessionNotSettled(topic)
         }
-        guard session.isController else {
+        guard session.selfIsController else {
             throw WalletConnectError.unauthorizedNonControllerCall
         }
         guard validatePermissions(permissions) else {
@@ -281,32 +281,31 @@ final class SessionEngine {
     
     private func wcSessionApprove(_ payload: WCRequestSubscriptionPayload, approveParams: SessionType.ApproveParams) {
         let topic = payload.topic
-        logger.debug("Responder Client approved session on topic: \(topic)")
-        guard let session = sequencesStore.getSequence(forTopic: topic),
-              let pendingSession = session.pending else {
-                  logger.error("Could not find pending session for topic: \(topic)")
-                  return
-              }
-        logger.debug("isController: \(session.isController)")
-        
-        guard !session.isController else {
-            logger.warn("Warning: Session Engine - Unexpected handleSessionApprove method call by non Controller client")
+        guard let session = sequencesStore.getSequence(forTopic: topic), let pendingSession = session.pending else {
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
         }
-        logger.debug("handleSessionApprove")
+        guard !session.selfIsController else {
+            // TODO: Replace generic reason with a valid code.
+            relayer.respondError(for: payload, reason: .generic(message: "wcSessionApproval received by a controller"))
+            return
+        }
         
-        let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: try! session.getPublicKey(), peerPublicKey: approveParams.responder.publicKey)
-        
-        let settledTopic = agreementKeys.derivedTopic()
-        
-        try! crypto.setAgreementSecret(agreementKeys, topic: settledTopic)
-        
+        let settledTopic: String
+        do {
+            let publicKey = try session.getPublicKey()
+            let agreementKeys = try crypto.performKeyAgreement(selfPublicKey: publicKey, peerPublicKey: approveParams.responder.publicKey)
+            settledTopic = agreementKeys.derivedTopic()
+            try crypto.setAgreementSecret(agreementKeys, topic: settledTopic)
+        } catch {
+            relayer.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
+            return
+        }
+
         let proposal = pendingSession.proposal
         let settledSession = SessionSequence.buildAcknowledged(approval: approveParams, proposal: proposal, agreementKeys: agreementKeys, metadata: metadata)
-        
         sequencesStore.delete(topic: proposal.topic)
         sequencesStore.setSequence(settledSession)
-        
         wcSubscriber.setSubscription(topic: settledTopic)
         wcSubscriber.removeSubscription(topic: proposal.topic)
         
@@ -317,6 +316,7 @@ final class SessionEngine {
                 blockchains: pendingSession.proposal.permissions.blockchain.chains,
                 methods: pendingSession.proposal.permissions.jsonrpc.methods), accounts: settledSession.settled!.state.accounts)
         
+        logger.debug("Responder Client approved session on topic: \(topic)")
         relayer.respondSuccess(for: payload)
         onSessionApproved?(approvedSession)
     }
@@ -445,7 +445,7 @@ final class SessionEngine {
     }
     
     private func validateNotification(session: SessionSequence, params: SessionType.NotificationParams) throws {
-        if session.isController {
+        if session.selfIsController {
             return
         } else {
             guard let notifications = session.settled?.permissions.notifications,

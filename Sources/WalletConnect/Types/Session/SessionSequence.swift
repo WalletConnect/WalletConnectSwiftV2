@@ -42,7 +42,7 @@ struct SessionSequence: ExpirableSequence {
         settled?.status == .acknowledged
     }
     
-    var isController: Bool {
+    var selfIsController: Bool {
         guard let controller = settled?.permissions.controller else { return false }
         return selfParticipant.publicKey == controller.publicKey
     }
