@@ -158,7 +158,7 @@ extension ResponderViewController: SessionViewControllerDelegate {
         print("did reject session")
         let proposal = currentProposal!
         currentProposal = nil
-        client.reject(proposal: proposal, reason: Reason(code: 0, message: "reject"))
+        client.reject(proposal: proposal, reason: .disapprovedChains)
     }
 }
 

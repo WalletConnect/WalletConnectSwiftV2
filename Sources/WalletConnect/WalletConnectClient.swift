@@ -146,9 +146,9 @@ public final class WalletConnectClient {
     /// For the responder to reject a session proposal.
     /// - Parameters:
     ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate.
-    ///   - reason: Reason why the session proposal was rejected.
-    public func reject(proposal: Session.Proposal, reason: Reason) {
-        sessionEngine.reject(proposal: proposal.proposal, reason: reason)
+    ///   - reason: Reason why the session proposal was rejected. Conforms to CAIP25.
+    public func reject(proposal: Session.Proposal, reason: RejectionReason) {
+        sessionEngine.reject(proposal: proposal.proposal, reason: reason.internalRepresentation())
     }
     
     /// For the responder to update the accounts
