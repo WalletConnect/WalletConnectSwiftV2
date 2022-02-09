@@ -29,15 +29,15 @@ public final class Relayer {
     }
     private let requestAcknowledgePublisherSubject = PassthroughSubject<JSONRPCResponse<Bool>, Never>()
     let logger: ConsoleLogging
+    static let historyIdentifier = "com.walletconnect.sdk.relayer.subscription_json_rpc_record"
     
     init(dispatcher: Dispatching,
          logger: ConsoleLogging,
-         keyValueStorage: KeyValueStorage,
-         uniqueIdentifier: String) {
+         keyValueStorage: KeyValueStorage) {
         self.logger = logger
         self.dispatcher = dispatcher
-        let historyIdentifier = "com.walletconnect.sdk.\(uniqueIdentifier).relayer.subscription_json_rpc_record"
-        self.jsonRpcSubscriptionsHistory = JsonRpcHistory<RelayJSONRPC.SubscriptionParams>(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: historyIdentifier))
+        
+        self.jsonRpcSubscriptionsHistory = JsonRpcHistory<RelayJSONRPC.SubscriptionParams>(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: Self.historyIdentifier))
         setUpBindings()
     }
     
