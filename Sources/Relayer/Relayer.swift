@@ -69,8 +69,7 @@ public final class Relayer {
         let dispatcher = Dispatcher(socket: socket, socketConnectionObserver: socketConnectionObserver, socketConnectionHandler: socketConnectionHandler)
         self.init(dispatcher: dispatcher,
                   logger: logger,
-                  keyValueStorage: keyValueStorage,
-                  uniqueIdentifier: uniqueIdentifier ?? "")
+                  keyValueStorage: keyValueStorage)
     }
     
     public func connect() throws {
