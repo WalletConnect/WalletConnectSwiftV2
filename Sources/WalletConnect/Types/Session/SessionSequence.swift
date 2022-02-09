@@ -73,6 +73,11 @@ struct SessionSequence: ExpirableSequence {
         return settled.permissions.jsonrpc.methods.contains(method)
     }
     
+    func hasPermission(forNotification type: String) -> Bool {
+        guard let notificationPermissions = settled?.permissions.notifications else { return false }
+        return notificationPermissions.types.contains(type)
+    }
+    
     mutating func upgrade(_ permissions: SessionPermissions) {
         settled?.permissions.upgrade(with: permissions)
     }

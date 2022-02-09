@@ -292,9 +292,10 @@ final class SessionEngine {
         }
         
         let settledTopic: String
+        let agreementKeys: AgreementSecret
         do {
             let publicKey = try session.getPublicKey()
-            let agreementKeys = try crypto.performKeyAgreement(selfPublicKey: publicKey, peerPublicKey: approveParams.responder.publicKey)
+            agreementKeys = try crypto.performKeyAgreement(selfPublicKey: publicKey, peerPublicKey: approveParams.responder.publicKey)
             settledTopic = agreementKeys.derivedTopic()
             try crypto.setAgreementSecret(agreementKeys, topic: settledTopic)
         } catch {
@@ -324,12 +325,12 @@ final class SessionEngine {
     private func wcSessionReject(_ payload: WCRequestSubscriptionPayload, rejectParams: SessionType.RejectParams) {
         let topic = payload.topic
         guard sequencesStore.hasSequence(forTopic: topic) else {
-            logger.debug("Could not find session for topic \(topic)")
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
         }
-        relayer.respondSuccess(for: payload)
         sequencesStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
+        relayer.respondSuccess(for: payload)
         onSessionRejected?(topic, rejectParams.reason)
     }
     
@@ -378,12 +379,12 @@ final class SessionEngine {
     private func wcSessionDelete(_ payload: WCRequestSubscriptionPayload, deleteParams: SessionType.DeleteParams) {
         let topic = payload.topic
         guard sequencesStore.hasSequence(forTopic: topic) else {
-            logger.debug("Could not find session for topic \(topic)")
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
         }
-        relayer.respondSuccess(for: payload)
         sequencesStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
+        relayer.respondSuccess(for: payload)
         onSessionDelete?(topic, deleteParams.reason)
     }
     
@@ -396,51 +397,42 @@ final class SessionEngine {
             method: jsonRpcRequest.method,
             params: jsonRpcRequest.params,
             chainId: payloadParams.chainId)
-        do {
-            try validatePayload(request)
-            onSessionPayloadRequest?(request)
-        } catch let error as WalletConnectError {
-            logger.error(error)
-            relayer.respondError(for: payload, reason: .generic(message: "invalid request")) // TODO: Replace with accurate reason
-        } catch {}
-    }
-
-    private func validatePayload(_ sessionRequest: Request) throws {
-        guard let session = sequencesStore.getSequence(forTopic: sessionRequest.topic) else {
-            throw WalletConnectError.internal(.noSequenceForTopic)
+        
+        guard let session = sequencesStore.getSequence(forTopic: topic) else {
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
+            return
         }
-        if let chainId = sessionRequest.chainId {
+        if let chainId = request.chainId {
             guard session.hasPermission(forChain: chainId) else {
-                throw WalletConnectError.unauthrorized(.unauthorizedJsonRpcMethod)
+                relayer.respondError(for: payload, reason: .unauthorizedTargetChain(chainId))
+                return
             }
         }
-        guard session.hasPermission(forMethod: sessionRequest.method) else {
-            throw WalletConnectError.unauthrorized(.unauthorizedJsonRpcMethod)
+        guard session.hasPermission(forMethod: request.method) else {
+            relayer.respondError(for: payload, reason: .unauthorizedRPCMethod(request.method))
+            return
         }
+        onSessionPayloadRequest?(request)
     }
     
     private func wcSessionPing(_ payload: WCRequestSubscriptionPayload) {
         relayer.respondSuccess(for: payload)
     }
     
-    // TODO: Add error responses
     private func wcSessionNotification(_ payload: WCRequestSubscriptionPayload, notificationParams: SessionType.NotificationParams) {
         let topic = payload.topic
         guard let session = sequencesStore.getSequence(forTopic: topic), session.isSettled else {
-            // respond error
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
             return
         }
-        do {
-            try validateNotification(session: session, params: notificationParams)
-        } catch let error as WalletConnectError {
-            logger.error(error)
-            // respond error
-            return
-        } catch {
-            return
+        if session.selfIsController {
+            guard session.hasPermission(forNotification: notificationParams.type) else {
+                relayer.respondError(for: payload, reason: .unauthorizedNotificationType(notificationParams.type))
+                return
+            }
         }
-        relayer.respondSuccess(for: payload)
         let notification = Session.Notification(type: notificationParams.type, data: notificationParams.data)
+        relayer.respondSuccess(for: payload)
         onNotificationReceived?(topic, notification)
     }
     
@@ -511,7 +503,7 @@ final class SessionEngine {
         }
         switch result {
         case .response:
-            guard let settledSession = try? sequencesStore.getSequence(forTopic: settledTopic) else {return}
+            guard let settledSession = sequencesStore.getSequence(forTopic: settledTopic) else {return}
             crypto.deleteAgreementSecret(for: topic)
             wcSubscriber.removeSubscription(topic: topic)
             sequencesStore.delete(topic: topic)
