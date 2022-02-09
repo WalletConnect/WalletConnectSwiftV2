@@ -73,7 +73,7 @@ final class WebSocketSession: NSObject, WebSocketSessionProtocol, WebSocketConne
         case .string(let text):
             onMessageReceived?(text)
         case .data(let data):
-            print("Transport: Unexpected type of message received: \(data.toHexString)")
+            print("Transport: Unexpected type of message received: \(data.toHexString())")
         @unknown default:
             print("Transport: Unexpected type of message received")
         }
