@@ -129,8 +129,8 @@ final class SessionEngine {
         }
     }
     
-    func reject(proposal: SessionProposal, reason: Reason) {
-        let rejectParams = SessionType.RejectParams(reason: reason.toInternal())
+    func reject(proposal: SessionProposal, reason: SessionType.Reason ) {
+        let rejectParams = SessionType.RejectParams(reason: reason)
         relayer.request(.wcSessionReject(rejectParams), onTopic: proposal.topic) { [weak self] result in
             self?.logger.debug("Reject result: \(result)")
         }
