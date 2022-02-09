@@ -86,7 +86,7 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "pairing_cell", for: indexPath)
-        cell.textLabel?.text = activePairings[indexPath.row].peer!.name
+        cell.textLabel?.text = activePairings[indexPath.row].peer?.name ?? ""
         return cell
     }
     

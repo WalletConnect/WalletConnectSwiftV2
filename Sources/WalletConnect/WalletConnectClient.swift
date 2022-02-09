@@ -26,14 +26,10 @@ public final class WalletConnectClient {
     private let pairingEngine: PairingEngine
     private let sessionEngine: SessionEngine
     private let relay: WalletConnectRelaying
-    private let wakuRelay: NetworkRelaying
     private let crypto: Crypto
     private let secureStorage: SecureStorage
     private let pairingQueue = DispatchQueue(label: "com.walletconnect.sdk.client.pairing", qos: .userInitiated)
     private let history: JsonRpcHistory
-#if os(iOS)
-    private var backgroundTaskID: UIBackgroundTaskIdentifier = .invalid
-#endif
 
     // MARK: - Initializers
 
@@ -44,7 +40,7 @@ public final class WalletConnectClient {
     ///   - projectId: an optional parameter used to access the public WalletConnect infrastructure. Go to `www.walletconnect.com` for info.
     ///   - isController: the peer that controls communication permissions for allowed chains, notification types and JSON-RPC request methods. Always true for a wallet.
     ///   - relayHost: proxy server host that your application will use to connect to Waku Network. If you register your project at `www.walletconnect.com` you can use `relay.walletconnect.com`
-    ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults but if for some reasons you want to provide your own storage you can inject it here.
+    ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults
     ///   - clientName: if your app requires more than one client you are required to call them with different names to distinguish logs source and prefix storage keys.
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
@@ -59,39 +55,47 @@ public final class WalletConnectClient {
 //        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
         self.crypto = Crypto(keychain: keychain)
         self.secureStorage = SecureStorage(keychain: keychain)
-        let relayUrl = WakuNetworkRelay.makeRelayUrl(host: relayHost, projectId: projectId)
-        self.wakuRelay = WakuNetworkRelay(logger: logger, url: relayUrl, keyValueStorage: keyValueStorage, uniqueIdentifier: clientName ?? "")
+        let relayer = Relayer(relayHost: relayHost, projectId: projectId, keyValueStorage: keyValueStorage, uniqueIdentifier: clientName ?? "", logger: logger)
         let serializer = JSONRPCSerializer(crypto: crypto)
         self.history = JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory(clientName: clientName ?? "_")))
-        self.relay = WalletConnectRelay(networkRelayer: wakuRelay, jsonRpcSerializer: serializer, logger: logger, jsonRpcHistory: history)
+        self.relay = WalletConnectRelay(networkRelayer: relayer, jsonRpcSerializer: serializer, logger: logger, jsonRpcHistory: history)
         let pairingSequencesStore = PairingStorage(storage: SequenceStore<PairingSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings(clientName: clientName ?? "_")))
         let sessionSequencesStore = SessionStorage(storage: SequenceStore<SessionSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions(clientName: clientName ?? "_")))
         self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
 
         self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
         setUpEnginesCallbacks()
-        subscribeNotificationCenter()
-        registerBackgroundTask()
     }
     
-    func registerBackgroundTask() {
-#if os(iOS)
-        backgroundTaskID = UIApplication.shared.beginBackgroundTask (withName: "Finish Network Tasks") { [weak self] in
-            self?.endBackgroundTask()
-        }
-#endif
+    /// Initializes and returns newly created WalletConnect Client Instance. Establishes a network connection with the relay
+    ///
+    /// - Parameters:
+    ///   - metadata: describes your application and will define pairing appearance in a web browser.
+    ///   - isController: the peer that controls communication permissions for allowed chains, notification types and JSON-RPC request methods. Always true for a wallet.
+    ///   - relayer: Relayer instance
+    ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults but if for some reasons you want to provide your own storage you can inject it here.
+    ///   - clientName: if your app requires more than one client you are required to call them with different names to distinguish logs source and prefix storage keys.
+    ///
+    /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
+    public convenience init(metadata: AppMetadata, isController: Bool, relayer: Relayer, keyValueStorage: KeyValueStorage = UserDefaults.standard, clientName: String? = nil) {
+        self.init(metadata: metadata, isController: isController, relayer: relayer, logger: ConsoleLogger(loggingLevel: .off), keychain: KeychainStorage(uniqueIdentifier: clientName), keyValueStorage: keyValueStorage, clientName: clientName)
     }
     
-    func endBackgroundTask() {
-#if os(iOS)
-        wakuRelay.disconnect(closeCode: .goingAway)
-        print("Background task ended.")
-        UIApplication.shared.endBackgroundTask(backgroundTaskID)
-        backgroundTaskID = .invalid
-#endif
-    }
-    deinit {
-        unsubscribeNotificationCenter()
+    init(metadata: AppMetadata, isController: Bool, relayer: Relayer, logger: ConsoleLogging, keychain: KeychainStorage, keyValueStorage: KeyValueStorage, clientName: String? = nil) {
+        self.metadata = metadata
+        self.isController = isController
+        self.logger = logger
+//        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
+        self.crypto = Crypto(keychain: keychain)
+        self.secureStorage = SecureStorage(keychain: keychain)
+        let serializer = JSONRPCSerializer(crypto: crypto)
+        self.history = JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory(clientName: clientName ?? "_")))
+        self.relay = WalletConnectRelay(networkRelayer: relayer, jsonRpcSerializer: serializer, logger: logger, jsonRpcHistory: history)
+        let pairingSequencesStore = PairingStorage(storage: SequenceStore<PairingSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings(clientName: clientName ?? "_")))
+        let sessionSequencesStore = SessionStorage(storage: SequenceStore<SessionSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions(clientName: clientName ?? "_")))
+        self.pairingEngine = PairingEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, isController: isController, metadata: metadata, logger: logger)
+        self.sessionEngine = SessionEngine(relay: relay, crypto: crypto, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, isController: isController, metadata: metadata, logger: logger)
+        setUpEnginesCallbacks()
     }
     
     // MARK: - Public interface
@@ -328,27 +332,4 @@ public final class WalletConnectClient {
         )
         delegate?.didReceive(sessionProposal: sessionProposal)
     }
-    
-    private func subscribeNotificationCenter() {
-#if os(iOS)
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(appWillEnterForeground),
-            name: UIApplication.willEnterForegroundNotification,
-            object: nil)
-#endif
-    }
-    
-    private func unsubscribeNotificationCenter() {
-#if os(iOS)
-        NotificationCenter.default.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
-#endif
-    }
-    
-    @objc
-    private func appWillEnterForeground() {
-        wakuRelay.connect()
-        registerBackgroundTask()
-    }
-
 }

@@ -4,16 +4,19 @@ protocol WebSocketSessionProtocol {
     var onMessageReceived: ((String) -> ())? {get set}
     var onMessageError: ((Error) -> ())? {get set}
     var isConnected: Bool {get}
-    func connect(on url: URL)
-    func disconnect(with closeCode: URLSessionWebSocketTask.CloseCode)
     func send(_ message: String, completionHandler: @escaping ((Error?) -> Void))
 }
 
+protocol WebSocketConnecting {
+    var isConnected: Bool {get}
+    func connect()
+    func disconnect(with closeCode: URLSessionWebSocketTask.CloseCode)
+}
 
-final class WebSocketSession: NSObject, WebSocketSessionProtocol {
+final class WebSocketSession: NSObject, WebSocketSessionProtocol, WebSocketConnecting {
     var onMessageReceived: ((String) -> ())?
     var onMessageError: ((Error) -> ())?
-    
+    let url: URL
     var isConnected: Bool {
         webSocketTask != nil
     }
@@ -22,12 +25,13 @@ final class WebSocketSession: NSObject, WebSocketSessionProtocol {
     
     private var webSocketTask: URLSessionWebSocketTaskProtocol?
     
-    init(session: URLSessionProtocol) {
+    init(session: URLSessionProtocol, url: URL) {
         self.session = session
+        self.url = url
         super.init()
     }
     
-    func connect(on url: URL) {
+    func connect() {
         webSocketTask = session.webSocketTask(with: url)
         listen()
         webSocketTask?.resume()
@@ -68,7 +72,9 @@ final class WebSocketSession: NSObject, WebSocketSessionProtocol {
         switch message {
         case .string(let text):
             onMessageReceived?(text)
-        default:
+        case .data(let data):
+            print("Transport: Unexpected type of message received: \(data)")
+        @unknown default:
             print("Transport: Unexpected type of message received")
         }
     }
