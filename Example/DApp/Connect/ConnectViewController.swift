@@ -74,7 +74,7 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
     }
     
     @objc func connectWithExampleWallet() {
-        let url = URL(string: "walletconnectwallet:\(uriString)")!
+        let url = URL(string: "https://walletconnect.com/wc?uri=\(uriString)")!
         UIApplication.shared.open(url, options: [:]) { [weak self] _ in
             self?.dismiss(animated: true, completion: nil)
         }
@@ -86,7 +86,7 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "pairing_cell", for: indexPath)
-        cell.textLabel?.text = activePairings[indexPath.row].peer!.name
+        cell.textLabel?.text = activePairings[indexPath.row].peer?.name ?? ""
         return cell
     }
     
@@ -98,17 +98,6 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
             notifications: []
         )
         _ = try! ClientDelegate.shared.client.connect(sessionPermissions: permissions, topic: pairingTopic)
-        presentConfirmationAlert()
-    }
-    
-    private func presentConfirmationAlert() {
-        let url = URL(string: "walletconnectwallet:")!
-        UIApplication.shared.open(url, options: [:]) { [weak self] _ in
-            self?.dismiss(animated: true, completion: nil)
-        }
-        let alert = UIAlertController(title: "Session Proposal Sent", message: "You can open a wallet now", preferredStyle: .alert)
-        let action = UIAlertAction(title: "OK", style: .cancel)
-        alert.addAction(action)
-        present(alert, animated: true)
+        connectWithExampleWallet()
     }
 }

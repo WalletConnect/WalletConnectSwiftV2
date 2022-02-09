@@ -18,3 +18,6 @@ class SocketConnectionObserver: NSObject, URLSessionWebSocketDelegate, SocketCon
         onDisconnect?()
     }
 }
+
+
+

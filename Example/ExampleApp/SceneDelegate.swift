@@ -11,10 +11,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.makeKeyAndVisible()
     }
     
-    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-        let url = URLContexts.first?.url
-        let urlString: String = url!.absoluteString
-        let wcUri = urlString.deletingPrefix("walletconnectwallet:")
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+              let incomingURL = userActivity.webpageURL else  {
+                  return
+              }
+        let wcUri = incomingURL.absoluteString.deletingPrefix("https://walletconnect.com/wc?uri=")
         let client = ((window!.rootViewController as! UINavigationController).viewControllers[0] as! ResponderViewController).client
         try? client.pair(uri: wcUri)
     }

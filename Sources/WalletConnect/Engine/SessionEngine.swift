@@ -17,7 +17,6 @@ final class SessionEngine {
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
     private let crypto: CryptoStorageProtocol
-    private var isController: Bool
     private var metadata: AppMetadata
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
@@ -27,7 +26,6 @@ final class SessionEngine {
          crypto: CryptoStorageProtocol,
          subscriber: WCSubscribing,
          sequencesStore: SessionSequenceStorage,
-         isController: Bool,
          metadata: AppMetadata,
          logger: ConsoleLogging,
          topicGenerator: @escaping () -> String? = String.generateTopic) {
@@ -36,7 +34,6 @@ final class SessionEngine {
         self.metadata = metadata
         self.wcSubscriber = subscriber
         self.sequencesStore = sequencesStore
-        self.isController = isController
         self.logger = logger
         self.topicInitializer = topicGenerator
         setUpWCRequestHandling()
@@ -72,7 +69,7 @@ final class SessionEngine {
         let proposal = SessionProposal(
             topic: pendingSessionTopic,
             relay: relay,
-            proposer: SessionType.Proposer(publicKey: publicKey.hexRepresentation, controller: isController, metadata: metadata),
+            proposer: SessionType.Proposer(publicKey: publicKey.hexRepresentation, controller: false, metadata: metadata),
             signal: SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: settledPairing.topic)),
             permissions: permissions,
             ttl: SessionSequence.timeToLivePending)
@@ -132,8 +129,8 @@ final class SessionEngine {
         }
     }
     
-    func reject(proposal: SessionProposal, reason: Reason) {
-        let rejectParams = SessionType.RejectParams(reason: reason.toInternal())
+    func reject(proposal: SessionProposal, reason: SessionType.Reason ) {
+        let rejectParams = SessionType.RejectParams(reason: reason)
         relayer.request(.wcSessionReject(rejectParams), onTopic: proposal.topic) { [weak self] result in
             self?.logger.debug("Reject result: \(result)")
         }
@@ -205,7 +202,7 @@ final class SessionEngine {
                 throw WalletConnectError.internal(.notApproved) // TODO: Use a suitable error cases
             }
         }
-        if !isController || session.settled?.status != .acknowledged {
+        if !session.isController || session.settled?.status != .acknowledged {
             throw WalletConnectError.unauthrorized(.unauthorizedUpdateRequest)
         }
         session.update(accounts)
@@ -221,7 +218,7 @@ final class SessionEngine {
         guard session.isSettled else {
             throw WalletConnectError.sessionNotSettled(topic)
         }
-        guard isController else {
+        guard session.isController else {
             throw WalletConnectError.unauthorizedNonControllerCall
         }
         guard validatePermissions(permissions) else {
@@ -333,10 +330,6 @@ final class SessionEngine {
             relayer.respondError(for: payload, reason: .unauthorizedUpdateRequest(context: .session))
             return
         }
-        guard !isController else {
-            relayer.respondError(for: payload, reason: .unauthorizedMatchingController(isController: isController))
-            return
-        }
         session.settled?.state = updateParams.state
         sequencesStore.setSequence(session)
         relayer.respondSuccess(for: payload)
@@ -354,10 +347,6 @@ final class SessionEngine {
         }
         guard session.peerIsController else {
             relayer.respondError(for: payload, reason: .unauthorizedUpgradeRequest(context: .session))
-            return
-        }
-        guard !isController else {
-            relayer.respondError(for: payload, reason: .unauthorizedMatchingController(isController: isController))
             return
         }
         session.upgrade(upgradeParams.permissions)
@@ -439,16 +428,17 @@ final class SessionEngine {
     
     private func handleSessionApprove(_ approveParams: SessionType.ApproveParams, topic: String, requestId: Int64) {
         logger.debug("Responder Client approved session on topic: \(topic)")
-        logger.debug("isController: \(isController)")
-        guard !isController else {
-            logger.warn("Warning: Session Engine - Unexpected handleSessionApprove method call by non Controller client")
-            return
-        }
         guard let session = sequencesStore.getSequence(forTopic: topic),
               let pendingSession = session.pending else {
                   logger.error("Could not find pending session for topic: \(topic)")
                   return
               }
+        logger.debug("isController: \(session.isController)")
+        
+        guard !session.isController else {
+            logger.warn("Warning: Session Engine - Unexpected handleSessionApprove method call by non Controller client")
+            return
+        }
         logger.debug("handleSessionApprove")
         
         let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: try! session.getPublicKey(), peerPublicKey: approveParams.responder.publicKey)

@@ -4,7 +4,7 @@ import Combine
 import WalletConnectUtils
 
 
-public final class WakuNetworkRelay {
+public final class Relayer {
     enum RelyerError: Error {
         case subscriptionIdNotFound
     }
@@ -28,39 +28,56 @@ public final class WakuNetworkRelay {
         requestAcknowledgePublisherSubject.eraseToAnyPublisher()
     }
     private let requestAcknowledgePublisherSubject = PassthroughSubject<JSONRPCResponse<Bool>, Never>()
-    private let logger: ConsoleLogging
+    let logger: ConsoleLogging
+    static let historyIdentifier = "com.walletconnect.sdk.relayer.subscription_json_rpc_record"
     
     init(dispatcher: Dispatching,
          logger: ConsoleLogging,
-         keyValueStorage: KeyValueStorage,
-         uniqueIdentifier: String) {
+         keyValueStorage: KeyValueStorage) {
         self.logger = logger
         self.dispatcher = dispatcher
-        let historyIdentifier = "com.walletconnect.sdk.\(uniqueIdentifier).relayer.subscription_json_rpc_record"
-        self.jsonRpcSubscriptionsHistory = JsonRpcHistory<RelayJSONRPC.SubscriptionParams>(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: historyIdentifier))
+        
+        self.jsonRpcSubscriptionsHistory = JsonRpcHistory<RelayJSONRPC.SubscriptionParams>(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: Self.historyIdentifier))
         setUpBindings()
     }
     
-    public convenience init(logger: ConsoleLogging,
-                            url: URL,
-                            keyValueStorage: KeyValueStorage,
-                            uniqueIdentifier: String) {
+    /// Instantiates Relayer
+    /// - Parameters:
+    ///   - relayHost: proxy server host that your application will use to connect to Waku Network. If you register your project at `www.walletconnect.com` you can use `relay.walletconnect.com`
+    ///   - projectId: an optional parameter used to access the public WalletConnect infrastructure. Go to `www.walletconnect.com` for info.
+    ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults
+    ///   - uniqueIdentifier: if your app requires more than one relayer instances you are required to call identify them
+    ///   - socketConnectionType: socket connection type
+    ///   - logger: logger instance
+    public convenience init(relayHost: String,
+                            projectId: String,
+                            keyValueStorage: KeyValueStorage = UserDefaults.standard,
+                            uniqueIdentifier: String? = nil,
+                            socketConnectionType: SocketConnectionType = .automatic,
+                            logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off)) {
         let socketConnectionObserver = SocketConnectionObserver()
         let urlSession = URLSession(configuration: .default, delegate: socketConnectionObserver, delegateQueue: OperationQueue())
-        let socket = WebSocketSession(session: urlSession)
-        let dispatcher = Dispatcher(url: url, socket: socket, socketConnectionObserver: socketConnectionObserver)
+        let url = Self.makeRelayUrl(host: relayHost, projectId: projectId)
+        let socket = WebSocketSession(session: urlSession, url: url)
+        var socketConnectionHandler: SocketConnectionHandler
+        switch socketConnectionType {
+        case .automatic:
+            socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket)
+        case .manual:
+            socketConnectionHandler = ManualSocketConnectionHandler(socket: socket)
+        }
+        let dispatcher = Dispatcher(socket: socket, socketConnectionObserver: socketConnectionObserver, socketConnectionHandler: socketConnectionHandler)
         self.init(dispatcher: dispatcher,
                   logger: logger,
-                  keyValueStorage: keyValueStorage,
-                  uniqueIdentifier: uniqueIdentifier)
+                  keyValueStorage: keyValueStorage)
     }
     
-    public func connect() {
-        dispatcher.connect()
+    public func connect() throws {
+        try dispatcher.connect()
     }
     
-    public func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) {
-        dispatcher.disconnect(closeCode: closeCode)
+    public func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
+        try dispatcher.disconnect(closeCode: closeCode)
     }
     
     @discardableResult public func publish(topic: String, payload: String, completion: @escaping ((Error?) -> ())) -> Int64 {
@@ -192,7 +209,7 @@ public final class WakuNetworkRelay {
         }
     }
     
-    static public func makeRelayUrl(host: String, projectId: String) -> URL {
+    static private func makeRelayUrl(host: String, projectId: String) -> URL {
         var components = URLComponents()
         components.scheme = "wss"
         components.host = host

@@ -15,7 +15,6 @@ final class ResponderViewController: UIViewController {
         return WalletConnectClient(
             metadata: metadata,
             projectId: "52af113ee0c1e1a20f4995730196c13e",
-            isController: true,
             relayHost: "relay.dev.walletconnect.com"
         )
     }()
@@ -159,7 +158,7 @@ extension ResponderViewController: SessionViewControllerDelegate {
         print("did reject session")
         let proposal = currentProposal!
         currentProposal = nil
-        client.reject(proposal: proposal, reason: Reason(code: 0, message: "reject"))
+        client.reject(proposal: proposal, reason: .disapprovedChains)
     }
 }
 
