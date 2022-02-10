@@ -1,12 +1,13 @@
 import Foundation
+import WalletConnectUtils
 
-protocol JSONRPCSerializing {
+public protocol JSONRPCSerializing {
     func serialize(topic: String, encodable: Encodable) throws -> String
     func tryDeserialize<T: Codable>(topic: String, message: String) -> T?
     var codec: Codec {get}
 }
 
-class JSONRPCSerializer: JSONRPCSerializing {
+public class JSONRPCSerializer: JSONRPCSerializing {
     
     private let crypto: Crypto
     let codec: Codec

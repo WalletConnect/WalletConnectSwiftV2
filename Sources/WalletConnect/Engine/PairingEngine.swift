@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import WalletConnectUtils
+import KMS
 
 
 final class PairingEngine {

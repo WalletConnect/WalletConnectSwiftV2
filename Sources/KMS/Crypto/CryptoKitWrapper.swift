@@ -17,7 +17,7 @@ extension Curve25519.KeyAgreement.PrivateKey: Equatable {
 
 // MARK: - Public Key
 
-struct AgreementPublicKey: Equatable {
+public struct AgreementPublicKey: Equatable {
     
     fileprivate let key: Curve25519.KeyAgreement.PublicKey
     
@@ -40,12 +40,12 @@ struct AgreementPublicKey: Equatable {
 
 extension AgreementPublicKey: Codable {
     
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(key.rawRepresentation)
     }
     
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let buffer = try container.decode(Data.self)
         try self.init(rawRepresentation: buffer)
@@ -54,7 +54,7 @@ extension AgreementPublicKey: Codable {
 
 // MARK: - Private Key
 
-struct AgreementPrivateKey: GenericPasswordConvertible, Equatable {
+public struct AgreementPrivateKey: GenericPasswordConvertible, Equatable {
 
     private let key: Curve25519.KeyAgreement.PrivateKey
     

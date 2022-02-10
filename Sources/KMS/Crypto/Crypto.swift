@@ -1,7 +1,7 @@
 import Foundation
 
 // TODO: Come up with better naming conventions
-protocol CryptoStorageProtocol {
+public protocol CryptoStorageProtocol {
     func createX25519KeyPair() throws -> AgreementPublicKey
     func setPrivateKey(_ privateKey: AgreementPrivateKey) throws
     func setAgreementSecret(_ agreementSecret: AgreementSecret, topic: String) throws
@@ -12,7 +12,10 @@ protocol CryptoStorageProtocol {
     func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret
 }
 
-class Crypto: CryptoStorageProtocol {
+public class Crypto: CryptoStorageProtocol {
+    enum Error: Swift.Error {
+        case keyNotFound
+    }
     
     private var keychain: KeychainStorageProtocol
     
@@ -20,21 +23,21 @@ class Crypto: CryptoStorageProtocol {
         self.keychain = keychain
     }
     
-    func createX25519KeyPair() throws -> AgreementPublicKey {
+    public func createX25519KeyPair() throws -> AgreementPublicKey {
         let privateKey = AgreementPrivateKey()
         try setPrivateKey(privateKey)
         return privateKey.publicKey
     }
     
-    func setPrivateKey(_ privateKey: AgreementPrivateKey) throws {
+    public func setPrivateKey(_ privateKey: AgreementPrivateKey) throws {
         try keychain.add(privateKey, forKey: privateKey.publicKey.hexRepresentation)
     }
     
-    func setAgreementSecret(_ agreementSecret: AgreementSecret, topic: String) throws {
+    public func setAgreementSecret(_ agreementSecret: AgreementSecret, topic: String) throws {
         try keychain.add(agreementSecret, forKey: topic)
     }
     
-    func getPrivateKey(for publicKey: AgreementPublicKey) throws -> AgreementPrivateKey? {
+    public func getPrivateKey(for publicKey: AgreementPublicKey) throws -> AgreementPrivateKey? {
         do {
             return try keychain.read(key: publicKey.hexRepresentation) as AgreementPrivateKey
         } catch let error where (error as? KeychainError)?.status == errSecItemNotFound {
@@ -44,7 +47,7 @@ class Crypto: CryptoStorageProtocol {
         }
     }
     
-    func getAgreementSecret(for topic: String) throws -> AgreementSecret? {
+    public func getAgreementSecret(for topic: String) throws -> AgreementSecret? {
         do {
             return try keychain.read(key: topic) as AgreementSecret
         } catch let error where (error as? KeychainError)?.status == errSecItemNotFound {
@@ -54,7 +57,7 @@ class Crypto: CryptoStorageProtocol {
         }
     }
     
-    func deletePrivateKey(for publicKey: String) {
+    public func deletePrivateKey(for publicKey: String) {
         do {
             try keychain.delete(key: publicKey)
         } catch {
@@ -62,7 +65,7 @@ class Crypto: CryptoStorageProtocol {
         }
     }
     
-    func deleteAgreementSecret(for topic: String) {
+    public func deleteAgreementSecret(for topic: String) {
         do {
             try keychain.delete(key: topic)
         } catch {
@@ -70,10 +73,10 @@ class Crypto: CryptoStorageProtocol {
         }
     }
     
-    func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret {
+    public func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret {
         guard let privateKey = try getPrivateKey(for: selfPublicKey) else {
             print("Key Agreement Error: Private key not found for public key: \(selfPublicKey.hexRepresentation)")
-            throw WalletConnectError.internal(.keyNotFound)
+            throw Crypto.Error.keyNotFound
         }
         return try Crypto.generateAgreementSecret(from: privateKey, peerPublicKey: hexRepresentation)
     }

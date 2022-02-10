@@ -1,6 +1,6 @@
 import Foundation
 
-struct AgreementSecret: Equatable {
+public struct AgreementSecret: Equatable {
     
     let sharedSecret: Data
     let publicKey: AgreementPublicKey
