@@ -13,13 +13,13 @@
 public struct Account: Equatable, Hashable {
     
     /// A blockchain namespace. Usually describes an ecosystem or standard.
-    public var namespace: String
+    public let namespace: String
     
     /// A reference string that identifies a blockchain within a given namespace.
-    public var reference: String
+    public let reference: String
     
     /// The account's address specific to the blockchain.
-    public var address: String
+    public let address: String
     
     /// The CAIP-2 blockchain identifier of the account.
     public var blockchainIdentifier: String {
@@ -45,9 +45,28 @@ public struct Account: Equatable, Hashable {
     public init?(_ string: String) {
         guard String.conformsToCAIP10(string) else { return nil }
         let splits = string.split(separator: ":")
-        self.namespace = String(splits[0])
-        self.reference = String(splits[1])
-        self.address = String(splits[2])
+        self.init(namespace: String(splits[0]), reference: String(splits[1]), address: String(splits[2]))
+    }
+    
+    /**
+     Creates an account instance from a chain ID and an address.
+     
+     This initializer returns nil if the `chainIdentifier` parameter doesn't represent a valid chain id in conformance with
+     [CAIP-2](https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-2.md) or if the `address` format is invalid.
+     */
+    public init?(chainIdentifier: String, address: String) {
+        self.init("\(chainIdentifier):\(address)")
+    }
+    
+    /**
+     Creates an account instance directly from the base components.
+     
+     This initializer bypass any checks to CAIP conformance, make sure to pass valid values as parameters.
+     */
+    public init(namespace: String, reference: String, address: String) {
+        self.namespace = namespace
+        self.reference = reference
+        self.address = address
     }
 }
 
