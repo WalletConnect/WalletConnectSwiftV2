@@ -6,15 +6,15 @@ protocol KeychainStorageProtocol {
     func delete(key: String) throws
 }
 
-final class KeychainStorage: KeychainStorageProtocol {
+final class KeychainStorage: KeychainStorageProtocol{
     
     private let service: String
     
     private let secItem: KeychainServiceProtocol
     
-    init(keychainService: KeychainServiceProtocol = KeychainServiceWrapper(), uniqueIdentifier: String? = nil) {
+    init(keychainService: KeychainServiceProtocol = KeychainServiceWrapper(), serviceIdentifier: String) {
         self.secItem = keychainService
-        service = "com.walletconnect.sdk.\(uniqueIdentifier ?? "")"
+        service = serviceIdentifier
     }
     
     func add<T>(_ item: T, forKey key: String) throws where T : GenericPasswordConvertible {

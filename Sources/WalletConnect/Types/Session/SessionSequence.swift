@@ -1,4 +1,5 @@
 import Foundation
+import KMS
 
 struct SessionSequence: ExpirableSequence {
     

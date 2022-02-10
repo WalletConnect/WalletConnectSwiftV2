@@ -25,15 +25,15 @@ public struct AgreementPublicKey: Equatable {
         self.key = publicKey
     }
     
-    init<D>(rawRepresentation data: D) throws where D: ContiguousBytes {
+    public init<D>(rawRepresentation data: D) throws where D: ContiguousBytes {
         self.key = try Curve25519.KeyAgreement.PublicKey(rawRepresentation: data)
     }
     
-    var rawRepresentation: Data {
+    public var rawRepresentation: Data {
         key.rawRepresentation
     }
     
-    var hexRepresentation: String {
+    public var hexRepresentation: String {
         key.rawRepresentation.toHexString()
     }
 }
@@ -62,15 +62,15 @@ public struct AgreementPrivateKey: GenericPasswordConvertible, Equatable {
         self.key = Curve25519.KeyAgreement.PrivateKey()
     }
     
-    init<D>(rawRepresentation: D) throws where D : ContiguousBytes {
+    public init<D>(rawRepresentation: D) throws where D : ContiguousBytes {
         self.key = try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: rawRepresentation)
     }
     
-    var rawRepresentation: Data {
+    public var rawRepresentation: Data {
         key.rawRepresentation
     }
     
-    var publicKey: AgreementPublicKey {
+    public var publicKey: AgreementPublicKey {
         AgreementPublicKey(publicKey: key.publicKey)
     }
     

@@ -4,20 +4,24 @@ import WalletConnectUtils
 public protocol JSONRPCSerializing {
     func serialize(topic: String, encodable: Encodable) throws -> String
     func tryDeserialize<T: Codable>(topic: String, message: String) -> T?
-    var codec: Codec {get}
 }
 
 public class JSONRPCSerializer: JSONRPCSerializing {
     
     private let crypto: Crypto
-    let codec: Codec
+    private let codec: Codec
     
     init(crypto: Crypto, codec: Codec = AES_256_CBC_HMAC_SHA256_Codec()) {
         self.crypto = crypto
         self.codec = codec
     }
     
-    func serialize(topic: String, encodable: Encodable) throws -> String {
+    public init(crypto: Crypto) {
+        self.crypto = crypto
+        self.codec = AES_256_CBC_HMAC_SHA256_Codec()
+    }
+    
+    public func serialize(topic: String, encodable: Encodable) throws -> String {
         let messageJson = try encodable.json()
         var message: String
         if let agreementKeys = try? crypto.getAgreementSecret(for: topic) {
@@ -28,7 +32,7 @@ public class JSONRPCSerializer: JSONRPCSerializing {
         return message
     }
     
-    func tryDeserialize<T: Codable>(topic: String, message: String) -> T? {
+    public func tryDeserialize<T: Codable>(topic: String, message: String) -> T? {
         do {
             let deserializedJsonRpcRequest: T
             if let agreementKeys = try? crypto.getAgreementSecret(for: topic) {

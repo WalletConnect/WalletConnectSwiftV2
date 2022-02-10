@@ -1,23 +1,17 @@
 import Foundation
 
-// TODO: Come up with better naming conventions
-public protocol CryptoStorageProtocol {
-    func createX25519KeyPair() throws -> AgreementPublicKey
-    func setPrivateKey(_ privateKey: AgreementPrivateKey) throws
-    func setAgreementSecret(_ agreementSecret: AgreementSecret, topic: String) throws
-    func getPrivateKey(for publicKey: AgreementPublicKey) throws -> AgreementPrivateKey?
-    func getAgreementSecret(for topic: String) throws -> AgreementSecret?
-    func deletePrivateKey(for publicKey: String)
-    func deleteAgreementSecret(for topic: String)
-    func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret
-}
 
-public class Crypto: CryptoStorageProtocol {
+
+public class Crypto {
     enum Error: Swift.Error {
         case keyNotFound
     }
     
     private var keychain: KeychainStorageProtocol
+    
+    public init(serviceIdentifier: String) {
+        self.keychain =  KeychainStorage(serviceIdentifier:  serviceIdentifier)
+    }
     
     init(keychain: KeychainStorageProtocol) {
         self.keychain = keychain

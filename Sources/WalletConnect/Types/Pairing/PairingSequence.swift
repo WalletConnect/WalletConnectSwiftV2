@@ -1,4 +1,5 @@
 import Foundation
+import KMS
 
 struct PairingSequence: ExpirableSequence {
     let topic: String
