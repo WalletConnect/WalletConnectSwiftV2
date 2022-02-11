@@ -2,7 +2,7 @@
 
 import Foundation
 import WalletConnectUtils
-import KMS
+@testable import KMS
 @testable import WalletConnect
 
 

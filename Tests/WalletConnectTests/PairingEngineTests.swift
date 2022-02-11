@@ -1,6 +1,7 @@
 import XCTest
 @testable import WalletConnect
 import TestingUtils
+@testable import KMS
 import WalletConnectUtils
 
 func deriveTopic(publicKey: String, privateKey: AgreementPrivateKey) -> String {
