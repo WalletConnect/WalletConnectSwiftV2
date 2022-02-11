@@ -1,6 +1,6 @@
 import Foundation
 @testable import WalletConnect
-@testable import KMS
+@testable import WalletConnectKMS
 
 final class CryptoStorageProtocolMock: KeyManagementServiceProtocol {
     

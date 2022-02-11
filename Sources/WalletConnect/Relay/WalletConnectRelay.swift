@@ -2,7 +2,7 @@
 import Foundation
 import Combine
 import WalletConnectUtils
-import KMS
+import WalletConnectKMS
 
 struct WCResponse {
     let topic: String

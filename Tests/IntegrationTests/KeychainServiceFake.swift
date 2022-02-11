@@ -1,6 +1,6 @@
 import Foundation
 @testable import WalletConnect
-@testable import KMS
+@testable import WalletConnectKMS
 
 // This file is a copy from the one in unit tests target, would be nice to figure out a way to share it between targets.
 final class KeychainServiceFake: KeychainServiceProtocol {

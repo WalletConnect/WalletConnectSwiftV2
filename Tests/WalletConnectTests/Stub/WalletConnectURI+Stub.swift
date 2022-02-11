@@ -1,5 +1,5 @@
 @testable import WalletConnect
-@testable import KMS
+@testable import WalletConnectKMS
 
 extension WalletConnectURI {
     

@@ -1,5 +1,5 @@
 import Foundation
-@testable import KMS
+@testable import WalletConnectKMS
 
 extension AgreementSecret {
     

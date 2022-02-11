@@ -1,7 +1,7 @@
 // 
 
 import Foundation
-@testable import KMS
+@testable import WalletConnectKMS
 
 enum SerializerTestData {
     static let emptyAgreementSecret = AgreementSecret(sharedSecret: Data(hex: ""), publicKey: AgreementPrivateKey().publicKey)

@@ -3,7 +3,7 @@
 import Foundation
 
 import XCTest
-@testable import KMS
+@testable import WalletConnectKMS
 @testable import TestingUtils
 
 final class SerializerTests: XCTestCase {

@@ -1,11 +1,9 @@
 import Foundation
 import Combine
 import WalletConnectUtils
-import KMS
-
+import WalletConnectKMS
 
 final class PairingEngine {
-    
     var onApprovalAcknowledgement: ((Pairing) -> Void)?
     var onSessionProposal: ((SessionProposal)->())?
     var onPairingApproved: ((Pairing, SessionPermissions, RelayProtocolOptions)->())?

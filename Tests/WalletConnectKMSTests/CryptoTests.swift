@@ -1,5 +1,5 @@
 import XCTest
-@testable import KMS
+@testable import WalletConnectKMS
 
 fileprivate extension Error {
     var isKeyNotFoundError: Bool {

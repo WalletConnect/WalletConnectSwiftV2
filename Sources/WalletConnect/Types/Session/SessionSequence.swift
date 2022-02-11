@@ -1,5 +1,5 @@
 import Foundation
-import KMS
+import WalletConnectKMS
 
 struct SessionSequence: ExpirableSequence {
     

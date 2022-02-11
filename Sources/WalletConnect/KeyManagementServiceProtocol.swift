@@ -1,6 +1,6 @@
 
 import Foundation
-import KMS
+import WalletConnectKMS
 
 // TODO: Come up with better naming conventions
 public protocol KeyManagementServiceProtocol {

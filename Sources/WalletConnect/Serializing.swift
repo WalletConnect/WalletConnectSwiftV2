@@ -1,6 +1,6 @@
 
 import Foundation
-import KMS
+import WalletConnectKMS
 
 public protocol Serializing {
     func serialize(topic: String, encodable: Encodable) throws -> String

@@ -2,7 +2,7 @@
 import Foundation
 import Relayer
 import WalletConnectUtils
-import KMS
+import WalletConnectKMS
 #if os(iOS)
 import UIKit
 #endif

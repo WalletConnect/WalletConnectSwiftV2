@@ -1,7 +1,7 @@
 import XCTest
 import WalletConnectUtils
 import TestingUtils
-import KMS
+import WalletConnectKMS
 @testable import WalletConnect
 
 final class SessionEngineTests: XCTestCase {

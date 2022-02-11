@@ -4,7 +4,7 @@ import XCTest
 import WalletConnectUtils
 import TestingUtils
 @testable import WalletConnect
-@testable import KMS
+@testable import WalletConnectKMS
 
 fileprivate extension Session.Permissions {
     static func stub(methods: Set<String> = [], notifications: [String] = []) -> Session.Permissions {

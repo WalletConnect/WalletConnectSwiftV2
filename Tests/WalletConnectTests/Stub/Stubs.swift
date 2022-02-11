@@ -1,5 +1,5 @@
 @testable import WalletConnect
-import KMS
+import WalletConnectKMS
 
 extension AppMetadata {
     static func stub() -> AppMetadata {
