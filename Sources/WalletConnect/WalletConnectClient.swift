@@ -126,7 +126,7 @@ public final class WalletConnectClient {
     /// - When topic is already in use
     public func pair(uri: String) throws {
         guard let pairingURI = WalletConnectURI(string: uri) else {
-            throw WalletConnectError.internal(.malformedPairingURI)
+            throw WalletConnectError.malformedPairingURI
         }
         try pairingQueue.sync {
             try pairingEngine.approve(pairingURI)
