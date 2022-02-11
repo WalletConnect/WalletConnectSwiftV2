@@ -7,12 +7,12 @@ enum WalletConnectError: Error {
     
     case noSessionMatchingTopic(String)
     case sessionNotSettled(String)
+    case invalidCAIP10Account(String)
     case invalidPermissions
+    case invalidNotificationType
     case unauthorizedNonControllerCall
     
     case `internal`(_ reason: InternalReason)
-
-    case unauthrorized(_ reason: UnauthorizedReason)
     
     enum InternalReason: Error {
         case notApproved
@@ -27,14 +27,6 @@ enum WalletConnectError: Error {
         case noJsonRpcRequestMatchingResponse
         case pairWithExistingPairingForbidden
     }
-    
-    public enum UnauthorizedReason: Error {
-        case unauthorizedTargetChain
-        case unauthorizedJsonRpcMethod
-        case unauthorizedNotificationType
-        case unauthorizedUpdateRequest
-        case unauthorizedUpgradeRequest
-    }
 }
 
 extension WalletConnectError: CustomStringConvertible {
@@ -47,8 +39,6 @@ extension WalletConnectError: CustomStringConvertible {
         switch self {
         case .internal(let reason):
             return reason.code
-        case .unauthrorized(let reason):
-            return reason.code
         default:
             return 0
         }
@@ -60,13 +50,15 @@ extension WalletConnectError: CustomStringConvertible {
             return "No session found matching topic \(topic)."
         case .sessionNotSettled(let topic):
             return "Session is not settled on topic \(topic)."
+        case .invalidCAIP10Account(let account):
+            return "The account ID \(account) does not conform to CAIP-10."
         case .invalidPermissions:
             return "Permission set is invalid."
+        case .invalidNotificationType:
+            return "Invalid notification type."
         case .unauthorizedNonControllerCall:
             return "Method must be called by a controller client."
         case .internal(let reason):
-            return reason.description
-        case .unauthrorized(let reason):
             return reason.description
         }
     }
@@ -116,34 +108,6 @@ extension WalletConnectError.InternalReason: CustomStringConvertible {
             return "No matching JSON RPC request for given response"
         case .pairWithExistingPairingForbidden:
             return "Pairing for uri already exist - Action Forbidden"
-        }
-    }
-}
-
-extension WalletConnectError.UnauthorizedReason: CustomStringConvertible {
-    
-    var code: Int {
-        switch self {
-        case .unauthorizedTargetChain: return 3000
-        case .unauthorizedJsonRpcMethod: return 3001
-        case .unauthorizedNotificationType: return 3002
-        case .unauthorizedUpdateRequest: return 3003
-        case .unauthorizedUpgradeRequest: return 3004
-        }
-    }
-    
-    var description: String {
-        switch self {
-        case .unauthorizedTargetChain:
-            return "Unauthorized Target ChainId Requested"
-        case .unauthorizedJsonRpcMethod:
-            return "Unauthorized JSON-RPC Method Requested"
-        case .unauthorizedNotificationType:
-            return "Unauthorized Notification Type Requested"
-        case .unauthorizedUpdateRequest:
-            return "Unauthorized update request"
-        case .unauthorizedUpgradeRequest:
-            return "Non-Controller Client is not authorized to upgrade session"
         }
     }
 }

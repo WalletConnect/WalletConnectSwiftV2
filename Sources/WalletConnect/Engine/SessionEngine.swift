@@ -119,30 +119,19 @@ final class SessionEngine {
         sequencesStore.setSequence(settledSession)
         wcSubscriber.setSubscription(topic: settledTopic)
         
-        relayer.request(.wcSessionApprove(approval), onTopic: proposal.topic) { [weak self] result in
-            switch result {
-            case .success:
-                self?.logger.debug("Success on wc_sessionApprove, published on topic: \(proposal.topic), settled topic: \(settledTopic)")
-            case .failure(let error):
-                self?.logger.error(error)
-            }
-        }
+        relayer.request(.wcSessionApprove(approval), onTopic: proposal.topic)
     }
     
     func reject(proposal: SessionProposal, reason: SessionType.Reason ) {
         let rejectParams = SessionType.RejectParams(reason: reason)
-        relayer.request(.wcSessionReject(rejectParams), onTopic: proposal.topic) { [weak self] result in
-            self?.logger.debug("Reject result: \(result)")
-        }
+        relayer.request(.wcSessionReject(rejectParams), onTopic: proposal.topic)
     }
     
     func delete(topic: String, reason: Reason) {
         logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
         sequencesStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
-        relayer.request(.wcSessionDelete(SessionType.DeleteParams(reason: reason.toInternal())), onTopic: topic) { [weak self] result in
-            self?.logger.debug("Session Delete result: \(result)")
-        }
+        relayer.request(.wcSessionDelete(SessionType.DeleteParams(reason: reason.toInternal())), onTopic: topic)
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
@@ -195,15 +184,18 @@ final class SessionEngine {
     
     func update(topic: String, accounts: Set<String>) throws {
         guard var session = sequencesStore.getSequence(forTopic: topic) else {
-            throw WalletConnectError.internal(.noSequenceForTopic)
+            throw WalletConnectError.noSessionMatchingTopic(topic)
+        }
+        guard session.isSettled else {
+            throw WalletConnectError.sessionNotSettled(topic)
+        }
+        guard session.selfIsController else {
+            throw WalletConnectError.unauthorizedNonControllerCall
         }
         for account in accounts {
             if !String.conformsToCAIP10(account) {
-                throw WalletConnectError.internal(.notApproved) // TODO: Use a suitable error cases
+                throw WalletConnectError.invalidCAIP10Account(account)
             }
-        }
-        if !session.selfIsController || session.settled?.status != .acknowledged {
-            throw WalletConnectError.unauthrorized(.unauthorizedUpdateRequest)
         }
         session.update(accounts)
         sequencesStore.setSequence(session)
@@ -442,7 +434,7 @@ final class SessionEngine {
         } else {
             guard let notifications = session.settled?.permissions.notifications,
                   notifications.types.contains(params.type) else {
-                throw WalletConnectError.unauthrorized(.unauthorizedNotificationType)
+                throw WalletConnectError.invalidNotificationType
             }
         }
     }
