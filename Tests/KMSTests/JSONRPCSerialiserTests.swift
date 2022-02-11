@@ -6,12 +6,12 @@ import XCTest
 @testable import KMS
 @testable import TestingUtils
 
-final class JSONRPCSerializerTests: XCTestCase {
-    var serializer: JSONRPCSerializer!
+final class SerializerTests: XCTestCase {
+    var serializer: Serializer!
     var codec: MockedCodec!
     override func setUp() {
         codec = MockedCodec()
-        self.serializer = JSONRPCSerializer(crypto: Crypto(keychain: KeychainStorageMock()), codec: codec)
+        self.serializer = Serializer(crypto: Crypto(keychain: KeychainStorageMock()), codec: codec)
     }
     
     override func tearDown() {

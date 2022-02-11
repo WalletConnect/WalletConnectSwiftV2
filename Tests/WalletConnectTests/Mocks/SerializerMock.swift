@@ -6,7 +6,7 @@ import WalletConnectUtils
 @testable import WalletConnect
 
 
-class MockedJSONRPCSerializer: JSONRPCSerializing {
+class SerializerMock: Serializing {
     var deserialized: Any!
     var serialized: String!
     

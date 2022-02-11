@@ -2,7 +2,10 @@ import Foundation
 import WalletConnectUtils
 
 
-public class JSONRPCSerializer {
+public class Serializer {
+    enum Error: String, Swift.Error {
+        case messageToShort = "Error: message is too short"
+    }
     private let crypto: Crypto
     private let codec: Codec
     
@@ -16,6 +19,7 @@ public class JSONRPCSerializer {
         self.codec = AES_256_CBC_HMAC_SHA256_Codec()
     }
     
+    /// Encrypts and serializes an object into (iv + publicKey + mac + cipherText) formatted sting
     /// - Parameters:
     ///   - topic: Topic that is associated with a symetric key for encrypting particular codable object
     ///   - message: Message to encrypt and serialize
@@ -31,28 +35,29 @@ public class JSONRPCSerializer {
         return message
     }
     
+    /// Deserializes and decrypts an object from (iv + publicKey + mac + cipherText) formatted sting
     /// - Parameters:
     ///   - topic: Topic that is associated with a symetric key for decrypting particular codable object
     ///   - message: Message to deserialize and decrypt
     /// - Returns: Deserialized object
     public func tryDeserialize<T: Codable>(topic: String, message: String) -> T? {
         do {
-            let deserializedJsonRpcRequest: T
+            let deserializedCodable: T
             if let agreementKeys = try? crypto.getAgreementSecret(for: topic) {
-                deserializedJsonRpcRequest = try deserialize(message: message, symmetricKey: agreementKeys.sharedSecret)
+                deserializedCodable = try deserialize(message: message, symmetricKey: agreementKeys.sharedSecret)
             } else {
                 let jsonData = Data(hex: message)
-                deserializedJsonRpcRequest = try JSONDecoder().decode(T.self, from: jsonData)
+                deserializedCodable = try JSONDecoder().decode(T.self, from: jsonData)
             }
-            return deserializedJsonRpcRequest
+            return deserializedCodable
         } catch {
             return nil
         }
     }
     
     private func deserialize<T: Codable>(message: String, symmetricKey: Data) throws -> T {
-        let JSONRPCData = try decrypt(message: message, symmetricKey: symmetricKey)
-        return try JSONDecoder().decode(T.self, from: JSONRPCData)
+        let decryptedData = try decrypt(message: message, symmetricKey: symmetricKey)
+        return try JSONDecoder().decode(T.self, from: decryptedData)
     }
     
     private func encrypt(json: String, agreementKeys: AgreementSecret) throws -> String {
@@ -66,17 +71,17 @@ public class JSONRPCSerializer {
     
     private func decrypt(message: String, symmetricKey: Data) throws -> Data {
         let encryptionPayload = try deserializeIntoPayload(message: message)
-        let decryptedJSONRPC = try codec.decode(payload: encryptionPayload, sharedSecret: symmetricKey)
-        guard let JSONRPCData = decryptedJSONRPC.data(using: .utf8) else {
+        let decryptedString = try codec.decode(payload: encryptionPayload, sharedSecret: symmetricKey)
+        guard let decryptedData = decryptedString.data(using: .utf8) else {
             throw DataConversionError.stringToDataFailed
         }
-        return JSONRPCData
+        return decryptedData
     }
     
     private func deserializeIntoPayload(message: String) throws -> EncryptionPayload {
         let data = Data(hex: message)
         guard data.count > EncryptionPayload.ivLength + EncryptionPayload.publicKeyLength + EncryptionPayload.macLength else {
-            throw JSONRPCSerializerError.messageToShort
+            throw Error.messageToShort
         }
         let pubKeyRangeStartIndex = EncryptionPayload.ivLength
         let macStartIndex = pubKeyRangeStartIndex + EncryptionPayload.publicKeyLength

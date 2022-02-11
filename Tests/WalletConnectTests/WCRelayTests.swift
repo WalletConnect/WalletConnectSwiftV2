@@ -9,15 +9,15 @@ import WalletConnectUtils
 class WalletConnectRelayTests: XCTestCase {
     var wcRelay: WalletConnectRelay!
     var networkRelayer: MockedNetworkRelayer!
-    var serializer: MockedJSONRPCSerializer!
+    var serializer: SerializerMock!
 
     private var publishers = [AnyCancellable]()
 
     override func setUp() {
         let logger = ConsoleLoggerMock()
-        serializer = MockedJSONRPCSerializer()
+        serializer = SerializerMock()
         networkRelayer = MockedNetworkRelayer()
-        wcRelay = WalletConnectRelay(networkRelayer: networkRelayer, jsonRpcSerializer: serializer, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<WalletConnect.JsonRpcRecord>(defaults: RuntimeKeyValueStorage(), identifier: "")))
+        wcRelay = WalletConnectRelay(networkRelayer: networkRelayer, serializer: serializer, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<WalletConnect.JsonRpcRecord>(defaults: RuntimeKeyValueStorage(), identifier: "")))
     }
 
     override func tearDown() {

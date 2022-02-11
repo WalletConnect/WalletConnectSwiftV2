@@ -2,9 +2,9 @@
 import Foundation
 import KMS
 
-public protocol JSONRPCSerializing {
+public protocol Serializing {
     func serialize(topic: String, encodable: Encodable) throws -> String
     func tryDeserialize<T: Codable>(topic: String, message: String) -> T?
 }
 
-extension JSONRPCSerializer: JSONRPCSerializing {}
+extension Serializer: Serializing {}
