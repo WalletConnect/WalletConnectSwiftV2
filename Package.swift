@@ -13,9 +13,6 @@ let package = Package(
             name: "WalletConnect",
             targets: ["WalletConnect"]),
     ],
-    dependencies: [
-
-    ],
     targets: [
         .target(
             name: "WalletConnect",
