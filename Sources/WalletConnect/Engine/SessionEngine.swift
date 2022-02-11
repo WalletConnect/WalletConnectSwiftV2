@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import WalletConnectUtils
+import WalletConnectKMS
 
 final class SessionEngine {
     var onSessionPayloadRequest: ((Request)->())?
@@ -16,21 +17,21 @@ final class SessionEngine {
     private let sequencesStore: SessionSequenceStorage
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
-    private let crypto: CryptoStorageProtocol
+    private let kms: KeyManagementServiceProtocol
     private var metadata: AppMetadata
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
     private let topicInitializer: () -> String?
 
     init(relay: WalletConnectRelaying,
-         crypto: CryptoStorageProtocol,
+         kms: KeyManagementServiceProtocol,
          subscriber: WCSubscribing,
          sequencesStore: SessionSequenceStorage,
          metadata: AppMetadata,
          logger: ConsoleLogging,
          topicGenerator: @escaping () -> String? = String.generateTopic) {
         self.relayer = relay
-        self.crypto = crypto
+        self.kms = kms
         self.metadata = metadata
         self.wcSubscriber = subscriber
         self.sequencesStore = sequencesStore
@@ -64,7 +65,7 @@ final class SessionEngine {
         }
         logger.debug("Propose Session on topic: \(pendingSessionTopic)")
         
-        let publicKey = try! crypto.createX25519KeyPair()
+        let publicKey = try! kms.createX25519KeyPair()
         
         let proposal = SessionProposal(
             topic: pendingSessionTopic,
@@ -78,8 +79,8 @@ final class SessionEngine {
         
         sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: pendingSessionTopic)
-        let pairingAgreementSecret = try! crypto.getAgreementSecret(for: settledPairing.topic)!
-        try! crypto.setAgreementSecret(pairingAgreementSecret, topic: proposal.topic)
+        let pairingAgreementSecret = try! kms.getAgreementSecret(for: settledPairing.topic)!
+        try! kms.setAgreementSecret(pairingAgreementSecret, topic: proposal.topic)
         
         let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: proposal)
         let pairingPayloadParams = PairingType.PayloadParams(request: request)
@@ -97,8 +98,8 @@ final class SessionEngine {
     func approve(proposal: SessionProposal, accounts: Set<String>) {
         logger.debug("Approve session")
         
-        let selfPublicKey = try! crypto.createX25519KeyPair()
-        let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposal.proposer.publicKey)
+        let selfPublicKey = try! kms.createX25519KeyPair()
+        let agreementKeys = try! kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposal.proposer.publicKey)
         
         let settledTopic = agreementKeys.derivedTopic()
         let pendingSession = SessionSequence.buildResponded(proposal: proposal, agreementKeys: agreementKeys, metadata: metadata)
@@ -115,7 +116,7 @@ final class SessionEngine {
         sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: proposal.topic)
         
-        try! crypto.setAgreementSecret(agreementKeys, topic: settledTopic)
+        try! kms.setAgreementSecret(agreementKeys, topic: settledTopic)
         sequencesStore.setSequence(settledSession)
         wcSubscriber.setSubscription(topic: settledTopic)
         
@@ -287,9 +288,9 @@ final class SessionEngine {
         let agreementKeys: AgreementSecret
         do {
             let publicKey = try session.getPublicKey()
-            agreementKeys = try crypto.performKeyAgreement(selfPublicKey: publicKey, peerPublicKey: approveParams.responder.publicKey)
+            agreementKeys = try kms.performKeyAgreement(selfPublicKey: publicKey, peerPublicKey: approveParams.responder.publicKey)
             settledTopic = agreementKeys.derivedTopic()
-            try crypto.setAgreementSecret(agreementKeys, topic: settledTopic)
+            try kms.setAgreementSecret(agreementKeys, topic: settledTopic)
         } catch {
             relayer.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
             return
@@ -441,8 +442,8 @@ final class SessionEngine {
     
     private func setupExpirationHandling() {
         sequencesStore.onSequenceExpiration = { [weak self] topic, publicKey in
-            self?.crypto.deletePrivateKey(for: publicKey)
-            self?.crypto.deleteAgreementSecret(for: topic)
+            self?.kms.deletePrivateKey(for: publicKey)
+            self?.kms.deleteAgreementSecret(for: topic)
         }
     }
     
@@ -479,8 +480,8 @@ final class SessionEngine {
             break
         case .error:
             wcSubscriber.removeSubscription(topic: proposeParams.topic)
-            crypto.deletePrivateKey(for: proposeParams.proposer.publicKey)
-            crypto.deleteAgreementSecret(for: topic)
+            kms.deletePrivateKey(for: proposeParams.proposer.publicKey)
+            kms.deleteAgreementSecret(for: topic)
             sequencesStore.delete(topic: proposeParams.topic)
         }
     }
@@ -496,7 +497,7 @@ final class SessionEngine {
         switch result {
         case .response:
             guard let settledSession = sequencesStore.getSequence(forTopic: settledTopic) else {return}
-            crypto.deleteAgreementSecret(for: topic)
+            kms.deleteAgreementSecret(for: topic)
             wcSubscriber.removeSubscription(topic: topic)
             sequencesStore.delete(topic: topic)
             let sessionSuccess = Session(
@@ -511,9 +512,9 @@ final class SessionEngine {
             wcSubscriber.removeSubscription(topic: settledTopic)
             sequencesStore.delete(topic: topic)
             sequencesStore.delete(topic: settledTopic)
-            crypto.deleteAgreementSecret(for: topic)
-            crypto.deleteAgreementSecret(for: settledTopic)
-            crypto.deletePrivateKey(for: pendingSession.publicKey)
+            kms.deleteAgreementSecret(for: topic)
+            kms.deleteAgreementSecret(for: settledTopic)
+            kms.deletePrivateKey(for: pendingSession.publicKey)
         }
     }
     

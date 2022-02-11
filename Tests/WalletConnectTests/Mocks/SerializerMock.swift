@@ -2,17 +2,13 @@
 
 import Foundation
 import WalletConnectUtils
+@testable import WalletConnectKMS
 @testable import WalletConnect
 
-class MockedJSONRPCSerializer: JSONRPCSerializing {
 
-    var codec: Codec
+class SerializerMock: Serializing {
     var deserialized: Any!
     var serialized: String!
-    
-    init(codec: Codec = MockedCodec()) {
-        self.codec = codec
-    }
     
     func serialize(topic: String, encodable: Encodable) throws -> String {
         try serialize(json: try encodable.json(), agreementKeys: AgreementSecret(sharedSecret: Data(), publicKey: AgreementPrivateKey().publicKey))

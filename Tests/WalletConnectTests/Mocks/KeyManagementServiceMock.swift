@@ -1,7 +1,8 @@
 import Foundation
 @testable import WalletConnect
+@testable import WalletConnectKMS
 
-final class CryptoStorageProtocolMock: CryptoStorageProtocol {
+final class KeyManagementServiceMock: KeyManagementServiceProtocol {
     
     func createX25519KeyPair() throws -> AgreementPublicKey {
         defer { privateKeyStub = AgreementPrivateKey() }
@@ -56,7 +57,7 @@ final class CryptoStorageProtocolMock: CryptoStorageProtocol {
     }
 }
 
-extension CryptoStorageProtocolMock {
+extension KeyManagementServiceMock {
     
     func hasPrivateKey(for publicKeyHex: String) -> Bool {
         privateKeys[publicKeyHex] != nil

@@ -17,7 +17,7 @@ extension Curve25519.KeyAgreement.PrivateKey: Equatable {
 
 // MARK: - Public Key
 
-struct AgreementPublicKey: Equatable {
+public struct AgreementPublicKey: Equatable {
     
     fileprivate let key: Curve25519.KeyAgreement.PublicKey
     
@@ -25,27 +25,27 @@ struct AgreementPublicKey: Equatable {
         self.key = publicKey
     }
     
-    init<D>(rawRepresentation data: D) throws where D: ContiguousBytes {
+    public init<D>(rawRepresentation data: D) throws where D: ContiguousBytes {
         self.key = try Curve25519.KeyAgreement.PublicKey(rawRepresentation: data)
     }
     
-    var rawRepresentation: Data {
+    public var rawRepresentation: Data {
         key.rawRepresentation
     }
     
-    var hexRepresentation: String {
+    public var hexRepresentation: String {
         key.rawRepresentation.toHexString()
     }
 }
 
 extension AgreementPublicKey: Codable {
     
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(key.rawRepresentation)
     }
     
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let buffer = try container.decode(Data.self)
         try self.init(rawRepresentation: buffer)
@@ -54,23 +54,23 @@ extension AgreementPublicKey: Codable {
 
 // MARK: - Private Key
 
-struct AgreementPrivateKey: GenericPasswordConvertible, Equatable {
+public struct AgreementPrivateKey: GenericPasswordConvertible, Equatable {
 
     private let key: Curve25519.KeyAgreement.PrivateKey
     
-    init() {
+    public init() {
         self.key = Curve25519.KeyAgreement.PrivateKey()
     }
     
-    init<D>(rawRepresentation: D) throws where D : ContiguousBytes {
+    public init<D>(rawRepresentation: D) throws where D : ContiguousBytes {
         self.key = try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: rawRepresentation)
     }
     
-    var rawRepresentation: Data {
+    public var rawRepresentation: Data {
         key.rawRepresentation
     }
     
-    var publicKey: AgreementPublicKey {
+    public var publicKey: AgreementPublicKey {
         AgreementPublicKey(publicKey: key.publicKey)
     }
     

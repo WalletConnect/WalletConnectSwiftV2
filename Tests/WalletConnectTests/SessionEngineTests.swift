@@ -1,6 +1,7 @@
 import XCTest
 import WalletConnectUtils
 import TestingUtils
+import WalletConnectKMS
 @testable import WalletConnect
 
 final class SessionEngineTests: XCTestCase {
@@ -10,7 +11,7 @@ final class SessionEngineTests: XCTestCase {
     var relayMock: MockedWCRelay!
     var subscriberMock: MockedSubscriber!
     var storageMock: SessionSequenceStorageMock!
-    var cryptoMock: CryptoStorageProtocolMock!
+    var cryptoMock: KeyManagementServiceMock!
     
     var topicGenerator: TopicGenerator!
     
@@ -20,7 +21,7 @@ final class SessionEngineTests: XCTestCase {
         relayMock = MockedWCRelay()
         subscriberMock = MockedSubscriber()
         storageMock = SessionSequenceStorageMock()
-        cryptoMock = CryptoStorageProtocolMock()
+        cryptoMock = KeyManagementServiceMock()
         topicGenerator = TopicGenerator()
     }
 
@@ -38,7 +39,7 @@ final class SessionEngineTests: XCTestCase {
         let logger = ConsoleLoggerMock()
         engine = SessionEngine(
             relay: relayMock,
-            crypto: cryptoMock,
+            kms: cryptoMock,
             subscriber: subscriberMock,
             sequencesStore: storageMock,
             metadata: metadata,
