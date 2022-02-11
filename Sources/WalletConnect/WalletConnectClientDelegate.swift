@@ -36,7 +36,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     /// Tells the delegate that extra accounts has been included in session sequence
     ///
     /// Function is executed on controller and non-controller client when both communicating peers have successfully included new accounts requested by the controller client.
-    func didUpdate(sessionTopic: String, accounts: Set<String>)
+    func didUpdate(sessionTopic: String, accounts: Set<Account>)
     
     /// Tells the delegate that the client has settled a session.
     ///

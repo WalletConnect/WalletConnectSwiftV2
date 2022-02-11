@@ -135,8 +135,8 @@ public final class WalletConnectClient {
     /// - Parameters:
     ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate function: `didReceive(sessionProposal: Session.Proposal)`
     ///   - accounts: A Set of accounts that the dapp will be allowed to request methods executions on.
-    public func approve(proposal: Session.Proposal, accounts: Set<String>) {
-        sessionEngine.approve(proposal: proposal.proposal, accounts: accounts)
+    public func approve(proposal: Session.Proposal, accounts: Set<Account>) {
+        sessionEngine.approve(proposal: proposal.proposal, accounts: Set(accounts.map { $0.absoluteString }))
     }
     
     /// For the responder to reject a session proposal.
@@ -151,12 +151,8 @@ public final class WalletConnectClient {
     /// - Parameters:
     ///   - topic: Topic of the session that is intended to be updated.
     ///   - accounts: Set of accounts that will be allowed to be used by the session after the update.
-    public func update(topic: String, accounts: Set<String>) {
-        do {
-            try sessionEngine.update(topic: topic, accounts: accounts)
-        } catch {
-            print("Error on session update call: \(error)")
-        }
+    public func update(topic: String, accounts: Set<Account>) throws {
+        try sessionEngine.update(topic: topic, accounts: Set(accounts.map { $0.absoluteString }))
     }
     
     /// For the responder to upgrade session permissions
@@ -303,7 +299,7 @@ public final class WalletConnectClient {
             delegate?.didUpgrade(sessionTopic: topic, permissions: upgradedPermissions)
         }
         sessionEngine.onSessionUpdate = { [unowned self] topic, accounts in
-            delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
+            delegate?.didUpdate(sessionTopic: topic, accounts: Set(accounts.compactMap { Account($0) }))
         }
         sessionEngine.onNotificationReceived = { [unowned self] topic, notification in
             delegate?.didReceive(notification: notification, sessionTopic: topic)

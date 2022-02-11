@@ -31,7 +31,7 @@ class ClientDelegate: WalletConnectClientDelegate {
         onSessionResponse?(sessionResponse)
     }
     
-    func didUpdate(sessionTopic: String, accounts: Set<String>) {
+    func didUpdate(sessionTopic: String, accounts: Set<Account>) {
     }
     
     func didUpgrade(sessionTopic: String, permissions: Session.Permissions) {
