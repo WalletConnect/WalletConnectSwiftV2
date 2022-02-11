@@ -79,11 +79,8 @@ final class PairingEngine {
     
     func approve(_ pairingURI: WalletConnectURI) throws {
         let proposal = PairingProposal.createFromURI(pairingURI)
-        guard !proposal.proposer.controller else {
-            throw WalletConnectError.internal(.unauthorizedMatchingController)
-        }
         guard !hasPairing(for: proposal.topic) else {
-            throw WalletConnectError.internal(.pairWithExistingPairingForbidden)
+            return
         }
         
         let selfPublicKey = try! crypto.createX25519KeyPair()

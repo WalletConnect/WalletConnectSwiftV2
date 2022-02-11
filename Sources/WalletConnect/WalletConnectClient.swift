@@ -102,7 +102,7 @@ public final class WalletConnectClient {
         logger.debug("Connecting Application")
         if let topic = topic {
             guard let pairing = pairingEngine.getSettledPairing(for: topic) else {
-                throw WalletConnectError.InternalReason.noSequenceForTopic
+                throw WalletConnectError.noPairingMatchingTopic(topic)
             }
             logger.debug("Proposing session on existing pairing")
             let permissions = SessionPermissions(permissions: sessionPermissions)
