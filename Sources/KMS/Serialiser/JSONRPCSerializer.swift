@@ -1,13 +1,8 @@
 import Foundation
 import WalletConnectUtils
 
-public protocol JSONRPCSerializing {
-    func serialize(topic: String, encodable: Encodable) throws -> String
-    func tryDeserialize<T: Codable>(topic: String, message: String) -> T?
-}
 
-public class JSONRPCSerializer: JSONRPCSerializing {
-    
+public class JSONRPCSerializer {
     private let crypto: Crypto
     private let codec: Codec
     
@@ -21,6 +16,10 @@ public class JSONRPCSerializer: JSONRPCSerializing {
         self.codec = AES_256_CBC_HMAC_SHA256_Codec()
     }
     
+    /// - Parameters:
+    ///   - topic: Topic that is associated with a symetric key for encrypting particular codable object
+    ///   - message: Message to encrypt and serialize
+    /// - Returns: Serialized String
     public func serialize(topic: String, encodable: Encodable) throws -> String {
         let messageJson = try encodable.json()
         var message: String
@@ -32,6 +31,10 @@ public class JSONRPCSerializer: JSONRPCSerializing {
         return message
     }
     
+    /// - Parameters:
+    ///   - topic: Topic that is associated with a symetric key for decrypting particular codable object
+    ///   - message: Message to deserialize and decrypt
+    /// - Returns: Deserialized object
     public func tryDeserialize<T: Codable>(topic: String, message: String) -> T? {
         do {
             let deserializedJsonRpcRequest: T
@@ -43,17 +46,16 @@ public class JSONRPCSerializer: JSONRPCSerializing {
             }
             return deserializedJsonRpcRequest
         } catch {
-//            logger.debug("Type \(T.self) does not match the payload")
             return nil
         }
     }
     
-    func deserialize<T: Codable>(message: String, symmetricKey: Data) throws -> T {
+    private func deserialize<T: Codable>(message: String, symmetricKey: Data) throws -> T {
         let JSONRPCData = try decrypt(message: message, symmetricKey: symmetricKey)
         return try JSONDecoder().decode(T.self, from: JSONRPCData)
     }
     
-    func encrypt(json: String, agreementKeys: AgreementSecret) throws -> String {
+    private func encrypt(json: String, agreementKeys: AgreementSecret) throws -> String {
         let payload = try codec.encode(plainText: json, agreementKeys: agreementKeys)
         let iv = payload.iv.toHexString()
         let publicKey = payload.publicKey.toHexString()

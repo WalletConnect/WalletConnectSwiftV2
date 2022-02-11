@@ -1,7 +1,7 @@
 
 import Foundation
 import XCTest
-@testable import WalletConnect
+@testable import KMS
 
 class AES_256_CBC_HMAC_SHA256_Codec_Test: XCTestCase {
     let message = "Test Message"

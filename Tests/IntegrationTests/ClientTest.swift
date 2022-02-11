@@ -4,6 +4,7 @@ import XCTest
 import WalletConnectUtils
 import TestingUtils
 @testable import WalletConnect
+@testable import KMS
 
 fileprivate extension Session.Permissions {
     static func stub(methods: Set<String> = [], notifications: [String] = []) -> Session.Permissions {
@@ -27,12 +28,13 @@ final class ClientTests: XCTestCase {
 
     static func makeClientDelegate(isController: Bool, relayHost: String, prefix: String, projectId: String) -> ClientDelegate {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
+        let keychain = KeychainStorage(keychainService: KeychainServiceFake(), serviceIdentifier: "")
         let client = WalletConnectClient(
             metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil),
             projectId: projectId,
             relayHost: relayHost,
             logger: logger,
-            keychain: KeychainStorage(keychainService: KeychainServiceFake()),
+            kms: Crypto(keychain: keychain),
             keyValueStorage: RuntimeKeyValueStorage())
         return ClientDelegate(client: client)
     }

@@ -6,7 +6,7 @@ protocol KeychainStorageProtocol {
     func delete(key: String) throws
 }
 
-final class KeychainStorage: KeychainStorageProtocol{
+final class KeychainStorage: KeychainStorageProtocol {
     
     private let service: String
     

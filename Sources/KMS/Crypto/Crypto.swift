@@ -1,7 +1,5 @@
 import Foundation
 
-
-
 public class Crypto {
     enum Error: Swift.Error {
         case keyNotFound

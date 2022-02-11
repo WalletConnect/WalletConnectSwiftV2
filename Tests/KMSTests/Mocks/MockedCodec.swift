@@ -1,7 +1,7 @@
-// 
+ 
 
 import Foundation
-@testable import WalletConnect
+@testable import KMS
 
 class MockedCodec: Codec {
     var hmacAuthenticator: HMACAuthenticating

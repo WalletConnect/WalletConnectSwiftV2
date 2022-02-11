@@ -41,6 +41,9 @@ let package = Package(
         .testTarget(
             name: "RelayerTests",
             dependencies: ["Relayer", "WalletConnectUtils", "TestingUtils"]),
+        .testTarget(
+            name: "KMSTests",
+            dependencies: ["KMS", "WalletConnectUtils", "TestingUtils"]),
         .target(
             name: "TestingUtils",
             dependencies: ["WalletConnectUtils"],

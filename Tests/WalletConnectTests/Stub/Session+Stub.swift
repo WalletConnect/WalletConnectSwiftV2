@@ -1,4 +1,5 @@
 import Foundation
+import KMS
 @testable import WalletConnect
 
 extension SessionSequence {

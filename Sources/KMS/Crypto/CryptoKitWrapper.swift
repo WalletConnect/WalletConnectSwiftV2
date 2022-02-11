@@ -58,7 +58,7 @@ public struct AgreementPrivateKey: GenericPasswordConvertible, Equatable {
 
     private let key: Curve25519.KeyAgreement.PrivateKey
     
-    init() {
+    public init() {
         self.key = Curve25519.KeyAgreement.PrivateKey()
     }
     

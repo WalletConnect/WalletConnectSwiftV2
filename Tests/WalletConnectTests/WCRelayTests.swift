@@ -2,15 +2,14 @@
 import Foundation
 import Combine
 import XCTest
-import TestingUtils
 import WalletConnectUtils
+@testable import TestingUtils
 @testable import WalletConnect
 
 class WalletConnectRelayTests: XCTestCase {
     var wcRelay: WalletConnectRelay!
     var networkRelayer: MockedNetworkRelayer!
     var serializer: MockedJSONRPCSerializer!
-    var crypto: Crypto!
 
     private var publishers = [AnyCancellable]()
 

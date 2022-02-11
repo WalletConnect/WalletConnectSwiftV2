@@ -1,5 +1,5 @@
 import Foundation
-@testable import WalletConnect
+@testable import KMS
 
 final class KeychainStorageMock: KeychainStorageProtocol {
     
