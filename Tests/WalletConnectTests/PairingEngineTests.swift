@@ -5,7 +5,7 @@ import TestingUtils
 import WalletConnectUtils
 
 func deriveTopic(publicKey: String, privateKey: AgreementPrivateKey) -> String {
-    try! Crypto.generateAgreementSecret(from: privateKey, peerPublicKey: publicKey).derivedTopic()
+    try! KeyManagementService.generateAgreementSecret(from: privateKey, peerPublicKey: publicKey).derivedTopic()
 }
 
 final class PairingEngineTests: XCTestCase {

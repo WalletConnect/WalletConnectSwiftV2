@@ -26,7 +26,7 @@ public final class WalletConnectClient {
     private let pairingEngine: PairingEngine
     private let sessionEngine: SessionEngine
     private let relay: WalletConnectRelaying
-    private let crypto: Crypto
+    private let crypto: KeyManagementService
     private let pairingQueue = DispatchQueue(label: "com.walletconnect.sdk.client.pairing", qos: .userInitiated)
     private let history: JsonRpcHistory
 
@@ -42,10 +42,10 @@ public final class WalletConnectClient {
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
     public convenience init(metadata: AppMetadata, projectId: String, relayHost: String, keyValueStorage: KeyValueStorage = UserDefaults.standard) {
-        self.init(metadata: metadata, projectId: projectId, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), kms: Crypto(serviceIdentifier:  "com.walletconnect.sdk"), keyValueStorage: keyValueStorage)
+        self.init(metadata: metadata, projectId: projectId, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), kms: KeyManagementService(serviceIdentifier:  "com.walletconnect.sdk"), keyValueStorage: keyValueStorage)
     }
     
-    init(metadata: AppMetadata, projectId: String, relayHost: String, logger: ConsoleLogging, kms: Crypto, keyValueStorage: KeyValueStorage) {
+    init(metadata: AppMetadata, projectId: String, relayHost: String, logger: ConsoleLogging, kms: KeyManagementService, keyValueStorage: KeyValueStorage) {
         self.metadata = metadata
         self.logger = logger
 //        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
@@ -71,10 +71,10 @@ public final class WalletConnectClient {
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
     public convenience init(metadata: AppMetadata, relayer: Relayer, keyValueStorage: KeyValueStorage = UserDefaults.standard) {
-        self.init(metadata: metadata, relayer: relayer, logger: ConsoleLogger(loggingLevel: .off), kms: Crypto(serviceIdentifier:  "com.walletconnect.sdk"), keyValueStorage: keyValueStorage)
+        self.init(metadata: metadata, relayer: relayer, logger: ConsoleLogger(loggingLevel: .off), kms: KeyManagementService(serviceIdentifier:  "com.walletconnect.sdk"), keyValueStorage: keyValueStorage)
     }
     
-    init(metadata: AppMetadata, relayer: Relayer, logger: ConsoleLogging, kms: Crypto, keyValueStorage: KeyValueStorage) {
+    init(metadata: AppMetadata, relayer: Relayer, logger: ConsoleLogging, kms: KeyManagementService, keyValueStorage: KeyValueStorage) {
         self.metadata = metadata
         self.logger = logger
 //        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever

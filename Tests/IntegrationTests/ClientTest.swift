@@ -34,7 +34,7 @@ final class ClientTests: XCTestCase {
             projectId: projectId,
             relayHost: relayHost,
             logger: logger,
-            kms: Crypto(keychain: keychain),
+            kms: KeyManagementService(keychain: keychain),
             keyValueStorage: RuntimeKeyValueStorage())
         return ClientDelegate(client: client)
     }

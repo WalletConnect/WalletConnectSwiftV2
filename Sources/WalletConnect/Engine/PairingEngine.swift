@@ -13,7 +13,7 @@ final class PairingEngine {
     
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
-    private let crypto: CryptoStorageProtocol
+    private let crypto: KeyManagementServiceProtocol
     private let sequencesStore: PairingSequenceStorage
     private var appMetadata: AppMetadata
     private var publishers = [AnyCancellable]()
@@ -22,7 +22,7 @@ final class PairingEngine {
     private let topicInitializer: () -> String?
     
     init(relay: WalletConnectRelaying,
-         crypto: CryptoStorageProtocol,
+         crypto: KeyManagementServiceProtocol,
          subscriber: WCSubscribing,
          sequencesStore: PairingSequenceStorage,
          metadata: AppMetadata,

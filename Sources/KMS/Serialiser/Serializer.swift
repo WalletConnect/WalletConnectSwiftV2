@@ -6,15 +6,15 @@ public class Serializer {
     enum Error: String, Swift.Error {
         case messageToShort = "Error: message is too short"
     }
-    private let crypto: Crypto
+    private let crypto: KeyManagementService
     private let codec: Codec
     
-    init(crypto: Crypto, codec: Codec = AES_256_CBC_HMAC_SHA256_Codec()) {
+    init(crypto: KeyManagementService, codec: Codec = AES_256_CBC_HMAC_SHA256_Codec()) {
         self.crypto = crypto
         self.codec = codec
     }
     
-    public init(crypto: Crypto) {
+    public init(crypto: KeyManagementService) {
         self.crypto = crypto
         self.codec = AES_256_CBC_HMAC_SHA256_Codec()
     }

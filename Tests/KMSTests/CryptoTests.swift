@@ -3,17 +3,17 @@ import XCTest
 
 fileprivate extension Error {
     var isKeyNotFoundError: Bool {
-        guard case .keyNotFound = self as? Crypto.Error else { return false }
+        guard case .keyNotFound = self as? KeyManagementService.Error else { return false }
         return true
     }
 }
 
 class CryptoTests: XCTestCase {
     
-    var crypto: Crypto!
+    var crypto: KeyManagementService!
 
     override func setUp() {
-        crypto = Crypto(keychain: KeychainStorageMock())
+        crypto = KeyManagementService(keychain: KeychainStorageMock())
     }
 
     override func tearDown() {
@@ -64,8 +64,8 @@ class CryptoTests: XCTestCase {
     func testGenerateX25519Agreement() throws {
         let privateKeyA = try AgreementPrivateKey(rawRepresentation: CryptoTestData._privateKeyA)
         let privateKeyB = try AgreementPrivateKey(rawRepresentation: CryptoTestData._privateKeyB)
-        let agreementSecretA = try Crypto.generateAgreementSecret(from: privateKeyA, peerPublicKey: privateKeyB.publicKey.hexRepresentation)
-        let agreementSecretB = try Crypto.generateAgreementSecret(from: privateKeyB, peerPublicKey: privateKeyA.publicKey.hexRepresentation)
+        let agreementSecretA = try KeyManagementService.generateAgreementSecret(from: privateKeyA, peerPublicKey: privateKeyB.publicKey.hexRepresentation)
+        let agreementSecretB = try KeyManagementService.generateAgreementSecret(from: privateKeyB, peerPublicKey: privateKeyA.publicKey.hexRepresentation)
         XCTAssertEqual(agreementSecretA.sharedSecret, agreementSecretB.sharedSecret)
         XCTAssertEqual(agreementSecretA.sharedSecret, CryptoTestData.expectedSharedSecret)
     }
@@ -73,15 +73,15 @@ class CryptoTests: XCTestCase {
     func testGenerateX25519AgreementRandomKeys() throws {
         let privateKeyA = AgreementPrivateKey()
         let privateKeyB = AgreementPrivateKey()
-        let agreementSecretA = try Crypto.generateAgreementSecret(from: privateKeyA, peerPublicKey: privateKeyB.publicKey.hexRepresentation)
-        let agreementSecretB = try Crypto.generateAgreementSecret(from: privateKeyB, peerPublicKey: privateKeyA.publicKey.hexRepresentation)
+        let agreementSecretA = try KeyManagementService.generateAgreementSecret(from: privateKeyA, peerPublicKey: privateKeyB.publicKey.hexRepresentation)
+        let agreementSecretB = try KeyManagementService.generateAgreementSecret(from: privateKeyB, peerPublicKey: privateKeyA.publicKey.hexRepresentation)
         XCTAssertEqual(agreementSecretA.sharedSecret, agreementSecretB.sharedSecret)
     }
     
     func testPerformKeyAgreement() throws {
         let privateKeySelf = AgreementPrivateKey()
         let privateKeyPeer = AgreementPrivateKey()
-        let peerSecret = try Crypto.generateAgreementSecret(from: privateKeyPeer, peerPublicKey: privateKeySelf.publicKey.hexRepresentation)
+        let peerSecret = try KeyManagementService.generateAgreementSecret(from: privateKeyPeer, peerPublicKey: privateKeySelf.publicKey.hexRepresentation)
         try crypto.setPrivateKey(privateKeySelf)
         let selfSecret = try crypto.performKeyAgreement(selfPublicKey: privateKeySelf.publicKey, peerPublicKey: privateKeyPeer.publicKey.hexRepresentation)
         XCTAssertEqual(selfSecret.sharedSecret, peerSecret.sharedSecret)

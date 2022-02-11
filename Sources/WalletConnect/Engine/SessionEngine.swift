@@ -16,14 +16,14 @@ final class SessionEngine {
     private let sequencesStore: SessionSequenceStorage
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
-    private let crypto: CryptoStorageProtocol
+    private let crypto: KeyManagementServiceProtocol
     private var metadata: AppMetadata
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
     private let topicInitializer: () -> String?
 
     init(relay: WalletConnectRelaying,
-         crypto: CryptoStorageProtocol,
+         crypto: KeyManagementServiceProtocol,
          subscriber: WCSubscribing,
          sequencesStore: SessionSequenceStorage,
          metadata: AppMetadata,

@@ -1,6 +1,6 @@
 import Foundation
 
-public class Crypto {
+public class KeyManagementService {
     enum Error: Swift.Error {
         case keyNotFound
     }
@@ -68,9 +68,9 @@ public class Crypto {
     public func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret {
         guard let privateKey = try getPrivateKey(for: selfPublicKey) else {
             print("Key Agreement Error: Private key not found for public key: \(selfPublicKey.hexRepresentation)")
-            throw Crypto.Error.keyNotFound
+            throw KeyManagementService.Error.keyNotFound
         }
-        return try Crypto.generateAgreementSecret(from: privateKey, peerPublicKey: hexRepresentation)
+        return try KeyManagementService.generateAgreementSecret(from: privateKey, peerPublicKey: hexRepresentation)
     }
     
     static func generateAgreementSecret(from privateKey: AgreementPrivateKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret {

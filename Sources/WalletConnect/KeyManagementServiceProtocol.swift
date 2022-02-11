@@ -3,7 +3,7 @@ import Foundation
 import KMS
 
 // TODO: Come up with better naming conventions
-public protocol CryptoStorageProtocol {
+public protocol KeyManagementServiceProtocol {
     func createX25519KeyPair() throws -> AgreementPublicKey
     func setPrivateKey(_ privateKey: AgreementPrivateKey) throws
     func setAgreementSecret(_ agreementSecret: AgreementSecret, topic: String) throws
@@ -14,4 +14,4 @@ public protocol CryptoStorageProtocol {
     func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret
 }
 
-extension Crypto: CryptoStorageProtocol {}
+extension KeyManagementService: KeyManagementServiceProtocol {}

@@ -2,7 +2,7 @@ import Foundation
 @testable import WalletConnect
 @testable import KMS
 
-final class CryptoStorageProtocolMock: CryptoStorageProtocol {
+final class CryptoStorageProtocolMock: KeyManagementServiceProtocol {
     
     func createX25519KeyPair() throws -> AgreementPublicKey {
         defer { privateKeyStub = AgreementPrivateKey() }
