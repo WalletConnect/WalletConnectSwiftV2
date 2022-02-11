@@ -34,7 +34,7 @@ let package = Package(
             dependencies: ["WalletConnect", "TestingUtils", "WalletConnectKMS"]),
         .testTarget(
             name: "IntegrationTests",
-            dependencies: ["WalletConnect", "TestingUtils"]),
+            dependencies: ["WalletConnect", "TestingUtils", "WalletConnectKMS"]),
         .testTarget(
             name: "RelayerTests",
             dependencies: ["Relayer", "WalletConnectUtils", "TestingUtils"]),
@@ -43,7 +43,7 @@ let package = Package(
             dependencies: ["WalletConnectKMS", "WalletConnectUtils", "TestingUtils"]),
         .target(
             name: "TestingUtils",
-            dependencies: ["WalletConnectUtils"],
+            dependencies: ["WalletConnectUtils", "WalletConnectKMS"],
             path: "Tests/TestingUtils"),
     ],
     swiftLanguageVersions: [.v5]

@@ -55,12 +55,12 @@ public class Serializer {
         }
     }
     
-    private func deserialize<T: Codable>(message: String, symmetricKey: Data) throws -> T {
+    func deserialize<T: Codable>(message: String, symmetricKey: Data) throws -> T {
         let decryptedData = try decrypt(message: message, symmetricKey: symmetricKey)
         return try JSONDecoder().decode(T.self, from: decryptedData)
     }
     
-    private func encrypt(json: String, agreementKeys: AgreementSecret) throws -> String {
+    func encrypt(json: String, agreementKeys: AgreementSecret) throws -> String {
         let payload = try codec.encode(plainText: json, agreementKeys: agreementKeys)
         let iv = payload.iv.toHexString()
         let publicKey = payload.publicKey.toHexString()

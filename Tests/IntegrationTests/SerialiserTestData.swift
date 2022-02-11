@@ -2,6 +2,7 @@
 
 import Foundation
 @testable import WalletConnectKMS
+@testable import WalletConnect
 
 enum SerializerTestData {
     static let emptyAgreementSecret = AgreementSecret(sharedSecret: Data(hex: ""), publicKey: AgreementPrivateKey().publicKey)
@@ -35,5 +36,23 @@ enum SerializerTestData {
     }
     }
     """
+    
+    static let pairingApproveJSONRPCRequest = WCRequest(
+        id: 0,
+        jsonrpc: "2.0",
+        method: WCRequest.Method.pairingApprove,
+        params: WCRequest.Params.pairingApprove(
+            PairingType.ApprovalParams(
+                relay: RelayProtocolOptions(
+                    protocol: "waku",
+                    params: nil),
+                responder: PairingParticipant(publicKey: "be9225978b6287a02d259ee0d9d1bcb683082d8386b7fb14b58ac95b93b2ef43"),
+                expiry: 1632742217,
+                state: PairingState(metadata: AppMetadata(
+                    name: "iOS",
+                    description: nil,
+                    url: nil,
+                    icons: nil))))
+    )
 }
 

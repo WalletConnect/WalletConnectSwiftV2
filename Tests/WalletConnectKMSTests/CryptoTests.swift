@@ -1,5 +1,6 @@
 import XCTest
 @testable import WalletConnectKMS
+@testable import TestingUtils
 
 fileprivate extension Error {
     var isKeyNotFoundError: Bool {
