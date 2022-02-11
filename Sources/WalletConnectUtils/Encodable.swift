@@ -2,12 +2,12 @@
 
 import Foundation
 
-enum DataConversionError: Error {
+public enum DataConversionError: Error {
     case stringToDataFailed
     case dataToStringFailed
 }
 
-extension Encodable  {
+public extension Encodable  {
     func json() throws -> String {
         let data = try JSONEncoder().encode(self)
         guard let string = String(data: data, encoding: .utf8) else {

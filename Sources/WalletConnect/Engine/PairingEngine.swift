@@ -1,10 +1,9 @@
 import Foundation
 import Combine
 import WalletConnectUtils
-
+import WalletConnectKMS
 
 final class PairingEngine {
-    
     var onApprovalAcknowledgement: ((Pairing) -> Void)?
     var onSessionProposal: ((SessionProposal)->())?
     var onPairingApproved: ((Pairing, SessionPermissions, RelayProtocolOptions)->())?
@@ -12,7 +11,7 @@ final class PairingEngine {
     
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
-    private let crypto: CryptoStorageProtocol
+    private let kms: KeyManagementServiceProtocol
     private let sequencesStore: PairingSequenceStorage
     private var appMetadata: AppMetadata
     private var publishers = [AnyCancellable]()
@@ -21,14 +20,14 @@ final class PairingEngine {
     private let topicInitializer: () -> String?
     
     init(relay: WalletConnectRelaying,
-         crypto: CryptoStorageProtocol,
+         kms: KeyManagementServiceProtocol,
          subscriber: WCSubscribing,
          sequencesStore: PairingSequenceStorage,
          metadata: AppMetadata,
          logger: ConsoleLogging,
          topicGenerator: @escaping () -> String? = String.generateTopic) {
         self.relayer = relay
-        self.crypto = crypto
+        self.kms = kms
         self.wcSubscriber = subscriber
         self.appMetadata = metadata
         self.sequencesStore = sequencesStore
@@ -65,7 +64,7 @@ final class PairingEngine {
             return nil
         }
         
-        let publicKey = try! crypto.createX25519KeyPair()
+        let publicKey = try! kms.createX25519KeyPair()
         
         let relay = RelayProtocolOptions(protocol: "waku", params: nil)
         let uri = WalletConnectURI(topic: topic, publicKey: publicKey.hexRepresentation, isController: false, relay: relay)
@@ -86,8 +85,8 @@ final class PairingEngine {
             throw WalletConnectError.internal(.pairWithExistingPairingForbidden)
         }
         
-        let selfPublicKey = try! crypto.createX25519KeyPair()
-        let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposal.proposer.publicKey)
+        let selfPublicKey = try! kms.createX25519KeyPair()
+        let agreementKeys = try! kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposal.proposer.publicKey)
         
         let settledTopic = agreementKeys.derivedTopic()
         let pendingPairing = PairingSequence.buildResponded(proposal: proposal, agreementKeys: agreementKeys)
@@ -98,7 +97,7 @@ final class PairingEngine {
         wcSubscriber.setSubscription(topic: settledTopic)
         sequencesStore.setSequence(settledPairing)
         
-        try? crypto.setAgreementSecret(agreementKeys, topic: settledTopic)
+        try? kms.setAgreementSecret(agreementKeys, topic: settledTopic)
         
         let approval = PairingType.ApprovalParams(
             relay: proposal.relay,
@@ -186,10 +185,10 @@ final class PairingEngine {
             return
         }
         
-        let agreementKeys = try! crypto.performKeyAgreement(selfPublicKey: try! pairing.getPublicKey(), peerPublicKey: approveParams.responder.publicKey)
+        let agreementKeys = try! kms.performKeyAgreement(selfPublicKey: try! pairing.getPublicKey(), peerPublicKey: approveParams.responder.publicKey)
         
         let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
-        try? crypto.setAgreementSecret(agreementKeys, topic: settledTopic)
+        try? kms.setAgreementSecret(agreementKeys, topic: settledTopic)
         let proposal = pendingPairing.proposal
         let settledPairing = PairingSequence.buildAcknowledged(approval: approveParams, proposal: proposal, agreementKeys: agreementKeys)
         
@@ -237,8 +236,8 @@ final class PairingEngine {
         }
         let sessionProposal = payloadParams.request.params
         do {
-            if let pairingAgreementSecret = try crypto.getAgreementSecret(for: sessionProposal.signal.params.topic) {
-                try crypto.setAgreementSecret(pairingAgreementSecret, topic: sessionProposal.topic)
+            if let pairingAgreementSecret = try kms.getAgreementSecret(for: sessionProposal.signal.params.topic) {
+                try kms.setAgreementSecret(pairingAgreementSecret, topic: sessionProposal.topic)
             } else {
                 relayer.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
                 return
@@ -274,8 +273,8 @@ final class PairingEngine {
     
     private func setupExpirationHandling() {
         sequencesStore.onSequenceExpiration = { [weak self] topic, publicKey in
-            self?.crypto.deletePrivateKey(for: publicKey)
-            self?.crypto.deleteAgreementSecret(for: topic)
+            self?.kms.deletePrivateKey(for: publicKey)
+            self?.kms.deleteAgreementSecret(for: topic)
         }
     }
     

@@ -1,6 +1,6 @@
 import XCTest
 import CryptoKit
-@testable import WalletConnect
+@testable import WalletConnectKMS
 
 extension Curve25519.KeyAgreement.PrivateKey: GenericPasswordConvertible {}
 
@@ -14,7 +14,9 @@ final class KeychainStorageTests: XCTestCase {
     
     override func setUp() {
         fakeKeychain = KeychainServiceFake()
-        sut = KeychainStorage(keychainService: fakeKeychain)
+        sut = KeychainStorage(
+            keychainService: fakeKeychain,
+            serviceIdentifier: "")
     }
     
     override func tearDown() {

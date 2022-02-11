@@ -3,14 +3,16 @@
 import Foundation
 
 import XCTest
+@testable import WalletConnectKMS
 @testable import WalletConnect
+@testable import TestingUtils
 
-final class JSONRPCSerializerTests: XCTestCase {
-    var serializer: JSONRPCSerializer!
+final class SerializerTests: XCTestCase {
+    var serializer: Serializer!
     var codec: MockedCodec!
     override func setUp() {
         codec = MockedCodec()
-        self.serializer = JSONRPCSerializer(crypto: Crypto(keychain: KeychainStorageMock()), codec: codec)
+        self.serializer = Serializer(kms: KeyManagementService(keychain: KeychainStorageMock()), codec: codec)
     }
     
     override func tearDown() {
@@ -26,7 +28,7 @@ final class JSONRPCSerializerTests: XCTestCase {
         let serializedMessageSample = SerializerTestData.serializedMessage
         XCTAssertEqual(serializedMessage, serializedMessageSample)
     }
-    
+
     func testDeserialize() {
         let serializedMessageSample = SerializerTestData.serializedMessage
         codec.decodedJson = SerializerTestData.pairingApproveJSON
