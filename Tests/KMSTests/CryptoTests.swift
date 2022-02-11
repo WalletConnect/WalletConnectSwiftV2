@@ -1,9 +1,9 @@
 import XCTest
-@testable import WalletConnect
+@testable import KMS
 
 fileprivate extension Error {
     var isKeyNotFoundError: Bool {
-        guard case .internal(.keyNotFound) = self as? WalletConnectError else { return false }
+        guard case .keyNotFound = self as? Crypto.Error else { return false }
         return true
     }
 }

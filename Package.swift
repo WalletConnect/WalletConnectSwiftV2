@@ -34,7 +34,7 @@ let package = Package(
             dependencies: []),
         .testTarget(
             name: "WalletConnectTests",
-            dependencies: ["WalletConnect", "TestingUtils"]),
+            dependencies: ["WalletConnect", "TestingUtils", "KMS"]),
         .testTarget(
             name: "IntegrationTests",
             dependencies: ["WalletConnect", "TestingUtils"]),

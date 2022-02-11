@@ -4,7 +4,6 @@ import Foundation
 
 import XCTest
 @testable import KMS
-@testable import WalletConnect
 @testable import TestingUtils
 
 final class JSONRPCSerializerTests: XCTestCase {
@@ -28,7 +27,7 @@ final class JSONRPCSerializerTests: XCTestCase {
 //        let serializedMessageSample = SerializerTestData.serializedMessage
 //        XCTAssertEqual(serializedMessage, serializedMessageSample)
 //    }
-//    
+//
 //    func testDeserialize() {
 //        let serializedMessageSample = SerializerTestData.serializedMessage
 //        codec.decodedJson = SerializerTestData.pairingApproveJSON
