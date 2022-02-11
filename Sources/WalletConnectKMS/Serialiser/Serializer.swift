@@ -6,16 +6,16 @@ public class Serializer {
     enum Error: String, Swift.Error {
         case messageToShort = "Error: message is too short"
     }
-    private let crypto: KeyManagementService
+    private let kms: KeyManagementService
     private let codec: Codec
     
-    init(crypto: KeyManagementService, codec: Codec = AES_256_CBC_HMAC_SHA256_Codec()) {
-        self.crypto = crypto
+    init(kms: KeyManagementService, codec: Codec = AES_256_CBC_HMAC_SHA256_Codec()) {
+        self.kms = kms
         self.codec = codec
     }
     
-    public init(crypto: KeyManagementService) {
-        self.crypto = crypto
+    public init(kms: KeyManagementService) {
+        self.kms = kms
         self.codec = AES_256_CBC_HMAC_SHA256_Codec()
     }
     
@@ -27,7 +27,7 @@ public class Serializer {
     public func serialize(topic: String, encodable: Encodable) throws -> String {
         let messageJson = try encodable.json()
         var message: String
-        if let agreementKeys = try? crypto.getAgreementSecret(for: topic) {
+        if let agreementKeys = try? kms.getAgreementSecret(for: topic) {
             message = try encrypt(json: messageJson, agreementKeys: agreementKeys)
         } else {
             message = messageJson.toHexEncodedString(uppercase: false)
@@ -43,7 +43,7 @@ public class Serializer {
     public func tryDeserialize<T: Codable>(topic: String, message: String) -> T? {
         do {
             let deserializedCodable: T
-            if let agreementKeys = try? crypto.getAgreementSecret(for: topic) {
+            if let agreementKeys = try? kms.getAgreementSecret(for: topic) {
                 deserializedCodable = try deserialize(message: message, symmetricKey: agreementKeys.sharedSecret)
             } else {
                 let jsonData = Data(hex: message)

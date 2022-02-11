@@ -11,7 +11,7 @@ final class SerializerTests: XCTestCase {
     var codec: MockedCodec!
     override func setUp() {
         codec = MockedCodec()
-        self.serializer = Serializer(crypto: KeyManagementService(keychain: KeychainStorageMock()), codec: codec)
+        self.serializer = Serializer(kms: KeyManagementService(keychain: KeychainStorageMock()), codec: codec)
     }
     
     override func tearDown() {

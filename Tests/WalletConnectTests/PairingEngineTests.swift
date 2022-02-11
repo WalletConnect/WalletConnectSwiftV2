@@ -15,7 +15,7 @@ final class PairingEngineTests: XCTestCase {
     var relayMock: MockedWCRelay!
     var subscriberMock: MockedSubscriber!
     var storageMock: PairingSequenceStorageMock!
-    var cryptoMock: CryptoStorageProtocolMock!
+    var cryptoMock: KeyManagementServiceMock!
     
     var topicGenerator: TopicGenerator!
     
@@ -23,7 +23,7 @@ final class PairingEngineTests: XCTestCase {
         relayMock = MockedWCRelay()
         subscriberMock = MockedSubscriber()
         storageMock = PairingSequenceStorageMock()
-        cryptoMock = CryptoStorageProtocolMock()
+        cryptoMock = KeyManagementServiceMock()
         topicGenerator = TopicGenerator()
     }
 
@@ -41,7 +41,7 @@ final class PairingEngineTests: XCTestCase {
         let logger = ConsoleLoggerMock()
         engine = PairingEngine(
             relay: relayMock,
-            crypto: cryptoMock,
+            kms: cryptoMock,
             subscriber: subscriberMock,
             sequencesStore: storageMock,
             metadata: meta,
