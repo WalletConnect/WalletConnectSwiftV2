@@ -1,10 +1,6 @@
-// 
-
-import Foundation
-
-// TODO: Migrate protocol errors to ReasonCode enum over time. Use WalletConnectError for client errors only.
 enum WalletConnectError: Error {
     
+    case pairingProposalFailed(Error)
     case malformedPairingURI
     case noPairingMatchingTopic(String)
     case noSessionMatchingTopic(String)
@@ -13,12 +9,11 @@ enum WalletConnectError: Error {
     case invalidPermissions
     case invalidNotificationType
     case unauthorizedNonControllerCall
+    case topicGenerationFailed
     
     case `internal`(_ reason: InternalReason)
     
     enum InternalReason: Error {
-        case pairingProposalGenerationFailed
-        case keyNotFound
         case jsonRpcDuplicateDetected
         case noJsonRpcRequestMatchingResponse
     }
@@ -28,6 +23,8 @@ extension WalletConnectError {
     
     var localizedDescription: String {
         switch self {
+        case .pairingProposalFailed(let error):
+            return "Pairing proposal failed with error: \(error.localizedDescription)"
         case .malformedPairingURI:
             return "Pairing URI string is invalid."
         case .noPairingMatchingTopic(let topic):
@@ -44,7 +41,9 @@ extension WalletConnectError {
             return "Invalid notification type."
         case .unauthorizedNonControllerCall:
             return "Method must be called by a controller client."
-        case .internal(_):
+        case .topicGenerationFailed:
+            return "Failed to generate topic from random bytes."
+        case .internal(_): // TODO: Remove internal case
             return ""
         }
     }

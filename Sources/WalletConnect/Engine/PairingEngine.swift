@@ -58,14 +58,11 @@ final class PairingEngine {
             .map { Pairing(topic: $0.topic, peer: $0.settled?.state?.metadata) }
     }
     
-    func propose(permissions: SessionPermissions) -> WalletConnectURI? {
+    func propose(permissions: SessionPermissions) throws -> WalletConnectURI {
         guard let topic = topicInitializer() else {
-            logger.debug("Could not generate topic")
-            return nil
+            throw WalletConnectError.topicGenerationFailed
         }
-        
-        let publicKey = try! kms.createX25519KeyPair()
-        
+        let publicKey = try kms.createX25519KeyPair()
         let relay = RelayProtocolOptions(protocol: "waku", params: nil)
         let uri = WalletConnectURI(topic: topic, publicKey: publicKey.hexRepresentation, isController: false, relay: relay)
         let pendingPairing = PairingSequence.buildProposed(uri: uri)

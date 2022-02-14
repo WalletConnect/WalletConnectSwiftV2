@@ -49,11 +49,11 @@ final class PairingEngineTests: XCTestCase {
             topicGenerator: topicGenerator.getTopic)
     }
     
-    func testPropose() {
+    func testPropose() throws {
         setupEngine(isController: false)
         
         let topicA = topicGenerator.topic
-        let uri = engine.propose(permissions: SessionPermissions.stub())!
+        let uri = try engine.propose(permissions: SessionPermissions.stub())
         
         XCTAssert(cryptoMock.hasPrivateKey(for: uri.publicKey), "Proposer must store the private key matching the public key sent through the URI.")
         XCTAssert(storageMock.hasPendingProposedPairing(on: topicA), "The engine must store a pending pairing on proposed state.")
@@ -116,13 +116,13 @@ final class PairingEngineTests: XCTestCase {
         // TODO: Assert update call
     }
     
-    func testReceiveApprovalResponse() {
+    func testReceiveApprovalResponse() throws {
         setupEngine(isController: false)
         
         var approvedPairing: Pairing?
         let responderPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let topicB = deriveTopic(publicKey: responderPubKey, privateKey: cryptoMock.privateKeyStub)
-        let uri = engine.propose(permissions: SessionPermissions.stub())!
+        let uri = try engine.propose(permissions: SessionPermissions.stub())
         let topicA = uri.topic
         
         let approveParams = PairingType.ApprovalParams(

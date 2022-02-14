@@ -1,5 +1,3 @@
-// 
-
 import Foundation
 
 extension String {
@@ -38,7 +36,6 @@ extension String {
         if result == errSecSuccess {
             return keyData.toHexString()
         } else {
-            print("Problem generating random bytes")
             return nil
         }
     }

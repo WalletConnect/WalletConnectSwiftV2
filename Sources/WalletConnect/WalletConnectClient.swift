@@ -108,10 +108,12 @@ public final class WalletConnectClient {
             return nil
         } else {
             let permissions = SessionPermissions(permissions: sessionPermissions)
-            guard let pairingURI = pairingEngine.propose(permissions: permissions) else {
-                throw WalletConnectError.internal(.pairingProposalGenerationFailed)
+            do {
+                let pairingURI = try pairingEngine.propose(permissions: permissions)
+                return pairingURI.absoluteString
+            } catch {
+                throw WalletConnectError.pairingProposalFailed(error)
             }
-            return pairingURI.absoluteString
         }
     }
     
