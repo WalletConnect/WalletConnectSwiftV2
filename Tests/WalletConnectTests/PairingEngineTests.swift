@@ -83,16 +83,13 @@ final class PairingEngineTests: XCTestCase {
         XCTAssertEqual(publishTopic, topicA, "The approval request must be published over topic A.")
     }
     
-    func testApproveMultipleCallsThrottleOnSameURI() {
+    func testApproveMultipleCallsThrottleOnSameURI() throws {
         setupEngine(isController: true)
         let uri = WalletConnectURI.stub()
-        for i in 1...10 {
-            if i == 1 {
-                XCTAssertNoThrow(try engine.approve(uri))
-            } else {
-                XCTAssertThrowsError(try engine.approve(uri))
-            }
+        for _ in 1...10 {
+            try engine.approve(uri)
         }
+        XCTAssert(relayMock.requestCallCount == 1, "Only the first approve call must make a request.")
     }
     
     func testApproveAcknowledgement() throws {
