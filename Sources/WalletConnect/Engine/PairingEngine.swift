@@ -217,12 +217,16 @@ final class PairingEngine {
             relayer.respondError(for: payload, reason: .unauthorizedUpdateRequest(context: .pairing))
             return
         }
+        guard let metadata = updateParams.state.metadata else {
+            relayer.respondError(for: payload, reason: .invalidUpdateRequest(context: .pairing))
+            return
+        }
         
         pairing.settled?.state = updateParams.state
         sequencesStore.setSequence(pairing)
         
         relayer.respondSuccess(for: payload)
-        onPairingUpdate?(topic, updateParams.state.metadata)
+        onPairingUpdate?(topic, metadata)
     }
     
     private func wcPairingPayload(_ payload: WCRequestSubscriptionPayload, payloadParams: PairingType.PayloadParams) {
