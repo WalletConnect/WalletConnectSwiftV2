@@ -71,8 +71,20 @@ class WalletConnectRelayTests: XCTestCase {
         waitForExpectations(timeout: 0.01, handler: nil)
     }
     
-    func testRequestCompletesWithError() {
-        //todo
+    func testPromptOnSessionPayload() {
+        let topic = "fefc3dc39cacbc562ed58f92b296e2d65a6b07ef08992b93db5b3cb86280635a"
+        let request = getWCSessionPayloadRequest()
+        networkRelayer.prompt = false
+        wcRelay.request(topic: topic, payload: request) { _ in }
+        XCTAssertTrue(networkRelayer.prompt)
+    }
+    
+    func testNoPromptOnSessionUpgrade() {
+        let topic = "fefc3dc39cacbc562ed58f92b296e2d65a6b07ef08992b93db5b3cb86280635a"
+        let request = getWCSessionUpgrade()
+        networkRelayer.prompt = false
+        wcRelay.request(topic: topic, payload: request) { _ in }
+        XCTAssertTrue(networkRelayer.prompt)
     }
 }
 
@@ -86,6 +98,14 @@ extension WalletConnectRelayTests {
         let wcRequestId: Int64 = 123456
         let sessionPayloadParams = SessionType.PayloadParams(request: SessionType.PayloadParams.Request(method: "method", params: AnyCodable("params")), chainId: "")
         let params = WCRequest.Params.sessionPayload(sessionPayloadParams)
+        let wcRequest = WCRequest(id: wcRequestId, method: WCRequest.Method.sessionPayload, params: params)
+        return wcRequest
+    }
+    
+    func getWCSessionUpgrade() -> WCRequest {
+        let wcRequestId: Int64 = 123456
+        let sessionUpgradeParams = SessionType.UpgradeParams(permissions: SessionPermissions(blockchain: SessionPermissions.Blockchain(chains: []), jsonrpc: SessionPermissions.JSONRPC(methods: []), notifications: SessionPermissions.Notifications(types: [])))
+        let params = WCRequest.Params.sessionUpgrade(sessionUpgradeParams)
         let wcRequest = WCRequest(id: wcRequestId, method: WCRequest.Method.sessionPayload, params: params)
         return wcRequest
     }
