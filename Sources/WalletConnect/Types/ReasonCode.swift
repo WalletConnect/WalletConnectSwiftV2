@@ -20,6 +20,7 @@ enum ReasonCode {
     case unauthorizedNotificationType(String)
     case unauthorizedUpdateRequest(context: Context)
     case unauthorizedUpgradeRequest(context: Context)
+    case unauthorizedExtendRequest(context: Context)
     case unauthorizedMatchingController(isController: Bool)
     
     var code: Int {
@@ -34,7 +35,8 @@ enum ReasonCode {
         case .unauthorizedNotificationType: return 3002
         case .unauthorizedUpdateRequest: return 3003
         case .unauthorizedUpgradeRequest: return 3004
-        case .unauthorizedMatchingController: return 3005
+        case .unauthorizedExtendRequest: return 3005
+        case .unauthorizedMatchingController: return 3100
         }
     }
     
@@ -62,6 +64,8 @@ enum ReasonCode {
             return "Unauthorized \(context) upgrade request"
         case .unauthorizedMatchingController(let isController):
             return "Unauthorized: peer is also \(isController ? "" : "non-")controller"
+        case .unauthorizedExtendRequest(context: let context):
+            return "Unauthorized \(context) extend request"
         }
     }
 }

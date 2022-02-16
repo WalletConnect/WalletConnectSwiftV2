@@ -246,6 +246,18 @@ final class PairingEngine {
         onPairingUpdate?(topic, metadata)
     }
     
+    private func wcPairingExtend(_ payload: WCRequestSubscriptionPayload, extendParams: PairingType.ExtendedParams) {
+        let topic = payload.topic
+        guard var pairing = sequencesStore.getSequence(forTopic: topic) else {
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .pairing, topic: topic))
+            return
+        }
+        guard pairing.peerIsController else {
+            relayer.respondError(for: payload, reason: .unauthorizedExtendRequest(context: .pairing))
+            return
+        }
+    }
+    
     private func wcPairingPayload(_ payload: WCRequestSubscriptionPayload, payloadParams: PairingType.PayloadParams) {
         guard sequencesStore.hasSequence(forTopic: payload.topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .pairing, topic: payload.topic))
