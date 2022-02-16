@@ -48,7 +48,9 @@ final class PairingEngine {
     }
     
     func getSettledPairing(for topic: String) -> PairingSequence? {
-        guard let pairing = try? sequencesStore.getSequence(forTopic: topic), pairing.isSettled else { return nil }
+        guard let pairing = sequencesStore.getSequence(forTopic: topic), pairing.isSettled else {
+            return nil
+        }
         return pairing
     }
     
@@ -141,11 +143,11 @@ final class PairingEngine {
     
     //MARK: - Private
     
-    private func acknowledgeApproval(pendingTopic: String) throws {
+    private func acknowledgeApproval(pendingTopic: String) {
         guard
-            let pendingPairing = try sequencesStore.getSequence(forTopic: pendingTopic),
+            let pendingPairing = sequencesStore.getSequence(forTopic: pendingTopic),
             case .responded(let settledTopic) = pendingPairing.pending?.status,
-            var settledPairing = try sequencesStore.getSequence(forTopic: settledTopic)
+            var settledPairing = sequencesStore.getSequence(forTopic: settledTopic)
         else { return }
         
         settledPairing.settled?.status = .acknowledged
@@ -161,7 +163,7 @@ final class PairingEngine {
     }
     
     private func update(topic: String) {
-        guard var pairing = try? sequencesStore.getSequence(forTopic: topic) else {
+        guard var pairing = sequencesStore.getSequence(forTopic: topic) else {
             logger.debug("Could not find pairing for topic \(topic)")
             return
         }
@@ -195,7 +197,7 @@ final class PairingEngine {
     
     private func wcPairingApprove(_ payload: WCRequestSubscriptionPayload, approveParams: PairingType.ApprovalParams) {
         let pendingPairingTopic = payload.topic
-        guard let pairing = try? sequencesStore.getSequence(forTopic: pendingPairingTopic), let pendingPairing = pairing.pending else {
+        guard let pairing = sequencesStore.getSequence(forTopic: pendingPairingTopic), let pendingPairing = pairing.pending else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .pairing, topic: pendingPairingTopic))
             return
         }
@@ -224,7 +226,7 @@ final class PairingEngine {
     
     private func wcPairingUpdate(_ payload: WCRequestSubscriptionPayload, updateParams: PairingType.UpdateParams) {
         let topic = payload.topic
-        guard var pairing = try? sequencesStore.getSequence(forTopic: topic) else {
+        guard var pairing = sequencesStore.getSequence(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .pairing, topic: topic))
             return
         }
@@ -300,7 +302,7 @@ final class PairingEngine {
     private func handleReponse(_ response: WCResponse) {
         switch response.requestParams {
         case .pairingApprove:
-            try? acknowledgeApproval(pendingTopic: response.topic)
+            acknowledgeApproval(pendingTopic: response.topic)
         default:
             break
         }
