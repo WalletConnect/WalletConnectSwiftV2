@@ -341,8 +341,8 @@ final class ClientTests: XCTestCase {
         let permissions = Session.Permissions.stub()
         let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         _ = try! responder.client.pair(uri: uri)
-        proposer.onPairingUpdate = { _, appMetadata in
-            XCTAssertNotNil(appMetadata)
+        proposer.onPairingUpdate = { pairing in
+            XCTAssertNotNil(pairing.peer)
             proposerReceivesPairingUpdateExpectation.fulfill()
         }
         waitForExpectations(timeout: defaultTimeout, handler: nil)
