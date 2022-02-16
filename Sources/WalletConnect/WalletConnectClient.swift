@@ -104,7 +104,7 @@ public final class WalletConnectClient {
             }
             logger.debug("Proposing session on existing pairing")
             let permissions = SessionPermissions(permissions: sessionPermissions)
-            sessionEngine.proposeSession(settledPairing: Pairing(topic: pairing.topic, peer: nil), permissions: permissions, relay: pairing.relay)
+            sessionEngine.proposeSession(settledPairing: Pairing(topic: pairing.topic, peer: nil, expiryDate: pairing.expiryDate), permissions: permissions, relay: pairing.relay)
             return nil
         } else {
             let permissions = SessionPermissions(permissions: sessionPermissions)
@@ -288,8 +288,8 @@ public final class WalletConnectClient {
         pairingEngine.onApprovalAcknowledgement = { [weak self] settledPairing in
             self?.delegate?.didSettle(pairing: settledPairing)
         }
-        pairingEngine.onPairingUpdate = { [unowned self] topic, appMetadata in
-            delegate?.didUpdate(pairingTopic: topic, appMetadata: appMetadata)
+        pairingEngine.onPairingUpdate = { [unowned self] pairing in
+            delegate?.didUpdate(pairing: pairing)
         }
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
             delegate?.didSettle(session: settledSession)

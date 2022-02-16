@@ -7,7 +7,8 @@ final class PairingEngine {
     var onApprovalAcknowledgement: ((Pairing) -> Void)?
     var onSessionProposal: ((SessionProposal)->())?
     var onPairingApproved: ((Pairing, SessionPermissions, RelayProtocolOptions)->())?
-    var onPairingUpdate: ((String, AppMetadata)->())?
+    var onPairingUpdate: ((Pairing)->())?
+    var onPairingExtend: ((Pairing)->())?
     
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
@@ -57,7 +58,7 @@ final class PairingEngine {
     func getSettledPairings() -> [Pairing] {
         sequencesStore.getAll()
             .filter { $0.isSettled }
-            .map { Pairing(topic: $0.topic, peer: $0.settled?.state?.metadata) }
+            .map { Pairing(topic: $0.topic, peer: $0.settled?.state?.metadata, expiryDate: $0.expiryDate) }
     }
     
     func propose(permissions: SessionPermissions) -> WalletConnectURI? {
@@ -155,7 +156,7 @@ final class PairingEngine {
         wcSubscriber.removeSubscription(topic: pendingTopic)
         sequencesStore.delete(topic: pendingTopic)
         
-        let pairing = Pairing(topic: settledPairing.topic, peer: nil)
+        let pairing = Pairing(topic: settledPairing.topic, peer: nil, expiryDate: settledPairing.expiryDate)
         onApprovalAcknowledgement?(pairing)
         update(topic: settledPairing.topic)
         logger.debug("Success on wc_pairingApprove - settled topic - \(settledTopic)")
@@ -221,7 +222,7 @@ final class PairingEngine {
         sessionPermissions[pendingPairingTopic] = nil
         
         relayer.respondSuccess(for: payload)
-        onPairingApproved?(Pairing(topic: settledPairing.topic, peer: nil), permissions, settledPairing.relay)
+        onPairingApproved?(Pairing(topic: settledPairing.topic, peer: nil, expiryDate: settledPairing.expiryDate), permissions, settledPairing.relay)
     }
     
     private func wcPairingUpdate(_ payload: WCRequestSubscriptionPayload, updateParams: PairingType.UpdateParams) {
@@ -243,7 +244,7 @@ final class PairingEngine {
         sequencesStore.setSequence(pairing)
         
         relayer.respondSuccess(for: payload)
-        onPairingUpdate?(topic, metadata)
+        onPairingUpdate?(Pairing(topic: topic, peer: metadata, expiryDate: pairing.expiryDate))
     }
     
     private func wcPairingExtend(_ payload: WCRequestSubscriptionPayload, extendParams: PairingType.ExtendedParams) {
@@ -256,6 +257,14 @@ final class PairingEngine {
             relayer.respondError(for: payload, reason: .unauthorizedExtendRequest(context: .pairing))
             return
         }
+        do {
+            try pairing.extend(extendParams.ttl)
+        } catch {
+            relayer.respondError(for: payload, reason: .invalidExtendRequest(context: .pairing))
+            return
+        }
+        sequencesStore.setSequence(pairing)
+        relayer.respondSuccess(for: payload)
     }
     
     private func wcPairingPayload(_ payload: WCRequestSubscriptionPayload, payloadParams: PairingType.PayloadParams) {

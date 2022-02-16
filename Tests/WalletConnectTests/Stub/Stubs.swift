@@ -1,4 +1,5 @@
 @testable import WalletConnect
+import Foundation
 import WalletConnectKMS
 
 extension AppMetadata {
@@ -13,8 +14,8 @@ extension AppMetadata {
 }
 
 extension Pairing {
-    static func stub() -> Pairing {
-        Pairing(topic: String.generateTopic()!, peer: nil)
+    static func stub(expiryDate: Date = Date(timeIntervalSinceNow: 10000)) -> Pairing {
+        Pairing(topic: String.generateTopic()!, peer: nil, expiryDate: expiryDate)
     }
 }
 

@@ -12,6 +12,7 @@ enum ReasonCode {
     case missingOrInvalid(String)
     case invalidUpdateRequest(context: Context)
     case invalidUpgradeRequest(context: Context)
+    case invalidExtendRequest(context: Context)
     case noContextWithTopic(context: Context, topic: String)
     
     // 3000 (Unauthorized)
@@ -29,6 +30,7 @@ enum ReasonCode {
         case .missingOrInvalid: return 1000
         case .invalidUpdateRequest: return 1003
         case .invalidUpgradeRequest: return 1004
+        case .invalidExtendRequest: return 1005
         case .noContextWithTopic: return 1301
         case .unauthorizedTargetChain: return 3000
         case .unauthorizedRPCMethod: return 3001
@@ -50,6 +52,8 @@ enum ReasonCode {
             return "Invalid \(context) update request"
         case .invalidUpgradeRequest(let context):
             return "Invalid \(context) upgrade request"
+        case .invalidExtendRequest(context: let context):
+            return "Invalid \(context) extend request"
         case .noContextWithTopic(let context, let topic):
             return "No matching \(context) with topic: \(topic)"
         case .unauthorizedTargetChain(let chainId):

@@ -59,14 +59,14 @@ public protocol WalletConnectClientDelegate: AnyObject {
     /// Tells the delegate that peer has updated metadata for pairing.
     ///
     /// Function will be executed on proposer client only.
-    func didUpdate(pairingTopic: String, appMetadata: AppMetadata)
+    func didUpdate(pairing: Pairing)
 }
 
 public extension WalletConnectClientDelegate {
     func didSettle(pairing: Pairing) {}
     func didReceive(notification: Session.Notification, sessionTopic: String) {}
     func didReject(pendingSessionTopic: String, reason: Reason) {}
-    func didUpdate(pairingTopic: String, appMetadata: AppMetadata) {}
+    func didUpdate(pairing: Pairing) {}
     func didReceive(sessionRequest: Request) {}
     func didReceive(sessionProposal: Session.Proposal) {}
     func didReceive(sessionResponse: Response) {}
