@@ -77,7 +77,6 @@ public final class WalletConnectClient {
     init(metadata: AppMetadata, relayer: Relayer, logger: ConsoleLogging, kms: KeyManagementService, keyValueStorage: KeyValueStorage) {
         self.metadata = metadata
         self.logger = logger
-//        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
         self.kms = kms
         let serializer = Serializer(kms: kms)
         self.history = JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
@@ -290,6 +289,9 @@ public final class WalletConnectClient {
         }
         pairingEngine.onPairingUpdate = { [unowned self] pairing in
             delegate?.didUpdate(pairing: pairing)
+        }
+        pairingEngine.onPairingExtend = { [unowned self] pairing in
+            delegate?.didExtend(pairing: pairing)
         }
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
             delegate?.didSettle(session: settledSession)
