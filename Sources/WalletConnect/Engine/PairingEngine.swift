@@ -124,6 +124,20 @@ final class PairingEngine {
         }
     }
     
+    func extend(topic: String) throws {
+        guard var pairing = sequencesStore.getSequence(forTopic: topic) else {
+            throw WalletConnectError.noPairingMatchingTopic(topic)
+        }
+        guard pairing.isSettled else {
+            throw WalletConnectError.pairingNotSettled(topic)
+        }
+        guard pairing.selfIsController else {
+            throw WalletConnectError.unauthorizedNonControllerCall
+        }
+        pairing.extend()
+        let newTtl = pairing.expiryDate
+    }
+    
     //MARK: - Private
     
     private func acknowledgeApproval(pendingTopic: String) throws {

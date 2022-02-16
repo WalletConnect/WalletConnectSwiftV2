@@ -57,6 +57,15 @@ struct PairingSequence: ExpirableSequence {
     static var timeToLiveSettled: Int {
         Time.day * 30
     }
+    
+    mutating func extend(_ ttl: Int) throws {
+        let newExpiryDate = Date(timeIntervalSinceNow: TimeInterval(ttl))
+        let maxExpiryDate: Date(timeIntervalSinceNow: TimeInterval(PairingSequence.timeToLiveSettled))
+        guard newExpiryDate > expiryDate && newExpiryDate <= maxExpiryDate else {
+            throw WalletConnectError.invalidExtendMethodCall
+        }
+        expiryDate = newExpiryDate
+    }
 }
 
 extension PairingSequence {

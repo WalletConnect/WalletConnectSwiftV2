@@ -41,5 +41,9 @@ internal enum PairingType {
         }
     }
     
-    struct PingParams: Codable, Equatable {} // Is an empty struct really needed?
+    struct PingParams: Codable, Equatable {}
+    
+    struct ExtendedParams: Codable, Equatable {
+        let ttl: String
+    }
 }

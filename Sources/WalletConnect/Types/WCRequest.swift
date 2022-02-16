@@ -1,6 +1,6 @@
 import Foundation
 
-struct WCRequest: Codable {
+struct  : Codable {
     let id: Int64
     let jsonrpc: String
     let method: Method
@@ -44,6 +44,9 @@ struct WCRequest: Codable {
         case .pairingPayload:
             let paramsValue = try container.decode(PairingType.PayloadParams.self, forKey: .params)
             params = .pairingPayload(paramsValue)
+        case .pairingExtend:
+            let paramsValue = try container.decode(PairingType.ExtendedParams.self, forKey: .params)
+            params = .pairingExtend(paramsValue)
         case .pairingPing:
             let paramsValue = try container.decode(PairingType.PingParams.self, forKey: .params)
             params = .pairingPing(paramsValue)
@@ -97,6 +100,8 @@ struct WCRequest: Codable {
             try container.encode(params, forKey: .params)
         case .pairingPing(let params):
             try container.encode(params, forKey: .params)
+        case .pairingExtend(let params):
+            try container.encode(params, forKey: .params)
         case .sessionPropose(let params):
             try container.encode(params, forKey: .params)
         case .sessionApprove(let params):
@@ -133,6 +138,7 @@ extension WCRequest {
         case pairingDelete = "wc_pairingDelete"
         case pairingPayload = "wc_pairingPayload"
         case pairingPing = "wc_pairingPing"
+        case pairingExtend = "wc_pairingExtend"
         case sessionPropose = "wc_sessionPropose"
         case sessionApprove = "wc_sessionApprove"
         case sessionReject = "wc_sessionReject"
@@ -154,6 +160,7 @@ extension WCRequest {
         case pairingDelete(PairingType.DeleteParams)
         case pairingPayload(PairingType.PayloadParams)
         case pairingPing(PairingType.PingParams)
+        case pairingExtend(PairingType.ExtendedParams)
         // sessionPropose method exists exclusively within a pairing payload
         case sessionPropose(SessionType.ProposeParams)
         case sessionApprove(SessionType.ApproveParams)
@@ -179,6 +186,8 @@ extension WCRequest {
                 return lhsParam == rhsParam
             case (.pairingPayload(let lhsParam), pairingPayload(let rhsParam)):
                 return lhsParam == rhsParam
+            case (.pairingExtend(let lhsParam), pairingExtend(let rhsParams)):
+                return lhsParam == rhsParams
             case (.sessionPropose(let lhsParam), sessionPropose(let rhsParam)):
                 return lhsParam == rhsParam
             case (.sessionApprove(let lhsParam), sessionApprove(let rhsParam)):
