@@ -5,7 +5,7 @@ struct PairingSequence: ExpirableSequence {
     let topic: String
     let relay: RelayProtocolOptions
     let selfParticipant: Participant
-    let expiryDate: Date
+    private (set) var expiryDate: Date
     private var sequenceState: Either<Pending, Settled>
     
     var publicKey: String {
@@ -38,6 +38,11 @@ struct PairingSequence: ExpirableSequence {
         }
     }
     
+    var selfIsController: Bool {
+        guard let controller = settled?.permissions.controller else { return false }
+        return selfParticipant.publicKey == controller.publicKey
+    }
+    
     var isSettled: Bool {
         settled != nil
     }
@@ -60,9 +65,9 @@ struct PairingSequence: ExpirableSequence {
     
     mutating func extend(_ ttl: Int) throws {
         let newExpiryDate = Date(timeIntervalSinceNow: TimeInterval(ttl))
-        let maxExpiryDate: Date(timeIntervalSinceNow: TimeInterval(PairingSequence.timeToLiveSettled))
+        let maxExpiryDate = Date(timeIntervalSinceNow: TimeInterval(PairingSequence.timeToLiveSettled))
         guard newExpiryDate > expiryDate && newExpiryDate <= maxExpiryDate else {
-            throw WalletConnectError.invalidExtendMethodCall
+            throw WalletConnectError.invalidExtendTime
         }
         expiryDate = newExpiryDate
     }

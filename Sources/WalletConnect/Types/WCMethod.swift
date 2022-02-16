@@ -3,6 +3,7 @@ enum WCMethod {
     case wcPairingUpdate(PairingType.UpdateParams)
     case wcPairingPayload(PairingType.PayloadParams)
     case wcPairingPing
+    case wcPaigingExtend(PairingType.ExtendedParams)
     case wcSessionApprove(SessionType.ApproveParams)
     case wcSessionReject(SessionType.RejectParams)
     case wcSessionUpdate(SessionType.UpdateParams)
@@ -22,6 +23,8 @@ enum WCMethod {
             return WCRequest(method: .pairingPayload, params: .pairingPayload(payloadParams))
         case .wcPairingPing:
             return WCRequest(method: .pairingPing, params: .pairingPing(PairingType.PingParams()))
+        case .wcPaigingExtend(let extendParams):
+            return WCRequest(method: .pairingExtend, params: .pairingExtend(extendParams))
         case .wcSessionApprove(let approveParams):
             return WCRequest(method: .sessionApprove, params: .sessionApprove(approveParams))
         case .wcSessionReject(let rejectParams):

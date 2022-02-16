@@ -10,7 +10,7 @@ enum WalletConnectError: Error {
     case sessionNotSettled(String)
     case pairingNotSettled(String)
     case invalidPermissions
-    case invalidExtendMethodCall
+    case invalidExtendTime
     case unauthorizedNonControllerCall
     
     case `internal`(_ reason: InternalReason)
@@ -65,6 +65,10 @@ extension WalletConnectError: CustomStringConvertible {
             return "No pairing found matching topic \(topic)."
         case .sessionNotSettled(let topic):
             return "Session is not settled on topic \(topic)."
+        case .pairingNotSettled(let topic):
+            return "Pairing is not settled on topic \(topic)."
+        case .invalidExtendTime:
+            return "Extend time is out of expected range"
         case .invalidPermissions:
             return "Permission set is invalid."
         case .unauthorizedNonControllerCall:

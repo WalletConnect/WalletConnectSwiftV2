@@ -1,6 +1,6 @@
 import Foundation
 
-struct  : Codable {
+struct WCRequest: Codable {
     let id: Int64
     let jsonrpc: String
     let method: Method

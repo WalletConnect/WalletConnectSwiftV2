@@ -124,7 +124,7 @@ final class PairingEngine {
         }
     }
     
-    func extend(topic: String) throws {
+    func extend(topic: String, ttl: Int) throws {
         guard var pairing = sequencesStore.getSequence(forTopic: topic) else {
             throw WalletConnectError.noPairingMatchingTopic(topic)
         }
@@ -134,8 +134,9 @@ final class PairingEngine {
         guard pairing.selfIsController else {
             throw WalletConnectError.unauthorizedNonControllerCall
         }
-        pairing.extend()
-        let newTtl = pairing.expiryDate
+        try pairing.extend(ttl)
+        sequencesStore.setSequence(pairing)
+        relayer.request(.wcPaigingExtend(PairingType.ExtendedParams(ttl: ttl)), onTopic: topic)
     }
     
     //MARK: - Private

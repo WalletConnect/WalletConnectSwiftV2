@@ -44,6 +44,6 @@ internal enum PairingType {
     struct PingParams: Codable, Equatable {}
     
     struct ExtendedParams: Codable, Equatable {
-        let ttl: String
+        let ttl: Int
     }
 }

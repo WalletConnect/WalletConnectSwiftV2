@@ -2,7 +2,7 @@ protocol PairingSequenceStorage: AnyObject {
     var onSequenceExpiration: ((_ topic: String, _ pubKey: String) -> Void)? { get set }
     func hasSequence(forTopic topic: String) -> Bool
     func setSequence(_ sequence: PairingSequence)
-    func getSequence(forTopic topic: String) throws -> PairingSequence?
+    func getSequence(forTopic topic: String) -> PairingSequence?
     func getAll() -> [PairingSequence]
     func delete(topic: String)
 }
@@ -28,8 +28,8 @@ final class PairingStorage: PairingSequenceStorage {
         storage.setSequence(sequence)
     }
     
-    func getSequence(forTopic topic: String) throws -> PairingSequence? {
-        try storage.getSequence(forTopic: topic)
+    func getSequence(forTopic topic: String) -> PairingSequence? {
+        try? storage.getSequence(forTopic: topic)
     }
     
     func getAll() -> [PairingSequence] {
