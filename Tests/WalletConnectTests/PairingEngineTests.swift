@@ -149,16 +149,12 @@ final class PairingEngineTests: XCTestCase {
         // TODO: Check if expiry time is correct
     }
     
-//    func testNotifyOnSessionProposal() {
-//        let topic = "1234"
-//        let proposalExpectation = expectation(description: "on session proposal is called after pairing payload")
-////        engine.sequencesStore.create(topic: topic, sequenceState: sequencePendingState)
-//        try? engine.sequencesStore.setSequence(pendingPairing)
-//        let subscriptionPayload = WCRequestSubscriptionPayload(topic: topic, clientSynchJsonRpc: sessionProposal)
-//        engine.onSessionProposal = { (_) in
-//            proposalExpectation.fulfill()
-//        }
-//        subscriber.onRequestSubscription?(subscriptionPayload)
-//        waitForExpectations(timeout: 0.01, handler: nil)
-//    }
+    func testNonControllerExtendFails() {
+        setupEngine(isController: false)
+        let pairing = PairingSequence.stubSettled(isSelfController: false)
+        storageMock.setSequence(pairing)
+        XCTAssertThrowsError(try engine.extend(topic: pairing.topic, ttl: 1234)) { error in
+            XCTAssertEqual(error as! WalletConnectError, WalletConnectError.unauthorizedNonControllerCall)
+        }
+    }
 }

@@ -3,7 +3,7 @@
 import Foundation
 
 // TODO: Migrate protocol errors to ReasonCode enum over time. Use WalletConnectError for client errors only.
-enum WalletConnectError: Error {
+enum WalletConnectError: Error, Equatable {
     
     case noSessionMatchingTopic(String)
     case noPairingMatchingTopic(String)
