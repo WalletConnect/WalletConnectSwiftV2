@@ -8,13 +8,15 @@ import TestingUtils
 
 final class RelayerEndToEndTests: XCTestCase {
     
-    let url = URL(string: "wss://staging.walletconnect.org")!
+    let relayHost = "relay.dev.walletconnect.com"
+    let projectId = "52af113ee0c1e1a20f4995730196c13e"
     private var publishers = [AnyCancellable]()
     
-    func makeRelayer(_ uniqueIdentifier: String = "") -> Relayer {
+    func makeRelayer() -> Relayer {
         let logger = ConsoleLogger()
         let socketConnectionObserver = SocketConnectionObserver()
         let urlSession = URLSession(configuration: .default, delegate: socketConnectionObserver, delegateQueue: OperationQueue())
+        let url = Relayer.makeRelayUrl(host: relayHost, projectId: projectId)
         let socket = WebSocketSession(session: urlSession, url: url)
         let dispatcher = Dispatcher(socket: socket, socketConnectionObserver: socketConnectionObserver, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket))
         return Relayer(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
@@ -32,8 +34,8 @@ final class RelayerEndToEndTests: XCTestCase {
     }
     
     func testEndToEndPayload() {
-        let relayA = makeRelayer("A")
-        let relayB = makeRelayer("B")
+        let relayA = makeRelayer()
+        let relayB = makeRelayer()
         try! relayA.connect()
         try! relayB.connect()
 

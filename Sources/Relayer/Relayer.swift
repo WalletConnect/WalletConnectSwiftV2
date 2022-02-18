@@ -80,8 +80,12 @@ public final class Relayer {
         try dispatcher.disconnect(closeCode: closeCode)
     }
     
-    @discardableResult public func publish(topic: String, payload: String, completion: @escaping ((Error?) -> ())) -> Int64 {
-        let params = RelayJSONRPC.PublishParams(topic: topic, message: payload, ttl: defaultTtl)
+    @discardableResult public func publish(
+        topic: String,
+        payload: String,
+        prompt: Bool = false,
+        completion: @escaping ((Error?) -> ())) -> Int64 {
+        let params = RelayJSONRPC.PublishParams(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt)
         let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.rawValue, params: params)
         let requestJson = try! request.json()
         logger.debug("waku: Publishing Payload on Topic: \(topic)")
@@ -209,7 +213,7 @@ public final class Relayer {
         }
     }
     
-    static private func makeRelayUrl(host: String, projectId: String) -> URL {
+    static func makeRelayUrl(host: String, projectId: String) -> URL {
         var components = URLComponents()
         components.scheme = "wss"
         components.host = host
