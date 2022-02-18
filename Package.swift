@@ -13,33 +13,37 @@ let package = Package(
             name: "WalletConnect",
             targets: ["WalletConnect"]),
     ],
-    dependencies: [
-
-    ],
     targets: [
         .target(
             name: "WalletConnect",
-            dependencies: ["Relayer", "WalletConnectUtils"],
+            dependencies: ["Relayer", "WalletConnectUtils", "WalletConnectKMS"],
             path: "Sources/WalletConnect"),
         .target(
             name: "Relayer",
             dependencies: ["WalletConnectUtils"],
             path: "Sources/Relayer"),
         .target(
+            name: "WalletConnectKMS",
+            dependencies: ["WalletConnectUtils"],
+            path: "Sources/WalletConnectKMS"),
+        .target(
             name: "WalletConnectUtils",
             dependencies: []),
         .testTarget(
             name: "WalletConnectTests",
-            dependencies: ["WalletConnect", "TestingUtils"]),
+            dependencies: ["WalletConnect", "TestingUtils", "WalletConnectKMS"]),
         .testTarget(
             name: "IntegrationTests",
-            dependencies: ["WalletConnect", "TestingUtils"]),
+            dependencies: ["WalletConnect", "TestingUtils", "WalletConnectKMS"]),
         .testTarget(
             name: "RelayerTests",
             dependencies: ["Relayer", "WalletConnectUtils", "TestingUtils"]),
+        .testTarget(
+            name: "WalletConnectKMSTests",
+            dependencies: ["WalletConnectKMS", "WalletConnectUtils", "TestingUtils"]),
         .target(
             name: "TestingUtils",
-            dependencies: ["WalletConnectUtils"],
+            dependencies: ["WalletConnectUtils", "WalletConnectKMS"],
             path: "Tests/TestingUtils"),
     ],
     swiftLanguageVersions: [.v5]

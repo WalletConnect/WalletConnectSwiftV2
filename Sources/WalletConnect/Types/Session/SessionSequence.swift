@@ -1,4 +1,5 @@
 import Foundation
+import WalletConnectKMS
 
 struct SessionSequence: ExpirableSequence {
     
@@ -42,7 +43,7 @@ struct SessionSequence: ExpirableSequence {
         settled?.status == .acknowledged
     }
     
-    var isController: Bool {
+    var selfIsController: Bool {
         guard let controller = settled?.permissions.controller else { return false }
         return selfParticipant.publicKey == controller.publicKey
     }
@@ -71,6 +72,11 @@ struct SessionSequence: ExpirableSequence {
     func hasPermission(forMethod method: String) -> Bool {
         guard let settled = settled else { return false }
         return settled.permissions.jsonrpc.methods.contains(method)
+    }
+    
+    func hasPermission(forNotification type: String) -> Bool {
+        guard let notificationPermissions = settled?.permissions.notifications else { return false }
+        return notificationPermissions.types.contains(type)
     }
     
     mutating func upgrade(_ permissions: SessionPermissions) {

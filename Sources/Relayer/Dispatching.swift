@@ -6,8 +6,8 @@ protocol Dispatching {
     var onDisconnect: (()->())? {get set}
     var onMessage: ((String) -> ())? {get set}
     func send(_ string: String, completion: @escaping (Error?)->())
-    func connect()
-    func disconnect(closeCode: URLSessionWebSocketTask.CloseCode)
+    func connect() throws
+    func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws
 }
 
 final class Dispatcher: NSObject, Dispatching {
@@ -15,43 +15,36 @@ final class Dispatcher: NSObject, Dispatching {
     var onDisconnect: (() -> ())?
     var onMessage: ((String) -> ())?
     private var textFramesQueue = Queue<String>()
-    private var networkMonitor: NetworkMonitoring
-    private let url: URL
     var socket: WebSocketSessionProtocol
     var socketConnectionObserver: SocketConnectionObserving
+    var socketConnectionHandler: SocketConnectionHandler
     
-    init(url: URL,
-         networkMonitor: NetworkMonitoring = NetworkMonitor(),
-         socket: WebSocketSessionProtocol,
-         socketConnectionObserver: SocketConnectionObserving) {
-        self.url = url
-        self.networkMonitor = networkMonitor
+    init(socket: WebSocketSessionProtocol,
+         socketConnectionObserver: SocketConnectionObserving,
+         socketConnectionHandler: SocketConnectionHandler) {
         self.socket = socket
         self.socketConnectionObserver = socketConnectionObserver
+        self.socketConnectionHandler = socketConnectionHandler
         super.init()
         setUpWebSocketSession()
         setUpSocketConnectionObserving()
-        setUpNetworkMonitoring()
-        socket.connect(on: url)
     }
 
     func send(_ string: String, completion: @escaping (Error?) -> Void) {
         if socket.isConnected {
             self.socket.send(string, completionHandler: completion)
+            //TODO - enqueue     if fails
         } else {
             textFramesQueue.enqueue(string)
         }
     }
     
-    func connect() {
-        if !socket.isConnected {
-            socket.connect(on: url)
-        }
+    func connect() throws {
+        try socketConnectionHandler.handleConnect()
     }
     
-    func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) {
-        socket.disconnect(with: closeCode)
-        onDisconnect?()
+    func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
+        try socketConnectionHandler.handleDisconnect(closeCode: closeCode)
     }
     
     private func setUpWebSocketSession() {
@@ -59,7 +52,7 @@ final class Dispatcher: NSObject, Dispatching {
             self?.onMessage?($0)
         }
         socket.onMessageError = { error in
-            print(error)
+            print("WebSocket Error \(error)")
         }
     }
     
@@ -73,16 +66,6 @@ final class Dispatcher: NSObject, Dispatching {
         }
     }
     
-    private func setUpNetworkMonitoring() {
-        networkMonitor.onSatisfied = { [weak self] in
-            self?.connect()
-        }
-        networkMonitor.onUnsatisfied = { [weak self] in
-            self?.disconnect(closeCode: .goingAway)
-        }
-        networkMonitor.startMonitoring()
-    }
-    
     private func dequeuePendingTextFrames() {
         while let frame = textFramesQueue.dequeue() {
             send(frame) { error in
@@ -93,4 +76,3 @@ final class Dispatcher: NSObject, Dispatching {
         }
     }
 }
-

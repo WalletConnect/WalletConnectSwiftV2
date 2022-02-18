@@ -52,7 +52,7 @@ struct ProposedPermissions: Codable, Equatable {
 }
 
 struct PairingState: Codable, Equatable {
-    var metadata: AppMetadata
+    var metadata: AppMetadata?
 }
 
 extension PairingType {

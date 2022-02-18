@@ -4,6 +4,7 @@ import XCTest
 import WalletConnectUtils
 import TestingUtils
 @testable import WalletConnect
+@testable import WalletConnectKMS
 
 fileprivate extension Session.Permissions {
     static func stub(methods: Set<String> = [], notifications: [String] = []) -> Session.Permissions {
@@ -15,8 +16,8 @@ final class ClientTests: XCTestCase {
     
     let defaultTimeout: TimeInterval = 5.0
     
-    let relayHost = "staging.walletconnect.org"
-    let projectId = ""
+    let relayHost = "relay.dev.walletconnect.com"
+    let projectId = "52af113ee0c1e1a20f4995730196c13e"
     var proposer: ClientDelegate!
     var responder: ClientDelegate!
     
@@ -27,13 +28,13 @@ final class ClientTests: XCTestCase {
 
     static func makeClientDelegate(isController: Bool, relayHost: String, prefix: String, projectId: String) -> ClientDelegate {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
+        let keychain = KeychainStorage(keychainService: KeychainServiceFake(), serviceIdentifier: "")
         let client = WalletConnectClient(
             metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil),
             projectId: projectId,
-            isController: isController,
             relayHost: relayHost,
             logger: logger,
-            keychain: KeychainStorage(keychainService: KeychainServiceFake()),
+            kms: KeyManagementService(keychain: keychain),
             keyValueStorage: RuntimeKeyValueStorage())
         return ClientDelegate(client: client)
     }
@@ -57,7 +58,7 @@ final class ClientTests: XCTestCase {
     func testNewSession() {
         let proposerSettlesSessionExpectation = expectation(description: "Proposer settles session")
         let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
-        let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
+        let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
         
         let permissions = Session.Permissions.stub()
         let uri = try! proposer.client.connect(sessionPermissions: permissions)!
@@ -113,10 +114,10 @@ final class ClientTests: XCTestCase {
         let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self] proposal in
-            self.responder.client.reject(proposal: proposal, reason: Reason(code: WalletConnectError.internal(.notApproved).code, message: WalletConnectError.internal(.notApproved).description))
+            self.responder.client.reject(proposal: proposal, reason: .disapprovedChains)
         }
         proposer.onSessionRejected = { _, reason in
-            XCTAssertEqual(reason.code, WalletConnectError.internal(.notApproved).code)
+            XCTAssertEqual(reason.code, 5000)
             sessionRejectExpectation.fulfill()
         }
         waitForExpectations(timeout: defaultTimeout, handler: nil)
@@ -245,7 +246,7 @@ final class ClientTests: XCTestCase {
     func testSuccessfulSessionUpgrade() {
         let proposerSessionUpgradeExpectation = expectation(description: "Proposer upgrades session on responder request")
         let responderSessionUpgradeExpectation = expectation(description: "Responder upgrades session on proposer response")
-        let account = "0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
+        let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
         let permissions = Session.Permissions.stub()
         let upgradePermissions = Session.Permissions(blockchains: ["eip155:42"], methods: ["eth_sendTransaction"])
         let uri = try! proposer.client.connect(sessionPermissions: permissions)!
@@ -272,8 +273,8 @@ final class ClientTests: XCTestCase {
     func testSuccessfulSessionUpdate() {
         let proposerSessionUpdateExpectation = expectation(description: "Proposer updates session on responder request")
         let responderSessionUpdateExpectation = expectation(description: "Responder updates session on proposer response")
-        let account = "eip155:42:0x022c0c42a80bd19EA4cF0F94c4F9F96645759716"
-        let updateAccounts: Set<String> = ["eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb"]
+        let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
+        let updateAccounts: Set<Account> = [Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdf")!]
         let permissions = Session.Permissions.stub()
         let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         try! responder.client.pair(uri: uri)
@@ -281,7 +282,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.approve(proposal: proposal, accounts: [account])
         }
         responder.onSessionSettled = { [unowned self] sessionSettled in
-            responder.client.update(topic: sessionSettled.topic, accounts: updateAccounts)
+            try? responder.client.update(topic: sessionSettled.topic, accounts: updateAccounts)
         }
         responder.onSessionUpdate = { _, accounts in
             XCTAssertEqual(accounts, updateAccounts)

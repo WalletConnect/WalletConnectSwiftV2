@@ -7,11 +7,12 @@ final class WebSocketSessionTests: XCTestCase {
     
     var webSocketTaskMock: URLSessionWebSocketTaskMock!
     var sessionMock: URLSessionMock!
-    
+    var url: URL!
     override func setUp() {
         webSocketTaskMock = URLSessionWebSocketTaskMock()
         sessionMock = URLSessionMock(webSocketTaskMock: webSocketTaskMock)
-        sut = WebSocketSession(session: sessionMock)
+        url = URL.stub()
+        sut = WebSocketSession(session: sessionMock, url: url)
     }
     
     override func tearDown() {
@@ -25,16 +26,15 @@ final class WebSocketSessionTests: XCTestCase {
     }
     
     func testConnect() {
-        let expectedURL = URL.stub()
-        sut.connect(on: expectedURL)
+        sut.connect()
         XCTAssertTrue(sut.isConnected)
         XCTAssertTrue(webSocketTaskMock.didCallResume)
         XCTAssertTrue(webSocketTaskMock.didCallReceive)
-        XCTAssertEqual(sessionMock.lastSessionTaskURL, expectedURL)
+        XCTAssertEqual(sessionMock.lastSessionTaskURL, url)
     }
     
     func testDisconnect() {
-        sut.connect(on: URL.stub())
+        sut.connect()
         sut.disconnect()
         XCTAssertFalse(sut.isConnected)
         XCTAssertTrue(webSocketTaskMock.didCallCancel)
@@ -43,7 +43,7 @@ final class WebSocketSessionTests: XCTestCase {
     func testSendMessageSuccessCallbacksNoError() {
         let expectedMessage = "message"
         
-        sut.connect(on: URL.stub())
+        sut.connect()
         sut.send(expectedMessage) { error in
             XCTAssertNil(error)
         }
@@ -64,7 +64,7 @@ final class WebSocketSessionTests: XCTestCase {
     func testSendMessageFailure() {
         webSocketTaskMock.sendMessageError = NSError.mock()
         
-        sut.connect(on: URL.stub())
+        sut.connect()
         sut.send("") { error in
             XCTAssertNotNil(error)
             XCTAssert(error?.asNetworkError?.isSendMessageError == true)
@@ -78,7 +78,7 @@ final class WebSocketSessionTests: XCTestCase {
         sut.onMessageReceived = { callbackMessage = $0 }
         webSocketTaskMock.receiveMessageResult = .success(.string(expectedMessage))
         
-        sut.connect(on: URL.stub())
+        sut.connect()
         
         XCTAssertEqual(callbackMessage, expectedMessage)
         XCTAssert(webSocketTaskMock.receiveCallsCount == 2)
@@ -91,7 +91,7 @@ final class WebSocketSessionTests: XCTestCase {
         sut.onMessageError = { _ in didCallbackError = true }
         webSocketTaskMock.receiveMessageResult = .success(.data("message".data(using: .utf8)!))
         
-        sut.connect(on: URL.stub())
+        sut.connect()
         
         XCTAssertNil(callbackMessage)
         XCTAssertFalse(didCallbackError)
@@ -105,7 +105,7 @@ final class WebSocketSessionTests: XCTestCase {
         }
         webSocketTaskMock.receiveMessageResult = .failure(NSError.mock())
         
-        sut.connect(on: URL.stub())
+        sut.connect()
         
         XCTAssert(webSocketTaskMock.receiveCallsCount == 2)
     }

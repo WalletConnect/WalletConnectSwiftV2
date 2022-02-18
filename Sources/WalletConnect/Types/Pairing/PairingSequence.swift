@@ -1,4 +1,5 @@
 import Foundation
+import WalletConnectKMS
 
 struct PairingSequence: ExpirableSequence {
     let topic: String

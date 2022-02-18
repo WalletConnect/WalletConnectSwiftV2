@@ -2,7 +2,7 @@
 import Foundation
 @testable import Relayer
 
-class WebSocketSessionMock: WebSocketSessionProtocol {
+class WebSocketSessionMock: WebSocketSessionProtocol, WebSocketConnecting {
     var onConnect: (() -> ())?
     var onDisconnect: (() -> ())?
     var onMessageReceived: ((String) -> ())?
@@ -10,7 +10,7 @@ class WebSocketSessionMock: WebSocketSessionProtocol {
     var sendCallCount: Int = 0
     var isConnected: Bool = false
     
-    func connect(on url: URL) {
+    func connect() {
         isConnected = true
         onConnect?()
     }

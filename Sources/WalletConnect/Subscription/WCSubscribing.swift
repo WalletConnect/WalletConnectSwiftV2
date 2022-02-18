@@ -31,7 +31,7 @@ class WCSubscriber: WCSubscribing {
 
     func setSubscription(topic: String) {
         logger.debug("Setting Subscription...")
-        concurrentQueue.sync {
+        concurrentQueue.sync(flags: .barrier) {
             topics.append(topic)
         }
         relay.subscribe(topic: topic)
@@ -44,7 +44,7 @@ class WCSubscriber: WCSubscribing {
     }
     
     func removeSubscription(topic: String) {
-        concurrentQueue.sync {
+        concurrentQueue.sync(flags: .barrier) {
             topics.removeAll {$0 == topic}
         }
         relay.unsubscribe(topic: topic)
