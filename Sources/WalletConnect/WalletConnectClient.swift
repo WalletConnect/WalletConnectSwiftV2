@@ -315,6 +315,9 @@ public final class WalletConnectClient {
         sessionEngine.onSessionUpdate = { [unowned self] topic, accounts in
             delegate?.didUpdate(sessionTopic: topic, accounts: Set(accounts.compactMap { Account($0) }))
         }
+        sessionEngine.onSessionExtended = { [unowned self] session in
+            delegate?.didExtend(session: session)
+        }
         sessionEngine.onNotificationReceived = { [unowned self] topic, notification in
             delegate?.didReceive(notification: notification, sessionTopic: topic)
         }

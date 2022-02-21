@@ -65,6 +65,11 @@ public protocol WalletConnectClientDelegate: AnyObject {
     ///
     /// Function will be executed on non-controller client only.
     func didExtend(pairing: Pairing)
+    
+    /// Tells the delegate that peer has extended session lifetime.
+    ///
+    /// Function will be executed on non-controller client only.
+    func didExtend(session: Session)
 }
 
 public extension WalletConnectClientDelegate {
@@ -76,4 +81,5 @@ public extension WalletConnectClientDelegate {
     func didReceive(sessionRequest: Request) {}
     func didReceive(sessionProposal: Session.Proposal) {}
     func didReceive(sessionResponse: Response) {}
+    func didExtend(session: Session) {}
 }

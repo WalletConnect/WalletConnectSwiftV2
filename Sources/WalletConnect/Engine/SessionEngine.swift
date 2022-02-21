@@ -411,6 +411,9 @@ final class SessionEngine {
         }
         sequencesStore.setSequence(session)
         relayer.respondSuccess(for: payload)
+        let permissions = Session.Permissions(blockchains: session.settled!.permissions.blockchain.chains, methods: session.settled!.permissions.jsonrpc.methods)
+        let publicSession = Session(topic: session.topic, peer: session.settled!.peer.metadata!, permissions: permissions, accounts: session.settled!.state.accounts)
+        onSessionExtended?(publicSession)
     }
     
     private func wcSessionDelete(_ payload: WCRequestSubscriptionPayload, deleteParams: SessionType.DeleteParams) {
