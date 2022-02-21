@@ -45,7 +45,7 @@ struct WCRequest: Codable {
             let paramsValue = try container.decode(PairingType.PayloadParams.self, forKey: .params)
             params = .pairingPayload(paramsValue)
         case .pairingExtend:
-            let paramsValue = try container.decode(PairingType.ExtendedParams.self, forKey: .params)
+            let paramsValue = try container.decode(PairingType.ExtendParams.self, forKey: .params)
             params = .pairingExtend(paramsValue)
         case .pairingPing:
             let paramsValue = try container.decode(PairingType.PingParams.self, forKey: .params)
@@ -74,6 +74,9 @@ struct WCRequest: Codable {
         case .sessionPing:
             let paramsValue = try container.decode(SessionType.PingParams.self, forKey: .params)
             params = .sessionPing(paramsValue)
+        case .sessionExtend:
+            let paramsValue = try container.decode(SessionType.ExtendParams.self, forKey: .params)
+            params = .sessionExtend(paramsValue)
         case .sessionNotification:
             let paramsValue = try container.decode(SessionType.NotificationParams.self, forKey: .params)
             params = .sessionNotification(paramsValue)
@@ -118,6 +121,8 @@ struct WCRequest: Codable {
             try container.encode(params, forKey: .params)
         case .sessionPing(let params):
             try container.encode(params, forKey: .params)
+        case .sessionExtend(let params):
+            try container.encode(params, forKey: .params)
         case .sessionNotification(let params):
             try container.encode(params, forKey: .params)
         }
@@ -147,6 +152,7 @@ extension WCRequest {
         case sessionDelete = "wc_sessionDelete"
         case sessionPayload = "wc_sessionPayload"
         case sessionPing = "wc_sessionPing"
+        case sessionExtend = "wc_sessionExtend"
         case sessionNotification = "wc_sessionNotification"
     }
 }
@@ -160,7 +166,7 @@ extension WCRequest {
         case pairingDelete(PairingType.DeleteParams)
         case pairingPayload(PairingType.PayloadParams)
         case pairingPing(PairingType.PingParams)
-        case pairingExtend(PairingType.ExtendedParams)
+        case pairingExtend(PairingType.ExtendParams)
         // sessionPropose method exists exclusively within a pairing payload
         case sessionPropose(SessionType.ProposeParams)
         case sessionApprove(SessionType.ApproveParams)
@@ -170,6 +176,7 @@ extension WCRequest {
         case sessionDelete(SessionType.DeleteParams)
         case sessionPayload(SessionType.PayloadParams)
         case sessionPing(SessionType.PingParams)
+        case sessionExtend(SessionType.ExtendParams)
         case sessionNotification(SessionType.NotificationParams)
 
         static func == (lhs: Params, rhs: Params) -> Bool {
@@ -204,6 +211,8 @@ extension WCRequest {
                 return lhsParam == rhsParam
             case (.sessionPing(let lhsParam), sessionPing(let rhsParam)):
                 return lhsParam == rhsParam
+            case (.sessionExtend(let lhsParam), sessionExtend(let rhsParams)):
+                return lhsParam == rhsParams
             case (.sessionNotification(let lhsParam), sessionNotification(let rhsParam)):
                 return lhsParam == rhsParam
             default:

@@ -162,6 +162,21 @@ final class SessionEngine {
         }
     }
     
+    func extend(topic: String, ttl: Int) throws {
+        guard var session = sequencesStore.getSequence(forTopic: topic) else {
+            throw WalletConnectError.noSessionMatchingTopic(topic)
+        }
+        guard session.isSettled else {
+            throw WalletConnectError.sessionNotSettled(topic)
+        }
+        guard session.selfIsController else {
+            throw WalletConnectError.unauthorizedNonControllerCall
+        }
+        try session.extend(ttl)
+        sequencesStore.setSequence(session)
+        relayer.request(.wcSessionExtend(SessionType.ExtendParams(ttl: ttl)), onTopic: topic)
+    }
+    
     func request(params: Request) {
         guard sequencesStore.hasSequence(forTopic: params.topic) else {
             logger.debug("Could not find session for topic \(params.topic)")

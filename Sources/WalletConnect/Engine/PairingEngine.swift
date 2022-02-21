@@ -139,7 +139,7 @@ final class PairingEngine {
         }
         try pairing.extend(ttl)
         sequencesStore.setSequence(pairing)
-        relayer.request(.wcPaigingExtend(PairingType.ExtendedParams(ttl: ttl)), onTopic: topic)
+        relayer.request(.wcPairingExtend(PairingType.ExtendParams(ttl: ttl)), onTopic: topic)
     }
     
     //MARK: - Private
@@ -247,7 +247,7 @@ final class PairingEngine {
         onPairingUpdate?(Pairing(topic: topic, peer: metadata, expiryDate: pairing.expiryDate))
     }
     
-    private func wcPairingExtend(_ payload: WCRequestSubscriptionPayload, extendParams: PairingType.ExtendedParams) {
+    private func wcPairingExtend(_ payload: WCRequestSubscriptionPayload, extendParams: PairingType.ExtendParams) {
         let topic = payload.topic
         guard var pairing = sequencesStore.getSequence(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .pairing, topic: topic))
