@@ -392,6 +392,26 @@ final class SessionEngine {
         onSessionUpgrade?(session.topic, newPermissions)
     }
     
+    private func wcSessionExtend(_ payload: WCRequestSubscriptionPayload, extendParams: SessionType.ExtendParams) {
+        let topic = payload.topic
+        guard var session = sequencesStore.getSequence(forTopic: topic) else {
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
+            return
+        }
+        guard session.peerIsController else {
+            relayer.respondError(for: payload, reason: .unauthorizedExtendRequest(context: .session))
+            return
+        }
+        do {
+            try session.extend(extendParams.ttl)
+        } catch {
+            relayer.respondError(for: payload, reason: .invalidExtendRequest(context: .session))
+            return
+        }
+        sequencesStore.setSequence(pairing)
+        relayer.respondSuccess(for: payload)
+    }
+    
     private func wcSessionDelete(_ payload: WCRequestSubscriptionPayload, deleteParams: SessionType.DeleteParams) {
         let topic = payload.topic
         guard sequencesStore.hasSequence(forTopic: topic) else {
