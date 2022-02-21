@@ -11,6 +11,7 @@ final class SessionEngine {
     var onSessionRejected: ((String, SessionType.Reason)->())?
     var onSessionUpdate: ((String, Set<String>)->())?
     var onSessionUpgrade: ((String, SessionPermissions)->())?
+    var onSessionExtended: ((Session) -> ())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
     var onNotificationReceived: ((String, Session.Notification)->())?
     
@@ -408,7 +409,7 @@ final class SessionEngine {
             relayer.respondError(for: payload, reason: .invalidExtendRequest(context: .session))
             return
         }
-        sequencesStore.setSequence(pairing)
+        sequencesStore.setSequence(session)
         relayer.respondSuccess(for: payload)
     }
     

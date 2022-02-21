@@ -265,6 +265,7 @@ final class PairingEngine {
         }
         sequencesStore.setSequence(pairing)
         relayer.respondSuccess(for: payload)
+        onPairingExtend?(Pairing(topic: pairing.topic, peer: pairing.settled?.state?.metadata, expiryDate: pairing.expiryDate))
     }
     
     private func wcPairingPayload(_ payload: WCRequestSubscriptionPayload, payloadParams: PairingType.PayloadParams) {

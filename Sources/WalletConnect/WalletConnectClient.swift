@@ -170,7 +170,7 @@ public final class WalletConnectClient {
         if pairingEngine.hasPairing(for: topic) {
             try pairingEngine.extend(topic: topic, ttl: ttl)
         } else if sessionEngine.hasSession(for: topic) {
-//            try sessionEngine.extend(topic: topic, ttl: ttl)
+            try sessionEngine.extend(topic: topic, ttl: ttl)
         }
     }
     
