@@ -71,4 +71,9 @@ extension WCRequestSubscriptionPayload {
         let upgradeMethod = WCMethod.wcSessionUpgrade(SessionType.UpgradeParams(permissions: permissions)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: upgradeMethod)
     }
+    
+    static func stubExtend(topic: String, ttl: Int) -> WCRequestSubscriptionPayload {
+        let extendMethod = WCMethod.wcSessionExtend(SessionType.ExtendParams(ttl: ttl)).asRequest()
+        return WCRequestSubscriptionPayload(topic: topic, wcRequest: extendMethod)
+    }
 }

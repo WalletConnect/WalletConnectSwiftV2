@@ -11,4 +11,8 @@ final class TimeTraveler {
     func travel(by timeInterval: TimeInterval) {
         referenceDate = referenceDate.addingTimeInterval(timeInterval)
     }
+    
+    static func dateByAdding(days: Int) -> Date {
+        Calendar.current.date(byAdding: .day, value: days, to: Date())!
+    }
 }

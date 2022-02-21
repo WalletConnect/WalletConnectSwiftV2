@@ -324,7 +324,7 @@ final class SessionEngineTests: XCTestCase {
     
     func testUpdatePeerErrorSessionNotSettled() {
         setupEngine()
-        let session = SessionSequence.stubPreSettled(isPeerController: true) // Session is not fully settled
+        let session = SessionSequence.stubPreSettled(isSelfController: false) // Session is not fully settled
         storageMock.setSequence(session)
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic))
         XCTAssertFalse(relayMock.didRespondSuccess)
@@ -428,7 +428,7 @@ final class SessionEngineTests: XCTestCase {
     
     func testUpgradePeerErrorSessionNotSettled() {
         setupEngine()
-        let session = SessionSequence.stubPreSettled(isPeerController: true) // Session is not fully settled
+        let session = SessionSequence.stubPreSettled(isSelfController: false) // Session is not fully settled
         storageMock.setSequence(session)
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpgrade(topic: session.topic))
         XCTAssertFalse(relayMock.didRespondSuccess)
@@ -443,6 +443,82 @@ final class SessionEngineTests: XCTestCase {
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 3004)
     }
+    
+    // MARK: - Session Extend on controller client
+    
+    func testExtendSuccess() {
+        setupEngine()
+        let tomorrow = TimeTraveler.dateByAdding(days: 1)
+        let session = SessionSequence.stubSettled(isSelfController: true, expiryDate: tomorrow)
+        storageMock.setSequence(session)
+        let twoDays = 2*Time.day
+        XCTAssertNoThrow(try engine.extend(topic: session.topic, ttl: twoDays))
+        let extendedSession = engine.getSettledSessions().first{$0.topic == session.topic}!
+        XCTAssertEqual(extendedSession.expiryDate.timeIntervalSinceReferenceDate, TimeTraveler.dateByAdding(days: 2).timeIntervalSinceReferenceDate, accuracy: 1)
+    }
+    
+    func testExtendSessionNotSettled() {
+        setupEngine()
+        let tomorrow = TimeTraveler.dateByAdding(days: 1)
+        let session = SessionSequence.stubPreSettled(isSelfController: false, expiryDate: tomorrow)
+        storageMock.setSequence(session)
+        let twoDays = 2*Time.day
+        XCTAssertThrowsError(try engine.extend(topic: session.topic, ttl: twoDays))
+    }
+    
+    func testExtendOnNonControllerClient() {
+        setupEngine()
+        let tomorrow = TimeTraveler.dateByAdding(days: 1)
+        let session = SessionSequence.stubSettled(isSelfController: false, expiryDate: tomorrow)
+        storageMock.setSequence(session)
+        let twoDays = 2*Time.day
+        XCTAssertThrowsError(try engine.extend(topic: session.topic, ttl: twoDays))
+    }
+    
+    func testExtendTtlTooHigh() {
+        setupEngine()
+        let tomorrow = TimeTraveler.dateByAdding(days: 1)
+        let session = SessionSequence.stubSettled(isSelfController: true, expiryDate: tomorrow)
+        storageMock.setSequence(session)
+        let tenDays = 10*Time.day
+        XCTAssertThrowsError(try engine.extend(topic: session.topic, ttl: tenDays))
+    }
+    
+    func testExtendTtlTooLow() {
+        setupEngine()
+        let dayAfterTommorow = TimeTraveler.dateByAdding(days: 2)
+        let session = SessionSequence.stubSettled(isSelfController: true, expiryDate: dayAfterTommorow)
+        storageMock.setSequence(session)
+        let oneDay = 1*Time.day
+        XCTAssertThrowsError(try engine.extend(topic: session.topic, ttl: oneDay))
+    }
+    
+    //MARK: - Handle Session Extend call from peer
+    
+    func testPeerExtendSuccess() {
+        setupEngine()
+        let tomorrow = TimeTraveler.dateByAdding(days: 1)
+        let session = SessionSequence.stubSettled(isSelfController: false, expiryDate: tomorrow)
+        storageMock.setSequence(session)
+        let twoDays = 2*Time.day
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubExtend(topic: session.topic, ttl: twoDays))
+        let extendedSession = engine.getSettledSessions().first{$0.topic == session.topic}!
+        XCTAssertEqual(extendedSession.expiryDate.timeIntervalSinceReferenceDate, TimeTraveler.dateByAdding(days: 2).timeIntervalSinceReferenceDate, accuracy: 1)
+    }
+    
+    
+    func testPeerExtendUnauthorized() {
+        
+    }
+    
+    func testPeerExtendTtlTooHigh() {
+        
+    }
+    
+    func testPeerExtendTtlTooLow() {
+        
+    }
+    
     
     // TODO: Upgrade acknowledgement tests
 }

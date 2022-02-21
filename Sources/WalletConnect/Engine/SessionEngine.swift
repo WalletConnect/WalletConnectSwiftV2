@@ -55,10 +55,10 @@ final class SessionEngine {
         sequencesStore.getAll().compactMap {
             guard let settled = $0.settled else { return nil }
             let permissions = Session.Permissions(blockchains: settled.permissions.blockchain.chains, methods: settled.permissions.jsonrpc.methods)
-            return Session(topic: $0.topic, peer: settled.peer.metadata!, permissions: permissions, accounts: settled.state.accounts)
+            return Session(topic: $0.topic, peer: settled.peer.metadata!, permissions: permissions, accounts: settled.state.accounts, expiryDate: $0.expiryDate)
         }
     }
-    
+        
     func proposeSession(settledPairing: Pairing, permissions: SessionPermissions, relay: RelayProtocolOptions) {
         guard let pendingSessionTopic = topicInitializer() else {
             logger.debug("Could not generate topic")
@@ -288,6 +288,8 @@ final class SessionEngine {
                 wcSessionPayload(subscriptionPayload, payloadParams: sessionPayloadParams)
             case .sessionPing(_):
                 wcSessionPing(subscriptionPayload)
+            case .sessionExtend(let extendParams):
+                wcSessionExtend(subscriptionPayload, extendParams: extendParams)
             case .sessionNotification(let notificationParams):
                 wcSessionNotification(subscriptionPayload, notificationParams: notificationParams)
             default:
@@ -332,7 +334,7 @@ final class SessionEngine {
             peer: approveParams.responder.metadata,
             permissions: Session.Permissions(
                 blockchains: pendingSession.proposal.permissions.blockchain.chains,
-                methods: pendingSession.proposal.permissions.jsonrpc.methods), accounts: settledSession.settled!.state.accounts)
+                methods: pendingSession.proposal.permissions.jsonrpc.methods), accounts: settledSession.settled!.state.accounts, expiryDate: settledSession.expiryDate)
         
         logger.debug("Responder Client approved session on topic: \(topic)")
         relayer.respondSuccess(for: payload)
@@ -412,7 +414,7 @@ final class SessionEngine {
         sequencesStore.setSequence(session)
         relayer.respondSuccess(for: payload)
         let permissions = Session.Permissions(blockchains: session.settled!.permissions.blockchain.chains, methods: session.settled!.permissions.jsonrpc.methods)
-        let publicSession = Session(topic: session.topic, peer: session.settled!.peer.metadata!, permissions: permissions, accounts: session.settled!.state.accounts)
+        let publicSession = Session(topic: session.topic, peer: session.settled!.peer.metadata!, permissions: permissions, accounts: session.settled!.state.accounts, expiryDate: session.expiryDate)
         onSessionExtended?(publicSession)
     }
     
@@ -552,7 +554,7 @@ final class SessionEngine {
                 peer: proposal.proposer.metadata,
                 permissions: Session.Permissions(
                     blockchains: proposal.permissions.blockchain.chains,
-                    methods: proposal.permissions.jsonrpc.methods), accounts: settledSession.settled!.state.accounts)
+                    methods: proposal.permissions.jsonrpc.methods), accounts: settledSession.settled!.state.accounts, expiryDate: settledSession.expiryDate)
             onApprovalAcknowledgement?(sessionSuccess)
         case .error:
             wcSubscriber.removeSubscription(topic: topic)
