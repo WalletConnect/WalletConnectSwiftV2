@@ -148,13 +148,4 @@ final class PairingEngineTests: XCTestCase {
         XCTAssertEqual(approvedPairing?.topic, topicB, "The approved pairing must settle on topic B.")
         // TODO: Check if expiry time is correct
     }
-//
-//    func testNonControllerExtendFails() {
-//        setupEngine(isController: false)
-//        let pairing = PairingSequence.stubSettled(isSelfController: false)
-//        storageMock.setSequence(pairing)
-//        XCTAssertThrowsError(try engine.extend(topic: pairing.topic, ttl: 1234)) { error in
-//            XCTAssertEqual(error as! WalletConnectError, WalletConnectError.unauthorizedNonControllerCall)
-//        }
-//    }
 }
