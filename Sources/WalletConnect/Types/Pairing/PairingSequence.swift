@@ -2,10 +2,13 @@ import Foundation
 import WalletConnectKMS
 
 struct PairingSequence: ExpirableSequence {
-    
+    //todo - expirable sequence should not depend on pubKey but rather on map key
     let topic: String
     let relay: RelayProtocolOptions
     let selfParticipant: Participant
+    let peerParticipant: Participant
+    var state: PairingState?
+    
     private (set) var expiryDate: Date
 
     static var timeToLiveProposed: Int {

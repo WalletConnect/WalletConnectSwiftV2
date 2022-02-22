@@ -35,7 +35,6 @@ final class PairingEngine {
         self.topicInitializer = topicGenerator
         setUpWCRequestHandling()
         setupExpirationHandling()
-        removeRespondedPendingPairings()
         restoreSubscriptions()
         
         relayer.onPairingResponse = { [weak self] in
@@ -54,12 +53,12 @@ final class PairingEngine {
         return pairing
     }
     
-    func getSettledPairings() -> [Pairing] {
+    func getPairings() -> [Pairing] {
         sequencesStore.getAll()
-            .map { Pairing(topic: $0.topic, peer: $0.settled?.state?.metadata, expiryDate: $0.expiryDate) }
+            .map { Pairing(topic: $0.topic, peer: state?.metadata, expiryDate: $0.expiryDate) }
     }
     
-    func propose(permissions: SessionPermissions) -> WalletConnectURI? {
+    func create(permissions: SessionPermissions) -> WalletConnectURI? {
         guard let topic = topicInitializer() else {
             logger.debug("Could not generate topic")
             return nil
@@ -75,38 +74,6 @@ final class PairingEngine {
         wcSubscriber.setSubscription(topic: topic)
         sessionPermissions[topic] = permissions
         return uri
-    }
-    
-    func approve(_ pairingURI: WalletConnectURI) throws {
-        let proposal = PairingProposal.createFromURI(pairingURI)
-        guard !proposal.proposer.controller else {
-            throw WalletConnectError.internal(.unauthorizedMatchingController)
-        }
-        guard !hasPairing(for: proposal.topic) else {
-            throw WalletConnectError.internal(.pairWithExistingPairingForbidden)
-        }
-        
-        let selfPublicKey = try! kms.createX25519KeyPair()
-        let agreementKeys = try! kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposal.proposer.publicKey)
-        
-        let settledTopic = agreementKeys.derivedTopic()
-        let pendingPairing = PairingSequence.buildResponded(proposal: proposal, agreementKeys: agreementKeys)
-        let settledPairing = PairingSequence.buildPreSettled(proposal: proposal, agreementKeys: agreementKeys)
-        
-        wcSubscriber.setSubscription(topic: proposal.topic)
-        sequencesStore.setSequence(pendingPairing)
-        wcSubscriber.setSubscription(topic: settledTopic)
-        sequencesStore.setSequence(settledPairing)
-        
-        try? kms.setAgreementSecret(agreementKeys, topic: settledTopic)
-        
-        let approval = PairingType.ApprovalParams(
-            relay: proposal.relay,
-            responder: PairingParticipant(publicKey: selfPublicKey.hexRepresentation),
-            expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
-            state: nil) // Should this be removed?
-        
-        relayer.request(.wcPairingApprove(approval), onTopic: proposal.topic)
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
@@ -135,68 +102,21 @@ final class PairingEngine {
     }
     
     //MARK: - Private
-    
-    private func acknowledgeApproval(pendingTopic: String) {
-        guard
-            let pendingPairing = sequencesStore.getSequence(forTopic: pendingTopic),
-            case .responded(let settledTopic) = pendingPairing.pending?.status,
-            var settledPairing = sequencesStore.getSequence(forTopic: settledTopic)
-        else { return }
-        
-        settledPairing.settled?.status = .acknowledged
-        sequencesStore.setSequence(settledPairing)
-        wcSubscriber.removeSubscription(topic: pendingTopic)
-        sequencesStore.delete(topic: pendingTopic)
-        
-        let pairing = Pairing(topic: settledPairing.topic, peer: nil, expiryDate: settledPairing.expiryDate)
-        onApprovalAcknowledgement?(pairing)
-        logger.debug("Success on wc_pairingApprove - settled topic - \(settledTopic)")
-        logger.debug("Pairing Success")
-    }
 
     private func setUpWCRequestHandling() {
         wcSubscriber.onReceivePayload = { [unowned self] subscriptionPayload in
             switch subscriptionPayload.wcRequest.params {
-            case .pairingApprove(let approveParams):
-                wcPairingApprove(subscriptionPayload, approveParams: approveParams)
-            case .pairingPayload(let pairingPayload):
-                wcPairingPayload(subscriptionPayload, payloadParams: pairingPayload)
             case .pairingPing(_):
                 wcPairingPing(subscriptionPayload)
+            case .pairingExtend(_):
+                //TODO - extend and delete
+                break
             default:
                 logger.warn("Warning: Pairing Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
             }
         }
     }
     
-    private func wcPairingApprove(_ payload: WCRequestSubscriptionPayload, approveParams: PairingType.ApprovalParams) {
-        let pendingPairingTopic = payload.topic
-        guard let pairing = sequencesStore.getSequence(forTopic: pendingPairingTopic), let pendingPairing = pairing.pending else {
-            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .pairing, topic: pendingPairingTopic))
-            return
-        }
-        
-        let agreementKeys = try! kms.performKeyAgreement(selfPublicKey: try! pairing.getPublicKey(), peerPublicKey: approveParams.responder.publicKey)
-        
-        let settledTopic = agreementKeys.sharedSecret.sha256().toHexString()
-        try? kms.setAgreementSecret(agreementKeys, topic: settledTopic)
-        let proposal = pendingPairing.proposal
-        let settledPairing = PairingSequence.buildAcknowledged(approval: approveParams, proposal: proposal, agreementKeys: agreementKeys)
-        
-        sequencesStore.setSequence(settledPairing)
-        sequencesStore.delete(topic: pendingPairingTopic)
-        wcSubscriber.setSubscription(topic: settledTopic)
-        wcSubscriber.removeSubscription(topic: proposal.topic)
-        
-        guard let permissions = sessionPermissions[pendingPairingTopic] else {
-            logger.debug("Cound not find permissions for pending topic: \(pendingPairingTopic)")
-            return
-        }
-        sessionPermissions[pendingPairingTopic] = nil
-        
-        relayer.respondSuccess(for: payload)
-        onPairingApproved?(Pairing(topic: settledPairing.topic, peer: nil, expiryDate: settledPairing.expiryDate), permissions, settledPairing.relay)
-    }
     
     private func wcPairingExtend(_ payload: WCRequestSubscriptionPayload, extendParams: PairingType.ExtendParams) {
         let topic = payload.topic
@@ -219,41 +139,8 @@ final class PairingEngine {
         onPairingExtend?(Pairing(topic: pairing.topic, peer: pairing.settled?.state?.metadata, expiryDate: pairing.expiryDate))
     }
     
-    private func wcPairingPayload(_ payload: WCRequestSubscriptionPayload, payloadParams: PairingType.PayloadParams) {
-        guard sequencesStore.hasSequence(forTopic: payload.topic) else {
-            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .pairing, topic: payload.topic))
-            return
-        }
-        guard payloadParams.request.method == PairingType.PayloadMethods.sessionPropose else {
-            relayer.respondError(for: payload, reason: .unauthorizedRPCMethod(payloadParams.request.method.rawValue))
-            return
-        }
-        let sessionProposal = payloadParams.request.params
-        do {
-            if let pairingAgreementSecret = try kms.getAgreementSecret(for: sessionProposal.signal.params.topic) {
-                try kms.setAgreementSecret(pairingAgreementSecret, topic: sessionProposal.topic)
-            } else {
-                relayer.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
-                return
-            }
-        } catch {
-            relayer.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
-            return
-        }
-        relayer.respondSuccess(for: payload)
-        onSessionProposal?(sessionProposal)
-    }
-    
     private func wcPairingPing(_ payload: WCRequestSubscriptionPayload) {
         relayer.respondSuccess(for: payload)
-    }
-    
-    private func removeRespondedPendingPairings() {
-        sequencesStore.getAll().forEach {
-            if let pending = $0.pending, pending.isResponded {
-                sequencesStore.delete(topic: $0.topic)
-            }
-        }
     }
     
     private func restoreSubscriptions() {
