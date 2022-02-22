@@ -56,7 +56,6 @@ final class PairingEngine {
     
     func getSettledPairings() -> [Pairing] {
         sequencesStore.getAll()
-            .filter { $0.isSettled }
             .map { Pairing(topic: $0.topic, peer: $0.settled?.state?.metadata, expiryDate: $0.expiryDate) }
     }
     
@@ -129,12 +128,6 @@ final class PairingEngine {
     func extend(topic: String, ttl: Int) throws {
         guard var pairing = sequencesStore.getSequence(forTopic: topic) else {
             throw WalletConnectError.noPairingMatchingTopic(topic)
-        }
-        guard pairing.isSettled else {
-            throw WalletConnectError.pairingNotSettled(topic)
-        }
-        guard pairing.selfIsController else {
-            throw WalletConnectError.unauthorizedNonControllerCall
         }
         try pairing.extend(ttl)
         sequencesStore.setSequence(pairing)
