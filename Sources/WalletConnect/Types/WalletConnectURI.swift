@@ -5,15 +5,13 @@ public struct WalletConnectURI: Equatable {
     let topic: String
     let version: String
     let symKey: String
-    let relayProtocol: String
-    let relayData: String?
+    let relay: RelayProtocolOptions
     
-    init(topic: String, symKey: String, relayProtocol: String, relayData: String? = nil) {
+    init(topic: String, symKey: String, relay: RelayProtocolOptions) {
         self.version = "2"
         self.topic = topic
         self.symKey = symKey
-        self.relayProtocol = relayProtocol
-        self.relayData = relayData
+        self.relay = relay
     }
     
     public init?(string: String) {
@@ -29,23 +27,24 @@ public struct WalletConnectURI: Equatable {
         guard let topic = components.user,
               let version = components.host,
               let symKey = query?["symKey"],
-              let relayProtocol = query?["relay-protocol"],
+              let relayProtocol = query?["relay-protocol"]
         else { return nil }
-        self.relayData = query?["relay-data"]
         self.version = version
         self.topic = topic
         self.symKey = symKey
-        self.relay = relay
+        //todo - parse params
+        self.relay = RelayProtocolOptions(protocol: relayProtocol, params: nil)
     }
     
     public var absoluteString: String {
         return "wc:\(topic)@\(version)?symKey=\(symKey)&\(relayQuery)"
     }
     
-    private var relayQuery() -> String {
-        var query = "relay-protocol=\(relayProtocol)"
-        if let relayData = relayData {
-            query = "\(query)&relay-data=\(relayData)"
+    private var relayQuery: String {
+        var query = "relay-protocol=\(relay.protocol)"
+        if let params = relay.params {
+//   todo -         parse params to data
+//            query = "\(query)&relay-data=\(relayData)"
         }
         return query
     }

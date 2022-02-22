@@ -5,7 +5,6 @@ struct PairingProposal: Codable {
     
     let topic: String
     let relay: RelayProtocolOptions
-    let proposer: PairingProposer
     let signal: PairingSignal
     let permissions: ProposedPermissions
     let ttl: Int
