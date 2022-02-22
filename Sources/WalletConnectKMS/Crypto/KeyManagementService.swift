@@ -20,6 +20,10 @@ public class KeyManagementService {
         try setPrivateKey(privateKey)
         return privateKey.publicKey
     }
+
+    public func createSymmetricKey() {
+        
+    }
     
     public func setPrivateKey(_ privateKey: AgreementPrivateKey) throws {
         try keychain.add(privateKey, forKey: privateKey.publicKey.hexRepresentation)

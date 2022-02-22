@@ -18,7 +18,7 @@ public struct WalletConnectURI: Equatable {
     
     public init?(string: String) {
         guard string.hasPrefix("wc:") else {
-            return nil
+            return ni
         }
         let urlString = !string.hasPrefix("wc://") ? string.replacingOccurrences(of: "wc:", with: "wc://") : string
         guard let components = URLComponents(string: urlString) else {
