@@ -157,7 +157,6 @@ final class PairingEngine {
         
         let pairing = Pairing(topic: settledPairing.topic, peer: nil, expiryDate: settledPairing.expiryDate)
         onApprovalAcknowledgement?(pairing)
-        update(topic: settledPairing.topic)
         logger.debug("Success on wc_pairingApprove - settled topic - \(settledTopic)")
         logger.debug("Pairing Success")
     }
