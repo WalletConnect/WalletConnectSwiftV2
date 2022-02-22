@@ -3,6 +3,7 @@ enum WCMethod {
     case wcPairingUpdate(PairingType.UpdateParams)
     case wcPairingPayload(PairingType.PayloadParams)
     case wcPairingPing
+    case wcPairingExtend(PairingType.ExtendParams)
     case wcSessionApprove(SessionType.ApproveParams)
     case wcSessionReject(SessionType.RejectParams)
     case wcSessionUpdate(SessionType.UpdateParams)
@@ -10,6 +11,7 @@ enum WCMethod {
     case wcSessionDelete(SessionType.DeleteParams)
     case wcSessionPayload(SessionType.PayloadParams)
     case wcSessionPing
+    case wcSessionExtend(SessionType.ExtendParams)
     case wcSessionNotification(SessionType.NotificationParams)
     
     func asRequest() -> WCRequest {
@@ -22,6 +24,8 @@ enum WCMethod {
             return WCRequest(method: .pairingPayload, params: .pairingPayload(payloadParams))
         case .wcPairingPing:
             return WCRequest(method: .pairingPing, params: .pairingPing(PairingType.PingParams()))
+        case .wcPairingExtend(let extendParams):
+            return WCRequest(method: .pairingExtend, params: .pairingExtend(extendParams))
         case .wcSessionApprove(let approveParams):
             return WCRequest(method: .sessionApprove, params: .sessionApprove(approveParams))
         case .wcSessionReject(let rejectParams):
@@ -38,6 +42,8 @@ enum WCMethod {
             return WCRequest(method: .sessionPing, params: .sessionPing(SessionType.PingParams()))
         case .wcSessionNotification(let notificationParams):
             return WCRequest(method: .sessionNotification, params: .sessionNotification(notificationParams))
+        case .wcSessionExtend(let extendParams):
+            return WCRequest(method: .sessionExtend, params: .sessionExtend(extendParams))
         }
     }
 }

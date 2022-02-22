@@ -66,7 +66,11 @@ internal enum SessionType {
         }
     }
     
-    struct PingParams: Codable, Equatable {} // Is an empty struct really needed?
+    struct PingParams: Codable, Equatable {} 
+    
+    struct ExtendParams: Codable, Equatable {
+        let ttl: Int
+    }
 }
 
 // A better solution could fit in here

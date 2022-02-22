@@ -3,11 +3,14 @@
 import Foundation
 
 // TODO: Migrate protocol errors to ReasonCode enum over time. Use WalletConnectError for client errors only.
-enum WalletConnectError: Error {
+enum WalletConnectError: Error, Equatable {
     
     case noSessionMatchingTopic(String)
+    case noPairingMatchingTopic(String)
     case sessionNotSettled(String)
+    case pairingNotSettled(String)
     case invalidPermissions
+    case invalidExtendTime
     case unauthorizedNonControllerCall
     
     case `internal`(_ reason: InternalReason)
@@ -58,8 +61,14 @@ extension WalletConnectError: CustomStringConvertible {
         switch self {
         case .noSessionMatchingTopic(let topic):
             return "No session found matching topic \(topic)."
+        case .noPairingMatchingTopic(let topic):
+            return "No pairing found matching topic \(topic)."
         case .sessionNotSettled(let topic):
             return "Session is not settled on topic \(topic)."
+        case .pairingNotSettled(let topic):
+            return "Pairing is not settled on topic \(topic)."
+        case .invalidExtendTime:
+            return "Extend time is out of expected range"
         case .invalidPermissions:
             return "Permission set is invalid."
         case .unauthorizedNonControllerCall:

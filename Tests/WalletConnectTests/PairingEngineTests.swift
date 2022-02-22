@@ -148,17 +148,4 @@ final class PairingEngineTests: XCTestCase {
         XCTAssertEqual(approvedPairing?.topic, topicB, "The approved pairing must settle on topic B.")
         // TODO: Check if expiry time is correct
     }
-    
-//    func testNotifyOnSessionProposal() {
-//        let topic = "1234"
-//        let proposalExpectation = expectation(description: "on session proposal is called after pairing payload")
-////        engine.sequencesStore.create(topic: topic, sequenceState: sequencePendingState)
-//        try? engine.sequencesStore.setSequence(pendingPairing)
-//        let subscriptionPayload = WCRequestSubscriptionPayload(topic: topic, clientSynchJsonRpc: sessionProposal)
-//        engine.onSessionProposal = { (_) in
-//            proposalExpectation.fulfill()
-//        }
-//        subscriber.onRequestSubscription?(subscriptionPayload)
-//        waitForExpectations(timeout: 0.01, handler: nil)
-//    }
 }
