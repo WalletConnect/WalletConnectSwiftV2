@@ -39,13 +39,13 @@ class AES_256_CBC_HMAC_SHA256_Codec: Codec {
 
     private func encrypt(key: Data, data: Data) throws -> (cipherText: Data, iv: Data) {
         let iv = AES.randomIV()
-        let symKey = SymmetricKey(data: key)
+        let symKey = CryptoKit.SymmetricKey(data: key)
         let cipherText = try AES.CBC.encrypt(data, using: symKey, iv: iv)
         return (cipherText, iv)
     }
 
     private func decrypt(key: Data, data: Data, iv: Data) throws -> Data {
-        let symKey = SymmetricKey(data: key)
+        let symKey = CryptoKit.SymmetricKey(data: key)
         let plainText = try AES.CBC.decrypt(data, using: symKey, iv: iv)
         return plainText
     }
