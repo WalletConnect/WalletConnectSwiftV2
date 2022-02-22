@@ -2,18 +2,18 @@ import Foundation
 
 public struct WalletConnectURI: Equatable {
     
-    public let topic: String
-    public let version: String
-    public let publicKey: String
-    public let isController: Bool
-    let relay: RelayProtocolOptions
+    let topic: String
+    let version: String
+    let symKey: String
+    let relayProtocol: String
+    let relayData: String?
     
-    init(topic: String, publicKey: String, isController: Bool, relay: RelayProtocolOptions) {
+    init(topic: String, symKey: String, relayProtocol: String, relayData: String? = nil) {
         self.version = "2"
         self.topic = topic
-        self.publicKey = publicKey
-        self.isController = isController
-        self.relay = relay
+        self.symKey = symKey
+        self.relayProtocol = relayProtocol
+        self.relayData = relayData
     }
     
     public init?(string: String) {
@@ -28,20 +28,25 @@ public struct WalletConnectURI: Equatable {
         
         guard let topic = components.user,
               let version = components.host,
-              let publicKey = query?["publicKey"],
-              let isController = Bool(query?["controller"] ?? ""),
-              let relayOptions = query?["relay"],
-              let relay = try? JSONDecoder().decode(RelayProtocolOptions.self, from: Data(relayOptions.utf8))
+              let symKey = query?["symKey"],
+              let relayProtocol = query?["relay-protocol"],
         else { return nil }
-        
+        self.relayData = query?["relay-data"]
         self.version = version
         self.topic = topic
-        self.publicKey = publicKey
-        self.isController = isController
+        self.symKey = symKey
         self.relay = relay
     }
     
     public var absoluteString: String {
-        return "wc:\(topic)@\(version)?controller=\(isController)&publicKey=\(publicKey)&relay=\(relay.asPercentEncodedString())"
+        return "wc:\(topic)@\(version)?symKey=\(symKey)&\(relayQuery)"
+    }
+    
+    private var relayQuery() -> String {
+        var query = "relay-protocol=\(relayProtocol)"
+        if let relayData = relayData {
+            query = "\(query)&relay-data=\(relayData)"
+        }
+        return query
     }
 }
