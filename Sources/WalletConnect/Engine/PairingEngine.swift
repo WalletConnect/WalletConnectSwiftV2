@@ -37,9 +37,6 @@ final class PairingEngine {
         setupExpirationHandling()
         restoreSubscriptions()
         
-        relayer.onPairingResponse = { [weak self] in
-            self?.handleReponse($0)
-        }
     }
     
     func hasPairing(for topic: String) -> Bool {
@@ -124,10 +121,6 @@ final class PairingEngine {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .pairing, topic: topic))
             return
         }
-        guard pairing.peerIsController else {
-            relayer.respondError(for: payload, reason: .unauthorizedExtendRequest(context: .pairing))
-            return
-        }
         do {
             try pairing.extend(extendParams.ttl)
         } catch {
@@ -136,7 +129,7 @@ final class PairingEngine {
         }
         sequencesStore.setSequence(pairing)
         relayer.respondSuccess(for: payload)
-        onPairingExtend?(Pairing(topic: pairing.topic, peer: pairing.settled?.state?.metadata, expiryDate: pairing.expiryDate))
+        onPairingExtend?(Pairing(topic: pairing.topic, peer: state?.metadata, expiryDate: pairing.expiryDate))
     }
     
     private func wcPairingPing(_ payload: WCRequestSubscriptionPayload) {
@@ -159,12 +152,4 @@ final class PairingEngine {
         }
     }
     
-    private func handleReponse(_ response: WCResponse) {
-        switch response.requestParams {
-        case .pairingApprove:
-            acknowledgeApproval(pendingTopic: response.topic)
-        default:
-            break
-        }
-    }
 }

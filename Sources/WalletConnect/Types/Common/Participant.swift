@@ -1,7 +1,9 @@
 struct Participant: Codable, Equatable {
+    let publicKey: String
     let metadata: AppMetadata?
     
-    init(metadata: AppMetadata? = nil) {
+    init(publicKey: String, metadata: AppMetadata? = nil) {
+        self.publicKey = publicKey
         self.metadata = metadata
     }
 }

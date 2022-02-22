@@ -5,6 +5,7 @@ struct PairingSequence: ExpirableSequence {
     //todo - expirable sequence should not depend on pubKey but rather on map key
     let topic: String
     let relay: RelayProtocolOptions
+    //TODO - is state needed when we have two participants with metadata
     let selfParticipant: Participant
     let peerParticipant: Participant
     var state: PairingState?

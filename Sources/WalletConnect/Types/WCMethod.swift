@@ -1,6 +1,4 @@
 enum WCMethod {
-    case wcPairingApprove(PairingType.ApprovalParams)
-    case wcPairingPayload(PairingType.PayloadParams)
     case wcPairingPing
     case wcPairingExtend(PairingType.ExtendParams)
     case wcSessionApprove(SessionType.ApproveParams)
@@ -15,10 +13,6 @@ enum WCMethod {
     
     func asRequest() -> WCRequest {
         switch self {
-        case .wcPairingApprove(let approveParams):
-            return WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
-        case .wcPairingPayload(let payloadParams):
-            return WCRequest(method: .pairingPayload, params: .pairingPayload(payloadParams))
         case .wcPairingPing:
             return WCRequest(method: .pairingPing, params: .pairingPing(PairingType.PingParams()))
         case .wcPairingExtend(let extendParams):

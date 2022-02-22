@@ -83,16 +83,17 @@ final class SessionEngine {
         let pairingAgreementSecret = try! kms.getAgreementSecret(for: settledPairing.topic)!
         try! kms.setAgreementSecret(pairingAgreementSecret, topic: proposal.topic)
         
-        let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: proposal)
-        let pairingPayloadParams = PairingType.PayloadParams(request: request)
-        relayer.request(.wcPairingPayload(pairingPayloadParams), onTopic: settledPairing.topic) { [unowned self] result in
-            switch result {
-            case .success:
-                logger.debug("Session Proposal response received")
-            case .failure(let error):
-                logger.debug("Could not send session proposal error: \(error)")
-            }
-        }
+        //TODO - session proposal is not send over pairing payload now
+//        let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: proposal)
+//        let pairingPayloadParams = PairingType.PayloadParams(request: request)
+//        relayer.request(.wcPairingPayload(pairingPayloadParams), onTopic: settledPairing.topic) { [unowned self] result in
+//            switch result {
+//            case .success:
+//                logger.debug("Session Proposal response received")
+//            case .failure(let error):
+//                logger.debug("Could not send session proposal error: \(error)")
+//            }
+//        }
     }
     
     // TODO: Check matching controller
@@ -506,9 +507,6 @@ final class SessionEngine {
     
     private func handleResponse(_ response: WCResponse) {
         switch response.requestParams {
-        case .pairingPayload(let payloadParams):
-            let proposeParams = payloadParams.request.params
-            handleProposeResponse(topic: response.topic, proposeParams: proposeParams, result: response.result)
         case .sessionApprove(_):
             handleApproveResponse(topic: response.topic, result: response.result)
         case .sessionUpdate:
