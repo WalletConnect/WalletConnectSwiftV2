@@ -87,7 +87,11 @@ public class KeyManagementService {
     }
     
     public func deleteSymmetricKey(for topic: String) {
-        
+        do {
+            try keychain.delete(key: topic)
+        } catch {
+            print("Error deleting symmetric key: \(error)")
+        }
     }
     
     public func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret {

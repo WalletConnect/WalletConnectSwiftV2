@@ -103,10 +103,17 @@ class KeyManagementServiceTests: XCTestCase {
     }
     
     func testSymmetricKeyRoundTrip() {
-        
+        let key = SymmetricKey()
+        try! kms.setSymmetricKey(key, for: key.derivedTopic())
+        let retrievedKey = try! kms.getSymmetricKey(for: key.derivedTopic())
+        XCTAssertEqual(key, retrievedKey)
     }
     
     func testDeleteSymmetricKey() {
-        
+        let key = SymmetricKey()
+        try! kms.setSymmetricKey(key, for: key.derivedTopic())
+        XCTAssertNotNil(try! kms.getSymmetricKey(for: key.derivedTopic()))
+        kms.deleteSymmetricKey(for: key.derivedTopic())
+        XCTAssertNil(try! kms.getSymmetricKey(for: key.derivedTopic()))
     }
 }
