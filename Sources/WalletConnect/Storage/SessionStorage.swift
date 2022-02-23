@@ -9,15 +9,15 @@ protocol SessionSequenceStorage: AnyObject {
 
 final class SessionStorage: SessionSequenceStorage {
     
-    var onSequenceExpiration: ((String, String) -> Void)? {
-        get { storage.onSequenceExpiration }
-        set { storage.onSequenceExpiration = newValue }
-    }
+    var onSequenceExpiration: ((String, String) -> Void)?
     
     private let storage: SequenceStore<SessionSequence>
     
     init(storage: SequenceStore<SessionSequence>) {
         self.storage = storage
+        storage.onSequenceExpiration = { [unowned self] topic, pubKey in
+            onSequenceExpiration?(topic, pubKey!)
+        }
     }
     
     func hasSequence(forTopic topic: String) -> Bool {
