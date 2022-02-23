@@ -209,11 +209,6 @@ final class SessionEngine {
         guard session.selfIsController else {
             throw WalletConnectError.unauthorizedNonControllerCall
         }
-//        for account in accounts {
-//            if !String.conformsToCAIP10(account) {
-//                throw WalletConnectError.invalidCAIP10Account(account)
-//            }
-//        }
         session.update(accounts)
         sequencesStore.setSequence(session)
         relayer.request(.wcSessionUpdate(SessionType.UpdateParams(accounts: accounts)), onTopic: topic)

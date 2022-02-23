@@ -31,11 +31,6 @@ public struct Account: Equatable, Hashable {
         "\(namespace):\(reference):\(address)"
     }
     
-//    /// Returns whether the account conforms to CAIP-10.
-//    public var isCAIP10Conformant: Bool {
-//        String.conformsToCAIP10(absoluteString)
-//    }
-    
     /**
      Creates an account instance from the provided string.
      
