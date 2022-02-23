@@ -62,8 +62,8 @@ extension Participant {
 }
 
 extension WCRequestSubscriptionPayload {
-    static func stubUpdate(topic: String, accounts: Set<String> = ["std:0:0"]) -> WCRequestSubscriptionPayload {
-        let updateMethod = WCMethod.wcSessionUpdate(SessionType.UpdateParams(accounts: accounts)).asRequest()
+    static func stubUpdate(topic: String, accounts: [String] = ["std:0:0"]) -> WCRequestSubscriptionPayload {
+        let updateMethod = WCMethod.wcSessionUpdate(SessionType.UpdateParams(state: SessionState(accounts: accounts))).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
     }
     

@@ -18,7 +18,8 @@ extension SessionSequence {
             settledState: Settled(
                 peer: Participant.stub(publicKey: peerKey),
                 permissions: permissions,
-                state: SessionState(accounts: ["chainstd:1:1"]),
+//                state: SessionState(accounts: ["chainstd:1:1"]),
+                accounts: Account.stubSet(),
                 status: .preSettled
             )
         )
@@ -38,9 +39,15 @@ extension SessionSequence {
             settledState: Settled(
                 peer: Participant.stub(publicKey: peerKey),
                 permissions: permissions,
-                state: SessionState(accounts: ["chainstd:1:1"]),
+                accounts: Account.stubSet(),
                 status: .acknowledged
             )
         )
+    }
+}
+
+extension Account {
+    static func stubSet() -> Set<Account> {
+        return Set(["chainstd:0:0", "chainstd:1:1", "chainstd:2:2"].map { Account($0)! })
     }
 }

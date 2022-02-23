@@ -24,14 +24,6 @@ final class AccountTests: XCTestCase {
         XCTAssertNil(Account(chainIdentifier: "std", address: "0"))
     }
     
-    func testInitCAIP10Conformance() {
-        XCTAssertTrue(Account(namespace: "std", reference: "0", address: "0").isCAIP10Conformant)
-        
-        XCTAssertFalse(Account(namespace: "st", reference: "0", address: "0").isCAIP10Conformant)
-        XCTAssertFalse(Account(namespace: "std", reference: "", address: "0").isCAIP10Conformant)
-        XCTAssertFalse(Account(namespace: "std", reference: "0", address: "").isCAIP10Conformant)
-    }
-    
     func testBlockchainIdentifier() {
         let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
         XCTAssertEqual(account.blockchainIdentifier, "eip155:1")

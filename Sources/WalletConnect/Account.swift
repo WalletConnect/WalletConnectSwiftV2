@@ -31,10 +31,10 @@ public struct Account: Equatable, Hashable {
         "\(namespace):\(reference):\(address)"
     }
     
-    /// Returns whether the account conforms to CAIP-10.
-    public var isCAIP10Conformant: Bool {
-        String.conformsToCAIP10(absoluteString)
-    }
+//    /// Returns whether the account conforms to CAIP-10.
+//    public var isCAIP10Conformant: Bool {
+//        String.conformsToCAIP10(absoluteString)
+//    }
     
     /**
      Creates an account instance from the provided string.
@@ -45,7 +45,9 @@ public struct Account: Equatable, Hashable {
     public init?(_ string: String) {
         guard String.conformsToCAIP10(string) else { return nil }
         let splits = string.split(separator: ":")
-        self.init(namespace: String(splits[0]), reference: String(splits[1]), address: String(splits[2]))
+        self.namespace = String(splits[0])
+        self.reference = String(splits[1])
+        self.address = String(splits[2])
     }
     
     /**
@@ -56,17 +58,6 @@ public struct Account: Equatable, Hashable {
      */
     public init?(chainIdentifier: String, address: String) {
         self.init("\(chainIdentifier):\(address)")
-    }
-    
-    /**
-     Creates an account instance directly from the base components.
-     
-     This initializer bypass any checks to CAIP conformance, make sure to pass valid values as parameters.
-     */
-    public init(namespace: String, reference: String, address: String) {
-        self.namespace = namespace
-        self.reference = reference
-        self.address = address
     }
 }
 

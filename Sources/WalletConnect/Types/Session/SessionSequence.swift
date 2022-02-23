@@ -82,8 +82,8 @@ struct SessionSequence: ExpirableSequence {
         settled?.permissions.upgrade(with: permissions)
     }
     
-    mutating func update(_ accounts: Set<String>) {
-        settled?.state.accounts = accounts
+    mutating func update(_ accounts: Set<Account>) {
+        settled?.accounts = accounts
     }
     
     mutating func extend(_ ttl: Int) throws {
@@ -112,7 +112,8 @@ extension SessionSequence {
     struct Settled: Codable {
         let peer: Participant
         var permissions: SessionPermissions
-        var state: SessionState
+//        var state: SessionState
+        var accounts: Set<Account>
         var status: Status
         
         enum Status: Codable {
@@ -162,7 +163,7 @@ extension SessionSequence {
         )
     }
     
-    static func buildPreSettled(proposal: SessionProposal, agreementKeys: AgreementSecret, metadata: AppMetadata, accounts: Set<String>) -> SessionSequence {
+    static func buildPreSettled(proposal: SessionProposal, agreementKeys: AgreementSecret, metadata: AppMetadata, accounts: Set<Account>) -> SessionSequence {
         let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : agreementKeys.publicKey.hexRepresentation
         return SessionSequence(
             topic: agreementKeys.derivedTopic(),
@@ -176,7 +177,8 @@ extension SessionSequence {
                     jsonrpc: proposal.permissions.jsonrpc,
                     notifications: proposal.permissions.notifications,
                     controller: Controller(publicKey: controllerKey)),
-                state: SessionState(accounts: accounts),
+//                state: SessionState(accounts: accounts),
+                accounts: accounts,
                 status: .acknowledged
             )
         )
@@ -196,7 +198,8 @@ extension SessionSequence {
                     jsonrpc: proposal.permissions.jsonrpc,
                     notifications: proposal.permissions.notifications,
                     controller: Controller(publicKey: controllerKey)),
-                state: approveParams.state,
+//                state: approveParams.state,
+                accounts: Set(approveParams.state.accounts.compactMap { Account($0) }),
                 status: .acknowledged
             )
         )
