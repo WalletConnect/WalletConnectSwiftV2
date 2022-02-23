@@ -79,6 +79,6 @@ final class JsonRpcHistoryTests: XCTestCase {
 
 private let testTopic = "test_topic"
 private func getTestJsonRpcRecordInput(id: Int64 = 0) -> (topic: String, request: WCRequest) {
-    let request = WCRequest(id: 1, jsonrpc: "2.0", method: .pairingPing, params: WCRequest.Params.pairingPing(PairingType.PingParams()))
+    let request = WCRequest(id: id, jsonrpc: "2.0", method: .pairingPing, params: WCRequest.Params.pairingPing(PairingType.PingParams()))
     return (topic: testTopic, request: request)
 }
