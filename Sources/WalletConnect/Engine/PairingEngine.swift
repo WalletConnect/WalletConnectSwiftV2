@@ -56,10 +56,10 @@ final class PairingEngine {
     }
     
     func create() -> WalletConnectURI? {
-        let symmKey = try! kms.createSymmetricKey()
-        let topic = symmKey.derivedTopic()
+        let symKey = try! kms.createSymmetricKey()
+        let topic = symKey.derivedTopic()
         let pairing = PairingSequence.build(topic)
-        let uri = WalletConnectURI(topic: topic, symmKey: symmKey.hexRepresentation, relay: pairing.relay)
+        let uri = WalletConnectURI(topic: topic, symKey: symKey.hexRepresentation, relay: pairing.relay)
         sequencesStore.setSequence(pairing)
         wcSubscriber.setSubscription(topic: topic)
         return uri

@@ -79,16 +79,6 @@ final class JsonRpcHistoryTests: XCTestCase {
 
 private let testTopic = "test_topic"
 private func getTestJsonRpcRecordInput(id: Int64 = 0) -> (topic: String, request: WCRequest) {
-    let request = WCRequest(id: id,
-              jsonrpc: "2.0",
-              method: WCRequest.Method.pairingApprove,
-              params: WCRequest.Params.pairingApprove(
-                PairingType.ApprovalParams(relay: RelayProtocolOptions(protocol: "waku",
-                                                                       params: nil), responder: PairingParticipant(publicKey: "be9225978b6287a02d259ee0d9d1bcb683082d8386b7fb14b58ac95b93b2ef43"),
-                                           expiry: 1632742217,
-                                           state: PairingState(metadata: AppMetadata(name: "iOS",
-                                                                                     description: nil,
-                                                                                     url: nil,
-                                                                                     icons: nil)))))
+    let request = WCRequest(id: 1, jsonrpc: "2.0", method: .pairingPing, params: WCRequest.Params.pairingPing(PairingType.PingParams()))
     return (topic: testTopic, request: request)
 }

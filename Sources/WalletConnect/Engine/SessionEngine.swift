@@ -561,7 +561,7 @@ final class SessionEngine {
             sequencesStore.delete(topic: settledTopic)
             kms.deleteAgreementSecret(for: topic)
             kms.deleteAgreementSecret(for: settledTopic)
-            kms.deletePrivateKey(for: pendingSession.publicKey)
+            kms.deletePrivateKey(for: pendingSession.publicKey!)
         }
     }
     

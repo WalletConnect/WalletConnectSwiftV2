@@ -3,6 +3,24 @@ import Foundation
 @testable import WalletConnectKMS
 
 final class KeyManagementServiceMock: KeyManagementServiceProtocol {
+    func createSymmetricKey() throws -> SymmetricKey {
+        // TODO
+        fatalError()
+    }
+    
+    func setSymmetricKey(_ symmetricKey: SymmetricKey, for topic: String) throws {
+        // TODO
+    }
+    
+    func getSymmetricKey(for topic: String) throws -> SymmetricKey? {
+        // TODO
+        fatalError()
+    }
+    
+    func deleteSymmetricKey(for topic: String) {
+        // TODO
+    }
+    
     
     func createX25519KeyPair() throws -> AgreementPublicKey {
         defer { privateKeyStub = AgreementPrivateKey() }
