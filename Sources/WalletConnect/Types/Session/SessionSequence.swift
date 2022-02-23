@@ -112,7 +112,6 @@ extension SessionSequence {
     struct Settled: Codable {
         let peer: Participant
         var permissions: SessionPermissions
-//        var state: SessionState
         var accounts: Set<Account>
         var status: Status
         
@@ -177,7 +176,6 @@ extension SessionSequence {
                     jsonrpc: proposal.permissions.jsonrpc,
                     notifications: proposal.permissions.notifications,
                     controller: Controller(publicKey: controllerKey)),
-//                state: SessionState(accounts: accounts),
                 accounts: accounts,
                 status: .acknowledged
             )
@@ -198,7 +196,6 @@ extension SessionSequence {
                     jsonrpc: proposal.permissions.jsonrpc,
                     notifications: proposal.permissions.notifications,
                     controller: Controller(publicKey: controllerKey)),
-//                state: approveParams.state,
                 accounts: Set(approveParams.state.accounts.compactMap { Account($0) }),
                 status: .acknowledged
             )

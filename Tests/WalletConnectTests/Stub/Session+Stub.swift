@@ -18,7 +18,6 @@ extension SessionSequence {
             settledState: Settled(
                 peer: Participant.stub(publicKey: peerKey),
                 permissions: permissions,
-//                state: SessionState(accounts: ["chainstd:1:1"]),
                 accounts: Account.stubSet(),
                 status: .preSettled
             )
