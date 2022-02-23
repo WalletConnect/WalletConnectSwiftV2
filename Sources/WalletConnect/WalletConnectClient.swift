@@ -107,7 +107,7 @@ public final class WalletConnectClient {
             return nil
         } else {
             let permissions = SessionPermissions(permissions: sessionPermissions)
-            guard let pairingURI = pairingEngine.propose(permissions: permissions) else {
+            guard let pairingURI = pairingEngine.create(permissions: permissions) else {
                 throw WalletConnectError.internal(.pairingProposalGenerationFailed)
             }
             return pairingURI.absoluteString
@@ -126,7 +126,7 @@ public final class WalletConnectClient {
             throw WalletConnectError.internal(.malformedPairingURI)
         }
         try pairingQueue.sync {
-            try pairingEngine.approve(pairingURI)
+            try pairingEngine.pair(pairingURI)
         }
     }
     

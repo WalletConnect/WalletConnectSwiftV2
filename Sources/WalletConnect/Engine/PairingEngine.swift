@@ -44,15 +44,15 @@ final class PairingEngine {
     }
     
     func getSettledPairing(for topic: String) -> PairingSequence? {
-        guard let pairing = sequencesStore.getSequence(forTopic: topic), pairing.isSettled else {
+        guard let pairing = sequencesStore.getSequence(forTopic: topic) else {
             return nil
         }
         return pairing
     }
     
-    func getPairings() -> [Pairing] {
+    func getSettledPairings() -> [Pairing] {
         sequencesStore.getAll()
-            .map { Pairing(topic: $0.topic, peer: state?.metadata, expiryDate: $0.expiryDate) }
+            .map { Pairing(topic: $0.topic, peer: $0.state?.metadata, expiryDate: $0.expiryDate) }
     }
     
     func create(permissions: SessionPermissions) -> WalletConnectURI? {
@@ -71,6 +71,10 @@ final class PairingEngine {
         wcSubscriber.setSubscription(topic: topic)
         sessionPermissions[topic] = permissions
         return uri
+    }
+    
+    func pair(_ uri: WalletConnectURI) {
+        
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
@@ -129,7 +133,7 @@ final class PairingEngine {
         }
         sequencesStore.setSequence(pairing)
         relayer.respondSuccess(for: payload)
-        onPairingExtend?(Pairing(topic: pairing.topic, peer: state?.metadata, expiryDate: pairing.expiryDate))
+        onPairingExtend?(Pairing(topic: pairing.topic, peer: pairing.state?.metadata, expiryDate: pairing.expiryDate))
     }
     
     private func wcPairingPing(_ payload: WCRequestSubscriptionPayload) {
@@ -146,9 +150,8 @@ final class PairingEngine {
     }
     
     private func setupExpirationHandling() {
-        sequencesStore.onSequenceExpiration = { [weak self] topic, publicKey in
-            self?.kms.deletePrivateKey(for: publicKey)
-            self?.kms.deleteAgreementSecret(for: topic)
+        sequencesStore.onSequenceExpiration = { [weak self] topic, _ in
+            self?.kms.deleteSymmetricKey(for: topic)
         }
     }
     

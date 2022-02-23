@@ -2,6 +2,8 @@ import Foundation
 import WalletConnectKMS
 
 struct PairingSequence: ExpirableSequence {
+    var publicKey: String
+    
     //todo - expirable sequence should not depend on pubKey but rather on map key
     let topic: String
     let relay: RelayProtocolOptions
@@ -31,5 +33,9 @@ struct PairingSequence: ExpirableSequence {
             throw WalletConnectError.invalidExtendTime
         }
         expiryDate = newExpiryDate
+    }
+    
+    static func build() {
+        
     }
 }
