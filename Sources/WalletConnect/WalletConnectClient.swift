@@ -106,8 +106,7 @@ public final class WalletConnectClient {
             sessionEngine.proposeSession(settledPairing: Pairing(topic: pairing.topic, peer: nil, expiryDate: pairing.expiryDate), permissions: permissions, relay: pairing.relay)
             return nil
         } else {
-            let permissions = SessionPermissions(permissions: sessionPermissions)
-            guard let pairingURI = pairingEngine.create(permissions: permissions) else {
+            guard let pairingURI = pairingEngine.create() else {
                 throw WalletConnectError.internal(.pairingProposalGenerationFailed)
             }
             return pairingURI.absoluteString

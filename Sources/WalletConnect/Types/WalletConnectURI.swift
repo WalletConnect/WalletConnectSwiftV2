@@ -4,13 +4,13 @@ public struct WalletConnectURI: Equatable {
     
     let topic: String
     let version: String
-    let symKey: String
+    let symmKey: String
     let relay: RelayProtocolOptions
     
-    init(topic: String, symKey: String, relay: RelayProtocolOptions) {
+    init(topic: String, symmKey: String, relay: RelayProtocolOptions) {
         self.version = "2"
         self.topic = topic
-        self.symKey = symKey
+        self.symmKey = symmKey
         self.relay = relay
     }
     
@@ -26,18 +26,18 @@ public struct WalletConnectURI: Equatable {
         
         guard let topic = components.user,
               let version = components.host,
-              let symKey = query?["symKey"],
+              let symmKey = query?["symKey"],
               let relayProtocol = query?["relay-protocol"]
         else { return nil }
         self.version = version
         self.topic = topic
-        self.symKey = symKey
+        self.symmKey = symmKey
         //todo - parse params
         self.relay = RelayProtocolOptions(protocol: relayProtocol, params: nil)
     }
     
     public var absoluteString: String {
-        return "wc:\(topic)@\(version)?symKey=\(symKey)&\(relayQuery)"
+        return "wc:\(topic)@\(version)?symKey=\(symmKey)&\(relayQuery)"
     }
     
     private var relayQuery: String {

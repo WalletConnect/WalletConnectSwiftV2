@@ -55,21 +55,13 @@ final class PairingEngine {
             .map { Pairing(topic: $0.topic, peer: $0.state?.metadata, expiryDate: $0.expiryDate) }
     }
     
-    func create(permissions: SessionPermissions) -> WalletConnectURI? {
-        guard let topic = topicInitializer() else {
-            logger.debug("Could not generate topic")
-            return nil
-        }
-        
-        let publicKey = try! kms.createX25519KeyPair()
-        
-        let relay = RelayProtocolOptions(protocol: "waku", params: nil)
-        let uri = WalletConnectURI(topic: topic, publicKey: publicKey.hexRepresentation, isController: false, relay: relay)
-        let pendingPairing = PairingSequence.buildProposed(uri: uri)
-        
-        sequencesStore.setSequence(pendingPairing)
+    func create() -> WalletConnectURI? {
+        let symmKey = try! kms.createSymmetricKey()
+        let topic = symmKey.derivedTopic()
+        let pairing = PairingSequence.build(topic)
+        let uri = WalletConnectURI(topic: topic, symmKey: symmKey.hexRepresentation, relay: pairing.relay)
+        sequencesStore.setSequence(pairing)
         wcSubscriber.setSubscription(topic: topic)
-        sessionPermissions[topic] = permissions
         return uri
     }
     

@@ -8,7 +8,7 @@ struct SessionSequence: ExpirableSequence {
     private (set) var expiryDate: Date
     private var sequenceState: Either<Pending, Settled>
     
-    var publicKey: String {
+    var publicKey: String? {
         selfParticipant.publicKey
     }
     

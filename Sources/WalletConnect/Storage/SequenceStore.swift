@@ -7,12 +7,12 @@ protocol Expirable {
 
 protocol ExpirableSequence: Codable, Expirable {
     var topic: String { get }
-    var publicKey: String { get }
+    var publicKey: String? { get }
 }
 
 final class SequenceStore<T> where T: ExpirableSequence {
 
-    var onSequenceExpiration: ((_ topic: String, _ pubKey: String) -> Void)?
+    var onSequenceExpiration: ((_ topic: String, _ pubKey: String?) -> Void)?
     
     private let storage: KeyValueStorage
     private let dateInitializer: () -> Date
