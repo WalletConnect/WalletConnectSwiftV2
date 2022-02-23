@@ -1,4 +1,5 @@
 import WalletConnectUtils
+import Foundation
 
 /**
  A representation of an active session connection.
@@ -8,6 +9,7 @@ public struct Session {
     public let peer: AppMetadata
     public let permissions: Permissions
     public let accounts: Set<String>
+    public let expiryDate: Date
 }
 
 extension Session {

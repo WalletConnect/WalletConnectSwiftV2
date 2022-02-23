@@ -8,7 +8,7 @@ import WalletConnectUtils
 
 class SerializerMock: Serializing {
     var deserialized: Any!
-    var serialized: String!
+    var serialized: String = ""
     
     func serialize(topic: String, encodable: Encodable) throws -> String {
         try serialize(json: try encodable.json(), agreementKeys: AgreementSecret(sharedSecret: Data(), publicKey: AgreementPrivateKey().publicKey))

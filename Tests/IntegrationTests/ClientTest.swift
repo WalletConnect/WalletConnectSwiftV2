@@ -16,8 +16,8 @@ final class ClientTests: XCTestCase {
     
     let defaultTimeout: TimeInterval = 5.0
     
-    let relayHost = "staging.walletconnect.org"
-    let projectId = ""
+    let relayHost = "relay.dev.walletconnect.com"
+    let projectId = "52af113ee0c1e1a20f4995730196c13e"
     var proposer: ClientDelegate!
     var responder: ClientDelegate!
     
@@ -341,8 +341,8 @@ final class ClientTests: XCTestCase {
         let permissions = Session.Permissions.stub()
         let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         _ = try! responder.client.pair(uri: uri)
-        proposer.onPairingUpdate = { _, appMetadata in
-            XCTAssertNotNil(appMetadata)
+        proposer.onPairingUpdate = { pairing in
+            XCTAssertNotNil(pairing.peer)
             proposerReceivesPairingUpdateExpectation.fulfill()
         }
         waitForExpectations(timeout: defaultTimeout, handler: nil)

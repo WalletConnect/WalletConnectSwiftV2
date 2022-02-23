@@ -6,7 +6,9 @@ class MockedNetworkRelayer: NetworkRelaying {
     var onConnect: (() -> ())?
     var onMessage: ((String, String) -> ())?
     var error: Error?
-    func publish(topic: String, payload: String, completion: @escaping ((Error?) -> ())) -> Int64 {
+    var prompt = false
+    func publish(topic: String, payload: String, prompt: Bool, completion: @escaping ((Error?) -> ())) -> Int64 {
+        self.prompt = prompt
         completion(error)
         return 0
     }

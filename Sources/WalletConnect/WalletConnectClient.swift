@@ -77,7 +77,6 @@ public final class WalletConnectClient {
     init(metadata: AppMetadata, relayer: Relayer, logger: ConsoleLogging, kms: KeyManagementService, keyValueStorage: KeyValueStorage) {
         self.metadata = metadata
         self.logger = logger
-//        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
         self.kms = kms
         let serializer = Serializer(kms: kms)
         self.history = JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
@@ -104,7 +103,7 @@ public final class WalletConnectClient {
             }
             logger.debug("Proposing session on existing pairing")
             let permissions = SessionPermissions(permissions: sessionPermissions)
-            sessionEngine.proposeSession(settledPairing: Pairing(topic: pairing.topic, peer: nil), permissions: permissions, relay: pairing.relay)
+            sessionEngine.proposeSession(settledPairing: Pairing(topic: pairing.topic, peer: nil, expiryDate: pairing.expiryDate), permissions: permissions, relay: pairing.relay)
             return nil
         } else {
             let permissions = SessionPermissions(permissions: sessionPermissions)
@@ -163,6 +162,18 @@ public final class WalletConnectClient {
     ///   - permissions: Sets of permissions that will be combined with existing ones.
     public func upgrade(topic: String, permissions: Session.Permissions) throws {
         try sessionEngine.upgrade(topic: topic, permissions: permissions)
+    }
+    
+    /// For controller to extend a sequence lifetime
+    /// - Parameters:
+    ///   - topic: Topic of the sequence, it can be a pairing or a session topic.
+    ///   - ttl: Time in seconds that a target sequence is expected to be extended for. Must be greater than current time to expiry and for session lower than 7 days and for pairing lower than 30 days.
+    public func extend(topic: String, ttl: Int) throws {
+        if pairingEngine.hasPairing(for: topic) {
+            try pairingEngine.extend(topic: topic, ttl: ttl)
+        } else if sessionEngine.hasSession(for: topic) {
+            try sessionEngine.extend(topic: topic, ttl: ttl)
+        }
     }
     
     /// For the proposer to send JSON-RPC requests to responding peer.
@@ -278,8 +289,11 @@ public final class WalletConnectClient {
         pairingEngine.onApprovalAcknowledgement = { [weak self] settledPairing in
             self?.delegate?.didSettle(pairing: settledPairing)
         }
-        pairingEngine.onPairingUpdate = { [unowned self] topic, appMetadata in
-            delegate?.didUpdate(pairingTopic: topic, appMetadata: appMetadata)
+        pairingEngine.onPairingUpdate = { [unowned self] pairing in
+            delegate?.didUpdate(pairing: pairing)
+        }
+        pairingEngine.onPairingExtend = { [unowned self] pairing in
+            delegate?.didExtend(pairing: pairing)
         }
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
             delegate?.didSettle(session: settledSession)
@@ -302,6 +316,9 @@ public final class WalletConnectClient {
         }
         sessionEngine.onSessionUpdate = { [unowned self] topic, accounts in
             delegate?.didUpdate(sessionTopic: topic, accounts: Set(accounts.compactMap { Account($0) }))
+        }
+        sessionEngine.onSessionExtended = { [unowned self] session in
+            delegate?.didExtend(session: session)
         }
         sessionEngine.onNotificationReceived = { [unowned self] topic, notification in
             delegate?.didReceive(notification: notification, sessionTopic: topic)

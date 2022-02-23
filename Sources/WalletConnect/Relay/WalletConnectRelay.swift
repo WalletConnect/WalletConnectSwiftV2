@@ -77,7 +77,8 @@ class WalletConnectRelay: WalletConnectRelaying {
         do {
             try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
             let message = try serializer.serialize(topic: topic, encodable: payload)
-            networkRelayer.publish(topic: topic, payload: message) { [weak self] error in
+            let prompt = shouldPrompt(payload.method)
+            networkRelayer.publish(topic: topic, payload: message, prompt: prompt) { [weak self] error in
                 guard let self = self else {return}
                 if let error = error {
                     self.logger.error(error)
@@ -108,10 +109,9 @@ class WalletConnectRelay: WalletConnectRelaying {
     func respond(topic: String, response: JsonRpcResult, completion: @escaping ((Error?)->())) {
         do {
             _ = try jsonRpcHistory.resolve(response: response)
-
             let message = try serializer.serialize(topic: topic, encodable: response.value)
             logger.debug("Responding....topic: \(topic)")
-            networkRelayer.publish(topic: topic, payload: message) { error in
+            networkRelayer.publish(topic: topic, payload: message, prompt: false) { error in
                 completion(error)
             }
         } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
@@ -214,6 +214,15 @@ class WalletConnectRelay: WalletConnectRelaying {
             onResponse?(wcResponse)
         } catch {
             logger.info("Info: \(error.localizedDescription)")
+        }
+    }
+    
+    private func shouldPrompt(_ method: WCRequest.Method) -> Bool {
+        switch method {
+        case .sessionPayload, .pairingPayload:
+            return true
+        default:
+            return false
         }
     }
     

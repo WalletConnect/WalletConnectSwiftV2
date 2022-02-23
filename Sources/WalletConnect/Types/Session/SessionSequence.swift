@@ -2,11 +2,10 @@ import Foundation
 import WalletConnectKMS
 
 struct SessionSequence: ExpirableSequence {
-    
     let topic: String
     let relay: RelayProtocolOptions
     let selfParticipant: Participant
-    let expiryDate: Date
+    private (set) var expiryDate: Date
     private var sequenceState: Either<Pending, Settled>
     
     var publicKey: String {
@@ -85,6 +84,15 @@ struct SessionSequence: ExpirableSequence {
     
     mutating func update(_ accounts: Set<String>) {
         settled?.state.accounts = accounts
+    }
+    
+    mutating func extend(_ ttl: Int) throws {
+        let newExpiryDate = Date(timeIntervalSinceNow: TimeInterval(ttl))
+        let maxExpiryDate = Date(timeIntervalSinceNow: TimeInterval(SessionSequence.timeToLiveSettled))
+        guard newExpiryDate > expiryDate && newExpiryDate <= maxExpiryDate else {
+            throw WalletConnectError.invalidExtendTime
+        }
+        expiryDate = newExpiryDate
     }
 }
 

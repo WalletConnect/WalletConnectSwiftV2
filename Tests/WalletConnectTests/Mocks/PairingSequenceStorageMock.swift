@@ -14,7 +14,7 @@ final class PairingSequenceStorageMock: PairingSequenceStorage {
         pairings[sequence.topic] = sequence
     }
     
-    func getSequence(forTopic topic: String) throws -> PairingSequence? {
+    func getSequence(forTopic topic: String) -> PairingSequence? {
         pairings[topic]
     }
     

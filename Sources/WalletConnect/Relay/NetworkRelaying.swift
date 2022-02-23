@@ -10,7 +10,7 @@ protocol NetworkRelaying {
     func connect() throws
     func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws
     /// - returns: request id
-    @discardableResult func publish(topic: String, payload: String, completion: @escaping ((Error?)->())) -> Int64
+    @discardableResult func publish(topic: String, payload: String, prompt: Bool, completion: @escaping ((Error?)->())) -> Int64
     /// - returns: request id
     @discardableResult func subscribe(topic: String, completion: @escaping (Error?)->()) -> Int64
     /// - returns: request id
