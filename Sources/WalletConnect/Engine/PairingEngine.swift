@@ -6,7 +6,6 @@ import WalletConnectKMS
 final class PairingEngine {
     var onApprovalAcknowledgement: ((Pairing) -> Void)?
     var onSessionProposal: ((SessionProposal)->())?
-    var onPairingApproved: ((Pairing, SessionPermissions, RelayProtocolOptions)->())?
     var onPairingExtend: ((Pairing)->())?
     
     private let wcSubscriber: WCSubscribing
@@ -112,7 +111,6 @@ final class PairingEngine {
             }
         }
     }
-    
     
     private func wcPairingExtend(_ payload: WCRequestSubscriptionPayload, extendParams: PairingType.ExtendParams) {
         let topic = payload.topic
