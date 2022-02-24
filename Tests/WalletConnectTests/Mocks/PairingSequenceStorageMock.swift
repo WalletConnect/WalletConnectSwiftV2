@@ -2,7 +2,7 @@
 
 final class PairingSequenceStorageMock: PairingSequenceStorage {
     
-    var onSequenceExpiration: ((String, String) -> Void)?
+    var onSequenceExpiration: ((String, String?) -> Void)?
     
     private(set) var pairings: [String: PairingSequence] = [:]
     
@@ -28,22 +28,13 @@ final class PairingSequenceStorageMock: PairingSequenceStorage {
 }
 
 extension PairingSequenceStorageMock {
-    
-    func hasPendingProposedPairing(on topic: String) -> Bool {
-        guard case .proposed = pairings[topic]?.pending?.status else { return false }
-        return true
-    }
-    
-    func hasPendingRespondedPairing(on topic: String) -> Bool {
-        guard case .responded = pairings[topic]?.pending?.status else { return false }
-        return true
-    }
-    
-    func hasPreSettledPairing(on topic: String) -> Bool {
-        pairings[topic]?.settled?.status == .preSettled
-    }
-    
-    func hasAcknowledgedPairing(on topic: String) -> Bool {
-        pairings[topic]?.settled?.status == .acknowledged
-    }
+//    TODO - distinguish by expiration time
+//    func hasPendingProposedPairing(on topic: String) -> Bool {
+//        guard case .proposed = pairings[topic]?.pending?.status else { return false }
+//        return true
+//    }
+//
+//    func hasAcknowledgedPairing(on topic: String) -> Bool {
+//        pairings[topic]?.settled?.status == .acknowledged
+//    }
 }

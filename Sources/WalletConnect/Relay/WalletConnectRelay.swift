@@ -219,7 +219,7 @@ class WalletConnectRelay: WalletConnectRelaying {
     
     private func shouldPrompt(_ method: WCRequest.Method) -> Bool {
         switch method {
-        case .sessionPayload, .pairingPayload:
+        case .sessionPayload:
             return true
         default:
             return false

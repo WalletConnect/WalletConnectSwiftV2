@@ -106,13 +106,10 @@ public final class WalletConnectClient {
             sessionEngine.proposeSession(settledPairing: Pairing(topic: pairing.topic, peer: nil, expiryDate: pairing.expiryDate), permissions: permissions, relay: pairing.relay)
             return nil
         } else {
-            let permissions = SessionPermissions(permissions: sessionPermissions)
-            do {
-                let pairingURI = try pairingEngine.propose(permissions: permissions)
-                return pairingURI.absoluteString
-            } catch {
-                throw WalletConnectError.pairingProposalFailed(error)
+            guard let pairingURI = pairingEngine.create() else {
+                throw WalletConnectError.pairingProposalFailed
             }
+            return pairingURI.absoluteString
         }
     }
     
@@ -127,8 +124,8 @@ public final class WalletConnectClient {
         guard let pairingURI = WalletConnectURI(string: uri) else {
             throw WalletConnectError.malformedPairingURI
         }
-        try pairingQueue.sync {
-            try pairingEngine.approve(pairingURI)
+        pairingQueue.sync {
+            pairingEngine.pair(pairingURI)
         }
     }
     
@@ -282,15 +279,8 @@ public final class WalletConnectClient {
         pairingEngine.onSessionProposal = { [unowned self] proposal in
             proposeSession(proposal: proposal)
         }
-        pairingEngine.onPairingApproved = { [unowned self] settledPairing, permissions, relayOptions in
-            delegate?.didSettle(pairing: settledPairing)
-            sessionEngine.proposeSession(settledPairing: settledPairing, permissions: permissions, relay: relayOptions)
-        }
         pairingEngine.onApprovalAcknowledgement = { [weak self] settledPairing in
             self?.delegate?.didSettle(pairing: settledPairing)
-        }
-        pairingEngine.onPairingUpdate = { [unowned self] pairing in
-            delegate?.didUpdate(pairing: pairing)
         }
         pairingEngine.onPairingExtend = { [unowned self] pairing in
             delegate?.didExtend(pairing: pairing)

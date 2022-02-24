@@ -51,7 +51,7 @@ extension SessionPermissions {
 
 extension RelayProtocolOptions {
     static func stub() -> RelayProtocolOptions {
-        RelayProtocolOptions(protocol: "", params: nil)
+        RelayProtocolOptions(protocol: "", data: nil)
     }
 }
 

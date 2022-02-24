@@ -1,5 +1,5 @@
 protocol PairingSequenceStorage: AnyObject {
-    var onSequenceExpiration: ((_ topic: String, _ pubKey: String) -> Void)? { get set }
+    var onSequenceExpiration: ((_ topic: String, _ pubKey: String?) -> Void)? { get set }
     func hasSequence(forTopic topic: String) -> Bool
     func setSequence(_ sequence: PairingSequence)
     func getSequence(forTopic topic: String) -> PairingSequence?
@@ -9,7 +9,7 @@ protocol PairingSequenceStorage: AnyObject {
 
 final class PairingStorage: PairingSequenceStorage {
     
-    var onSequenceExpiration: ((String, String) -> Void)? {
+    var onSequenceExpiration: ((String, String?) -> Void)? {
         get { storage.onSequenceExpiration }
         set { storage.onSequenceExpiration = newValue }
     }

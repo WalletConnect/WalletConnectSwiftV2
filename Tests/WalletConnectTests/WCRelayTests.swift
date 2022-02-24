@@ -32,7 +32,7 @@ class WalletConnectRelayTests: XCTestCase {
         wcRelay.wcRequestPublisher.sink { (request) in
             requestExpectation.fulfill()
         }.store(in: &publishers)
-        serializer.deserialized = pairingApproveJSONRPCRequest
+        serializer.deserialized = request
         networkRelayer.onMessage?(topic, testPayload)
         waitForExpectations(timeout: 1.001, handler: nil)
     }
@@ -126,21 +126,5 @@ fileprivate let testPayload =
    }
 }
 """
-
-fileprivate let pairingApproveJSONRPCRequest = WCRequest(
-    id: 0,
-    jsonrpc: "2.0",
-    method: WCRequest.Method.pairingApprove,
-    params: WCRequest.Params.pairingApprove(
-        PairingType.ApprovalParams(
-            relay: RelayProtocolOptions(
-                protocol: "waku",
-                params: nil),
-            responder: PairingParticipant(publicKey: "be9225978b6287a02d259ee0d9d1bcb683082d8386b7fb14b58ac95b93b2ef43"),
-            expiry: 1632742217,
-            state: PairingState(metadata: AppMetadata(
-                name: "iOS",
-                description: nil,
-                url: nil,
-                icons: nil))))
-)
+//TODO - change for different request
+fileprivate let request = WCRequest(id: 1, jsonrpc: "2.0", method: .pairingPing, params: WCRequest.Params.pairingPing(PairingType.PingParams()))

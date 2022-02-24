@@ -9,21 +9,21 @@ fileprivate extension Error {
     }
 }
 
-class CryptoTests: XCTestCase {
+class KeyManagementServiceTests: XCTestCase {
     
-    var crypto: KeyManagementService!
+    var kms: KeyManagementService!
 
     override func setUp() {
-        crypto = KeyManagementService(keychain: KeychainStorageMock())
+        kms = KeyManagementService(keychain: KeychainStorageMock())
     }
 
     override func tearDown() {
-        crypto = nil
+        kms = nil
     }
     
     func testCreateKeyPair() throws {
-        let publicKey = try crypto.createX25519KeyPair()
-        let privateKey = try crypto.getPrivateKey(for: publicKey)
+        let publicKey = try kms.createX25519KeyPair()
+        let privateKey = try kms.getPrivateKey(for: publicKey)
         XCTAssertNotNil(privateKey)
         XCTAssertEqual(privateKey?.publicKey, publicKey)
     }
@@ -31,35 +31,35 @@ class CryptoTests: XCTestCase {
     func testPrivateKeyRoundTrip() throws {
         let privateKey = AgreementPrivateKey()
         let publicKey = privateKey.publicKey
-        XCTAssertNil(try crypto.getPrivateKey(for: publicKey))
-        try crypto.setPrivateKey(privateKey)
-        let storedPrivateKey = try crypto.getPrivateKey(for: publicKey)
+        XCTAssertNil(try kms.getPrivateKey(for: publicKey))
+        try kms.setPrivateKey(privateKey)
+        let storedPrivateKey = try kms.getPrivateKey(for: publicKey)
         XCTAssertEqual(privateKey, storedPrivateKey)
     }
     
     func testDeletePrivateKey() throws {
         let privateKey = AgreementPrivateKey()
         let publicKey = privateKey.publicKey
-        try crypto.setPrivateKey(privateKey)
-        crypto.deletePrivateKey(for: publicKey.hexRepresentation)
-        XCTAssertNil(try crypto.getPrivateKey(for: publicKey))
+        try kms.setPrivateKey(privateKey)
+        kms.deletePrivateKey(for: publicKey.hexRepresentation)
+        XCTAssertNil(try kms.getPrivateKey(for: publicKey))
     }
     
     func testAgreementSecretRoundTrip() throws {
         let topic = "topic"
-        XCTAssertNil(try crypto.getAgreementSecret(for: topic))
+        XCTAssertNil(try kms.getAgreementSecret(for: topic))
         let agreementKeys = AgreementSecret.stub()
-        try? crypto.setAgreementSecret(agreementKeys, topic: topic)
-        let storedAgreementSecret = try crypto.getAgreementSecret(for: topic)
+        try? kms.setAgreementSecret(agreementKeys, topic: topic)
+        let storedAgreementSecret = try kms.getAgreementSecret(for: topic)
         XCTAssertEqual(agreementKeys, storedAgreementSecret)
     }
     
     func testDeleteAgreementSecret() throws {
         let topic = "topic"
         let agreementKeys = AgreementSecret.stub()
-        try? crypto.setAgreementSecret(agreementKeys, topic: topic)
-        crypto.deleteAgreementSecret(for: topic)
-        XCTAssertNil(try crypto.getAgreementSecret(for: topic))
+        try? kms.setAgreementSecret(agreementKeys, topic: topic)
+        kms.deleteAgreementSecret(for: topic)
+        XCTAssertNil(try kms.getAgreementSecret(for: topic))
     }
     
     func testGenerateX25519Agreement() throws {
@@ -83,16 +83,40 @@ class CryptoTests: XCTestCase {
         let privateKeySelf = AgreementPrivateKey()
         let privateKeyPeer = AgreementPrivateKey()
         let peerSecret = try KeyManagementService.generateAgreementSecret(from: privateKeyPeer, peerPublicKey: privateKeySelf.publicKey.hexRepresentation)
-        try crypto.setPrivateKey(privateKeySelf)
-        let selfSecret = try crypto.performKeyAgreement(selfPublicKey: privateKeySelf.publicKey, peerPublicKey: privateKeyPeer.publicKey.hexRepresentation)
+        try kms.setPrivateKey(privateKeySelf)
+        let selfSecret = try kms.performKeyAgreement(selfPublicKey: privateKeySelf.publicKey, peerPublicKey: privateKeyPeer.publicKey.hexRepresentation)
         XCTAssertEqual(selfSecret.sharedSecret, peerSecret.sharedSecret)
     }
     
     func testPerformKeyAgreementFailure() {
         let publicKeySelf = AgreementPrivateKey().publicKey
         let publicKeyPeer = AgreementPrivateKey().publicKey.hexRepresentation
-        XCTAssertThrowsError(try crypto.performKeyAgreement(selfPublicKey: publicKeySelf, peerPublicKey: publicKeyPeer)) { error in
+        XCTAssertThrowsError(try kms.performKeyAgreement(selfPublicKey: publicKeySelf, peerPublicKey: publicKeyPeer)) { error in
             XCTAssert(error.isKeyNotFoundError)
         }
+    }
+    
+    func testCreateSymmetricKey() {
+        let topic = "topic"
+        let key = try! kms.createSymmetricKey(topic)
+        let retrievedKey = try! kms.getSymmetricKey(for: topic)
+        XCTAssertEqual(key, retrievedKey)
+    }
+    
+    func testSymmetricKeyRoundTrip() {
+        let topic = "topic"
+        let key = SymmetricKey()
+        try! kms.setSymmetricKey(key, for: topic)
+        let retrievedKey = try! kms.getSymmetricKey(for: topic)
+        XCTAssertEqual(key, retrievedKey)
+    }
+    
+    func testDeleteSymmetricKey() {
+        let topic = "topic"
+        let key = SymmetricKey()
+        try! kms.setSymmetricKey(key, for: topic)
+        XCTAssertNotNil(try! kms.getSymmetricKey(for: topic))
+        kms.deleteSymmetricKey(for: topic)
+        XCTAssertNil(try! kms.getSymmetricKey(for: topic))
     }
 }

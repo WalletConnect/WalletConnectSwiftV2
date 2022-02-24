@@ -1,6 +1,6 @@
 enum WalletConnectError: Error {
     
-    case pairingProposalFailed(Error)
+    case pairingProposalFailed
     case malformedPairingURI
     case noPairingMatchingTopic(String)
     case noSessionMatchingTopic(String)
@@ -24,8 +24,8 @@ extension WalletConnectError {
     
     var localizedDescription: String {
         switch self {
-        case .pairingProposalFailed(let error):
-            return "Pairing proposal failed with error: \(error.localizedDescription)"
+        case .pairingProposalFailed:
+            return "Pairing proposal failed."
         case .malformedPairingURI:
             return "Pairing URI string is invalid."
         case .noPairingMatchingTopic(let topic):

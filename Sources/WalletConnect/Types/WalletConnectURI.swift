@@ -2,17 +2,15 @@ import Foundation
 
 public struct WalletConnectURI: Equatable {
     
-    public let topic: String
-    public let version: String
-    public let publicKey: String
-    public let isController: Bool
+    let topic: String
+    let version: String
+    let symKey: String
     let relay: RelayProtocolOptions
     
-    init(topic: String, publicKey: String, isController: Bool, relay: RelayProtocolOptions) {
+    init(topic: String, symKey: String, relay: RelayProtocolOptions) {
         self.version = "2"
         self.topic = topic
-        self.publicKey = publicKey
-        self.isController = isController
+        self.symKey = symKey
         self.relay = relay
     }
     
@@ -28,20 +26,25 @@ public struct WalletConnectURI: Equatable {
         
         guard let topic = components.user,
               let version = components.host,
-              let publicKey = query?["publicKey"],
-              let isController = Bool(query?["controller"] ?? ""),
-              let relayOptions = query?["relay"],
-              let relay = try? JSONDecoder().decode(RelayProtocolOptions.self, from: Data(relayOptions.utf8))
+              let symKey = query?["symKey"],
+              let relayProtocol = query?["relay-protocol"]
         else { return nil }
-        
+        let relayData = query?["relay-data"]
         self.version = version
         self.topic = topic
-        self.publicKey = publicKey
-        self.isController = isController
-        self.relay = relay
+        self.symKey = symKey
+        self.relay = RelayProtocolOptions(protocol: relayProtocol, data: relayData)
     }
     
     public var absoluteString: String {
-        return "wc:\(topic)@\(version)?controller=\(isController)&publicKey=\(publicKey)&relay=\(relay.asPercentEncodedString())"
+        return "wc:\(topic)@\(version)?symKey=\(symKey)&\(relayQuery)"
+    }
+    
+    private var relayQuery: String {
+        var query = "relay-protocol=\(relay.protocol)"
+        if let relayData = relay.data {
+            query = "\(query)&relay-data=\(relayData)"
+        }
+        return query
     }
 }

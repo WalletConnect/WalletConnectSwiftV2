@@ -4,7 +4,7 @@ import WalletConnectUtils
 
 struct ExpirableSequenceStub: ExpirableSequence, Equatable {
     let topic: String
-    let publicKey: String
+    let publicKey: String?
     let expiryDate: Date
 }
 
