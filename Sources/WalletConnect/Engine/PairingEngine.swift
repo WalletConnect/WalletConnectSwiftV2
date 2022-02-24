@@ -56,8 +56,11 @@ final class PairingEngine {
     }
     
     func create() -> WalletConnectURI? {
-        let symKey = try! kms.createSymmetricKey()
-        let topic = symKey.derivedTopic()
+        guard let topic = topicInitializer() else {
+            logger.debug("Could not generate topic")
+            return nil
+        }
+        let symKey = try! kms.createSymmetricKey(topic)
         let pairing = PairingSequence.build(topic)
         let uri = WalletConnectURI(topic: topic, symKey: symKey.hexRepresentation, relay: pairing.relay)
         sequencesStore.setSequence(pairing)

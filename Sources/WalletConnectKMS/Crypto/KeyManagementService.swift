@@ -21,9 +21,8 @@ public class KeyManagementService {
         return privateKey.publicKey
     }
 
-    public func createSymmetricKey() throws -> SymmetricKey {
+    public func createSymmetricKey(_ topic: String) throws -> SymmetricKey {
         let key = SymmetricKey()
-        let topic = key.derivedTopic()
         try setSymmetricKey(key, for: topic)
         return key
     }

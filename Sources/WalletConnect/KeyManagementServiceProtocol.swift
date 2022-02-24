@@ -5,7 +5,7 @@ import WalletConnectKMS
 // TODO: Come up with better naming conventions
 public protocol KeyManagementServiceProtocol {
     func createX25519KeyPair() throws -> AgreementPublicKey
-    func createSymmetricKey() throws -> SymmetricKey 
+    func createSymmetricKey(_ topic: String) throws -> SymmetricKey 
     func setPrivateKey(_ privateKey: AgreementPrivateKey) throws
     func setAgreementSecret(_ agreementSecret: AgreementSecret, topic: String) throws
     func setSymmetricKey(_ symmetricKey: SymmetricKey, for topic: String) throws

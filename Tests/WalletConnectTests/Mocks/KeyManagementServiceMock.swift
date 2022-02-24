@@ -3,7 +3,7 @@ import Foundation
 @testable import WalletConnectKMS
 
 final class KeyManagementServiceMock: KeyManagementServiceProtocol {
-    func createSymmetricKey() throws -> SymmetricKey {
+    func createSymmetricKey(_ topic: String) throws -> SymmetricKey {
         // TODO
         fatalError()
     }

@@ -103,10 +103,6 @@ public struct SymmetricKey: GenericPasswordConvertible, Equatable {
     public init<D>(rawRepresentation data: D) throws where D : ContiguousBytes {
         self.key = CryptoKit.SymmetricKey(data: data)
     }
-    
-    public func derivedTopic() -> String {
-        rawRepresentation.sha256().toHexString()
-    }
 }
 
 extension SymmetricKey {
