@@ -100,6 +100,12 @@ public struct SymmetricKey: GenericPasswordConvertible, Equatable {
             self.key = CryptoKit.SymmetricKey(size: SymmetricKeySize.bits256)
         }
     }
+    
+    public init(hex: String) throws {
+        let data = Data(hex: hex)
+        try self.init(rawRepresentation: data)
+    }
+    
     public init<D>(rawRepresentation data: D) throws where D : ContiguousBytes {
         self.key = CryptoKit.SymmetricKey(data: data)
     }

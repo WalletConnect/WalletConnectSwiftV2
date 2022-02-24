@@ -37,4 +37,11 @@ struct PairingSequence: ExpirableSequence {
             state: nil,
             expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveProposed)))
     }
+    
+    static func createFromURI(_ uri: WalletConnectURI) -> PairingSequence {
+        return PairingSequence(
+            topic: uri.topic,
+            relay: uri.relay,
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveSettled)))
+    }
 }
