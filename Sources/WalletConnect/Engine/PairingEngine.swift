@@ -67,8 +67,14 @@ final class PairingEngine {
         return uri
     }
     
-    func pair(_ uri: WalletConnectURI) {
-        
+    func pair(_ uri: WalletConnectURI) throws {
+        guard !hasPairing(for: uri.topic) else {
+            throw WalletConnectError.internal(.pairWithExistingPairingForbidden)
+        }
+        let pairing = PairingSequence.createFromURI(uri)
+        kms.setSymmetricKey(uri.symKey, for: pairing.topic)
+        wcSubscriber.setSubscription(topic: pairing.topic)
+        sequencesStore.setSequence(pairing)
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
