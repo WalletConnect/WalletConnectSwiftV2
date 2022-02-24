@@ -21,7 +21,7 @@ public extension AES {
         ///   - iv: initial vector data
         /// - Throws: when fails to encrypt
         /// - Returns: encrypted data
-        public static func encrypt(_ data: Data, using key: SymmetricKey, iv: Data, options: CCOptions = pkcs7Padding) throws -> Data {
+        public static func encrypt(_ data: Data, using key: CryptoKit.SymmetricKey, iv: Data, options: CCOptions = pkcs7Padding) throws -> Data {
             try process(data, using: key, iv: iv, operation: .encrypt, options: options)
         }
 
@@ -32,12 +32,12 @@ public extension AES {
         ///   - iv: initial vector data
         /// - Throws: when fails to decrypt
         /// - Returns: clear text data after decryption
-        public static func decrypt(_ data: Data, using key: SymmetricKey, iv: Data, options: CCOptions = pkcs7Padding) throws -> Data {
+        public static func decrypt(_ data: Data, using key: CryptoKit.SymmetricKey, iv: Data, options: CCOptions = pkcs7Padding) throws -> Data {
             try process(data, using: key, iv: iv, operation: .decrypt, options: options)
         }
 
         /// Process data, either encrypt or decrypt it
-        private static func process(_ data: Data, using key: SymmetricKey, iv: Data, operation: Operation, options: CCOptions) throws -> Data {
+        private static func process(_ data: Data, using key: CryptoKit.SymmetricKey, iv: Data, operation: Operation, options: CCOptions) throws -> Data {
             let inputBuffer = data.bytes
             let keyData = key.dataRepresentation.bytes
             let ivData = iv.bytes

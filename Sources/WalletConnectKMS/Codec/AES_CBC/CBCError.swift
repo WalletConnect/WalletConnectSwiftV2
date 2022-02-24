@@ -24,7 +24,7 @@ public extension Data {
     }
 }
 
-public extension SymmetricKey {
+public extension CryptoKit.SymmetricKey {
     /// A Data instance created safely from the contiguous bytes without making any copies.
     var dataRepresentation: Data {
         return withUnsafeBytes { bytes in

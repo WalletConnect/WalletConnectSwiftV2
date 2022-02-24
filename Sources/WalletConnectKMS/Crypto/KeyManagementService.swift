@@ -20,6 +20,17 @@ public class KeyManagementService {
         try setPrivateKey(privateKey)
         return privateKey.publicKey
     }
+
+    public func createSymmetricKey() throws -> SymmetricKey {
+        let key = SymmetricKey()
+        let topic = key.derivedTopic()
+        try setSymmetricKey(key, for: topic)
+        return key
+    }
+    
+    public func setSymmetricKey(_ symmetricKey: SymmetricKey, for topic: String) throws {
+        try keychain.add(symmetricKey, forKey: topic)
+    }
     
     public func setPrivateKey(_ privateKey: AgreementPrivateKey) throws {
         try keychain.add(privateKey, forKey: privateKey.publicKey.hexRepresentation)
@@ -27,6 +38,16 @@ public class KeyManagementService {
     
     public func setAgreementSecret(_ agreementSecret: AgreementSecret, topic: String) throws {
         try keychain.add(agreementSecret, forKey: topic)
+    }
+    
+    public func getSymmetricKey(for topic: String) throws -> SymmetricKey? {
+        do {
+            return try keychain.read(key: topic) as SymmetricKey
+        } catch let error where (error as? KeychainError)?.status == errSecItemNotFound {
+            return nil
+        } catch {
+            throw error
+        }
     }
     
     public func getPrivateKey(for publicKey: AgreementPublicKey) throws -> AgreementPrivateKey? {
@@ -62,6 +83,14 @@ public class KeyManagementService {
             try keychain.delete(key: topic)
         } catch {
             print("Error deleting agreement key: \(error)")
+        }
+    }
+    
+    public func deleteSymmetricKey(for topic: String) {
+        do {
+            try keychain.delete(key: topic)
+        } catch {
+            print("Error deleting symmetric key: \(error)")
         }
     }
     

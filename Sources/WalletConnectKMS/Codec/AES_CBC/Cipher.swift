@@ -21,7 +21,7 @@ extension AES.CBC {
         ///   - key: a symmetric key for operation
         ///   - iv: initial vector data
         /// - Throws: when fails to create a cryptografic context
-        public init(_ operation: Operation, using key: SymmetricKey, iv: Data, options: CCOptions = pkcs7Padding) throws {
+        public init(_ operation: Operation, using key: CryptoKit.SymmetricKey, iv: Data, options: CCOptions = pkcs7Padding) throws {
             let keyData = key.dataRepresentation.bytes
             let ivData = iv.bytes
             var cryptorRef: CCCryptorRef?

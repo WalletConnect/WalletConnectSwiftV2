@@ -17,7 +17,7 @@ class HMACAuthenticator: HMACAuthenticating {
     }
     
     func generateAuthenticationDigest(for data: Data, using symmetricKey: Data)  throws -> Data {
-        let key = SymmetricKey(data: symmetricKey)
+        let key = CryptoKit.SymmetricKey(data: symmetricKey)
         let hmac = HMAC<SHA256>.authenticationCode(for: data, using: key)
         return Data(hmac)
     }

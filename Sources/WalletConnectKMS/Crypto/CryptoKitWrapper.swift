@@ -78,3 +78,35 @@ public struct AgreementPrivateKey: GenericPasswordConvertible, Equatable {
         try key.sharedSecretFromKeyAgreement(with: publicKeyShare.key)
     }
 }
+
+
+// MARK: - Symmetric Key
+
+public struct SymmetricKey: GenericPasswordConvertible, Equatable {
+    
+    private let key: CryptoKit.SymmetricKey
+    
+    public var rawRepresentation: Data {
+        return key.withUnsafeBytes {Data(Array($0))}
+    }
+
+    public init(size: Size = .bits256) {
+        switch size {
+        case .bits256:
+            self.key = CryptoKit.SymmetricKey(size: SymmetricKeySize.bits256)
+        }
+    }
+    public init<D>(rawRepresentation data: D) throws where D : ContiguousBytes {
+        self.key = CryptoKit.SymmetricKey(data: data)
+    }
+    
+    public func derivedTopic() -> String {
+        rawRepresentation.sha256().toHexString()
+    }
+}
+
+extension SymmetricKey {
+    public enum Size {
+        case bits256
+    }
+}
