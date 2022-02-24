@@ -279,10 +279,6 @@ public final class WalletConnectClient {
         pairingEngine.onSessionProposal = { [unowned self] proposal in
             proposeSession(proposal: proposal)
         }
-        pairingEngine.onPairingApproved = { [unowned self] settledPairing, permissions, relayOptions in
-            delegate?.didSettle(pairing: settledPairing)
-            sessionEngine.proposeSession(settledPairing: settledPairing, permissions: permissions, relay: relayOptions)
-        }
         pairingEngine.onApprovalAcknowledgement = { [weak self] settledPairing in
             self?.delegate?.didSettle(pairing: settledPairing)
         }
