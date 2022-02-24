@@ -72,9 +72,14 @@ final class PairingEngine {
             throw WalletConnectError.internal(.pairWithExistingPairingForbidden)
         }
         let pairing = PairingSequence.createFromURI(uri)
-        kms.setSymmetricKey(uri.symKey, for: pairing.topic)
+        let symKey = try! SymmetricKey(hex: uri.symKey)
+        try! kms.setSymmetricKey(symKey, for: pairing.topic)
         wcSubscriber.setSubscription(topic: pairing.topic)
         sequencesStore.setSequence(pairing)
+    }
+    
+    func proposeSession() {
+        
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
