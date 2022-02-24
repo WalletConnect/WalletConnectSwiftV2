@@ -16,7 +16,7 @@ final class PairingEngine {
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
     private var sessionPermissions: [String: SessionPermissions] = [:]
-    private let topicInitializer: () -> String?
+    private let topicInitializer: () -> String
     
     init(relay: WalletConnectRelaying,
          kms: KeyManagementServiceProtocol,
@@ -24,7 +24,7 @@ final class PairingEngine {
          sequencesStore: PairingSequenceStorage,
          metadata: AppMetadata,
          logger: ConsoleLogging,
-         topicGenerator: @escaping () -> String? = String.generateTopic) {
+         topicGenerator: @escaping () -> String = String.generateTopic) {
         self.relayer = relay
         self.kms = kms
         self.wcSubscriber = subscriber
@@ -55,9 +55,7 @@ final class PairingEngine {
     }
     
     func create() -> WalletConnectURI? {
-        guard let topic = topicInitializer() else {
-            return nil
-        }
+        let topic = topicInitializer()
         let symKey = try! kms.createSymmetricKey(topic)
         let pairing = PairingSequence.build(topic)
         let uri = WalletConnectURI(topic: topic, symKey: symKey.hexRepresentation, relay: pairing.relay)

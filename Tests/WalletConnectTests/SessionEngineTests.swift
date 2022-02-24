@@ -116,8 +116,8 @@ final class SessionEngineTests: XCTestCase {
     func testApprove() {
         setupEngine()
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
-        let topicB = String.generateTopic()!
-        let topicC = String.generateTopic()!
+        let topicB = String.generateTopic()
+        let topicC = String.generateTopic()
         let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
         
         let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: true, metadata: metadata)
@@ -148,8 +148,8 @@ final class SessionEngineTests: XCTestCase {
         setupEngine()
         
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
-        let topicB = String.generateTopic()!
-        let topicC = String.generateTopic()!
+        let topicB = String.generateTopic()
+        let topicC = String.generateTopic()
         let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
         
         let agreementKeys = AgreementSecret.stub()
@@ -188,8 +188,8 @@ final class SessionEngineTests: XCTestCase {
         
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let selfPubKey = cryptoMock.privateKeyStub.publicKey.hexRepresentation
-        let topicB = String.generateTopic()!
-        let topicC = String.generateTopic()!
+        let topicB = String.generateTopic()
+        let topicC = String.generateTopic()
         let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
         
         let agreementKeys = AgreementSecret.stub()

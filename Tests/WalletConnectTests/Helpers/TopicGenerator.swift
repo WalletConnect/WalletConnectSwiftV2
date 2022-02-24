@@ -4,11 +4,11 @@ final class TopicGenerator {
     
     let topic: String
     
-    init(topic: String = String.generateTopic()!) {
+    init(topic: String = String.generateTopic()) {
         self.topic = topic
     }
     
-    func getTopic() -> String? {
+    func getTopic() -> String {
         return topic
     }
 }
