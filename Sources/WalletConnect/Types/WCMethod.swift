@@ -1,6 +1,5 @@
 enum WCMethod {
     case wcPairingApprove(PairingType.ApprovalParams)
-    case wcPairingUpdate(PairingType.UpdateParams)
     case wcPairingPayload(PairingType.PayloadParams)
     case wcPairingPing
     case wcPairingExtend(PairingType.ExtendParams)
@@ -18,8 +17,6 @@ enum WCMethod {
         switch self {
         case .wcPairingApprove(let approveParams):
             return WCRequest(method: .pairingApprove, params: .pairingApprove(approveParams))
-        case .wcPairingUpdate(let updateParams):
-            return WCRequest(method: .pairingUpdate, params: .pairingUpdate(updateParams))
         case .wcPairingPayload(let payloadParams):
             return WCRequest(method: .pairingPayload, params: .pairingPayload(payloadParams))
         case .wcPairingPing:

@@ -7,7 +7,6 @@ final class PairingEngine {
     var onApprovalAcknowledgement: ((Pairing) -> Void)?
     var onSessionProposal: ((SessionProposal)->())?
     var onPairingApproved: ((Pairing, SessionPermissions, RelayProtocolOptions)->())?
-    var onPairingUpdate: ((Pairing)->())?
     var onPairingExtend: ((Pairing)->())?
     
     private let wcSubscriber: WCSubscribing
@@ -158,25 +157,8 @@ final class PairingEngine {
         
         let pairing = Pairing(topic: settledPairing.topic, peer: nil, expiryDate: settledPairing.expiryDate)
         onApprovalAcknowledgement?(pairing)
-        update(topic: settledPairing.topic)
         logger.debug("Success on wc_pairingApprove - settled topic - \(settledTopic)")
         logger.debug("Pairing Success")
-    }
-    
-    private func update(topic: String) {
-        guard var pairing = sequencesStore.getSequence(forTopic: topic) else {
-            logger.debug("Could not find pairing for topic \(topic)")
-            return
-        }
-        relayer.request(.wcPairingUpdate(PairingType.UpdateParams(state: PairingState(metadata: appMetadata))), onTopic: topic) { [unowned self] result in
-            switch result {
-            case .success(_):
-                pairing.settled?.state?.metadata = appMetadata
-                sequencesStore.setSequence(pairing)
-            case .failure(let error):
-                logger.error(error)
-            }
-        }
     }
 
     private func setUpWCRequestHandling() {
@@ -184,8 +166,6 @@ final class PairingEngine {
             switch subscriptionPayload.wcRequest.params {
             case .pairingApprove(let approveParams):
                 wcPairingApprove(subscriptionPayload, approveParams: approveParams)
-            case .pairingUpdate(let updateParams):
-                wcPairingUpdate(subscriptionPayload, updateParams: updateParams)
             case .pairingPayload(let pairingPayload):
                 wcPairingPayload(subscriptionPayload, payloadParams: pairingPayload)
             case .pairingPing(_):
@@ -223,28 +203,6 @@ final class PairingEngine {
         
         relayer.respondSuccess(for: payload)
         onPairingApproved?(Pairing(topic: settledPairing.topic, peer: nil, expiryDate: settledPairing.expiryDate), permissions, settledPairing.relay)
-    }
-    
-    private func wcPairingUpdate(_ payload: WCRequestSubscriptionPayload, updateParams: PairingType.UpdateParams) {
-        let topic = payload.topic
-        guard var pairing = sequencesStore.getSequence(forTopic: topic) else {
-            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .pairing, topic: topic))
-            return
-        }
-        guard pairing.peerIsController else {
-            relayer.respondError(for: payload, reason: .unauthorizedUpdateRequest(context: .pairing))
-            return
-        }
-        guard let metadata = updateParams.state.metadata else {
-            relayer.respondError(for: payload, reason: .invalidUpdateRequest(context: .pairing))
-            return
-        }
-        
-        pairing.settled?.state = updateParams.state
-        sequencesStore.setSequence(pairing)
-        
-        relayer.respondSuccess(for: payload)
-        onPairingUpdate?(Pairing(topic: topic, peer: metadata, expiryDate: pairing.expiryDate))
     }
     
     private func wcPairingExtend(_ payload: WCRequestSubscriptionPayload, extendParams: PairingType.ExtendParams) {

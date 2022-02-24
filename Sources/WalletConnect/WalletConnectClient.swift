@@ -287,9 +287,6 @@ public final class WalletConnectClient {
         pairingEngine.onApprovalAcknowledgement = { [weak self] settledPairing in
             self?.delegate?.didSettle(pairing: settledPairing)
         }
-        pairingEngine.onPairingUpdate = { [unowned self] pairing in
-            delegate?.didUpdate(pairing: pairing)
-        }
         pairingEngine.onPairingExtend = { [unowned self] pairing in
             delegate?.didExtend(pairing: pairing)
         }

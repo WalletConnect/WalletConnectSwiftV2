@@ -48,9 +48,6 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didReceive(notification: Session.Notification, sessionTopic: String) {
         onNotificationReceived?(notification, sessionTopic)
     }
-    func didUpdate(pairing: Pairing) {
-        onPairingUpdate?(pairing)
-    }
     func didReceive(sessionResponse: Response) {
         onSessionResponse?(sessionResponse)
     }

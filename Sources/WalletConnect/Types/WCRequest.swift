@@ -32,12 +32,6 @@ struct WCRequest: Codable {
         case .pairingReject:
             let paramsValue = try container.decode(PairingType.RejectParams.self, forKey: .params)
             params = .pairingReject(paramsValue)
-        case .pairingUpdate:
-            let paramsValue = try container.decode(PairingType.UpdateParams.self, forKey: .params)
-            params = .pairingUpdate(paramsValue)
-        case .pairingUpgrade:
-            let paramsValue = try container.decode(PairingType.UpgradeParams.self, forKey: .params)
-            params = .pairingUpgrade(paramsValue)
         case .pairingDelete:
             let paramsValue = try container.decode(PairingType.DeleteParams.self, forKey: .params)
             params = .pairingDelete(paramsValue)
@@ -93,10 +87,6 @@ struct WCRequest: Codable {
             try container.encode(params, forKey: .params)
         case .pairingReject(let params):
             try container.encode(params, forKey: .params)
-        case .pairingUpdate(let params):
-            try container.encode(params, forKey: .params)
-        case .pairingUpgrade(let params):
-            try container.encode(params, forKey: .params)
         case .pairingDelete(let params):
             try container.encode(params, forKey: .params)
         case .pairingPayload(let params):
@@ -138,8 +128,6 @@ extension WCRequest {
     enum Method: String, Codable {
         case pairingApprove = "wc_pairingApprove"
         case pairingReject = "wc_pairingReject"
-        case pairingUpdate = "wc_pairingUpdate"
-        case pairingUpgrade = "wc_pairingUpgrade"
         case pairingDelete = "wc_pairingDelete"
         case pairingPayload = "wc_pairingPayload"
         case pairingPing = "wc_pairingPing"
@@ -161,8 +149,6 @@ extension WCRequest {
     enum Params: Codable, Equatable {
         case pairingApprove(PairingType.ApprovalParams)
         case pairingReject(PairingType.RejectParams)
-        case pairingUpdate(PairingType.UpdateParams)
-        case pairingUpgrade(PairingType.UpgradeParams)
         case pairingDelete(PairingType.DeleteParams)
         case pairingPayload(PairingType.PayloadParams)
         case pairingPing(PairingType.PingParams)
@@ -184,10 +170,6 @@ extension WCRequest {
             case (.pairingApprove(let lhsParam), .pairingApprove(let rhsParam)):
                 return lhsParam == rhsParam
             case (.pairingReject(let lhsParam), pairingReject(let rhsParam)):
-                return lhsParam == rhsParam
-            case (.pairingUpdate(let lhsParam), pairingUpdate(let rhsParam)):
-                return lhsParam == rhsParam
-            case (.pairingUpgrade(let lhsParam), pairingUpgrade(let rhsParam)):
                 return lhsParam == rhsParam
             case (.pairingDelete(let lhsParam), pairingDelete(let rhsParam)):
                 return lhsParam == rhsParam
