@@ -4,8 +4,9 @@ import Foundation
 
 final class KeyManagementServiceMock: KeyManagementServiceProtocol {
     func createSymmetricKey(_ topic: String) throws -> SymmetricKey {
-        // TODO
-        fatalError()
+        let key = SymmetricKey()
+        try setSymmetricKey(key, for: topic)
+        return key
     }
     
     func setSymmetricKey(_ symmetricKey: SymmetricKey, for topic: String) throws {
@@ -13,12 +14,11 @@ final class KeyManagementServiceMock: KeyManagementServiceProtocol {
     }
     
     func getSymmetricKey(for topic: String) throws -> SymmetricKey? {
-        // TODO
-        fatalError()
+        symmetricKeys[topic]
     }
     
     func deleteSymmetricKey(for topic: String) {
-        // TODO
+        symmetricKeys[topic] = nil
     }
     
     
