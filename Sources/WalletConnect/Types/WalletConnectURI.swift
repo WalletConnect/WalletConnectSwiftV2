@@ -29,11 +29,11 @@ public struct WalletConnectURI: Equatable {
               let symKey = query?["symKey"],
               let relayProtocol = query?["relay-protocol"]
         else { return nil }
+        let relayData = query?["relay-data"]
         self.version = version
         self.topic = topic
         self.symKey = symKey
-        //todo - parse params
-        self.relay = RelayProtocolOptions(protocol: relayProtocol, params: nil)
+        self.relay = RelayProtocolOptions(protocol: relayProtocol, data: relayData)
     }
     
     public var absoluteString: String {
@@ -42,9 +42,8 @@ public struct WalletConnectURI: Equatable {
     
     private var relayQuery: String {
         var query = "relay-protocol=\(relay.protocol)"
-        if let params = relay.params {
-//   todo -         parse params to data
-//            query = "\(query)&relay-data=\(relayData)"
+        if let relayData = relay.data {
+            query = "\(query)&relay-data=\(relayData)"
         }
         return query
     }

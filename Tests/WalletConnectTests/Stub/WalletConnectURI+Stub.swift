@@ -8,7 +8,7 @@ extension WalletConnectURI {
         WalletConnectURI(
             topic: String.generateTopic()!,
             symKey: SymmetricKey().hexRepresentation,
-            relay: RelayProtocolOptions(protocol: "", params: nil)
+            relay: RelayProtocolOptions(protocol: "", data: nil)
         )
     }
 }

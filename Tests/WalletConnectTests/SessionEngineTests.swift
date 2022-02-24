@@ -116,7 +116,7 @@ final class SessionEngineTests: XCTestCase {
         let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: true, metadata: metadata)
         let proposal = SessionProposal(
             topic: topicC,
-            relay: RelayProtocolOptions(protocol: "", params: nil),
+            relay: RelayProtocolOptions(protocol: "", data: nil),
             proposer: proposer,
             signal: SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: topicB)),
             permissions: SessionPermissions.stub(),
@@ -151,7 +151,7 @@ final class SessionEngineTests: XCTestCase {
         let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: true, metadata: metadata)
         let proposal = SessionProposal(
             topic: topicC,
-            relay: RelayProtocolOptions(protocol: "", params: nil),
+            relay: RelayProtocolOptions(protocol: "", data: nil),
             proposer: proposer,
             signal: SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: topicB)),
             permissions: SessionPermissions.stub(),
@@ -191,7 +191,7 @@ final class SessionEngineTests: XCTestCase {
         let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: true, metadata: metadata)
         let proposal = SessionProposal(
             topic: topicC,
-            relay: RelayProtocolOptions(protocol: "", params: nil),
+            relay: RelayProtocolOptions(protocol: "", data: nil),
             proposer: proposer,
             signal: SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: topicB)),
             permissions: SessionPermissions.stub(),
@@ -233,7 +233,7 @@ final class SessionEngineTests: XCTestCase {
         let topicD = deriveTopic(publicKey: responderPubKey, privateKey: privateKeyStub)
 
         let permissions = SessionPermissions.stub()
-        let relayOptions = RelayProtocolOptions(protocol: "", params: nil)
+        let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
         let approveParams = SessionType.ApproveParams(
             relay: relayOptions,
             responder: SessionParticipant(publicKey: responderPubKey, metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil)),

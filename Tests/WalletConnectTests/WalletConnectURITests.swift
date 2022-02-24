@@ -13,7 +13,7 @@ final class WalletConnectURITests: XCTestCase {
         let inputURI = WalletConnectURI(
             topic: "8097df5f14871126866252c1b7479a14aefb980188fc35ec97d130d24bd887c8",
             symKey: "19c5ecc857963976fabb98ed6a3e0a6ab6b0d65c018b6e25fbdcd3a164def868",
-            relay: RelayProtocolOptions(protocol: "waku", params: nil))
+            relay: RelayProtocolOptions(protocol: "waku", data: nil))
         let uriString = inputURI.absoluteString
         let outputURI = WalletConnectURI(string: uriString)
         XCTAssertEqual(inputURI, outputURI)

@@ -29,7 +29,7 @@ struct PairingSequence: ExpirableSequence {
     }
     
     static func build(_ topic: String) -> PairingSequence {
-        let relay = RelayProtocolOptions(protocol: "waku", params: nil)
+        let relay = RelayProtocolOptions(protocol: "waku", data: nil)
         return PairingSequence(
             publicKey: nil,
             topic: topic,
