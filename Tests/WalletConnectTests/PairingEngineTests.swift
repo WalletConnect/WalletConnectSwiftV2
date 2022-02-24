@@ -26,7 +26,7 @@ final class PairingEngineTests: XCTestCase {
         cryptoMock = KeyManagementServiceMock()
         topicGenerator = TopicGenerator()
     }
-
+    
     override func tearDown() {
         relayMock = nil
         subscriberMock = nil
@@ -36,7 +36,7 @@ final class PairingEngineTests: XCTestCase {
         engine = nil
     }
     
-    func setupEngine(isController: Bool) {
+    func setupEngine() {
         let meta = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
         let logger = ConsoleLoggerMock()
         engine = PairingEngine(
@@ -49,16 +49,13 @@ final class PairingEngineTests: XCTestCase {
             topicGenerator: topicGenerator.getTopic)
     }
     
-//    func testApproveMultipleCallsThrottleOnSameURI() {
-//        setupEngine(isController: true)
-//        let uri = WalletConnectURI.stub()
-//        for i in 1...10 {
-//            if i == 1 {
-//                XCTAssertNoThrow(try engine.approve(uri))
-//            } else {
-//                XCTAssertThrowsError(try engine.approve(uri))
-//            }
-//        }
-//    }
-//
+    func testPair() {
+        setupEngine()
+        let uri = WalletConnectURI.stub()
+        let topic = uri.topic
+        try! engine.pair(uri)
+        XCTAssert(subscriberMock.didSubscribe(to: topic), "Proposer must subscribe to pairing topic.")
+        XCTAssert(cryptoMock.hasSymmetricKey(for: topic), "Proposer must store the symmetric key matching the pairing topic")
+        XCTAssert(storageMock.hasSequence(forTopic: topic), "The engine must store a pairing after creating one")
+    }
 }

@@ -9,7 +9,7 @@ final class KeyManagementServiceMock: KeyManagementServiceProtocol {
     }
     
     func setSymmetricKey(_ symmetricKey: SymmetricKey, for topic: String) throws {
-        // TODO
+        symmetricKeys[topic] = symmetricKey
     }
     
     func getSymmetricKey(for topic: String) throws -> SymmetricKey? {
@@ -43,6 +43,7 @@ final class KeyManagementServiceMock: KeyManagementServiceProtocol {
     var privateKeyStub = AgreementPrivateKey()
     
     private(set) var privateKeys: [String: AgreementPrivateKey] = [:]
+    private(set) var symmetricKeys: [String: SymmetricKey] = [:]
     private(set) var agreementKeys: [String: AgreementSecret] = [:]
     
     func makePrivateKey() -> AgreementPrivateKey {
@@ -83,5 +84,9 @@ extension KeyManagementServiceMock {
     
     func hasAgreementSecret(for topic: String) -> Bool {
         agreementKeys[topic] != nil
+    }
+    
+    func hasSymmetricKey(for topic: String) -> Bool {
+        symmetricKeys[topic] != nil
     }
 }
