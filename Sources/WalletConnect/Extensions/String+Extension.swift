@@ -29,14 +29,7 @@ extension String {
     }
     
     static func generateTopic() -> String {
-        var keyData = Data(count: 32)
-        let result = keyData.withUnsafeMutableBytes {
-            SecRandomCopyBytes(kSecRandomDefault, 32, $0.baseAddress!)
-        }
-        guard result == errSecSuccess else {
-            fatalError("Failed to generate secure random bytes.")
-        }
+        let keyData = Data.randomBytes(count: 32)
         return keyData.toHexString()
     }
 }
-
