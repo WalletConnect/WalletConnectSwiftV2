@@ -87,7 +87,11 @@ public struct SymmetricKey: GenericPasswordConvertible, Equatable {
     private let key: CryptoKit.SymmetricKey
     
     public var rawRepresentation: Data {
-        return key.withUnsafeBytes {Data(Array($0))}
+        key.withUnsafeBytes {Data(Array($0))}
+    }
+    
+    public var hexRepresentation: String {
+        rawRepresentation.toHexString()
     }
 
     public init(size: Size = .bits256) {
@@ -98,10 +102,6 @@ public struct SymmetricKey: GenericPasswordConvertible, Equatable {
     }
     public init<D>(rawRepresentation data: D) throws where D : ContiguousBytes {
         self.key = CryptoKit.SymmetricKey(data: data)
-    }
-    
-    public func derivedTopic() -> String {
-        rawRepresentation.sha256().toHexString()
     }
 }
 

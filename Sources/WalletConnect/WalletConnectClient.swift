@@ -106,8 +106,7 @@ public final class WalletConnectClient {
             sessionEngine.proposeSession(settledPairing: Pairing(topic: pairing.topic, peer: nil, expiryDate: pairing.expiryDate), permissions: permissions, relay: pairing.relay)
             return nil
         } else {
-            let permissions = SessionPermissions(permissions: sessionPermissions)
-            guard let pairingURI = pairingEngine.propose(permissions: permissions) else {
+            guard let pairingURI = pairingEngine.create() else {
                 throw WalletConnectError.internal(.pairingProposalGenerationFailed)
             }
             return pairingURI.absoluteString
@@ -126,7 +125,7 @@ public final class WalletConnectClient {
             throw WalletConnectError.internal(.malformedPairingURI)
         }
         try pairingQueue.sync {
-            try pairingEngine.approve(pairingURI)
+            try pairingEngine.pair(pairingURI)
         }
     }
     
@@ -279,10 +278,6 @@ public final class WalletConnectClient {
     private func setUpEnginesCallbacks() {
         pairingEngine.onSessionProposal = { [unowned self] proposal in
             proposeSession(proposal: proposal)
-        }
-        pairingEngine.onPairingApproved = { [unowned self] settledPairing, permissions, relayOptions in
-            delegate?.didSettle(pairing: settledPairing)
-            sessionEngine.proposeSession(settledPairing: settledPairing, permissions: permissions, relay: relayOptions)
         }
         pairingEngine.onApprovalAcknowledgement = { [weak self] settledPairing in
             self?.delegate?.didSettle(pairing: settledPairing)

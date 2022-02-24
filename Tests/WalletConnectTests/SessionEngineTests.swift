@@ -47,63 +47,64 @@ final class SessionEngineTests: XCTestCase {
             topicGenerator: topicGenerator.getTopic)
     }
     
-    func testPropose() {
-        setupEngine()
-        
-        let pairing = Pairing.stub()
-        
-        let topicB = pairing.topic
-        let topicC = topicGenerator.topic
-        
-        let agreementKeys = AgreementSecret.stub()
-        cryptoMock.setAgreementSecret(agreementKeys, topic: topicB)
-        let permissions = SessionPermissions.stub()
-        let relayOptions = RelayProtocolOptions(protocol: "", params: nil)
-        engine.proposeSession(settledPairing: pairing, permissions: permissions, relay: relayOptions)
-        
-        guard let publishTopic = relayMock.requests.first?.topic, let proposal = relayMock.requests.first?.request.sessionProposal else {
-            XCTFail("Proposer must publish a proposal request."); return
-        }
-        
-        XCTAssert(subscriberMock.didSubscribe(to: topicC), "Proposer must subscribe to topic C to listen for approval message.")
-        XCTAssert(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must store the private key matching the public key sent through the proposal.")
-        XCTAssert(cryptoMock.hasAgreementSecret(for: topicB))
-        XCTAssert(storageMock.hasPendingProposedPairing(on: topicC), "The engine must store a pending session on proposed state.")
-        
-        XCTAssertEqual(publishTopic, topicB)
-        XCTAssertEqual(proposal.topic, topicC)
-    }
-    
-    func testProposeResponseFailure() {
-        setupEngine()
-        let pairing = Pairing.stub()
-        
-        let topicB = pairing.topic
-        let topicC = topicGenerator.topic
-        
-        let agreementKeys = AgreementSecret.stub()
-        cryptoMock.setAgreementSecret(agreementKeys, topic: topicB)
-        let permissions = SessionPermissions.stub()
-        let relayOptions = RelayProtocolOptions(protocol: "", params: nil)
-        engine.proposeSession(settledPairing: pairing, permissions: permissions, relay: relayOptions)
-        
-        guard let publishTopic = relayMock.requests.first?.topic, let request = relayMock.requests.first?.request else {
-            XCTFail("Proposer must publish a proposal request."); return
-        }
-        let error = JSONRPCErrorResponse(id: request.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))
-        let response = WCResponse(
-            topic: publishTopic,
-            chainId: nil,
-            requestMethod: request.method,
-            requestParams: request.params,
-            result: .error(error))
-        relayMock.onResponse?(response)
-        
-        XCTAssert(subscriberMock.didUnsubscribe(to: topicC))
-        XCTAssertFalse(cryptoMock.hasPrivateKey(for: request.sessionProposal?.proposer.publicKey ?? ""))
-        XCTAssertFalse(cryptoMock.hasAgreementSecret(for: topicB))
-        XCTAssertFalse(storageMock.hasSequence(forTopic: topicC))
-    }
+    // TODO - session proposal will be called from pairing engine
+//    func testPropose() {
+//        setupEngine()
+//
+//        let pairing = Pairing.stub()
+//
+//        let topicB = pairing.topic
+//        let topicC = topicGenerator.topic
+//
+//        let agreementKeys = AgreementSecret.stub()
+//        cryptoMock.setAgreementSecret(agreementKeys, topic: topicB)
+//        let permissions = SessionPermissions.stub()
+//        let relayOptions = RelayProtocolOptions(protocol: "", params: nil)
+//        engine.proposeSession(settledPairing: pairing, permissions: permissions, relay: relayOptions)
+//
+//        guard let publishTopic = relayMock.requests.first?.topic, let proposal = relayMock.requests.first?.request.sessionProposal else {
+//            XCTFail("Proposer must publish a proposal request."); return
+//        }
+//
+//        XCTAssert(subscriberMock.didSubscribe(to: topicC), "Proposer must subscribe to topic C to listen for approval message.")
+//        XCTAssert(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must store the private key matching the public key sent through the proposal.")
+//        XCTAssert(cryptoMock.hasAgreementSecret(for: topicB))
+//        XCTAssert(storageMock.hasPendingProposedPairing(on: topicC), "The engine must store a pending session on proposed state.")
+//
+//        XCTAssertEqual(publishTopic, topicB)
+//        XCTAssertEqual(proposal.topic, topicC)
+//    }
+//
+//    func testProposeResponseFailure() {
+//        setupEngine()
+//        let pairing = Pairing.stub()
+//
+//        let topicB = pairing.topic
+//        let topicC = topicGenerator.topic
+//
+//        let agreementKeys = AgreementSecret.stub()
+//        cryptoMock.setAgreementSecret(agreementKeys, topic: topicB)
+//        let permissions = SessionPermissions.stub()
+//        let relayOptions = RelayProtocolOptions(protocol: "", params: nil)
+//        engine.proposeSession(settledPairing: pairing, permissions: permissions, relay: relayOptions)
+//
+//        guard let publishTopic = relayMock.requests.first?.topic, let request = relayMock.requests.first?.request else {
+//            XCTFail("Proposer must publish a proposal request."); return
+//        }
+//        let error = JSONRPCErrorResponse(id: request.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))
+//        let response = WCResponse(
+//            topic: publishTopic,
+//            chainId: nil,
+//            requestMethod: request.method,
+//            requestParams: request.params,
+//            result: .error(error))
+//        relayMock.onResponse?(response)
+//
+//        XCTAssert(subscriberMock.didUnsubscribe(to: topicC))
+//        XCTAssertFalse(cryptoMock.hasPrivateKey(for: request.sessionProposal?.proposer.publicKey ?? ""))
+//        XCTAssertFalse(cryptoMock.hasAgreementSecret(for: topicB))
+//        XCTAssertFalse(storageMock.hasSequence(forTopic: topicC))
+//    }
     
     func testApprove() {
         setupEngine()
@@ -115,7 +116,7 @@ final class SessionEngineTests: XCTestCase {
         let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: true, metadata: metadata)
         let proposal = SessionProposal(
             topic: topicC,
-            relay: RelayProtocolOptions(protocol: "", params: nil),
+            relay: RelayProtocolOptions(protocol: "", data: nil),
             proposer: proposer,
             signal: SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: topicB)),
             permissions: SessionPermissions.stub(),
@@ -150,7 +151,7 @@ final class SessionEngineTests: XCTestCase {
         let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: true, metadata: metadata)
         let proposal = SessionProposal(
             topic: topicC,
-            relay: RelayProtocolOptions(protocol: "", params: nil),
+            relay: RelayProtocolOptions(protocol: "", data: nil),
             proposer: proposer,
             signal: SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: topicB)),
             permissions: SessionPermissions.stub(),
@@ -190,7 +191,7 @@ final class SessionEngineTests: XCTestCase {
         let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: true, metadata: metadata)
         let proposal = SessionProposal(
             topic: topicC,
-            relay: RelayProtocolOptions(protocol: "", params: nil),
+            relay: RelayProtocolOptions(protocol: "", data: nil),
             proposer: proposer,
             signal: SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: topicB)),
             permissions: SessionPermissions.stub(),
@@ -232,7 +233,7 @@ final class SessionEngineTests: XCTestCase {
         let topicD = deriveTopic(publicKey: responderPubKey, privateKey: privateKeyStub)
 
         let permissions = SessionPermissions.stub()
-        let relayOptions = RelayProtocolOptions(protocol: "", params: nil)
+        let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
         let approveParams = SessionType.ApproveParams(
             relay: relayOptions,
             responder: SessionParticipant(publicKey: responderPubKey, metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil)),

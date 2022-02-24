@@ -26,18 +26,9 @@ struct WCRequest: Codable {
         jsonrpc = try container.decode(String.self, forKey: .jsonrpc)
         method = try container.decode(Method.self, forKey: .method)
         switch method {
-        case .pairingApprove:
-            let paramsValue = try container.decode(PairingType.ApprovalParams.self, forKey: .params)
-            params = .pairingApprove(paramsValue)
-        case .pairingReject:
-            let paramsValue = try container.decode(PairingType.RejectParams.self, forKey: .params)
-            params = .pairingReject(paramsValue)
         case .pairingDelete:
             let paramsValue = try container.decode(PairingType.DeleteParams.self, forKey: .params)
             params = .pairingDelete(paramsValue)
-        case .pairingPayload:
-            let paramsValue = try container.decode(PairingType.PayloadParams.self, forKey: .params)
-            params = .pairingPayload(paramsValue)
         case .pairingExtend:
             let paramsValue = try container.decode(PairingType.ExtendParams.self, forKey: .params)
             params = .pairingExtend(paramsValue)
@@ -83,13 +74,7 @@ struct WCRequest: Codable {
         try container.encode(jsonrpc, forKey: .jsonrpc)
         try container.encode(method.rawValue, forKey: .method)
         switch params {
-        case .pairingApprove(let params):
-            try container.encode(params, forKey: .params)
-        case .pairingReject(let params):
-            try container.encode(params, forKey: .params)
         case .pairingDelete(let params):
-            try container.encode(params, forKey: .params)
-        case .pairingPayload(let params):
             try container.encode(params, forKey: .params)
         case .pairingPing(let params):
             try container.encode(params, forKey: .params)
@@ -126,10 +111,7 @@ struct WCRequest: Codable {
 
 extension WCRequest {
     enum Method: String, Codable {
-        case pairingApprove = "wc_pairingApprove"
-        case pairingReject = "wc_pairingReject"
         case pairingDelete = "wc_pairingDelete"
-        case pairingPayload = "wc_pairingPayload"
         case pairingPing = "wc_pairingPing"
         case pairingExtend = "wc_pairingExtend"
         case sessionPropose = "wc_sessionPropose"
@@ -147,10 +129,7 @@ extension WCRequest {
 
 extension WCRequest {
     enum Params: Codable, Equatable {
-        case pairingApprove(PairingType.ApprovalParams)
-        case pairingReject(PairingType.RejectParams)
         case pairingDelete(PairingType.DeleteParams)
-        case pairingPayload(PairingType.PayloadParams)
         case pairingPing(PairingType.PingParams)
         case pairingExtend(PairingType.ExtendParams)
         // sessionPropose method exists exclusively within a pairing payload
@@ -167,13 +146,7 @@ extension WCRequest {
 
         static func == (lhs: Params, rhs: Params) -> Bool {
             switch (lhs, rhs) {
-            case (.pairingApprove(let lhsParam), .pairingApprove(let rhsParam)):
-                return lhsParam == rhsParam
-            case (.pairingReject(let lhsParam), pairingReject(let rhsParam)):
-                return lhsParam == rhsParam
             case (.pairingDelete(let lhsParam), pairingDelete(let rhsParam)):
-                return lhsParam == rhsParam
-            case (.pairingPayload(let lhsParam), pairingPayload(let rhsParam)):
                 return lhsParam == rhsParam
             case (.pairingExtend(let lhsParam), pairingExtend(let rhsParams)):
                 return lhsParam == rhsParams

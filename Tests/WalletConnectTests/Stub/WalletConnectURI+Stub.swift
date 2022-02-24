@@ -1,14 +1,14 @@
 @testable import WalletConnect
 @testable import WalletConnectKMS
+import CryptoKit
 
 extension WalletConnectURI {
     
     static func stub(isController: Bool = false) -> WalletConnectURI {
         WalletConnectURI(
             topic: String.generateTopic()!,
-            publicKey: AgreementPrivateKey().publicKey.hexRepresentation,
-            isController: isController,
-            relay: RelayProtocolOptions(protocol: "", params: nil)
+            symKey: SymmetricKey().hexRepresentation,
+            relay: RelayProtocolOptions(protocol: "", data: nil)
         )
     }
 }
