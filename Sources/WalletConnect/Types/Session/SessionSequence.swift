@@ -7,7 +7,7 @@ struct SessionSequence: ExpirableSequence {
     let selfParticipant: Participant
     private (set) var expiryDate: Date
     private var sequenceState: Either<Pending, Settled>
-    
+
     var publicKey: String? {
         selfParticipant.publicKey
     }
@@ -65,7 +65,7 @@ struct SessionSequence: ExpirableSequence {
     
     func hasPermission(forChain chainId: String) -> Bool {
         guard let settled = settled else { return false }
-        return settled.permissions.blockchain.chains.contains(chainId)
+        return settled.blockchain.contains(chainId)
     }
     
     func hasPermission(forMethod method: String) -> Bool {
@@ -114,7 +114,8 @@ extension SessionSequence {
         var permissions: SessionPermissions
         var accounts: Set<Account>
         var status: Status
-        
+        var blockchain: Set<String>
+
         enum Status: Codable {
             case preSettled
             case acknowledged
@@ -172,12 +173,12 @@ extension SessionSequence {
             settledState: Settled(
                 peer: Participant(publicKey: proposal.proposer.publicKey, metadata: proposal.proposer.metadata),
                 permissions: SessionPermissions(
-                    blockchain: proposal.permissions.blockchain,
                     jsonrpc: proposal.permissions.jsonrpc,
                     notifications: proposal.permissions.notifications,
                     controller: Controller(publicKey: controllerKey)),
                 accounts: accounts,
-                status: .acknowledged
+                status: .acknowledged,
+                blockchain: proposal.blockchainProposed.chains
             )
         )
     }
@@ -192,12 +193,12 @@ extension SessionSequence {
             settledState: Settled(
                 peer: Participant(publicKey: approveParams.responder.publicKey, metadata: approveParams.responder.metadata),
                 permissions: SessionPermissions(
-                    blockchain: proposal.permissions.blockchain,
                     jsonrpc: proposal.permissions.jsonrpc,
                     notifications: proposal.permissions.notifications,
                     controller: Controller(publicKey: controllerKey)),
                 accounts: Set(approveParams.state.accounts.compactMap { Account($0) }),
-                status: .acknowledged
+                status: .acknowledged,
+                blockchain: proposal.blockchainProposed.chains
             )
         )
     }

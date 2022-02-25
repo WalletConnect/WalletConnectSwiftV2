@@ -54,8 +54,8 @@ final class SessionEngine {
     func getSettledSessions() -> [Session] {
         sequencesStore.getAll().compactMap {
             guard let settled = $0.settled else { return nil }
-            let permissions = Session.Permissions(blockchains: settled.permissions.blockchain.chains, methods: settled.permissions.jsonrpc.methods)
-            return Session(topic: $0.topic, peer: settled.peer.metadata!, permissions: permissions, accounts: settled.accounts, expiryDate: $0.expiryDate)
+            let permissions = Session.Permissions(methods: settled.permissions.jsonrpc.methods)
+            return Session(topic: $0.topic, peer: settled.peer.metadata!, permissions: permissions, accounts: settled.accounts, expiryDate: $0.expiryDate, blockchains: settled.blockchain)
         }
     }
         
@@ -71,9 +71,9 @@ final class SessionEngine {
         let proposal = SessionProposal(
             topic: pendingSessionTopic,
             relay: relay,
-            proposer: SessionType.Proposer(publicKey: publicKey.hexRepresentation, controller: false, metadata: metadata),
-            signal: SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: settledPairing.topic)),
+            proposer: Proposer(publicKey: publicKey.hexRepresentation, controller: false, metadata: metadata),
             permissions: permissions,
+            blockchainProposed: BlockchainProposed(chains: []),//todo
             ttl: SessionSequence.timeToLivePending)
         
         let pendingSession = SessionSequence.buildProposed(proposal: proposal)
@@ -321,8 +321,7 @@ final class SessionEngine {
             topic: settledTopic,
             peer: approveParams.responder.metadata,
             permissions: Session.Permissions(
-                blockchains: pendingSession.proposal.permissions.blockchain.chains,
-                methods: pendingSession.proposal.permissions.jsonrpc.methods), accounts: settledSession.settled!.accounts, expiryDate: settledSession.expiryDate)
+                methods: pendingSession.proposal.permissions.jsonrpc.methods), accounts: settledSession.settled!.accounts, expiryDate: settledSession.expiryDate, blockchains: settledSession.settled!.blockchain)
         
         logger.debug("Responder Client approved session on topic: \(topic)")
         relayer.respondSuccess(for: payload)
@@ -402,8 +401,8 @@ final class SessionEngine {
         }
         sequencesStore.setSequence(session)
         relayer.respondSuccess(for: payload)
-        let permissions = Session.Permissions(blockchains: session.settled!.permissions.blockchain.chains, methods: session.settled!.permissions.jsonrpc.methods)
-        let publicSession = Session(topic: session.topic, peer: session.settled!.peer.metadata!, permissions: permissions, accounts: session.settled!.accounts, expiryDate: session.expiryDate)
+        let permissions = Session.Permissions(methods: session.settled!.permissions.jsonrpc.methods)
+        let publicSession = Session(topic: session.topic, peer: session.settled!.peer.metadata!, permissions: permissions, accounts: session.settled!.accounts, expiryDate: session.expiryDate, blockchains: session.settled!.blockchain)
         onSessionExtended?(publicSession)
     }
     
@@ -540,10 +539,10 @@ final class SessionEngine {
                 topic: settledTopic,
                 peer: proposal.proposer.metadata,
                 permissions: Session.Permissions(
-                    blockchains: proposal.permissions.blockchain.chains,
                     methods: proposal.permissions.jsonrpc.methods),
                 accounts: settledSession.settled!.accounts,
-                expiryDate: settledSession.expiryDate)
+                expiryDate: settledSession.expiryDate,
+                blockchains: proposal.blockchainProposed.chains)
             onApprovalAcknowledgement?(sessionSuccess)
         case .error:
             wcSubscriber.removeSubscription(topic: topic)
@@ -581,11 +580,11 @@ final class SessionEngine {
     }
     
     private func validatePermissions(_ permissions: SessionPermissions) -> Bool {
-        for chainId in permissions.blockchain.chains {
-            if !String.conformsToCAIP2(chainId) {
-                return false
-            }
-        }
+//        for chainId in permissions.blockchain.chains {
+//            if !String.conformsToCAIP2(chainId) {
+//                return false
+//            }
+//        }
         for method in permissions.jsonrpc.methods {
             if method.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 return false

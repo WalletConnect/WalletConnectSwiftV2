@@ -322,8 +322,8 @@ public final class WalletConnectClient {
         let sessionProposal = Session.Proposal(
             proposer: proposal.proposer.metadata,
             permissions: Session.Permissions(
-                blockchains: proposal.permissions.blockchain.chains,
                 methods: proposal.permissions.jsonrpc.methods),
+            blockchains: proposal.blockchainProposed.chains,
             proposal: proposal
         )
         delegate?.didReceive(sessionProposal: sessionProposal)

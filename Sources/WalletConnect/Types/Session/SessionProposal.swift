@@ -6,27 +6,24 @@ struct SessionState: Codable, Equatable {
 }
 
 struct SessionProposal: Codable, Equatable {
+    //todo - remove topic
     let topic: String
     let relay: RelayProtocolOptions
-    let proposer: SessionType.Proposer
-    let signal: SessionType.Signal
+    let proposer: Proposer
     let permissions: SessionPermissions
+    let blockchainProposed: BlockchainProposed
     let ttl: Int
 }
 
-extension SessionType {
-    
-    struct Proposer: Codable, Equatable {
-        let publicKey: String
-        let controller: Bool
-        let metadata: AppMetadata
-    }
-    
-    struct Signal: Codable, Equatable {
-        struct Params: Codable, Equatable {
-            let topic: String
-        }
-        let method: String
-        let params: Params
-    }
+struct Proposer: Codable, Equatable {
+    let publicKey: String
+    let controller: Bool
+    let metadata: AppMetadata
+}
+//?
+struct BlockchainProposed: Codable, Equatable {
+    //TODO - auth type not specified yet
+    let auth: String? = nil
+    // TODO - change for caip2 objects
+    let chains: Set<String>
 }
