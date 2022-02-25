@@ -511,7 +511,6 @@ final class SessionEngineTests: XCTestCase {
         XCTAssertEqual(extendedSession.expiryDate.timeIntervalSinceReferenceDate, TimeTraveler.dateByAdding(days: 2).timeIntervalSinceReferenceDate, accuracy: 1)
     }
     
-    
     func testPeerExtendUnauthorized() {
         setupEngine()
         let tomorrow = TimeTraveler.dateByAdding(days: 1)

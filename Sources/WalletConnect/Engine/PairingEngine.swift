@@ -12,7 +12,7 @@ final class PairingEngine {
     private let relayer: WalletConnectRelaying
     private let kms: KeyManagementServiceProtocol
     private let sequencesStore: PairingSequenceStorage
-    private var appMetadata: AppMetadata
+    private var metadata: AppMetadata
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
     private var sessionPermissions: [String: SessionPermissions] = [:]
@@ -28,7 +28,7 @@ final class PairingEngine {
         self.relayer = relay
         self.kms = kms
         self.wcSubscriber = subscriber
-        self.appMetadata = metadata
+        self.metadata = metadata
         self.sequencesStore = sequencesStore
         self.logger = logger
         self.topicInitializer = topicGenerator
@@ -75,10 +75,6 @@ final class PairingEngine {
         try! kms.setSymmetricKey(symKey, for: pairing.topic)
         wcSubscriber.setSubscription(topic: pairing.topic)
         sequencesStore.setSequence(pairing)
-    }
-    
-    func proposeSession() {
-        
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
