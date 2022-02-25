@@ -8,7 +8,7 @@ public struct Session {
     public let topic: String
     public let peer: AppMetadata
     public let permissions: Permissions
-    public let accounts: Set<String>
+    public let accounts: Set<Account>
     public let expiryDate: Date
 }
 

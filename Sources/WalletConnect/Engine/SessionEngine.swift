@@ -9,7 +9,7 @@ final class SessionEngine {
     var onSessionApproved: ((Session)->())?
     var onApprovalAcknowledgement: ((Session) -> Void)?
     var onSessionRejected: ((String, SessionType.Reason)->())?
-    var onSessionUpdate: ((String, Set<String>)->())?
+    var onSessionUpdate: ((String, Set<Account>)->())?
     var onSessionUpgrade: ((String, SessionPermissions)->())?
     var onSessionExtended: ((Session) -> ())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
@@ -55,7 +55,7 @@ final class SessionEngine {
         sequencesStore.getAll().compactMap {
             guard let settled = $0.settled else { return nil }
             let permissions = Session.Permissions(blockchains: settled.permissions.blockchain.chains, methods: settled.permissions.jsonrpc.methods)
-            return Session(topic: $0.topic, peer: settled.peer.metadata!, permissions: permissions, accounts: settled.state.accounts, expiryDate: $0.expiryDate)
+            return Session(topic: $0.topic, peer: settled.peer.metadata!, permissions: permissions, accounts: settled.accounts, expiryDate: $0.expiryDate)
         }
     }
         
@@ -97,7 +97,7 @@ final class SessionEngine {
     }
     
     // TODO: Check matching controller
-    func approve(proposal: SessionProposal, accounts: Set<String>) {
+    func approve(proposal: SessionProposal, accounts: Set<Account>) {
         logger.debug("Approve session")
         
         let selfPublicKey = try! kms.createX25519KeyPair()
@@ -113,7 +113,7 @@ final class SessionEngine {
                 publicKey: selfPublicKey.hexRepresentation,
                 metadata: metadata),
             expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
-            state: SessionState(accounts: accounts))
+            state: SessionState(accounts: accounts.map { $0.absoluteString }))
         
         sequencesStore.setSequence(pendingSession)
         wcSubscriber.setSubscription(topic: proposal.topic)
@@ -122,30 +122,19 @@ final class SessionEngine {
         sequencesStore.setSequence(settledSession)
         wcSubscriber.setSubscription(topic: settledTopic)
         
-        relayer.request(.wcSessionApprove(approval), onTopic: proposal.topic) { [weak self] result in
-            switch result {
-            case .success:
-                self?.logger.debug("Success on wc_sessionApprove, published on topic: \(proposal.topic), settled topic: \(settledTopic)")
-            case .failure(let error):
-                self?.logger.error(error)
-            }
-        }
+        relayer.request(.wcSessionApprove(approval), onTopic: proposal.topic)
     }
     
     func reject(proposal: SessionProposal, reason: SessionType.Reason ) {
         let rejectParams = SessionType.RejectParams(reason: reason)
-        relayer.request(.wcSessionReject(rejectParams), onTopic: proposal.topic) { [weak self] result in
-            self?.logger.debug("Reject result: \(result)")
-        }
+        relayer.request(.wcSessionReject(rejectParams), onTopic: proposal.topic)
     }
     
     func delete(topic: String, reason: Reason) {
         logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
         sequencesStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
-        relayer.request(.wcSessionDelete(SessionType.DeleteParams(reason: reason.toInternal())), onTopic: topic) { [weak self] result in
-            self?.logger.debug("Session Delete result: \(result)")
-        }
+        relayer.request(.wcSessionDelete(SessionType.DeleteParams(reason: reason.toInternal())), onTopic: topic)
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
@@ -211,17 +200,15 @@ final class SessionEngine {
         }
     }
     
-    func update(topic: String, accounts: Set<String>) throws {
+    func update(topic: String, accounts: Set<Account>) throws {
         guard var session = sequencesStore.getSequence(forTopic: topic) else {
-            throw WalletConnectError.internal(.noSequenceForTopic)
+            throw WalletConnectError.noSessionMatchingTopic(topic)
         }
-        for account in accounts {
-            if !String.conformsToCAIP10(account) {
-                throw WalletConnectError.internal(.notApproved) // TODO: Use a suitable error cases
-            }
+        guard session.isSettled else {
+            throw WalletConnectError.sessionNotSettled(topic)
         }
-        if !session.selfIsController || session.settled?.status != .acknowledged {
-            throw WalletConnectError.unauthrorized(.unauthorizedUpdateRequest)
+        guard session.selfIsController else {
+            throw WalletConnectError.unauthorizedNonControllerCall
         }
         session.update(accounts)
         sequencesStore.setSequence(session)
@@ -335,7 +322,7 @@ final class SessionEngine {
             peer: approveParams.responder.metadata,
             permissions: Session.Permissions(
                 blockchains: pendingSession.proposal.permissions.blockchain.chains,
-                methods: pendingSession.proposal.permissions.jsonrpc.methods), accounts: settledSession.settled!.state.accounts, expiryDate: settledSession.expiryDate)
+                methods: pendingSession.proposal.permissions.jsonrpc.methods), accounts: settledSession.settled!.accounts, expiryDate: settledSession.expiryDate)
         
         logger.debug("Responder Client approved session on topic: \(topic)")
         relayer.respondSuccess(for: payload)
@@ -370,10 +357,11 @@ final class SessionEngine {
             relayer.respondError(for: payload, reason: .unauthorizedUpdateRequest(context: .session))
             return
         }
-        session.settled?.state = updateParams.state
+        let accounts = Set(updateParams.state.accounts.compactMap { Account($0) })
+        session.settled?.accounts = accounts
         sequencesStore.setSequence(session)
         relayer.respondSuccess(for: payload)
-        onSessionUpdate?(topic, updateParams.state.accounts)
+        onSessionUpdate?(topic, accounts)
     }
     
     private func wcSessionUpgrade(payload: WCRequestSubscriptionPayload, upgradeParams: SessionType.UpgradeParams) {
@@ -415,7 +403,7 @@ final class SessionEngine {
         sequencesStore.setSequence(session)
         relayer.respondSuccess(for: payload)
         let permissions = Session.Permissions(blockchains: session.settled!.permissions.blockchain.chains, methods: session.settled!.permissions.jsonrpc.methods)
-        let publicSession = Session(topic: session.topic, peer: session.settled!.peer.metadata!, permissions: permissions, accounts: session.settled!.state.accounts, expiryDate: session.expiryDate)
+        let publicSession = Session(topic: session.topic, peer: session.settled!.peer.metadata!, permissions: permissions, accounts: session.settled!.accounts, expiryDate: session.expiryDate)
         onSessionExtended?(publicSession)
     }
     
@@ -485,7 +473,7 @@ final class SessionEngine {
         } else {
             guard let notifications = session.settled?.permissions.notifications,
                   notifications.types.contains(params.type) else {
-                throw WalletConnectError.unauthrorized(.unauthorizedNotificationType)
+                throw WalletConnectError.invalidNotificationType
             }
         }
     }
@@ -533,6 +521,7 @@ final class SessionEngine {
         }
     }
     
+    // FIXME: Session is not changed to acknowledged status
     private func handleApproveResponse(topic: String, result: JsonRpcResult) {
         guard
             let pendingSession = sequencesStore.getSequence(forTopic: topic),
@@ -552,7 +541,9 @@ final class SessionEngine {
                 peer: proposal.proposer.metadata,
                 permissions: Session.Permissions(
                     blockchains: proposal.permissions.blockchain.chains,
-                    methods: proposal.permissions.jsonrpc.methods), accounts: settledSession.settled!.state.accounts, expiryDate: settledSession.expiryDate)
+                    methods: proposal.permissions.jsonrpc.methods),
+                accounts: settledSession.settled!.accounts,
+                expiryDate: settledSession.expiryDate)
             onApprovalAcknowledgement?(sessionSuccess)
         case .error:
             wcSubscriber.removeSubscription(topic: topic)
@@ -566,7 +557,7 @@ final class SessionEngine {
     }
     
     private func handleUpdateResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sequencesStore.getSequence(forTopic: topic), let accounts = session.settled?.state.accounts else {
+        guard let session = sequencesStore.getSequence(forTopic: topic), let accounts = session.settled?.accounts else {
             return
         }
         switch result {

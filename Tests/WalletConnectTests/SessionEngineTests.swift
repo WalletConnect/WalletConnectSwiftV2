@@ -4,6 +4,13 @@ import TestingUtils
 import WalletConnectKMS
 @testable import WalletConnect
 
+extension Collection where Self.Element == String {
+    func toAccountSet() -> Set<Account> {
+        Set(self.map { Account($0)! })
+    }
+}
+
+// TODO: Remove `setupEngine()` calls now that setting controller flag is not needed anymore
 final class SessionEngineTests: XCTestCase {
     
     var engine: SessionEngine!
@@ -265,36 +272,33 @@ final class SessionEngineTests: XCTestCase {
     
     func testUpdateSuccess() throws {
         setupEngine()
+        let updateAccounts = ["std:0:0"]
         let session = SessionSequence.stubSettled(isSelfController: true)
         storageMock.setSequence(session)
-        try engine.update(topic: session.topic, accounts: ["std:0:0"])
+        try engine.update(topic: session.topic, accounts: updateAccounts.toAccountSet())
         XCTAssertTrue(relayMock.didCallRequest)
-    }
-    
-    func testUpdateErrorInvalidAccount() {
-        setupEngine()
-        let session = SessionSequence.stubSettled(isSelfController: true)
-        storageMock.setSequence(session)
-        XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: ["err"]))
     }
     
     func testUpdateErrorIfNonController() {
         setupEngine()
+        let updateAccounts = ["std:0:0"]
         let session = SessionSequence.stubSettled(isSelfController: false)
         storageMock.setSequence(session)
-        XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: ["std:0:0"]), "Update must fail if called by a non-controller.")
+        XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: updateAccounts.toAccountSet()), "Update must fail if called by a non-controller.")
     }
     
     func testUpdateErrorSessionNotFound() {
         setupEngine()
-        XCTAssertThrowsError(try engine.update(topic: "", accounts: ["std:0:0"]), "Update must fail if there is no session matching the target topic.")
+        let updateAccounts = ["std:0:0"]
+        XCTAssertThrowsError(try engine.update(topic: "", accounts: updateAccounts.toAccountSet()), "Update must fail if there is no session matching the target topic.")
     }
     
     func testUpdateErrorSessionNotSettled() {
         setupEngine()
+        let updateAccounts = ["std:0:0"]
         let session = SessionSequence.stubPreSettled()
         storageMock.setSequence(session)
-        XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: ["std:0:0"]), "Update must fail if session is not on settled state.")
+        XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: updateAccounts.toAccountSet()), "Update must fail if session is not on settled state.")
     }
     
     // MARK: - Update peer response tests

@@ -2,7 +2,7 @@
 import Foundation
 
 struct SessionState: Codable, Equatable {
-    var accounts: Set<String>
+    var accounts: [String]
 }
 
 struct SessionProposal: Codable, Equatable {
