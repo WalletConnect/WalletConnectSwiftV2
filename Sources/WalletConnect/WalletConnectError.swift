@@ -10,6 +10,7 @@ enum WalletConnectError: Error {
     case invalidNotificationType
     case invalidExtendTime
     case unauthorizedNonControllerCall
+    case pairingAlreadyExist
     case topicGenerationFailed
     
     case `internal`(_ reason: InternalReason)
@@ -46,6 +47,8 @@ extension WalletConnectError {
             return "Method must be called by a controller client."
         case .topicGenerationFailed:
             return "Failed to generate topic from random bytes."
+        case .pairingAlreadyExist:
+            return "Pairing already exist"
         case .internal(_): // TODO: Remove internal case
             return ""
         }

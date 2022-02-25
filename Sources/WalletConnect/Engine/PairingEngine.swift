@@ -64,7 +64,18 @@ final class PairingEngine {
         return uri
     }
     
-    func pair(_ uri: WalletConnectURI) {
+    func pair(_ uri: WalletConnectURI) throws {
+        guard !hasPairing(for: uri.topic) else {
+            throw WalletConnectError.pairingAlreadyExist
+        }
+        let pairing = PairingSequence.createFromURI(uri)
+        let symKey = try! SymmetricKey(hex: uri.symKey)
+        try! kms.setSymmetricKey(symKey, for: pairing.topic)
+        wcSubscriber.setSubscription(topic: pairing.topic)
+        sequencesStore.setSequence(pairing)
+    }
+    
+    func proposeSession() {
         
     }
     
