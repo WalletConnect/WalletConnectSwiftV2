@@ -124,8 +124,8 @@ public final class WalletConnectClient {
         guard let pairingURI = WalletConnectURI(string: uri) else {
             throw WalletConnectError.malformedPairingURI
         }
-        pairingQueue.sync {
-            pairingEngine.pair(pairingURI)
+        try pairingQueue.sync {
+            try pairingEngine.pair(pairingURI)
         }
     }
     
