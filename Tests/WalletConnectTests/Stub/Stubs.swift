@@ -15,7 +15,7 @@ extension AppMetadata {
 
 extension Pairing {
     static func stub(expiryDate: Date = Date(timeIntervalSinceNow: 10000)) -> Pairing {
-        Pairing(topic: String.generateTopic()!, peer: nil, expiryDate: expiryDate)
+        Pairing(topic: String.generateTopic(), peer: nil, expiryDate: expiryDate)
     }
 }
 
