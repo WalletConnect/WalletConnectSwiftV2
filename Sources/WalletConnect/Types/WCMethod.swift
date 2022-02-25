@@ -4,6 +4,7 @@ enum WCMethod {
     case wcSessionPropose(SessionType.ProposeParams)
     case wcSessionApprove(SessionType.ApproveParams)
     case wcSessionReject(SessionType.RejectParams)
+    case wcSessionSettlement(SessionType.SettlementParams)
     case wcSessionUpdate(SessionType.UpdateParams)
     case wcSessionUpgrade(SessionType.UpgradeParams)
     case wcSessionDelete(SessionType.DeleteParams)
@@ -24,6 +25,8 @@ enum WCMethod {
             return WCRequest(method: .sessionApprove, params: .sessionApprove(approveParams))
         case .wcSessionReject(let rejectParams):
             return WCRequest(method: .sessionReject, params: .sessionReject(rejectParams))
+        case .wcSessionSettlement(let settlementParams):
+            return WCRequest(method: .sessionSettlement, params: .sessionSettlement(settlementParams))
         case .wcSessionUpdate(let updateParams):
             return WCRequest(method: .sessionUpdate, params: .sessionUpdate(updateParams))
         case .wcSessionUpgrade(let upgradeParams):

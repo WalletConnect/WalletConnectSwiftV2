@@ -44,6 +44,9 @@ struct WCRequest: Codable {
         case .sessionReject:
             let paramsValue = try container.decode(SessionType.RejectParams.self, forKey: .params)
             params = .sessionReject(paramsValue)
+        case .sessionSettlement:
+            let paramsValue = try container.decode(SessionType.SettlementParams.self, forKey: .params)
+            params = .sessionSettlement(paramsValue)
         case .sessionUpdate:
             let paramsValue = try container.decode(SessionType.UpdateParams.self, forKey: .params)
             params = .sessionUpdate(paramsValue)
@@ -86,6 +89,8 @@ struct WCRequest: Codable {
             try container.encode(params, forKey: .params)
         case .sessionReject(let params):
             try container.encode(params, forKey: .params)
+        case .sessionSettlement(let params):
+            try container.encode(params, forKey: .params)
         case .sessionUpdate(let params):
             try container.encode(params, forKey: .params)
         case .sessionUpgrade(let params):
@@ -117,6 +122,7 @@ extension WCRequest {
         case sessionPropose = "wc_sessionPropose"
         case sessionApprove = "wc_sessionApprove"
         case sessionReject = "wc_sessionReject"
+        case sessionSettlement = "wc_sessionSettlement" // is this correct? check the signature of the method
         case sessionUpdate = "wc_sessionUpdate"
         case sessionUpgrade = "wc_sessionUpgrade"
         case sessionDelete = "wc_sessionDelete"
@@ -132,10 +138,10 @@ extension WCRequest {
         case pairingDelete(PairingType.DeleteParams)
         case pairingPing(PairingType.PingParams)
         case pairingExtend(PairingType.ExtendParams)
-        // sessionPropose method exists exclusively within a pairing payload
         case sessionPropose(SessionType.ProposeParams)
         case sessionApprove(SessionType.ApproveParams)
         case sessionReject(SessionType.RejectParams)
+        case sessionSettlement(SessionType.SettlementParams)
         case sessionUpdate(SessionType.UpdateParams)
         case sessionUpgrade(SessionType.UpgradeParams)
         case sessionDelete(SessionType.DeleteParams)
