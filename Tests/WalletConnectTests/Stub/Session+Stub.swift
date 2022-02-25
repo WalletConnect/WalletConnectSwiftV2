@@ -19,7 +19,8 @@ extension SessionSequence {
                 peer: Participant.stub(publicKey: peerKey),
                 permissions: permissions,
                 accounts: Account.stubSet(),
-                status: .preSettled
+                status: .preSettled,
+                blockchain: []
             )
         )
     }
@@ -39,7 +40,8 @@ extension SessionSequence {
                 peer: Participant.stub(publicKey: peerKey),
                 permissions: permissions,
                 accounts: Account.stubSet(),
-                status: .acknowledged
+                status: .acknowledged,
+                blockchain: []
             )
         )
     }

@@ -120,13 +120,13 @@ final class SessionEngineTests: XCTestCase {
         let topicC = String.generateTopic()!
         let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
         
-        let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: true, metadata: metadata)
+        let proposer = Proposer(publicKey: proposerPubKey, controller: true, metadata: metadata)
         let proposal = SessionProposal(
             topic: topicC,
             relay: RelayProtocolOptions(protocol: "", data: nil),
             proposer: proposer,
-            signal: SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: topicB)),
             permissions: SessionPermissions.stub(),
+            blockchainProposed: BlockchainProposed.stub(),
             ttl: SessionSequence.timeToLivePending)
             
         engine.approve(proposal: proposal, accounts: [])
@@ -155,13 +155,13 @@ final class SessionEngineTests: XCTestCase {
         let agreementKeys = AgreementSecret.stub()
         cryptoMock.setAgreementSecret(agreementKeys, topic: topicC)
         
-        let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: true, metadata: metadata)
+        let proposer = Proposer(publicKey: proposerPubKey, controller: true, metadata: metadata)
         let proposal = SessionProposal(
             topic: topicC,
             relay: RelayProtocolOptions(protocol: "", data: nil),
             proposer: proposer,
-            signal: SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: topicB)),
             permissions: SessionPermissions.stub(),
+            blockchainProposed: BlockchainProposed.stub(),
             ttl: SessionSequence.timeToLivePending)
             
         engine.approve(proposal: proposal, accounts: [])
@@ -195,13 +195,13 @@ final class SessionEngineTests: XCTestCase {
         let agreementKeys = AgreementSecret.stub()
         cryptoMock.setAgreementSecret(agreementKeys, topic: topicC)
         
-        let proposer = SessionType.Proposer(publicKey: proposerPubKey, controller: true, metadata: metadata)
+        let proposer = Proposer(publicKey: proposerPubKey, controller: true, metadata: metadata)
         let proposal = SessionProposal(
             topic: topicC,
             relay: RelayProtocolOptions(protocol: "", data: nil),
             proposer: proposer,
-            signal: SessionType.Signal(method: "pairing", params: SessionType.Signal.Params(topic: topicB)),
             permissions: SessionPermissions.stub(),
+            blockchainProposed: BlockchainProposed.stub(),
             ttl: SessionSequence.timeToLivePending)
             
         engine.approve(proposal: proposal, accounts: [])
@@ -378,9 +378,9 @@ final class SessionEngineTests: XCTestCase {
         setupEngine()
         let session = SessionSequence.stubSettled(isSelfController: true)
         storageMock.setSequence(session)
-        XCTAssertThrowsError(try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub(chains: [""]))) { error in
-            XCTAssertTrue(error.isInvalidPermissionsError)
-        }
+//        XCTAssertThrowsError(try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub())) { error in
+//            XCTAssertTrue(error.isInvalidPermissionsError)
+//        }
         XCTAssertThrowsError(try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub(methods: [""]))) { error in
             XCTAssertTrue(error.isInvalidPermissionsError)
         }
@@ -414,15 +414,15 @@ final class SessionEngineTests: XCTestCase {
         XCTAssertTrue(relayMock.didRespondSuccess)
     }
     
-    func testUpgradePeerErrorInvalidPermissions() {
-        setupEngine()
-        let invalidPermissions = SessionPermissions.stub(chains: [""])
-        let session = SessionSequence.stubSettled(isSelfController: false)
-        storageMock.setSequence(session)
-        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpgrade(topic: session.topic, permissions: invalidPermissions))
-        XCTAssertFalse(relayMock.didRespondSuccess)
-        XCTAssertEqual(relayMock.lastErrorCode, 1004)
-    }
+//    func testUpgradePeerErrorInvalidPermissions() {
+//        setupEngine()
+//        let invalidPermissions = SessionPermissions.stub()
+//        let session = SessionSequence.stubSettled(isSelfController: false)
+//        storageMock.setSequence(session)
+//        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpgrade(topic: session.topic, permissions: invalidPermissions))
+//        XCTAssertFalse(relayMock.didRespondSuccess)
+//        XCTAssertEqual(relayMock.lastErrorCode, 1004)
+//    }
     
     func testUpgradePeerErrorSessionNotFound() {
         setupEngine()
