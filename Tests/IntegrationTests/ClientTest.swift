@@ -8,7 +8,7 @@ import TestingUtils
 
 fileprivate extension Session.Permissions {
     static func stub(methods: Set<String> = [], notifications: [String] = []) -> Session.Permissions {
-        Session.Permissions(blockchains: [], methods: methods, notifications: notifications)
+        Session.Permissions(methods: methods, notifications: notifications)
     }
 }
 
@@ -248,7 +248,7 @@ final class ClientTests: XCTestCase {
         let responderSessionUpgradeExpectation = expectation(description: "Responder upgrades session on proposer response")
         let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
         let permissions = Session.Permissions.stub()
-        let upgradePermissions = Session.Permissions(blockchains: ["eip155:42"], methods: ["eth_sendTransaction"])
+        let upgradePermissions = Session.Permissions(methods: ["eth_sendTransaction"])
         let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
@@ -258,12 +258,10 @@ final class ClientTests: XCTestCase {
             try? responder.client.upgrade(topic: sessionSettled.topic, permissions: upgradePermissions)
         }
         proposer.onSessionUpgrade = { topic, permissions in
-            XCTAssertTrue(permissions.blockchains.isSuperset(of: upgradePermissions.blockchains))
             XCTAssertTrue(permissions.methods.isSuperset(of: upgradePermissions.methods))
             proposerSessionUpgradeExpectation.fulfill()
         }
         responder.onSessionUpgrade = { topic, permissions in
-            XCTAssertTrue(permissions.blockchains.isSuperset(of: upgradePermissions.blockchains))
             XCTAssertTrue(permissions.methods.isSuperset(of: upgradePermissions.methods))
             responderSessionUpgradeExpectation.fulfill()
         }

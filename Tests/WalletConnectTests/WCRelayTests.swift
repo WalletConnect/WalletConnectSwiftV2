@@ -104,7 +104,7 @@ extension WalletConnectRelayTests {
     
     func getWCSessionUpgrade() -> WCRequest {
         let wcRequestId: Int64 = 123456
-        let sessionUpgradeParams = SessionType.UpgradeParams(permissions: SessionPermissions(blockchain: SessionPermissions.Blockchain(chains: []), jsonrpc: SessionPermissions.JSONRPC(methods: []), notifications: SessionPermissions.Notifications(types: [])))
+        let sessionUpgradeParams = SessionType.UpgradeParams(permissions: SessionPermissions(jsonrpc: SessionPermissions.JSONRPC(methods: []), notifications: SessionPermissions.Notifications(types: [])))
         let params = WCRequest.Params.sessionUpgrade(sessionUpgradeParams)
         let wcRequest = WCRequest(id: wcRequestId, method: WCRequest.Method.sessionPayload, params: params)
         return wcRequest
