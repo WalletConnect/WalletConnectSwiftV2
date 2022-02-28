@@ -184,7 +184,7 @@ extension SessionSequence {
     }
     
     static func buildAcknowledged(approval approveParams: SessionType.ApproveParams, proposal: SessionProposal, agreementKeys: AgreementSecret, metadata: AppMetadata) -> SessionSequence {
-        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : approveParams.responder.publicKey
+        let controllerKey = approveParams.responder.publicKey
         return SessionSequence(
             topic: agreementKeys.derivedTopic(),
             relay: approveParams.relay,

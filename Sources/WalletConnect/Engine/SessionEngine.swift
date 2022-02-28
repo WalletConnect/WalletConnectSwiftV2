@@ -73,7 +73,7 @@ final class SessionEngine {
         
         let pendingSession = SessionSequence.buildProposed(proposal: proposal, topic: pairing.topic)
         sequencesStore.setSequence(pendingSession)
-        relayer.request(.wcSessionPropose(proposal)), onTopic: pairing.topic) { [unowned self] result in
+        relayer.request(.wcSessionPropose(proposal), onTopic: pairing.topic) { [unowned self] result in
             switch result {
             case .success:
                 logger.debug("Session Proposal response received")
