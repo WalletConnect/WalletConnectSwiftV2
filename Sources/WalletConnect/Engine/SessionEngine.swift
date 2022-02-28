@@ -59,40 +59,28 @@ final class SessionEngine {
         }
     }
         
-    func proposeSession(settledPairing: Pairing, permissions: SessionPermissions, relay: RelayProtocolOptions) {
-        guard let pendingSessionTopic = topicInitializer() else {
-            logger.debug("Could not generate topic")
-            return
-        }
-        logger.debug("Propose Session on topic: \(pendingSessionTopic)")
-        
+    func proposeSession(pairing: Pairing, permissions: SessionPermissions, relay: RelayProtocolOptions) {
+        logger.debug("Propose Session on topic: \(pairing.topic)")
         let publicKey = try! kms.createX25519KeyPair()
-        
+        let proposer = Proposer(
+            publicKey: publicKey.hexRepresentation,
+            metadata: metadata)
         let proposal = SessionProposal(
-            topic: pendingSessionTopic,
             relay: relay,
-            proposer: Proposer(publicKey: publicKey.hexRepresentation, controller: false, metadata: metadata),
+            proposer: proposer,
             permissions: permissions,
-            blockchainProposed: BlockchainProposed(chains: []))
+            blockchainProposed: BlockchainProposed(chains: [])) //todo
         
-        let pendingSession = SessionSequence.buildProposed(proposal: proposal)
-        
+        let pendingSession = SessionSequence.buildProposed(proposal: proposal, topic: pairing.topic)
         sequencesStore.setSequence(pendingSession)
-        wcSubscriber.setSubscription(topic: pendingSessionTopic)
-        let pairingAgreementSecret = try! kms.getAgreementSecret(for: settledPairing.topic)!
-        try! kms.setAgreementSecret(pairingAgreementSecret, topic: proposal.topic)
-        
-        //TODO - session proposal is not send over pairing payload now
-//        let request = PairingType.PayloadParams.Request(method: .sessionPropose, params: proposal)
-//        let pairingPayloadParams = PairingType.PayloadParams(request: request)
-//        relayer.request(.wcPairingPayload(pairingPayloadParams), onTopic: settledPairing.topic) { [unowned self] result in
-//            switch result {
-//            case .success:
-//                logger.debug("Session Proposal response received")
-//            case .failure(let error):
-//                logger.debug("Could not send session proposal error: \(error)")
-//            }
-//        }
+        relayer.request(.wcSessionPropose(proposal)), onTopic: pairing.topic) { [unowned self] result in
+            switch result {
+            case .success:
+                logger.debug("Session Proposal response received")
+            case .failure(let error):
+                logger.debug("Could not send session proposal error: \(error)")
+            }
+        }
     }
     
     // TODO: Check matching controller

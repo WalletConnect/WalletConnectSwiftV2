@@ -135,9 +135,9 @@ extension SessionSequence {
         self.init(topic: topic, relay: relay, selfParticipant: selfParticipant, expiryDate: expiryDate, sequenceState: .right(settledState))
     }
     
-    static func buildProposed(proposal: SessionProposal) -> SessionSequence {
+    static func buildProposed(proposal: SessionProposal, topic: String) -> SessionSequence {
         SessionSequence(
-            topic: proposal.topic,
+            topic: topic,
             relay: proposal.relay,
             selfParticipant: Participant(publicKey: proposal.proposer.publicKey, metadata: proposal.proposer.metadata),
             expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveProposed)),
