@@ -26,15 +26,3 @@ final class PairingSequenceStorageMock: PairingSequenceStorage {
         pairings[topic] = nil
     }
 }
-
-extension PairingSequenceStorageMock {
-//    TODO - distinguish by expiration time
-//    func hasPendingProposedPairing(on topic: String) -> Bool {
-//        guard case .proposed = pairings[topic]?.pending?.status else { return false }
-//        return true
-//    }
-//
-//    func hasAcknowledgedPairing(on topic: String) -> Bool {
-//        pairings[topic]?.settled?.status == .acknowledged
-//    }
-}

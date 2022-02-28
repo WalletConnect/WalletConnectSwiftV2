@@ -30,7 +30,7 @@ final class SessionSequenceStorageMock: SessionSequenceStorage {
 
 extension SessionSequenceStorageMock {
     
-    func hasPendingProposedPairing(on topic: String) -> Bool {
+    func hasPendingProposedSession(on topic: String) -> Bool {
         guard case .proposed = sessions[topic]?.pending?.status else { return false }
         return true
     }

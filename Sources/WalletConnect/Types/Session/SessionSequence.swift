@@ -149,9 +149,9 @@ extension SessionSequence {
         )
     }
     
-    static func buildResponded(proposal: SessionProposal, agreementKeys: AgreementSecret, metadata: AppMetadata) -> SessionSequence {
+    static func buildResponded(proposal: SessionProposal, agreementKeys: AgreementSecret, metadata: AppMetadata, topic: String) -> SessionSequence {
         SessionSequence(
-            topic: proposal.topic,
+            topic: topic,
             relay: proposal.relay,
             selfParticipant: Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata),
             expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
@@ -164,7 +164,7 @@ extension SessionSequence {
     }
     
     static func buildPreSettled(proposal: SessionProposal, agreementKeys: AgreementSecret, metadata: AppMetadata, accounts: Set<Account>) -> SessionSequence {
-        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : agreementKeys.publicKey.hexRepresentation
+        let controllerKey = agreementKeys.publicKey.hexRepresentation
         return SessionSequence(
             topic: agreementKeys.derivedTopic(),
             relay: proposal.relay,
