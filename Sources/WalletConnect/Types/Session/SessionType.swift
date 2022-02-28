@@ -22,7 +22,7 @@ internal enum SessionType {
         let reason: Reason
     }
     
-    struct SettlementParams: Codable, Equatable {
+    struct SettleParams: Codable, Equatable {
         // TODO
     }
     
