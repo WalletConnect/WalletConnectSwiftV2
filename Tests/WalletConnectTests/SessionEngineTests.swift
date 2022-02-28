@@ -126,8 +126,7 @@ final class SessionEngineTests: XCTestCase {
             relay: RelayProtocolOptions(protocol: "", data: nil),
             proposer: proposer,
             permissions: SessionPermissions.stub(),
-            blockchainProposed: BlockchainProposed.stub(),
-            ttl: SessionSequence.timeToLivePending)
+            blockchainProposed: BlockchainProposed.stub())
             
         engine.approve(proposal: proposal, accounts: [])
         
@@ -161,8 +160,7 @@ final class SessionEngineTests: XCTestCase {
             relay: RelayProtocolOptions(protocol: "", data: nil),
             proposer: proposer,
             permissions: SessionPermissions.stub(),
-            blockchainProposed: BlockchainProposed.stub(),
-            ttl: SessionSequence.timeToLivePending)
+            blockchainProposed: BlockchainProposed.stub())
             
         engine.approve(proposal: proposal, accounts: [])
         
@@ -201,8 +199,7 @@ final class SessionEngineTests: XCTestCase {
             relay: RelayProtocolOptions(protocol: "", data: nil),
             proposer: proposer,
             permissions: SessionPermissions.stub(),
-            blockchainProposed: BlockchainProposed.stub(),
-            ttl: SessionSequence.timeToLivePending)
+            blockchainProposed: BlockchainProposed.stub())
             
         engine.approve(proposal: proposal, accounts: [])
         

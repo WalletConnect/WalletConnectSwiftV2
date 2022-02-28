@@ -73,8 +73,7 @@ final class SessionEngine {
             relay: relay,
             proposer: Proposer(publicKey: publicKey.hexRepresentation, controller: false, metadata: metadata),
             permissions: permissions,
-            blockchainProposed: BlockchainProposed(chains: []),//todo
-            ttl: SessionSequence.timeToLivePending)
+            blockchainProposed: BlockchainProposed(chains: []))
         
         let pendingSession = SessionSequence.buildProposed(proposal: proposal)
         
@@ -112,7 +111,7 @@ final class SessionEngine {
             responder: SessionParticipant(
                 publicKey: selfPublicKey.hexRepresentation,
                 metadata: metadata),
-            expiry: Int(Date().timeIntervalSince1970) + proposal.ttl,
+            expiry: Int(Date().timeIntervalSince1970) + SessionSequence.timeToLiveSettled,
             state: SessionState(accounts: accounts.map { $0.absoluteString }))
         
         sequencesStore.setSequence(pendingSession)

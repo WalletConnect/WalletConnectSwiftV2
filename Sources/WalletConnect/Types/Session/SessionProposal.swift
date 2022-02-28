@@ -12,7 +12,6 @@ struct SessionProposal: Codable, Equatable {
     let proposer: Proposer
     let permissions: SessionPermissions
     let blockchainProposed: BlockchainProposed
-    let ttl: Int
 }
 
 struct Proposer: Codable, Equatable {

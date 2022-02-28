@@ -169,7 +169,7 @@ extension SessionSequence {
             topic: agreementKeys.derivedTopic(),
             relay: proposal.relay,
             selfParticipant: Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata),
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(proposal.ttl)),
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(SessionSequence.timeToLiveSettled)),
             settledState: Settled(
                 peer: Participant(publicKey: proposal.proposer.publicKey, metadata: proposal.proposer.metadata),
                 permissions: SessionPermissions(
