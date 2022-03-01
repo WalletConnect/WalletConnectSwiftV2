@@ -85,38 +85,8 @@ final class SessionEngine {
         }
     }
     
-//    // TODO: Check matching controller
-//    func approve(proposal: SessionProposal, accounts: Set<Account>) {
-//        logger.debug("Approve session")
-//
-//        let selfPublicKey = try! kms.createX25519KeyPair()
-//        let agreementKeys = try! kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposal.proposer.publicKey)
-//
-//        let settledTopic = agreementKeys.derivedTopic()
-//        let pendingSession = SessionSequence.buildResponded(proposal: proposal, agreementKeys: agreementKeys, metadata: metadata, topic: <#String#>)
-//        let settledSession = SessionSequence.buildPreSettled(proposal: proposal, agreementKeys: agreementKeys, metadata: metadata, accounts: accounts)
-//
-//        let approval = SessionType.ApproveParams(
-//            relay: proposal.relay,
-//            responder: SessionParticipant(
-//                publicKey: selfPublicKey.hexRepresentation,
-//                metadata: metadata),
-//            expiry: Int(Date().timeIntervalSince1970) + SessionSequence.timeToLiveSettled,
-//            state: SessionState(accounts: accounts.map { $0.absoluteString }))
-//
-//        sequencesStore.setSequence(pendingSession)
-//        wcSubscriber.setSubscription(topic: proposal.topic)
-//
-//        try! kms.setAgreementSecret(agreementKeys, topic: settledTopic)
-//        sequencesStore.setSequence(settledSession)
-//        wcSubscriber.setSubscription(topic: settledTopic)
-//
-//        relayer.request(.wcSessionApprove(approval), onTopic: proposal.topic)
-//    }
-    
     func reject(proposal: SessionProposal, reason: SessionType.Reason ) {
-//        let rejectParams = SessionType.RejectParams(reason: reason)
-//        relayer.request(.wcSessionReject(rejectParams), onTopic: proposal.topic)
+
     }
     
     func delete(topic: String, reason: Reason) {
@@ -253,8 +223,6 @@ final class SessionEngine {
             switch subscriptionPayload.wcRequest.params {
             case .sessionPropose(let proposeParams):
                 wcSessionPropose(subscriptionPayload, proposal: proposeParams)
-            case .sessionApprove(let approveParams):
-                wcSessionApprove(subscriptionPayload, approveParams: approveParams)
             case .sessionReject(let rejectParams):
                 wcSessionReject(subscriptionPayload, rejectParams: rejectParams)
             case .sessionUpdate(let updateParams):
@@ -308,48 +276,6 @@ final class SessionEngine {
         let proposeResponse = SessionType.ProposeResponse(relay: proposal.relay, responder: AgreementPeer(publicKey: selfPublicKey.hexRepresentation))
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
         relayer.respond(topic: sessionTopic, response: .response(response)) { _ in }
-    }
-    
-    private func wcSessionApprove(_ payload: WCRequestSubscriptionPayload, approveParams: SessionType.ApproveParams) {
-//        let topic = payload.topic
-//        guard let session = sequencesStore.getSequence(forTopic: topic), let pendingSession = session.pending else {
-//            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
-//            return
-//        }
-//        guard !session.selfIsController else {
-//            // TODO: Replace generic reason with a valid code.
-//            relayer.respondError(for: payload, reason: .generic(message: "wcSessionApproval received by a controller"))
-//            return
-//        }
-//
-//        let settledTopic: String
-//        let agreementKeys: AgreementSecret
-//        do {
-//            let publicKey = try session.getPublicKey()
-//            agreementKeys = try kms.performKeyAgreement(selfPublicKey: publicKey, peerPublicKey: approveParams.responder.publicKey)
-//            settledTopic = agreementKeys.derivedTopic()
-//            try kms.setAgreementSecret(agreementKeys, topic: settledTopic)
-//        } catch {
-//            relayer.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
-//            return
-//        }
-//
-//        let proposal = pendingSession.proposal
-//        let settledSession = SessionSequence.buildAcknowledged(approval: approveParams, proposal: proposal, agreementKeys: agreementKeys, metadata: metadata)
-//        sequencesStore.delete(topic: proposal.topic)
-//        sequencesStore.setSequence(settledSession)
-//        wcSubscriber.setSubscription(topic: settledTopic)
-//        wcSubscriber.removeSubscription(topic: proposal.topic)
-//
-//        let approvedSession = Session(
-//            topic: settledTopic,
-//            peer: approveParams.responder.metadata,
-//            permissions: Session.Permissions(
-//                methods: pendingSession.proposal.permissions.jsonrpc.methods), accounts: settledSession.settled!.accounts, expiryDate: settledSession.expiryDate, blockchains: settledSession.settled!.blockchain)
-//
-//        logger.debug("Responder Client approved session on topic: \(topic)")
-//        relayer.respondSuccess(for: payload)
-//        onSessionApproved?(approvedSession)
     }
     
     private func wcSessionReject(_ payload: WCRequestSubscriptionPayload, rejectParams: SessionType.RejectParams) {
