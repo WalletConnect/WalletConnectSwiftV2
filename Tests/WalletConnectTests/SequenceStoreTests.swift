@@ -35,7 +35,7 @@ final class SequenceStoreTests: XCTestCase {
     
     private func stubSequence(expiry: TimeInterval? = nil) -> ExpirableSequenceStub {
         ExpirableSequenceStub(
-            topic: String.generateTopic()!,
+            topic: String.generateTopic(),
             publicKey: "0x",
             expiryDate: timeTraveler.referenceDate.addingTimeInterval(expiry ?? defaultTime)
         )

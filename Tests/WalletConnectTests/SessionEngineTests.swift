@@ -251,6 +251,7 @@ final class SessionEngineTests: XCTestCase {
 //        // TODO: assert session settlement callback
 //    }
     
+
 //    func testReceiveApprovalResponse() {
 //        setupEngine()
 //
@@ -290,6 +291,7 @@ final class SessionEngineTests: XCTestCase {
 //        XCTAssertNotNil(approvedSession)
 //        XCTAssertEqual(approvedSession?.topic, topicD)
 //    }
+
     
     // MARK: - Update call tests
     

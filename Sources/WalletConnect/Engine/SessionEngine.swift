@@ -24,7 +24,7 @@ final class SessionEngine {
     private var metadata: AppMetadata
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
-    private let topicInitializer: () -> String?
+    private let topicInitializer: () -> String
 
     init(relay: WalletConnectRelaying,
          kms: KeyManagementServiceProtocol,
@@ -32,7 +32,7 @@ final class SessionEngine {
          sequencesStore: SessionSequenceStorage,
          metadata: AppMetadata,
          logger: ConsoleLogging,
-         topicGenerator: @escaping () -> String? = String.generateTopic) {
+         topicGenerator: @escaping () -> String = String.generateTopic) {
         self.relayer = relay
         self.kms = kms
         self.metadata = metadata
@@ -61,6 +61,7 @@ final class SessionEngine {
         }
     }
         
+
     func proposeSession(pairing: Pairing, permissions: SessionPermissions, relay: RelayProtocolOptions) {
         logger.debug("Propose Session on topic: \(pairing.topic)")
         let publicKey = try! kms.createX25519KeyPair()
