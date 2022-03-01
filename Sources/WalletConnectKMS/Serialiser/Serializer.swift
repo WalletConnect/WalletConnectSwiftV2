@@ -27,9 +27,9 @@ public class Serializer {
     public func serialize(topic: String, encodable: Encodable) throws -> String {
         let messageJson = try encodable.json()
         var message: String
-        //todo - get symmetric key or agreement key - remove hex encoding
+        //todo - get symmetric key or agreement key
         if let agreementKeys = try? kms.getAgreementSecret(for: topic) {
-            message = try encrypt(json: messageJson, agreementKeys: agreementKeys)
+            message = try encrypt(json: messageJson, symmetricKey: agreementKeys.rawRepresentation)
         } else {
             message = messageJson.toHexEncodedString(uppercase: false)
         }
@@ -61,18 +61,17 @@ public class Serializer {
         return try JSONDecoder().decode(T.self, from: decryptedData)
     }
     
-    func encrypt(json: String, agreementKeys: AgreementSecret) throws -> String {
-        let payload = try codec.encode(plainText: json, agreementKeys: agreementKeys)
+    func encrypt(json: String, symmetricKey: Data) throws -> String {
+        let payload = try codec.encode(plainText: json, symmetricKey: symmetricKey)
         let iv = payload.iv.toHexString()
-        let publicKey = payload.publicKey.toHexString()
         let mac = payload.mac.toHexString()
         let cipherText = payload.cipherText.toHexString()
-        return "\(iv)\(publicKey)\(mac)\(cipherText)"
+        return "\(iv)\(mac)\(cipherText)"
     }
     
     private func decrypt(message: String, symmetricKey: Data) throws -> Data {
         let encryptionPayload = try deserializeIntoPayload(message: message)
-        let decryptedString = try codec.decode(payload: encryptionPayload, sharedSecret: symmetricKey)
+        let decryptedString = try codec.decode(payload: encryptionPayload, symmetricKey: symmetricKey)
         guard let decryptedData = decryptedString.data(using: .utf8) else {
             throw DataConversionError.stringToDataFailed
         }
@@ -81,16 +80,14 @@ public class Serializer {
     
     private func deserializeIntoPayload(message: String) throws -> EncryptionPayload {
         let data = Data(hex: message)
-        guard data.count > EncryptionPayload.ivLength + EncryptionPayload.publicKeyLength + EncryptionPayload.macLength else {
+        guard data.count > EncryptionPayload.ivLength + EncryptionPayload.macLength else {
             throw Error.messageToShort
         }
-        let pubKeyRangeStartIndex = EncryptionPayload.ivLength
-        let macStartIndex = pubKeyRangeStartIndex + EncryptionPayload.publicKeyLength
+        let macStartIndex = EncryptionPayload.ivLength
         let cipherTextStartIndex = macStartIndex + EncryptionPayload.macLength
-        let iv = data.subdata(in: 0..<pubKeyRangeStartIndex)
-        let pubKey = data.subdata(in: pubKeyRangeStartIndex..<macStartIndex)
+        let iv = data.subdata(in: 0..<macStartIndex)
         let mac = data.subdata(in: macStartIndex..<cipherTextStartIndex)
         let cipherText = data.subdata(in: cipherTextStartIndex..<data.count)
-        return EncryptionPayload(iv: iv, publicKey: pubKey, mac: mac, cipherText: cipherText)
+        return EncryptionPayload(iv: iv, mac: mac, cipherText: cipherText)
     }
 }

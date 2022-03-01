@@ -8,16 +8,16 @@ import XCTest
 @testable import TestingUtils
 
 final class SerializerTests: XCTestCase {
-    var serializer: Serializer!
-    var codec: MockedCodec!
-    override func setUp() {
-        codec = MockedCodec()
-        self.serializer = Serializer(kms: KeyManagementService(keychain: KeychainStorageMock()), codec: codec)
-    }
-    
-    override func tearDown() {
-        serializer = nil
-    }
+//    var serializer: Serializer!
+//    var codec: MockedCodec!
+//    override func setUp() {
+//        codec = MockedCodec()
+//        self.serializer = Serializer(kms: KeyManagementService(keychain: KeychainStorageMock()), codec: codec)
+//    }
+//    
+//    override func tearDown() {
+//        serializer = nil
+//    }
     
     //TODO - change pairing serialisation for sessions
 //    func testSerialize() {
