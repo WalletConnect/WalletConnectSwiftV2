@@ -2,14 +2,15 @@ import Foundation
 import WalletConnectUtils
 
 
+
 public class Serializer {
     enum Error: String, Swift.Error {
         case messageToShort = "Error: message is too short"
     }
-    private let kms: KeyManagementService
+    private let kms: KeyManagementServiceProtocol
     private let codec: Codec
     
-    init(kms: KeyManagementService, codec: Codec = AES_256_CBC_HMAC_SHA256_Codec()) {
+    init(kms: KeyManagementServiceProtocol, codec: Codec = AES_256_CBC_HMAC_SHA256_Codec()) {
         self.kms = kms
         self.codec = codec
     }

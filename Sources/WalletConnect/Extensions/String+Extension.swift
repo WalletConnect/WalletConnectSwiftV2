@@ -27,17 +27,5 @@ extension String {
         let isAddressValid = (address.range(of: accountAddressRegex, options: .regularExpression) != nil)
         return isNamespaceValid && isReferenceValid && isAddressValid
     }
-    
-    static func generateTopic() -> String? {
-        var keyData = Data(count: 32)
-        let result = keyData.withUnsafeMutableBytes {
-            SecRandomCopyBytes(kSecRandomDefault, 32, $0.baseAddress!)
-        }
-        if result == errSecSuccess {
-            return keyData.toHexString()
-        } else {
-            return nil
-        }
-    }
 }
 

@@ -1,5 +1,4 @@
 import Foundation
-@testable import WalletConnect
 @testable import WalletConnectKMS
 
 final class KeyManagementServiceMock: KeyManagementServiceProtocol {

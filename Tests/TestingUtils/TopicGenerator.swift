@@ -1,6 +1,6 @@
-@testable import WalletConnect
+@testable import WalletConnectUtils
 
-final class TopicGenerator {
+public final class TopicGenerator {
     
     let topic: String
     
