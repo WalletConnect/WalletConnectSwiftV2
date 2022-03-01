@@ -284,13 +284,19 @@ final class SessionEngine {
         
     func respondSessionPropose(proposal: SessionType.ProposeParams) {
         guard let payload = proposerToRequestPayload[proposal.proposer.publicKey] else {
-            //TODO
             return
         }
-        let selfPublicKey = try! kms.createX25519KeyPair()
-
-        let agreementKey = try! kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposal.proposer.publicKey)
         
+        let selfPublicKey = try! kms.createX25519KeyPair()
+        var agreementKey: AgreementSecret!
+        
+        do {
+            agreementKey = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposal.proposer.publicKey)
+        } catch {
+            relayer.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
+            return
+        }
+
         let sessionTopic = agreementKey.derivedTopic()
         
         let pendingSession = SessionSequence.buildResponded(proposal: proposal, agreementKeys: agreementKey, metadata: metadata, topic: sessionTopic)
@@ -301,9 +307,7 @@ final class SessionEngine {
         wcSubscriber.setSubscription(topic: sessionTopic)
         let proposeResponse = SessionType.ProposeResponse(relay: proposal.relay, responder: AgreementPeer(publicKey: selfPublicKey.hexRepresentation))
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
-        relayer.respond(topic: sessionTopic, response: .response(response)) { error in
-            
-        }
+        relayer.respond(topic: sessionTopic, response: .response(response)) { _ in }
     }
     
     private func wcSessionApprove(_ payload: WCRequestSubscriptionPayload, approveParams: SessionType.ApproveParams) {
