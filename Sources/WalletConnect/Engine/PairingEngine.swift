@@ -5,7 +5,6 @@ import WalletConnectKMS
 
 final class PairingEngine {
     var onApprovalAcknowledgement: ((Pairing) -> Void)?
-    var onSessionProposal: ((SessionProposal)->())?
     var onPairingExtend: ((Pairing)->())?
     
     private let wcSubscriber: WCSubscribing

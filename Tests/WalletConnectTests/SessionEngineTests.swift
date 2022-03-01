@@ -71,6 +71,42 @@ final class SessionEngineTests: XCTestCase {
         XCTAssert(storageMock.hasPendingProposedSession(on: topicA), "The engine must store a pending session on proposed state.")
         XCTAssertEqual(publishTopic, topicA)
     }
+    
+    func testReceiveProposal() {
+        setupEngine()
+        let pairing = Pairing.stub()
+        let topicA = pairing.topic
+        var sessionProposed = false
+        let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
+        let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
+        let request = WCRequest(method: .sessionPropose, params: .sessionPropose(proposal))
+        let payload = WCRequestSubscriptionPayload(topic: topicA, wcRequest: request)
+        engine.onSessionProposal = { _ in
+            sessionProposed = true
+        }
+        subscriberMock.onReceivePayload?(payload)
+        XCTAssertTrue(sessionProposed)
+    }
+    
+    func testRespondProposal() {
+        setupEngine()
+        // Client receives a proposal
+        let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
+        let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
+        let request = WCRequest(method: .sessionPropose, params: .sessionPropose(proposal))
+        let payload = WCRequestSubscriptionPayload(topic: "topicA", wcRequest: request)
+        subscriberMock.onReceivePayload?(payload)
+
+        let topicB = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
+
+        // User approves proposal
+        engine.respondSessionPropose(proposal: proposal)
+        
+        XCTAssert(subscriberMock.didSubscribe(to: topicB), "Responder must subscribe for session topic B")
+        XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must store agreement key for topic B")
+        XCTAssert(storageMock.hasSequence(forTopic: topicB), "Responder must persist a session on topic B")
+        XCTAssertTrue(relayMock.didRespond)
+    }
 //
 //    func testProposeResponseFailure() {
 //        setupEngine()

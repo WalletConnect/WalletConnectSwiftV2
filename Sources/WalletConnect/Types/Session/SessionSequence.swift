@@ -175,7 +175,7 @@ extension SessionSequence {
                 permissions: SessionPermissions(
                     jsonrpc: proposal.permissions.jsonrpc,
                     notifications: proposal.permissions.notifications,
-                    controller: Controller(publicKey: controllerKey)),
+                    controller: AgreementPeer(publicKey: controllerKey)),
                 accounts: accounts,
                 status: .acknowledged,
                 blockchain: proposal.blockchainProposed.chains
@@ -195,7 +195,7 @@ extension SessionSequence {
                 permissions: SessionPermissions(
                     jsonrpc: proposal.permissions.jsonrpc,
                     notifications: proposal.permissions.notifications,
-                    controller: Controller(publicKey: controllerKey)),
+                    controller: AgreementPeer(publicKey: controllerKey)),
                 accounts: Set(approveParams.state.accounts.compactMap { Account($0) }),
                 status: .acknowledged,
                 blockchain: proposal.blockchainProposed.chains

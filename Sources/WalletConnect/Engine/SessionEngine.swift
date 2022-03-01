@@ -7,6 +7,7 @@ final class SessionEngine {
     var onSessionPayloadRequest: ((Request)->())?
     var onSessionPayloadResponse: ((Response)->())?
     var onSessionApproved: ((Session)->())?
+    var onSessionProposal: ((SessionProposal)->())?
     var onApprovalAcknowledgement: ((Session) -> Void)?
     var onSessionRejected: ((String, SessionType.Reason)->())?
     var onSessionUpdate: ((String, Set<Account>)->())?
@@ -14,6 +15,7 @@ final class SessionEngine {
     var onSessionExtended: ((Session) -> ())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
     var onNotificationReceived: ((String, Session.Notification)->())?
+    var proposerToRequestPayload: [String: WCRequestSubscriptionPayload] = [:]
     
     private let sequencesStore: SessionSequenceStorage
     private let wcSubscriber: WCSubscribing
@@ -83,8 +85,8 @@ final class SessionEngine {
         }
     }
     
-    // TODO: Check matching controller
-    func approve(proposal: SessionProposal, accounts: Set<Account>) {
+//    // TODO: Check matching controller
+//    func approve(proposal: SessionProposal, accounts: Set<Account>) {
 //        logger.debug("Approve session")
 //
 //        let selfPublicKey = try! kms.createX25519KeyPair()
@@ -110,7 +112,7 @@ final class SessionEngine {
 //        wcSubscriber.setSubscription(topic: settledTopic)
 //
 //        relayer.request(.wcSessionApprove(approval), onTopic: proposal.topic)
-    }
+//    }
     
     func reject(proposal: SessionProposal, reason: SessionType.Reason ) {
 //        let rejectParams = SessionType.RejectParams(reason: reason)
@@ -249,6 +251,8 @@ final class SessionEngine {
     private func setUpWCRequestHandling() {
         wcSubscriber.onReceivePayload = { [unowned self] subscriptionPayload in
             switch subscriptionPayload.wcRequest.params {
+            case .sessionPropose(let proposeParams):
+                wcSessionPropose(subscriptionPayload, proposal: proposeParams)
             case .sessionApprove(let approveParams):
                 wcSessionApprove(subscriptionPayload, approveParams: approveParams)
             case .sessionReject(let rejectParams):
@@ -273,6 +277,35 @@ final class SessionEngine {
         }
     }
     
+    private func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
+        proposerToRequestPayload[proposal.proposer.publicKey] = payload
+        onSessionProposal?(proposal)
+    }
+        
+    func respondSessionPropose(proposal: SessionType.ProposeParams) {
+        guard let payload = proposerToRequestPayload[proposal.proposer.publicKey] else {
+            //TODO
+            return
+        }
+        let selfPublicKey = try! kms.createX25519KeyPair()
+
+        let agreementKey = try! kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposal.proposer.publicKey)
+        
+        let sessionTopic = agreementKey.derivedTopic()
+        
+        let pendingSession = SessionSequence.buildResponded(proposal: proposal, agreementKeys: agreementKey, metadata: metadata, topic: sessionTopic)
+        
+        sequencesStore.setSequence(pendingSession)
+
+        try! kms.setAgreementSecret(agreementKey, topic: sessionTopic)
+        wcSubscriber.setSubscription(topic: sessionTopic)
+        let proposeResponse = SessionType.ProposeResponse(relay: proposal.relay, responder: AgreementPeer(publicKey: selfPublicKey.hexRepresentation))
+        let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
+        relayer.respond(topic: sessionTopic, response: .response(response)) { error in
+            
+        }
+    }
+    
     private func wcSessionApprove(_ payload: WCRequestSubscriptionPayload, approveParams: SessionType.ApproveParams) {
 //        let topic = payload.topic
 //        guard let session = sequencesStore.getSequence(forTopic: topic), let pendingSession = session.pending else {
@@ -284,7 +317,7 @@ final class SessionEngine {
 //            relayer.respondError(for: payload, reason: .generic(message: "wcSessionApproval received by a controller"))
 //            return
 //        }
-//        
+//
 //        let settledTopic: String
 //        let agreementKeys: AgreementSecret
 //        do {
@@ -303,13 +336,13 @@ final class SessionEngine {
 //        sequencesStore.setSequence(settledSession)
 //        wcSubscriber.setSubscription(topic: settledTopic)
 //        wcSubscriber.removeSubscription(topic: proposal.topic)
-//        
+//
 //        let approvedSession = Session(
 //            topic: settledTopic,
 //            peer: approveParams.responder.metadata,
 //            permissions: Session.Permissions(
 //                methods: pendingSession.proposal.permissions.jsonrpc.methods), accounts: settledSession.settled!.accounts, expiryDate: settledSession.expiryDate, blockchains: settledSession.settled!.blockchain)
-//        
+//
 //        logger.debug("Responder Client approved session on topic: \(topic)")
 //        relayer.respondSuccess(for: payload)
 //        onSessionApproved?(approvedSession)

@@ -6,9 +6,14 @@ internal enum SessionType {
     
     typealias ProposeParams = SessionProposal
     
+    struct ProposeResponse: Codable, Equatable {
+        let relay: RelayProtocolOptions
+        let responder: AgreementPeer
+    }
+    
     struct ApproveParams: Codable, Equatable {
         let relay: RelayProtocolOptions
-        let responder: SessionParticipant
+        let responder: Participant
         let expiry: Int
         let state: SessionState
     }

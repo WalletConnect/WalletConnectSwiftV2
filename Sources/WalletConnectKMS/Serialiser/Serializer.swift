@@ -27,6 +27,7 @@ public class Serializer {
     public func serialize(topic: String, encodable: Encodable) throws -> String {
         let messageJson = try encodable.json()
         var message: String
+        //todo - get symmetric key or agreement key - remove hex encoding
         if let agreementKeys = try? kms.getAgreementSecret(for: topic) {
             message = try encrypt(json: messageJson, agreementKeys: agreementKeys)
         } else {

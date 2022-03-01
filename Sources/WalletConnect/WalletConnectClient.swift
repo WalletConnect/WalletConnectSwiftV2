@@ -134,7 +134,7 @@ public final class WalletConnectClient {
     ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate function: `didReceive(sessionProposal: Session.Proposal)`
     ///   - accounts: A Set of accounts that the dapp will be allowed to request methods executions on.
     public func approve(proposal: Session.Proposal, accounts: Set<Account>) {
-        sessionEngine.approve(proposal: proposal.proposal, accounts: accounts)
+//        sessionEngine.approve(proposal: proposal.proposal, accounts: accounts)
     }
     
     /// For the responder to reject a session proposal.
@@ -276,9 +276,6 @@ public final class WalletConnectClient {
     // MARK: - Private
     
     private func setUpEnginesCallbacks() {
-        pairingEngine.onSessionProposal = { [unowned self] proposal in
-            proposeSession(proposal: proposal)
-        }
         pairingEngine.onApprovalAcknowledgement = { [weak self] settledPairing in
             self?.delegate?.didSettle(pairing: settledPairing)
         }
@@ -287,6 +284,9 @@ public final class WalletConnectClient {
         }
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
             delegate?.didSettle(session: settledSession)
+        }
+        sessionEngine.onSessionProposal = { proposal in
+            
         }
         sessionEngine.onApprovalAcknowledgement = { [weak self] session in
             self?.delegate?.didSettle(session: session)

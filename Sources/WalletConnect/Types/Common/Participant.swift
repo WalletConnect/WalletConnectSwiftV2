@@ -1,3 +1,4 @@
+
 struct Participant: Codable, Equatable {
     let publicKey: String
     let metadata: AppMetadata?
@@ -8,11 +9,6 @@ struct Participant: Codable, Equatable {
     }
 }
 
-struct PairingParticipant: Codable, Equatable {
+struct AgreementPeer: Codable, Equatable {
     let publicKey: String
-}
-
-struct SessionParticipant: Codable, Equatable {
-    let publicKey: String
-    let metadata: AppMetadata
 }

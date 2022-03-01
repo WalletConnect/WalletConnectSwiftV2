@@ -40,7 +40,7 @@ extension SessionPermissions {
         return SessionPermissions(
             jsonrpc: JSONRPC(methods: jsonrpc),
             notifications: Notifications(types: notifications),
-            controller: Controller(publicKey: controllerKey)
+            controller: AgreementPeer(publicKey: controllerKey)
         )
     }
 }
@@ -77,5 +77,16 @@ extension WCRequestSubscriptionPayload {
     static func stubExtend(topic: String, ttl: Int) -> WCRequestSubscriptionPayload {
         let extendMethod = WCMethod.wcSessionExtend(SessionType.ExtendParams(ttl: ttl)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: extendMethod)
+    }
+}
+
+extension SessionProposal {
+    static func stub(proposerPubKey: String) -> SessionProposal {
+        let relayOptions = RelayProtocolOptions(protocol: "waku", data: nil)
+        return SessionType.ProposeParams(
+            relay: relayOptions,
+            proposer: Proposer(publicKey: proposerPubKey, metadata: AppMetadata(name: "", description: "", url: "", icons: nil)),
+            permissions: SessionPermissions.stub(),
+            blockchainProposed: BlockchainProposed(chains: []))
     }
 }
