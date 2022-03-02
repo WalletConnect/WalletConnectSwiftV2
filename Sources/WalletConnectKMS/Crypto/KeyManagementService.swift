@@ -9,6 +9,7 @@ public protocol KeyManagementServiceProtocol {
     func getPrivateKey(for publicKey: AgreementPublicKey) throws -> AgreementPrivateKey?
     func getAgreementSecret(for topic: String) throws -> AgreementSecret?
     func getSymmetricKey(for topic: String) throws -> SymmetricKey?
+    func getSymmetricKeyRepresentable(for topic: String) -> SymmetricRepresentable?
     func deletePrivateKey(for publicKey: String)
     func deleteAgreementSecret(for topic: String)
     func deleteSymmetricKey(for topic: String)
@@ -16,6 +17,7 @@ public protocol KeyManagementServiceProtocol {
 }
 
 public class KeyManagementService: KeyManagementServiceProtocol {
+
     enum Error: Swift.Error {
         case keyNotFound
     }
@@ -57,10 +59,16 @@ public class KeyManagementService: KeyManagementServiceProtocol {
     public func getSymmetricKey(for topic: String) throws -> SymmetricKey? {
         do {
             return try keychain.read(key: topic) as SymmetricKey
-        } catch let error where (error as? KeychainError)?.status == errSecItemNotFound {
-            return nil
         } catch {
-            throw error
+            return nil
+        }
+    }
+    
+    public func getSymmetricKeyRepresentable(for topic: String) -> SymmetricRepresentable? {
+        if let key = try? getAgreementSecret(for: topic) {
+            return key
+        } else {
+            return try? getSymmetricKey(for: topic)
         }
     }
     
@@ -77,10 +85,8 @@ public class KeyManagementService: KeyManagementServiceProtocol {
     public func getAgreementSecret(for topic: String) throws -> AgreementSecret? {
         do {
             return try keychain.read(key: topic) as AgreementSecret
-        } catch let error where (error as? KeychainError)?.status == errSecItemNotFound {
-            return nil
         } catch {
-            throw error
+            return nil
         }
     }
     

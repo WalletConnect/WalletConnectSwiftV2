@@ -82,12 +82,20 @@ public struct AgreementPrivateKey: GenericPasswordConvertible, Equatable {
 
 // MARK: - Symmetric Key
 
-public struct SymmetricKey: GenericPasswordConvertible, Equatable {
+public protocol SymmetricRepresentable {
+    var symmetricRepresentation: Data {get}
+}
+
+public struct SymmetricKey: GenericPasswordConvertible, Equatable, SymmetricRepresentable {
     
     private let key: CryptoKit.SymmetricKey
     
     public var rawRepresentation: Data {
         key.withUnsafeBytes {Data(Array($0))}
+    }
+    
+    public var symmetricRepresentation: Data {
+        return rawRepresentation
     }
     
     public var hexRepresentation: String {
@@ -110,6 +118,7 @@ public struct SymmetricKey: GenericPasswordConvertible, Equatable {
         self.key = CryptoKit.SymmetricKey(data: data)
     }
 }
+
 
 extension SymmetricKey {
     public enum Size {
