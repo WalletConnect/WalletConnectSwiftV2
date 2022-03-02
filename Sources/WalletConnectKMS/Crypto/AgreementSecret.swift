@@ -29,6 +29,10 @@ extension AgreementSecret: GenericPasswordConvertible {
 }
 
 extension AgreementSecret: SymmetricRepresentable {
+    public var pub: Data {
+        return publicKey.rawRepresentation
+    }
+    
     public var symmetricRepresentation: Data {
         return sharedSecret
     }

@@ -5,8 +5,8 @@ import CryptoKit
 
 protocol Codec {
     var hmacAuthenticator: HMACAuthenticating {get}
-    func encode(plainText: String, symmetricKey: Data) throws -> EncryptionPayload
-    func decode(payload: EncryptionPayload, symmetricKey: Data) throws -> String
+    func encode(plainText: String, symmetricKey: SymmetricRepresentable) throws -> EncryptionPayload
+    func decode(payload: EncryptionPayload, symmetricKey: SymmetricRepresentable) throws -> String
 }
 
 class AES_256_CBC_HMAC_SHA256_Codec: Codec {
@@ -16,20 +16,21 @@ class AES_256_CBC_HMAC_SHA256_Codec: Codec {
         self.hmacAuthenticator = hmacAuthenticator
     }
     
-    func encode(plainText: String, symmetricKey: Data) throws -> EncryptionPayload {
-        let (encryptionKey, authenticationKey) = getKeyPair(from: symmetricKey)
+    func encode(plainText: String, symmetricKey: SymmetricRepresentable) throws -> EncryptionPayload {
+        let (encryptionKey, authenticationKey) = getKeyPair(from: symmetricKey.symmetricRepresentation)
         let plainTextData = try data(string: plainText)
         let (cipherText, iv) = try encrypt(key: encryptionKey, data: plainTextData)
-        let dataToMac = iv + cipherText
+        let dataToMac = iv + symmetricKey.pub + cipherText
         let hmac = try hmacAuthenticator.generateAuthenticationDigest(for: dataToMac, using: authenticationKey)
         return EncryptionPayload(iv: iv,
+                                 publicKey: symmetricKey.pub,
                                  mac: hmac,
                                  cipherText: cipherText)
     }
     
-    func decode(payload: EncryptionPayload, symmetricKey: Data) throws -> String {
-        let (decryptionKey, authenticationKey) = getKeyPair(from: symmetricKey)
-        let dataToMac = payload.iv + payload.cipherText
+    func decode(payload: EncryptionPayload, symmetricKey: SymmetricRepresentable) throws -> String {
+        let (decryptionKey, authenticationKey) = getKeyPair(from: symmetricKey.symmetricRepresentation)
+        let dataToMac = payload.iv + payload.publicKey + payload.cipherText
         try hmacAuthenticator.validateAuthentication(for: dataToMac, with: payload.mac, using: authenticationKey)
         let plainTextData = try decrypt(key: decryptionKey, data: payload.cipherText, iv: payload.iv)
         let plainText = try string(data: plainTextData)
