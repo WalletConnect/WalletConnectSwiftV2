@@ -6,7 +6,7 @@ import XCTest
 class AES_256_CBC_HMAC_SHA256_Codec_Test: XCTestCase {
     let message = "Test Message"
     var codec: AES_256_CBC_HMAC_SHA256_Codec!
-    let symmetricKey = Data(hex: "404D635166546A576E5A7234753777217A25432A462D4A614E645267556B5870")
+    let symmetricKey = try! SymmetricKey(hex: "404D635166546A576E5A7234753777217A25432A462D4A614E645267556B5870")
 
     override func setUp() {
         codec = AES_256_CBC_HMAC_SHA256_Codec()
