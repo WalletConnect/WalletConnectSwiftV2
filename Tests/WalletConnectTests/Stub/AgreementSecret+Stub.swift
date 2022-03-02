@@ -4,6 +4,6 @@ import Foundation
 extension AgreementSecret {
     
     static func stub() -> AgreementSecret {
-        AgreementSecret(sharedSecret: Data.randomBytes(32), publicKey: AgreementPrivateKey().publicKey)
+        AgreementSecret(sharedSecret: Data.randomBytes(count: 32), publicKey: AgreementPrivateKey().publicKey)
     }
 }

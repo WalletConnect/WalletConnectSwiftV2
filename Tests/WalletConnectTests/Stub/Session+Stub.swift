@@ -11,7 +11,7 @@ extension SessionSequence {
             let selfKey = AgreementPrivateKey().publicKey.hexRepresentation
             let permissions = isSelfController ? SessionPermissions.stub(controllerKey: selfKey) : SessionPermissions.stub(controllerKey: peerKey)
         return SessionSequence(
-            topic: String.generateTopic()!,
+            topic: String.generateTopic(),
             relay: RelayProtocolOptions.stub(),
             selfParticipant: Participant.stub(publicKey: selfKey),
             expiryDate: expiryDate,
@@ -32,7 +32,7 @@ extension SessionSequence {
         let selfKey = AgreementPrivateKey().publicKey.hexRepresentation
         let permissions = isSelfController ? SessionPermissions.stub(controllerKey: selfKey) : SessionPermissions.stub(controllerKey: peerKey)
         return SessionSequence(
-            topic: String.generateTopic()!,
+            topic: String.generateTopic(),
             relay: RelayProtocolOptions.stub(),
             selfParticipant: Participant.stub(publicKey: selfKey),
             expiryDate: expiryDate,

@@ -91,10 +91,11 @@ final class SessionEngineTests: XCTestCase {
     func testRespondProposal() {
         setupEngine()
         // Client receives a proposal
+        let topicA = String.generateTopic()
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
         let request = WCRequest(method: .sessionPropose, params: .sessionPropose(proposal))
-        let payload = WCRequestSubscriptionPayload(topic: "topicA", wcRequest: request)
+        let payload = WCRequestSubscriptionPayload(topic: topicA, wcRequest: request)
         subscriberMock.onReceivePayload?(payload)
 
         let topicB = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
@@ -105,7 +106,7 @@ final class SessionEngineTests: XCTestCase {
         XCTAssert(subscriberMock.didSubscribe(to: topicB), "Responder must subscribe for session topic B")
         XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must store agreement key for topic B")
         XCTAssert(storageMock.hasSequence(forTopic: topicB), "Responder must persist a session on topic B")
-        XCTAssertTrue(relayMock.didRespond)
+        XCTAssertEqual(relayMock.didRespondOnTopic!, topicA)
     }
 //
 //    func testProposeResponseFailure() {
@@ -251,6 +252,7 @@ final class SessionEngineTests: XCTestCase {
 //        // TODO: assert session settlement callback
 //    }
     
+
 //    func testReceiveApprovalResponse() {
 //        setupEngine()
 //
@@ -290,6 +292,7 @@ final class SessionEngineTests: XCTestCase {
 //        XCTAssertNotNil(approvedSession)
 //        XCTAssertEqual(approvedSession?.topic, topicD)
 //    }
+
     
     // MARK: - Update call tests
     

@@ -28,4 +28,3 @@ extension String {
         return isNamespaceValid && isReferenceValid && isAddressValid
     }
 }
-

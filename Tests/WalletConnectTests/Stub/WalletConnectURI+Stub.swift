@@ -6,7 +6,7 @@ extension WalletConnectURI {
     
     static func stub(isController: Bool = false) -> WalletConnectURI {
         WalletConnectURI(
-            topic: String.generateTopic()!,
+            topic: String.generateTopic(),
             symKey: SymmetricKey().hexRepresentation,
             relay: RelayProtocolOptions(protocol: "", data: nil)
         )
