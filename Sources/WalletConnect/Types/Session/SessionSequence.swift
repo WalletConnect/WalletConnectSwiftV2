@@ -135,9 +135,9 @@ extension SessionSequence {
         self.init(topic: topic, relay: relay, selfParticipant: selfParticipant, expiryDate: expiryDate, sequenceState: .right(settledState))
     }
     
-    static func buildProposed(proposal: SessionProposal) -> SessionSequence {
+    static func buildProposed(proposal: SessionProposal, topic: String) -> SessionSequence {
         SessionSequence(
-            topic: proposal.topic,
+            topic: topic,
             relay: proposal.relay,
             selfParticipant: Participant(publicKey: proposal.proposer.publicKey, metadata: proposal.proposer.metadata),
             expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveProposed)),
@@ -149,9 +149,9 @@ extension SessionSequence {
         )
     }
     
-    static func buildResponded(proposal: SessionProposal, agreementKeys: AgreementSecret, metadata: AppMetadata) -> SessionSequence {
+    static func buildResponded(proposal: SessionProposal, agreementKeys: AgreementSecret, metadata: AppMetadata, topic: String) -> SessionSequence {
         SessionSequence(
-            topic: proposal.topic,
+            topic: topic,
             relay: proposal.relay,
             selfParticipant: Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata),
             expiryDate: Date(timeIntervalSinceNow: TimeInterval(Time.day)),
@@ -164,7 +164,7 @@ extension SessionSequence {
     }
     
     static func buildPreSettled(proposal: SessionProposal, agreementKeys: AgreementSecret, metadata: AppMetadata, accounts: Set<Account>) -> SessionSequence {
-        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : agreementKeys.publicKey.hexRepresentation
+        let controllerKey = agreementKeys.publicKey.hexRepresentation
         return SessionSequence(
             topic: agreementKeys.derivedTopic(),
             relay: proposal.relay,
@@ -175,7 +175,7 @@ extension SessionSequence {
                 permissions: SessionPermissions(
                     jsonrpc: proposal.permissions.jsonrpc,
                     notifications: proposal.permissions.notifications,
-                    controller: Controller(publicKey: controllerKey)),
+                    controller: AgreementPeer(publicKey: controllerKey)),
                 accounts: accounts,
                 status: .acknowledged,
                 blockchain: proposal.blockchainProposed.chains
@@ -184,7 +184,7 @@ extension SessionSequence {
     }
     
     static func buildAcknowledged(approval approveParams: SessionType.ApproveParams, proposal: SessionProposal, agreementKeys: AgreementSecret, metadata: AppMetadata) -> SessionSequence {
-        let controllerKey = proposal.proposer.controller ? proposal.proposer.publicKey : approveParams.responder.publicKey
+        let controllerKey = approveParams.responder.publicKey
         return SessionSequence(
             topic: agreementKeys.derivedTopic(),
             relay: approveParams.relay,
@@ -195,7 +195,7 @@ extension SessionSequence {
                 permissions: SessionPermissions(
                     jsonrpc: proposal.permissions.jsonrpc,
                     notifications: proposal.permissions.notifications,
-                    controller: Controller(publicKey: controllerKey)),
+                    controller: AgreementPeer(publicKey: controllerKey)),
                 accounts: Set(approveParams.state.accounts.compactMap { Account($0) }),
                 status: .acknowledged,
                 blockchain: proposal.blockchainProposed.chains

@@ -23,6 +23,7 @@ class MockedWCRelay: WalletConnectRelaying {
     }
     
     var didCallSubscribe = false
+    var didRespondOnTopic: String? = nil
     var didCallUnsubscribe = false
     var didRespondSuccess = false
     var lastErrorCode = -1
@@ -43,6 +44,7 @@ class MockedWCRelay: WalletConnectRelaying {
     }
     
     func respond(topic: String, response: JsonRpcResult, completion: @escaping ((Error?) -> ())) {
+        didRespondOnTopic = topic
         completion(error)
     }
     

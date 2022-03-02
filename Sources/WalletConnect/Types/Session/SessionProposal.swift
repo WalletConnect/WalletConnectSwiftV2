@@ -6,8 +6,6 @@ struct SessionState: Codable, Equatable {
 }
 
 struct SessionProposal: Codable, Equatable {
-    //todo - remove topic
-    let topic: String
     let relay: RelayProtocolOptions
     let proposer: Proposer
     let permissions: SessionPermissions
@@ -16,7 +14,6 @@ struct SessionProposal: Codable, Equatable {
 
 struct Proposer: Codable, Equatable {
     let publicKey: String
-    let controller: Bool
     let metadata: AppMetadata
 }
 //?
