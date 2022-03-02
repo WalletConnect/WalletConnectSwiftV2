@@ -255,6 +255,7 @@ final class SessionEngine {
         guard let payload = proposerToRequestPayload[proposal.proposer.publicKey] else {
             return
         }
+        proposerToRequestPayload[proposal.proposer.publicKey] = nil
         
         let selfPublicKey = try! kms.createX25519KeyPair()
         var agreementKey: AgreementSecret!
@@ -276,7 +277,7 @@ final class SessionEngine {
         wcSubscriber.setSubscription(topic: sessionTopic)
         let proposeResponse = SessionType.ProposeResponse(relay: proposal.relay, responder: AgreementPeer(publicKey: selfPublicKey.hexRepresentation))
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
-        relayer.respond(topic: sessionTopic, response: .response(response)) { _ in }
+        relayer.respond(topic: payload.topic, response: .response(response)) { _ in }
     }
     
     private func wcSessionReject(_ payload: WCRequestSubscriptionPayload, rejectParams: SessionType.RejectParams) {
