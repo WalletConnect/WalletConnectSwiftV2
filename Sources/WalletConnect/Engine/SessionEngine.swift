@@ -60,7 +60,6 @@ final class SessionEngine {
             return Session(topic: $0.topic, peer: settled.peer.metadata!, permissions: permissions, accounts: settled.accounts, expiryDate: $0.expiryDate, blockchains: settled.blockchain)
         }
     }
-        
 
     func proposeSession(pairing: Pairing, permissions: SessionPermissions, relay: RelayProtocolOptions) {
         logger.debug("Propose Session on topic: \(pairing.topic)")
@@ -84,10 +83,6 @@ final class SessionEngine {
                 logger.debug("Could not send session proposal error: \(error)")
             }
         }
-    }
-    
-    func reject(proposal: SessionProposal, reason: SessionType.Reason ) {
-
     }
     
     func delete(topic: String, reason: Reason) {
@@ -249,6 +244,15 @@ final class SessionEngine {
     private func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
         proposerToRequestPayload[proposal.proposer.publicKey] = payload
         onSessionProposal?(proposal)
+    }
+    
+    
+    func reject(proposal: SessionProposal, reason: SessionType.Reason ) {
+        guard let payload = proposerToRequestPayload[proposal.proposer.publicKey] else {
+            return
+        }
+        proposerToRequestPayload[proposal.proposer.publicKey] = nil
+        relayer.respondError(for: payload.topic, reason: reason)
     }
         
     func respondSessionPropose(proposal: SessionType.ProposeParams) {
