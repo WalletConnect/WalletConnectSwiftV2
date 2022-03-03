@@ -282,18 +282,6 @@ final class SessionEngine {
         relayer.respond(topic: payload.topic, response: .response(response)) { _ in }
     }
     
-//    private func wcSessionReject(_ payload: WCRequestSubscriptionPayload, rejectParams: SessionType.RejectParams) {
-//        let topic = payload.topic
-//        guard sequencesStore.hasSequence(forTopic: topic) else {
-//            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
-//            return
-//        }
-//        sequencesStore.delete(topic: topic)
-//        wcSubscriber.removeSubscription(topic: topic)
-//        relayer.respondSuccess(for: payload)
-//        onSessionRejected?(topic, rejectParams.reason)
-//    }
-    
     private func wcSessionUpdate(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {
         for account in updateParams.state.accounts {
             if !String.conformsToCAIP10(account) {
@@ -450,6 +438,8 @@ final class SessionEngine {
         switch response.requestParams {
         case .sessionApprove(_):
             handleApproveResponse(topic: response.topic, result: response.result)
+        case .sessionPropose(let proposal):
+            handleProposeResponse(topic: response.topic, proposeParams: proposal, result: response.result)
         case .sessionUpdate:
             handleUpdateResponse(topic: response.topic, result: response.result)
         case .sessionUpgrade:
@@ -467,11 +457,10 @@ final class SessionEngine {
         case .response:
             break
         case .error:
+            guard let session = sequencesStore.getSequence(forTopic: topic) else {return}
+            kms.deletePrivateKey(for: proposeParams.proposer.publicKey) //ok
+            sequencesStore.delete(topic: proposeParams.topic)
             return
-//            wcSubscriber.removeSubscription(topic: proposeParams.topic)
-//            kms.deletePrivateKey(for: proposeParams.proposer.publicKey)
-//            kms.deleteAgreementSecret(for: topic)
-//            sequencesStore.delete(topic: proposeParams.topic)
         }
     }
     
