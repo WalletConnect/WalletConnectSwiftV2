@@ -12,6 +12,7 @@ struct SessionProposal: Codable, Equatable {
     let blockchainProposed: BlockchainProposed
 }
 
+// FIXME: This struct is redundant with Participant
 struct Proposer: Codable, Equatable {
     let publicKey: String
     let metadata: AppMetadata

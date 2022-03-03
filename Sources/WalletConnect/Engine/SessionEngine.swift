@@ -10,6 +10,7 @@ final class SessionEngine {
     var onSessionProposal: ((SessionProposal)->())?
     var onApprovalAcknowledgement: ((Session) -> Void)?
     var onSessionRejected: ((String, SessionType.Reason)->())?
+//    var onSessionSettled: (() -> ())? // TODO
     var onSessionUpdate: ((String, Set<Account>)->())?
     var onSessionUpgrade: ((String, SessionPermissions)->())?
     var onSessionExtended: ((Session) -> ())?
@@ -226,6 +227,8 @@ final class SessionEngine {
                 wcSessionPropose(subscriptionPayload, proposal: proposeParams)
             case .sessionReject(let rejectParams):
                 wcSessionReject(subscriptionPayload, rejectParams: rejectParams)
+            case .sessionSettle(let settleParams):
+                wcSessionSettle(subscriptionPayload, settleParams: settleParams)
             case .sessionUpdate(let updateParams):
                 wcSessionUpdate(payload: subscriptionPayload, updateParams: updateParams)
             case .sessionUpgrade(let upgradeParams):
@@ -278,6 +281,19 @@ final class SessionEngine {
         let proposeResponse = SessionType.ProposeResponse(relay: proposal.relay, responder: AgreementPeer(publicKey: selfPublicKey.hexRepresentation))
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
         relayer.respond(topic: payload.topic, response: .response(response)) { _ in }
+        // settle
+    }
+    
+    private func settle(session: SessionSequence) {
+        
+        let settlement = SessionType.SettleParams(
+            relay: session.relay
+//            state: <#T##SessionState#>,
+//            blockchainSettled: <#T##BlockchainProposed#>,
+//            permissions: <#T##SessionPermissions#>,
+//            controller: <#T##Participant#>
+        )
+        relayer.request(.wcSessionSettle(settlement), onTopic: session.topic)
     }
     
     private func wcSessionReject(_ payload: WCRequestSubscriptionPayload, rejectParams: SessionType.RejectParams) {
@@ -290,6 +306,12 @@ final class SessionEngine {
         wcSubscriber.removeSubscription(topic: topic)
         relayer.respondSuccess(for: payload)
         onSessionRejected?(topic, rejectParams.reason)
+    }
+    
+    private func wcSessionSettle(_ payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
+        // Settle the session
+        relayer.respondSuccess(for: payload)
+//        onSessionSettled?() // TODO
     }
     
     private func wcSessionUpdate(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {

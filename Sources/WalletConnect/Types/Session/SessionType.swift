@@ -22,8 +22,13 @@ internal enum SessionType {
         let reason: Reason
     }
     
+    // TODO: Resolve correct parameters
     struct SettleParams: Codable, Equatable {
-        // TODO
+        let relay: RelayProtocolOptions
+//        let state: SessionState // Is this the correct state param?
+//        let blockchainSettled: BlockchainProposed // Check the correct object to be used here
+//        let permissions: SessionPermissions // Permissions now only need to include methods and notifications
+//        let controller: Participant
     }
     
     struct UpdateParams: Codable, Equatable {
