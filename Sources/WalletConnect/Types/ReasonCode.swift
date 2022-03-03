@@ -24,6 +24,11 @@ enum ReasonCode {
     case unauthorizedExtendRequest(context: Context)
     case unauthorizedMatchingController(isController: Bool)
     
+    // 5000
+    case disapprovedChains
+    case disapprovedMethods
+    case disapprovedNotificationTypes
+    
     var code: Int {
         switch self {
         case .generic: return 0
@@ -39,6 +44,9 @@ enum ReasonCode {
         case .unauthorizedUpgradeRequest: return 3004
         case .unauthorizedExtendRequest: return 3005
         case .unauthorizedMatchingController: return 3100
+        case .disapprovedChains: return 5000
+        case .disapprovedMethods: return 5001
+        case .disapprovedNotificationTypes: return 5002
         }
     }
     
@@ -70,6 +78,12 @@ enum ReasonCode {
             return "Unauthorized: peer is also \(isController ? "" : "non-")controller"
         case .unauthorizedExtendRequest(context: let context):
             return "Unauthorized \(context) extend request"
+        case .disapprovedChains:
+            return "User disapproved requested chains"
+        case .disapprovedMethods:
+            return "User disapproved requested json-rpc methods"
+        case .disapprovedNotificationTypes:
+            return "User disapproved requested notification types"
         }
     }
 }
