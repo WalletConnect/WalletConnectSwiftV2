@@ -219,8 +219,6 @@ final class SessionEngine {
             switch subscriptionPayload.wcRequest.params {
             case .sessionPropose(let proposeParams):
                 wcSessionPropose(subscriptionPayload, proposal: proposeParams)
-            case .sessionReject(let rejectParams):
-                wcSessionReject(subscriptionPayload, rejectParams: rejectParams)
             case .sessionUpdate(let updateParams):
                 wcSessionUpdate(payload: subscriptionPayload, updateParams: updateParams)
             case .sessionUpgrade(let upgradeParams):
@@ -284,17 +282,17 @@ final class SessionEngine {
         relayer.respond(topic: payload.topic, response: .response(response)) { _ in }
     }
     
-    private func wcSessionReject(_ payload: WCRequestSubscriptionPayload, rejectParams: SessionType.RejectParams) {
-        let topic = payload.topic
-        guard sequencesStore.hasSequence(forTopic: topic) else {
-            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
-            return
-        }
-        sequencesStore.delete(topic: topic)
-        wcSubscriber.removeSubscription(topic: topic)
-        relayer.respondSuccess(for: payload)
-        onSessionRejected?(topic, rejectParams.reason)
-    }
+//    private func wcSessionReject(_ payload: WCRequestSubscriptionPayload, rejectParams: SessionType.RejectParams) {
+//        let topic = payload.topic
+//        guard sequencesStore.hasSequence(forTopic: topic) else {
+//            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
+//            return
+//        }
+//        sequencesStore.delete(topic: topic)
+//        wcSubscriber.removeSubscription(topic: topic)
+//        relayer.respondSuccess(for: payload)
+//        onSessionRejected?(topic, rejectParams.reason)
+//    }
     
     private func wcSessionUpdate(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {
         for account in updateParams.state.accounts {
