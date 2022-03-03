@@ -439,7 +439,7 @@ final class SessionEngine {
         case .sessionApprove(_):
             handleApproveResponse(topic: response.topic, result: response.result)
         case .sessionPropose(let proposal):
-            handleProposeResponse(topic: response.topic, proposeParams: proposal, result: response.result)
+            handleProposeResponse(topic: response.topic, proposal: proposal, result: response.result)
         case .sessionUpdate:
             handleUpdateResponse(topic: response.topic, result: response.result)
         case .sessionUpgrade:
@@ -452,20 +452,29 @@ final class SessionEngine {
         }
     }
     
-    private func handleProposeResponse(topic: String, proposeParams: SessionProposal, result: JsonRpcResult) {
+    private func handleProposeResponse(topic: String, proposal: SessionProposal, result: JsonRpcResult) {
         switch result {
         case .response(let response):
             let selfPublicKey = try! kms.createX25519KeyPair()
-            let proposeResponse = response.result.get(SessionType.ProposeResponse)
-            let agreementKey = kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposeResponse.responder.publicKey)
+            var agreementKeys: AgreementSecret!
             
-            let sessionTopic = agreementKey.derivedTopic()
+            do {
+                let proposeResponse = try response.result.get(SessionType.ProposeResponse.self)
+                agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposeResponse.responder.publicKey)
+            } catch {
+                //TODO - handle error
+                return
+            }
+
+            let sessionTopic = agreementKeys.derivedTopic()
             wcSubscriber.setSubscription(topic: sessionTopic)
             
+            let pendingSession = SessionSequence.buildResponded(proposal: proposal, agreementKeys: agreementKeys, topic: sessionTopic)
+            sequencesStore.setSequence(pendingSession)
+            
         case .error:
-            guard let session = sequencesStore.getSequence(forTopic: topic) else {return}
-            kms.deletePrivateKey(for: proposeParams.proposer.publicKey) //ok
-            sequencesStore.delete(topic: proposeParams.topic)
+            kms.deletePrivateKey(for: proposal.proposer.publicKey)
+            sequencesStore.delete(topic: topic)
             return
         }
     }
