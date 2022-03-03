@@ -247,12 +247,12 @@ final class SessionEngine {
     }
     
     
-    func reject(proposal: SessionProposal, reason: SessionType.Reason ) {
+    func reject(proposal: SessionProposal, reason: ReasonCode) {
         guard let payload = proposerToRequestPayload[proposal.proposer.publicKey] else {
             return
         }
         proposerToRequestPayload[proposal.proposer.publicKey] = nil
-        relayer.respondError(for: payload.topic, reason: reason)
+        relayer.respondError(for: payload, reason: reason)
     }
         
     func respondSessionPropose(proposal: SessionType.ProposeParams) {

@@ -9,7 +9,7 @@ public enum RejectionReason {
 }
 
 internal extension RejectionReason {
-    func internalRepresentation() -> SessionType.Reason {
+    func internalRepresentation() -> ReasonCode {
         switch self {
         case .disapprovedChains:
             return SessionType.Reason(code: 5000, message: "User disapproved requested chains")
