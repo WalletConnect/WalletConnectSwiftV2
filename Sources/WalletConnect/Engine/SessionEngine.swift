@@ -454,8 +454,14 @@ final class SessionEngine {
     
     private func handleProposeResponse(topic: String, proposeParams: SessionProposal, result: JsonRpcResult) {
         switch result {
-        case .response:
-            break
+        case .response(let response):
+            let selfPublicKey = try! kms.createX25519KeyPair()
+            let proposeResponse = response.result.get(SessionType.ProposeResponse)
+            let agreementKey = kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposeResponse.responder.publicKey)
+            
+            let sessionTopic = agreementKey.derivedTopic()
+            wcSubscriber.setSubscription(topic: sessionTopic)
+            
         case .error:
             guard let session = sequencesStore.getSequence(forTopic: topic) else {return}
             kms.deletePrivateKey(for: proposeParams.proposer.publicKey) //ok
