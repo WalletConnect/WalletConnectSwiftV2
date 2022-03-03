@@ -37,7 +37,7 @@ final class PairingEngineTests: XCTestCase {
     }
     
     func setupEngine() {
-        let meta = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
+        let meta = AppMetadata.stub()
         let logger = ConsoleLoggerMock()
         engine = PairingEngine(
             relay: relayMock,
