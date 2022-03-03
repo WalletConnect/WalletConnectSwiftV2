@@ -469,7 +469,7 @@ final class SessionEngine {
             let sessionTopic = agreementKeys.derivedTopic()
             wcSubscriber.setSubscription(topic: sessionTopic)
             
-            let pendingSession = SessionSequence.buildResponded(proposal: proposal, agreementKeys: agreementKeys, topic: sessionTopic)
+            let pendingSession = SessionSequence.buildResponded(proposal: proposal, agreementKeys: agreementKeys, metadata: nil, topic: sessionTopic)
             sequencesStore.setSequence(pendingSession)
             
         case .error:
