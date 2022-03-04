@@ -29,6 +29,11 @@ public struct AgreementPublicKey: Equatable {
         self.key = try Curve25519.KeyAgreement.PublicKey(rawRepresentation: data)
     }
     
+    public init(hex: String) throws {
+        let data = Data(hex: hex)
+        try self.init(rawRepresentation: data)
+    }
+    
     public var rawRepresentation: Data {
         key.rawRepresentation
     }

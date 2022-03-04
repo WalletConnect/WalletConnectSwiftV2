@@ -108,7 +108,50 @@ final class SessionEngineTests: XCTestCase {
         XCTAssert(storageMock.hasSequence(forTopic: topicB), "Responder must persist a session on topic B")
         XCTAssertEqual(relayMock.didRespondOnTopic!, topicA)
     }
-//
+    
+    func testSessionProposeResponse() {
+        setupEngine()
+        
+        
+        
+        let pairing = Pairing.stub()
+        let topicA = pairing.topic
+        let permissions = SessionPermissions.stub()
+        let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
+        
+        //propose
+        engine.proposeSession(pairing: pairing, permissions: permissions, relay: relayOptions)
+        
+        // receive response
+        guard let request = relayMock.requests.first?.request,
+              let proposal = relayMock.requests.first?.request.sessionProposal else {
+            XCTFail("Responder must publish an approval request."); return
+        }
+        let responder = AgreementPeer.stub()
+        let proposalResponse = SessionType.ProposeResponse(relay: relayOptions, responder: responder)
+        let encoded = try! JSONEncoder().encode(proposalResponse)
+        let decoded = try! JSONDecoder().decode(AnyCodable.self, from: encoded)
+
+        let jsonRpcResponse = JSONRPCResponse<AnyCodable>(id: request.id, result: decoded)
+        let response = WCResponse(topic: topicA,
+                                  chainId: nil,
+                                  requestMethod: request.method,
+                                  requestParams: request.params,
+                                  result: .response(jsonRpcResponse))
+
+        relayMock.onResponse?(response)
+        
+        let privateKey = try! cryptoMock.getPrivateKey(for: proposal.proposer.publicKey)!
+        let topicB = deriveTopic(publicKey: responder.publicKey, privateKey: privateKey)
+        
+        
+        XCTAssert(subscriberMock.didSubscribe(to: topicB), "Proposer must subscribe for session topic B")
+        XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Proposer must store agreement key for topic B")
+        XCTAssert(storageMock.hasSequence(forTopic: topicB), "Proposer must persist a session on topic B")
+        XCTAssertFalse(storageMock.hasSequence(forTopic: topicA), "Proposer must remove pending session on topic A")
+
+    }
+
 //    func testProposeResponseFailure() {
 //        setupEngine()
 //        let pairing = Pairing.stub()
@@ -119,7 +162,7 @@ final class SessionEngineTests: XCTestCase {
 //        let agreementKeys = AgreementSecret.stub()
 //        cryptoMock.setAgreementSecret(agreementKeys, topic: topicB)
 //        let permissions = SessionPermissions.stub()
-//        let relayOptions = RelayProtocolOptions(protocol: "", params: nil)
+//        let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
 //        engine.proposeSession(settledPairing: pairing, permissions: permissions, relay: relayOptions)
 //
 //        guard let publishTopic = relayMock.requests.first?.topic, let request = relayMock.requests.first?.request else {

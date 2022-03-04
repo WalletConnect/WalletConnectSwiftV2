@@ -455,7 +455,7 @@ final class SessionEngine {
     private func handleProposeResponse(topic: String, proposal: SessionProposal, result: JsonRpcResult) {
         switch result {
         case .response(let response):
-            let selfPublicKey = try! kms.createX25519KeyPair()
+            let selfPublicKey = try! AgreementPublicKey(hex: proposal.proposer.publicKey)
             var agreementKeys: AgreementSecret!
             
             do {

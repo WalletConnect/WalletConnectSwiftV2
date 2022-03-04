@@ -4,7 +4,7 @@ import Combine
 import WalletConnectUtils
 import WalletConnectKMS
 
-struct WCResponse {
+struct WCResponse: Codable {
     let topic: String
     let chainId: String?
     let requestMethod: WCRequest.Method
