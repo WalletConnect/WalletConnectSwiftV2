@@ -2,14 +2,15 @@ import Foundation
 import WalletConnectUtils
 
 
+
 public class Serializer {
     enum Error: String, Swift.Error {
         case messageToShort = "Error: message is too short"
     }
-    private let kms: KeyManagementService
+    private let kms: KeyManagementServiceProtocol
     private let codec: Codec
     
-    init(kms: KeyManagementService, codec: Codec = AES_256_CBC_HMAC_SHA256_Codec()) {
+    init(kms: KeyManagementServiceProtocol, codec: Codec = AES_256_CBC_HMAC_SHA256_Codec()) {
         self.kms = kms
         self.codec = codec
     }
@@ -27,9 +28,8 @@ public class Serializer {
     public func serialize(topic: String, encodable: Encodable) throws -> String {
         let messageJson = try encodable.json()
         var message: String
-        //todo - get symmetric key or agreement key - remove hex encoding
-        if let agreementKeys = try? kms.getAgreementSecret(for: topic) {
-            message = try encrypt(json: messageJson, agreementKeys: agreementKeys)
+        if let symmetricKey = try? kms.getSymmetricKeyRepresentable(for: topic) {
+            message = try encrypt(json: messageJson, symmetricKey: symmetricKey)
         } else {
             message = messageJson.toHexEncodedString(uppercase: false)
         }
@@ -44,8 +44,8 @@ public class Serializer {
     public func tryDeserialize<T: Codable>(topic: String, message: String) -> T? {
         do {
             let deserializedCodable: T
-            if let agreementKeys = try? kms.getAgreementSecret(for: topic) {
-                deserializedCodable = try deserialize(message: message, symmetricKey: agreementKeys.sharedSecret)
+            if let symmetricKey = try? kms.getSymmetricKeyRepresentable(for: topic) {
+                deserializedCodable = try deserialize(message: message, symmetricKey: symmetricKey)
             } else {
                 let jsonData = Data(hex: message)
                 deserializedCodable = try JSONDecoder().decode(T.self, from: jsonData)
@@ -56,13 +56,13 @@ public class Serializer {
         }
     }
     
-    func deserialize<T: Codable>(message: String, symmetricKey: Data) throws -> T {
+    func deserialize<T: Codable>(message: String, symmetricKey: SymmetricRepresentable) throws -> T {
         let decryptedData = try decrypt(message: message, symmetricKey: symmetricKey)
         return try JSONDecoder().decode(T.self, from: decryptedData)
     }
     
-    func encrypt(json: String, agreementKeys: AgreementSecret) throws -> String {
-        let payload = try codec.encode(plainText: json, agreementKeys: agreementKeys)
+    func encrypt(json: String, symmetricKey: SymmetricRepresentable) throws -> String {
+        let payload = try codec.encode(plainText: json, symmetricKey: symmetricKey)
         let iv = payload.iv.toHexString()
         let publicKey = payload.publicKey.toHexString()
         let mac = payload.mac.toHexString()
@@ -70,9 +70,9 @@ public class Serializer {
         return "\(iv)\(publicKey)\(mac)\(cipherText)"
     }
     
-    private func decrypt(message: String, symmetricKey: Data) throws -> Data {
+    private func decrypt(message: String, symmetricKey: SymmetricRepresentable) throws -> Data {
         let encryptionPayload = try deserializeIntoPayload(message: message)
-        let decryptedString = try codec.decode(payload: encryptionPayload, sharedSecret: symmetricKey)
+        let decryptedString = try codec.decode(payload: encryptionPayload, symmetricKey: symmetricKey)
         guard let decryptedData = decryptedString.data(using: .utf8) else {
             throw DataConversionError.stringToDataFailed
         }

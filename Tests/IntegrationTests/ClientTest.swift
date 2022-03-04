@@ -40,17 +40,15 @@ final class ClientTests: XCTestCase {
     }
     
     func testNewPairingWithoutSession() {
-        let proposerSettlesPairingExpectation = expectation(description: "Proposer settles pairing")
-        let responderSettlesPairingExpectation = expectation(description: "Responder settles pairing")
+        let responderReceivesPingResponseExpectation = expectation(description: "Responder receives ping response")
         let permissions = Session.Permissions.stub()
         let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         
-        _ = try! responder.client.pair(uri: uri)
-        responder.onPairingSettled = { _ in
-            responderSettlesPairingExpectation.fulfill()
-        }
-        proposer.onPairingSettled = { pairing in
-            proposerSettlesPairingExpectation.fulfill()
+        try! responder.client.pair(uri: uri)
+        let pairing = responder.client.getSettledPairings().first!
+        responder.client.ping(topic: pairing.topic) { response in
+            XCTAssertTrue(response.isSuccess)
+            responderReceivesPingResponseExpectation.fulfill()
         }
         waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
@@ -89,9 +87,9 @@ final class ClientTests: XCTestCase {
         let permissions = Session.Permissions.stub()
         let uri = try! proposer.client.connect(sessionPermissions: permissions, topic: nil)!
         try! responder.client.pair(uri: uri)
-        proposer.onPairingSettled = { pairing in
-            pairingTopic = pairing.topic
-        }
+//        proposer.onPairingSettled = { pairing in
+//            pairingTopic = pairing.topic
+//        }
         responder.onSessionProposal = { [unowned self] proposal in
             responder.client.approve(proposal: proposal, accounts: [])
         }
@@ -216,12 +214,12 @@ final class ClientTests: XCTestCase {
         let uri = try! proposer.client.connect(sessionPermissions: permissions)!
         
         _ = try! responder.client.pair(uri: uri)
-        proposer.onPairingSettled = { [unowned self] pairing in
-            proposer.client.ping(topic: pairing.topic) { response in
-                XCTAssertTrue(response.isSuccess)
-                proposerReceivesPingResponseExpectation.fulfill()
-            }
-        }
+//        proposer.onPairingSettled = { [unowned self] pairing in
+//            proposer.client.ping(topic: pairing.topic) { response in
+//                XCTAssertTrue(response.isSuccess)
+//                proposerReceivesPingResponseExpectation.fulfill()
+//            }
+//        }
         waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     

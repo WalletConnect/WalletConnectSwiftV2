@@ -1,6 +1,23 @@
 import Foundation
 
-public class KeyManagementService {
+public protocol KeyManagementServiceProtocol {
+    func createX25519KeyPair() throws -> AgreementPublicKey
+    func createSymmetricKey(_ topic: String) throws -> SymmetricKey
+    func setPrivateKey(_ privateKey: AgreementPrivateKey) throws
+    func setAgreementSecret(_ agreementSecret: AgreementSecret, topic: String) throws
+    func setSymmetricKey(_ symmetricKey: SymmetricKey, for topic: String) throws
+    func getPrivateKey(for publicKey: AgreementPublicKey) throws -> AgreementPrivateKey?
+    func getAgreementSecret(for topic: String) throws -> AgreementSecret?
+    func getSymmetricKey(for topic: String) throws -> SymmetricKey?
+    func getSymmetricKeyRepresentable(for topic: String) -> SymmetricRepresentable?
+    func deletePrivateKey(for publicKey: String)
+    func deleteAgreementSecret(for topic: String)
+    func deleteSymmetricKey(for topic: String)
+    func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementSecret
+}
+
+public class KeyManagementService: KeyManagementServiceProtocol {
+
     enum Error: Swift.Error {
         case keyNotFound
     }
@@ -42,10 +59,16 @@ public class KeyManagementService {
     public func getSymmetricKey(for topic: String) throws -> SymmetricKey? {
         do {
             return try keychain.read(key: topic) as SymmetricKey
-        } catch let error where (error as? KeychainError)?.status == errSecItemNotFound {
-            return nil
         } catch {
-            throw error
+            return nil
+        }
+    }
+    
+    public func getSymmetricKeyRepresentable(for topic: String) -> SymmetricRepresentable? {
+        if let key = try? getAgreementSecret(for: topic) {
+            return key
+        } else {
+            return try? getSymmetricKey(for: topic)
         }
     }
     
@@ -62,10 +85,8 @@ public class KeyManagementService {
     public func getAgreementSecret(for topic: String) throws -> AgreementSecret? {
         do {
             return try keychain.read(key: topic) as AgreementSecret
-        } catch let error where (error as? KeychainError)?.status == errSecItemNotFound {
-            return nil
         } catch {
-            throw error
+            return nil
         }
     }
     

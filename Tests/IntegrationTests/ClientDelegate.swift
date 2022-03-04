@@ -5,7 +5,6 @@ import Foundation
 class ClientDelegate: WalletConnectClientDelegate {
     var client: WalletConnectClient
     var onSessionSettled: ((Session)->())?
-    var onPairingSettled: ((Pairing)->())?
     var onSessionProposal: ((Session.Proposal)->())?
     var onSessionRequest: ((Request)->())?
     var onSessionResponse: ((Response)->())?
@@ -26,9 +25,6 @@ class ClientDelegate: WalletConnectClientDelegate {
     }
     func didSettle(session: Session) {
         onSessionSettled?(session)
-    }
-    func didSettle(pairing: Pairing) {
-        onPairingSettled?(pairing)
     }
     func didReceive(sessionProposal: Session.Proposal) {
         onSessionProposal?(sessionProposal)
