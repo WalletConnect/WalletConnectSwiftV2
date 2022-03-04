@@ -111,28 +111,25 @@ final class SessionEngineTests: XCTestCase {
     
     func testSessionProposeResponse() {
         setupEngine()
-        
-        
-        
+
         let pairing = Pairing.stub()
         let topicA = pairing.topic
         let permissions = SessionPermissions.stub()
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
         
-        //propose
+        // Client propose session
         engine.proposeSession(pairing: pairing, permissions: permissions, relay: relayOptions)
         
-        // receive response
         guard let request = relayMock.requests.first?.request,
               let proposal = relayMock.requests.first?.request.sessionProposal else {
-            XCTFail("Responder must publish an approval request."); return
+            XCTFail("Proposer must publish session proposal request"); return
         }
+        
+        // Client receives proposal response response
         let responder = AgreementPeer.stub()
         let proposalResponse = SessionType.ProposeResponse(relay: relayOptions, responder: responder)
-        let encoded = try! JSONEncoder().encode(proposalResponse)
-        let decoded = try! JSONDecoder().decode(AnyCodable.self, from: encoded)
 
-        let jsonRpcResponse = JSONRPCResponse<AnyCodable>(id: request.id, result: decoded)
+        let jsonRpcResponse = JSONRPCResponse<AnyCodable>(id: request.id, result: AnyCodable.decoded(proposalResponse))
         let response = WCResponse(topic: topicA,
                                   chainId: nil,
                                   requestMethod: request.method,
@@ -143,7 +140,6 @@ final class SessionEngineTests: XCTestCase {
         
         let privateKey = try! cryptoMock.getPrivateKey(for: proposal.proposer.publicKey)!
         let topicB = deriveTopic(publicKey: responder.publicKey, privateKey: privateKey)
-        
         
         XCTAssert(subscriberMock.didSubscribe(to: topicB), "Proposer must subscribe for session topic B")
         XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Proposer must store agreement key for topic B")

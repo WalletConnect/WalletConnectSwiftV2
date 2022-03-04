@@ -439,7 +439,7 @@ final class SessionEngine {
         case .sessionApprove(_):
             handleApproveResponse(topic: response.topic, result: response.result)
         case .sessionPropose(let proposal):
-            handleProposeResponse(topic: response.topic, proposal: proposal, result: response.result)
+            handleProposeResponse(pairingTopic: response.topic, proposal: proposal, result: response.result)
         case .sessionUpdate:
             handleUpdateResponse(topic: response.topic, result: response.result)
         case .sessionUpgrade:
@@ -452,7 +452,7 @@ final class SessionEngine {
         }
     }
     
-    private func handleProposeResponse(topic: String, proposal: SessionProposal, result: JsonRpcResult) {
+    private func handleProposeResponse(pairingTopic: String, proposal: SessionProposal, result: JsonRpcResult) {
         switch result {
         case .response(let response):
             let selfPublicKey = try! AgreementPublicKey(hex: proposal.proposer.publicKey)
@@ -470,11 +470,14 @@ final class SessionEngine {
             wcSubscriber.setSubscription(topic: sessionTopic)
             
             let pendingSession = SessionSequence.buildResponded(proposal: proposal, agreementKeys: agreementKeys, metadata: nil, topic: sessionTopic)
+            try! kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
+
             sequencesStore.setSequence(pendingSession)
+            sequencesStore.delete(topic: pairingTopic)
             
         case .error:
             kms.deletePrivateKey(for: proposal.proposer.publicKey)
-            sequencesStore.delete(topic: topic)
+            sequencesStore.delete(topic: pairingTopic)
             return
         }
     }
