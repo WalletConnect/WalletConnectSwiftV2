@@ -145,7 +145,34 @@ final class SessionEngineTests: XCTestCase {
         XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Proposer must store agreement key for topic B")
         XCTAssert(storageMock.hasSequence(forTopic: topicB), "Proposer must persist a session on topic B")
         XCTAssertFalse(storageMock.hasSequence(forTopic: topicA), "Proposer must remove pending session on topic A")
+    }
+    
+    func testSessionProposeError() {
+        setupEngine()
 
+        let pairing = Pairing.stub()
+        let topicA = pairing.topic
+        let permissions = SessionPermissions.stub()
+        let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
+        
+        // Client propose session
+        engine.proposeSession(pairing: pairing, permissions: permissions, relay: relayOptions)
+        
+        guard let request = relayMock.requests.first?.request,
+              let proposal = relayMock.requests.first?.request.sessionProposal else {
+            XCTFail("Proposer must publish session proposal request"); return
+        }
+        let errorResponse = JSONRPCErrorResponse(id: request.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))
+        let response = WCResponse(topic: topicA,
+                                  chainId: nil,
+                                  requestMethod: request.method,
+                                  requestParams: request.params,
+                                  result: .error(errorResponse))
+
+        relayMock.onResponse?(response)
+        
+        XCTAssertFalse(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must remove private key for rejected session")
+        XCTAssertFalse(storageMock.hasSequence(forTopic: topicA), "Proposer must remove pending session on topic A")
     }
 
 //    func testProposeResponseFailure() {
