@@ -42,7 +42,7 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func setupEngine() {
-        metadata = AppMetadata(name: nil, description: nil, url: nil, icons: nil)
+        metadata = AppMetadata.stub()
         let logger = ConsoleLoggerMock()
         engine = SessionEngine(
             relay: relayMock,
