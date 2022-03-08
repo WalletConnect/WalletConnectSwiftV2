@@ -12,12 +12,12 @@ public struct AgreementSecret: Equatable {
 
 extension AgreementSecret: GenericPasswordConvertible {
     enum Error: Swift.Error {
-        case forbiddenBufferLenght
+        case invalidBufferLenght
     }
     public init<D>(rawRepresentation data: D) throws where D : ContiguousBytes {
         let buffer = data.withUnsafeBytes { Data($0) }
         guard buffer.count == 64 else {
-            throw Error.forbiddenBufferLenght
+            throw Error.invalidBufferLenght
         }
         self.sharedSecret = buffer.subdata(in: 0..<32)
         self.publicKey = try AgreementPublicKey(rawRepresentation: buffer.subdata(in: 32..<64))

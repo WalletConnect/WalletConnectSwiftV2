@@ -149,7 +149,7 @@ extension SessionSequence {
         )
     }
     
-    static func buildResponded(proposal: SessionProposal, agreementKeys: AgreementSecret, metadata: AppMetadata, topic: String) -> SessionSequence {
+    static func buildResponded(proposal: SessionProposal, agreementKeys: AgreementSecret, metadata: AppMetadata?, topic: String) -> SessionSequence {
         SessionSequence(
             topic: topic,
             relay: proposal.relay,

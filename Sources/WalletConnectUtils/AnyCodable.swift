@@ -13,7 +13,7 @@ public struct AnyCodable {
     
     private var genericEncoding: ((Encoder) throws -> Void)?
     
-    public init(_ value: Any) {
+    private init(_ value: Any) {
         self.value = value
     }
 

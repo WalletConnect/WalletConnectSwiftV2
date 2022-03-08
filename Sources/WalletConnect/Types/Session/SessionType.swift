@@ -18,10 +18,6 @@ internal enum SessionType {
         let state: SessionState
     }
     
-    struct RejectParams: Codable, Equatable {
-        let reason: Reason
-    }
-    
     struct UpdateParams: Codable, Equatable {
         let state: SessionState
         

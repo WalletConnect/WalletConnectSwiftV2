@@ -9,14 +9,14 @@ public enum RejectionReason {
 }
 
 internal extension RejectionReason {
-    func internalRepresentation() -> SessionType.Reason {
+    func internalRepresentation() -> ReasonCode {
         switch self {
         case .disapprovedChains:
-            return SessionType.Reason(code: 5000, message: "User disapproved requested chains")
+            return ReasonCode.disapprovedChains
         case .disapprovedMethods:
-            return SessionType.Reason(code: 5001, message: "User disapproved requested json-rpc methods")
+            return ReasonCode.disapprovedMethods
         case  .disapprovedNotificationTypes:
-            return SessionType.Reason(code: 5002, message: "User disapproved requested notification types")
+            return ReasonCode.disapprovedNotificationTypes
         }
     }
 }

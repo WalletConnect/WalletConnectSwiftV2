@@ -66,6 +66,10 @@ final class KeyManagementServiceMock: KeyManagementServiceProtocol {
         privateKeys[publicKey.rawRepresentation.toHexString()]
     }
     
+    func getPrivateKey(for publicKey: String) throws -> AgreementPrivateKey? {
+        privateKeys[publicKey]
+    }
+    
     func setAgreementSecret(_ agreementKeys: AgreementSecret, topic: String) {
         self.agreementKeys[topic] = agreementKeys
     }

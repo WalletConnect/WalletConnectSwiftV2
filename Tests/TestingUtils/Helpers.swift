@@ -1,4 +1,5 @@
 import Foundation
+import WalletConnectUtils
 
 public let defaultTimeout: TimeInterval = 5.0
 
@@ -21,3 +22,9 @@ public extension Result {
     }
 }
 
+extension AnyCodable {
+    static func decoded<C>(_ codable: C) -> AnyCodable where C: Codable {
+        let encoded = try! JSONEncoder().encode(codable)
+        return try! JSONDecoder().decode(AnyCodable.self, from: encoded)
+    }
+}

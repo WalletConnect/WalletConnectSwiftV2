@@ -63,6 +63,12 @@ extension Participant {
     }
 }
 
+extension AgreementPeer {
+    static func stub(publicKey: String = AgreementPrivateKey().publicKey.hexRepresentation) -> AgreementPeer {
+        AgreementPeer(publicKey: publicKey)
+    }
+}
+
 extension WCRequestSubscriptionPayload {
     static func stubUpdate(topic: String, accounts: [String] = ["std:0:0"]) -> WCRequestSubscriptionPayload {
         let updateMethod = WCMethod.wcSessionUpdate(SessionType.UpdateParams(state: SessionState(accounts: accounts))).asRequest()

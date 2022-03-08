@@ -60,7 +60,6 @@ final class SessionEngine {
             return Session(topic: $0.topic, peer: settled.peer.metadata!, permissions: permissions, accounts: settled.accounts, expiryDate: $0.expiryDate, blockchains: settled.blockchain)
         }
     }
-        
 
     func proposeSession(pairing: Pairing, permissions: SessionPermissions, relay: RelayProtocolOptions) {
         logger.debug("Propose Session on topic: \(pairing.topic)")
@@ -84,10 +83,6 @@ final class SessionEngine {
                 logger.debug("Could not send session proposal error: \(error)")
             }
         }
-    }
-    
-    func reject(proposal: SessionProposal, reason: SessionType.Reason ) {
-
     }
     
     func delete(topic: String, reason: Reason) {
@@ -224,8 +219,6 @@ final class SessionEngine {
             switch subscriptionPayload.wcRequest.params {
             case .sessionPropose(let proposeParams):
                 wcSessionPropose(subscriptionPayload, proposal: proposeParams)
-            case .sessionReject(let rejectParams):
-                wcSessionReject(subscriptionPayload, rejectParams: rejectParams)
             case .sessionUpdate(let updateParams):
                 wcSessionUpdate(payload: subscriptionPayload, updateParams: updateParams)
             case .sessionUpgrade(let upgradeParams):
@@ -249,6 +242,15 @@ final class SessionEngine {
     private func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
         proposerToRequestPayload[proposal.proposer.publicKey] = payload
         onSessionProposal?(proposal)
+    }
+    
+    
+    func reject(proposal: SessionProposal, reason: ReasonCode) {
+        guard let payload = proposerToRequestPayload[proposal.proposer.publicKey] else {
+            return
+        }
+        proposerToRequestPayload[proposal.proposer.publicKey] = nil
+        relayer.respondError(for: payload, reason: reason)
     }
         
     func respondSessionPropose(proposal: SessionType.ProposeParams) {
@@ -278,18 +280,6 @@ final class SessionEngine {
         let proposeResponse = SessionType.ProposeResponse(relay: proposal.relay, responder: AgreementPeer(publicKey: selfPublicKey.hexRepresentation))
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
         relayer.respond(topic: payload.topic, response: .response(response)) { _ in }
-    }
-    
-    private func wcSessionReject(_ payload: WCRequestSubscriptionPayload, rejectParams: SessionType.RejectParams) {
-        let topic = payload.topic
-        guard sequencesStore.hasSequence(forTopic: topic) else {
-            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
-            return
-        }
-        sequencesStore.delete(topic: topic)
-        wcSubscriber.removeSubscription(topic: topic)
-        relayer.respondSuccess(for: payload)
-        onSessionRejected?(topic, rejectParams.reason)
     }
     
     private func wcSessionUpdate(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {
@@ -448,6 +438,8 @@ final class SessionEngine {
         switch response.requestParams {
         case .sessionApprove(_):
             handleApproveResponse(topic: response.topic, result: response.result)
+        case .sessionPropose(let proposal):
+            handleProposeResponse(pairingTopic: response.topic, proposal: proposal, result: response.result)
         case .sessionUpdate:
             handleUpdateResponse(topic: response.topic, result: response.result)
         case .sessionUpgrade:
@@ -460,16 +452,33 @@ final class SessionEngine {
         }
     }
     
-    private func handleProposeResponse(topic: String, proposeParams: SessionProposal, result: JsonRpcResult) {
+    private func handleProposeResponse(pairingTopic: String, proposal: SessionProposal, result: JsonRpcResult) {
         switch result {
-        case .response:
-            break
+        case .response(let response):
+            let selfPublicKey = try! AgreementPublicKey(hex: proposal.proposer.publicKey)
+            var agreementKeys: AgreementSecret!
+            
+            do {
+                let proposeResponse = try response.result.get(SessionType.ProposeResponse.self)
+                agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposeResponse.responder.publicKey)
+            } catch {
+                //TODO - handle error
+                return
+            }
+
+            let sessionTopic = agreementKeys.derivedTopic()
+            wcSubscriber.setSubscription(topic: sessionTopic)
+            
+            let pendingSession = SessionSequence.buildResponded(proposal: proposal, agreementKeys: agreementKeys, metadata: nil, topic: sessionTopic)
+            try! kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
+
+            sequencesStore.setSequence(pendingSession)
+            sequencesStore.delete(topic: pairingTopic)
+            
         case .error:
+            kms.deletePrivateKey(for: proposal.proposer.publicKey)
+            sequencesStore.delete(topic: pairingTopic)
             return
-//            wcSubscriber.removeSubscription(topic: proposeParams.topic)
-//            kms.deletePrivateKey(for: proposeParams.proposer.publicKey)
-//            kms.deleteAgreementSecret(for: topic)
-//            sequencesStore.delete(topic: proposeParams.topic)
         }
     }
     
