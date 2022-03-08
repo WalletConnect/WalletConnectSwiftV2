@@ -5,7 +5,7 @@ enum WCMethod {
     case wcSessionSettle(SessionType.SettleParams)
     case wcSessionUpdate(SessionType.UpdateParams)
     case wcSessionUpgrade(SessionType.UpgradeParams)
-    case wcSessionDelete(SessionType.DeleteParams)cal
+    case wcSessionDelete(SessionType.DeleteParams)
     case wcSessionPayload(SessionType.PayloadParams)
     case wcSessionPing
     case wcSessionExtend(SessionType.ExtendParams)

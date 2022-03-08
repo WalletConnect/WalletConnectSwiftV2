@@ -126,7 +126,6 @@ extension WCRequest {
         case pairingDelete(PairingType.DeleteParams)
         case pairingPing(PairingType.PingParams)
         case pairingExtend(PairingType.ExtendParams)
-        // sessionPropose method exists exclusively within a pairing payload
         case sessionPropose(SessionType.ProposeParams)
         case sessionSettle(SessionType.SettleParams)
         case sessionUpdate(SessionType.UpdateParams)

@@ -188,6 +188,10 @@ final class SessionEngineTests: XCTestCase {
     func testHandleSessionSettleAcknowledge() {
         // responder must ack session
     }
+    
+    func testHandleSessionSettleError() {
+        //?
+    }
 
 //    func testProposeResponseFailure() {
 //        setupEngine()

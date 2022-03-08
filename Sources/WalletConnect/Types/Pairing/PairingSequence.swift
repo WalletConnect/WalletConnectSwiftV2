@@ -40,7 +40,7 @@ struct PairingSequence: ExpirableSequence {
     
     static func createFromURI(_ uri: WalletConnectURI) -> PairingSequence {
         return PairingSequence(
-            topic: uri.topic,x§
+            topic: uri.topic,
             relay: uri.relay,
             expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveSettled)))
     }

@@ -253,8 +253,8 @@ final class SessionEngine {
         relayer.respondError(for: payload, reason: reason)
     }
     
-    func approve(proposal: SessionType.ProposeParams, accounts: accounts) {
-        guard sessionTopic = respondSessionPropose(proposal: proposal) else {return}
+    func approve(proposal: SessionType.ProposeParams, accounts: Set<Account>) {
+        guard let sessionTopic = respondSessionPropose(proposal: proposal) else {return}
         settle(topic: sessionTopic, proposal: proposal, accounts: accounts)
     }
         
@@ -312,7 +312,7 @@ final class SessionEngine {
         
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!
         
-        let session = SessionSequence.buildAcknowledged(settleParams: settleParams, agreementKeys: agreementKeys, metadata: metadata)
+        let session = SessionSequence.buildAcknowledged(topic: topic, settleParams: settleParams, agreementKeys: agreementKeys, metadata: metadata)
         
         sequencesStore.setSequence(session)
         
@@ -476,9 +476,8 @@ final class SessionEngine {
         switch response.requestParams {
         case .sessionPropose(let proposal):
             handleProposeResponse(pairingTopic: response.topic, proposal: proposal, result: response.result)
-        case .sessionSettle() {
-            
-        }
+        case .sessionSettle:
+            handleSessionSettleResponse(topic: response.topic, result: response.result)
         case .sessionUpdate:
             handleUpdateResponse(topic: response.topic, result: response.result)
         case .sessionUpgrade:
@@ -518,6 +517,20 @@ final class SessionEngine {
             kms.deletePrivateKey(for: proposal.proposer.publicKey)
             sequencesStore.delete(topic: pairingTopic)
             return
+        }
+    }
+    
+    func handleSessionSettleResponse(topic: String, result: JsonRpcResult) {
+        guard let preSettledSession = sequencesStore.getSequence(forTopic: topic) else {return}
+        switch result {
+        case .response:
+            //todo - acknowledge preSettled
+            onSessionApproved?(Session(topic: <#T##String#>, peer: <#T##AppMetadata#>, permissions: <#T##Session.Permissions#>, accounts: <#T##Set<Account>#>, expiryDate: <#T##Date#>, blockchains: <#T##Set<String>#>))
+        case .error(let error):
+            wcSubscriber.removeSubscription(topic: topic)
+            sequencesStore.delete(topic: topic)
+            kms.deleteAgreementSecret(for: topic)
+            kms.deletePrivateKey(for: preSettledSession.publicKey!)
         }
     }
     

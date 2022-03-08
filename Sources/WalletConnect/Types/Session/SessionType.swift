@@ -16,11 +16,12 @@ internal enum SessionType {
         let blockchain: BlockchainSettled
         let permissions: SessionPermissions
         let controller: Participant
+        let expiry: Double // todo!!
     }
     
     struct BlockchainSettled: Codable, Equatable {
-        let chains: [String]
-        let accounts: [String]
+        let chains: Set<String>
+        let accounts: Set<String>
     }
     
     struct UpdateParams: Codable, Equatable {
