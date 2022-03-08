@@ -11,12 +11,6 @@ internal enum SessionType {
         let responder: AgreementPeer
     }
     
-    struct ApproveParams: Codable, Equatable {
-        let relay: RelayProtocolOptions
-        let responder: Participant
-        let expiry: Int
-    }
-    
     struct SettleParams: Codable, Equatable {
         let relay: RelayProtocolOptions
         let blockchain: BlockchainSettled

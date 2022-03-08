@@ -38,9 +38,9 @@ struct WCRequest: Codable {
         case .sessionPropose:
             let paramsValue = try container.decode(SessionType.ProposeParams.self, forKey: .params)
             params = .sessionPropose(paramsValue)
-        case .sessionApprove:
-            let paramsValue = try container.decode(SessionType.ApproveParams.self, forKey: .params)
-            params = .sessionApprove(paramsValue)
+        case .sessionSettle:
+            let paramsValue = try container.decode(SessionType.SettleParams.self, forKey: .params)
+            params = .sessionSettle(paramsValue)
         case .sessionUpdate:
             let paramsValue = try container.decode(SessionType.UpdateParams.self, forKey: .params)
             params = .sessionUpdate(paramsValue)
@@ -79,7 +79,7 @@ struct WCRequest: Codable {
             try container.encode(params, forKey: .params)
         case .sessionPropose(let params):
             try container.encode(params, forKey: .params)
-        case .sessionApprove(let params):
+        case .sessionSettle(let params):
             try container.encode(params, forKey: .params)
         case .sessionUpdate(let params):
             try container.encode(params, forKey: .params)
@@ -110,7 +110,7 @@ extension WCRequest {
         case pairingPing = "wc_pairingPing"
         case pairingExtend = "wc_pairingExtend"
         case sessionPropose = "wc_sessionPropose"
-        case sessionApprove = "wc_sessionApprove"
+        case sessionSettle = "wc_sessionSettle"
         case sessionUpdate = "wc_sessionUpdate"
         case sessionUpgrade = "wc_sessionUpgrade"
         case sessionDelete = "wc_sessionDelete"
@@ -128,7 +128,7 @@ extension WCRequest {
         case pairingExtend(PairingType.ExtendParams)
         // sessionPropose method exists exclusively within a pairing payload
         case sessionPropose(SessionType.ProposeParams)
-        case sessionApprove(SessionType.ApproveParams)
+        case sessionSettle(SessionType.SettleParams)
         case sessionUpdate(SessionType.UpdateParams)
         case sessionUpgrade(SessionType.UpgradeParams)
         case sessionDelete(SessionType.DeleteParams)
@@ -145,7 +145,7 @@ extension WCRequest {
                 return lhsParam == rhsParams
             case (.sessionPropose(let lhsParam), sessionPropose(let rhsParam)):
                 return lhsParam == rhsParam
-            case (.sessionApprove(let lhsParam), sessionApprove(let rhsParam)):
+            case (.sessionSettle(let lhsParam), sessionSettle(let rhsParam)):
                 return lhsParam == rhsParam
             case (.sessionUpdate(let lhsParam), sessionUpdate(let rhsParam)):
                 return lhsParam == rhsParam

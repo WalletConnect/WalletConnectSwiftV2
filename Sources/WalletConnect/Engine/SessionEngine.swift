@@ -253,12 +253,12 @@ final class SessionEngine {
         relayer.respondError(for: payload, reason: reason)
     }
     
-    func approve(proposal: SessionType.ProposeParams) {
-        guard session = respondSessionPropose(proposal: proposal) else {return}
-        settle(session)
+    func approve(proposal: SessionType.ProposeParams, accounts: accounts) {
+        guard sessionTopic = respondSessionPropose(proposal: proposal) else {return}
+        settle(topic: sessionTopic, proposal: proposal, accounts: accounts)
     }
         
-    func respondSessionPropose(proposal: SessionType.ProposeParams) -> SessionSequence? {
+    func respondSessionPropose(proposal: SessionType.ProposeParams) -> String? {
         guard let payload = proposerToRequestPayload[proposal.proposer.publicKey] else {
             return nil
         }
@@ -275,8 +275,7 @@ final class SessionEngine {
         }
 
         let sessionTopic = agreementKey.derivedTopic()
-        
-        let pendingSession = SessionSequence.buildResponded(proposal: proposal, agreementKeys: agreementKey, metadata: metadata, topic: sessionTopic)
+
         
         sequencesStore.setSequence(pendingSession)
 
@@ -285,20 +284,24 @@ final class SessionEngine {
         let proposeResponse = SessionType.ProposeResponse(relay: proposal.relay, responder: AgreementPeer(publicKey: selfPublicKey.hexRepresentation))
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
         relayer.respond(topic: payload.topic, response: .response(response)) { _ in }
-        return pendingSession
+        return sessionTopic
     }
     
     
-    func settle(_ session: SessionSequence) {
-//        wc_sessionSettle
-//        Request
-//           Params = relay, state, blockchainSettled (chains, auth, accounts, signatures),                     permissions, controller (pubKey, metadata)
-//        Response
-//          Success (acknowledgement) =  boolean
-//          Error (failure) = code, message
+    func settle(topic: String, proposal: SessionProposal, accounts: Set<Account>) {
+        let agreementKeys = try! kms.getAgreementSecret(for: topic)!
         
+        let selfParticipant = Participant(publicKey: agreementKeys.publicKey, metadata: metadata)
         
+        SessionSequence.buildPreSettled(proposal: proposal, agreementKeys: agreementKeys, metadata: metadata, accounts: accounts)
+        
+        let settleParams = SessionType.SettleParams(
+            relay: proposal.relay,
+            blockchain: proposal.blockchainProposed,
+            permissions: proposal.permissions,
+            controller: selfParticipant)
 
+        relayer.request(.wcSessionSettle(settleParams), onTopic: session.topic)
     }
     
     private func wcSessionUpdate(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {
