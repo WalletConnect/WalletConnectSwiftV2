@@ -258,7 +258,7 @@ final class SessionEngine {
         settle(topic: sessionTopic, proposal: proposal, accounts: accounts)
     }
         
-    func respondSessionPropose(proposal: SessionType.ProposeParams) -> String? {
+    private func respondSessionPropose(proposal: SessionType.ProposeParams) -> String? {
         guard let payload = proposerToRequestPayload[proposal.proposer.publicKey] else {
             return nil
         }
@@ -288,10 +288,10 @@ final class SessionEngine {
     }
     
     
-    func settle(topic: String, proposal: SessionProposal, accounts: Set<Account>) {
+    private func settle(topic: String, proposal: SessionProposal, accounts: Set<Account>) {
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!
         
-        let selfParticipant = Participant(publicKey: agreementKeys.publicKey, metadata: metadata)
+        let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
         
         SessionSequence.buildPreSettled(proposal: proposal, agreementKeys: agreementKeys, metadata: metadata, accounts: accounts)
         
@@ -301,7 +301,23 @@ final class SessionEngine {
             permissions: proposal.permissions,
             controller: selfParticipant)
 
-        relayer.request(.wcSessionSettle(settleParams), onTopic: session.topic)
+        relayer.request(.wcSessionSettle(settleParams), onTopic: topic)
+    }
+    
+    private func wcSessionSettle(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
+        let topic = payload.topic
+        guard let pendingSession = sequencesStore.getSequence(forTopic: topic) else {
+            return
+        }
+        
+        let agreementKeys = try! kms.getAgreementSecret(for: topic)!
+        
+        let session = SessionSequence.buildAcknowledged(settleParams: settleParams, agreementKeys: agreementKeys, metadata: metadata)
+        
+        sequencesStore.setSequence(session)
+        
+        relayer.respondSuccess(for: payload)
+        onSessionApproved?(<#Session#>)
     }
     
     private func wcSessionUpdate(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {
@@ -458,10 +474,11 @@ final class SessionEngine {
     
     private func handleResponse(_ response: WCResponse) {
         switch response.requestParams {
-        case .sessionApprove(_):
-            handleApproveResponse(topic: response.topic, result: response.result)
         case .sessionPropose(let proposal):
             handleProposeResponse(pairingTopic: response.topic, proposal: proposal, result: response.result)
+        case .sessionSettle() {
+            
+        }
         case .sessionUpdate:
             handleUpdateResponse(topic: response.topic, result: response.result)
         case .sessionUpgrade:
@@ -504,7 +521,6 @@ final class SessionEngine {
         }
     }
     
-    // FIXME: Session is not changed to acknowledged status
     private func handleApproveResponse(topic: String, result: JsonRpcResult) {
         guard
             let pendingSession = sequencesStore.getSequence(forTopic: topic),

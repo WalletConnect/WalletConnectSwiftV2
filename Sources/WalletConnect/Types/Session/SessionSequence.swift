@@ -166,7 +166,7 @@ extension SessionSequence {
     static func buildPreSettled(proposal: SessionProposal, agreementKeys: AgreementSecret, metadata: AppMetadata, accounts: Set<Account>) -> SessionSequence {
         let controllerKey = agreementKeys.publicKey.hexRepresentation
         return SessionSequence(
-            topic: agreementKeys.derivedTopic(),
+            topic: ,
             relay: proposal.relay,
             selfParticipant: Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata),
             expiryDate: Date(timeIntervalSinceNow: TimeInterval(SessionSequence.timeToLiveSettled)),
@@ -183,10 +183,10 @@ extension SessionSequence {
         )
     }
     
-    static func buildAcknowledged(approval approveParams: SessionType.ApproveParams, proposal: SessionProposal, agreementKeys: AgreementSecret, metadata: AppMetadata) -> SessionSequence {
+    static func buildAcknowledged(settleParams : SessionType.settleParams, agreementKeys: AgreementSecret, metadata: AppMetadata) -> SessionSequence {
         let controllerKey = approveParams.responder.publicKey
         return SessionSequence(
-            topic: agreementKeys.derivedTopic(),
+            topic: ,
             relay: approveParams.relay,
             selfParticipant: Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata),
             expiryDate: Date(timeIntervalSince1970: TimeInterval(approveParams.expiry)),

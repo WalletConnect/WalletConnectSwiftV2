@@ -176,18 +176,19 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testSessionSettle() {
-        
         // responder must send session settle payload on topic B
         // responder must persist session on topic B
     }
     
-    func testSessionSettleAcknowledge() {
-        
+    func testHandleSessionSettle() {
+        // proposer must store session ack on topic B
+        // proposer must send ack response
+    }
+    
+    func testHandleSessionSettleAcknowledge() {
+        // responder must ack session
     }
 
-    func testHandleSessionSettle() {
-        
-    }
 //    func testProposeResponseFailure() {
 //        setupEngine()
 //        let pairing = Pairing.stub()
