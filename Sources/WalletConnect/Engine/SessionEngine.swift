@@ -61,7 +61,7 @@ final class SessionEngine {
         }
     }
 
-    func proposeSession(pairing: Pairing, permissions: SessionPermissions, relay: RelayProtocolOptions) {
+    func propose(pairing: Pairing, permissions: SessionPermissions, relay: RelayProtocolOptions) {
         logger.debug("Propose Session on topic: \(pairing.topic)")
         let publicKey = try! kms.createX25519KeyPair()
         let proposer = Proposer(
@@ -252,10 +252,15 @@ final class SessionEngine {
         proposerToRequestPayload[proposal.proposer.publicKey] = nil
         relayer.respondError(for: payload, reason: reason)
     }
+    
+    func approve(proposal: SessionType.ProposeParams) {
+        guard session = respondSessionPropose(proposal: proposal) else {return}
+        settle(session)
+    }
         
-    func respondSessionPropose(proposal: SessionType.ProposeParams) {
+    func respondSessionPropose(proposal: SessionType.ProposeParams) -> SessionSequence? {
         guard let payload = proposerToRequestPayload[proposal.proposer.publicKey] else {
-            return
+            return nil
         }
         proposerToRequestPayload[proposal.proposer.publicKey] = nil
         
@@ -266,7 +271,7 @@ final class SessionEngine {
             agreementKey = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposal.proposer.publicKey)
         } catch {
             relayer.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
-            return
+            return nil
         }
 
         let sessionTopic = agreementKey.derivedTopic()
@@ -280,6 +285,20 @@ final class SessionEngine {
         let proposeResponse = SessionType.ProposeResponse(relay: proposal.relay, responder: AgreementPeer(publicKey: selfPublicKey.hexRepresentation))
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
         relayer.respond(topic: payload.topic, response: .response(response)) { _ in }
+        return pendingSession
+    }
+    
+    
+    func settle(_ session: SessionSequence) {
+//        wc_sessionSettle
+//        Request
+//           Params = relay, state, blockchainSettled (chains, auth, accounts, signatures),                     permissions, controller (pubKey, metadata)
+//        Response
+//          Success (acknowledgement) =  boolean
+//          Error (failure) = code, message
+        
+        
+
     }
     
     private func wcSessionUpdate(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {

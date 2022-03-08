@@ -18,8 +18,6 @@ struct Proposer: Codable, Equatable {
 }
 //?
 struct BlockchainProposed: Codable, Equatable {
-    //TODO - auth type not specified yet
-    let auth: String? = nil
     // TODO - change for caip2 objects
     let chains: Set<String>
 }

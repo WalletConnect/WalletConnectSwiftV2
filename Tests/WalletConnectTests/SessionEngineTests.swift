@@ -61,7 +61,7 @@ final class SessionEngineTests: XCTestCase {
         let permissions = SessionPermissions.stub()
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
         
-        engine.proposeSession(pairing: pairing, permissions: permissions, relay: relayOptions)
+        engine.propose(pairing: pairing, permissions: permissions, relay: relayOptions)
 
         guard let publishTopic = relayMock.requests.first?.topic,
               let proposal = relayMock.requests.first?.request.sessionProposal else {
@@ -109,7 +109,7 @@ final class SessionEngineTests: XCTestCase {
         XCTAssertEqual(relayMock.didRespondOnTopic!, topicA)
     }
     
-    func testSessionProposeResponse() {
+    func testHandleSessionProposeResponse() {
         setupEngine()
 
         let pairing = Pairing.stub()
@@ -118,7 +118,7 @@ final class SessionEngineTests: XCTestCase {
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
         
         // Client propose session
-        engine.proposeSession(pairing: pairing, permissions: permissions, relay: relayOptions)
+        engine.propose(pairing: pairing, permissions: permissions, relay: relayOptions)
         
         guard let request = relayMock.requests.first?.request,
               let proposal = relayMock.requests.first?.request.sessionProposal else {
@@ -156,7 +156,7 @@ final class SessionEngineTests: XCTestCase {
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
         
         // Client propose session
-        engine.proposeSession(pairing: pairing, permissions: permissions, relay: relayOptions)
+        engine.propose(pairing: pairing, permissions: permissions, relay: relayOptions)
         
         guard let request = relayMock.requests.first?.request,
               let proposal = relayMock.requests.first?.request.sessionProposal else {
@@ -174,7 +174,20 @@ final class SessionEngineTests: XCTestCase {
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must remove private key for rejected session")
         XCTAssertFalse(storageMock.hasSequence(forTopic: topicA), "Proposer must remove pending session on topic A")
     }
+    
+    func testSessionSettle() {
+        
+        // responder must send session settle payload on topic B
+        // responder must persist session on topic B
+    }
+    
+    func testSessionSettleAcknowledge() {
+        
+    }
 
+    func testHandleSessionSettle() {
+        
+    }
 //    func testProposeResponseFailure() {
 //        setupEngine()
 //        let pairing = Pairing.stub()

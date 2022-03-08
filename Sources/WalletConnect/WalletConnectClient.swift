@@ -103,7 +103,7 @@ public final class WalletConnectClient {
             }
             logger.debug("Proposing session on existing pairing")
             let permissions = SessionPermissions(permissions: sessionPermissions)
-            sessionEngine.proposeSession(pairing: Pairing(topic: pairing.topic, peer: nil, expiryDate: pairing.expiryDate), permissions: permissions, relay: pairing.relay)
+            sessionEngine.propose(pairing: Pairing(topic: pairing.topic, peer: nil, expiryDate: pairing.expiryDate), permissions: permissions, relay: pairing.relay)
             return nil
         } else {
             guard let pairingURI = pairingEngine.create() else {

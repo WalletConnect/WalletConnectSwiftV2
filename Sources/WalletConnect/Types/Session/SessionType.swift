@@ -15,7 +15,18 @@ internal enum SessionType {
         let relay: RelayProtocolOptions
         let responder: Participant
         let expiry: Int
-        let state: SessionState
+    }
+    
+    struct SettleParams: Codable, Equatable {
+        let relay: RelayProtocolOptions
+        let blockchain: BlockchainSettled
+        let permissions: SessionPermissions
+        let controller: Participant
+    }
+    
+    struct BlockchainSettled: Codable, Equatable {
+        let chains: [String]
+        let accounts: [String]
     }
     
     struct UpdateParams: Codable, Equatable {
