@@ -71,7 +71,7 @@ final class SessionEngine {
             relay: relay,
             proposer: proposer,
             permissions: permissions,
-            blockchainProposed: BlockchainProposed(chains: [])) //todo
+            blockchainProposed: Blockchain(chains: [], accounts: [])) //todo!!
         
         let pendingSession = SessionSequence.buildProposed(proposal: proposal, topic: pairing.topic)
         sequencesStore.setSequence(pendingSession)
@@ -276,9 +276,6 @@ final class SessionEngine {
 
         let sessionTopic = agreementKey.derivedTopic()
 
-        
-        sequencesStore.setSequence(pendingSession)
-
         try! kms.setAgreementSecret(agreementKey, topic: sessionTopic)
         wcSubscriber.setSubscription(topic: sessionTopic)
         let proposeResponse = SessionType.ProposeResponse(relay: proposal.relay, responder: AgreementPeer(publicKey: selfPublicKey.hexRepresentation))
@@ -293,13 +290,16 @@ final class SessionEngine {
         
         let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
         
-        SessionSequence.buildPreSettled(proposal: proposal, agreementKeys: agreementKeys, metadata: metadata, accounts: accounts)
+        let session = SessionSequence.buildPreSettled(topic: topic, proposal: proposal, selfParticipant: selfParticipant, metadata: metadata, accounts: accounts)
+        
+        sequencesStore.setSequence(session)
         
         let settleParams = SessionType.SettleParams(
             relay: proposal.relay,
             blockchain: proposal.blockchainProposed,
             permissions: proposal.permissions,
-            controller: selfParticipant)
+            controller: selfParticipant,
+            expiry: 99999999)//todo
 
         relayer.request(.wcSessionSettle(settleParams), onTopic: topic)
     }
@@ -312,12 +312,14 @@ final class SessionEngine {
         
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!
         
-        let session = SessionSequence.buildAcknowledged(topic: topic, settleParams: settleParams, agreementKeys: agreementKeys, metadata: metadata)
+        let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
+        
+        let session = SessionSequence.buildAcknowledged(topic: topic, settleParams: settleParams, selfParticipant: selfParticipant, peerParticipant: settleParams.controller)
         
         sequencesStore.setSequence(session)
         
         relayer.respondSuccess(for: payload)
-        onSessionApproved?(<#Session#>)
+        onSessionApproved?(session.publicRepresentation()!)
     }
     
     private func wcSessionUpdate(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {
@@ -524,9 +526,13 @@ final class SessionEngine {
         guard let preSettledSession = sequencesStore.getSequence(forTopic: topic) else {return}
         switch result {
         case .response:
-            //todo - acknowledge preSettled
-            onSessionApproved?(Session(topic: <#T##String#>, peer: <#T##AppMetadata#>, permissions: <#T##Session.Permissions#>, accounts: <#T##Set<Account>#>, expiryDate: <#T##Date#>, blockchains: <#T##Set<String>#>))
+            
+            //to acknowledge presettled
+            
+            
+            onSessionApproved?(preSettledSession.publicRepresentation()!)
         case .error(let error):
+            //todo - log error
             wcSubscriber.removeSubscription(topic: topic)
             sequencesStore.delete(topic: topic)
             kms.deleteAgreementSecret(for: topic)

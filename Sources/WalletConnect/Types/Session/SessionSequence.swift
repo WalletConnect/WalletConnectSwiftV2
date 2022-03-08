@@ -166,14 +166,14 @@ extension SessionSequence {
     static func buildPreSettled(
         topic: String,
         proposal: SessionProposal,
-        agreementKeys: AgreementSecret,
+        selfParticipant: Participant,
         metadata: AppMetadata,
         accounts: Set<Account>) -> SessionSequence {
-            let controllerKey = agreementKeys.publicKey.hexRepresentation
+            let controllerKey = selfParticipant.publicKey
             return SessionSequence(
                 topic: topic,
                 relay: proposal.relay,
-                selfParticipant: Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata),
+                selfParticipant: selfParticipant,
                 expiryDate: Date(timeIntervalSinceNow: TimeInterval(SessionSequence.timeToLiveSettled)),
                 settledState: Settled(
                     peer: Participant(publicKey: proposal.proposer.publicKey, metadata: proposal.proposer.metadata),
@@ -191,17 +191,16 @@ extension SessionSequence {
     static func buildAcknowledged(
         topic: String,
         settleParams : SessionType.SettleParams,
-        self: Participant,
-        peer: Participant,
-        metadata: AppMetadata) -> SessionSequence {
+        selfParticipant: Participant,
+        peerParticipant: Participant) -> SessionSequence {
             let controllerKey = settleParams.controller.publicKey
             return SessionSequence(
                 topic: topic,
                 relay: settleParams.relay,
-                selfParticipant: self,
+                selfParticipant: selfParticipant,
                 expiryDate: Date(timeIntervalSince1970: TimeInterval(settleParams.expiry)),
                 settledState: Settled(
-                    peer: peer,
+                    peer: peerParticipant,
                     permissions: SessionPermissions(
                         jsonrpc: settleParams.permissions.jsonrpc,
                         notifications: settleParams.permissions.notifications,
@@ -212,4 +211,15 @@ extension SessionSequence {
                 )
             )
         }
+    
+    func publicRepresentation() -> Session? {
+        guard let settled = self.settled else {return nil}
+        return Session(
+            topic: topic,
+            peer: settled.peer.metadata!,
+            permissions: Session.Permissions(methods: settled.permissions.jsonrpc.methods),
+            accounts: settled.accounts,
+            expiryDate: expiryDate,
+            blockchains: settled.blockchain)
+    }
 }
