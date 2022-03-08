@@ -22,7 +22,7 @@ extension Pairing {
 extension Session.Permissions {
     static func stub(
         methods: Set<String> = ["getGenesisHash"],
-        notifications: [String] = ["msg"]
+        notifications: Set<String> = ["msg"]
     ) -> Session.Permissions {
         Session.Permissions(
             methods: methods,
@@ -34,7 +34,7 @@ extension Session.Permissions {
 extension SessionPermissions {
     static func stub(
         jsonrpc: Set<String> = ["eth_sign"],
-        notifications: [String] = ["a_type"],
+        notifications: Set<String> = ["a_type"],
         controllerKey: String = AgreementPrivateKey().publicKey.hexRepresentation
     ) -> SessionPermissions {
         return SessionPermissions(
@@ -45,9 +45,9 @@ extension SessionPermissions {
     }
 }
 
-extension BlockchainProposed {
-    static func stub(chains: Set<String> = ["eip155:1"]) -> BlockchainProposed {
-        return BlockchainProposed(chains: chains)
+extension Blockchain {
+    static func stub(chains: Set<String> = ["eip155:1"]) -> Blockchain {
+        return Blockchain(chains: chains, accounts: [])
     }
 }
 
@@ -93,6 +93,6 @@ extension SessionProposal {
             relay: relayOptions,
             proposer: Proposer(publicKey: proposerPubKey, metadata: AppMetadata(name: "", description: "", url: "", icons: nil)),
             permissions: SessionPermissions.stub(),
-            blockchainProposed: BlockchainProposed(chains: []))
+            blockchainProposed: Blockchain(chains: [], accounts: []))
     }
 }

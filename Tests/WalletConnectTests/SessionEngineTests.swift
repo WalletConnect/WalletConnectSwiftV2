@@ -101,7 +101,7 @@ final class SessionEngineTests: XCTestCase {
         let topicB = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
 
         // User approves proposal
-        engine.respondSessionPropose(proposal: proposal)
+        engine.approve(proposal: proposal, accounts: [])
         
         XCTAssert(subscriberMock.didSubscribe(to: topicB), "Responder must subscribe for session topic B")
         XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must store agreement key for topic B")
