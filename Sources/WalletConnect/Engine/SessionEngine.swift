@@ -460,7 +460,7 @@ final class SessionEngine {
         switch result {
         case .response:
             
-            //to acknowledge presettled
+            //todo - acknowledge presettled
             
             
             onSessionApproved?(preSettledSession.publicRepresentation()!)

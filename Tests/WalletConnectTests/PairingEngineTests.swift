@@ -162,7 +162,7 @@ final class PairingEngineTests: XCTestCase {
                                   requestParams: request.params,
                                   result: .response(jsonRpcResponse))
 
-        relayMock.onResponse?(response)
+        relayMock.onPairingResponse?(response)
 
         let privateKey = try! cryptoMock.getPrivateKey(for: proposal.proposer.publicKey)!
         let topicB = deriveTopic(publicKey: responder.publicKey, privateKey: privateKey)
@@ -195,7 +195,7 @@ final class PairingEngineTests: XCTestCase {
                                   requestParams: request.params,
                                   result: .error(errorResponse))
 
-        relayMock.onResponse?(response)
+        relayMock.onPairingResponse?(response)
 
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must remove private key for rejected session")
         
