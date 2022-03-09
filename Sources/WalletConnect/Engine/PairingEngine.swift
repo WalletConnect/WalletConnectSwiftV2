@@ -36,7 +36,9 @@ final class PairingEngine {
         setUpWCRequestHandling()
         setupExpirationHandling()
         restoreSubscriptions()
-        
+        relayer.onResponse = { [weak self] in
+            self?.handleResponse($0)
+        }
     }
     
     func hasPairing(for topic: String) -> Bool {
@@ -229,6 +231,47 @@ final class PairingEngine {
     private func setupExpirationHandling() {
         sequencesStore.onSequenceExpiration = { [weak self] topic, _ in
             self?.kms.deleteSymmetricKey(for: topic)
+        }
+    }
+    
+    
+    private func handleResponse(_ response: WCResponse) {
+        switch response.requestParams {
+        case .sessionPropose(let proposal):
+            handleProposeResponse(pairingTopic: response.topic, proposal: proposal, result: response.result)
+        default:
+            break
+        }
+    }
+    
+    
+    private func handleProposeResponse(pairingTopic: String, proposal: SessionProposal, result: JsonRpcResult) {
+        switch result {
+        case .response(let response):
+            let selfPublicKey = try! AgreementPublicKey(hex: proposal.proposer.publicKey)
+            var agreementKeys: AgreementSecret!
+            
+            do {
+                let proposeResponse = try response.result.get(SessionType.ProposeResponse.self)
+                agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposeResponse.responder.publicKey)
+            } catch {
+                //TODO - handle error
+                return
+            }
+
+            let sessionTopic = agreementKeys.derivedTopic()
+            wcSubscriber.setSubscription(topic: sessionTopic)
+            
+            let pendingSession = SessionSequence.buildResponded(proposal: proposal, agreementKeys: agreementKeys, metadata: nil, topic: sessionTopic)
+            try! kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
+
+//            sequencesStore.setSequence(pendingSession)
+//            sequencesStore.delete(topic: pairingTopic)
+            
+        case .error:
+            kms.deletePrivateKey(for: proposal.proposer.publicKey)
+            sequencesStore.delete(topic: pairingTopic)
+            return
         }
     }
     
