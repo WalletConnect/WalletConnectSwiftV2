@@ -47,6 +47,10 @@ final class SessionEngine {
         }
     }
     
+    func setSubscription(topic: String) {
+        wcSubscriber.setSubscription(topic: topic)
+    }
+    
     func hasSession(for topic: String) -> Bool {
         return sequencesStore.hasSequence(forTopic: topic)
     }
@@ -239,9 +243,7 @@ final class SessionEngine {
     
     private func wcSessionSettle(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
         let topic = payload.topic
-        guard let pendingSession = sequencesStore.getSequence(forTopic: topic) else {
-            return
-        }
+
         
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!
         
@@ -409,8 +411,6 @@ final class SessionEngine {
     
     private func handleResponse(_ response: WCResponse) {
         switch response.requestParams {
-        case .sessionPropose(let proposal):
-            handleProposeResponse(pairingTopic: response.topic, proposal: proposal, result: response.result)
         case .sessionSettle:
             handleSessionSettleResponse(topic: response.topic, result: response.result)
         case .sessionUpdate:

@@ -320,6 +320,11 @@ public final class WalletConnectClient {
         sessionEngine.onSessionPayloadResponse = { [unowned self] response in
             delegate?.didReceive(sessionResponse: response)
         }
+        
+        
+        pairingEngine.onProposeResponse = { [unowned self] sessionTopic in
+            sessionEngine.setSubscription(topic: sessionTopic)
+        }
     }
     
     private func proposeSession(proposal: SessionProposal) {

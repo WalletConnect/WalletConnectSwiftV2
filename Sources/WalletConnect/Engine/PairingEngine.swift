@@ -7,6 +7,7 @@ final class PairingEngine {
     var onApprovalAcknowledgement: ((Pairing) -> Void)?
     var onPairingExtend: ((Pairing)->())?
     var onSessionProposal: ((Session.Proposal)->())?
+    var onProposeResponse: ((String)->())?
 
     
     private let wcSubscriber: WCSubscribing
@@ -36,7 +37,7 @@ final class PairingEngine {
         setUpWCRequestHandling()
         setupExpirationHandling()
         restoreSubscriptions()
-        relayer.onResponse = { [weak self] in
+        relayer.onPairingResponse = { [weak self] in
             self?.handleResponse($0)
         }
     }
@@ -260,13 +261,12 @@ final class PairingEngine {
             }
 
             let sessionTopic = agreementKeys.derivedTopic()
-            wcSubscriber.setSubscription(topic: sessionTopic)
             
-            let pendingSession = SessionSequence.buildResponded(proposal: proposal, agreementKeys: agreementKeys, metadata: nil, topic: sessionTopic)
+            
+
             try! kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
 
-//            sequencesStore.setSequence(pendingSession)
-//            sequencesStore.delete(topic: pairingTopic)
+            onProposeResponse?(sessionTopic)
             
         case .error:
             kms.deletePrivateKey(for: proposal.proposer.publicKey)
