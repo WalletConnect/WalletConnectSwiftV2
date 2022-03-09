@@ -15,8 +15,8 @@ final class SessionEngine {
     var onSessionExtended: ((Session) -> ())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
     var onNotificationReceived: ((String, Session.Notification)->())?
-    var proposerToRequestPayload: [String: WCRequestSubscriptionPayload] = [:]
     
+    private var proposerToRequestPayload: [String: WCRequestSubscriptionPayload] = [:]
     private let sequencesStore: SessionSequenceStorage
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
@@ -61,8 +61,8 @@ final class SessionEngine {
         }
     }
 
-    func propose(pairing: Pairing, permissions: SessionPermissions, relay: RelayProtocolOptions) {
-        logger.debug("Propose Session on topic: \(pairing.topic)")
+    func propose(pairingTopic: String, permissions: SessionPermissions, relay: RelayProtocolOptions) {
+        logger.debug("Propose Session on topic: \(pairingTopic)")
         let publicKey = try! kms.createX25519KeyPair()
         let proposer = Proposer(
             publicKey: publicKey.hexRepresentation,
@@ -73,9 +73,9 @@ final class SessionEngine {
             permissions: permissions,
             blockchainProposed: Blockchain(chains: [], accounts: [])) //todo!!
         
-        let pendingSession = SessionSequence.buildProposed(proposal: proposal, topic: pairing.topic)
+        let pendingSession = SessionSequence.buildProposed(proposal: proposal, topic: pairingTopic)
         sequencesStore.setSequence(pendingSession)
-        relayer.request(.wcSessionPropose(proposal), onTopic: pairing.topic) { [unowned self] result in
+        relayer.request(.wcSessionPropose(proposal), onTopic: pairingTopic) { [unowned self] result in
             switch result {
             case .success:
                 logger.debug("Session Proposal response received")
