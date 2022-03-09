@@ -193,6 +193,8 @@ final class SessionEngine {
     private func setUpWCRequestHandling() {
         wcSubscriber.onReceivePayload = { [unowned self] subscriptionPayload in
             switch subscriptionPayload.wcRequest.params {
+            case .sessionSettle(let settleParams):
+                wcSessionSettle(payload: subscriptionPayload, settleParams: settleParams)
             case .sessionUpdate(let updateParams):
                 wcSessionUpdate(payload: subscriptionPayload, updateParams: updateParams)
             case .sessionUpgrade(let upgradeParams):
@@ -471,39 +473,7 @@ final class SessionEngine {
         }
     }
     
-    private func handleApproveResponse(topic: String, result: JsonRpcResult) {
-        guard
-            let pendingSession = sequencesStore.getSequence(forTopic: topic),
-            let settledTopic = pendingSession.pending?.outcomeTopic,
-            let proposal = pendingSession.pending?.proposal
-        else {
-            return
-        }
-        switch result {
-        case .response:
-            guard let settledSession = sequencesStore.getSequence(forTopic: settledTopic) else {return}
-            kms.deleteAgreementSecret(for: topic)
-            wcSubscriber.removeSubscription(topic: topic)
-            sequencesStore.delete(topic: topic)
-            let sessionSuccess = Session(
-                topic: settledTopic,
-                peer: proposal.proposer.metadata,
-                permissions: Session.Permissions(
-                    methods: proposal.permissions.jsonrpc.methods),
-                accounts: settledSession.settled!.accounts,
-                expiryDate: settledSession.expiryDate,
-                blockchains: proposal.blockchainProposed.chains)
-            onApprovalAcknowledgement?(sessionSuccess)
-        case .error:
-            wcSubscriber.removeSubscription(topic: topic)
-            wcSubscriber.removeSubscription(topic: settledTopic)
-            sequencesStore.delete(topic: topic)
-            sequencesStore.delete(topic: settledTopic)
-            kms.deleteAgreementSecret(for: topic)
-            kms.deleteAgreementSecret(for: settledTopic)
-            kms.deletePrivateKey(for: pendingSession.publicKey!)
-        }
-    }
+
     
     private func handleUpdateResponse(topic: String, result: JsonRpcResult) {
         guard let session = sequencesStore.getSequence(forTopic: topic), let accounts = session.settled?.accounts else {
