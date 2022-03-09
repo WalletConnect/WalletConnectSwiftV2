@@ -5,7 +5,7 @@ struct SessionPermissions: Codable, Equatable {
     }
 
     struct Notifications: Codable, Equatable {
-        let types: [String]
+        let types: Set<String>
     }
     
     private(set) var jsonrpc: JSONRPC

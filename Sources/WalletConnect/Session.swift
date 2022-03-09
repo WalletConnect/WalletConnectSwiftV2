@@ -26,9 +26,9 @@ extension Session {
     
     public struct Permissions: Equatable {
         public let methods: Set<String>
-        public let notifications: [String]
+        public let notifications: Set<String>
         
-        public init(methods: Set<String>, notifications: [String] = []) {
+        public init(methods: Set<String>, notifications: Set<String> = []) {
             self.methods = methods
             self.notifications = notifications
         }

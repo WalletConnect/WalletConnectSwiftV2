@@ -163,43 +163,63 @@ extension SessionSequence {
         )
     }
     
-    static func buildPreSettled(proposal: SessionProposal, agreementKeys: AgreementSecret, metadata: AppMetadata, accounts: Set<Account>) -> SessionSequence {
-        let controllerKey = agreementKeys.publicKey.hexRepresentation
-        return SessionSequence(
-            topic: agreementKeys.derivedTopic(),
-            relay: proposal.relay,
-            selfParticipant: Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata),
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(SessionSequence.timeToLiveSettled)),
-            settledState: Settled(
-                peer: Participant(publicKey: proposal.proposer.publicKey, metadata: proposal.proposer.metadata),
-                permissions: SessionPermissions(
-                    jsonrpc: proposal.permissions.jsonrpc,
-                    notifications: proposal.permissions.notifications,
-                    controller: AgreementPeer(publicKey: controllerKey)),
-                accounts: accounts,
-                status: .acknowledged,
-                blockchain: proposal.blockchainProposed.chains
-            )
+    static func buildPreSettled(
+        topic: String,
+        proposal: SessionProposal,
+        selfParticipant: Participant,
+        metadata: AppMetadata,
+        accounts: Set<Account>) -> SessionSequence {
+            let controllerKey = selfParticipant.publicKey
+            return SessionSequence(
+                topic: topic,
+                relay: proposal.relay,
+                selfParticipant: selfParticipant,
+                expiryDate: Date(timeIntervalSinceNow: TimeInterval(SessionSequence.timeToLiveSettled)),
+                settledState: Settled(
+                    peer: Participant(publicKey: proposal.proposer.publicKey, metadata: proposal.proposer.metadata),
+                    permissions: SessionPermissions(
+                        jsonrpc: proposal.permissions.jsonrpc,
+                        notifications: proposal.permissions.notifications,
+                        controller: AgreementPeer(publicKey: controllerKey)),
+                    accounts: accounts,
+                    status: .acknowledged,
+                    blockchain: proposal.blockchainProposed.chains
+                )
         )
     }
     
-    static func buildAcknowledged(approval approveParams: SessionType.ApproveParams, proposal: SessionProposal, agreementKeys: AgreementSecret, metadata: AppMetadata) -> SessionSequence {
-        let controllerKey = approveParams.responder.publicKey
-        return SessionSequence(
-            topic: agreementKeys.derivedTopic(),
-            relay: approveParams.relay,
-            selfParticipant: Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata),
-            expiryDate: Date(timeIntervalSince1970: TimeInterval(approveParams.expiry)),
-            settledState: Settled(
-                peer: Participant(publicKey: approveParams.responder.publicKey, metadata: approveParams.responder.metadata),
-                permissions: SessionPermissions(
-                    jsonrpc: proposal.permissions.jsonrpc,
-                    notifications: proposal.permissions.notifications,
-                    controller: AgreementPeer(publicKey: controllerKey)),
-                accounts: Set(approveParams.state.accounts.compactMap { Account($0) }),
-                status: .acknowledged,
-                blockchain: proposal.blockchainProposed.chains
+    static func buildAcknowledged(
+        topic: String,
+        settleParams : SessionType.SettleParams,
+        selfParticipant: Participant,
+        peerParticipant: Participant) -> SessionSequence {
+            let controllerKey = settleParams.controller.publicKey
+            return SessionSequence(
+                topic: topic,
+                relay: settleParams.relay,
+                selfParticipant: selfParticipant,
+                expiryDate: Date(timeIntervalSince1970: TimeInterval(settleParams.expiry)),
+                settledState: Settled(
+                    peer: peerParticipant,
+                    permissions: SessionPermissions(
+                        jsonrpc: settleParams.permissions.jsonrpc,
+                        notifications: settleParams.permissions.notifications,
+                        controller: AgreementPeer(publicKey: controllerKey)),
+                    accounts: Set(settleParams.blockchain.accounts.compactMap { Account($0) }),
+                    status: .acknowledged,
+                    blockchain: settleParams.blockchain.chains
+                )
             )
-        )
+        }
+    
+    func publicRepresentation() -> Session? {
+        guard let settled = self.settled else {return nil}
+        return Session(
+            topic: topic,
+            peer: settled.peer.metadata!,
+            permissions: Session.Permissions(methods: settled.permissions.jsonrpc.methods),
+            accounts: settled.accounts,
+            expiryDate: expiryDate,
+            blockchains: settled.blockchain)
     }
 }

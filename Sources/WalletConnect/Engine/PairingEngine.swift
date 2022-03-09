@@ -6,6 +6,9 @@ import WalletConnectKMS
 final class PairingEngine {
     var onApprovalAcknowledgement: ((Pairing) -> Void)?
     var onPairingExtend: ((Pairing)->())?
+    var onSessionProposal: ((Session.Proposal)->())?
+    var onProposeResponse: ((String)->())?
+
     
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
@@ -34,7 +37,9 @@ final class PairingEngine {
         setUpWCRequestHandling()
         setupExpirationHandling()
         restoreSubscriptions()
-        
+        relayer.onPairingResponse = { [weak self] in
+            self?.handleResponse($0)
+        }
     }
     
     func hasPairing(for topic: String) -> Bool {
@@ -61,6 +66,34 @@ final class PairingEngine {
         sequencesStore.setSequence(pairing)
         wcSubscriber.setSubscription(topic: topic)
         return uri
+    }
+    
+    var proposals = [String: SessionProposal]()
+    
+    func propose(pairingTopic: String, permissions: SessionPermissions, relay: RelayProtocolOptions) {
+        logger.debug("Propose Session on topic: \(pairingTopic)")
+        let publicKey = try! kms.createX25519KeyPair()
+        let proposer = Proposer(
+            publicKey: publicKey.hexRepresentation,
+            metadata: metadata)
+        let proposal = SessionProposal(
+            relay: relay,
+            proposer: proposer,
+            permissions: permissions,
+            blockchainProposed: Blockchain(chains: [], accounts: [])) //todo!!
+        
+//        let pendingSession = SessionSequence.buildProposed(proposal: proposal, topic: pairingTopic)
+        
+        proposals[pairingTopic] = proposal
+//        sequencesStore.setSequence(pendingSession)
+        relayer.request(.wcSessionPropose(proposal), onTopic: pairingTopic) { [unowned self] result in
+            switch result {
+            case .success:
+                logger.debug("Session Proposal response received")
+            case .failure(let error):
+                logger.debug("Could not send session proposal error: \(error)")
+            }
+        }
     }
     
     func pair(_ uri: WalletConnectURI) throws {
@@ -109,11 +142,62 @@ final class PairingEngine {
             case .pairingExtend(_):
                 //TODO - extend and delete
                 break
+            case .sessionPropose(let proposeParams):
+                wcSessionPropose(subscriptionPayload, proposal: proposeParams)
             default:
                 logger.warn("Warning: Pairing Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
             }
         }
     }
+    
+    private var proposerToRequestPayload: [String: WCRequestSubscriptionPayload] = [:]
+
+    
+    private func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
+        proposerToRequestPayload[proposal.proposer.publicKey] = payload
+        //todo - provide better type conversion
+        let sessionProposal = Session.Proposal(proposer: proposal.proposer.metadata, permissions: Session.Permissions(permissions: proposal.permissions), blockchains: proposal.blockchainProposed.chains, proposal: proposal)
+        onSessionProposal?(sessionProposal)
+    }
+    
+    func reject(proposal: SessionProposal, reason: ReasonCode) {
+        guard let payload = proposerToRequestPayload[proposal.proposer.publicKey] else {
+            return
+        }
+        proposerToRequestPayload[proposal.proposer.publicKey] = nil
+        relayer.respondError(for: payload, reason: reason)
+    }
+    
+    
+    
+    func respondSessionPropose(proposal: SessionType.ProposeParams) -> String? {
+        guard let payload = proposerToRequestPayload[proposal.proposer.publicKey] else {
+            return nil
+        }
+        proposerToRequestPayload[proposal.proposer.publicKey] = nil
+        
+        let selfPublicKey = try! kms.createX25519KeyPair()
+        var agreementKey: AgreementSecret!
+        
+        do {
+            agreementKey = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposal.proposer.publicKey)
+        } catch {
+            relayer.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
+            return nil
+        }
+
+        let sessionTopic = agreementKey.derivedTopic()
+
+        try! kms.setAgreementSecret(agreementKey, topic: sessionTopic)
+        wcSubscriber.setSubscription(topic: sessionTopic)
+        let proposeResponse = SessionType.ProposeResponse(relay: proposal.relay, responder: AgreementPeer(publicKey: selfPublicKey.hexRepresentation))
+        let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
+        relayer.respond(topic: payload.topic, response: .response(response)) { _ in }
+        return sessionTopic
+    }
+    
+    
+    
     
     private func wcPairingExtend(_ payload: WCRequestSubscriptionPayload, extendParams: PairingType.ExtendParams) {
         let topic = payload.topic
@@ -148,6 +232,46 @@ final class PairingEngine {
     private func setupExpirationHandling() {
         sequencesStore.onSequenceExpiration = { [weak self] topic, _ in
             self?.kms.deleteSymmetricKey(for: topic)
+        }
+    }
+    
+    
+    private func handleResponse(_ response: WCResponse) {
+        switch response.requestParams {
+        case .sessionPropose(let proposal):
+            handleProposeResponse(pairingTopic: response.topic, proposal: proposal, result: response.result)
+        default:
+            break
+        }
+    }
+    
+    
+    private func handleProposeResponse(pairingTopic: String, proposal: SessionProposal, result: JsonRpcResult) {
+        switch result {
+        case .response(let response):
+            let selfPublicKey = try! AgreementPublicKey(hex: proposal.proposer.publicKey)
+            var agreementKeys: AgreementSecret!
+            
+            do {
+                let proposeResponse = try response.result.get(SessionType.ProposeResponse.self)
+                agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposeResponse.responder.publicKey)
+            } catch {
+                //TODO - handle error
+                return
+            }
+
+            let sessionTopic = agreementKeys.derivedTopic()
+            
+            
+
+            try! kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
+
+            onProposeResponse?(sessionTopic)
+            
+        case .error:
+            kms.deletePrivateKey(for: proposal.proposer.publicKey)
+            sequencesStore.delete(topic: pairingTopic)
+            return
         }
     }
     
