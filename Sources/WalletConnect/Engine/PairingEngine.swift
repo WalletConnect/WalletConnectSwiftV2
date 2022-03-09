@@ -67,7 +67,7 @@ final class PairingEngine {
         wcSubscriber.setSubscription(topic: topic)
         return uri
     }
-    
+    // todo - move to proposer to payload
     var proposals = [String: SessionProposal]()
     
     func propose(pairingTopic: String, permissions: SessionPermissions, relay: RelayProtocolOptions) {

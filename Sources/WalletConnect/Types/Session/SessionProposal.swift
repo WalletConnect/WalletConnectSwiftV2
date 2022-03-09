@@ -19,5 +19,5 @@ struct Proposer: Codable, Equatable {
 
 struct Blockchain: Codable, Equatable {
     let chains: Set<String>
-    let accounts: Set<String>
+    let accounts: Set<Account>
 }
