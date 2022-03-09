@@ -103,14 +103,14 @@ public final class WalletConnectClient {
             }
             logger.debug("Proposing session on existing pairing")
             let permissions = SessionPermissions(permissions: sessionPermissions)
-            sessionEngine.propose(pairingTopic: topic, permissions: permissions, relay: pairing.relay)
+            pairingEngine.propose(pairingTopic: topic, permissions: permissions, relay: pairing.relay)
             return nil
         } else {
             guard let pairingURI = pairingEngine.create() else {
                 throw WalletConnectError.pairingProposalFailed
             }
             let permissions = SessionPermissions(permissions: sessionPermissions)
-            sessionEngine.propose(pairingTopic: pairingURI.topic, permissions: permissions, relay: pairingURI.relay)
+            pairingEngine.propose(pairingTopic: pairingURI.topic, permissions: permissions, relay: pairingURI.relay)
             return pairingURI.absoluteString
         }
     }
@@ -136,7 +136,9 @@ public final class WalletConnectClient {
     ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate function: `didReceive(sessionProposal: Session.Proposal)`
     ///   - accounts: A Set of accounts that the dapp will be allowed to request methods executions on.
     public func approve(proposal: Session.Proposal, accounts: Set<Account>) {
-        sessionEngine.approve(proposal: proposal.proposal, accounts: accounts)
+        guard let sessionTopic = pairingEngine.respondSessionPropose(proposal: proposal.proposal) else {return}
+
+        sessionEngine.settle(topic: sessionTopic, proposal: proposal.proposal, accounts: accounts)
     }
     
     /// For the responder to reject a session proposal.
@@ -144,7 +146,7 @@ public final class WalletConnectClient {
     ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate.
     ///   - reason: Reason why the session proposal was rejected. Conforms to CAIP25.
     public func reject(proposal: Session.Proposal, reason: RejectionReason) {
-        sessionEngine.reject(proposal: proposal.proposal, reason: reason.internalRepresentation())
+        pairingEngine.reject(proposal: proposal.proposal, reason: reason.internalRepresentation())
     }
     
     /// For the responder to update the accounts
@@ -287,8 +289,8 @@ public final class WalletConnectClient {
         sessionEngine.onSessionApproved = { [unowned self] settledSession in
             delegate?.didSettle(session: settledSession)
         }
-        sessionEngine.onSessionProposal = { proposal in
-            
+        pairingEngine.onSessionProposal = { [unowned self] proposal in
+            delegate?.didReceive(sessionProposal: proposal)
         }
         sessionEngine.onApprovalAcknowledgement = { [weak self] session in
             self?.delegate?.didSettle(session: session)
