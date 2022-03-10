@@ -395,9 +395,9 @@ final class SessionEngine {
     }
     
     private func setupExpirationHandling() {
-        sequencesStore.onSequenceExpiration = { [weak self] topic, publicKey in
-            self?.kms.deletePrivateKey(for: publicKey)
-            self?.kms.deleteAgreementSecret(for: topic)
+        sequencesStore.onSequenceExpiration = { [weak self] session in
+            self?.kms.deletePrivateKey(for: session.selfParticipant.publicKey)
+            self?.kms.deleteAgreementSecret(for: session.topic)
         }
     }
     
