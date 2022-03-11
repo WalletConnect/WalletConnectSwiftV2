@@ -224,14 +224,13 @@ final class SessionEngine {
         
         let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
         
-        
+        let expectedExpiryTimeStamp = Date().addingTimeInterval(TimeInterval(SessionSequence.defaultTimeToLive)).timeIntervalSince1970
         let settleParams = SessionType.SettleParams(
             relay: proposal.relay,
             blockchain: proposal.blockchainProposed,
             permissions: proposal.permissions,
             controller: selfParticipant,
-            expiry: 99999999)//todo
-        
+            expiry: expectedExpiryTimeStamp)//todo - test expiration times
         let session = SessionSequence(
             topic: topic,
             selfParticipant: selfParticipant,
@@ -402,7 +401,7 @@ final class SessionEngine {
     
     private func setupExpirationHandling() {
         sequencesStore.onSequenceExpiration = { [weak self] session in
-            self?.kms.deletePrivateKey(for: session.selfParticipant.publicKey)
+            self?.kms.deletePrivateKey(for: session.participants.`self`.publicKey)
             self?.kms.deleteAgreementSecret(for: session.topic)
         }
     }

@@ -91,7 +91,7 @@ extension SessionProposal {
         let relayOptions = RelayProtocolOptions(protocol: "waku", data: nil)
         return SessionType.ProposeParams(
             relay: relayOptions,
-            proposer: Proposer(publicKey: proposerPubKey, metadata: AppMetadata.stub()),
+            proposer: Participant(publicKey: proposerPubKey, metadata: AppMetadata.stub()),
             permissions: SessionPermissions.stub(),
             blockchainProposed: Blockchain(chains: [], accounts: []))
     }

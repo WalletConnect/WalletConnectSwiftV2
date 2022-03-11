@@ -4,47 +4,47 @@ import WalletConnectKMS
 
 extension SessionSequence {
     
-    static func stubPreSettled(
-        isSelfController: Bool = false,
-        expiryDate: Date = Date.distantFuture) -> SessionSequence {
-            let peerKey = AgreementPrivateKey().publicKey.hexRepresentation
-            let selfKey = AgreementPrivateKey().publicKey.hexRepresentation
-            let permissions = isSelfController ? SessionPermissions.stub(controllerKey: selfKey) : SessionPermissions.stub(controllerKey: peerKey)
-        return SessionSequence(
-            topic: String.generateTopic(),
-            relay: RelayProtocolOptions.stub(),
-            selfParticipant: Participant.stub(publicKey: selfKey),
-            expiryDate: expiryDate,
-            settledState: Settled(
-                peer: Participant.stub(publicKey: peerKey),
-                permissions: permissions,
-                accounts: Account.stubSet(),
-                status: .preSettled,
-                blockchain: []
-            )
-        )
-    }
-    
-    static func stubSettled(
-        isSelfController: Bool,
-        expiryDate: Date = Date.distantFuture) -> SessionSequence {
-        let peerKey = AgreementPrivateKey().publicKey.hexRepresentation
-        let selfKey = AgreementPrivateKey().publicKey.hexRepresentation
-        let permissions = isSelfController ? SessionPermissions.stub(controllerKey: selfKey) : SessionPermissions.stub(controllerKey: peerKey)
-        return SessionSequence(
-            topic: String.generateTopic(),
-            relay: RelayProtocolOptions.stub(),
-            selfParticipant: Participant.stub(publicKey: selfKey),
-            expiryDate: expiryDate,
-            settledState: Settled(
-                peer: Participant.stub(publicKey: peerKey),
-                permissions: permissions,
-                accounts: Account.stubSet(),
-                status: .acknowledged,
-                blockchain: []
-            )
-        )
-    }
+//    static func stubPreSettled(
+//        isSelfController: Bool = false,
+//        expiryDate: Date = Date.distantFuture) -> SessionSequence {
+//            let peerKey = AgreementPrivateKey().publicKey.hexRepresentation
+//            let selfKey = AgreementPrivateKey().publicKey.hexRepresentation
+//            let permissions = isSelfController ? SessionPermissions.stub(controllerKey: selfKey) : SessionPermissions.stub(controllerKey: peerKey)
+//        return SessionSequence(
+//            topic: String.generateTopic(),
+//            relay: RelayProtocolOptions.stub(),
+//            selfParticipant: Participant.stub(publicKey: selfKey),
+//            expiryDate: expiryDate,
+//            settledState: Settled(
+//                peer: Participant.stub(publicKey: peerKey),
+//                permissions: permissions,
+//                accounts: Account.stubSet(),
+//                status: .preSettled,
+//                blockchain: []
+//            )
+//        )
+//    }
+//
+//    static func stubSettled(
+//        isSelfController: Bool,
+//        expiryDate: Date = Date.distantFuture) -> SessionSequence {
+//        let peerKey = AgreementPrivateKey().publicKey.hexRepresentation
+//        let selfKey = AgreementPrivateKey().publicKey.hexRepresentation
+//        let permissions = isSelfController ? SessionPermissions.stub(controllerKey: selfKey) : SessionPermissions.stub(controllerKey: peerKey)
+//        return SessionSequence(
+//            topic: String.generateTopic(),
+//            relay: RelayProtocolOptions.stub(),
+//            selfParticipant: Participant.stub(publicKey: selfKey),
+//            expiryDate: expiryDate,
+//            settledState: Settled(
+//                peer: Participant.stub(publicKey: peerKey),
+//                permissions: permissions,
+//                accounts: Account.stubSet(),
+//                status: .acknowledged,
+//                blockchain: []
+//            )
+//        )
+//    }
 }
 
 extension Account {
