@@ -221,13 +221,13 @@ final class SessionEngine {
         
         let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
         
-        let expectedExpiryTimeStamp = Date().addingTimeInterval(TimeInterval(SessionSequence.defaultTimeToLive)).timeIntervalSince1970
+        let expectedExpiryTimeStamp = Date(timeIntervalSinceNow: TimeInterval(SessionSequence.defaultTimeToLive))
         let settleParams = SessionType.SettleParams(
             relay: proposal.relay,
             blockchain: proposal.blockchainProposed,
             permissions: proposal.permissions,
             controller: selfParticipant,
-            expiry: expectedExpiryTimeStamp)//todo - test expiration times
+            expiry: expectedExpiryTimeStamp.timeIntervalSince1970)//todo - test expiration times
         let session = SessionSequence(
             topic: topic,
             selfParticipant: selfParticipant,
