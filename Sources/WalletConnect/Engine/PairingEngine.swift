@@ -174,7 +174,7 @@ final class PairingEngine {
         let sessionTopic = agreementKey.derivedTopic()
 
         try! kms.setAgreementSecret(agreementKey, topic: sessionTopic)
-        wcSubscriber.setSubscription(topic: sessionTopic)
+
         let proposeResponse = SessionType.ProposeResponse(relay: proposal.relay, responder: AgreementPeer(publicKey: selfPublicKey.hexRepresentation))
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
         relayer.respond(topic: payload.topic, response: .response(response)) { _ in }

@@ -234,7 +234,8 @@ final class SessionEngine {
             peerParticipant: proposal.proposer,
             settleParams: settleParams,
             acknowledged: false)
-
+        
+        wcSubscriber.setSubscription(topic: topic)
         sequencesStore.setSequence(session)
         
         relayer.request(.wcSessionSettle(settleParams), onTopic: topic)
