@@ -11,7 +11,6 @@ extension SessionSequence {
             let selfKey = AgreementPrivateKey().publicKey.hexRepresentation
             let permissions = SessionPermissions.stub()
             let controllerKey = isSelfController ? selfKey : peerKey
-            
             return SessionSequence(
                 topic: String.generateTopic(),
                 relay: RelayProtocolOptions.stub(),
@@ -19,7 +18,8 @@ extension SessionSequence {
                 participants: Participants(self: Participant.stub(publicKey: selfKey), peer: Participant.stub(publicKey: peerKey)),
                 blockchain: Blockchain.stub(),
                 permissions: permissions,
-                acknowledged: acknowledged)
+                acknowledged: acknowledged,
+                expiry: expiryDate.millisecondsSince1970)
         }
 }
 

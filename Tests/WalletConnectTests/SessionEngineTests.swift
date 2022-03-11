@@ -492,7 +492,7 @@ final class SessionEngineTests: XCTestCase {
         let twoDays = 2*Time.day
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubExtend(topic: session.topic, ttl: twoDays))
         let potentiallyExtendedSession = engine.getSettledSessions().first{$0.topic == session.topic}!
-        XCTAssertEqual(potentiallyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, "expiry date has been extended for peer non controller request ")
+        XCTAssertEqual(potentiallyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, accuracy: 0.01, "expiry date has been extended for peer non controller request ")
     }
     
     func testPeerExtendTtlTooHigh() {
@@ -503,7 +503,7 @@ final class SessionEngineTests: XCTestCase {
         let twoDays = 10*Time.day
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubExtend(topic: session.topic, ttl: twoDays))
         let potentaillyExtendedSession = engine.getSettledSessions().first{$0.topic == session.topic}!
-        XCTAssertEqual(potentaillyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, "expiry date has been extended despite ttl to high")
+        XCTAssertEqual(potentaillyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, accuracy: 0.01, "expiry date has been extended despite ttl to high")
     }
     
     func testPeerExtendTtlTooLow() {
@@ -514,7 +514,7 @@ final class SessionEngineTests: XCTestCase {
         let twoDays = 1*Time.day
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubExtend(topic: session.topic, ttl: twoDays))
         let potentaillyExtendedSession = engine.getSettledSessions().first{$0.topic == session.topic}!
-        XCTAssertEqual(potentaillyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, "expiry date has been extended despite ttl to low")
+        XCTAssertEqual(potentaillyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, accuracy: 0.01, "expiry date has been extended despite ttl to low")
     }
     
     

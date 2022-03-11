@@ -16,7 +16,7 @@ internal enum SessionType {
         let blockchain: Blockchain
         let permissions: SessionPermissions
         let controller: Participant
-        let expiry: Double // todo!!
+        let expiry: Int64 // todo!!
     }
     
     struct UpdateParams: Codable, Equatable {
