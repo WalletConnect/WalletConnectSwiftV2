@@ -39,7 +39,7 @@ final class ClientTests: XCTestCase {
         return ClientDelegate(client: client)
     }
     
-    func testNewPairingWithoutSession() {
+    func testNewPairingPing() {
         let responderReceivesPingResponseExpectation = expectation(description: "Responder receives ping response")
         let permissions = Session.Permissions.stub()
         let uri = try! proposer.client.connect(sessionPermissions: permissions)!
