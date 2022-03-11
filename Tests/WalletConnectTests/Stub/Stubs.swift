@@ -34,13 +34,11 @@ extension Session.Permissions {
 extension SessionPermissions {
     static func stub(
         jsonrpc: Set<String> = ["eth_sign"],
-        notifications: Set<String> = ["a_type"],
-        controllerKey: String = AgreementPrivateKey().publicKey.hexRepresentation
+        notifications: Set<String> = ["a_type"]
     ) -> SessionPermissions {
         return SessionPermissions(
             jsonrpc: JSONRPC(methods: jsonrpc),
-            notifications: Notifications(types: notifications),
-            controller: AgreementPeer(publicKey: controllerKey)
+            notifications: Notifications(types: notifications)
         )
     }
 }

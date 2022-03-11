@@ -216,9 +216,6 @@ final class SessionEngine {
         }
     }
 
-    
-
-    
     func settle(topic: String, proposal: SessionProposal, accounts: Set<Account>) {
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!
         
