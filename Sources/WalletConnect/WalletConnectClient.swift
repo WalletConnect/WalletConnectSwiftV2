@@ -165,14 +165,12 @@ public final class WalletConnectClient {
         try sessionEngine.upgrade(topic: topic, permissions: permissions)
     }
     
-    /// For controller to extend a sequence lifetime
+    /// For controller to extend a session lifetime
     /// - Parameters:
-    ///   - topic: Topic of the sequence, it can be a pairing or a session topic.
-    ///   - ttl: Time in seconds that a target sequence is expected to be extended for. Must be greater than current time to expiry and for session lower than 7 days and for pairing lower than 30 days.
+    ///   - topic: Topic of the Session, it can be a pairing or a session topic.
+    ///   - ttl: Time in seconds that a target session is expected to be extended for. Must be greater than current time to expire and than 7 days
     public func extend(topic: String, ttl: Int) throws {
-        if pairingEngine.hasPairing(for: topic) {
-            try pairingEngine.extend(topic: topic, ttl: ttl)
-        } else if sessionEngine.hasSession(for: topic) {
+        if sessionEngine.hasSession(for: topic) {
             try sessionEngine.extend(topic: topic, ttl: ttl)
         }
     }

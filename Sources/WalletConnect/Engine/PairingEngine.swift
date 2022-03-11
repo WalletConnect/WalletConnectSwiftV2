@@ -123,16 +123,7 @@ final class PairingEngine {
             }
         }
     }
-    
-    func extend(topic: String, ttl: Int) throws {
-        guard var pairing = sequencesStore.getSequence(forTopic: topic) else {
-            throw WalletConnectError.noPairingMatchingTopic(topic)
-        }
-        try pairing.extend(ttl)
-        sequencesStore.setSequence(pairing)
-        relayer.request(.wcPairingExtend(PairingType.ExtendParams(ttl: ttl)), onTopic: topic)
-    }
-    
+
     //MARK: - Private
 
     private func setUpWCRequestHandling() {
@@ -140,9 +131,6 @@ final class PairingEngine {
             switch subscriptionPayload.wcRequest.params {
             case .pairingPing(_):
                 wcPairingPing(subscriptionPayload)
-            case .pairingExtend(_):
-                //TODO - extend and delete
-                break
             case .sessionPropose(let proposeParams):
                 wcSessionPropose(subscriptionPayload, proposal: proposeParams)
             default:
@@ -166,8 +154,6 @@ final class PairingEngine {
         proposerToRequestPayload[proposal.proposer.publicKey] = nil
         relayer.respondError(for: payload, reason: reason)
     }
-    
-    
     
     func respondSessionPropose(proposal: SessionType.ProposeParams) -> String? {
         guard let payload = proposerToRequestPayload[proposal.proposer.publicKey] else {
@@ -195,26 +181,6 @@ final class PairingEngine {
         return sessionTopic
     }
     
-    
-    
-    
-    private func wcPairingExtend(_ payload: WCRequestSubscriptionPayload, extendParams: PairingType.ExtendParams) {
-        let topic = payload.topic
-        guard var pairing = sequencesStore.getSequence(forTopic: topic) else {
-            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .pairing, topic: topic))
-            return
-        }
-        do {
-            try pairing.extend(extendParams.ttl)
-        } catch {
-            relayer.respondError(for: payload, reason: .invalidExtendRequest(context: .pairing))
-            return
-        }
-        sequencesStore.setSequence(pairing)
-        relayer.respondSuccess(for: payload)
-        onPairingExtend?(Pairing(topic: pairing.topic, peer: pairing.state?.metadata, expiryDate: pairing.expiryDate))
-    }
-    
     private func wcPairingPing(_ payload: WCRequestSubscriptionPayload) {
         relayer.respondSuccess(for: payload)
     }
@@ -234,7 +200,6 @@ final class PairingEngine {
         }
     }
     
-    
     private func handleResponse(_ response: WCResponse) {
         switch response.requestParams {
         case .sessionPropose(let proposal):
@@ -243,7 +208,6 @@ final class PairingEngine {
             break
         }
     }
-    
     
     private func handleProposeResponse(pairingTopic: String, proposal: SessionProposal, result: JsonRpcResult) {
         switch result {
@@ -260,9 +224,6 @@ final class PairingEngine {
             }
 
             let sessionTopic = agreementKeys.derivedTopic()
-            
-            
-
             try! kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
 
             onProposeResponse?(sessionTopic)
