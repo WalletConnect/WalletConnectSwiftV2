@@ -3,9 +3,10 @@ import WalletConnectKMS
 @testable import WalletConnect
 
 extension SessionSequence {
-    static func stubUnacknowledged(
+    static func stub(
         isSelfController: Bool = false,
-        expiryDate: Date = Date.distantFuture) -> SessionSequence {
+        expiryDate: Date = Date.distantFuture,
+        acknowledged: Bool = true) -> SessionSequence {
             let peerKey = AgreementPrivateKey().publicKey.hexRepresentation
             let selfKey = AgreementPrivateKey().publicKey.hexRepresentation
             let permissions = SessionPermissions.stub()
@@ -18,25 +19,7 @@ extension SessionSequence {
                 participants: Participants(self: Participant.stub(publicKey: selfKey), peer: Participant.stub(publicKey: peerKey)),
                 blockchain: Blockchain.stub(),
                 permissions: permissions,
-                acknowledged: false)
-        }
-    
-    static func stubAcknowledged(
-        isSelfController: Bool,
-        expiryDate: Date = Date.distantFuture) -> SessionSequence {
-            let peerKey = AgreementPrivateKey().publicKey.hexRepresentation
-            let selfKey = AgreementPrivateKey().publicKey.hexRepresentation
-            let permissions = SessionPermissions.stub()
-            let controllerKey = isSelfController ? selfKey : peerKey
-
-            return SessionSequence(
-                topic: String.generateTopic(),
-                relay: RelayProtocolOptions.stub(),
-                controller: AgreementPeer(publicKey: controllerKey),
-                participants: Participants(self: Participant.stub(publicKey: selfKey), peer: Participant.stub(publicKey: peerKey)),
-                blockchain: Blockchain.stub(),
-                permissions: permissions,
-                acknowledged: true)
+                acknowledged: acknowledged)
         }
 }
 
