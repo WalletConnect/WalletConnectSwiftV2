@@ -12,43 +12,54 @@ struct SessionSequence: ExpirableSequence {
     }
     let topic: String
     let relay: RelayProtocolOptions
-    let controller: AgreementPeer?
+    let controller: AgreementPeer
     let participants: Participants
     var blockchain: Blockchain
     var permissions: SessionPermissions
 
-    let acknowledge: Bool
+    var acknowledged: Bool
 
     private (set) var expiryDate: Date
     
     static var defaultTimeToLive: Int {
         7*Time.day
     }
-
+    // for expirable...
     var publicKey: String? {
         participants.`self`.publicKey
     }
     
+    init(topic: String,
+         `self`: Participant,
+         peer: Participant,
+         settleParams: SessionType.SettleParams,
+         acknowledged: Bool) {
+        
+        self.topic = topic
+        self.relay = settleParams.relay
+        self.controller = settleParams.controller
+        self.participants = Participants(self: `self`, peer: peer)
+        self.blockchain = settleParams.blockchain
+        self.permissions = settleParams.permissions
+        self.acknowledged = acknowledged
+        self.expiryDate = settleParams.expiry
+    }
+    
+    mutating func acknowledge() {
+        acknowledged = true
+    }
+    
+    
     func getPublicKey() throws -> AgreementPublicKey {
         try AgreementPublicKey(rawRepresentation: Data(hex: participants.`self`.publicKey))
     }
-
-    var isSettled: Bool {
-        return acknowledge
-    }
     
     var selfIsController: Bool {
-        get throws {
-            guard let controllerKey = controller?.publicKey else { throw Error.controllerNotSet }
-            return controllerKey == participants.`self`.publicKey
-        }
+        return controller.publicKey == participants.`self`.publicKey
     }
-
+    
     var peerIsController: Bool {
-        get throws {
-            guard let controllerKey = controller?.publicKey else { throw Error.controllerNotSet }
-            return controllerKey == participants.peer.publicKey
-        }
+        return controller.publicKey == participants.peer.publicKey
     }
     
     func hasPermission(forChain chainId: String) -> Bool {
@@ -69,8 +80,7 @@ struct SessionSequence: ExpirableSequence {
     }
     
     mutating func update(_ accounts: Set<Account>) {
-        // todo when decide on object structure
-//        accounts = accounts
+        blockchain.accounts = accounts
     }
     
     mutating func extend(_ ttl: Int) throws {
@@ -82,7 +92,7 @@ struct SessionSequence: ExpirableSequence {
         expiryDate = newExpiryDate
     }
 
-    func publicRepresentation() -> Session? {
+    func publicRepresentation() -> Session {
         return Session(
             topic: topic,
             peer: participants.peer.metadata!,

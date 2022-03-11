@@ -7,15 +7,11 @@ struct SessionState: Codable, Equatable {
 
 struct SessionProposal: Codable, Equatable {
     let relay: RelayProtocolOptions
-    let proposer: Proposer
+    let proposer: Participant
     let permissions: SessionPermissions
     let blockchainProposed: Blockchain
 }
 
-struct Proposer: Codable, Equatable {
-    let publicKey: String
-    let metadata: AppMetadata
-}
 
 struct Blockchain: Codable, Equatable {
     let chains: Set<String>
