@@ -82,14 +82,11 @@ final class ClientTests: XCTestCase {
         proposerSettlesSessionExpectation.expectedFulfillmentCount = 2
         let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
         responderSettlesSessionExpectation.expectedFulfillmentCount = 2
-        var pairingTopic: String!
         var initiatedSecondSession = false
         let permissions = Session.Permissions.stub()
         let uri = try! proposer.client.connect(sessionPermissions: permissions, topic: nil)!
         try! responder.client.pair(uri: uri)
-//        proposer.onPairingSettled = { pairing in
-//            pairingTopic = pairing.topic
-//        }
+
         responder.onSessionProposal = { [unowned self] proposal in
             responder.client.approve(proposal: proposal, accounts: [])
         }
@@ -98,6 +95,7 @@ final class ClientTests: XCTestCase {
         }
         proposer.onSessionSettled = { [unowned self] sessionSettled in
             proposerSettlesSessionExpectation.fulfill()
+            let pairingTopic = proposer.client.getSettledPairings().first!.topic
             if !initiatedSecondSession {
                 let _ = try! proposer.client.connect(sessionPermissions: permissions, topic: pairingTopic)
                 initiatedSecondSession = true
