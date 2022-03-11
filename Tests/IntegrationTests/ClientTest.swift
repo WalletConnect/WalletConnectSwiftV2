@@ -30,7 +30,7 @@ final class ClientTests: XCTestCase {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let keychain = KeychainStorage(keychainService: KeychainServiceFake(), serviceIdentifier: "")
         let client = WalletConnectClient(
-            metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil),
+            metadata: AppMetadata(name: prefix, description: "", url: "", icons: [""]),
             projectId: projectId,
             relayHost: relayHost,
             logger: logger,

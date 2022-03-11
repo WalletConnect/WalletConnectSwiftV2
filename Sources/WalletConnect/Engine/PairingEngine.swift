@@ -230,8 +230,8 @@ final class PairingEngine {
     }
     
     private func setupExpirationHandling() {
-        sequencesStore.onSequenceExpiration = { [weak self] topic, _ in
-            self?.kms.deleteSymmetricKey(for: topic)
+        sequencesStore.onSequenceExpiration = { [weak self] pairing in
+            self?.kms.deleteSymmetricKey(for: pairing.topic)
         }
     }
     
