@@ -234,8 +234,8 @@ final class SessionEngine {
         
         let session = SessionSequence(
             topic: topic,
-            self: selfParticipant,
-            peer: proposal.proposer,
+            selfParticipant: selfParticipant,
+            peerParticipant: proposal.proposer,
             settleParams: settleParams,
             acknowledged: false)
 
@@ -253,8 +253,8 @@ final class SessionEngine {
         let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
         
         let session = SessionSequence(topic: topic,
-                                      self: selfParticipant,
-                                      peer: settleParams.controller,
+                                      selfParticipant: selfParticipant,
+                                      peerParticipant: settleParams.controller,
                                       settleParams: settleParams,
                                       acknowledged: true)
         
@@ -465,10 +465,10 @@ final class SessionEngine {
     }
     
     private func handleUpgradeResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sequencesStore.getSequence(forTopic: topic),
-              let permissions = session.permissions else {
+        guard let session = sequencesStore.getSequence(forTopic: topic) else {
             return
         }
+        let permissions = session.permissions
         switch result {
         case .response:
             onSessionUpgrade?(session.topic, permissions)

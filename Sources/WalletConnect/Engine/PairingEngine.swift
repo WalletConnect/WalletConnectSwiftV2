@@ -73,7 +73,7 @@ final class PairingEngine {
     func propose(pairingTopic: String, permissions: SessionPermissions, relay: RelayProtocolOptions) {
         logger.debug("Propose Session on topic: \(pairingTopic)")
         let publicKey = try! kms.createX25519KeyPair()
-        let proposer = Proposer(
+        let proposer = Participant(
             publicKey: publicKey.hexRepresentation,
             metadata: metadata)
         let proposal = SessionProposal(

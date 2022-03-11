@@ -14,6 +14,6 @@ struct SessionProposal: Codable, Equatable {
 
 
 struct Blockchain: Codable, Equatable {
-    let chains: Set<String>
-    let accounts: Set<Account>
+    var chains: Set<String>
+    var accounts: Set<Account>
 }
