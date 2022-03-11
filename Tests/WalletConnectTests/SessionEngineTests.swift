@@ -317,16 +317,7 @@ final class SessionEngineTests: XCTestCase {
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 1301)
     }
-    
-    func testUpdatePeerErrorSessionNotSettled() {
-        setupEngine()
-        let session = SessionSequence.stub(isSelfController: false, acknowledged: false) // Session is not fully settled
-        storageMock.setSequence(session)
-        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic))
-        XCTAssertFalse(relayMock.didRespondSuccess)
-        XCTAssertEqual(relayMock.lastErrorCode, 3003)
-    }
-    
+
     func testUpdatePeerErrorUnauthorized() {
         setupEngine()
         let session = SessionSequence.stub(isSelfController: true) // Peer is not a controller
@@ -420,15 +411,6 @@ final class SessionEngineTests: XCTestCase {
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpgrade(topic: ""))
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 1301)
-    }
-    
-    func testUpgradePeerErrorSessionNotSettled() {
-        setupEngine()
-        let session = SessionSequence.stub(isSelfController: false, acknowledged: false) // Session is not fully settled
-        storageMock.setSequence(session)
-        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpgrade(topic: session.topic))
-        XCTAssertFalse(relayMock.didRespondSuccess)
-        XCTAssertEqual(relayMock.lastErrorCode, 3004)
     }
     
     func testUpgradePeerErrorUnauthorized() {

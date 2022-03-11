@@ -268,8 +268,7 @@ final class SessionEngine {
             }
         }
         let topic = payload.topic
-        guard var session = sequencesStore.getSequence(forTopic: topic),
-              session.acknowledged else {
+        guard var session = sequencesStore.getSequence(forTopic: topic) else {
                   relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
                   return
               }
