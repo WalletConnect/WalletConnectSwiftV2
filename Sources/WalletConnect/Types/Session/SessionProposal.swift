@@ -10,6 +10,10 @@ struct SessionProposal: Codable, Equatable {
     let proposer: Participant
     let permissions: SessionPermissions
     let blockchainProposed: Blockchain
+    
+    func publicRepresentation() -> Session.Proposal {
+        return Session.Proposal(proposer: proposer.metadata, permissions: Session.Permissions(permissions: permissions), blockchains: blockchainProposed.chains, proposal: self)
+    }
 }
 
 

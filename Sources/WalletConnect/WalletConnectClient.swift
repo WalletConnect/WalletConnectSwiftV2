@@ -295,8 +295,8 @@ public final class WalletConnectClient {
         sessionEngine.onApprovalAcknowledgement = { [weak self] session in
             self?.delegate?.didSettle(session: session)
         }
-        sessionEngine.onSessionRejected = { [unowned self] pendingTopic, reason in
-            delegate?.didReject(pendingSessionTopic: pendingTopic, reason: reason.toPublic())
+        pairingEngine.onSessionRejected = { [unowned self] proposal, reason in
+            delegate?.didReject(proposal: proposal, reason: reason.toPublic())
         }
         sessionEngine.onSessionPayloadRequest = { [unowned self] sessionRequest in
             delegate?.didReceive(sessionRequest: sessionRequest)

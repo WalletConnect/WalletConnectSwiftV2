@@ -8,6 +8,7 @@ final class PairingEngine {
     var onPairingExtend: ((Pairing)->())?
     var onSessionProposal: ((Session.Proposal)->())?
     var onProposeResponse: ((String)->())?
+    var onSessionRejected: ((Session.Proposal, SessionType.Reason)->())?
 
     
     private let wcSubscriber: WCSubscribing
@@ -155,9 +156,7 @@ final class PairingEngine {
     
     private func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
         proposerToRequestPayload[proposal.proposer.publicKey] = payload
-        //todo - provide better type conversion
-        let sessionProposal = Session.Proposal(proposer: proposal.proposer.metadata, permissions: Session.Permissions(permissions: proposal.permissions), blockchains: proposal.blockchainProposed.chains, proposal: proposal)
-        onSessionProposal?(sessionProposal)
+        onSessionProposal?(proposal.publicRepresentation())
     }
     
     func reject(proposal: SessionProposal, reason: ReasonCode) {
@@ -268,9 +267,10 @@ final class PairingEngine {
 
             onProposeResponse?(sessionTopic)
             
-        case .error:
+        case .error(let error):
             kms.deletePrivateKey(for: proposal.proposer.publicKey)
             sequencesStore.delete(topic: pairingTopic)
+            onSessionRejected?(proposal.publicRepresentation(), SessionType.Reason(code: error.error.code, message: error.error.message))
             return
         }
     }
