@@ -3,6 +3,7 @@ import Combine
 import WalletConnectUtils
 import WalletConnectKMS
 
+
 final class SessionEngine {
     var onSessionPayloadRequest: ((Request)->())?
     var onSessionPayloadResponse: ((Response)->())?

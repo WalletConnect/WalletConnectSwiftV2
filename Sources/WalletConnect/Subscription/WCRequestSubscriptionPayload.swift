@@ -1,7 +1,7 @@
 
 import Foundation
 
-struct WCRequestSubscriptionPayload {
+struct WCRequestSubscriptionPayload: Codable {
     let topic: String
     let wcRequest: WCRequest
 }

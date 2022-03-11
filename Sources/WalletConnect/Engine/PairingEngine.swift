@@ -3,6 +3,7 @@ import Combine
 import WalletConnectUtils
 import WalletConnectKMS
 
+
 final class PairingEngine {
     var onApprovalAcknowledgement: ((Pairing) -> Void)?
     var onPairingExtend: ((Pairing)->())?
@@ -10,6 +11,10 @@ final class PairingEngine {
     var onProposeResponse: ((String)->())?
     var onSessionRejected: ((Session.Proposal, SessionType.Reason)->())?
 
+    // todo - move to proposer to payload
+    var proposals = [String: SessionProposal]()
+    private let proposalStore: KeyValueStore<WCRequestSubscriptionPayload>
+    
     
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
@@ -18,7 +23,6 @@ final class PairingEngine {
     private var metadata: AppMetadata
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
-    private var sessionPermissions: [String: SessionPermissions] = [:]
     private let topicInitializer: () -> String
     
     init(relay: WalletConnectRelaying,
@@ -27,7 +31,8 @@ final class PairingEngine {
          sequencesStore: PairingSequenceStorage,
          metadata: AppMetadata,
          logger: ConsoleLogging,
-         topicGenerator: @escaping () -> String = String.generateTopic) {
+         topicGenerator: @escaping () -> String = String.generateTopic,
+         proposalStore: KeyValueStore<WCRequestSubscriptionPayload> = KeyValueStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.proposals.rawValue)) {
         self.relayer = relay
         self.kms = kms
         self.wcSubscriber = subscriber
@@ -35,6 +40,7 @@ final class PairingEngine {
         self.sequencesStore = sequencesStore
         self.logger = logger
         self.topicInitializer = topicGenerator
+        self.proposalStore = proposalStore
         setUpWCRequestHandling()
         setupExpirationHandling()
         restoreSubscriptions()
@@ -68,8 +74,6 @@ final class PairingEngine {
         wcSubscriber.setSubscription(topic: topic)
         return uri
     }
-    // todo - move to proposer to payload
-    var proposals = [String: SessionProposal]()
     
     func propose(pairingTopic: String, permissions: SessionPermissions, relay: RelayProtocolOptions) {
         logger.debug("Propose Session on topic: \(pairingTopic)")
@@ -139,28 +143,25 @@ final class PairingEngine {
         }
     }
     
-    private var proposerToRequestPayload: [String: WCRequestSubscriptionPayload] = [:]
-
-    
     private func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
-        proposerToRequestPayload[proposal.proposer.publicKey] = payload
+        proposalStore.set(payload, forKey: proposal.proposer.publicKey)
         onSessionProposal?(proposal.publicRepresentation())
     }
     
     func reject(proposal: SessionProposal, reason: ReasonCode) {
-        guard let payload = proposerToRequestPayload[proposal.proposer.publicKey] else {
+        guard let payload = try? proposalStore.get(key: proposal.proposer.publicKey) else {
             return
         }
-        proposerToRequestPayload[proposal.proposer.publicKey] = nil
+        proposalStore.delete(forKey: proposal.proposer.publicKey)
         relayer.respondError(for: payload, reason: reason)
     }
     
     func respondSessionPropose(proposal: SessionType.ProposeParams) -> String? {
-        guard let payload = proposerToRequestPayload[proposal.proposer.publicKey] else {
+        guard let payload = try? proposalStore.get(key: proposal.proposer.publicKey) else {
             return nil
         }
-        proposerToRequestPayload[proposal.proposer.publicKey] = nil
-        
+        proposalStore.delete(forKey: proposal.proposer.publicKey)
+
         let selfPublicKey = try! kms.createX25519KeyPair()
         var agreementKey: AgreementSecret!
         
