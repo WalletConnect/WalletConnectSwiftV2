@@ -17,4 +17,7 @@ jobs:
         xcode-version: '13.1'
     - name: Build Package
       run: swift build -v
+    - name: Run tests
+      run: swift test -v
+      
 
