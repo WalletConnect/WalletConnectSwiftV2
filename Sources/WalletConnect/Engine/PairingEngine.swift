@@ -119,26 +119,6 @@ final class PairingEngine {
             }
         }
     }
-
-    //MARK: - Private
-
-    private func setUpWCRequestHandling() {
-        wcSubscriber.onReceivePayload = { [unowned self] subscriptionPayload in
-            switch subscriptionPayload.wcRequest.params {
-            case .pairingPing(_):
-                wcPairingPing(subscriptionPayload)
-            case .sessionPropose(let proposeParams):
-                wcSessionPropose(subscriptionPayload, proposal: proposeParams)
-            default:
-                logger.warn("Warning: Pairing Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
-            }
-        }
-    }
-    
-    private func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
-        try? proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
-        onSessionProposal?(proposal.publicRepresentation())
-    }
     
     func reject(proposal: SessionProposal, reason: ReasonCode) {
         guard let payload = try? proposalPayloadsStore.get(key: proposal.proposer.publicKey) else {
@@ -172,6 +152,26 @@ final class PairingEngine {
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
         relayer.respond(topic: payload.topic, response: .response(response)) { _ in }
         return sessionTopic
+    }
+
+    //MARK: - Private
+
+    private func setUpWCRequestHandling() {
+        wcSubscriber.onReceivePayload = { [unowned self] subscriptionPayload in
+            switch subscriptionPayload.wcRequest.params {
+            case .pairingPing(_):
+                wcPairingPing(subscriptionPayload)
+            case .sessionPropose(let proposeParams):
+                wcSessionPropose(subscriptionPayload, proposal: proposeParams)
+            default:
+                logger.warn("Warning: Pairing Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
+            }
+        }
+    }
+    
+    private func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
+        try? proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
+        onSessionProposal?(proposal.publicRepresentation())
     }
     
     private func wcPairingPing(_ payload: WCRequestSubscriptionPayload) {
@@ -228,5 +228,4 @@ final class PairingEngine {
             return
         }
     }
-    
 }
