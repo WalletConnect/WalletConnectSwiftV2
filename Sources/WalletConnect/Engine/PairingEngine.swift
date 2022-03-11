@@ -11,11 +11,7 @@ final class PairingEngine {
     var onProposeResponse: ((String)->())?
     var onSessionRejected: ((Session.Proposal, SessionType.Reason)->())?
 
-    // todo - move to proposer to payload
-    var proposals = [String: SessionProposal]()
-    private let proposalStore: KeyValueStore<WCRequestSubscriptionPayload>
-    
-    
+    private let proposalPayloadsStore: KeyValueStore<WCRequestSubscriptionPayload>
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
     private let kms: KeyManagementServiceProtocol
@@ -32,7 +28,7 @@ final class PairingEngine {
          metadata: AppMetadata,
          logger: ConsoleLogging,
          topicGenerator: @escaping () -> String = String.generateTopic,
-         proposalStore: KeyValueStore<WCRequestSubscriptionPayload> = KeyValueStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.proposals.rawValue)) {
+         proposalPayloadsStore: KeyValueStore<WCRequestSubscriptionPayload> = KeyValueStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.proposals.rawValue)) {
         self.relayer = relay
         self.kms = kms
         self.wcSubscriber = subscriber
@@ -40,7 +36,7 @@ final class PairingEngine {
         self.sequencesStore = sequencesStore
         self.logger = logger
         self.topicInitializer = topicGenerator
-        self.proposalStore = proposalStore
+        self.proposalPayloadsStore = proposalPayloadsStore
         setUpWCRequestHandling()
         setupExpirationHandling()
         restoreSubscriptions()
@@ -86,11 +82,7 @@ final class PairingEngine {
             proposer: proposer,
             permissions: permissions,
             blockchainProposed: Blockchain(chains: [], accounts: [])) //todo!!
-        
-//        let pendingSession = SessionSequence.buildProposed(proposal: proposal, topic: pairingTopic)
-        
-        proposals[pairingTopic] = proposal
-//        sequencesStore.setSequence(pendingSession)
+                
         relayer.request(.wcSessionPropose(proposal), onTopic: pairingTopic) { [unowned self] result in
             switch result {
             case .success:
@@ -144,23 +136,23 @@ final class PairingEngine {
     }
     
     private func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
-        proposalStore.set(payload, forKey: proposal.proposer.publicKey)
+        try? proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
         onSessionProposal?(proposal.publicRepresentation())
     }
     
     func reject(proposal: SessionProposal, reason: ReasonCode) {
-        guard let payload = try? proposalStore.get(key: proposal.proposer.publicKey) else {
+        guard let payload = try? proposalPayloadsStore.get(key: proposal.proposer.publicKey) else {
             return
         }
-        proposalStore.delete(forKey: proposal.proposer.publicKey)
+        proposalPayloadsStore.delete(forKey: proposal.proposer.publicKey)
         relayer.respondError(for: payload, reason: reason)
     }
     
     func respondSessionPropose(proposal: SessionType.ProposeParams) -> String? {
-        guard let payload = try? proposalStore.get(key: proposal.proposer.publicKey) else {
+        guard let payload = try? proposalPayloadsStore.get(key: proposal.proposer.publicKey) else {
             return nil
         }
-        proposalStore.delete(forKey: proposal.proposer.publicKey)
+        proposalPayloadsStore.delete(forKey: proposal.proposer.publicKey)
 
         let selfPublicKey = try! kms.createX25519KeyPair()
         var agreementKey: AgreementSecret!
