@@ -2,7 +2,7 @@
 
 final class PairingSequenceStorageMock: PairingSequenceStorage {
     
-    var onSequenceExpiration: ((String, String?) -> Void)?
+    var onSequenceExpiration: ((PairingSequence) -> Void)?
     
     private(set) var pairings: [String: PairingSequence] = [:]
     

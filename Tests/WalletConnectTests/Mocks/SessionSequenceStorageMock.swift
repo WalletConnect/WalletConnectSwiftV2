@@ -3,7 +3,7 @@ import Foundation
 
 final class SessionSequenceStorageMock: SessionSequenceStorage {
     
-    var onSequenceExpiration: ((String, String) -> Void)?
+    var onSequenceExpiration: ((SessionSequence) -> Void)?
     
     private(set) var sessions: [String: SessionSequence] = [:]
     
