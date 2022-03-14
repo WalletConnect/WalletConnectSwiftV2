@@ -8,6 +8,7 @@ final class PairingEngine {
     var onPairingExtend: ((Pairing)->())?
     var onSessionProposal: ((Session.Proposal)->())?
     var onProposeResponse: ((String)->())?
+    var onSessionRejected: ((Session.Proposal, SessionType.Reason)->())?
 
     
     private let wcSubscriber: WCSubscribing
@@ -122,16 +123,7 @@ final class PairingEngine {
             }
         }
     }
-    
-    func extend(topic: String, ttl: Int) throws {
-        guard var pairing = sequencesStore.getSequence(forTopic: topic) else {
-            throw WalletConnectError.noPairingMatchingTopic(topic)
-        }
-        try pairing.extend(ttl)
-        sequencesStore.setSequence(pairing)
-        relayer.request(.wcPairingExtend(PairingType.ExtendParams(ttl: ttl)), onTopic: topic)
-    }
-    
+
     //MARK: - Private
 
     private func setUpWCRequestHandling() {
@@ -139,9 +131,6 @@ final class PairingEngine {
             switch subscriptionPayload.wcRequest.params {
             case .pairingPing(_):
                 wcPairingPing(subscriptionPayload)
-            case .pairingExtend(_):
-                //TODO - extend and delete
-                break
             case .sessionPropose(let proposeParams):
                 wcSessionPropose(subscriptionPayload, proposal: proposeParams)
             default:
@@ -155,9 +144,7 @@ final class PairingEngine {
     
     private func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
         proposerToRequestPayload[proposal.proposer.publicKey] = payload
-        //todo - provide better type conversion
-        let sessionProposal = Session.Proposal(proposer: proposal.proposer.metadata, permissions: Session.Permissions(permissions: proposal.permissions), blockchains: proposal.blockchainProposed.chains, proposal: proposal)
-        onSessionProposal?(sessionProposal)
+        onSessionProposal?(proposal.publicRepresentation())
     }
     
     func reject(proposal: SessionProposal, reason: ReasonCode) {
@@ -167,8 +154,6 @@ final class PairingEngine {
         proposerToRequestPayload[proposal.proposer.publicKey] = nil
         relayer.respondError(for: payload, reason: reason)
     }
-    
-    
     
     func respondSessionPropose(proposal: SessionType.ProposeParams) -> String? {
         guard let payload = proposerToRequestPayload[proposal.proposer.publicKey] else {
@@ -189,31 +174,11 @@ final class PairingEngine {
         let sessionTopic = agreementKey.derivedTopic()
 
         try! kms.setAgreementSecret(agreementKey, topic: sessionTopic)
-        wcSubscriber.setSubscription(topic: sessionTopic)
+
         let proposeResponse = SessionType.ProposeResponse(relay: proposal.relay, responder: AgreementPeer(publicKey: selfPublicKey.hexRepresentation))
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
         relayer.respond(topic: payload.topic, response: .response(response)) { _ in }
         return sessionTopic
-    }
-    
-    
-    
-    
-    private func wcPairingExtend(_ payload: WCRequestSubscriptionPayload, extendParams: PairingType.ExtendParams) {
-        let topic = payload.topic
-        guard var pairing = sequencesStore.getSequence(forTopic: topic) else {
-            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .pairing, topic: topic))
-            return
-        }
-        do {
-            try pairing.extend(extendParams.ttl)
-        } catch {
-            relayer.respondError(for: payload, reason: .invalidExtendRequest(context: .pairing))
-            return
-        }
-        sequencesStore.setSequence(pairing)
-        relayer.respondSuccess(for: payload)
-        onPairingExtend?(Pairing(topic: pairing.topic, peer: pairing.state?.metadata, expiryDate: pairing.expiryDate))
     }
     
     private func wcPairingPing(_ payload: WCRequestSubscriptionPayload) {
@@ -235,7 +200,6 @@ final class PairingEngine {
         }
     }
     
-    
     private func handleResponse(_ response: WCResponse) {
         switch response.requestParams {
         case .sessionPropose(let proposal):
@@ -244,7 +208,6 @@ final class PairingEngine {
             break
         }
     }
-    
     
     private func handleProposeResponse(pairingTopic: String, proposal: SessionProposal, result: JsonRpcResult) {
         switch result {
@@ -261,16 +224,14 @@ final class PairingEngine {
             }
 
             let sessionTopic = agreementKeys.derivedTopic()
-            
-            
-
             try! kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
 
             onProposeResponse?(sessionTopic)
             
-        case .error:
+        case .error(let error):
             kms.deletePrivateKey(for: proposal.proposer.publicKey)
             sequencesStore.delete(topic: pairingTopic)
+            onSessionRejected?(proposal.publicRepresentation(), SessionType.Reason(code: error.error.code, message: error.error.message))
             return
         }
     }

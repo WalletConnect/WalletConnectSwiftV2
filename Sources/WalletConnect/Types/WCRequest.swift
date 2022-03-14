@@ -29,9 +29,6 @@ struct WCRequest: Codable {
         case .pairingDelete:
             let paramsValue = try container.decode(PairingType.DeleteParams.self, forKey: .params)
             params = .pairingDelete(paramsValue)
-        case .pairingExtend:
-            let paramsValue = try container.decode(PairingType.ExtendParams.self, forKey: .params)
-            params = .pairingExtend(paramsValue)
         case .pairingPing:
             let paramsValue = try container.decode(PairingType.PingParams.self, forKey: .params)
             params = .pairingPing(paramsValue)
@@ -75,8 +72,6 @@ struct WCRequest: Codable {
             try container.encode(params, forKey: .params)
         case .pairingPing(let params):
             try container.encode(params, forKey: .params)
-        case .pairingExtend(let params):
-            try container.encode(params, forKey: .params)
         case .sessionPropose(let params):
             try container.encode(params, forKey: .params)
         case .sessionSettle(let params):
@@ -108,7 +103,6 @@ extension WCRequest {
     enum Method: String, Codable {
         case pairingDelete = "wc_pairingDelete"
         case pairingPing = "wc_pairingPing"
-        case pairingExtend = "wc_pairingExtend"
         case sessionPropose = "wc_sessionPropose"
         case sessionSettle = "wc_sessionSettle"
         case sessionUpdate = "wc_sessionUpdate"
@@ -125,7 +119,6 @@ extension WCRequest {
     enum Params: Codable, Equatable {
         case pairingDelete(PairingType.DeleteParams)
         case pairingPing(PairingType.PingParams)
-        case pairingExtend(PairingType.ExtendParams)
         case sessionPropose(SessionType.ProposeParams)
         case sessionSettle(SessionType.SettleParams)
         case sessionUpdate(SessionType.UpdateParams)
@@ -140,8 +133,6 @@ extension WCRequest {
             switch (lhs, rhs) {
             case (.pairingDelete(let lhsParam), pairingDelete(let rhsParam)):
                 return lhsParam == rhsParam
-            case (.pairingExtend(let lhsParam), pairingExtend(let rhsParams)):
-                return lhsParam == rhsParams
             case (.sessionPropose(let lhsParam), sessionPropose(let rhsParam)):
                 return lhsParam == rhsParam
             case (.sessionSettle(let lhsParam), sessionSettle(let rhsParam)):

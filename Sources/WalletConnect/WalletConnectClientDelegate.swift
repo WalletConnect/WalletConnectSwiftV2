@@ -54,7 +54,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     /// Tells the delegate that peer client has rejected a session proposal.
     ///
     /// Function will be executed on proposer client only.
-    func didReject(pendingSessionTopic: String, reason: Reason)
+    func didReject(proposal: Session.Proposal, reason: Reason)
     
     /// Tells the delegate that peer has extended pairing lifetime.
     ///
@@ -70,7 +70,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
 public extension WalletConnectClientDelegate {
     func didSettle(pairing: Pairing) {}
     func didReceive(notification: Session.Notification, sessionTopic: String) {}
-    func didReject(pendingSessionTopic: String, reason: Reason) {}
+    func didReject(proposal: String, reason: Reason) {}
     func didExtend(pairing: Pairing) {}
     func didReceive(sessionRequest: Request) {}
     func didReceive(sessionProposal: Session.Proposal) {}
