@@ -16,6 +16,7 @@ final class PairingEngineTests: XCTestCase {
     var subscriberMock: MockedSubscriber!
     var storageMock: PairingSequenceStorageMock!
     var cryptoMock: KeyManagementServiceMock!
+    var proposalPayloadsStore: KeyValueStore<WCRequestSubscriptionPayload>!
     
     var topicGenerator: TopicGenerator!
     
@@ -25,6 +26,7 @@ final class PairingEngineTests: XCTestCase {
         storageMock = PairingSequenceStorageMock()
         cryptoMock = KeyManagementServiceMock()
         topicGenerator = TopicGenerator()
+        proposalPayloadsStore = KeyValueStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: "")
     }
     
     override func tearDown() {
@@ -46,7 +48,8 @@ final class PairingEngineTests: XCTestCase {
             sequencesStore: storageMock,
             metadata: meta,
             logger: logger,
-            topicGenerator: topicGenerator.getTopic)
+            topicGenerator: topicGenerator.getTopic,
+            proposalPayloadsStore: proposalPayloadsStore)
     }
     
         func testPairMultipleTimesOnSameURIThrows() {
@@ -111,6 +114,7 @@ final class PairingEngineTests: XCTestCase {
             sessionProposed = true
         }
         subscriberMock.onReceivePayload?(payload)
+        XCTAssertNotNil(try! proposalPayloadsStore.get(key: proposal.proposer.publicKey), "Proposer must store proposal payload")
         XCTAssertTrue(sessionProposed)
     }
     
@@ -124,17 +128,13 @@ final class PairingEngineTests: XCTestCase {
         let payload = WCRequestSubscriptionPayload(topic: topicA, wcRequest: request)
         subscriberMock.onReceivePayload?(payload)
 
-//        let topicB = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
-
-        // User approves proposal
         let topicB = engine.respondSessionPropose(proposal: proposal)!
 
-//        XCTAssertFalse(subscriberMock.didSubscribe(to: topicB), "Responder must subscribe for session topic B")
         XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must store agreement key for topic B")
-//        XCTAssert(storageMock.hasSequence(forTopic: topicB), "Responder must persist a session on topic B")
-        XCTAssertEqual(relayMock.didRespondOnTopic!, topicA)
+        XCTAssertEqual(relayMock.didRespondOnTopic!, topicA, "Responder must respond on topic A")
     }
     
+    //  settle session eng -      XCTAssertFalse(subscriberMock.didSubscribe(to: topicB), "Responder must subscribe for session topic B")
     func testHandleSessionProposeResponse() {
         setupEngine()
 
@@ -143,7 +143,7 @@ final class PairingEngineTests: XCTestCase {
         let permissions = SessionPermissions.stub()
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
 
-        // Client propose session
+        // Client proposes session
         engine.propose(pairingTopic: pairing.topic, permissions: permissions, relay: relayOptions)
 
         guard let request = relayMock.requests.first?.request,
@@ -162,15 +162,16 @@ final class PairingEngineTests: XCTestCase {
                                   requestParams: request.params,
                                   result: .response(jsonRpcResponse))
 
+        var sessionTopic: String!
+        
+        engine.onProposeResponse = { topic in
+            sessionTopic = topic
+        }
         relayMock.onPairingResponse?(response)
-
         let privateKey = try! cryptoMock.getPrivateKey(for: proposal.proposer.publicKey)!
         let topicB = deriveTopic(publicKey: responder.publicKey, privateKey: privateKey)
-
-
-        //must persist proposal?
-//        must delegate on session proposal
-
+        
+        XCTAssertEqual(topicB, sessionTopic, "Responder engine calls back with session topic")
     }
     
     func testSessionProposeError() {
@@ -198,7 +199,9 @@ final class PairingEngineTests: XCTestCase {
         relayMock.onPairingResponse?(response)
 
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must remove private key for rejected session")
+    }
+    
+    func testExtendPairingExpiryOnProposeResponse() {
         
-        //must remove proposal?
     }
 }
