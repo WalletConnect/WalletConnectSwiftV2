@@ -87,18 +87,24 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testHandleSessionSettleAcknowledge() {
-//        let session = SessionSequence.stub(isSelfController: false, acknowledged: false)
+        let session = SessionSequence.stub(isSelfController: false, acknowledged: false)
+        storageMock.setSequence(session)
+        var didCallBackOnSessionApproved = false
+        engine.onSessionApproved = { _ in
+            didCallBackOnSessionApproved = true
+        }
+        
+        let settleResponse = JSONRPCResponse(id: 1, result: AnyCodable(true))
+        let response = WCResponse(
+            topic: session.topic,
+            chainId: nil,
+            requestMethod: .sessionSettle,
+            requestParams: .sessionSettle(SessionType.SettleParams.stub()),
+            result: .response(settleResponse))
+        relayMock.onResponse?(response)
 
-//        let settleResponse = JSONRPCResponse(id: 1, result: AnyCodable(true))
-//        let response = WCResponse(
-//            topic: session.topic,
-//            chainId: nil,
-//            requestMethod: .sessionSettle,
-//            requestParams: .sessionSettle(SessionType.SettleParams.stub()),
-//            result: .response(settleResponse))
-//        relayMock.onResponse?(response)
-//
-        // responder must ack session
+        XCTAssertTrue(storageMock.getSequence(forTopic: session.topic)!.acknowledged, "Responder must acknowledged session")
+        XCTAssertTrue(didCallBackOnSessionApproved, "Responder's engine must calls back with session")
     }
     
     func testHandleSessionSettleError() {
