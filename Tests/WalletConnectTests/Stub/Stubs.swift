@@ -34,13 +34,11 @@ extension Session.Permissions {
 extension SessionPermissions {
     static func stub(
         jsonrpc: Set<String> = ["eth_sign"],
-        notifications: Set<String> = ["a_type"],
-        controllerKey: String = AgreementPrivateKey().publicKey.hexRepresentation
+        notifications: Set<String> = ["a_type"]
     ) -> SessionPermissions {
         return SessionPermissions(
             jsonrpc: JSONRPC(methods: jsonrpc),
-            notifications: Notifications(types: notifications),
-            controller: AgreementPeer(publicKey: controllerKey)
+            notifications: Notifications(types: notifications)
         )
     }
 }
@@ -91,7 +89,7 @@ extension SessionProposal {
         let relayOptions = RelayProtocolOptions(protocol: "waku", data: nil)
         return SessionType.ProposeParams(
             relay: relayOptions,
-            proposer: Proposer(publicKey: proposerPubKey, metadata: AppMetadata.stub()),
+            proposer: Participant(publicKey: proposerPubKey, metadata: AppMetadata.stub()),
             permissions: SessionPermissions.stub(),
             blockchainProposed: Blockchain(chains: [], accounts: []))
     }

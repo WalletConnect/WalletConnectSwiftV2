@@ -39,7 +39,7 @@ final class ClientTests: XCTestCase {
         return ClientDelegate(client: client)
     }
     
-    func testNewPairingWithoutSession() {
+    func testNewPairingPing() {
         let responderReceivesPingResponseExpectation = expectation(description: "Responder receives ping response")
         let permissions = Session.Permissions.stub()
         let uri = try! proposer.client.connect(sessionPermissions: permissions)!
@@ -207,22 +207,6 @@ final class ClientTests: XCTestCase {
         }
         waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
-    
-    func testPairingPing() {
-        let proposerReceivesPingResponseExpectation = expectation(description: "Proposer receives ping response")
-        let permissions = Session.Permissions.stub()
-        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
-        
-        _ = try! responder.client.pair(uri: uri)
-//        proposer.onPairingSettled = { [unowned self] pairing in
-//            proposer.client.ping(topic: pairing.topic) { response in
-//                XCTAssertTrue(response.isSuccess)
-//                proposerReceivesPingResponseExpectation.fulfill()
-//            }
-//        }
-        waitForExpectations(timeout: defaultTimeout, handler: nil)
-    }
-    
     
     func testSessionPing() {
         let proposerReceivesPingResponseExpectation = expectation(description: "Proposer receives ping response")

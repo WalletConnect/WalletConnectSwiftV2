@@ -67,13 +67,13 @@ final class PairingEngine {
         wcSubscriber.setSubscription(topic: topic)
         return uri
     }
-    
+    // todo - move to proposer to payload
     var proposals = [String: SessionProposal]()
     
     func propose(pairingTopic: String, permissions: SessionPermissions, relay: RelayProtocolOptions) {
         logger.debug("Propose Session on topic: \(pairingTopic)")
         let publicKey = try! kms.createX25519KeyPair()
-        let proposer = Proposer(
+        let proposer = Participant(
             publicKey: publicKey.hexRepresentation,
             metadata: metadata)
         let proposal = SessionProposal(
