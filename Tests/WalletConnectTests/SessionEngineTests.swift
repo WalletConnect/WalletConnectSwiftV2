@@ -72,25 +72,32 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testHandleSessionSettle() {
-
+        let sessionTopic = String.generateTopic()
+        cryptoMock.setAgreementSecret(AgreementSecret.stub(), topic: sessionTopic)
+        var didCallBackOnSessionApproved = false
+        engine.onSessionApproved = { _ in
+            didCallBackOnSessionApproved = true
+        }
         
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubSettle(topic: sessionTopic))
         
-        //        let error = JSONRPCErrorResponse(id: request.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))
-        //        let response = WCResponse(
-        //            topic: publishTopic,
-        //            chainId: nil,
-        //            requestMethod: request.method,
-        //            requestParams: request.params,
-        //            result: .error(error))
-        //        relayMock.onResponse?(response)
-        
-        
-        // proposer must store session ack on topic B
-        // proposer must send ack response
-        // proposer's engine must calls back with session
+        XCTAssertTrue(storageMock.getSequence(forTopic: sessionTopic)!.acknowledged, "Proposer must store acknowledged session on topic B")
+        XCTAssertTrue(relayMock.didRespondSuccess, "Proposer must send acknowledge on settle request")
+        XCTAssertTrue(didCallBackOnSessionApproved, "Proposer's engine must calls back with session")
     }
     
     func testHandleSessionSettleAcknowledge() {
+//        let session = SessionSequence.stub(isSelfController: false, acknowledged: false)
+
+//        let settleResponse = JSONRPCResponse(id: 1, result: AnyCodable(true))
+//        let response = WCResponse(
+//            topic: session.topic,
+//            chainId: nil,
+//            requestMethod: .sessionSettle,
+//            requestParams: .sessionSettle(SessionType.SettleParams.stub()),
+//            result: .response(settleResponse))
+//        relayMock.onResponse?(response)
+//
         // responder must ack session
     }
     
