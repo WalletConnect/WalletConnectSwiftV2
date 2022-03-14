@@ -6,8 +6,9 @@ extension SessionSequence {
     static func stub(
         isSelfController: Bool = false,
         expiryDate: Date = Date.distantFuture,
+        selfPrivateKey: AgreementPrivateKey = AgreementPrivateKey(),
         acknowledged: Bool = true) -> SessionSequence {
-            let peerKey = AgreementPrivateKey().publicKey.hexRepresentation
+            let peerKey = selfPrivateKey.publicKey.hexRepresentation
             let selfKey = AgreementPrivateKey().publicKey.hexRepresentation
             let permissions = SessionPermissions.stub()
             let controllerKey = isSelfController ? selfKey : peerKey

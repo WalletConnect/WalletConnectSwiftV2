@@ -10,7 +10,6 @@ extension Collection where Self.Element == String {
     }
 }
 
-// TODO: Remove `setupEngine()` calls now that setting controller flag is not needed anymore
 final class SessionEngineTests: XCTestCase {
     
     var engine: SessionEngine!
@@ -83,11 +82,11 @@ final class SessionEngineTests: XCTestCase {
         
         XCTAssertTrue(storageMock.getSequence(forTopic: sessionTopic)!.acknowledged, "Proposer must store acknowledged session on topic B")
         XCTAssertTrue(relayMock.didRespondSuccess, "Proposer must send acknowledge on settle request")
-        XCTAssertTrue(didCallBackOnSessionApproved, "Proposer's engine must calls back with session")
+        XCTAssertTrue(didCallBackOnSessionApproved, "Proposer's engine must call back with session")
     }
     
     func testHandleSessionSettleAcknowledge() {
-        let session = SessionSequence.stub(isSelfController: false, acknowledged: false)
+        let session = SessionSequence.stub(isSelfController: true, acknowledged: false)
         storageMock.setSequence(session)
         var didCallBackOnSessionApproved = false
         engine.onSessionApproved = { _ in
@@ -104,11 +103,28 @@ final class SessionEngineTests: XCTestCase {
         relayMock.onResponse?(response)
 
         XCTAssertTrue(storageMock.getSequence(forTopic: session.topic)!.acknowledged, "Responder must acknowledged session")
-        XCTAssertTrue(didCallBackOnSessionApproved, "Responder's engine must calls back with session")
+        XCTAssertTrue(didCallBackOnSessionApproved, "Responder's engine must call back with session")
     }
     
     func testHandleSessionSettleError() {
-        //?
+        let privateKey = AgreementPrivateKey()
+        let session = SessionSequence.stub(isSelfController: false, selfPrivateKey: privateKey, acknowledged: false)
+        storageMock.setSequence(session)
+        cryptoMock.setAgreementSecret(AgreementSecret.stub(), topic: session.topic)
+        try! cryptoMock.setPrivateKey(privateKey)
+        
+        let response = WCResponse(
+            topic: session.topic,
+            chainId: nil,
+            requestMethod: .sessionSettle,
+            requestParams: .sessionSettle(SessionType.SettleParams.stub()),
+            result: .error(JSONRPCErrorResponse(id: 1, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
+        relayMock.onResponse?(response)
+        
+        XCTAssertNil(storageMock.getSequence(forTopic: session.topic), "Responder must remove session")
+        XCTAssertTrue(subscriberMock.didUnsubscribe(to: session.topic), "Responder must unsubscribe topic B")
+        XCTAssertFalse(cryptoMock.hasAgreementSecret(for: session.topic), "Responder must remove agreement secret")
+        XCTAssertFalse(cryptoMock.hasPrivateKey(for: session.self.publicKey!), "Responder must remove private key")
     }
 
 //    func testProposeResponseFailure() {

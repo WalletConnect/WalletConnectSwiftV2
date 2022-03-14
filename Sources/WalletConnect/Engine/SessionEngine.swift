@@ -429,22 +429,19 @@ final class SessionEngine {
     }
     
     func handleSessionSettleResponse(topic: String, result: JsonRpcResult) {
-        guard let preSettledSession = sequencesStore.getSequence(forTopic: topic) else {return}
+        guard let session = sequencesStore.getSequence(forTopic: topic) else {return}
         switch result {
         case .response:
-            
             guard var session = sequencesStore.getSequence(forTopic: topic) else {return}
             session.acknowledge()
-            
-            sequencesStore.setSequence(session)
-            
-            onSessionApproved?(preSettledSession.publicRepresentation())
+            sequencesStore.setSequence(session)            
+            onSessionApproved?(session.publicRepresentation())
         case .error(let error):
             //todo - log error
             wcSubscriber.removeSubscription(topic: topic)
             sequencesStore.delete(topic: topic)
             kms.deleteAgreementSecret(for: topic)
-            kms.deletePrivateKey(for: preSettledSession.publicKey!)
+            kms.deletePrivateKey(for: session.publicKey!)
         }
     }
     
