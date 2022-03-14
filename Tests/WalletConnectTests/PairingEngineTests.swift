@@ -53,16 +53,16 @@ final class PairingEngineTests: XCTestCase {
             proposalPayloadsStore: proposalPayloadsStore)
     }
     
-        func testPairMultipleTimesOnSameURIThrows() {
-            let uri = WalletConnectURI.stub()
-            for i in 1...10 {
-                if i == 1 {
-                    XCTAssertNoThrow(try engine.pair(uri))
-                } else {
-                    XCTAssertThrowsError(try engine.pair(uri))
-                }
+    func testPairMultipleTimesOnSameURIThrows() {
+        let uri = WalletConnectURI.stub()
+        for i in 1...10 {
+            if i == 1 {
+                XCTAssertNoThrow(try engine.pair(uri))
+            } else {
+                XCTAssertThrowsError(try engine.pair(uri))
             }
         }
+    }
     
     
     func testCreate() {
@@ -86,15 +86,15 @@ final class PairingEngineTests: XCTestCase {
         let topicA = pairing.topic
         let permissions = SessionPermissions.stub()
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
-
+        
         engine.propose(pairingTopic: pairing.topic, permissions: permissions, relay: relayOptions)
-
+        
         guard let publishTopic = relayMock.requests.first?.topic,
               let proposal = relayMock.requests.first?.request.sessionProposal else {
-            XCTFail("Proposer must publish a proposal request."); return
-        }
+                  XCTFail("Proposer must publish a proposal request."); return
+              }
         XCTAssert(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must store the private key matching the public key sent through the proposal.")
-//        XCTAssert(storageMock.hasProposal(on: topicA), "The engine must store a proposal ")
+        //        XCTAssert(storageMock.hasProposal(on: topicA), "The engine must store a proposal ")
         XCTAssertEqual(publishTopic, topicA)
     }
     
@@ -122,39 +122,39 @@ final class PairingEngineTests: XCTestCase {
         let request = WCRequest(method: .sessionPropose, params: .sessionPropose(proposal))
         let payload = WCRequestSubscriptionPayload(topic: topicA, wcRequest: request)
         subscriberMock.onReceivePayload?(payload)
-
+        
         let topicB = engine.respondSessionPropose(proposal: proposal)!
-
+        
         XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must store agreement key for topic B")
         XCTAssertEqual(relayMock.didRespondOnTopic!, topicA, "Responder must respond on topic A")
     }
     
     func testHandleSessionProposeResponse() {
-
+        
         let pairing = Pairing.stub()
         let topicA = pairing.topic
         let permissions = SessionPermissions.stub()
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
-
+        
         // Client proposes session
         engine.propose(pairingTopic: pairing.topic, permissions: permissions, relay: relayOptions)
-
+        
         guard let request = relayMock.requests.first?.request,
               let proposal = relayMock.requests.first?.request.sessionProposal else {
-            XCTFail("Proposer must publish session proposal request"); return
-        }
-
+                  XCTFail("Proposer must publish session proposal request"); return
+              }
+        
         // Client receives proposal response response
         let responder = AgreementPeer.stub()
         let proposalResponse = SessionType.ProposeResponse(relay: relayOptions, responder: responder)
-
+        
         let jsonRpcResponse = JSONRPCResponse<AnyCodable>(id: request.id, result: AnyCodable.decoded(proposalResponse))
         let response = WCResponse(topic: topicA,
                                   chainId: nil,
                                   requestMethod: request.method,
                                   requestParams: request.params,
                                   result: .response(jsonRpcResponse))
-
+        
         var sessionTopic: String!
         
         engine.onProposeResponse = { topic in
@@ -168,28 +168,28 @@ final class PairingEngineTests: XCTestCase {
     }
     
     func testSessionProposeError() {
-
+        
         let pairing = Pairing.stub()
         let topicA = pairing.topic
         let permissions = SessionPermissions.stub()
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
-
+        
         // Client propose session
         engine.propose(pairingTopic: pairing.topic, permissions: permissions, relay: relayOptions)
-
+        
         guard let request = relayMock.requests.first?.request,
               let proposal = relayMock.requests.first?.request.sessionProposal else {
-            XCTFail("Proposer must publish session proposal request"); return
-        }
+                  XCTFail("Proposer must publish session proposal request"); return
+              }
         let errorResponse = JSONRPCErrorResponse(id: request.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))
         let response = WCResponse(topic: topicA,
                                   chainId: nil,
                                   requestMethod: request.method,
                                   requestParams: request.params,
                                   result: .error(errorResponse))
-
+        
         relayMock.onPairingResponse?(response)
-
+        
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must remove private key for rejected session")
     }
     
