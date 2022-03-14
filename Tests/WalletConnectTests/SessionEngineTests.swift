@@ -57,8 +57,18 @@ final class SessionEngineTests: XCTestCase {
 
     
     func testSessionSettle() {
-        // responder must send session settle payload on topic B
-        // responder must persist session on topic B
+        setupEngine()
+        let agreementKeys = AgreementSecret.stub()
+        let topicB = String.generateTopic()
+        cryptoMock.setAgreementSecret(agreementKeys, topic: topicB)
+        
+        let proposal = SessionProposal.stub(proposerPubKey: AgreementPrivateKey().publicKey.hexRepresentation)
+        
+        engine.settle(topic: topicB, proposal: proposal, accounts: [])
+        
+        XCTAssertTrue(storageMock.hasSequence(forTopic: topicB), "Responder must persist session on topic B")
+        XCTAssert(subscriberMock.didSubscribe(to: topicB), "Responder must subscribe for topic B")
+        XCTAssertTrue(relayMock.didCallRequest, "Responder must send session settle payload on topic B")
     }
     
     func testHandleSessionSettle() {
