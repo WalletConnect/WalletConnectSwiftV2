@@ -27,6 +27,7 @@ final class PairingEngineTests: XCTestCase {
         cryptoMock = KeyManagementServiceMock()
         topicGenerator = TopicGenerator()
         proposalPayloadsStore = KeyValueStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: "")
+        setupEngine()
     }
     
     override func tearDown() {
@@ -53,7 +54,6 @@ final class PairingEngineTests: XCTestCase {
     }
     
         func testPairMultipleTimesOnSameURIThrows() {
-            setupEngine()
             let uri = WalletConnectURI.stub()
             for i in 1...10 {
                 if i == 1 {
@@ -66,7 +66,6 @@ final class PairingEngineTests: XCTestCase {
     
     
     func testCreate() {
-        setupEngine()
         let uri = engine.create()!
         XCTAssert(cryptoMock.hasSymmetricKey(for: uri.topic), "Proposer must store the symmetric key matching the URI.")
         XCTAssert(storageMock.hasSequence(forTopic: uri.topic), "The engine must store a pairing after creating one")
@@ -74,7 +73,6 @@ final class PairingEngineTests: XCTestCase {
     }
     
     func testPair() {
-        setupEngine()
         let uri = WalletConnectURI.stub()
         let topic = uri.topic
         try! engine.pair(uri)
@@ -84,7 +82,6 @@ final class PairingEngineTests: XCTestCase {
     }
     
     func testPropose() {
-        setupEngine()
         let pairing = Pairing.stub()
         let topicA = pairing.topic
         let permissions = SessionPermissions.stub()
@@ -102,7 +99,6 @@ final class PairingEngineTests: XCTestCase {
     }
     
     func testReceiveProposal() {
-        setupEngine()
         let pairing = Pairing.stub()
         let topicA = pairing.topic
         var sessionProposed = false
@@ -119,7 +115,6 @@ final class PairingEngineTests: XCTestCase {
     }
     
     func testRespondProposal() {
-        setupEngine()
         // Client receives a proposal
         let topicA = String.generateTopic()
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
@@ -134,9 +129,7 @@ final class PairingEngineTests: XCTestCase {
         XCTAssertEqual(relayMock.didRespondOnTopic!, topicA, "Responder must respond on topic A")
     }
     
-    //  settle session eng -      XCTAssertFalse(subscriberMock.didSubscribe(to: topicB), "Responder must subscribe for session topic B")
     func testHandleSessionProposeResponse() {
-        setupEngine()
 
         let pairing = Pairing.stub()
         let topicA = pairing.topic
@@ -175,7 +168,6 @@ final class PairingEngineTests: XCTestCase {
     }
     
     func testSessionProposeError() {
-        setupEngine()
 
         let pairing = Pairing.stub()
         let topicA = pairing.topic
