@@ -47,9 +47,9 @@ struct WCRequest: Codable {
         case .sessionDelete:
             let paramsValue = try container.decode(SessionType.DeleteParams.self, forKey: .params)
             params = .sessionDelete(paramsValue)
-        case .sessionPayload:
-            let paramsValue = try container.decode(SessionType.PayloadParams.self, forKey: .params)
-            params = .sessionPayload(paramsValue)
+        case .sessionRequest:
+            let paramsValue = try container.decode(SessionType.RequestParams.self, forKey: .params)
+            params = .sessionRequest(paramsValue)
         case .sessionPing:
             let paramsValue = try container.decode(SessionType.PingParams.self, forKey: .params)
             params = .sessionPing(paramsValue)
@@ -82,7 +82,7 @@ struct WCRequest: Codable {
             try container.encode(params, forKey: .params)
         case .sessionDelete(let params):
             try container.encode(params, forKey: .params)
-        case .sessionPayload(let params):
+        case .sessionRequest(let params):
             try container.encode(params, forKey: .params)
         case .sessionPing(let params):
             try container.encode(params, forKey: .params)
@@ -108,7 +108,7 @@ extension WCRequest {
         case sessionUpdate = "wc_sessionUpdate"
         case sessionUpgrade = "wc_sessionUpgrade"
         case sessionDelete = "wc_sessionDelete"
-        case sessionPayload = "wc_sessionPayload"
+        case sessionRequest = "wc_sessionRequest"
         case sessionPing = "wc_sessionPing"
         case sessionExtend = "wc_sessionExtend"
         case sessionNotification = "wc_sessionNotification"
@@ -124,7 +124,7 @@ extension WCRequest {
         case sessionUpdate(SessionType.UpdateParams)
         case sessionUpgrade(SessionType.UpgradeParams)
         case sessionDelete(SessionType.DeleteParams)
-        case sessionPayload(SessionType.PayloadParams)
+        case sessionRequest(SessionType.RequestParams)
         case sessionPing(SessionType.PingParams)
         case sessionExtend(SessionType.ExtendParams)
         case sessionNotification(SessionType.NotificationParams)
@@ -143,7 +143,7 @@ extension WCRequest {
                 return lhsParam == rhsParam
             case (.sessionDelete(let lhsParam), sessionDelete(let rhsParam)):
                 return lhsParam == rhsParam
-            case (.sessionPayload(let lhsParam), sessionPayload(let rhsParam)):
+            case (.sessionRequest(let lhsParam), sessionRequest(let rhsParam)):
                 return lhsParam == rhsParam
             case (.sessionPing(let lhsParam), sessionPing(let rhsParam)):
                 return lhsParam == rhsParam
