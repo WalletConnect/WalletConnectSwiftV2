@@ -82,6 +82,11 @@ extension WCRequestSubscriptionPayload {
         let extendMethod = WCMethod.wcSessionExtend(SessionType.ExtendParams(ttl: ttl)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: extendMethod)
     }
+    
+    static func stubSettle(topic: String) -> WCRequestSubscriptionPayload {
+        let method = WCMethod.wcSessionSettle(SessionType.SettleParams.stub())
+        return WCRequestSubscriptionPayload(topic: topic, wcRequest: method.asRequest())
+    }
 }
 
 extension SessionProposal {

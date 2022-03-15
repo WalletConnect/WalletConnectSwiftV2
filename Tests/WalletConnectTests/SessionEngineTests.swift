@@ -10,7 +10,6 @@ extension Collection where Self.Element == String {
     }
 }
 
-// TODO: Remove `setupEngine()` calls now that setting controller flag is not needed anymore
 final class SessionEngineTests: XCTestCase {
     
     var engine: SessionEngine!
@@ -30,6 +29,7 @@ final class SessionEngineTests: XCTestCase {
         storageMock = SessionSequenceStorageMock()
         cryptoMock = KeyManagementServiceMock()
         topicGenerator = TopicGenerator()
+        setupEngine()
     }
 
     override func tearDown() {
@@ -57,212 +57,79 @@ final class SessionEngineTests: XCTestCase {
 
     
     func testSessionSettle() {
-        // responder must send session settle payload on topic B
-        // responder must persist session on topic B
+        let agreementKeys = AgreementSecret.stub()
+        let topicB = String.generateTopic()
+        cryptoMock.setAgreementSecret(agreementKeys, topic: topicB)
+        
+        let proposal = SessionProposal.stub(proposerPubKey: AgreementPrivateKey().publicKey.hexRepresentation)
+        
+        engine.settle(topic: topicB, proposal: proposal, accounts: [])
+        
+        XCTAssertTrue(storageMock.hasSequence(forTopic: topicB), "Responder must persist session on topic B")
+        XCTAssert(subscriberMock.didSubscribe(to: topicB), "Responder must subscribe for topic B")
+        XCTAssertTrue(relayMock.didCallRequest, "Responder must send session settle payload on topic B")
     }
     
     func testHandleSessionSettle() {
-        // proposer must store session ack on topic B
-        // proposer must send ack response
+        let sessionTopic = String.generateTopic()
+        cryptoMock.setAgreementSecret(AgreementSecret.stub(), topic: sessionTopic)
+        var didCallBackOnSessionApproved = false
+        engine.onSessionApproved = { _ in
+            didCallBackOnSessionApproved = true
+        }
+        
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubSettle(topic: sessionTopic))
+        
+        XCTAssertTrue(storageMock.getSequence(forTopic: sessionTopic)!.acknowledged, "Proposer must store acknowledged session on topic B")
+        XCTAssertTrue(relayMock.didRespondSuccess, "Proposer must send acknowledge on settle request")
+        XCTAssertTrue(didCallBackOnSessionApproved, "Proposer's engine must call back with session")
     }
     
     func testHandleSessionSettleAcknowledge() {
-        // responder must ack session
+        let session = SessionSequence.stub(isSelfController: true, acknowledged: false)
+        storageMock.setSequence(session)
+        var didCallBackOnSessionApproved = false
+        engine.onSessionApproved = { _ in
+            didCallBackOnSessionApproved = true
+        }
+        
+        let settleResponse = JSONRPCResponse(id: 1, result: AnyCodable(true))
+        let response = WCResponse(
+            topic: session.topic,
+            chainId: nil,
+            requestMethod: .sessionSettle,
+            requestParams: .sessionSettle(SessionType.SettleParams.stub()),
+            result: .response(settleResponse))
+        relayMock.onResponse?(response)
+
+        XCTAssertTrue(storageMock.getSequence(forTopic: session.topic)!.acknowledged, "Responder must acknowledged session")
+        XCTAssertTrue(didCallBackOnSessionApproved, "Responder's engine must call back with session")
     }
     
     func testHandleSessionSettleError() {
-        //?
+        let privateKey = AgreementPrivateKey()
+        let session = SessionSequence.stub(isSelfController: false, selfPrivateKey: privateKey, acknowledged: false)
+        storageMock.setSequence(session)
+        cryptoMock.setAgreementSecret(AgreementSecret.stub(), topic: session.topic)
+        try! cryptoMock.setPrivateKey(privateKey)
+        
+        let response = WCResponse(
+            topic: session.topic,
+            chainId: nil,
+            requestMethod: .sessionSettle,
+            requestParams: .sessionSettle(SessionType.SettleParams.stub()),
+            result: .error(JSONRPCErrorResponse(id: 1, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
+        relayMock.onResponse?(response)
+        
+        XCTAssertNil(storageMock.getSequence(forTopic: session.topic), "Responder must remove session")
+        XCTAssertTrue(subscriberMock.didUnsubscribe(to: session.topic), "Responder must unsubscribe topic B")
+        XCTAssertFalse(cryptoMock.hasAgreementSecret(for: session.topic), "Responder must remove agreement secret")
+        XCTAssertFalse(cryptoMock.hasPrivateKey(for: session.self.publicKey!), "Responder must remove private key")
     }
 
-//    func testProposeResponseFailure() {
-//        setupEngine()
-//        let pairing = Pairing.stub()
-//
-//        let topicB = pairing.topic
-//        let topicC = topicGenerator.topic
-//
-//        let agreementKeys = AgreementSecret.stub()
-//        cryptoMock.setAgreementSecret(agreementKeys, topic: topicB)
-//        let permissions = SessionPermissions.stub()
-//        let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
-//        engine.proposeSession(settledPairing: pairing, permissions: permissions, relay: relayOptions)
-//
-//        guard let publishTopic = relayMock.requests.first?.topic, let request = relayMock.requests.first?.request else {
-//            XCTFail("Proposer must publish a proposal request."); return
-//        }
-//        let error = JSONRPCErrorResponse(id: request.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))
-//        let response = WCResponse(
-//            topic: publishTopic,
-//            chainId: nil,
-//            requestMethod: request.method,
-//            requestParams: request.params,
-//            result: .error(error))
-//        relayMock.onResponse?(response)
-//
-//        XCTAssert(subscriberMock.didUnsubscribe(to: topicC))
-//        XCTAssertFalse(cryptoMock.hasPrivateKey(for: request.sessionProposal?.proposer.publicKey ?? ""))
-//        XCTAssertFalse(cryptoMock.hasAgreementSecret(for: topicB))
-//        XCTAssertFalse(storageMock.hasSequence(forTopic: topicC))
-//    }
-    
-//    func testApprove() {
-//        setupEngine()
-//        let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
-//        let topicB = String.generateTopic()!
-//        let topicC = String.generateTopic()!
-//        let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
-//
-//        let proposer = Proposer(publicKey: proposerPubKey, controller: true, metadata: metadata)
-//        let proposal = SessionProposal(
-//            topic: topicC,
-//            relay: RelayProtocolOptions(protocol: "", data: nil),
-//            proposer: proposer,
-//            permissions: SessionPermissions.stub(),
-//            blockchainProposed: BlockchainProposed.stub())
-//
-//        engine.approve(proposal: proposal, accounts: [])
-//
-//        guard let publishTopic = relayMock.requests.first?.topic, let approval = relayMock.requests.first?.request.approveParams else {
-//            XCTFail("Responder must publish an approval request."); return
-//        }
-//
-//        XCTAssert(subscriberMock.didSubscribe(to: topicC))
-//        XCTAssert(subscriberMock.didSubscribe(to: topicD))
-//        XCTAssert(cryptoMock.hasPrivateKey(for: approval.responder.publicKey))
-//        XCTAssert(cryptoMock.hasAgreementSecret(for: topicD))
-//        XCTAssert(storageMock.hasSequence(forTopic: topicC)) // TODO: check state
-//        XCTAssert(storageMock.hasSequence(forTopic: topicD)) // TODO: check state
-//        XCTAssertEqual(publishTopic, topicC)
-//    }
-    
-//    func testApprovalAcknowledgementSuccess() {
-//        setupEngine()
-//
-//        let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
-//        let topicB = String.generateTopic()!
-//        let topicC = String.generateTopic()!
-//        let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
-//
-//        let agreementKeys = AgreementSecret.stub()
-//        cryptoMock.setAgreementSecret(agreementKeys, topic: topicC)
-//
-//        let proposer = Proposer(publicKey: proposerPubKey, controller: true, metadata: metadata)
-//        let proposal = SessionProposal(
-//            topic: topicC,
-//            relay: RelayProtocolOptions(protocol: "", data: nil),
-//            proposer: proposer,
-//            permissions: SessionPermissions.stub(),
-//            blockchainProposed: BlockchainProposed.stub())
-//
-//        engine.approve(proposal: proposal, accounts: [])
-//
-//        guard let publishTopic = relayMock.requests.first?.topic, let request = relayMock.requests.first?.request else {
-//            XCTFail("Responder must publish an approval request."); return
-//        }
-//        let success = JSONRPCResponse<AnyCodable>(id: request.id, result: AnyCodable(true))
-//        let response = WCResponse(
-//            topic: publishTopic,
-//            chainId: nil,
-//            requestMethod: request.method,
-//            requestParams: request.params,
-//            result: .response(success))
-//        relayMock.onResponse?(response)
-//
-//        XCTAssertFalse(cryptoMock.hasAgreementSecret(for: topicC))
-//        XCTAssertFalse(storageMock.hasSequence(forTopic: topicC)) // TODO: Check state
-//        XCTAssert(subscriberMock.didUnsubscribe(to: topicC))
-//    }
-    
-//    func testApprovalAcknowledgementFailure() {
-//        setupEngine()
-//
-//        let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
-//        let selfPubKey = cryptoMock.privateKeyStub.publicKey.hexRepresentation
-//        let topicB = String.generateTopic()!
-//        let topicC = String.generateTopic()!
-//        let topicD = deriveTopic(publicKey: proposerPubKey, privateKey: cryptoMock.privateKeyStub)
-//
-//        let agreementKeys = AgreementSecret.stub()
-//        cryptoMock.setAgreementSecret(agreementKeys, topic: topicC)
-//
-//        let proposer = Proposer(publicKey: proposerPubKey, controller: true, metadata: metadata)
-//        let proposal = SessionProposal(
-//            topic: topicC,
-//            relay: RelayProtocolOptions(protocol: "", data: nil),
-//            proposer: proposer,
-//            permissions: SessionPermissions.stub(),
-//            blockchainProposed: BlockchainProposed.stub())
-//
-//        engine.approve(proposal: proposal, accounts: [])
-//
-//        guard let publishTopic = relayMock.requests.first?.topic, let request = relayMock.requests.first?.request else {
-//            XCTFail("Responder must publish an approval request."); return
-//        }
-//        let error = JSONRPCErrorResponse(id: request.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))
-//        let response = WCResponse(
-//            topic: publishTopic,
-//            chainId: nil,
-//            requestMethod: request.method,
-//            requestParams: request.params,
-//            result: .error(error))
-//        relayMock.onResponse?(response)
-//
-//        XCTAssertFalse(cryptoMock.hasPrivateKey(for: selfPubKey))
-//        XCTAssertFalse(cryptoMock.hasAgreementSecret(for: topicC))
-//        XCTAssertFalse(cryptoMock.hasAgreementSecret(for: topicD))
-//        XCTAssertFalse(storageMock.hasSequence(forTopic: topicC)) // TODO: Check state
-//        XCTAssertFalse(storageMock.hasSequence(forTopic: topicD))
-//        XCTAssert(subscriberMock.didUnsubscribe(to: topicC))
-//        XCTAssert(subscriberMock.didUnsubscribe(to: topicD))
-//        // TODO: assert session settlement callback
-//    }
-    
-
-//    func testReceiveApprovalResponse() {
-//        setupEngine()
-//
-//        var approvedSession: Session?
-//
-//        let privateKeyStub = cryptoMock.privateKeyStub
-//        let proposerPubKey = privateKeyStub.publicKey.hexRepresentation
-//        let responderPubKey = AgreementPrivateKey().publicKey.hexRepresentation
-//        let topicC = topicGenerator.topic
-//        let topicD = deriveTopic(publicKey: responderPubKey, privateKey: privateKeyStub)
-//
-//        let permissions = SessionPermissions.stub()
-//        let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
-//        let approveParams = SessionType.ApproveParams(
-//            relay: relayOptions,
-//            responder: SessionParticipant(publicKey: responderPubKey, metadata: AppMetadata(name: nil, description: nil, url: nil, icons: nil)),
-//            expiry: Time.day,
-//            state: SessionState(accounts: []))
-//        let request = WCRequest(method: .sessionApprove, params: .sessionApprove(approveParams))
-//        let payload = WCRequestSubscriptionPayload(topic: topicC, wcRequest: request)
-//        let pairing = Pairing.stub()
-//
-//        let agreementKeys = AgreementSecret.stub()
-//        cryptoMock.setAgreementSecret(agreementKeys, topic: pairing.topic)
-//
-//        engine.proposeSession(settledPairing: pairing, permissions: permissions, relay: relayOptions)
-//        engine.onSessionApproved = { session in
-//            approvedSession = session
-//        }
-//        subscriberMock.onReceivePayload?(payload)
-//
-//        XCTAssert(subscriberMock.didUnsubscribe(to: topicC)) // FIXME: Actually, only on acknowledgement
-//        XCTAssert(subscriberMock.didSubscribe(to: topicD))
-//        XCTAssert(cryptoMock.hasPrivateKey(for: proposerPubKey))
-//        XCTAssert(cryptoMock.hasAgreementSecret(for: topicD))
-//        XCTAssert(storageMock.hasSequence(forTopic: topicD)) // TODO: check for state
-//        XCTAssertNotNil(approvedSession)
-//        XCTAssertEqual(approvedSession?.topic, topicD)
-//    }
-
-    
     // MARK: - Update call tests
     
     func testUpdateSuccess() throws {
-        setupEngine()
         let updateAccounts = ["std:0:0"]
         let session = SessionSequence.stub(isSelfController: true)
         storageMock.setSequence(session)
@@ -271,7 +138,6 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testUpdateErrorIfNonController() {
-        setupEngine()
         let updateAccounts = ["std:0:0"]
         let session = SessionSequence.stub(isSelfController: false)
         storageMock.setSequence(session)
@@ -279,13 +145,11 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testUpdateErrorSessionNotFound() {
-        setupEngine()
         let updateAccounts = ["std:0:0"]
         XCTAssertThrowsError(try engine.update(topic: "", accounts: updateAccounts.toAccountSet()), "Update must fail if there is no session matching the target topic.")
     }
     
     func testUpdateErrorSessionNotSettled() {
-        setupEngine()
         let updateAccounts = ["std:0:0"]
         let session = SessionSequence.stub(acknowledged: false)
         storageMock.setSequence(session)
@@ -295,7 +159,6 @@ final class SessionEngineTests: XCTestCase {
     // MARK: - Update peer response tests
     
     func testUpdatePeerSuccess() {
-        setupEngine()
         let session = SessionSequence.stub(isSelfController: false)
         storageMock.setSequence(session)
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic))
@@ -303,7 +166,6 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testUpdatePeerErrorAccountInvalid() {
-        setupEngine()
         let session = SessionSequence.stub(isSelfController: false)
         storageMock.setSequence(session)
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic, accounts: ["0"]))
@@ -312,14 +174,12 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testUpdatePeerErrorNoSession() {
-        setupEngine()
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: ""))
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 1301)
     }
 
     func testUpdatePeerErrorUnauthorized() {
-        setupEngine()
         let session = SessionSequence.stub(isSelfController: true) // Peer is not a controller
         storageMock.setSequence(session)
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic))
@@ -331,7 +191,6 @@ final class SessionEngineTests: XCTestCase {
     // MARK: - Upgrade call tests
     
     func testUpgradeSuccess() throws {
-        setupEngine()
         let permissions = Session.Permissions.stub()
         let session = SessionSequence.stub(isSelfController: true)
         storageMock.setSequence(session)
@@ -341,14 +200,12 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testUpgradeErrorSessionNotFound() {
-        setupEngine()
         XCTAssertThrowsError(try engine.upgrade(topic: "", permissions: Session.Permissions.stub())) { error in
             XCTAssertTrue(error.isNoSessionMatchingTopicError)
         }
     }
     
     func testUpgradeErrorSessionNotSettled() {
-        setupEngine()
         let session = SessionSequence.stub(acknowledged: false)
         storageMock.setSequence(session)
         XCTAssertThrowsError(try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub())) { error in
@@ -357,7 +214,6 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testUpgradeErrorInvalidPermissions() {
-        setupEngine()
         let session = SessionSequence.stub(isSelfController: true)
         storageMock.setSequence(session)
 //        XCTAssertThrowsError(try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub())) { error in
@@ -372,7 +228,6 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testUpgradeErrorCalledByNonController() {
-        setupEngine()
         let session = SessionSequence.stub(isSelfController: false)
         storageMock.setSequence(session)
         XCTAssertThrowsError(try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub())) { error in
@@ -383,7 +238,6 @@ final class SessionEngineTests: XCTestCase {
     // MARK: - Upgrade peer response tests
     
     func testUpgradePeerSuccess() {
-        setupEngine()
         var didCallbackUpgrade = false
         let session = SessionSequence.stub(isSelfController: false)
         storageMock.setSequence(session)
@@ -407,14 +261,12 @@ final class SessionEngineTests: XCTestCase {
 //    }
     
     func testUpgradePeerErrorSessionNotFound() {
-        setupEngine()
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpgrade(topic: ""))
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 1301)
     }
     
     func testUpgradePeerErrorUnauthorized() {
-        setupEngine()
         let session = SessionSequence.stub(isSelfController: true) // Peer is not a controller
         storageMock.setSequence(session)
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpgrade(topic: session.topic))
@@ -425,7 +277,6 @@ final class SessionEngineTests: XCTestCase {
     // MARK: - Session Extend on extending client
     
     func testExtendSuccess() {
-        setupEngine()
         let tomorrow = TimeTraveler.dateByAdding(days: 1)
         let session = SessionSequence.stub(isSelfController: true, expiryDate: tomorrow)
         storageMock.setSequence(session)
@@ -436,7 +287,6 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testExtendSessionNotSettled() {
-        setupEngine()
         let tomorrow = TimeTraveler.dateByAdding(days: 1)
         let session = SessionSequence.stub(isSelfController: false, expiryDate: tomorrow, acknowledged: false)
         storageMock.setSequence(session)
@@ -445,7 +295,6 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testExtendOnNonControllerClient() {
-        setupEngine()
         let tomorrow = TimeTraveler.dateByAdding(days: 1)
         let session = SessionSequence.stub(isSelfController: false, expiryDate: tomorrow)
         storageMock.setSequence(session)
@@ -454,7 +303,6 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testExtendTtlTooHigh() {
-        setupEngine()
         let tomorrow = TimeTraveler.dateByAdding(days: 1)
         let session = SessionSequence.stub(isSelfController: true, expiryDate: tomorrow)
         storageMock.setSequence(session)
@@ -463,7 +311,6 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testExtendTtlTooLow() {
-        setupEngine()
         let dayAfterTommorow = TimeTraveler.dateByAdding(days: 2)
         let session = SessionSequence.stub(isSelfController: true, expiryDate: dayAfterTommorow)
         storageMock.setSequence(session)
@@ -474,7 +321,6 @@ final class SessionEngineTests: XCTestCase {
     //MARK: - Handle Session Extend call from peer
     
     func testPeerExtendSuccess() {
-        setupEngine()
         let tomorrow = TimeTraveler.dateByAdding(days: 1)
         let session = SessionSequence.stub(isSelfController: false, expiryDate: tomorrow)
         storageMock.setSequence(session)
@@ -485,7 +331,6 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testPeerExtendUnauthorized() {
-        setupEngine()
         let tomorrow = TimeTraveler.dateByAdding(days: 1)
         let session = SessionSequence.stub(isSelfController: true, expiryDate: tomorrow)
         storageMock.setSequence(session)
@@ -496,7 +341,6 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testPeerExtendTtlTooHigh() {
-        setupEngine()
         let tomorrow = TimeTraveler.dateByAdding(days: 1)
         let session = SessionSequence.stub(isSelfController: false, expiryDate: tomorrow)
         storageMock.setSequence(session)
@@ -507,7 +351,6 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func testPeerExtendTtlTooLow() {
-        setupEngine()
         let tomorrow = TimeTraveler.dateByAdding(days: 2)
         let session = SessionSequence.stub(isSelfController: false, expiryDate: tomorrow)
         storageMock.setSequence(session)

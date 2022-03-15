@@ -6,8 +6,9 @@ extension SessionSequence {
     static func stub(
         isSelfController: Bool = false,
         expiryDate: Date = Date.distantFuture,
+        selfPrivateKey: AgreementPrivateKey = AgreementPrivateKey(),
         acknowledged: Bool = true) -> SessionSequence {
-            let peerKey = AgreementPrivateKey().publicKey.hexRepresentation
+            let peerKey = selfPrivateKey.publicKey.hexRepresentation
             let selfKey = AgreementPrivateKey().publicKey.hexRepresentation
             let permissions = SessionPermissions.stub()
             let controllerKey = isSelfController ? selfKey : peerKey
@@ -29,3 +30,8 @@ extension Account {
     }
 }
 
+extension SessionType.SettleParams {
+    static func stub() -> SessionType.SettleParams {
+        return SessionType.SettleParams(relay: RelayProtocolOptions.stub(), blockchain: Blockchain.stub(), permissions: SessionPermissions.stub(), controller: Participant.stub(), expiry: Date.distantFuture.millisecondsSince1970)
+    }
+}

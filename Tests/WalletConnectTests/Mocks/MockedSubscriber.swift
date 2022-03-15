@@ -18,9 +18,7 @@ class MockedSubscriber: WCSubscribing {
     }
 
     func removeSubscription(topic: String) {
-        if subscriptions.contains(topic) {
-            unsubscriptions.append(topic)
-        }
+        unsubscriptions.append(topic)
         subscriptions.removeAll { $0 == topic }
     }
 }
