@@ -136,7 +136,7 @@ final class ClientTests: XCTestCase {
         waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
-    func testProposerRequestSessionPayload() {
+    func testProposerRequestSessionRequest() {
         let requestExpectation = expectation(description: "Responder receives request")
         let responseExpectation = expectation(description: "Proposer receives response")
         let method = "eth_sendTransaction"
@@ -174,7 +174,7 @@ final class ClientTests: XCTestCase {
     }
     
     
-    func testSessionPayloadFailureResponse() {
+    func testSessionRequestFailureResponse() {
         let failureResponseExpectation = expectation(description: "Proposer receives failure response")
         let method = "eth_sendTransaction"
         let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]

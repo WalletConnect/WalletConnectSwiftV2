@@ -53,7 +53,7 @@ internal enum SessionType {
         }
     }
     
-    struct PayloadParams: Codable, Equatable {
+    struct RequestParams: Codable, Equatable {
         let request: Request
         let chainId: String?
         

@@ -187,7 +187,7 @@ public final class WalletConnectClient {
     ///   - topic: Topic of the session for which the request was received.
     ///   - response: Your JSON RPC response or an error.
     public func respond(topic: String, response: JsonRpcResult) {
-        sessionEngine.respondSessionPayload(topic: topic, response: response)
+        sessionEngine.respondSessionRequest(topic: topic, response: response)
     }
     
     /// Ping method allows to check if client's peer is online and is subscribing for your sequence topic
@@ -250,13 +250,13 @@ public final class WalletConnectClient {
         pairingEngine.getSettledPairings()
     }
     
-    /// - Returns: Pending requests received with wc_sessionPayload
+    /// - Returns: Pending requests received with wc_sessionRequest
     /// - Parameter topic: topic representing session for which you want to get pending requests. If nil, you will receive pending requests for all active sessions.
     public func getPendingRequests(topic: String? = nil) -> [Request] {
         let pendingRequests: [Request] = history.getPending()
-            .filter{$0.request.method == .sessionPayload}
+            .filter{$0.request.method == .sessionRequest}
             .compactMap {
-                guard case let .sessionPayload(payloadRequest) = $0.request.params else {return nil}
+                guard case let .sessionRequest(payloadRequest) = $0.request.params else {return nil}
                 return Request(id: $0.id, topic: $0.topic, method: payloadRequest.request.method, params: payloadRequest.request.params, chainId: payloadRequest.chainId)
             }
         if let topic = topic {
@@ -266,11 +266,11 @@ public final class WalletConnectClient {
         }
     }
     
-    /// - Parameter id: id of a wc_sessionPayload jsonrpc request
+    /// - Parameter id: id of a wc_sessionRequest jsonrpc request
     /// - Returns: json rpc record object for given id or nil if record for give id does not exits
     public func getSessionRequestRecord(id: Int64) -> WalletConnectUtils.JsonRpcRecord? {
         guard let record = history.get(id: id),
-              case .sessionPayload(let payload) = record.request.params else {return nil}
+              case .sessionRequest(let payload) = record.request.params else {return nil}
         let request = WalletConnectUtils.JsonRpcRecord.Request(method: payload.request.method, params: payload.request.params)
         return WalletConnectUtils.JsonRpcRecord(id: record.id, topic: record.topic, request: request, response: record.response, chainId: record.chainId)
     }
@@ -296,7 +296,7 @@ public final class WalletConnectClient {
         pairingEngine.onSessionRejected = { [unowned self] proposal, reason in
             delegate?.didReject(proposal: proposal, reason: reason.toPublic())
         }
-        sessionEngine.onSessionPayloadRequest = { [unowned self] sessionRequest in
+        sessionEngine.onSessionRequest = { [unowned self] sessionRequest in
             delegate?.didReceive(sessionRequest: sessionRequest)
         }
         sessionEngine.onSessionDelete = { [unowned self] topic, reason in
@@ -315,7 +315,7 @@ public final class WalletConnectClient {
         sessionEngine.onNotificationReceived = { [unowned self] topic, notification in
             delegate?.didReceive(notification: notification, sessionTopic: topic)
         }
-        sessionEngine.onSessionPayloadResponse = { [unowned self] response in
+        sessionEngine.onSessionResponse = { [unowned self] response in
             delegate?.didReceive(sessionResponse: response)
         }
         

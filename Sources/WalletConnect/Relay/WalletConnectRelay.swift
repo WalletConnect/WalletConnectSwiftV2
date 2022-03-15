@@ -219,7 +219,7 @@ class WalletConnectRelay: WalletConnectRelaying {
     
     private func shouldPrompt(_ method: WCRequest.Method) -> Bool {
         switch method {
-        case .sessionPayload:
+        case .sessionRequest:
             return true
         default:
             return false
@@ -227,7 +227,7 @@ class WalletConnectRelay: WalletConnectRelaying {
     }
     
     func getChainId(_ request: WCRequest) -> String? {
-        guard case let .sessionPayload(payload) = request.params else {return nil}
+        guard case let .sessionRequest(payload) = request.params else {return nil}
         return payload.chainId
     }
 }

@@ -5,8 +5,8 @@ import WalletConnectKMS
 
 
 final class SessionEngine {
-    var onSessionPayloadRequest: ((Request)->())?
-    var onSessionPayloadResponse: ((Response)->())?
+    var onSessionRequest: ((Request)->())?
+    var onSessionResponse: ((Response)->())?
     var onSessionApproved: ((Session)->())?
     var onApprovalAcknowledgement: ((Session) -> Void)?
     var onSessionRejected: ((String, SessionType.Reason)->())?
@@ -106,10 +106,10 @@ final class SessionEngine {
             logger.debug("Could not find session for topic \(params.topic)")
             return
         }
-        let request = SessionType.PayloadParams.Request(method: params.method, params: params.params)
-        let sessionPayloadParams = SessionType.PayloadParams(request: request, chainId: params.chainId)
-        let sessionPayloadRequest = WCRequest(id: params.id, method: .sessionPayload, params: .sessionPayload(sessionPayloadParams))
-        relayer.request(topic: params.topic, payload: sessionPayloadRequest) { [weak self] result in
+        let request = SessionType.RequestParams.Request(method: params.method, params: params.params)
+        let sessionRequestParams = SessionType.RequestParams(request: request, chainId: params.chainId)
+        let sessionRequest = WCRequest(id: params.id, method: .sessionRequest, params: .sessionRequest(sessionRequestParams))
+        relayer.request(topic: params.topic, payload: sessionRequest) { [weak self] result in
             switch result {
             case .success(_):
                 self?.logger.debug("Did receive session payload response")
@@ -119,7 +119,7 @@ final class SessionEngine {
         }
     }
     
-    func respondSessionPayload(topic: String, response: JsonRpcResult) {
+    func respondSessionRequest(topic: String, response: JsonRpcResult) {
         guard sequencesStore.hasSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
@@ -203,8 +203,8 @@ final class SessionEngine {
                 wcSessionUpgrade(payload: subscriptionPayload, upgradeParams: upgradeParams)
             case .sessionDelete(let deleteParams):
                 wcSessionDelete(subscriptionPayload, deleteParams: deleteParams)
-            case .sessionPayload(let sessionPayloadParams):
-                wcSessionPayload(subscriptionPayload, payloadParams: sessionPayloadParams)
+            case .sessionRequest(let sessionRequestParams):
+                wcSessionRequest(subscriptionPayload, payloadParams: sessionRequestParams)
             case .sessionPing(_):
                 wcSessionPing(subscriptionPayload)
             case .sessionExtend(let extendParams):
@@ -338,7 +338,7 @@ final class SessionEngine {
         onSessionDelete?(topic, deleteParams.reason)
     }
     
-    private func wcSessionPayload(_ payload: WCRequestSubscriptionPayload, payloadParams: SessionType.PayloadParams) {
+    private func wcSessionRequest(_ payload: WCRequestSubscriptionPayload, payloadParams: SessionType.RequestParams) {
         let topic = payload.topic
         let jsonRpcRequest = JSONRPCRequest<AnyCodable>(id: payload.wcRequest.id, method: payloadParams.request.method, params: payloadParams.request.params)
         let request = Request(
@@ -362,7 +362,7 @@ final class SessionEngine {
             relayer.respondError(for: payload, reason: .unauthorizedRPCMethod(request.method))
             return
         }
-        onSessionPayloadRequest?(request)
+        onSessionRequest?(request)
     }
     
     private func wcSessionPing(_ payload: WCRequestSubscriptionPayload) {
@@ -420,9 +420,9 @@ final class SessionEngine {
             handleUpdateResponse(topic: response.topic, result: response.result)
         case .sessionUpgrade:
             handleUpgradeResponse(topic: response.topic, result: response.result)
-        case .sessionPayload(_):
+        case .sessionRequest(_):
             let response = Response(topic: response.topic, chainId: response.chainId, result: response.result)
-            onSessionPayloadResponse?(response)
+            onSessionResponse?(response)
         default:
             break
         }
