@@ -21,7 +21,7 @@ final class SerializerTests: XCTestCase {
 //    TODO - change pairing serialisation for sessions
     func testSerializeDeserialize() {
         let topic = TopicGenerator().topic
-        let symKey = try! kms.createSymmetricKey(topic)
+        _ = try! kms.createSymmetricKey(topic)
         let messageToSerialize = "todo - change for request object"
         let serializedMessage = try! serializer.serialize(topic: topic, encodable: messageToSerialize)
         let deserializedMessage: String? = serializer.tryDeserialize(topic: topic, message: serializedMessage)
