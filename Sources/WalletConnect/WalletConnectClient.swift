@@ -95,25 +95,47 @@ public final class WalletConnectClient {
     /// - Parameter sessionPermissions: The session permissions the responder will be requested for.
     /// - Parameter topic: Optional parameter - use it if you already have an established pairing with peer client.
     /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
-    public func connect(sessionPermissions: Session.Permissions, topic: String? = nil) throws -> String? {
+    @available(*, renamed: "connect(sessionPermissions:topic:)")
+    public func connect(sessionPermissions: Session.Permissions, topic: String? = nil, completion: @escaping ((Result<String?, Error>)->())) {
         logger.debug("Connecting Application")
         if let topic = topic {
             guard let pairing = pairingEngine.getSettledPairing(for: topic) else {
-                throw WalletConnectError.noPairingMatchingTopic(topic)
+                completion(.failure(WalletConnectError.noPairingMatchingTopic(topic)))
+                return
             }
             logger.debug("Proposing session on existing pairing")
             let permissions = SessionPermissions(permissions: sessionPermissions)
-            pairingEngine.propose(pairingTopic: topic, permissions: permissions, relay: pairing.relay)
-            return nil
+            pairingEngine.propose(pairingTopic: topic, permissions: permissions, relay: pairing.relay) { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(nil))
+                }
+            }
         } else {
             guard let pairingURI = pairingEngine.create() else {
-                throw WalletConnectError.pairingProposalFailed
+                completion(.failure(WalletConnectError.pairingProposalFailed))
+                return
             }
             let permissions = SessionPermissions(permissions: sessionPermissions)
-            pairingEngine.propose(pairingTopic: pairingURI.topic, permissions: permissions, relay: pairingURI.relay)
-            return pairingURI.absoluteString
+            pairingEngine.propose(pairingTopic: pairingURI.topic, permissions: permissions, relay: pairingURI.relay) { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(pairingURI.absoluteString))
+                }
+            }
         }
     }
+    
+    public func connect(sessionPermissions: Session.Permissions, topic: String? = nil) async throws -> String? {
+        return try await withCheckedThrowingContinuation { continuation in
+            connect(sessionPermissions: sessionPermissions, topic: topic) { result in
+                continuation.resume(with: result)
+            }
+        }
+    }
+    
     
     /// For responder to receive a session proposal from a proposer
     /// Responder should call this function in order to accept peer's pairing proposal and be able to subscribe for future session proposals.
