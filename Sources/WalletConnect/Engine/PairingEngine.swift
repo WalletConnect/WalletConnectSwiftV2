@@ -82,8 +82,7 @@ final class PairingEngine {
             proposer: proposer,
             permissions: permissions,
             blockchainProposed: Blockchain(chains: [], accounts: [])) //todo!!
-                
-        relayer.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { [unowned self] error in
+        relayer.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { error in
             completion(error)
         }
     }
