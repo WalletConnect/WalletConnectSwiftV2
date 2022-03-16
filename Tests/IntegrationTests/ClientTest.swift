@@ -77,33 +77,33 @@ final class ClientTests: XCTestCase {
         await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
-    func testNewSessionOnExistingPairing() {
+    func testNewSessionOnExistingPairing() async {
         let proposerSettlesSessionExpectation = expectation(description: "Proposer settles session")
         proposerSettlesSessionExpectation.expectedFulfillmentCount = 2
         let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
         responderSettlesSessionExpectation.expectedFulfillmentCount = 2
         var initiatedSecondSession = false
         let permissions = Session.Permissions.stub()
-        proposer.client.connect(sessionPermissions: permissions, topic: nil) { [unowned self] result in
-            let uri = try! result.get()!
-            try! responder.client.pair(uri: uri)
-            responder.onSessionProposal = { [unowned self] proposal in
-                responder.client.approve(proposal: proposal, accounts: [])
-            }
-            responder.onSessionSettled = { sessionSettled in
-                responderSettlesSessionExpectation.fulfill()
-            }
-            proposer.onSessionSettled = { [unowned self] sessionSettled in
-                proposerSettlesSessionExpectation.fulfill()
-                let pairingTopic = proposer.client.getSettledPairings().first!.topic
-                if !initiatedSecondSession {
-                    proposer.client.connect(sessionPermissions: permissions, topic: pairingTopic) {_ in
-                        initiatedSecondSession = true
-                    }
+        let uri = try! await proposer.client.connect(sessionPermissions: permissions, topic: nil)!
+        try! responder.client.pair(uri: uri)
+
+        responder.onSessionProposal = { [unowned self] proposal in
+            responder.client.approve(proposal: proposal, accounts: [])
+        }
+        responder.onSessionSettled = { sessionSettled in
+            responderSettlesSessionExpectation.fulfill()
+        }
+        proposer.onSessionSettled = { [unowned self] sessionSettled in
+            proposerSettlesSessionExpectation.fulfill()
+            let pairingTopic = proposer.client.getSettledPairings().first!.topic
+            if !initiatedSecondSession {
+                Task {
+                    let _ = try! await proposer.client.connect(sessionPermissions: permissions, topic: pairingTopic)
                 }
+                initiatedSecondSession = true
             }
         }
-        waitForExpectations(timeout: defaultTimeout, handler: nil)
+        await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testResponderRejectsSession() async {
