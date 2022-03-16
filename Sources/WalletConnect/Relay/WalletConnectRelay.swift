@@ -21,10 +21,8 @@ protocol WalletConnectRelaying: AnyObject {
     func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
     /// Completes with a peer response
     func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
-    
-    /// Completes with an acknowledge from network
-    func requestNetwork(_ wcMethod: WCMethod, onTopic topic: String, completion: @escaping ((Error?) -> ()))
-
+    /// Completes with an acknowledgement from the relay network
+    func requestNetworkAck(_ wcMethod: WCMethod, onTopic topic: String, completion: @escaping ((Error?) -> ()))
     func respond(topic: String, response: JsonRpcResult, completion: @escaping ((Error?)->()))
     func respondSuccess(for payload: WCRequestSubscriptionPayload)
     func respondError(for payload: WCRequestSubscriptionPayload, reason: ReasonCode)
@@ -112,8 +110,8 @@ class WalletConnectRelay: WalletConnectRelaying {
         }
     }
     
-    
-    func requestNetwork(_ wcMethod: WCMethod, onTopic topic: String, completion: @escaping ((Error?) -> ())) {
+    /// Completes with an acknowledgement from the relay network
+    func requestNetworkAck(_ wcMethod: WCMethod, onTopic topic: String, completion: @escaping ((Error?) -> ())) {
         do {
             let payload = wcMethod.asRequest()
             try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
@@ -128,9 +126,7 @@ class WalletConnectRelay: WalletConnectRelaying {
             logger.error(error)
         }
     }
-    
-    
-    
+
     func respond(topic: String, response: JsonRpcResult, completion: @escaping ((Error?)->())) {
         do {
             _ = try jsonRpcHistory.resolve(response: response)

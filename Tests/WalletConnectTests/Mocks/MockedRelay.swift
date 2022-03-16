@@ -38,7 +38,7 @@ class MockedWCRelay: WalletConnectRelaying {
         request(topic: topic, payload: wcMethod.asRequest(), completion: completion)
     }
     
-    func requestNetwork(_ wcMethod: WCMethod, onTopic topic: String, completion: @escaping ((Error?) -> ())) {
+    func requestNetworkAck(_ wcMethod: WCMethod, onTopic topic: String, completion: @escaping ((Error?) -> ())) {
         requestCallCount += 1
         requests.append((topic, wcMethod.asRequest()))
     }
