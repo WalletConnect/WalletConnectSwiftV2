@@ -14,8 +14,8 @@ final class ResponderViewController: UIViewController {
             icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])
         return WalletConnectClient(
             metadata: metadata,
-            projectId: "52af113ee0c1e1a20f4995730196c13e",
-            relayHost: "relay.dev.walletconnect.com"
+            projectId: "8ba9ee138960775e5231b70cc5ef1c3a",
+            relayHost: "relay.walletconnect.com"
         )
     }()
     lazy  var account = Signer.privateKey.address.hex(eip55: true)
