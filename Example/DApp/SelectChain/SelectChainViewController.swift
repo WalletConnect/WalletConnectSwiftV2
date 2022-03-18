@@ -31,17 +31,17 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
         
 
     }
-    
+
     @objc
-    private func connect() {
+    private func connect() async {
         print("[PROPOSER] Connecting to a pairing...")
         let permissions = Session.Permissions(
-            blockchains: ["eip155:1", "eip155:137"],
             methods: ["eth_sendTransaction", "personal_sign", "eth_signTypedData"],
             notifications: []
         )
         do {
-            if let uri = try client.connect(sessionPermissions: permissions) {
+            let blockchains: Set<String> = ["eip155:1", "eip155:137"]
+            if let uri = try await client.connect(sessionPermissions: permissions, blockchains: blockchains) {
                 showConnectScreen(uriString: uri)
             }
         } catch {

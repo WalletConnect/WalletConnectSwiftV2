@@ -71,7 +71,7 @@ final class PairingEngine {
         return uri
     }
     
-    func propose(pairingTopic: String, permissions: SessionPermissions, relay: RelayProtocolOptions, completion: @escaping ((Error?) -> ())) {
+    func propose(pairingTopic: String, permissions: SessionPermissions, blockchains: Set<String>, relay: RelayProtocolOptions, completion: @escaping ((Error?) -> ())) {
         logger.debug("Propose Session on topic: \(pairingTopic)")
         let publicKey = try! kms.createX25519KeyPair()
         let proposer = Participant(

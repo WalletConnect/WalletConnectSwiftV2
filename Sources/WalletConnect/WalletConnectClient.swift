@@ -96,7 +96,7 @@ public final class WalletConnectClient {
     /// - Parameter topic: Optional parameter - use it if you already have an established pairing with peer client.
     /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
     @available(*, renamed: "connect(sessionPermissions:topic:)")
-    public func connect(sessionPermissions: Session.Permissions, topic: String? = nil, completion: @escaping ((Result<String?, Error>)->())) {
+    public func connect(sessionPermissions: Session.Permissions, blockchains: Set<String>, topic: String? = nil, completion: @escaping ((Result<String?, Error>)->())) {
         logger.debug("Connecting Application")
         if let topic = topic {
             guard let pairing = pairingEngine.getSettledPairing(for: topic) else {
@@ -105,7 +105,7 @@ public final class WalletConnectClient {
             }
             logger.debug("Proposing session on existing pairing")
             let permissions = SessionPermissions(permissions: sessionPermissions)
-            pairingEngine.propose(pairingTopic: topic, permissions: permissions, relay: pairing.relay) { error in
+            pairingEngine.propose(pairingTopic: topic, permissions: permissions, blockchains: blockchains, relay: pairing.relay) { error in
                 if let error = error {
                     completion(.failure(error))
                 } else {
@@ -118,7 +118,7 @@ public final class WalletConnectClient {
                 return
             }
             let permissions = SessionPermissions(permissions: sessionPermissions)
-            pairingEngine.propose(pairingTopic: pairingURI.topic, permissions: permissions, relay: pairingURI.relay) { error in
+            pairingEngine.propose(pairingTopic: pairingURI.topic, permissions: permissions, blockchains: blockchains, relay: pairingURI.relay) { error in
                 if let error = error {
                     completion(.failure(error))
                 } else {
@@ -128,9 +128,9 @@ public final class WalletConnectClient {
         }
     }
     
-    public func connect(sessionPermissions: Session.Permissions, topic: String? = nil) async throws -> String? {
+    public func connect(sessionPermissions: Session.Permissions, blockchains: Set<String>, topic: String? = nil) async throws -> String? {
         return try await withCheckedThrowingContinuation { continuation in
-            connect(sessionPermissions: sessionPermissions, topic: topic) { result in
+            connect(sessionPermissions: sessionPermissions, blockchains: blockchains, topic: topic) { result in
                 continuation.resume(with: result)
             }
         }

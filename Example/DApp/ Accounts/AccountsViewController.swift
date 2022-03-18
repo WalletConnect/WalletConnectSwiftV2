@@ -45,10 +45,7 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
         accountsView.tableView.delegate = self
         client.logger.setLogging(level: .debug)
         session.accounts.forEach { account in
-            let splits = account.split(separator: ":", omittingEmptySubsequences: false)
-            guard splits.count == 3 else { return }
-            let chain = String(splits[0] + ":" + splits[1])
-            accountsDetails.append(AccountDetails(chain: chain, methods: Array(session.permissions.methods), account: account))
+            accountsDetails.append(AccountDetails(chain: account.blockchainIdentifier, methods: Array(session.permissions.methods), account: account.address))
         }
     }
     

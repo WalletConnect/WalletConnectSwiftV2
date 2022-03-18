@@ -2,6 +2,8 @@ import WalletConnect
 import Relayer
 
 class ClientDelegate: WalletConnectClientDelegate {
+
+    
     var client: WalletConnectClient
     var onSessionSettled: ((Session)->())?
     var onSessionResponse: ((Response)->())?
@@ -35,5 +37,9 @@ class ClientDelegate: WalletConnectClientDelegate {
     }
     
     func didUpgrade(sessionTopic: String, permissions: Session.Permissions) {
+    }
+    
+    func didReject(proposal: Session.Proposal, reason: Reason) {
+        
     }
 }
