@@ -162,7 +162,7 @@ final class SessionEngine {
             throw WalletConnectError.invalidPermissions
         }
         session.upgrade(permissions)
-        let newPermissions = session.permissions // We know session is settled
+        let newPermissions = session.permissions
         sequencesStore.setSequence(session)
         relayer.request(.wcSessionUpgrade(SessionType.UpgradeParams(permissions: newPermissions)), onTopic: topic)
     }
@@ -243,7 +243,6 @@ final class SessionEngine {
     
     private func wcSessionSettle(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
         let topic = payload.topic
-
         
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!
         
