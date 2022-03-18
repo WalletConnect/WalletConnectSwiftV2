@@ -303,14 +303,11 @@ public final class WalletConnectClient {
         pairingEngine.onPairingExtend = { [unowned self] pairing in
             delegate?.didExtend(pairing: pairing)
         }
-        sessionEngine.onSessionApproved = { [unowned self] settledSession in
+        sessionEngine.onSessionSettle = { [unowned self] settledSession in
             delegate?.didSettle(session: settledSession)
         }
         pairingEngine.onSessionProposal = { [unowned self] proposal in
             delegate?.didReceive(sessionProposal: proposal)
-        }
-        sessionEngine.onApprovalAcknowledgement = { [weak self] session in
-            self?.delegate?.didSettle(session: session)
         }
         pairingEngine.onSessionRejected = { [unowned self] proposal, reason in
             delegate?.didReject(proposal: proposal, reason: reason.toPublic())
