@@ -19,7 +19,6 @@ class ClientDelegate: WalletConnectClientDelegate {
         let relayer = Relayer(relayHost: "relay.walletconnect.com", projectId: "8ba9ee138960775e5231b70cc5ef1c3a")
         self.client = WalletConnectClient(metadata: metadata, relayer: relayer)
         client.delegate = self
-        client.logger.setLogging(level: .debug)
     }
 	
     func didSettle(session: Session) {
