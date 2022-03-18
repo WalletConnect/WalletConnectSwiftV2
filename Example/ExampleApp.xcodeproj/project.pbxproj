@@ -20,6 +20,7 @@
 		76744CF526FDFB6B00B77ED9 /* ResponderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF426FDFB6B00B77ED9 /* ResponderView.swift */; };
 		76744CF726FE4D5400B77ED9 /* ActiveSessionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */; };
 		76744CF926FE4D7400B77ED9 /* ActiveSessionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */; };
+		8448F1D427E4726F0000B866 /* WalletConnect in Frameworks */ = {isa = PBXBuildFile; productRef = 8448F1D327E4726F0000B866 /* WalletConnect */; };
 		84494388278D9C1B00CC26BB /* UIAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84494387278D9C1B00CC26BB /* UIAlertController.swift */; };
 		844943A1278EC49700CC26BB /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = 844943A0278EC49700CC26BB /* Web3 */; };
 		8460DCFC274F98A10081F94C /* RequestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8460DCFB274F98A10081F94C /* RequestViewController.swift */; };
@@ -32,7 +33,6 @@
 		84CE6430279820F600142511 /* AccountsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761C649926FB7ABB004239D1 /* AccountsViewController.swift */; };
 		84CE6431279820F600142511 /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7603D74C2703429A00DD27A2 /* AccountsView.swift */; };
 		84CE64392798228D00142511 /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = 84CE64382798228D00142511 /* Web3 */; };
-		84CE643B2798229100142511 /* WalletConnect in Frameworks */ = {isa = PBXBuildFile; productRef = 84CE643A2798229100142511 /* WalletConnect */; };
 		84CE643D2798322600142511 /* ConnectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE643C2798322600142511 /* ConnectViewController.swift */; };
 		84CE6444279AB5AD00142511 /* SelectChainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE6443279AB5AD00142511 /* SelectChainViewController.swift */; };
 		84CE6446279ABBF300142511 /* ClientDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE6445279ABBF300142511 /* ClientDelegate.swift */; };
@@ -132,7 +132,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84CE643B2798229100142511 /* WalletConnect in Frameworks */,
+				8448F1D427E4726F0000B866 /* WalletConnect in Frameworks */,
 				84CE64392798228D00142511 /* Web3 in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -355,7 +355,7 @@
 			name = DApp;
 			packageProductDependencies = (
 				84CE64382798228D00142511 /* Web3 */,
-				84CE643A2798229100142511 /* WalletConnect */,
+				8448F1D327E4726F0000B866 /* WalletConnect */,
 			);
 			productName = DApp;
 			productReference = 84CE641C27981DED00142511 /* DApp.app */;
@@ -957,6 +957,10 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnect;
 		};
+		8448F1D327E4726F0000B866 /* WalletConnect */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = WalletConnect;
+		};
 		844943A0278EC49700CC26BB /* Web3 */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 8449439F278EC49700CC26BB /* XCRemoteSwiftPackageReference "Web3" */;
@@ -966,10 +970,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8449439F278EC49700CC26BB /* XCRemoteSwiftPackageReference "Web3" */;
 			productName = Web3;
-		};
-		84CE643A2798229100142511 /* WalletConnect */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = WalletConnect;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
