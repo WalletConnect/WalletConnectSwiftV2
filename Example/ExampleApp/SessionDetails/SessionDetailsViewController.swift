@@ -14,8 +14,8 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
         self.sessionInfo = SessionInfo(name: session.peer.name ?? "",
                                        descriptionText: session.peer.description ?? "",
                                        dappURL: session.peer.description ?? "",
-                                       iconURL: session.peer.icons?.first ?? "",
-                                       chains: Array(session.permissions.blockchains),
+                                       iconURL: session.peer.icons.first ?? "",
+                                       chains: Array(session.blockchains),
                                        methods: Array(session.permissions.methods),
                                        pendingRequests: pendingRequests)
         self.client = client
@@ -121,11 +121,11 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
     
     func reloadTable() {
         let pendingRequests = client.getPendingRequests(topic: session.topic).map{$0.method}
-        self.sessionInfo = SessionInfo(name: session.peer.name ?? "",
-                                       descriptionText: session.peer.description ?? "",
-                                       dappURL: session.peer.description ?? "",
-                                       iconURL: session.peer.icons?.first ?? "",
-                                       chains: Array(session.permissions.blockchains),
+        self.sessionInfo = SessionInfo(name: session.peer.name,
+                                       descriptionText: session.peer.description,
+                                       dappURL: session.peer.description,
+                                       iconURL: session.peer.icons.first ?? "",
+                                       chains: Array(session.blockchains),
                                        methods: Array(session.permissions.methods),
                                        pendingRequests: pendingRequests)
         sessiondetailsView.tableView.reloadData()

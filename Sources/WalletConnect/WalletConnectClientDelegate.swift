@@ -76,4 +76,5 @@ public extension WalletConnectClientDelegate {
     func didReceive(sessionProposal: Session.Proposal) {}
     func didReceive(sessionResponse: Response) {}
     func didExtend(session: Session) {}
+    func didReject(proposal: Session.Proposal, reason: Reason) {}
 }

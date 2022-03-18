@@ -150,7 +150,7 @@ extension ResponderViewController: SessionViewControllerDelegate {
         print("[RESPONDER] Approving session...")
         let proposal = currentProposal!
         currentProposal = nil
-        let accounts = Set(proposal.permissions.blockchains.compactMap { Account($0+":\(account)") })
+        let accounts = Set(proposal.blockchains.compactMap { Account($0+":\(account)") })
         client.approve(proposal: proposal, accounts: accounts)
     }
     
@@ -163,16 +163,16 @@ extension ResponderViewController: SessionViewControllerDelegate {
 }
 
 extension ResponderViewController: WalletConnectClientDelegate {
-    
+
     func didReceive(sessionProposal: Session.Proposal) {
         print("[RESPONDER] WC: Did receive session proposal")
         let appMetadata = sessionProposal.proposer
         let info = SessionInfo(
-            name: appMetadata.name ?? "",
-            descriptionText: appMetadata.description ?? "",
-            dappURL: appMetadata.url ?? "",
-            iconURL: appMetadata.icons?.first ?? "",
-            chains: Array(sessionProposal.permissions.blockchains),
+            name: appMetadata.name,
+            descriptionText: appMetadata.description,
+            dappURL: appMetadata.url,
+            iconURL: appMetadata.icons.first ?? "",
+            chains: Array(sessionProposal.blockchains),
             methods: Array(sessionProposal.permissions.methods), pendingRequests: [])
         currentProposal = sessionProposal
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread
@@ -213,7 +213,7 @@ extension ResponderViewController: WalletConnectClientDelegate {
             return ActiveSessionItem(
                 dappName: app.name ?? "",
                 dappURL: app.url ?? "",
-                iconURL: app.icons?.first ?? "",
+                iconURL: app.icons.first ?? "",
                 topic: session.topic)
         }
     }
