@@ -300,9 +300,6 @@ public final class WalletConnectClient {
     // MARK: - Private
     
     private func setUpEnginesCallbacks() {
-        pairingEngine.onApprovalAcknowledgement = { [weak self] settledPairing in
-            self?.delegate?.didSettle(pairing: settledPairing)
-        }
         pairingEngine.onPairingExtend = { [unowned self] pairing in
             delegate?.didExtend(pairing: pairing)
         }

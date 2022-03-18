@@ -5,7 +5,6 @@ import WalletConnectKMS
 
 
 final class PairingEngine {
-    var onApprovalAcknowledgement: ((Pairing) -> Void)?
     var onPairingExtend: ((Pairing)->())?
     var onSessionProposal: ((Session.Proposal)->())?
     var onProposeResponse: ((String)->())?
@@ -81,7 +80,7 @@ final class PairingEngine {
             relay: relay,
             proposer: proposer,
             permissions: permissions,
-            blockchainProposed: Blockchain(chains: [], accounts: [])) //todo!!
+            blockchainProposed: Blockchain(chains: blockchains, accounts: [])) //todo!!
         relayer.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { [unowned self] error in
             logger.debug("Received propose acknowledgement")
             completion(error)
