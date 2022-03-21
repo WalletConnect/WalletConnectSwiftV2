@@ -41,6 +41,7 @@ final class ResponderViewController: UIViewController {
         let settledSessions = client.getSettledSessions()
         sessionItems = getActiveSessionItem(for: settledSessions)
         client.delegate = self
+        client.logger.setLogging(level: .debug)
     }
     
     @objc

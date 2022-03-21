@@ -222,9 +222,10 @@ final class SessionEngine {
         let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
         
         let expectedExpiryTimeStamp = Date().addingTimeInterval(TimeInterval(SessionSequence.defaultTimeToLive))
+        guard let relay = proposal.relays.first else {return}
         let settleParams = SessionType.SettleParams(
-            relay: proposal.relay,
-            blockchain: Blockchain(chains: proposal.blockchainProposed.chains, accounts: accounts),//TODO
+            relay: relay,
+            blockchain: Blockchain(chains: proposal.blockchain.chains, accounts: accounts),//TODO
             permissions: proposal.permissions,
             controller: selfParticipant,
             expiry: expectedExpiryTimeStamp.millisecondsSince1970)//todo - test expiration times
@@ -242,6 +243,7 @@ final class SessionEngine {
     }
     
     private func wcSessionSettle(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
+        logger.debug("Did receive session settle request")
         let topic = payload.topic
         
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!

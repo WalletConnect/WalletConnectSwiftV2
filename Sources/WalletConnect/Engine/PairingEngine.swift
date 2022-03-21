@@ -77,10 +77,10 @@ final class PairingEngine {
             publicKey: publicKey.hexRepresentation,
             metadata: metadata)
         let proposal = SessionProposal(
-            relay: relay,
+            relays: [relay],
             proposer: proposer,
             permissions: permissions,
-            blockchainProposed: Blockchain(chains: blockchains, accounts: [])) //todo!!
+            blockchain: Blockchain(chains: blockchains, accounts: [])) //todo!!
         relayer.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { [unowned self] error in
             logger.debug("Received propose acknowledgement")
             completion(error)
@@ -141,8 +141,8 @@ final class PairingEngine {
         let sessionTopic = agreementKey.derivedTopic()
 
         try! kms.setAgreementSecret(agreementKey, topic: sessionTopic)
-
-        let proposeResponse = SessionType.ProposeResponse(relay: proposal.relay, responder: AgreementPeer(publicKey: selfPublicKey.hexRepresentation))
+        guard let relay = proposal.relays.first else {return nil}
+        let proposeResponse = SessionType.ProposeResponse(relay: relay, responder: AgreementPeer(publicKey: selfPublicKey.hexRepresentation))
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
         relayer.respond(topic: payload.topic, response: .response(response)) { _ in }
         return sessionTopic
@@ -164,6 +164,7 @@ final class PairingEngine {
     }
     
     private func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
+        logger.debug(proposal)
         try? proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
         onSessionProposal?(proposal.publicRepresentation())
     }
