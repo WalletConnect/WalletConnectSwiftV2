@@ -7,8 +7,7 @@ import WalletConnectKMS
 final class SessionEngine {
     var onSessionRequest: ((Request)->())?
     var onSessionResponse: ((Response)->())?
-    var onSessionApproved: ((Session)->())?
-    var onApprovalAcknowledgement: ((Session) -> Void)?
+    var onSessionSettle: ((Session)->())?
     var onSessionRejected: ((String, SessionType.Reason)->())?
     var onSessionUpdate: ((String, Set<Account>)->())?
     var onSessionUpgrade: ((String, SessionPermissions)->())?
@@ -163,7 +162,7 @@ final class SessionEngine {
             throw WalletConnectError.invalidPermissions
         }
         session.upgrade(permissions)
-        let newPermissions = session.permissions // We know session is settled
+        let newPermissions = session.permissions
         sequencesStore.setSequence(session)
         relayer.request(.wcSessionUpgrade(SessionType.UpgradeParams(permissions: newPermissions)), onTopic: topic)
     }
@@ -225,7 +224,7 @@ final class SessionEngine {
         let expectedExpiryTimeStamp = Date().addingTimeInterval(TimeInterval(SessionSequence.defaultTimeToLive))
         let settleParams = SessionType.SettleParams(
             relay: proposal.relay,
-            blockchain: proposal.blockchainProposed,
+            blockchain: Blockchain(chains: proposal.blockchainProposed.chains, accounts: accounts),//TODO
             permissions: proposal.permissions,
             controller: selfParticipant,
             expiry: expectedExpiryTimeStamp.millisecondsSince1970)//todo - test expiration times
@@ -244,7 +243,6 @@ final class SessionEngine {
     
     private func wcSessionSettle(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
         let topic = payload.topic
-
         
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!
         
@@ -259,7 +257,7 @@ final class SessionEngine {
         sequencesStore.setSequence(session)
         
         relayer.respondSuccess(for: payload)
-        onSessionApproved?(session.publicRepresentation())
+        onSessionSettle?(session.publicRepresentation())
     }
     
     private func wcSessionUpdate(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {
@@ -435,7 +433,7 @@ final class SessionEngine {
             guard var session = sequencesStore.getSequence(forTopic: topic) else {return}
             session.acknowledge()
             sequencesStore.setSequence(session)            
-            onSessionApproved?(session.publicRepresentation())
+            onSessionSettle?(session.publicRepresentation())
         case .error(let error):
             logger.error("Error - session rejected, Reason: \(error)")
             wcSubscriber.removeSubscription(topic: topic)

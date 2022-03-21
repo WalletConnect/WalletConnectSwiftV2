@@ -75,8 +75,10 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
     
     @objc func connectWithExampleWallet() {
         let url = URL(string: "https://walletconnect.com/wc?uri=\(uriString)")!
-        UIApplication.shared.open(url, options: [:]) { [weak self] _ in
-            self?.dismiss(animated: true, completion: nil)
+        DispatchQueue.main.async {
+            UIApplication.shared.open(url, options: [:]) { [weak self] _ in
+                self?.dismiss(animated: true, completion: nil)
+            }
         }
     }
     
@@ -92,12 +94,15 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let pairingTopic = activePairings[indexPath.row].topic
+        let blockchains: Set<String> = ["eip155:1", "eip155:137"]
         let permissions = Session.Permissions(
-            blockchains: ["eip155:1", "eip155:137"],
             methods: ["eth_sendTransaction", "personal_sign", "eth_signTypedData"],
             notifications: []
         )
-        _ = try! ClientDelegate.shared.client.connect(sessionPermissions: permissions, topic: pairingTopic)
-        connectWithExampleWallet()
+        DispatchQueue.global().async {
+            ClientDelegate.shared.client.connect(sessionPermissions: permissions, blockchains: blockchains, topic: pairingTopic) { [weak self] _ in
+                self?.connectWithExampleWallet()
+            }
+        }
     }
 }

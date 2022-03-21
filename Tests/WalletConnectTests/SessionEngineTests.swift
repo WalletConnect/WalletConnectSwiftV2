@@ -74,7 +74,7 @@ final class SessionEngineTests: XCTestCase {
         let sessionTopic = String.generateTopic()
         cryptoMock.setAgreementSecret(AgreementSecret.stub(), topic: sessionTopic)
         var didCallBackOnSessionApproved = false
-        engine.onSessionApproved = { _ in
+        engine.onSessionSettle = { _ in
             didCallBackOnSessionApproved = true
         }
         
@@ -89,7 +89,7 @@ final class SessionEngineTests: XCTestCase {
         let session = SessionSequence.stub(isSelfController: true, acknowledged: false)
         storageMock.setSequence(session)
         var didCallBackOnSessionApproved = false
-        engine.onSessionApproved = { _ in
+        engine.onSessionSettle = { _ in
             didCallBackOnSessionApproved = true
         }
         

@@ -43,11 +43,6 @@ public protocol WalletConnectClientDelegate: AnyObject {
     /// Function is executed on proposer and responder client when both communicating peers have successfully established a session.
     func didSettle(session: Session)
     
-    /// Tells the delegate that the client has settled a pairing.
-    ///
-    /// Function is executed on proposer and responder client when both communicating peers have successfully established a pairing.
-    func didSettle(pairing: Pairing)
-    
     /// Tells the delegate that notification has been received.
     func didReceive(notification: Session.Notification, sessionTopic : String)
     
@@ -68,7 +63,6 @@ public protocol WalletConnectClientDelegate: AnyObject {
 }
 
 public extension WalletConnectClientDelegate {
-    func didSettle(pairing: Pairing) {}
     func didReceive(notification: Session.Notification, sessionTopic: String) {}
     func didReject(proposal: String, reason: Reason) {}
     func didExtend(pairing: Pairing) {}
@@ -76,4 +70,5 @@ public extension WalletConnectClientDelegate {
     func didReceive(sessionProposal: Session.Proposal) {}
     func didReceive(sessionResponse: Response) {}
     func didExtend(session: Session) {}
+    func didReject(proposal: Session.Proposal, reason: Reason) {}
 }

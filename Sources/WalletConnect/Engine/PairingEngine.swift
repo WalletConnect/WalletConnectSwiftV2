@@ -5,7 +5,6 @@ import WalletConnectKMS
 
 
 final class PairingEngine {
-    var onApprovalAcknowledgement: ((Pairing) -> Void)?
     var onPairingExtend: ((Pairing)->())?
     var onSessionProposal: ((Session.Proposal)->())?
     var onProposeResponse: ((String)->())?
@@ -71,7 +70,7 @@ final class PairingEngine {
         return uri
     }
     
-    func propose(pairingTopic: String, permissions: SessionPermissions, relay: RelayProtocolOptions, completion: @escaping ((Error?) -> ())) {
+    func propose(pairingTopic: String, permissions: SessionPermissions, blockchains: Set<String>, relay: RelayProtocolOptions, completion: @escaping ((Error?) -> ())) {
         logger.debug("Propose Session on topic: \(pairingTopic)")
         let publicKey = try! kms.createX25519KeyPair()
         let proposer = Participant(
@@ -81,8 +80,9 @@ final class PairingEngine {
             relay: relay,
             proposer: proposer,
             permissions: permissions,
-            blockchainProposed: Blockchain(chains: [], accounts: [])) //todo!!
-        relayer.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { error in
+            blockchainProposed: Blockchain(chains: blockchains, accounts: [])) //todo!!
+        relayer.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { [unowned self] error in
+            logger.debug("Received propose acknowledgement")
             completion(error)
         }
     }

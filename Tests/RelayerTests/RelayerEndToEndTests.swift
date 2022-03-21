@@ -8,8 +8,8 @@ import TestingUtils
 
 final class RelayerEndToEndTests: XCTestCase {
     
-    let relayHost = "relay.dev.walletconnect.com"
-    let projectId = "52af113ee0c1e1a20f4995730196c13e"
+    let relayHost = "relay.walletconnect.com"
+    let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
     private var publishers = [AnyCancellable]()
     
     func makeRelayer() -> Relayer {

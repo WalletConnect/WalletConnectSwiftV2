@@ -14,8 +14,8 @@ final class ResponderViewController: UIViewController {
             icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])
         return WalletConnectClient(
             metadata: metadata,
-            projectId: "52af113ee0c1e1a20f4995730196c13e",
-            relayHost: "relay.dev.walletconnect.com"
+            projectId: "8ba9ee138960775e5231b70cc5ef1c3a",
+            relayHost: "relay.walletconnect.com"
         )
     }()
     lazy  var account = Signer.privateKey.address.hex(eip55: true)
@@ -41,7 +41,6 @@ final class ResponderViewController: UIViewController {
         let settledSessions = client.getSettledSessions()
         sessionItems = getActiveSessionItem(for: settledSessions)
         client.delegate = self
-        client.logger.setLogging(level: .debug)
     }
     
     @objc
@@ -150,7 +149,7 @@ extension ResponderViewController: SessionViewControllerDelegate {
         print("[RESPONDER] Approving session...")
         let proposal = currentProposal!
         currentProposal = nil
-        let accounts = Set(proposal.permissions.blockchains.compactMap { Account($0+":\(account)") })
+        let accounts = Set(proposal.blockchains.compactMap { Account($0+":\(account)") })
         client.approve(proposal: proposal, accounts: accounts)
     }
     
@@ -163,16 +162,16 @@ extension ResponderViewController: SessionViewControllerDelegate {
 }
 
 extension ResponderViewController: WalletConnectClientDelegate {
-    
+
     func didReceive(sessionProposal: Session.Proposal) {
         print("[RESPONDER] WC: Did receive session proposal")
         let appMetadata = sessionProposal.proposer
         let info = SessionInfo(
-            name: appMetadata.name ?? "",
-            descriptionText: appMetadata.description ?? "",
-            dappURL: appMetadata.url ?? "",
-            iconURL: appMetadata.icons?.first ?? "",
-            chains: Array(sessionProposal.permissions.blockchains),
+            name: appMetadata.name,
+            descriptionText: appMetadata.description,
+            dappURL: appMetadata.url,
+            iconURL: appMetadata.icons.first ?? "",
+            chains: Array(sessionProposal.blockchains),
             methods: Array(sessionProposal.permissions.methods), pendingRequests: [])
         currentProposal = sessionProposal
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread
@@ -213,7 +212,7 @@ extension ResponderViewController: WalletConnectClientDelegate {
             return ActiveSessionItem(
                 dappName: app.name ?? "",
                 dappURL: app.url ?? "",
-                iconURL: app.icons?.first ?? "",
+                iconURL: app.icons.first ?? "",
                 topic: session.topic)
         }
     }
