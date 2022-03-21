@@ -39,10 +39,10 @@ final class ClientTests: XCTestCase {
         return ClientDelegate(client: client)
     }
     
-    func testNewPairingPing() {
+    func testNewPairingPing() async {
         let responderReceivesPingResponseExpectation = expectation(description: "Responder receives ping response")
         let permissions = Session.Permissions.stub()
-        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
+        let uri = try! await proposer.client.connect(sessionPermissions: permissions)!
         
         try! responder.client.pair(uri: uri)
         let pairing = responder.client.getSettledPairings().first!
@@ -50,16 +50,16 @@ final class ClientTests: XCTestCase {
             XCTAssertTrue(response.isSuccess)
             responderReceivesPingResponseExpectation.fulfill()
         }
-        waitForExpectations(timeout: defaultTimeout, handler: nil)
+        await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
-    func testNewSession() {
+    func testNewSession() async {
         let proposerSettlesSessionExpectation = expectation(description: "Proposer settles session")
         let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
         let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
         
         let permissions = Session.Permissions.stub()
-        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
+        let uri = try! await proposer.client.connect(sessionPermissions: permissions)!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [account])
@@ -74,17 +74,17 @@ final class ClientTests: XCTestCase {
 //            XCTAssertEqual(account, sessionSettled.state.accounts[0])
             proposerSettlesSessionExpectation.fulfill()
         }
-        waitForExpectations(timeout: defaultTimeout, handler: nil)
+        await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
-    func testNewSessionOnExistingPairing() {
+    func testNewSessionOnExistingPairing() async {
         let proposerSettlesSessionExpectation = expectation(description: "Proposer settles session")
         proposerSettlesSessionExpectation.expectedFulfillmentCount = 2
         let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
         responderSettlesSessionExpectation.expectedFulfillmentCount = 2
         var initiatedSecondSession = false
         let permissions = Session.Permissions.stub()
-        let uri = try! proposer.client.connect(sessionPermissions: permissions, topic: nil)!
+        let uri = try! await proposer.client.connect(sessionPermissions: permissions, topic: nil)!
         try! responder.client.pair(uri: uri)
 
         responder.onSessionProposal = { [unowned self] proposal in
@@ -97,17 +97,19 @@ final class ClientTests: XCTestCase {
             proposerSettlesSessionExpectation.fulfill()
             let pairingTopic = proposer.client.getSettledPairings().first!.topic
             if !initiatedSecondSession {
-                let _ = try! proposer.client.connect(sessionPermissions: permissions, topic: pairingTopic)
+                Task {
+                    let _ = try! await proposer.client.connect(sessionPermissions: permissions, topic: pairingTopic)
+                }
                 initiatedSecondSession = true
             }
         }
-        waitForExpectations(timeout: defaultTimeout, handler: nil)
+        await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
-    func testResponderRejectsSession() {
+    func testResponderRejectsSession() async {
         let sessionRejectExpectation = expectation(description: "Proposer is notified on session rejection")
         let permissions = Session.Permissions.stub()
-        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
+        let uri = try! await proposer.client.connect(sessionPermissions: permissions)!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self] proposal in
             self.responder.client.reject(proposal: proposal, reason: .disapprovedChains)
@@ -116,13 +118,13 @@ final class ClientTests: XCTestCase {
             XCTAssertEqual(reason.code, 5000)
             sessionRejectExpectation.fulfill()
         }
-        waitForExpectations(timeout: defaultTimeout, handler: nil)
+        await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
-    func testDeleteSession() {
+    func testDeleteSession() async {
         let sessionDeleteExpectation = expectation(description: "Responder is notified on session deletion")
         let permissions = Session.Permissions.stub()
-        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
+        let uri = try! await proposer.client.connect(sessionPermissions: permissions)!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
@@ -133,17 +135,17 @@ final class ClientTests: XCTestCase {
         responder.onSessionDelete = {
             sessionDeleteExpectation.fulfill()
         }
-        waitForExpectations(timeout: defaultTimeout, handler: nil)
+        await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
-    func testProposerRequestSessionRequest() {
+    func testProposerRequestSessionRequest() async {
         let requestExpectation = expectation(description: "Responder receives request")
         let responseExpectation = expectation(description: "Proposer receives response")
         let method = "eth_sendTransaction"
         let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]
         let responseParams = "0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c"
         let permissions = Session.Permissions.stub(methods: [method])
-        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
+        let uri = try! await proposer.client.connect(sessionPermissions: permissions)!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
@@ -170,17 +172,17 @@ final class ClientTests: XCTestCase {
             self.responder.client.respond(topic: sessionRequest.topic, response: .response(jsonrpcResponse))
             requestExpectation.fulfill()
         }
-        waitForExpectations(timeout: defaultTimeout, handler: nil)
+        await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
     
-    func testSessionRequestFailureResponse() {
+    func testSessionRequestFailureResponse() async {
         let failureResponseExpectation = expectation(description: "Proposer receives failure response")
         let method = "eth_sendTransaction"
         let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]
         let error = JSONRPCErrorResponse.Error(code: 0, message: "error_message")
         let permissions = Session.Permissions.stub(methods: [method])
-        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
+        let uri = try! await proposer.client.connect(sessionPermissions: permissions)!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
@@ -203,13 +205,13 @@ final class ClientTests: XCTestCase {
             let jsonrpcErrorResponse = JSONRPCErrorResponse(id: sessionRequest.id, error: error)
             self.responder.client.respond(topic: sessionRequest.topic, response: .error(jsonrpcErrorResponse))
         }
-        waitForExpectations(timeout: defaultTimeout, handler: nil)
+        await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
-    func testSessionPing() {
+    func testSessionPing() async {
         let proposerReceivesPingResponseExpectation = expectation(description: "Proposer receives ping response")
         let permissions = Session.Permissions.stub()
-        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
+        let uri = try! await proposer.client.connect(sessionPermissions: permissions)!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
@@ -220,16 +222,16 @@ final class ClientTests: XCTestCase {
                 proposerReceivesPingResponseExpectation.fulfill()
             }
         }
-        waitForExpectations(timeout: defaultTimeout, handler: nil)
+        await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
-    func testSuccessfulSessionUpgrade() {
+    func testSuccessfulSessionUpgrade() async {
         let proposerSessionUpgradeExpectation = expectation(description: "Proposer upgrades session on responder request")
         let responderSessionUpgradeExpectation = expectation(description: "Responder upgrades session on proposer response")
         let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
         let permissions = Session.Permissions.stub()
         let upgradePermissions = Session.Permissions(methods: ["eth_sendTransaction"])
-        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
+        let uri = try! await proposer.client.connect(sessionPermissions: permissions)!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [account])
@@ -245,16 +247,16 @@ final class ClientTests: XCTestCase {
             XCTAssertTrue(permissions.methods.isSuperset(of: upgradePermissions.methods))
             responderSessionUpgradeExpectation.fulfill()
         }
-        waitForExpectations(timeout: defaultTimeout, handler: nil)
+        await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
-    func testSuccessfulSessionUpdate() {
+    func testSuccessfulSessionUpdate() async {
         let proposerSessionUpdateExpectation = expectation(description: "Proposer updates session on responder request")
         let responderSessionUpdateExpectation = expectation(description: "Responder updates session on proposer response")
         let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
         let updateAccounts: Set<Account> = [Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdf")!]
         let permissions = Session.Permissions.stub()
-        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
+        let uri = try! await proposer.client.connect(sessionPermissions: permissions)!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [account])
@@ -270,13 +272,13 @@ final class ClientTests: XCTestCase {
             XCTAssertEqual(accounts, updateAccounts)
             proposerSessionUpdateExpectation.fulfill()
         }
-        waitForExpectations(timeout: defaultTimeout, handler: nil)
+        await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
-    func testSessionNotificationSucceeds() {
+    func testSessionNotificationSucceeds() async {
         let proposerReceivesNotificationExpectation = expectation(description: "Proposer receives notification")
         let permissions = Session.Permissions.stub(notifications: ["type1"])
-        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
+        let uri = try! await proposer.client.connect(sessionPermissions: permissions)!
         try! responder.client.pair(uri: uri)
         let notificationParams = Session.Notification(type: "type1", data: AnyCodable("notification_data"))
         responder.onSessionProposal = { [unowned self] proposal in
@@ -289,14 +291,14 @@ final class ClientTests: XCTestCase {
             XCTAssertEqual(notification, notificationParams)
             proposerReceivesNotificationExpectation.fulfill()
         }
-        waitForExpectations(timeout: defaultTimeout, handler: nil)
+        await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
-    func testSessionNotificationFails() {
+    func testSessionNotificationFails() async {
         let proposerReceivesNotificationExpectation = expectation(description: "Proposer receives notification")
         proposerReceivesNotificationExpectation.isInverted = true
         let permissions = Session.Permissions.stub(notifications: ["type1"])
-        let uri = try! proposer.client.connect(sessionPermissions: permissions)!
+        let uri = try! await proposer.client.connect(sessionPermissions: permissions)!
         try! responder.client.pair(uri: uri)
         let notificationParams = Session.Notification(type: "type2", data: AnyCodable("notification_data"))
         responder.onSessionProposal = { [unowned self] proposal in
@@ -311,7 +313,7 @@ final class ClientTests: XCTestCase {
             XCTFail()
             proposerReceivesNotificationExpectation.fulfill()
         }
-        waitForExpectations(timeout: defaultTimeout, handler: nil)
+        await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 }
 

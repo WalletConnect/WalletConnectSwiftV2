@@ -28,7 +28,7 @@ public class Serializer {
     public func serialize(topic: String, encodable: Encodable) throws -> String {
         let messageJson = try encodable.json()
         var message: String
-        if let symmetricKey = try? kms.getSymmetricKeyRepresentable(for: topic) {
+        if let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) {
             message = try encrypt(json: messageJson, symmetricKey: symmetricKey)
         } else {
             message = messageJson.toHexEncodedString(uppercase: false)
@@ -44,7 +44,7 @@ public class Serializer {
     public func tryDeserialize<T: Codable>(topic: String, message: String) -> T? {
         do {
             let deserializedCodable: T
-            if let symmetricKey = try? kms.getSymmetricKeyRepresentable(for: topic) {
+            if let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) {
                 deserializedCodable = try deserialize(message: message, symmetricKey: symmetricKey)
             } else {
                 let jsonData = Data(hex: message)

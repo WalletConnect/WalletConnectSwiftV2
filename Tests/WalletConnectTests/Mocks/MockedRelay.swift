@@ -38,6 +38,11 @@ class MockedWCRelay: WalletConnectRelaying {
         request(topic: topic, payload: wcMethod.asRequest(), completion: completion)
     }
     
+    func requestNetworkAck(_ wcMethod: WCMethod, onTopic topic: String, completion: @escaping ((Error?) -> ())) {
+        requestCallCount += 1
+        requests.append((topic, wcMethod.asRequest()))
+    }
+    
     func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ())?) {
         requestCallCount += 1
         requests.append((topic, payload))

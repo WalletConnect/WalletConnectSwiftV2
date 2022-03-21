@@ -17,8 +17,12 @@ protocol WalletConnectRelaying: AnyObject {
     var onResponse: ((WCResponse) -> Void)? {get set}
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
+    /// Completes with a peer response
     func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
-    func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?) 
+    /// Completes with a peer response
+    func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
+    /// Completes with an acknowledgement from the relay network
+    func requestNetworkAck(_ wcMethod: WCMethod, onTopic topic: String, completion: @escaping ((Error?) -> ()))
     func respond(topic: String, response: JsonRpcResult, completion: @escaping ((Error?)->()))
     func respondSuccess(for payload: WCRequestSubscriptionPayload)
     func respondError(for payload: WCRequestSubscriptionPayload, reason: ReasonCode)
@@ -106,6 +110,23 @@ class WalletConnectRelay: WalletConnectRelaying {
         }
     }
     
+    /// Completes with an acknowledgement from the relay network
+    func requestNetworkAck(_ wcMethod: WCMethod, onTopic topic: String, completion: @escaping ((Error?) -> ())) {
+        do {
+            let payload = wcMethod.asRequest()
+            try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
+            let message = try serializer.serialize(topic: topic, encodable: payload)
+            let prompt = shouldPrompt(payload.method)
+            networkRelayer.publish(topic: topic, payload: message, prompt: prompt) { error in
+                completion(error)
+            }
+        } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
+            logger.info("Info: Json Rpc Duplicate Detected")
+        } catch {
+            logger.error(error)
+        }
+    }
+
     func respond(topic: String, response: JsonRpcResult, completion: @escaping ((Error?)->())) {
         do {
             _ = try jsonRpcHistory.resolve(response: response)

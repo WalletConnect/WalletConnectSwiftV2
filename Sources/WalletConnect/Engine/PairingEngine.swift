@@ -71,7 +71,7 @@ final class PairingEngine {
         return uri
     }
     
-    func propose(pairingTopic: String, permissions: SessionPermissions, relay: RelayProtocolOptions) {
+    func propose(pairingTopic: String, permissions: SessionPermissions, relay: RelayProtocolOptions, completion: @escaping ((Error?) -> ())) {
         logger.debug("Propose Session on topic: \(pairingTopic)")
         let publicKey = try! kms.createX25519KeyPair()
         let proposer = Participant(
@@ -82,14 +82,8 @@ final class PairingEngine {
             proposer: proposer,
             permissions: permissions,
             blockchainProposed: Blockchain(chains: [], accounts: [])) //todo!!
-                
-        relayer.request(.wcSessionPropose(proposal), onTopic: pairingTopic) { [unowned self] result in
-            switch result {
-            case .success:
-                logger.debug("Session Proposal response received")
-            case .failure(let error):
-                logger.debug("Could not send session proposal error: \(error)")
-            }
+        relayer.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { error in
+            completion(error)
         }
     }
     

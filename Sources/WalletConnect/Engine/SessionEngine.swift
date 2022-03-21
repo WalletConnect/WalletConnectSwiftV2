@@ -437,7 +437,7 @@ final class SessionEngine {
             sequencesStore.setSequence(session)            
             onSessionApproved?(session.publicRepresentation())
         case .error(let error):
-            //todo - log error
+            logger.error("Error - session rejected, Reason: \(error)")
             wcSubscriber.removeSubscription(topic: topic)
             sequencesStore.delete(topic: topic)
             kms.deleteAgreementSecret(for: topic)
