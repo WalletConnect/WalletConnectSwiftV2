@@ -78,8 +78,8 @@ extension WCRequestSubscriptionPayload {
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: upgradeMethod)
     }
     
-    static func stubExtend(topic: String, ttl: Int) -> WCRequestSubscriptionPayload {
-        let extendMethod = WCMethod.wcSessionExtend(SessionType.ExtendParams(ttl: ttl)).asRequest()
+    static func stubExtend(topic: String, expiry: Int64) -> WCRequestSubscriptionPayload {
+        let extendMethod = WCMethod.wcSessionExtend(SessionType.ExtendParams(expiry: expiry)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: extendMethod)
     }
     

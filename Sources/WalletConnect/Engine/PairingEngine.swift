@@ -80,7 +80,7 @@ final class PairingEngine {
             relays: [relay],
             proposer: proposer,
             permissions: permissions,
-            blockchain: SessionProposal.ProposedBlockchain(chains: blockchains)) 
+            blockchain: SessionProposal.ProposedBlockchain(chains: blockchains))
         relayer.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { [unowned self] error in
             logger.debug("Received propose acknowledgement")
             completion(error)
@@ -219,6 +219,7 @@ final class PairingEngine {
             onProposeResponse?(sessionTopic)
             
         case .error(let error):
+            logger.debug("session propose has been rejected")
             kms.deletePrivateKey(for: proposal.proposer.publicKey)
             sequencesStore.delete(topic: pairingTopic)
             onSessionRejected?(proposal.publicRepresentation(), SessionType.Reason(code: error.error.code, message: error.error.message))
