@@ -188,9 +188,9 @@ final class PairingEngineTests: XCTestCase {
         let response = WCResponse.stubError(forRequest: request, topic: topicA)
         relayMock.onPairingResponse?(response)
         
-        XCTAssert(subscriberMock.didUnsubscribe(to: pairing.topic), "Proposer must not unsubscribe if pairing is inactive.")
-        XCTAssertFalse(storageMock.hasSequence(forTopic: pairing.topic), "Proposer must not delete an active pairing.")
-        XCTAssertFalse(cryptoMock.hasSymmetricKey(for: pairing.topic), "Proposer must not delete symmetric key if pairing is inactive.")
+        XCTAssert(subscriberMock.didUnsubscribe(to: pairing.topic), "Proposer must unsubscribe if pairing is inactive.")
+        XCTAssertFalse(storageMock.hasSequence(forTopic: pairing.topic), "Proposer must delete an inactive pairing.")
+        XCTAssertFalse(cryptoMock.hasSymmetricKey(for: pairing.topic), "Proposer must delete symmetric key if pairing is inactive.")
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must remove private key for rejected session")
     }
     
