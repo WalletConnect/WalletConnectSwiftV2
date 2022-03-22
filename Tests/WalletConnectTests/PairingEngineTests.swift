@@ -64,12 +64,12 @@ final class PairingEngineTests: XCTestCase {
         }
     }
     
-    
     func testCreate() {
         let uri = engine.create()!
         XCTAssert(cryptoMock.hasSymmetricKey(for: uri.topic), "Proposer must store the symmetric key matching the URI.")
         XCTAssert(storageMock.hasSequence(forTopic: uri.topic), "The engine must store a pairing after creating one")
         XCTAssert(subscriberMock.didSubscribe(to: uri.topic), "Proposer must subscribe to pairing topic.")
+        XCTAssert(storageMock.getSequence(forTopic: uri.topic)?.isActive == false, "Recently created pairing must be inactive.")
     }
     
     func testPair() {
@@ -164,6 +164,9 @@ final class PairingEngineTests: XCTestCase {
         let privateKey = try! cryptoMock.getPrivateKey(for: proposal.proposer.publicKey)!
         let topicB = deriveTopic(publicKey: responder.publicKey, privateKey: privateKey)
         
+//        let storedPairing = storageMock.getSequence(forTopic: topicA)!
+//
+//        XCTAssert(storedPairing.isActive)
         XCTAssertEqual(topicB, sessionTopic, "Responder engine calls back with session topic")
     }
     
@@ -195,5 +198,13 @@ final class PairingEngineTests: XCTestCase {
     
     func testExtendPairingExpiryOnProposeResponse() {
         
+    }
+    
+    func testPairingExpiration() {
+        let uri = engine.create()!
+        let pairing = storageMock.getSequence(forTopic: uri.topic)!
+        storageMock.onSequenceExpiration?(pairing)
+        XCTAssertFalse(cryptoMock.hasSymmetricKey(for: uri.topic))
+        XCTAssert(subscriberMock.didUnsubscribe(to: uri.topic))
     }
 }
