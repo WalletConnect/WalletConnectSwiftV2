@@ -96,6 +96,6 @@ extension SessionProposal {
             relays: [relayOptions],
             proposer: Participant(publicKey: proposerPubKey, metadata: AppMetadata.stub()),
             permissions: SessionPermissions.stub(),
-            blockchain: Blockchain(chains: [], accounts: []))
+            blockchain: SessionProposal.ProposedBlockchain(chains: []))
     }
 }
