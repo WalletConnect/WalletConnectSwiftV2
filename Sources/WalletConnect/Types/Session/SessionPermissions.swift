@@ -10,9 +10,9 @@ struct SessionPermissions: Codable, Equatable {
     
     private(set) var jsonrpc: JSONRPC
     let notifications: Notifications?
-    let controller: AgreementPeer?
+    let controller: Participant?
     
-    internal init(jsonrpc: JSONRPC, notifications: Notifications? = nil, controller: AgreementPeer? = nil) {
+    internal init(jsonrpc: JSONRPC, notifications: Notifications? = nil, controller: Participant? = nil) {
         self.jsonrpc = jsonrpc
         self.notifications = notifications
         self.controller = controller

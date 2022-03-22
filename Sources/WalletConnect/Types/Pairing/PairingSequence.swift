@@ -8,6 +8,7 @@ struct PairingSequence: ExpirableSequence {
     let topic: String
     let relay: RelayProtocolOptions
     var state: PairingState?
+    private (set) var isActive: Bool = false
     
     private (set) var expiryDate: Date
 
@@ -17,6 +18,11 @@ struct PairingSequence: ExpirableSequence {
     
     static var timeToLiveSettled: Int {
         Time.day * 30
+    }
+    
+    mutating func activate() {
+        isActive = true
+        try! extend(Self.timeToLiveSettled)
     }
     
     mutating func extend(_ ttl: Int) throws {
