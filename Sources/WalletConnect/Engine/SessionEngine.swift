@@ -85,7 +85,7 @@ final class SessionEngine {
         }
     }
      
-    func extend(topic: String, ttl: Int64) throws {
+    func extend(topic: String, by ttl: Int64) throws {
         guard var session = sequencesStore.getSequence(forTopic: topic) else {
             throw WalletConnectError.noSessionMatchingTopic(topic)
         }
