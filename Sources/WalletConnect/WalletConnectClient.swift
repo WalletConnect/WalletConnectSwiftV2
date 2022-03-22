@@ -193,7 +193,7 @@ public final class WalletConnectClient {
     ///   - ttl: Time in seconds that a target session is expected to be extended for. Must be greater than current time to expire and than 7 days
     public func extend(topic: String, ttl: Int64 = Session.defaultTimeToLive) throws {
         if sessionEngine.hasSession(for: topic) {
-            try sessionEngine.extend(topic: topic, ttl: ttl)
+            try sessionEngine.extend(topic: topic, by: ttl)
         }
     }
     

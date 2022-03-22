@@ -281,7 +281,7 @@ final class SessionEngineTests: XCTestCase {
         let session = SessionSequence.stub(isSelfController: true, expiryDate: tomorrow)
         storageMock.setSequence(session)
         let twoDays = 2*Time.day
-        XCTAssertNoThrow(try engine.extend(topic: session.topic, ttl: Int64(twoDays)))
+        XCTAssertNoThrow(try engine.extend(topic: session.topic, by: Int64(twoDays)))
         let extendedSession = engine.getSettledSessions().first{$0.topic == session.topic}!
         XCTAssertEqual(extendedSession.expiryDate.timeIntervalSinceReferenceDate, TimeTraveler.dateByAdding(days: 2).timeIntervalSinceReferenceDate, accuracy: 1)
     }
@@ -291,7 +291,7 @@ final class SessionEngineTests: XCTestCase {
         let session = SessionSequence.stub(isSelfController: false, expiryDate: tomorrow, acknowledged: false)
         storageMock.setSequence(session)
         let twoDays = 2*Time.day
-        XCTAssertThrowsError(try engine.extend(topic: session.topic, ttl: Int64(twoDays)))
+        XCTAssertThrowsError(try engine.extend(topic: session.topic, by: Int64(twoDays)))
     }
     
     func testExtendOnNonControllerClient() {
@@ -299,7 +299,7 @@ final class SessionEngineTests: XCTestCase {
         let session = SessionSequence.stub(isSelfController: false, expiryDate: tomorrow)
         storageMock.setSequence(session)
         let twoDays = 2*Time.day
-        XCTAssertThrowsError(try engine.extend(topic: session.topic, ttl: Int64(twoDays)))
+        XCTAssertThrowsError(try engine.extend(topic: session.topic, by: Int64(twoDays)))
     }
     
     func testExtendTtlTooHigh() {
@@ -307,7 +307,7 @@ final class SessionEngineTests: XCTestCase {
         let session = SessionSequence.stub(isSelfController: true, expiryDate: tomorrow)
         storageMock.setSequence(session)
         let tenDays = 10*Time.day
-        XCTAssertThrowsError(try engine.extend(topic: session.topic, ttl: Int64(tenDays)))
+        XCTAssertThrowsError(try engine.extend(topic: session.topic, by: Int64(tenDays)))
     }
     
     func testExtendTtlTooLow() {
@@ -315,7 +315,7 @@ final class SessionEngineTests: XCTestCase {
         let session = SessionSequence.stub(isSelfController: true, expiryDate: dayAfterTommorow)
         storageMock.setSequence(session)
         let oneDay = Int64(1*Time.day)
-        XCTAssertThrowsError(try engine.extend(topic: session.topic, ttl: oneDay))
+        XCTAssertThrowsError(try engine.extend(topic: session.topic, by: oneDay))
     }
     
     //MARK: - Handle Session Extend call from peer
