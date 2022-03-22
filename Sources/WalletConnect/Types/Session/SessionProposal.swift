@@ -6,10 +6,13 @@ struct SessionState: Codable, Equatable {
 }
 
 struct SessionProposal: Codable, Equatable {
+    struct ProposedBlockchain: Codable, Equatable {
+        var chains: Set<String>
+    }
     let relays: [RelayProtocolOptions]
     let proposer: Participant
     let permissions: SessionPermissions
-    let blockchain: Blockchain
+    let blockchain: ProposedBlockchain
     
     func publicRepresentation() -> Session.Proposal {
         return Session.Proposal(proposer: proposer.metadata, permissions: Session.Permissions(permissions: permissions), blockchains: blockchain.chains, proposal: self)

@@ -52,6 +52,7 @@ public class Serializer {
             }
             return deserializedCodable
         } catch {
+            print(error)
             return nil
         }
     }

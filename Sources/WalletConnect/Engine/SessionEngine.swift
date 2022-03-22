@@ -96,11 +96,13 @@ final class SessionEngine {
             throw WalletConnectError.unauthorizedNonControllerCall
         }
         try session.extend(ttl)
+        //TODO - not to send ttl but a timestamp instead
         sequencesStore.setSequence(session)
         relayer.request(.wcSessionExtend(SessionType.ExtendParams(ttl: ttl)), onTopic: topic)
     }
     
     func request(params: Request) {
+        print("will request on session topic: \(params.topic)")
         guard sequencesStore.hasSequence(forTopic: params.topic) else {
             logger.debug("Could not find session for topic \(params.topic)")
             return
@@ -228,7 +230,7 @@ final class SessionEngine {
             blockchain: Blockchain(chains: proposal.blockchain.chains, accounts: accounts),//TODO
             permissions: proposal.permissions,
             controller: selfParticipant,
-            expiry: expectedExpiryTimeStamp.millisecondsSince1970)//todo - test expiration times
+            expiry: Int64(expectedExpiryTimeStamp.timeIntervalSince1970))//todo - test expiration times
         let session = SessionSequence(
             topic: topic,
             selfParticipant: selfParticipant,
@@ -257,7 +259,7 @@ final class SessionEngine {
                                       acknowledged: true)
         
         sequencesStore.setSequence(session)
-        
+        sequencesStore.getSequence(forTopic: session.topic)
         relayer.respondSuccess(for: payload)
         onSessionSettle?(session.publicRepresentation())
     }

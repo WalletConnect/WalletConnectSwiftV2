@@ -80,7 +80,7 @@ final class PairingEngine {
             relays: [relay],
             proposer: proposer,
             permissions: permissions,
-            blockchain: Blockchain(chains: blockchains, accounts: [])) //todo!!
+            blockchain: SessionProposal.ProposedBlockchain(chains: blockchains)) 
         relayer.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { [unowned self] error in
             logger.debug("Received propose acknowledgement")
             completion(error)
@@ -208,10 +208,12 @@ final class PairingEngine {
                 agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposeResponse.responder.publicKey)
             } catch {
                 //TODO - handle error
+                logger.debug(error)
                 return
             }
 
             let sessionTopic = agreementKeys.derivedTopic()
+            logger.debug("session topic: \(sessionTopic)")
             try! kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
 
             onProposeResponse?(sessionTopic)
