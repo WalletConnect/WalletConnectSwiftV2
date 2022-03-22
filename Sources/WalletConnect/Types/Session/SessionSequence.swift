@@ -94,7 +94,7 @@ struct SessionSequence: ExpirableSequence {
         blockchain.accounts = accounts
     }
     
-    mutating func extend(_ ttl: Int) throws {
+    mutating func extend(_ ttl: Int64) throws {
         let newExpiryDate = Date(timeIntervalSinceNow: TimeInterval(ttl))
         let maxExpiryDate = Date(timeIntervalSinceNow: TimeInterval(SessionSequence.defaultTimeToLive))
         guard newExpiryDate > expiryDate && newExpiryDate <= maxExpiryDate else {

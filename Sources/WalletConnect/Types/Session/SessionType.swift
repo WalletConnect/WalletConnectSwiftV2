@@ -76,7 +76,7 @@ internal enum SessionType {
     struct PingParams: Codable, Equatable {} 
     
     struct ExtendParams: Codable, Equatable {
-        let ttl: Int
+        let expiry: Int64
     }
 }
 

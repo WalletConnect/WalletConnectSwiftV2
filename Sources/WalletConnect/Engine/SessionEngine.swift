@@ -84,8 +84,8 @@ final class SessionEngine {
             }
         }
     }
-    
-    func extend(topic: String, ttl: Int) throws {
+     
+    func extend(topic: String, ttl: Int64) throws {
         guard var session = sequencesStore.getSequence(forTopic: topic) else {
             throw WalletConnectError.noSessionMatchingTopic(topic)
         }
@@ -96,9 +96,9 @@ final class SessionEngine {
             throw WalletConnectError.unauthorizedNonControllerCall
         }
         try session.extend(ttl)
-        //TODO - not to send ttl but a timestamp instead
+        let newExpiry = Int64(session.expiryDate.timeIntervalSince1970 )
         sequencesStore.setSequence(session)
-        relayer.request(.wcSessionExtend(SessionType.ExtendParams(ttl: ttl)), onTopic: topic)
+        relayer.request(.wcSessionExtend(SessionType.ExtendParams(expiry: newExpiry)), onTopic: topic)
     }
     
     func request(params: Request) {
@@ -259,7 +259,6 @@ final class SessionEngine {
                                       acknowledged: true)
         
         sequencesStore.setSequence(session)
-        sequencesStore.getSequence(forTopic: session.topic)
         relayer.respondSuccess(for: payload)
         onSessionSettle?(session.publicRepresentation())
     }
@@ -318,7 +317,7 @@ final class SessionEngine {
             return
         }
         do {
-            try session.extend(extendParams.ttl)
+            try session.extend(extendParams.expiry)
         } catch {
             relayer.respondError(for: payload, reason: .invalidExtendRequest(context: .session))
             return
