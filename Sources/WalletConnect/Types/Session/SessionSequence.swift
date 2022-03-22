@@ -21,8 +21,8 @@ struct SessionSequence: ExpirableSequence {
 
     private (set) var expiryDate: Date
     
-    static var defaultTimeToLive: Int {
-        7*Time.day
+    static var defaultTimeToLive: Int64 {
+        Int64(7*Time.day)
     }
     // for expirable...
     var publicKey: String? {
@@ -94,8 +94,21 @@ struct SessionSequence: ExpirableSequence {
         blockchain.accounts = accounts
     }
     
-    mutating func extend(_ ttl: Int) throws {
+    /// extends session by givien ttl
+    /// - Parameter ttl: time the session should be extended by - in seconds
+    mutating func extend(by ttl: Int64) throws {
         let newExpiryDate = Date(timeIntervalSinceNow: TimeInterval(ttl))
+        let maxExpiryDate = Date(timeIntervalSinceNow: TimeInterval(SessionSequence.defaultTimeToLive))
+        guard newExpiryDate > expiryDate && newExpiryDate <= maxExpiryDate else {
+            throw WalletConnectError.invalidExtendTime
+        }
+        expiryDate = newExpiryDate
+    }
+    
+    /// extends session expiry to given timestamp
+    /// - Parameter expiry: timestamp in the future in seconds
+    mutating func extend(to expiry: Int64) throws {
+        let newExpiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
         let maxExpiryDate = Date(timeIntervalSinceNow: TimeInterval(SessionSequence.defaultTimeToLive))
         guard newExpiryDate > expiryDate && newExpiryDate <= maxExpiryDate else {
             throw WalletConnectError.invalidExtendTime

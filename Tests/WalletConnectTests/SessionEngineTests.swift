@@ -281,7 +281,7 @@ final class SessionEngineTests: XCTestCase {
         let session = SessionSequence.stub(isSelfController: true, expiryDate: tomorrow)
         storageMock.setSequence(session)
         let twoDays = 2*Time.day
-        XCTAssertNoThrow(try engine.extend(topic: session.topic, ttl: twoDays))
+        XCTAssertNoThrow(try engine.extend(topic: session.topic, by: Int64(twoDays)))
         let extendedSession = engine.getSettledSessions().first{$0.topic == session.topic}!
         XCTAssertEqual(extendedSession.expiryDate.timeIntervalSinceReferenceDate, TimeTraveler.dateByAdding(days: 2).timeIntervalSinceReferenceDate, accuracy: 1)
     }
@@ -291,7 +291,7 @@ final class SessionEngineTests: XCTestCase {
         let session = SessionSequence.stub(isSelfController: false, expiryDate: tomorrow, acknowledged: false)
         storageMock.setSequence(session)
         let twoDays = 2*Time.day
-        XCTAssertThrowsError(try engine.extend(topic: session.topic, ttl: twoDays))
+        XCTAssertThrowsError(try engine.extend(topic: session.topic, by: Int64(twoDays)))
     }
     
     func testExtendOnNonControllerClient() {
@@ -299,7 +299,7 @@ final class SessionEngineTests: XCTestCase {
         let session = SessionSequence.stub(isSelfController: false, expiryDate: tomorrow)
         storageMock.setSequence(session)
         let twoDays = 2*Time.day
-        XCTAssertThrowsError(try engine.extend(topic: session.topic, ttl: twoDays))
+        XCTAssertThrowsError(try engine.extend(topic: session.topic, by: Int64(twoDays)))
     }
     
     func testExtendTtlTooHigh() {
@@ -307,15 +307,15 @@ final class SessionEngineTests: XCTestCase {
         let session = SessionSequence.stub(isSelfController: true, expiryDate: tomorrow)
         storageMock.setSequence(session)
         let tenDays = 10*Time.day
-        XCTAssertThrowsError(try engine.extend(topic: session.topic, ttl: tenDays))
+        XCTAssertThrowsError(try engine.extend(topic: session.topic, by: Int64(tenDays)))
     }
     
     func testExtendTtlTooLow() {
         let dayAfterTommorow = TimeTraveler.dateByAdding(days: 2)
         let session = SessionSequence.stub(isSelfController: true, expiryDate: dayAfterTommorow)
         storageMock.setSequence(session)
-        let oneDay = 1*Time.day
-        XCTAssertThrowsError(try engine.extend(topic: session.topic, ttl: oneDay))
+        let oneDay = Int64(1*Time.day)
+        XCTAssertThrowsError(try engine.extend(topic: session.topic, by: oneDay))
     }
     
     //MARK: - Handle Session Extend call from peer
@@ -324,18 +324,21 @@ final class SessionEngineTests: XCTestCase {
         let tomorrow = TimeTraveler.dateByAdding(days: 1)
         let session = SessionSequence.stub(isSelfController: false, expiryDate: tomorrow)
         storageMock.setSequence(session)
-        let twoDays = 2*Time.day
-        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubExtend(topic: session.topic, ttl: twoDays))
+        let twoDaysFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 2).timeIntervalSince1970)
+        
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubExtend(topic: session.topic, expiry: twoDaysFromNowTimestamp))
         let extendedSession = engine.getSettledSessions().first{$0.topic == session.topic}!
-        XCTAssertEqual(extendedSession.expiryDate.timeIntervalSinceReferenceDate, TimeTraveler.dateByAdding(days: 2).timeIntervalSinceReferenceDate, accuracy: 1)
+        print(extendedSession.expiryDate)
+        
+        XCTAssertEqual(extendedSession.expiryDate.timeIntervalSince1970, TimeTraveler.dateByAdding(days: 2).timeIntervalSince1970, accuracy: 1)
     }
     
     func testPeerExtendUnauthorized() {
         let tomorrow = TimeTraveler.dateByAdding(days: 1)
         let session = SessionSequence.stub(isSelfController: true, expiryDate: tomorrow)
         storageMock.setSequence(session)
-        let twoDays = 2*Time.day
-        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubExtend(topic: session.topic, ttl: twoDays))
+        let twoDaysFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 2).timeIntervalSince1970)
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubExtend(topic: session.topic, expiry: twoDaysFromNowTimestamp))
         let potentiallyExtendedSession = engine.getSettledSessions().first{$0.topic == session.topic}!
         XCTAssertEqual(potentiallyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, accuracy: 1, "expiry date has been extended for peer non controller request ")
     }
@@ -344,8 +347,9 @@ final class SessionEngineTests: XCTestCase {
         let tomorrow = TimeTraveler.dateByAdding(days: 1)
         let session = SessionSequence.stub(isSelfController: false, expiryDate: tomorrow)
         storageMock.setSequence(session)
-        let twoDays = 10*Time.day
-        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubExtend(topic: session.topic, ttl: twoDays))
+        let tenDaysFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 10).timeIntervalSince1970)
+        
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubExtend(topic: session.topic, expiry: tenDaysFromNowTimestamp))
         let potentaillyExtendedSession = engine.getSettledSessions().first{$0.topic == session.topic}!
         XCTAssertEqual(potentaillyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, accuracy: 1, "expiry date has been extended despite ttl to high")
     }
@@ -354,8 +358,9 @@ final class SessionEngineTests: XCTestCase {
         let tomorrow = TimeTraveler.dateByAdding(days: 2)
         let session = SessionSequence.stub(isSelfController: false, expiryDate: tomorrow)
         storageMock.setSequence(session)
-        let twoDays = 1*Time.day
-        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubExtend(topic: session.topic, ttl: twoDays))
+        let oneDayFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 10).timeIntervalSince1970)
+        
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubExtend(topic: session.topic, expiry: oneDayFromNowTimestamp))
         let potentaillyExtendedSession = engine.getSettledSessions().first{$0.topic == session.topic}!
         XCTAssertEqual(potentaillyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, accuracy: 1, "expiry date has been extended despite ttl to low")
     }
