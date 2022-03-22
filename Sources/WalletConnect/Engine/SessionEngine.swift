@@ -95,7 +95,7 @@ final class SessionEngine {
         guard session.selfIsController else {
             throw WalletConnectError.unauthorizedNonControllerCall
         }
-        try session.extend(ttl)
+        try session.extend(by: ttl)
         let newExpiry = Int64(session.expiryDate.timeIntervalSince1970 )
         sequencesStore.setSequence(session)
         relayer.request(.wcSessionExtend(SessionType.ExtendParams(expiry: newExpiry)), onTopic: topic)
@@ -317,7 +317,7 @@ final class SessionEngine {
             return
         }
         do {
-            try session.extend(extendParams.expiry)
+            try session.extend(to: extendParams.expiry)
         } catch {
             relayer.respondError(for: payload, reason: .invalidExtendRequest(context: .session))
             return

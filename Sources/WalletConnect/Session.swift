@@ -11,6 +11,9 @@ public struct Session {
     public let accounts: Set<Account>
     public let expiryDate: Date
     public let blockchains: Set<String>
+    public static var defaultTimeToLive: Int64 {
+        SessionSequence.defaultTimeToLive
+    }
 }
 
 extension Session {
