@@ -2,12 +2,14 @@ import Foundation
 import WalletConnectKMS
 
 struct PairingSequence: ExpirableSequence {
-    var publicKey: String?
-    
-    //todo - expirable sequence should not depend on pubKey but rather on map key
+    struct Participants: Codable, Equatable {
+        let `self`: Participant
+        let peer: Participant
+    }    
     let topic: String
     let relay: RelayProtocolOptions
     var state: PairingState?
+//    var participants: Participants
     private (set) var isActive: Bool = false
     
     private (set) var expiryDate: Date
@@ -36,7 +38,6 @@ struct PairingSequence: ExpirableSequence {
     static func build(_ topic: String) -> PairingSequence {
         let relay = RelayProtocolOptions(protocol: "waku", data: nil)
         return PairingSequence(
-            publicKey: nil,
             topic: topic,
             relay: relay,
             state: nil,
