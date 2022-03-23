@@ -1,12 +1,11 @@
 import Foundation
 import WalletConnectKMS
 
-struct Participants: Codable, Equatable {
-    let `self`: Participant
-    let peer: Participant
-}
-
 struct SessionSequence: ExpirableSequence {
+    struct Participants: Codable, Equatable {
+        let `self`: Participant
+        let peer: Participant
+    }
     enum Error: Swift.Error {
         case controllerNotSet
     }

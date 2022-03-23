@@ -57,13 +57,13 @@ final class PairingEngine {
     
     func getSettledPairings() -> [Pairing] {
         sequencesStore.getAll()
-            .map { Pairing(topic: $0.topic, peer: $0.state?.metadata, expiryDate: $0.expiryDate) }
+            .map { Pairing(topic: $0.topic, peer: $0.participants.peer, expiryDate: $0.expiryDate) }
     }
     
     func create() -> WalletConnectURI? {
         let topic = topicInitializer()
         let symKey = try! kms.createSymmetricKey(topic)
-        let pairing = PairingSequence.build(topic)
+        let pairing = PairingSequence.build(topic, selfMetadata: metadata)
         let uri = WalletConnectURI(topic: topic, symKey: symKey.hexRepresentation, relay: pairing.relay)
         sequencesStore.setSequence(pairing)
         wcSubscriber.setSubscription(topic: topic)
@@ -166,6 +166,9 @@ final class PairingEngine {
     private func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
         logger.debug(proposal)
         try? proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
+        guard var pairing = sequencesStore.getSequence(forTopic: payload.topic) else {return}
+        pairing.participants.peer = proposal.proposer.metadata
+        sequencesStore.setSequence(pairing)
         onSessionProposal?(proposal.publicRepresentation())
     }
     

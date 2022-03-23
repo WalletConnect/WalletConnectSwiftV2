@@ -3,13 +3,12 @@ import WalletConnectKMS
 
 struct PairingSequence: ExpirableSequence {
     struct Participants: Codable, Equatable {
-        let `self`: Participant
-        let peer: Participant
+        var `self`: AppMetadata?
+        var peer: AppMetadata?
     }    
     let topic: String
     let relay: RelayProtocolOptions
-    var state: PairingState?
-//    var participants: Participants
+    var participants: Participants
     private (set) var isActive: Bool = false
     
     private (set) var expiryDate: Date
@@ -35,12 +34,14 @@ struct PairingSequence: ExpirableSequence {
         expiryDate = newExpiryDate
     }
     
-    static func build(_ topic: String) -> PairingSequence {
+    static func build(_ topic: String, selfMetadata: AppMetadata) -> PairingSequence {
         let relay = RelayProtocolOptions(protocol: "waku", data: nil)
         return PairingSequence(
             topic: topic,
             relay: relay,
-            state: nil,
+            participants: Participants(
+                self: selfMetadata,
+                peer: nil),
             expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveInactive)))
     }
     
@@ -48,6 +49,9 @@ struct PairingSequence: ExpirableSequence {
         return PairingSequence(
             topic: uri.topic,
             relay: uri.relay,
+            participants: Participants(
+                self: nil,
+                peer: nil),
             expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveActive)))
     }
 }

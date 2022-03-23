@@ -20,6 +20,12 @@ extension Pairing {
     }
 }
 
+extension PairingSequence {
+    static func stub(expiryDate: Date = Date(timeIntervalSinceNow: 10000), isActive: Bool = true) -> PairingSequence {
+        PairingSequence(topic: String.generateTopic(), relay: RelayProtocolOptions.stub(), participants: Participants(self: nil, peer: nil), isActive: isActive, expiryDate: expiryDate)
+    }
+}
+
 extension Session.Permissions {
     static func stub(
         methods: Set<String> = ["getGenesisHash"],
