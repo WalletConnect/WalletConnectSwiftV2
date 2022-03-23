@@ -22,10 +22,9 @@ struct PairingSequence: ExpirableSequence {
     
     mutating func activate() {
         isActive = true
-        try! extend(Self.timeToLiveActive)
     }
     
-    mutating func extend(_ ttl: Int) throws {
+    mutating func extend(_ ttl: Int = PairingSequence.timeToLiveActive) throws {
         let newExpiryDate = Date(timeIntervalSinceNow: TimeInterval(ttl))
         let maxExpiryDate = Date(timeIntervalSinceNow: TimeInterval(PairingSequence.timeToLiveActive))
         guard newExpiryDate > expiryDate && newExpiryDate <= maxExpiryDate else {

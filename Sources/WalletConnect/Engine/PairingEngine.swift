@@ -142,7 +142,7 @@ final class PairingEngine {
 
         try! kms.setAgreementSecret(agreementKey, topic: sessionTopic)
         guard let relay = proposal.relays.first else {return nil}
-        let proposeResponse = SessionType.ProposeResponse(relay: relay, responder: AgreementPeer(publicKey: selfPublicKey.hexRepresentation))
+        let proposeResponse = SessionType.ProposeResponse(relay: relay, responder: Participant(publicKey: selfPublicKey.hexRepresentation, metadata: metadata))
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
         relayer.respond(topic: payload.topic, response: .response(response)) { _ in }
         return sessionTopic
@@ -185,6 +185,7 @@ final class PairingEngine {
     private func setupExpirationHandling() {
         sequencesStore.onSequenceExpiration = { [weak self] pairing in
             self?.kms.deleteSymmetricKey(for: pairing.topic)
+            self?.wcSubscriber.removeSubscription(topic: pairing.topic)
         }
     }
     
@@ -198,8 +199,19 @@ final class PairingEngine {
     }
     
     private func handleProposeResponse(pairingTopic: String, proposal: SessionProposal, result: JsonRpcResult) {
+        guard var pairing = sequencesStore.getSequence(forTopic: pairingTopic) else {
+            return
+        }
         switch result {
         case .response(let response):
+            
+            // Activate the pairing
+            if !pairing.isActive {
+                pairing.activate()
+            }
+            try? pairing.extend()
+            sequencesStore.setSequence(pairing)
+            
             let selfPublicKey = try! AgreementPublicKey(hex: proposal.proposer.publicKey)
             var agreementKeys: AgreementSecret!
             
@@ -219,9 +231,13 @@ final class PairingEngine {
             onProposeResponse?(sessionTopic)
             
         case .error(let error):
+            if !pairing.isActive {
+                kms.deleteSymmetricKey(for: pairing.topic)
+                wcSubscriber.removeSubscription(topic: pairing.topic)
+                sequencesStore.delete(topic: pairingTopic)
+            }
             logger.debug("session propose has been rejected")
             kms.deletePrivateKey(for: proposal.proposer.publicKey)
-            sequencesStore.delete(topic: pairingTopic)
             onSessionRejected?(proposal.publicRepresentation(), SessionType.Reason(code: error.error.code, message: error.error.message))
             return
         }
