@@ -120,6 +120,7 @@ final class PairingEngine {
         }
         proposalPayloadsStore.delete(forKey: proposal.proposer.publicKey)
         relayer.respondError(for: payload, reason: reason)
+//        todo - delete pairing if inactive
     }
     
     func respondSessionPropose(proposal: SessionType.ProposeParams) -> String? {
@@ -137,7 +138,7 @@ final class PairingEngine {
             relayer.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
             return nil
         }
-
+        //todo - extend pairing
         let sessionTopic = agreementKey.derivedTopic()
 
         try! kms.setAgreementSecret(agreementKey, topic: sessionTopic)
