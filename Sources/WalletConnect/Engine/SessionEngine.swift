@@ -227,7 +227,7 @@ final class SessionEngine {
         guard let relay = proposal.relays.first else {return}
         let settleParams = SessionType.SettleParams(
             relay: relay,
-            blockchain: Blockchain(chains: proposal.blockchain.chains, accounts: accounts),//TODO
+            blockchain: SessionType.Blockchain(chains: proposal.blockchain.chains, accounts: accounts),//TODO
             permissions: proposal.permissions,
             controller: selfParticipant,
             expiry: Int64(expectedExpiryTimeStamp.timeIntervalSince1970))//todo - test expiration times

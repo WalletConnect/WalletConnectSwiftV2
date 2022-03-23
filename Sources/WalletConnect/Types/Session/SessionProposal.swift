@@ -18,9 +18,3 @@ struct SessionProposal: Codable, Equatable {
         return Session.Proposal(proposer: proposer.metadata, permissions: Session.Permissions(permissions: permissions), blockchains: blockchain.chains, proposal: self)
     }
 }
-
-
-struct Blockchain: Codable, Equatable {
-    var chains: Set<String>
-    var accounts: Set<Account>
-}

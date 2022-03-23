@@ -17,7 +17,7 @@ extension SessionSequence {
                 relay: RelayProtocolOptions.stub(),
                 controller: AgreementPeer(publicKey: controllerKey),
                 participants: Participants(self: Participant.stub(publicKey: selfKey), peer: Participant.stub(publicKey: peerKey)),
-                blockchain: Blockchain.stub(),
+                blockchain: SessionType.Blockchain.stub(),
                 permissions: permissions,
                 acknowledged: acknowledged,
                 expiry: Int64(expiryDate.timeIntervalSince1970))
@@ -32,6 +32,6 @@ extension Account {
 
 extension SessionType.SettleParams {
     static func stub() -> SessionType.SettleParams {
-        return SessionType.SettleParams(relay: RelayProtocolOptions.stub(), blockchain: Blockchain.stub(), permissions: SessionPermissions.stub(), controller: Participant.stub(), expiry: Int64(Date.distantFuture.timeIntervalSince1970))
+        return SessionType.SettleParams(relay: RelayProtocolOptions.stub(), blockchain: SessionType.Blockchain.stub(), permissions: SessionPermissions.stub(), controller: Participant.stub(), expiry: Int64(Date.distantFuture.timeIntervalSince1970))
     }
 }
