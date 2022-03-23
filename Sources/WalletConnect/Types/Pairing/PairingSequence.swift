@@ -12,22 +12,22 @@ struct PairingSequence: ExpirableSequence {
     
     private (set) var expiryDate: Date
 
-    static var timeToLiveProposed: Int {
-        Time.hour
+    static var timeToLiveInactive: Int {
+        5 * Time.minute
     }
     
-    static var timeToLiveSettled: Int {
+    static var timeToLiveActive: Int {
         Time.day * 30
     }
     
     mutating func activate() {
         isActive = true
-        try! extend(Self.timeToLiveSettled)
+        try! extend(Self.timeToLiveActive)
     }
     
     mutating func extend(_ ttl: Int) throws {
         let newExpiryDate = Date(timeIntervalSinceNow: TimeInterval(ttl))
-        let maxExpiryDate = Date(timeIntervalSinceNow: TimeInterval(PairingSequence.timeToLiveSettled))
+        let maxExpiryDate = Date(timeIntervalSinceNow: TimeInterval(PairingSequence.timeToLiveActive))
         guard newExpiryDate > expiryDate && newExpiryDate <= maxExpiryDate else {
             throw WalletConnectError.invalidExtendTime
         }
@@ -41,13 +41,13 @@ struct PairingSequence: ExpirableSequence {
             topic: topic,
             relay: relay,
             state: nil,
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveProposed)))
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveInactive)))
     }
     
     static func createFromURI(_ uri: WalletConnectURI) -> PairingSequence {
         return PairingSequence(
             topic: uri.topic,
             relay: uri.relay,
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveSettled)))
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveActive)))
     }
 }

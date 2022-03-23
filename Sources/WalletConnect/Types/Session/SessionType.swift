@@ -8,7 +8,7 @@ internal enum SessionType {
     
     struct ProposeResponse: Codable, Equatable {
         let relay: RelayProtocolOptions
-        let responder: AgreementPeer
+        let responder: Participant
     }
     
     struct SettleParams: Codable, Equatable {
