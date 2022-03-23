@@ -1,6 +1,7 @@
 @testable import WalletConnect
 import Foundation
 import WalletConnectKMS
+import WalletConnectUtils
 
 extension AppMetadata {
     static func stub() -> AppMetadata {
@@ -97,5 +98,18 @@ extension SessionProposal {
             proposer: Participant(publicKey: proposerPubKey, metadata: AppMetadata.stub()),
             permissions: SessionPermissions.stub(),
             blockchain: SessionProposal.ProposedBlockchain(chains: []))
+    }
+}
+
+extension WCResponse {
+    static func stubError(forRequest request: WCRequest, topic: String) -> WCResponse {
+        let errorResponse = JSONRPCErrorResponse(id: request.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))
+        return WCResponse(
+            topic: topic,
+            chainId: nil,
+            requestMethod: request.method,
+            requestParams: request.params,
+            result: .error(errorResponse)
+        )
     }
 }
