@@ -57,7 +57,7 @@ final class PairingEngine {
     
     func getSettledPairings() -> [Pairing] {
         sequencesStore.getAll()
-            .map { Pairing(topic: $0.topic, peer: $0.participants.peer, expiryDate: $0.expiryDate) }
+            .map {Pairing(topic: $0.topic, peer: $0.participants.peer, expiryDate: $0.expiryDate)}
     }
     
     func create() -> WalletConnectURI? {
@@ -166,9 +166,7 @@ final class PairingEngine {
     private func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
         logger.debug(proposal)
         try? proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
-        guard var pairing = sequencesStore.getSequence(forTopic: payload.topic) else {return}
-        pairing.participants.peer = proposal.proposer.metadata
-        sequencesStore.setSequence(pairing)
+        updatePairingMetadata(topic: payload.topic, metadata: proposal.proposer.metadata)
         onSessionProposal?(proposal.publicRepresentation())
     }
     
@@ -221,6 +219,7 @@ final class PairingEngine {
             do {
                 let proposeResponse = try response.result.get(SessionType.ProposeResponse.self)
                 agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposeResponse.responder.publicKey)
+                updatePairingMetadata(topic: pairingTopic, metadata: proposeResponse.responder.metadata)
             } catch {
                 //TODO - handle error
                 logger.debug(error)
@@ -230,7 +229,6 @@ final class PairingEngine {
             let sessionTopic = agreementKeys.derivedTopic()
             logger.debug("session topic: \(sessionTopic)")
             try! kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
-
             onProposeResponse?(sessionTopic)
             
         case .error(let error):
@@ -244,5 +242,11 @@ final class PairingEngine {
             onSessionRejected?(proposal.publicRepresentation(), SessionType.Reason(code: error.error.code, message: error.error.message))
             return
         }
+    }
+    
+    private func updatePairingMetadata(topic: String, metadata: AppMetadata) {
+        guard var pairing = sequencesStore.getSequence(forTopic: topic) else {return}
+        pairing.participants.peer = metadata
+        sequencesStore.setSequence(pairing)
     }
 }
