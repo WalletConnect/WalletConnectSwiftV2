@@ -16,23 +16,18 @@ class AES_256_CBC_HMAC_SHA256_Codec: Codec {
         self.hmacAuthenticator = hmacAuthenticator
     }
     
-    func encode(plainText: String, symmetricKey: SymmetricRepresentable) throws -> EncryptionPayload {
-        let (encryptionKey, authenticationKey) = getKeyPair(from: symmetricKey.symmetricRepresentation)
-        let plainTextData = try data(string: plainText)
-        let (cipherText, iv) = try encrypt(key: encryptionKey, data: plainTextData)
-        let dataToMac = iv + symmetricKey.pub + cipherText
-        let hmac = try hmacAuthenticator.generateAuthenticationDigest(for: dataToMac, using: authenticationKey)
+    func encode(plainText: String, symmetricKey: SymmetricKey) throws -> EncryptionPayload {
+        let sealedBoxData = try! ChaChaPoly.seal(data, using: symmetricKey).combined
         return EncryptionPayload(iv: iv,
-                                 publicKey: symmetricKey.pub,
-                                 mac: hmac,
+                                 tag: hmac,
                                  cipherText: cipherText)
     }
     
     func decode(payload: EncryptionPayload, symmetricKey: SymmetricRepresentable) throws -> String {
         let (decryptionKey, authenticationKey) = getKeyPair(from: symmetricKey.symmetricRepresentation)
         let dataToMac = payload.iv + payload.publicKey + payload.cipherText
-        try hmacAuthenticator.validateAuthentication(for: dataToMac, with: payload.mac, using: authenticationKey)
-        let plainTextData = try decrypt(key: decryptionKey, data: payload.cipherText, iv: payload.iv)
+        try hmacAuthenticator.validateAuthentication(for: dataToMac, with: payload.tag, using: authenticationKey)
+        let plainTextData = try decrypt(key: decryptionKey, data: payload.cipherText, iv: payload.noce)
         let plainText = try string(data: plainTextData)
         return plainText
     }

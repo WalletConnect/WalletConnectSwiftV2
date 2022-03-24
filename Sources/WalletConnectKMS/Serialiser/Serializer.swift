@@ -63,9 +63,8 @@ public class Serializer {
     
     func encrypt(json: String, symmetricKey: SymmetricRepresentable) throws -> String {
         let payload = try codec.encode(plainText: json, symmetricKey: symmetricKey)
-        let iv = payload.iv.toHexString()
-        let publicKey = payload.publicKey.toHexString()
-        let mac = payload.mac.toHexString()
+        let iv = payload.noce.toHexString()
+        let mac = payload.tag.toHexString()
         let cipherText = payload.cipherText.toHexString()
         return "\(iv)\(publicKey)\(mac)\(cipherText)"
     }

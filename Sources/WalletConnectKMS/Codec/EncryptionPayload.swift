@@ -3,9 +3,8 @@
 import Foundation
 
 struct EncryptionPayload: Codable {
-    var iv: Data
-    var publicKey: Data
-    var mac: Data
+    var noce: Data
+    var tag: Data
     var cipherText: Data
     
     static let ivLength = 16
