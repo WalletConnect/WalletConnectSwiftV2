@@ -57,13 +57,13 @@ final class PairingEngine {
     
     func getSettledPairings() -> [Pairing] {
         sequencesStore.getAll()
-            .map { Pairing(topic: $0.topic, peer: $0.state?.metadata, expiryDate: $0.expiryDate) }
+            .map {Pairing(topic: $0.topic, peer: $0.participants.peer, expiryDate: $0.expiryDate)}
     }
     
     func create() -> WalletConnectURI? {
         let topic = topicInitializer()
         let symKey = try! kms.createSymmetricKey(topic)
-        let pairing = PairingSequence.build(topic)
+        let pairing = PairingSequence.build(topic, selfMetadata: metadata)
         let uri = WalletConnectURI(topic: topic, symKey: symKey.hexRepresentation, relay: pairing.relay)
         sequencesStore.setSequence(pairing)
         wcSubscriber.setSubscription(topic: topic)
@@ -120,6 +120,7 @@ final class PairingEngine {
         }
         proposalPayloadsStore.delete(forKey: proposal.proposer.publicKey)
         relayer.respondError(for: payload, reason: reason)
+//        todo - delete pairing if inactive
     }
     
     func respondSessionPropose(proposal: SessionType.ProposeParams) -> String? {
@@ -137,12 +138,12 @@ final class PairingEngine {
             relayer.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
             return nil
         }
-
+        //todo - extend pairing
         let sessionTopic = agreementKey.derivedTopic()
 
         try! kms.setAgreementSecret(agreementKey, topic: sessionTopic)
         guard let relay = proposal.relays.first else {return nil}
-        let proposeResponse = SessionType.ProposeResponse(relay: relay, responder: AgreementPeer(publicKey: selfPublicKey.hexRepresentation))
+        let proposeResponse = SessionType.ProposeResponse(relay: relay, responder: Participant(publicKey: selfPublicKey.hexRepresentation, metadata: metadata))
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
         relayer.respond(topic: payload.topic, response: .response(response)) { _ in }
         return sessionTopic
@@ -166,6 +167,7 @@ final class PairingEngine {
     private func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
         logger.debug(proposal)
         try? proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
+        updatePairingMetadata(topic: payload.topic, metadata: proposal.proposer.metadata)
         onSessionProposal?(proposal.publicRepresentation())
     }
     
@@ -218,6 +220,7 @@ final class PairingEngine {
             do {
                 let proposeResponse = try response.result.get(SessionType.ProposeResponse.self)
                 agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposeResponse.responder.publicKey)
+                updatePairingMetadata(topic: pairingTopic, metadata: proposeResponse.responder.metadata)
             } catch {
                 //TODO - handle error
                 logger.debug(error)
@@ -227,7 +230,6 @@ final class PairingEngine {
             let sessionTopic = agreementKeys.derivedTopic()
             logger.debug("session topic: \(sessionTopic)")
             try! kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
-
             onProposeResponse?(sessionTopic)
             
         case .error(let error):
@@ -241,5 +243,11 @@ final class PairingEngine {
             onSessionRejected?(proposal.publicRepresentation(), SessionType.Reason(code: error.error.code, message: error.error.message))
             return
         }
+    }
+    
+    private func updatePairingMetadata(topic: String, metadata: AppMetadata) {
+        guard var pairing = sequencesStore.getSequence(forTopic: topic) else {return}
+        pairing.participants.peer = metadata
+        sequencesStore.setSequence(pairing)
     }
 }

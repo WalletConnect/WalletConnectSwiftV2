@@ -2,21 +2,22 @@ import Foundation
 import WalletConnectKMS
 
 struct PairingSequence: ExpirableSequence {
-    var publicKey: String?
-    
-    //todo - expirable sequence should not depend on pubKey but rather on map key
+    struct Participants: Codable, Equatable {
+        var `self`: AppMetadata?
+        var peer: AppMetadata?
+    }    
     let topic: String
     let relay: RelayProtocolOptions
-    var state: PairingState?
+    var participants: Participants
     private (set) var isActive: Bool = false
     
     private (set) var expiryDate: Date
 
-    static var timeToLiveProposed: Int {
-        Time.hour
+    static var timeToLiveInactive: Int {
+        5 * Time.minute
     }
     
-    static var timeToLiveSettled: Int {
+    static var timeToLiveActive: Int {
         Time.day * 30
     }
     
@@ -24,29 +25,33 @@ struct PairingSequence: ExpirableSequence {
         isActive = true
     }
     
-    mutating func extend(_ ttl: Int = PairingSequence.timeToLiveSettled) throws {
+    mutating func extend(_ ttl: Int = PairingSequence.timeToLiveActive) throws {
         let newExpiryDate = Date(timeIntervalSinceNow: TimeInterval(ttl))
-        let maxExpiryDate = Date(timeIntervalSinceNow: TimeInterval(PairingSequence.timeToLiveSettled))
+        let maxExpiryDate = Date(timeIntervalSinceNow: TimeInterval(PairingSequence.timeToLiveActive))
         guard newExpiryDate > expiryDate && newExpiryDate <= maxExpiryDate else {
             throw WalletConnectError.invalidExtendTime
         }
         expiryDate = newExpiryDate
     }
     
-    static func build(_ topic: String) -> PairingSequence {
+    static func build(_ topic: String, selfMetadata: AppMetadata) -> PairingSequence {
         let relay = RelayProtocolOptions(protocol: "waku", data: nil)
         return PairingSequence(
-            publicKey: nil,
             topic: topic,
             relay: relay,
-            state: nil,
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveProposed)))
+            participants: Participants(
+                self: selfMetadata,
+                peer: nil),
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveInactive)))
     }
     
     static func createFromURI(_ uri: WalletConnectURI) -> PairingSequence {
         return PairingSequence(
             topic: uri.topic,
             relay: uri.relay,
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveSettled)))
+            participants: Participants(
+                self: nil,
+                peer: nil),
+            expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveActive)))
     }
 }

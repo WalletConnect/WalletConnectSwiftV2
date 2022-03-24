@@ -94,13 +94,13 @@ final class PairingEngineTests: XCTestCase {
                   XCTFail("Proposer must publish a proposal request."); return
               }
         XCTAssert(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must store the private key matching the public key sent through the proposal.")
-        //        XCTAssert(storageMock.hasProposal(on: topicA), "The engine must store a proposal ")
         XCTAssertEqual(publishTopic, topicA)
     }
     
     func testReceiveProposal() {
-        let pairing = Pairing.stub()
+        let pairing = PairingSequence.stub()
         let topicA = pairing.topic
+        storageMock.setSequence(pairing)
         var sessionProposed = false
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
@@ -145,7 +145,7 @@ final class PairingEngineTests: XCTestCase {
               }
         
         // Client receives proposal response response
-        let responder = AgreementPeer.stub()
+        let responder = Participant.stub()
         let proposalResponse = SessionType.ProposeResponse(relay: relayOptions, responder: responder)
         
         let jsonRpcResponse = JSONRPCResponse<AnyCodable>(id: request.id, result: AnyCodable.decoded(proposalResponse))
