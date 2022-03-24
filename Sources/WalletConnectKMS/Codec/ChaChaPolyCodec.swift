@@ -4,20 +4,15 @@ import Foundation
 import CryptoKit
 
 protocol Codec {
-    var hmacAuthenticator: HMACAuthenticating {get}
     func encode(plaintext: String, symmetricKey: Data) throws -> String
     func decode(sealboxString: String, symmetricKey: Data) throws -> Data
 }
 
 class ChaChaPolyCodec: Codec {
-    let hmacAuthenticator: HMACAuthenticating
-    
-    init(hmacAuthenticator: HMACAuthenticating = HMACAuthenticator()) {
-        self.hmacAuthenticator = hmacAuthenticator
-    }
     
     func encode(plaintext: String, symmetricKey: Data) throws -> String {
         let key = CryptoKit.SymmetricKey(data: symmetricKey)
+        print(key)
         let sealboxData = try ChaChaPoly.seal(data(string: plaintext), using: key).combined
         return sealboxData.base64EncodedString()
     }

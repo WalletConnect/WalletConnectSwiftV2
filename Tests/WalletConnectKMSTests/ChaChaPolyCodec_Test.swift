@@ -16,7 +16,16 @@ class ChaChaPolyCodec_Test: XCTestCase {
         codec = nil
     }
 
-    func testEncodeDecode() {
+    func testEncodeDecodeSymKey() {
+        let encryptionPayload = try! codec.encode(plaintext: message, symmetricKey: symmetricKey)
+        let decodedMessage = try! codec.decode(sealboxString: encryptionPayload, symmetricKey: symmetricKey)
+        XCTAssertEqual(message, String(decoding: decodedMessage, as: UTF8.self))
+    }
+    
+    func testEncodeDecodeSharedSecret() {
+        
+        let sharedSecret =
+        
         let encryptionPayload = try! codec.encode(plaintext: message, symmetricKey: symmetricKey)
         let decodedMessage = try! codec.decode(sealboxString: encryptionPayload, symmetricKey: symmetricKey)
         XCTAssertEqual(message, String(decoding: decodedMessage, as: UTF8.self))

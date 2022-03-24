@@ -65,8 +65,8 @@ public class KeyManagementService: KeyManagementServiceProtocol {
     }
     
     public func getSymmetricKeyRepresentable(for topic: String) -> Data? {
-        if let key = try? getAgreementSecret(for: topic) {
-            return key.rawRepresentation
+        if let key = try? getAgreementSecret(for: topic)?.sharedSecret {
+            return key
         } else {
             return try? getSymmetricKey(for: topic)?.rawRepresentation
         }
