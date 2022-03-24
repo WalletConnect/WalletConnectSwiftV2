@@ -27,13 +27,3 @@ extension AgreementSecret: GenericPasswordConvertible {
         sharedSecret + publicKey.rawRepresentation
     }
 }
-
-extension AgreementSecret: SymmetricRepresentable {
-    public var pub: Data {
-        return publicKey.rawRepresentation
-    }
-    
-    public var symmetricRepresentation: Data {
-        return sharedSecret
-    }
-}

@@ -9,7 +9,7 @@ public protocol KeyManagementServiceProtocol {
     func getPrivateKey(for publicKey: AgreementPublicKey) throws -> AgreementPrivateKey?
     func getAgreementSecret(for topic: String) throws -> AgreementSecret?
     func getSymmetricKey(for topic: String) throws -> SymmetricKey?
-    func getSymmetricKeyRepresentable(for topic: String) -> SymmetricRepresentable?
+    func getSymmetricKeyRepresentable(for topic: String) -> Data?
     func deletePrivateKey(for publicKey: String)
     func deleteAgreementSecret(for topic: String)
     func deleteSymmetricKey(for topic: String)
@@ -64,11 +64,11 @@ public class KeyManagementService: KeyManagementServiceProtocol {
         }
     }
     
-    public func getSymmetricKeyRepresentable(for topic: String) -> SymmetricRepresentable? {
+    public func getSymmetricKeyRepresentable(for topic: String) -> Data? {
         if let key = try? getAgreementSecret(for: topic) {
-            return key
+            return key.rawRepresentation
         } else {
-            return try? getSymmetricKey(for: topic)
+            return try? getSymmetricKey(for: topic)?.rawRepresentation
         }
     }
     

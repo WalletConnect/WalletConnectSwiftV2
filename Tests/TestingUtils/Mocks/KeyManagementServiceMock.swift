@@ -2,11 +2,11 @@ import Foundation
 @testable import WalletConnectKMS
 
 final class KeyManagementServiceMock: KeyManagementServiceProtocol {
-    func getSymmetricKeyRepresentable(for topic: String) -> SymmetricRepresentable? {
+    func getSymmetricKeyRepresentable(for topic: String) -> Data? {
         if let key = getAgreementSecret(for: topic) {
-            return key
+            return key.rawRepresentation
         } else {
-            return try? getSymmetricKey(for: topic)
+            return try? getSymmetricKey(for: topic)?.rawRepresentation
         }
     }
     
