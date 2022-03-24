@@ -1,4 +1,4 @@
-public struct Blockchain {
+public struct Blockchain: Equatable {
     
     public let namespace: String
     
@@ -17,5 +17,28 @@ public struct Blockchain {
     
     public init?(namespace: String, reference: String) {
         self.init("\(namespace):\(reference)")
+    }
+}
+
+extension Blockchain: LosslessStringConvertible {
+    public var description: String {
+        return absoluteString
+    }
+}
+
+extension Blockchain: Codable {
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let absoluteString = try container.decode(String.self)
+        guard let blockchain = Blockchain(absoluteString) else {
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Malformed CAIP-2 chain identifier.")
+        }
+        self = blockchain
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(absoluteString)
     }
 }
