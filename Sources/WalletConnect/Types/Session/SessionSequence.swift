@@ -13,7 +13,7 @@ struct SessionSequence: ExpirableSequence {
     let relay: RelayProtocolOptions
     let controller: AgreementPeer
     let participants: Participants
-    var blockchain: Blockchain
+    var blockchain: SessionType.Blockchain
     var permissions: SessionPermissions
 
     var acknowledged: Bool
@@ -43,7 +43,7 @@ struct SessionSequence: ExpirableSequence {
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(settleParams.expiry))
     }
     
-    init(topic: String, relay: RelayProtocolOptions, controller: AgreementPeer, participants: Participants, blockchain: Blockchain, permissions: SessionPermissions, acknowledged: Bool, expiry: Int64) {
+    init(topic: String, relay: RelayProtocolOptions, controller: AgreementPeer, participants: Participants, blockchain: SessionType.Blockchain, permissions: SessionPermissions, acknowledged: Bool, expiry: Int64) {
         self.topic = topic
         self.relay = relay
         self.controller = controller

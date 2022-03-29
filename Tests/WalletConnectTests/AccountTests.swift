@@ -24,9 +24,28 @@ final class AccountTests: XCTestCase {
         XCTAssertNil(Account(chainIdentifier: "std", address: "0"))
     }
     
+    func testInitFromBlockchain() {
+        let chain = Blockchain("std:0")!
+        
+        // Valid accounts
+        XCTAssertNotNil(Account(blockchain: chain, address: "0"))
+        XCTAssertNotNil(Account(blockchain: chain, address: "6d9b0b4b9994e8a6afbd3dc3ed983cd51c755afb27cd1dc7825ef59c134a39f7"))
+        
+        // Invalid accounts
+        XCTAssertNil(Account(blockchain: chain, address: ""))
+        XCTAssertNil(Account(blockchain: chain, address: "$"))
+    }
+    
     func testBlockchainIdentifier() {
         let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
         XCTAssertEqual(account.blockchainIdentifier, "eip155:1")
+    }
+    
+    func testBlockchainExtraction() {
+        let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
+        let blockchain = account.blockchain
+        XCTAssertEqual(account.namespace, blockchain.namespace)
+        XCTAssertEqual(account.reference, blockchain.reference)
     }
     
     func testAbsoluteString() {

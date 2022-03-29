@@ -78,6 +78,11 @@ internal enum SessionType {
     struct ExtendParams: Codable, Equatable {
         let expiry: Int64
     }
+    
+    struct Blockchain: Codable, Equatable {
+        var chains: Set<String>
+        var accounts: Set<Account>
+    }
 }
 
 // A better solution could fit in here

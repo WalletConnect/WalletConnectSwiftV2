@@ -31,6 +31,14 @@ public struct Account: Equatable, Hashable {
         "\(namespace):\(reference):\(address)"
     }
     
+    /// Returns a CAIP-2 reference to the blockchain where the account is located.
+    public var blockchain: Blockchain {
+        guard let blockchain = Blockchain(namespace: namespace, reference: reference) else {
+            preconditionFailure("The CAIP-2 chain id of a CAIP-10 account must always be consistent.")
+        }
+        return blockchain
+    }
+    
     /**
      Creates an account instance from the provided string.
      
@@ -53,6 +61,15 @@ public struct Account: Equatable, Hashable {
      */
     public init?(chainIdentifier: String, address: String) {
         self.init("\(chainIdentifier):\(address)")
+    }
+    
+    /**
+     Creates an account instance from a blockchain reference and an address.
+     
+     This initializer returns nil if the `address` format is invalid. The `blockchain` type is already expected to be conformant.
+     */
+    public init?(blockchain: Blockchain, address: String) {
+        self.init("\(blockchain.absoluteString):\(address)")
     }
 }
 

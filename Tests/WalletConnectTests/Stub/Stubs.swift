@@ -50,9 +50,9 @@ extension SessionPermissions {
     }
 }
 
-extension Blockchain {
-    static func stub(chains: Set<String> = ["eip155:1"]) -> Blockchain {
-        return Blockchain(chains: chains, accounts: [])
+extension SessionType.Blockchain {
+    static func stub(chains: Set<String> = ["eip155:1"]) -> SessionType.Blockchain {
+        return SessionType.Blockchain(chains: chains, accounts: [])
     }
 }
 
