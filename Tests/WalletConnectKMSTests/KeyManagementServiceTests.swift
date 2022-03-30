@@ -62,14 +62,14 @@ class KeyManagementServiceTests: XCTestCase {
         XCTAssertNil(try kms.getAgreementSecret(for: topic))
     }
     
-//    func testGenerateX25519Agreement() throws {
-//        let privateKeyA = try AgreementPrivateKey(rawRepresentation: CryptoTestData._privateKeyA)
-//        let privateKeyB = try AgreementPrivateKey(rawRepresentation: CryptoTestData._privateKeyB)
-//        let agreementSecretA = try KeyManagementService.generateAgreementKey(from: privateKeyA, peerPublicKey: privateKeyB.publicKey.hexRepresentation)
-//        let agreementSecretB = try KeyManagementService.generateAgreementKey(from: privateKeyB, peerPublicKey: privateKeyA.publicKey.hexRepresentation)
-//        XCTAssertEqual(agreementSecretA.sharedKey, agreementSecretB.sharedKey)
-//        XCTAssertEqual(agreementSecretA.sharedKey.rawRepresentation, CryptoTestData.expectedSharedSecret)
-//    }
+    func testGenerateX25519Agreement() throws {
+        let privateKeyA = try AgreementPrivateKey(rawRepresentation: CryptoTestData.privateKeyA)
+        let privateKeyB = try AgreementPrivateKey(rawRepresentation: CryptoTestData.privateKeyB)
+        let agreementSecretA = try KeyManagementService.generateAgreementKey(from: privateKeyA, peerPublicKey: privateKeyB.publicKey.hexRepresentation)
+        let agreementSecretB = try KeyManagementService.generateAgreementKey(from: privateKeyB, peerPublicKey: privateKeyA.publicKey.hexRepresentation)
+        XCTAssertEqual(agreementSecretA.sharedKey, agreementSecretB.sharedKey)
+        XCTAssertEqual(agreementSecretA.sharedKey.rawRepresentation, CryptoTestData.expectedSharedKey)
+    }
     
     func testGenerateX25519AgreementRandomKeys() throws {
         let privateKeyA = AgreementPrivateKey()
