@@ -10,6 +10,10 @@ public struct SymmetricKey: Equatable {
     public var hexRepresentation: String {
         rawRepresentation.toHexString()
     }
+    
+    init(key: CryptoKit.SymmetricKey) {
+        self.key = key
+    }
 
     public init(size: Size = .bits256) {
         switch size {

@@ -1,9 +1,10 @@
 import Foundation
 @testable import WalletConnectKMS
 
-extension AgreementSecret {
+extension AgreementKeys {
     
-    static func stub() -> AgreementSecret {
-        AgreementSecret(sharedSecret: Data.randomBytes(count: 32), publicKey: AgreementPrivateKey().publicKey)
+    static func stub() -> AgreementKeys {
+        let key = try! SymmetricKey(rawRepresentation: Data.randomBytes(count: 32))
+        return AgreementKeys(sharedKey: key, publicKey: AgreementPrivateKey().publicKey)
     }
 }

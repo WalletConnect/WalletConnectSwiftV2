@@ -11,7 +11,7 @@ class SerializerMock: Serializing {
     var serialized: String = ""
     
     func serialize(topic: String, encodable: Encodable) throws -> String {
-        try serialize(json: try encodable.json(), agreementKeys: AgreementSecret(sharedSecret: Data(), publicKey: AgreementPrivateKey().publicKey))
+        try serialize(json: try encodable.json(), agreementKeys: AgreementKeys.stub())
     }
     func tryDeserialize<T: Codable>(topic: String, message: String) -> T? {
         try? deserialize(message: message, symmetricKey: Data())
@@ -28,7 +28,7 @@ class SerializerMock: Serializing {
         }
     }
     
-    func serialize(json: String, agreementKeys: AgreementSecret) throws -> String {
+    func serialize(json: String, agreementKeys: AgreementKeys) throws -> String {
         return serialized
     }
 
