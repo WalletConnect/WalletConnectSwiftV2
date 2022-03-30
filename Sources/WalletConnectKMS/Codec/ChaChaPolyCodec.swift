@@ -12,7 +12,6 @@ class ChaChaPolyCodec: Codec {
     
     func encode(plaintext: String, symmetricKey: Data) throws -> String {
         let key = CryptoKit.SymmetricKey(data: symmetricKey)
-        print(key)
         let sealboxData = try ChaChaPoly.seal(data(string: plaintext), using: key).combined
         return sealboxData.base64EncodedString()
     }
