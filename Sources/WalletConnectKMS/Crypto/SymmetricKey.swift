@@ -11,7 +11,7 @@ public struct SymmetricKey: Equatable {
         rawRepresentation.toHexString()
     }
     
-    init(key: CryptoKit.SymmetricKey) {
+    public init(key: CryptoKit.SymmetricKey) {
         self.key = key
     }
 

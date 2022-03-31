@@ -27,5 +27,15 @@ final class SerializerTests: XCTestCase {
         let deserializedMessage: String? = serializer.tryDeserialize(topic: topic, message: serializedMessage)
         XCTAssertEqual(messageToSerialize, deserializedMessage)
     }
+    
+    func testSerialise() {
+        let topic = "topic"
+        let key = Data(hex: "0653ca620c7b4990392e1c53c4a51c14a2840cd20f0f1524cf435b17b6fe988c")
+        let symKey = try! SymmetricKey(rawRepresentation: key)
+        try! kms.setSymmetricKey(symKey, for: topic)
+        let messageToSerialize = "WalletConnect"
+        let serializedMessage = try! serializer.serialize(topic: topic, encodable: messageToSerialize)
+        XCTAssertEqual(serializedMessage, "5JJK04yH8m/DmHWxvEQ7u09nkK1IxOJqlTJ1CqQ=")
+    }
 }
 
