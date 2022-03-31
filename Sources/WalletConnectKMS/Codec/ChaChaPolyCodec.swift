@@ -32,12 +32,4 @@ class ChaChaPolyCodec: Codec {
             throw CodecError.stringToDataFailed(string)
         }
     }
-
-    private func string(data: Data) throws -> String {
-        if let string = String(data: data, encoding: .utf8) {
-            return string
-        } else {
-            throw CodecError.dataToStringFailed(data)
-        }
-    }
 }
