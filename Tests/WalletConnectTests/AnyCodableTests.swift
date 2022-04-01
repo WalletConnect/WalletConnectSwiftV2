@@ -46,8 +46,43 @@ fileprivate struct SampleStruct: Codable, Equatable {
 """.data(using: .utf8)!
 }
 
+fileprivate let heterogeneousArrayJSON = """
+[
+    420,
+    3.14,
+    true,
+    "string",
+    [0, 1, 2],
+    {
+        "key": "value"
+    }
+]
+""".data(using: .utf8)!
+
 final class AnyCodableTests: XCTestCase {
 
+//    func testGet() {
+//        do {
+//            let value = AnyCodable(SampleStruct.stub())
+//            _ = try value.get(SampleStruct.self)
+//        } catch {
+//            XCTFail()
+//        }
+//    }
+    
+    func testInitGet() throws {
+        XCTAssertNoThrow(try AnyCodable(Int.random(in: Int.min...Int.max)).get(Int.self))
+        XCTAssertNoThrow(try AnyCodable(Double.pi).get(Double.self))
+        XCTAssertNoThrow(try AnyCodable(Bool.random()).get(Bool.self))
+        XCTAssertNoThrow(try AnyCodable(UUID().uuidString).get(String.self))
+//        XCTAssertNoThrow(try AnyCodable((1...10).map { _ in UUID().uuidString }).get([String].self))
+//
+//        XCTAssertNoThrow(try AnyCodable(SampleStruct.stub()).get(SampleStruct.self))
+//
+//        let arr = [AnyCodable(42), AnyCodable(3.14), AnyCodable(true), AnyCodable("string")]
+//        XCTAssertNoThrow(try AnyCodable(arr).get([AnyCodable].self))
+    }
+    
     func testCodingBool() {
         [true, false].forEach { bool in
             do {
@@ -140,19 +175,35 @@ final class AnyCodableTests: XCTestCase {
         }
     }
     
-    func testDecoding() {
+    func testDecodingObject() {
         do {
             let data = SampleStruct.sampleJSONData
             let decoded = try JSONDecoder().decode(AnyCodable.self, from: data)
             _ = try JSONEncoder().encode(decoded)
+            _ = try decoded.get(SampleStruct.self)
         } catch {
             XCTFail()
         }
     }
     
+    func testDecodingHeterogeneousArray() throws {
+        let decoded = try JSONDecoder().decode(AnyCodable.self, from: heterogeneousArrayJSON)
+        let array = try decoded.get([AnyCodable].self)
+        XCTAssertNoThrow(try array[0].get(Int.self))
+        XCTAssertNoThrow(try array[1].get(Double.self))
+        XCTAssertNoThrow(try array[2].get(Bool.self))
+        XCTAssertNoThrow(try array[3].get(String.self))
+        XCTAssertNoThrow(try array[4].get([Int].self))
+        XCTAssertNoThrow(try array[5].get([String: String].self))
+    }
+    
     func testDecodeFail() {
         let data = SampleStruct.invalidJSONData
         XCTAssertThrowsError(try JSONDecoder().decode(AnyCodable.self, from: data)) { error in
+            XCTAssert(error is DecodingError)
+        }
+        let nullData = " ".data(using: .utf8)!
+        XCTAssertThrowsError(try JSONDecoder().decode(AnyCodable.self, from: nullData)) { error in
             XCTAssert(error is DecodingError)
         }
     }

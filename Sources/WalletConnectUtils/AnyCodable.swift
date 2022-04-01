@@ -32,6 +32,17 @@ public struct AnyCodable {
     }
 }
 
+extension AnyCodable: Equatable {
+    public static func == (lhs: AnyCodable, rhs: AnyCodable) -> Bool {
+        if let lString = try? lhs.get(String.self),
+           let rString = try? rhs.get(String.self),
+           lString == rString {
+            return true
+        }
+        fatalError("Not implemented")
+    }
+}
+
 extension AnyCodable: Decodable, Encodable {
     
     struct CodingKeys: CodingKey {
@@ -75,10 +86,10 @@ extension AnyCodable: Decodable, Encodable {
             } else if let stringVal = try? container.decode(String.self) {
                 value = stringVal
             } else {
-                throw DecodingError.dataCorruptedError(in: container, debugDescription: "the container contains nothing serializable")
+                throw DecodingError.dataCorruptedError(in: container, debugDescription: "The container contains nothing serializable.")
             }
         } else {
-            throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Could not serialize"))
+            throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "No data found in the decoder."))
         }
     }
     
@@ -109,19 +120,8 @@ extension AnyCodable: Decodable, Encodable {
             } else if let stringVal = value as? String {
                 try container.encode(stringVal)
             } else {
-                throw EncodingError.invalidValue(value, EncodingError.Context.init(codingPath: [], debugDescription: "The value is not encodable"))
+                throw EncodingError.invalidValue(value, EncodingError.Context.init(codingPath: [], debugDescription: "The value is not encodable."))
             }
         }
-    }
-}
-
-extension AnyCodable: Equatable {
-    public static func == (lhs: AnyCodable, rhs: AnyCodable) -> Bool {
-        if let lString = try? lhs.get(String.self),
-           let rString = try? rhs.get(String.self),
-           lString == rString {
-            return true
-        }
-        fatalError("Not implemented")
     }
 }
