@@ -59,28 +59,39 @@ fileprivate let heterogeneousArrayJSON = """
 ]
 """.data(using: .utf8)!
 
-final class AnyCodableTests: XCTestCase {
+// Move this
+extension Int {
+    static func random() -> Int {
+        random(in: Int.min...Int.max)
+    }
+}
 
-//    func testGet() {
-//        do {
-//            let value = AnyCodable(SampleStruct.stub())
-//            _ = try value.get(SampleStruct.self)
-//        } catch {
-//            XCTFail()
-//        }
-//    }
+final class AnyCodableTests: XCTestCase {
     
     func testInitGet() throws {
         XCTAssertNoThrow(try AnyCodable(Int.random(in: Int.min...Int.max)).get(Int.self))
         XCTAssertNoThrow(try AnyCodable(Double.pi).get(Double.self))
         XCTAssertNoThrow(try AnyCodable(Bool.random()).get(Bool.self))
         XCTAssertNoThrow(try AnyCodable(UUID().uuidString).get(String.self))
-//        XCTAssertNoThrow(try AnyCodable((1...10).map { _ in UUID().uuidString }).get([String].self))
-//
-//        XCTAssertNoThrow(try AnyCodable(SampleStruct.stub()).get(SampleStruct.self))
-//
-//        let arr = [AnyCodable(42), AnyCodable(3.14), AnyCodable(true), AnyCodable("string")]
-//        XCTAssertNoThrow(try AnyCodable(arr).get([AnyCodable].self))
+        XCTAssertNoThrow(try AnyCodable((1...10).map { _ in UUID().uuidString }).get([String].self))
+        XCTAssertNoThrow(try AnyCodable(SampleStruct.stub()).get(SampleStruct.self))
+    }
+    
+    func testEqualityInt() {
+        let int = Int.random()
+        let intA = AnyCodable(int)
+        let intB = AnyCodable(int)
+        let intC = AnyCodable(int + 1)
+        XCTAssertEqual(intA, intB)
+        XCTAssertNotEqual(intA, intC)
+        XCTAssertNotEqual(intB, intC)
+    }
+    
+    func testEqualityObject() {
+        let objectA = AnyCodable(SampleStruct.stub())
+        let objectB = AnyCodable(SampleStruct.stub())
+        XCTAssertEqual(objectA, objectA)
+        XCTAssertNotEqual(objectA, objectB)
     }
     
     func testCodingBool() {
@@ -202,7 +213,7 @@ final class AnyCodableTests: XCTestCase {
         XCTAssertThrowsError(try JSONDecoder().decode(AnyCodable.self, from: data)) { error in
             XCTAssert(error is DecodingError)
         }
-        let nullData = " ".data(using: .utf8)!
+        let nullData = "null".data(using: .utf8)!
         XCTAssertThrowsError(try JSONDecoder().decode(AnyCodable.self, from: nullData)) { error in
             XCTAssert(error is DecodingError)
         }

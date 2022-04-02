@@ -18,7 +18,13 @@ public struct AnyCodable {
     }
 
     public init<C>(_ codable: C) where C: Codable {
-        self.value = codable
+        do {
+            let codableData = try JSONEncoder().encode(codable)
+            let jsonRepresentation = try JSONSerialization.jsonObject(with: codableData)
+            self.value = jsonRepresentation
+        } catch {
+            self.value = codable
+        }
         genericEncoding = { encoder in
             try codable.encode(to: encoder)
         }
@@ -30,16 +36,22 @@ public struct AnyCodable {
         let valueData = try JSONSerialization.data(withJSONObject: value, options: [.fragmentsAllowed])
         return try JSONDecoder().decode(type, from: valueData)
     }
+    
+    public var stringRepresentation: String {
+        guard
+            let valueData = try? JSONSerialization.data(withJSONObject: value, options: [.fragmentsAllowed, .prettyPrinted]),
+            let string = String(data: valueData, encoding: .utf8)
+        else {
+            return "unknown"
+        }
+        return string
+    }
 }
 
 extension AnyCodable: Equatable {
+    
     public static func == (lhs: AnyCodable, rhs: AnyCodable) -> Bool {
-        if let lString = try? lhs.get(String.self),
-           let rString = try? rhs.get(String.self),
-           lString == rString {
-            return true
-        }
-        fatalError("Not implemented")
+        lhs.stringRepresentation == rhs.stringRepresentation
     }
 }
 
