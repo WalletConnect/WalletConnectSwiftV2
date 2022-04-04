@@ -44,7 +44,7 @@ public struct AnyCodable {
             let valueData = try? getDataRepresentation(),
             let string = String(data: valueData, encoding: .utf8)
         else {
-            return "unknown"
+            return ""
         }
         return string
     }
@@ -74,7 +74,9 @@ extension AnyCodable: Equatable {
 extension AnyCodable: CustomStringConvertible {
     
     public var description: String {
-        "AnyCodable: \"\(stringRepresentation)\""
+        let stringSelf = stringRepresentation
+        let description = stringSelf.isEmpty ? "invalid data" : stringSelf
+        return "AnyCodable: \"\(description)\""
     }
 }
 
