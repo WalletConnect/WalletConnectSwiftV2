@@ -1,12 +1,17 @@
 import Foundation
 
-
-/// An Object that allows to encode and decode `Any` type
-///
-/// ```Swift
-///        let anyCodable = AnyCodable("")
-///        let string = try! anyCodable.get(String.self)
-/// ```
+/**
+ A type-erased codable object.
+ 
+ The `AnyCodable` type allows to encode and decode data prior to knowing the underlying type, delaying the type-matching
+ to a later point in execution.
+ 
+ When dealing with serialized JSON data structures where a single key can match to different types of values, the `AnyCodable`
+ type can be used as a placeholder for `Any` while preserving the `Codable` conformance of the containing type. Another use case
+ for the `AnyCodable` type is to facilitate the encoding of arrays of heterogeneous-typed values.
+ 
+ You can call `get(_:)` to transform the underlying value back to the type you specify.
+ */
 public struct AnyCodable {
     
     private let value: Any
@@ -18,7 +23,13 @@ public struct AnyCodable {
     private init(_ value: Any) {
         self.value = value
     }
-
+    
+    /**
+     Creates a type-erased codable value that wraps the given instance.
+     
+     - parameters:
+        - codable: A codable value to wrap.
+     */
     public init<C>(_ codable: C) where C: Codable {
         self.value = codable
         dataEncoding = {
@@ -32,13 +43,31 @@ public struct AnyCodable {
         
     }
     
-    /// Derives object of expected type from AnyCodable. Throws if encapsulated object type does not match type provided in function parameter.
-    /// - Returns: derived object of required type
+    /**
+     Returns the underlying value, provided it matches the type spcified.
+     
+     Use this method to retrieve a strong-typed value, as long as it can be decoded from its underlying representation.
+     
+     - throws: If the value fails to decode to the specified type.
+     
+     - returns: The underlying value, if it can be decoded.
+     
+     ```
+     let anyCodable = AnyCodable("a message")
+     do {
+         let value = try anyCodable.get(String.self)
+         print(value)
+     } catch {
+         print("Error retrieving the value: \(error)")
+     }
+     ```
+     */
     public func get<T: Codable>(_ type: T.Type) throws -> T {
         let valueData = try getDataRepresentation()
         return try JSONDecoder().decode(type, from: valueData)
     }
     
+    /// A textual representation of the underlying encoded data. Returns an empty string if the type fails to encode.
     public var stringRepresentation: String {
         guard
             let valueData = try? getDataRepresentation(),
