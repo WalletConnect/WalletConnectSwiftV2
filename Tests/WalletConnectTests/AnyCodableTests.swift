@@ -1,5 +1,6 @@
 import XCTest
 import WalletConnectUtils
+import TestingUtils
 @testable import WalletConnect
 
 fileprivate struct SampleStruct: Codable, Equatable {
@@ -21,6 +22,18 @@ fileprivate struct SampleStruct: Codable, Equatable {
             double: Double.random(in: -1337.00...1337.00),
             string: UUID().uuidString,
             object: SubObject(string: UUID().uuidString)
+        )
+    }
+    
+    static func stubFixed() -> SampleStruct {
+        SampleStruct(
+            bool: true,
+            int: 1337,
+            double: 13.37,
+            string: "verystringwow",
+            object: SubObject(
+                string: "0xdeadbeef"
+            )
         )
     }
     
@@ -59,13 +72,6 @@ fileprivate let heterogeneousArrayJSON = """
 ]
 """.data(using: .utf8)!
 
-// Move this
-extension Int {
-    static func random() -> Int {
-        random(in: Int.min...Int.max)
-    }
-}
-
 final class AnyCodableTests: XCTestCase {
     
     func testInitGet() throws {
@@ -88,10 +94,33 @@ final class AnyCodableTests: XCTestCase {
     }
     
     func testEqualityObject() {
-        let objectA = AnyCodable(SampleStruct.stub())
-        let objectB = AnyCodable(SampleStruct.stub())
-        XCTAssertEqual(objectA, objectA)
-        XCTAssertNotEqual(objectA, objectB)
+        let a = AnyCodable(SampleStruct.stub())
+        let b = AnyCodable(SampleStruct.stub())
+        XCTAssertEqual(a, a)
+        XCTAssertNotEqual(a, b)
+    }
+    
+    func testEqualityEmptyObject() {
+        let a = AnyCodable(EmptyCodable())
+        let b = AnyCodable(EmptyCodable())
+        XCTAssertEqual(a, b)
+    }
+    
+    func testEqualityFailIfCodingFails() {
+        let a = AnyCodable(FailableCodable())
+        let b = AnyCodable(FailableCodable())
+        XCTAssertNotEqual(a, b)
+    }
+    
+    func testTwoWayDataRepresentation() throws {
+        let fromInit = AnyCodable(SampleStruct.stubFixed())
+        let fromJSON = try JSONDecoder().decode(AnyCodable.self, from: SampleStruct.sampleJSONData)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        let encodedFromInit = try encoder.encode(fromInit)
+        let encodedFromJSON = try encoder.encode(fromJSON)
+        XCTAssertEqual(fromInit, fromJSON, "An AnyCodable initialized both ways with the same data must have a consistent representation.")
+        XCTAssertEqual(encodedFromInit, encodedFromJSON, "Encoded JSON (with sorted keys) must be the same.")
     }
     
     func testCodingBool() {
@@ -110,7 +139,7 @@ final class AnyCodableTests: XCTestCase {
     
     func testCodingInt() {
         do {
-            let int = Int.random(in: Int.min...Int.max)
+            let int = Int.random()
             let anyCodable = AnyCodable(int)
             let encoded = try JSONEncoder().encode(anyCodable)
             let decoded = try JSONDecoder().decode(AnyCodable.self, from: encoded)
@@ -123,7 +152,7 @@ final class AnyCodableTests: XCTestCase {
     
     func testCodingDouble() {
         do {
-            let double = Double.random(in: -1337.00...1337.00)
+            let double = Double.random()
             let anyCodable = AnyCodable(double)
             let encoded = try JSONEncoder().encode(anyCodable)
             let decoded = try JSONDecoder().decode(AnyCodable.self, from: encoded)

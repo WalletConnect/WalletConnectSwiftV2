@@ -11,6 +11,8 @@ public struct AnyCodable {
     
     private let value: Any
     
+    private var dataEncoding: (() throws -> Data)?
+    
     private var genericEncoding: ((Encoder) throws -> Void)?
     
     private init(_ value: Any) {
@@ -18,40 +20,61 @@ public struct AnyCodable {
     }
 
     public init<C>(_ codable: C) where C: Codable {
-        do {
-            let codableData = try JSONEncoder().encode(codable)
-            let jsonRepresentation = try JSONSerialization.jsonObject(with: codableData)
-            self.value = jsonRepresentation
-        } catch {
-            self.value = codable
+        self.value = codable
+        dataEncoding = {
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = .sortedKeys
+            return try encoder.encode(codable)
         }
         genericEncoding = { encoder in
             try codable.encode(to: encoder)
         }
+        
     }
     
     /// Derives object of expected type from AnyCodable. Throws if encapsulated object type does not match type provided in function parameter.
     /// - Returns: derived object of required type
     public func get<T: Codable>(_ type: T.Type) throws -> T {
-        let valueData = try JSONSerialization.data(withJSONObject: value, options: [.fragmentsAllowed])
+        let valueData = try getDataRepresentation()
         return try JSONDecoder().decode(type, from: valueData)
     }
     
     public var stringRepresentation: String {
         guard
-            let valueData = try? JSONSerialization.data(withJSONObject: value, options: [.fragmentsAllowed, .prettyPrinted]),
+            let valueData = try? getDataRepresentation(),
             let string = String(data: valueData, encoding: .utf8)
         else {
             return "unknown"
         }
         return string
     }
+    
+    private func getDataRepresentation() throws -> Data {
+        if let encodeToData = dataEncoding {
+            return try encodeToData()
+        } else {
+            return try JSONSerialization.data(withJSONObject: value, options: [.fragmentsAllowed, .sortedKeys])
+        }
+    }
 }
 
 extension AnyCodable: Equatable {
     
     public static func == (lhs: AnyCodable, rhs: AnyCodable) -> Bool {
-        lhs.stringRepresentation == rhs.stringRepresentation
+        do {
+            let lhsData = try lhs.getDataRepresentation()
+            let rhsData = try rhs.getDataRepresentation()
+            return lhsData == rhsData
+        } catch {
+            return false
+        }
+    }
+}
+
+extension AnyCodable: CustomStringConvertible {
+    
+    public var description: String {
+        "AnyCodable: \"\(stringRepresentation)\""
     }
 }
 
