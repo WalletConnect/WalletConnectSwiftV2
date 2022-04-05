@@ -91,8 +91,7 @@ final class ClientTests: XCTestCase {
             let pairingTopic = proposer.client.getSettledPairings().first!.topic
             if !initiatedSecondSession {
                 Task {
-                    let _ = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
-
+                    let _ = try! await proposer.client.connect(blockchains: [], methods: [], events: [], topic: pairingTopic)
                 }
                 initiatedSecondSession = true
             }
@@ -103,6 +102,7 @@ final class ClientTests: XCTestCase {
     func testResponderRejectsSession() async {
         let sessionRejectExpectation = expectation(description: "Proposer is notified on session rejection")
         let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
+        _ = try! responder.client.pair(uri: uri)
 
         responder.onSessionProposal = {[unowned self] proposal in
             self.responder.client.reject(proposal: proposal, reason: .disapprovedChains)
@@ -136,7 +136,7 @@ final class ClientTests: XCTestCase {
         let method = "eth_sendTransaction"
         let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]
         let responseParams = "0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c"
-        let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
+        let uri = try! await proposer.client.connect(blockchains: [], methods: ["eth_sendTransaction"], events: [])!
 
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
@@ -173,8 +173,7 @@ final class ClientTests: XCTestCase {
         let method = "eth_sendTransaction"
         let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]
         let error = JSONRPCErrorResponse.Error(code: 0, message: "error_message")
-        let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
-
+        let uri = try! await proposer.client.connect(blockchains: [], methods: ["eth_sendTransaction"], events: [])!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
