@@ -4,7 +4,7 @@ enum WalletConnectError: Error {
     case malformedPairingURI
     case noPairingMatchingTopic(String)
     case noSessionMatchingTopic(String)
-    case sessionNotSettled(String)
+    case sessionNotAcknowledged(String)
     case pairingNotSettled(String)
     case invalidPermissions
     case invalidNotificationType
@@ -33,7 +33,7 @@ extension WalletConnectError {
             return "There is no existing pairing matching the topic: \(topic)."
         case .noSessionMatchingTopic(let topic):
             return "There is no existing session matching the topic: \(topic)."
-        case .sessionNotSettled(let topic):
+        case .sessionNotAcknowledged(let topic):
             return "Session is not settled on topic \(topic)."
         case .pairingNotSettled(let topic):
             return "Pairing is not settled on topic \(topic)."

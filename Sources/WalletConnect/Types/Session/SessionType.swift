@@ -13,7 +13,8 @@ internal enum SessionType {
     
     struct SettleParams: Codable, Equatable {
         let relay: RelayProtocolOptions
-        let blockchain: Blockchain
+//        let blockchain: Blockchain
+        let accounts: Account
         let permissions: SessionPermissions
         let controller: Participant
         let expiry: Int64
@@ -79,10 +80,10 @@ internal enum SessionType {
         let expiry: Int64
     }
     
-    struct Blockchain: Codable, Equatable {
-        var chains: Set<String>
-        var accounts: Set<Account>
-    }
+//    struct Blockchain: Codable, Equatable {
+//        var chains: Set<String>
+//        var accounts: Set<Account>
+//    }
 }
 
 // A better solution could fit in here

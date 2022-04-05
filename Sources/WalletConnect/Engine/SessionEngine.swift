@@ -90,7 +90,7 @@ final class SessionEngine {
             throw WalletConnectError.noSessionMatchingTopic(topic)
         }
         guard session.acknowledged else {
-            throw WalletConnectError.sessionNotSettled(topic)
+            throw WalletConnectError.sessionNotAcknowledged(topic)
         }
         guard session.selfIsController else {
             throw WalletConnectError.unauthorizedNonControllerCall
@@ -139,7 +139,7 @@ final class SessionEngine {
             throw WalletConnectError.noSessionMatchingTopic(topic)
         }
         guard session.acknowledged else {
-            throw WalletConnectError.sessionNotSettled(topic)
+            throw WalletConnectError.sessionNotAcknowledged(topic)
         }
         guard session.selfIsController else {
             throw WalletConnectError.unauthorizedNonControllerCall
@@ -155,7 +155,7 @@ final class SessionEngine {
             throw WalletConnectError.noSessionMatchingTopic(topic)
         }
         guard session.acknowledged else {
-            throw WalletConnectError.sessionNotSettled(topic)
+            throw WalletConnectError.sessionNotAcknowledged(topic)
         }
         guard session.selfIsController else {
             throw WalletConnectError.unauthorizedNonControllerCall
@@ -377,7 +377,7 @@ final class SessionEngine {
             return
         }
         if session.selfIsController {
-            guard session.hasPermission(forNotification: notificationParams.type) else {
+            guard session.hasPermission(forEvents: notificationParams.type) else {
                 relayer.respondError(for: payload, reason: .unauthorizedNotificationType(notificationParams.type))
                 return
             }

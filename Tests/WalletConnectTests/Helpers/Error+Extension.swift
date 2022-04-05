@@ -20,7 +20,7 @@ extension Error {
     }
     
     var isSessionNotSettledError: Bool {
-        guard case .sessionNotSettled = wcError else { return false }
+        guard case .sessionNotAcknowledged = wcError else { return false }
         return true
     }
     
