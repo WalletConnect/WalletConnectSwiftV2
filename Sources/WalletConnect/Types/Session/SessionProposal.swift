@@ -1,10 +1,6 @@
 
 import Foundation
 
-struct SessionState: Codable, Equatable {
-    var accounts: [String]
-}
-
 struct SessionProposal: Codable, Equatable {
     let relays: [RelayProtocolOptions]
     let proposer: Participant

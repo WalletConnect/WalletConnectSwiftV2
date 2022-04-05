@@ -97,7 +97,7 @@ final class SessionEngine {
         try session.extend(by: ttl)
         let newExpiry = Int64(session.expiryDate.timeIntervalSince1970 )
         sequencesStore.setSequence(session)
-        relayer.request(.wcSessionExtend(SessionType.ExtendParams(expiry: newExpiry)), onTopic: topic)
+        relayer.request(.wcSessionExtend(SessionType.UpdateExpiryParams(expiry: newExpiry)), onTopic: topic)
     }
     
     func request(params: Request) {
@@ -145,7 +145,7 @@ final class SessionEngine {
         }
         session.updateAccounts(accounts)
         sequencesStore.setSequence(session)
-        relayer.request(.wcSessionUpdate(SessionType.UpdateParams(accounts: accounts)), onTopic: topic)
+        relayer.request(.wcSessionUpdateAccounts(SessionType.UpdateAccountsParams(accounts: accounts)), onTopic: topic)
     }
     
 //    func upgrade(topic: String, permissions: Session.Permissions) throws {
@@ -174,7 +174,7 @@ final class SessionEngine {
             return
         }
         do {
-            let params = SessionType.NotificationParams(type: params.type, data: params.data)
+            let params = SessionType.EventParams(type: params.type, data: params.data)
             try validateEvents(session: session, params: params)
             relayer.request(.wcSessionNotification(params), onTopic: topic) { result in
                 switch result {
@@ -197,7 +197,7 @@ final class SessionEngine {
             switch subscriptionPayload.wcRequest.params {
             case .sessionSettle(let settleParams):
                 wcSessionSettle(payload: subscriptionPayload, settleParams: settleParams)
-            case .sessionUpdate(let updateParams):
+            case .sessionUpdateAccounts(let updateParams):
                 wcSessionUpdate(payload: subscriptionPayload, updateParams: updateParams)
             case .sessionDelete(let deleteParams):
                 wcSessionDelete(subscriptionPayload, deleteParams: deleteParams)
@@ -205,9 +205,9 @@ final class SessionEngine {
                 wcSessionRequest(subscriptionPayload, payloadParams: sessionRequestParams)
             case .sessionPing(_):
                 wcSessionPing(subscriptionPayload)
-            case .sessionExtend(let extendParams):
+            case .sessionUpdateExpiry(let extendParams):
                 wcSessionExtend(subscriptionPayload, extendParams: extendParams)
-            case .sessionNotification(let notificationParams):
+            case .sessionEvent(let notificationParams):
                 wcSessionNotification(subscriptionPayload, notificationParams: notificationParams)
             default:
                 logger.warn("Warning: Session Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
@@ -261,27 +261,24 @@ final class SessionEngine {
         onSessionSettle?(session.publicRepresentation())
     }
     
-    private func wcSessionUpdate(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {
-        for account in updateParams.state.accounts {
-            if !String.conformsToCAIP10(account) {
-                relayer.respondError(for: payload, reason: .invalidUpdateRequest(context: .session))
-                return
-            }
+    private func wcSessionUpdate(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateAccountsParams) {
+        if !updateParams.isValidParam {
+            relayer.respondError(for: payload, reason: .invalidUpdateRequest(context: .session))
+            return
         }
         let topic = payload.topic
         guard var session = sequencesStore.getSequence(forTopic: topic) else {
-                  relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
                   return
               }
         guard session.peerIsController else {
             relayer.respondError(for: payload, reason: .unauthorizedUpdateRequest(context: .session))
             return
         }
-        let accounts = Set(updateParams.state.accounts.compactMap { Account($0) })
-        session.updateAccounts(accounts)
+        session.updateAccounts(updateParams.accounts)
         sequencesStore.setSequence(session)
         relayer.respondSuccess(for: payload)
-        onSessionUpdate?(topic, accounts)
+        onSessionUpdate?(topic, updateParams.accounts)
     }
     
 //    private func wcSessionUpgrade(payload: WCRequestSubscriptionPayload, upgradeParams: SessionType.UpgradeParams) {
@@ -304,7 +301,7 @@ final class SessionEngine {
 //        onSessionUpgrade?(session.topic, newPermissions)
 //    }
     
-    private func wcSessionExtend(_ payload: WCRequestSubscriptionPayload, extendParams: SessionType.ExtendParams) {
+    private func wcSessionExtend(_ payload: WCRequestSubscriptionPayload, extendParams: SessionType.UpdateExpiryParams) {
         let topic = payload.topic
         guard var session = sequencesStore.getSequence(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
@@ -368,7 +365,7 @@ final class SessionEngine {
         relayer.respondSuccess(for: payload)
     }
     
-    private func wcSessionNotification(_ payload: WCRequestSubscriptionPayload, notificationParams: SessionType.NotificationParams) {
+    private func wcSessionNotification(_ payload: WCRequestSubscriptionPayload, notificationParams: SessionType.EventParams) {
         let topic = payload.topic
         guard let session = sequencesStore.getSequence(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
@@ -385,7 +382,7 @@ final class SessionEngine {
         onNotificationReceived?(topic, notification)
     }
     
-    private func validateEvents(session: SessionSequence, params: SessionType.NotificationParams) throws {
+    private func validateEvents(session: SessionSequence, params: SessionType.EventParams) throws {
         if session.selfIsController {
             return
         } else {
@@ -414,9 +411,9 @@ final class SessionEngine {
         switch response.requestParams {
         case .sessionSettle:
             handleSessionSettleResponse(topic: response.topic, result: response.result)
-        case .sessionUpdate:
+        case .sessionUpdateAccounts:
             handleUpdateResponse(topic: response.topic, result: response.result)
-        case .sessionRequest(_):
+        case .sessionRequest:
             let response = Response(topic: response.topic, chainId: response.chainId, result: response.result)
             onSessionResponse?(response)
         default:
