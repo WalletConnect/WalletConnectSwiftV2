@@ -22,13 +22,13 @@ extension Session {
         public let proposer: AppMetadata
         public let methods: Set<String>
         public let events: Set<String>
-        public let blockchains: Set<String>
+        public let blockchains: Set<Blockchain>
         
         // TODO: Refactor internal objects to manage only needed data
         internal let proposal: SessionProposal
     }
 
-    public struct Notification: Equatable {
+    public struct Event: Equatable, Hashable {
         public let type: String
         public let data: AnyCodable
     }

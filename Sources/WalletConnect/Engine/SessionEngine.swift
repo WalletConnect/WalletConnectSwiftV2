@@ -10,10 +10,9 @@ final class SessionEngine {
     var onSessionSettle: ((Session)->())?
     var onSessionRejected: ((String, SessionType.Reason)->())?
     var onSessionUpdate: ((String, Set<Account>)->())?
-    var onSessionUpgrade: ((String, SessionPermissions)->())?
     var onSessionExtended: ((Session) -> ())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
-    var onNotificationReceived: ((String, Session.Notification)->())?
+    var onNotificationReceived: ((String, Session.Event)->())?
     
     private let sequencesStore: SessionSequenceStorage
     private let wcSubscriber: WCSubscribing
@@ -134,7 +133,7 @@ final class SessionEngine {
         }
     }
     
-    func update(topic: String, accounts: Set<Account>) throws {
+    func updateAccounts(topic: String, accounts: Set<Account>) throws {
         guard var session = sequencesStore.getSequence(forTopic: topic) else {
             throw WalletConnectError.noSessionMatchingTopic(topic)
         }
@@ -144,39 +143,39 @@ final class SessionEngine {
         guard session.selfIsController else {
             throw WalletConnectError.unauthorizedNonControllerCall
         }
-        session.update(accounts)
+        session.updateAccounts(accounts)
         sequencesStore.setSequence(session)
         relayer.request(.wcSessionUpdate(SessionType.UpdateParams(accounts: accounts)), onTopic: topic)
     }
     
-    func upgrade(topic: String, permissions: Session.Permissions) throws {
-        let permissions = SessionPermissions(permissions: permissions)
-        guard var session = sequencesStore.getSequence(forTopic: topic) else {
-            throw WalletConnectError.noSessionMatchingTopic(topic)
-        }
-        guard session.acknowledged else {
-            throw WalletConnectError.sessionNotAcknowledged(topic)
-        }
-        guard session.selfIsController else {
-            throw WalletConnectError.unauthorizedNonControllerCall
-        }
-        guard validatePermissions(permissions) else {
-            throw WalletConnectError.invalidPermissions
-        }
-        session.upgrade(permissions)
-        let newPermissions = session.permissions
-        sequencesStore.setSequence(session)
-        relayer.request(.wcSessionUpgrade(SessionType.UpgradeParams(permissions: newPermissions)), onTopic: topic)
-    }
+//    func upgrade(topic: String, permissions: Session.Permissions) throws {
+//        let permissions = SessionPermissions(permissions: permissions)
+//        guard var session = sequencesStore.getSequence(forTopic: topic) else {
+//            throw WalletConnectError.noSessionMatchingTopic(topic)
+//        }
+//        guard session.acknowledged else {
+//            throw WalletConnectError.sessionNotAcknowledged(topic)
+//        }
+//        guard session.selfIsController else {
+//            throw WalletConnectError.unauthorizedNonControllerCall
+//        }
+//        guard validatePermissions(permissions) else {
+//            throw WalletConnectError.invalidPermissions
+//        }
+//        session.upgrade(permissions)
+//        let newPermissions = session.permissions
+//        sequencesStore.setSequence(session)
+//        relayer.request(.wcSessionUpgrade(SessionType.UpgradeParams(permissions: newPermissions)), onTopic: topic)
+//    }
     
-    func notify(topic: String, params: Session.Notification, completion: ((Error?)->())?) {
+    func notify(topic: String, params: Session.Event, completion: ((Error?)->())?) {
         guard let session = sequencesStore.getSequence(forTopic: topic), session.acknowledged else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
         do {
             let params = SessionType.NotificationParams(type: params.type, data: params.data)
-            try validateNotification(session: session, params: params)
+            try validateEvents(session: session, params: params)
             relayer.request(.wcSessionNotification(params), onTopic: topic) { result in
                 switch result {
                 case .success(_):
@@ -200,8 +199,6 @@ final class SessionEngine {
                 wcSessionSettle(payload: subscriptionPayload, settleParams: settleParams)
             case .sessionUpdate(let updateParams):
                 wcSessionUpdate(payload: subscriptionPayload, updateParams: updateParams)
-            case .sessionUpgrade(let upgradeParams):
-                wcSessionUpgrade(payload: subscriptionPayload, upgradeParams: upgradeParams)
             case .sessionDelete(let deleteParams):
                 wcSessionDelete(subscriptionPayload, deleteParams: deleteParams)
             case .sessionRequest(let sessionRequestParams):
@@ -227,8 +224,9 @@ final class SessionEngine {
         guard let relay = proposal.relays.first else {return}
         let settleParams = SessionType.SettleParams(
             relay: relay,
-            blockchain: SessionType.Blockchain(chains: proposal.blockchain.chains, accounts: accounts),//TODO
-            permissions: proposal.permissions,
+            accounts: accounts,
+            methods: proposal.methods,
+            events: proposal.events,
             controller: selfParticipant,
             expiry: Int64(expectedExpiryTimeStamp.timeIntervalSince1970))//todo - test expiration times
         let session = SessionSequence(
@@ -280,31 +278,31 @@ final class SessionEngine {
             return
         }
         let accounts = Set(updateParams.state.accounts.compactMap { Account($0) })
-        session.update(accounts)
+        session.updateAccounts(accounts)
         sequencesStore.setSequence(session)
         relayer.respondSuccess(for: payload)
         onSessionUpdate?(topic, accounts)
     }
     
-    private func wcSessionUpgrade(payload: WCRequestSubscriptionPayload, upgradeParams: SessionType.UpgradeParams) {
-        guard validatePermissions(upgradeParams.permissions) else {
-            relayer.respondError(for: payload, reason: .invalidUpgradeRequest(context: .session))
-            return
-        }
-        guard var session = sequencesStore.getSequence(forTopic: payload.topic) else {
-            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
-            return
-        }
-        guard session.peerIsController else {
-            relayer.respondError(for: payload, reason: .unauthorizedUpgradeRequest(context: .session))
-            return
-        }
-        session.upgrade(upgradeParams.permissions)
-        sequencesStore.setSequence(session)
-        let newPermissions = session.permissions // We know session is settled
-        relayer.respondSuccess(for: payload)
-        onSessionUpgrade?(session.topic, newPermissions)
-    }
+//    private func wcSessionUpgrade(payload: WCRequestSubscriptionPayload, upgradeParams: SessionType.UpgradeParams) {
+//        guard validatePermissions(upgradeParams.permissions) else {
+//            relayer.respondError(for: payload, reason: .invalidUpgradeRequest(context: .session))
+//            return
+//        }
+//        guard var session = sequencesStore.getSequence(forTopic: payload.topic) else {
+//            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
+//            return
+//        }
+//        guard session.peerIsController else {
+//            relayer.respondError(for: payload, reason: .unauthorizedUpgradeRequest(context: .session))
+//            return
+//        }
+//        session.upgrade(upgradeParams.permissions)
+//        sequencesStore.setSequence(session)
+//        let newPermissions = session.permissions // We know session is settled
+//        relayer.respondSuccess(for: payload)
+//        onSessionUpgrade?(session.topic, newPermissions)
+//    }
     
     private func wcSessionExtend(_ payload: WCRequestSubscriptionPayload, extendParams: SessionType.ExtendParams) {
         let topic = payload.topic
@@ -382,17 +380,16 @@ final class SessionEngine {
                 return
             }
         }
-        let notification = Session.Notification(type: notificationParams.type, data: notificationParams.data)
+        let notification = Session.Event(type: notificationParams.type, data: notificationParams.data)
         relayer.respondSuccess(for: payload)
         onNotificationReceived?(topic, notification)
     }
     
-    private func validateNotification(session: SessionSequence, params: SessionType.NotificationParams) throws {
+    private func validateEvents(session: SessionSequence, params: SessionType.NotificationParams) throws {
         if session.selfIsController {
             return
         } else {
-            guard let notifications = session.permissions.notifications,
-                  notifications.types.contains(params.type) else {
+            guard session.events.contains(params.type) else {
                 throw WalletConnectError.invalidNotificationType
             }
         }
@@ -419,8 +416,6 @@ final class SessionEngine {
             handleSessionSettleResponse(topic: response.topic, result: response.result)
         case .sessionUpdate:
             handleUpdateResponse(topic: response.topic, result: response.result)
-        case .sessionUpgrade:
-            handleUpgradeResponse(topic: response.topic, result: response.result)
         case .sessionRequest(_):
             let response = Response(topic: response.topic, chainId: response.chainId, result: response.result)
             onSessionResponse?(response)
@@ -450,7 +445,7 @@ final class SessionEngine {
         guard let session = sequencesStore.getSequence(forTopic: topic) else {
             return
         }
-        let accounts = session.blockchain.accounts
+        let accounts = session.accounts
         switch result {
         case .response:
             onSessionUpdate?(topic, accounts)
@@ -459,37 +454,37 @@ final class SessionEngine {
         }
     }
     
-    private func handleUpgradeResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sequencesStore.getSequence(forTopic: topic) else {
-            return
-        }
-        let permissions = session.permissions
-        switch result {
-        case .response:
-            onSessionUpgrade?(session.topic, permissions)
-        case .error:
-            logger.error("Peer failed to upgrade permissions.")
-        }
-    }
+//    private func handleUpgradeResponse(topic: String, result: JsonRpcResult) {
+//        guard let session = sequencesStore.getSequence(forTopic: topic) else {
+//            return
+//        }
+//        let permissions = session.permissions
+//        switch result {
+//        case .response:
+//            onSessionUpgrade?(session.topic, permissions)
+//        case .error:
+//            logger.error("Peer failed to upgrade permissions.")
+//        }
+//    }
     
-    private func validatePermissions(_ permissions: SessionPermissions) -> Bool {
-//        for chainId in permissions.blockchain.chains {
-//            if !String.conformsToCAIP2(chainId) {
+//    private func validatePermissions(_ permissions: SessionPermissions) -> Bool {
+////        for chainId in permissions.blockchain.chains {
+////            if !String.conformsToCAIP2(chainId) {
+////                return false
+////            }
+////        }
+//        for method in permissions.jsonrpc.methods {
+//            if method.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
 //                return false
 //            }
 //        }
-        for method in permissions.jsonrpc.methods {
-            if method.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                return false
-            }
-        }
-        if let notificationTypes = permissions.notifications?.types {
-            for notification in notificationTypes {
-                if notification.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    return false
-                }
-            }
-        }
-        return true
-    }
+//        if let notificationTypes = permissions.notifications?.types {
+//            for notification in notificationTypes {
+//                if notification.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+//                    return false
+//                }
+//            }
+//        }
+//        return true
+//    }
 }

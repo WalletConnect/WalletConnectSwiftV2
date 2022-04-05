@@ -14,8 +14,9 @@ internal enum SessionType {
     struct SettleParams: Codable, Equatable {
         let relay: RelayProtocolOptions
 //        let blockchain: Blockchain
-        let accounts: Account
-        let permissions: SessionPermissions
+        let accounts: Set<Account>
+        let methods: Set<String>
+        let events: Set<String>
         let controller: Participant
         let expiry: Int64
     }
@@ -31,10 +32,6 @@ internal enum SessionType {
             let accountIds = accounts.map { $0.absoluteString }
             self.state = SessionState(accounts: accountIds)
         }
-    }
-    
-    struct UpgradeParams: Codable, Equatable {
-        let permissions: SessionPermissions
     }
     
     struct DeleteParams: Codable, Equatable {

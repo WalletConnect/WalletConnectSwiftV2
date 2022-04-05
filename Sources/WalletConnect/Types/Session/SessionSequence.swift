@@ -16,7 +16,6 @@ struct SessionSequence: ExpirableSequence {
 
 //    let `self`: Participant
 //    let peer: Participant
-//    var blockchain: SessionType.Blockchain
     private(set) var methods: Set<String>
     private(set) var events: Set<String>
     private(set) var accounts: Set<Account>
@@ -45,19 +44,11 @@ struct SessionSequence: ExpirableSequence {
 
 //        self.`self` = selfParticipant
 //        self.peer = peerParticipant
-//        self.blockchain = settleParams.blockchain
-        self.methods = settleParams.permissions.jsonrpc.methods
-        self.events = settleParams.permissions.notifications.types
+        self.methods = settleParams.methods
+        self.events = settleParams.events
+        self.accounts = settleParams.accounts
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(settleParams.expiry))
-    }
-    
-    init(topic: String, relay: RelayProtocolOptions, controller: AgreementPeer, participants: Participants, blockchain: SessionType.Blockchain, permissions: SessionPermissions, acknowledged: Bool, expiry: Int64) {
-        self.topic = topic
-        self.relay = relay
-        self.controller = controller
-        self.acknowledged = acknowledged
-        self.expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
     }
     
     mutating func acknowledge() {

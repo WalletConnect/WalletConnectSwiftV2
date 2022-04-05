@@ -133,7 +133,7 @@ final class SessionEngineTests: XCTestCase {
         let updateAccounts = ["std:0:0"]
         let session = SessionSequence.stub(isSelfController: true)
         storageMock.setSequence(session)
-        try engine.update(topic: session.topic, accounts: updateAccounts.toAccountSet())
+        try engine.updateAccounts(topic: session.topic, accounts: updateAccounts.toAccountSet())
         XCTAssertTrue(relayMock.didCallRequest)
     }
     
@@ -141,19 +141,19 @@ final class SessionEngineTests: XCTestCase {
         let updateAccounts = ["std:0:0"]
         let session = SessionSequence.stub(isSelfController: false)
         storageMock.setSequence(session)
-        XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: updateAccounts.toAccountSet()), "Update must fail if called by a non-controller.")
+        XCTAssertThrowsError(try engine.updateAccounts(topic: session.topic, accounts: updateAccounts.toAccountSet()), "Update must fail if called by a non-controller.")
     }
     
     func testUpdateErrorSessionNotFound() {
         let updateAccounts = ["std:0:0"]
-        XCTAssertThrowsError(try engine.update(topic: "", accounts: updateAccounts.toAccountSet()), "Update must fail if there is no session matching the target topic.")
+        XCTAssertThrowsError(try engine.updateAccounts(topic: "", accounts: updateAccounts.toAccountSet()), "Update must fail if there is no session matching the target topic.")
     }
     
     func testUpdateErrorSessionNotSettled() {
         let updateAccounts = ["std:0:0"]
         let session = SessionSequence.stub(acknowledged: false)
         storageMock.setSequence(session)
-        XCTAssertThrowsError(try engine.update(topic: session.topic, accounts: updateAccounts.toAccountSet()), "Update must fail if session is not on settled state.")
+        XCTAssertThrowsError(try engine.updateAccounts(topic: session.topic, accounts: updateAccounts.toAccountSet()), "Update must fail if session is not on settled state.")
     }
     
     // MARK: - Update peer response tests

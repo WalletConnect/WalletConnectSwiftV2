@@ -96,7 +96,7 @@ public final class WalletConnectClient {
     /// - Parameter topic: Optional parameter - use it if you already have an established pairing with peer client.
     /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
     @available(*, renamed: "connect(sessionPermissions:topic:)")
-    public func connect(sessionPermissions: Session.Permissions, blockchains: Set<String>, topic: String? = nil, completion: @escaping ((Result<String?, Error>)->())) {
+    public func connect(blockchains: Set<Blockchain>, methods: Set<String>, events: Set<String>, topic: String? = nil, completion: @escaping ((Result<String?, Error>)->())) {
         logger.debug("Connecting Application")
         if let topic = topic {
             guard let pairing = pairingEngine.getSettledPairing(for: topic) else {
@@ -104,8 +104,7 @@ public final class WalletConnectClient {
                 return
             }
             logger.debug("Proposing session on existing pairing")
-            let permissions = SessionPermissions(permissions: sessionPermissions)
-            pairingEngine.propose(pairingTopic: topic, permissions: permissions, blockchains: blockchains, relay: pairing.relay) { error in
+            pairingEngine.propose(pairingTopic: topic, blockchains: blockchains, methods: methods, events: events, relay: pairing.relay) { error in
                 if let error = error {
                     completion(.failure(error))
                 } else {
@@ -117,8 +116,7 @@ public final class WalletConnectClient {
                 completion(.failure(WalletConnectError.pairingProposalFailed))
                 return
             }
-            let permissions = SessionPermissions(permissions: sessionPermissions)
-            pairingEngine.propose(pairingTopic: pairingURI.topic, permissions: permissions, blockchains: blockchains, relay: pairingURI.relay) { error in
+            pairingEngine.propose(pairingTopic: pairingURI.topic, blockchains: blockchains, methods: methods, events: events ,relay: pairingURI.relay) { error in
                 if let error = error {
                     completion(.failure(error))
                 } else {
@@ -128,9 +126,9 @@ public final class WalletConnectClient {
         }
     }
     
-    public func connect(sessionPermissions: Session.Permissions, blockchains: Set<String>, topic: String? = nil) async throws -> String? {
+    public func connect(blockchains: Set<Blockchain>, methods: Set<String>, events: Set<String>, topic: String? = nil) async throws -> String? {
         return try await withCheckedThrowingContinuation { continuation in
-            connect(sessionPermissions: sessionPermissions, blockchains: blockchains, topic: topic) { result in
+            connect(blockchains: blockchains, methods: methods, events: events, topic: topic) { result in
                 continuation.resume(with: result)
             }
         }
@@ -176,16 +174,16 @@ public final class WalletConnectClient {
     ///   - topic: Topic of the session that is intended to be updated.
     ///   - accounts: Set of accounts that will be allowed to be used by the session after the update.
     public func update(topic: String, accounts: Set<Account>) throws {
-        try sessionEngine.update(topic: topic, accounts: accounts)
+        try sessionEngine.updateAccounts(topic: topic, accounts: accounts)
     }
     
     /// For the responder to upgrade session permissions
     /// - Parameters:
     ///   - topic: Topic of the session that is intended to be upgraded.
     ///   - permissions: Sets of permissions that will be combined with existing ones.
-    public func upgrade(topic: String, permissions: Session.Permissions) throws {
-        try sessionEngine.upgrade(topic: topic, permissions: permissions)
-    }
+//    public func upgrade(topic: String, permissions: Session.Permissions) throws {
+//        try sessionEngine.upgrade(topic: topic, permissions: permissions)
+//    }
     
     /// For controller to extend a session lifetime
     /// - Parameters:
@@ -246,7 +244,7 @@ public final class WalletConnectClient {
     ///   - topic: Session topic
     ///   - params: Notification Parameters
     ///   - completion: calls a handler upon completion
-    public func notify(topic: String, params: Session.Notification, completion: ((Error?)->())?) {
+    public func notify(topic: String, params: Session.Event, completion: ((Error?)->())?) {
         sessionEngine.notify(topic: topic, params: params, completion: completion)
     }
     
@@ -318,10 +316,10 @@ public final class WalletConnectClient {
         sessionEngine.onSessionDelete = { [unowned self] topic, reason in
             delegate?.didDelete(sessionTopic: topic, reason: reason.toPublic())
         }
-        sessionEngine.onSessionUpgrade = { [unowned self] topic, permissions in
-            let upgradedPermissions = Session.Permissions(permissions: permissions)
-            delegate?.didUpgrade(sessionTopic: topic, permissions: upgradedPermissions)
-        }
+//        sessionEngine.onSessionUpgrade = { [unowned self] topic, permissions in
+//            let upgradedPermissions = Session.Permissions(permissions: permissions)
+//            delegate?.didUpgrade(sessionTopic: topic, permissions: upgradedPermissions)
+//        }
         sessionEngine.onSessionUpdate = { [unowned self] topic, accounts in
             delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
         }
@@ -334,21 +332,8 @@ public final class WalletConnectClient {
         sessionEngine.onSessionResponse = { [unowned self] response in
             delegate?.didReceive(sessionResponse: response)
         }
-        
-        
         pairingEngine.onProposeResponse = { [unowned self] sessionTopic in
             sessionEngine.setSubscription(topic: sessionTopic)
         }
-    }
-    
-    private func proposeSession(proposal: SessionProposal) {
-        let sessionProposal = Session.Proposal(
-            proposer: proposal.proposer.metadata,
-            permissions: Session.Permissions(
-                methods: proposal.permissions.jsonrpc.methods),
-            blockchains: proposal.blockchain.chains,
-            proposal: proposal
-        )
-        delegate?.didReceive(sessionProposal: sessionProposal)
     }
 }

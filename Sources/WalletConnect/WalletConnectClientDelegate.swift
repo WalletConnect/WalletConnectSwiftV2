@@ -31,7 +31,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     /// Tells the delegate that session permissions has been upgraded.
     ///
     /// Function is executed on controller and non-controller client when both communicating peers have successfully upgraded permissions.
-    func didUpgrade(sessionTopic: String, permissions: Session.Permissions)
+//    func didUpgrade(sessionTopic: String, permissions: Session.Permissions)
     
     /// Tells the delegate that extra accounts has been included in session sequence
     ///
@@ -44,7 +44,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     func didSettle(session: Session)
     
     /// Tells the delegate that notification has been received.
-    func didReceive(notification: Session.Notification, sessionTopic : String)
+    func didReceive(notification: Session.Event, sessionTopic : String)
     
     /// Tells the delegate that peer client has rejected a session proposal.
     ///
@@ -63,7 +63,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
 }
 
 public extension WalletConnectClientDelegate {
-    func didReceive(notification: Session.Notification, sessionTopic: String) {}
+    func didReceive(notification: Session.Event, sessionTopic: String) {}
     func didReject(proposal: String, reason: Reason) {}
     func didExtend(pairing: Pairing) {}
     func didReceive(sessionRequest: Request) {}

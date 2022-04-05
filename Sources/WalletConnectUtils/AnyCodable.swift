@@ -99,7 +99,11 @@ extension AnyCodable: Equatable {
         }
     }
 }
-
+extension AnyCodable: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(stringRepresentation)
+    }
+}
 extension AnyCodable: CustomStringConvertible {
     
     public var description: String {

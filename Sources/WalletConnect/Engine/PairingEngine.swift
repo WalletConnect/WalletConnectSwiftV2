@@ -70,7 +70,7 @@ final class PairingEngine {
         return uri
     }
     
-    func propose(pairingTopic: String, permissions: SessionPermissions, blockchains: Set<String>, relay: RelayProtocolOptions, completion: @escaping ((Error?) -> ())) {
+    func propose(pairingTopic: String, blockchains: Set<Blockchain>, methods: Set<String>, events: Set<String>, relay: RelayProtocolOptions, completion: @escaping ((Error?) -> ())) {
         logger.debug("Propose Session on topic: \(pairingTopic)")
         let publicKey = try! kms.createX25519KeyPair()
         let proposer = Participant(
@@ -79,8 +79,9 @@ final class PairingEngine {
         let proposal = SessionProposal(
             relays: [relay],
             proposer: proposer,
-            permissions: permissions,
-            blockchain: SessionProposal.ProposedBlockchain(chains: blockchains))
+            methods: methods,
+            events: events,
+            blockchains: blockchains)
         relayer.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { [unowned self] error in
             logger.debug("Received propose acknowledgement")
             completion(error)

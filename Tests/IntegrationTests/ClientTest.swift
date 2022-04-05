@@ -280,7 +280,7 @@ final class ClientTests: XCTestCase {
         let permissions = Session.Permissions.stub(notifications: ["type1"])
         let uri = try! await proposer.client.connect(sessionPermissions: permissions, blockchains: [])!
         try! responder.client.pair(uri: uri)
-        let notificationParams = Session.Notification(type: "type1", data: AnyCodable("notification_data"))
+        let notificationParams = Session.Event(type: "type1", data: AnyCodable("notification_data"))
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
@@ -300,7 +300,7 @@ final class ClientTests: XCTestCase {
         let permissions = Session.Permissions.stub(notifications: ["type1"])
         let uri = try! await proposer.client.connect(sessionPermissions: permissions, blockchains: [])!
         try! responder.client.pair(uri: uri)
-        let notificationParams = Session.Notification(type: "type2", data: AnyCodable("notification_data"))
+        let notificationParams = Session.Event(type: "type2", data: AnyCodable("notification_data"))
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
         }

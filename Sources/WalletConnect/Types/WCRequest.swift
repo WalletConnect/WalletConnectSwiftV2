@@ -41,9 +41,6 @@ struct WCRequest: Codable {
         case .sessionUpdate:
             let paramsValue = try container.decode(SessionType.UpdateParams.self, forKey: .params)
             params = .sessionUpdate(paramsValue)
-        case .sessionUpgrade:
-            let paramsValue = try container.decode(SessionType.UpgradeParams.self, forKey: .params)
-            params = .sessionUpgrade(paramsValue)
         case .sessionDelete:
             let paramsValue = try container.decode(SessionType.DeleteParams.self, forKey: .params)
             params = .sessionDelete(paramsValue)
@@ -78,8 +75,6 @@ struct WCRequest: Codable {
             try container.encode(params, forKey: .params)
         case .sessionUpdate(let params):
             try container.encode(params, forKey: .params)
-        case .sessionUpgrade(let params):
-            try container.encode(params, forKey: .params)
         case .sessionDelete(let params):
             try container.encode(params, forKey: .params)
         case .sessionRequest(let params):
@@ -106,7 +101,6 @@ extension WCRequest {
         case sessionPropose = "wc_sessionPropose"
         case sessionSettle = "wc_sessionSettle"
         case sessionUpdate = "wc_sessionUpdate"
-        case sessionUpgrade = "wc_sessionUpgrade"
         case sessionDelete = "wc_sessionDelete"
         case sessionRequest = "wc_sessionRequest"
         case sessionPing = "wc_sessionPing"
@@ -122,7 +116,6 @@ extension WCRequest {
         case sessionPropose(SessionType.ProposeParams)
         case sessionSettle(SessionType.SettleParams)
         case sessionUpdate(SessionType.UpdateParams)
-        case sessionUpgrade(SessionType.UpgradeParams)
         case sessionDelete(SessionType.DeleteParams)
         case sessionRequest(SessionType.RequestParams)
         case sessionPing(SessionType.PingParams)
@@ -138,8 +131,6 @@ extension WCRequest {
             case (.sessionSettle(let lhsParam), sessionSettle(let rhsParam)):
                 return lhsParam == rhsParam
             case (.sessionUpdate(let lhsParam), sessionUpdate(let rhsParam)):
-                return lhsParam == rhsParam
-            case (.sessionUpgrade(let lhsParam), sessionUpgrade(let rhsParam)):
                 return lhsParam == rhsParam
             case (.sessionDelete(let lhsParam), sessionDelete(let rhsParam)):
                 return lhsParam == rhsParam
