@@ -29,7 +29,7 @@ struct SessionSequence: ExpirableSequence {
     }
     // for expirable...
     var publicKey: String? {
-        `self`.publicKey
+        participants.`self`.publicKey
     }
     
     init(topic: String,
@@ -49,6 +49,18 @@ struct SessionSequence: ExpirableSequence {
         self.accounts = settleParams.accounts
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(settleParams.expiry))
+    }
+    
+    internal init(topic: String, relay: RelayProtocolOptions, controller: AgreementPeer, participants: SessionSequence.Participants, methods: Set<String>, events: Set<String>, accounts: Set<Account>, acknowledged: Bool, expiry: Int64) {
+        self.topic = topic
+        self.relay = relay
+        self.controller = controller
+        self.participants = participants
+        self.methods = methods
+        self.events = events
+        self.accounts = accounts
+        self.acknowledged = acknowledged
+        self.expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
     }
     
     mutating func acknowledge() {

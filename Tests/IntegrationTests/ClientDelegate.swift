@@ -10,7 +10,6 @@ class ClientDelegate: WalletConnectClientDelegate {
     var onSessionResponse: ((Response)->())?
     var onSessionRejected: ((Session.Proposal, Reason)->())?
     var onSessionDelete: (()->())?
-    var onSessionUpgrade: ((String, Session.Permissions)->())?
     var onSessionUpdate: ((String, Set<Account>)->())?
     var onNotificationReceived: ((Session.Event, String)->())?
     var onPairingUpdate: ((Pairing)->())?
@@ -34,9 +33,6 @@ class ClientDelegate: WalletConnectClientDelegate {
     }
     func didDelete(sessionTopic: String, reason: Reason) {
         onSessionDelete?()
-    }
-    func didUpgrade(sessionTopic: String, permissions: Session.Permissions) {
-        onSessionUpgrade?(sessionTopic, permissions)
     }
     func didUpdate(sessionTopic: String, accounts: Set<Account>) {
         onSessionUpdate?(sessionTopic, accounts)

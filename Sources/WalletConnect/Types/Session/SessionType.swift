@@ -76,22 +76,17 @@ internal enum SessionType {
     struct ExtendParams: Codable, Equatable {
         let expiry: Int64
     }
-    
-//    struct Blockchain: Codable, Equatable {
-//        var chains: Set<String>
-//        var accounts: Set<Account>
-//    }
 }
 
 // A better solution could fit in here
 internal extension Reason {
-    func toInternal() -> SessionType.Reason {
+    func internalRepresentation() -> SessionType.Reason {
         SessionType.Reason(code: self.code, message: self.message)
     }
 }
 
 extension SessionType.Reason {
-    func toPublic() -> Reason {
+    func publicRepresentation() -> Reason {
         Reason(code: self.code, message: self.message)
     }
 }

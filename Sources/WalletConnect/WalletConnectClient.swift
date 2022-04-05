@@ -308,13 +308,13 @@ public final class WalletConnectClient {
             delegate?.didReceive(sessionProposal: proposal)
         }
         pairingEngine.onSessionRejected = { [unowned self] proposal, reason in
-            delegate?.didReject(proposal: proposal, reason: reason.toPublic())
+            delegate?.didReject(proposal: proposal, reason: reason.publicRepresentation())
         }
         sessionEngine.onSessionRequest = { [unowned self] sessionRequest in
             delegate?.didReceive(sessionRequest: sessionRequest)
         }
         sessionEngine.onSessionDelete = { [unowned self] topic, reason in
-            delegate?.didDelete(sessionTopic: topic, reason: reason.toPublic())
+            delegate?.didDelete(sessionTopic: topic, reason: reason.publicRepresentation())
         }
 //        sessionEngine.onSessionUpgrade = { [unowned self] topic, permissions in
 //            let upgradedPermissions = Session.Permissions(permissions: permissions)
