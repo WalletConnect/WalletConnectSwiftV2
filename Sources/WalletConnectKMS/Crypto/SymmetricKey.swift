@@ -2,10 +2,6 @@
 import Foundation
 import CryptoKit
 
-public protocol SymmetricRepresentable {
-    var symmetricRepresentation: Data {get}
-    var pub: Data {get}
-}
 
 public struct SymmetricKey: Equatable {
     
@@ -13,6 +9,10 @@ public struct SymmetricKey: Equatable {
     
     public var hexRepresentation: String {
         rawRepresentation.toHexString()
+    }
+    
+    public init(key: CryptoKit.SymmetricKey) {
+        self.key = key
     }
 
     public init(size: Size = .bits256) {
@@ -40,16 +40,6 @@ extension SymmetricKey: GenericPasswordConvertible {
     }
 }
 
-extension SymmetricKey: SymmetricRepresentable {
-    public var pub: Data {
-        return symmetricRepresentation.sha256()
-    }
-    
-    
-    public var symmetricRepresentation: Data {
-        return rawRepresentation
-    }
-}
 
 extension SymmetricKey {
     public enum Size {

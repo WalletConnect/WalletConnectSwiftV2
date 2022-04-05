@@ -57,7 +57,7 @@ final class SessionEngineTests: XCTestCase {
 
     
     func testSessionSettle() {
-        let agreementKeys = AgreementSecret.stub()
+        let agreementKeys = AgreementKeys.stub()
         let topicB = String.generateTopic()
         cryptoMock.setAgreementSecret(agreementKeys, topic: topicB)
         
@@ -72,7 +72,7 @@ final class SessionEngineTests: XCTestCase {
     
     func testHandleSessionSettle() {
         let sessionTopic = String.generateTopic()
-        cryptoMock.setAgreementSecret(AgreementSecret.stub(), topic: sessionTopic)
+        cryptoMock.setAgreementSecret(AgreementKeys.stub(), topic: sessionTopic)
         var didCallBackOnSessionApproved = false
         engine.onSessionSettle = { _ in
             didCallBackOnSessionApproved = true
@@ -110,7 +110,7 @@ final class SessionEngineTests: XCTestCase {
         let privateKey = AgreementPrivateKey()
         let session = SessionSequence.stub(isSelfController: false, selfPrivateKey: privateKey, acknowledged: false)
         storageMock.setSequence(session)
-        cryptoMock.setAgreementSecret(AgreementSecret.stub(), topic: session.topic)
+        cryptoMock.setAgreementSecret(AgreementKeys.stub(), topic: session.topic)
         try! cryptoMock.setPrivateKey(privateKey)
         
         let response = WCResponse(

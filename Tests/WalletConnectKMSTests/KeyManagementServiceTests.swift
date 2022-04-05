@@ -48,7 +48,7 @@ class KeyManagementServiceTests: XCTestCase {
     func testAgreementSecretRoundTrip() throws {
         let topic = "topic"
         XCTAssertNil(try kms.getAgreementSecret(for: topic))
-        let agreementKeys = AgreementSecret.stub()
+        let agreementKeys = AgreementKeys.stub()
         try? kms.setAgreementSecret(agreementKeys, topic: topic)
         let storedAgreementSecret = try kms.getAgreementSecret(for: topic)
         XCTAssertEqual(agreementKeys, storedAgreementSecret)
@@ -56,36 +56,37 @@ class KeyManagementServiceTests: XCTestCase {
     
     func testDeleteAgreementSecret() throws {
         let topic = "topic"
-        let agreementKeys = AgreementSecret.stub()
+        let agreementKeys = AgreementKeys.stub()
         try? kms.setAgreementSecret(agreementKeys, topic: topic)
         kms.deleteAgreementSecret(for: topic)
         XCTAssertNil(try kms.getAgreementSecret(for: topic))
     }
     
     func testGenerateX25519Agreement() throws {
-        let privateKeyA = try AgreementPrivateKey(rawRepresentation: CryptoTestData._privateKeyA)
-        let privateKeyB = try AgreementPrivateKey(rawRepresentation: CryptoTestData._privateKeyB)
-        let agreementSecretA = try KeyManagementService.generateAgreementSecret(from: privateKeyA, peerPublicKey: privateKeyB.publicKey.hexRepresentation)
-        let agreementSecretB = try KeyManagementService.generateAgreementSecret(from: privateKeyB, peerPublicKey: privateKeyA.publicKey.hexRepresentation)
-        XCTAssertEqual(agreementSecretA.sharedSecret, agreementSecretB.sharedSecret)
-        XCTAssertEqual(agreementSecretA.sharedSecret, CryptoTestData.expectedSharedSecret)
+        let privateKeyA = try AgreementPrivateKey(rawRepresentation: CryptoTestData.privateKeyA)
+        let privateKeyB = try AgreementPrivateKey(rawRepresentation: CryptoTestData.privateKeyB)
+        let agreementSecretA = try KeyManagementService.generateAgreementKey(from: privateKeyA, peerPublicKey: privateKeyB.publicKey.hexRepresentation)
+        let agreementSecretB = try KeyManagementService.generateAgreementKey(from: privateKeyB, peerPublicKey: privateKeyA.publicKey.hexRepresentation)
+        XCTAssertEqual(agreementSecretA.derivedTopic(), "2c03712132ad2f85adc472a2242e608d67bfecd4362d05012d69a89143fecd16")
+        XCTAssertEqual(agreementSecretA.sharedKey, agreementSecretB.sharedKey)
+        XCTAssertEqual(agreementSecretA.sharedKey.rawRepresentation, CryptoTestData.expectedSharedKey)
     }
-    
+        
     func testGenerateX25519AgreementRandomKeys() throws {
         let privateKeyA = AgreementPrivateKey()
         let privateKeyB = AgreementPrivateKey()
-        let agreementSecretA = try KeyManagementService.generateAgreementSecret(from: privateKeyA, peerPublicKey: privateKeyB.publicKey.hexRepresentation)
-        let agreementSecretB = try KeyManagementService.generateAgreementSecret(from: privateKeyB, peerPublicKey: privateKeyA.publicKey.hexRepresentation)
-        XCTAssertEqual(agreementSecretA.sharedSecret, agreementSecretB.sharedSecret)
+        let agreementSecretA = try KeyManagementService.generateAgreementKey(from: privateKeyA, peerPublicKey: privateKeyB.publicKey.hexRepresentation)
+        let agreementSecretB = try KeyManagementService.generateAgreementKey(from: privateKeyB, peerPublicKey: privateKeyA.publicKey.hexRepresentation)
+        XCTAssertEqual(agreementSecretA.sharedKey, agreementSecretB.sharedKey)
     }
     
     func testPerformKeyAgreement() throws {
         let privateKeySelf = AgreementPrivateKey()
         let privateKeyPeer = AgreementPrivateKey()
-        let peerSecret = try KeyManagementService.generateAgreementSecret(from: privateKeyPeer, peerPublicKey: privateKeySelf.publicKey.hexRepresentation)
+        let peerSecret = try KeyManagementService.generateAgreementKey(from: privateKeyPeer, peerPublicKey: privateKeySelf.publicKey.hexRepresentation)
         try kms.setPrivateKey(privateKeySelf)
         let selfSecret = try kms.performKeyAgreement(selfPublicKey: privateKeySelf.publicKey, peerPublicKey: privateKeyPeer.publicKey.hexRepresentation)
-        XCTAssertEqual(selfSecret.sharedSecret, peerSecret.sharedSecret)
+        XCTAssertEqual(selfSecret.sharedKey, peerSecret.sharedKey)
     }
     
     func testPerformKeyAgreementFailure() {

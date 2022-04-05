@@ -130,7 +130,7 @@ final class PairingEngine {
         proposalPayloadsStore.delete(forKey: proposal.proposer.publicKey)
 
         let selfPublicKey = try! kms.createX25519KeyPair()
-        var agreementKey: AgreementSecret!
+        var agreementKey: AgreementKeys!
         
         do {
             agreementKey = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposal.proposer.publicKey)
@@ -215,7 +215,7 @@ final class PairingEngine {
             sequencesStore.setSequence(pairing)
             
             let selfPublicKey = try! AgreementPublicKey(hex: proposal.proposer.publicKey)
-            var agreementKeys: AgreementSecret!
+            var agreementKeys: AgreementKeys!
             
             do {
                 let proposeResponse = try response.result.get(SessionType.ProposeResponse.self)

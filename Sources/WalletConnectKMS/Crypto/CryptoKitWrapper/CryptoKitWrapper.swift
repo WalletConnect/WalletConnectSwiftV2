@@ -80,6 +80,7 @@ public struct AgreementPrivateKey: GenericPasswordConvertible, Equatable {
     }
     
     func sharedSecretFromKeyAgreement(with publicKeyShare: AgreementPublicKey) throws -> SharedSecret {
-        try key.sharedSecretFromKeyAgreement(with: publicKeyShare.key)
+        let sharedSecret = try key.sharedSecretFromKeyAgreement(with: publicKeyShare.key)
+        return SharedSecret(sharedSecret: sharedSecret)
     }
 }

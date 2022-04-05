@@ -1,16 +1,16 @@
 import Foundation
 
-public struct AgreementSecret: Equatable {
+public struct AgreementKeys: Equatable {
     
-    public let sharedSecret: Data
+    public let sharedKey: SymmetricKey
     public let publicKey: AgreementPublicKey
     
     public func derivedTopic() -> String {
-        sharedSecret.sha256().toHexString()
+        sharedKey.rawRepresentation.sha256().toHexString()
     }
 }
 
-extension AgreementSecret: GenericPasswordConvertible {
+extension AgreementKeys: GenericPasswordConvertible {
     enum Error: Swift.Error {
         case invalidBufferLenght
     }
@@ -19,21 +19,12 @@ extension AgreementSecret: GenericPasswordConvertible {
         guard buffer.count == 64 else {
             throw Error.invalidBufferLenght
         }
-        self.sharedSecret = buffer.subdata(in: 0..<32)
+        let symKeyRaw = buffer.subdata(in: 0..<32)
+        self.sharedKey = try SymmetricKey(rawRepresentation: symKeyRaw)
         self.publicKey = try AgreementPublicKey(rawRepresentation: buffer.subdata(in: 32..<64))
     }
     
     public var rawRepresentation: Data {
-        sharedSecret + publicKey.rawRepresentation
-    }
-}
-
-extension AgreementSecret: SymmetricRepresentable {
-    public var pub: Data {
-        return publicKey.rawRepresentation
-    }
-    
-    public var symmetricRepresentation: Data {
-        return sharedSecret
+        sharedKey.rawRepresentation + publicKey.rawRepresentation
     }
 }
