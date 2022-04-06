@@ -216,32 +216,31 @@ final class ClientTests: XCTestCase {
         await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
-//    func testSuccessfulSessionUpgrade() async {
-//        let proposerSessionUpgradeExpectation = expectation(description: "Proposer upgrades session on responder request")
-//        let responderSessionUpgradeExpectation = expectation(description: "Responder upgrades session on proposer response")
-//        let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
-//        let permissions = Session.Permissions.stub()
-//        let upgradePermissions = Session.Permissions(methods: ["eth_sendTransaction"])
-//        let uri = try! await proposer.client.connect(sessionPermissions: permissions, blockchains: [])!
-//        try! responder.client.pair(uri: uri)
-//        responder.onSessionProposal = { [unowned self] proposal in
-//            self.responder.client.approve(proposal: proposal, accounts: [account])
-//        }
-//        responder.onSessionSettled = { [unowned self] sessionSettled in
-//            try? responder.client.upgrade(topic: sessionSettled.topic, permissions: upgradePermissions)
-//        }
-//        proposer.onSessionUpgrade = { topic, permissions in
-//            XCTAssertTrue(permissions.methods.isSuperset(of: upgradePermissions.methods))
-//            proposerSessionUpgradeExpectation.fulfill()
-//        }
-//        responder.onSessionUpgrade = { topic, permissions in
-//            XCTAssertTrue(permissions.methods.isSuperset(of: upgradePermissions.methods))
-//            responderSessionUpgradeExpectation.fulfill()
-//        }
-//        await waitForExpectations(timeout: defaultTimeout, handler: nil)
-//    }
+    func testSuccessfulSessionUpdateMethods() async {
+        let proposerSessionUpgradeExpectation = expectation(description: "Proposer updates session methods on responder request")
+        let responderSessionUpgradeExpectation = expectation(description: "Responder updates session methods on proposer response")
+        let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
+        let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
+        let methodsToUpdateWith: Set<String> = ["eth_sendTransaction"]
+        try! responder.client.pair(uri: uri)
+        responder.onSessionProposal = { [unowned self] proposal in
+            self.responder.client.approve(proposal: proposal, accounts: [account])
+        }
+        responder.onSessionSettled = { [unowned self] session in
+            try? responder.client.updateMethods(topic: session.topic, methods: methodsToUpdateWith)
+        }
+        proposer.onSessionUpdateMethods = { topic, methods in
+            XCTAssertEqual(methods, methodsToUpdateWith)
+            proposerSessionUpgradeExpectation.fulfill()
+        }
+        responder.onSessionUpdateMethods = { topic, methods in
+            XCTAssertEqual(methods, methodsToUpdateWith)
+            responderSessionUpgradeExpectation.fulfill()
+        }
+        await waitForExpectations(timeout: 40, handler: nil)
+    }
     
-    func testSuccessfulSessionUpdate() async {
+    func testSuccessfulSessionUpdateAccounts() async {
         let proposerSessionUpdateExpectation = expectation(description: "Proposer updates session on responder request")
         let responderSessionUpdateExpectation = expectation(description: "Responder updates session on proposer response")
         let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
@@ -254,11 +253,11 @@ final class ClientTests: XCTestCase {
         responder.onSessionSettled = { [unowned self] sessionSettled in
             try? responder.client.update(topic: sessionSettled.topic, accounts: updateAccounts)
         }
-        responder.onSessionUpdate = { _, accounts in
+        responder.onSessionUpdateAccounts = { _, accounts in
             XCTAssertEqual(accounts, updateAccounts)
             responderSessionUpdateExpectation.fulfill()
         }
-        proposer.onSessionUpdate = { _, accounts in
+        proposer.onSessionUpdateAccounts = { _, accounts in
             XCTAssertEqual(accounts, updateAccounts)
             proposerSessionUpdateExpectation.fulfill()
         }

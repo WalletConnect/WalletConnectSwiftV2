@@ -40,6 +40,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         guard validateMethods(methods) else {
             throw WalletConnectError.invalidMethod
         }
+        logger.debug("controller will update methods")
         session.updateMethods(methods)
         sequencesStore.setSequence(session)
         relayer.request(.wcSessionUpdateMethods(SessionType.UpdateMethodsParams(methods: methods)), onTopic: topic)

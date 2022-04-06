@@ -33,10 +33,15 @@ public protocol WalletConnectClientDelegate: AnyObject {
     /// Function is executed on controller and non-controller client when both communicating peers have successfully upgraded permissions.
 //    func didUpgrade(sessionTopic: String, permissions: Session.Permissions)
     
-    /// Tells the delegate that extra accounts has been included in session sequence
+    /// Tells the delegate that accounts has been updated in session
     ///
-    /// Function is executed on controller and non-controller client when both communicating peers have successfully included new accounts requested by the controller client.
+    /// Function is executed on controller and non-controller client when both communicating peers have successfully updated accounts requested by the controller client.
     func didUpdate(sessionTopic: String, accounts: Set<Account>)
+    
+    /// Tells the delegate that methods has been updated in session
+    ///
+    /// Function is executed on controller and non-controller client when both communicating peers have successfully updated methods requested by the controller client.
+    func didUpdate(sessionTopic: String, methods: Set<String>)
     
     /// Tells the delegate that the client has settled a session.
     ///

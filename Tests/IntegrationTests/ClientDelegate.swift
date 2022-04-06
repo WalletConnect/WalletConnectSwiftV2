@@ -3,6 +3,7 @@ import Foundation
 @testable import WalletConnect
 
 class ClientDelegate: WalletConnectClientDelegate {
+    
     var client: WalletConnectClient
     var onSessionSettled: ((Session)->())?
     var onSessionProposal: ((Session.Proposal)->())?
@@ -10,7 +11,8 @@ class ClientDelegate: WalletConnectClientDelegate {
     var onSessionResponse: ((Response)->())?
     var onSessionRejected: ((Session.Proposal, Reason)->())?
     var onSessionDelete: (()->())?
-    var onSessionUpdate: ((String, Set<Account>)->())?
+    var onSessionUpdateAccounts: ((String, Set<Account>)->())?
+    var onSessionUpdateMethods: ((String, Set<String>)->())?
     var onNotificationReceived: ((Session.Event, String)->())?
     var onPairingUpdate: ((Pairing)->())?
     
@@ -35,7 +37,10 @@ class ClientDelegate: WalletConnectClientDelegate {
         onSessionDelete?()
     }
     func didUpdate(sessionTopic: String, accounts: Set<Account>) {
-        onSessionUpdate?(sessionTopic, accounts)
+        onSessionUpdateAccounts?(sessionTopic, accounts)
+    }
+    func didUpdate(sessionTopic: String, methods: Set<String>) {
+        onSessionUpdateMethods?(sessionTopic, methods)
     }
     func didReceive(notification: Session.Event, sessionTopic: String) {
         onNotificationReceived?(notification, sessionTopic)

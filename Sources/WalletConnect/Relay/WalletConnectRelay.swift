@@ -221,6 +221,7 @@ class WalletConnectRelay: WalletConnectRelaying {
                 requestParams: record.request.params,
                 result: JsonRpcResult.response(response))
             wcResponsePublisherSubject.send(.response(response))
+            responsePublisherSubject.send(wcResponse)
             onPairingResponse?(wcResponse)
             onResponse?(wcResponse)
         } catch  {
@@ -238,6 +239,7 @@ class WalletConnectRelay: WalletConnectRelaying {
                 requestParams: record.request.params,
                 result: JsonRpcResult.error(response))
             wcResponsePublisherSubject.send(.error(response))
+            responsePublisherSubject.send(wcResponse)
             onPairingResponse?(wcResponse)
             onResponse?(wcResponse)
         } catch {

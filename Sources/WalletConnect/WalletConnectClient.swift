@@ -182,13 +182,13 @@ public final class WalletConnectClient {
         try sessionEngine.updateAccounts(topic: topic, accounts: accounts)
     }
     
-    /// For the responder to upgrade session permissions
+    /// For the responder to update session methods
     /// - Parameters:
     ///   - topic: Topic of the session that is intended to be upgraded.
-    ///   - permissions: Sets of permissions that will be combined with existing ones.
-//    public func upgrade(topic: String, permissions: Session.Permissions) throws {
-//        try sessionEngine.upgrade(topic: topic, permissions: permissions)
-//    }
+    ///   - methods: Sets of methods that will replace existing ones.
+    public func updateMethods(topic: String, methods: Set<String>) throws {
+        try controllerSessionStateMachine.updateMethods(topic: topic, methods: methods)
+    }
     
     /// For controller to extend a session lifetime
     /// - Parameters:
@@ -321,11 +321,13 @@ public final class WalletConnectClient {
         sessionEngine.onSessionDelete = { [unowned self] topic, reason in
             delegate?.didDelete(sessionTopic: topic, reason: reason.publicRepresentation())
         }
-//        sessionEngine.onSessionUpgrade = { [unowned self] topic, permissions in
-//            let upgradedPermissions = Session.Permissions(permissions: permissions)
-//            delegate?.didUpgrade(sessionTopic: topic, permissions: upgradedPermissions)
-//        }
-        sessionEngine.onSessionUpdate = { [unowned self] topic, accounts in
+        controllerSessionStateMachine.onMethodsUpdate = { [unowned self] topic, methods in
+            delegate?.didUpdate(sessionTopic: topic, methods: methods)
+        }
+        nonControllerSessionStateMachine.onMethodsUpdate = { [unowned self] topic, methods in
+            delegate?.didUpdate(sessionTopic: topic, methods: methods)
+        }
+        sessionEngine.onSessionUpdateAccounts = { [unowned self] topic, accounts in
             delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
         }
         sessionEngine.onSessionExtended = { [unowned self] session in

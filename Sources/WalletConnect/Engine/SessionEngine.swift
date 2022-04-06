@@ -9,7 +9,7 @@ final class SessionEngine {
     var onSessionResponse: ((Response)->())?
     var onSessionSettle: ((Session)->())?
     var onSessionRejected: ((String, SessionType.Reason)->())?
-    var onSessionUpdate: ((String, Set<Account>)->())?
+    var onSessionUpdateAccounts: ((String, Set<Account>)->())?
     var onSessionExtended: ((Session) -> ())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
     var onNotificationReceived: ((String, Session.Event)->())?
@@ -258,7 +258,7 @@ final class SessionEngine {
         session.updateAccounts(updateParams.accounts)
         sequencesStore.setSequence(session)
         relayer.respondSuccess(for: payload)
-        onSessionUpdate?(topic, updateParams.accounts)
+        onSessionUpdateAccounts?(topic, updateParams.accounts)
     }
     
     private func wcSessionExtend(_ payload: WCRequestSubscriptionPayload, extendParams: SessionType.UpdateExpiryParams) {
@@ -405,7 +405,7 @@ final class SessionEngine {
         let accounts = session.accounts
         switch result {
         case .response:
-            onSessionUpdate?(topic, accounts)
+            onSessionUpdateAccounts?(topic, accounts)
         case .error:
             logger.error("Peer failed to update state.")
         }
