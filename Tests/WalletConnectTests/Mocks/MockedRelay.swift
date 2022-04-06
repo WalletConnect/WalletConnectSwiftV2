@@ -6,6 +6,11 @@ import WalletConnectUtils
 @testable import TestingUtils
 
 class MockedWCRelay: WalletConnectRelaying {
+    private let responsePublisherSubject = PassthroughSubject<WCResponse, Never>()
+
+    var responsePublisher: AnyPublisher<WCResponse, Never> {
+        responsePublisherSubject.eraseToAnyPublisher()
+    }
     
     var onPairingResponse: ((WCResponse) -> Void)?
     var onResponse: ((WCResponse) -> Void)?

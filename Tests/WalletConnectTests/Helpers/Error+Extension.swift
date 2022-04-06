@@ -24,10 +24,10 @@ extension Error {
         return true
     }
     
-    var isInvalidPermissionsError: Bool {
-        guard case .invalidPermissions = wcError else { return false }
-        return true
-    }
+//    var isInvalidPermissionsError: Bool {
+//        guard case .invalidPermissions = wcError else { return false }
+//        return true
+//    }
     
     var isUnauthorizedNonControllerCallError: Bool {
         guard case .unauthorizedNonControllerCall = wcError else { return false }

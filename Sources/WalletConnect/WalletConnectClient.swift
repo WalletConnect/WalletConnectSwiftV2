@@ -25,6 +25,8 @@ public final class WalletConnectClient {
     private let metadata: AppMetadata
     private let pairingEngine: PairingEngine
     private let sessionEngine: SessionEngine
+    private let nonControllerSessionStateMachine: NonControllerSessionStateMachine
+    private let controllerSessionStateMachine: ControllerSessionStateMachine
     private let relay: WalletConnectRelaying
     private let kms: KeyManagementService
     private let pairingQueue = DispatchQueue(label: "com.walletconnect.sdk.client.pairing", qos: .userInitiated)
@@ -57,8 +59,9 @@ public final class WalletConnectClient {
         let pairingSequencesStore = PairingStorage(storage: SequenceStore<PairingSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue))
         let sessionSequencesStore = SessionStorage(storage: SequenceStore<SessionSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue))
         self.pairingEngine = PairingEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, metadata: metadata, logger: logger)
-
         self.sessionEngine = SessionEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, metadata: metadata, logger: logger)
+        self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(relay: relay, kms: kms, sequencesStore: sessionSequencesStore, logger: logger)
+        self.controllerSessionStateMachine = ControllerSessionStateMachine(relay: relay, kms: kms, sequencesStore: sessionSequencesStore, logger: logger)
         setUpEnginesCallbacks()
     }
     
@@ -85,6 +88,8 @@ public final class WalletConnectClient {
         let sessionSequencesStore = SessionStorage(storage: SequenceStore<SessionSequence>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue))
         self.pairingEngine = PairingEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, metadata: metadata, logger: logger)
         self.sessionEngine = SessionEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, metadata: metadata, logger: logger)
+        self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(relay: relay, kms: kms, sequencesStore: sessionSequencesStore, logger: logger)
+        self.controllerSessionStateMachine = ControllerSessionStateMachine(relay: relay, kms: kms, sequencesStore: sessionSequencesStore, logger: logger)
         setUpEnginesCallbacks()
     }
     
