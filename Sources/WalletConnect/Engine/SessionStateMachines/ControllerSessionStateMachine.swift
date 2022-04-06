@@ -2,13 +2,13 @@
 import Foundation
 import WalletConnectUtils
 import WalletConnectKMS
+import Combine
 
 final class ControllerSessionStateMachine: SessionStateMachineValidating {
     
     var onMethodsUpdate: ((String, Set<String>)->())?
     
     private let sequencesStore: SessionSequenceStorage
-    private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
@@ -16,19 +16,15 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
 
     init(relay: WalletConnectRelaying,
          kms: KeyManagementServiceProtocol,
-         subscriber: WCSubscribing,
          sequencesStore: SessionSequenceStorage,
-         metadata: AppMetadata,
-         logger: ConsoleLogging,
-         topicGenerator: @escaping () -> String = String.generateTopic) {
+         logger: ConsoleLogging) {
         self.relayer = relay
         self.kms = kms
-        self.wcSubscriber = subscriber
         self.sequencesStore = sequencesStore
         self.logger = logger
-        relayer.onResponse = { [weak self] in
-            self?.handleResponse($0)
-        }
+        relayer.responsePublisher.sink { [unowned self] response in
+            handleResponse(response)
+        }.store(in: &publishers)
     }
     
     func updateMethods(topic: String, methods: Set<String>) throws {

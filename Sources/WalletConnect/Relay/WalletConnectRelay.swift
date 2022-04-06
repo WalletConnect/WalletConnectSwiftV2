@@ -17,6 +17,7 @@ protocol WalletConnectRelaying: AnyObject {
     var onResponse: ((WCResponse) -> Void)? {get set}
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
+    var responsePublisher: AnyPublisher<WCResponse, Never> {get}
     /// Completes with a peer response
     func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
     /// Completes with a peer response
@@ -55,11 +56,17 @@ class WalletConnectRelay: WalletConnectRelaying {
         wcRequestPublisherSubject.eraseToAnyPublisher()
     }
     private let wcRequestPublisherSubject = PassthroughSubject<WCRequestSubscriptionPayload, Never>()
-    
+    /// TODO - leave only one response publisher when possible - remove wcResponsePublisher dependencies
     private var wcResponsePublisher: AnyPublisher<JsonRpcResult, Never> {
         wcResponsePublisherSubject.eraseToAnyPublisher()
     }
+    var responsePublisher: AnyPublisher<WCResponse, Never> {
+        responsePublisherSubject.eraseToAnyPublisher()
+    }
     private let wcResponsePublisherSubject = PassthroughSubject<JsonRpcResult, Never>()
+    private let responsePublisherSubject = PassthroughSubject<WCResponse, Never>()
+    /////////////////////////////
+
     let logger: ConsoleLogging
     
     init(networkRelayer: NetworkRelaying,
