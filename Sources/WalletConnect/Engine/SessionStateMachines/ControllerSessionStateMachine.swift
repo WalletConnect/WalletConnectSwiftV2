@@ -67,7 +67,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
             onMethodsUpdate?(session.topic, session.methods)
         case .error:
             //TODO - state sync
-            logger.error("Peer failed to upgrade permissions.")
+            logger.error("Peer failed to update methods.")
         }
     }
 }

@@ -243,7 +243,7 @@ final class SessionEngine {
     
     private func wcSessionUpdate(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateAccountsParams) {
         if !updateParams.isValidParam {
-            relayer.respondError(for: payload, reason: .invalidUpdateRequest(context: .session))
+            relayer.respondError(for: payload, reason: .invalidUpdateAccountsRequest)
             return
         }
         let topic = payload.topic
@@ -333,7 +333,7 @@ final class SessionEngine {
         }
         if session.selfIsController {
             guard session.hasPermission(forEvents: notificationParams.type) else {
-                relayer.respondError(for: payload, reason: .unauthorizedNotificationType(notificationParams.type))
+                relayer.respondError(for: payload, reason: .unauthorizedEventType(notificationParams.type))
                 return
             }
         }
