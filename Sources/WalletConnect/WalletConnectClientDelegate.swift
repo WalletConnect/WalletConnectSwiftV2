@@ -28,11 +28,6 @@ public protocol WalletConnectClientDelegate: AnyObject {
     /// Function can be executed on any type of the client.
     func didDelete(sessionTopic: String, reason: Reason)
     
-    /// Tells the delegate that session permissions has been upgraded.
-    ///
-    /// Function is executed on controller and non-controller client when both communicating peers have successfully upgraded permissions.
-//    func didUpgrade(sessionTopic: String, permissions: Session.Permissions)
-    
     /// Tells the delegate that accounts has been updated in session
     ///
     /// Function is executed on controller and non-controller client when both communicating peers have successfully updated accounts requested by the controller client.

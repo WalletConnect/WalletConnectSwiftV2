@@ -184,7 +184,7 @@ public final class WalletConnectClient {
     
     /// For the responder to update session methods
     /// - Parameters:
-    ///   - topic: Topic of the session that is intended to be upgraded.
+    ///   - topic: Topic of the session that is intended to be updated.
     ///   - methods: Sets of methods that will replace existing ones.
     public func updateMethods(topic: String, methods: Set<String>) throws {
         try controllerSessionStateMachine.updateMethods(topic: topic, methods: methods)
