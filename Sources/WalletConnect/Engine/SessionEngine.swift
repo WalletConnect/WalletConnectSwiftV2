@@ -97,7 +97,7 @@ final class SessionEngine {
         try session.extend(by: ttl)
         let newExpiry = Int64(session.expiryDate.timeIntervalSince1970 )
         sequencesStore.setSequence(session)
-        relayer.request(.wcSessionExtend(SessionType.UpdateExpiryParams(expiry: newExpiry)), onTopic: topic)
+        relayer.request(.wcSessionUpdateExpiry(SessionType.UpdateExpiryParams(expiry: newExpiry)), onTopic: topic)
     }
     
     func request(params: Request) {
@@ -147,26 +147,6 @@ final class SessionEngine {
         sequencesStore.setSequence(session)
         relayer.request(.wcSessionUpdateAccounts(SessionType.UpdateAccountsParams(accounts: accounts)), onTopic: topic)
     }
-    
-//    func upgrade(topic: String, permissions: Session.Permissions) throws {
-//        let permissions = SessionPermissions(permissions: permissions)
-//        guard var session = sequencesStore.getSequence(forTopic: topic) else {
-//            throw WalletConnectError.noSessionMatchingTopic(topic)
-//        }
-//        guard session.acknowledged else {
-//            throw WalletConnectError.sessionNotAcknowledged(topic)
-//        }
-//        guard session.selfIsController else {
-//            throw WalletConnectError.unauthorizedNonControllerCall
-//        }
-//        guard validatePermissions(permissions) else {
-//            throw WalletConnectError.invalidPermissions
-//        }
-//        session.upgrade(permissions)
-//        let newPermissions = session.permissions
-//        sequencesStore.setSequence(session)
-//        relayer.request(.wcSessionUpgrade(SessionType.UpgradeParams(permissions: newPermissions)), onTopic: topic)
-//    }
     
     func notify(topic: String, params: Session.Event, completion: ((Error?)->())?) {
         guard let session = sequencesStore.getSequence(forTopic: topic), session.acknowledged else {
@@ -281,26 +261,6 @@ final class SessionEngine {
         onSessionUpdate?(topic, updateParams.accounts)
     }
     
-//    private func wcSessionUpgrade(payload: WCRequestSubscriptionPayload, upgradeParams: SessionType.UpgradeParams) {
-//        guard validatePermissions(upgradeParams.permissions) else {
-//            relayer.respondError(for: payload, reason: .invalidUpgradeRequest(context: .session))
-//            return
-//        }
-//        guard var session = sequencesStore.getSequence(forTopic: payload.topic) else {
-//            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
-//            return
-//        }
-//        guard session.peerIsController else {
-//            relayer.respondError(for: payload, reason: .unauthorizedUpgradeRequest(context: .session))
-//            return
-//        }
-//        session.upgrade(upgradeParams.permissions)
-//        sequencesStore.setSequence(session)
-//        let newPermissions = session.permissions // We know session is settled
-//        relayer.respondSuccess(for: payload)
-//        onSessionUpgrade?(session.topic, newPermissions)
-//    }
-    
     private func wcSessionExtend(_ payload: WCRequestSubscriptionPayload, extendParams: SessionType.UpdateExpiryParams) {
         let topic = payload.topic
         guard var session = sequencesStore.getSequence(forTopic: topic) else {
@@ -412,7 +372,7 @@ final class SessionEngine {
         case .sessionSettle:
             handleSessionSettleResponse(topic: response.topic, result: response.result)
         case .sessionUpdateAccounts:
-            handleUpdateResponse(topic: response.topic, result: response.result)
+            handleUpdateAccountsResponse(topic: response.topic, result: response.result)
         case .sessionRequest:
             let response = Response(topic: response.topic, chainId: response.chainId, result: response.result)
             onSessionResponse?(response)
@@ -438,7 +398,7 @@ final class SessionEngine {
         }
     }
     
-    private func handleUpdateResponse(topic: String, result: JsonRpcResult) {
+    private func handleUpdateAccountsResponse(topic: String, result: JsonRpcResult) {
         guard let session = sequencesStore.getSequence(forTopic: topic) else {
             return
         }
@@ -450,19 +410,6 @@ final class SessionEngine {
             logger.error("Peer failed to update state.")
         }
     }
-    
-//    private func handleUpgradeResponse(topic: String, result: JsonRpcResult) {
-//        guard let session = sequencesStore.getSequence(forTopic: topic) else {
-//            return
-//        }
-//        let permissions = session.permissions
-//        switch result {
-//        case .response:
-//            onSessionUpgrade?(session.topic, permissions)
-//        case .error:
-//            logger.error("Peer failed to upgrade permissions.")
-//        }
-//    }
     
 //    private func validatePermissions(_ permissions: SessionPermissions) -> Bool {
 ////        for chainId in permissions.blockchain.chains {

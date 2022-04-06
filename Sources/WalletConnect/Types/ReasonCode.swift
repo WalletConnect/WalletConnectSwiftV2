@@ -20,7 +20,6 @@ enum ReasonCode {
     case unauthorizedRPCMethod(String)
     case unauthorizedNotificationType(String)
     case unauthorizedUpdateRequest(context: Context)
-    case unauthorizedUpgradeRequest(context: Context)
     case unauthorizedExtendRequest(context: Context)
     case unauthorizedMatchingController(isController: Bool)
     
@@ -41,7 +40,6 @@ enum ReasonCode {
         case .unauthorizedRPCMethod: return 3001
         case .unauthorizedNotificationType: return 3002
         case .unauthorizedUpdateRequest: return 3003
-        case .unauthorizedUpgradeRequest: return 3004
         case .unauthorizedExtendRequest: return 3005
         case .unauthorizedMatchingController: return 3100
         case .disapprovedChains: return 5000
@@ -72,8 +70,6 @@ enum ReasonCode {
             return "Unauthorized notification type requested: \(type)"
         case .unauthorizedUpdateRequest(let context):
             return "Unauthorized \(context) update request"
-        case .unauthorizedUpgradeRequest(let context):
-            return "Unauthorized \(context) upgrade request"
         case .unauthorizedMatchingController(let isController):
             return "Unauthorized: peer is also \(isController ? "" : "non-")controller"
         case .unauthorizedExtendRequest(context: let context):

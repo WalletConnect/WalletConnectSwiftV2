@@ -6,7 +6,7 @@ enum WalletConnectError: Error {
     case noSessionMatchingTopic(String)
     case sessionNotAcknowledged(String)
     case pairingNotSettled(String)
-    case invalidPermissions
+    case invalidMethod
     case invalidNotificationType
     case invalidExtendTime
     case unauthorizedNonControllerCall
@@ -39,8 +39,8 @@ extension WalletConnectError {
             return "Pairing is not settled on topic \(topic)."
         case .invalidExtendTime:
             return "Extend time is out of expected range"
-        case .invalidPermissions:
-            return "Permission set is invalid."
+        case .invalidMethod:
+            return "Methods set is invalid."
         case .invalidNotificationType:
             return "Invalid notification type."
         case .unauthorizedNonControllerCall:
