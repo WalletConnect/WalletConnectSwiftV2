@@ -9,7 +9,7 @@ enum WCMethod {
     case wcSessionDelete(SessionType.DeleteParams)
     case wcSessionRequest(SessionType.RequestParams)
     case wcSessionPing
-    case wcSessionNotification(SessionType.EventParams)
+    case wcSessionEvent(SessionType.EventParams)
     
     func asRequest() -> WCRequest {
         switch self {
@@ -33,7 +33,7 @@ enum WCMethod {
             return WCRequest(method: .sessionRequest, params: .sessionRequest(payloadParams))
         case .wcSessionPing:
             return WCRequest(method: .sessionPing, params: .sessionPing(SessionType.PingParams()))
-        case .wcSessionNotification(let notificationParams):
+        case .wcSessionEvent(let notificationParams):
             return WCRequest(method: .sessionEvent, params: .sessionEvent(notificationParams))
         }
     }

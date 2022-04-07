@@ -333,7 +333,7 @@ public final class WalletConnectClient {
         sessionEngine.onSessionExtended = { [unowned self] session in
             delegate?.didExtend(session: session)
         }
-        sessionEngine.onNotificationReceived = { [unowned self] topic, notification in
+        sessionEngine.onEventReceived = { [unowned self] topic, notification in
             delegate?.didReceive(notification: notification, sessionTopic: topic)
         }
         sessionEngine.onSessionResponse = { [unowned self] response in

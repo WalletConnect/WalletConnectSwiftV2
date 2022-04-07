@@ -12,7 +12,7 @@ final class SessionEngine {
     var onSessionUpdateAccounts: ((String, Set<Account>)->())?
     var onSessionExtended: ((Session) -> ())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
-    var onNotificationReceived: ((String, Session.Event)->())?
+    var onEventReceived: ((String, Session.Event)->())?
     
     private let sequencesStore: SessionSequenceStorage
     private let wcSubscriber: WCSubscribing
@@ -156,7 +156,7 @@ final class SessionEngine {
         do {
             let params = SessionType.EventParams(type: params.type, data: params.data)
             try validateEvents(session: session, params: params)
-            relayer.request(.wcSessionNotification(params), onTopic: topic) { result in
+            relayer.request(.wcSessionEvent(params), onTopic: topic) { result in
                 switch result {
                 case .success(_):
                     completion?(nil)
@@ -339,7 +339,7 @@ final class SessionEngine {
         }
         let notification = Session.Event(type: notificationParams.type, data: notificationParams.data)
         relayer.respondSuccess(for: payload)
-        onNotificationReceived?(topic, notification)
+        onEventReceived?(topic, notification)
     }
     
     private func validateEvents(session: SessionSequence, params: SessionType.EventParams) throws {

@@ -276,7 +276,7 @@ final class ClientTests: XCTestCase {
         responder.onSessionSettled = { [unowned self] session in
             responder.client.notify(topic: session.topic, params: notificationParams, completion: nil)
         }
-        proposer.onNotificationReceived = { notification, _ in
+        proposer.onEventReceived = { notification, _ in
             XCTAssertEqual(notification, notificationParams)
             proposerReceivesNotificationExpectation.fulfill()
         }
@@ -298,7 +298,7 @@ final class ClientTests: XCTestCase {
                 XCTAssertNotNil(error)
             }
         }
-        responder.onNotificationReceived = { notification, _ in
+        responder.onEventReceived = { notification, _ in
             XCTFail()
             proposerReceivesNotificationExpectation.fulfill()
         }
