@@ -110,24 +110,24 @@ struct SessionSequence: ExpirableSequence {
         self.events = events
     }
     
-    /// extends session by givien ttl
-    /// - Parameter ttl: time the session should be extended by - in seconds
-    mutating func extend(by ttl: Int64) throws {
+    /// updates session expiry by given ttl
+    /// - Parameter ttl: time the session expiry should be updated by - in seconds
+    mutating func updateExpiry(by ttl: Int64) throws {
         let newExpiryDate = Date(timeIntervalSinceNow: TimeInterval(ttl))
         let maxExpiryDate = Date(timeIntervalSinceNow: TimeInterval(SessionSequence.defaultTimeToLive))
         guard newExpiryDate > expiryDate && newExpiryDate <= maxExpiryDate else {
-            throw WalletConnectError.invalidExtendTime
+            throw WalletConnectError.invalidUpdateExpiryValue
         }
         expiryDate = newExpiryDate
     }
     
-    /// extends session expiry to given timestamp
+    /// updates session expiry to given timestamp
     /// - Parameter expiry: timestamp in the future in seconds
-    mutating func extend(to expiry: Int64) throws {
+    mutating func updateExpiry(to expiry: Int64) throws {
         let newExpiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
         let maxExpiryDate = Date(timeIntervalSinceNow: TimeInterval(SessionSequence.defaultTimeToLive))
         guard newExpiryDate > expiryDate && newExpiryDate <= maxExpiryDate else {
-            throw WalletConnectError.invalidExtendTime
+            throw WalletConnectError.invalidUpdateExpiryValue
         }
         expiryDate = newExpiryDate
     }

@@ -51,24 +51,18 @@ public protocol WalletConnectClientDelegate: AnyObject {
     /// Function will be executed on proposer client only.
     func didReject(proposal: Session.Proposal, reason: Reason)
     
-    /// Tells the delegate that peer has extended pairing lifetime.
+    /// Tells the delegate that session expiry has been updated
     ///
     /// Function will be executed on non-controller client only.
-    func didExtend(pairing: Pairing)
-    
-    /// Tells the delegate that peer has extended session lifetime.
-    ///
-    /// Function will be executed on non-controller client only.
-    func didExtend(session: Session)
+    func didUpdateExpiry(session: Session)
 }
 
 public extension WalletConnectClientDelegate {
     func didReceive(notification: Session.Event, sessionTopic: String) {}
     func didReject(proposal: String, reason: Reason) {}
-    func didExtend(pairing: Pairing) {}
     func didReceive(sessionRequest: Request) {}
     func didReceive(sessionProposal: Session.Proposal) {}
     func didReceive(sessionResponse: Response) {}
-    func didExtend(session: Session) {}
+    func didUpdateExpiry(session: Session) {}
     func didReject(proposal: Session.Proposal, reason: Reason) {}
 }

@@ -217,11 +217,7 @@ final class PairingEngineTests: XCTestCase {
         XCTAssert(cryptoMock.hasSymmetricKey(for: pairing.topic), "Proposer must not delete symmetric key if pairing is active.")
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must remove private key for rejected session")
     }
-    
-    func testExtendPairingExpiryOnProposeResponse() {
-        
-    }
-    
+
     func testPairingExpiration() {
         let uri = engine.create()!
         let pairing = storageMock.getSequence(forTopic: uri.topic)!

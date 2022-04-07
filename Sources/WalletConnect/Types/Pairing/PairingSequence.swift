@@ -55,15 +55,15 @@ struct PairingSequence: ExpirableSequence {
     
     mutating func activate() {
         isActive = true
-        try? extend()
+        try? updateExpiry()
     }
     
-    mutating func extend(_ ttl: TimeInterval = PairingSequence.timeToLiveActive) throws {
+    mutating func updateExpiry(_ ttl: TimeInterval = PairingSequence.timeToLiveActive) throws {
         let now = Self.dateInitializer()
         let newExpiryDate = now.advanced(by: ttl)
         let maxExpiryDate = now.advanced(by: Self.timeToLiveActive)
         guard newExpiryDate > expiryDate && newExpiryDate <= maxExpiryDate else {
-            throw WalletConnectError.invalidExtendTime
+            throw WalletConnectError.invalidUpdateExpiryValue
         }
         expiryDate = newExpiryDate
     }

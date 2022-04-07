@@ -6,7 +6,7 @@ import WalletConnectUtils
 @testable import TestingUtils
 
 class MockedWCRelay: WalletConnectRelaying {
-    private let responsePublisherSubject = PassthroughSubject<WCResponse, Never>()
+    let responsePublisherSubject = PassthroughSubject<WCResponse, Never>()
 
     var responsePublisher: AnyPublisher<WCResponse, Never> {
         responsePublisherSubject.eraseToAnyPublisher()
@@ -22,7 +22,7 @@ class MockedWCRelay: WalletConnectRelaying {
     }
     private let transportConnectionPublisherSubject = PassthroughSubject<Void, Never>()
     
-    private let wcRequestPublisherSubject = PassthroughSubject<WCRequestSubscriptionPayload, Never>()
+    let wcRequestPublisherSubject = PassthroughSubject<WCRequestSubscriptionPayload, Never>()
     var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {
         wcRequestPublisherSubject.eraseToAnyPublisher()
     }

@@ -25,16 +25,16 @@ enum WCMethod {
             return WCRequest(method: .sessionUpdateMethods, params: .sessionUpdateMethods(updateParams))
         case .wcSessionUpdateEvents(let updateParams):
             return WCRequest(method: .sessionUpdateEvents, params: .sessionUpdateEvents(updateParams))
-        case .wcSessionUpdateExpiry(let extendParams):
-            return WCRequest(method: .sessionUpdateExpiry, params: .sessionUpdateExpiry(extendParams))
+        case .wcSessionUpdateExpiry(let updateExpiryParams):
+            return WCRequest(method: .sessionUpdateExpiry, params: .sessionUpdateExpiry(updateExpiryParams))
         case .wcSessionDelete(let deleteParams):
             return WCRequest(method: .sessionDelete, params: .sessionDelete(deleteParams))
         case .wcSessionRequest(let payloadParams):
             return WCRequest(method: .sessionRequest, params: .sessionRequest(payloadParams))
         case .wcSessionPing:
             return WCRequest(method: .sessionPing, params: .sessionPing(SessionType.PingParams()))
-        case .wcSessionEvent(let notificationParams):
-            return WCRequest(method: .sessionEvent, params: .sessionEvent(notificationParams))
+        case .wcSessionEvent(let eventParams):
+            return WCRequest(method: .sessionEvent, params: .sessionEvent(eventParams))
         }
     }
 }
