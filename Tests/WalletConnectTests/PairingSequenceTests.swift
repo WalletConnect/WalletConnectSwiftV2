@@ -21,12 +21,15 @@ final class PairingSequenceTests: XCTestCase {
     
     func testInitInactiveFromTopic() {
         let pairing = PairingSequence.build("", selfMetadata: AppMetadata.stub())
-        let inactiveExpiry = referenceDate.advanced(by: TimeInterval(PairingSequence.timeToLiveInactive))
+        let inactiveExpiry = referenceDate.advanced(by: PairingSequence.timeToLiveInactive)
         XCTAssertFalse(pairing.isActive)
         XCTAssertEqual(pairing.expiryDate, inactiveExpiry)
     }
     
     func testInitInactiveFromURI() {
-        
+        let pairing = PairingSequence.createFromURI(WalletConnectURI.stub())
+        let inactiveExpiry = referenceDate.advanced(by: PairingSequence.timeToLiveInactive)
+        XCTAssertFalse(pairing.isActive)
+        XCTAssertEqual(pairing.expiryDate, inactiveExpiry)
     }
 }

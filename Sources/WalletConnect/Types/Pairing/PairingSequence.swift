@@ -9,12 +9,12 @@ struct PairingSequence: ExpirableSequence {
     private static var dateInitializer: () -> Date = Date.init
     #endif
     
-    static var timeToLiveInactive: Int {
-        5 * Time.minute
+    static var timeToLiveInactive: TimeInterval {
+        5 * .minute
     }
     
-    static var timeToLiveActive: Int {
-        Time.day * 30
+    static var timeToLiveActive: TimeInterval {
+        30 * .day 
     }
     
     struct Participants: Codable, Equatable {
@@ -33,7 +33,7 @@ struct PairingSequence: ExpirableSequence {
         isActive = true
     }
     
-    mutating func extend(_ ttl: Int = PairingSequence.timeToLiveActive) throws {
+    mutating func extend(_ ttl: Int = Int(PairingSequence.timeToLiveActive)) throws {
 //        let now = Date()
         let newExpiryDate = Date(timeIntervalSinceNow: TimeInterval(ttl))
         let maxExpiryDate = Date(timeIntervalSinceNow: TimeInterval(PairingSequence.timeToLiveActive))
@@ -44,7 +44,6 @@ struct PairingSequence: ExpirableSequence {
     }
     
     static func build(_ topic: String, selfMetadata: AppMetadata) -> PairingSequence {
-        let now = dateInitializer()
         let relay = RelayProtocolOptions(protocol: "waku", data: nil)
         return PairingSequence(
             topic: topic,
@@ -52,8 +51,7 @@ struct PairingSequence: ExpirableSequence {
             participants: Participants(
                 self: selfMetadata,
                 peer: nil),
-//            expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveInactive)))
-            expiryDate: now.advanced(by: TimeInterval(timeToLiveInactive)))
+            expiryDate: dateInitializer().advanced(by: timeToLiveInactive))
     }
     
     static func createFromURI(_ uri: WalletConnectURI) -> PairingSequence {
@@ -63,6 +61,6 @@ struct PairingSequence: ExpirableSequence {
             participants: Participants(
                 self: nil,
                 peer: nil),
-            expiryDate: Date(timeIntervalSinceNow: TimeInterval(timeToLiveActive)))
+            expiryDate: dateInitializer().advanced(by: timeToLiveInactive))
     }
 }
