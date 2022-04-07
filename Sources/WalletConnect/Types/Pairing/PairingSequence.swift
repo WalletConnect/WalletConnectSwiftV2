@@ -55,6 +55,7 @@ struct PairingSequence: ExpirableSequence {
     
     mutating func activate() {
         isActive = true
+        try? extend()
     }
     
     mutating func extend(_ ttl: TimeInterval = PairingSequence.timeToLiveActive) throws {

@@ -40,4 +40,12 @@ final class PairingSequenceTests: XCTestCase {
         try? pairing.extend()
         XCTAssertEqual(pairing.expiryDate, activeExpiry)
     }
+    
+    func testActivate() {
+        var pairing = PairingSequence(topic: "", selfMetadata: AppMetadata.stub())
+        let activeExpiry = referenceDate.advanced(by: PairingSequence.timeToLiveActive)
+        pairing.activate()
+        XCTAssertTrue(pairing.isActive)
+        XCTAssertEqual(pairing.expiryDate, activeExpiry)
+    }
 }

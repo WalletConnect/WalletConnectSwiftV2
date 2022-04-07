@@ -213,8 +213,9 @@ final class PairingEngine {
             // Activate the pairing
             if !pairing.isActive {
                 pairing.activate()
+            } else {
+                try? pairing.extend()
             }
-            try? pairing.extend()
             sequencesStore.setSequence(pairing)
             
             let selfPublicKey = try! AgreementPublicKey(hex: proposal.proposer.publicKey)
