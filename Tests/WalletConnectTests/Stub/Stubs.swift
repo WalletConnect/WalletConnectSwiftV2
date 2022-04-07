@@ -50,9 +50,9 @@ extension WCRequestSubscriptionPayload {
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
     }
     
-    static func stubExtend(topic: String, expiry: Int64) -> WCRequestSubscriptionPayload {
-        let extendMethod = WCMethod.wcSessionUpdateExpiry(SessionType.UpdateExpiryParams(expiry: expiry)).asRequest()
-        return WCRequestSubscriptionPayload(topic: topic, wcRequest: extendMethod)
+    static func stubUpdateExpiry(topic: String, expiry: Int64) -> WCRequestSubscriptionPayload {
+        let updateExpiryMethod = WCMethod.wcSessionUpdateExpiry(SessionType.UpdateExpiryParams(expiry: expiry)).asRequest()
+        return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateExpiryMethod)
     }
     
     static func stubSettle(topic: String) -> WCRequestSubscriptionPayload {
