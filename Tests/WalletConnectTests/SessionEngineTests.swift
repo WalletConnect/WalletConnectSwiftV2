@@ -186,54 +186,8 @@ final class SessionEngineTests: XCTestCase {
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 3003)
     }
-    // TODO: Update acknowledgement tests
     
-    // MARK: - Upgrade call tests
-    
-//    func testUpgradeSuccess() throws {
-//        let permissions = Session.Permissions.stub()
-//        let session = SessionSequence.stub(isSelfController: true)
-//        storageMock.setSequence(session)
-//        try engine.upgrade(topic: session.topic, permissions: permissions)
-//        XCTAssertTrue(relayMock.didCallRequest)
-//        // TODO: Check permissions on stored session
-//    }
-//
-//    func testUpgradeErrorSessionNotFound() {
-//        XCTAssertThrowsError(try engine.upgrade(topic: "", permissions: Session.Permissions.stub())) { error in
-//            XCTAssertTrue(error.isNoSessionMatchingTopicError)
-//        }
-//    }
-//
-//    func testUpgradeErrorSessionNotSettled() {
-//        let session = SessionSequence.stub(acknowledged: false)
-//        storageMock.setSequence(session)
-//        XCTAssertThrowsError(try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub())) { error in
-//            XCTAssertTrue(error.isSessionNotSettledError)
-//        }
-//    }
-    
-//    func testUpgradeErrorInvalidPermissions() {
-//        let session = SessionSequence.stub(isSelfController: true)
-//        storageMock.setSequence(session)
-////        XCTAssertThrowsError(try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub())) { error in
-////            XCTAssertTrue(error.isInvalidPermissionsError)
-////        }
-//        XCTAssertThrowsError(try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub(methods: [""]))) { error in
-//            XCTAssertTrue(error.isInvalidPermissionsError)
-//        }
-//        XCTAssertThrowsError(try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub(notifications: [""]))) { error in
-//            XCTAssertTrue(error.isInvalidPermissionsError)
-//        }
-//    }
-    
-//    func testUpgradeErrorCalledByNonController() {
-//        let session = SessionSequence.stub(isSelfController: false)
-//        storageMock.setSequence(session)
-//        XCTAssertThrowsError(try engine.upgrade(topic: session.topic, permissions: Session.Permissions.stub())) { error in
-//            XCTAssertTrue(error.isUnauthorizedNonControllerCallError)
-//        }
-//    }
+
     
     // MARK: - Upgrade peer response tests
     
