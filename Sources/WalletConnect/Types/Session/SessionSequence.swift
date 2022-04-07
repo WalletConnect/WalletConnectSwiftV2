@@ -13,8 +13,12 @@ struct SessionSequence: ExpirableSequence {
     let relay: RelayProtocolOptions
     let controller: AgreementPeer
     let participants: Participants
-    var blockchain: SessionType.Blockchain
-    var permissions: SessionPermissions
+
+//    let `self`: Participant
+//    let peer: Participant
+    private(set) var methods: Set<String>
+    private(set) var events: Set<String>
+    private(set) var accounts: Set<Account>
 
     var acknowledged: Bool
 
@@ -37,19 +41,24 @@ struct SessionSequence: ExpirableSequence {
         self.relay = settleParams.relay
         self.controller = AgreementPeer(publicKey: settleParams.controller.publicKey)
         self.participants = Participants(self: selfParticipant, peer: peerParticipant)
-        self.blockchain = settleParams.blockchain
-        self.permissions = settleParams.permissions
+
+//        self.`self` = selfParticipant
+//        self.peer = peerParticipant
+        self.methods = settleParams.methods
+        self.events = settleParams.events
+        self.accounts = settleParams.accounts
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(settleParams.expiry))
     }
     
-    init(topic: String, relay: RelayProtocolOptions, controller: AgreementPeer, participants: Participants, blockchain: SessionType.Blockchain, permissions: SessionPermissions, acknowledged: Bool, expiry: Int64) {
+    internal init(topic: String, relay: RelayProtocolOptions, controller: AgreementPeer, participants: SessionSequence.Participants, methods: Set<String>, events: Set<String>, accounts: Set<Account>, acknowledged: Bool, expiry: Int64) {
         self.topic = topic
         self.relay = relay
         self.controller = controller
         self.participants = participants
-        self.blockchain = blockchain
-        self.permissions = permissions
+        self.methods = methods
+        self.events = events
+        self.accounts = accounts
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
     }
@@ -71,26 +80,34 @@ struct SessionSequence: ExpirableSequence {
         return controller.publicKey == participants.peer.publicKey
     }
     
+    var blockchains: [Blockchain] {
+        return accounts.map{$0.blockchain}
+    }
+    
     func hasPermission(forChain chainId: String) -> Bool {
-        return blockchain.chains.contains(chainId)
+        return blockchains
+            .map{$0.absoluteString}
+            .contains(chainId)
     }
     
     func hasPermission(forMethod method: String) -> Bool {
-        return permissions.jsonrpc.methods.contains(method)
+        return methods.contains(method)
     }
     
-    func hasPermission(forNotification type: String) -> Bool {
-        guard let notificationPermissions = permissions.notifications else { return false }
-        return notificationPermissions.types.contains(type)
+    func hasPermission(forEvents type: String) -> Bool {
+        return events.contains(type)
+    }
+
+    mutating func updateAccounts(_ accounts: Set<Account>) {
+        self.accounts = accounts
     }
     
-    mutating func upgrade(_ permissions: SessionPermissions) {
-        self.permissions.upgrade(with: permissions)
+    mutating func updateMethods(_ methods: Set<String>) {
+        self.methods = methods
     }
     
-    mutating func update(_ accounts: Set<Account>) {
-        //todo - handle chains and accounts
-        blockchain.accounts = accounts
+    mutating func updateEvents(_ events: Set<String>) {
+        self.events = events
     }
     
     /// extends session by givien ttl
@@ -119,9 +136,9 @@ struct SessionSequence: ExpirableSequence {
         return Session(
             topic: topic,
             peer: participants.peer.metadata,
-            permissions: Session.Permissions(methods: permissions.jsonrpc.methods),
-            accounts: blockchain.accounts,
-            expiryDate: expiryDate,
-            blockchains: blockchain.chains)
+            methods: methods,
+            events: events,
+            accounts: accounts,
+            expiryDate: expiryDate)
     }
 }

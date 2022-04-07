@@ -26,36 +26,6 @@ extension PairingSequence {
     }
 }
 
-extension Session.Permissions {
-    static func stub(
-        methods: Set<String> = ["getGenesisHash"],
-        notifications: Set<String> = ["msg"]
-    ) -> Session.Permissions {
-        Session.Permissions(
-            methods: methods,
-            notifications: notifications
-        )
-    }
-}
-
-extension SessionPermissions {
-    static func stub(
-        jsonrpc: Set<String> = ["eth_sign"],
-        notifications: Set<String> = ["a_type"]
-    ) -> SessionPermissions {
-        return SessionPermissions(
-            jsonrpc: JSONRPC(methods: jsonrpc),
-            notifications: Notifications(types: notifications)
-        )
-    }
-}
-
-extension SessionType.Blockchain {
-    static func stub(chains: Set<String> = ["eip155:1"]) -> SessionType.Blockchain {
-        return SessionType.Blockchain(chains: chains, accounts: [])
-    }
-}
-
 extension RelayProtocolOptions {
     static func stub() -> RelayProtocolOptions {
         RelayProtocolOptions(protocol: "", data: nil)
@@ -75,18 +45,13 @@ extension AgreementPeer {
 }
 
 extension WCRequestSubscriptionPayload {
-    static func stubUpdate(topic: String, accounts: [String] = ["std:0:0"]) -> WCRequestSubscriptionPayload {
-        let updateMethod = WCMethod.wcSessionUpdate(SessionType.UpdateParams(state: SessionState(accounts: accounts))).asRequest()
+    static func stubUpdate(topic: String, accounts: Set<String> = ["std:0:0"]) -> WCRequestSubscriptionPayload {
+        let updateMethod = WCMethod.wcSessionUpdateAccounts(SessionType.UpdateAccountsParams(accounts: accounts)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
     }
     
-    static func stubUpgrade(topic: String, permissions: SessionPermissions = SessionPermissions(permissions: Session.Permissions.stub())) -> WCRequestSubscriptionPayload {
-        let upgradeMethod = WCMethod.wcSessionUpgrade(SessionType.UpgradeParams(permissions: permissions)).asRequest()
-        return WCRequestSubscriptionPayload(topic: topic, wcRequest: upgradeMethod)
-    }
-    
     static func stubExtend(topic: String, expiry: Int64) -> WCRequestSubscriptionPayload {
-        let extendMethod = WCMethod.wcSessionExtend(SessionType.ExtendParams(expiry: expiry)).asRequest()
+        let extendMethod = WCMethod.wcSessionUpdateExpiry(SessionType.UpdateExpiryParams(expiry: expiry)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: extendMethod)
     }
     
@@ -102,8 +67,9 @@ extension SessionProposal {
         return SessionType.ProposeParams(
             relays: [relayOptions],
             proposer: Participant(publicKey: proposerPubKey, metadata: AppMetadata.stub()),
-            permissions: SessionPermissions.stub(),
-            blockchain: SessionProposal.ProposedBlockchain(chains: []))
+            methods: [],
+            events: [],
+            blockchains: [])
     }
 }
 

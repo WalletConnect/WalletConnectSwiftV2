@@ -2,13 +2,14 @@ enum WCMethod {
     case wcPairingPing
     case wcSessionPropose(SessionType.ProposeParams)
     case wcSessionSettle(SessionType.SettleParams)
-    case wcSessionUpdate(SessionType.UpdateParams)
-    case wcSessionUpgrade(SessionType.UpgradeParams)
+    case wcSessionUpdateAccounts(SessionType.UpdateAccountsParams)
+    case wcSessionUpdateMethods(SessionType.UpdateMethodsParams)
+    case wcSessionUpdateEvents(SessionType.UpdateEventsParams)
+    case wcSessionUpdateExpiry(SessionType.UpdateExpiryParams)
     case wcSessionDelete(SessionType.DeleteParams)
     case wcSessionRequest(SessionType.RequestParams)
     case wcSessionPing
-    case wcSessionExtend(SessionType.ExtendParams)
-    case wcSessionNotification(SessionType.NotificationParams)
+    case wcSessionEvent(SessionType.EventParams)
     
     func asRequest() -> WCRequest {
         switch self {
@@ -18,20 +19,22 @@ enum WCMethod {
             return WCRequest(method: .sessionPropose, params: .sessionPropose(proposalParams))
         case .wcSessionSettle(let settleParams):
             return WCRequest(method: .sessionSettle, params: .sessionSettle(settleParams))
-        case .wcSessionUpdate(let updateParams):
-            return WCRequest(method: .sessionUpdate, params: .sessionUpdate(updateParams))
-        case .wcSessionUpgrade(let upgradeParams):
-            return WCRequest(method: .sessionUpgrade, params: .sessionUpgrade(upgradeParams))
+        case .wcSessionUpdateAccounts(let updateParams):
+            return WCRequest(method: .sessionUpdateAccounts, params: .sessionUpdateAccounts(updateParams))
+        case .wcSessionUpdateMethods(let updateParams):
+            return WCRequest(method: .sessionUpdateMethods, params: .sessionUpdateMethods(updateParams))
+        case .wcSessionUpdateEvents(let updateParams):
+            return WCRequest(method: .sessionUpdateEvents, params: .sessionUpdateEvents(updateParams))
+        case .wcSessionUpdateExpiry(let extendParams):
+            return WCRequest(method: .sessionUpdateExpiry, params: .sessionUpdateExpiry(extendParams))
         case .wcSessionDelete(let deleteParams):
             return WCRequest(method: .sessionDelete, params: .sessionDelete(deleteParams))
         case .wcSessionRequest(let payloadParams):
             return WCRequest(method: .sessionRequest, params: .sessionRequest(payloadParams))
         case .wcSessionPing:
             return WCRequest(method: .sessionPing, params: .sessionPing(SessionType.PingParams()))
-        case .wcSessionNotification(let notificationParams):
-            return WCRequest(method: .sessionNotification, params: .sessionNotification(notificationParams))
-        case .wcSessionExtend(let extendParams):
-            return WCRequest(method: .sessionExtend, params: .sessionExtend(extendParams))
+        case .wcSessionEvent(let notificationParams):
+            return WCRequest(method: .sessionEvent, params: .sessionEvent(notificationParams))
         }
     }
 }

@@ -3,6 +3,7 @@ import Foundation
 @testable import WalletConnect
 
 class ClientDelegate: WalletConnectClientDelegate {
+    
     var client: WalletConnectClient
     var onSessionSettled: ((Session)->())?
     var onSessionProposal: ((Session.Proposal)->())?
@@ -10,9 +11,9 @@ class ClientDelegate: WalletConnectClientDelegate {
     var onSessionResponse: ((Response)->())?
     var onSessionRejected: ((Session.Proposal, Reason)->())?
     var onSessionDelete: (()->())?
-    var onSessionUpgrade: ((String, Session.Permissions)->())?
-    var onSessionUpdate: ((String, Set<Account>)->())?
-    var onNotificationReceived: ((Session.Notification, String)->())?
+    var onSessionUpdateAccounts: ((String, Set<Account>)->())?
+    var onSessionUpdateMethods: ((String, Set<String>)->())?
+    var onEventReceived: ((Session.Event, String)->())?
     var onPairingUpdate: ((Pairing)->())?
     
     internal init(client: WalletConnectClient) {
@@ -35,14 +36,14 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didDelete(sessionTopic: String, reason: Reason) {
         onSessionDelete?()
     }
-    func didUpgrade(sessionTopic: String, permissions: Session.Permissions) {
-        onSessionUpgrade?(sessionTopic, permissions)
-    }
     func didUpdate(sessionTopic: String, accounts: Set<Account>) {
-        onSessionUpdate?(sessionTopic, accounts)
+        onSessionUpdateAccounts?(sessionTopic, accounts)
     }
-    func didReceive(notification: Session.Notification, sessionTopic: String) {
-        onNotificationReceived?(notification, sessionTopic)
+    func didUpdate(sessionTopic: String, methods: Set<String>) {
+        onSessionUpdateMethods?(sessionTopic, methods)
+    }
+    func didReceive(notification: Session.Event, sessionTopic: String) {
+        onEventReceived?(notification, sessionTopic)
     }
     func didReceive(sessionResponse: Response) {
         onSessionResponse?(sessionResponse)

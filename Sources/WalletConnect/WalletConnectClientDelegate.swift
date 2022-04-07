@@ -28,15 +28,15 @@ public protocol WalletConnectClientDelegate: AnyObject {
     /// Function can be executed on any type of the client.
     func didDelete(sessionTopic: String, reason: Reason)
     
-    /// Tells the delegate that session permissions has been upgraded.
+    /// Tells the delegate that accounts has been updated in session
     ///
-    /// Function is executed on controller and non-controller client when both communicating peers have successfully upgraded permissions.
-    func didUpgrade(sessionTopic: String, permissions: Session.Permissions)
-    
-    /// Tells the delegate that extra accounts has been included in session sequence
-    ///
-    /// Function is executed on controller and non-controller client when both communicating peers have successfully included new accounts requested by the controller client.
+    /// Function is executed on controller and non-controller client when both communicating peers have successfully updated accounts requested by the controller client.
     func didUpdate(sessionTopic: String, accounts: Set<Account>)
+    
+    /// Tells the delegate that methods has been updated in session
+    ///
+    /// Function is executed on controller and non-controller client when both communicating peers have successfully updated methods requested by the controller client.
+    func didUpdate(sessionTopic: String, methods: Set<String>)
     
     /// Tells the delegate that the client has settled a session.
     ///
@@ -44,7 +44,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     func didSettle(session: Session)
     
     /// Tells the delegate that notification has been received.
-    func didReceive(notification: Session.Notification, sessionTopic : String)
+    func didReceive(notification: Session.Event, sessionTopic : String)
     
     /// Tells the delegate that peer client has rejected a session proposal.
     ///
@@ -63,7 +63,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
 }
 
 public extension WalletConnectClientDelegate {
-    func didReceive(notification: Session.Notification, sessionTopic: String) {}
+    func didReceive(notification: Session.Event, sessionTopic: String) {}
     func didReject(proposal: String, reason: Reason) {}
     func didExtend(pairing: Pairing) {}
     func didReceive(sessionRequest: Request) {}

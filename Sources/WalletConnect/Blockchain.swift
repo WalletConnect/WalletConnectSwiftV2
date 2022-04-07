@@ -8,7 +8,7 @@
  
  [CAIP-2]:https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-2.md
  */
-public struct Blockchain: Equatable {
+public struct Blockchain: Equatable, Hashable {
     
     /// A blockchain namespace. Usually describes an ecosystem or standard.
     public let namespace: String

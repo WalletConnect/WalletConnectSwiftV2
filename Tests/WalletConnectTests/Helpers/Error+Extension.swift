@@ -20,14 +20,14 @@ extension Error {
     }
     
     var isSessionNotSettledError: Bool {
-        guard case .sessionNotSettled = wcError else { return false }
+        guard case .sessionNotAcknowledged = wcError else { return false }
         return true
     }
     
-    var isInvalidPermissionsError: Bool {
-        guard case .invalidPermissions = wcError else { return false }
-        return true
-    }
+//    var isInvalidPermissionsError: Bool {
+//        guard case .invalidPermissions = wcError else { return false }
+//        return true
+//    }
     
     var isUnauthorizedNonControllerCallError: Bool {
         guard case .unauthorizedNonControllerCall = wcError else { return false }

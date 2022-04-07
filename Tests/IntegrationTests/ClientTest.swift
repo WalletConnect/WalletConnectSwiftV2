@@ -6,11 +6,6 @@ import TestingUtils
 @testable import WalletConnect
 @testable import WalletConnectKMS
 
-fileprivate extension Session.Permissions {
-    static func stub(methods: Set<String> = [], notifications: Set<String> = []) -> Session.Permissions {
-        Session.Permissions(methods: methods, notifications: notifications)
-    }
-}
 
 final class ClientTests: XCTestCase {
     
@@ -41,8 +36,7 @@ final class ClientTests: XCTestCase {
     
     func testNewPairingPing() async {
         let responderReceivesPingResponseExpectation = expectation(description: "Responder receives ping response")
-        let permissions = Session.Permissions.stub()
-        let uri = try! await proposer.client.connect(sessionPermissions: permissions, blockchains: [])!
+        let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
         
         try! responder.client.pair(uri: uri)
         let pairing = responder.client.getSettledPairings().first!
@@ -58,8 +52,7 @@ final class ClientTests: XCTestCase {
         let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
         let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
         
-        let permissions = Session.Permissions.stub()
-        let uri = try! await proposer.client.connect(sessionPermissions: permissions, blockchains: [])!
+        let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [account])
@@ -83,8 +76,8 @@ final class ClientTests: XCTestCase {
         let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
         responderSettlesSessionExpectation.expectedFulfillmentCount = 2
         var initiatedSecondSession = false
-        let permissions = Session.Permissions.stub()
-        let uri = try! await proposer.client.connect(sessionPermissions: permissions, blockchains: [], topic: nil)!
+        let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
+
         try! responder.client.pair(uri: uri)
 
         responder.onSessionProposal = { [unowned self] proposal in
@@ -98,7 +91,7 @@ final class ClientTests: XCTestCase {
             let pairingTopic = proposer.client.getSettledPairings().first!.topic
             if !initiatedSecondSession {
                 Task {
-                    let _ = try! await proposer.client.connect(sessionPermissions: permissions, blockchains: [], topic: pairingTopic)
+                    let _ = try! await proposer.client.connect(blockchains: [], methods: [], events: [], topic: pairingTopic)
                 }
                 initiatedSecondSession = true
             }
@@ -108,9 +101,9 @@ final class ClientTests: XCTestCase {
 
     func testResponderRejectsSession() async {
         let sessionRejectExpectation = expectation(description: "Proposer is notified on session rejection")
-        let permissions = Session.Permissions.stub()
-        let uri = try! await proposer.client.connect(sessionPermissions: permissions, blockchains: [])!
+        let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
         _ = try! responder.client.pair(uri: uri)
+
         responder.onSessionProposal = {[unowned self] proposal in
             self.responder.client.reject(proposal: proposal, reason: .disapprovedChains)
         }
@@ -123,8 +116,7 @@ final class ClientTests: XCTestCase {
     
     func testDeleteSession() async {
         let sessionDeleteExpectation = expectation(description: "Responder is notified on session deletion")
-        let permissions = Session.Permissions.stub()
-        let uri = try! await proposer.client.connect(sessionPermissions: permissions, blockchains: [])!
+        let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
@@ -144,8 +136,8 @@ final class ClientTests: XCTestCase {
         let method = "eth_sendTransaction"
         let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]
         let responseParams = "0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c"
-        let permissions = Session.Permissions.stub(methods: [method])
-        let uri = try! await proposer.client.connect(sessionPermissions: permissions, blockchains: [])!
+        let uri = try! await proposer.client.connect(blockchains: [], methods: ["eth_sendTransaction"], events: [])!
+
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
@@ -181,8 +173,7 @@ final class ClientTests: XCTestCase {
         let method = "eth_sendTransaction"
         let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]
         let error = JSONRPCErrorResponse.Error(code: 0, message: "error_message")
-        let permissions = Session.Permissions.stub(methods: [method])
-        let uri = try! await proposer.client.connect(sessionPermissions: permissions, blockchains: [])!
+        let uri = try! await proposer.client.connect(blockchains: [], methods: ["eth_sendTransaction"], events: [])!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
@@ -210,8 +201,8 @@ final class ClientTests: XCTestCase {
     
     func testSessionPing() async {
         let proposerReceivesPingResponseExpectation = expectation(description: "Proposer receives ping response")
-        let permissions = Session.Permissions.stub()
-        let uri = try! await proposer.client.connect(sessionPermissions: permissions, blockchains: [])!
+        let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
+
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
@@ -225,38 +216,36 @@ final class ClientTests: XCTestCase {
         await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
-    func testSuccessfulSessionUpgrade() async {
-        let proposerSessionUpgradeExpectation = expectation(description: "Proposer upgrades session on responder request")
-        let responderSessionUpgradeExpectation = expectation(description: "Responder upgrades session on proposer response")
+    func testSuccessfulSessionUpdateMethods() async {
+        let proposerSessionUpgradeExpectation = expectation(description: "Proposer updates session methods on responder request")
+        let responderSessionUpgradeExpectation = expectation(description: "Responder updates session methods on proposer response")
         let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
-        let permissions = Session.Permissions.stub()
-        let upgradePermissions = Session.Permissions(methods: ["eth_sendTransaction"])
-        let uri = try! await proposer.client.connect(sessionPermissions: permissions, blockchains: [])!
+        let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
+        let methodsToUpdateWith: Set<String> = ["eth_sendTransaction"]
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [account])
         }
-        responder.onSessionSettled = { [unowned self] sessionSettled in
-            try? responder.client.upgrade(topic: sessionSettled.topic, permissions: upgradePermissions)
+        responder.onSessionSettled = { [unowned self] session in
+            try? responder.client.updateMethods(topic: session.topic, methods: methodsToUpdateWith)
         }
-        proposer.onSessionUpgrade = { topic, permissions in
-            XCTAssertTrue(permissions.methods.isSuperset(of: upgradePermissions.methods))
+        proposer.onSessionUpdateMethods = { topic, methods in
+            XCTAssertEqual(methods, methodsToUpdateWith)
             proposerSessionUpgradeExpectation.fulfill()
         }
-        responder.onSessionUpgrade = { topic, permissions in
-            XCTAssertTrue(permissions.methods.isSuperset(of: upgradePermissions.methods))
+        responder.onSessionUpdateMethods = { topic, methods in
+            XCTAssertEqual(methods, methodsToUpdateWith)
             responderSessionUpgradeExpectation.fulfill()
         }
-        await waitForExpectations(timeout: defaultTimeout, handler: nil)
+        await waitForExpectations(timeout: 40, handler: nil)
     }
     
-    func testSuccessfulSessionUpdate() async {
+    func testSuccessfulSessionUpdateAccounts() async {
         let proposerSessionUpdateExpectation = expectation(description: "Proposer updates session on responder request")
         let responderSessionUpdateExpectation = expectation(description: "Responder updates session on proposer response")
         let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
         let updateAccounts: Set<Account> = [Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdf")!]
-        let permissions = Session.Permissions.stub()
-        let uri = try! await proposer.client.connect(sessionPermissions: permissions, blockchains: [])!
+        let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [account])
@@ -264,11 +253,11 @@ final class ClientTests: XCTestCase {
         responder.onSessionSettled = { [unowned self] sessionSettled in
             try? responder.client.update(topic: sessionSettled.topic, accounts: updateAccounts)
         }
-        responder.onSessionUpdate = { _, accounts in
+        responder.onSessionUpdateAccounts = { _, accounts in
             XCTAssertEqual(accounts, updateAccounts)
             responderSessionUpdateExpectation.fulfill()
         }
-        proposer.onSessionUpdate = { _, accounts in
+        proposer.onSessionUpdateAccounts = { _, accounts in
             XCTAssertEqual(accounts, updateAccounts)
             proposerSessionUpdateExpectation.fulfill()
         }
@@ -277,17 +266,17 @@ final class ClientTests: XCTestCase {
     
     func testSessionNotificationSucceeds() async {
         let proposerReceivesNotificationExpectation = expectation(description: "Proposer receives notification")
-        let permissions = Session.Permissions.stub(notifications: ["type1"])
-        let uri = try! await proposer.client.connect(sessionPermissions: permissions, blockchains: [])!
+        let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
+
         try! responder.client.pair(uri: uri)
-        let notificationParams = Session.Notification(type: "type1", data: AnyCodable("notification_data"))
+        let notificationParams = Session.Event(type: "type1", data: AnyCodable("notification_data"))
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
         responder.onSessionSettled = { [unowned self] session in
             responder.client.notify(topic: session.topic, params: notificationParams, completion: nil)
         }
-        proposer.onNotificationReceived = { notification, _ in
+        proposer.onEventReceived = { notification, _ in
             XCTAssertEqual(notification, notificationParams)
             proposerReceivesNotificationExpectation.fulfill()
         }
@@ -297,10 +286,10 @@ final class ClientTests: XCTestCase {
     func testSessionNotificationFails() async {
         let proposerReceivesNotificationExpectation = expectation(description: "Proposer receives notification")
         proposerReceivesNotificationExpectation.isInverted = true
-        let permissions = Session.Permissions.stub(notifications: ["type1"])
-        let uri = try! await proposer.client.connect(sessionPermissions: permissions, blockchains: [])!
+        let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
+
         try! responder.client.pair(uri: uri)
-        let notificationParams = Session.Notification(type: "type2", data: AnyCodable("notification_data"))
+        let notificationParams = Session.Event(type: "type2", data: AnyCodable("notification_data"))
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
@@ -309,7 +298,7 @@ final class ClientTests: XCTestCase {
                 XCTAssertNotNil(error)
             }
         }
-        responder.onNotificationReceived = { notification, _ in
+        responder.onEventReceived = { notification, _ in
             XCTFail()
             proposerReceivesNotificationExpectation.fulfill()
         }

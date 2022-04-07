@@ -10,17 +10,19 @@ enum ReasonCode {
     
     // 1000 (Internal)
     case missingOrInvalid(String)
-    case invalidUpdateRequest(context: Context)
-    case invalidUpgradeRequest(context: Context)
+    case invalidUpdateAccountsRequest
+    
+
+    
+    case invalidUpdateMethodsRequest
     case invalidExtendRequest(context: Context)
     case noContextWithTopic(context: Context, topic: String)
     
     // 3000 (Unauthorized)
     case unauthorizedTargetChain(String)
     case unauthorizedRPCMethod(String)
-    case unauthorizedNotificationType(String)
+    case unauthorizedEventType(String)
     case unauthorizedUpdateRequest(context: Context)
-    case unauthorizedUpgradeRequest(context: Context)
     case unauthorizedExtendRequest(context: Context)
     case unauthorizedMatchingController(isController: Bool)
     
@@ -33,15 +35,17 @@ enum ReasonCode {
         switch self {
         case .generic: return 0
         case .missingOrInvalid: return 1000
-        case .invalidUpdateRequest: return 1003
-        case .invalidUpgradeRequest: return 1004
+        case .invalidUpdateAccountsRequest: return 1003
+            
+        case .invalidUpdateMethodsRequest: return 1004
         case .invalidExtendRequest: return 1005
         case .noContextWithTopic: return 1301
         case .unauthorizedTargetChain: return 3000
         case .unauthorizedRPCMethod: return 3001
-        case .unauthorizedNotificationType: return 3002
+        case .unauthorizedEventType: return 3002
+            
+            
         case .unauthorizedUpdateRequest: return 3003
-        case .unauthorizedUpgradeRequest: return 3004
         case .unauthorizedExtendRequest: return 3005
         case .unauthorizedMatchingController: return 3100
         case .disapprovedChains: return 5000
@@ -56,10 +60,10 @@ enum ReasonCode {
             return message
         case .missingOrInvalid(let name):
             return "Missing or invalid \(name)"
-        case .invalidUpdateRequest(let context):
-            return "Invalid \(context) update request"
-        case .invalidUpgradeRequest(let context):
-            return "Invalid \(context) upgrade request"
+        case .invalidUpdateAccountsRequest:
+            return "Invalid update accounts request"
+        case .invalidUpdateMethodsRequest:
+            return "Invalid update methods request"
         case .invalidExtendRequest(context: let context):
             return "Invalid \(context) extend request"
         case .noContextWithTopic(let context, let topic):
@@ -68,12 +72,10 @@ enum ReasonCode {
             return "Unauthorized target chain id requested: \(chainId)"
         case .unauthorizedRPCMethod(let method):
             return "Unauthorized JSON-RPC method requested: \(method)"
-        case .unauthorizedNotificationType(let type):
+        case .unauthorizedEventType(let type):
             return "Unauthorized notification type requested: \(type)"
         case .unauthorizedUpdateRequest(let context):
             return "Unauthorized \(context) update request"
-        case .unauthorizedUpgradeRequest(let context):
-            return "Unauthorized \(context) upgrade request"
         case .unauthorizedMatchingController(let isController):
             return "Unauthorized: peer is also \(isController ? "" : "non-")controller"
         case .unauthorizedExtendRequest(context: let context):

@@ -13,27 +13,37 @@ internal enum SessionType {
     
     struct SettleParams: Codable, Equatable {
         let relay: RelayProtocolOptions
-        let blockchain: Blockchain
-        let permissions: SessionPermissions
+        let accounts: Set<Account>
+        let methods: Set<String>
+        let events: Set<String>
         let controller: Participant
         let expiry: Int64
     }
     
-    struct UpdateParams: Codable, Equatable {
-        let state: SessionState
-        
-        init(state: SessionState) {
-            self.state = state
+    struct UpdateAccountsParams: Codable, Equatable {
+        private let accountsString: Set<String>
+        var accounts: Set<Account> {
+            return Set(accountsString.compactMap{Account($0)})
         }
-        
         init(accounts: Set<Account>) {
-            let accountIds = accounts.map { $0.absoluteString }
-            self.state = SessionState(accounts: accountIds)
+            self.accountsString = Set(accounts.map{$0.absoluteString})
+        }
+        /// Initialiser for testing purposes only, allows to init invalid params,
+        /// use `init(accounts: Set<Account>)` instead.
+        init(accounts: Set<String>) {
+            self.accountsString = accounts
+        }
+        var isValidParam: Bool {
+            return accountsString.allSatisfy{String.conformsToCAIP10($0)}
         }
     }
     
-    struct UpgradeParams: Codable, Equatable {
-        let permissions: SessionPermissions
+    struct UpdateMethodsParams: Codable, Equatable {
+        let methods: Set<String>
+    }
+    
+    struct UpdateEventsParams: Codable, Equatable {
+        let events: Set<String>
     }
     
     struct DeleteParams: Codable, Equatable {
@@ -63,7 +73,7 @@ internal enum SessionType {
         }
     }
     
-    struct NotificationParams: Codable, Equatable {
+    struct EventParams: Codable, Equatable {
         let type: String
         let data: AnyCodable
         
@@ -75,25 +85,19 @@ internal enum SessionType {
     
     struct PingParams: Codable, Equatable {} 
     
-    struct ExtendParams: Codable, Equatable {
+    struct UpdateExpiryParams: Codable, Equatable {
         let expiry: Int64
-    }
-    
-    struct Blockchain: Codable, Equatable {
-        var chains: Set<String>
-        var accounts: Set<Account>
     }
 }
 
-// A better solution could fit in here
 internal extension Reason {
-    func toInternal() -> SessionType.Reason {
+    func internalRepresentation() -> SessionType.Reason {
         SessionType.Reason(code: self.code, message: self.message)
     }
 }
 
 extension SessionType.Reason {
-    func toPublic() -> Reason {
+    func publicRepresentation() -> Reason {
         Reason(code: self.code, message: self.message)
     }
 }
