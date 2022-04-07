@@ -16,18 +16,19 @@ final class PairingSequenceTests: XCTestCase {
     }
     
     func testAbsoluteValues() {
-        
+        XCTAssertEqual(PairingSequence.timeToLiveInactive, 5 * .minute, "Inactive time-to-live is 5 minutes.")
+        XCTAssertEqual(PairingSequence.timeToLiveActive, 30 * .day, "Active time-to-live is 30 days.")
     }
     
     func testInitInactiveFromTopic() {
-        let pairing = PairingSequence.build("", selfMetadata: AppMetadata.stub())
+        let pairing = PairingSequence(topic: "", selfMetadata: AppMetadata.stub())
         let inactiveExpiry = referenceDate.advanced(by: PairingSequence.timeToLiveInactive)
         XCTAssertFalse(pairing.isActive)
         XCTAssertEqual(pairing.expiryDate, inactiveExpiry)
     }
     
     func testInitInactiveFromURI() {
-        let pairing = PairingSequence.createFromURI(WalletConnectURI.stub())
+        let pairing = PairingSequence(uri: WalletConnectURI.stub())
         let inactiveExpiry = referenceDate.advanced(by: PairingSequence.timeToLiveInactive)
         XCTAssertFalse(pairing.isActive)
         XCTAssertEqual(pairing.expiryDate, inactiveExpiry)

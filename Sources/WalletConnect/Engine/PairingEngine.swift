@@ -63,7 +63,7 @@ final class PairingEngine {
     func create() -> WalletConnectURI? {
         let topic = topicInitializer()
         let symKey = try! kms.createSymmetricKey(topic)
-        let pairing = PairingSequence.build(topic, selfMetadata: metadata)
+        let pairing = PairingSequence(topic: topic, selfMetadata: metadata)
         let uri = WalletConnectURI(topic: topic, symKey: symKey.hexRepresentation, relay: pairing.relay)
         sequencesStore.setSequence(pairing)
         wcSubscriber.setSubscription(topic: topic)
@@ -92,7 +92,7 @@ final class PairingEngine {
         guard !hasPairing(for: uri.topic) else {
             throw WalletConnectError.pairingAlreadyExist
         }
-        let pairing = PairingSequence.createFromURI(uri)
+        let pairing = PairingSequence(uri: uri)
         let symKey = try! SymmetricKey(hex: uri.symKey) // FIXME: Malformed QR code from external source can crash the SDK
         try! kms.setSymmetricKey(symKey, for: pairing.topic)
 //        pairing.activate()
