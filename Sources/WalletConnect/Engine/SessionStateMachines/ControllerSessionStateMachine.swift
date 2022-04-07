@@ -46,6 +46,21 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         relayer.request(.wcSessionUpdateMethods(SessionType.UpdateMethodsParams(methods: methods)), onTopic: topic)
     }
     
+//    func updateEvents(topic: String, events: Set<String>) throws {
+//        guard var session = sequencesStore.getSequence(forTopic: topic) else {
+//            throw WalletConnectError.noSessionMatchingTopic(topic)
+//        }
+//        guard session.acknowledged else {
+//            throw WalletConnectError.sessionNotAcknowledged(topic)
+//        }
+//        guard session.selfIsController else {
+//            throw WalletConnectError.unauthorizedNonControllerCall
+//        }
+//        guard validateEvents(events) else {
+//            throw WalletConnectError.invalidEventType
+//        }
+//    }
+    
     // MARK: - Handle Response
     
     private func handleResponse(_ response: WCResponse) {

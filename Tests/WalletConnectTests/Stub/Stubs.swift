@@ -45,8 +45,13 @@ extension AgreementPeer {
 }
 
 extension WCRequestSubscriptionPayload {
-    static func stubUpdate(topic: String, accounts: Set<String> = ["std:0:0"]) -> WCRequestSubscriptionPayload {
+    static func stubUpdateAccounts(topic: String, accounts: Set<String> = ["std:0:0"]) -> WCRequestSubscriptionPayload {
         let updateMethod = WCMethod.wcSessionUpdateAccounts(SessionType.UpdateAccountsParams(accounts: accounts)).asRequest()
+        return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
+    }
+    
+    static func stubUpdateMethods(topic: String, methods: Set<String> = ["std:0:0"]) -> WCRequestSubscriptionPayload {
+        let updateMethod = WCMethod.wcSessionUpdateMethods(SessionType.UpdateMethodsParams(methods: methods)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
     }
     

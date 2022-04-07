@@ -252,7 +252,7 @@ final class SessionEngine {
                   return
               }
         guard session.peerIsController else {
-            relayer.respondError(for: payload, reason: .unauthorizedUpdateRequest(context: .session))
+            relayer.respondError(for: payload, reason: .unauthorizedUpdateAccountRequest)
             return
         }
         session.updateAccounts(updateParams.accounts)
@@ -347,7 +347,7 @@ final class SessionEngine {
             return
         } else {
             guard session.events.contains(params.type) else {
-                throw WalletConnectError.invalidNotificationType
+                throw WalletConnectError.invalidEventType
             }
         }
     }
@@ -410,25 +410,4 @@ final class SessionEngine {
             logger.error("Peer failed to update state.")
         }
     }
-    
-//    private func validatePermissions(_ permissions: SessionPermissions) -> Bool {
-////        for chainId in permissions.blockchain.chains {
-////            if !String.conformsToCAIP2(chainId) {
-////                return false
-////            }
-////        }
-//        for method in permissions.jsonrpc.methods {
-//            if method.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-//                return false
-//            }
-//        }
-//        if let notificationTypes = permissions.notifications?.types {
-//            for notification in notificationTypes {
-//                if notification.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-//                    return false
-//                }
-//            }
-//        }
-//        return true
-//    }
 }

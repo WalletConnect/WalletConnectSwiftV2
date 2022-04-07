@@ -24,6 +24,8 @@ class ControllerSessionStateMachineTests: XCTestCase {
         cryptoMock = nil
         sut = nil
     }
+    
+    // MARK: - Update Methods
         
     func testUpdateMethodsSuccess() throws {
         let session = SessionSequence.stub(isSelfController: true)

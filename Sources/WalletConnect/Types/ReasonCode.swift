@@ -22,7 +22,9 @@ enum ReasonCode {
     case unauthorizedTargetChain(String)
     case unauthorizedRPCMethod(String)
     case unauthorizedEventType(String)
-    case unauthorizedUpdateRequest(context: Context)
+    case unauthorizedUpdateAccountRequest
+    case unauthorizedUpdateMethodsRequest
+    case unauthorizedUpdateEventsRequest
     case unauthorizedUpdateExpiryRequest
     case unauthorizedMatchingController(isController: Bool)
     
@@ -40,12 +42,18 @@ enum ReasonCode {
         case .invalidUpdateMethodsRequest: return 1004
         case .invalidUpdateExpiryRequest: return 1005
         case .noContextWithTopic: return 1301
+            
+            
         case .unauthorizedTargetChain: return 3000
         case .unauthorizedRPCMethod: return 3001
         case .unauthorizedEventType: return 3002
             
             
-        case .unauthorizedUpdateRequest: return 3003
+        case .unauthorizedUpdateAccountRequest: return 3003
+            
+            
+        case .unauthorizedUpdateMethodsRequest: return 3004
+        case .unauthorizedUpdateEventsRequest: return 3005
         case .unauthorizedUpdateExpiryRequest: return 3005
         case .unauthorizedMatchingController: return 3100
         case .disapprovedChains: return 5000
@@ -74,12 +82,16 @@ enum ReasonCode {
             return "Unauthorized JSON-RPC method requested: \(method)"
         case .unauthorizedEventType(let type):
             return "Unauthorized notification type requested: \(type)"
-        case .unauthorizedUpdateRequest(let context):
-            return "Unauthorized \(context) update request"
-        case .unauthorizedMatchingController(let isController):
-            return "Unauthorized: peer is also \(isController ? "" : "non-")controller"
+        case .unauthorizedUpdateAccountRequest:
+            return "Unauthorized update accounts request"
+        case .unauthorizedUpdateMethodsRequest:
+            return "Unauthorized update methods request"
+        case .unauthorizedUpdateEventsRequest:
+            return "Unauthorized update events request"
         case .unauthorizedUpdateExpiryRequest:
             return "Unauthorized update expiry request"
+        case .unauthorizedMatchingController(let isController):
+            return "Unauthorized: peer is also \(isController ? "" : "non-")controller"
         case .disapprovedChains:
             return "User disapproved requested chains"
         case .disapprovedMethods:

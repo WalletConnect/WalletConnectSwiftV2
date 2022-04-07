@@ -161,20 +161,20 @@ final class SessionEngineTests: XCTestCase {
     func testUpdatePeerSuccess() {
         let session = SessionSequence.stub(isSelfController: false)
         storageMock.setSequence(session)
-        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic))
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdateAccounts(topic: session.topic))
         XCTAssertTrue(relayMock.didRespondSuccess)
     }
     
     func testUpdatePeerErrorAccountInvalid() {
         let session = SessionSequence.stub(isSelfController: false)
         storageMock.setSequence(session)
-        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic, accounts: ["0"]))
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdateAccounts(topic: session.topic, accounts: ["0"]))
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 1003)
     }
     
     func testUpdatePeerErrorNoSession() {
-        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: ""))
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdateAccounts(topic: ""))
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 1301)
     }
@@ -182,51 +182,10 @@ final class SessionEngineTests: XCTestCase {
     func testUpdatePeerErrorUnauthorized() {
         let session = SessionSequence.stub(isSelfController: true) // Peer is not a controller
         storageMock.setSequence(session)
-        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdate(topic: session.topic))
+        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdateAccounts(topic: session.topic))
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 3003)
     }
-    
-
-    
-    // MARK: - Upgrade peer response tests
-    
-//    func testUpgradePeerSuccess() {
-//        var didCallbackUpgrade = false
-//        let session = SessionSequence.stub(isSelfController: false)
-//        storageMock.setSequence(session)
-//        engine.onSessionUpgrade = { topic, _ in
-//            didCallbackUpgrade = true
-//            XCTAssertEqual(topic, session.topic)
-//        }
-//        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpgrade(topic: session.topic))
-//        XCTAssertTrue(didCallbackUpgrade)
-//        XCTAssertTrue(relayMock.didRespondSuccess)
-//    }
-    
-//    func testUpgradePeerErrorInvalidPermissions() {
-//        setupEngine()
-//        let invalidPermissions = SessionPermissions.stub()
-//        let session = SessionSequence.stubSettled(isSelfController: false)
-//        storageMock.setSequence(session)
-//        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpgrade(topic: session.topic, permissions: invalidPermissions))
-//        XCTAssertFalse(relayMock.didRespondSuccess)
-//        XCTAssertEqual(relayMock.lastErrorCode, 1004)
-//    }
-//
-//    func testUpgradePeerErrorSessionNotFound() {
-//        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpgrade(topic: ""))
-//        XCTAssertFalse(relayMock.didRespondSuccess)
-//        XCTAssertEqual(relayMock.lastErrorCode, 1301)
-//    }
-//
-//    func testUpgradePeerErrorUnauthorized() {
-//        let session = SessionSequence.stub(isSelfController: true) // Peer is not a controller
-//        storageMock.setSequence(session)
-//        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpgrade(topic: session.topic))
-//        XCTAssertFalse(relayMock.didRespondSuccess)
-//        XCTAssertEqual(relayMock.lastErrorCode, 3004)
-//    }
     
     // MARK: - Session Update expiry on updating client
     
