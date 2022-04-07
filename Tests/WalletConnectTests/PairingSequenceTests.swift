@@ -33,4 +33,11 @@ final class PairingSequenceTests: XCTestCase {
         XCTAssertFalse(pairing.isActive)
         XCTAssertEqual(pairing.expiryDate, inactiveExpiry)
     }
+    
+    func testExtend() {
+        var pairing = PairingSequence(topic: "", selfMetadata: AppMetadata.stub())
+        let activeExpiry = referenceDate.advanced(by: PairingSequence.timeToLiveActive)
+        try? pairing.extend()
+        XCTAssertEqual(pairing.expiryDate, activeExpiry)
+    }
 }
