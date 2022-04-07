@@ -94,8 +94,7 @@ final class PairingEngine {
         let pairing = PairingSequence(uri: uri)
         let symKey = try! SymmetricKey(hex: uri.symKey) // FIXME: Malformed QR code from external source can crash the SDK
         try! kms.setSymmetricKey(symKey, for: pairing.topic)
-//        pairing.activate()
-//        try? pairing.extend()
+        pairing.activate()
         wcSubscriber.setSubscription(topic: pairing.topic)
         sequencesStore.setSequence(pairing)
     }
