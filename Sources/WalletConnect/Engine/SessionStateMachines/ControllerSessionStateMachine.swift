@@ -7,7 +7,8 @@ import Combine
 final class ControllerSessionStateMachine: SessionStateMachineValidating {
     
     var onMethodsUpdate: ((String, Set<String>)->())?
-    
+    var onEventsUpdate: ((String, Set<String>)->())?
+
     private let sequencesStore: SessionSequenceStorage
     private let relayer: WalletConnectRelaying
     private let kms: KeyManagementServiceProtocol
@@ -71,6 +72,8 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         switch response.requestParams {
         case .sessionUpdateMethods:
             handleUpdateMethodsResponse(topic: response.topic, result: response.result)
+        case .sessionUpdateEvents:
+            handleUpdateEventsResponse(topic: response.topic, result: response.result)
         default:
             break
         }
@@ -87,6 +90,20 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         case .error:
             //TODO - state sync
             logger.error("Peer failed to update methods.")
+        }
+    }
+    
+    private func handleUpdateEventsResponse(topic: String, result: JsonRpcResult) {
+        guard let session = sequencesStore.getSequence(forTopic: topic) else {
+            return
+        }
+        switch result {
+        case .response:
+            //TODO - state sync
+            onEventsUpdate?(session.topic, session.methods)
+        case .error:
+            //TODO - state sync
+            logger.error("Peer failed to update events.")
         }
     }
 }
