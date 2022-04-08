@@ -91,7 +91,7 @@ final class PairingEngine {
         guard !hasPairing(for: uri.topic) else {
             throw WalletConnectError.pairingAlreadyExist
         }
-        let pairing = PairingSequence(uri: uri)
+        var pairing = PairingSequence(uri: uri)
         let symKey = try! SymmetricKey(hex: uri.symKey) // FIXME: Malformed QR code from external source can crash the SDK
         try! kms.setSymmetricKey(symKey, for: pairing.topic)
         pairing.activate()
