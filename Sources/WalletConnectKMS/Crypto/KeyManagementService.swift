@@ -119,8 +119,6 @@ public class KeyManagementService: KeyManagementServiceProtocol {
             print("Key Agreement Error: Private key not found for public key: \(selfPublicKey.hexRepresentation)")
             throw KeyManagementService.Error.keyNotFound
         }
-        
-        
         return try KeyManagementService.generateAgreementKey(from: privateKey, peerPublicKey: hexRepresentation)
     }
     

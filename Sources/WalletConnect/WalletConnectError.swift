@@ -7,8 +7,8 @@ enum WalletConnectError: Error {
     case sessionNotAcknowledged(String)
     case pairingNotSettled(String)
     case invalidMethod
-    case invalidNotificationType
-    case invalidExtendTime
+    case invalidEventType
+    case invalidUpdateExpiryValue
     case unauthorizedNonControllerCall
     case pairingAlreadyExist
     case topicGenerationFailed
@@ -37,11 +37,11 @@ extension WalletConnectError {
             return "Session is not settled on topic \(topic)."
         case .pairingNotSettled(let topic):
             return "Pairing is not settled on topic \(topic)."
-        case .invalidExtendTime:
-            return "Extend time is out of expected range"
+        case .invalidUpdateExpiryValue:
+            return "Update expiry time is out of expected range"
         case .invalidMethod:
             return "Methods set is invalid."
-        case .invalidNotificationType:
+        case .invalidEventType:
             return "Invalid notification type."
         case .unauthorizedNonControllerCall:
             return "Method must be called by a controller client."

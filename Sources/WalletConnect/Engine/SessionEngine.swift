@@ -10,7 +10,7 @@ final class SessionEngine {
     var onSessionSettle: ((Session)->())?
     var onSessionRejected: ((String, SessionType.Reason)->())?
     var onSessionUpdateAccounts: ((String, Set<Account>)->())?
-    var onSessionExtended: ((Session) -> ())?
+    var onSessionExpiry: ((Session) -> ())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
     var onEventReceived: ((String, Session.Event)->())?
     
@@ -84,7 +84,7 @@ final class SessionEngine {
         }
     }
      
-    func extend(topic: String, by ttl: Int64) throws {
+    func updateExpiry(topic: String, by ttl: Int64) throws {
         guard var session = sequencesStore.getSequence(forTopic: topic) else {
             throw WalletConnectError.noSessionMatchingTopic(topic)
         }
@@ -94,7 +94,7 @@ final class SessionEngine {
         guard session.selfIsController else {
             throw WalletConnectError.unauthorizedNonControllerCall
         }
-        try session.extend(by: ttl)
+        try session.updateExpiry(by: ttl)
         let newExpiry = Int64(session.expiryDate.timeIntervalSince1970 )
         sequencesStore.setSequence(session)
         relayer.request(.wcSessionUpdateExpiry(SessionType.UpdateExpiryParams(expiry: newExpiry)), onTopic: topic)
@@ -185,10 +185,10 @@ final class SessionEngine {
                 wcSessionRequest(subscriptionPayload, payloadParams: sessionRequestParams)
             case .sessionPing(_):
                 wcSessionPing(subscriptionPayload)
-            case .sessionUpdateExpiry(let extendParams):
-                wcSessionExtend(subscriptionPayload, extendParams: extendParams)
-            case .sessionEvent(let notificationParams):
-                wcSessionNotification(subscriptionPayload, notificationParams: notificationParams)
+            case .sessionUpdateExpiry(let updateExpiryParams):
+                wcSessionUpdateExpiry(subscriptionPayload, updateExpiryParams: updateExpiryParams)
+            case .sessionEvent(let eventParams):
+                wcSessionNotification(subscriptionPayload, notificationParams: eventParams)
             default:
                 logger.warn("Warning: Session Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
             }
@@ -252,7 +252,7 @@ final class SessionEngine {
                   return
               }
         guard session.peerIsController else {
-            relayer.respondError(for: payload, reason: .unauthorizedUpdateRequest(context: .session))
+            relayer.respondError(for: payload, reason: .unauthorizedUpdateAccountRequest)
             return
         }
         session.updateAccounts(updateParams.accounts)
@@ -261,25 +261,25 @@ final class SessionEngine {
         onSessionUpdateAccounts?(topic, updateParams.accounts)
     }
     
-    private func wcSessionExtend(_ payload: WCRequestSubscriptionPayload, extendParams: SessionType.UpdateExpiryParams) {
+    private func wcSessionUpdateExpiry(_ payload: WCRequestSubscriptionPayload, updateExpiryParams: SessionType.UpdateExpiryParams) {
         let topic = payload.topic
         guard var session = sequencesStore.getSequence(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
         }
         guard session.peerIsController else {
-            relayer.respondError(for: payload, reason: .unauthorizedExtendRequest(context: .session))
+            relayer.respondError(for: payload, reason: .unauthorizedUpdateExpiryRequest)
             return
         }
         do {
-            try session.extend(to: extendParams.expiry)
+            try session.updateExpiry(to: updateExpiryParams.expiry)
         } catch {
-            relayer.respondError(for: payload, reason: .invalidExtendRequest(context: .session))
+            relayer.respondError(for: payload, reason: .invalidUpdateExpiryRequest)
             return
         }
         sequencesStore.setSequence(session)
         relayer.respondSuccess(for: payload)
-        onSessionExtended?(session.publicRepresentation())
+        onSessionExpiry?(session.publicRepresentation())
     }
     
     private func wcSessionDelete(_ payload: WCRequestSubscriptionPayload, deleteParams: SessionType.DeleteParams) {
@@ -347,7 +347,7 @@ final class SessionEngine {
             return
         } else {
             guard session.events.contains(params.type) else {
-                throw WalletConnectError.invalidNotificationType
+                throw WalletConnectError.invalidEventType
             }
         }
     }
@@ -410,25 +410,4 @@ final class SessionEngine {
             logger.error("Peer failed to update state.")
         }
     }
-    
-//    private func validatePermissions(_ permissions: SessionPermissions) -> Bool {
-////        for chainId in permissions.blockchain.chains {
-////            if !String.conformsToCAIP2(chainId) {
-////                return false
-////            }
-////        }
-//        for method in permissions.jsonrpc.methods {
-//            if method.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-//                return false
-//            }
-//        }
-//        if let notificationTypes = permissions.notifications?.types {
-//            for notification in notificationTypes {
-//                if notification.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-//                    return false
-//                }
-//            }
-//        }
-//        return true
-//    }
 }

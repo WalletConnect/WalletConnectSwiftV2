@@ -5,7 +5,6 @@ import WalletConnectKMS
 
 
 final class PairingEngine {
-    var onPairingExtend: ((Pairing)->())?
     var onSessionProposal: ((Session.Proposal)->())?
     var onProposeResponse: ((String)->())?
     var onSessionRejected: ((Session.Proposal, SessionType.Reason)->())?
@@ -212,7 +211,7 @@ final class PairingEngine {
             if !pairing.isActive {
                 pairing.activate()
             }
-            try? pairing.extend()
+            try? pairing.updateExpiry()
             sequencesStore.setSequence(pairing)
             
             let selfPublicKey = try! AgreementPublicKey(hex: proposal.proposer.publicKey)

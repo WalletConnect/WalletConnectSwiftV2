@@ -190,13 +190,13 @@ public final class WalletConnectClient {
         try controllerSessionStateMachine.updateMethods(topic: topic, methods: methods)
     }
     
-    /// For controller to extend a session lifetime
+    /// For controller to update expiry of a session
     /// - Parameters:
     ///   - topic: Topic of the Session, it can be a pairing or a session topic.
     ///   - ttl: Time in seconds that a target session is expected to be extended for. Must be greater than current time to expire and than 7 days
-    public func extend(topic: String, ttl: Int64 = Session.defaultTimeToLive) throws {
+    public func updateExpiry(topic: String, ttl: Int64 = Session.defaultTimeToLive) throws {
         if sessionEngine.hasSession(for: topic) {
-            try sessionEngine.extend(topic: topic, by: ttl)
+            try sessionEngine.updateExpiry(topic: topic, by: ttl)
         }
     }
     
@@ -303,9 +303,6 @@ public final class WalletConnectClient {
     // MARK: - Private
     
     private func setUpEnginesCallbacks() {
-        pairingEngine.onPairingExtend = { [unowned self] pairing in
-            delegate?.didExtend(pairing: pairing)
-        }
         sessionEngine.onSessionSettle = { [unowned self] settledSession in
             delegate?.didSettle(session: settledSession)
         }
@@ -330,8 +327,8 @@ public final class WalletConnectClient {
         sessionEngine.onSessionUpdateAccounts = { [unowned self] topic, accounts in
             delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
         }
-        sessionEngine.onSessionExtended = { [unowned self] session in
-            delegate?.didExtend(session: session)
+        sessionEngine.onSessionExpiry = { [unowned self] session in
+            delegate?.didUpdateExpiry(session: session)
         }
         sessionEngine.onEventReceived = { [unowned self] topic, notification in
             delegate?.didReceive(notification: notification, sessionTopic: topic)
