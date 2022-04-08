@@ -1,22 +1,22 @@
-protocol PairingSequenceStorage: AnyObject {
-    var onSequenceExpiration: ((PairingSequence) -> Void)? { get set }
+protocol WCPairingStorage: AnyObject {
+    var onSequenceExpiration: ((WCPairing) -> Void)? { get set }
     func hasSequence(forTopic topic: String) -> Bool
-    func setSequence(_ sequence: PairingSequence)
-    func getSequence(forTopic topic: String) -> PairingSequence?
-    func getAll() -> [PairingSequence]
+    func setSequence(_ sequence: WCPairing)
+    func getSequence(forTopic topic: String) -> WCPairing?
+    func getAll() -> [WCPairing]
     func delete(topic: String)
 }
 
-final class PairingStorage: PairingSequenceStorage {
+final class PairingStorage: WCPairingStorage {
     
-    var onSequenceExpiration: ((PairingSequence) -> Void)? {
+    var onSequenceExpiration: ((WCPairing) -> Void)? {
         get { storage.onSequenceExpiration }
         set { storage.onSequenceExpiration = newValue }
     }
     
-    private let storage: SequenceStore<PairingSequence>
+    private let storage: SequenceStore<WCPairing>
     
-    init(storage: SequenceStore<PairingSequence>) {
+    init(storage: SequenceStore<WCPairing>) {
         self.storage = storage
     }
     
@@ -24,15 +24,15 @@ final class PairingStorage: PairingSequenceStorage {
         storage.hasSequence(forTopic: topic)
     }
     
-    func setSequence(_ sequence: PairingSequence) {
+    func setSequence(_ sequence: WCPairing) {
         storage.setSequence(sequence)
     }
     
-    func getSequence(forTopic topic: String) -> PairingSequence? {
+    func getSequence(forTopic topic: String) -> WCPairing? {
         try? storage.getSequence(forTopic: topic)
     }
     
-    func getAll() -> [PairingSequence] {
+    func getAll() -> [WCPairing] {
         storage.getAll()
     }
     

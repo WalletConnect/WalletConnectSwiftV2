@@ -14,7 +14,7 @@ final class PairingEngineTests: XCTestCase {
     
     var relayMock: MockedWCRelay!
     var subscriberMock: MockedSubscriber!
-    var storageMock: PairingSequenceStorageMock!
+    var storageMock: WCPairingStorageMock!
     var cryptoMock: KeyManagementServiceMock!
     var proposalPayloadsStore: KeyValueStore<WCRequestSubscriptionPayload>!
     
@@ -23,7 +23,7 @@ final class PairingEngineTests: XCTestCase {
     override func setUp() {
         relayMock = MockedWCRelay()
         subscriberMock = MockedSubscriber()
-        storageMock = PairingSequenceStorageMock()
+        storageMock = WCPairingStorageMock()
         cryptoMock = KeyManagementServiceMock()
         topicGenerator = TopicGenerator()
         proposalPayloadsStore = KeyValueStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: "")
@@ -97,7 +97,7 @@ final class PairingEngineTests: XCTestCase {
     }
     
     func testReceiveProposal() {
-        let pairing = PairingSequence.stub()
+        let pairing = WCPairing.stub()
         let topicA = pairing.topic
         storageMock.setSequence(pairing)
         var sessionProposed = false

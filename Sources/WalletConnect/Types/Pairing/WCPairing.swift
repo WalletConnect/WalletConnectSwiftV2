@@ -1,7 +1,7 @@
 import Foundation
 import WalletConnectKMS
 
-struct PairingSequence: ExpirableSequence {
+struct WCPairing: ExpirableSequence {
     
     struct Participants: Codable, Equatable {
         var `self`: AppMetadata?
@@ -58,7 +58,7 @@ struct PairingSequence: ExpirableSequence {
         try? updateExpiry()
     }
     
-    mutating func updateExpiry(_ ttl: TimeInterval = PairingSequence.timeToLiveActive) throws {
+    mutating func updateExpiry(_ ttl: TimeInterval = WCPairing.timeToLiveActive) throws {
         let now = Self.dateInitializer()
         let newExpiryDate = now.advanced(by: ttl)
         let maxExpiryDate = now.advanced(by: Self.timeToLiveActive)

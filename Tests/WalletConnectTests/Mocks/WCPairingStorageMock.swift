@@ -1,24 +1,24 @@
 @testable import WalletConnect
 
-final class PairingSequenceStorageMock: PairingSequenceStorage {
+final class WCPairingStorageMock: WCPairingStorage {
     
-    var onSequenceExpiration: ((PairingSequence) -> Void)?
+    var onSequenceExpiration: ((WCPairing) -> Void)?
     
-    private(set) var pairings: [String: PairingSequence] = [:]
+    private(set) var pairings: [String: WCPairing] = [:]
     
     func hasSequence(forTopic topic: String) -> Bool {
         pairings[topic] != nil
     }
     
-    func setSequence(_ sequence: PairingSequence) {
+    func setSequence(_ sequence: WCPairing) {
         pairings[sequence.topic] = sequence
     }
     
-    func getSequence(forTopic topic: String) -> PairingSequence? {
+    func getSequence(forTopic topic: String) -> WCPairing? {
         pairings[topic]
     }
     
-    func getAll() -> [PairingSequence] {
+    func getAll() -> [WCPairing] {
         Array(pairings.values)
     }
     

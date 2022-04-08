@@ -13,7 +13,7 @@ final class PairingEngine {
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
     private let kms: KeyManagementServiceProtocol
-    private let sequencesStore: PairingSequenceStorage
+    private let sequencesStore: WCPairingStorage
     private var metadata: AppMetadata
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
@@ -22,7 +22,7 @@ final class PairingEngine {
     init(relay: WalletConnectRelaying,
          kms: KeyManagementServiceProtocol,
          subscriber: WCSubscribing,
-         sequencesStore: PairingSequenceStorage,
+         sequencesStore: WCPairingStorage,
          metadata: AppMetadata,
          logger: ConsoleLogging,
          topicGenerator: @escaping () -> String = String.generateTopic,
@@ -47,7 +47,7 @@ final class PairingEngine {
         return sequencesStore.hasSequence(forTopic: topic)
     }
     
-    func getSettledPairing(for topic: String) -> PairingSequence? {
+    func getSettledPairing(for topic: String) -> WCPairing? {
         guard let pairing = sequencesStore.getSequence(forTopic: topic) else {
             return nil
         }
@@ -62,7 +62,7 @@ final class PairingEngine {
     func create() -> WalletConnectURI? {
         let topic = topicInitializer()
         let symKey = try! kms.createSymmetricKey(topic)
-        let pairing = PairingSequence(topic: topic, selfMetadata: metadata)
+        let pairing = WCPairing(topic: topic, selfMetadata: metadata)
         let uri = WalletConnectURI(topic: topic, symKey: symKey.hexRepresentation, relay: pairing.relay)
         sequencesStore.setSequence(pairing)
         wcSubscriber.setSubscription(topic: topic)
@@ -91,7 +91,7 @@ final class PairingEngine {
         guard !hasPairing(for: uri.topic) else {
             throw WalletConnectError.pairingAlreadyExist
         }
-        var pairing = PairingSequence(uri: uri)
+        var pairing = WCPairing(uri: uri)
         let symKey = try! SymmetricKey(hex: uri.symKey) // FIXME: Malformed QR code from external source can crash the SDK
         try! kms.setSymmetricKey(symKey, for: pairing.topic)
         pairing.activate()
