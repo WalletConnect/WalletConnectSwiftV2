@@ -8,12 +8,12 @@ import WalletConnectKMS
 class ControllerSessionStateMachineTests: XCTestCase {
     var sut: ControllerSessionStateMachine!
     var relayMock: MockedWCRelay!
-    var storageMock: SessionSequenceStorageMock!
+    var storageMock: WCSessionStorageMock!
     var cryptoMock: KeyManagementServiceMock!
     
     override func setUp() {
         relayMock = MockedWCRelay()
-        storageMock = SessionSequenceStorageMock()
+        storageMock = WCSessionStorageMock()
         cryptoMock = KeyManagementServiceMock()
         sut = ControllerSessionStateMachine(relay: relayMock, kms: cryptoMock, sequencesStore: storageMock, logger: ConsoleLoggerMock())
     }
@@ -28,7 +28,7 @@ class ControllerSessionStateMachineTests: XCTestCase {
     // MARK: - Update Methods
         
     func testUpdateMethodsSuccess() throws {
-        let session = SessionSequence.stub(isSelfController: true)
+        let session = WCSession.stub(isSelfController: true)
         storageMock.setSequence(session)
         let methodsToUpdate: Set<String> = ["m1", "m2"]
         try sut.updateMethods(topic: session.topic, methods: methodsToUpdate)
@@ -44,7 +44,7 @@ class ControllerSessionStateMachineTests: XCTestCase {
     }
     
     func testUpdateMethodsErrorSessionNotAcknowledged() {
-        let session = SessionSequence.stub(acknowledged: false)
+        let session = WCSession.stub(acknowledged: false)
         storageMock.setSequence(session)
         XCTAssertThrowsError(try sut.updateMethods(topic: session.topic, methods: ["m1"])) { error in
             XCTAssertTrue(error.isSessionNotAcknowledgedError)
@@ -52,7 +52,7 @@ class ControllerSessionStateMachineTests: XCTestCase {
     }
 
     func testUpdateMethodsErrorInvalidMethod() {
-        let session = SessionSequence.stub(isSelfController: true)
+        let session = WCSession.stub(isSelfController: true)
         storageMock.setSequence(session)
         XCTAssertThrowsError(try sut.updateMethods(topic: session.topic, methods: [""])) { error in
             XCTAssertTrue(error.isInvalidMethodError)
@@ -60,7 +60,7 @@ class ControllerSessionStateMachineTests: XCTestCase {
     }
 
     func testUpdateMethodsErrorCalledByNonController() {
-        let session = SessionSequence.stub(isSelfController: false)
+        let session = WCSession.stub(isSelfController: false)
         storageMock.setSequence(session)
         XCTAssertThrowsError(try sut.updateMethods(topic: session.topic, methods: ["m1"])) { error in
             XCTAssertTrue(error.isUnauthorizedNonControllerCallError)
@@ -70,7 +70,7 @@ class ControllerSessionStateMachineTests: XCTestCase {
     // MARK: - Update Events
 
     func testUpdateEventsSuccess() throws {
-        let session = SessionSequence.stub(isSelfController: true)
+        let session = WCSession.stub(isSelfController: true)
         storageMock.setSequence(session)
         let eventsToUpdate: Set<String> = ["e1", "e2"]
         try sut.updateEvents(topic: session.topic, events: eventsToUpdate)

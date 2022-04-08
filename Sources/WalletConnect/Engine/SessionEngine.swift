@@ -14,7 +14,7 @@ final class SessionEngine {
     var onSessionDelete: ((String, SessionType.Reason)->())?
     var onEventReceived: ((String, Session.Event)->())?
     
-    private let sequencesStore: SessionSequenceStorage
+    private let sequencesStore: WCSessionStorage
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
     private let kms: KeyManagementServiceProtocol
@@ -26,7 +26,7 @@ final class SessionEngine {
     init(relay: WalletConnectRelaying,
          kms: KeyManagementServiceProtocol,
          subscriber: WCSubscribing,
-         sequencesStore: SessionSequenceStorage,
+         sequencesStore: WCSessionStorage,
          metadata: AppMetadata,
          logger: ConsoleLogging,
          topicGenerator: @escaping () -> String = String.generateTopic) {
@@ -200,7 +200,7 @@ final class SessionEngine {
         
         let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
         
-        let expectedExpiryTimeStamp = Date().addingTimeInterval(TimeInterval(SessionSequence.defaultTimeToLive))
+        let expectedExpiryTimeStamp = Date().addingTimeInterval(TimeInterval(WCSession.defaultTimeToLive))
         guard let relay = proposal.relays.first else {return}
         let settleParams = SessionType.SettleParams(
             relay: relay,
@@ -209,7 +209,7 @@ final class SessionEngine {
             events: proposal.events,
             controller: selfParticipant,
             expiry: Int64(expectedExpiryTimeStamp.timeIntervalSince1970))//todo - test expiration times
-        let session = SessionSequence(
+        let session = WCSession(
             topic: topic,
             selfParticipant: selfParticipant,
             peerParticipant: proposal.proposer,
@@ -230,7 +230,7 @@ final class SessionEngine {
         
         let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
         
-        let session = SessionSequence(topic: topic,
+        let session = WCSession(topic: topic,
                                       selfParticipant: selfParticipant,
                                       peerParticipant: settleParams.controller,
                                       settleParams: settleParams,
@@ -342,7 +342,7 @@ final class SessionEngine {
         onEventReceived?(topic, notification)
     }
     
-    private func validateEvents(session: SessionSequence, params: SessionType.EventParams) throws {
+    private func validateEvents(session: WCSession, params: SessionType.EventParams) throws {
         if session.selfIsController {
             return
         } else {

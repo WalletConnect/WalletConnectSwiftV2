@@ -9,7 +9,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
     var onMethodsUpdate: ((String, Set<String>)->())?
     var onEventsUpdate: ((String, Set<String>)->())?
     
-    private let sequencesStore: SessionSequenceStorage
+    private let sequencesStore: WCSessionStorage
     private let relayer: WalletConnectRelaying
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
@@ -17,7 +17,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
 
     init(relay: WalletConnectRelaying,
          kms: KeyManagementServiceProtocol,
-         sequencesStore: SessionSequenceStorage,
+         sequencesStore: WCSessionStorage,
          logger: ConsoleLogging) {
         self.relayer = relay
         self.kms = kms

@@ -9,7 +9,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
     var onMethodsUpdate: ((String, Set<String>)->())?
     var onEventsUpdate: ((String, Set<String>)->())?
 
-    private let sequencesStore: SessionSequenceStorage
+    private let sequencesStore: WCSessionStorage
     private let relayer: WalletConnectRelaying
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
@@ -17,7 +17,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
 
     init(relay: WalletConnectRelaying,
          kms: KeyManagementServiceProtocol,
-         sequencesStore: SessionSequenceStorage,
+         sequencesStore: WCSessionStorage,
          logger: ConsoleLogging) {
         self.relayer = relay
         self.kms = kms
@@ -90,7 +90,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
     }
     
     // MARK: - Private
-    private func getSession(for topic: String) throws -> SessionSequence {
+    private func getSession(for topic: String) throws -> WCSession {
         if let session = sequencesStore.getSequence(forTopic: topic) {
             return session
         } else {
@@ -98,7 +98,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         }
     }
     
-    private func validateControlledAcknowledged(_ session: SessionSequence) throws {
+    private func validateControlledAcknowledged(_ session: WCSession) throws {
         guard session.acknowledged else {
             throw WalletConnectError.sessionNotAcknowledged(session.topic)
         }

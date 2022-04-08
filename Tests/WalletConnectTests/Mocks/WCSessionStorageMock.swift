@@ -1,25 +1,25 @@
 @testable import WalletConnect
 import Foundation
 
-final class SessionSequenceStorageMock: SessionSequenceStorage {
+final class WCSessionStorageMock: WCSessionStorage {
     
-    var onSequenceExpiration: ((SessionSequence) -> Void)?
+    var onSequenceExpiration: ((WCSession) -> Void)?
     
-    private(set) var sessions: [String: SessionSequence] = [:]
+    private(set) var sessions: [String: WCSession] = [:]
     
     func hasSequence(forTopic topic: String) -> Bool {
         sessions[topic] != nil
     }
     
-    func setSequence(_ sequence: SessionSequence) {
+    func setSequence(_ sequence: WCSession) {
         sessions[sequence.topic] = sequence
     }
     
-    func getSequence(forTopic topic: String) -> SessionSequence? {
+    func getSequence(forTopic topic: String) -> WCSession? {
         return sessions[topic]
     }
     
-    func getAll() -> [SessionSequence] {
+    func getAll() -> [WCSession] {
         Array(sessions.values)
     }
     
