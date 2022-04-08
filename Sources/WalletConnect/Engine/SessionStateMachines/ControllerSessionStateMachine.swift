@@ -29,18 +29,9 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
     }
     
     func updateMethods(topic: String, methods: Set<String>) throws {
-        guard var session = sequencesStore.getSequence(forTopic: topic) else {
-            throw WalletConnectError.noSessionMatchingTopic(topic)
-        }
-        guard session.acknowledged else {
-            throw WalletConnectError.sessionNotAcknowledged(topic)
-        }
-        guard session.selfIsController else {
-            throw WalletConnectError.unauthorizedNonControllerCall
-        }
-        guard validateMethods(methods) else {
-            throw WalletConnectError.invalidMethod
-        }
+        var session = try getSession(for: topic)
+        try validateControlledAcknowledged(session)
+        try validateMethods(methods)
         logger.debug("Controller will update methods")
         session.updateMethods(methods)
         sequencesStore.setSequence(session)
@@ -48,18 +39,9 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
     }
     
     func updateEvents(topic: String, events: Set<String>) throws {
-        guard var session = sequencesStore.getSequence(forTopic: topic) else {
-            throw WalletConnectError.noSessionMatchingTopic(topic)
-        }
-        guard session.acknowledged else {
-            throw WalletConnectError.sessionNotAcknowledged(topic)
-        }
-        guard session.selfIsController else {
-            throw WalletConnectError.unauthorizedNonControllerCall
-        }
-        guard validateEvents(events) else {
-            throw WalletConnectError.invalidEventType
-        }
+        var session = try getSession(for: topic)
+        try validateControlledAcknowledged(session)
+        try validateEvents(events)
         logger.debug("Controller will update events")
         session.updateEvents(events)
         sequencesStore.setSequence(session)
@@ -104,6 +86,24 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         case .error:
             //TODO - state sync
             logger.error("Peer failed to update events.")
+        }
+    }
+    
+    // MARK: - Private
+    private func getSession(for topic: String) throws -> SessionSequence {
+        if let session = sequencesStore.getSequence(forTopic: topic) {
+            return session
+        } else {
+            throw WalletConnectError.noSessionMatchingTopic(topic)
+        }
+    }
+    
+    private func validateControlledAcknowledged(_ session: SessionSequence) throws {
+        guard session.acknowledged else {
+            throw WalletConnectError.sessionNotAcknowledged(session.topic)
+        }
+        guard session.selfIsController else {
+            throw WalletConnectError.unauthorizedNonControllerCall
         }
     }
 }

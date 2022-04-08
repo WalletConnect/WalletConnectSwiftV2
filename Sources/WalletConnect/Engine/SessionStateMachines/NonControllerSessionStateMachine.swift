@@ -37,7 +37,9 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
     }
     
     private func wcSessionUpdateMethods(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateMethodsParams) {
-        guard validateMethods(updateParams.methods) else {
+        do {
+            try validateMethods(updateParams.methods)
+        } catch {
             relayer.respondError(for: payload, reason: .invalidUpdateMethodsRequest)
             return
         }
