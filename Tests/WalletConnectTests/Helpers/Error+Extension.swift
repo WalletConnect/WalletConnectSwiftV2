@@ -24,7 +24,7 @@ extension Error {
         return true
     }
     
-    var isInvalidMetodError: Bool {
+    var isInvalidMethodError: Bool {
         guard case .invalidMethod = wcError else { return false }
         return true
     }
