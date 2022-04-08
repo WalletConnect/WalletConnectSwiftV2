@@ -2,7 +2,7 @@ import Foundation
 import Combine
 import WalletConnectUtils
 import WalletConnectKMS
-
+import Commons
 
 final class SessionEngine {
     var onSessionRequest: ((Request)->())?

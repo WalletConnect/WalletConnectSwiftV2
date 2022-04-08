@@ -1,5 +1,5 @@
-
 import Foundation
+import Commons
 
 public class JsonRpcHistory<T> where T: Codable&Equatable {
     enum RecordingError: Error {

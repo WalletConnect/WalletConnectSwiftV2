@@ -3,6 +3,7 @@ import XCTest
 @testable import TestingUtils
 @testable import WalletConnectKMS
 import WalletConnectUtils
+import Commons
 
 func deriveTopic(publicKey: String, privateKey: AgreementPrivateKey) -> String {
     try! KeyManagementService.generateAgreementKey(from: privateKey, peerPublicKey: publicKey).derivedTopic()

@@ -1,5 +1,6 @@
 import WalletConnectUtils
 import Foundation
+import Commons
 
 /**
  A representation of an active session connection.

@@ -2,6 +2,7 @@
 import Foundation
 import Combine
 import WalletConnectUtils
+import Commons
 @testable import WalletConnect
 @testable import TestingUtils
 

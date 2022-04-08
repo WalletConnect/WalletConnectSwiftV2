@@ -1,5 +1,6 @@
 import Foundation
 import WalletConnectUtils
+import Commons
 
 public let defaultTimeout: TimeInterval = 5.0
 

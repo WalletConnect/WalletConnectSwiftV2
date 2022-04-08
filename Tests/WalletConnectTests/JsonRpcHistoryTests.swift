@@ -3,6 +3,7 @@ import Foundation
 import XCTest
 import TestingUtils
 import WalletConnectUtils
+import Commons
 @testable import WalletConnect
 
 final class JsonRpcHistoryTests: XCTestCase {

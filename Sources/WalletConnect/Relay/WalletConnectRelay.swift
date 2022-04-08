@@ -1,8 +1,8 @@
-
 import Foundation
 import Combine
 import WalletConnectUtils
 import WalletConnectKMS
+import Commons
 
 struct WCResponse: Codable {
     let topic: String

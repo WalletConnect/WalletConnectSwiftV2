@@ -1,5 +1,6 @@
 import Foundation
 import WalletConnectUtils
+import Commons
 
 public struct Request: Codable, Equatable {
     public let id: Int64

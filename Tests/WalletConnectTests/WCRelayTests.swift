@@ -3,6 +3,7 @@ import Foundation
 import Combine
 import XCTest
 import WalletConnectUtils
+import Commons
 @testable import TestingUtils
 @testable import WalletConnect
 

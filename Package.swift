@@ -16,7 +16,7 @@ let package = Package(
     targets: [
         .target(
             name: "WalletConnect",
-            dependencies: ["Relayer", "WalletConnectUtils", "WalletConnectKMS"],
+            dependencies: ["Relayer", "WalletConnectUtils", "WalletConnectKMS", "Commons"],
             path: "Sources/WalletConnect"),
         .target(
             name: "Relayer",
@@ -28,7 +28,7 @@ let package = Package(
             path: "Sources/WalletConnectKMS"),
         .target(
             name: "WalletConnectUtils",
-            dependencies: []),
+            dependencies: ["Commons"]),
         .target(
             name: "Commons"),
         .target(

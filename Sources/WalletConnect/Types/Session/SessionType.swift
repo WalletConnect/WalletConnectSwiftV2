@@ -1,5 +1,6 @@
 import Foundation
 import WalletConnectUtils
+import Commons
 
 // Internal namespace for session payloads.
 internal enum SessionType {

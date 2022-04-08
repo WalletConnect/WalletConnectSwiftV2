@@ -1,8 +1,7 @@
-
 import Foundation
 import Combine
 import WalletConnectUtils
-
+import Commons
 
 public final class Relayer {
     enum RelyerError: Error {
