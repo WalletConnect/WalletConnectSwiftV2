@@ -90,6 +90,34 @@
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Toolbox"
+               BuildableName = "Toolbox"
+               BlueprintName = "Toolbox"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Commons"
+               BuildableName = "Commons"
+               BlueprintName = "Commons"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -145,6 +173,26 @@
                BlueprintIdentifier = "WalletConnectKMSTests"
                BuildableName = "WalletConnectKMSTests"
                BlueprintName = "WalletConnectKMSTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "ToolboxTests"
+               BuildableName = "ToolboxTests"
+               BlueprintName = "ToolboxTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "CommonsTests"
+               BuildableName = "CommonsTests"
+               BlueprintName = "CommonsTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>

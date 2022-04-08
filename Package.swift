@@ -29,6 +29,11 @@ let package = Package(
         .target(
             name: "WalletConnectUtils",
             dependencies: []),
+        .target(
+            name: "Commons"),
+        .target(
+            name: "Toolbox",
+            path: "Tests/Toolbox"),
         .testTarget(
             name: "WalletConnectTests",
             dependencies: ["WalletConnect", "TestingUtils", "WalletConnectKMS"]),
@@ -41,6 +46,9 @@ let package = Package(
         .testTarget(
             name: "WalletConnectKMSTests",
             dependencies: ["WalletConnectKMS", "WalletConnectUtils", "TestingUtils"]),
+        .testTarget(
+            name: "CommonsTests",
+            dependencies: ["Commons", "Toolbox"]),
         .target(
             name: "TestingUtils",
             dependencies: ["WalletConnectUtils", "WalletConnectKMS"],
