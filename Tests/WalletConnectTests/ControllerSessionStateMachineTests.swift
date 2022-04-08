@@ -66,4 +66,22 @@ class ControllerSessionStateMachineTests: XCTestCase {
             XCTAssertTrue(error.isUnauthorizedNonControllerCallError)
         }
     }
+    
+    // MARK: - Update Events
+
+    func testUpdateEventsSuccess() throws {
+        let session = SessionSequence.stub(isSelfController: true)
+        storageMock.setSequence(session)
+        let eventsToUpdate: Set<String> = ["e1", "e2"]
+        try sut.updateEvents(topic: session.topic, events: eventsToUpdate)
+        let updatedSession = storageMock.getSequence(forTopic: session.topic)!
+        XCTAssertTrue(relayMock.didCallRequest)
+        XCTAssertEqual(eventsToUpdate, updatedSession.events)
+    }
+    
+    func testUpdateEventsErrorSessionNotFound() {
+        XCTAssertThrowsError(try sut.updateEvents(topic: "", events: ["e1"])) { error in
+            XCTAssertTrue(error.isNoSessionMatchingTopicError)
+        }
+    }
 }
