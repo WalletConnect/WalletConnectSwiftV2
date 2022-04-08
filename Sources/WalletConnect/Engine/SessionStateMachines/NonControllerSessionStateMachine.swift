@@ -7,6 +7,7 @@ import Combine
 final class NonControllerSessionStateMachine: SessionStateMachineValidating {
     
     var onMethodsUpdate: ((String, Set<String>)->())?
+    var onEventsUpdate: ((String, Set<String>)->())?
     
     private let sequencesStore: SessionSequenceStorage
     private let relayer: WalletConnectRelaying
@@ -29,14 +30,16 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
         relayer.wcRequestPublisher.sink { [unowned self] subscriptionPayload in
             switch subscriptionPayload.wcRequest.params {
             case .sessionUpdateMethods(let updateParams):
-                wcSessionUpdateMethods(payload: subscriptionPayload, updateParams: updateParams)
+                onSessionUpdateMethodsRequest(payload: subscriptionPayload, updateParams: updateParams)
+            case .sessionUpdateEvents(let updateParams):
+                onSessionUpdateEventsRequest(payload: subscriptionPayload, updateParams: updateParams)
             default:
                 logger.warn("Warning: Session Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
             }
         }.store(in: &publishers)
     }
     
-    private func wcSessionUpdateMethods(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateMethodsParams) {
+    private func onSessionUpdateMethodsRequest(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateMethodsParams) {
         do {
             try validateMethods(updateParams.methods)
         } catch {
@@ -55,5 +58,26 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
         sequencesStore.setSequence(session)
         relayer.respondSuccess(for: payload)
         onMethodsUpdate?(session.topic, updateParams.methods)
+    }
+    
+    private func onSessionUpdateEventsRequest(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateEventsParams) {
+        do {
+            try validateEvents(updateParams.events)
+        } catch {
+            relayer.respondError(for: payload, reason: .invalidUpdateEventsRequest)
+            return
+        }
+        guard var session = sequencesStore.getSequence(forTopic: payload.topic) else {
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
+            return
+        }
+        guard session.peerIsController else {
+            relayer.respondError(for: payload, reason: .unauthorizedUpdateMethodsRequest)
+            return
+        }
+        session.updateEvents(updateParams.events)
+        sequencesStore.setSequence(session)
+        relayer.respondSuccess(for: payload)
+        onEventsUpdate?(session.topic, updateParams.events)
     }
 }

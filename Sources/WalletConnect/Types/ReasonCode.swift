@@ -11,10 +11,8 @@ enum ReasonCode {
     // 1000 (Internal)
     case missingOrInvalid(String)
     case invalidUpdateAccountsRequest
-    
-
-    
     case invalidUpdateMethodsRequest
+    case invalidUpdateEventsRequest
     case invalidUpdateExpiryRequest
     case noContextWithTopic(context: Context, topic: String)
     
@@ -37,21 +35,18 @@ enum ReasonCode {
         switch self {
         case .generic: return 0
         case .missingOrInvalid: return 1000
+            
         case .invalidUpdateAccountsRequest: return 1003
-            
         case .invalidUpdateMethodsRequest: return 1004
-        case .invalidUpdateExpiryRequest: return 1005
+        case .invalidUpdateEventsRequest: return 1005
+        case .invalidUpdateExpiryRequest: return 1006
         case .noContextWithTopic: return 1301
-            
             
         case .unauthorizedTargetChain: return 3000
         case .unauthorizedRPCMethod: return 3001
         case .unauthorizedEventType: return 3002
             
-            
         case .unauthorizedUpdateAccountRequest: return 3003
-            
-            
         case .unauthorizedUpdateMethodsRequest: return 3004
         case .unauthorizedUpdateEventsRequest: return 3005
         case .unauthorizedUpdateExpiryRequest: return 3005
@@ -72,6 +67,8 @@ enum ReasonCode {
             return "Invalid update accounts request"
         case .invalidUpdateMethodsRequest:
             return "Invalid update methods request"
+        case .invalidUpdateEventsRequest:
+            return "Invalid update events request"
         case .invalidUpdateExpiryRequest:
             return "Invalid update expiry request"
         case .noContextWithTopic(let context, let topic):
