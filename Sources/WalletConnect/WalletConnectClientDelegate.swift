@@ -38,6 +38,11 @@ public protocol WalletConnectClientDelegate: AnyObject {
     /// Function is executed on controller and non-controller client when both communicating peers have successfully updated methods requested by the controller client.
     func didUpdate(sessionTopic: String, methods: Set<String>)
     
+    /// Tells the delegate that events has been updated in session
+    ///
+    /// Function is executed on controller and non-controller client when both communicating peers have successfully updated events requested by the controller client.
+    func didUpdate(sessionTopic: String, events: Set<String>)
+    
     /// Tells the delegate that the client has settled a session.
     ///
     /// Function is executed on proposer and responder client when both communicating peers have successfully established a session.

@@ -82,7 +82,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         switch result {
         case .response:
             //TODO - state sync
-            onEventsUpdate?(session.topic, session.methods)
+            onEventsUpdate?(session.topic, session.events)
         case .error:
             //TODO - state sync
             logger.error("Peer failed to update events.")

@@ -178,7 +178,7 @@ public final class WalletConnectClient {
     /// - Parameters:
     ///   - topic: Topic of the session that is intended to be updated.
     ///   - accounts: Set of accounts that will be allowed to be used by the session after the update.
-    public func update(topic: String, accounts: Set<Account>) throws {
+    public func updateAccounts(topic: String, accounts: Set<Account>) throws {
         try sessionEngine.updateAccounts(topic: topic, accounts: accounts)
     }
     
@@ -188,6 +188,14 @@ public final class WalletConnectClient {
     ///   - methods: Sets of methods that will replace existing ones.
     public func updateMethods(topic: String, methods: Set<String>) throws {
         try controllerSessionStateMachine.updateMethods(topic: topic, methods: methods)
+    }
+    
+    /// For the responder to update session events
+    /// - Parameters:
+    ///   - topic: Topic of the session that is intended to be updated.
+    ///   - events: Sets of events that will replace existing ones.
+    public func updateEvents(topic: String, events: Set<String>) throws {
+        try controllerSessionStateMachine.updateEvents(topic: topic, events: events)
     }
     
     /// For controller to update expiry of a session
@@ -321,8 +329,14 @@ public final class WalletConnectClient {
         controllerSessionStateMachine.onMethodsUpdate = { [unowned self] topic, methods in
             delegate?.didUpdate(sessionTopic: topic, methods: methods)
         }
+        controllerSessionStateMachine.onEventsUpdate = { [unowned self] topic, events in
+            delegate?.didUpdate(sessionTopic: topic, events: events)
+        }
         nonControllerSessionStateMachine.onMethodsUpdate = { [unowned self] topic, methods in
             delegate?.didUpdate(sessionTopic: topic, methods: methods)
+        }
+        nonControllerSessionStateMachine.onEventsUpdate = { [unowned self] topic, events in
+            delegate?.didUpdate(sessionTopic: topic, events: events)
         }
         sessionEngine.onSessionUpdateAccounts = { [unowned self] topic, accounts in
             delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
