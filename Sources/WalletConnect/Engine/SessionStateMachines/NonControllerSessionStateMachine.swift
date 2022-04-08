@@ -72,7 +72,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
             return
         }
         guard session.peerIsController else {
-            relayer.respondError(for: payload, reason: .unauthorizedUpdateMethodsRequest)
+            relayer.respondError(for: payload, reason: .unauthorizedUpdateEventsRequest)
             return
         }
         session.updateEvents(updateParams.events)

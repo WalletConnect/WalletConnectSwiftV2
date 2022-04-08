@@ -50,9 +50,14 @@ extension WCRequestSubscriptionPayload {
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
     }
     
-    static func stubUpdateMethods(topic: String, methods: Set<String> = ["std:0:0"]) -> WCRequestSubscriptionPayload {
+    static func stubUpdateMethods(topic: String, methods: Set<String> = ["method"]) -> WCRequestSubscriptionPayload {
         let updateMethod = WCMethod.wcSessionUpdateMethods(SessionType.UpdateMethodsParams(methods: methods)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
+    }
+    
+    static func stubUpdateEvents(topic: String, events: Set<String> = ["event"]) -> WCRequestSubscriptionPayload {
+        let updateEvent = WCMethod.wcSessionUpdateEvents(SessionType.UpdateEventsParams(events: events)).asRequest()
+        return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateEvent)
     }
     
     static func stubUpdateExpiry(topic: String, expiry: Int64) -> WCRequestSubscriptionPayload {
