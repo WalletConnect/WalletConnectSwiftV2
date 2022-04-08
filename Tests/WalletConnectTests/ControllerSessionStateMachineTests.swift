@@ -55,7 +55,7 @@ class ControllerSessionStateMachineTests: XCTestCase {
         let session = SessionSequence.stub(isSelfController: true)
         storageMock.setSequence(session)
         XCTAssertThrowsError(try sut.updateMethods(topic: session.topic, methods: [""])) { error in
-            XCTAssertTrue(error.isInvalidMetodError)
+            XCTAssertTrue(error.isInvalidMethodError)
         }
     }
 
