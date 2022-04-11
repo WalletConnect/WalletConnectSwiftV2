@@ -3,6 +3,7 @@
 import Foundation
 import WalletConnectUtils
 import Commons
+import Toolbox
 @testable import WalletConnectKMS
 @testable import WalletConnect
 

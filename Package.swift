@@ -36,13 +36,13 @@ let package = Package(
             path: "Tests/Toolbox"),
         .testTarget(
             name: "WalletConnectTests",
-            dependencies: ["WalletConnect", "TestingUtils", "WalletConnectKMS"]),
+            dependencies: ["WalletConnect", "TestingUtils", "WalletConnectKMS", "Toolbox"]),
         .testTarget(
             name: "IntegrationTests",
-            dependencies: ["WalletConnect", "TestingUtils", "WalletConnectKMS"]),
+            dependencies: ["WalletConnect", "TestingUtils", "WalletConnectKMS", "Toolbox"]),
         .testTarget(
             name: "RelayerTests",
-            dependencies: ["Relayer", "WalletConnectUtils", "TestingUtils"]),
+            dependencies: ["Relayer", "WalletConnectUtils", "TestingUtils", "Toolbox"]),
         .testTarget(
             name: "WalletConnectKMSTests",
             dependencies: ["WalletConnectKMS", "WalletConnectUtils", "TestingUtils"]),
