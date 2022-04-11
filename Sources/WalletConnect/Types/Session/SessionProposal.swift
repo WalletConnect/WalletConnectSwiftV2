@@ -9,6 +9,6 @@ struct SessionProposal: Codable, Equatable {
     let chains: Set<Blockchain>
     
     func publicRepresentation() -> Session.Proposal {
-        return Session.Proposal(proposer: proposer.metadata, methods: methods, events: events, blockchains: chains, proposal: self)
+        return Session.Proposal(proposer: proposer.metadata, methods: methods, events: events, chains: chains, proposal: self)
     }
 }

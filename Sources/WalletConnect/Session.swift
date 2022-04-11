@@ -22,7 +22,7 @@ extension Session {
         public let proposer: AppMetadata
         public let methods: Set<String>
         public let events: Set<String>
-        public let blockchains: Set<Blockchain>
+        public let chains: Set<Blockchain>
         
         // TODO: Refactor internal objects to manage only needed data
         internal let proposal: SessionProposal
