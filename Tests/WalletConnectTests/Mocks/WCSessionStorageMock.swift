@@ -11,8 +11,8 @@ final class WCSessionStorageMock: WCSessionStorage {
         sessions[topic] != nil
     }
     
-    func setSession(_ sequence: WCSession) {
-        sessions[sequence.topic] = sequence
+    func setSession(_ session: WCSession) {
+        sessions[session.topic] = session
     }
     
     func getSession(forTopic topic: String) -> WCSession? {

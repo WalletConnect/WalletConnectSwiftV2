@@ -10,8 +10,8 @@ final class WCPairingStorageMock: WCPairingStorage {
         pairings[topic] != nil
     }
     
-    func setPairing(_ sequence: WCPairing) {
-        pairings[sequence.topic] = sequence
+    func setPairing(_ pairing: WCPairing) {
+        pairings[pairing.topic] = pairing
     }
     
     func getPairing(forTopic topic: String) -> WCPairing? {
