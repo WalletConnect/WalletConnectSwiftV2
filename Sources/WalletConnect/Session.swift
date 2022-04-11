@@ -31,5 +31,6 @@ extension Session {
     public struct Event: Equatable, Hashable {
         public let type: String
         public let data: AnyCodable
+        public let chainId: String?
     }
 }

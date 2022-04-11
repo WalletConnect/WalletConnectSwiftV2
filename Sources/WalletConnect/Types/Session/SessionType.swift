@@ -13,10 +13,10 @@ internal enum SessionType {
     
     struct SettleParams: Codable, Equatable {
         let relay: RelayProtocolOptions
+        let controller: Participant
         let accounts: Set<Account>
         let methods: Set<String>
         let events: Set<String>
-        let controller: Participant
         let expiry: Int64
     }
     
@@ -74,12 +74,12 @@ internal enum SessionType {
     }
     
     struct EventParams: Codable, Equatable {
-        let type: String
-        let data: AnyCodable
-        
-        init(type: String, data: AnyCodable) {
-            self.type = type
-            self.data = data
+        let event: Event
+        let chainId: String?
+
+        struct Event: Codable, Equatable {
+            let type: String
+            let data: AnyCodable
         }
     }
     

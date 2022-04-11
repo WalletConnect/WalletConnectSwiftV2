@@ -154,7 +154,7 @@ final class SessionEngine {
             return
         }
         do {
-            let params = SessionType.EventParams(type: params.type, data: params.data)
+            let params = SessionType.EventParams(event: SessionType.EventParams.Event(type: params.type, data: params.data), chainId: params.chainId)
             try validateEvents(session: session, params: params)
             relayer.request(.wcSessionEvent(params), onTopic: topic) { result in
                 switch result {
@@ -188,7 +188,7 @@ final class SessionEngine {
             case .sessionUpdateExpiry(let updateExpiryParams):
                 wcSessionUpdateExpiry(subscriptionPayload, updateExpiryParams: updateExpiryParams)
             case .sessionEvent(let eventParams):
-                wcSessionNotification(subscriptionPayload, notificationParams: eventParams)
+                wcSessionNotification(subscriptionPayload, eventParams: eventParams)
             default:
                 logger.warn("Warning: Session Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
             }
@@ -204,10 +204,9 @@ final class SessionEngine {
         guard let relay = proposal.relays.first else {return}
         let settleParams = SessionType.SettleParams(
             relay: relay,
-            accounts: accounts,
+            controller: selfParticipant, accounts: accounts,
             methods: proposal.methods,
             events: proposal.events,
-            controller: selfParticipant,
             expiry: Int64(expectedExpiryTimeStamp.timeIntervalSince1970))//todo - test expiration times
         let session = SessionSequence(
             topic: topic,
@@ -325,28 +324,29 @@ final class SessionEngine {
         relayer.respondSuccess(for: payload)
     }
     
-    private func wcSessionNotification(_ payload: WCRequestSubscriptionPayload, notificationParams: SessionType.EventParams) {
+    private func wcSessionNotification(_ payload: WCRequestSubscriptionPayload, eventParams: SessionType.EventParams) {
+        let event = eventParams.event
         let topic = payload.topic
         guard let session = sequencesStore.getSequence(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
             return
         }
         if session.selfIsController {
-            guard session.hasPermission(forEvents: notificationParams.type) else {
-                relayer.respondError(for: payload, reason: .unauthorizedEventType(notificationParams.type))
+            guard session.hasPermission(forEvents: event.type) else {
+                relayer.respondError(for: payload, reason: .unauthorizedEventType(event.type))
                 return
             }
         }
-        let notification = Session.Event(type: notificationParams.type, data: notificationParams.data)
+        let eventPublicRepresentation = Session.Event(type: event.type, data: event.data, chainId: eventParams.chainId)
         relayer.respondSuccess(for: payload)
-        onEventReceived?(topic, notification)
+        onEventReceived?(topic, eventPublicRepresentation)
     }
     
     private func validateEvents(session: SessionSequence, params: SessionType.EventParams) throws {
         if session.selfIsController {
             return
         } else {
-            guard session.events.contains(params.type) else {
+            guard session.events.contains(params.event.type) else {
                 throw WalletConnectError.invalidEventType
             }
         }

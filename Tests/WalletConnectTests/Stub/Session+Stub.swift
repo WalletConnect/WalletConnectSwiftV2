@@ -34,10 +34,9 @@ extension SessionType.SettleParams {
     static func stub() -> SessionType.SettleParams {
         return SessionType.SettleParams(
             relay: RelayProtocolOptions.stub(),
-            accounts: Account.stubSet(),
+            controller: Participant.stub(), accounts: Account.stubSet(),
             methods: [],
             events: [],
-            controller: Participant.stub(),
             expiry: Int64(Date.distantFuture.timeIntervalSince1970))
     }
 }

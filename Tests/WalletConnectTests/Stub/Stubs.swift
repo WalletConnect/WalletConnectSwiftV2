@@ -79,7 +79,7 @@ extension SessionProposal {
             proposer: Participant(publicKey: proposerPubKey, metadata: AppMetadata.stub()),
             methods: [],
             events: [],
-            blockchains: [])
+            chains: [])
     }
 }
 

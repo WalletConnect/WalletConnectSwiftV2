@@ -291,7 +291,7 @@ final class ClientTests: XCTestCase {
         let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
 
         try! responder.client.pair(uri: uri)
-        let notificationParams = Session.Event(type: "type1", data: AnyCodable("notification_data"))
+        let notificationParams = Session.Event(type: "type1", data: AnyCodable("notification_data"), chainId: nil)
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
@@ -311,7 +311,7 @@ final class ClientTests: XCTestCase {
         let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
 
         try! responder.client.pair(uri: uri)
-        let notificationParams = Session.Event(type: "type2", data: AnyCodable("notification_data"))
+        let notificationParams = Session.Event(type: "type2", data: AnyCodable("notification_data"), chainId: nil)
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
