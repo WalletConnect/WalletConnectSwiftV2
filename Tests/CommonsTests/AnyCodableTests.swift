@@ -14,11 +14,11 @@ fileprivate struct SampleStruct: Codable, Equatable {
         let string: String
     }
     
-    static func stub() -> SampleStruct {
+    static func stubRandom() -> SampleStruct {
         SampleStruct(
             bool: Bool.random(),
-            int: Int.random(in: Int.min...Int.max),
-            double: Double.random(in: -1337.00...1337.00),
+            int: Int.random(),
+            double: Double.pi, // Value is constant to workaround a JSONDecoder bug: https://bugs.swift.org/browse/SR-7054
             string: UUID().uuidString,
             object: SubObject(string: UUID().uuidString)
         )
@@ -74,12 +74,12 @@ fileprivate let heterogeneousArrayJSON = """
 final class AnyCodableTests: XCTestCase {
     
     func testInitGet() throws {
-        XCTAssertNoThrow(try AnyCodable(Int.random(in: Int.min...Int.max)).get(Int.self))
-        XCTAssertNoThrow(try AnyCodable(Double.pi).get(Double.self))
+        XCTAssertNoThrow(try AnyCodable(Int.random()).get(Int.self))
+        XCTAssertNoThrow(try AnyCodable(Double.random()).get(Double.self))
         XCTAssertNoThrow(try AnyCodable(Bool.random()).get(Bool.self))
         XCTAssertNoThrow(try AnyCodable(UUID().uuidString).get(String.self))
         XCTAssertNoThrow(try AnyCodable((1...10).map { _ in UUID().uuidString }).get([String].self))
-        XCTAssertNoThrow(try AnyCodable(SampleStruct.stub()).get(SampleStruct.self))
+        XCTAssertNoThrow(try AnyCodable(SampleStruct.stubRandom()).get(SampleStruct.self))
     }
     
     func testEqualityInt() {
@@ -93,8 +93,8 @@ final class AnyCodableTests: XCTestCase {
     }
     
     func testEqualityObject() {
-        let a = AnyCodable(SampleStruct.stub())
-        let b = AnyCodable(SampleStruct.stub())
+        let a = AnyCodable(SampleStruct.stubRandom())
+        let b = AnyCodable(SampleStruct.stubRandom())
         XCTAssertEqual(a, a)
         XCTAssertNotEqual(a, b)
     }
@@ -190,7 +190,7 @@ final class AnyCodableTests: XCTestCase {
     
     func testCodingStruct() {
         do {
-            let object = SampleStruct.stub()
+            let object = SampleStruct.stubRandom()
             let value = AnyCodable(object)
             let encoded = try JSONEncoder().encode(value)
             let decoded = try JSONDecoder().decode(AnyCodable.self, from: encoded)
@@ -203,7 +203,7 @@ final class AnyCodableTests: XCTestCase {
     
     func testCodingStructArray() {
         do {
-            let objects = (1...10).map { _ in SampleStruct.stub() }
+            let objects = (1...10).map { _ in SampleStruct.stubRandom() }
             let value = AnyCodable(objects)
             let encoded = try JSONEncoder().encode(value)
             let decoded = try JSONDecoder().decode(AnyCodable.self, from: encoded)
