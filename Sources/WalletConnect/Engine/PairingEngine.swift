@@ -13,7 +13,7 @@ final class PairingEngine {
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
     private let kms: KeyManagementServiceProtocol
-    private let sequencesStore: WCPairingStorage
+    private let pairingStore: WCPairingStorage
     private var metadata: AppMetadata
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
@@ -22,7 +22,7 @@ final class PairingEngine {
     init(relay: WalletConnectRelaying,
          kms: KeyManagementServiceProtocol,
          subscriber: WCSubscribing,
-         sequencesStore: WCPairingStorage,
+         pairingStore: WCPairingStorage,
          metadata: AppMetadata,
          logger: ConsoleLogging,
          topicGenerator: @escaping () -> String = String.generateTopic,
@@ -31,7 +31,7 @@ final class PairingEngine {
         self.kms = kms
         self.wcSubscriber = subscriber
         self.metadata = metadata
-        self.sequencesStore = sequencesStore
+        self.pairingStore = pairingStore
         self.logger = logger
         self.topicInitializer = topicGenerator
         self.proposalPayloadsStore = proposalPayloadsStore
@@ -44,18 +44,18 @@ final class PairingEngine {
     }
     
     func hasPairing(for topic: String) -> Bool {
-        return sequencesStore.hasSequence(forTopic: topic)
+        return pairingStore.hasSequence(forTopic: topic)
     }
     
     func getSettledPairing(for topic: String) -> WCPairing? {
-        guard let pairing = sequencesStore.getSequence(forTopic: topic) else {
+        guard let pairing = pairingStore.getSequence(forTopic: topic) else {
             return nil
         }
         return pairing
     }
     
     func getSettledPairings() -> [Pairing] {
-        sequencesStore.getAll()
+        pairingStore.getAll()
             .map {Pairing(topic: $0.topic, peer: $0.participants.peer, expiryDate: $0.expiryDate)}
     }
     
@@ -64,7 +64,7 @@ final class PairingEngine {
         let symKey = try! kms.createSymmetricKey(topic)
         let pairing = WCPairing(topic: topic, selfMetadata: metadata)
         let uri = WalletConnectURI(topic: topic, symKey: symKey.hexRepresentation, relay: pairing.relay)
-        sequencesStore.setSequence(pairing)
+        pairingStore.setSequence(pairing)
         wcSubscriber.setSubscription(topic: topic)
         return uri
     }
@@ -96,11 +96,11 @@ final class PairingEngine {
         try! kms.setSymmetricKey(symKey, for: pairing.topic)
         pairing.activate()
         wcSubscriber.setSubscription(topic: pairing.topic)
-        sequencesStore.setSequence(pairing)
+        pairingStore.setSequence(pairing)
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
-        guard sequencesStore.hasSequence(forTopic: topic) else {
+        guard pairingStore.hasSequence(forTopic: topic) else {
             logger.debug("Could not find pairing to ping for topic \(topic)")
             return
         }
@@ -179,14 +179,14 @@ final class PairingEngine {
     private func restoreSubscriptions() {
         relayer.transportConnectionPublisher
             .sink { [unowned self] (_) in
-                let topics = sequencesStore.getAll()
+                let topics = pairingStore.getAll()
                     .map{$0.topic}
                 topics.forEach{self.wcSubscriber.setSubscription(topic: $0)}
             }.store(in: &publishers)
     }
     
     private func setupExpirationHandling() {
-        sequencesStore.onSequenceExpiration = { [weak self] pairing in
+        pairingStore.onSequenceExpiration = { [weak self] pairing in
             self?.kms.deleteSymmetricKey(for: pairing.topic)
             self?.wcSubscriber.removeSubscription(topic: pairing.topic)
         }
@@ -202,7 +202,7 @@ final class PairingEngine {
     }
     
     private func handleProposeResponse(pairingTopic: String, proposal: SessionProposal, result: JsonRpcResult) {
-        guard var pairing = sequencesStore.getSequence(forTopic: pairingTopic) else {
+        guard var pairing = pairingStore.getSequence(forTopic: pairingTopic) else {
             return
         }
         switch result {
@@ -215,7 +215,7 @@ final class PairingEngine {
                 try? pairing.updateExpiry()
             }
             
-            sequencesStore.setSequence(pairing)
+            pairingStore.setSequence(pairing)
             
             let selfPublicKey = try! AgreementPublicKey(hex: proposal.proposer.publicKey)
             var agreementKeys: AgreementKeys!
@@ -239,7 +239,7 @@ final class PairingEngine {
             if !pairing.isActive {
                 kms.deleteSymmetricKey(for: pairing.topic)
                 wcSubscriber.removeSubscription(topic: pairing.topic)
-                sequencesStore.delete(topic: pairingTopic)
+                pairingStore.delete(topic: pairingTopic)
             }
             logger.debug("session propose has been rejected")
             kms.deletePrivateKey(for: proposal.proposer.publicKey)
@@ -249,8 +249,8 @@ final class PairingEngine {
     }
     
     private func updatePairingMetadata(topic: String, metadata: AppMetadata) {
-        guard var pairing = sequencesStore.getSequence(forTopic: topic) else {return}
+        guard var pairing = pairingStore.getSequence(forTopic: topic) else {return}
         pairing.participants.peer = metadata
-        sequencesStore.setSequence(pairing)
+        pairingStore.setSequence(pairing)
     }
 }

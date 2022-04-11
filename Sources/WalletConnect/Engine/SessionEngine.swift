@@ -14,7 +14,7 @@ final class SessionEngine {
     var onSessionDelete: ((String, SessionType.Reason)->())?
     var onEventReceived: ((String, Session.Event)->())?
     
-    private let sequencesStore: WCSessionStorage
+    private let sessionStore: WCSessionStorage
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
     private let kms: KeyManagementServiceProtocol
@@ -26,7 +26,7 @@ final class SessionEngine {
     init(relay: WalletConnectRelaying,
          kms: KeyManagementServiceProtocol,
          subscriber: WCSubscribing,
-         sequencesStore: WCSessionStorage,
+         sessionStore: WCSessionStorage,
          metadata: AppMetadata,
          logger: ConsoleLogging,
          topicGenerator: @escaping () -> String = String.generateTopic) {
@@ -34,7 +34,7 @@ final class SessionEngine {
         self.kms = kms
         self.metadata = metadata
         self.wcSubscriber = subscriber
-        self.sequencesStore = sequencesStore
+        self.sessionStore = sessionStore
         self.logger = logger
         self.topicInitializer = topicGenerator
         setUpWCRequestHandling()
@@ -51,11 +51,11 @@ final class SessionEngine {
     }
     
     func hasSession(for topic: String) -> Bool {
-        return sequencesStore.hasSequence(forTopic: topic)
+        return sessionStore.hasSequence(forTopic: topic)
     }
     
     func getSettledSessions() -> [Session] {
-        sequencesStore.getAll().compactMap {
+        sessionStore.getAll().compactMap {
             guard $0.acknowledged else { return nil }
             return $0.publicRepresentation()
         }
@@ -63,13 +63,13 @@ final class SessionEngine {
     
     func delete(topic: String, reason: Reason) {
         logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
-        sequencesStore.delete(topic: topic)
+        sessionStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
         relayer.request(.wcSessionDelete(SessionType.DeleteParams(reason: reason.internalRepresentation())), onTopic: topic)
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
-        guard sequencesStore.hasSequence(forTopic: topic) else {
+        guard sessionStore.hasSequence(forTopic: topic) else {
             logger.debug("Could not find session to ping for topic \(topic)")
             return
         }
@@ -85,7 +85,7 @@ final class SessionEngine {
     }
      
     func updateExpiry(topic: String, by ttl: Int64) throws {
-        guard var session = sequencesStore.getSequence(forTopic: topic) else {
+        guard var session = sessionStore.getSequence(forTopic: topic) else {
             throw WalletConnectError.noSessionMatchingTopic(topic)
         }
         guard session.acknowledged else {
@@ -96,13 +96,13 @@ final class SessionEngine {
         }
         try session.updateExpiry(by: ttl)
         let newExpiry = Int64(session.expiryDate.timeIntervalSince1970 )
-        sequencesStore.setSequence(session)
+        sessionStore.setSequence(session)
         relayer.request(.wcSessionUpdateExpiry(SessionType.UpdateExpiryParams(expiry: newExpiry)), onTopic: topic)
     }
     
     func request(params: Request) {
         print("will request on session topic: \(params.topic)")
-        guard sequencesStore.hasSequence(forTopic: params.topic) else {
+        guard sessionStore.hasSequence(forTopic: params.topic) else {
             logger.debug("Could not find session for topic \(params.topic)")
             return
         }
@@ -120,7 +120,7 @@ final class SessionEngine {
     }
     
     func respondSessionRequest(topic: String, response: JsonRpcResult) {
-        guard sequencesStore.hasSequence(forTopic: topic) else {
+        guard sessionStore.hasSequence(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
@@ -134,7 +134,7 @@ final class SessionEngine {
     }
     
     func updateAccounts(topic: String, accounts: Set<Account>) throws {
-        guard var session = sequencesStore.getSequence(forTopic: topic) else {
+        guard var session = sessionStore.getSequence(forTopic: topic) else {
             throw WalletConnectError.noSessionMatchingTopic(topic)
         }
         guard session.acknowledged else {
@@ -144,12 +144,12 @@ final class SessionEngine {
             throw WalletConnectError.unauthorizedNonControllerCall
         }
         session.updateAccounts(accounts)
-        sequencesStore.setSequence(session)
+        sessionStore.setSequence(session)
         relayer.request(.wcSessionUpdateAccounts(SessionType.UpdateAccountsParams(accounts: accounts)), onTopic: topic)
     }
     
     func notify(topic: String, params: Session.Event, completion: ((Error?)->())?) {
-        guard let session = sequencesStore.getSequence(forTopic: topic), session.acknowledged else {
+        guard let session = sessionStore.getSequence(forTopic: topic), session.acknowledged else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
@@ -217,7 +217,7 @@ final class SessionEngine {
             acknowledged: false)
         
         wcSubscriber.setSubscription(topic: topic)
-        sequencesStore.setSequence(session)
+        sessionStore.setSequence(session)
         
         relayer.request(.wcSessionSettle(settleParams), onTopic: topic)
     }
@@ -236,7 +236,7 @@ final class SessionEngine {
                                       settleParams: settleParams,
                                       acknowledged: true)
         
-        sequencesStore.setSequence(session)
+        sessionStore.setSequence(session)
         relayer.respondSuccess(for: payload)
         onSessionSettle?(session.publicRepresentation())
     }
@@ -247,7 +247,7 @@ final class SessionEngine {
             return
         }
         let topic = payload.topic
-        guard var session = sequencesStore.getSequence(forTopic: topic) else {
+        guard var session = sessionStore.getSequence(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
                   return
               }
@@ -256,14 +256,14 @@ final class SessionEngine {
             return
         }
         session.updateAccounts(updateParams.accounts)
-        sequencesStore.setSequence(session)
+        sessionStore.setSequence(session)
         relayer.respondSuccess(for: payload)
         onSessionUpdateAccounts?(topic, updateParams.accounts)
     }
     
     private func wcSessionUpdateExpiry(_ payload: WCRequestSubscriptionPayload, updateExpiryParams: SessionType.UpdateExpiryParams) {
         let topic = payload.topic
-        guard var session = sequencesStore.getSequence(forTopic: topic) else {
+        guard var session = sessionStore.getSequence(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
         }
@@ -277,18 +277,18 @@ final class SessionEngine {
             relayer.respondError(for: payload, reason: .invalidUpdateExpiryRequest)
             return
         }
-        sequencesStore.setSequence(session)
+        sessionStore.setSequence(session)
         relayer.respondSuccess(for: payload)
         onSessionExpiry?(session.publicRepresentation())
     }
     
     private func wcSessionDelete(_ payload: WCRequestSubscriptionPayload, deleteParams: SessionType.DeleteParams) {
         let topic = payload.topic
-        guard sequencesStore.hasSequence(forTopic: topic) else {
+        guard sessionStore.hasSequence(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
         }
-        sequencesStore.delete(topic: topic)
+        sessionStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
         relayer.respondSuccess(for: payload)
         onSessionDelete?(topic, deleteParams.reason)
@@ -304,7 +304,7 @@ final class SessionEngine {
             params: jsonRpcRequest.params,
             chainId: payloadParams.chainId)
         
-        guard let session = sequencesStore.getSequence(forTopic: topic) else {
+        guard let session = sessionStore.getSequence(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
         }
@@ -327,7 +327,7 @@ final class SessionEngine {
     
     private func wcSessionNotification(_ payload: WCRequestSubscriptionPayload, notificationParams: SessionType.EventParams) {
         let topic = payload.topic
-        guard let session = sequencesStore.getSequence(forTopic: topic) else {
+        guard let session = sessionStore.getSequence(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
             return
         }
@@ -353,7 +353,7 @@ final class SessionEngine {
     }
     
     private func setupExpirationHandling() {
-        sequencesStore.onSequenceExpiration = { [weak self] session in
+        sessionStore.onSequenceExpiration = { [weak self] session in
             self?.kms.deletePrivateKey(for: session.participants.`self`.publicKey)
             self?.kms.deleteAgreementSecret(for: session.topic)
         }
@@ -362,7 +362,7 @@ final class SessionEngine {
     private func restoreSubscriptions() {
         relayer.transportConnectionPublisher
             .sink { [unowned self] (_) in
-                let topics = sequencesStore.getAll().map{$0.topic}
+                let topics = sessionStore.getAll().map{$0.topic}
                 topics.forEach{self.wcSubscriber.setSubscription(topic: $0)}
             }.store(in: &publishers)
     }
@@ -382,24 +382,24 @@ final class SessionEngine {
     }
     
     func handleSessionSettleResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sequencesStore.getSequence(forTopic: topic) else {return}
+        guard let session = sessionStore.getSequence(forTopic: topic) else {return}
         switch result {
         case .response:
-            guard var session = sequencesStore.getSequence(forTopic: topic) else {return}
+            guard var session = sessionStore.getSequence(forTopic: topic) else {return}
             session.acknowledge()
-            sequencesStore.setSequence(session)            
+            sessionStore.setSequence(session)
             onSessionSettle?(session.publicRepresentation())
         case .error(let error):
             logger.error("Error - session rejected, Reason: \(error)")
             wcSubscriber.removeSubscription(topic: topic)
-            sequencesStore.delete(topic: topic)
+            sessionStore.delete(topic: topic)
             kms.deleteAgreementSecret(for: topic)
             kms.deletePrivateKey(for: session.publicKey!)
         }
     }
     
     private func handleUpdateAccountsResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sequencesStore.getSequence(forTopic: topic) else {
+        guard let session = sessionStore.getSequence(forTopic: topic) else {
             return
         }
         let accounts = session.accounts

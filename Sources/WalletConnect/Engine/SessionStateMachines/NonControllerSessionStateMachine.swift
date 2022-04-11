@@ -9,7 +9,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
     var onMethodsUpdate: ((String, Set<String>)->())?
     var onEventsUpdate: ((String, Set<String>)->())?
     
-    private let sequencesStore: WCSessionStorage
+    private let sessionStore: WCSessionStorage
     private let relayer: WalletConnectRelaying
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
@@ -17,11 +17,11 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
 
     init(relay: WalletConnectRelaying,
          kms: KeyManagementServiceProtocol,
-         sequencesStore: WCSessionStorage,
+         sessionStore: WCSessionStorage,
          logger: ConsoleLogging) {
         self.relayer = relay
         self.kms = kms
-        self.sequencesStore = sequencesStore
+        self.sessionStore = sessionStore
         self.logger = logger
         setUpWCRequestHandling()
     }
@@ -46,7 +46,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
             relayer.respondError(for: payload, reason: .invalidUpdateMethodsRequest)
             return
         }
-        guard var session = sequencesStore.getSequence(forTopic: payload.topic) else {
+        guard var session = sessionStore.getSequence(forTopic: payload.topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
             return
         }
@@ -55,7 +55,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
             return
         }
         session.updateMethods(updateParams.methods)
-        sequencesStore.setSequence(session)
+        sessionStore.setSequence(session)
         relayer.respondSuccess(for: payload)
         onMethodsUpdate?(session.topic, updateParams.methods)
     }
@@ -67,7 +67,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
             relayer.respondError(for: payload, reason: .invalidUpdateEventsRequest)
             return
         }
-        guard var session = sequencesStore.getSequence(forTopic: payload.topic) else {
+        guard var session = sessionStore.getSequence(forTopic: payload.topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
             return
         }
@@ -76,7 +76,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
             return
         }
         session.updateEvents(updateParams.events)
-        sequencesStore.setSequence(session)
+        sessionStore.setSequence(session)
         relayer.respondSuccess(for: payload)
         onEventsUpdate?(session.topic, updateParams.events)
     }

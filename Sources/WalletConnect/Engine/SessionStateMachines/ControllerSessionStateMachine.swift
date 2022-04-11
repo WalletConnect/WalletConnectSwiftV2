@@ -9,7 +9,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
     var onMethodsUpdate: ((String, Set<String>)->())?
     var onEventsUpdate: ((String, Set<String>)->())?
 
-    private let sequencesStore: WCSessionStorage
+    private let sessionStore: WCSessionStorage
     private let relayer: WalletConnectRelaying
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
@@ -17,11 +17,11 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
 
     init(relay: WalletConnectRelaying,
          kms: KeyManagementServiceProtocol,
-         sequencesStore: WCSessionStorage,
+         sessionStore: WCSessionStorage,
          logger: ConsoleLogging) {
         self.relayer = relay
         self.kms = kms
-        self.sequencesStore = sequencesStore
+        self.sessionStore = sessionStore
         self.logger = logger
         relayer.responsePublisher.sink { [unowned self] response in
             handleResponse(response)
@@ -34,7 +34,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         try validateMethods(methods)
         logger.debug("Controller will update methods")
         session.updateMethods(methods)
-        sequencesStore.setSequence(session)
+        sessionStore.setSequence(session)
         relayer.request(.wcSessionUpdateMethods(SessionType.UpdateMethodsParams(methods: methods)), onTopic: topic)
     }
     
@@ -44,7 +44,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         try validateEvents(events)
         logger.debug("Controller will update events")
         session.updateEvents(events)
-        sequencesStore.setSequence(session)
+        sessionStore.setSequence(session)
         relayer.request(.wcSessionUpdateEvents(SessionType.UpdateEventsParams(events: events)), onTopic: topic)
     }
     
@@ -62,7 +62,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
     }
     
     private func handleUpdateMethodsResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sequencesStore.getSequence(forTopic: topic) else {
+        guard let session = sessionStore.getSequence(forTopic: topic) else {
             return
         }
         switch result {
@@ -76,7 +76,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
     }
     
     private func handleUpdateEventsResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sequencesStore.getSequence(forTopic: topic) else {
+        guard let session = sessionStore.getSequence(forTopic: topic) else {
             return
         }
         switch result {
@@ -91,7 +91,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
     
     // MARK: - Private
     private func getSession(for topic: String) throws -> WCSession {
-        if let session = sequencesStore.getSequence(forTopic: topic) {
+        if let session = sessionStore.getSequence(forTopic: topic) {
             return session
         } else {
             throw WalletConnectError.noSessionMatchingTopic(topic)

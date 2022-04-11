@@ -48,7 +48,7 @@ final class SessionEngineTests: XCTestCase {
             relay: relayMock,
             kms: cryptoMock,
             subscriber: subscriberMock,
-            sequencesStore: storageMock,
+            sessionStore: storageMock,
             metadata: metadata,
             logger: logger,
             topicGenerator: topicGenerator.getTopic)

@@ -15,7 +15,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         relayMock = MockedWCRelay()
         storageMock = WCSessionStorageMock()
         cryptoMock = KeyManagementServiceMock()
-        sut = NonControllerSessionStateMachine(relay: relayMock, kms: cryptoMock, sequencesStore: storageMock, logger: ConsoleLoggerMock())
+        sut = NonControllerSessionStateMachine(relay: relayMock, kms: cryptoMock, sessionStore: storageMock, logger: ConsoleLoggerMock())
     }
     
     override func tearDown() {

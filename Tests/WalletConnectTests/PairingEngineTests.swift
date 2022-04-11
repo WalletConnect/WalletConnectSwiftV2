@@ -46,7 +46,7 @@ final class PairingEngineTests: XCTestCase {
             relay: relayMock,
             kms: cryptoMock,
             subscriber: subscriberMock,
-            sequencesStore: storageMock,
+            pairingStore: storageMock,
             metadata: meta,
             logger: logger,
             topicGenerator: topicGenerator.getTopic,

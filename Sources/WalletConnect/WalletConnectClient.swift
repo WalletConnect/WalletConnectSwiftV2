@@ -58,10 +58,10 @@ public final class WalletConnectClient {
         self.relay = WalletConnectRelay(networkRelayer: relayer, serializer: serializer, logger: logger, jsonRpcHistory: history)
         let pairingSequencesStore = PairingStorage(storage: SequenceStore<WCPairing>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue))
         let sessionSequencesStore = SessionStorage(storage: SequenceStore<WCSession>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue))
-        self.pairingEngine = PairingEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, metadata: metadata, logger: logger)
-        self.sessionEngine = SessionEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, metadata: metadata, logger: logger)
-        self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(relay: relay, kms: kms, sequencesStore: sessionSequencesStore, logger: logger)
-        self.controllerSessionStateMachine = ControllerSessionStateMachine(relay: relay, kms: kms, sequencesStore: sessionSequencesStore, logger: logger)
+        self.pairingEngine = PairingEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), pairingStore: pairingSequencesStore, metadata: metadata, logger: logger)
+        self.sessionEngine = SessionEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), sessionStore: sessionSequencesStore, metadata: metadata, logger: logger)
+        self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionSequencesStore, logger: logger)
+        self.controllerSessionStateMachine = ControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionSequencesStore, logger: logger)
         setUpEnginesCallbacks()
     }
     
@@ -86,10 +86,10 @@ public final class WalletConnectClient {
         self.relay = WalletConnectRelay(networkRelayer: relayer, serializer: serializer, logger: logger, jsonRpcHistory: history)
         let pairingSequencesStore = PairingStorage(storage: SequenceStore<WCPairing>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue))
         let sessionSequencesStore = SessionStorage(storage: SequenceStore<WCSession>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue))
-        self.pairingEngine = PairingEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: pairingSequencesStore, metadata: metadata, logger: logger)
-        self.sessionEngine = SessionEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), sequencesStore: sessionSequencesStore, metadata: metadata, logger: logger)
-        self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(relay: relay, kms: kms, sequencesStore: sessionSequencesStore, logger: logger)
-        self.controllerSessionStateMachine = ControllerSessionStateMachine(relay: relay, kms: kms, sequencesStore: sessionSequencesStore, logger: logger)
+        self.pairingEngine = PairingEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), pairingStore: pairingSequencesStore, metadata: metadata, logger: logger)
+        self.sessionEngine = SessionEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), sessionStore: sessionSequencesStore, metadata: metadata, logger: logger)
+        self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionSequencesStore, logger: logger)
+        self.controllerSessionStateMachine = ControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionSequencesStore, logger: logger)
         setUpEnginesCallbacks()
     }
     
