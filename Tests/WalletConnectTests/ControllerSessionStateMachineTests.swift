@@ -29,10 +29,10 @@ class ControllerSessionStateMachineTests: XCTestCase {
         
     func testUpdateMethodsSuccess() throws {
         let session = WCSession.stub(isSelfController: true)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         let methodsToUpdate: Set<String> = ["m1", "m2"]
         try sut.updateMethods(topic: session.topic, methods: methodsToUpdate)
-        let updatedSession = storageMock.getSequence(forTopic: session.topic)
+        let updatedSession = storageMock.getSession(forTopic: session.topic)
         XCTAssertTrue(relayMock.didCallRequest)
         XCTAssertEqual(methodsToUpdate, updatedSession?.methods)
     }
@@ -45,7 +45,7 @@ class ControllerSessionStateMachineTests: XCTestCase {
     
     func testUpdateMethodsErrorSessionNotAcknowledged() {
         let session = WCSession.stub(acknowledged: false)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         XCTAssertThrowsError(try sut.updateMethods(topic: session.topic, methods: ["m1"])) { error in
             XCTAssertTrue(error.isSessionNotAcknowledgedError)
         }
@@ -53,7 +53,7 @@ class ControllerSessionStateMachineTests: XCTestCase {
 
     func testUpdateMethodsErrorInvalidMethod() {
         let session = WCSession.stub(isSelfController: true)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         XCTAssertThrowsError(try sut.updateMethods(topic: session.topic, methods: [""])) { error in
             XCTAssertTrue(error.isInvalidMethodError)
         }
@@ -61,7 +61,7 @@ class ControllerSessionStateMachineTests: XCTestCase {
 
     func testUpdateMethodsErrorCalledByNonController() {
         let session = WCSession.stub(isSelfController: false)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         XCTAssertThrowsError(try sut.updateMethods(topic: session.topic, methods: ["m1"])) { error in
             XCTAssertTrue(error.isUnauthorizedNonControllerCallError)
         }
@@ -71,10 +71,10 @@ class ControllerSessionStateMachineTests: XCTestCase {
 
     func testUpdateEventsSuccess() throws {
         let session = WCSession.stub(isSelfController: true)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         let eventsToUpdate: Set<String> = ["e1", "e2"]
         try sut.updateEvents(topic: session.topic, events: eventsToUpdate)
-        let updatedSession = storageMock.getSequence(forTopic: session.topic)!
+        let updatedSession = storageMock.getSession(forTopic: session.topic)!
         XCTAssertTrue(relayMock.didCallRequest)
         XCTAssertEqual(eventsToUpdate, updatedSession.events)
     }

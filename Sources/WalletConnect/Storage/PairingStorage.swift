@@ -1,15 +1,15 @@
 protocol WCPairingStorage: AnyObject {
-    var onSequenceExpiration: ((WCPairing) -> Void)? { get set }
-    func hasSequence(forTopic topic: String) -> Bool
-    func setSequence(_ sequence: WCPairing)
-    func getSequence(forTopic topic: String) -> WCPairing?
+    var onPairingExpiration: ((WCPairing) -> Void)? { get set }
+    func hasPairing(forTopic topic: String) -> Bool
+    func setPairing(_ pairing: WCPairing)
+    func getPairing(forTopic topic: String) -> WCPairing?
     func getAll() -> [WCPairing]
     func delete(topic: String)
 }
 
 final class PairingStorage: WCPairingStorage {
     
-    var onSequenceExpiration: ((WCPairing) -> Void)? {
+    var onPairingExpiration: ((WCPairing) -> Void)? {
         get { storage.onSequenceExpiration }
         set { storage.onSequenceExpiration = newValue }
     }
@@ -20,15 +20,15 @@ final class PairingStorage: WCPairingStorage {
         self.storage = storage
     }
     
-    func hasSequence(forTopic topic: String) -> Bool {
+    func hasPairing(forTopic topic: String) -> Bool {
         storage.hasSequence(forTopic: topic)
     }
     
-    func setSequence(_ sequence: WCPairing) {
-        storage.setSequence(sequence)
+    func setPairing(_ pairing: WCPairing) {
+        storage.setSequence(pairing)
     }
     
-    func getSequence(forTopic topic: String) -> WCPairing? {
+    func getPairing(forTopic topic: String) -> WCPairing? {
         try? storage.getSequence(forTopic: topic)
     }
     

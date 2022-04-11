@@ -46,7 +46,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
             relayer.respondError(for: payload, reason: .invalidUpdateMethodsRequest)
             return
         }
-        guard var session = sessionStore.getSequence(forTopic: payload.topic) else {
+        guard var session = sessionStore.getSession(forTopic: payload.topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
             return
         }
@@ -55,7 +55,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
             return
         }
         session.updateMethods(updateParams.methods)
-        sessionStore.setSequence(session)
+        sessionStore.setSession(session)
         relayer.respondSuccess(for: payload)
         onMethodsUpdate?(session.topic, updateParams.methods)
     }
@@ -67,7 +67,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
             relayer.respondError(for: payload, reason: .invalidUpdateEventsRequest)
             return
         }
-        guard var session = sessionStore.getSequence(forTopic: payload.topic) else {
+        guard var session = sessionStore.getSession(forTopic: payload.topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
             return
         }
@@ -76,7 +76,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
             return
         }
         session.updateEvents(updateParams.events)
-        sessionStore.setSequence(session)
+        sessionStore.setSession(session)
         relayer.respondSuccess(for: payload)
         onEventsUpdate?(session.topic, updateParams.events)
     }

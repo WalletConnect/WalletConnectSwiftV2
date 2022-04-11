@@ -51,7 +51,7 @@ final class SessionEngine {
     }
     
     func hasSession(for topic: String) -> Bool {
-        return sessionStore.hasSequence(forTopic: topic)
+        return sessionStore.hasSession(forTopic: topic)
     }
     
     func getSettledSessions() -> [Session] {
@@ -69,7 +69,7 @@ final class SessionEngine {
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
-        guard sessionStore.hasSequence(forTopic: topic) else {
+        guard sessionStore.hasSession(forTopic: topic) else {
             logger.debug("Could not find session to ping for topic \(topic)")
             return
         }
@@ -85,7 +85,7 @@ final class SessionEngine {
     }
      
     func updateExpiry(topic: String, by ttl: Int64) throws {
-        guard var session = sessionStore.getSequence(forTopic: topic) else {
+        guard var session = sessionStore.getSession(forTopic: topic) else {
             throw WalletConnectError.noSessionMatchingTopic(topic)
         }
         guard session.acknowledged else {
@@ -96,13 +96,13 @@ final class SessionEngine {
         }
         try session.updateExpiry(by: ttl)
         let newExpiry = Int64(session.expiryDate.timeIntervalSince1970 )
-        sessionStore.setSequence(session)
+        sessionStore.setSession(session)
         relayer.request(.wcSessionUpdateExpiry(SessionType.UpdateExpiryParams(expiry: newExpiry)), onTopic: topic)
     }
     
     func request(params: Request) {
         print("will request on session topic: \(params.topic)")
-        guard sessionStore.hasSequence(forTopic: params.topic) else {
+        guard sessionStore.hasSession(forTopic: params.topic) else {
             logger.debug("Could not find session for topic \(params.topic)")
             return
         }
@@ -120,7 +120,7 @@ final class SessionEngine {
     }
     
     func respondSessionRequest(topic: String, response: JsonRpcResult) {
-        guard sessionStore.hasSequence(forTopic: topic) else {
+        guard sessionStore.hasSession(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
@@ -134,7 +134,7 @@ final class SessionEngine {
     }
     
     func updateAccounts(topic: String, accounts: Set<Account>) throws {
-        guard var session = sessionStore.getSequence(forTopic: topic) else {
+        guard var session = sessionStore.getSession(forTopic: topic) else {
             throw WalletConnectError.noSessionMatchingTopic(topic)
         }
         guard session.acknowledged else {
@@ -144,12 +144,12 @@ final class SessionEngine {
             throw WalletConnectError.unauthorizedNonControllerCall
         }
         session.updateAccounts(accounts)
-        sessionStore.setSequence(session)
+        sessionStore.setSession(session)
         relayer.request(.wcSessionUpdateAccounts(SessionType.UpdateAccountsParams(accounts: accounts)), onTopic: topic)
     }
     
     func notify(topic: String, params: Session.Event, completion: ((Error?)->())?) {
-        guard let session = sessionStore.getSequence(forTopic: topic), session.acknowledged else {
+        guard let session = sessionStore.getSession(forTopic: topic), session.acknowledged else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
@@ -217,7 +217,7 @@ final class SessionEngine {
             acknowledged: false)
         
         wcSubscriber.setSubscription(topic: topic)
-        sessionStore.setSequence(session)
+        sessionStore.setSession(session)
         
         relayer.request(.wcSessionSettle(settleParams), onTopic: topic)
     }
@@ -236,7 +236,7 @@ final class SessionEngine {
                                       settleParams: settleParams,
                                       acknowledged: true)
         
-        sessionStore.setSequence(session)
+        sessionStore.setSession(session)
         relayer.respondSuccess(for: payload)
         onSessionSettle?(session.publicRepresentation())
     }
@@ -247,7 +247,7 @@ final class SessionEngine {
             return
         }
         let topic = payload.topic
-        guard var session = sessionStore.getSequence(forTopic: topic) else {
+        guard var session = sessionStore.getSession(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
                   return
               }
@@ -256,14 +256,14 @@ final class SessionEngine {
             return
         }
         session.updateAccounts(updateParams.accounts)
-        sessionStore.setSequence(session)
+        sessionStore.setSession(session)
         relayer.respondSuccess(for: payload)
         onSessionUpdateAccounts?(topic, updateParams.accounts)
     }
     
     private func wcSessionUpdateExpiry(_ payload: WCRequestSubscriptionPayload, updateExpiryParams: SessionType.UpdateExpiryParams) {
         let topic = payload.topic
-        guard var session = sessionStore.getSequence(forTopic: topic) else {
+        guard var session = sessionStore.getSession(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
         }
@@ -277,14 +277,14 @@ final class SessionEngine {
             relayer.respondError(for: payload, reason: .invalidUpdateExpiryRequest)
             return
         }
-        sessionStore.setSequence(session)
+        sessionStore.setSession(session)
         relayer.respondSuccess(for: payload)
         onSessionExpiry?(session.publicRepresentation())
     }
     
     private func wcSessionDelete(_ payload: WCRequestSubscriptionPayload, deleteParams: SessionType.DeleteParams) {
         let topic = payload.topic
-        guard sessionStore.hasSequence(forTopic: topic) else {
+        guard sessionStore.hasSession(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
         }
@@ -304,7 +304,7 @@ final class SessionEngine {
             params: jsonRpcRequest.params,
             chainId: payloadParams.chainId)
         
-        guard let session = sessionStore.getSequence(forTopic: topic) else {
+        guard let session = sessionStore.getSession(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
         }
@@ -327,7 +327,7 @@ final class SessionEngine {
     
     private func wcSessionNotification(_ payload: WCRequestSubscriptionPayload, notificationParams: SessionType.EventParams) {
         let topic = payload.topic
-        guard let session = sessionStore.getSequence(forTopic: topic) else {
+        guard let session = sessionStore.getSession(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
             return
         }
@@ -353,7 +353,7 @@ final class SessionEngine {
     }
     
     private func setupExpirationHandling() {
-        sessionStore.onSequenceExpiration = { [weak self] session in
+        sessionStore.onSessionExpiration = { [weak self] session in
             self?.kms.deletePrivateKey(for: session.participants.`self`.publicKey)
             self?.kms.deleteAgreementSecret(for: session.topic)
         }
@@ -382,12 +382,12 @@ final class SessionEngine {
     }
     
     func handleSessionSettleResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sessionStore.getSequence(forTopic: topic) else {return}
+        guard let session = sessionStore.getSession(forTopic: topic) else {return}
         switch result {
         case .response:
-            guard var session = sessionStore.getSequence(forTopic: topic) else {return}
+            guard var session = sessionStore.getSession(forTopic: topic) else {return}
             session.acknowledge()
-            sessionStore.setSequence(session)
+            sessionStore.setSession(session)
             onSessionSettle?(session.publicRepresentation())
         case .error(let error):
             logger.error("Error - session rejected, Reason: \(error)")
@@ -399,7 +399,7 @@ final class SessionEngine {
     }
     
     private func handleUpdateAccountsResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sessionStore.getSequence(forTopic: topic) else {
+        guard let session = sessionStore.getSession(forTopic: topic) else {
             return
         }
         let accounts = session.accounts

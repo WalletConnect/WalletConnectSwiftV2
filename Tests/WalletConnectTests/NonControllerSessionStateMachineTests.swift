@@ -30,7 +30,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
     func testUpdateMethodsPeerSuccess() {
         var didCallbackUpdatMethods = false
         let session = WCSession.stub(isSelfController: false)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         sut.onMethodsUpdate = { topic, _ in
             didCallbackUpdatMethods = true
             XCTAssertEqual(topic, session.topic)
@@ -43,7 +43,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
     func testUpdateMethodsPeerErrorInvalidType() {
         let invalidMethods: Set<String> = [""]
         let session = WCSession.stub(isSelfController: false)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateMethods(topic: session.topic, methods: invalidMethods))
         XCTAssertEqual(relayMock.lastErrorCode, 1004)
     }
@@ -56,7 +56,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
 
     func testUpdateMethodPeerErrorUnauthorized() {
         let session = WCSession.stub(isSelfController: true) // Peer is not a controller
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateMethods(topic: session.topic))
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 3004)
@@ -67,7 +67,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
     func testUpdateEventsPeerSuccess() {
         var didCallbackUpdateEvents = false
         let session = WCSession.stub(isSelfController: false)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         sut.onEventsUpdate = { topic, _ in
             didCallbackUpdateEvents = true
             XCTAssertEqual(topic, session.topic)
@@ -80,7 +80,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
     
     func testUpdateEventsPeerErrorUnauthorized() {
         let session = WCSession.stub(isSelfController: true) // Peer is not a controller
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateEvents(topic: session.topic))
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 3005)

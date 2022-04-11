@@ -34,7 +34,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         try validateMethods(methods)
         logger.debug("Controller will update methods")
         session.updateMethods(methods)
-        sessionStore.setSequence(session)
+        sessionStore.setSession(session)
         relayer.request(.wcSessionUpdateMethods(SessionType.UpdateMethodsParams(methods: methods)), onTopic: topic)
     }
     
@@ -44,7 +44,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         try validateEvents(events)
         logger.debug("Controller will update events")
         session.updateEvents(events)
-        sessionStore.setSequence(session)
+        sessionStore.setSession(session)
         relayer.request(.wcSessionUpdateEvents(SessionType.UpdateEventsParams(events: events)), onTopic: topic)
     }
     
@@ -62,7 +62,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
     }
     
     private func handleUpdateMethodsResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sessionStore.getSequence(forTopic: topic) else {
+        guard let session = sessionStore.getSession(forTopic: topic) else {
             return
         }
         switch result {
@@ -76,7 +76,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
     }
     
     private func handleUpdateEventsResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sessionStore.getSequence(forTopic: topic) else {
+        guard let session = sessionStore.getSession(forTopic: topic) else {
             return
         }
         switch result {
@@ -91,7 +91,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
     
     // MARK: - Private
     private func getSession(for topic: String) throws -> WCSession {
-        if let session = sessionStore.getSequence(forTopic: topic) {
+        if let session = sessionStore.getSession(forTopic: topic) {
             return session
         } else {
             throw WalletConnectError.noSessionMatchingTopic(topic)

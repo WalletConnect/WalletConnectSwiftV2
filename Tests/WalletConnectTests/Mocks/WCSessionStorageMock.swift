@@ -3,19 +3,19 @@ import Foundation
 
 final class WCSessionStorageMock: WCSessionStorage {
     
-    var onSequenceExpiration: ((WCSession) -> Void)?
+    var onSessionExpiration: ((WCSession) -> Void)?
     
     private(set) var sessions: [String: WCSession] = [:]
     
-    func hasSequence(forTopic topic: String) -> Bool {
+    func hasSession(forTopic topic: String) -> Bool {
         sessions[topic] != nil
     }
     
-    func setSequence(_ sequence: WCSession) {
+    func setSession(_ sequence: WCSession) {
         sessions[sequence.topic] = sequence
     }
     
-    func getSequence(forTopic topic: String) -> WCSession? {
+    func getSession(forTopic topic: String) -> WCSession? {
         return sessions[topic]
     }
     

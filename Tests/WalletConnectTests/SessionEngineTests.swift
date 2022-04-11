@@ -65,7 +65,7 @@ final class SessionEngineTests: XCTestCase {
         
         engine.settle(topic: topicB, proposal: proposal, accounts: [])
         
-        XCTAssertTrue(storageMock.hasSequence(forTopic: topicB), "Responder must persist session on topic B")
+        XCTAssertTrue(storageMock.hasSession(forTopic: topicB), "Responder must persist session on topic B")
         XCTAssert(subscriberMock.didSubscribe(to: topicB), "Responder must subscribe for topic B")
         XCTAssertTrue(relayMock.didCallRequest, "Responder must send session settle payload on topic B")
     }
@@ -80,14 +80,14 @@ final class SessionEngineTests: XCTestCase {
         
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubSettle(topic: sessionTopic))
         
-        XCTAssertTrue(storageMock.getSequence(forTopic: sessionTopic)!.acknowledged, "Proposer must store acknowledged session on topic B")
+        XCTAssertTrue(storageMock.getSession(forTopic: sessionTopic)!.acknowledged, "Proposer must store acknowledged session on topic B")
         XCTAssertTrue(relayMock.didRespondSuccess, "Proposer must send acknowledge on settle request")
         XCTAssertTrue(didCallBackOnSessionApproved, "Proposer's engine must call back with session")
     }
     
     func testHandleSessionSettleAcknowledge() {
         let session = WCSession.stub(isSelfController: true, acknowledged: false)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         var didCallBackOnSessionApproved = false
         engine.onSessionSettle = { _ in
             didCallBackOnSessionApproved = true
@@ -102,14 +102,14 @@ final class SessionEngineTests: XCTestCase {
             result: .response(settleResponse))
         relayMock.onResponse?(response)
 
-        XCTAssertTrue(storageMock.getSequence(forTopic: session.topic)!.acknowledged, "Responder must acknowledged session")
+        XCTAssertTrue(storageMock.getSession(forTopic: session.topic)!.acknowledged, "Responder must acknowledged session")
         XCTAssertTrue(didCallBackOnSessionApproved, "Responder's engine must call back with session")
     }
     
     func testHandleSessionSettleError() {
         let privateKey = AgreementPrivateKey()
         let session = WCSession.stub(isSelfController: false, selfPrivateKey: privateKey, acknowledged: false)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         cryptoMock.setAgreementSecret(AgreementKeys.stub(), topic: session.topic)
         try! cryptoMock.setPrivateKey(privateKey)
 
@@ -121,7 +121,7 @@ final class SessionEngineTests: XCTestCase {
             result: .error(JSONRPCErrorResponse(id: 1, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
         relayMock.onResponse?(response)
 
-        XCTAssertNil(storageMock.getSequence(forTopic: session.topic), "Responder must remove session")
+        XCTAssertNil(storageMock.getSession(forTopic: session.topic), "Responder must remove session")
         XCTAssertTrue(subscriberMock.didUnsubscribe(to: session.topic), "Responder must unsubscribe topic B")
         XCTAssertFalse(cryptoMock.hasAgreementSecret(for: session.topic), "Responder must remove agreement secret")
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: session.self.publicKey!), "Responder must remove private key")
@@ -132,7 +132,7 @@ final class SessionEngineTests: XCTestCase {
     func testUpdateSuccess() throws {
         let updateAccounts = ["std:0:0"]
         let session = WCSession.stub(isSelfController: true)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         try engine.updateAccounts(topic: session.topic, accounts: updateAccounts.toAccountSet())
         XCTAssertTrue(relayMock.didCallRequest)
     }
@@ -140,7 +140,7 @@ final class SessionEngineTests: XCTestCase {
     func testUpdateErrorIfNonController() {
         let updateAccounts = ["std:0:0"]
         let session = WCSession.stub(isSelfController: false)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         XCTAssertThrowsError(try engine.updateAccounts(topic: session.topic, accounts: updateAccounts.toAccountSet()), "Update must fail if called by a non-controller.")
     }
     
@@ -152,7 +152,7 @@ final class SessionEngineTests: XCTestCase {
     func testUpdateErrorSessionNotSettled() {
         let updateAccounts = ["std:0:0"]
         let session = WCSession.stub(acknowledged: false)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         XCTAssertThrowsError(try engine.updateAccounts(topic: session.topic, accounts: updateAccounts.toAccountSet()), "Update must fail if session is not on settled state.")
     }
     
@@ -160,14 +160,14 @@ final class SessionEngineTests: XCTestCase {
     
     func testUpdatePeerSuccess() {
         let session = WCSession.stub(isSelfController: false)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdateAccounts(topic: session.topic))
         XCTAssertTrue(relayMock.didRespondSuccess)
     }
     
     func testUpdatePeerErrorAccountInvalid() {
         let session = WCSession.stub(isSelfController: false)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdateAccounts(topic: session.topic, accounts: ["0"]))
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 1003)
@@ -181,7 +181,7 @@ final class SessionEngineTests: XCTestCase {
 
     func testUpdatePeerErrorUnauthorized() {
         let session = WCSession.stub(isSelfController: true) // Peer is not a controller
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdateAccounts(topic: session.topic))
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 3003)
@@ -192,7 +192,7 @@ final class SessionEngineTests: XCTestCase {
     func testUpdateExpirySuccess() {
         let tomorrow = TimeTraveler.dateByAdding(days: 1)
         let session = WCSession.stub(isSelfController: true, expiryDate: tomorrow)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         let twoDays = 2*Time.day
         XCTAssertNoThrow(try engine.updateExpiry(topic: session.topic, by: Int64(twoDays)))
         let extendedSession = engine.getSettledSessions().first{$0.topic == session.topic}!
@@ -202,7 +202,7 @@ final class SessionEngineTests: XCTestCase {
     func testUpdateExpirySessionNotSettled() {
         let tomorrow = TimeTraveler.dateByAdding(days: 1)
         let session = WCSession.stub(isSelfController: false, expiryDate: tomorrow, acknowledged: false)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         let twoDays = 2*Time.day
         XCTAssertThrowsError(try engine.updateExpiry(topic: session.topic, by: Int64(twoDays)))
     }
@@ -210,7 +210,7 @@ final class SessionEngineTests: XCTestCase {
     func testUpdateExpiryOnNonControllerClient() {
         let tomorrow = TimeTraveler.dateByAdding(days: 1)
         let session = WCSession.stub(isSelfController: false, expiryDate: tomorrow)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         let twoDays = 2*Time.day
         XCTAssertThrowsError(try engine.updateExpiry(topic: session.topic, by: Int64(twoDays)))
     }
@@ -218,7 +218,7 @@ final class SessionEngineTests: XCTestCase {
     func testUpdateExpiryTtlTooHigh() {
         let tomorrow = TimeTraveler.dateByAdding(days: 1)
         let session = WCSession.stub(isSelfController: true, expiryDate: tomorrow)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         let tenDays = 10*Time.day
         XCTAssertThrowsError(try engine.updateExpiry(topic: session.topic, by: Int64(tenDays)))
     }
@@ -226,7 +226,7 @@ final class SessionEngineTests: XCTestCase {
     func testUpdateExpiryTtlTooLow() {
         let dayAfterTommorow = TimeTraveler.dateByAdding(days: 2)
         let session = WCSession.stub(isSelfController: true, expiryDate: dayAfterTommorow)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         let oneDay = Int64(1*Time.day)
         XCTAssertThrowsError(try engine.updateExpiry(topic: session.topic, by: oneDay))
     }
@@ -236,7 +236,7 @@ final class SessionEngineTests: XCTestCase {
     func testPeerUpdateExpirySuccess() {
         let tomorrow = TimeTraveler.dateByAdding(days: 1)
         let session = WCSession.stub(isSelfController: false, expiryDate: tomorrow)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         let twoDaysFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 2).timeIntervalSince1970)
         
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdateExpiry(topic: session.topic, expiry: twoDaysFromNowTimestamp))
@@ -249,7 +249,7 @@ final class SessionEngineTests: XCTestCase {
     func testPeerUpdateExpiryUnauthorized() {
         let tomorrow = TimeTraveler.dateByAdding(days: 1)
         let session = WCSession.stub(isSelfController: true, expiryDate: tomorrow)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         let twoDaysFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 2).timeIntervalSince1970)
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdateExpiry(topic: session.topic, expiry: twoDaysFromNowTimestamp))
         let potentiallyExtendedSession = engine.getSettledSessions().first{$0.topic == session.topic}!
@@ -259,7 +259,7 @@ final class SessionEngineTests: XCTestCase {
     func testPeerUpdateExpiryTtlTooHigh() {
         let tomorrow = TimeTraveler.dateByAdding(days: 1)
         let session = WCSession.stub(isSelfController: false, expiryDate: tomorrow)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         let tenDaysFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 10).timeIntervalSince1970)
         
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdateExpiry(topic: session.topic, expiry: tenDaysFromNowTimestamp))
@@ -270,7 +270,7 @@ final class SessionEngineTests: XCTestCase {
     func testPeerUpdateExpiryTtlTooLow() {
         let tomorrow = TimeTraveler.dateByAdding(days: 2)
         let session = WCSession.stub(isSelfController: false, expiryDate: tomorrow)
-        storageMock.setSequence(session)
+        storageMock.setSession(session)
         let oneDayFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 10).timeIntervalSince1970)
         
         subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubUpdateExpiry(topic: session.topic, expiry: oneDayFromNowTimestamp))
