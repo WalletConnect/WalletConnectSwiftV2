@@ -12,7 +12,7 @@ public struct Session {
     public let accounts: Set<Account>
     public let expiryDate: Date
     public static var defaultTimeToLive: Int64 {
-        SessionSequence.defaultTimeToLive
+        WCSession.defaultTimeToLive
     }
 }
 

@@ -1,7 +1,7 @@
 import Foundation
 import WalletConnectKMS
 
-struct SessionSequence: ExpirableSequence {
+struct WCSession: ExpirableSequence {
     struct Participants: Codable, Equatable {
         let `self`: Participant
         let peer: Participant
@@ -51,7 +51,7 @@ struct SessionSequence: ExpirableSequence {
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(settleParams.expiry))
     }
     
-    internal init(topic: String, relay: RelayProtocolOptions, controller: AgreementPeer, participants: SessionSequence.Participants, methods: Set<String>, events: Set<String>, accounts: Set<Account>, acknowledged: Bool, expiry: Int64) {
+    internal init(topic: String, relay: RelayProtocolOptions, controller: AgreementPeer, participants: WCSession.Participants, methods: Set<String>, events: Set<String>, accounts: Set<Account>, acknowledged: Bool, expiry: Int64) {
         self.topic = topic
         self.relay = relay
         self.controller = controller
@@ -114,7 +114,7 @@ struct SessionSequence: ExpirableSequence {
     /// - Parameter ttl: time the session expiry should be updated by - in seconds
     mutating func updateExpiry(by ttl: Int64) throws {
         let newExpiryDate = Date(timeIntervalSinceNow: TimeInterval(ttl))
-        let maxExpiryDate = Date(timeIntervalSinceNow: TimeInterval(SessionSequence.defaultTimeToLive))
+        let maxExpiryDate = Date(timeIntervalSinceNow: TimeInterval(WCSession.defaultTimeToLive))
         guard newExpiryDate > expiryDate && newExpiryDate <= maxExpiryDate else {
             throw WalletConnectError.invalidUpdateExpiryValue
         }
@@ -125,7 +125,7 @@ struct SessionSequence: ExpirableSequence {
     /// - Parameter expiry: timestamp in the future in seconds
     mutating func updateExpiry(to expiry: Int64) throws {
         let newExpiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
-        let maxExpiryDate = Date(timeIntervalSinceNow: TimeInterval(SessionSequence.defaultTimeToLive))
+        let maxExpiryDate = Date(timeIntervalSinceNow: TimeInterval(WCSession.defaultTimeToLive))
         guard newExpiryDate > expiryDate && newExpiryDate <= maxExpiryDate else {
             throw WalletConnectError.invalidUpdateExpiryValue
         }
