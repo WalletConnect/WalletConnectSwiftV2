@@ -27,9 +27,6 @@ internal enum SessionType {
             self.accounts = Set(accounts.map{$0.absoluteString})
         }
 #if DEBUG
-
-        /// Initialiser for testing purposes only, allows to init invalid params,
-        /// use `init(accounts: Set<Account>)` instead.
         init(accounts: Set<String>) {
             self.accounts = accounts
         }
