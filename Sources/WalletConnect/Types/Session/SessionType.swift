@@ -21,22 +21,30 @@ internal enum SessionType {
     }
     
     struct UpdateAccountsParams: Codable, Equatable {
-        private let accountsString: Set<String>
-        var accounts: Set<Account> {
-            return Set(accountsString.compactMap{Account($0)})
-        }
+        private let accounts: Set<String>
+        
         init(accounts: Set<Account>) {
-            self.accountsString = Set(accounts.map{$0.absoluteString})
+            self.accounts = Set(accounts.map{$0.absoluteString})
         }
+#if DEBUG
+
         /// Initialiser for testing purposes only, allows to init invalid params,
         /// use `init(accounts: Set<Account>)` instead.
         init(accounts: Set<String>) {
-            self.accountsString = accounts
+            self.accounts = accounts
         }
+#endif
+
         var isValidParam: Bool {
-            return accountsString.allSatisfy{String.conformsToCAIP10($0)}
+            return accounts.allSatisfy{String.conformsToCAIP10($0)}
+        }
+        
+        func getAccounts() -> Set<Account> {
+            return Set(accounts.compactMap{Account($0)})
         }
     }
+    
+    
     
     struct UpdateMethodsParams: Codable, Equatable {
         let methods: Set<String>

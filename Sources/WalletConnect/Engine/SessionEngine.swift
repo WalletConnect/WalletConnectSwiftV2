@@ -254,10 +254,10 @@ final class SessionEngine {
             relayer.respondError(for: payload, reason: .unauthorizedUpdateAccountRequest)
             return
         }
-        session.updateAccounts(updateParams.accounts)
+        session.updateAccounts(updateParams.getAccounts())
         sequencesStore.setSequence(session)
         relayer.respondSuccess(for: payload)
-        onSessionUpdateAccounts?(topic, updateParams.accounts)
+        onSessionUpdateAccounts?(topic, updateParams.getAccounts())
     }
     
     private func wcSessionUpdateExpiry(_ payload: WCRequestSubscriptionPayload, updateExpiryParams: SessionType.UpdateExpiryParams) {
