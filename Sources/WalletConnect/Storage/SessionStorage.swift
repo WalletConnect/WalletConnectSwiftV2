@@ -1,38 +1,38 @@
-protocol SessionSequenceStorage: AnyObject {
-    var onSequenceExpiration: ((SessionSequence) -> Void)? { get set }
-    func hasSequence(forTopic topic: String) -> Bool
-    func setSequence(_ sequence: SessionSequence)
-    func getSequence(forTopic topic: String) -> SessionSequence?
-    func getAll() -> [SessionSequence]
+protocol WCSessionStorage: AnyObject {
+    var onSessionExpiration: ((WCSession) -> Void)? { get set }
+    func hasSession(forTopic topic: String) -> Bool
+    func setSession(_ session: WCSession)
+    func getSession(forTopic topic: String) -> WCSession?
+    func getAll() -> [WCSession]
     func delete(topic: String)
 }
 
-final class SessionStorage: SessionSequenceStorage {
+final class SessionStorage: WCSessionStorage {
     
-    var onSequenceExpiration: ((SessionSequence) -> Void)?
+    var onSessionExpiration: ((WCSession) -> Void)?
     
-    private let storage: SequenceStore<SessionSequence>
+    private let storage: SequenceStore<WCSession>
     
-    init(storage: SequenceStore<SessionSequence>) {
+    init(storage: SequenceStore<WCSession>) {
         self.storage = storage
         storage.onSequenceExpiration = { [unowned self] session in
-            onSequenceExpiration?(session)
+            onSessionExpiration?(session)
         }
     }
     
-    func hasSequence(forTopic topic: String) -> Bool {
+    func hasSession(forTopic topic: String) -> Bool {
         storage.hasSequence(forTopic: topic)
     }
     
-    func setSequence(_ sequence: SessionSequence) {
-        storage.setSequence(sequence)
+    func setSession(_ session: WCSession) {
+        storage.setSequence(session)
     }
     
-    func getSequence(forTopic topic: String) -> SessionSequence? {
+    func getSession(forTopic topic: String) -> WCSession? {
         return try? storage.getSequence(forTopic: topic)
     }
     
-    func getAll() -> [SessionSequence] {
+    func getAll() -> [WCSession] {
         storage.getAll()
     }
     

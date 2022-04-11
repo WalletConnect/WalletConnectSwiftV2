@@ -9,6 +9,7 @@ protocol ExpirableSequence: Codable, Expirable {
     var topic: String { get }
 }
 
+// TODO: Find replacement for 'Sequence' prefix
 final class SequenceStore<T> where T: ExpirableSequence {
 
     var onSequenceExpiration: ((_ sequence: T) -> Void)?
