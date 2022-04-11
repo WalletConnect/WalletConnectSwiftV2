@@ -2,16 +2,16 @@ import Foundation
 import WalletConnectKMS
 @testable import WalletConnect
 
-extension SessionSequence {
+extension WCSession {
     static func stub(
         isSelfController: Bool = false,
         expiryDate: Date = Date.distantFuture,
         selfPrivateKey: AgreementPrivateKey = AgreementPrivateKey(),
-        acknowledged: Bool = true) -> SessionSequence {
+        acknowledged: Bool = true) -> WCSession {
             let peerKey = selfPrivateKey.publicKey.hexRepresentation
             let selfKey = AgreementPrivateKey().publicKey.hexRepresentation
             let controllerKey = isSelfController ? selfKey : peerKey
-            return SessionSequence(
+            return WCSession(
                 topic: String.generateTopic(),
                 relay: RelayProtocolOptions.stub(),
                 controller: AgreementPeer(publicKey: controllerKey),
