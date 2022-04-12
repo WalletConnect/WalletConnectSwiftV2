@@ -5,6 +5,7 @@ protocol WCSessionStorage: AnyObject {
     func getSession(forTopic topic: String) -> WCSession?
     func getAll() -> [WCSession]
     func delete(topic: String)
+    func getAcknowledgedSessions() -> [WCSession]
 }
 
 final class SessionStorage: WCSessionStorage {
@@ -38,5 +39,12 @@ final class SessionStorage: WCSessionStorage {
     
     func delete(topic: String) {
         storage.delete(topic: topic)
+    }
+    
+    func getAcknowledgedSessions() -> [WCSession] {
+        getAll().compactMap {
+            guard $0.acknowledged else { return nil }
+            return $0
+        }
     }
 }

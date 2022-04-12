@@ -10,7 +10,6 @@ final class SessionEngine {
     var onSessionSettle: ((Session)->())?
     var onSessionRejected: ((String, SessionType.Reason)->())?
     var onSessionUpdateAccounts: ((String, Set<Account>)->())?
-    var onSessionExpiry: ((Session) -> ())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
     var onEventReceived: ((String, Session.Event)->())?
     
@@ -54,11 +53,8 @@ final class SessionEngine {
         return sessionStore.hasSession(forTopic: topic)
     }
     
-    func getSettledSessions() -> [Session] {
-        sessionStore.getAll().compactMap {
-            guard $0.acknowledged else { return nil }
-            return $0.publicRepresentation()
-        }
+    func getAcknowledgedSessions() -> [Session] {
+        sessionStore.getAcknowledgedSessions().map{$0.publicRepresentation()}
     }
     
     func delete(topic: String, reason: Reason) {
@@ -82,22 +78,6 @@ final class SessionEngine {
                 logger.debug("error: \(error)")
             }
         }
-    }
-     
-    func updateExpiry(topic: String, by ttl: Int64) throws {
-        guard var session = sessionStore.getSession(forTopic: topic) else {
-            throw WalletConnectError.noSessionMatchingTopic(topic)
-        }
-        guard session.acknowledged else {
-            throw WalletConnectError.sessionNotAcknowledged(topic)
-        }
-        guard session.selfIsController else {
-            throw WalletConnectError.unauthorizedNonControllerCall
-        }
-        try session.updateExpiry(by: ttl)
-        let newExpiry = Int64(session.expiryDate.timeIntervalSince1970 )
-        sessionStore.setSession(session)
-        relayer.request(.wcSessionUpdateExpiry(SessionType.UpdateExpiryParams(expiry: newExpiry)), onTopic: topic)
     }
     
     func request(params: Request) {
@@ -185,8 +165,6 @@ final class SessionEngine {
                 wcSessionRequest(subscriptionPayload, payloadParams: sessionRequestParams)
             case .sessionPing(_):
                 wcSessionPing(subscriptionPayload)
-            case .sessionUpdateExpiry(let updateExpiryParams):
-                wcSessionUpdateExpiry(subscriptionPayload, updateExpiryParams: updateExpiryParams)
             case .sessionEvent(let eventParams):
                 wcSessionNotification(subscriptionPayload, eventParams: eventParams)
             default:
@@ -258,27 +236,6 @@ final class SessionEngine {
         sessionStore.setSession(session)
         relayer.respondSuccess(for: payload)
         onSessionUpdateAccounts?(topic, updateParams.getAccounts())
-    }
-    
-    private func wcSessionUpdateExpiry(_ payload: WCRequestSubscriptionPayload, updateExpiryParams: SessionType.UpdateExpiryParams) {
-        let topic = payload.topic
-        guard var session = sessionStore.getSession(forTopic: topic) else {
-            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
-            return
-        }
-        guard session.peerIsController else {
-            relayer.respondError(for: payload, reason: .unauthorizedUpdateExpiryRequest)
-            return
-        }
-        do {
-            try session.updateExpiry(to: updateExpiryParams.expiry)
-        } catch {
-            relayer.respondError(for: payload, reason: .invalidUpdateExpiryRequest)
-            return
-        }
-        sessionStore.setSession(session)
-        relayer.respondSuccess(for: payload)
-        onSessionExpiry?(session.publicRepresentation())
     }
     
     private func wcSessionDelete(_ payload: WCRequestSubscriptionPayload, deleteParams: SessionType.DeleteParams) {

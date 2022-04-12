@@ -48,6 +48,15 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         relayer.request(.wcSessionUpdateEvents(SessionType.UpdateEventsParams(events: events)), onTopic: topic)
     }
     
+   func updateExpiry(topic: String, by ttl: Int64) throws {
+       var session = try getSession(for: topic)
+       try validateControlledAcknowledged(session)
+       try session.updateExpiry(by: ttl)
+       let newExpiry = Int64(session.expiryDate.timeIntervalSince1970 )
+       sessionStore.setSession(session)
+       relayer.request(.wcSessionUpdateExpiry(SessionType.UpdateExpiryParams(expiry: newExpiry)), onTopic: topic)
+   }
+    
     // MARK: - Handle Response
     
     private func handleResponse(_ response: WCResponse) {

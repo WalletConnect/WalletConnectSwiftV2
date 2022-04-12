@@ -2,7 +2,6 @@
 import Foundation
 
 final class WCSessionStorageMock: WCSessionStorage {
-    
     var onSessionExpiration: ((WCSession) -> Void)?
     
     private(set) var sessions: [String: WCSession] = [:]
@@ -25,6 +24,13 @@ final class WCSessionStorageMock: WCSessionStorage {
     
     func delete(topic: String) {
         sessions[topic] = nil
+    }
+    
+    func getAcknowledgedSessions() -> [WCSession] {
+        getAll().compactMap {
+            guard $0.acknowledged else { return nil }
+            return $0
+        }
     }
 }
 

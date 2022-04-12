@@ -162,7 +162,6 @@ public final class WalletConnectClient {
     ///   - accounts: A Set of accounts that the dapp will be allowed to request methods executions on.
     public func approve(proposal: Session.Proposal, accounts: Set<Account>) {
         guard let sessionTopic = pairingEngine.respondSessionPropose(proposal: proposal.proposal) else {return}
-
         sessionEngine.settle(topic: sessionTopic, proposal: proposal.proposal, accounts: accounts)
     }
     
@@ -204,7 +203,7 @@ public final class WalletConnectClient {
     ///   - ttl: Time in seconds that a target session is expected to be extended for. Must be greater than current time to expire and than 7 days
     public func updateExpiry(topic: String, ttl: Int64 = Session.defaultTimeToLive) throws {
         if sessionEngine.hasSession(for: topic) {
-            try sessionEngine.updateExpiry(topic: topic, by: ttl)
+            try controllerSessionStateMachine.updateExpiry(topic: topic, by: ttl)
         }
     }
     
@@ -275,7 +274,7 @@ public final class WalletConnectClient {
     
     /// - Returns: All settled sessions that are active
     public func getSettledSessions() -> [Session] {
-        sessionEngine.getSettledSessions()
+        sessionEngine.getAcknowledgedSessions()
     }
     
     /// - Returns: All settled pairings that are active
@@ -338,11 +337,11 @@ public final class WalletConnectClient {
         nonControllerSessionStateMachine.onEventsUpdate = { [unowned self] topic, events in
             delegate?.didUpdate(sessionTopic: topic, events: events)
         }
+        nonControllerSessionStateMachine.onSessionExpiry = { [unowned self] session in
+            delegate?.didUpdateExpiry(session: session)
+        }
         sessionEngine.onSessionUpdateAccounts = { [unowned self] topic, accounts in
             delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
-        }
-        sessionEngine.onSessionExpiry = { [unowned self] session in
-            delegate?.didUpdateExpiry(session: session)
         }
         sessionEngine.onEventReceived = { [unowned self] topic, notification in
             delegate?.didReceive(notification: notification, sessionTopic: topic)

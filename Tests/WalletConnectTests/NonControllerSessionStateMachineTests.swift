@@ -85,4 +85,55 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 3005)
     }
+    
+    //MARK: - Update Expiry
+    
+    func testPeerUpdateExpirySuccess() {
+        let tomorrow = TimeTraveler.dateByAdding(days: 1)
+        let session = WCSession.stub(isSelfController: false, expiryDate: tomorrow)
+        storageMock.setSession(session)
+        let twoDaysFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 2).timeIntervalSince1970)
+        
+        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateExpiry(topic: session.topic, expiry: twoDaysFromNowTimestamp))
+        let extendedSession = storageMock.getAcknowledgedSessions().first{$0.topic == session.topic}!
+        print(extendedSession.expiryDate)
+        
+        XCTAssertEqual(extendedSession.expiryDate.timeIntervalSince1970, TimeTraveler.dateByAdding(days: 2).timeIntervalSince1970, accuracy: 1)
+    }
+    
+    func testPeerUpdateExpiryUnauthorized() {
+        let tomorrow = TimeTraveler.dateByAdding(days: 1)
+        let session = WCSession.stub(isSelfController: true, expiryDate: tomorrow)
+        storageMock.setSession(session)
+        let twoDaysFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 2).timeIntervalSince1970)
+
+        
+        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateExpiry(topic: session.topic, expiry: twoDaysFromNowTimestamp))
+
+        
+        let potentiallyExtendedSession = storageMock.getAcknowledgedSessions().first{$0.topic == session.topic}!
+        XCTAssertEqual(potentiallyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, accuracy: 1, "expiry date has been extended for peer non controller request ")
+    }
+    
+    func testPeerUpdateExpiryTtlTooHigh() {
+        let tomorrow = TimeTraveler.dateByAdding(days: 1)
+        let session = WCSession.stub(isSelfController: false, expiryDate: tomorrow)
+        storageMock.setSession(session)
+        let tenDaysFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 10).timeIntervalSince1970)
+        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateExpiry(topic: session.topic, expiry: tenDaysFromNowTimestamp))
+
+        let potentaillyExtendedSession = storageMock.getAcknowledgedSessions().first{$0.topic == session.topic}!
+        XCTAssertEqual(potentaillyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, accuracy: 1, "expiry date has been extended despite ttl to high")
+    }
+
+    func testPeerUpdateExpiryTtlTooLow() {
+        let tomorrow = TimeTraveler.dateByAdding(days: 2)
+        let session = WCSession.stub(isSelfController: false, expiryDate: tomorrow)
+        storageMock.setSession(session)
+        let oneDayFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 10).timeIntervalSince1970)
+
+        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateExpiry(topic: session.topic, expiry: oneDayFromNowTimestamp))
+        let potentaillyExtendedSession = storageMock.getAcknowledgedSessions().first{$0.topic == session.topic}!
+        XCTAssertEqual(potentaillyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, accuracy: 1, "expiry date has been extended despite ttl to low")
+    }
 }

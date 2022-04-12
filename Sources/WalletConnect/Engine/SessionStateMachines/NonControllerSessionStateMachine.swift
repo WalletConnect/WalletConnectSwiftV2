@@ -8,6 +8,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
     
     var onMethodsUpdate: ((String, Set<String>)->())?
     var onEventsUpdate: ((String, Set<String>)->())?
+    var onSessionExpiry: ((Session) -> ())?
     
     private let sessionStore: WCSessionStorage
     private let relayer: WalletConnectRelaying
@@ -33,6 +34,8 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
                 onSessionUpdateMethodsRequest(payload: subscriptionPayload, updateParams: updateParams)
             case .sessionUpdateEvents(let updateParams):
                 onSessionUpdateEventsRequest(payload: subscriptionPayload, updateParams: updateParams)
+            case .sessionUpdateExpiry(let updateExpiryParams):
+                onSessionUpdateExpiry(subscriptionPayload, updateExpiryParams: updateExpiryParams)
             default:
                 logger.warn("Warning: Session Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
             }
@@ -79,5 +82,26 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
         sessionStore.setSession(session)
         relayer.respondSuccess(for: payload)
         onEventsUpdate?(session.topic, updateParams.events)
+    }
+    
+    private func onSessionUpdateExpiry(_ payload: WCRequestSubscriptionPayload, updateExpiryParams: SessionType.UpdateExpiryParams) {
+        let topic = payload.topic
+        guard var session = sessionStore.getSession(forTopic: topic) else {
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
+            return
+        }
+        guard session.peerIsController else {
+            relayer.respondError(for: payload, reason: .unauthorizedUpdateExpiryRequest)
+            return
+        }
+        do {
+            try session.updateExpiry(to: updateExpiryParams.expiry)
+        } catch {
+            relayer.respondError(for: payload, reason: .invalidUpdateExpiryRequest)
+            return
+        }
+        sessionStore.setSession(session)
+        relayer.respondSuccess(for: payload)
+        onSessionExpiry?(session.publicRepresentation())
     }
 }
