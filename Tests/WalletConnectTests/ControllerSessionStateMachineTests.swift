@@ -114,7 +114,7 @@ class ControllerSessionStateMachineTests: XCTestCase {
         }
     }
         
-    // MARK: - Session Update expiry on updating client
+    // MARK: - Update Expiry
     
     func testUpdateExpirySuccess() {
         let tomorrow = TimeTraveler.dateByAdding(days: 1)
