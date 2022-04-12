@@ -25,6 +25,35 @@ class ControllerSessionStateMachineTests: XCTestCase {
         sut = nil
     }
     
+    // MARK: - Update Accounts
+        
+    func testUpdateSuccess() throws {
+        let updateAccounts = ["std:0:0"]
+        let session = WCSession.stub(isSelfController: true)
+        storageMock.setSession(session)
+        try sut.updateAccounts(topic: session.topic, accounts: updateAccounts.toAccountSet())
+        XCTAssertTrue(relayMock.didCallRequest)
+    }
+    
+    func testUpdateErrorIfNonController() {
+        let updateAccounts = ["std:0:0"]
+        let session = WCSession.stub(isSelfController: false)
+        storageMock.setSession(session)
+        XCTAssertThrowsError(try sut.updateAccounts(topic: session.topic, accounts: updateAccounts.toAccountSet()), "Update must fail if called by a non-controller.")
+    }
+    
+    func testUpdateErrorSessionNotFound() {
+        let updateAccounts = ["std:0:0"]
+        XCTAssertThrowsError(try sut.updateAccounts(topic: "", accounts: updateAccounts.toAccountSet()), "Update must fail if there is no session matching the target topic.")
+    }
+    
+    func testUpdateErrorSessionNotSettled() {
+        let updateAccounts = ["std:0:0"]
+        let session = WCSession.stub(acknowledged: false)
+        storageMock.setSession(session)
+        XCTAssertThrowsError(try sut.updateAccounts(topic: session.topic, accounts: updateAccounts.toAccountSet()), "Update must fail if session is not on settled state.")
+    }
+
     // MARK: - Update Methods
         
     func testUpdateMethodsSuccess() throws {

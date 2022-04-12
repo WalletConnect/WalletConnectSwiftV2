@@ -6,6 +6,7 @@ import Combine
 
 final class ControllerSessionStateMachine: SessionStateMachineValidating {
     
+    var onSessionUpdateAccounts: ((String, Set<Account>)->())?
     var onMethodsUpdate: ((String, Set<String>)->())?
     var onEventsUpdate: ((String, Set<String>)->())?
 
@@ -26,6 +27,21 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         relayer.responsePublisher.sink { [unowned self] response in
             handleResponse(response)
         }.store(in: &publishers)
+    }
+    
+    func updateAccounts(topic: String, accounts: Set<Account>) throws {
+        guard var session = sessionStore.getSession(forTopic: topic) else {
+            throw WalletConnectError.noSessionMatchingTopic(topic)
+        }
+        guard session.acknowledged else {
+            throw WalletConnectError.sessionNotAcknowledged(topic)
+        }
+        guard session.selfIsController else {
+            throw WalletConnectError.unauthorizedNonControllerCall
+        }
+        session.updateAccounts(accounts)
+        sessionStore.setSession(session)
+        relayer.request(.wcSessionUpdateAccounts(SessionType.UpdateAccountsParams(accounts: accounts)), onTopic: topic)
     }
     
     func updateMethods(topic: String, methods: Set<String>) throws {
@@ -61,6 +77,8 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
     
     private func handleResponse(_ response: WCResponse) {
         switch response.requestParams {
+        case .sessionUpdateAccounts:
+            handleUpdateAccountsResponse(topic: response.topic, result: response.result)
         case .sessionUpdateMethods:
             handleUpdateMethodsResponse(topic: response.topic, result: response.result)
         case .sessionUpdateEvents:
@@ -113,6 +131,20 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         }
         guard session.selfIsController else {
             throw WalletConnectError.unauthorizedNonControllerCall
+        }
+    }
+    
+    
+    private func handleUpdateAccountsResponse(topic: String, result: JsonRpcResult) {
+        guard let session = sessionStore.getSession(forTopic: topic) else {
+            return
+        }
+        let accounts = session.accounts
+        switch result {
+        case .response:
+            onSessionUpdateAccounts?(topic, accounts)
+        case .error:
+            logger.error("Peer failed to update state.")
         }
     }
 }

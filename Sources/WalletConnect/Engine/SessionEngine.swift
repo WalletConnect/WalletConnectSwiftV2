@@ -9,7 +9,6 @@ final class SessionEngine {
     var onSessionResponse: ((Response)->())?
     var onSessionSettle: ((Session)->())?
     var onSessionRejected: ((String, SessionType.Reason)->())?
-    var onSessionUpdateAccounts: ((String, Set<Account>)->())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
     var onEventReceived: ((String, Session.Event)->())?
     
@@ -113,21 +112,6 @@ final class SessionEngine {
         }
     }
     
-    func updateAccounts(topic: String, accounts: Set<Account>) throws {
-        guard var session = sessionStore.getSession(forTopic: topic) else {
-            throw WalletConnectError.noSessionMatchingTopic(topic)
-        }
-        guard session.acknowledged else {
-            throw WalletConnectError.sessionNotAcknowledged(topic)
-        }
-        guard session.selfIsController else {
-            throw WalletConnectError.unauthorizedNonControllerCall
-        }
-        session.updateAccounts(accounts)
-        sessionStore.setSession(session)
-        relayer.request(.wcSessionUpdateAccounts(SessionType.UpdateAccountsParams(accounts: accounts)), onTopic: topic)
-    }
-    
     func notify(topic: String, params: Session.Event, completion: ((Error?)->())?) {
         guard let session = sessionStore.getSession(forTopic: topic), session.acknowledged else {
             logger.debug("Could not find session for topic \(topic)")
@@ -157,8 +141,6 @@ final class SessionEngine {
             switch subscriptionPayload.wcRequest.params {
             case .sessionSettle(let settleParams):
                 wcSessionSettle(payload: subscriptionPayload, settleParams: settleParams)
-            case .sessionUpdateAccounts(let updateParams):
-                wcSessionUpdate(payload: subscriptionPayload, updateParams: updateParams)
             case .sessionDelete(let deleteParams):
                 wcSessionDelete(subscriptionPayload, deleteParams: deleteParams)
             case .sessionRequest(let sessionRequestParams):
@@ -216,26 +198,6 @@ final class SessionEngine {
         sessionStore.setSession(session)
         relayer.respondSuccess(for: payload)
         onSessionSettle?(session.publicRepresentation())
-    }
-    
-    private func wcSessionUpdate(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateAccountsParams) {
-        if !updateParams.isValidParam {
-            relayer.respondError(for: payload, reason: .invalidUpdateAccountsRequest)
-            return
-        }
-        let topic = payload.topic
-        guard var session = sessionStore.getSession(forTopic: topic) else {
-            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
-                  return
-              }
-        guard session.peerIsController else {
-            relayer.respondError(for: payload, reason: .unauthorizedUpdateAccountRequest)
-            return
-        }
-        session.updateAccounts(updateParams.getAccounts())
-        sessionStore.setSession(session)
-        relayer.respondSuccess(for: payload)
-        onSessionUpdateAccounts?(topic, updateParams.getAccounts())
     }
     
     private func wcSessionDelete(_ payload: WCRequestSubscriptionPayload, deleteParams: SessionType.DeleteParams) {
@@ -328,8 +290,6 @@ final class SessionEngine {
         switch response.requestParams {
         case .sessionSettle:
             handleSessionSettleResponse(topic: response.topic, result: response.result)
-        case .sessionUpdateAccounts:
-            handleUpdateAccountsResponse(topic: response.topic, result: response.result)
         case .sessionRequest:
             let response = Response(topic: response.topic, chainId: response.chainId, result: response.result)
             onSessionResponse?(response)
@@ -352,19 +312,6 @@ final class SessionEngine {
             sessionStore.delete(topic: topic)
             kms.deleteAgreementSecret(for: topic)
             kms.deletePrivateKey(for: session.publicKey!)
-        }
-    }
-    
-    private func handleUpdateAccountsResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sessionStore.getSession(forTopic: topic) else {
-            return
-        }
-        let accounts = session.accounts
-        switch result {
-        case .response:
-            onSessionUpdateAccounts?(topic, accounts)
-        case .error:
-            logger.error("Peer failed to update state.")
         }
     }
 }

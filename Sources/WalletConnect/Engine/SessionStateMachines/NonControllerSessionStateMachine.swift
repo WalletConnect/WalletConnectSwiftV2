@@ -6,6 +6,7 @@ import Combine
 
 final class NonControllerSessionStateMachine: SessionStateMachineValidating {
     
+    var onSessionUpdateAccounts: ((String, Set<Account>)->())?
     var onMethodsUpdate: ((String, Set<String>)->())?
     var onEventsUpdate: ((String, Set<String>)->())?
     var onSessionExpiry: ((Session) -> ())?
@@ -30,6 +31,8 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
     private func setUpWCRequestHandling() {
         relayer.wcRequestPublisher.sink { [unowned self] subscriptionPayload in
             switch subscriptionPayload.wcRequest.params {
+            case .sessionUpdateAccounts(let updateParams):
+                onSessionUpdateAccounts(payload: subscriptionPayload, updateParams: updateParams)
             case .sessionUpdateMethods(let updateParams):
                 onSessionUpdateMethodsRequest(payload: subscriptionPayload, updateParams: updateParams)
             case .sessionUpdateEvents(let updateParams):
@@ -40,6 +43,26 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
                 logger.warn("Warning: Session Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
             }
         }.store(in: &publishers)
+    }
+    
+    private func onSessionUpdateAccounts(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateAccountsParams) {
+        if !updateParams.isValidParam {
+            relayer.respondError(for: payload, reason: .invalidUpdateAccountsRequest)
+            return
+        }
+        let topic = payload.topic
+        guard var session = sessionStore.getSession(forTopic: topic) else {
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
+                  return
+              }
+        guard session.peerIsController else {
+            relayer.respondError(for: payload, reason: .unauthorizedUpdateAccountRequest)
+            return
+        }
+        session.updateAccounts(updateParams.getAccounts())
+        sessionStore.setSession(session)
+        relayer.respondSuccess(for: payload)
+        onSessionUpdateAccounts?(topic, updateParams.getAccounts())
     }
     
     private func onSessionUpdateMethodsRequest(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateMethodsParams) {

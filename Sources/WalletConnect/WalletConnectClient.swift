@@ -178,7 +178,7 @@ public final class WalletConnectClient {
     ///   - topic: Topic of the session that is intended to be updated.
     ///   - accounts: Set of accounts that will be allowed to be used by the session after the update.
     public func updateAccounts(topic: String, accounts: Set<Account>) throws {
-        try sessionEngine.updateAccounts(topic: topic, accounts: accounts)
+        try controllerSessionStateMachine.updateAccounts(topic: topic, accounts: accounts)
     }
     
     /// For the responder to update session methods
@@ -331,6 +331,9 @@ public final class WalletConnectClient {
         controllerSessionStateMachine.onEventsUpdate = { [unowned self] topic, events in
             delegate?.didUpdate(sessionTopic: topic, events: events)
         }
+        controllerSessionStateMachine.onSessionUpdateAccounts = { [unowned self] topic, accounts in
+            delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
+        }
         nonControllerSessionStateMachine.onMethodsUpdate = { [unowned self] topic, methods in
             delegate?.didUpdate(sessionTopic: topic, methods: methods)
         }
@@ -340,7 +343,7 @@ public final class WalletConnectClient {
         nonControllerSessionStateMachine.onSessionExpiry = { [unowned self] session in
             delegate?.didUpdateExpiry(session: session)
         }
-        sessionEngine.onSessionUpdateAccounts = { [unowned self] topic, accounts in
+        nonControllerSessionStateMachine.onSessionUpdateAccounts = { [unowned self] topic, accounts in
             delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
         }
         sessionEngine.onEventReceived = { [unowned self] topic, event in
