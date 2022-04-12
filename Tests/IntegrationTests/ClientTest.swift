@@ -286,6 +286,27 @@ final class ClientTests: XCTestCase {
         await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
+    func testSuccessfulSessionUpdateExpiry() async {
+        let proposerSessionUpgradeExpectation = expectation(description: "Proposer updates session expiry on responder request")
+        let responderSessionUpgradeExpectation = expectation(description: "Responder updates session expiry on proposer response")
+        let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
+        try! responder.client.pair(uri: uri)
+        responder.onSessionProposal = { [unowned self] proposal in
+            self.responder.client.approve(proposal: proposal, accounts: [])
+        }
+        responder.onSessionSettled = { [unowned self] session in
+            Thread.sleep(forTimeInterval: 1) //sleep because new expiry must be greater than current
+            try? responder.client.updateExpiry(topic: session.topic)
+        }
+        proposer.onSessionUpdateExpiry = { _, _ in
+            proposerSessionUpgradeExpectation.fulfill()
+        }
+        responder.onSessionUpdateExpiry = { _, _ in
+            responderSessionUpgradeExpectation.fulfill()
+        }
+        await waitForExpectations(timeout: defaultTimeout, handler: nil)
+    }
+    
     func testSessionEventSucceeds() async {
         let proposerReceivesEventExpectation = expectation(description: "Proposer receives event")
         let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!

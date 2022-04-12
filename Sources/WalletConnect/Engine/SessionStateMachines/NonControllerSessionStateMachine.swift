@@ -6,10 +6,10 @@ import Combine
 
 final class NonControllerSessionStateMachine: SessionStateMachineValidating {
     
-    var onSessionUpdateAccounts: ((String, Set<Account>)->())?
+    var onAccountsUpdate: ((String, Set<Account>)->())?
     var onMethodsUpdate: ((String, Set<String>)->())?
     var onEventsUpdate: ((String, Set<String>)->())?
-    var onSessionExpiry: ((String, Date) -> ())?
+    var onExpiryUpdate: ((String, Date) -> ())?
     
     private let sessionStore: WCSessionStorage
     private let relayer: WalletConnectRelaying
@@ -62,7 +62,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
         session.updateAccounts(updateParams.getAccounts())
         sessionStore.setSession(session)
         relayer.respondSuccess(for: payload)
-        onSessionUpdateAccounts?(topic, updateParams.getAccounts())
+        onAccountsUpdate?(topic, updateParams.getAccounts())
     }
     
     private func onSessionUpdateMethodsRequest(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateMethodsParams) {
@@ -120,11 +120,12 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
         do {
             try session.updateExpiry(to: updateExpiryParams.expiry)
         } catch {
+            print(error)
             relayer.respondError(for: payload, reason: .invalidUpdateExpiryRequest)
             return
         }
         sessionStore.setSession(session)
         relayer.respondSuccess(for: payload)
-        onSessionExpiry?(session.topic, session.expiryDate)
+        onExpiryUpdate?(session.topic, session.expiryDate)
     }
 }

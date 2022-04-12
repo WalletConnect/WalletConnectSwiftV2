@@ -331,8 +331,11 @@ public final class WalletConnectClient {
         controllerSessionStateMachine.onEventsUpdate = { [unowned self] topic, events in
             delegate?.didUpdate(sessionTopic: topic, events: events)
         }
-        controllerSessionStateMachine.onSessionUpdateAccounts = { [unowned self] topic, accounts in
+        controllerSessionStateMachine.onAccountsUpdate = { [unowned self] topic, accounts in
             delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
+        }
+        controllerSessionStateMachine.onExpiryUpdate = { [unowned self] topic, expiry in
+            delegate?.didUpdate(sessionTopic: topic, expiry: expiry)
         }
         nonControllerSessionStateMachine.onMethodsUpdate = { [unowned self] topic, methods in
             delegate?.didUpdate(sessionTopic: topic, methods: methods)
@@ -340,10 +343,10 @@ public final class WalletConnectClient {
         nonControllerSessionStateMachine.onEventsUpdate = { [unowned self] topic, events in
             delegate?.didUpdate(sessionTopic: topic, events: events)
         }
-        nonControllerSessionStateMachine.onSessionExpiry = { [unowned self] topic, expiry in
+        nonControllerSessionStateMachine.onExpiryUpdate = { [unowned self] topic, expiry in
             delegate?.didUpdate(sessionTopic: topic, expiry: expiry)
         }
-        nonControllerSessionStateMachine.onSessionUpdateAccounts = { [unowned self] topic, accounts in
+        nonControllerSessionStateMachine.onAccountsUpdate = { [unowned self] topic, accounts in
             delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
         }
         sessionEngine.onEventReceived = { [unowned self] topic, event in

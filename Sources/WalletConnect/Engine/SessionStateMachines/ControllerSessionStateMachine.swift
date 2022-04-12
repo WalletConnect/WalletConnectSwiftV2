@@ -6,9 +6,10 @@ import Combine
 
 final class ControllerSessionStateMachine: SessionStateMachineValidating {
     
-    var onSessionUpdateAccounts: ((String, Set<Account>)->())?
+    var onAccountsUpdate: ((String, Set<Account>)->())?
     var onMethodsUpdate: ((String, Set<String>)->())?
     var onEventsUpdate: ((String, Set<String>)->())?
+    var onExpiryUpdate: ((String, Date)->())?
 
     private let sessionStore: WCSessionStorage
     private let relayer: WalletConnectRelaying
@@ -30,15 +31,8 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
     }
     
     func updateAccounts(topic: String, accounts: Set<Account>) throws {
-        guard var session = sessionStore.getSession(forTopic: topic) else {
-            throw WalletConnectError.noSessionMatchingTopic(topic)
-        }
-        guard session.acknowledged else {
-            throw WalletConnectError.sessionNotAcknowledged(topic)
-        }
-        guard session.selfIsController else {
-            throw WalletConnectError.unauthorizedNonControllerCall
-        }
+        var session = try getSession(for: topic)
+        try validateControlledAcknowledged(session)
         session.updateAccounts(accounts)
         sessionStore.setSession(session)
         relayer.request(.wcSessionUpdateAccounts(SessionType.UpdateAccountsParams(accounts: accounts)), onTopic: topic)
@@ -83,8 +77,23 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
             handleUpdateMethodsResponse(topic: response.topic, result: response.result)
         case .sessionUpdateEvents:
             handleUpdateEventsResponse(topic: response.topic, result: response.result)
+        case .sessionUpdateExpiry:
+            handleUpdateExpiryResponse(topic: response.topic, result: response.result)
         default:
             break
+        }
+    }
+    
+    private func handleUpdateAccountsResponse(topic: String, result: JsonRpcResult) {
+        guard let session = sessionStore.getSession(forTopic: topic) else {
+            return
+        }
+        let accounts = session.accounts
+        switch result {
+        case .response:
+            onAccountsUpdate?(topic, accounts)
+        case .error:
+            logger.error("Peer failed to update state.")
         }
     }
     
@@ -116,6 +125,20 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         }
     }
     
+    private func handleUpdateExpiryResponse(topic: String, result: JsonRpcResult) {
+        guard let session = sessionStore.getSession(forTopic: topic) else {
+            return
+        }
+        switch result {
+        case .response:
+            //TODO - state sync
+            onExpiryUpdate?(session.topic, session.expiryDate)
+        case .error:
+            //TODO - state sync
+            logger.error("Peer failed to update events.")
+        }
+    }
+    
     // MARK: - Private
     private func getSession(for topic: String) throws -> WCSession {
         if let session = sessionStore.getSession(forTopic: topic) {
@@ -131,20 +154,6 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         }
         guard session.selfIsController else {
             throw WalletConnectError.unauthorizedNonControllerCall
-        }
-    }
-    
-    
-    private func handleUpdateAccountsResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sessionStore.getSession(forTopic: topic) else {
-            return
-        }
-        let accounts = session.accounts
-        switch result {
-        case .response:
-            onSessionUpdateAccounts?(topic, accounts)
-        case .error:
-            logger.error("Peer failed to update state.")
         }
     }
 }

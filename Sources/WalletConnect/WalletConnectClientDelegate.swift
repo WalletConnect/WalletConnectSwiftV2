@@ -45,7 +45,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     
     /// Tells the delegate that session expiry has been updated
     ///
-    /// Function will be executed on non-controller client only.
+    /// Function will be executed on controller and non-controller clients.
     func didUpdate(sessionTopic: String, expiry: Date)
 
     /// Tells the delegate that the client has settled a session.
