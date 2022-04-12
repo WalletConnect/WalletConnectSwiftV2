@@ -9,7 +9,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
     var onSessionUpdateAccounts: ((String, Set<Account>)->())?
     var onMethodsUpdate: ((String, Set<String>)->())?
     var onEventsUpdate: ((String, Set<String>)->())?
-    var onSessionExpiry: ((Session) -> ())?
+    var onSessionExpiry: ((String, Date) -> ())?
     
     private let sessionStore: WCSessionStorage
     private let relayer: WalletConnectRelaying
@@ -125,6 +125,6 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
         }
         sessionStore.setSession(session)
         relayer.respondSuccess(for: payload)
-        onSessionExpiry?(session.publicRepresentation())
+        onSessionExpiry?(session.topic, session.expiryDate)
     }
 }

@@ -340,8 +340,8 @@ public final class WalletConnectClient {
         nonControllerSessionStateMachine.onEventsUpdate = { [unowned self] topic, events in
             delegate?.didUpdate(sessionTopic: topic, events: events)
         }
-        nonControllerSessionStateMachine.onSessionExpiry = { [unowned self] session in
-            delegate?.didUpdateExpiry(session: session)
+        nonControllerSessionStateMachine.onSessionExpiry = { [unowned self] topic, expiry in
+            delegate?.didUpdate(sessionTopic: topic, expiry: expiry)
         }
         nonControllerSessionStateMachine.onSessionUpdateAccounts = { [unowned self] topic, accounts in
             delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
