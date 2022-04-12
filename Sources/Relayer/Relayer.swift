@@ -125,7 +125,9 @@ public final class Relayer {
             .filter {$0.id == request.id}
             .sink { [weak self] (subscriptionResponse) in
             cancellable?.cancel()
-                self?.subscriptions[topic] = subscriptionResponse.result
+                self?.concurrentQueue.async(flags: .barrier) {
+                    self?.subscriptions[topic] = subscriptionResponse.result
+                }
                 completion(nil)
         }
         return request.id
