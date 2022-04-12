@@ -166,7 +166,7 @@ final class SessionEngine {
             case .sessionPing(_):
                 wcSessionPing(subscriptionPayload)
             case .sessionEvent(let eventParams):
-                wcSessionNotification(subscriptionPayload, eventParams: eventParams)
+                wcSessionEvent(subscriptionPayload, eventParams: eventParams)
             default:
                 logger.warn("Warning: Session Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
             }
@@ -281,7 +281,7 @@ final class SessionEngine {
         relayer.respondSuccess(for: payload)
     }
     
-    private func wcSessionNotification(_ payload: WCRequestSubscriptionPayload, eventParams: SessionType.EventParams) {
+    private func wcSessionEvent(_ payload: WCRequestSubscriptionPayload, eventParams: SessionType.EventParams) {
         let event = eventParams.event
         let topic = payload.topic
         guard let session = sessionStore.getSession(forTopic: topic) else {

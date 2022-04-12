@@ -29,7 +29,7 @@ enum ReasonCode {
     // 5000
     case disapprovedChains
     case disapprovedMethods
-    case disapprovedNotificationTypes
+    case disapprovedEventTypes
     
     var code: Int {
         switch self {
@@ -53,7 +53,7 @@ enum ReasonCode {
         case .unauthorizedMatchingController: return 3100
         case .disapprovedChains: return 5000
         case .disapprovedMethods: return 5001
-        case .disapprovedNotificationTypes: return 5002
+        case .disapprovedEventTypes: return 5002
         }
     }
     
@@ -78,7 +78,7 @@ enum ReasonCode {
         case .unauthorizedRPCMethod(let method):
             return "Unauthorized JSON-RPC method requested: \(method)"
         case .unauthorizedEventType(let type):
-            return "Unauthorized notification type requested: \(type)"
+            return "Unauthorized event type requested: \(type)"
         case .unauthorizedUpdateAccountRequest:
             return "Unauthorized update accounts request"
         case .unauthorizedUpdateMethodsRequest:
@@ -93,8 +93,8 @@ enum ReasonCode {
             return "User disapproved requested chains"
         case .disapprovedMethods:
             return "User disapproved requested json-rpc methods"
-        case .disapprovedNotificationTypes:
-            return "User disapproved requested notification types"
+        case .disapprovedEventTypes:
+            return "User disapproved requested event types"
         }
     }
 }

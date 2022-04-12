@@ -244,17 +244,17 @@ public final class WalletConnectClient {
         }
     }
     
-    /// For the proposer and responder to emits a notification event on the peer for an existing session
+    /// For the proposer and responder to emits an event on the peer for an existing session
     ///
     /// When:  a client wants to emit an event to its peer client (eg. chain changed or tx replaced)
     ///
     /// Should Error:
     /// - When the session topic is not found
-    /// - When the notification params are invalid
+    /// - When the event params are invalid
 
     /// - Parameters:
     ///   - topic: Session topic
-    ///   - params: Notification Parameters
+    ///   - params: Event Parameters
     ///   - completion: calls a handler upon completion
     public func notify(topic: String, params: Session.Event, completion: ((Error?)->())?) {
         sessionEngine.notify(topic: topic, params: params, completion: completion)
@@ -343,8 +343,8 @@ public final class WalletConnectClient {
         sessionEngine.onSessionUpdateAccounts = { [unowned self] topic, accounts in
             delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
         }
-        sessionEngine.onEventReceived = { [unowned self] topic, notification in
-            delegate?.didReceive(notification: notification, sessionTopic: topic)
+        sessionEngine.onEventReceived = { [unowned self] topic, event in
+            delegate?.didReceive(event: event, sessionTopic: topic)
         }
         sessionEngine.onSessionResponse = { [unowned self] response in
             delegate?.didReceive(sessionResponse: response)

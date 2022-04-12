@@ -46,8 +46,8 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didUpdate(sessionTopic: String, events: Set<String>) {
         onSessionUpdateEvents?(sessionTopic, events)
     }
-    func didReceive(notification: Session.Event, sessionTopic: String) {
-        onEventReceived?(notification, sessionTopic)
+    func didReceive(event: Session.Event, sessionTopic: String) {
+        onEventReceived?(event, sessionTopic)
     }
     func didReceive(sessionResponse: Response) {
         onSessionResponse?(sessionResponse)
