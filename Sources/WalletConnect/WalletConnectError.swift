@@ -42,7 +42,7 @@ extension WalletConnectError {
         case .invalidMethod:
             return "Methods set is invalid."
         case .invalidEventType:
-            return "Invalid notification type."
+            return "Invalid event type."
         case .unauthorizedNonControllerCall:
             return "Method must be called by a controller client."
         case .topicGenerationFailed:

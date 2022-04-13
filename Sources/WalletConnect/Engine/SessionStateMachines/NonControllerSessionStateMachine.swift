@@ -6,8 +6,10 @@ import Combine
 
 final class NonControllerSessionStateMachine: SessionStateMachineValidating {
     
+    var onAccountsUpdate: ((String, Set<Account>)->())?
     var onMethodsUpdate: ((String, Set<String>)->())?
     var onEventsUpdate: ((String, Set<String>)->())?
+    var onExpiryUpdate: ((String, Date) -> ())?
     
     private let sessionStore: WCSessionStorage
     private let relayer: WalletConnectRelaying
@@ -29,14 +31,38 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
     private func setUpWCRequestHandling() {
         relayer.wcRequestPublisher.sink { [unowned self] subscriptionPayload in
             switch subscriptionPayload.wcRequest.params {
+            case .sessionUpdateAccounts(let updateParams):
+                onSessionUpdateAccounts(payload: subscriptionPayload, updateParams: updateParams)
             case .sessionUpdateMethods(let updateParams):
                 onSessionUpdateMethodsRequest(payload: subscriptionPayload, updateParams: updateParams)
             case .sessionUpdateEvents(let updateParams):
                 onSessionUpdateEventsRequest(payload: subscriptionPayload, updateParams: updateParams)
+            case .sessionUpdateExpiry(let updateExpiryParams):
+                onSessionUpdateExpiry(subscriptionPayload, updateExpiryParams: updateExpiryParams)
             default:
                 logger.warn("Warning: Session Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
             }
         }.store(in: &publishers)
+    }
+    
+    private func onSessionUpdateAccounts(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateAccountsParams) {
+        if !updateParams.isValidParam {
+            relayer.respondError(for: payload, reason: .invalidUpdateAccountsRequest)
+            return
+        }
+        let topic = payload.topic
+        guard var session = sessionStore.getSession(forTopic: topic) else {
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
+                  return
+              }
+        guard session.peerIsController else {
+            relayer.respondError(for: payload, reason: .unauthorizedUpdateAccountRequest)
+            return
+        }
+        session.updateAccounts(updateParams.getAccounts())
+        sessionStore.setSession(session)
+        relayer.respondSuccess(for: payload)
+        onAccountsUpdate?(topic, updateParams.getAccounts())
     }
     
     private func onSessionUpdateMethodsRequest(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateMethodsParams) {
@@ -79,5 +105,27 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
         sessionStore.setSession(session)
         relayer.respondSuccess(for: payload)
         onEventsUpdate?(session.topic, updateParams.events)
+    }
+    
+    private func onSessionUpdateExpiry(_ payload: WCRequestSubscriptionPayload, updateExpiryParams: SessionType.UpdateExpiryParams) {
+        let topic = payload.topic
+        guard var session = sessionStore.getSession(forTopic: topic) else {
+            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
+            return
+        }
+        guard session.peerIsController else {
+            relayer.respondError(for: payload, reason: .unauthorizedUpdateExpiryRequest)
+            return
+        }
+        do {
+            try session.updateExpiry(to: updateExpiryParams.expiry)
+        } catch {
+            print(error)
+            relayer.respondError(for: payload, reason: .invalidUpdateExpiryRequest)
+            return
+        }
+        sessionStore.setSession(session)
+        relayer.respondSuccess(for: payload)
+        onExpiryUpdate?(session.topic, session.expiryDate)
     }
 }

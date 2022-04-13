@@ -5,7 +5,7 @@ import Foundation
 public enum RejectionReason {
     case disapprovedChains
     case disapprovedMethods
-    case disapprovedNotificationTypes
+    case disapprovedEventTypes
 }
 
 internal extension RejectionReason {
@@ -15,8 +15,8 @@ internal extension RejectionReason {
             return ReasonCode.disapprovedChains
         case .disapprovedMethods:
             return ReasonCode.disapprovedMethods
-        case  .disapprovedNotificationTypes:
-            return ReasonCode.disapprovedNotificationTypes
+        case  .disapprovedEventTypes:
+            return ReasonCode.disapprovedEventTypes
         }
     }
 }

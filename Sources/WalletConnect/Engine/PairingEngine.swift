@@ -80,7 +80,7 @@ final class PairingEngine {
             proposer: proposer,
             methods: methods,
             events: events,
-            blockchains: blockchains)
+            chains: blockchains)
         relayer.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { [unowned self] error in
             logger.debug("Received propose acknowledgement")
             completion(error)
