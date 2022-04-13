@@ -150,7 +150,7 @@ extension ResponderViewController: SessionViewControllerDelegate {
         print("[RESPONDER] Approving session...")
         let proposal = currentProposal!
         currentProposal = nil
-        let accounts = Set(proposal.blockchains.compactMap { Account($0+":\(account)") })
+        let accounts = Set(proposal.chains.compactMap { Account($0.absoluteString + ":\(account)") })
         client.approve(proposal: proposal, accounts: accounts)
     }
     
@@ -163,6 +163,8 @@ extension ResponderViewController: SessionViewControllerDelegate {
 }
 
 extension ResponderViewController: WalletConnectClientDelegate {
+    
+    
 
     func didReceive(sessionProposal: Session.Proposal) {
         print("[RESPONDER] WC: Did receive session proposal")
@@ -172,8 +174,8 @@ extension ResponderViewController: WalletConnectClientDelegate {
             descriptionText: appMetadata.description,
             dappURL: appMetadata.url,
             iconURL: appMetadata.icons.first ?? "",
-            chains: Array(sessionProposal.blockchains),
-            methods: Array(sessionProposal.permissions.methods), pendingRequests: [])
+            chains: Array(sessionProposal.chains.map { $0.absoluteString }),
+            methods: Array(sessionProposal.methods), pendingRequests: [])
         currentProposal = sessionProposal
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread
             self.showSessionProposal(info)
@@ -191,13 +193,17 @@ extension ResponderViewController: WalletConnectClientDelegate {
         print("[RESPONDER] WC: Did receive session request")
         
     }
-    
-    func didUpgrade(sessionTopic: String, permissions: Session.Permissions) {
-
-    }
 
     func didUpdate(sessionTopic: String, accounts: Set<Account>) {
 
+    }
+    
+    func didUpdate(sessionTopic: String, methods: Set<String>) {
+        
+    }
+    
+    func didUpdate(sessionTopic: String, events: Set<String>) {
+        
     }
     
     func didDelete(sessionTopic: String, reason: Reason) {
