@@ -42,9 +42,6 @@ final class SessionStorage: WCSessionStorage {
     }
     
     func getAcknowledgedSessions() -> [WCSession] {
-        getAll().compactMap {
-            guard $0.acknowledged else { return nil }
-            return $0
-        }
+        getAll().filter {$0.acknowledged}
     }
 }
