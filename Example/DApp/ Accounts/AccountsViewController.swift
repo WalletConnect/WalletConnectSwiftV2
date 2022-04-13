@@ -44,7 +44,7 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
         accountsView.tableView.dataSource = self
         accountsView.tableView.delegate = self
         session.accounts.forEach { account in
-            accountsDetails.append(AccountDetails(chain: account.blockchainIdentifier, methods: Array(session.permissions.methods), account: account.address))
+            accountsDetails.append(AccountDetails(chain: account.blockchainIdentifier, methods: Array(session.methods), account: account.address))
         }
     }
     
