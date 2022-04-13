@@ -43,31 +43,32 @@ public protocol WalletConnectClientDelegate: AnyObject {
     /// Function is executed on controller and non-controller client when both communicating peers have successfully updated events requested by the controller client.
     func didUpdate(sessionTopic: String, events: Set<String>)
     
+    /// Tells the delegate that session expiry has been updated
+    ///
+    /// Function will be executed on controller and non-controller clients.
+    func didUpdate(sessionTopic: String, expiry: Date)
+
     /// Tells the delegate that the client has settled a session.
     ///
     /// Function is executed on proposer and responder client when both communicating peers have successfully established a session.
     func didSettle(session: Session)
     
-    /// Tells the delegate that notification has been received.
-    func didReceive(notification: Session.Event, sessionTopic : String)
+    /// Tells the delegate that event has been received.
+    func didReceive(event: Session.Event, sessionTopic : String)
     
     /// Tells the delegate that peer client has rejected a session proposal.
     ///
     /// Function will be executed on proposer client only.
     func didReject(proposal: Session.Proposal, reason: Reason)
-    
-    /// Tells the delegate that session expiry has been updated
-    ///
-    /// Function will be executed on non-controller client only.
-    func didUpdateExpiry(session: Session)
 }
 
 public extension WalletConnectClientDelegate {
-    func didReceive(notification: Session.Event, sessionTopic: String) {}
+    func didReceive(event: Session.Event, sessionTopic: String) {}
     func didReject(proposal: String, reason: Reason) {}
     func didReceive(sessionRequest: Request) {}
     func didReceive(sessionProposal: Session.Proposal) {}
     func didReceive(sessionResponse: Response) {}
-    func didUpdateExpiry(session: Session) {}
+    func didUpdate(sessionTopic: String, expiry: Date) {}
+    
     func didReject(proposal: Session.Proposal, reason: Reason) {}
 }

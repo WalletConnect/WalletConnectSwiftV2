@@ -9,8 +9,6 @@ final class SessionEngine {
     var onSessionResponse: ((Response)->())?
     var onSessionSettle: ((Session)->())?
     var onSessionRejected: ((String, SessionType.Reason)->())?
-    var onSessionUpdateAccounts: ((String, Set<Account>)->())?
-    var onSessionExpiry: ((Session) -> ())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
     var onEventReceived: ((String, Session.Event)->())?
     
@@ -54,11 +52,8 @@ final class SessionEngine {
         return sessionStore.hasSession(forTopic: topic)
     }
     
-    func getSettledSessions() -> [Session] {
-        sessionStore.getAll().compactMap {
-            guard $0.acknowledged else { return nil }
-            return $0.publicRepresentation()
-        }
+    func getAcknowledgedSessions() -> [Session] {
+        sessionStore.getAcknowledgedSessions().map{$0.publicRepresentation()}
     }
     
     func delete(topic: String, reason: Reason) {
@@ -82,22 +77,6 @@ final class SessionEngine {
                 logger.debug("error: \(error)")
             }
         }
-    }
-     
-    func updateExpiry(topic: String, by ttl: Int64) throws {
-        guard var session = sessionStore.getSession(forTopic: topic) else {
-            throw WalletConnectError.noSessionMatchingTopic(topic)
-        }
-        guard session.acknowledged else {
-            throw WalletConnectError.sessionNotAcknowledged(topic)
-        }
-        guard session.selfIsController else {
-            throw WalletConnectError.unauthorizedNonControllerCall
-        }
-        try session.updateExpiry(by: ttl)
-        let newExpiry = Int64(session.expiryDate.timeIntervalSince1970 )
-        sessionStore.setSession(session)
-        relayer.request(.wcSessionUpdateExpiry(SessionType.UpdateExpiryParams(expiry: newExpiry)), onTopic: topic)
     }
     
     func request(params: Request) {
@@ -133,28 +112,13 @@ final class SessionEngine {
         }
     }
     
-    func updateAccounts(topic: String, accounts: Set<Account>) throws {
-        guard var session = sessionStore.getSession(forTopic: topic) else {
-            throw WalletConnectError.noSessionMatchingTopic(topic)
-        }
-        guard session.acknowledged else {
-            throw WalletConnectError.sessionNotAcknowledged(topic)
-        }
-        guard session.selfIsController else {
-            throw WalletConnectError.unauthorizedNonControllerCall
-        }
-        session.updateAccounts(accounts)
-        sessionStore.setSession(session)
-        relayer.request(.wcSessionUpdateAccounts(SessionType.UpdateAccountsParams(accounts: accounts)), onTopic: topic)
-    }
-    
     func notify(topic: String, params: Session.Event, completion: ((Error?)->())?) {
         guard let session = sessionStore.getSession(forTopic: topic), session.acknowledged else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
         do {
-            let params = SessionType.EventParams(type: params.type, data: params.data)
+            let params = SessionType.EventParams(event: SessionType.EventParams.Event(type: params.type, data: params.data), chainId: params.chainId)
             try validateEvents(session: session, params: params)
             relayer.request(.wcSessionEvent(params), onTopic: topic) { result in
                 switch result {
@@ -177,18 +141,14 @@ final class SessionEngine {
             switch subscriptionPayload.wcRequest.params {
             case .sessionSettle(let settleParams):
                 wcSessionSettle(payload: subscriptionPayload, settleParams: settleParams)
-            case .sessionUpdateAccounts(let updateParams):
-                wcSessionUpdate(payload: subscriptionPayload, updateParams: updateParams)
             case .sessionDelete(let deleteParams):
                 wcSessionDelete(subscriptionPayload, deleteParams: deleteParams)
             case .sessionRequest(let sessionRequestParams):
                 wcSessionRequest(subscriptionPayload, payloadParams: sessionRequestParams)
             case .sessionPing(_):
                 wcSessionPing(subscriptionPayload)
-            case .sessionUpdateExpiry(let updateExpiryParams):
-                wcSessionUpdateExpiry(subscriptionPayload, updateExpiryParams: updateExpiryParams)
             case .sessionEvent(let eventParams):
-                wcSessionNotification(subscriptionPayload, notificationParams: eventParams)
+                wcSessionEvent(subscriptionPayload, eventParams: eventParams)
             default:
                 logger.warn("Warning: Session Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
             }
@@ -204,10 +164,9 @@ final class SessionEngine {
         guard let relay = proposal.relays.first else {return}
         let settleParams = SessionType.SettleParams(
             relay: relay,
-            accounts: accounts,
+            controller: selfParticipant, accounts: accounts,
             methods: proposal.methods,
             events: proposal.events,
-            controller: selfParticipant,
             expiry: Int64(expectedExpiryTimeStamp.timeIntervalSince1970))//todo - test expiration times
         let session = WCSession(
             topic: topic,
@@ -239,47 +198,6 @@ final class SessionEngine {
         sessionStore.setSession(session)
         relayer.respondSuccess(for: payload)
         onSessionSettle?(session.publicRepresentation())
-    }
-    
-    private func wcSessionUpdate(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateAccountsParams) {
-        if !updateParams.isValidParam {
-            relayer.respondError(for: payload, reason: .invalidUpdateAccountsRequest)
-            return
-        }
-        let topic = payload.topic
-        guard var session = sessionStore.getSession(forTopic: topic) else {
-            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
-                  return
-              }
-        guard session.peerIsController else {
-            relayer.respondError(for: payload, reason: .unauthorizedUpdateAccountRequest)
-            return
-        }
-        session.updateAccounts(updateParams.accounts)
-        sessionStore.setSession(session)
-        relayer.respondSuccess(for: payload)
-        onSessionUpdateAccounts?(topic, updateParams.accounts)
-    }
-    
-    private func wcSessionUpdateExpiry(_ payload: WCRequestSubscriptionPayload, updateExpiryParams: SessionType.UpdateExpiryParams) {
-        let topic = payload.topic
-        guard var session = sessionStore.getSession(forTopic: topic) else {
-            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
-            return
-        }
-        guard session.peerIsController else {
-            relayer.respondError(for: payload, reason: .unauthorizedUpdateExpiryRequest)
-            return
-        }
-        do {
-            try session.updateExpiry(to: updateExpiryParams.expiry)
-        } catch {
-            relayer.respondError(for: payload, reason: .invalidUpdateExpiryRequest)
-            return
-        }
-        sessionStore.setSession(session)
-        relayer.respondSuccess(for: payload)
-        onSessionExpiry?(session.publicRepresentation())
     }
     
     private func wcSessionDelete(_ payload: WCRequestSubscriptionPayload, deleteParams: SessionType.DeleteParams) {
@@ -325,28 +243,29 @@ final class SessionEngine {
         relayer.respondSuccess(for: payload)
     }
     
-    private func wcSessionNotification(_ payload: WCRequestSubscriptionPayload, notificationParams: SessionType.EventParams) {
+    private func wcSessionEvent(_ payload: WCRequestSubscriptionPayload, eventParams: SessionType.EventParams) {
+        let event = eventParams.event
         let topic = payload.topic
         guard let session = sessionStore.getSession(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
             return
         }
         if session.selfIsController {
-            guard session.hasPermission(forEvents: notificationParams.type) else {
-                relayer.respondError(for: payload, reason: .unauthorizedEventType(notificationParams.type))
+            guard session.hasPermission(forEvents: event.type) else {
+                relayer.respondError(for: payload, reason: .unauthorizedEventType(event.type))
                 return
             }
         }
-        let notification = Session.Event(type: notificationParams.type, data: notificationParams.data)
+        let eventPublicRepresentation = Session.Event(type: event.type, data: event.data, chainId: eventParams.chainId)
         relayer.respondSuccess(for: payload)
-        onEventReceived?(topic, notification)
+        onEventReceived?(topic, eventPublicRepresentation)
     }
     
     private func validateEvents(session: WCSession, params: SessionType.EventParams) throws {
         if session.selfIsController {
             return
         } else {
-            guard session.events.contains(params.type) else {
+            guard session.events.contains(params.event.type) else {
                 throw WalletConnectError.invalidEventType
             }
         }
@@ -371,8 +290,6 @@ final class SessionEngine {
         switch response.requestParams {
         case .sessionSettle:
             handleSessionSettleResponse(topic: response.topic, result: response.result)
-        case .sessionUpdateAccounts:
-            handleUpdateAccountsResponse(topic: response.topic, result: response.result)
         case .sessionRequest:
             let response = Response(topic: response.topic, chainId: response.chainId, result: response.result)
             onSessionResponse?(response)
@@ -395,19 +312,6 @@ final class SessionEngine {
             sessionStore.delete(topic: topic)
             kms.deleteAgreementSecret(for: topic)
             kms.deletePrivateKey(for: session.publicKey!)
-        }
-    }
-    
-    private func handleUpdateAccountsResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sessionStore.getSession(forTopic: topic) else {
-            return
-        }
-        let accounts = session.accounts
-        switch result {
-        case .response:
-            onSessionUpdateAccounts?(topic, accounts)
-        case .error:
-            logger.error("Peer failed to update state.")
         }
     }
 }

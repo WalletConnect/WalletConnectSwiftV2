@@ -162,7 +162,6 @@ public final class WalletConnectClient {
     ///   - accounts: A Set of accounts that the dapp will be allowed to request methods executions on.
     public func approve(proposal: Session.Proposal, accounts: Set<Account>) {
         guard let sessionTopic = pairingEngine.respondSessionPropose(proposal: proposal.proposal) else {return}
-
         sessionEngine.settle(topic: sessionTopic, proposal: proposal.proposal, accounts: accounts)
     }
     
@@ -179,7 +178,7 @@ public final class WalletConnectClient {
     ///   - topic: Topic of the session that is intended to be updated.
     ///   - accounts: Set of accounts that will be allowed to be used by the session after the update.
     public func updateAccounts(topic: String, accounts: Set<Account>) throws {
-        try sessionEngine.updateAccounts(topic: topic, accounts: accounts)
+        try controllerSessionStateMachine.updateAccounts(topic: topic, accounts: accounts)
     }
     
     /// For the responder to update session methods
@@ -204,7 +203,7 @@ public final class WalletConnectClient {
     ///   - ttl: Time in seconds that a target session is expected to be extended for. Must be greater than current time to expire and than 7 days
     public func updateExpiry(topic: String, ttl: Int64 = Session.defaultTimeToLive) throws {
         if sessionEngine.hasSession(for: topic) {
-            try sessionEngine.updateExpiry(topic: topic, by: ttl)
+            try controllerSessionStateMachine.updateExpiry(topic: topic, by: ttl)
         }
     }
     
@@ -245,17 +244,17 @@ public final class WalletConnectClient {
         }
     }
     
-    /// For the proposer and responder to emits a notification event on the peer for an existing session
+    /// For the proposer and responder to emits an event on the peer for an existing session
     ///
     /// When:  a client wants to emit an event to its peer client (eg. chain changed or tx replaced)
     ///
     /// Should Error:
     /// - When the session topic is not found
-    /// - When the notification params are invalid
+    /// - When the event params are invalid
 
     /// - Parameters:
     ///   - topic: Session topic
-    ///   - params: Notification Parameters
+    ///   - params: Event Parameters
     ///   - completion: calls a handler upon completion
     public func notify(topic: String, params: Session.Event, completion: ((Error?)->())?) {
         sessionEngine.notify(topic: topic, params: params, completion: completion)
@@ -275,7 +274,7 @@ public final class WalletConnectClient {
     
     /// - Returns: All settled sessions that are active
     public func getSettledSessions() -> [Session] {
-        sessionEngine.getSettledSessions()
+        sessionEngine.getAcknowledgedSessions()
     }
     
     /// - Returns: All settled pairings that are active
@@ -332,20 +331,26 @@ public final class WalletConnectClient {
         controllerSessionStateMachine.onEventsUpdate = { [unowned self] topic, events in
             delegate?.didUpdate(sessionTopic: topic, events: events)
         }
+        controllerSessionStateMachine.onAccountsUpdate = { [unowned self] topic, accounts in
+            delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
+        }
+        controllerSessionStateMachine.onExpiryUpdate = { [unowned self] topic, expiry in
+            delegate?.didUpdate(sessionTopic: topic, expiry: expiry)
+        }
         nonControllerSessionStateMachine.onMethodsUpdate = { [unowned self] topic, methods in
             delegate?.didUpdate(sessionTopic: topic, methods: methods)
         }
         nonControllerSessionStateMachine.onEventsUpdate = { [unowned self] topic, events in
             delegate?.didUpdate(sessionTopic: topic, events: events)
         }
-        sessionEngine.onSessionUpdateAccounts = { [unowned self] topic, accounts in
+        nonControllerSessionStateMachine.onExpiryUpdate = { [unowned self] topic, expiry in
+            delegate?.didUpdate(sessionTopic: topic, expiry: expiry)
+        }
+        nonControllerSessionStateMachine.onAccountsUpdate = { [unowned self] topic, accounts in
             delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
         }
-        sessionEngine.onSessionExpiry = { [unowned self] session in
-            delegate?.didUpdateExpiry(session: session)
-        }
-        sessionEngine.onEventReceived = { [unowned self] topic, notification in
-            delegate?.didReceive(notification: notification, sessionTopic: topic)
+        sessionEngine.onEventReceived = { [unowned self] topic, event in
+            delegate?.didReceive(event: event, sessionTopic: topic)
         }
         sessionEngine.onSessionResponse = { [unowned self] response in
             delegate?.didReceive(sessionResponse: response)

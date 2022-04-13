@@ -13,30 +13,35 @@ internal enum SessionType {
     
     struct SettleParams: Codable, Equatable {
         let relay: RelayProtocolOptions
+        let controller: Participant
         let accounts: Set<Account>
         let methods: Set<String>
         let events: Set<String>
-        let controller: Participant
         let expiry: Int64
     }
     
     struct UpdateAccountsParams: Codable, Equatable {
-        private let accountsString: Set<String>
-        var accounts: Set<Account> {
-            return Set(accountsString.compactMap{Account($0)})
-        }
+        private let accounts: Set<String>
+        
         init(accounts: Set<Account>) {
-            self.accountsString = Set(accounts.map{$0.absoluteString})
+            self.accounts = Set(accounts.map{$0.absoluteString})
         }
-        /// Initialiser for testing purposes only, allows to init invalid params,
-        /// use `init(accounts: Set<Account>)` instead.
+#if DEBUG
         init(accounts: Set<String>) {
-            self.accountsString = accounts
+            self.accounts = accounts
         }
+#endif
+
         var isValidParam: Bool {
-            return accountsString.allSatisfy{String.conformsToCAIP10($0)}
+            return accounts.allSatisfy{String.conformsToCAIP10($0)}
+        }
+        
+        func getAccounts() -> Set<Account> {
+            return Set(accounts.compactMap{Account($0)})
         }
     }
+    
+    
     
     struct UpdateMethodsParams: Codable, Equatable {
         let methods: Set<String>
@@ -74,12 +79,12 @@ internal enum SessionType {
     }
     
     struct EventParams: Codable, Equatable {
-        let type: String
-        let data: AnyCodable
-        
-        init(type: String, data: AnyCodable) {
-            self.type = type
-            self.data = data
+        let event: Event
+        let chainId: String?
+
+        struct Event: Codable, Equatable {
+            let type: String
+            let data: AnyCodable
         }
     }
     

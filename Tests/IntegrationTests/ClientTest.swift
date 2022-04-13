@@ -286,43 +286,64 @@ final class ClientTests: XCTestCase {
         await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
-    func testSessionEventSucceeds() async {
-        let proposerReceivesNotificationExpectation = expectation(description: "Proposer receives notification")
+    func testSuccessfulSessionUpdateExpiry() async {
+        let proposerSessionUpgradeExpectation = expectation(description: "Proposer updates session expiry on responder request")
+        let responderSessionUpgradeExpectation = expectation(description: "Responder updates session expiry on proposer response")
         let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
-
         try! responder.client.pair(uri: uri)
-        let notificationParams = Session.Event(type: "type1", data: AnyCodable("notification_data"))
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
         responder.onSessionSettled = { [unowned self] session in
-            responder.client.notify(topic: session.topic, params: notificationParams, completion: nil)
+            Thread.sleep(forTimeInterval: 1) //sleep because new expiry must be greater than current
+            try? responder.client.updateExpiry(topic: session.topic)
         }
-        proposer.onEventReceived = { notification, _ in
-            XCTAssertEqual(notification, notificationParams)
-            proposerReceivesNotificationExpectation.fulfill()
+        proposer.onSessionUpdateExpiry = { _, _ in
+            proposerSessionUpgradeExpectation.fulfill()
+        }
+        responder.onSessionUpdateExpiry = { _, _ in
+            responderSessionUpgradeExpectation.fulfill()
         }
         await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
-    func testSessionNotificationFails() async {
-        let proposerReceivesNotificationExpectation = expectation(description: "Proposer receives notification")
-        proposerReceivesNotificationExpectation.isInverted = true
+    func testSessionEventSucceeds() async {
+        let proposerReceivesEventExpectation = expectation(description: "Proposer receives event")
         let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
 
         try! responder.client.pair(uri: uri)
-        let notificationParams = Session.Event(type: "type2", data: AnyCodable("notification_data"))
+        let eventParams = Session.Event(type: "type1", data: AnyCodable("event_data"), chainId: nil)
+        responder.onSessionProposal = { [unowned self] proposal in
+            self.responder.client.approve(proposal: proposal, accounts: [])
+        }
+        responder.onSessionSettled = { [unowned self] session in
+            responder.client.notify(topic: session.topic, params: eventParams, completion: nil)
+        }
+        proposer.onEventReceived = { event, _ in
+            XCTAssertEqual(event, eventParams)
+            proposerReceivesEventExpectation.fulfill()
+        }
+        await waitForExpectations(timeout: defaultTimeout, handler: nil)
+    }
+    
+    func testSessionEventFails() async {
+        let proposerReceivesEventExpectation = expectation(description: "Proposer receives event")
+        proposerReceivesEventExpectation.isInverted = true
+        let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
+
+        try! responder.client.pair(uri: uri)
+        let eventParams = Session.Event(type: "type2", data: AnyCodable("event_data"), chainId: nil)
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
         proposer.onSessionSettled = { [unowned self] session in
-            proposer.client.notify(topic: session.topic, params: notificationParams) { error in
+            proposer.client.notify(topic: session.topic, params: eventParams) { error in
                 XCTAssertNotNil(error)
             }
         }
-        responder.onEventReceived = { notification, _ in
+        responder.onEventReceived = { _, _ in
             XCTFail()
-            proposerReceivesNotificationExpectation.fulfill()
+            proposerReceivesEventExpectation.fulfill()
         }
         await waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
