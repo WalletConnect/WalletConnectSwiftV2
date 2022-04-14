@@ -35,21 +35,21 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
     @objc
     private func connect() {
         print("[PROPOSER] Connecting to a pairing...")
-        let permissions = Session.Permissions(
-            methods: ["eth_sendTransaction", "personal_sign", "eth_signTypedData"],
-            notifications: []
-        )
-        let blockchains: Set<String> = ["eip155:1", "eip155:137"]
-        DispatchQueue.global().async { [weak self] in
-            self?.client.connect(sessionPermissions: permissions, blockchains: blockchains) { result in
-                switch result {
-                case .success(let uri):
-                    self?.showConnectScreen(uriString: uri!)
-                case .failure(let error):
-                    print("[PROPOSER] Pairing connect error: \(error)")
-                }
-            }
-        }
+//        let permissions = Session.Permissions(
+//            methods: ["eth_sendTransaction", "personal_sign", "eth_signTypedData"],
+//            notifications: []
+//        )
+//        let blockchains: Set<String> = ["eip155:1", "eip155:137"]
+//        DispatchQueue.global().async { [weak self] in
+//            self?.client.connect(sessionPermissions: permissions, blockchains: blockchains) { result in
+//                switch result {
+//                case .success(let uri):
+//                    self?.showConnectScreen(uriString: uri!)
+//                case .failure(let error):
+//                    print("[PROPOSER] Pairing connect error: \(error)")
+//                }
+//            }
+//        }
     }
     
     private func showConnectScreen(uriString: String) {

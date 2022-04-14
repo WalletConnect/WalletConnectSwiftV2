@@ -95,14 +95,14 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let pairingTopic = activePairings[indexPath.row].topic
         let blockchains: Set<String> = ["eip155:1", "eip155:137"]
-        let permissions = Session.Permissions(
-            methods: ["eth_sendTransaction", "personal_sign", "eth_signTypedData"],
-            notifications: []
-        )
-        DispatchQueue.global().async {
-            ClientDelegate.shared.client.connect(sessionPermissions: permissions, blockchains: blockchains, topic: pairingTopic) { [weak self] _ in
-                self?.connectWithExampleWallet()
-            }
-        }
+//        let permissions = Session.Permissions(
+//            methods: ["eth_sendTransaction", "personal_sign", "eth_signTypedData"],
+//            notifications: []
+//        )
+//        DispatchQueue.global().async {
+//            ClientDelegate.shared.client.connect(sessionPermissions: permissions, blockchains: blockchains, topic: pairingTopic) { [weak self] _ in
+//                self?.connectWithExampleWallet()
+//            }
+//        }
     }
 }

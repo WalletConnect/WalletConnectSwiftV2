@@ -148,10 +148,10 @@ extension ResponderViewController: SessionViewControllerDelegate {
     
     func didApproveSession() {
         print("[RESPONDER] Approving session...")
-        let proposal = currentProposal!
-        currentProposal = nil
-        let accounts = Set(proposal.blockchains.compactMap { Account($0+":\(account)") })
-        client.approve(proposal: proposal, accounts: accounts)
+//        let proposal = currentProposal!
+//        currentProposal = nil
+//        let accounts = Set(proposal.blockchains.compactMap { Account($0+":\(account)") })
+//        client.approve(proposal: proposal, accounts: accounts)
     }
     
     func didRejectSession() {
@@ -166,33 +166,29 @@ extension ResponderViewController: WalletConnectClientDelegate {
 
     func didReceive(sessionProposal: Session.Proposal) {
         print("[RESPONDER] WC: Did receive session proposal")
-        let appMetadata = sessionProposal.proposer
-        let info = SessionInfo(
-            name: appMetadata.name,
-            descriptionText: appMetadata.description,
-            dappURL: appMetadata.url,
-            iconURL: appMetadata.icons.first ?? "",
-            chains: Array(sessionProposal.blockchains),
-            methods: Array(sessionProposal.permissions.methods), pendingRequests: [])
-        currentProposal = sessionProposal
-        DispatchQueue.main.async { // FIXME: Delegate being called from background thread
-            self.showSessionProposal(info)
-        }
+//        let appMetadata = sessionProposal.proposer
+//        let info = SessionInfo(
+//            name: appMetadata.name,
+//            descriptionText: appMetadata.description,
+//            dappURL: appMetadata.url,
+//            iconURL: appMetadata.icons.first ?? "",
+//            chains: Array(sessionProposal.blockchains),
+//            methods: Array(sessionProposal.permissions.methods), pendingRequests: [])
+//        currentProposal = sessionProposal
+//        DispatchQueue.main.async { // FIXME: Delegate being called from background thread
+//            self.showSessionProposal(info)
+//        }
     }
-    
+
     func didSettle(session: Session) {
         reloadActiveSessions()
     }
-    
+
     func didReceive(sessionRequest: Request) {
         DispatchQueue.main.async { [weak self] in
             self?.showSessionRequest(sessionRequest)
         }
         print("[RESPONDER] WC: Did receive session request")
-        
-    }
-    
-    func didUpgrade(sessionTopic: String, permissions: Session.Permissions) {
 
     }
 
@@ -200,13 +196,21 @@ extension ResponderViewController: WalletConnectClientDelegate {
 
     }
     
+    func didUpdate(sessionTopic: String, methods: Set<String>) {
+        
+    }
+    
+    func didUpdate(sessionTopic: String, events: Set<String>) {
+        
+    }
+
     func didDelete(sessionTopic: String, reason: Reason) {
         reloadActiveSessions()
         DispatchQueue.main.async { [unowned self] in
             navigationController?.popToRootViewController(animated: true)
         }
     }
-    
+
     private func getActiveSessionItem(for settledSessions: [Session]) -> [ActiveSessionItem] {
         return settledSessions.map { session -> ActiveSessionItem in
             let app = session.peer
@@ -217,7 +221,7 @@ extension ResponderViewController: WalletConnectClientDelegate {
                 topic: session.topic)
         }
     }
-    
+
     private func reloadActiveSessions() {
         let settledSessions = client.getSettledSessions()
         let activeSessions = getActiveSessionItem(for: settledSessions)
