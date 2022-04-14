@@ -209,7 +209,7 @@ final class PairingEngine {
         case .response(let response):
             
             // Activate the pairing
-            if !pairing.isActive {
+            if !pairing.active {
                 pairing.activate()
             } else {
                 try? pairing.updateExpiry()
@@ -236,7 +236,7 @@ final class PairingEngine {
             onProposeResponse?(sessionTopic)
             
         case .error(let error):
-            if !pairing.isActive {
+            if !pairing.active {
                 kms.deleteSymmetricKey(for: pairing.topic)
                 wcSubscriber.removeSubscription(topic: pairing.topic)
                 pairingStore.delete(topic: pairingTopic)

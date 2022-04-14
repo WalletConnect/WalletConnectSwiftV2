@@ -6,7 +6,7 @@ struct WCPairing: ExpirableSequence {
     let relay: RelayProtocolOptions
     var peerMetadata: AppMetadata?
     private (set) var expiryDate: Date
-    private (set) var isActive: Bool
+    private (set) var active: Bool
     
     #if DEBUG
     static var dateInitializer: () -> Date = Date.init
@@ -20,32 +20,32 @@ struct WCPairing: ExpirableSequence {
     
     static var timeToLiveActive: TimeInterval {
         30 * .day
-    }    
+    }
     
     init(topic: String, relay: RelayProtocolOptions, peerMetadata: AppMetadata, isActive: Bool = false, expiryDate: Date) {
         self.topic = topic
         self.relay = relay
         self.peerMetadata = peerMetadata
-        self.isActive = isActive
+        self.active = isActive
         self.expiryDate = expiryDate
     }
     
     init(topic: String) {
         self.topic = topic
         self.relay = RelayProtocolOptions(protocol: "waku", data: nil)
-        self.isActive = false
+        self.active = false
         self.expiryDate = Self.dateInitializer().advanced(by: Self.timeToLiveInactive)
     }
     
     init(uri: WalletConnectURI) {
         self.topic = uri.topic
         self.relay = uri.relay
-        self.isActive = false
+        self.active = false
         self.expiryDate = Self.dateInitializer().advanced(by: Self.timeToLiveInactive)
     }
     
     mutating func activate() {
-        isActive = true
+        active = true
         try? updateExpiry()
     }
     

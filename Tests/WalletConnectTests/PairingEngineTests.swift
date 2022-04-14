@@ -69,7 +69,7 @@ final class PairingEngineTests: XCTestCase {
         XCTAssert(cryptoMock.hasSymmetricKey(for: uri.topic), "Proposer must store the symmetric key matching the URI.")
         XCTAssert(storageMock.hasPairing(forTopic: uri.topic), "The engine must store a pairing after creating one")
         XCTAssert(subscriberMock.didSubscribe(to: uri.topic), "Proposer must subscribe to pairing topic.")
-        XCTAssert(storageMock.getPairing(forTopic: uri.topic)?.isActive == false, "Recently created pairing must be inactive.")
+        XCTAssert(storageMock.getPairing(forTopic: uri.topic)?.active == false, "Recently created pairing must be inactive.")
     }
     
     func testPair() {
@@ -164,7 +164,7 @@ final class PairingEngineTests: XCTestCase {
         
         let storedPairing = storageMock.getPairing(forTopic: topicA)!
 
-        XCTAssert(storedPairing.isActive)
+        XCTAssert(storedPairing.active)
         XCTAssertEqual(topicB, sessionTopic, "Responder engine calls back with session topic")
     }
     
