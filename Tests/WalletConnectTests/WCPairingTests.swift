@@ -21,7 +21,7 @@ final class WCPairingTests: XCTestCase {
     }
     
     func testInitInactiveFromTopic() {
-        let pairing = WCPairing(topic: "", selfMetadata: AppMetadata.stub())
+        let pairing = WCPairing(topic: "")
         let inactiveExpiry = referenceDate.advanced(by: WCPairing.timeToLiveInactive)
         XCTAssertFalse(pairing.isActive)
         XCTAssertEqual(pairing.expiryDate, inactiveExpiry)
@@ -35,14 +35,14 @@ final class WCPairingTests: XCTestCase {
     }
     
     func testUpdateExpiry() {
-        var pairing = WCPairing(topic: "", selfMetadata: AppMetadata.stub())
+        var pairing = WCPairing(topic: "")
         let activeExpiry = referenceDate.advanced(by: WCPairing.timeToLiveActive)
         try? pairing.updateExpiry()
         XCTAssertEqual(pairing.expiryDate, activeExpiry)
     }
     
     func testActivate() {
-        var pairing = WCPairing(topic: "", selfMetadata: AppMetadata.stub())
+        var pairing = WCPairing(topic: "")
         let activeExpiry = referenceDate.advanced(by: WCPairing.timeToLiveActive)
         pairing.activate()
         XCTAssertTrue(pairing.isActive)

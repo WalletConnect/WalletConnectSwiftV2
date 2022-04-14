@@ -56,13 +56,13 @@ final class PairingEngine {
     
     func getSettledPairings() -> [Pairing] {
         pairingStore.getAll()
-            .map {Pairing(topic: $0.topic, peer: $0.participants.peer, expiryDate: $0.expiryDate)}
+            .map {Pairing(topic: $0.topic, peer: $0.peerMetadata, expiryDate: $0.expiryDate)}
     }
     
     func create() -> WalletConnectURI? {
         let topic = topicInitializer()
         let symKey = try! kms.createSymmetricKey(topic)
-        let pairing = WCPairing(topic: topic, selfMetadata: metadata)
+        let pairing = WCPairing(topic: topic)
         let uri = WalletConnectURI(topic: topic, symKey: symKey.hexRepresentation, relay: pairing.relay)
         pairingStore.setPairing(pairing)
         wcSubscriber.setSubscription(topic: topic)
@@ -250,7 +250,7 @@ final class PairingEngine {
     
     private func updatePairingMetadata(topic: String, metadata: AppMetadata) {
         guard var pairing = pairingStore.getPairing(forTopic: topic) else {return}
-        pairing.participants.peer = metadata
+        pairing.peerMetadata = metadata
         pairingStore.setPairing(pairing)
     }
 }
