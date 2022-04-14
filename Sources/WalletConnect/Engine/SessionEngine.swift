@@ -13,6 +13,8 @@ final class SessionEngine {
     var onEventReceived: ((String, Session.Event)->())?
     
     private let sessionStore: WCSessionStorage
+    private let pairingStore: WCPairingStorage
+    private let sessionToPairingTopic: KeyValueStore<String>
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
     private let kms: KeyManagementServiceProtocol
@@ -24,7 +26,9 @@ final class SessionEngine {
     init(relay: WalletConnectRelaying,
          kms: KeyManagementServiceProtocol,
          subscriber: WCSubscribing,
+         pairingStore: WCPairingStorage,
          sessionStore: WCSessionStorage,
+         sessionToPairingTopic: KeyValueStore<String>,
          metadata: AppMetadata,
          logger: ConsoleLogging,
          topicGenerator: @escaping () -> String = String.generateTopic) {
@@ -33,6 +37,8 @@ final class SessionEngine {
         self.metadata = metadata
         self.wcSubscriber = subscriber
         self.sessionStore = sessionStore
+        self.pairingStore = pairingStore
+        self.sessionToPairingTopic = sessionToPairingTopic
         self.logger = logger
         self.topicInitializer = topicGenerator
         setUpWCRequestHandling()
@@ -180,7 +186,7 @@ final class SessionEngine {
         
         relayer.request(.wcSessionSettle(settleParams), onTopic: topic)
     }
-    
+
     private func wcSessionSettle(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
         logger.debug("Did receive session settle request")
         let topic = payload.topic
@@ -188,9 +194,10 @@ final class SessionEngine {
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!
         
         let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
-        sessionStore.getSession(forTopic: topic)
         
-        updatePairingMetadata(topic: session.pairingTopic, metadata: proposeResponse.responder.metadata)
+        if let pairingTopic = try? sessionToPairingTopic.get(key: topic) {
+            updatePairingMetadata(topic: pairingTopic, metadata: settleParams.controller.metadata)
+        }
         
         let session = WCSession(topic: topic,
                                       selfParticipant: selfParticipant,
@@ -315,5 +322,11 @@ final class SessionEngine {
             kms.deleteAgreementSecret(for: topic)
             kms.deletePrivateKey(for: session.publicKey!)
         }
+    }
+    
+    private func updatePairingMetadata(topic: String, metadata: AppMetadata) {
+        guard var pairing = pairingStore.getPairing(forTopic: topic) else {return}
+        pairing.peerMetadata = metadata
+        pairingStore.setPairing(pairing)
     }
 }

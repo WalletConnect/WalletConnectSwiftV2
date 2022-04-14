@@ -47,6 +47,7 @@ final class PairingEngineTests: XCTestCase {
             kms: cryptoMock,
             subscriber: subscriberMock,
             pairingStore: storageMock,
+            sessionToPairingTopic: KeyValueStore<String>(defaults: RuntimeKeyValueStorage(), identifier: ""),
             metadata: meta,
             logger: logger,
             topicGenerator: topicGenerator.getTopic,
@@ -144,7 +145,7 @@ final class PairingEngineTests: XCTestCase {
         
         // Client receives proposal response response
         let responder = Participant.stub()
-        let proposalResponse = SessionType.ProposeResponse(relay: relayOptions, responder: responder)
+        let proposalResponse = SessionType.ProposeResponse(relay: relayOptions, publicKey: responder.publicKey)
         
         let jsonRpcResponse = JSONRPCResponse<AnyCodable>(id: request.id, result: AnyCodable.decoded(proposalResponse))
         let response = WCResponse(topic: topicA,

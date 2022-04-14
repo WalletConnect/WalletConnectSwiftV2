@@ -14,6 +14,7 @@ final class PairingEngine {
     private let relayer: WalletConnectRelaying
     private let kms: KeyManagementServiceProtocol
     private let pairingStore: WCPairingStorage
+    private let sessionToPairingTopic: KeyValueStore<String>
     private var metadata: AppMetadata
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
@@ -23,6 +24,7 @@ final class PairingEngine {
          kms: KeyManagementServiceProtocol,
          subscriber: WCSubscribing,
          pairingStore: WCPairingStorage,
+         sessionToPairingTopic: KeyValueStore<String>,
          metadata: AppMetadata,
          logger: ConsoleLogging,
          topicGenerator: @escaping () -> String = String.generateTopic,
@@ -34,6 +36,7 @@ final class PairingEngine {
         self.pairingStore = pairingStore
         self.logger = logger
         self.topicInitializer = topicGenerator
+        self.sessionToPairingTopic = sessionToPairingTopic
         self.proposalPayloadsStore = proposalPayloadsStore
         setUpWCRequestHandling()
         setupExpirationHandling()
@@ -68,7 +71,6 @@ final class PairingEngine {
         wcSubscriber.setSubscription(topic: topic)
         return uri
     }
-    
     func propose(pairingTopic: String, blockchains: Set<Blockchain>, methods: Set<String>, events: Set<String>, relay: RelayProtocolOptions, completion: @escaping ((Error?) -> ())) {
         logger.debug("Propose Session on topic: \(pairingTopic)")
         let publicKey = try! kms.createX25519KeyPair()
@@ -232,6 +234,7 @@ final class PairingEngine {
             let sessionTopic = agreementKeys.derivedTopic()
             logger.debug("session topic: \(sessionTopic)")
             try! kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
+            try! sessionToPairingTopic.set(pairingTopic, forKey: sessionTopic)
             onProposeResponse?(sessionTopic)
             
         case .error(let error):
