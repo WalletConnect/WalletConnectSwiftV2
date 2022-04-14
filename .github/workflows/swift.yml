@@ -25,7 +25,8 @@ jobs:
     #   run: swift test -v
 
     - name: Build Example Wallet
-      run: xcodebuild -project Example/ExampleApp.xcodeproj -scheme Wallet  -sdk iphonesimulator
+      run: xcodebuild -project Example/ExampleApp.xcodeproj -scheme Wallet -destination 'platform=iOS Simulator,name=iPhone 11,OS=13.0'
+      # -sdk iphonesimulator
       # -destination 'platform=iOS Simulator,name=iPhone 11,OS=13.0'
         
       # working-directory: ./Example
