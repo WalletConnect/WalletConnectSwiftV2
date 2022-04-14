@@ -27,13 +27,13 @@ jobs:
     - name: Prepare minimum iOS version
       run: |
         sudo mkdir -p /Library/Developer/CoreSimulator/Profiles/Runtimes
-        sudo ln -s /Applications/Xcode_13.2.1.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime /Library/Developer/CoreSimulator/Profiles/Runtimes/iOS\ 13.0.simruntime
+        sudo ln -s /Applications/Xcode_13.2.1.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime /Library/Developer/CoreSimulator/Profiles/Runtimes/iOS\ 13.1.simruntime
         xcrun simctl list runtimes
-        xcrun simctl create custom-test-device "iPhone 11" "com.apple.CoreSimulator.SimRuntime.iOS-13-0"
-        xcrun simctl list devices 13.0
+        xcrun simctl create "iPhone 11" "com.apple.CoreSimulator.SimRuntime.iOS-13-1"
+        xcrun simctl list devices 13.1
 
     - name: Build Example Wallet
-      run: xcodebuild -project Example/ExampleApp.xcodeproj -scheme Wallet -destination 'platform=iOS Simulator,name=iPhone 11,OS=13.0'
+      run: xcodebuild -project Example/ExampleApp.xcodeproj -scheme Wallet -destination 'platform=iOS Simulator,name=iPhone 11,OS=13.1'
       # -sdk iphonesimulator
       # -destination 'platform=iOS Simulator,name=iPhone 11,OS=13.0'
         
