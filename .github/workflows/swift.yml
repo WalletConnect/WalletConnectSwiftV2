@@ -8,20 +8,28 @@ on:
 
 jobs:
   build:
-    runs-on: macos-11
+    runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: maxim-lobanov/setup-xcode@v1
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    - name: Setup Xcode Version
+      uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '13.2'
-    - name: Build Package
-      run: swift build -v
-    - name: Run tests
-      run: swift test -v
-    - name: Test Wallet
-      working-directory: ./Example
-      run: bundle exec fastlane test_wallet
+        xcode-version: '13.3'
+    # - name: Build Package
+    #   run: swift build -v
+    # - name: Run tests
+    #   run: swift test -v
+    - name: Build Example Wallet
+      run: xcodebuild \
+        -project Example/ExampleApp.xcodeproj \
+        -scheme Wallet \
+        -destination 'platform=iOS Simulator,name=iPhone 11,OS=13.0' \
+        clean build
+      # working-directory: ./Example
+      # run: bundle exec fastlane test_wallet
     # - name: Test Dapp
     #   working-directory: ./Example
     #   run: bundle exec fastlane test_dapp
