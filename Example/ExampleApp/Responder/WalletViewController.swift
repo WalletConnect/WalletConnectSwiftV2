@@ -4,7 +4,7 @@ import WalletConnectUtils
 import Web3
 import CryptoSwift
 
-final class ResponderViewController: UIViewController {
+final class WalletViewController: UIViewController {
 
     let client: WalletConnectClient = {
         let metadata = AppMetadata(
@@ -103,7 +103,7 @@ final class ResponderViewController: UIViewController {
     }
 }
 
-extension ResponderViewController: UITableViewDataSource, UITableViewDelegate {
+extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         sessionItems.count
@@ -137,14 +137,14 @@ extension ResponderViewController: UITableViewDataSource, UITableViewDelegate {
     }
 }
 
-extension ResponderViewController: ScannerViewControllerDelegate {
+extension WalletViewController: ScannerViewControllerDelegate {
     
     func didScan(_ code: String) {
         pairClient(uri: code)
     }
 }
 
-extension ResponderViewController: SessionViewControllerDelegate {
+extension WalletViewController: SessionViewControllerDelegate {
     
     func didApproveSession() {
         print("[RESPONDER] Approving session...")
@@ -162,7 +162,7 @@ extension ResponderViewController: SessionViewControllerDelegate {
     }
 }
 
-extension ResponderViewController: WalletConnectClientDelegate {
+extension WalletViewController: WalletConnectClientDelegate {
     
     
 
