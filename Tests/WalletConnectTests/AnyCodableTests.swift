@@ -152,7 +152,7 @@ final class AnyCodableTests: XCTestCase {
     
     func testCodingDouble() {
         do {
-            let double = Double.random()
+            let double = Double.pi // Value is constant to workaround a JSONDecoder bug: https://bugs.swift.org/browse/SR-7054
             let anyCodable = AnyCodable(double)
             let encoded = try JSONEncoder().encode(anyCodable)
             let decoded = try JSONDecoder().decode(AnyCodable.self, from: encoded)
