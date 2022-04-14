@@ -6,6 +6,7 @@ struct WCSession: ExpirableSequence {
         case controllerNotSet
     }
     let topic: String
+    let pairingTopic: String
     let relay: RelayProtocolOptions
     let selfParticipant: Participant
     let peerParticipant: Participant
@@ -25,6 +26,7 @@ struct WCSession: ExpirableSequence {
     }
     
     init(topic: String,
+         pairingTopic: String,
          selfParticipant: Participant,
          peerParticipant: Participant,
          settleParams: SessionType.SettleParams,

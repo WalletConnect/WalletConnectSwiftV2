@@ -23,14 +23,14 @@ final class WCPairingTests: XCTestCase {
     func testInitInactiveFromTopic() {
         let pairing = WCPairing(topic: "")
         let inactiveExpiry = referenceDate.advanced(by: WCPairing.timeToLiveInactive)
-        XCTAssertFalse(pairing.isActive)
+        XCTAssertFalse(pairing.active)
         XCTAssertEqual(pairing.expiryDate, inactiveExpiry)
     }
     
     func testInitInactiveFromURI() {
         let pairing = WCPairing(uri: WalletConnectURI.stub())
         let inactiveExpiry = referenceDate.advanced(by: WCPairing.timeToLiveInactive)
-        XCTAssertFalse(pairing.isActive)
+        XCTAssertFalse(pairing.active)
         XCTAssertEqual(pairing.expiryDate, inactiveExpiry)
     }
     
@@ -45,7 +45,7 @@ final class WCPairingTests: XCTestCase {
         var pairing = WCPairing(topic: "")
         let activeExpiry = referenceDate.advanced(by: WCPairing.timeToLiveActive)
         pairing.activate()
-        XCTAssertTrue(pairing.isActive)
+        XCTAssertTrue(pairing.active)
         XCTAssertEqual(pairing.expiryDate, activeExpiry)
     }
 }

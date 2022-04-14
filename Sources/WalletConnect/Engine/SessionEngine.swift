@@ -188,13 +188,15 @@ final class SessionEngine {
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!
         
         let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
+        sessionStore.getSession(forTopic: topic)
+        
+        updatePairingMetadata(topic: session.pairingTopic, metadata: proposeResponse.responder.metadata)
         
         let session = WCSession(topic: topic,
                                       selfParticipant: selfParticipant,
                                       peerParticipant: settleParams.controller,
                                       settleParams: settleParams,
                                       acknowledged: true)
-        
         sessionStore.setSession(session)
         relayer.respondSuccess(for: payload)
         onSessionSettle?(session.publicRepresentation())
