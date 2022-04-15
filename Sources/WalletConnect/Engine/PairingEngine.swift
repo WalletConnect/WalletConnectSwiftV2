@@ -170,7 +170,6 @@ final class PairingEngine {
     private func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
         logger.debug(proposal)
         try? proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
-        updatePairingMetadata(topic: payload.topic, metadata: proposal.proposer.metadata)
         onSessionProposal?(proposal.publicRepresentation())
     }
     
@@ -248,11 +247,5 @@ final class PairingEngine {
             onSessionRejected?(proposal.publicRepresentation(), SessionType.Reason(code: error.error.code, message: error.error.message))
             return
         }
-    }
-    
-    private func updatePairingMetadata(topic: String, metadata: AppMetadata) {
-        guard var pairing = pairingStore.getPairing(forTopic: topic) else {return}
-        pairing.peerMetadata = metadata
-        pairingStore.setPairing(pairing)
     }
 }
