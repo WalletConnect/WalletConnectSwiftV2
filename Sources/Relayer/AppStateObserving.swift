@@ -23,7 +23,7 @@ class AppStateObserver: AppStateObserving {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(appWillEnterForeground),
-            name: UIApplication.willEnterForegroundNotification,
+            name: UIApplication.didBecomeActiveNotification,
             object: nil)
         NotificationCenter.default.addObserver(
             self,

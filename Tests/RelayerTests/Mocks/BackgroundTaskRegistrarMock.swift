@@ -4,7 +4,11 @@ import Foundation
 
 class BackgroundTaskRegistrarMock: BackgroundTaskRegistering {
     var completion: (()->())?
-    func register(name: String, completion: @escaping () -> ()) {
+    func beginBackgroundTask(name: String, completion: @escaping () -> ()) {
         self.completion = completion
+    }
+
+    func endBackgroundTask() {
+
     }
 }
