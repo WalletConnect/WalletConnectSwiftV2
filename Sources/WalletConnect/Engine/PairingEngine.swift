@@ -146,7 +146,7 @@ final class PairingEngine {
 
         try! kms.setAgreementSecret(agreementKey, topic: sessionTopic)
         guard let relay = proposal.relays.first else {return nil}
-        let proposeResponse = SessionType.ProposeResponse(relay: relay, publicKey: selfPublicKey.hexRepresentation)
+        let proposeResponse = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
         relayer.respond(topic: payload.topic, response: .response(response)) { _ in }
         return sessionTopic
@@ -224,7 +224,7 @@ final class PairingEngine {
             
             do {
                 let proposeResponse = try response.result.get(SessionType.ProposeResponse.self)
-                agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposeResponse.publicKey)
+                agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposeResponse.responderPublicKey)
             } catch {
                 //TODO - handle error
                 logger.debug(error)

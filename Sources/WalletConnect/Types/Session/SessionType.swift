@@ -8,7 +8,7 @@ internal enum SessionType {
     
     struct ProposeResponse: Codable, Equatable {
         let relay: RelayProtocolOptions
-        let publicKey: String
+        let responderPublicKey: String
     }
     
     struct SettleParams: Codable, Equatable {
@@ -51,12 +51,7 @@ internal enum SessionType {
         let events: Set<String>
     }
     
-    struct DeleteParams: Codable, Equatable {
-        let reason: Reason
-        init(reason: SessionType.Reason) {
-            self.reason = reason
-        }
-    }
+    typealias DeleteParams = SessionType.Reason
     
     struct Reason: Codable, Equatable {
         let code: Int

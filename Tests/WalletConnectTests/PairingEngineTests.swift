@@ -145,7 +145,7 @@ final class PairingEngineTests: XCTestCase {
         
         // Client receives proposal response response
         let responder = Participant.stub()
-        let proposalResponse = SessionType.ProposeResponse(relay: relayOptions, publicKey: responder.publicKey)
+        let proposalResponse = SessionType.ProposeResponse(relay: relayOptions, responderPublicKey: responder.publicKey)
         
         let jsonRpcResponse = JSONRPCResponse<AnyCodable>(id: request.id, result: AnyCodable.decoded(proposalResponse))
         let response = WCResponse(topic: topicA,

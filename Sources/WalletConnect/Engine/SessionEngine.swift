@@ -66,7 +66,7 @@ final class SessionEngine {
         logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
         sessionStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
-        relayer.request(.wcSessionDelete(SessionType.DeleteParams(reason: reason.internalRepresentation())), onTopic: topic)
+        relayer.request(.wcSessionDelete(reason.internalRepresentation()), onTopic: topic)
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
@@ -218,7 +218,7 @@ final class SessionEngine {
         sessionStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
         relayer.respondSuccess(for: payload)
-        onSessionDelete?(topic, deleteParams.reason)
+        onSessionDelete?(topic, deleteParams)
     }
     
     private func wcSessionRequest(_ payload: WCRequestSubscriptionPayload, payloadParams: SessionType.RequestParams) {
