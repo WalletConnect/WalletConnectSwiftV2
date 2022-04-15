@@ -1,6 +1,22 @@
 .DS_Store
-/.build
-/Packages
-/*.xcodeproj
+.build/
+
+## User settings
 xcuserdata/
+
 **/xcshareddata/WorkspaceSettings.xcsettings
+
+
+# Swift Package Manager
+Packages/
+Package.pins
+Package.resolved
+/*.xcodeproj
+
+# Fastlane
+*/fastlane/report.xml
+*/fastlane/Preview.html
+*/fastlane/screenshots/**/*.png
+*/fastlane/test_output
+*/fastlane/README.md
+
