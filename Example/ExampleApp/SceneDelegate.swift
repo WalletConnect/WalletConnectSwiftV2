@@ -17,7 +17,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                   return
               }
         let wcUri = incomingURL.absoluteString.deletingPrefix("https://walletconnect.com/wc?uri=")
-        let client = ((window!.rootViewController as! UINavigationController).viewControllers[0] as! ResponderViewController).client
+        let client = ((window!.rootViewController as! UINavigationController).viewControllers[0] as! WalletViewController).client
         try? client.pair(uri: wcUri)
     }
 }
@@ -25,7 +25,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 extension UITabBarController {
     
     static func createExampleApp() -> UINavigationController    {
-        let responderController = UINavigationController(rootViewController: ResponderViewController())
+        let responderController = UINavigationController(rootViewController: WalletViewController())
         return responderController
     }
 }
