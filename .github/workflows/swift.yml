@@ -19,27 +19,14 @@ jobs:
       with:
         xcode-version: '13.2'
 
-    # - name: Build Package
-    #   run: swift build -v
-    # - name: Run tests
-    #   run: swift test -v
+# Package builds
+    - name: Build Package
+      run: swift build -v
+    - name: Run tests
+      run: swift test -v
 
-    - name: Prepare minimum iOS version
-      run: |
-        sudo mkdir -p /Library/Developer/CoreSimulator/Profiles/Runtimes
-        sudo ln -s /Applications/Xcode_13.2.1.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime /Library/Developer/CoreSimulator/Profiles/Runtimes/iOS\ 13.1.simruntime
-        xcrun simctl list devicetypes
-        xcrun simctl list runtimes
-        xcrun simctl create "iPhone 11" "com.apple.CoreSimulator.SimDeviceType.iPhone-11" "com.apple.CoreSimulator.SimRuntime.iOS-13-1"
-        xcrun simctl list devices 13.1
-
+# Example app builds
     - name: Build Example Wallet
-      run: xcodebuild -project Example/ExampleApp.xcodeproj -scheme Wallet -destination 'platform=iOS Simulator,name=iPhone 11,OS=13.1'
-      # -sdk iphonesimulator
-      # -destination 'platform=iOS Simulator,name=iPhone 11,OS=13.0'
-        
-      # working-directory: ./Example
-      # run: bundle exec fastlane test_wallet
-    # - name: Test Dapp
-    #   working-directory: ./Example
-    #   run: bundle exec fastlane test_dapp
+      run: xcodebuild -project Example/ExampleApp.xcodeproj -scheme Wallet -sdk iphonesimulator
+    - name: Build Example Dapp
+      run: xcodebuild -project Example/ExampleApp.xcodeproj -scheme DApp -sdk iphonesimulator
