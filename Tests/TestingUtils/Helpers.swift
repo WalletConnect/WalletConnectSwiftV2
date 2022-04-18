@@ -10,6 +10,8 @@ public extension Int {
 }
 
 public extension Double {
+    
+    // Do not use this function when testing Codables: https://bugs.swift.org/browse/SR-7054
     static func random() -> Double {
         random(in: 0...1)
     }

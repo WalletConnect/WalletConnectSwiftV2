@@ -11,12 +11,12 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
     private let session: Session
     init(_ session: Session, _ client: WalletConnectClient) {
         let pendingRequests = client.getPendingRequests(topic: session.topic).map{$0.method}
-        self.sessionInfo = SessionInfo(name: session.peer.name ?? "",
-                                       descriptionText: session.peer.description ?? "",
-                                       dappURL: session.peer.description ?? "",
+        self.sessionInfo = SessionInfo(name: session.peer.name,
+                                       descriptionText: session.peer.description,
+                                       dappURL: session.peer.description,
                                        iconURL: session.peer.icons.first ?? "",
-                                       chains: [],//Array(session.blockchains),
-                                       methods: [],//Array(session.permissions.methods),
+                                       chains: Array(session.accounts.map { $0.blockchainIdentifier }),
+                                       methods: Array(session.methods),
                                        pendingRequests: pendingRequests)
         self.client = client
         self.session = session
@@ -120,14 +120,14 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
     }
     
     func reloadTable() {
-//        let pendingRequests = client.getPendingRequests(topic: session.topic).map{$0.method}
-//        self.sessionInfo = SessionInfo(name: session.peer.name,
-//                                       descriptionText: session.peer.description,
-//                                       dappURL: session.peer.description,
-//                                       iconURL: session.peer.icons.first ?? "",
-//                                       chains: Array(session.blockchains),
-//                                       methods: Array(session.permissions.methods),
-//                                       pendingRequests: pendingRequests)
-//        sessiondetailsView.tableView.reloadData()
+        let pendingRequests = client.getPendingRequests(topic: session.topic).map{$0.method}
+        self.sessionInfo = SessionInfo(name: session.peer.name,
+                                       descriptionText: session.peer.description,
+                                       dappURL: session.peer.description,
+                                       iconURL: session.peer.icons.first ?? "",
+                                       chains: Array(session.accounts.map { $0.blockchainIdentifier }),
+                                       methods: Array(session.methods),
+                                       pendingRequests: pendingRequests)
+        sessiondetailsView.tableView.reloadData()
     }
 }

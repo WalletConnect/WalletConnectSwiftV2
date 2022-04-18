@@ -4,7 +4,7 @@ import WalletConnectUtils
 import Web3
 import CryptoSwift
 
-final class ResponderViewController: UIViewController {
+final class WalletViewController: UIViewController {
 
     let client: WalletConnectClient = {
         let metadata = AppMetadata(
@@ -103,7 +103,7 @@ final class ResponderViewController: UIViewController {
     }
 }
 
-extension ResponderViewController: UITableViewDataSource, UITableViewDelegate {
+extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         sessionItems.count
@@ -137,21 +137,21 @@ extension ResponderViewController: UITableViewDataSource, UITableViewDelegate {
     }
 }
 
-extension ResponderViewController: ScannerViewControllerDelegate {
+extension WalletViewController: ScannerViewControllerDelegate {
     
     func didScan(_ code: String) {
         pairClient(uri: code)
     }
 }
 
-extension ResponderViewController: SessionViewControllerDelegate {
+extension WalletViewController: SessionViewControllerDelegate {
     
     func didApproveSession() {
         print("[RESPONDER] Approving session...")
-//        let proposal = currentProposal!
-//        currentProposal = nil
-//        let accounts = Set(proposal.blockchains.compactMap { Account($0+":\(account)") })
-//        client.approve(proposal: proposal, accounts: accounts)
+        let proposal = currentProposal!
+        currentProposal = nil
+        let accounts = Set(proposal.chains.compactMap { Account($0.absoluteString + ":\(account)") })
+        client.approve(proposal: proposal, accounts: accounts)
     }
     
     func didRejectSession() {
@@ -162,22 +162,24 @@ extension ResponderViewController: SessionViewControllerDelegate {
     }
 }
 
-extension ResponderViewController: WalletConnectClientDelegate {
+extension WalletViewController: WalletConnectClientDelegate {
+    
+    
 
     func didReceive(sessionProposal: Session.Proposal) {
         print("[RESPONDER] WC: Did receive session proposal")
-//        let appMetadata = sessionProposal.proposer
-//        let info = SessionInfo(
-//            name: appMetadata.name,
-//            descriptionText: appMetadata.description,
-//            dappURL: appMetadata.url,
-//            iconURL: appMetadata.icons.first ?? "",
-//            chains: Array(sessionProposal.blockchains),
-//            methods: Array(sessionProposal.permissions.methods), pendingRequests: [])
-//        currentProposal = sessionProposal
-//        DispatchQueue.main.async { // FIXME: Delegate being called from background thread
-//            self.showSessionProposal(info)
-//        }
+        let appMetadata = sessionProposal.proposer
+        let info = SessionInfo(
+            name: appMetadata.name,
+            descriptionText: appMetadata.description,
+            dappURL: appMetadata.url,
+            iconURL: appMetadata.icons.first ?? "",
+            chains: Array(sessionProposal.chains.map { $0.absoluteString }),
+            methods: Array(sessionProposal.methods), pendingRequests: [])
+        currentProposal = sessionProposal
+        DispatchQueue.main.async { // FIXME: Delegate being called from background thread
+            self.showSessionProposal(info)
+        }
     }
 
     func didSettle(session: Session) {
@@ -189,7 +191,6 @@ extension ResponderViewController: WalletConnectClientDelegate {
             self?.showSessionRequest(sessionRequest)
         }
         print("[RESPONDER] WC: Did receive session request")
-
     }
 
     func didUpdate(sessionTopic: String, accounts: Set<Account>) {
@@ -203,7 +204,7 @@ extension ResponderViewController: WalletConnectClientDelegate {
     func didUpdate(sessionTopic: String, events: Set<String>) {
         
     }
-
+    
     func didDelete(sessionTopic: String, reason: Reason) {
         reloadActiveSessions()
         DispatchQueue.main.async { [unowned self] in
