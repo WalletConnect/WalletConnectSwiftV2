@@ -24,16 +24,6 @@ jobs:
       run: swift build -v
     - name: Run tests
       run: swift test -v
-<<<<<<< HEAD
-=======
-#     - name: Test Wallet
-#       working-directory: ./Example
-#       run: bundle exec fastlane test_wallet
-#     - name: Test Dapp
-#       working-directory: ./Example
-#       run: bundle exec fastlane test_dapp
-      
->>>>>>> develop
 
 # Example app builds
     - name: Build Example Wallet
