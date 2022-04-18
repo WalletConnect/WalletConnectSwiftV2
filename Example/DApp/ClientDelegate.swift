@@ -38,9 +38,11 @@ class ClientDelegate: WalletConnectClientDelegate {
     }
     
     func didUpdate(sessionTopic: String, methods: Set<String>) {
+        
     }
     
     func didUpdate(sessionTopic: String, events: Set<String>) {
+        
     }
     
     func didReject(proposal: Session.Proposal, reason: Reason) {

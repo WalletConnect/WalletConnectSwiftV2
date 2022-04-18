@@ -181,17 +181,16 @@ extension WalletViewController: WalletConnectClientDelegate {
             self.showSessionProposal(info)
         }
     }
-    
+
     func didSettle(session: Session) {
         reloadActiveSessions()
     }
-    
+
     func didReceive(sessionRequest: Request) {
         DispatchQueue.main.async { [weak self] in
             self?.showSessionRequest(sessionRequest)
         }
         print("[RESPONDER] WC: Did receive session request")
-        
     }
 
     func didUpdate(sessionTopic: String, accounts: Set<Account>) {
@@ -212,7 +211,7 @@ extension WalletViewController: WalletConnectClientDelegate {
             navigationController?.popToRootViewController(animated: true)
         }
     }
-    
+
     private func getActiveSessionItem(for settledSessions: [Session]) -> [ActiveSessionItem] {
         return settledSessions.map { session -> ActiveSessionItem in
             let app = session.peer
@@ -223,7 +222,7 @@ extension WalletViewController: WalletConnectClientDelegate {
                 topic: session.topic)
         }
     }
-    
+
     private func reloadActiveSessions() {
         let settledSessions = client.getSettledSessions()
         let activeSessions = getActiveSessionItem(for: settledSessions)
