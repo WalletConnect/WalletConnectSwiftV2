@@ -15,7 +15,6 @@ final class SessionEngine {
     private let sessionStore: WCSessionStorage
     private let pairingStore: WCPairingStorage
     private let sessionToPairingTopic: KeyValueStore<String>
-    private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
     private let kms: KeyManagementServiceProtocol
     private var metadata: AppMetadata
@@ -25,7 +24,6 @@ final class SessionEngine {
 
     init(relay: WalletConnectRelaying,
          kms: KeyManagementServiceProtocol,
-         subscriber: WCSubscribing,
          pairingStore: WCPairingStorage,
          sessionStore: WCSessionStorage,
          sessionToPairingTopic: KeyValueStore<String>,
@@ -35,7 +33,6 @@ final class SessionEngine {
         self.relayer = relay
         self.kms = kms
         self.metadata = metadata
-        self.wcSubscriber = subscriber
         self.sessionStore = sessionStore
         self.pairingStore = pairingStore
         self.sessionToPairingTopic = sessionToPairingTopic
@@ -51,7 +48,7 @@ final class SessionEngine {
     }
     
     func setSubscription(topic: String) {
-        wcSubscriber.setSubscription(topic: topic)
+        relayer.subscribe(topic: topic)
     }
     
     func hasSession(for topic: String) -> Bool {
@@ -65,7 +62,7 @@ final class SessionEngine {
     func delete(topic: String, reason: Reason) {
         logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
         sessionStore.delete(topic: topic)
-        wcSubscriber.removeSubscription(topic: topic)
+        relayer.unsubscribe(topic: topic)
         relayer.request(.wcSessionDelete(reason.internalRepresentation()), onTopic: topic)
     }
     
@@ -143,7 +140,7 @@ final class SessionEngine {
     //MARK: - Private
     
     private func setUpWCRequestHandling() {
-        wcSubscriber.onReceivePayload = { [unowned self] subscriptionPayload in
+        relayer.wcRequestPublisher.sink  { [unowned self] subscriptionPayload in
             switch subscriptionPayload.wcRequest.params {
             case .sessionSettle(let settleParams):
                 wcSessionSettle(payload: subscriptionPayload, settleParams: settleParams)
@@ -158,7 +155,7 @@ final class SessionEngine {
             default:
                 return
             }
-        }
+        }.store(in: &publishers)
     }
 
     func settle(topic: String, proposal: SessionProposal, accounts: Set<Account>) {
@@ -181,7 +178,7 @@ final class SessionEngine {
             settleParams: settleParams,
             acknowledged: false)
         
-        wcSubscriber.setSubscription(topic: topic)
+        relayer.subscribe(topic: topic)
         sessionStore.setSession(session)
         
         relayer.request(.wcSessionSettle(settleParams), onTopic: topic)
@@ -216,7 +213,7 @@ final class SessionEngine {
             return
         }
         sessionStore.delete(topic: topic)
-        wcSubscriber.removeSubscription(topic: topic)
+        relayer.unsubscribe(topic: topic)
         relayer.respondSuccess(for: payload)
         onSessionDelete?(topic, deleteParams)
     }
@@ -291,7 +288,7 @@ final class SessionEngine {
         relayer.transportConnectionPublisher
             .sink { [unowned self] (_) in
                 let topics = sessionStore.getAll().map{$0.topic}
-                topics.forEach{self.wcSubscriber.setSubscription(topic: $0)}
+                topics.forEach{relayer.subscribe(topic: $0)}
             }.store(in: &publishers)
     }
     
@@ -317,7 +314,7 @@ final class SessionEngine {
             onSessionSettle?(session.publicRepresentation())
         case .error(let error):
             logger.error("Error - session rejected, Reason: \(error)")
-            wcSubscriber.removeSubscription(topic: topic)
+            relayer.unsubscribe(topic: topic)
             sessionStore.delete(topic: topic)
             kms.deleteAgreementSecret(for: topic)
             kms.deletePrivateKey(for: session.publicKey!)

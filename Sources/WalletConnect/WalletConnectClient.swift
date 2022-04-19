@@ -62,7 +62,7 @@ public final class WalletConnectClient {
         
         let sessionToPairingTopic = KeyValueStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
         self.pairingEngine = PairingEngine(relay: relay, kms: kms, pairingStore: pairingStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
-        self.sessionEngine = SessionEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
+        self.sessionEngine = SessionEngine(relay: relay, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionStore, logger: logger)
         self.controllerSessionStateMachine = ControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionStore, logger: logger)
         setUpEnginesCallbacks()
@@ -92,7 +92,7 @@ public final class WalletConnectClient {
         let sessionToPairingTopic = KeyValueStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
         
         self.pairingEngine = PairingEngine(relay: relay, kms: kms, pairingStore: pairingStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
-        self.sessionEngine = SessionEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
+        self.sessionEngine = SessionEngine(relay: relay, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionStore, logger: logger)
         self.controllerSessionStateMachine = ControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionStore, logger: logger)
         setUpEnginesCallbacks()
