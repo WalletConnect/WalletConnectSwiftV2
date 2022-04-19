@@ -2,34 +2,26 @@ import Foundation
 import WalletConnectKMS
 
 struct WCSession: ExpirableSequence {
-    struct Participants: Codable, Equatable {
-        let `self`: Participant
-        let peer: Participant
-    }
     enum Error: Swift.Error {
         case controllerNotSet
     }
     let topic: String
     let relay: RelayProtocolOptions
+    let selfParticipant: Participant
+    let peerParticipant: Participant
+    private (set) var expiryDate: Date
+    var acknowledged: Bool
     let controller: AgreementPeer
-    let participants: Participants
-
-//    let `self`: Participant
-//    let peer: Participant
+    private(set) var accounts: Set<Account>
     private(set) var methods: Set<String>
     private(set) var events: Set<String>
-    private(set) var accounts: Set<Account>
-
-    var acknowledged: Bool
-
-    private (set) var expiryDate: Date
     
     static var defaultTimeToLive: Int64 {
         Int64(7*Time.day)
     }
     // for expirable...
     var publicKey: String? {
-        participants.`self`.publicKey
+        selfParticipant.publicKey
     }
     
     init(topic: String,
@@ -40,10 +32,8 @@ struct WCSession: ExpirableSequence {
         self.topic = topic
         self.relay = settleParams.relay
         self.controller = AgreementPeer(publicKey: settleParams.controller.publicKey)
-        self.participants = Participants(self: selfParticipant, peer: peerParticipant)
-
-//        self.`self` = selfParticipant
-//        self.peer = peerParticipant
+        self.selfParticipant = selfParticipant
+        self.peerParticipant = peerParticipant
         self.methods = settleParams.methods
         self.events = settleParams.events
         self.accounts = settleParams.accounts
@@ -51,33 +41,31 @@ struct WCSession: ExpirableSequence {
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(settleParams.expiry))
     }
     
-    internal init(topic: String, relay: RelayProtocolOptions, controller: AgreementPeer, participants: WCSession.Participants, methods: Set<String>, events: Set<String>, accounts: Set<Account>, acknowledged: Bool, expiry: Int64) {
+#if DEBUG
+    internal init(topic: String, relay: RelayProtocolOptions, controller: AgreementPeer, selfParticipant: Participant, peerParticipant: Participant, methods: Set<String>, events: Set<String>, accounts: Set<Account>, acknowledged: Bool, expiry: Int64) {
         self.topic = topic
         self.relay = relay
         self.controller = controller
-        self.participants = participants
+        self.selfParticipant = selfParticipant
+        self.peerParticipant = peerParticipant
         self.methods = methods
         self.events = events
         self.accounts = accounts
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
     }
+#endif
     
     mutating func acknowledge() {
         self.acknowledged = true
     }
     
-    
-    func getPublicKey() throws -> AgreementPublicKey {
-        try AgreementPublicKey(rawRepresentation: Data(hex: participants.`self`.publicKey))
-    }
-    
     var selfIsController: Bool {
-        return controller.publicKey == participants.`self`.publicKey
+        return controller.publicKey == selfParticipant.publicKey
     }
     
     var peerIsController: Bool {
-        return controller.publicKey == participants.peer.publicKey
+        return controller.publicKey == peerParticipant.publicKey
     }
     
     var blockchains: [Blockchain] {
@@ -135,7 +123,7 @@ struct WCSession: ExpirableSequence {
     func publicRepresentation() -> Session {
         return Session(
             topic: topic,
-            peer: participants.peer.metadata,
+            peer: peerParticipant.metadata,
             methods: methods,
             events: events,
             accounts: accounts,

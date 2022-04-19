@@ -2,11 +2,11 @@ import Foundation
 import WalletConnectKMS
 
 struct WCPairing: ExpirableSequence {
-    
-    struct Participants: Codable, Equatable {
-        var `self`: AppMetadata?
-        var peer: AppMetadata?
-    }
+    let topic: String
+    let relay: RelayProtocolOptions
+    var peerMetadata: AppMetadata?
+    private (set) var expiryDate: Date
+    private (set) var active: Bool
     
     #if DEBUG
     static var dateInitializer: () -> Date = Date.init
@@ -19,42 +19,33 @@ struct WCPairing: ExpirableSequence {
     }
     
     static var timeToLiveActive: TimeInterval {
-        30 * .day 
+        30 * .day
     }
     
-    let topic: String
-    let relay: RelayProtocolOptions
-    var participants: Participants
-    
-    private (set) var isActive: Bool
-    private (set) var expiryDate: Date
-    
-    init(topic: String, relay: RelayProtocolOptions, participants: Participants, isActive: Bool = false, expiryDate: Date) {
+    init(topic: String, relay: RelayProtocolOptions, peerMetadata: AppMetadata, isActive: Bool = false, expiryDate: Date) {
         self.topic = topic
         self.relay = relay
-        self.participants = participants
-        self.isActive = isActive
+        self.peerMetadata = peerMetadata
+        self.active = isActive
         self.expiryDate = expiryDate
     }
     
-    init(topic: String, selfMetadata: AppMetadata) {
+    init(topic: String) {
         self.topic = topic
         self.relay = RelayProtocolOptions(protocol: "waku", data: nil)
-        self.participants = Participants(self: selfMetadata, peer: nil)
-        self.isActive = false
+        self.active = false
         self.expiryDate = Self.dateInitializer().advanced(by: Self.timeToLiveInactive)
     }
     
     init(uri: WalletConnectURI) {
         self.topic = uri.topic
         self.relay = uri.relay
-        self.participants = Participants()
-        self.isActive = false
+        self.active = false
         self.expiryDate = Self.dateInitializer().advanced(by: Self.timeToLiveInactive)
     }
     
     mutating func activate() {
-        isActive = true
+        active = true
         try? updateExpiry()
     }
     

@@ -22,7 +22,7 @@ extension Pairing {
 
 extension WCPairing {
     static func stub(expiryDate: Date = Date(timeIntervalSinceNow: 10000), isActive: Bool = true) -> WCPairing {
-        WCPairing(topic: String.generateTopic(), relay: RelayProtocolOptions.stub(), participants: Participants(self: nil, peer: nil), isActive: isActive, expiryDate: expiryDate)
+        WCPairing(topic: String.generateTopic(), relay: RelayProtocolOptions.stub(), peerMetadata: AppMetadata.stub(), isActive: isActive, expiryDate: expiryDate)
     }
 }
 
@@ -77,9 +77,9 @@ extension SessionProposal {
         return SessionType.ProposeParams(
             relays: [relayOptions],
             proposer: Participant(publicKey: proposerPubKey, metadata: AppMetadata.stub()),
+            chains: [],
             methods: [],
-            events: [],
-            chains: [])
+            events: [])
     }
 }
 

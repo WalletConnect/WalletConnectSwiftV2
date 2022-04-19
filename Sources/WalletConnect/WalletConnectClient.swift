@@ -56,12 +56,15 @@ public final class WalletConnectClient {
         let serializer = Serializer(kms: kms)
         self.history = JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
         self.relay = WalletConnectRelay(networkRelayer: relayer, serializer: serializer, logger: logger, jsonRpcHistory: history)
-        let pairingSequencesStore = PairingStorage(storage: SequenceStore<WCPairing>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue))
-        let sessionSequencesStore = SessionStorage(storage: SequenceStore<WCSession>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue))
-        self.pairingEngine = PairingEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), pairingStore: pairingSequencesStore, metadata: metadata, logger: logger)
-        self.sessionEngine = SessionEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), sessionStore: sessionSequencesStore, metadata: metadata, logger: logger)
-        self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionSequencesStore, logger: logger)
-        self.controllerSessionStateMachine = ControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionSequencesStore, logger: logger)
+        let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue))
+        let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue))
+        
+        
+        let sessionToPairingTopic = KeyValueStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
+        self.pairingEngine = PairingEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), pairingStore: pairingStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
+        self.sessionEngine = SessionEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
+        self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionStore, logger: logger)
+        self.controllerSessionStateMachine = ControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionStore, logger: logger)
         setUpEnginesCallbacks()
     }
     
@@ -84,12 +87,14 @@ public final class WalletConnectClient {
         let serializer = Serializer(kms: kms)
         self.history = JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
         self.relay = WalletConnectRelay(networkRelayer: relayer, serializer: serializer, logger: logger, jsonRpcHistory: history)
-        let pairingSequencesStore = PairingStorage(storage: SequenceStore<WCPairing>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue))
-        let sessionSequencesStore = SessionStorage(storage: SequenceStore<WCSession>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue))
-        self.pairingEngine = PairingEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), pairingStore: pairingSequencesStore, metadata: metadata, logger: logger)
-        self.sessionEngine = SessionEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), sessionStore: sessionSequencesStore, metadata: metadata, logger: logger)
-        self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionSequencesStore, logger: logger)
-        self.controllerSessionStateMachine = ControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionSequencesStore, logger: logger)
+        let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue))
+        let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue))
+        let sessionToPairingTopic = KeyValueStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
+        
+        self.pairingEngine = PairingEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), pairingStore: pairingStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
+        self.sessionEngine = SessionEngine(relay: relay, kms: kms, subscriber: WCSubscriber(relay: relay, logger: logger), pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
+        self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionStore, logger: logger)
+        self.controllerSessionStateMachine = ControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionStore, logger: logger)
         setUpEnginesCallbacks()
     }
     

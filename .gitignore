@@ -4,6 +4,9 @@
 ## User settings
 xcuserdata/
 
+**/xcshareddata/WorkspaceSettings.xcsettings
+
+
 # Swift Package Manager
 Packages/
 Package.pins
@@ -16,3 +19,4 @@ Package.resolved
 */fastlane/screenshots/**/*.png
 */fastlane/test_output
 */fastlane/README.md
+

@@ -48,13 +48,13 @@ final class SessionEngineTests: XCTestCase {
             relay: relayMock,
             kms: cryptoMock,
             subscriber: subscriberMock,
+            pairingStore: WCPairingStorageMock(),
             sessionStore: storageMock,
+            sessionToPairingTopic: KeyValueStore<String>(defaults: RuntimeKeyValueStorage(), identifier: ""),
             metadata: metadata,
             logger: logger,
             topicGenerator: topicGenerator.getTopic)
     }
-    
-
     
     func testSessionSettle() {
         let agreementKeys = AgreementKeys.stub()

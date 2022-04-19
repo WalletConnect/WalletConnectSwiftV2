@@ -13,6 +13,8 @@ final class SessionEngine {
     var onEventReceived: ((String, Session.Event)->())?
     
     private let sessionStore: WCSessionStorage
+    private let pairingStore: WCPairingStorage
+    private let sessionToPairingTopic: KeyValueStore<String>
     private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
     private let kms: KeyManagementServiceProtocol
@@ -24,7 +26,9 @@ final class SessionEngine {
     init(relay: WalletConnectRelaying,
          kms: KeyManagementServiceProtocol,
          subscriber: WCSubscribing,
+         pairingStore: WCPairingStorage,
          sessionStore: WCSessionStorage,
+         sessionToPairingTopic: KeyValueStore<String>,
          metadata: AppMetadata,
          logger: ConsoleLogging,
          topicGenerator: @escaping () -> String = String.generateTopic) {
@@ -33,6 +37,8 @@ final class SessionEngine {
         self.metadata = metadata
         self.wcSubscriber = subscriber
         self.sessionStore = sessionStore
+        self.pairingStore = pairingStore
+        self.sessionToPairingTopic = sessionToPairingTopic
         self.logger = logger
         self.topicInitializer = topicGenerator
         setUpWCRequestHandling()
@@ -60,7 +66,7 @@ final class SessionEngine {
         logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
         sessionStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
-        relayer.request(.wcSessionDelete(SessionType.DeleteParams(reason: reason.internalRepresentation())), onTopic: topic)
+        relayer.request(.wcSessionDelete(reason.internalRepresentation()), onTopic: topic)
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
@@ -180,7 +186,7 @@ final class SessionEngine {
         
         relayer.request(.wcSessionSettle(settleParams), onTopic: topic)
     }
-    
+
     private func wcSessionSettle(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
         logger.debug("Did receive session settle request")
         let topic = payload.topic
@@ -189,12 +195,15 @@ final class SessionEngine {
         
         let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
         
+        if let pairingTopic = try? sessionToPairingTopic.get(key: topic) {
+            updatePairingMetadata(topic: pairingTopic, metadata: settleParams.controller.metadata)
+        }
+        
         let session = WCSession(topic: topic,
                                       selfParticipant: selfParticipant,
                                       peerParticipant: settleParams.controller,
                                       settleParams: settleParams,
                                       acknowledged: true)
-        
         sessionStore.setSession(session)
         relayer.respondSuccess(for: payload)
         onSessionSettle?(session.publicRepresentation())
@@ -209,7 +218,7 @@ final class SessionEngine {
         sessionStore.delete(topic: topic)
         wcSubscriber.removeSubscription(topic: topic)
         relayer.respondSuccess(for: payload)
-        onSessionDelete?(topic, deleteParams.reason)
+        onSessionDelete?(topic, deleteParams)
     }
     
     private func wcSessionRequest(_ payload: WCRequestSubscriptionPayload, payloadParams: SessionType.RequestParams) {
@@ -273,7 +282,7 @@ final class SessionEngine {
     
     private func setupExpirationHandling() {
         sessionStore.onSessionExpiration = { [weak self] session in
-            self?.kms.deletePrivateKey(for: session.participants.`self`.publicKey)
+            self?.kms.deletePrivateKey(for: session.selfParticipant.publicKey)
             self?.kms.deleteAgreementSecret(for: session.topic)
         }
     }
@@ -313,5 +322,11 @@ final class SessionEngine {
             kms.deleteAgreementSecret(for: topic)
             kms.deletePrivateKey(for: session.publicKey!)
         }
+    }
+    
+    private func updatePairingMetadata(topic: String, metadata: AppMetadata) {
+        guard var pairing = pairingStore.getPairing(forTopic: topic) else {return}
+        pairing.peerMetadata = metadata
+        pairingStore.setPairing(pairing)
     }
 }
