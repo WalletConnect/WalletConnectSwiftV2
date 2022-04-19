@@ -7,7 +7,9 @@ import WalletConnectUtils
 
 class MockedWCRelay: WalletConnectRelaying {
     let responsePublisherSubject = PassthroughSubject<WCResponse, Never>()
-
+    private(set) var subscriptions: [String] = []
+    private(set) var unsubscriptions: [String] = []
+    
     var responsePublisher: AnyPublisher<WCResponse, Never> {
         responsePublisherSubject.eraseToAnyPublisher()
     }
@@ -68,9 +70,11 @@ class MockedWCRelay: WalletConnectRelaying {
     
     func subscribe(topic: String) {
         didCallSubscribe = true
+        subscriptions.append(topic)
     }
     
     func unsubscribe(topic: String) {
+        unsubscriptions.append(topic)
         didCallUnsubscribe = true
     }
     

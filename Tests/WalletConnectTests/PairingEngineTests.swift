@@ -65,7 +65,7 @@ final class PairingEngineTests: XCTestCase {
         let uri = engine.create()!
         XCTAssert(cryptoMock.hasSymmetricKey(for: uri.topic), "Proposer must store the symmetric key matching the URI.")
         XCTAssert(storageMock.hasPairing(forTopic: uri.topic), "The engine must store a pairing after creating one")
-        XCTAssert(subscriberMock.didSubscribe(to: uri.topic), "Proposer must subscribe to pairing topic.")
+        XCTAssert(relayMock.didSubscribe(to: uri.topic), "Proposer must subscribe to pairing topic.")
         XCTAssert(storageMock.getPairing(forTopic: uri.topic)?.active == false, "Recently created pairing must be inactive.")
     }
     
@@ -73,7 +73,7 @@ final class PairingEngineTests: XCTestCase {
         let uri = WalletConnectURI.stub()
         let topic = uri.topic
         try! engine.pair(uri)
-        XCTAssert(subscriberMock.didSubscribe(to: topic), "Responder must subscribe to pairing topic.")
+        XCTAssert(relayMock.didSubscribe(to: topic), "Responder must subscribe to pairing topic.")
         XCTAssert(cryptoMock.hasSymmetricKey(for: topic), "Responder must store the symmetric key matching the pairing topic")
         XCTAssert(storageMock.hasPairing(forTopic: topic), "The engine must store a pairing")
     }
@@ -105,7 +105,7 @@ final class PairingEngineTests: XCTestCase {
         engine.onSessionProposal = { _ in
             sessionProposed = true
         }
-        subscriberMock.onReceivePayload?(payload)
+        relayMock.wcRequestPublisherSubject.send(payload)
         XCTAssertNotNil(try! proposalPayloadsStore.get(key: proposal.proposer.publicKey), "Proposer must store proposal payload")
         XCTAssertTrue(sessionProposed)
     }
@@ -117,8 +117,7 @@ final class PairingEngineTests: XCTestCase {
         let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
         let request = WCRequest(method: .sessionPropose, params: .sessionPropose(proposal))
         let payload = WCRequestSubscriptionPayload(topic: topicA, wcRequest: request)
-        subscriberMock.onReceivePayload?(payload)
-        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload(topic: topicA, wcRequest: proposal))
+        relayMock.wcRequestPublisherSubject.send(payload)
         let topicB = engine.respondSessionPropose(proposal: proposal)!
         
         XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must store agreement key for topic B")
@@ -182,7 +181,7 @@ final class PairingEngineTests: XCTestCase {
         let response = WCResponse.stubError(forRequest: request, topic: topicA)
         relayMock.onPairingResponse?(response)
         
-        XCTAssert(subscriberMock.didUnsubscribe(to: pairing.topic), "Proposer must unsubscribe if pairing is inactive.")
+        XCTAssert(relayMock.didUnsubscribe(to: pairing.topic), "Proposer must unsubscribe if pairing is inactive.")
         XCTAssertFalse(storageMock.hasPairing(forTopic: pairing.topic), "Proposer must delete an inactive pairing.")
         XCTAssertFalse(cryptoMock.hasSymmetricKey(for: pairing.topic), "Proposer must delete symmetric key if pairing is inactive.")
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must remove private key for rejected session")
@@ -209,7 +208,7 @@ final class PairingEngineTests: XCTestCase {
         let response = WCResponse.stubError(forRequest: request, topic: topicA)
         relayMock.onPairingResponse?(response)
         
-        XCTAssertFalse(subscriberMock.didUnsubscribe(to: pairing.topic), "Proposer must not unsubscribe if pairing is active.")
+        XCTAssertFalse(relayMock.didUnsubscribe(to: pairing.topic), "Proposer must not unsubscribe if pairing is active.")
         XCTAssert(storageMock.hasPairing(forTopic: pairing.topic), "Proposer must not delete an active pairing.")
         XCTAssert(cryptoMock.hasSymmetricKey(for: pairing.topic), "Proposer must not delete symmetric key if pairing is active.")
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must remove private key for rejected session")
@@ -220,6 +219,6 @@ final class PairingEngineTests: XCTestCase {
         let pairing = storageMock.getPairing(forTopic: uri.topic)!
         storageMock.onPairingExpiration?(pairing)
         XCTAssertFalse(cryptoMock.hasSymmetricKey(for: uri.topic))
-        XCTAssert(subscriberMock.didUnsubscribe(to: uri.topic))
+        XCTAssert(relayMock.didUnsubscribe(to: uri.topic))
     }
 }
