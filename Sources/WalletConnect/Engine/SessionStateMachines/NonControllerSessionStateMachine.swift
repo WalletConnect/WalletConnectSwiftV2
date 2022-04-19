@@ -40,7 +40,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
             case .sessionUpdateExpiry(let updateExpiryParams):
                 onSessionUpdateExpiry(subscriptionPayload, updateExpiryParams: updateExpiryParams)
             default:
-                logger.warn("Warning: Session Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
+                return
             }
         }.store(in: &publishers)
     }

@@ -13,7 +13,6 @@ final class PairingEngineTests: XCTestCase {
     var engine: PairingEngine!
     
     var relayMock: MockedWCRelay!
-    var subscriberMock: MockedSubscriber!
     var storageMock: WCPairingStorageMock!
     var cryptoMock: KeyManagementServiceMock!
     var proposalPayloadsStore: KeyValueStore<WCRequestSubscriptionPayload>!
@@ -22,7 +21,6 @@ final class PairingEngineTests: XCTestCase {
     
     override func setUp() {
         relayMock = MockedWCRelay()
-        subscriberMock = MockedSubscriber()
         storageMock = WCPairingStorageMock()
         cryptoMock = KeyManagementServiceMock()
         topicGenerator = TopicGenerator()
@@ -32,7 +30,6 @@ final class PairingEngineTests: XCTestCase {
     
     override func tearDown() {
         relayMock = nil
-        subscriberMock = nil
         storageMock = nil
         cryptoMock = nil
         topicGenerator = nil
@@ -45,7 +42,6 @@ final class PairingEngineTests: XCTestCase {
         engine = PairingEngine(
             relay: relayMock,
             kms: cryptoMock,
-            subscriber: subscriberMock,
             pairingStore: storageMock,
             sessionToPairingTopic: KeyValueStore<String>(defaults: RuntimeKeyValueStorage(), identifier: ""),
             metadata: meta,
@@ -122,7 +118,7 @@ final class PairingEngineTests: XCTestCase {
         let request = WCRequest(method: .sessionPropose, params: .sessionPropose(proposal))
         let payload = WCRequestSubscriptionPayload(topic: topicA, wcRequest: request)
         subscriberMock.onReceivePayload?(payload)
-        
+        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload(topic: topicA, wcRequest: proposal))
         let topicB = engine.respondSessionPropose(proposal: proposal)!
         
         XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must store agreement key for topic B")

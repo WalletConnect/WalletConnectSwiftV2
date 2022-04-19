@@ -78,6 +78,14 @@ class MockedWCRelay: WalletConnectRelaying {
         let payload = WCRequestSubscriptionPayload(topic: topic, wcRequest: pingRequest)
         wcRequestPublisherSubject.send(payload)
     }
+    
+    func didSubscribe(to topic: String) -> Bool {
+        subscriptions.contains { $0 == topic }
+    }
+    
+    func didUnsubscribe(to topic: String) -> Bool {
+        unsubscriptions.contains { $0 == topic }
+    }
 }
 
 fileprivate let pingRequest = WCRequest(id: 1, jsonrpc: "2.0", method: .pairingPing, params: WCRequest.Params.pairingPing(PairingType.PingParams()))

@@ -10,7 +10,6 @@ final class PairingEngine {
     var onSessionRejected: ((Session.Proposal, SessionType.Reason)->())?
 
     private let proposalPayloadsStore: KeyValueStore<WCRequestSubscriptionPayload>
-    private let wcSubscriber: WCSubscribing
     private let relayer: WalletConnectRelaying
     private let kms: KeyManagementServiceProtocol
     private let pairingStore: WCPairingStorage
@@ -22,7 +21,6 @@ final class PairingEngine {
     
     init(relay: WalletConnectRelaying,
          kms: KeyManagementServiceProtocol,
-         subscriber: WCSubscribing,
          pairingStore: WCPairingStorage,
          sessionToPairingTopic: KeyValueStore<String>,
          metadata: AppMetadata,
@@ -31,7 +29,6 @@ final class PairingEngine {
          proposalPayloadsStore: KeyValueStore<WCRequestSubscriptionPayload> = KeyValueStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.proposals.rawValue)) {
         self.relayer = relay
         self.kms = kms
-        self.wcSubscriber = subscriber
         self.metadata = metadata
         self.pairingStore = pairingStore
         self.logger = logger
@@ -68,7 +65,7 @@ final class PairingEngine {
         let pairing = WCPairing(topic: topic)
         let uri = WalletConnectURI(topic: topic, symKey: symKey.hexRepresentation, relay: pairing.relay)
         pairingStore.setPairing(pairing)
-        wcSubscriber.setSubscription(topic: topic)
+        relayer.subscribe(topic: topic)
         return uri
     }
     func propose(pairingTopic: String, blockchains: Set<Blockchain>, methods: Set<String>, events: Set<String>, relay: RelayProtocolOptions, completion: @escaping ((Error?) -> ())) {
@@ -97,7 +94,7 @@ final class PairingEngine {
         let symKey = try! SymmetricKey(hex: uri.symKey) // FIXME: Malformed QR code from external source can crash the SDK
         try! kms.setSymmetricKey(symKey, for: pairing.topic)
         pairing.activate()
-        wcSubscriber.setSubscription(topic: pairing.topic)
+        relayer.subscribe(topic: pairing.topic)
         pairingStore.setPairing(pairing)
     }
     
@@ -155,16 +152,16 @@ final class PairingEngine {
     //MARK: - Private
 
     private func setUpWCRequestHandling() {
-        wcSubscriber.onReceivePayload = { [unowned self] subscriptionPayload in
+        relayer.wcRequestPublisher.sink { [unowned self] subscriptionPayload in
             switch subscriptionPayload.wcRequest.params {
             case .pairingPing(_):
                 wcPairingPing(subscriptionPayload)
             case .sessionPropose(let proposeParams):
                 wcSessionPropose(subscriptionPayload, proposal: proposeParams)
             default:
-                logger.warn("Warning: Pairing Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
+                return
             }
-        }
+        }.store(in: &publishers)
     }
     
     private func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
@@ -182,14 +179,14 @@ final class PairingEngine {
             .sink { [unowned self] (_) in
                 let topics = pairingStore.getAll()
                     .map{$0.topic}
-                topics.forEach{self.wcSubscriber.setSubscription(topic: $0)}
+                topics.forEach{relayer.subscribe(topic: $0)}
             }.store(in: &publishers)
     }
     
     private func setupExpirationHandling() {
         pairingStore.onPairingExpiration = { [weak self] pairing in
             self?.kms.deleteSymmetricKey(for: pairing.topic)
-            self?.wcSubscriber.removeSubscription(topic: pairing.topic)
+            self?.relayer.unsubscribe(topic: pairing.topic)
         }
     }
     
@@ -239,7 +236,7 @@ final class PairingEngine {
         case .error(let error):
             if !pairing.active {
                 kms.deleteSymmetricKey(for: pairing.topic)
-                wcSubscriber.removeSubscription(topic: pairing.topic)
+                relayer.unsubscribe(topic: pairing.topic)
                 pairingStore.delete(topic: pairingTopic)
             }
             logger.debug("session propose has been rejected")

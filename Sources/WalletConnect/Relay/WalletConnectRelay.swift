@@ -117,7 +117,8 @@ class WalletConnectRelay: WalletConnectRelaying {
         }
     }
     
-    /// Completes with an acknowledgement from the relay network
+    /// Completes with an acknowledgement from the relay network.
+    /// completes with error if networking client was not able to send a message
     func requestNetworkAck(_ wcMethod: WCMethod, onTopic topic: String, completion: @escaping ((Error?) -> ())) {
         do {
             let payload = wcMethod.asRequest()

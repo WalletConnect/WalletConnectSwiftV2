@@ -156,7 +156,7 @@ final class SessionEngine {
             case .sessionEvent(let eventParams):
                 wcSessionEvent(subscriptionPayload, eventParams: eventParams)
             default:
-                logger.warn("Warning: Session Engine - Unexpected method type: \(subscriptionPayload.wcRequest.method) received from subscriber")
+                return
             }
         }
     }
