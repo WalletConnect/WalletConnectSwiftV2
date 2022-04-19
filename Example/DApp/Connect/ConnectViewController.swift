@@ -66,7 +66,8 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
         let data = string.data(using: .ascii)
         if let filter = CIFilter(name: "CIQRCodeGenerator") {
             filter.setValue(data, forKey: "inputMessage")
-            if let output = filter.outputImage {
+            let transform = CGAffineTransform(scaleX: 4, y: 4)
+            if let output = filter.outputImage?.transformed(by: transform) {
                 return UIImage(ciImage: output)
             }
         }
