@@ -51,10 +51,10 @@ class WakuRelayTests: XCTestCase {
     
     func testPublishRequestAcknowledge() {
         let acknowledgeExpectation = expectation(description: "completion with no error on waku request acknowledge after publish")
-        let requestId = wakuRelay.publish(topic: "", payload: "{}") { error in
+        let requestId = wakuRelay.publish(topic: "", payload: "{}", onNetworkAcknowledge: { error in
             acknowledgeExpectation.fulfill()
             XCTAssertNil(error)
-        }
+        })
         let response = try! JSONRPCResponse<Bool>(id: requestId, result: true).json()
         dispatcher.onMessage?(response)
         waitForExpectations(timeout: 0.001, handler: nil)
@@ -86,7 +86,7 @@ class WakuRelayTests: XCTestCase {
     }
     
     func testSendOnPublish() {
-        wakuRelay.publish(topic: "", payload: "") {_ in }
+        wakuRelay.publish(topic: "", payload: "", onNetworkAcknowledge: { _ in})
         XCTAssertTrue(dispatcher.sent)
     }
     

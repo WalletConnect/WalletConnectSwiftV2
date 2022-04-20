@@ -61,12 +61,12 @@ final class RelayerEndToEndTests: XCTestCase {
             (subscriptionBTopic, subscriptionBPayload) = (topic, payload)
             expectation.fulfill()
         }
-        relayA.publish(topic: randomTopic, payload: payloadA) { error in
+        relayA.publish(topic: randomTopic, payload: payloadA, onNetworkAcknowledge: { error in
             XCTAssertNil(error)
-        }
-        relayB.publish(topic: randomTopic, payload: payloadB) { error in
+        })
+        relayB.publish(topic: randomTopic, payload: payloadB, onNetworkAcknowledge: { error in
             XCTAssertNil(error)
-        }
+        })
         relayA.subscribe(topic: randomTopic) { error in
             XCTAssertNil(error)
         }
