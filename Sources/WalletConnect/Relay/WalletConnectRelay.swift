@@ -79,6 +79,13 @@ class WalletConnectRelay: WalletConnectRelaying {
         request(topic: topic, payload: wcMethod.asRequest(), completion: completion)
     }
     
+    ///TODO - Completes when networking client sends a request
+    func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Error)->())) {
+        
+    }
+    
+    /// Completes with response from peer
+    /// TODO - rename to distinguish all requests types
     func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?) {
         do {
             try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
