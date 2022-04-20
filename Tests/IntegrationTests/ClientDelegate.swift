@@ -50,7 +50,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didUpdate(sessionTopic: String, expiry: Date) {
         onSessionUpdateExpiry?(sessionTopic, expiry)
     }
-    func didReceive(event: Session.Event, sessionTopic: String) {
+    func didReceive(event: Session.Event, sessionTopic: String, chainId: Blockchain?) {
         onEventReceived?(event, sessionTopic)
     }
     func didReceive(sessionResponse: Response) {

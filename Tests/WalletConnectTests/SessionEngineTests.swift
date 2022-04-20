@@ -15,7 +15,6 @@ final class SessionEngineTests: XCTestCase {
     var engine: SessionEngine!
 
     var relayMock: MockedWCRelay!
-    var subscriberMock: MockedSubscriber!
     var storageMock: WCSessionStorageMock!
     var cryptoMock: KeyManagementServiceMock!
     
@@ -25,7 +24,6 @@ final class SessionEngineTests: XCTestCase {
     
     override func setUp() {
         relayMock = MockedWCRelay()
-        subscriberMock = MockedSubscriber()
         storageMock = WCSessionStorageMock()
         cryptoMock = KeyManagementServiceMock()
         topicGenerator = TopicGenerator()
@@ -34,7 +32,6 @@ final class SessionEngineTests: XCTestCase {
 
     override func tearDown() {
         relayMock = nil
-        subscriberMock = nil
         storageMock = nil
         cryptoMock = nil
         topicGenerator = nil
@@ -47,7 +44,6 @@ final class SessionEngineTests: XCTestCase {
         engine = SessionEngine(
             relay: relayMock,
             kms: cryptoMock,
-            subscriber: subscriberMock,
             pairingStore: WCPairingStorageMock(),
             sessionStore: storageMock,
             sessionToPairingTopic: KeyValueStore<String>(defaults: RuntimeKeyValueStorage(), identifier: ""),
@@ -66,7 +62,7 @@ final class SessionEngineTests: XCTestCase {
         engine.settle(topic: topicB, proposal: proposal, accounts: [])
         
         XCTAssertTrue(storageMock.hasSession(forTopic: topicB), "Responder must persist session on topic B")
-        XCTAssert(subscriberMock.didSubscribe(to: topicB), "Responder must subscribe for topic B")
+        XCTAssert(relayMock.didSubscribe(to: topicB), "Responder must subscribe for topic B")
         XCTAssertTrue(relayMock.didCallRequest, "Responder must send session settle payload on topic B")
     }
     
@@ -78,7 +74,8 @@ final class SessionEngineTests: XCTestCase {
             didCallBackOnSessionApproved = true
         }
         
-        subscriberMock.onReceivePayload?(WCRequestSubscriptionPayload.stubSettle(topic: sessionTopic))
+        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubSettle(topic: sessionTopic))
+        
         
         XCTAssertTrue(storageMock.getSession(forTopic: sessionTopic)!.acknowledged, "Proposer must store acknowledged session on topic B")
         XCTAssertTrue(relayMock.didRespondSuccess, "Proposer must send acknowledge on settle request")
@@ -122,7 +119,7 @@ final class SessionEngineTests: XCTestCase {
         relayMock.onResponse?(response)
 
         XCTAssertNil(storageMock.getSession(forTopic: session.topic), "Responder must remove session")
-        XCTAssertTrue(subscriberMock.didUnsubscribe(to: session.topic), "Responder must unsubscribe topic B")
+        XCTAssertTrue(relayMock.didUnsubscribe(to: session.topic), "Responder must unsubscribe topic B")
         XCTAssertFalse(cryptoMock.hasAgreementSecret(for: session.topic), "Responder must remove agreement secret")
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: session.self.publicKey!), "Responder must remove private key")
     }

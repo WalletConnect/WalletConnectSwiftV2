@@ -75,11 +75,15 @@ internal enum SessionType {
     
     struct EventParams: Codable, Equatable {
         let event: Event
-        let chainId: String?
+        let chainId: Blockchain?
 
         struct Event: Codable, Equatable {
-            let type: String
+            let name: String
             let data: AnyCodable
+            
+            func publicRepresentation() -> Session.Event {
+                Session.Event(name: name, data: data)
+            }
         }
     }
     
