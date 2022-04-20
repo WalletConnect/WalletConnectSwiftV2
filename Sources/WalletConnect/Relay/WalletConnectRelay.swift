@@ -56,16 +56,11 @@ class WalletConnectRelay: WalletConnectRelaying {
         wcRequestPublisherSubject.eraseToAnyPublisher()
     }
     private let wcRequestPublisherSubject = PassthroughSubject<WCRequestSubscriptionPayload, Never>()
-    /// TODO - leave only one response publisher when possible - remove wcResponsePublisher dependencies
-    private var wcResponsePublisher: AnyPublisher<JsonRpcResult, Never> {
-        wcResponsePublisherSubject.eraseToAnyPublisher()
-    }
+    
     var responsePublisher: AnyPublisher<WCResponse, Never> {
         responsePublisherSubject.eraseToAnyPublisher()
     }
-    private let wcResponsePublisherSubject = PassthroughSubject<JsonRpcResult, Never>()
     private let responsePublisherSubject = PassthroughSubject<WCResponse, Never>()
-    /////////////////////////////
 
     let logger: ConsoleLogging
     
@@ -95,12 +90,12 @@ class WalletConnectRelay: WalletConnectRelaying {
                     self.logger.error(error)
                 } else {
                     var cancellable: AnyCancellable!
-                    cancellable = self.wcResponsePublisher
-                        .filter {$0.id == payload.id}
+                    cancellable = self.responsePublisher
+                        .filter {$0.result.id == payload.id}
                         .sink { (response) in
                             cancellable.cancel()
                             self.logger.debug("WC Relay - received response on topic: \(topic)")
-                            switch response {
+                            switch response.result {
                             case .response(let response):
                                 completion?(.success(response))
                             case .error(let error):
@@ -221,7 +216,6 @@ class WalletConnectRelay: WalletConnectRelaying {
                 requestMethod: record.request.method,
                 requestParams: record.request.params,
                 result: JsonRpcResult.response(response))
-            wcResponsePublisherSubject.send(.response(response))
             responsePublisherSubject.send(wcResponse)
             onPairingResponse?(wcResponse)
             onResponse?(wcResponse)
@@ -239,7 +233,6 @@ class WalletConnectRelay: WalletConnectRelaying {
                 requestMethod: record.request.method,
                 requestParams: record.request.params,
                 result: JsonRpcResult.error(response))
-            wcResponsePublisherSubject.send(.error(response))
             responsePublisherSubject.send(wcResponse)
             onPairingResponse?(wcResponse)
             onResponse?(wcResponse)
