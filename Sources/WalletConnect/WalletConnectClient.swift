@@ -165,6 +165,8 @@ public final class WalletConnectClient {
     /// - Parameters:
     ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate function: `didReceive(sessionProposal: Session.Proposal)`
     ///   - accounts: A Set of accounts that the dapp will be allowed to request methods executions on.
+    ///   - methods: A Set of methods that the dapp will be allowed to request.
+    ///   - events: A Set of events
     public func approve(
         proposal: Session.Proposal,
         accounts: Set<Account>,
