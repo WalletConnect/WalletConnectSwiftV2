@@ -10,7 +10,7 @@ final class SessionEngine {
     var onSessionSettle: ((Session)->())?
     var onSessionRejected: ((String, SessionType.Reason)->())?
     var onSessionDelete: ((String, SessionType.Reason)->())?
-    var onEventReceived: ((String, Session.Event)->())?
+    var onEventReceived: ((String, Session.Event, Blockchain?)->())?
     
     private let sessionStore: WCSessionStorage
     private let pairingStore: WCPairingStorage
@@ -115,13 +115,13 @@ final class SessionEngine {
         }
     }
     
-    func notify(topic: String, params: Session.Event, completion: ((Error?)->())?) {
+    func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain?, completion: ((Error?)->())?) {
         guard let session = sessionStore.getSession(forTopic: topic), session.acknowledged else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
         do {
-            let params = SessionType.EventParams(event: SessionType.EventParams.Event(type: params.type, data: params.data), chainId: params.chainId)
+            let params = SessionType.EventParams(event: event, chainId: chainId)
             try validateEvents(session: session, params: params)
             relayer.request(.wcSessionEvent(params), onTopic: topic) { result in
                 switch result {
@@ -257,21 +257,20 @@ final class SessionEngine {
             return
         }
         if session.selfIsController {
-            guard session.hasPermission(forEvents: event.type) else {
-                relayer.respondError(for: payload, reason: .unauthorizedEventType(event.type))
+            guard session.hasPermission(forEvents: event.name) else {
+                relayer.respondError(for: payload, reason: .unauthorizedEventType(event.name))
                 return
             }
         }
-        let eventPublicRepresentation = Session.Event(type: event.type, data: event.data, chainId: eventParams.chainId)
         relayer.respondSuccess(for: payload)
-        onEventReceived?(topic, eventPublicRepresentation)
+        onEventReceived?(topic, event.publicRepresentation(), eventParams.chainId)
     }
     
     private func validateEvents(session: WCSession, params: SessionType.EventParams) throws {
         if session.selfIsController {
             return
         } else {
-            guard session.events.contains(params.event.type) else {
+            guard session.events.contains(params.event.name) else {
                 throw WalletConnectError.invalidEventType
             }
         }

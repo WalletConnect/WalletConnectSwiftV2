@@ -261,8 +261,8 @@ public final class WalletConnectClient {
     ///   - topic: Session topic
     ///   - params: Event Parameters
     ///   - completion: calls a handler upon completion
-    public func notify(topic: String, params: Session.Event, completion: ((Error?)->())?) {
-        sessionEngine.notify(topic: topic, params: params, completion: completion)
+    public func emit(topic: String, event: Session.Event, chainId: Blockchain?, completion: ((Error?)->())?) {
+        sessionEngine.emit(topic: topic, event: event.internalRepresentation(), chainId: chainId, completion: completion)
     }
     
     /// For the proposer and responder to terminate a session
@@ -354,8 +354,8 @@ public final class WalletConnectClient {
         nonControllerSessionStateMachine.onAccountsUpdate = { [unowned self] topic, accounts in
             delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
         }
-        sessionEngine.onEventReceived = { [unowned self] topic, event in
-            delegate?.didReceive(event: event, sessionTopic: topic)
+        sessionEngine.onEventReceived = { [unowned self] topic, event, chainId in
+            delegate?.didReceive(event: event, sessionTopic: topic, chainId: chainId)
         }
         sessionEngine.onSessionResponse = { [unowned self] response in
             delegate?.didReceive(sessionResponse: response)

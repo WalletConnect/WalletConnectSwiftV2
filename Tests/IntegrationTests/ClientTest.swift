@@ -312,15 +312,15 @@ final class ClientTests: XCTestCase {
         let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
 
         try! responder.client.pair(uri: uri)
-        let eventParams = Session.Event(type: "type1", data: AnyCodable("event_data"), chainId: nil)
+        let event = Session.Event(name: "type1", data: AnyCodable("event_data"))
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
         responder.onSessionSettled = { [unowned self] session in
-            responder.client.notify(topic: session.topic, params: eventParams, completion: nil)
+            responder.client.emit(topic: session.topic, event: event, chainId: nil, completion: nil)
         }
         proposer.onEventReceived = { event, _ in
-            XCTAssertEqual(event, eventParams)
+            XCTAssertEqual(event, event)
             proposerReceivesEventExpectation.fulfill()
         }
         await waitForExpectations(timeout: defaultTimeout, handler: nil)
@@ -332,12 +332,12 @@ final class ClientTests: XCTestCase {
         let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
 
         try! responder.client.pair(uri: uri)
-        let eventParams = Session.Event(type: "type2", data: AnyCodable("event_data"), chainId: nil)
+        let event = Session.Event(name: "type2", data: AnyCodable("event_data"))
         responder.onSessionProposal = { [unowned self] proposal in
             self.responder.client.approve(proposal: proposal, accounts: [])
         }
         proposer.onSessionSettled = { [unowned self] session in
-            proposer.client.notify(topic: session.topic, params: eventParams) { error in
+            proposer.client.emit(topic: session.topic, event: event, chainId: nil) { error in
                 XCTAssertNotNil(error)
             }
         }

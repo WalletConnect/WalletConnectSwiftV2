@@ -29,8 +29,12 @@ extension Session {
     }
 
     public struct Event: Equatable, Hashable {
-        public let type: String
+        public let name: String
         public let data: AnyCodable
-        public let chainId: String?
+        
+        internal func internalRepresentation() -> SessionType.EventParams.Event{
+            SessionType.EventParams.Event(name: name, data: data)
+        }
     }
+    
 }
