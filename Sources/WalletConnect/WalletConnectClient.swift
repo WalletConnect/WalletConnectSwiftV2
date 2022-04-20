@@ -165,9 +165,13 @@ public final class WalletConnectClient {
     /// - Parameters:
     ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate function: `didReceive(sessionProposal: Session.Proposal)`
     ///   - accounts: A Set of accounts that the dapp will be allowed to request methods executions on.
-    public func approve(proposal: Session.Proposal, accounts: Set<Account>) {
+    public func approve(
+        proposal: Session.Proposal,
+        accounts: Set<Account>,
+        methods: Set<String>,
+        events: Set<String>) {
         guard let sessionTopic = pairingEngine.respondSessionPropose(proposal: proposal.proposal) else {return}
-        sessionEngine.settle(topic: sessionTopic, proposal: proposal.proposal, accounts: accounts)
+            sessionEngine.settle(topic: sessionTopic, proposal: proposal.proposal, accounts: accounts, methods: methods, events: events)
     }
     
     /// For the responder to reject a session proposal.
