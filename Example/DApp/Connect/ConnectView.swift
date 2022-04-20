@@ -7,7 +7,7 @@ final class ConnectView: UIView {
     
     let qrCodeView: UIImageView = {
         let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
+        imageView.contentMode = .center
         return imageView
     }()
     
