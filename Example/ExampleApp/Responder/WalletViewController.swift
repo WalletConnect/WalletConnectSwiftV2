@@ -151,7 +151,7 @@ extension WalletViewController: SessionViewControllerDelegate {
         let proposal = currentProposal!
         currentProposal = nil
         let accounts = Set(proposal.chains.compactMap { Account($0.absoluteString + ":\(account)") })
-        client.approve(proposal: proposal, accounts: accounts)
+        client.approve(proposal: proposal, accounts: accounts, methods: proposal.methods, events: proposal.events)
     }
     
     func didRejectSession() {

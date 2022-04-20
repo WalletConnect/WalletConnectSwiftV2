@@ -158,7 +158,7 @@ final class SessionEngine {
         }.store(in: &publishers)
     }
 
-    func settle(topic: String, proposal: SessionProposal, accounts: Set<Account>) {
+    func settle(topic: String, proposal: SessionProposal, accounts: Set<Account>, methods: Set<String>, events: Set<String>) {
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!
         
         let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
@@ -168,8 +168,8 @@ final class SessionEngine {
         let settleParams = SessionType.SettleParams(
             relay: relay,
             controller: selfParticipant, accounts: accounts,
-            methods: proposal.methods,
-            events: proposal.events,
+            methods: methods,
+            events: events,
             expiry: Int64(expectedExpiryTimeStamp.timeIntervalSince1970))//todo - test expiration times
         let session = WCSession(
             topic: topic,
