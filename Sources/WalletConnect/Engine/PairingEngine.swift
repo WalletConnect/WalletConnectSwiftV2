@@ -121,11 +121,11 @@ final class PairingEngine {
 //        todo - delete pairing if inactive
     }
     
-    func respondSessionPropose(proposal: SessionType.ProposeParams) -> String? {
-        guard let payload = try? proposalPayloadsStore.get(key: proposal.proposer.publicKey) else {
+    func respondSessionPropose(proposalId: String) -> String? {
+        guard let payload = try? proposalPayloadsStore.get(key: proposalId) else {
             return nil
         }
-        proposalPayloadsStore.delete(forKey: proposal.proposer.publicKey)
+        proposalPayloadsStore.delete(forKey: proposalId)
 
         let selfPublicKey = try! kms.createX25519KeyPair()
         var agreementKey: AgreementKeys!
