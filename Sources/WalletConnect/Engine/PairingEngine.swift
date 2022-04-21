@@ -229,7 +229,8 @@ final class PairingEngine {
 
             let sessionTopic = agreementKeys.derivedTopic()
             logger.debug("session topic: \(sessionTopic)")
-            try! kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
+            
+            try? kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
             try! sessionToPairingTopic.set(pairingTopic, forKey: sessionTopic)
             onProposeResponse?(sessionTopic)
             
