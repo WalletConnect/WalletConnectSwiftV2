@@ -1,3 +1,6 @@
+public typealias AccountCAIP10 = (namespace: String, reference: String, address: String)
+public typealias AccountCAIP2 = (namespace: String, reference: String)
+
 /**
  A value that identifies an account in any given blockchain.
  
@@ -43,9 +46,9 @@ public struct Account: Equatable, Hashable {
      [CAIP-10](https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-10.md).
      */
     public init?(_ string: String) {
-        guard String.conformsToCAIP10(string) else { return nil }
-        let splits = string.split(separator: ":")
-        self.init(namespace: String(splits[0]), reference: String(splits[1]), address: String(splits[2]))
+        guard String.conformsToCAIP10(string), let account: AccountCAIP10 = String.split(string)
+        else { return nil }
+        self.init(account)
     }
     
     /**
@@ -63,10 +66,10 @@ public struct Account: Equatable, Hashable {
      
      This initializer bypass any checks to CAIP conformance, make sure to pass valid values as parameters.
      */
-    public init(namespace: String, reference: String, address: String) {
-        self.namespace = namespace
-        self.reference = reference
-        self.address = address
+    public init(_ string: AccountCAIP10) {
+        self.namespace = string.namespace
+        self.reference = string.reference
+        self.address = string.address
     }
 }
 

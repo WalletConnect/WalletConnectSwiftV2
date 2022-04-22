@@ -1,5 +1,3 @@
-// 
-
 import Foundation
 
 extension String {
@@ -8,26 +6,37 @@ extension String {
     static let chainReferenceRegex = "^[-a-zA-Z0-9]{1,32}$"
     static let accountAddressRegex = "^[a-zA-Z0-9]{1,64}$"
     
+    // MARK: CAIP2
     static func conformsToCAIP2(_ string: String) -> Bool {
-        let splits = string.split(separator: ":", omittingEmptySubsequences: false)
-        guard splits.count == 2 else { return false }
-        let namespace = splits[0]
-        let reference = splits[1]
-        let isNamespaceValid = (namespace.range(of: chainNamespaceRegex, options: .regularExpression) != nil)
-        let isReferenceValid = (reference.range(of: chainReferenceRegex, options: .regularExpression) != nil)
+        guard let value: AccountCAIP2 = split(string) else {
+            return false
+        }
+        let isNamespaceValid = (value.namespace.range(of: chainNamespaceRegex, options: .regularExpression) != nil)
+        let isReferenceValid = (value.reference.range(of: chainReferenceRegex, options: .regularExpression) != nil)
         return isNamespaceValid && isReferenceValid
     }
     
+    static func split(_ string: String) -> AccountCAIP2? {
+        let splitted = string.split(separator: ":", omittingEmptySubsequences: false)
+        let strings = splitted.map { String.init($0) }
+        return strings.count == 2 ? (strings[0], strings[1]) : nil
+    }
+    
+    // MARK: CAIP10
     static func conformsToCAIP10(_ string: String) -> Bool {
-        let splits = string.split(separator: ":", omittingEmptySubsequences: false)
-        guard splits.count == 3 else { return false }
-        let namespace = splits[0]
-        let reference = splits[1]
-        let address = splits[2]
-        let isNamespaceValid = (namespace.range(of: chainNamespaceRegex, options: .regularExpression) != nil)
-        let isReferenceValid = (reference.range(of: chainReferenceRegex, options: .regularExpression) != nil)
-        let isAddressValid = (address.range(of: accountAddressRegex, options: .regularExpression) != nil)
+        guard let value: AccountCAIP10 = split(string) else {
+            return false
+        }
+        let isNamespaceValid = (value.namespace.range(of: chainNamespaceRegex, options: .regularExpression) != nil)
+        let isReferenceValid = (value.reference.range(of: chainReferenceRegex, options: .regularExpression) != nil)
+        let isAddressValid = (value.address.range(of: accountAddressRegex, options: .regularExpression) != nil)
         return isNamespaceValid && isReferenceValid && isAddressValid
+    }
+    
+    static func split(_ string: String) -> AccountCAIP10? {
+        let splitted = string.split(separator: ":", omittingEmptySubsequences: false)
+        let strings = splitted.map { String.init($0) }
+        return strings.count == 3 ? (strings[0], strings[1], strings[2]): nil
     }
     
     static func generateTopic() -> String? {
@@ -43,4 +52,3 @@ extension String {
         }
     }
 }
-
