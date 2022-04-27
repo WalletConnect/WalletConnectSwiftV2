@@ -1,6 +1,6 @@
 import UIKit
 
-final class ResponderView: UIView {
+final class WalletView: UIView {
     
     let tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .insetGrouped)

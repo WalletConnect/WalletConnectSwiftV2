@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		761248172819F9E600CB6D48 /* WalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761248162819F9E600CB6D48 /* WalletView.swift */; };
 		761C649E26FB7FD7004239D1 /* SessionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761C649D26FB7FD7004239D1 /* SessionViewController.swift */; };
 		761C64A326FB83CE004239D1 /* SessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761C64A226FB83CE004239D1 /* SessionView.swift */; };
 		761C64A626FCB0AA004239D1 /* SessionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761C64A526FCB0AA004239D1 /* SessionInfo.swift */; };
@@ -16,7 +17,6 @@
 		764E1D4C26F8D3FE00A1FB15 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 764E1D4A26F8D3FE00A1FB15 /* LaunchScreen.storyboard */; };
 		764E1D5826F8DBAB00A1FB15 /* WalletConnect in Frameworks */ = {isa = PBXBuildFile; productRef = 764E1D5726F8DBAB00A1FB15 /* WalletConnect */; };
 		764E1D5A26F8DF1B00A1FB15 /* ScannerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764E1D5926F8DF1B00A1FB15 /* ScannerViewController.swift */; };
-		76744CF526FDFB6B00B77ED9 /* ResponderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF426FDFB6B00B77ED9 /* ResponderView.swift */; };
 		76744CF726FE4D5400B77ED9 /* ActiveSessionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */; };
 		76744CF926FE4D7400B77ED9 /* ActiveSessionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */; };
 		76B6E39F2807A3B6004DF775 /* WalletViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76B6E39E2807A3B6004DF775 /* WalletViewController.swift */; };
@@ -73,6 +73,7 @@
 
 /* Begin PBXFileReference section */
 		7603D74C2703429A00DD27A2 /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
+		761248162819F9E600CB6D48 /* WalletView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WalletView.swift; sourceTree = "<group>"; };
 		761C649926FB7ABB004239D1 /* AccountsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsViewController.swift; sourceTree = "<group>"; };
 		761C649D26FB7FD7004239D1 /* SessionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionViewController.swift; sourceTree = "<group>"; };
 		761C64A226FB83CE004239D1 /* SessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionView.swift; sourceTree = "<group>"; };
@@ -87,7 +88,6 @@
 		764E1D5526F8DADE00A1FB15 /* WalletConnectSwiftV2 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WalletConnectSwiftV2; path = ..; sourceTree = "<group>"; };
 		764E1D5626F8DB6000A1FB15 /* WalletConnectSwiftV2 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WalletConnectSwiftV2; path = ..; sourceTree = "<group>"; };
 		764E1D5926F8DF1B00A1FB15 /* ScannerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerViewController.swift; sourceTree = "<group>"; };
-		76744CF426FDFB6B00B77ED9 /* ResponderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponderView.swift; sourceTree = "<group>"; };
 		76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionItem.swift; sourceTree = "<group>"; };
 		76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionCell.swift; sourceTree = "<group>"; };
 		76B6E39E2807A3B6004DF775 /* WalletViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WalletViewController.swift; sourceTree = "<group>"; };
@@ -154,19 +154,27 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		761C64A026FB8387004239D1 /* Responder */ = {
+		761248152819F9A800CB6D48 /* Wallet */ = {
 			isa = PBXGroup;
 			children = (
 				76B6E39E2807A3B6004DF775 /* WalletViewController.swift */,
+				761248162819F9E600CB6D48 /* WalletView.swift */,
+				76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */,
+				76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */,
+				764E1D5926F8DF1B00A1FB15 /* ScannerViewController.swift */,
+			);
+			path = Wallet;
+			sourceTree = "<group>";
+		};
+		761248182819FA8B00CB6D48 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				761C64A526FCB0AA004239D1 /* SessionInfo.swift */,
 				84F568C32795832A00D0A289 /* EthereumTransaction.swift */,
 				84F568C1279582D200D0A289 /* Signer.swift */,
 				84494387278D9C1B00CC26BB /* UIAlertController.swift */,
-				76744CF426FDFB6B00B77ED9 /* ResponderView.swift */,
-				764E1D5926F8DF1B00A1FB15 /* ScannerViewController.swift */,
-				761C64A426FCB08B004239D1 /* SessionProposal */,
-				8460DCFD274F98A90081F94C /* Request */,
 			);
-			path = Responder;
+			path = Shared;
 			sourceTree = "<group>";
 		};
 		761C64A426FCB08B004239D1 /* SessionProposal */ = {
@@ -174,7 +182,6 @@
 			children = (
 				761C649D26FB7FD7004239D1 /* SessionViewController.swift */,
 				761C64A226FB83CE004239D1 /* SessionView.swift */,
-				761C64A526FCB0AA004239D1 /* SessionInfo.swift */,
 			);
 			path = SessionProposal;
 			sourceTree = "<group>";
@@ -209,10 +216,11 @@
 			children = (
 				764E1D3F26F8D3FC00A1FB15 /* AppDelegate.swift */,
 				764E1D4126F8D3FC00A1FB15 /* SceneDelegate.swift */,
-				76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */,
-				76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */,
+				761248152819F9A800CB6D48 /* Wallet */,
+				761C64A426FCB08B004239D1 /* SessionProposal */,
 				8460DCFE2750D6DF0081F94C /* SessionDetails */,
-				761C64A026FB8387004239D1 /* Responder */,
+				8460DCFD274F98A90081F94C /* Request */,
+				761248182819FA8B00CB6D48 /* Shared */,
 				764E1D4826F8D3FE00A1FB15 /* Assets.xcassets */,
 				764E1D4A26F8D3FE00A1FB15 /* LaunchScreen.storyboard */,
 				764E1D4D26F8D3FE00A1FB15 /* Info.plist */,
@@ -489,7 +497,6 @@
 			files = (
 				761C64A326FB83CE004239D1 /* SessionView.swift in Sources */,
 				8460DCFC274F98A10081F94C /* RequestViewController.swift in Sources */,
-				76744CF526FDFB6B00B77ED9 /* ResponderView.swift in Sources */,
 				8460DD002750D6F50081F94C /* SessionDetailsViewController.swift in Sources */,
 				76744CF926FE4D7400B77ED9 /* ActiveSessionCell.swift in Sources */,
 				764E1D4026F8D3FC00A1FB15 /* AppDelegate.swift in Sources */,
@@ -498,6 +505,7 @@
 				76744CF726FE4D5400B77ED9 /* ActiveSessionItem.swift in Sources */,
 				764E1D4226F8D3FC00A1FB15 /* SceneDelegate.swift in Sources */,
 				84F568C2279582D200D0A289 /* Signer.swift in Sources */,
+				761248172819F9E600CB6D48 /* WalletView.swift in Sources */,
 				8460DD022750D7020081F94C /* SessionDetailsView.swift in Sources */,
 				76B6E39F2807A3B6004DF775 /* WalletViewController.swift in Sources */,
 				764E1D5A26F8DF1B00A1FB15 /* ScannerViewController.swift in Sources */,
