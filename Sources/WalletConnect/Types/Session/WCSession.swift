@@ -13,8 +13,7 @@ struct WCSession: ExpirableSequence {
     var acknowledged: Bool
     let controller: AgreementPeer
     private(set) var accounts: Set<Account>
-    private(set) var methods: Set<String>
-    private(set) var events: Set<String>
+    private(set) var namespaces: Set<Namespace>
     
     static var defaultTimeToLive: Int64 {
         Int64(7*Time.day)
@@ -34,22 +33,20 @@ struct WCSession: ExpirableSequence {
         self.controller = AgreementPeer(publicKey: settleParams.controller.publicKey)
         self.selfParticipant = selfParticipant
         self.peerParticipant = peerParticipant
-        self.methods = settleParams.methods
-        self.events = settleParams.events
+        self.namespaces = settleParams.namespaces
         self.accounts = settleParams.accounts
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(settleParams.expiry))
     }
     
 #if DEBUG
-    internal init(topic: String, relay: RelayProtocolOptions, controller: AgreementPeer, selfParticipant: Participant, peerParticipant: Participant, methods: Set<String>, events: Set<String>, accounts: Set<Account>, acknowledged: Bool, expiry: Int64) {
+    internal init(topic: String, relay: RelayProtocolOptions, controller: AgreementPeer, selfParticipant: Participant, peerParticipant: Participant, namespaces: Set<Namespace>, events: Set<String>, accounts: Set<Account>, acknowledged: Bool, expiry: Int64) {
         self.topic = topic
         self.relay = relay
         self.controller = controller
         self.selfParticipant = selfParticipant
         self.peerParticipant = peerParticipant
-        self.methods = methods
-        self.events = events
+        self.namespaces = namespaces
         self.accounts = accounts
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
@@ -79,7 +76,7 @@ struct WCSession: ExpirableSequence {
     }
     
     func hasPermission(forMethod method: String) -> Bool {
-        return methods.contains(method)
+        return namespaces.contains(method)
     }
     
     func hasPermission(forEvents type: String) -> Bool {
@@ -90,12 +87,8 @@ struct WCSession: ExpirableSequence {
         self.accounts = accounts
     }
     
-    mutating func updateMethods(_ methods: Set<String>) {
-        self.methods = methods
-    }
-    
-    mutating func updateEvents(_ events: Set<String>) {
-        self.events = events
+    mutating func updateNamespaces(_ namespaces: Set<Namespace>) {
+        self.namespaces = namespaces
     }
     
     /// updates session expiry by given ttl
@@ -124,8 +117,7 @@ struct WCSession: ExpirableSequence {
         return Session(
             topic: topic,
             peer: peerParticipant.metadata,
-            methods: methods,
-            events: events,
+            namespaces: namespaces,
             accounts: accounts,
             expiryDate: expiryDate)
     }

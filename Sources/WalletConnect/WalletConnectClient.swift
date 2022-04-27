@@ -173,7 +173,7 @@ public final class WalletConnectClient {
         methods: Set<String>,
         events: Set<String>) {
         guard let sessionTopic = pairingEngine.respondSessionPropose(proposal: proposal.proposal) else {return}
-            sessionEngine.settle(topic: sessionTopic, proposal: proposal.proposal, accounts: accounts, methods: methods, events: events)
+            sessionEngine.settle(topic: sessionTopic, proposal: proposal.proposal, accounts: accounts, namespaces: methods, events: events)
     }
     
     /// For the responder to reject a session proposal.
@@ -196,16 +196,8 @@ public final class WalletConnectClient {
     /// - Parameters:
     ///   - topic: Topic of the session that is intended to be updated.
     ///   - methods: Sets of methods that will replace existing ones.
-    public func updateMethods(topic: String, methods: Set<String>) throws {
-        try controllerSessionStateMachine.updateMethods(topic: topic, methods: methods)
-    }
-    
-    /// For the responder to update session events
-    /// - Parameters:
-    ///   - topic: Topic of the session that is intended to be updated.
-    ///   - events: Sets of events that will replace existing ones.
-    public func updateEvents(topic: String, events: Set<String>) throws {
-        try controllerSessionStateMachine.updateEvents(topic: topic, events: events)
+    public func updateNamespaces(topic: String, namespaces: Set<Namespace>) throws {
+        try controllerSessionStateMachine.updateNamespaces(topic: topic, namespaces: namespaces)
     }
     
     /// For controller to update expiry of a session
@@ -336,11 +328,8 @@ public final class WalletConnectClient {
         sessionEngine.onSessionDelete = { [unowned self] topic, reason in
             delegate?.didDelete(sessionTopic: topic, reason: reason.publicRepresentation())
         }
-        controllerSessionStateMachine.onMethodsUpdate = { [unowned self] topic, methods in
-            delegate?.didUpdate(sessionTopic: topic, methods: methods)
-        }
-        controllerSessionStateMachine.onEventsUpdate = { [unowned self] topic, events in
-            delegate?.didUpdate(sessionTopic: topic, events: events)
+        controllerSessionStateMachine.onNamespacesUpdate = { [unowned self] topic, namespaces in
+            delegate?.didUpdate(sessionTopic: topic, namespaces: namespaces)
         }
         controllerSessionStateMachine.onAccountsUpdate = { [unowned self] topic, accounts in
             delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
@@ -348,11 +337,8 @@ public final class WalletConnectClient {
         controllerSessionStateMachine.onExpiryUpdate = { [unowned self] topic, expiry in
             delegate?.didUpdate(sessionTopic: topic, expiry: expiry)
         }
-        nonControllerSessionStateMachine.onMethodsUpdate = { [unowned self] topic, methods in
-            delegate?.didUpdate(sessionTopic: topic, methods: methods)
-        }
-        nonControllerSessionStateMachine.onEventsUpdate = { [unowned self] topic, events in
-            delegate?.didUpdate(sessionTopic: topic, events: events)
+        nonControllerSessionStateMachine.onNamespacesUpdate = { [unowned self] topic, namespaces in
+            delegate?.didUpdate(sessionTopic: topic, namespaces: namespaces)
         }
         nonControllerSessionStateMachine.onExpiryUpdate = { [unowned self] topic, expiry in
             delegate?.didUpdate(sessionTopic: topic, expiry: expiry)

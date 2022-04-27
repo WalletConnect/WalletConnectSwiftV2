@@ -2,12 +2,11 @@
 import Foundation
 
 protocol SessionStateMachineValidating {
-    func validateMethods(_ methods: Set<String>) throws
-    func validateEvents(_ events: Set<String>) throws
+    func validateNamespaces(_ namespaces: Set<Namespace>) throws
 }
 
 extension SessionStateMachineValidating {
-    func validateMethods(_ methods: Set<String>) throws {
+    func validateNamespaces(_ namespaces: Set<Namespace>) throws {
         for method in methods {
             if method.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 throw WalletConnectError.invalidMethod
@@ -15,11 +14,11 @@ extension SessionStateMachineValidating {
         }
     }
     
-    func validateEvents(_ events: Set<String>) throws {
-        for event in events {
-            if event.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                throw WalletConnectError.invalidEventType
-            }
-        }
-    }
+//    func validateEvents(_ events: Set<String>) throws {
+//        for event in events {
+//            if event.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+//                throw WalletConnectError.invalidEventType
+//            }
+//        }
+//    }
 }

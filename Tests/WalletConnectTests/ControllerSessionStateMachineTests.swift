@@ -60,14 +60,14 @@ class ControllerSessionStateMachineTests: XCTestCase {
         let session = WCSession.stub(isSelfController: true)
         storageMock.setSession(session)
         let methodsToUpdate: Set<String> = ["m1", "m2"]
-        try sut.updateMethods(topic: session.topic, methods: methodsToUpdate)
+        try sut.updateNamespaces(topic: session.topic, methods: methodsToUpdate)
         let updatedSession = storageMock.getSession(forTopic: session.topic)
         XCTAssertTrue(relayMock.didCallRequest)
-        XCTAssertEqual(methodsToUpdate, updatedSession?.methods)
+        XCTAssertEqual(methodsToUpdate, updatedSession?.namespaces)
     }
     
     func testUpdateMethodsErrorSessionNotFound() {
-        XCTAssertThrowsError(try sut.updateMethods(topic: "", methods: ["m1"])) { error in
+        XCTAssertThrowsError(try sut.updateNamespaces(topic: "", methods: ["m1"])) { error in
             XCTAssertTrue(error.isNoSessionMatchingTopicError)
         }
     }
@@ -75,7 +75,7 @@ class ControllerSessionStateMachineTests: XCTestCase {
     func testUpdateMethodsErrorSessionNotAcknowledged() {
         let session = WCSession.stub(acknowledged: false)
         storageMock.setSession(session)
-        XCTAssertThrowsError(try sut.updateMethods(topic: session.topic, methods: ["m1"])) { error in
+        XCTAssertThrowsError(try sut.updateNamespaces(topic: session.topic, methods: ["m1"])) { error in
             XCTAssertTrue(error.isSessionNotAcknowledgedError)
         }
     }
@@ -83,7 +83,7 @@ class ControllerSessionStateMachineTests: XCTestCase {
     func testUpdateMethodsErrorInvalidMethod() {
         let session = WCSession.stub(isSelfController: true)
         storageMock.setSession(session)
-        XCTAssertThrowsError(try sut.updateMethods(topic: session.topic, methods: [""])) { error in
+        XCTAssertThrowsError(try sut.updateNamespaces(topic: session.topic, methods: [""])) { error in
             XCTAssertTrue(error.isInvalidMethodError)
         }
     }
@@ -91,7 +91,7 @@ class ControllerSessionStateMachineTests: XCTestCase {
     func testUpdateMethodsErrorCalledByNonController() {
         let session = WCSession.stub(isSelfController: false)
         storageMock.setSession(session)
-        XCTAssertThrowsError(try sut.updateMethods(topic: session.topic, methods: ["m1"])) { error in
+        XCTAssertThrowsError(try sut.updateNamespaces(topic: session.topic, methods: ["m1"])) { error in
             XCTAssertTrue(error.isUnauthorizedNonControllerCallError)
         }
     }

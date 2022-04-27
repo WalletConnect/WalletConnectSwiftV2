@@ -7,8 +7,7 @@ import Combine
 final class NonControllerSessionStateMachine: SessionStateMachineValidating {
     
     var onAccountsUpdate: ((String, Set<Account>)->())?
-    var onMethodsUpdate: ((String, Set<String>)->())?
-    var onEventsUpdate: ((String, Set<String>)->())?
+    var onNamespacesUpdate: ((String, Set<Namespace>)->())?
     var onExpiryUpdate: ((String, Date) -> ())?
     
     private let sessionStore: WCSessionStorage
@@ -33,10 +32,8 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
             switch subscriptionPayload.wcRequest.params {
             case .sessionUpdateAccounts(let updateParams):
                 onSessionUpdateAccounts(payload: subscriptionPayload, updateParams: updateParams)
-            case .sessionUpdateMethods(let updateParams):
-                onSessionUpdateMethodsRequest(payload: subscriptionPayload, updateParams: updateParams)
-            case .sessionUpdateEvents(let updateParams):
-                onSessionUpdateEventsRequest(payload: subscriptionPayload, updateParams: updateParams)
+            case .sessionUpdateNamespaces(let updateParams):
+                onSessionUpdateNamespacesRequest(payload: subscriptionPayload, updateParams: updateParams)
             case .sessionUpdateExpiry(let updateExpiryParams):
                 onSessionUpdateExpiry(subscriptionPayload, updateExpiryParams: updateExpiryParams)
             default:
@@ -65,7 +62,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
         onAccountsUpdate?(topic, updateParams.getAccounts())
     }
     
-    private func onSessionUpdateMethodsRequest(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateMethodsParams) {
+    private func onSessionUpdateNamespacesRequest(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateNamespaceParams) {
         do {
             try validateMethods(updateParams.methods)
         } catch {
@@ -80,33 +77,33 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
             relayer.respondError(for: payload, reason: .unauthorizedUpdateMethodsRequest)
             return
         }
-        session.updateMethods(updateParams.methods)
+        session.updateNamespaces(updateParams.namespaces)
         sessionStore.setSession(session)
         relayer.respondSuccess(for: payload)
-        onMethodsUpdate?(session.topic, updateParams.methods)
+        onNamespacesUpdate?(session.topic, updateParams.namespaces)
     }
     
-    private func onSessionUpdateEventsRequest(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateEventsParams) {
-        do {
-            try validateEvents(updateParams.events)
-        } catch {
-            relayer.respondError(for: payload, reason: .invalidUpdateEventsRequest)
-            return
-        }
-        guard var session = sessionStore.getSession(forTopic: payload.topic) else {
-            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
-            return
-        }
-        guard session.peerIsController else {
-            relayer.respondError(for: payload, reason: .unauthorizedUpdateEventsRequest)
-            return
-        }
-        session.updateEvents(updateParams.events)
-        sessionStore.setSession(session)
-        relayer.respondSuccess(for: payload)
-        onEventsUpdate?(session.topic, updateParams.events)
-    }
-    
+//    private func onSessionUpdateEventsRequest(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateEventsParams) {
+//        do {
+//            try validateEvents(updateParams.events)
+//        } catch {
+//            relayer.respondError(for: payload, reason: .invalidUpdateEventsRequest)
+//            return
+//        }
+//        guard var session = sessionStore.getSession(forTopic: payload.topic) else {
+//            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
+//            return
+//        }
+//        guard session.peerIsController else {
+//            relayer.respondError(for: payload, reason: .unauthorizedUpdateEventsRequest)
+//            return
+//        }
+//        session.updateEvents(updateParams.events)
+//        sessionStore.setSession(session)
+//        relayer.respondSuccess(for: payload)
+//        onEventsUpdate?(session.topic, updateParams.events)
+//    }
+//
     private func onSessionUpdateExpiry(_ payload: WCRequestSubscriptionPayload, updateExpiryParams: SessionType.UpdateExpiryParams) {
         let topic = payload.topic
         guard var session = sessionStore.getSession(forTopic: topic) else {

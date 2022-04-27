@@ -51,7 +51,7 @@ extension WCRequestSubscriptionPayload {
     }
     
     static func stubUpdateMethods(topic: String, methods: Set<String> = ["method"]) -> WCRequestSubscriptionPayload {
-        let updateMethod = WCMethod.wcSessionUpdateMethods(SessionType.UpdateMethodsParams(methods: methods)).asRequest()
+        let updateMethod = WCMethod.wcSessionUpdateMethods(SessionType.UpdateNamespaceParams(methods: methods)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
     }
     

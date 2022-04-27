@@ -4,11 +4,15 @@ import WalletConnectUtils
 import WalletConnectKMS
 import Combine
 
+public struct Namespace: Codable, Equatable, Hashable {
+    let chains: Set<Blockchain>
+    let methods: Set<String>
+    let events: Set<String>
+}
+
 final class ControllerSessionStateMachine: SessionStateMachineValidating {
-    
     var onAccountsUpdate: ((String, Set<Account>)->())?
-    var onMethodsUpdate: ((String, Set<String>)->())?
-    var onEventsUpdate: ((String, Set<String>)->())?
+    var onNamespacesUpdate: ((String, Set<Namespace>)->())?
     var onExpiryUpdate: ((String, Date)->())?
 
     private let sessionStore: WCSessionStorage
@@ -38,24 +42,14 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         relayer.request(.wcSessionUpdateAccounts(SessionType.UpdateAccountsParams(accounts: accounts)), onTopic: topic)
     }
     
-    func updateMethods(topic: String, methods: Set<String>) throws {
+    func updateNamespaces(topic: String, namespaces: Set<Namespace>) throws {
         var session = try getSession(for: topic)
         try validateControlledAcknowledged(session)
-        try validateMethods(methods)
+        try validateNamespaces(namespaces)
         logger.debug("Controller will update methods")
-        session.updateMethods(methods)
+        session.updateNamespaces(namespaces)
         sessionStore.setSession(session)
-        relayer.request(.wcSessionUpdateMethods(SessionType.UpdateMethodsParams(methods: methods)), onTopic: topic)
-    }
-    
-    func updateEvents(topic: String, events: Set<String>) throws {
-        var session = try getSession(for: topic)
-        try validateControlledAcknowledged(session)
-        try validateEvents(events)
-        logger.debug("Controller will update events")
-        session.updateEvents(events)
-        sessionStore.setSession(session)
-        relayer.request(.wcSessionUpdateEvents(SessionType.UpdateEventsParams(events: events)), onTopic: topic)
+        relayer.request(.wcSessionUpdateNamespaces(SessionType.UpdateNamespaceParams(namespaces: namespaces)), onTopic: topic)
     }
     
    func updateExpiry(topic: String, by ttl: Int64) throws {
@@ -73,10 +67,8 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         switch response.requestParams {
         case .sessionUpdateAccounts:
             handleUpdateAccountsResponse(topic: response.topic, result: response.result)
-        case .sessionUpdateMethods:
-            handleUpdateMethodsResponse(topic: response.topic, result: response.result)
-        case .sessionUpdateEvents:
-            handleUpdateEventsResponse(topic: response.topic, result: response.result)
+        case .sessionUpdateNamespaces:
+            handleUpdateNamespacesResponse(topic: response.topic, result: response.result)
         case .sessionUpdateExpiry:
             handleUpdateExpiryResponse(topic: response.topic, result: response.result)
         default:
@@ -97,31 +89,17 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         }
     }
     
-    private func handleUpdateMethodsResponse(topic: String, result: JsonRpcResult) {
+    private func handleUpdateNamespacesResponse(topic: String, result: JsonRpcResult) {
         guard let session = sessionStore.getSession(forTopic: topic) else {
             return
         }
         switch result {
         case .response:
             //TODO - state sync
-            onMethodsUpdate?(session.topic, session.methods)
+            onNamespacesUpdate?(session.topic, session.namespaces)
         case .error:
             //TODO - state sync
             logger.error("Peer failed to update methods.")
-        }
-    }
-    
-    private func handleUpdateEventsResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sessionStore.getSession(forTopic: topic) else {
-            return
-        }
-        switch result {
-        case .response:
-            //TODO - state sync
-            onEventsUpdate?(session.topic, session.events)
-        case .error:
-            //TODO - state sync
-            logger.error("Peer failed to update events.")
         }
     }
     

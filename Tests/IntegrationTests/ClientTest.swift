@@ -140,7 +140,7 @@ final class ClientTests: XCTestCase {
 
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [], methods: proposal.methods, events: [])
+            self.responder.client.approve(proposal: proposal, accounts: [], methods: proposal.namespaces, events: [])
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
             let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
@@ -176,7 +176,7 @@ final class ClientTests: XCTestCase {
         let uri = try! await proposer.client.connect(blockchains: [], methods: ["eth_sendTransaction"], events: [])!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [], methods: proposal.methods, events: [])
+            self.responder.client.approve(proposal: proposal, accounts: [], methods: proposal.namespaces, events: [])
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
             let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
@@ -250,7 +250,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.approve(proposal: proposal, accounts: [], methods: [], events: [])
         }
         responder.onSessionSettled = { [unowned self] session in
-            try? responder.client.updateMethods(topic: session.topic, methods: methodsToUpdateWith)
+            try? responder.client.updateNamespaces(topic: session.topic, namespaces: methodsToUpdateWith)
         }
         proposer.onSessionUpdateMethods = { topic, methods in
             XCTAssertEqual(methods, methodsToUpdateWith)

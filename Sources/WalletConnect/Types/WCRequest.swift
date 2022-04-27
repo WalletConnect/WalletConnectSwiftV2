@@ -41,12 +41,9 @@ struct WCRequest: Codable {
         case .sessionUpdateAccounts:
             let paramsValue = try container.decode(SessionType.UpdateAccountsParams.self, forKey: .params)
             params = .sessionUpdateAccounts(paramsValue)
-        case .sessionUpdateMethods:
-            let paramsValue = try container.decode(SessionType.UpdateMethodsParams.self, forKey: .params)
-            params = .sessionUpdateMethods(paramsValue)
-        case .sessionUpdateEvents:
-            let paramsValue = try container.decode(SessionType.UpdateEventsParams.self, forKey: .params)
-            params = .sessionUpdateEvents(paramsValue)
+        case .sessionUpdateNamespaces:
+            let paramsValue = try container.decode(SessionType.UpdateNamespaceParams.self, forKey: .params)
+            params = .sessionUpdateNamespaces(paramsValue)
         case .sessionDelete:
             let paramsValue = try container.decode(SessionType.DeleteParams.self, forKey: .params)
             params = .sessionDelete(paramsValue)
@@ -81,7 +78,7 @@ struct WCRequest: Codable {
             try container.encode(params, forKey: .params)
         case .sessionUpdateAccounts(let params):
             try container.encode(params, forKey: .params)
-        case .sessionUpdateMethods(let params):
+        case .sessionUpdateNamespaces(let params):
             try container.encode(params, forKey: .params)
         case .sessionUpdateEvents(let params):
             try container.encode(params, forKey: .params)
@@ -111,8 +108,7 @@ extension WCRequest {
         case sessionPropose = "wc_sessionPropose"
         case sessionSettle = "wc_sessionSettle"
         case sessionUpdateAccounts = "wc_sessionUpdateAccounts"
-        case sessionUpdateMethods = "wc_sessionUpdateMethods"
-        case sessionUpdateEvents = "wc_sessionUpdateEvents"
+        case sessionUpdateNamespaces = "wc_sessionUpdateNamespaces"
         case sessionUpdateExpiry = "wc_sessionUpdateExpiry"
         case sessionDelete = "wc_sessionDelete"
         case sessionRequest = "wc_sessionRequest"
@@ -128,8 +124,7 @@ extension WCRequest {
         case sessionPropose(SessionType.ProposeParams)
         case sessionSettle(SessionType.SettleParams)
         case sessionUpdateAccounts(SessionType.UpdateAccountsParams)
-        case sessionUpdateMethods(SessionType.UpdateMethodsParams)
-        case sessionUpdateEvents(SessionType.UpdateEventsParams)
+        case sessionUpdateNamespaces(SessionType.UpdateNamespaceParams)
         case sessionUpdateExpiry(SessionType.UpdateExpiryParams)
         case sessionDelete(SessionType.DeleteParams)
         case sessionRequest(SessionType.RequestParams)
@@ -146,9 +141,7 @@ extension WCRequest {
                 return lhsParam == rhsParam
             case (.sessionUpdateAccounts(let lhsParam), sessionUpdateAccounts(let rhsParam)):
                 return lhsParam == rhsParam
-            case (.sessionUpdateMethods(let lhsParam), sessionUpdateMethods(let rhsParam)):
-                return lhsParam == rhsParam
-            case (.sessionUpdateEvents(let lhsParam), sessionUpdateEvents(let rhsParam)):
+            case (.sessionUpdateNamespaces(let lhsParam), sessionUpdateNamespaces(let rhsParam)):
                 return lhsParam == rhsParam
             case (.sessionUpdateExpiry(let lhsParam), sessionUpdateExpiry(let rhsParams)):
                 return lhsParam == rhsParams

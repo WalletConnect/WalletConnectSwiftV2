@@ -62,7 +62,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         var didCallbackUpdatMethods = false
         let session = WCSession.stub(isSelfController: false)
         storageMock.setSession(session)
-        sut.onMethodsUpdate = { topic, _ in
+        sut.onNamespacesUpdate = { topic, _ in
             didCallbackUpdatMethods = true
             XCTAssertEqual(topic, session.topic)
         }

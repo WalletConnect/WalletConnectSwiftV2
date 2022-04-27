@@ -7,8 +7,7 @@ import Foundation
 public struct Session {
     public let topic: String
     public let peer: AppMetadata
-    public let methods: Set<String>
-    public let events: Set<String>
+    public let namespaces: Set<Namespace>
     public let accounts: Set<Account>
     public let expiryDate: Date
     public static var defaultTimeToLive: Int64 {
@@ -20,8 +19,7 @@ extension Session {
     
     public struct Proposal {
         public let proposer: AppMetadata
-        public let methods: Set<String>
-        public let events: Set<String>
+        public let namespaces: Set<Namespace>
         public let chains: Set<Blockchain>
         
         // TODO: Refactor internal objects to manage only needed data
