@@ -1,6 +1,6 @@
 import UIKit
 
-final class SessionView: UIView {
+final class ProposalView: UIView {
     
     let iconView: UIImageView = {
         let imageView = UIImageView()

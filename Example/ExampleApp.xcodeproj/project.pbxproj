@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		760022392819FBF90011DD38 /* ProposalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 760022382819FBF90011DD38 /* ProposalViewController.swift */; };
+		7600223B2819FC0B0011DD38 /* ProposalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7600223A2819FC0B0011DD38 /* ProposalView.swift */; };
 		761248172819F9E600CB6D48 /* WalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761248162819F9E600CB6D48 /* WalletView.swift */; };
-		761C649E26FB7FD7004239D1 /* SessionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761C649D26FB7FD7004239D1 /* SessionViewController.swift */; };
-		761C64A326FB83CE004239D1 /* SessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761C64A226FB83CE004239D1 /* SessionView.swift */; };
 		761C64A626FCB0AA004239D1 /* SessionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761C64A526FCB0AA004239D1 /* SessionInfo.swift */; };
 		764E1D4026F8D3FC00A1FB15 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764E1D3F26F8D3FC00A1FB15 /* AppDelegate.swift */; };
 		764E1D4226F8D3FC00A1FB15 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764E1D4126F8D3FC00A1FB15 /* SceneDelegate.swift */; };
@@ -72,11 +72,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		760022382819FBF90011DD38 /* ProposalViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProposalViewController.swift; sourceTree = "<group>"; };
+		7600223A2819FC0B0011DD38 /* ProposalView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProposalView.swift; sourceTree = "<group>"; };
 		7603D74C2703429A00DD27A2 /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
 		761248162819F9E600CB6D48 /* WalletView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WalletView.swift; sourceTree = "<group>"; };
 		761C649926FB7ABB004239D1 /* AccountsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsViewController.swift; sourceTree = "<group>"; };
-		761C649D26FB7FD7004239D1 /* SessionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionViewController.swift; sourceTree = "<group>"; };
-		761C64A226FB83CE004239D1 /* SessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionView.swift; sourceTree = "<group>"; };
 		761C64A526FCB0AA004239D1 /* SessionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionInfo.swift; sourceTree = "<group>"; };
 		764E1D3C26F8D3FC00A1FB15 /* WalletConnect Wallet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "WalletConnect Wallet.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		764E1D3F26F8D3FC00A1FB15 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -180,8 +180,8 @@
 		761C64A426FCB08B004239D1 /* SessionProposal */ = {
 			isa = PBXGroup;
 			children = (
-				761C649D26FB7FD7004239D1 /* SessionViewController.swift */,
-				761C64A226FB83CE004239D1 /* SessionView.swift */,
+				760022382819FBF90011DD38 /* ProposalViewController.swift */,
+				7600223A2819FC0B0011DD38 /* ProposalView.swift */,
 			);
 			path = SessionProposal;
 			sourceTree = "<group>";
@@ -495,20 +495,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				761C64A326FB83CE004239D1 /* SessionView.swift in Sources */,
 				8460DCFC274F98A10081F94C /* RequestViewController.swift in Sources */,
 				8460DD002750D6F50081F94C /* SessionDetailsViewController.swift in Sources */,
 				76744CF926FE4D7400B77ED9 /* ActiveSessionCell.swift in Sources */,
 				764E1D4026F8D3FC00A1FB15 /* AppDelegate.swift in Sources */,
 				761C64A626FCB0AA004239D1 /* SessionInfo.swift in Sources */,
-				761C649E26FB7FD7004239D1 /* SessionViewController.swift in Sources */,
 				76744CF726FE4D5400B77ED9 /* ActiveSessionItem.swift in Sources */,
 				764E1D4226F8D3FC00A1FB15 /* SceneDelegate.swift in Sources */,
 				84F568C2279582D200D0A289 /* Signer.swift in Sources */,
+				7600223B2819FC0B0011DD38 /* ProposalView.swift in Sources */,
 				761248172819F9E600CB6D48 /* WalletView.swift in Sources */,
 				8460DD022750D7020081F94C /* SessionDetailsView.swift in Sources */,
 				76B6E39F2807A3B6004DF775 /* WalletViewController.swift in Sources */,
 				764E1D5A26F8DF1B00A1FB15 /* ScannerViewController.swift in Sources */,
+				760022392819FBF90011DD38 /* ProposalViewController.swift in Sources */,
 				84494388278D9C1B00CC26BB /* UIAlertController.swift in Sources */,
 				84F568C42795832A00D0A289 /* EthereumTransaction.swift in Sources */,
 			);

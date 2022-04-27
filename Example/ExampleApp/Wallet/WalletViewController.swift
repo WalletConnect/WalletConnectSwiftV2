@@ -60,7 +60,7 @@ final class WalletViewController: UIViewController {
     }
     
     private func showSessionProposal(_ info: SessionInfo) {
-        let proposalViewController = SessionViewController()
+        let proposalViewController = ProposalViewController()
         proposalViewController.delegate = self
         proposalViewController.show(info)
         present(proposalViewController, animated: true)
@@ -144,7 +144,7 @@ extension WalletViewController: ScannerViewControllerDelegate {
     }
 }
 
-extension WalletViewController: SessionViewControllerDelegate {
+extension WalletViewController: ProposalViewControllerDelegate {
     
     func didApproveSession() {
         print("[RESPONDER] Approving session...")
