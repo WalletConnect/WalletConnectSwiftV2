@@ -50,14 +50,9 @@ extension WCRequestSubscriptionPayload {
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
     }
     
-    static func stubUpdateMethods(topic: String, methods: Set<String> = ["method"]) -> WCRequestSubscriptionPayload {
-        let updateMethod = WCMethod.wcSessionUpdateMethods(SessionType.UpdateNamespaceParams(methods: methods)).asRequest()
+    static func stubUpdateNamespaces(topic: String, namespaces: Set<Namespace> = [Namespace(chains: [Blockchain("eip155:1")], methods: ["method"], events: ["event"])]) -> WCRequestSubscriptionPayload {
+        let updateMethod = WCMethod.wcSessionUpdateNamespaces(SessionType.UpdateNamespaceParams(namespaces: namespaces)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
-    }
-    
-    static func stubUpdateEvents(topic: String, events: Set<String> = ["event"]) -> WCRequestSubscriptionPayload {
-        let updateEvent = WCMethod.wcSessionUpdateEvents(SessionType.UpdateEventsParams(events: events)).asRequest()
-        return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateEvent)
     }
     
     static func stubUpdateExpiry(topic: String, expiry: Int64) -> WCRequestSubscriptionPayload {

@@ -65,11 +65,11 @@ struct WCSession: ExpirableSequence {
         return controller.publicKey == peerParticipant.publicKey
     }
     
-    func hasPermission(for chain: Blockchain) -> Bool {
+    func hasNamespace(for chain: Blockchain) -> Bool {
         namespaces.contains{$0.chains.contains(chain)}
     }
     
-    func hasPermission(for chain: Blockchain, method: String) -> Bool {
+    func hasNamespace(for chain: Blockchain, method: String) -> Bool {
         let namespacesIncludingChain = namespaces.filter{$0.chains.contains(chain)}
         let methods = namespacesIncludingChain.flatMap{$0.methods}
         return methods.contains(method)

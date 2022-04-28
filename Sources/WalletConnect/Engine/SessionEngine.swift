@@ -234,11 +234,11 @@ final class SessionEngine {
             return
         }
         if let chain = request.chainId {
-            guard session.hasPermission(for: chain) else {
+            guard session.hasNamespace(for: chain) else {
                 relayer.respondError(for: payload, reason: .unauthorizedTargetChain(chain.absoluteString))
                 return
             }
-            guard session.hasPermission(for: chain, method: request.method) else {
+            guard session.hasNamespace(for: chain, method: request.method) else {
                 relayer.respondError(for: payload, reason: .unauthorizedRPCMethod(request.method))
                 return
             }

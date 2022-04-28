@@ -66,7 +66,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
             didCallbackUpdatMethods = true
             XCTAssertEqual(topic, session.topic)
         }
-        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateMethods(topic: session.topic))
+        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateNamespaces(topic: session.topic))
         XCTAssertTrue(didCallbackUpdatMethods)
         XCTAssertTrue(relayMock.didRespondSuccess)
     }
@@ -75,12 +75,12 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         let invalidMethods: Set<String> = [""]
         let session = WCSession.stub(isSelfController: false)
         storageMock.setSession(session)
-        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateMethods(topic: session.topic, methods: invalidMethods))
+        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateNamespaces(topic: session.topic, methods: invalidMethods))
         XCTAssertEqual(relayMock.lastErrorCode, 1004)
     }
 
     func testUpdateMethodPeerErrorSessionNotFound() {
-        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateMethods(topic: ""))
+        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateNamespaces(topic: ""))
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 1301)
     }
@@ -88,7 +88,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
     func testUpdateMethodPeerErrorUnauthorized() {
         let session = WCSession.stub(isSelfController: true) // Peer is not a controller
         storageMock.setSession(session)
-        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateMethods(topic: session.topic))
+        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateNamespaces(topic: session.topic))
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 3004)
     }
