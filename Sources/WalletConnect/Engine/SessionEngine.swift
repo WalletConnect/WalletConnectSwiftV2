@@ -120,9 +120,11 @@ final class SessionEngine {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
+        let params = SessionType.EventParams(event: event, chainId: chainId)
         do {
-            let params = SessionType.EventParams(event: event, chainId: chainId)
-            try validateEvents(session: session, params: params)
+            guard session.hasNamespace(for: chainId, event: event.name) else {
+                throw WalletConnectError.invalidEvent
+            }
             relayer.request(.wcSessionEvent(params), onTopic: topic) { result in
                 switch result {
                 case .success(_):
@@ -255,33 +257,13 @@ final class SessionEngine {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
             return
         }
-        guard session.peerIsController else {
-            relayer.respondError(for: payload, reason: .unauthorizedUpdateNamespacesRequest)
-            return
-        }
-        guard session.hasPermission(for: eventParams.chainId, event: event)) else {
+        guard session.peerIsController,
+              session.hasNamespace(for: eventParams.chainId, event: event.name) else {
             relayer.respondError(for: payload, reason: .unauthorizedEventType(event.name))
             return
         }
         relayer.respondSuccess(for: payload)
         onEventReceived?(topic, event.publicRepresentation(), eventParams.chainId)
-    }
-    
-    private func validateEvents(session: WCSession, params: SessionType.EventParams) throws {
-        guard session.selfIsController else {
-            throw WalletConnectError.unauthorizedNonControllerCall
-        }
-        if let chain = params.chainId {
-            guard let namespace = session.namespaces.first(where: {$0.chains.contains(chain)}),
-            namespace.events.contains(params.event.name) else {
-                throw WalletConnectError.invalidEvent
-            }
-        } else {
-            guard let namespace = session.namespaces.first(where: {$0.chains.isEmpty}),
-            namespace.events.contains(params.event.name) else {
-                throw WalletConnectError.invalidEvent
-            }
-        }
     }
 
     private func setupExpirationHandling() {

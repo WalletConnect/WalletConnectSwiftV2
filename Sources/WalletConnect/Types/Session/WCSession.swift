@@ -75,10 +75,22 @@ struct WCSession: ExpirableSequence {
         return methods.contains(method)
     }
     
-    func hasPermission(for chain: Blockchain,  event: String) -> Bool {
-        let namespacesIncludingChain = namespaces.filter{$0.chains.contains(chain)}
-        let events = namespacesIncludingChain.flatMap{$0.events}
-        return events.contains(event)
+    func hasNamespace(for chain: Blockchain?,  event: String) -> Bool {
+        if let chain = chain {
+            if let namespace = namespaces.first(where: {$0.chains.contains(chain)}),
+               namespace.events.contains(event) {
+                return true
+            } else {
+                return false
+            }
+        } else {
+            if let namespace = namespaces.first(where: {$0.chains.isEmpty}),
+               namespace.events.contains(event) {
+                return true
+            } else {
+                return false
+            }
+        }
     }
 
     mutating func updateAccounts(_ accounts: Set<Account>) {
