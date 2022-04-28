@@ -106,7 +106,7 @@ public final class WalletConnectClient {
     /// - Parameter topic: Optional parameter - use it if you already have an established pairing with peer client.
     /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
     @available(*, renamed: "connect(sessionPermissions:topic:)")
-    public func connect(blockchains: Set<Blockchain>, methods: Set<String>, events: Set<String>, topic: String? = nil, completion: @escaping ((Result<String?, Error>)->())) {
+    public func connect(blockchains: Set<Blockchain>, namespaces: Set<Namespace>, topic: String? = nil, completion: @escaping ((Result<String?, Error>)->())) {
         logger.debug("Connecting Application")
         if let topic = topic {
             guard let pairing = pairingEngine.getSettledPairing(for: topic) else {
@@ -114,7 +114,7 @@ public final class WalletConnectClient {
                 return
             }
             logger.debug("Proposing session on existing pairing")
-            pairingEngine.propose(pairingTopic: topic, blockchains: blockchains, methods: methods, events: events, relay: pairing.relay) { error in
+            pairingEngine.propose(pairingTopic: topic, blockchains: blockchains, namespaces: namespaces, relay: pairing.relay) { error in
                 if let error = error {
                     completion(.failure(error))
                 } else {
@@ -126,7 +126,7 @@ public final class WalletConnectClient {
                 completion(.failure(WalletConnectError.pairingProposalFailed))
                 return
             }
-            pairingEngine.propose(pairingTopic: pairingURI.topic, blockchains: blockchains, methods: methods, events: events ,relay: pairingURI.relay) { error in
+            pairingEngine.propose(pairingTopic: pairingURI.topic, blockchains: blockchains, namespaces: namespaces ,relay: pairingURI.relay) { error in
                 if let error = error {
                     completion(.failure(error))
                 } else {
@@ -136,9 +136,9 @@ public final class WalletConnectClient {
         }
     }
     
-    public func connect(blockchains: Set<Blockchain>, methods: Set<String>, events: Set<String>, topic: String? = nil) async throws -> String? {
+    public func connect(blockchains: Set<Blockchain>, namespaces: Set<Namespace>, topic: String? = nil) async throws -> String? {
         return try await withCheckedThrowingContinuation { continuation in
-            connect(blockchains: blockchains, methods: methods, events: events, topic: topic) { result in
+            connect(blockchains: blockchains, namespaces: namespaces, topic: topic) { result in
                 continuation.resume(with: result)
             }
         }
@@ -170,10 +170,9 @@ public final class WalletConnectClient {
     public func approve(
         proposal: Session.Proposal,
         accounts: Set<Account>,
-        methods: Set<String>,
-        events: Set<String>) {
+        namespaces: Set<Namespace>) {
         guard let sessionTopic = pairingEngine.respondSessionPropose(proposal: proposal.proposal) else {return}
-            sessionEngine.settle(topic: sessionTopic, proposal: proposal.proposal, accounts: accounts, namespaces: methods, events: events)
+            sessionEngine.settle(topic: sessionTopic, proposal: proposal.proposal, accounts: accounts, namespaces: namespaces)
     }
     
     /// For the responder to reject a session proposal.

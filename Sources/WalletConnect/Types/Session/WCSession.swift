@@ -65,22 +65,20 @@ struct WCSession: ExpirableSequence {
         return controller.publicKey == peerParticipant.publicKey
     }
     
-    var blockchains: [Blockchain] {
-        return accounts.map{$0.blockchain}
+    func hasPermission(for chain: Blockchain) -> Bool {
+        namespaces.contains{$0.chains.contains(chain)}
     }
     
-    func hasPermission(forChain chainId: String) -> Bool {
-        return blockchains
-            .map{$0.absoluteString}
-            .contains(chainId)
+    func hasPermission(for chain: Blockchain, method: String) -> Bool {
+        let namespacesIncludingChain = namespaces.filter{$0.chains.contains(chain)}
+        let methods = namespacesIncludingChain.flatMap{$0.methods}
+        return methods.contains(method)
     }
     
-    func hasPermission(forMethod method: String) -> Bool {
-        return namespaces.contains(method)
-    }
-    
-    func hasPermission(forEvents type: String) -> Bool {
-        return events.contains(type)
+    func hasPermission(for chain: Blockchain,  event: String) -> Bool {
+        let namespacesIncludingChain = namespaces.filter{$0.chains.contains(chain)}
+        let events = namespacesIncludingChain.flatMap{$0.events}
+        return events.contains(event)
     }
 
     mutating func updateAccounts(_ accounts: Set<Account>) {

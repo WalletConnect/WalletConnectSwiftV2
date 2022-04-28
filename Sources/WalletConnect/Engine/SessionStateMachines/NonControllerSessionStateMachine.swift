@@ -64,9 +64,9 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
     
     private func onSessionUpdateNamespacesRequest(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateNamespaceParams) {
         do {
-            try validateMethods(updateParams.methods)
+            try validateNamespaces(updateParams.namespaces)
         } catch {
-            relayer.respondError(for: payload, reason: .invalidUpdateMethodsRequest)
+            relayer.respondError(for: payload, reason: .invalidUpdateNamespaceRequest)
             return
         }
         guard var session = sessionStore.getSession(forTopic: payload.topic) else {
@@ -74,7 +74,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
             return
         }
         guard session.peerIsController else {
-            relayer.respondError(for: payload, reason: .unauthorizedUpdateMethodsRequest)
+            relayer.respondError(for: payload, reason: .unauthorizedUpdateNamespacesRequest)
             return
         }
         session.updateNamespaces(updateParams.namespaces)

@@ -80,8 +80,6 @@ struct WCRequest: Codable {
             try container.encode(params, forKey: .params)
         case .sessionUpdateNamespaces(let params):
             try container.encode(params, forKey: .params)
-        case .sessionUpdateEvents(let params):
-            try container.encode(params, forKey: .params)
         case .sessionUpdateExpiry(let params):
             try container.encode(params, forKey: .params)
         case .sessionDelete(let params):

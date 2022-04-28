@@ -60,7 +60,7 @@ internal enum SessionType {
     
     struct RequestParams: Codable, Equatable {
         let request: Request
-        let chainId: String?
+        let chainId: Blockchain?
         
         struct Request: Codable, Equatable {
             let method: String

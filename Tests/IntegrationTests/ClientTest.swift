@@ -55,7 +55,7 @@ final class ClientTests: XCTestCase {
         let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [account], methods: [], events: [])
+            self.responder.client.approve(proposal: proposal, accounts: [account], namespaces: [], events: [])
         }
         responder.onSessionSettled = { sessionSettled in
             // FIXME: Commented assertion
@@ -81,7 +81,7 @@ final class ClientTests: XCTestCase {
         try! responder.client.pair(uri: uri)
 
         responder.onSessionProposal = { [unowned self] proposal in
-            responder.client.approve(proposal: proposal, accounts: [], methods: [], events: [])
+            responder.client.approve(proposal: proposal, accounts: [], namespaces: [], events: [])
         }
         responder.onSessionSettled = { sessionSettled in
             responderSettlesSessionExpectation.fulfill()
@@ -119,7 +119,7 @@ final class ClientTests: XCTestCase {
         let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [], methods: [], events: [])
+            self.responder.client.approve(proposal: proposal, accounts: [], namespaces: [], events: [])
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
             self.proposer.client.disconnect(topic: settledSession.topic, reason: Reason(code: 5900, message: "User disconnected session"))
@@ -205,7 +205,7 @@ final class ClientTests: XCTestCase {
 
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [], methods: [], events: [])
+            self.responder.client.approve(proposal: proposal, accounts: [], namespaces: [], events: [])
         }
         proposer.onSessionSettled = { [unowned self] sessionSettled in
             self.proposer.client.ping(topic: sessionSettled.topic) { response in
@@ -224,7 +224,7 @@ final class ClientTests: XCTestCase {
         let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [account], methods: [], events: [])
+            self.responder.client.approve(proposal: proposal, accounts: [account], namespaces: [], events: [])
         }
         responder.onSessionSettled = { [unowned self] sessionSettled in
             try? responder.client.updateAccounts(topic: sessionSettled.topic, accounts: updateAccounts)
@@ -247,7 +247,7 @@ final class ClientTests: XCTestCase {
         let methodsToUpdateWith: Set<String> = ["eth_sendTransaction"]
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [], methods: [], events: [])
+            self.responder.client.approve(proposal: proposal, accounts: [], namespaces: [], events: [])
         }
         responder.onSessionSettled = { [unowned self] session in
             try? responder.client.updateNamespaces(topic: session.topic, namespaces: methodsToUpdateWith)
@@ -270,7 +270,7 @@ final class ClientTests: XCTestCase {
         let eventsToUpdateWith: Set<String> = ["chain-changed"]
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [], methods: [], events: [])
+            self.responder.client.approve(proposal: proposal, accounts: [], namespaces: [], events: [])
         }
         responder.onSessionSettled = { [unowned self] session in
             try? responder.client.updateEvents(topic: session.topic, events: eventsToUpdateWith)
@@ -292,7 +292,7 @@ final class ClientTests: XCTestCase {
         let uri = try! await proposer.client.connect(blockchains: [], methods: [], events: [])!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [], methods: [], events: [])
+            self.responder.client.approve(proposal: proposal, accounts: [], namespaces: [], events: [])
         }
         responder.onSessionSettled = { [unowned self] session in
             Thread.sleep(forTimeInterval: 1) //sleep because new expiry must be greater than current
@@ -314,7 +314,7 @@ final class ClientTests: XCTestCase {
         try! responder.client.pair(uri: uri)
         let event = Session.Event(name: "type1", data: AnyCodable("event_data"))
         responder.onSessionProposal = { [unowned self] proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [], methods: [], events: [])
+            self.responder.client.approve(proposal: proposal, accounts: [], namespaces: [], events: [])
         }
         responder.onSessionSettled = { [unowned self] session in
             responder.client.emit(topic: session.topic, event: event, chainId: nil, completion: nil)
@@ -334,7 +334,7 @@ final class ClientTests: XCTestCase {
         try! responder.client.pair(uri: uri)
         let event = Session.Event(name: "type2", data: AnyCodable("event_data"))
         responder.onSessionProposal = { [unowned self] proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [], methods: [], events: [])
+            self.responder.client.approve(proposal: proposal, accounts: [], namespaces: [], events: [])
         }
         proposer.onSessionSettled = { [unowned self] session in
             proposer.client.emit(topic: session.topic, event: event, chainId: nil) { error in
