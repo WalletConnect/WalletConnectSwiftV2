@@ -114,7 +114,7 @@ public final class WalletConnectClient {
                 return
             }
             logger.debug("Proposing session on existing pairing")
-            pairingEngine.propose(pairingTopic: topic, blockchains: blockchains, namespaces: namespaces, relay: pairing.relay) { error in
+            pairingEngine.propose(pairingTopic: topic, namespaces: namespaces, relay: pairing.relay) { error in
                 if let error = error {
                     completion(.failure(error))
                 } else {
@@ -126,7 +126,7 @@ public final class WalletConnectClient {
                 completion(.failure(WalletConnectError.pairingProposalFailed))
                 return
             }
-            pairingEngine.propose(pairingTopic: pairingURI.topic, blockchains: blockchains, namespaces: namespaces ,relay: pairingURI.relay) { error in
+            pairingEngine.propose(pairingTopic: pairingURI.topic, namespaces: namespaces ,relay: pairingURI.relay) { error in
                 if let error = error {
                     completion(.failure(error))
                 } else {

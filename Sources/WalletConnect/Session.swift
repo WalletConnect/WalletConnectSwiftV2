@@ -20,7 +20,6 @@ extension Session {
     public struct Proposal {
         public let proposer: AppMetadata
         public let namespaces: Set<Namespace>
-        public let chains: Set<Blockchain>
         
         // TODO: Refactor internal objects to manage only needed data
         internal let proposal: SessionProposal

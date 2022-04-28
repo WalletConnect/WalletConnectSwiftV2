@@ -96,7 +96,7 @@ extension WalletConnectRelayTests {
     
     func getWCSessionRequest() -> WCRequest {
         let wcRequestId: Int64 = 123456
-        let sessionRequestParams = SessionType.RequestParams(request: SessionType.RequestParams.Request(method: "method", params: AnyCodable("params")), chainId: "")
+        let sessionRequestParams = SessionType.RequestParams(request: SessionType.RequestParams.Request(method: "method", params: AnyCodable("params")), chainId: Blockchain("eip155:1")!)
         let params = WCRequest.Params.sessionRequest(sessionRequestParams)
         let wcRequest = WCRequest(id: wcRequestId, method: WCRequest.Method.sessionRequest, params: params)
         return wcRequest

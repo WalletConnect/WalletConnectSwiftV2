@@ -83,7 +83,7 @@ final class PairingEngineTests: XCTestCase {
         let topicA = pairing.topic
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
         
-        engine.propose(pairingTopic: pairing.topic, blockchains: [], methods: [], events: [], relay: relayOptions) {_ in}
+        engine.propose(pairingTopic: pairing.topic, relay: relayOptions) {_ in}
         
         guard let publishTopic = relayMock.requests.first?.topic,
               let proposal = relayMock.requests.first?.request.sessionProposal else {

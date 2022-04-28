@@ -26,6 +26,12 @@ extension WCPairing {
     }
 }
 
+extension Namespace {
+    static func stub() -> Namespace {
+        Namespace(chains: [Blockchain("eip155:1")!], methods: ["method"], events: ["event"])
+    }
+}
+
 extension RelayProtocolOptions {
     static func stub() -> RelayProtocolOptions {
         RelayProtocolOptions(protocol: "", data: nil)
@@ -50,7 +56,7 @@ extension WCRequestSubscriptionPayload {
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
     }
     
-    static func stubUpdateNamespaces(topic: String, namespaces: Set<Namespace> = [Namespace(chains: [Blockchain("eip155:1")], methods: ["method"], events: ["event"])]) -> WCRequestSubscriptionPayload {
+    static func stubUpdateNamespaces(topic: String, namespaces: Set<Namespace> = [Namespace.stub()]) -> WCRequestSubscriptionPayload {
         let updateMethod = WCMethod.wcSessionUpdateNamespaces(SessionType.UpdateNamespaceParams(namespaces: namespaces)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
     }
@@ -73,8 +79,7 @@ extension SessionProposal {
             relays: [relayOptions],
             proposer: Participant(publicKey: proposerPubKey, metadata: AppMetadata.stub()),
             chains: [],
-            methods: [],
-            events: [])
+            namespaces: [Namespace.stub()])
     }
 }
 
