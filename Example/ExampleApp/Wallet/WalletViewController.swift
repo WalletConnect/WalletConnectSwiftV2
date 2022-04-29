@@ -22,22 +22,22 @@ final class WalletViewController: UIViewController {
     var sessionItems: [ActiveSessionItem] = []
     var currentProposal: Session.Proposal?
     
-    private let responderView: ResponderView = {
-        ResponderView()
+    private let walletView: WalletView = {
+        WalletView()
     }()
     
     override func loadView() {
-        view = responderView
+        view = walletView
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Wallet"
-        responderView.scanButton.addTarget(self, action: #selector(showScanner), for: .touchUpInside)
-        responderView.pasteButton.addTarget(self, action: #selector(showTextInput), for: .touchUpInside)
+        walletView.scanButton.addTarget(self, action: #selector(showScanner), for: .touchUpInside)
+        walletView.pasteButton.addTarget(self, action: #selector(showTextInput), for: .touchUpInside)
         
-        responderView.tableView.dataSource = self
-        responderView.tableView.delegate = self
+        walletView.tableView.dataSource = self
+        walletView.tableView.delegate = self
         let settledSessions = client.getSettledSessions()
         sessionItems = getActiveSessionItem(for: settledSessions)
         client.delegate = self
@@ -60,7 +60,7 @@ final class WalletViewController: UIViewController {
     }
     
     private func showSessionProposal(_ info: SessionInfo) {
-        let proposalViewController = SessionViewController()
+        let proposalViewController = ProposalViewController()
         proposalViewController.delegate = self
         proposalViewController.show(info)
         present(proposalViewController, animated: true)
@@ -144,7 +144,7 @@ extension WalletViewController: ScannerViewControllerDelegate {
     }
 }
 
-extension WalletViewController: SessionViewControllerDelegate {
+extension WalletViewController: ProposalViewControllerDelegate {
     
     func didApproveSession() {
         print("[RESPONDER] Approving session...")
@@ -228,7 +228,7 @@ extension WalletViewController: WalletConnectClientDelegate {
         let activeSessions = getActiveSessionItem(for: settledSessions)
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread
             self.sessionItems = activeSessions
-            self.responderView.tableView.reloadData()
+            self.walletView.tableView.reloadData()
         }
     }
 }

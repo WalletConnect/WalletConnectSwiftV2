@@ -1,16 +1,16 @@
 import UIKit
 
-protocol SessionViewControllerDelegate: AnyObject {
+protocol ProposalViewControllerDelegate: AnyObject {
     func didApproveSession()
     func didRejectSession()
 }
 
-final class SessionViewController: UIViewController {
+final class ProposalViewController: UIViewController {
     
-    weak var delegate: SessionViewControllerDelegate?
+    weak var delegate: ProposalViewControllerDelegate?
     
     private let sessionView = {
-        SessionView()
+        ProposalView()
     }()
     
     override func loadView() {
