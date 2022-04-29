@@ -16,7 +16,7 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
                                        dappURL: session.peer.description,
                                        iconURL: session.peer.icons.first ?? "",
                                        chains: Array(session.accounts.map { $0.blockchainIdentifier }),
-                                       methods: Array(session.namespaces.first?.methods ?? []),
+                                       methods: Array(session.namespaces.first?.methods ?? []), // TODO: Rethink how to show this info on example app
                                        pendingRequests: pendingRequests)
         self.client = client
         self.session = session
