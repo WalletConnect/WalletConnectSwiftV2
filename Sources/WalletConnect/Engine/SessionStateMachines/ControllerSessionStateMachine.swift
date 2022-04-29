@@ -4,12 +4,6 @@ import WalletConnectUtils
 import WalletConnectKMS
 import Combine
 
-public struct Namespace: Codable, Equatable, Hashable {
-    let chains: Set<Blockchain>
-    let methods: Set<String>
-    let events: Set<String>
-}
-
 final class ControllerSessionStateMachine: SessionStateMachineValidating {
     var onAccountsUpdate: ((String, Set<Account>)->())?
     var onNamespacesUpdate: ((String, Set<Namespace>)->())?
