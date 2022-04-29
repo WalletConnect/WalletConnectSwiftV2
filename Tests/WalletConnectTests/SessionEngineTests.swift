@@ -123,4 +123,40 @@ final class SessionEngineTests: XCTestCase {
         XCTAssertFalse(cryptoMock.hasAgreementSecret(for: session.topic), "Responder must remove agreement secret")
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: session.self.publicKey!), "Responder must remove private key")
     }
+    
+    func testSessionRequestEmptyNamespaceUnmatchingMethod() {
+        var didTriggerRequest = false
+        engine.onSessionRequest = { _ in didTriggerRequest = true }
+        
+        let session = WCSession.stub(isSelfController: true)
+        storageMock.setSession(session)
+        
+        let request = SessionType.RequestParams.Request(method: "someMethod", params: AnyCodable(EmptyCodable()))
+        let params = SessionType.RequestParams(request: request, chainId: nil)
+        let req = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
+        let payload = WCRequestSubscriptionPayload(topic: session.topic, wcRequest: req)
+        
+        relayMock.wcRequestPublisherSubject.send(payload)
+        
+        XCTAssertTrue(relayMock.didRespondError)
+        XCTAssertFalse(didTriggerRequest)
+    }
+    
+    func testSessionRequestEmptyNamespaceMatchingMethod() {
+        var didTriggerRequest = false
+        engine.onSessionRequest = { _ in didTriggerRequest = true }
+        
+        var session = WCSession.stub(isSelfController: true)
+        session.updateNamespaces([Namespace(chains: [], methods: ["someMethod"], events: [])])
+        storageMock.setSession(session)
+        
+        let request = SessionType.RequestParams.Request(method: "someMethod", params: AnyCodable(EmptyCodable()))
+        let params = SessionType.RequestParams(request: request, chainId: nil)
+        let req = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
+        let payload = WCRequestSubscriptionPayload(topic: session.topic, wcRequest: req)
+        relayMock.wcRequestPublisherSubject.send(payload)
+        
+        XCTAssertFalse(relayMock.didRespondError)
+        XCTAssertTrue(didTriggerRequest)
+    }
 }
