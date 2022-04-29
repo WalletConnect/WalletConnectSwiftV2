@@ -70,6 +70,14 @@ extension WCRequestSubscriptionPayload {
         let method = WCMethod.wcSessionSettle(SessionType.SettleParams.stub())
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: method.asRequest())
     }
+    
+    static func stubRequest(topic: String, method: String, chainId: Blockchain?) -> WCRequestSubscriptionPayload {
+        let params = SessionType.RequestParams(
+            request: SessionType.RequestParams.Request(method: method, params: AnyCodable(EmptyCodable())),
+            chainId: chainId)
+        let request = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
+        return WCRequestSubscriptionPayload(topic: topic, wcRequest: request)
+    }
 }
 
 extension SessionProposal {

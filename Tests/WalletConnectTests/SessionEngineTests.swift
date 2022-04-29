@@ -131,11 +131,7 @@ final class SessionEngineTests: XCTestCase {
         let session = WCSession.stub(isSelfController: true)
         storageMock.setSession(session)
         
-        let request = SessionType.RequestParams.Request(method: "someMethod", params: AnyCodable(EmptyCodable()))
-        let params = SessionType.RequestParams(request: request, chainId: nil)
-        let req = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
-        let payload = WCRequestSubscriptionPayload(topic: session.topic, wcRequest: req)
-        
+        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: nil)
         relayMock.wcRequestPublisherSubject.send(payload)
         
         XCTAssertTrue(relayMock.didRespondError)
@@ -150,10 +146,7 @@ final class SessionEngineTests: XCTestCase {
         session.updateNamespaces([Namespace(chains: [], methods: ["someMethod"], events: [])])
         storageMock.setSession(session)
         
-        let request = SessionType.RequestParams.Request(method: "someMethod", params: AnyCodable(EmptyCodable()))
-        let params = SessionType.RequestParams(request: request, chainId: nil)
-        let req = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
-        let payload = WCRequestSubscriptionPayload(topic: session.topic, wcRequest: req)
+        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: nil)
         relayMock.wcRequestPublisherSubject.send(payload)
         
         XCTAssertFalse(relayMock.didRespondError)
@@ -168,10 +161,7 @@ final class SessionEngineTests: XCTestCase {
         session.updateNamespaces([Namespace(chains: [Blockchain("eip155:1")!], methods: ["someMethod"], events: [])])
         storageMock.setSession(session)
         
-        let request = SessionType.RequestParams.Request(method: "someMethod", params: AnyCodable(EmptyCodable()))
-        let params = SessionType.RequestParams(request: request, chainId: nil)
-        let req = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
-        let payload = WCRequestSubscriptionPayload(topic: session.topic, wcRequest: req)
+        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: nil)
         relayMock.wcRequestPublisherSubject.send(payload)
         
         XCTAssertTrue(relayMock.didRespondError)
@@ -186,10 +176,7 @@ final class SessionEngineTests: XCTestCase {
         session.updateNamespaces([Namespace(chains: [Blockchain("eip155:1")!], methods: ["someMethod"], events: [])])
         storageMock.setSession(session)
         
-        let request = SessionType.RequestParams.Request(method: "someMethod", params: AnyCodable(EmptyCodable()))
-        let params = SessionType.RequestParams(request: request, chainId: Blockchain("eip155:1")!)
-        let req = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
-        let payload = WCRequestSubscriptionPayload(topic: session.topic, wcRequest: req)
+        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: Blockchain("eip155:1")!)
         relayMock.wcRequestPublisherSubject.send(payload)
         
         XCTAssertFalse(relayMock.didRespondError)
@@ -204,10 +191,7 @@ final class SessionEngineTests: XCTestCase {
         session.updateNamespaces([Namespace(chains: [Blockchain("eip155:1")!], methods: ["someMethod"], events: [])])
         storageMock.setSession(session)
         
-        let request = SessionType.RequestParams.Request(method: "someOtherMethod", params: AnyCodable(EmptyCodable()))
-        let params = SessionType.RequestParams(request: request, chainId: Blockchain("eip155:1")!)
-        let req = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
-        let payload = WCRequestSubscriptionPayload(topic: session.topic, wcRequest: req)
+        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someOtherMethod", chainId: Blockchain("eip155:1")!)
         relayMock.wcRequestPublisherSubject.send(payload)
         
         XCTAssertTrue(relayMock.didRespondError)
@@ -222,10 +206,7 @@ final class SessionEngineTests: XCTestCase {
         session.updateNamespaces([Namespace(chains: [], methods: ["someMethod"], events: [])])
         storageMock.setSession(session)
         
-        let request = SessionType.RequestParams.Request(method: "someMethod", params: AnyCodable(EmptyCodable()))
-        let params = SessionType.RequestParams(request: request, chainId: Blockchain("eip155:1")!)
-        let req = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
-        let payload = WCRequestSubscriptionPayload(topic: session.topic, wcRequest: req)
+        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: Blockchain("eip155:1")!)
         relayMock.wcRequestPublisherSubject.send(payload)
         
         XCTAssertTrue(relayMock.didRespondError)
@@ -243,10 +224,7 @@ final class SessionEngineTests: XCTestCase {
         ])
         storageMock.setSession(session)
         
-        let request = SessionType.RequestParams.Request(method: "someMethod", params: AnyCodable(EmptyCodable()))
-        let params = SessionType.RequestParams(request: request, chainId: nil)
-        let req = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
-        let payload = WCRequestSubscriptionPayload(topic: session.topic, wcRequest: req)
+        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: nil)
         relayMock.wcRequestPublisherSubject.send(payload)
         
         XCTAssertFalse(relayMock.didRespondError)
@@ -264,10 +242,7 @@ final class SessionEngineTests: XCTestCase {
         ])
         storageMock.setSession(session)
         
-        let request = SessionType.RequestParams.Request(method: "someOtherMethod", params: AnyCodable(EmptyCodable()))
-        let params = SessionType.RequestParams(request: request, chainId: Blockchain("eip155:1")!)
-        let req = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
-        let payload = WCRequestSubscriptionPayload(topic: session.topic, wcRequest: req)
+        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someOtherMethod", chainId: Blockchain("eip155:1")!)
         relayMock.wcRequestPublisherSubject.send(payload)
         
         XCTAssertFalse(relayMock.didRespondError)
@@ -284,10 +259,7 @@ final class SessionEngineTests: XCTestCase {
         ])
         storageMock.setSession(session)
         
-        let request = SessionType.RequestParams.Request(method: "someMethod", params: AnyCodable(EmptyCodable()))
-        let params = SessionType.RequestParams(request: request, chainId: Blockchain("cosmos:cosmoshub4")!)
-        let req = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
-        let payload = WCRequestSubscriptionPayload(topic: session.topic, wcRequest: req)
+        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: Blockchain("cosmos:cosmoshub4")!)
         relayMock.wcRequestPublisherSubject.send(payload)
         
         XCTAssertFalse(relayMock.didRespondError)
