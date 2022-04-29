@@ -159,4 +159,138 @@ final class SessionEngineTests: XCTestCase {
         XCTAssertFalse(relayMock.didRespondError)
         XCTAssertTrue(didTriggerRequest)
     }
+    
+    func testSessionRequestUndefinedChainMatchingMethod() {
+        var didTriggerRequest = false
+        engine.onSessionRequest = { _ in didTriggerRequest = true }
+        
+        var session = WCSession.stub(isSelfController: true)
+        session.updateNamespaces([Namespace(chains: [Blockchain("eip155:1")!], methods: ["someMethod"], events: [])])
+        storageMock.setSession(session)
+        
+        let request = SessionType.RequestParams.Request(method: "someMethod", params: AnyCodable(EmptyCodable()))
+        let params = SessionType.RequestParams(request: request, chainId: nil)
+        let req = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
+        let payload = WCRequestSubscriptionPayload(topic: session.topic, wcRequest: req)
+        relayMock.wcRequestPublisherSubject.send(payload)
+        
+        XCTAssertTrue(relayMock.didRespondError)
+        XCTAssertFalse(didTriggerRequest)
+    }
+    
+    func testSessionRequestDefinedChainMatchingMethod() {
+        var didTriggerRequest = false
+        engine.onSessionRequest = { _ in didTriggerRequest = true }
+        
+        var session = WCSession.stub(isSelfController: true)
+        session.updateNamespaces([Namespace(chains: [Blockchain("eip155:1")!], methods: ["someMethod"], events: [])])
+        storageMock.setSession(session)
+        
+        let request = SessionType.RequestParams.Request(method: "someMethod", params: AnyCodable(EmptyCodable()))
+        let params = SessionType.RequestParams(request: request, chainId: Blockchain("eip155:1")!)
+        let req = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
+        let payload = WCRequestSubscriptionPayload(topic: session.topic, wcRequest: req)
+        relayMock.wcRequestPublisherSubject.send(payload)
+        
+        XCTAssertFalse(relayMock.didRespondError)
+        XCTAssertTrue(didTriggerRequest)
+    }
+    
+    func testSessionRequestDefinedChainUnmatchingMethod() {
+        var didTriggerRequest = false
+        engine.onSessionRequest = { _ in didTriggerRequest = true }
+        
+        var session = WCSession.stub(isSelfController: true)
+        session.updateNamespaces([Namespace(chains: [Blockchain("eip155:1")!], methods: ["someMethod"], events: [])])
+        storageMock.setSession(session)
+        
+        let request = SessionType.RequestParams.Request(method: "someOtherMethod", params: AnyCodable(EmptyCodable()))
+        let params = SessionType.RequestParams(request: request, chainId: Blockchain("eip155:1")!)
+        let req = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
+        let payload = WCRequestSubscriptionPayload(topic: session.topic, wcRequest: req)
+        relayMock.wcRequestPublisherSubject.send(payload)
+        
+        XCTAssertTrue(relayMock.didRespondError)
+        XCTAssertFalse(didTriggerRequest)
+    }
+    
+    func testSessionRequestEmptyNamespaceDefinedChainMatchingMethod() {
+        var didTriggerRequest = false
+        engine.onSessionRequest = { _ in didTriggerRequest = true }
+        
+        var session = WCSession.stub(isSelfController: true)
+        session.updateNamespaces([Namespace(chains: [], methods: ["someMethod"], events: [])])
+        storageMock.setSession(session)
+        
+        let request = SessionType.RequestParams.Request(method: "someMethod", params: AnyCodable(EmptyCodable()))
+        let params = SessionType.RequestParams(request: request, chainId: Blockchain("eip155:1")!)
+        let req = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
+        let payload = WCRequestSubscriptionPayload(topic: session.topic, wcRequest: req)
+        relayMock.wcRequestPublisherSubject.send(payload)
+        
+        XCTAssertTrue(relayMock.didRespondError)
+        XCTAssertFalse(didTriggerRequest)
+    }
+    
+    func testSessionRequestMultiNamespaceUndefinedChainMatchingMethod() {
+        var didTriggerRequest = false
+        engine.onSessionRequest = { _ in didTriggerRequest = true }
+        
+        var session = WCSession.stub(isSelfController: true)
+        session.updateNamespaces([
+            Namespace(chains: [Blockchain("eip155:1")!], methods: ["someMethod"], events: []),
+            Namespace(chains: [], methods: ["someMethod"], events: [])
+        ])
+        storageMock.setSession(session)
+        
+        let request = SessionType.RequestParams.Request(method: "someMethod", params: AnyCodable(EmptyCodable()))
+        let params = SessionType.RequestParams(request: request, chainId: nil)
+        let req = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
+        let payload = WCRequestSubscriptionPayload(topic: session.topic, wcRequest: req)
+        relayMock.wcRequestPublisherSubject.send(payload)
+        
+        XCTAssertFalse(relayMock.didRespondError)
+        XCTAssertTrue(didTriggerRequest)
+    }
+    
+    func testSessionRequestMultiNamespaceDefinedChainMatchingMethod() {
+        var didTriggerRequest = false
+        engine.onSessionRequest = { _ in didTriggerRequest = true }
+        
+        var session = WCSession.stub(isSelfController: true)
+        session.updateNamespaces([
+            Namespace(chains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], methods: ["someMethod"], events: []),
+            Namespace(chains: [Blockchain("eip155:1")!], methods: ["someOtherMethod"], events: [])
+        ])
+        storageMock.setSession(session)
+        
+        let request = SessionType.RequestParams.Request(method: "someOtherMethod", params: AnyCodable(EmptyCodable()))
+        let params = SessionType.RequestParams(request: request, chainId: Blockchain("eip155:1")!)
+        let req = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
+        let payload = WCRequestSubscriptionPayload(topic: session.topic, wcRequest: req)
+        relayMock.wcRequestPublisherSubject.send(payload)
+        
+        XCTAssertFalse(relayMock.didRespondError)
+        XCTAssertTrue(didTriggerRequest)
+    }
+    
+    func testSessionRequestMultiChainNamespaceDefinedChainMatchingMethod() {
+        var didTriggerRequest = false
+        engine.onSessionRequest = { _ in didTriggerRequest = true }
+        
+        var session = WCSession.stub(isSelfController: true)
+        session.updateNamespaces([
+            Namespace(chains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!, Blockchain("cosmos:cosmoshub4")!], methods: ["someMethod"], events: []),
+        ])
+        storageMock.setSession(session)
+        
+        let request = SessionType.RequestParams.Request(method: "someMethod", params: AnyCodable(EmptyCodable()))
+        let params = SessionType.RequestParams(request: request, chainId: Blockchain("cosmos:cosmoshub4")!)
+        let req = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
+        let payload = WCRequestSubscriptionPayload(topic: session.topic, wcRequest: req)
+        relayMock.wcRequestPublisherSubject.send(payload)
+        
+        XCTAssertFalse(relayMock.didRespondError)
+        XCTAssertTrue(didTriggerRequest)
+    }
 }
