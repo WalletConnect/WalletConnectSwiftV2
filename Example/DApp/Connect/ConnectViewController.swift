@@ -97,8 +97,9 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
         let pairingTopic = activePairings[indexPath.row].topic
         let blockchains: Set<Blockchain> = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
         let methods: Set<String> = ["eth_sendTransaction", "personal_sign", "eth_signTypedData"]
+        let namespaces: Set<Namespace> = [Namespace(chains: blockchains, methods: methods, events: [])]
         DispatchQueue.global().async {
-            ClientDelegate.shared.client.connect(blockchains: blockchains, methods: methods, events: [], topic: pairingTopic) { [weak self] _ in
+            ClientDelegate.shared.client.connect(namespaces: namespaces, topic: pairingTopic) { [weak self] _ in
                 self?.connectWithExampleWallet()
             }
         }

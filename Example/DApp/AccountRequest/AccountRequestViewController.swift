@@ -58,7 +58,7 @@ class AccountRequestViewController: UIViewController, UITableViewDelegate, UITab
         let requestParams = getRequest(for: method)
         
         
-        let request = Request(topic: session.topic, method: method, params: requestParams, chainId: chainId)
+        let request = Request(topic: session.topic, method: method, params: requestParams, chainId: Blockchain(chainId)!)
         client.request(params: request) 
         presentConfirmationAlert()
     }
