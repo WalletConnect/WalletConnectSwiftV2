@@ -78,7 +78,6 @@ extension SessionProposal {
         return SessionType.ProposeParams(
             relays: [relayOptions],
             proposer: Participant(publicKey: proposerPubKey, metadata: AppMetadata.stub()),
-            chains: [],
             namespaces: [Namespace.stub()])
     }
 }
