@@ -83,7 +83,7 @@ final class PairingEngineTests: XCTestCase {
         let topicA = pairing.topic
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
         
-        engine.propose(pairingTopic: pairing.topic, blockchains: [], methods: [], events: [], relay: relayOptions) {_ in}
+        engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions) {_ in}
         
         guard let publishTopic = relayMock.requests.first?.topic,
               let proposal = relayMock.requests.first?.request.sessionProposal else {
@@ -131,7 +131,7 @@ final class PairingEngineTests: XCTestCase {
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
         
         // Client proposes session
-        engine.propose(pairingTopic: pairing.topic, blockchains: [], methods: [], events: [], relay: relayOptions){_ in}
+        engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions){_ in}
         
         guard let request = relayMock.requests.first?.request,
               let proposal = relayMock.requests.first?.request.sessionProposal else {
@@ -171,7 +171,7 @@ final class PairingEngineTests: XCTestCase {
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
         
         // Client propose session
-        engine.propose(pairingTopic: pairing.topic, blockchains: [], methods: [], events: [], relay: relayOptions){_ in}
+        engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions){_ in}
         
         guard let request = relayMock.requests.first?.request,
               let proposal = relayMock.requests.first?.request.sessionProposal else {
@@ -194,7 +194,7 @@ final class PairingEngineTests: XCTestCase {
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
         
         // Client propose session
-        engine.propose(pairingTopic: pairing.topic, blockchains: [], methods: [], events: [], relay: relayOptions){_ in}
+        engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions){_ in}
         
         guard let request = relayMock.requests.first?.request,
               let proposal = relayMock.requests.first?.request.sessionProposal else {

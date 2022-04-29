@@ -120,9 +120,11 @@ final class SessionEngine {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
+        let params = SessionType.EventParams(event: event, chainId: chainId)
         do {
-            let params = SessionType.EventParams(event: event, chainId: chainId)
-            try validateEvents(session: session, params: params)
+            guard session.hasNamespace(for: chainId, event: event.name) else {
+                throw WalletConnectError.invalidEvent
+            }
             relayer.request(.wcSessionEvent(params), onTopic: topic) { result in
                 switch result {
                 case .success(_):
@@ -143,22 +145,22 @@ final class SessionEngine {
         relayer.wcRequestPublisher.sink  { [unowned self] subscriptionPayload in
             switch subscriptionPayload.wcRequest.params {
             case .sessionSettle(let settleParams):
-                wcSessionSettle(payload: subscriptionPayload, settleParams: settleParams)
+                onSessionSettle(payload: subscriptionPayload, settleParams: settleParams)
             case .sessionDelete(let deleteParams):
-                wcSessionDelete(subscriptionPayload, deleteParams: deleteParams)
+                onSessionDelete(subscriptionPayload, deleteParams: deleteParams)
             case .sessionRequest(let sessionRequestParams):
-                wcSessionRequest(subscriptionPayload, payloadParams: sessionRequestParams)
+                onSessionRequest(subscriptionPayload, payloadParams: sessionRequestParams)
             case .sessionPing(_):
-                wcSessionPing(subscriptionPayload)
+                onSessionPing(subscriptionPayload)
             case .sessionEvent(let eventParams):
-                wcSessionEvent(subscriptionPayload, eventParams: eventParams)
+                onSessionEvent(subscriptionPayload, eventParams: eventParams)
             default:
                 return
             }
         }.store(in: &publishers)
     }
 
-    func settle(topic: String, proposal: SessionProposal, accounts: Set<Account>, methods: Set<String>, events: Set<String>) {
+    func settle(topic: String, proposal: SessionProposal, accounts: Set<Account>, namespaces: Set<Namespace>) {
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!
         
         let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
@@ -168,8 +170,7 @@ final class SessionEngine {
         let settleParams = SessionType.SettleParams(
             relay: relay,
             controller: selfParticipant, accounts: accounts,
-            methods: methods,
-            events: events,
+            namespaces: namespaces,
             expiry: Int64(expectedExpiryTimeStamp.timeIntervalSince1970))//todo - test expiration times
         let session = WCSession(
             topic: topic,
@@ -184,7 +185,7 @@ final class SessionEngine {
         relayer.request(.wcSessionSettle(settleParams), onTopic: topic)
     }
 
-    private func wcSessionSettle(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
+    private func onSessionSettle(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
         logger.debug("Did receive session settle request")
         let topic = payload.topic
         
@@ -206,7 +207,7 @@ final class SessionEngine {
         onSessionSettle?(session.publicRepresentation())
     }
     
-    private func wcSessionDelete(_ payload: WCRequestSubscriptionPayload, deleteParams: SessionType.DeleteParams) {
+    private func onSessionDelete(_ payload: WCRequestSubscriptionPayload, deleteParams: SessionType.DeleteParams) {
         let topic = payload.topic
         guard sessionStore.hasSession(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
@@ -218,7 +219,7 @@ final class SessionEngine {
         onSessionDelete?(topic, deleteParams)
     }
     
-    private func wcSessionRequest(_ payload: WCRequestSubscriptionPayload, payloadParams: SessionType.RequestParams) {
+    private func onSessionRequest(_ payload: WCRequestSubscriptionPayload, payloadParams: SessionType.RequestParams) {
         let topic = payload.topic
         let jsonRpcRequest = JSONRPCRequest<AnyCodable>(id: payload.wcRequest.id, method: payloadParams.request.method, params: payloadParams.request.params)
         let request = Request(
@@ -232,50 +233,39 @@ final class SessionEngine {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
         }
-        if let chainId = request.chainId {
-            guard session.hasPermission(forChain: chainId) else {
-                relayer.respondError(for: payload, reason: .unauthorizedTargetChain(chainId))
+        if let chain = request.chainId {
+            guard session.hasNamespace(for: chain) else {
+                relayer.respondError(for: payload, reason: .unauthorizedTargetChain(chain.absoluteString))
                 return
             }
-        }
-        guard session.hasPermission(forMethod: request.method) else {
-            relayer.respondError(for: payload, reason: .unauthorizedRPCMethod(request.method))
-            return
+            guard session.hasNamespace(for: chain, method: request.method) else {
+                relayer.respondError(for: payload, reason: .unauthorizedRPCMethod(request.method))
+                return
+            }
         }
         onSessionRequest?(request)
     }
     
-    private func wcSessionPing(_ payload: WCRequestSubscriptionPayload) {
+    private func onSessionPing(_ payload: WCRequestSubscriptionPayload) {
         relayer.respondSuccess(for: payload)
     }
     
-    private func wcSessionEvent(_ payload: WCRequestSubscriptionPayload, eventParams: SessionType.EventParams) {
+    private func onSessionEvent(_ payload: WCRequestSubscriptionPayload, eventParams: SessionType.EventParams) {
         let event = eventParams.event
         let topic = payload.topic
         guard let session = sessionStore.getSession(forTopic: topic) else {
             relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
             return
         }
-        if session.selfIsController {
-            guard session.hasPermission(forEvents: event.name) else {
-                relayer.respondError(for: payload, reason: .unauthorizedEventType(event.name))
-                return
-            }
+        guard session.peerIsController,
+              session.hasNamespace(for: eventParams.chainId, event: event.name) else {
+            relayer.respondError(for: payload, reason: .unauthorizedEventType(event.name))
+            return
         }
         relayer.respondSuccess(for: payload)
         onEventReceived?(topic, event.publicRepresentation(), eventParams.chainId)
     }
-    
-    private func validateEvents(session: WCSession, params: SessionType.EventParams) throws {
-        if session.selfIsController {
-            return
-        } else {
-            guard session.events.contains(params.event.name) else {
-                throw WalletConnectError.invalidEventType
-            }
-        }
-    }
-    
+
     private func setupExpirationHandling() {
         sessionStore.onSessionExpiration = { [weak self] session in
             self?.kms.deletePrivateKey(for: session.selfParticipant.publicKey)

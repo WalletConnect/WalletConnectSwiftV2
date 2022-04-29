@@ -252,6 +252,6 @@ class WalletConnectRelay: WalletConnectRelaying {
     
     func getChainId(_ request: WCRequest) -> String? {
         guard case let .sessionRequest(payload) = request.params else {return nil}
-        return payload.chainId
+        return payload.chainId?.absoluteString
     }
 }

@@ -7,7 +7,7 @@ enum WalletConnectError: Error {
     case sessionNotAcknowledged(String)
     case pairingNotSettled(String)
     case invalidMethod
-    case invalidEventType
+    case invalidEvent
     case invalidUpdateExpiryValue
     case unauthorizedNonControllerCall
     case pairingAlreadyExist
@@ -41,7 +41,7 @@ extension WalletConnectError {
             return "Update expiry time is out of expected range"
         case .invalidMethod:
             return "Methods set is invalid."
-        case .invalidEventType:
+        case .invalidEvent:
             return "Invalid event type."
         case .unauthorizedNonControllerCall:
             return "Method must be called by a controller client."

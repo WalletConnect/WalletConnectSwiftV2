@@ -26,6 +26,12 @@ extension WCPairing {
     }
 }
 
+extension Namespace {
+    static func stub() -> Namespace {
+        Namespace(chains: [Blockchain("eip155:1")!], methods: ["method"], events: ["event"])
+    }
+}
+
 extension RelayProtocolOptions {
     static func stub() -> RelayProtocolOptions {
         RelayProtocolOptions(protocol: "", data: nil)
@@ -50,14 +56,9 @@ extension WCRequestSubscriptionPayload {
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
     }
     
-    static func stubUpdateMethods(topic: String, methods: Set<String> = ["method"]) -> WCRequestSubscriptionPayload {
-        let updateMethod = WCMethod.wcSessionUpdateMethods(SessionType.UpdateMethodsParams(methods: methods)).asRequest()
+    static func stubUpdateNamespaces(topic: String, namespaces: Set<Namespace> = [Namespace.stub()]) -> WCRequestSubscriptionPayload {
+        let updateMethod = WCMethod.wcSessionUpdateNamespaces(SessionType.UpdateNamespaceParams(namespaces: namespaces)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
-    }
-    
-    static func stubUpdateEvents(topic: String, events: Set<String> = ["event"]) -> WCRequestSubscriptionPayload {
-        let updateEvent = WCMethod.wcSessionUpdateEvents(SessionType.UpdateEventsParams(events: events)).asRequest()
-        return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateEvent)
     }
     
     static func stubUpdateExpiry(topic: String, expiry: Int64) -> WCRequestSubscriptionPayload {
@@ -77,9 +78,7 @@ extension SessionProposal {
         return SessionType.ProposeParams(
             relays: [relayOptions],
             proposer: Participant(publicKey: proposerPubKey, metadata: AppMetadata.stub()),
-            chains: [],
-            methods: [],
-            events: [])
+            namespaces: [Namespace.stub()])
     }
 }
 

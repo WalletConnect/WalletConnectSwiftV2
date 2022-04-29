@@ -11,8 +11,7 @@ enum ReasonCode {
     // 1000 (Internal)
     case missingOrInvalid(String)
     case invalidUpdateAccountsRequest
-    case invalidUpdateMethodsRequest
-    case invalidUpdateEventsRequest
+    case invalidUpdateNamespaceRequest
     case invalidUpdateExpiryRequest
     case noContextWithTopic(context: Context, topic: String)
     
@@ -21,8 +20,7 @@ enum ReasonCode {
     case unauthorizedRPCMethod(String)
     case unauthorizedEventType(String)
     case unauthorizedUpdateAccountRequest
-    case unauthorizedUpdateMethodsRequest
-    case unauthorizedUpdateEventsRequest
+    case unauthorizedUpdateNamespacesRequest
     case unauthorizedUpdateExpiryRequest
     case unauthorizedMatchingController(isController: Bool)
     
@@ -37,9 +35,8 @@ enum ReasonCode {
         case .missingOrInvalid: return 1000
             
         case .invalidUpdateAccountsRequest: return 1003
-        case .invalidUpdateMethodsRequest: return 1004
-        case .invalidUpdateEventsRequest: return 1005
-        case .invalidUpdateExpiryRequest: return 1006
+        case .invalidUpdateNamespaceRequest: return 1004
+        case .invalidUpdateExpiryRequest: return 1005
         case .noContextWithTopic: return 1301
             
         case .unauthorizedTargetChain: return 3000
@@ -47,8 +44,7 @@ enum ReasonCode {
         case .unauthorizedEventType: return 3002
             
         case .unauthorizedUpdateAccountRequest: return 3003
-        case .unauthorizedUpdateMethodsRequest: return 3004
-        case .unauthorizedUpdateEventsRequest: return 3005
+        case .unauthorizedUpdateNamespacesRequest: return 3004
         case .unauthorizedUpdateExpiryRequest: return 3005
         case .unauthorizedMatchingController: return 3100
         case .disapprovedChains: return 5000
@@ -65,10 +61,8 @@ enum ReasonCode {
             return "Missing or invalid \(name)"
         case .invalidUpdateAccountsRequest:
             return "Invalid update accounts request"
-        case .invalidUpdateMethodsRequest:
-            return "Invalid update methods request"
-        case .invalidUpdateEventsRequest:
-            return "Invalid update events request"
+        case .invalidUpdateNamespaceRequest:
+            return "Invalid update namespace request"
         case .invalidUpdateExpiryRequest:
             return "Invalid update expiry request"
         case .noContextWithTopic(let context, let topic):
@@ -81,10 +75,8 @@ enum ReasonCode {
             return "Unauthorized event type requested: \(type)"
         case .unauthorizedUpdateAccountRequest:
             return "Unauthorized update accounts request"
-        case .unauthorizedUpdateMethodsRequest:
-            return "Unauthorized update methods request"
-        case .unauthorizedUpdateEventsRequest:
-            return "Unauthorized update events request"
+        case .unauthorizedUpdateNamespacesRequest:
+            return "Unauthorized update namespaces request"
         case .unauthorizedUpdateExpiryRequest:
             return "Unauthorized update expiry request"
         case .unauthorizedMatchingController(let isController):

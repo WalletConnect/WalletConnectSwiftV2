@@ -106,7 +106,7 @@ public final class WalletConnectClient {
     /// - Parameter topic: Optional parameter - use it if you already have an established pairing with peer client.
     /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
     @available(*, renamed: "connect(sessionPermissions:topic:)")
-    public func connect(blockchains: Set<Blockchain>, methods: Set<String>, events: Set<String>, topic: String? = nil, completion: @escaping ((Result<String?, Error>)->())) {
+    public func connect(namespaces: Set<Namespace>, topic: String? = nil, completion: @escaping ((Result<String?, Error>)->())) {
         logger.debug("Connecting Application")
         if let topic = topic {
             guard let pairing = pairingEngine.getSettledPairing(for: topic) else {
@@ -114,7 +114,7 @@ public final class WalletConnectClient {
                 return
             }
             logger.debug("Proposing session on existing pairing")
-            pairingEngine.propose(pairingTopic: topic, blockchains: blockchains, methods: methods, events: events, relay: pairing.relay) { error in
+            pairingEngine.propose(pairingTopic: topic, namespaces: namespaces, relay: pairing.relay) { error in
                 if let error = error {
                     completion(.failure(error))
                 } else {
@@ -126,7 +126,7 @@ public final class WalletConnectClient {
                 completion(.failure(WalletConnectError.pairingProposalFailed))
                 return
             }
-            pairingEngine.propose(pairingTopic: pairingURI.topic, blockchains: blockchains, methods: methods, events: events ,relay: pairingURI.relay) { error in
+            pairingEngine.propose(pairingTopic: pairingURI.topic, namespaces: namespaces ,relay: pairingURI.relay) { error in
                 if let error = error {
                     completion(.failure(error))
                 } else {
@@ -136,9 +136,9 @@ public final class WalletConnectClient {
         }
     }
     
-    public func connect(blockchains: Set<Blockchain>, methods: Set<String>, events: Set<String>, topic: String? = nil) async throws -> String? {
+    public func connect(namespaces: Set<Namespace>, topic: String? = nil) async throws -> String? {
         return try await withCheckedThrowingContinuation { continuation in
-            connect(blockchains: blockchains, methods: methods, events: events, topic: topic) { result in
+            connect(namespaces: namespaces, topic: topic) { result in
                 continuation.resume(with: result)
             }
         }
@@ -170,10 +170,10 @@ public final class WalletConnectClient {
     public func approve(
         proposal: Session.Proposal,
         accounts: Set<Account>,
-        methods: Set<String>,
-        events: Set<String>) {
+        namespaces: Set<Namespace>) {
+            //TODO - accounts should be validated for matching namespaces
         guard let sessionTopic = pairingEngine.respondSessionPropose(proposal: proposal.proposal) else {return}
-            sessionEngine.settle(topic: sessionTopic, proposal: proposal.proposal, accounts: accounts, methods: methods, events: events)
+            sessionEngine.settle(topic: sessionTopic, proposal: proposal.proposal, accounts: accounts, namespaces: namespaces)
     }
     
     /// For the responder to reject a session proposal.
@@ -196,16 +196,8 @@ public final class WalletConnectClient {
     /// - Parameters:
     ///   - topic: Topic of the session that is intended to be updated.
     ///   - methods: Sets of methods that will replace existing ones.
-    public func updateMethods(topic: String, methods: Set<String>) throws {
-        try controllerSessionStateMachine.updateMethods(topic: topic, methods: methods)
-    }
-    
-    /// For the responder to update session events
-    /// - Parameters:
-    ///   - topic: Topic of the session that is intended to be updated.
-    ///   - events: Sets of events that will replace existing ones.
-    public func updateEvents(topic: String, events: Set<String>) throws {
-        try controllerSessionStateMachine.updateEvents(topic: topic, events: events)
+    public func updateNamespaces(topic: String, namespaces: Set<Namespace>) throws {
+        try controllerSessionStateMachine.updateNamespaces(topic: topic, namespaces: namespaces)
     }
     
     /// For controller to update expiry of a session
@@ -336,11 +328,8 @@ public final class WalletConnectClient {
         sessionEngine.onSessionDelete = { [unowned self] topic, reason in
             delegate?.didDelete(sessionTopic: topic, reason: reason.publicRepresentation())
         }
-        controllerSessionStateMachine.onMethodsUpdate = { [unowned self] topic, methods in
-            delegate?.didUpdate(sessionTopic: topic, methods: methods)
-        }
-        controllerSessionStateMachine.onEventsUpdate = { [unowned self] topic, events in
-            delegate?.didUpdate(sessionTopic: topic, events: events)
+        controllerSessionStateMachine.onNamespacesUpdate = { [unowned self] topic, namespaces in
+            delegate?.didUpdate(sessionTopic: topic, namespaces: namespaces)
         }
         controllerSessionStateMachine.onAccountsUpdate = { [unowned self] topic, accounts in
             delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
@@ -348,11 +337,8 @@ public final class WalletConnectClient {
         controllerSessionStateMachine.onExpiryUpdate = { [unowned self] topic, expiry in
             delegate?.didUpdate(sessionTopic: topic, expiry: expiry)
         }
-        nonControllerSessionStateMachine.onMethodsUpdate = { [unowned self] topic, methods in
-            delegate?.didUpdate(sessionTopic: topic, methods: methods)
-        }
-        nonControllerSessionStateMachine.onEventsUpdate = { [unowned self] topic, events in
-            delegate?.didUpdate(sessionTopic: topic, events: events)
+        nonControllerSessionStateMachine.onNamespacesUpdate = { [unowned self] topic, namespaces in
+            delegate?.didUpdate(sessionTopic: topic, namespaces: namespaces)
         }
         nonControllerSessionStateMachine.onExpiryUpdate = { [unowned self] topic, expiry in
             delegate?.didUpdate(sessionTopic: topic, expiry: expiry)

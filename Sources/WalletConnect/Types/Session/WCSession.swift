@@ -13,8 +13,7 @@ struct WCSession: ExpirableSequence {
     var acknowledged: Bool
     let controller: AgreementPeer
     private(set) var accounts: Set<Account>
-    private(set) var methods: Set<String>
-    private(set) var events: Set<String>
+    private(set) var namespaces: Set<Namespace>
     
     static var defaultTimeToLive: Int64 {
         Int64(7*Time.day)
@@ -34,22 +33,20 @@ struct WCSession: ExpirableSequence {
         self.controller = AgreementPeer(publicKey: settleParams.controller.publicKey)
         self.selfParticipant = selfParticipant
         self.peerParticipant = peerParticipant
-        self.methods = settleParams.methods
-        self.events = settleParams.events
+        self.namespaces = settleParams.namespaces
         self.accounts = settleParams.accounts
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(settleParams.expiry))
     }
     
 #if DEBUG
-    internal init(topic: String, relay: RelayProtocolOptions, controller: AgreementPeer, selfParticipant: Participant, peerParticipant: Participant, methods: Set<String>, events: Set<String>, accounts: Set<Account>, acknowledged: Bool, expiry: Int64) {
+    internal init(topic: String, relay: RelayProtocolOptions, controller: AgreementPeer, selfParticipant: Participant, peerParticipant: Participant, namespaces: Set<Namespace>, events: Set<String>, accounts: Set<Account>, acknowledged: Bool, expiry: Int64) {
         self.topic = topic
         self.relay = relay
         self.controller = controller
         self.selfParticipant = selfParticipant
         self.peerParticipant = peerParticipant
-        self.methods = methods
-        self.events = events
+        self.namespaces = namespaces
         self.accounts = accounts
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
@@ -68,34 +65,40 @@ struct WCSession: ExpirableSequence {
         return controller.publicKey == peerParticipant.publicKey
     }
     
-    var blockchains: [Blockchain] {
-        return accounts.map{$0.blockchain}
+    func hasNamespace(for chain: Blockchain) -> Bool {
+        namespaces.contains{$0.chains.contains(chain)}
     }
     
-    func hasPermission(forChain chainId: String) -> Bool {
-        return blockchains
-            .map{$0.absoluteString}
-            .contains(chainId)
-    }
-    
-    func hasPermission(forMethod method: String) -> Bool {
+    func hasNamespace(for chain: Blockchain, method: String) -> Bool {
+        let namespacesIncludingChain = namespaces.filter{$0.chains.contains(chain)}
+        let methods = namespacesIncludingChain.flatMap{$0.methods}
         return methods.contains(method)
     }
     
-    func hasPermission(forEvents type: String) -> Bool {
-        return events.contains(type)
+    func hasNamespace(for chain: Blockchain?,  event: String) -> Bool {
+        if let chain = chain {
+            if let namespace = namespaces.first(where: {$0.chains.contains(chain)}),
+               namespace.events.contains(event) {
+                return true
+            } else {
+                return false
+            }
+        } else {
+            if let namespace = namespaces.first(where: {$0.chains.isEmpty}),
+               namespace.events.contains(event) {
+                return true
+            } else {
+                return false
+            }
+        }
     }
 
     mutating func updateAccounts(_ accounts: Set<Account>) {
         self.accounts = accounts
     }
     
-    mutating func updateMethods(_ methods: Set<String>) {
-        self.methods = methods
-    }
-    
-    mutating func updateEvents(_ events: Set<String>) {
-        self.events = events
+    mutating func updateNamespaces(_ namespaces: Set<Namespace>) {
+        self.namespaces = namespaces
     }
     
     /// updates session expiry by given ttl
@@ -124,8 +127,7 @@ struct WCSession: ExpirableSequence {
         return Session(
             topic: topic,
             peer: peerParticipant.metadata,
-            methods: methods,
-            events: events,
+            namespaces: namespaces,
             accounts: accounts,
             expiryDate: expiryDate)
     }

@@ -3,8 +3,7 @@ enum WCMethod {
     case wcSessionPropose(SessionType.ProposeParams)
     case wcSessionSettle(SessionType.SettleParams)
     case wcSessionUpdateAccounts(SessionType.UpdateAccountsParams)
-    case wcSessionUpdateMethods(SessionType.UpdateMethodsParams)
-    case wcSessionUpdateEvents(SessionType.UpdateEventsParams)
+    case wcSessionUpdateNamespaces(SessionType.UpdateNamespaceParams)
     case wcSessionUpdateExpiry(SessionType.UpdateExpiryParams)
     case wcSessionDelete(SessionType.DeleteParams)
     case wcSessionRequest(SessionType.RequestParams)
@@ -21,10 +20,8 @@ enum WCMethod {
             return WCRequest(method: .sessionSettle, params: .sessionSettle(settleParams))
         case .wcSessionUpdateAccounts(let updateParams):
             return WCRequest(method: .sessionUpdateAccounts, params: .sessionUpdateAccounts(updateParams))
-        case .wcSessionUpdateMethods(let updateParams):
-            return WCRequest(method: .sessionUpdateMethods, params: .sessionUpdateMethods(updateParams))
-        case .wcSessionUpdateEvents(let updateParams):
-            return WCRequest(method: .sessionUpdateEvents, params: .sessionUpdateEvents(updateParams))
+        case .wcSessionUpdateNamespaces(let updateParams):
+            return WCRequest(method: .sessionUpdateNamespaces, params: .sessionUpdateNamespaces(updateParams))
         case .wcSessionUpdateExpiry(let updateExpiryParams):
             return WCRequest(method: .sessionUpdateExpiry, params: .sessionUpdateExpiry(updateExpiryParams))
         case .wcSessionDelete(let deleteParams):

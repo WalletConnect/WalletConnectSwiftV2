@@ -15,8 +15,7 @@ internal enum SessionType {
         let relay: RelayProtocolOptions
         let controller: Participant
         let accounts: Set<Account>
-        let methods: Set<String>
-        let events: Set<String>
+        let namespaces: Set<Namespace>
         let expiry: Int64
     }
     
@@ -43,14 +42,10 @@ internal enum SessionType {
     
     
     
-    struct UpdateMethodsParams: Codable, Equatable {
-        let methods: Set<String>
+    struct UpdateNamespaceParams: Codable, Equatable {
+        let namespaces: Set<Namespace>
     }
-    
-    struct UpdateEventsParams: Codable, Equatable {
-        let events: Set<String>
-    }
-    
+
     typealias DeleteParams = SessionType.Reason
     
     struct Reason: Codable, Equatable {
@@ -65,7 +60,7 @@ internal enum SessionType {
     
     struct RequestParams: Codable, Equatable {
         let request: Request
-        let chainId: String?
+        let chainId: Blockchain?
         
         struct Request: Codable, Equatable {
             let method: String

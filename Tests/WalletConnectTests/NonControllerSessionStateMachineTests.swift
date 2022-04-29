@@ -62,25 +62,26 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         var didCallbackUpdatMethods = false
         let session = WCSession.stub(isSelfController: false)
         storageMock.setSession(session)
-        sut.onMethodsUpdate = { topic, _ in
+        sut.onNamespacesUpdate = { topic, _ in
             didCallbackUpdatMethods = true
             XCTAssertEqual(topic, session.topic)
         }
-        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateMethods(topic: session.topic))
+        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateNamespaces(topic: session.topic))
         XCTAssertTrue(didCallbackUpdatMethods)
         XCTAssertTrue(relayMock.didRespondSuccess)
     }
     
     func testUpdateMethodsPeerErrorInvalidType() {
-        let invalidMethods: Set<String> = [""]
         let session = WCSession.stub(isSelfController: false)
         storageMock.setSession(session)
-        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateMethods(topic: session.topic, methods: invalidMethods))
+        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateNamespaces(topic: session.topic, namespaces: [
+            Namespace(chains: [Blockchain("eip155:11")!], methods: ["", "m2"], events: ["e1", "e2"])]
+))
         XCTAssertEqual(relayMock.lastErrorCode, 1004)
     }
 
     func testUpdateMethodPeerErrorSessionNotFound() {
-        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateMethods(topic: ""))
+        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateNamespaces(topic: ""))
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 1301)
     }
@@ -88,33 +89,9 @@ class NonControllerSessionStateMachineTests: XCTestCase {
     func testUpdateMethodPeerErrorUnauthorized() {
         let session = WCSession.stub(isSelfController: true) // Peer is not a controller
         storageMock.setSession(session)
-        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateMethods(topic: session.topic))
+        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateNamespaces(topic: session.topic))
         XCTAssertFalse(relayMock.didRespondSuccess)
         XCTAssertEqual(relayMock.lastErrorCode, 3004)
-    }
-    
-    // MARK: - Update Events
-
-    func testUpdateEventsPeerSuccess() {
-        var didCallbackUpdateEvents = false
-        let session = WCSession.stub(isSelfController: false)
-        storageMock.setSession(session)
-        sut.onEventsUpdate = { topic, _ in
-            didCallbackUpdateEvents = true
-            XCTAssertEqual(topic, session.topic)
-        }
-        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateEvents(topic: session.topic))
-        XCTAssertTrue(didCallbackUpdateEvents)
-        XCTAssertTrue(relayMock.didRespondSuccess)
-    }
-    
-    
-    func testUpdateEventsPeerErrorUnauthorized() {
-        let session = WCSession.stub(isSelfController: true) // Peer is not a controller
-        storageMock.setSession(session)
-        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateEvents(topic: session.topic))
-        XCTAssertFalse(relayMock.didRespondSuccess)
-        XCTAssertEqual(relayMock.lastErrorCode, 3005)
     }
     
     //MARK: - Update Expiry

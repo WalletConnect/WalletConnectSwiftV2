@@ -59,7 +59,7 @@ final class SessionEngineTests: XCTestCase {
         
         let proposal = SessionProposal.stub(proposerPubKey: AgreementPrivateKey().publicKey.hexRepresentation)
         
-        engine.settle(topic: topicB, proposal: proposal, accounts: [], methods: [], events: [])
+        engine.settle(topic: topicB, proposal: proposal, accounts: [], namespaces: [Namespace.stub()])
         
         XCTAssertTrue(storageMock.hasSession(forTopic: topicB), "Responder must persist session on topic B")
         XCTAssert(relayMock.didSubscribe(to: topicB), "Responder must subscribe for topic B")

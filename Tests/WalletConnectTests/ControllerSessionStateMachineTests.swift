@@ -56,61 +56,43 @@ class ControllerSessionStateMachineTests: XCTestCase {
 
     // MARK: - Update Methods
         
-    func testUpdateMethodsSuccess() throws {
+    func testUpdateNamespacesSuccess() throws {
         let session = WCSession.stub(isSelfController: true)
         storageMock.setSession(session)
-        let methodsToUpdate: Set<String> = ["m1", "m2"]
-        try sut.updateMethods(topic: session.topic, methods: methodsToUpdate)
+        let namespacesToUpdate: Set<Namespace> = [Namespace(chains: [Blockchain("eip155:11")!], methods: ["m1", "m2"], events: ["e1", "e2"])]
+        try sut.updateNamespaces(topic: session.topic, namespaces: namespacesToUpdate)
         let updatedSession = storageMock.getSession(forTopic: session.topic)
         XCTAssertTrue(relayMock.didCallRequest)
-        XCTAssertEqual(methodsToUpdate, updatedSession?.methods)
+        XCTAssertEqual(namespacesToUpdate, updatedSession?.namespaces)
     }
     
-    func testUpdateMethodsErrorSessionNotFound() {
-        XCTAssertThrowsError(try sut.updateMethods(topic: "", methods: ["m1"])) { error in
+    func testUpdateNamespacesErrorSessionNotFound() {
+        XCTAssertThrowsError(try sut.updateNamespaces(topic: "", namespaces: [Namespace.stub()])) { error in
             XCTAssertTrue(error.isNoSessionMatchingTopicError)
         }
     }
     
-    func testUpdateMethodsErrorSessionNotAcknowledged() {
+    func testUpdateNamespacesErrorSessionNotAcknowledged() {
         let session = WCSession.stub(acknowledged: false)
         storageMock.setSession(session)
-        XCTAssertThrowsError(try sut.updateMethods(topic: session.topic, methods: ["m1"])) { error in
+        XCTAssertThrowsError(try sut.updateNamespaces(topic: session.topic, namespaces: [Namespace.stub()])) { error in
             XCTAssertTrue(error.isSessionNotAcknowledgedError)
         }
     }
 
-    func testUpdateMethodsErrorInvalidMethod() {
+    func testUpdateNamespacesErrorInvalidMethod() {
         let session = WCSession.stub(isSelfController: true)
         storageMock.setSession(session)
-        XCTAssertThrowsError(try sut.updateMethods(topic: session.topic, methods: [""])) { error in
+        XCTAssertThrowsError(try sut.updateNamespaces(topic: session.topic, namespaces: [Namespace(chains: [Blockchain("eip155:1")!], methods: [""], events: [])])) { error in
             XCTAssertTrue(error.isInvalidMethodError)
         }
     }
 
-    func testUpdateMethodsErrorCalledByNonController() {
+    func testUpdateNamespacesErrorCalledByNonController() {
         let session = WCSession.stub(isSelfController: false)
         storageMock.setSession(session)
-        XCTAssertThrowsError(try sut.updateMethods(topic: session.topic, methods: ["m1"])) { error in
+        XCTAssertThrowsError(try sut.updateNamespaces(topic: session.topic, namespaces: [Namespace.stub()])) { error in
             XCTAssertTrue(error.isUnauthorizedNonControllerCallError)
-        }
-    }
-    
-    // MARK: - Update Events
-
-    func testUpdateEventsSuccess() throws {
-        let session = WCSession.stub(isSelfController: true)
-        storageMock.setSession(session)
-        let eventsToUpdate: Set<String> = ["e1", "e2"]
-        try sut.updateEvents(topic: session.topic, events: eventsToUpdate)
-        let updatedSession = storageMock.getSession(forTopic: session.topic)!
-        XCTAssertTrue(relayMock.didCallRequest)
-        XCTAssertEqual(eventsToUpdate, updatedSession.events)
-    }
-    
-    func testUpdateEventsErrorSessionNotFound() {
-        XCTAssertThrowsError(try sut.updateEvents(topic: "", events: ["e1"])) { error in
-            XCTAssertTrue(error.isNoSessionMatchingTopicError)
         }
     }
         

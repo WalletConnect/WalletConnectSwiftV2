@@ -3,7 +3,6 @@ import Foundation
 @testable import WalletConnect
 
 class ClientDelegate: WalletConnectClientDelegate {
-    
     var client: WalletConnectClient
     var onSessionSettled: ((Session)->())?
     var onSessionProposal: ((Session.Proposal)->())?
@@ -12,7 +11,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     var onSessionRejected: ((Session.Proposal, Reason)->())?
     var onSessionDelete: (()->())?
     var onSessionUpdateAccounts: ((String, Set<Account>)->())?
-    var onSessionUpdateMethods: ((String, Set<String>)->())?
+    var onSessionUpdateNamespaces: ((String, Set<Namespace>)->())?
     var onSessionUpdateEvents: ((String, Set<String>)->())?
     var onSessionUpdateExpiry: ((String, Date)->())?
     var onEventReceived: ((Session.Event, String)->())?
@@ -41,11 +40,8 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didUpdate(sessionTopic: String, accounts: Set<Account>) {
         onSessionUpdateAccounts?(sessionTopic, accounts)
     }
-    func didUpdate(sessionTopic: String, methods: Set<String>) {
-        onSessionUpdateMethods?(sessionTopic, methods)
-    }
-    func didUpdate(sessionTopic: String, events: Set<String>) {
-        onSessionUpdateEvents?(sessionTopic, events)
+    func didUpdate(sessionTopic: String, namespaces: Set<Namespace>) {
+        onSessionUpdateNamespaces?(sessionTopic, namespaces)
     }
     func didUpdate(sessionTopic: String, expiry: Date) {
         onSessionUpdateExpiry?(sessionTopic, expiry)
