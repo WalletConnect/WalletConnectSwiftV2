@@ -136,14 +136,14 @@ final class ClientTests: XCTestCase {
         let method = "eth_sendTransaction"
         let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]
         let responseParams = "0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c"
-        let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
+        let uri = try! await proposer.client.connect(namespaces: [Namespace.stub(methods: [method])])!
 
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [], namespaces: [])
+            self.responder.client.approve(proposal: proposal, accounts: [], namespaces: proposal.namespaces)
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
-            let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
+            let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: Blockchain("eip155:1")!)
             self.proposer.client.request(params: requestParams)
         }
         proposer.onSessionResponse = { response in
@@ -173,13 +173,13 @@ final class ClientTests: XCTestCase {
         let method = "eth_sendTransaction"
         let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]
         let error = JSONRPCErrorResponse.Error(code: 0, message: "error_message")
-        let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
+        let uri = try! await proposer.client.connect(namespaces: [Namespace.stub(methods: [method])])!
         _ = try! responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
-            self.responder.client.approve(proposal: proposal, accounts: [], namespaces: [])
+            self.responder.client.approve(proposal: proposal, accounts: [], namespaces: proposal.namespaces)
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
-            let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: nil)
+            let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: Blockchain("eip155:1")!)
             self.proposer.client.request(params: requestParams)
         }
         proposer.onSessionResponse = { response in
@@ -350,7 +350,7 @@ fileprivate let ethSendTransaction = """
 """
 
 extension Namespace {
-    static func stub() -> Namespace {
-        Namespace(chains: [Blockchain("eip155:1")!], methods: ["method"], events: ["event"])
+    static func stub(methods: Set<String> = ["method"]) -> Namespace {
+        Namespace(chains: [Blockchain("eip155:1")!], methods: methods, events: ["event"])
     }
 }
