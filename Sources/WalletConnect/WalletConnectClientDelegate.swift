@@ -49,7 +49,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     func didSettle(session: Session)
     
     /// Tells the delegate that event has been received.
-    func didReceive(event: Session.Event, sessionTopic : String, chainId: Blockchain?)
+    func didReceive(event: Session.Event, sessionTopic: String, chainId: Blockchain?)
     
     /// Tells the delegate that peer client has rejected a session proposal.
     ///
@@ -59,11 +59,9 @@ public protocol WalletConnectClientDelegate: AnyObject {
 
 public extension WalletConnectClientDelegate {
     func didReceive(event: Session.Event, sessionTopic: String, chainId: Blockchain?) {}
-    func didReject(proposal: String, reason: Reason) {}
+    func didReject(proposal: Session.Proposal, reason: Reason) {}
     func didReceive(sessionRequest: Request) {}
     func didReceive(sessionProposal: Session.Proposal) {}
     func didReceive(sessionResponse: Response) {}
     func didUpdate(sessionTopic: String, expiry: Date) {}
-    
-    func didReject(proposal: Session.Proposal, reason: Reason) {}
 }
