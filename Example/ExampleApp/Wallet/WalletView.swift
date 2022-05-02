@@ -1,4 +1,5 @@
 import UIKit
+import SwiftUI
 
 final class WalletView: UIView {
     
@@ -59,5 +60,13 @@ final class WalletView: UIView {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+}
+
+struct WalletView_Previews: PreviewProvider {
+    
+    static var previews: some View {
+        WalletView().makePreview()
+        WalletView().makePreview().preferredColorScheme(.dark)
     }
 }
