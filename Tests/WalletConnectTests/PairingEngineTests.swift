@@ -118,7 +118,7 @@ final class PairingEngineTests: XCTestCase {
         let request = WCRequest(method: .sessionPropose, params: .sessionPropose(proposal))
         let payload = WCRequestSubscriptionPayload(topic: topicA, wcRequest: request)
         relayMock.wcRequestPublisherSubject.send(payload)
-        let topicB = engine.respondSessionPropose(proposal: proposal)!
+        let (topicB, _) = engine.respondSessionPropose(proposerPubKey: proposal.proposer.publicKey)!
         
         XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must store agreement key for topic B")
         XCTAssertEqual(relayMock.didRespondOnTopic!, topicA, "Responder must respond on topic A")

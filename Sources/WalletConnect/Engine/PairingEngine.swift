@@ -121,11 +121,13 @@ final class PairingEngine {
 //        todo - delete pairing if inactive
     }
     
-    func respondSessionPropose(proposal: SessionType.ProposeParams) -> String? {
-        guard let payload = try? proposalPayloadsStore.get(key: proposal.proposer.publicKey) else {
+    func respondSessionPropose(proposerPubKey: String) -> (String, SessionProposal)? {
+        guard let payload = try? proposalPayloadsStore.get(key: proposerPubKey),
+              case .sessionPropose(let proposal) = payload.wcRequest.params else {
+                  //TODO - throws
             return nil
         }
-        proposalPayloadsStore.delete(forKey: proposal.proposer.publicKey)
+        proposalPayloadsStore.delete(forKey: proposerPubKey)
 
         let selfPublicKey = try! kms.createX25519KeyPair()
         var agreementKey: AgreementKeys!
@@ -144,7 +146,7 @@ final class PairingEngine {
         let proposeResponse = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
         relayer.respond(topic: payload.topic, response: .response(response)) { _ in }
-        return sessionTopic
+        return (sessionTopic, proposal)
     }
 
     //MARK: - Private
