@@ -1,4 +1,5 @@
 import UIKit
+import SwiftUI
 
 final class SessionDetailsView: UIView {
     
@@ -105,3 +106,17 @@ final class SessionDetailsView: UIView {
     }
 }
 
+struct SessionDetailsView_Previews: PreviewProvider {
+    
+    static func makeSessionDetailsView() -> SessionDetailsView {
+        let view = SessionDetailsView()
+        view.nameLabel.text = "Example name"
+        view.descriptionLabel.text = String.loremIpsum
+        view.urlLabel.text = "example.url"
+        return view
+    }
+    
+    static var previews: some View {
+        makeSessionDetailsView().makePreview()
+    }
+}

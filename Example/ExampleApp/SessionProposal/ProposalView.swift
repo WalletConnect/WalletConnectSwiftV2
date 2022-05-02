@@ -1,4 +1,31 @@
 import UIKit
+import SwiftUI
+
+final class ListItem: UIView {
+    
+    private let label: UILabel = {
+        let label = UILabel()
+        label.textColor = .secondaryLabel
+        return label
+    }()
+    
+    init(text: String) {
+        super.init(frame: .zero)
+        label.text = text
+        label.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(label)
+        NSLayoutConstraint.activate([
+            label.topAnchor.constraint(equalTo: topAnchor),
+            label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            label.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            label.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
 
 final class ProposalView: UIView {
     
@@ -159,28 +186,19 @@ final class ProposalView: UIView {
     }
 }
 
-final class ListItem: UIView {
+struct ProposalView_Previews: PreviewProvider {
     
-    private let label: UILabel = {
-        let label = UILabel()
-        label.textColor = .secondaryLabel
-        return label
-    }()
-    
-    init(text: String) {
-        super.init(frame: .zero)
-        label.text = text
-        label.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(label)
-        NSLayoutConstraint.activate([
-            label.topAnchor.constraint(equalTo: topAnchor),
-            label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            label.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            label.bottomAnchor.constraint(equalTo: bottomAnchor)
-        ])
+    static func makeProposalView() -> ProposalView {
+        let view = ProposalView()
+        view.nameLabel.text = "Example name"
+        view.descriptionLabel.text = String.loremIpsum
+        view.urlLabel.text = "example.url"
+        view.list(chains: ["eip155:1", "cosmos:cosmoshub-2"])
+        view.list(methods: ["eth_sign", "eth_signTransaction"])
+        return view
     }
     
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    static var previews: some View {
+        makeProposalView().makePreview()
     }
 }
