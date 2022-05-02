@@ -242,6 +242,11 @@ final class SessionEngine {
                 relayer.respondError(for: payload, reason: .unauthorizedRPCMethod(request.method))
                 return
             }
+        } else {
+            guard session.hasNamespace(for: nil, method: request.method) else {
+                relayer.respondError(for: payload, reason: .unauthorizedRPCMethod(request.method))
+                return
+            }
         }
         onSessionRequest?(request)
     }

@@ -69,10 +69,17 @@ struct WCSession: ExpirableSequence {
         namespaces.contains{$0.chains.contains(chain)}
     }
     
-    func hasNamespace(for chain: Blockchain, method: String) -> Bool {
-        let namespacesIncludingChain = namespaces.filter{$0.chains.contains(chain)}
-        let methods = namespacesIncludingChain.flatMap{$0.methods}
-        return methods.contains(method)
+    func hasNamespace(for chain: Blockchain?, method: String) -> Bool {
+        if let chain = chain {
+            let namespacesIncludingChain = namespaces.filter{$0.chains.contains(chain)}
+            let methods = namespacesIncludingChain.flatMap{$0.methods}
+            return methods.contains(method)
+        } else {
+            return namespaces
+                .filter { $0.chains.isEmpty }
+                .flatMap { $0.methods }
+                .contains(method)
+        }
     }
     
     func hasNamespace(for chain: Blockchain?,  event: String) -> Bool {
