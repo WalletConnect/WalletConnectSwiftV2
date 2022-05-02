@@ -37,8 +37,9 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
         print("[PROPOSER] Connecting to a pairing...")
         let methods: Set<String> = ["eth_sendTransaction", "personal_sign", "eth_signTypedData"]
         let blockchains: Set<Blockchain> = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
+        let namespaces: Set<Namespace> = [Namespace(chains: blockchains, methods: methods, events: [])]
         DispatchQueue.global().async { [weak self] in
-            self?.client.connect(blockchains: blockchains, methods: methods, events: []) { result in
+            self?.client.connect(namespaces: namespaces) { result in
                 switch result {
                 case .success(let uri):
                     self?.showConnectScreen(uriString: uri!)

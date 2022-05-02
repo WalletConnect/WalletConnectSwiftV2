@@ -26,7 +26,7 @@ jobs:
       run: swift test -v
 
 # Example app builds
-#    - name: Build Example Wallet
-#      run: xcodebuild -project Example/ExampleApp.xcodeproj -scheme Wallet -sdk iphonesimulator
-#    - name: Build Example Dapp
-#      run: xcodebuild -project Example/ExampleApp.xcodeproj -scheme DApp -sdk iphonesimulator
+    - name: Build Example Wallet
+      run: xcodebuild -project Example/ExampleApp.xcodeproj -scheme Wallet -sdk iphonesimulator
+    - name: Build Example Dapp
+      run: xcodebuild -project Example/ExampleApp.xcodeproj -scheme DApp -sdk iphonesimulator

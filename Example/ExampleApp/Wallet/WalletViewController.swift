@@ -150,8 +150,8 @@ extension WalletViewController: ProposalViewControllerDelegate {
         print("[RESPONDER] Approving session...")
         let proposal = currentProposal!
         currentProposal = nil
-        let accounts = Set(proposal.chains.compactMap { Account($0.absoluteString + ":\(account)") })
-        client.approve(proposal: proposal, accounts: accounts, methods: proposal.methods, events: proposal.events)
+        let accounts = Set(proposal.namespaces.first?.chains.compactMap { Account($0.absoluteString + ":\(account)") } ?? [])
+        client.approve(proposal: proposal, accounts: accounts, namespaces: proposal.namespaces)
     }
     
     func didRejectSession() {
@@ -164,8 +164,6 @@ extension WalletViewController: ProposalViewControllerDelegate {
 
 extension WalletViewController: WalletConnectClientDelegate {
     
-    
-
     func didReceive(sessionProposal: Session.Proposal) {
         print("[RESPONDER] WC: Did receive session proposal")
         let appMetadata = sessionProposal.proposer
@@ -174,8 +172,8 @@ extension WalletViewController: WalletConnectClientDelegate {
             descriptionText: appMetadata.description,
             dappURL: appMetadata.url,
             iconURL: appMetadata.icons.first ?? "",
-            chains: Array(sessionProposal.chains.map { $0.absoluteString }),
-            methods: Array(sessionProposal.methods), pendingRequests: [])
+            chains: Array(sessionProposal.namespaces.first?.chains.map { $0.absoluteString } ?? []),
+            methods: Array(sessionProposal.namespaces.first?.methods ?? []), pendingRequests: [])
         currentProposal = sessionProposal
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread
             self.showSessionProposal(info)
@@ -197,11 +195,7 @@ extension WalletViewController: WalletConnectClientDelegate {
 
     }
     
-    func didUpdate(sessionTopic: String, methods: Set<String>) {
-        
-    }
-    
-    func didUpdate(sessionTopic: String, events: Set<String>) {
+    func didUpdate(sessionTopic: String, namespaces: Set<Namespace>) {
         
     }
     

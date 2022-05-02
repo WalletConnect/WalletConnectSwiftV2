@@ -37,11 +37,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didUpdate(sessionTopic: String, accounts: Set<Account>) {
     }
     
-    func didUpdate(sessionTopic: String, methods: Set<String>) {
-        
-    }
-    
-    func didUpdate(sessionTopic: String, events: Set<String>) {
+    func didUpdate(sessionTopic: String, namespaces: Set<Namespace>) {
         
     }
     
