@@ -7,6 +7,6 @@ struct SessionProposal: Codable, Equatable {
     let namespaces: Set<Namespace>
     
     func publicRepresentation() -> Session.Proposal {
-        return Session.Proposal(proposer: proposer.metadata, namespaces: namespaces, proposal: self)
+        return Session.Proposal(id: proposer.publicKey, proposer: proposer.metadata, namespaces: namespaces, proposal: self)
     }
 }

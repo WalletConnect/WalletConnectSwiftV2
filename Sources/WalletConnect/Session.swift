@@ -18,6 +18,7 @@ public struct Session {
 extension Session {
     
     public struct Proposal {
+        public var id: String
         public let proposer: AppMetadata
         public let namespaces: Set<Namespace>
         

@@ -168,11 +168,11 @@ public final class WalletConnectClient {
     ///   - methods: A Set of methods that the dapp will be allowed to request.
     ///   - events: A Set of events
     public func approve(
-        proposerPubKey: String,
+        proposalId: String,
         accounts: Set<Account>,
         namespaces: Set<Namespace>) {
             //TODO - accounts should be validated for matching namespaces
-        guard let (sessionTopic, proposal) = pairingEngine.respondSessionPropose(proposerPubKey: proposerPubKey) else {return}
+        guard let (sessionTopic, proposal) = pairingEngine.respondSessionPropose(proposerPubKey: proposalId) else {return}
             sessionEngine.settle(topic: sessionTopic, proposal: proposal, accounts: accounts, namespaces: namespaces)
     }
     
