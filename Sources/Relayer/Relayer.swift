@@ -80,18 +80,24 @@ public final class Relayer {
         try dispatcher.disconnect(closeCode: closeCode)
     }
     
-//    TODO - Completes when networking client sends a request
-//     error if fails on client side
+    /// Completes when networking client sends a request, error if it fails on client side
     public func publish(
         topic: String,
         payload: String,
-        prompt: Bool = false,
-        completion: @escaping ((Error?) -> ())) {
+        prompt: Bool = false) async throws {
             let params = RelayJSONRPC.PublishParams(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt)
             let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.rawValue, params: params)
             let requestJson = try! request.json()
             logger.debug("Publishing Payload on Topic: \(topic)")
-            dispatcher.send(requestJson, completion: completion)
+            return try await withCheckedThrowingContinuation { continuation in
+                dispatcher.send(requestJson) { error in
+                    if let error = error {
+                        continuation.resume(throwing: error)
+                        return
+                    }
+                    continuation.resume(returning: ())
+                }
+            }
         }
     
     /// Completes with an acknowledgement from the relay network.
