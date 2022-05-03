@@ -7,11 +7,14 @@ struct NewProposalView: View {
     var body: some View {
         VStack {
             VStack(alignment: .center, spacing: 12) {
-                Image("wc-icon")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
+                AsyncImage(url: URL(string: proposal.iconURL)) { phase in
+                    if case .success(let image) = phase {
+                        image.resizable()
+                    } else {
+                        Rectangle().foregroundColor(.secondarySystemBackground)
+                    }
+                }
                     .frame(width: 64, height: 64)
-                    .background(Color.secondarySystemBackground)
                     .clipShape(Circle())
                     .padding(.top, 32)
                 Text(proposal.proposerName)
@@ -112,6 +115,6 @@ struct NewProposalView_Previews: PreviewProvider {
     
     static var previews: some View {
         NewProposalView()
-        NewProposalView().preferredColorScheme(.dark)
+//        NewProposalView().preferredColorScheme(.dark)
     }
 }
