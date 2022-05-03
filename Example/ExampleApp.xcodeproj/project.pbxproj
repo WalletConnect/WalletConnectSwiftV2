@@ -21,6 +21,7 @@
 		764E1D4C26F8D3FE00A1FB15 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 764E1D4A26F8D3FE00A1FB15 /* LaunchScreen.storyboard */; };
 		764E1D5826F8DBAB00A1FB15 /* WalletConnect in Frameworks */ = {isa = PBXBuildFile; productRef = 764E1D5726F8DBAB00A1FB15 /* WalletConnect */; };
 		764E1D5A26F8DF1B00A1FB15 /* ScannerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764E1D5926F8DF1B00A1FB15 /* ScannerViewController.swift */; };
+		765056272821989600F9AE79 /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 765056262821989600F9AE79 /* Color+Extension.swift */; };
 		76744CF726FE4D5400B77ED9 /* ActiveSessionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */; };
 		76744CF926FE4D7400B77ED9 /* ActiveSessionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */; };
 		76B6E39F2807A3B6004DF775 /* WalletViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76B6E39E2807A3B6004DF775 /* WalletViewController.swift */; };
@@ -96,6 +97,7 @@
 		764E1D5526F8DADE00A1FB15 /* WalletConnectSwiftV2 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WalletConnectSwiftV2; path = ..; sourceTree = "<group>"; };
 		764E1D5626F8DB6000A1FB15 /* WalletConnectSwiftV2 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WalletConnectSwiftV2; path = ..; sourceTree = "<group>"; };
 		764E1D5926F8DF1B00A1FB15 /* ScannerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerViewController.swift; sourceTree = "<group>"; };
+		765056262821989600F9AE79 /* Color+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extension.swift"; sourceTree = "<group>"; };
 		76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionItem.swift; sourceTree = "<group>"; };
 		76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionCell.swift; sourceTree = "<group>"; };
 		76B6E39E2807A3B6004DF775 /* WalletViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WalletViewController.swift; sourceTree = "<group>"; };
@@ -180,6 +182,7 @@
 				761C64A526FCB0AA004239D1 /* SessionInfo.swift */,
 				84F568C32795832A00D0A289 /* EthereumTransaction.swift */,
 				84F568C1279582D200D0A289 /* Signer.swift */,
+				765056262821989600F9AE79 /* Color+Extension.swift */,
 				84494387278D9C1B00CC26BB /* UIAlertController.swift */,
 				76235E882820198B004ED0AA /* UIKit+Previews.swift */,
 				76235E8A28201C9C004ED0AA /* Utilities.swift */,
@@ -508,6 +511,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				76235E892820198B004ED0AA /* UIKit+Previews.swift in Sources */,
+				765056272821989600F9AE79 /* Color+Extension.swift in Sources */,
 				76235E8F282026BF004ED0AA /* NewProposalView.swift in Sources */,
 				76235E8D28202043004ED0AA /* RequestView.swift in Sources */,
 				8460DCFC274F98A10081F94C /* RequestViewController.swift in Sources */,
