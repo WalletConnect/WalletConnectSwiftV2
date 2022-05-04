@@ -122,7 +122,9 @@ final class ClientTests: XCTestCase {
             self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [])
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
-            self.proposer.client.disconnect(topic: settledSession.topic, reason: Reason(code: 5900, message: "User disconnected session"))
+            Task {
+                try await self.proposer.client.disconnect(topic: settledSession.topic, reason: Reason(code: 5900, message: "User disconnected session"))
+            }
         }
         responder.onSessionDelete = {
             sessionDeleteExpectation.fulfill()

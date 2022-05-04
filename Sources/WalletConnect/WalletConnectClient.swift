@@ -271,8 +271,8 @@ public final class WalletConnectClient {
     /// - Parameters:
     ///   - topic: Session topic that you want to delete
     ///   - reason: Reason of session deletion
-    public func disconnect(topic: String, reason: Reason) {
-        sessionEngine.delete(topic: topic, reason: reason)
+    public func disconnect(topic: String, reason: Reason) async throws {
+        try await sessionEngine.delete(topic: topic, reason: reason)
     }
     
     /// - Returns: All settled sessions that are active

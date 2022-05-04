@@ -59,11 +59,11 @@ final class SessionEngine {
         sessionStore.getAcknowledgedSessions().map{$0.publicRepresentation()}
     }
     
-    func delete(topic: String, reason: Reason) {
+    func delete(topic: String, reason: Reason) async throws {
         logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
         sessionStore.delete(topic: topic)
         networkingInteractor.unsubscribe(topic: topic)
-        networkingInteractor.request(.wcSessionDelete(reason.internalRepresentation()), onTopic: topic)
+        try await networkingInteractor.request(.wcSessionDelete(reason.internalRepresentation()), onTopic: topic)
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
