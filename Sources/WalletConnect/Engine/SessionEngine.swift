@@ -90,8 +90,7 @@ final class SessionEngine {
         }
         let request = SessionType.RequestParams.Request(method: params.method, params: params.params)
         let sessionRequestParams = SessionType.RequestParams(request: request, chainId: params.chainId)
-        let sessionRequest = WCRequest(id: params.id, method: .sessionRequest, params: .sessionRequest(sessionRequestParams))
-        try await networkingInteractor.request(topic: params.topic, payload: sessionRequest)
+        try await networkingInteractor.request(.wcSessionRequest(sessionRequestParams), onTopic: params.topic)
     }
     
     func respondSessionRequest(topic: String, response: JsonRpcResult) {

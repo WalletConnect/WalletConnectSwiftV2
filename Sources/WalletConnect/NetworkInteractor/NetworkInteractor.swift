@@ -22,7 +22,7 @@ protocol NetworkInteracting: AnyObject {
     var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
     var responsePublisher: AnyPublisher<WCResponse, Never> {get}
     /// Completes when request sent from a networking client
-    func request(topic: String, payload: WCRequest) async throws
+    func request(_ wcMethod: WCMethod, onTopic topic: String) async throws
     /// Completes with an acknowledgement from the relay network
     func requestNetworkAck(_ wcMethod: WCMethod, onTopic topic: String, completion: @escaping ((Error?) -> ()))
     /// Completes with a peer response
