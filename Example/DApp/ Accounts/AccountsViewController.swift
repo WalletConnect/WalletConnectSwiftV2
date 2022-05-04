@@ -50,8 +50,17 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
     
     @objc
     private func disconnect() {
-        client.disconnect(topic: session.topic, reason: Reason(code: 0, message: "disconnect"))
-        onDisconnect?()
+        Task {
+            do {
+                try await client.disconnect(topic: session.topic, reason: Reason(code: 0, message: "disconnect"))
+                DispatchQueue.main.async { [weak self] in
+                    self?.onDisconnect?()
+                }
+            } catch {
+                print(error)
+                //show failure alert
+            }
+        }
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

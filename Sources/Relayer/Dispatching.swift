@@ -32,12 +32,12 @@ final class Dispatcher: NSObject, Dispatching {
 
     func send(_ string: String, completion: @escaping (Error?) -> Void) {
         //TODO - add policy for retry and "single try"
-        if socket.isConnected {
-            self.socket.send(string, completionHandler: completion)
-            //TODO - enqueue     if fails
-        } else {
-            textFramesQueue.enqueue(string)
-        }
+        //        if socket.isConnected {
+        self.socket.send(string, completionHandler: completion)
+        //TODO - enqueue     if fails
+        //        } else {
+        //            textFramesQueue.enqueue(string)
+        //        }
     }
     
     func connect() throws {
