@@ -59,10 +59,9 @@ final class WalletViewController: UIViewController {
         present(alert, animated: true)
     }
     
-    private func showSessionProposal(_ info: SessionInfo) {
-        let proposalViewController = ProposalViewController(proposal: Proposal.mock())
+    private func showSessionProposal(_ proposal: Proposal) {
+        let proposalViewController = ProposalViewController(proposal: proposal)
         proposalViewController.delegate = self
-//        proposalViewController.show(info)
         present(proposalViewController, animated: true)
     }
     
@@ -164,19 +163,20 @@ extension WalletViewController: ProposalViewControllerDelegate {
 
 extension WalletViewController: WalletConnectClientDelegate {
     
+    // TODO: Adapt proposal data to be used on the view
     func didReceive(sessionProposal: Session.Proposal) {
         print("[RESPONDER] WC: Did receive session proposal")
-        let appMetadata = sessionProposal.proposer
-        let info = SessionInfo(
-            name: appMetadata.name,
-            descriptionText: appMetadata.description,
-            dappURL: appMetadata.url,
-            iconURL: appMetadata.icons.first ?? "",
-            chains: Array(sessionProposal.namespaces.first?.chains.map { $0.absoluteString } ?? []),
-            methods: Array(sessionProposal.namespaces.first?.methods ?? []), pendingRequests: [])
+//        let appMetadata = sessionProposal.proposer
+//        let info = SessionInfo(
+//            name: appMetadata.name,
+//            descriptionText: appMetadata.description,
+//            dappURL: appMetadata.url,
+//            iconURL: appMetadata.icons.first ?? "",
+//            chains: Array(sessionProposal.namespaces.first?.chains.map { $0.absoluteString } ?? []),
+//            methods: Array(sessionProposal.namespaces.first?.methods ?? []), pendingRequests: [])
         currentProposal = sessionProposal
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread
-            self.showSessionProposal(info)
+            self.showSessionProposal(Proposal.mock()) // FIXME: Remove mock
         }
     }
 
