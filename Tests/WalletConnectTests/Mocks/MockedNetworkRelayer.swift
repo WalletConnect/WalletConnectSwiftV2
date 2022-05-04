@@ -3,6 +3,11 @@ import Foundation
 @testable import WalletConnect
 
 class MockedNetworkRelayer: NetworkRelaying {
+    func publish(topic: String, payload: String, prompt: Bool) async throws {
+        self.prompt = prompt
+
+    }
+    
     var onConnect: (() -> ())?
     var onMessage: ((String, String) -> ())?
     var error: Error?

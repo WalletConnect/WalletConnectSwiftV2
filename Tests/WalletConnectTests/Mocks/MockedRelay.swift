@@ -6,6 +6,11 @@ import WalletConnectUtils
 @testable import TestingUtils
 
 class MockedWCRelay: WalletConnectRelaying {
+    func request(topic: String, payload: WCRequest) async throws {
+        requestCallCount += 1
+        requests.append((topic, payload))
+    }
+    
     let responsePublisherSubject = PassthroughSubject<WCResponse, Never>()
     private(set) var subscriptions: [String] = []
     private(set) var unsubscriptions: [String] = []

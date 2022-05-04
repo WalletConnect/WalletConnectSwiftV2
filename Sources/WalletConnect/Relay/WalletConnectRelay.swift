@@ -20,8 +20,7 @@ protocol WalletConnectRelaying: AnyObject {
     var responsePublisher: AnyPublisher<WCResponse, Never> {get}
     /// Completes with a peer response
     func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
-    /// Completes with a peer response
-    func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
+    func request(topic: String, payload: WCRequest) async throws
     /// Completes with an acknowledgement from the relay network
     func requestNetworkAck(_ wcMethod: WCMethod, onTopic topic: String, completion: @escaping ((Error?) -> ()))
     func respond(topic: String, response: JsonRpcResult, completion: @escaping ((Error?)->()))
@@ -75,17 +74,27 @@ class WalletConnectRelay: WalletConnectRelaying {
         setUpPublishers()
     }
     
+    func request(_ wcMethod: WCMethod, onTopic topic: String) async throws {
+        try await request(topic: topic, payload: wcMethod.asRequest())
+    }
+    
+    /// Completes when networking client sends a request
+    func request(topic: String, payload: WCRequest) async throws {
+        try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
+        let message = try serializer.serialize(topic: topic, encodable: payload)
+        let prompt = shouldPrompt(payload.method)
+        try await networkRelayer.publish(topic: topic, payload: message, prompt: prompt)
+    }
+    
+    
+    
+    
+    
+    
     func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ())?) {
         request(topic: topic, payload: wcMethod.asRequest(), completion: completion)
     }
     
-    ///TODO - Completes when networking client sends a request
-    func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Error)->())) {
-        
-    }
-    
-    /// Completes with response from peer
-    /// TODO - rename to distinguish all requests types
     func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?) {
         do {
             try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
@@ -118,6 +127,15 @@ class WalletConnectRelay: WalletConnectRelaying {
             logger.error(error)
         }
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     /// Completes with an acknowledgement from the relay network.
     /// completes with error if networking client was not able to send a message

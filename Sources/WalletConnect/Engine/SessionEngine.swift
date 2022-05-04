@@ -71,18 +71,10 @@ final class SessionEngine {
             logger.debug("Could not find session to ping for topic \(topic)")
             return
         }
-        relayer.request(.wcSessionPing, onTopic: topic) { [unowned self] result in
-            switch result {
-            case .success(_):
-                logger.debug("Did receive ping response")
-                completion(.success(()))
-            case .failure(let error):
-                logger.debug("error: \(error)")
-            }
-        }
+        relayer.request(.wcSessionPing, onTopic: topic)
     }
     
-    func request(params: Request) {
+    func request(params: Request) async throws {
         print("will request on session topic: \(params.topic)")
         guard sessionStore.hasSession(forTopic: params.topic) else {
             logger.debug("Could not find session for topic \(params.topic)")
@@ -91,14 +83,7 @@ final class SessionEngine {
         let request = SessionType.RequestParams.Request(method: params.method, params: params.params)
         let sessionRequestParams = SessionType.RequestParams(request: request, chainId: params.chainId)
         let sessionRequest = WCRequest(id: params.id, method: .sessionRequest, params: .sessionRequest(sessionRequestParams))
-        relayer.request(topic: params.topic, payload: sessionRequest) { [weak self] result in
-            switch result {
-            case .success(_):
-                self?.logger.debug("Did receive session payload response")
-            case .failure(let error):
-                self?.logger.debug("error: \(error)")
-            }
-        }
+        try await relayer.request(topic: params.topic, payload: sessionRequest)
     }
     
     func respondSessionRequest(topic: String, response: JsonRpcResult) {
@@ -125,14 +110,7 @@ final class SessionEngine {
             guard session.hasNamespace(for: chainId, event: event.name) else {
                 throw WalletConnectError.invalidEvent
             }
-            relayer.request(.wcSessionEvent(params), onTopic: topic) { result in
-                switch result {
-                case .success(_):
-                    completion?(nil)
-                case .failure(let error):
-                    completion?(error)
-                }
-            }
+            relayer.request(.wcSessionEvent(params), onTopic: topic)
         } catch let error as WalletConnectError {
             logger.error(error)
             completion?(error)
@@ -239,12 +217,12 @@ final class SessionEngine {
                 return
             }
             guard session.hasNamespace(for: chain, method: request.method) else {
-                relayer.respondError(for: payload, reason: .unauthorizedRPCMethod(request.method))
+                relayer.respondError(for: payload, reason: .unauthorizedMethod(request.method))
                 return
             }
         } else {
             guard session.hasNamespace(for: nil, method: request.method) else {
-                relayer.respondError(for: payload, reason: .unauthorizedRPCMethod(request.method))
+                relayer.respondError(for: payload, reason: .unauthorizedMethod(request.method))
                 return
             }
         }
@@ -264,7 +242,7 @@ final class SessionEngine {
         }
         guard session.peerIsController,
               session.hasNamespace(for: eventParams.chainId, event: event.name) else {
-            relayer.respondError(for: payload, reason: .unauthorizedEventType(event.name))
+            relayer.respondError(for: payload, reason: .unauthorizedEvent(event.name))
             return
         }
         relayer.respondSuccess(for: payload)

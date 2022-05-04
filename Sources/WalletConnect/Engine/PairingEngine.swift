@@ -101,15 +101,7 @@ final class PairingEngine {
             logger.debug("Could not find pairing to ping for topic \(topic)")
             return
         }
-        relayer.request(.wcPairingPing, onTopic: topic) { [unowned self] result in
-            switch result {
-            case .success(_):
-                logger.debug("Did receive ping response")
-                completion(.success(()))
-            case .failure(let error):
-                logger.debug("error: \(error)")
-            }
-        }
+        relayer.request(.wcPairingPing, onTopic: topic)
     }
     
     func reject(proposal: SessionProposal, reason: ReasonCode) {

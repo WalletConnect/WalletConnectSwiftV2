@@ -213,8 +213,8 @@ public final class WalletConnectClient {
     /// For the proposer to send JSON-RPC requests to responding peer.
     /// - Parameters:
     ///   - params: Parameters defining request and related session
-    public func request(params: Request) {
-        sessionEngine.request(params: params)
+    public func request(params: Request) async throws {
+        try await sessionEngine.request(params: params)
     }
     
     /// For the responder to respond on pending peer's session JSON-RPC Request

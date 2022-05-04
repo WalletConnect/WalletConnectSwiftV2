@@ -144,7 +144,9 @@ final class ClientTests: XCTestCase {
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
             let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: Blockchain("eip155:1")!)
-            self.proposer.client.request(params: requestParams)
+            Task {
+                try await self.proposer.client.request(params: requestParams)
+            }
         }
         proposer.onSessionResponse = { response in
             switch response.result {
@@ -180,7 +182,9 @@ final class ClientTests: XCTestCase {
         }
         proposer.onSessionSettled = {[unowned self]  settledSession in
             let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: Blockchain("eip155:1")!)
-            self.proposer.client.request(params: requestParams)
+            Task {
+                try await self.proposer.client.request(params: requestParams)
+            }
         }
         proposer.onSessionResponse = { response in
             switch response.result {
