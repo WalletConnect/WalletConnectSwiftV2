@@ -21,6 +21,7 @@ protocol WalletConnectRelaying: AnyObject {
     /// Completes with a peer response
     func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
     func request(topic: String, payload: WCRequest) async throws
+    func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
     /// Completes with an acknowledgement from the relay network
     func requestNetworkAck(_ wcMethod: WCMethod, onTopic topic: String, completion: @escaping ((Error?) -> ()))
     func respond(topic: String, response: JsonRpcResult, completion: @escaping ((Error?)->()))
@@ -127,15 +128,6 @@ class WalletConnectRelay: WalletConnectRelaying {
             logger.error(error)
         }
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     /// Completes with an acknowledgement from the relay network.
     /// completes with error if networking client was not able to send a message

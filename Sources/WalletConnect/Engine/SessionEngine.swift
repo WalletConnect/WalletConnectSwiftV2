@@ -71,7 +71,15 @@ final class SessionEngine {
             logger.debug("Could not find session to ping for topic \(topic)")
             return
         }
-        relayer.request(.wcSessionPing, onTopic: topic)
+        relayer.request(.wcSessionPing, onTopic: topic) { [unowned self] result in
+            switch result {
+            case .success(_):
+                logger.debug("Did receive ping response")
+                completion(.success(()))
+            case .failure(let error):
+                logger.debug("error: \(error)")
+            }
+        }
     }
     
     func request(params: Request) async throws {
