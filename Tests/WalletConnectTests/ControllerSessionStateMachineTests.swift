@@ -7,19 +7,19 @@ import WalletConnectKMS
 
 class ControllerSessionStateMachineTests: XCTestCase {
     var sut: ControllerSessionStateMachine!
-    var relayMock: MockedWCRelay!
+    var networkingInteractor: MockedWCRelay!
     var storageMock: WCSessionStorageMock!
     var cryptoMock: KeyManagementServiceMock!
     
     override func setUp() {
-        relayMock = MockedWCRelay()
+        networkingInteractor = MockedWCRelay()
         storageMock = WCSessionStorageMock()
         cryptoMock = KeyManagementServiceMock()
-        sut = ControllerSessionStateMachine(relay: relayMock, kms: cryptoMock, sessionStore: storageMock, logger: ConsoleLoggerMock())
+        sut = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: cryptoMock, sessionStore: storageMock, logger: ConsoleLoggerMock())
     }
     
     override func tearDown() {
-        relayMock = nil
+        networkingInteractor = nil
         storageMock = nil
         cryptoMock = nil
         sut = nil
@@ -32,7 +32,7 @@ class ControllerSessionStateMachineTests: XCTestCase {
         let session = WCSession.stub(isSelfController: true)
         storageMock.setSession(session)
         try sut.updateAccounts(topic: session.topic, accounts: updateAccounts.toAccountSet())
-        XCTAssertTrue(relayMock.didCallRequest)
+        XCTAssertTrue(networkingInteractor.didCallRequest)
     }
     
     func testUpdateErrorIfNonController() {
@@ -62,7 +62,7 @@ class ControllerSessionStateMachineTests: XCTestCase {
         let namespacesToUpdate: Set<Namespace> = [Namespace(chains: [Blockchain("eip155:11")!], methods: ["m1", "m2"], events: ["e1", "e2"])]
         try sut.updateNamespaces(topic: session.topic, namespaces: namespacesToUpdate)
         let updatedSession = storageMock.getSession(forTopic: session.topic)
-        XCTAssertTrue(relayMock.didCallRequest)
+        XCTAssertTrue(networkingInteractor.didCallRequest)
         XCTAssertEqual(namespacesToUpdate, updatedSession?.namespaces)
     }
     

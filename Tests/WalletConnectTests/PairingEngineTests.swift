@@ -12,7 +12,7 @@ final class PairingEngineTests: XCTestCase {
     
     var engine: PairingEngine!
     
-    var relayMock: MockedWCRelay!
+    var networkingInteractor: MockedWCRelay!
     var storageMock: WCPairingStorageMock!
     var cryptoMock: KeyManagementServiceMock!
     var proposalPayloadsStore: KeyValueStore<WCRequestSubscriptionPayload>!
@@ -20,7 +20,7 @@ final class PairingEngineTests: XCTestCase {
     var topicGenerator: TopicGenerator!
     
     override func setUp() {
-        relayMock = MockedWCRelay()
+        networkingInteractor = MockedWCRelay()
         storageMock = WCPairingStorageMock()
         cryptoMock = KeyManagementServiceMock()
         topicGenerator = TopicGenerator()
@@ -29,7 +29,7 @@ final class PairingEngineTests: XCTestCase {
     }
     
     override func tearDown() {
-        relayMock = nil
+        networkingInteractor = nil
         storageMock = nil
         cryptoMock = nil
         topicGenerator = nil
@@ -40,7 +40,7 @@ final class PairingEngineTests: XCTestCase {
         let meta = AppMetadata.stub()
         let logger = ConsoleLoggerMock()
         engine = PairingEngine(
-            relay: relayMock,
+            networkingInteractor: networkingInteractor,
             kms: cryptoMock,
             pairingStore: storageMock,
             sessionToPairingTopic: KeyValueStore<String>(defaults: RuntimeKeyValueStorage(), identifier: ""),
@@ -65,7 +65,7 @@ final class PairingEngineTests: XCTestCase {
         let uri = engine.create()!
         XCTAssert(cryptoMock.hasSymmetricKey(for: uri.topic), "Proposer must store the symmetric key matching the URI.")
         XCTAssert(storageMock.hasPairing(forTopic: uri.topic), "The engine must store a pairing after creating one")
-        XCTAssert(relayMock.didSubscribe(to: uri.topic), "Proposer must subscribe to pairing topic.")
+        XCTAssert(networkingInteractor.didSubscribe(to: uri.topic), "Proposer must subscribe to pairing topic.")
         XCTAssert(storageMock.getPairing(forTopic: uri.topic)?.active == false, "Recently created pairing must be inactive.")
     }
     
@@ -73,7 +73,7 @@ final class PairingEngineTests: XCTestCase {
         let uri = WalletConnectURI.stub()
         let topic = uri.topic
         try! engine.pair(uri)
-        XCTAssert(relayMock.didSubscribe(to: topic), "Responder must subscribe to pairing topic.")
+        XCTAssert(networkingInteractor.didSubscribe(to: topic), "Responder must subscribe to pairing topic.")
         XCTAssert(cryptoMock.hasSymmetricKey(for: topic), "Responder must store the symmetric key matching the pairing topic")
         XCTAssert(storageMock.hasPairing(forTopic: topic), "The engine must store a pairing")
     }
@@ -85,8 +85,8 @@ final class PairingEngineTests: XCTestCase {
         
         engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions) {_ in}
         
-        guard let publishTopic = relayMock.requests.first?.topic,
-              let proposal = relayMock.requests.first?.request.sessionProposal else {
+        guard let publishTopic = networkingInteractor.requests.first?.topic,
+              let proposal = networkingInteractor.requests.first?.request.sessionProposal else {
                   XCTFail("Proposer must publish a proposal request."); return
               }
         XCTAssert(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must store the private key matching the public key sent through the proposal.")
@@ -105,7 +105,7 @@ final class PairingEngineTests: XCTestCase {
         engine.onSessionProposal = { _ in
             sessionProposed = true
         }
-        relayMock.wcRequestPublisherSubject.send(payload)
+        networkingInteractor.wcRequestPublisherSubject.send(payload)
         XCTAssertNotNil(try! proposalPayloadsStore.get(key: proposal.proposer.publicKey), "Proposer must store proposal payload")
         XCTAssertTrue(sessionProposed)
     }
@@ -117,11 +117,11 @@ final class PairingEngineTests: XCTestCase {
         let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
         let request = WCRequest(method: .sessionPropose, params: .sessionPropose(proposal))
         let payload = WCRequestSubscriptionPayload(topic: topicA, wcRequest: request)
-        relayMock.wcRequestPublisherSubject.send(payload)
+        networkingInteractor.wcRequestPublisherSubject.send(payload)
         let (topicB, _) = engine.respondSessionPropose(proposerPubKey: proposal.proposer.publicKey)!
         
         XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must store agreement key for topic B")
-        XCTAssertEqual(relayMock.didRespondOnTopic!, topicA, "Responder must respond on topic A")
+        XCTAssertEqual(networkingInteractor.didRespondOnTopic!, topicA, "Responder must respond on topic A")
     }
     
     func testHandleSessionProposeResponse() {
@@ -133,8 +133,8 @@ final class PairingEngineTests: XCTestCase {
         // Client proposes session
         engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions){_ in}
         
-        guard let request = relayMock.requests.first?.request,
-              let proposal = relayMock.requests.first?.request.sessionProposal else {
+        guard let request = networkingInteractor.requests.first?.request,
+              let proposal = networkingInteractor.requests.first?.request.sessionProposal else {
                   XCTFail("Proposer must publish session proposal request"); return
               }
         
@@ -154,7 +154,7 @@ final class PairingEngineTests: XCTestCase {
         engine.onProposeResponse = { topic in
             sessionTopic = topic
         }
-        relayMock.onPairingResponse?(response)
+        networkingInteractor.onPairingResponse?(response)
         let privateKey = try! cryptoMock.getPrivateKey(for: proposal.proposer.publicKey)!
         let topicB = deriveTopic(publicKey: responder.publicKey, privateKey: privateKey)
         
@@ -173,15 +173,15 @@ final class PairingEngineTests: XCTestCase {
         // Client propose session
         engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions){_ in}
         
-        guard let request = relayMock.requests.first?.request,
-              let proposal = relayMock.requests.first?.request.sessionProposal else {
+        guard let request = networkingInteractor.requests.first?.request,
+              let proposal = networkingInteractor.requests.first?.request.sessionProposal else {
                   XCTFail("Proposer must publish session proposal request"); return
               }
         
         let response = WCResponse.stubError(forRequest: request, topic: topicA)
-        relayMock.onPairingResponse?(response)
+        networkingInteractor.onPairingResponse?(response)
         
-        XCTAssert(relayMock.didUnsubscribe(to: pairing.topic), "Proposer must unsubscribe if pairing is inactive.")
+        XCTAssert(networkingInteractor.didUnsubscribe(to: pairing.topic), "Proposer must unsubscribe if pairing is inactive.")
         XCTAssertFalse(storageMock.hasPairing(forTopic: pairing.topic), "Proposer must delete an inactive pairing.")
         XCTAssertFalse(cryptoMock.hasSymmetricKey(for: pairing.topic), "Proposer must delete symmetric key if pairing is inactive.")
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must remove private key for rejected session")
@@ -196,8 +196,8 @@ final class PairingEngineTests: XCTestCase {
         // Client propose session
         engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions){_ in}
         
-        guard let request = relayMock.requests.first?.request,
-              let proposal = relayMock.requests.first?.request.sessionProposal else {
+        guard let request = networkingInteractor.requests.first?.request,
+              let proposal = networkingInteractor.requests.first?.request.sessionProposal else {
                   XCTFail("Proposer must publish session proposal request"); return
               }
         
@@ -206,9 +206,9 @@ final class PairingEngineTests: XCTestCase {
         storageMock.setPairing(storedPairing)
         
         let response = WCResponse.stubError(forRequest: request, topic: topicA)
-        relayMock.onPairingResponse?(response)
+        networkingInteractor.onPairingResponse?(response)
         
-        XCTAssertFalse(relayMock.didUnsubscribe(to: pairing.topic), "Proposer must not unsubscribe if pairing is active.")
+        XCTAssertFalse(networkingInteractor.didUnsubscribe(to: pairing.topic), "Proposer must not unsubscribe if pairing is active.")
         XCTAssert(storageMock.hasPairing(forTopic: pairing.topic), "Proposer must not delete an active pairing.")
         XCTAssert(cryptoMock.hasSymmetricKey(for: pairing.topic), "Proposer must not delete symmetric key if pairing is active.")
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must remove private key for rejected session")
@@ -219,6 +219,6 @@ final class PairingEngineTests: XCTestCase {
         let pairing = storageMock.getPairing(forTopic: uri.topic)!
         storageMock.onPairingExpiration?(pairing)
         XCTAssertFalse(cryptoMock.hasSymmetricKey(for: uri.topic))
-        XCTAssert(relayMock.didUnsubscribe(to: uri.topic))
+        XCTAssert(networkingInteractor.didUnsubscribe(to: uri.topic))
     }
 }

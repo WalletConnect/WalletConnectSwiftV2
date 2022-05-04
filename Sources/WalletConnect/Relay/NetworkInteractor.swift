@@ -12,7 +12,7 @@ struct WCResponse: Codable {
     let result: JsonRpcResult
 }
 
-protocol WalletConnectRelaying: AnyObject {
+protocol NetworkInteracting: AnyObject {
     //// TODO - both methods to remove, use Publishers instead
     var onPairingResponse: ((WCResponse) -> Void)? {get set} // Temporary workaround
     var onResponse: ((WCResponse) -> Void)? {get set}
@@ -34,13 +34,13 @@ protocol WalletConnectRelaying: AnyObject {
     func unsubscribe(topic: String)
 }
 
-extension WalletConnectRelaying {
+extension NetworkInteracting {
     func request(_ wcMethod: WCMethod, onTopic topic: String) {
         requestPeerResponse(wcMethod, onTopic: topic, completion: nil)
     }
 }
 
-class WalletConnectRelay: WalletConnectRelaying {
+class NetworkInteractor: NetworkInteracting {
     
     var onPairingResponse: ((WCResponse) -> Void)?
     var onResponse: ((WCResponse) -> Void)?

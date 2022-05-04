@@ -15,14 +15,14 @@ final class SessionEngine {
     private let sessionStore: WCSessionStorage
     private let pairingStore: WCPairingStorage
     private let sessionToPairingTopic: KeyValueStore<String>
-    private let relayer: WalletConnectRelaying
+    private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private var metadata: AppMetadata
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
     private let topicInitializer: () -> String
 
-    init(relay: WalletConnectRelaying,
+    init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
          pairingStore: WCPairingStorage,
          sessionStore: WCSessionStorage,
@@ -30,7 +30,7 @@ final class SessionEngine {
          metadata: AppMetadata,
          logger: ConsoleLogging,
          topicGenerator: @escaping () -> String = String.generateTopic) {
-        self.relayer = relay
+        self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.metadata = metadata
         self.sessionStore = sessionStore
@@ -42,13 +42,13 @@ final class SessionEngine {
         setupExpirationHandling()
         restoreSubscriptions()
         
-        relayer.onResponse = { [weak self] in
+        networkingInteractor.onResponse = { [weak self] in
             self?.handleResponse($0)
         }
     }
     
     func setSubscription(topic: String) {
-        relayer.subscribe(topic: topic)
+        networkingInteractor.subscribe(topic: topic)
     }
     
     func hasSession(for topic: String) -> Bool {
@@ -62,8 +62,8 @@ final class SessionEngine {
     func delete(topic: String, reason: Reason) {
         logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
         sessionStore.delete(topic: topic)
-        relayer.unsubscribe(topic: topic)
-        relayer.request(.wcSessionDelete(reason.internalRepresentation()), onTopic: topic)
+        networkingInteractor.unsubscribe(topic: topic)
+        networkingInteractor.request(.wcSessionDelete(reason.internalRepresentation()), onTopic: topic)
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
@@ -71,7 +71,7 @@ final class SessionEngine {
             logger.debug("Could not find session to ping for topic \(topic)")
             return
         }
-        relayer.requestPeerResponse(.wcSessionPing, onTopic: topic) { [unowned self] result in
+        networkingInteractor.requestPeerResponse(.wcSessionPing, onTopic: topic) { [unowned self] result in
             switch result {
             case .success(_):
                 logger.debug("Did receive ping response")
@@ -91,7 +91,7 @@ final class SessionEngine {
         let request = SessionType.RequestParams.Request(method: params.method, params: params.params)
         let sessionRequestParams = SessionType.RequestParams(request: request, chainId: params.chainId)
         let sessionRequest = WCRequest(id: params.id, method: .sessionRequest, params: .sessionRequest(sessionRequestParams))
-        try await relayer.request(topic: params.topic, payload: sessionRequest)
+        try await networkingInteractor.request(topic: params.topic, payload: sessionRequest)
     }
     
     func respondSessionRequest(topic: String, response: JsonRpcResult) {
@@ -99,7 +99,7 @@ final class SessionEngine {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
-        relayer.respond(topic: topic, response: response) { [weak self] error in
+        networkingInteractor.respond(topic: topic, response: response) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Could not send session payload, error: \(error.localizedDescription)")
             } else {
@@ -118,7 +118,7 @@ final class SessionEngine {
             guard session.hasNamespace(for: chainId, event: event.name) else {
                 throw WalletConnectError.invalidEvent
             }
-            relayer.request(.wcSessionEvent(params), onTopic: topic)
+            networkingInteractor.request(.wcSessionEvent(params), onTopic: topic)
         } catch let error as WalletConnectError {
             logger.error(error)
             completion?(error)
@@ -128,7 +128,7 @@ final class SessionEngine {
     //MARK: - Private
     
     private func setUpWCRequestHandling() {
-        relayer.wcRequestPublisher.sink  { [unowned self] subscriptionPayload in
+        networkingInteractor.wcRequestPublisher.sink  { [unowned self] subscriptionPayload in
             switch subscriptionPayload.wcRequest.params {
             case .sessionSettle(let settleParams):
                 onSessionSettle(payload: subscriptionPayload, settleParams: settleParams)
@@ -165,10 +165,10 @@ final class SessionEngine {
             settleParams: settleParams,
             acknowledged: false)
         
-        relayer.subscribe(topic: topic)
+        networkingInteractor.subscribe(topic: topic)
         sessionStore.setSession(session)
         
-        relayer.request(.wcSessionSettle(settleParams), onTopic: topic)
+        networkingInteractor.request(.wcSessionSettle(settleParams), onTopic: topic)
     }
 
     private func onSessionSettle(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
@@ -189,19 +189,19 @@ final class SessionEngine {
                                       settleParams: settleParams,
                                       acknowledged: true)
         sessionStore.setSession(session)
-        relayer.respondSuccess(for: payload)
+        networkingInteractor.respondSuccess(for: payload)
         onSessionSettle?(session.publicRepresentation())
     }
     
     private func onSessionDelete(_ payload: WCRequestSubscriptionPayload, deleteParams: SessionType.DeleteParams) {
         let topic = payload.topic
         guard sessionStore.hasSession(forTopic: topic) else {
-            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
+            networkingInteractor.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
         }
         sessionStore.delete(topic: topic)
-        relayer.unsubscribe(topic: topic)
-        relayer.respondSuccess(for: payload)
+        networkingInteractor.unsubscribe(topic: topic)
+        networkingInteractor.respondSuccess(for: payload)
         onSessionDelete?(topic, deleteParams)
     }
     
@@ -216,21 +216,21 @@ final class SessionEngine {
             chainId: payloadParams.chainId)
         
         guard let session = sessionStore.getSession(forTopic: topic) else {
-            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
+            networkingInteractor.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
         }
         if let chain = request.chainId {
             guard session.hasNamespace(for: chain) else {
-                relayer.respondError(for: payload, reason: .unauthorizedTargetChain(chain.absoluteString))
+                networkingInteractor.respondError(for: payload, reason: .unauthorizedTargetChain(chain.absoluteString))
                 return
             }
             guard session.hasNamespace(for: chain, method: request.method) else {
-                relayer.respondError(for: payload, reason: .unauthorizedMethod(request.method))
+                networkingInteractor.respondError(for: payload, reason: .unauthorizedMethod(request.method))
                 return
             }
         } else {
             guard session.hasNamespace(for: nil, method: request.method) else {
-                relayer.respondError(for: payload, reason: .unauthorizedMethod(request.method))
+                networkingInteractor.respondError(for: payload, reason: .unauthorizedMethod(request.method))
                 return
             }
         }
@@ -238,22 +238,22 @@ final class SessionEngine {
     }
     
     private func onSessionPing(_ payload: WCRequestSubscriptionPayload) {
-        relayer.respondSuccess(for: payload)
+        networkingInteractor.respondSuccess(for: payload)
     }
     
     private func onSessionEvent(_ payload: WCRequestSubscriptionPayload, eventParams: SessionType.EventParams) {
         let event = eventParams.event
         let topic = payload.topic
         guard let session = sessionStore.getSession(forTopic: topic) else {
-            relayer.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
+            networkingInteractor.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
             return
         }
         guard session.peerIsController,
               session.hasNamespace(for: eventParams.chainId, event: event.name) else {
-            relayer.respondError(for: payload, reason: .unauthorizedEvent(event.name))
+            networkingInteractor.respondError(for: payload, reason: .unauthorizedEvent(event.name))
             return
         }
-        relayer.respondSuccess(for: payload)
+        networkingInteractor.respondSuccess(for: payload)
         onEventReceived?(topic, event.publicRepresentation(), eventParams.chainId)
     }
 
@@ -265,10 +265,10 @@ final class SessionEngine {
     }
     
     private func restoreSubscriptions() {
-        relayer.transportConnectionPublisher
+        networkingInteractor.transportConnectionPublisher
             .sink { [unowned self] (_) in
                 let topics = sessionStore.getAll().map{$0.topic}
-                topics.forEach{relayer.subscribe(topic: $0)}
+                topics.forEach{networkingInteractor.subscribe(topic: $0)}
             }.store(in: &publishers)
     }
     
@@ -294,7 +294,7 @@ final class SessionEngine {
             onSessionSettle?(session.publicRepresentation())
         case .error(let error):
             logger.error("Error - session rejected, Reason: \(error)")
-            relayer.unsubscribe(topic: topic)
+            networkingInteractor.unsubscribe(topic: topic)
             sessionStore.delete(topic: topic)
             kms.deleteAgreementSecret(for: topic)
             kms.deletePrivateKey(for: session.publicKey!)

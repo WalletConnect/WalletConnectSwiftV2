@@ -14,7 +14,7 @@ final class SessionEngineTests: XCTestCase {
     
     var engine: SessionEngine!
 
-    var relayMock: MockedWCRelay!
+    var networkingInteractor: MockedWCRelay!
     var storageMock: WCSessionStorageMock!
     var cryptoMock: KeyManagementServiceMock!
     
@@ -23,7 +23,7 @@ final class SessionEngineTests: XCTestCase {
     var metadata: AppMetadata!
     
     override func setUp() {
-        relayMock = MockedWCRelay()
+        networkingInteractor = MockedWCRelay()
         storageMock = WCSessionStorageMock()
         cryptoMock = KeyManagementServiceMock()
         topicGenerator = TopicGenerator()
@@ -31,7 +31,7 @@ final class SessionEngineTests: XCTestCase {
     }
 
     override func tearDown() {
-        relayMock = nil
+        networkingInteractor = nil
         storageMock = nil
         cryptoMock = nil
         topicGenerator = nil
@@ -42,7 +42,7 @@ final class SessionEngineTests: XCTestCase {
         metadata = AppMetadata.stub()
         let logger = ConsoleLoggerMock()
         engine = SessionEngine(
-            relay: relayMock,
+            networkingInteractor: networkingInteractor,
             kms: cryptoMock,
             pairingStore: WCPairingStorageMock(),
             sessionStore: storageMock,
@@ -62,8 +62,8 @@ final class SessionEngineTests: XCTestCase {
         engine.settle(topic: topicB, proposal: proposal, accounts: [], namespaces: [Namespace.stub()])
         
         XCTAssertTrue(storageMock.hasSession(forTopic: topicB), "Responder must persist session on topic B")
-        XCTAssert(relayMock.didSubscribe(to: topicB), "Responder must subscribe for topic B")
-        XCTAssertTrue(relayMock.didCallRequest, "Responder must send session settle payload on topic B")
+        XCTAssert(networkingInteractor.didSubscribe(to: topicB), "Responder must subscribe for topic B")
+        XCTAssertTrue(networkingInteractor.didCallRequest, "Responder must send session settle payload on topic B")
     }
     
     func testHandleSessionSettle() {
@@ -74,11 +74,11 @@ final class SessionEngineTests: XCTestCase {
             didCallBackOnSessionApproved = true
         }
         
-        relayMock.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubSettle(topic: sessionTopic))
+        networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubSettle(topic: sessionTopic))
         
         
         XCTAssertTrue(storageMock.getSession(forTopic: sessionTopic)!.acknowledged, "Proposer must store acknowledged session on topic B")
-        XCTAssertTrue(relayMock.didRespondSuccess, "Proposer must send acknowledge on settle request")
+        XCTAssertTrue(networkingInteractor.didRespondSuccess, "Proposer must send acknowledge on settle request")
         XCTAssertTrue(didCallBackOnSessionApproved, "Proposer's engine must call back with session")
     }
     
@@ -97,7 +97,7 @@ final class SessionEngineTests: XCTestCase {
             requestMethod: .sessionSettle,
             requestParams: .sessionSettle(SessionType.SettleParams.stub()),
             result: .response(settleResponse))
-        relayMock.onResponse?(response)
+        networkingInteractor.onResponse?(response)
 
         XCTAssertTrue(storageMock.getSession(forTopic: session.topic)!.acknowledged, "Responder must acknowledged session")
         XCTAssertTrue(didCallBackOnSessionApproved, "Responder's engine must call back with session")
@@ -116,10 +116,10 @@ final class SessionEngineTests: XCTestCase {
             requestMethod: .sessionSettle,
             requestParams: .sessionSettle(SessionType.SettleParams.stub()),
             result: .error(JSONRPCErrorResponse(id: 1, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
-        relayMock.onResponse?(response)
+        networkingInteractor.onResponse?(response)
 
         XCTAssertNil(storageMock.getSession(forTopic: session.topic), "Responder must remove session")
-        XCTAssertTrue(relayMock.didUnsubscribe(to: session.topic), "Responder must unsubscribe topic B")
+        XCTAssertTrue(networkingInteractor.didUnsubscribe(to: session.topic), "Responder must unsubscribe topic B")
         XCTAssertFalse(cryptoMock.hasAgreementSecret(for: session.topic), "Responder must remove agreement secret")
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: session.self.publicKey!), "Responder must remove private key")
     }
@@ -132,9 +132,9 @@ final class SessionEngineTests: XCTestCase {
         storageMock.setSession(session)
         
         let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: nil)
-        relayMock.wcRequestPublisherSubject.send(payload)
+        networkingInteractor.wcRequestPublisherSubject.send(payload)
         
-        XCTAssertTrue(relayMock.didRespondError)
+        XCTAssertTrue(networkingInteractor.didRespondError)
         XCTAssertFalse(didTriggerRequest)
     }
     
@@ -147,9 +147,9 @@ final class SessionEngineTests: XCTestCase {
         storageMock.setSession(session)
         
         let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: nil)
-        relayMock.wcRequestPublisherSubject.send(payload)
+        networkingInteractor.wcRequestPublisherSubject.send(payload)
         
-        XCTAssertFalse(relayMock.didRespondError)
+        XCTAssertFalse(networkingInteractor.didRespondError)
         XCTAssertTrue(didTriggerRequest)
     }
     
@@ -162,9 +162,9 @@ final class SessionEngineTests: XCTestCase {
         storageMock.setSession(session)
         
         let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: nil)
-        relayMock.wcRequestPublisherSubject.send(payload)
+        networkingInteractor.wcRequestPublisherSubject.send(payload)
         
-        XCTAssertTrue(relayMock.didRespondError)
+        XCTAssertTrue(networkingInteractor.didRespondError)
         XCTAssertFalse(didTriggerRequest)
     }
     
@@ -177,9 +177,9 @@ final class SessionEngineTests: XCTestCase {
         storageMock.setSession(session)
         
         let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: Blockchain("eip155:1")!)
-        relayMock.wcRequestPublisherSubject.send(payload)
+        networkingInteractor.wcRequestPublisherSubject.send(payload)
         
-        XCTAssertFalse(relayMock.didRespondError)
+        XCTAssertFalse(networkingInteractor.didRespondError)
         XCTAssertTrue(didTriggerRequest)
     }
     
@@ -192,9 +192,9 @@ final class SessionEngineTests: XCTestCase {
         storageMock.setSession(session)
         
         let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someOtherMethod", chainId: Blockchain("eip155:1")!)
-        relayMock.wcRequestPublisherSubject.send(payload)
+        networkingInteractor.wcRequestPublisherSubject.send(payload)
         
-        XCTAssertTrue(relayMock.didRespondError)
+        XCTAssertTrue(networkingInteractor.didRespondError)
         XCTAssertFalse(didTriggerRequest)
     }
     
@@ -207,9 +207,9 @@ final class SessionEngineTests: XCTestCase {
         storageMock.setSession(session)
         
         let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: Blockchain("eip155:1")!)
-        relayMock.wcRequestPublisherSubject.send(payload)
+        networkingInteractor.wcRequestPublisherSubject.send(payload)
         
-        XCTAssertTrue(relayMock.didRespondError)
+        XCTAssertTrue(networkingInteractor.didRespondError)
         XCTAssertFalse(didTriggerRequest)
     }
     
@@ -225,9 +225,9 @@ final class SessionEngineTests: XCTestCase {
         storageMock.setSession(session)
         
         let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: nil)
-        relayMock.wcRequestPublisherSubject.send(payload)
+        networkingInteractor.wcRequestPublisherSubject.send(payload)
         
-        XCTAssertFalse(relayMock.didRespondError)
+        XCTAssertFalse(networkingInteractor.didRespondError)
         XCTAssertTrue(didTriggerRequest)
     }
     
@@ -243,9 +243,9 @@ final class SessionEngineTests: XCTestCase {
         storageMock.setSession(session)
         
         let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someOtherMethod", chainId: Blockchain("eip155:1")!)
-        relayMock.wcRequestPublisherSubject.send(payload)
+        networkingInteractor.wcRequestPublisherSubject.send(payload)
         
-        XCTAssertFalse(relayMock.didRespondError)
+        XCTAssertFalse(networkingInteractor.didRespondError)
         XCTAssertTrue(didTriggerRequest)
     }
     
@@ -260,9 +260,9 @@ final class SessionEngineTests: XCTestCase {
         storageMock.setSession(session)
         
         let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: Blockchain("cosmos:cosmoshub4")!)
-        relayMock.wcRequestPublisherSubject.send(payload)
+        networkingInteractor.wcRequestPublisherSubject.send(payload)
         
-        XCTAssertFalse(relayMock.didRespondError)
+        XCTAssertFalse(networkingInteractor.didRespondError)
         XCTAssertTrue(didTriggerRequest)
     }
 }

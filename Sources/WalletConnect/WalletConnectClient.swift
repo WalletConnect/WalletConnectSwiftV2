@@ -27,7 +27,7 @@ public final class WalletConnectClient {
     private let sessionEngine: SessionEngine
     private let nonControllerSessionStateMachine: NonControllerSessionStateMachine
     private let controllerSessionStateMachine: ControllerSessionStateMachine
-    private let relay: WalletConnectRelaying
+    private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementService
     private let pairingQueue = DispatchQueue(label: "com.walletconnect.sdk.client.pairing", qos: .userInitiated)
     private let history: JsonRpcHistory
@@ -55,16 +55,16 @@ public final class WalletConnectClient {
         let relayer = Relayer(relayHost: relayHost, projectId: projectId, keyValueStorage: keyValueStorage, logger: logger)
         let serializer = Serializer(kms: kms)
         self.history = JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
-        self.relay = WalletConnectRelay(networkRelayer: relayer, serializer: serializer, logger: logger, jsonRpcHistory: history)
+        self.networkingInteractor = NetworkInteractor(networkRelayer: relayer, serializer: serializer, logger: logger, jsonRpcHistory: history)
         let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue))
         let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue))
         
         
         let sessionToPairingTopic = KeyValueStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
-        self.pairingEngine = PairingEngine(relay: relay, kms: kms, pairingStore: pairingStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
-        self.sessionEngine = SessionEngine(relay: relay, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
-        self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionStore, logger: logger)
-        self.controllerSessionStateMachine = ControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionStore, logger: logger)
+        self.pairingEngine = PairingEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
+        self.sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
+        self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
+        self.controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         setUpEnginesCallbacks()
     }
     
@@ -86,15 +86,15 @@ public final class WalletConnectClient {
         self.kms = kms
         let serializer = Serializer(kms: kms)
         self.history = JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
-        self.relay = WalletConnectRelay(networkRelayer: relayer, serializer: serializer, logger: logger, jsonRpcHistory: history)
+        self.networkingInteractor = NetworkInteractor(networkRelayer: relayer, serializer: serializer, logger: logger, jsonRpcHistory: history)
         let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue))
         let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue))
         let sessionToPairingTopic = KeyValueStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
         
-        self.pairingEngine = PairingEngine(relay: relay, kms: kms, pairingStore: pairingStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
-        self.sessionEngine = SessionEngine(relay: relay, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
-        self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionStore, logger: logger)
-        self.controllerSessionStateMachine = ControllerSessionStateMachine(relay: relay, kms: kms, sessionStore: sessionStore, logger: logger)
+        self.pairingEngine = PairingEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
+        self.sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
+        self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
+        self.controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         setUpEnginesCallbacks()
     }
     

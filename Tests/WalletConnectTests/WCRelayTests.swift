@@ -6,8 +6,8 @@ import WalletConnectUtils
 @testable import TestingUtils
 @testable import WalletConnect
 
-class WalletConnectRelayTests: XCTestCase {
-    var wcRelay: WalletConnectRelay!
+class NetworkingInteractorTests: XCTestCase {
+    var networkingInteractor: NetworkInteractor!
     var networkRelayer: MockedNetworkRelayer!
     var serializer: SerializerMock!
 
@@ -17,11 +17,11 @@ class WalletConnectRelayTests: XCTestCase {
         let logger = ConsoleLoggerMock()
         serializer = SerializerMock()
         networkRelayer = MockedNetworkRelayer()
-        wcRelay = WalletConnectRelay(networkRelayer: networkRelayer, serializer: serializer, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<WalletConnect.JsonRpcRecord>(defaults: RuntimeKeyValueStorage(), identifier: "")))
+        networkingInteractor = NetworkInteractor(networkRelayer: networkRelayer, serializer: serializer, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<WalletConnect.JsonRpcRecord>(defaults: RuntimeKeyValueStorage(), identifier: "")))
     }
 
     override func tearDown() {
-        wcRelay = nil
+        networkingInteractor = nil
         networkRelayer = nil
         serializer = nil
     }
@@ -29,7 +29,7 @@ class WalletConnectRelayTests: XCTestCase {
     func testNotifiesOnEncryptedWCJsonRpcRequest() {
         let requestExpectation = expectation(description: "notifies with request")
         let topic = "fefc3dc39cacbc562ed58f92b296e2d65a6b07ef08992b93db5b3cb86280635a"
-        wcRelay.wcRequestPublisher.sink { (request) in
+        networkingInteractor.wcRequestPublisher.sink { (request) in
             requestExpectation.fulfill()
         }.store(in: &publishers)
         serializer.deserialized = request
@@ -39,25 +39,17 @@ class WalletConnectRelayTests: XCTestCase {
 
     func testPromptOnSessionRequest() async {
         let topic = "fefc3dc39cacbc562ed58f92b296e2d65a6b07ef08992b93db5b3cb86280635a"
-        let request = getWCSessionRequest()
+        let method = getWCSessionMethod()
         networkRelayer.prompt = false
-        try! await wcRelay.request(topic: topic, payload: request)
+        try! await networkingInteractor.request(topic: topic, payload: method.asRequest())
         XCTAssertTrue(networkRelayer.prompt)
     }
 }
 
-extension WalletConnectRelayTests {
-    func getWCSessionResponse() -> JSONRPCResponse<AnyCodable> {
-        let result = AnyCodable("")
-        return JSONRPCResponse<AnyCodable>(id: 123456, result: result)
-    }
-    
-    func getWCSessionRequest() -> WCRequest {
-        let wcRequestId: Int64 = 123456
+extension NetworkingInteractorTests {
+    func getWCSessionMethod() -> WCMethod {
         let sessionRequestParams = SessionType.RequestParams(request: SessionType.RequestParams.Request(method: "method", params: AnyCodable("params")), chainId: Blockchain("eip155:1")!)
-        let params = WCRequest.Params.sessionRequest(sessionRequestParams)
-        let wcRequest = WCRequest(id: wcRequestId, method: WCRequest.Method.sessionRequest, params: params)
-        return wcRequest
+        return .wcSessionRequest(sessionRequestParams)
     }
 }
 

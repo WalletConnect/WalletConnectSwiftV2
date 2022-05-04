@@ -5,7 +5,7 @@ import WalletConnectUtils
 @testable import WalletConnect
 @testable import TestingUtils
 
-class MockedWCRelay: WalletConnectRelaying {
+class MockedWCRelay: NetworkInteracting {
 
     let responsePublisherSubject = PassthroughSubject<WCResponse, Never>()
     private(set) var subscriptions: [String] = []
