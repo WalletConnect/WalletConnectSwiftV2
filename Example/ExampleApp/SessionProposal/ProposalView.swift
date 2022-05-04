@@ -29,6 +29,7 @@ struct ProposalView: View {
         }
     }
     
+    // App metadata for the session
     var headerView: some View {
         VStack(alignment: .center, spacing: 12) {
             asyncImage(urlString: proposal.iconURL)
@@ -49,6 +50,7 @@ struct ProposalView: View {
         }
     }
     
+    // Scrollable view with permissions text
     var permissionsView: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Requested permissions:")
@@ -71,6 +73,7 @@ struct ProposalView: View {
         }
     }
     
+    // Displays a chain's methods and events
     func sectionView(for namespace: Proposal.Namespace) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("For \(namespace.chains.joined(separator: ", "))")
@@ -102,6 +105,7 @@ struct ProposalView: View {
         }
     }
     
+    // Approve and reject buttons
     var footerView: some View {
         HStack {
             Button {

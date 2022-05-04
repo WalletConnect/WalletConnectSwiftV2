@@ -21,7 +21,7 @@ struct Proposal {
             iconURL: "https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media",
             permissions: [
                 Namespace(
-                    chains: ["eip155:1", "eip155:157"],
+                    chains: ["eip155:1"],
                     methods: ["eth_sendTransaction", "personal_sign", "eth_signTypedData"],
                     events: ["accountsChanged", "chainChanged"]),
                 Namespace(
