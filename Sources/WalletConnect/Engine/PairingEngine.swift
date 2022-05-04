@@ -101,7 +101,7 @@ final class PairingEngine {
             logger.debug("Could not find pairing to ping for topic \(topic)")
             return
         }
-        relayer.request(.wcPairingPing, onTopic: topic) { [unowned self] result in
+        relayer.requestPeerResponse(.wcPairingPing, onTopic: topic) { [unowned self] result in
             switch result {
             case .success(_):
                 logger.debug("Did receive ping response")

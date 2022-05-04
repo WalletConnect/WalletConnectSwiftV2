@@ -71,7 +71,7 @@ final class SessionEngine {
             logger.debug("Could not find session to ping for topic \(topic)")
             return
         }
-        relayer.request(.wcSessionPing, onTopic: topic) { [unowned self] result in
+        relayer.requestPeerResponse(.wcSessionPing, onTopic: topic) { [unowned self] result in
             switch result {
             case .success(_):
                 logger.debug("Did receive ping response")
