@@ -60,9 +60,9 @@ final class WalletViewController: UIViewController {
     }
     
     private func showSessionProposal(_ info: SessionInfo) {
-        let proposalViewController = ProposalViewController()
+        let proposalViewController = ProposalViewController(proposal: Proposal.mock())
         proposalViewController.delegate = self
-        proposalViewController.show(info)
+//        proposalViewController.show(info)
         present(proposalViewController, animated: true)
     }
     
