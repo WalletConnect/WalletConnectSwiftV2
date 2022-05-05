@@ -17,8 +17,8 @@ enum ReasonCode {
     
     // 3000 (Unauthorized)
     case unauthorizedTargetChain(String)
-    case unauthorizedRPCMethod(String)
-    case unauthorizedEventType(String)
+    case unauthorizedMethod(String)
+    case unauthorizedEvent(String)
     case unauthorizedUpdateAccountRequest
     case unauthorizedUpdateNamespacesRequest
     case unauthorizedUpdateExpiryRequest
@@ -40,8 +40,8 @@ enum ReasonCode {
         case .noContextWithTopic: return 1301
             
         case .unauthorizedTargetChain: return 3000
-        case .unauthorizedRPCMethod: return 3001
-        case .unauthorizedEventType: return 3002
+        case .unauthorizedMethod: return 3001
+        case .unauthorizedEvent: return 3002
             
         case .unauthorizedUpdateAccountRequest: return 3003
         case .unauthorizedUpdateNamespacesRequest: return 3004
@@ -69,9 +69,9 @@ enum ReasonCode {
             return "No matching \(context) with topic: \(topic)"
         case .unauthorizedTargetChain(let chainId):
             return "Unauthorized target chain id requested: \(chainId)"
-        case .unauthorizedRPCMethod(let method):
+        case .unauthorizedMethod(let method):
             return "Unauthorized JSON-RPC method requested: \(method)"
-        case .unauthorizedEventType(let type):
+        case .unauthorizedEvent(let type):
             return "Unauthorized event type requested: \(type)"
         case .unauthorizedUpdateAccountRequest:
             return "Unauthorized update accounts request"

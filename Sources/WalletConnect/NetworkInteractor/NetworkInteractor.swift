@@ -12,18 +12,21 @@ struct WCResponse: Codable {
     let result: JsonRpcResult
 }
 
-protocol WalletConnectRelaying: AnyObject {
+protocol NetworkInteracting: AnyObject {
+    //// TODO - both methods to remove, use Publishers instead
     var onPairingResponse: ((WCResponse) -> Void)? {get set} // Temporary workaround
     var onResponse: ((WCResponse) -> Void)? {get set}
+    ///////
+    
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
     var responsePublisher: AnyPublisher<WCResponse, Never> {get}
-    /// Completes with a peer response
-    func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
-    /// Completes with a peer response
-    func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
+    /// Completes when request sent from a networking client
+    func request(_ wcMethod: WCMethod, onTopic topic: String) async throws
     /// Completes with an acknowledgement from the relay network
     func requestNetworkAck(_ wcMethod: WCMethod, onTopic topic: String, completion: @escaping ((Error?) -> ()))
+    /// Completes with a peer response
+    func requestPeerResponse(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
     func respond(topic: String, response: JsonRpcResult, completion: @escaping ((Error?)->()))
     func respondSuccess(for payload: WCRequestSubscriptionPayload)
     func respondError(for payload: WCRequestSubscriptionPayload, reason: ReasonCode)
@@ -31,13 +34,13 @@ protocol WalletConnectRelaying: AnyObject {
     func unsubscribe(topic: String)
 }
 
-extension WalletConnectRelaying {
+extension NetworkInteracting {
     func request(_ wcMethod: WCMethod, onTopic topic: String) {
-        request(wcMethod, onTopic: topic, completion: nil)
+        requestPeerResponse(wcMethod, onTopic: topic, completion: nil)
     }
 }
 
-class WalletConnectRelay: WalletConnectRelaying {
+class NetworkInteractor: NetworkInteracting {
     
     var onPairingResponse: ((WCResponse) -> Void)?
     var onResponse: ((WCResponse) -> Void)?
@@ -75,11 +78,20 @@ class WalletConnectRelay: WalletConnectRelaying {
         setUpPublishers()
     }
     
-    func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ())?) {
-        request(topic: topic, payload: wcMethod.asRequest(), completion: completion)
+    func request(_ wcMethod: WCMethod, onTopic topic: String) async throws {
+        try await request(topic: topic, payload: wcMethod.asRequest())
     }
     
-    func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?) {
+    /// Completes when networking client sends a request
+    func request(topic: String, payload: WCRequest) async throws {
+        try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
+        let message = try serializer.serialize(topic: topic, encodable: payload)
+        let prompt = shouldPrompt(payload.method)
+        try await networkRelayer.publish(topic: topic, payload: message, prompt: prompt)
+    }
+
+    func requestPeerResponse(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ())?) {
+        let payload = wcMethod.asRequest()
         do {
             try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
             let message = try serializer.serialize(topic: topic, encodable: payload)

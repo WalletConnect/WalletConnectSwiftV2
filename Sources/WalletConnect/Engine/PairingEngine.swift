@@ -10,7 +10,7 @@ final class PairingEngine {
     var onSessionRejected: ((Session.Proposal, SessionType.Reason)->())?
 
     private let proposalPayloadsStore: KeyValueStore<WCRequestSubscriptionPayload>
-    private let relayer: WalletConnectRelaying
+    private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private let pairingStore: WCPairingStorage
     private let sessionToPairingTopic: KeyValueStore<String>
@@ -19,7 +19,7 @@ final class PairingEngine {
     private let logger: ConsoleLogging
     private let topicInitializer: () -> String
     
-    init(relay: WalletConnectRelaying,
+    init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
          pairingStore: WCPairingStorage,
          sessionToPairingTopic: KeyValueStore<String>,
@@ -27,7 +27,7 @@ final class PairingEngine {
          logger: ConsoleLogging,
          topicGenerator: @escaping () -> String = String.generateTopic,
          proposalPayloadsStore: KeyValueStore<WCRequestSubscriptionPayload> = KeyValueStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.proposals.rawValue)) {
-        self.relayer = relay
+        self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.metadata = metadata
         self.pairingStore = pairingStore
@@ -38,7 +38,7 @@ final class PairingEngine {
         setUpWCRequestHandling()
         setupExpirationHandling()
         restoreSubscriptions()
-        relayer.onPairingResponse = { [weak self] in
+        networkingInteractor.onPairingResponse = { [weak self] in
             self?.handleResponse($0)
         }
     }
@@ -65,7 +65,7 @@ final class PairingEngine {
         let pairing = WCPairing(topic: topic)
         let uri = WalletConnectURI(topic: topic, symKey: symKey.hexRepresentation, relay: pairing.relay)
         pairingStore.setPairing(pairing)
-        relayer.subscribe(topic: topic)
+        networkingInteractor.subscribe(topic: topic)
         return uri
     }
     func propose(pairingTopic: String, namespaces: Set<Namespace>, relay: RelayProtocolOptions, completion: @escaping ((Error?) -> ())) {
@@ -78,7 +78,7 @@ final class PairingEngine {
             relays: [relay],
             proposer: proposer,
             namespaces: namespaces)
-        relayer.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { [unowned self] error in
+        networkingInteractor.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { [unowned self] error in
             logger.debug("Received propose acknowledgement")
             completion(error)
         }
@@ -92,7 +92,7 @@ final class PairingEngine {
         let symKey = try! SymmetricKey(hex: uri.symKey) // FIXME: Malformed QR code from external source can crash the SDK
         try! kms.setSymmetricKey(symKey, for: pairing.topic)
         pairing.activate()
-        relayer.subscribe(topic: pairing.topic)
+        networkingInteractor.subscribe(topic: pairing.topic)
         pairingStore.setPairing(pairing)
     }
     
@@ -101,7 +101,7 @@ final class PairingEngine {
             logger.debug("Could not find pairing to ping for topic \(topic)")
             return
         }
-        relayer.request(.wcPairingPing, onTopic: topic) { [unowned self] result in
+        networkingInteractor.requestPeerResponse(.wcPairingPing, onTopic: topic) { [unowned self] result in
             switch result {
             case .success(_):
                 logger.debug("Did receive ping response")
@@ -117,7 +117,7 @@ final class PairingEngine {
             return
         }
         proposalPayloadsStore.delete(forKey: proposal.proposer.publicKey)
-        relayer.respondError(for: payload, reason: reason)
+        networkingInteractor.respondError(for: payload, reason: reason)
 //        todo - delete pairing if inactive
     }
     
@@ -135,7 +135,7 @@ final class PairingEngine {
         do {
             agreementKey = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposal.proposer.publicKey)
         } catch {
-            relayer.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
+            networkingInteractor.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
             return nil
         }
         //todo - extend pairing
@@ -145,14 +145,14 @@ final class PairingEngine {
         guard let relay = proposal.relays.first else {return nil}
         let proposeResponse = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
-        relayer.respond(topic: payload.topic, response: .response(response)) { _ in }
+        networkingInteractor.respond(topic: payload.topic, response: .response(response)) { _ in }
         return (sessionTopic, proposal)
     }
 
     //MARK: - Private
 
     private func setUpWCRequestHandling() {
-        relayer.wcRequestPublisher.sink { [unowned self] subscriptionPayload in
+        networkingInteractor.wcRequestPublisher.sink { [unowned self] subscriptionPayload in
             switch subscriptionPayload.wcRequest.params {
             case .pairingPing(_):
                 wcPairingPing(subscriptionPayload)
@@ -171,22 +171,22 @@ final class PairingEngine {
     }
     
     private func wcPairingPing(_ payload: WCRequestSubscriptionPayload) {
-        relayer.respondSuccess(for: payload)
+        networkingInteractor.respondSuccess(for: payload)
     }
     
     private func restoreSubscriptions() {
-        relayer.transportConnectionPublisher
+        networkingInteractor.transportConnectionPublisher
             .sink { [unowned self] (_) in
                 let topics = pairingStore.getAll()
                     .map{$0.topic}
-                topics.forEach{relayer.subscribe(topic: $0)}
+                topics.forEach{networkingInteractor.subscribe(topic: $0)}
             }.store(in: &publishers)
     }
     
     private func setupExpirationHandling() {
         pairingStore.onPairingExpiration = { [weak self] pairing in
             self?.kms.deleteSymmetricKey(for: pairing.topic)
-            self?.relayer.unsubscribe(topic: pairing.topic)
+            self?.networkingInteractor.unsubscribe(topic: pairing.topic)
         }
     }
     
@@ -237,7 +237,7 @@ final class PairingEngine {
         case .error(let error):
             if !pairing.active {
                 kms.deleteSymmetricKey(for: pairing.topic)
-                relayer.unsubscribe(topic: pairing.topic)
+                networkingInteractor.unsubscribe(topic: pairing.topic)
                 pairingStore.delete(topic: pairingTopic)
             }
             logger.debug("session propose has been rejected")

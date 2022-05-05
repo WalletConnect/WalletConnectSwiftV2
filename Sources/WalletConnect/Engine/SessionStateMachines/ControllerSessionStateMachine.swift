@@ -10,20 +10,20 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
     var onExpiryUpdate: ((String, Date)->())?
 
     private let sessionStore: WCSessionStorage
-    private let relayer: WalletConnectRelaying
+    private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
 
-    init(relay: WalletConnectRelaying,
+    init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
          sessionStore: WCSessionStorage,
          logger: ConsoleLogging) {
-        self.relayer = relay
+        self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.sessionStore = sessionStore
         self.logger = logger
-        relayer.responsePublisher.sink { [unowned self] response in
+        networkingInteractor.responsePublisher.sink { [unowned self] response in
             handleResponse(response)
         }.store(in: &publishers)
     }
@@ -33,7 +33,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         try validateControlledAcknowledged(session)
         session.updateAccounts(accounts)
         sessionStore.setSession(session)
-        relayer.request(.wcSessionUpdateAccounts(SessionType.UpdateAccountsParams(accounts: accounts)), onTopic: topic)
+        networkingInteractor.request(.wcSessionUpdateAccounts(SessionType.UpdateAccountsParams(accounts: accounts)), onTopic: topic)
     }
     
     func updateNamespaces(topic: String, namespaces: Set<Namespace>) throws {
@@ -43,7 +43,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         logger.debug("Controller will update methods")
         session.updateNamespaces(namespaces)
         sessionStore.setSession(session)
-        relayer.request(.wcSessionUpdateNamespaces(SessionType.UpdateNamespaceParams(namespaces: namespaces)), onTopic: topic)
+        networkingInteractor.request(.wcSessionUpdateNamespaces(SessionType.UpdateNamespaceParams(namespaces: namespaces)), onTopic: topic)
     }
     
    func updateExpiry(topic: String, by ttl: Int64) throws {
@@ -52,7 +52,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
        try session.updateExpiry(by: ttl)
        let newExpiry = Int64(session.expiryDate.timeIntervalSince1970 )
        sessionStore.setSession(session)
-       relayer.request(.wcSessionUpdateExpiry(SessionType.UpdateExpiryParams(expiry: newExpiry)), onTopic: topic)
+       networkingInteractor.request(.wcSessionUpdateExpiry(SessionType.UpdateExpiryParams(expiry: newExpiry)), onTopic: topic)
    }
     
     // MARK: - Handle Response

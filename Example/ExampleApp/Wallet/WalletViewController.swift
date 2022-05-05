@@ -118,9 +118,17 @@ extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let item = sessionItems[indexPath.row]
-            client.disconnect(topic: item.topic, reason: Reason(code: 0, message: "disconnect"))
-            sessionItems.remove(at: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: .automatic)
+            Task {
+                do {
+                    try await client.disconnect(topic: item.topic, reason: Reason(code: 0, message: "disconnect"))
+                    DispatchQueue.main.async { [weak self] in
+                        self?.sessionItems.remove(at: indexPath.row)
+                        tableView.deleteRows(at: [indexPath], with: .automatic)
+                    }
+                } catch {
+                    print(error)
+                }
+            }
         }
     }
     

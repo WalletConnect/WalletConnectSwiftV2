@@ -5,7 +5,8 @@ import WalletConnectUtils
 @testable import WalletConnect
 @testable import TestingUtils
 
-class MockedWCRelay: WalletConnectRelaying {
+class MockedWCRelay: NetworkInteracting {
+
     let responsePublisherSubject = PassthroughSubject<WCResponse, Never>()
     private(set) var subscriptions: [String] = []
     private(set) var unsubscriptions: [String] = []
@@ -42,8 +43,9 @@ class MockedWCRelay: WalletConnectRelaying {
     
     private(set) var requests: [(topic: String, request: WCRequest)] = []
     
-    func request(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ())?) {
-        request(topic: topic, payload: wcMethod.asRequest(), completion: completion)
+    func request(topic: String, payload: WCRequest) async throws {
+        requestCallCount += 1
+        requests.append((topic, payload))
     }
     
     func requestNetworkAck(_ wcMethod: WCMethod, onTopic topic: String, completion: @escaping ((Error?) -> ())) {
@@ -51,9 +53,9 @@ class MockedWCRelay: WalletConnectRelaying {
         requests.append((topic, wcMethod.asRequest()))
     }
     
-    func request(topic: String, payload: WCRequest, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ())?) {
+    func requestPeerResponse(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ())?) {
         requestCallCount += 1
-        requests.append((topic, payload))
+        requests.append((topic, wcMethod.asRequest()))
     }
     
     func respond(topic: String, response: JsonRpcResult, completion: @escaping ((Error?) -> ())) {

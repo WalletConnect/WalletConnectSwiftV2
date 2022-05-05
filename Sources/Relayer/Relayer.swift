@@ -80,11 +80,32 @@ public final class Relayer {
         try dispatcher.disconnect(closeCode: closeCode)
     }
     
+    /// Completes when networking client sends a request, error if it fails on client side
+    public func publish(
+        topic: String,
+        payload: String,
+        prompt: Bool = false) async throws {
+            let params = RelayJSONRPC.PublishParams(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt)
+            let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.rawValue, params: params)
+            let requestJson = try! request.json()
+            logger.debug("Publishing Payload on Topic: \(topic)")
+            return try await withCheckedThrowingContinuation { continuation in
+                dispatcher.send(requestJson) { error in
+                    if let error = error {
+                        continuation.resume(throwing: error)
+                        return
+                    }
+                    continuation.resume(returning: ())
+                }
+            }
+        }
+    
+    /// Completes with an acknowledgement from the relay network.
     @discardableResult public func publish(
         topic: String,
         payload: String,
         prompt: Bool = false,
-        completion: @escaping ((Error?) -> ())) -> Int64 {
+        onNetworkAcknowledge: @escaping ((Error?) -> ())) -> Int64 {
         let params = RelayJSONRPC.PublishParams(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt)
         let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.rawValue, params: params)
         let requestJson = try! request.json()
@@ -94,14 +115,14 @@ public final class Relayer {
             if let error = error {
                 self?.logger.debug("Failed to Publish Payload, error: \(error)")
                 cancellable?.cancel()
-                completion(error)
+                onNetworkAcknowledge(error)
             }
         }
         cancellable = requestAcknowledgePublisher
             .filter {$0.id == request.id}
             .sink { (subscriptionResponse) in
             cancellable?.cancel()
-                completion(nil)
+                onNetworkAcknowledge(nil)
         }
         return request.id
     }
