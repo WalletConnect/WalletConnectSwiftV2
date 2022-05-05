@@ -17,6 +17,7 @@ class NetworkMonitor: NetworkMonitoring {
     
     func startMonitoring() {
         monitor.pathUpdateHandler = { [weak self] path in
+            print(path.status)
             if path.status == .satisfied {
                 self?.onSatisfied?()
             } else {

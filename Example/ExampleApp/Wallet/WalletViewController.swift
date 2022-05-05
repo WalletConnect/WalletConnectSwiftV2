@@ -184,7 +184,7 @@ extension WalletViewController: WalletConnectClientDelegate {
 //            methods: Array(sessionProposal.namespaces.first?.methods ?? []), pendingRequests: [])
         currentProposal = sessionProposal
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread
-            self.showSessionProposal(Proposal.mock()) // FIXME: Remove mock
+            self.showSessionProposal(Proposal(proposal: sessionProposal)) // FIXME: Remove mock
         }
     }
 
