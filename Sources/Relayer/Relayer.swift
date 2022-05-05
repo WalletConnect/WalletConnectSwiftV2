@@ -2,7 +2,7 @@
 import Foundation
 import Combine
 import WalletConnectUtils
-
+import Starscream
 
 public final class Relayer {
     enum RelyerError: Error {
@@ -55,18 +55,16 @@ public final class Relayer {
                             uniqueIdentifier: String? = nil,
                             socketConnectionType: SocketConnectionType = .automatic,
                             logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off)) {
-        let socketConnectionObserver = SocketConnectionObserver()
-        let urlSession = URLSession(configuration: .default, delegate: socketConnectionObserver, delegateQueue: OperationQueue())
         let url = Self.makeRelayUrl(host: relayHost, projectId: projectId)
-        let socket = WebSocketSession(session: urlSession, url: url)
         var socketConnectionHandler: SocketConnectionHandler
+        let socket = WebSocket(url: url)
         switch socketConnectionType {
         case .automatic:
             socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket)
         case .manual:
             socketConnectionHandler = ManualSocketConnectionHandler(socket: socket)
         }
-        let dispatcher = Dispatcher(socket: socket, socketConnectionObserver: socketConnectionObserver, socketConnectionHandler: socketConnectionHandler)
+        let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: socketConnectionHandler)
         self.init(dispatcher: dispatcher,
                   logger: logger,
                   keyValueStorage: keyValueStorage)

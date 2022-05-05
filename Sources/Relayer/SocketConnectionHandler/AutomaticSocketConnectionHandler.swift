@@ -54,7 +54,7 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
     }
     
     func endBackgroundTask() {
-        socket.disconnect(with: .normalClosure)
+        socket.disconnect()
     }
     
     func handleConnect() throws {
@@ -66,7 +66,7 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
     }
     
     func handleNetworkUnsatisfied() {
-        socket.disconnect(with: .goingAway)
+        socket.disconnect()
     }
     
     func handleNetworkSatisfied() {

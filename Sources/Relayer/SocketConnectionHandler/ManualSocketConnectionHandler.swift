@@ -13,6 +13,15 @@ class ManualSocketConnectionHandler: SocketConnectionHandler {
     }
     
     func handleDisconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
-        socket.disconnect(with: closeCode)
+        socket.disconnect()
     }
 }
+protocol WebSocketConnecting {
+    var isConnected: Bool {get}
+    func connect()
+    func disconnect()
+}
+
+import Starscream
+
+extension WebSocket: WebSocketConnecting{}
