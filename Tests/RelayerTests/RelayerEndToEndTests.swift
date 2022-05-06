@@ -56,12 +56,10 @@ final class RelayerEndToEndTests: XCTestCase {
 
         relayA.onMessage = { topic, payload in
             (subscriptionATopic, subscriptionAPayload) = (topic, payload)
-            print("message on relay A")
             expectationA.fulfill()
         }
         relayB.onMessage = { topic, payload in
             (subscriptionBTopic, subscriptionBPayload) = (topic, payload)
-            print("message on relay B")
             expectationB.fulfill()
         }
         relayA.onConnect = {

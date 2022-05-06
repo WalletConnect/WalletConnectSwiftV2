@@ -79,7 +79,7 @@ final class PairingEngine {
             proposer: proposer,
             namespaces: namespaces)
         networkingInteractor.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { [unowned self] error in
-            logger.debug("Received propose acknowledgement")
+            logger.debug("Received propose acknowledgement from network")
             completion(error)
         }
     }
@@ -145,6 +145,7 @@ final class PairingEngine {
         guard let relay = proposal.relays.first else {return nil}
         let proposeResponse = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
+        logger.debug("Responding session propose")
         networkingInteractor.respond(topic: payload.topic, response: .response(response)) { _ in }
         return (sessionTopic, proposal)
     }
@@ -165,7 +166,7 @@ final class PairingEngine {
     }
     
     private func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
-        logger.debug(proposal)
+        logger.debug("Received Session Proposal")
         try? proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
         onSessionProposal?(proposal.publicRepresentation())
     }
@@ -228,7 +229,7 @@ final class PairingEngine {
             }
 
             let sessionTopic = agreementKeys.derivedTopic()
-            logger.debug("session topic: \(sessionTopic)")
+            logger.debug("Received Session Proposal response")
             
             try? kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
             try! sessionToPairingTopic.set(pairingTopic, forKey: sessionTopic)
@@ -240,7 +241,7 @@ final class PairingEngine {
                 networkingInteractor.unsubscribe(topic: pairing.topic)
                 pairingStore.delete(topic: pairingTopic)
             }
-            logger.debug("session propose has been rejected")
+            logger.debug("Session Proposal has been rejected")
             kms.deletePrivateKey(for: proposal.proposer.publicKey)
             onSessionRejected?(proposal.publicRepresentation(), SessionType.Reason(code: error.error.code, message: error.error.message))
             return

@@ -55,6 +55,9 @@ public protocol WalletConnectClientDelegate: AnyObject {
     ///
     /// Function will be executed on proposer client only.
     func didReject(proposal: Session.Proposal, reason: Reason)
+    
+    /// Tells the delegate that client has connected WebSocket
+    func didConnect()
 }
 
 public extension WalletConnectClientDelegate {

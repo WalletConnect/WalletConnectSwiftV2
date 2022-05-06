@@ -34,8 +34,25 @@ final class ClientTests: XCTestCase {
         return ClientDelegate(client: client)
     }
     
+    private func waitConnected() async {
+        let group = DispatchGroup()
+        group.enter()
+        
+        proposer.onConnected = {
+            group.leave()
+        }
+        group.enter()
+        responder.onConnected = {
+            group.leave()
+        }
+        group.wait()
+        return
+    }
+    
     func testNewPairingPing() async {
         let responderReceivesPingResponseExpectation = expectation(description: "Responder receives ping response")
+        await waitConnected()
+
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
         
         try! responder.client.pair(uri: uri)
