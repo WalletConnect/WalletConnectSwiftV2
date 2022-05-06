@@ -8,7 +8,6 @@ class MockedNetworkRelayer: NetworkRelaying {
 
     }
     
-    var onConnect: (() -> ())?
     var onMessage: ((String, String) -> ())?
     var error: Error?
     var prompt = false

@@ -44,6 +44,8 @@ class NetworkInteractor: NetworkInteracting {
     
     var onPairingResponse: ((WCResponse) -> Void)?
     var onResponse: ((WCResponse) -> Void)?
+    private var publishers = [AnyCancellable]()
+
     
     private var networkRelayer: NetworkRelaying
     private let serializer: Serializing
@@ -187,9 +189,11 @@ class NetworkInteractor: NetworkInteracting {
     
     //MARK: - Private
     private func setUpPublishers() {
-        networkRelayer.onConnect = { [weak self] in
-            self?.transportConnectionPublisherSubject.send()
-        }
+        networkRelayer.socketConnectionStatusPublisher.sink { [weak self] status in
+            if status == .connected {
+                self?.transportConnectionPublisherSubject.send()
+            }
+        }.store(in: &publishers)
         networkRelayer.onMessage = { [unowned self] topic, message in
             manageSubscription(topic, message)
         }

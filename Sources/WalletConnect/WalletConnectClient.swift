@@ -3,6 +3,7 @@ import Foundation
 import Relayer
 import WalletConnectUtils
 import WalletConnectKMS
+import Combine
 #if os(iOS)
 import UIKit
 #endif
@@ -22,6 +23,7 @@ import UIKit
 public final class WalletConnectClient {
     public weak var delegate: WalletConnectClientDelegate?
     public let logger: ConsoleLogging
+    private var publishers = [AnyCancellable]()
     private let metadata: AppMetadata
     private let pairingEngine: PairingEngine
     private let sessionEngine: SessionEngine
@@ -63,9 +65,7 @@ public final class WalletConnectClient {
         self.sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
-        relayer.onConnect = { [weak self] in
-            self?.delegate?.didConnect()
-        }
+        setUpConnectionObserving(relayClient: relayer)
         setUpEnginesCallbacks()
     }
     
@@ -95,12 +95,21 @@ public final class WalletConnectClient {
         self.sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
-        relayer.onConnect = { [weak self] in
-            self?.delegate?.didConnect()
-        }
+        setUpConnectionObserving(relayClient: relayer)
         setUpEnginesCallbacks()
     }
     
+    func setUpConnectionObserving(relayClient: Relayer) {
+        relayClient.socketConnectionStatusPublisher.sink { [weak self] status in
+            switch status {
+            case .connected:
+                self?.delegate?.didConnect()
+            default:
+                break
+            }
+        }.store(in: &publishers)
+    }
+
     // MARK: - Public interface
 
     /// For the Proposer to propose a session to a responder.

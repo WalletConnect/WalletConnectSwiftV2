@@ -1,12 +1,13 @@
 
 import Foundation
 import Relayer
+import Combine
 
 extension Relayer: NetworkRelaying {}
 
 protocol NetworkRelaying {
-    var onConnect: (()->())? {get set}
     var onMessage: ((_ topic: String, _ message: String) -> ())? {get set}
+    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> { get }
     func connect() throws
     func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws
     func publish(topic: String, payload: String, prompt: Bool) async throws
