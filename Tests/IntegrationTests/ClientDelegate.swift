@@ -56,4 +56,5 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didConnect() {
         onConnected?()
     }
+    func didDisconnect() {}
 }

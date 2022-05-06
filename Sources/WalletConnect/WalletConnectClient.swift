@@ -104,8 +104,8 @@ public final class WalletConnectClient {
             switch status {
             case .connected:
                 self?.delegate?.didConnect()
-            default:
-                break
+            case .disconnected:
+                self?.delegate?.didDisconnect()
             }
         }.store(in: &publishers)
     }

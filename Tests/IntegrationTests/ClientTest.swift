@@ -34,10 +34,9 @@ final class ClientTests: XCTestCase {
         return ClientDelegate(client: client)
     }
     
-    private func waitConnected() async {
+    private func waitClientsConnected() async {
         let group = DispatchGroup()
         group.enter()
-        
         proposer.onConnected = {
             group.leave()
         }
@@ -51,7 +50,7 @@ final class ClientTests: XCTestCase {
     
     func testNewPairingPing() async {
         let responderReceivesPingResponseExpectation = expectation(description: "Responder receives ping response")
-        await waitConnected()
+        await waitClientsConnected()
 
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
         
