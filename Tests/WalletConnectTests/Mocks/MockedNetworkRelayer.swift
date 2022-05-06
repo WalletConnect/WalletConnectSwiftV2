@@ -1,8 +1,14 @@
-
+import Combine
 import Foundation
+@testable import Relayer
 @testable import WalletConnect
 
 class MockedNetworkRelayer: NetworkRelaying {
+    var socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
+    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
+        socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
+    }
+    
     func publish(topic: String, payload: String, prompt: Bool) async throws {
         self.prompt = prompt
 

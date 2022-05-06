@@ -25,12 +25,15 @@ final class RelayerEndToEndTests: XCTestCase {
         let relayer = makeRelayer()
         try! relayer.connect()
         let subscribeExpectation = expectation(description: "subscribe call succeeds")
-        relayer.onConnect = {
-            relayer.subscribe(topic: "qwerty") { error in
-                XCTAssertNil(error)
-                subscribeExpectation.fulfill()
+        subscribeExpectation.assertForOverFulfill = true
+        relayer.socketConnectionStatusPublisher.sink { status in
+            if status == .connected {
+                relayer.subscribe(topic: "qwerty") { error in
+                    XCTAssertNil(error)
+                    subscribeExpectation.fulfill()
+                }
             }
-        }
+        }.store(in: &publishers)
         waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
@@ -62,22 +65,22 @@ final class RelayerEndToEndTests: XCTestCase {
             (subscriptionBTopic, subscriptionBPayload) = (topic, payload)
             expectationB.fulfill()
         }
-        relayA.onConnect = {
+        relayA.socketConnectionStatusPublisher.sink {  _ in
             relayA.publish(topic: randomTopic, payload: payloadA, onNetworkAcknowledge: { error in
                 XCTAssertNil(error)
             })
             relayA.subscribe(topic: randomTopic) { error in
                 XCTAssertNil(error)
             }
-        }
-        relayB.onConnect = {
+        }.store(in: &publishers)
+        relayB.socketConnectionStatusPublisher.sink {  _ in
             relayB.publish(topic: randomTopic, payload: payloadB, onNetworkAcknowledge: { error in
                 XCTAssertNil(error)
             })
             relayB.subscribe(topic: randomTopic) { error in
                 XCTAssertNil(error)
             }
-        }
+        }.store(in: &publishers)
 
         waitForExpectations(timeout: defaultTimeout, handler: nil)
         XCTAssertEqual(subscriptionATopic, randomTopic)
