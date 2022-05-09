@@ -70,7 +70,7 @@ internal enum SessionType {
     
     struct EventParams: Codable, Equatable {
         let event: Event
-        let chainId: Blockchain?
+        let chainId: Blockchain
 
         struct Event: Codable, Equatable {
             let name: String

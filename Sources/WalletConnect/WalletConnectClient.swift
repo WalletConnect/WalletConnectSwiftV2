@@ -259,7 +259,7 @@ public final class WalletConnectClient {
     ///   - topic: Session topic
     ///   - params: Event Parameters
     ///   - completion: calls a handler upon completion
-    public func emit(topic: String, event: Session.Event, chainId: Blockchain?, completion: ((Error?)->())?) {
+    public func emit(topic: String, event: Session.Event, chainId: Blockchain, completion: ((Error?)->())?) {
         sessionEngine.emit(topic: topic, event: event.internalRepresentation(), chainId: chainId, completion: completion)
     }
     

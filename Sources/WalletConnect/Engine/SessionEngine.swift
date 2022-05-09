@@ -107,7 +107,7 @@ final class SessionEngine {
         }
     }
     
-    func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain?, completion: ((Error?)->())?) {
+    func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain, completion: ((Error?)->())?) {
         guard let session = sessionStore.getSession(forTopic: topic), session.acknowledged else {
             logger.debug("Could not find session for topic \(topic)")
             return

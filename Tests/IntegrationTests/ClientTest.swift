@@ -292,7 +292,7 @@ final class ClientTests: XCTestCase {
     
     func testSessionEventSucceeds() async {
         let proposerReceivesEventExpectation = expectation(description: "Proposer receives event")
-        let namespace = Namespace(chains: [], methods: [], events: ["type1"])
+        let namespace = Namespace(chains: [], methods: [], events: ["type1"]) // TODO: Fix namespace with empty chain array / protocol change
         let uri = try! await proposer.client.connect(namespaces: [namespace])!
 
         try! responder.client.pair(uri: uri)
@@ -301,7 +301,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [namespace])
         }
         responder.onSessionSettled = { [unowned self] session in
-            responder.client.emit(topic: session.topic, event: event, chainId: nil, completion: nil)
+            responder.client.emit(topic: session.topic, event: event, chainId: Blockchain("eip155:1")!, completion: nil)
         }
         proposer.onEventReceived = { event, _ in
             XCTAssertEqual(event, event)
@@ -321,7 +321,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [])
         }
         proposer.onSessionSettled = { [unowned self] session in
-            proposer.client.emit(topic: session.topic, event: event, chainId: nil) { error in
+            proposer.client.emit(topic: session.topic, event: event, chainId: Blockchain("eip155:1")!) { error in
                 XCTAssertNotNil(error)
             }
         }
