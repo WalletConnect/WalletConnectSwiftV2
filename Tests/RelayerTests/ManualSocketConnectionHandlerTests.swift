@@ -1,29 +1,28 @@
-//
-//
-//import Foundation
-//import XCTest
-//@testable import Relayer
-//
-//final class ManualSocketConnectionHandlerTests: XCTestCase {
-//    var sut: ManualSocketConnectionHandler!
-//    var webSocketSession: WebSocketSessionMock!
-//    var networkMonitor: NetworkMonitoringMock!
-//    var socketConnectionObserver: SocketConnectionObserverMock!
-//    override func setUp() {
-//        webSocketSession = WebSocketSessionMock()
-//        sut = ManualSocketConnectionHandler(socket: webSocketSession)
-//    }
-//    
-//    func testHandleDisconnect() {
-//        webSocketSession.connect()
-//        XCTAssertTrue(webSocketSession.isConnected)
-//        try! sut.handleDisconnect(closeCode: .normalClosure)
-//        XCTAssertFalse(webSocketSession.isConnected)
-//    }
-//    
-//    func testHandleConnect() {
-//        XCTAssertFalse(webSocketSession.isConnected)
-//        try! sut.handleConnect()
-//        XCTAssertTrue(webSocketSession.isConnected)
-//    }
-//}
+
+
+import Foundation
+import XCTest
+@testable import Relayer
+
+final class ManualSocketConnectionHandlerTests: XCTestCase {
+    var sut: ManualSocketConnectionHandler!
+    var socket: WebSocketConnecting!
+    var networkMonitor: NetworkMonitoringMock!
+    override func setUp() {
+        socket = WebSocketMock()
+        sut = ManualSocketConnectionHandler(socket: socket)
+    }
+    
+    func testHandleDisconnect() {
+        socket.connect()
+        XCTAssertTrue(socket.isConnected)
+        try! sut.handleDisconnect(closeCode: .normalClosure)
+        XCTAssertFalse(socket.isConnected)
+    }
+    
+    func testHandleConnect() {
+        XCTAssertFalse(socket.isConnected)
+        try! sut.handleConnect()
+        XCTAssertTrue(socket.isConnected)
+    }
+}

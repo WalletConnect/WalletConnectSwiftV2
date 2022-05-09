@@ -17,10 +17,10 @@ final class Dispatcher: NSObject, Dispatching {
     var onMessage: ((String) -> ())?
     private var textFramesQueue = Queue<String>()
     private let logger: ConsoleLogging
-    var socket: WebSocket
+    var socket: WebSocketProtocol
     var socketConnectionHandler: SocketConnectionHandler
     
-    init(socket: WebSocket,
+    init(socket: WebSocketProtocol,
          socketConnectionHandler: SocketConnectionHandler,
          logger: ConsoleLogging) {
         self.socket = socket

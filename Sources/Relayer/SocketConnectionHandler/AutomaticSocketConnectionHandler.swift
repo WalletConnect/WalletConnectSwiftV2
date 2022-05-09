@@ -41,9 +41,6 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
         networkMonitor.onSatisfied = { [weak self] in
             self?.handleNetworkSatisfied()
         }
-        networkMonitor.onUnsatisfied = { [weak self] in
-            self?.handleNetworkUnsatisfied()
-        }
         networkMonitor.startMonitoring()
     }
     
@@ -63,10 +60,6 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
     
     func handleDisconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
         throw Error.manualSocketDisconnectionForbidden
-    }
-    
-    func handleNetworkUnsatisfied() {
-        socket.disconnect()
     }
     
     func handleNetworkSatisfied() {
