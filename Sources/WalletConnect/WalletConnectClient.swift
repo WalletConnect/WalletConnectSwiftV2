@@ -77,8 +77,8 @@ public final class WalletConnectClient {
     ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults but if for some reasons you want to provide your own storage you can inject it here.
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
-    public convenience init(metadata: AppMetadata, relayer: Relayer, keyValueStorage: KeyValueStorage = UserDefaults.standard) {
-        self.init(metadata: metadata, relayer: relayer, logger: ConsoleLogger(loggingLevel: .off), kms: KeyManagementService(serviceIdentifier:  "com.walletconnect.sdk"), keyValueStorage: keyValueStorage)
+    public convenience init(metadata: AppMetadata, relayer: Relayer, keyValueStorage: KeyValueStorage = UserDefaults.standard, kms: KeyManagementService = KeyManagementService(serviceIdentifier:  "com.walletconnect.sdk")) {
+        self.init(metadata: metadata, relayer: relayer, logger: ConsoleLogger(loggingLevel: .off), kms: kms, keyValueStorage: keyValueStorage)
     }
     
     init(metadata: AppMetadata, relayer: Relayer, logger: ConsoleLogging, kms: KeyManagementService, keyValueStorage: KeyValueStorage) {

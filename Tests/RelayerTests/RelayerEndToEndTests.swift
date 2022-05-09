@@ -17,7 +17,7 @@ final class RelayerEndToEndTests: XCTestCase {
         let logger = ConsoleLogger()
         let url = Relayer.makeRelayUrl(host: relayHost, projectId: projectId)
         let socket = WebSocket(url: url)
-        let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket))
+        let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket), logger: logger)
         return Relayer(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
     

@@ -60,10 +60,11 @@ final class ClientTests: XCTestCase {
             XCTAssertTrue(response.isSuccess)
             responderReceivesPingResponseExpectation.fulfill()
         }
-        await waitForExpectations(timeout: defaultTimeout, handler: nil)
+        wait(for: [responderReceivesPingResponseExpectation], timeout: defaultTimeout)
     }
 
     func testNewSession() async {
+        await waitClientsConnected()
         let proposerSettlesSessionExpectation = expectation(description: "Proposer settles session")
         let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
         let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
@@ -83,10 +84,11 @@ final class ClientTests: XCTestCase {
 //            XCTAssertEqual(account, sessionSettled.state.accounts[0])
             proposerSettlesSessionExpectation.fulfill()
         }
-        await waitForExpectations(timeout: defaultTimeout, handler: nil)
+        wait(for: [proposerSettlesSessionExpectation, responderSettlesSessionExpectation], timeout: defaultTimeout)
     }
     
     func testNewSessionOnExistingPairing() async {
+        await waitClientsConnected()
         let proposerSettlesSessionExpectation = expectation(description: "Proposer settles session")
         proposerSettlesSessionExpectation.expectedFulfillmentCount = 2
         let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
@@ -112,10 +114,11 @@ final class ClientTests: XCTestCase {
                 initiatedSecondSession = true
             }
         }
-        await waitForExpectations(timeout: defaultTimeout, handler: nil)
+        wait(for: [proposerSettlesSessionExpectation, responderSettlesSessionExpectation], timeout: defaultTimeout)
     }
 
     func testResponderRejectsSession() async {
+        await waitClientsConnected()
         let sessionRejectExpectation = expectation(description: "Proposer is notified on session rejection")
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
         _ = try! responder.client.pair(uri: uri)
@@ -127,10 +130,11 @@ final class ClientTests: XCTestCase {
             XCTAssertEqual(reason.code, 5000)
             sessionRejectExpectation.fulfill()
         }
-        await waitForExpectations(timeout: defaultTimeout, handler: nil)
+        wait(for: [sessionRejectExpectation], timeout: defaultTimeout)
     }
     
     func testDeleteSession() async {
+        await waitClientsConnected()
         let sessionDeleteExpectation = expectation(description: "Responder is notified on session deletion")
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
         _ = try! responder.client.pair(uri: uri)
@@ -145,10 +149,11 @@ final class ClientTests: XCTestCase {
         responder.onSessionDelete = {
             sessionDeleteExpectation.fulfill()
         }
-        await waitForExpectations(timeout: defaultTimeout, handler: nil)
+        wait(for: [sessionDeleteExpectation], timeout: defaultTimeout)
     }
     
     func testProposerRequestSessionRequest() async {
+        await waitClientsConnected()
         let requestExpectation = expectation(description: "Responder receives request")
         let responseExpectation = expectation(description: "Proposer receives response")
         let method = "eth_sendTransaction"
@@ -184,11 +189,12 @@ final class ClientTests: XCTestCase {
             self.responder.client.respond(topic: sessionRequest.topic, response: .response(jsonrpcResponse))
             requestExpectation.fulfill()
         }
-        await waitForExpectations(timeout: defaultTimeout, handler: nil)
+        wait(for: [requestExpectation, responseExpectation], timeout: defaultTimeout)
     }
     
     
     func testSessionRequestFailureResponse() async {
+        await waitClientsConnected()
         let failureResponseExpectation = expectation(description: "Proposer receives failure response")
         let method = "eth_sendTransaction"
         let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]
@@ -218,10 +224,11 @@ final class ClientTests: XCTestCase {
             let jsonrpcErrorResponse = JSONRPCErrorResponse(id: sessionRequest.id, error: error)
             self.responder.client.respond(topic: sessionRequest.topic, response: .error(jsonrpcErrorResponse))
         }
-        await waitForExpectations(timeout: defaultTimeout, handler: nil)
+        wait(for: [failureResponseExpectation], timeout: defaultTimeout)
     }
     
     func testSessionPing() async {
+        await waitClientsConnected()
         let proposerReceivesPingResponseExpectation = expectation(description: "Proposer receives ping response")
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
 
@@ -235,10 +242,11 @@ final class ClientTests: XCTestCase {
                 proposerReceivesPingResponseExpectation.fulfill()
             }
         }
-        await waitForExpectations(timeout: defaultTimeout, handler: nil)
+        wait(for: [proposerReceivesPingResponseExpectation], timeout: defaultTimeout)
     }
     
     func testSuccessfulSessionUpdateAccounts() async {
+        await waitClientsConnected()
         let proposerSessionUpdateExpectation = expectation(description: "Proposer updates session on responder request")
         let responderSessionUpdateExpectation = expectation(description: "Responder updates session on proposer response")
         let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
@@ -259,12 +267,13 @@ final class ClientTests: XCTestCase {
             XCTAssertEqual(accounts, updateAccounts)
             proposerSessionUpdateExpectation.fulfill()
         }
-        await waitForExpectations(timeout: defaultTimeout, handler: nil)
+        wait(for: [proposerSessionUpdateExpectation, responderSessionUpdateExpectation], timeout: defaultTimeout)
     }
     
     func testSuccessfulSessionUpdateNamespaces() async {
-        let proposerSessionUpgradeExpectation = expectation(description: "Proposer updates session methods on responder request")
-        let responderSessionUpgradeExpectation = expectation(description: "Responder updates session methods on proposer response")
+        await waitClientsConnected()
+        let proposerSessionUpdateExpectation = expectation(description: "Proposer updates session methods on responder request")
+        let responderSessionUpdateExpectation = expectation(description: "Responder updates session methods on proposer response")
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
         let namespacesToUpdateWith: Set<Namespace> = [Namespace(chains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], methods: ["xyz"], events: ["abc"])]
         try! responder.client.pair(uri: uri)
@@ -276,18 +285,19 @@ final class ClientTests: XCTestCase {
         }
         proposer.onSessionUpdateNamespaces = { topic, namespaces in
             XCTAssertEqual(namespaces, namespacesToUpdateWith)
-            proposerSessionUpgradeExpectation.fulfill()
+            proposerSessionUpdateExpectation.fulfill()
         }
         responder.onSessionUpdateNamespaces = { topic, namespaces in
             XCTAssertEqual(namespaces, namespacesToUpdateWith)
-            responderSessionUpgradeExpectation.fulfill()
+            responderSessionUpdateExpectation.fulfill()
         }
-        await waitForExpectations(timeout: defaultTimeout, handler: nil)
+        wait(for: [proposerSessionUpdateExpectation, responderSessionUpdateExpectation], timeout: defaultTimeout)
     }
     
     func testSuccessfulSessionUpdateExpiry() async {
-        let proposerSessionUpgradeExpectation = expectation(description: "Proposer updates session expiry on responder request")
-        let responderSessionUpgradeExpectation = expectation(description: "Responder updates session expiry on proposer response")
+        await waitClientsConnected()
+        let proposerSessionUpdateExpectation = expectation(description: "Proposer updates session expiry on responder request")
+        let responderSessionUpdateExpectation = expectation(description: "Responder updates session expiry on proposer response")
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
         try! responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
@@ -298,15 +308,16 @@ final class ClientTests: XCTestCase {
             try? responder.client.updateExpiry(topic: session.topic)
         }
         proposer.onSessionUpdateExpiry = { _, _ in
-            proposerSessionUpgradeExpectation.fulfill()
+            proposerSessionUpdateExpectation.fulfill()
         }
         responder.onSessionUpdateExpiry = { _, _ in
-            responderSessionUpgradeExpectation.fulfill()
+            responderSessionUpdateExpectation.fulfill()
         }
-        await waitForExpectations(timeout: defaultTimeout, handler: nil)
+        wait(for: [proposerSessionUpdateExpectation, responderSessionUpdateExpectation], timeout: defaultTimeout)
     }
     
     func testSessionEventSucceeds() async {
+        await waitClientsConnected()
         let proposerReceivesEventExpectation = expectation(description: "Proposer receives event")
         let namespace = Namespace(chains: [], methods: [], events: ["type1"])
         let uri = try! await proposer.client.connect(namespaces: [namespace])!
@@ -323,10 +334,11 @@ final class ClientTests: XCTestCase {
             XCTAssertEqual(event, event)
             proposerReceivesEventExpectation.fulfill()
         }
-        await waitForExpectations(timeout: defaultTimeout, handler: nil)
+        wait(for: [proposerReceivesEventExpectation], timeout: defaultTimeout)
     }
     
     func testSessionEventFails() async {
+        await waitClientsConnected()
         let proposerReceivesEventExpectation = expectation(description: "Proposer receives event")
         proposerReceivesEventExpectation.isInverted = true
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
@@ -345,7 +357,7 @@ final class ClientTests: XCTestCase {
             XCTFail()
             proposerReceivesEventExpectation.fulfill()
         }
-        await waitForExpectations(timeout: defaultTimeout, handler: nil)
+        wait(for: [proposerReceivesEventExpectation], timeout: defaultTimeout)
     }
 }
 

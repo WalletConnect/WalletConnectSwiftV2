@@ -16,12 +16,15 @@ final class Dispatcher: NSObject, Dispatching {
     var onDisconnect: (() -> ())?
     var onMessage: ((String) -> ())?
     private var textFramesQueue = Queue<String>()
+    private let logger: ConsoleLogging
     var socket: WebSocket
     var socketConnectionHandler: SocketConnectionHandler
     
     init(socket: WebSocket,
-         socketConnectionHandler: SocketConnectionHandler) {
+         socketConnectionHandler: SocketConnectionHandler,
+         logger: ConsoleLogging) {
         self.socket = socket
+        self.logger = logger
         self.socketConnectionHandler = socketConnectionHandler
         super.init()
         setUpWebSocketSession()
@@ -61,7 +64,6 @@ final class Dispatcher: NSObject, Dispatching {
             self?.onConnect?()
         }
         socket.onDisconnect = { [weak self] error in
-            print(error)
             self?.onDisconnect?()
         }
     }

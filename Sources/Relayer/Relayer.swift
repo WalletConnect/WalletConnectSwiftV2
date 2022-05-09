@@ -71,7 +71,7 @@ public final class Relayer {
         case .manual:
             socketConnectionHandler = ManualSocketConnectionHandler(socket: socket)
         }
-        let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: socketConnectionHandler)
+        let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: socketConnectionHandler, logger: logger)
         self.init(dispatcher: dispatcher,
                   logger: logger,
                   keyValueStorage: keyValueStorage)
