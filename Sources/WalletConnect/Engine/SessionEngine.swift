@@ -218,20 +218,14 @@ final class SessionEngine {
             networkingInteractor.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
         }
-        if let chain = request.chainId {
-            guard session.hasNamespace(for: chain) else {
-                networkingInteractor.respondError(for: payload, reason: .unauthorizedTargetChain(chain.absoluteString))
-                return
-            }
-            guard session.hasNamespace(for: chain, method: request.method) else {
-                networkingInteractor.respondError(for: payload, reason: .unauthorizedMethod(request.method))
-                return
-            }
-        } else {
-            guard session.hasNamespace(for: nil, method: request.method) else {
-                networkingInteractor.respondError(for: payload, reason: .unauthorizedMethod(request.method))
-                return
-            }
+        let chain = request.chainId
+        guard session.hasNamespace(for: chain) else {
+            networkingInteractor.respondError(for: payload, reason: .unauthorizedTargetChain(chain.absoluteString))
+            return
+        }
+        guard session.hasNamespace(for: chain, method: request.method) else {
+            networkingInteractor.respondError(for: payload, reason: .unauthorizedMethod(request.method))
+            return
         }
         onSessionRequest?(request)
     }

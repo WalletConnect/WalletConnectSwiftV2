@@ -124,49 +124,50 @@ final class SessionEngineTests: XCTestCase {
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: session.self.publicKey!), "Responder must remove private key")
     }
     
-    func testSessionRequestEmptyNamespaceUnmatchingMethod() {
-        var didTriggerRequest = false
-        engine.onSessionRequest = { _ in didTriggerRequest = true }
-        
-        let session = WCSession.stub(isSelfController: true)
-        storageMock.setSession(session)
-        
-        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: nil)
-        networkingInteractor.wcRequestPublisherSubject.send(payload)
-        
-        XCTAssertTrue(networkingInteractor.didRespondError)
-        XCTAssertFalse(didTriggerRequest)
-    }
-    
-    func testSessionRequestEmptyNamespaceMatchingMethod() {
-        var didTriggerRequest = false
-        engine.onSessionRequest = { _ in didTriggerRequest = true }
-        
-        var session = WCSession.stub(isSelfController: true)
-        session.updateNamespaces([Namespace(chains: [], methods: ["someMethod"], events: [])])
-        storageMock.setSession(session)
-        
-        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: nil)
-        networkingInteractor.wcRequestPublisherSubject.send(payload)
-        
-        XCTAssertFalse(networkingInteractor.didRespondError)
-        XCTAssertTrue(didTriggerRequest)
-    }
-    
-    func testSessionRequestUndefinedChainMatchingMethod() {
-        var didTriggerRequest = false
-        engine.onSessionRequest = { _ in didTriggerRequest = true }
-        
-        var session = WCSession.stub(isSelfController: true)
-        session.updateNamespaces([Namespace(chains: [Blockchain("eip155:1")!], methods: ["someMethod"], events: [])])
-        storageMock.setSession(session)
-        
-        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: nil)
-        networkingInteractor.wcRequestPublisherSubject.send(payload)
-        
-        XCTAssertTrue(networkingInteractor.didRespondError)
-        XCTAssertFalse(didTriggerRequest)
-    }
+    // TODO: Tests with nil chainId are obsolete after protocol change, check planned test before removing
+//    func testSessionRequestEmptyNamespaceUnmatchingMethod() {
+//        var didTriggerRequest = false
+//        engine.onSessionRequest = { _ in didTriggerRequest = true }
+//
+//        let session = WCSession.stub(isSelfController: true)
+//        storageMock.setSession(session)
+//
+//        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: nil)
+//        networkingInteractor.wcRequestPublisherSubject.send(payload)
+//        
+//        XCTAssertTrue(networkingInteractor.didRespondError)
+//        XCTAssertFalse(didTriggerRequest)
+//    }
+//
+//    func testSessionRequestEmptyNamespaceMatchingMethod() {
+//        var didTriggerRequest = false
+//        engine.onSessionRequest = { _ in didTriggerRequest = true }
+//
+//        var session = WCSession.stub(isSelfController: true)
+//        session.updateNamespaces([Namespace(chains: [], methods: ["someMethod"], events: [])])
+//        storageMock.setSession(session)
+//
+//        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: nil)
+//        networkingInteractor.wcRequestPublisherSubject.send(payload)
+//
+//        XCTAssertFalse(networkingInteractor.didRespondError)
+//        XCTAssertTrue(didTriggerRequest)
+//    }
+//
+//    func testSessionRequestUndefinedChainMatchingMethod() {
+//        var didTriggerRequest = false
+//        engine.onSessionRequest = { _ in didTriggerRequest = true }
+//
+//        var session = WCSession.stub(isSelfController: true)
+//        session.updateNamespaces([Namespace(chains: [Blockchain("eip155:1")!], methods: ["someMethod"], events: [])])
+//        storageMock.setSession(session)
+//
+//        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: nil)
+//        networkingInteractor.wcRequestPublisherSubject.send(payload)
+//
+//        XCTAssertTrue(networkingInteractor.didRespondError)
+//        XCTAssertFalse(didTriggerRequest)
+//    }
     
     func testSessionRequestDefinedChainMatchingMethod() {
         var didTriggerRequest = false
@@ -198,38 +199,38 @@ final class SessionEngineTests: XCTestCase {
         XCTAssertFalse(didTriggerRequest)
     }
     
-    func testSessionRequestEmptyNamespaceDefinedChainMatchingMethod() {
-        var didTriggerRequest = false
-        engine.onSessionRequest = { _ in didTriggerRequest = true }
-        
-        var session = WCSession.stub(isSelfController: true)
-        session.updateNamespaces([Namespace(chains: [], methods: ["someMethod"], events: [])])
-        storageMock.setSession(session)
-        
-        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: Blockchain("eip155:1")!)
-        networkingInteractor.wcRequestPublisherSubject.send(payload)
-        
-        XCTAssertTrue(networkingInteractor.didRespondError)
-        XCTAssertFalse(didTriggerRequest)
-    }
-    
-    func testSessionRequestMultiNamespaceUndefinedChainMatchingMethod() {
-        var didTriggerRequest = false
-        engine.onSessionRequest = { _ in didTriggerRequest = true }
-        
-        var session = WCSession.stub(isSelfController: true)
-        session.updateNamespaces([
-            Namespace(chains: [Blockchain("eip155:1")!], methods: ["someMethod"], events: []),
-            Namespace(chains: [], methods: ["someMethod"], events: [])
-        ])
-        storageMock.setSession(session)
-        
-        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: nil)
-        networkingInteractor.wcRequestPublisherSubject.send(payload)
-        
-        XCTAssertFalse(networkingInteractor.didRespondError)
-        XCTAssertTrue(didTriggerRequest)
-    }
+//    func testSessionRequestEmptyNamespaceDefinedChainMatchingMethod() {
+//        var didTriggerRequest = false
+//        engine.onSessionRequest = { _ in didTriggerRequest = true }
+//
+//        var session = WCSession.stub(isSelfController: true)
+//        session.updateNamespaces([Namespace(chains: [], methods: ["someMethod"], events: [])])
+//        storageMock.setSession(session)
+//
+//        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: Blockchain("eip155:1")!)
+//        networkingInteractor.wcRequestPublisherSubject.send(payload)
+//
+//        XCTAssertTrue(networkingInteractor.didRespondError)
+//        XCTAssertFalse(didTriggerRequest)
+//    }
+//
+//    func testSessionRequestMultiNamespaceUndefinedChainMatchingMethod() {
+//        var didTriggerRequest = false
+//        engine.onSessionRequest = { _ in didTriggerRequest = true }
+//
+//        var session = WCSession.stub(isSelfController: true)
+//        session.updateNamespaces([
+//            Namespace(chains: [Blockchain("eip155:1")!], methods: ["someMethod"], events: []),
+//            Namespace(chains: [], methods: ["someMethod"], events: [])
+//        ])
+//        storageMock.setSession(session)
+//
+//        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: nil)
+//        networkingInteractor.wcRequestPublisherSubject.send(payload)
+//
+//        XCTAssertFalse(networkingInteractor.didRespondError)
+//        XCTAssertTrue(didTriggerRequest)
+//    }
     
     func testSessionRequestMultiNamespaceDefinedChainMatchingMethod() {
         var didTriggerRequest = false

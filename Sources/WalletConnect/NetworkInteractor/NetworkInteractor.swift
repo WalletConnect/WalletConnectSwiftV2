@@ -264,6 +264,6 @@ class NetworkInteractor: NetworkInteracting {
     
     func getChainId(_ request: WCRequest) -> String? {
         guard case let .sessionRequest(payload) = request.params else {return nil}
-        return payload.chainId?.absoluteString
+        return payload.chainId.absoluteString
     }
 }
