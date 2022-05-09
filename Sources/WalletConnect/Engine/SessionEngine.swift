@@ -61,9 +61,9 @@ final class SessionEngine {
     
     func delete(topic: String, reason: Reason) async throws {
         logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
+        try await networkingInteractor.request(.wcSessionDelete(reason.internalRepresentation()), onTopic: topic)
         sessionStore.delete(topic: topic)
         networkingInteractor.unsubscribe(topic: topic)
-        try await networkingInteractor.request(.wcSessionDelete(reason.internalRepresentation()), onTopic: topic)
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
