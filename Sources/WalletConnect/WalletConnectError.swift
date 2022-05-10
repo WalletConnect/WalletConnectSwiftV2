@@ -6,6 +6,7 @@ enum WalletConnectError: Error {
     case noSessionMatchingTopic(String)
     case sessionNotAcknowledged(String)
     case pairingNotSettled(String)
+    case namespaceHasEmptyChains
     case invalidMethod
     case invalidEvent
     case invalidUpdateExpiryValue
@@ -39,6 +40,8 @@ extension WalletConnectError {
             return "Pairing is not settled on topic \(topic)."
         case .invalidUpdateExpiryValue:
             return "Update expiry time is out of expected range"
+        case .namespaceHasEmptyChains:
+            return "Namespace has an empty list of chain IDs."
         case .invalidMethod:
             return "Methods set is invalid."
         case .invalidEvent:

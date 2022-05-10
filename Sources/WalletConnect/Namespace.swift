@@ -10,3 +10,24 @@ public struct Namespace: Codable, Equatable, Hashable {
         self.events = events
     }
 }
+
+internal extension Namespace {
+    
+    static func validate(_ namespaces: Set<Namespace>) throws {
+        for namespace in namespaces {
+            guard !namespace.chains.isEmpty else {
+                throw WalletConnectError.namespaceHasEmptyChains
+            }
+            for method in namespace.methods {
+                if method.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    throw WalletConnectError.invalidMethod
+                }
+            }
+            for event in namespace.events {
+                if event.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    throw WalletConnectError.invalidEvent
+                }
+            }
+        }
+    }
+}
