@@ -94,10 +94,12 @@ final class WalletViewController: UIViewController {
     
     private func pairClient(uri: String) {
         print("[RESPONDER] Pairing to: \(uri)")
-        do {
-            try client.pair(uri: uri)
-        } catch {
-            print("[PROPOSER] Pairing connect error: \(error)")
+        Task {
+            do {
+                try await client.pair(uri: uri)
+            } catch {
+                print("[PROPOSER] Pairing connect error: \(error)")
+            }
         }
     }
 }

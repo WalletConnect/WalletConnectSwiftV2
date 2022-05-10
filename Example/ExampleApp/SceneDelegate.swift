@@ -18,7 +18,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
               }
         let wcUri = incomingURL.absoluteString.deletingPrefix("https://walletconnect.com/wc?uri=")
         let client = ((window!.rootViewController as! UINavigationController).viewControllers[0] as! WalletViewController).client
-        try? client.pair(uri: wcUri)
+        Task {
+            try? await client.pair(uri: wcUri)
+        }
     }
 }
 

@@ -30,8 +30,8 @@ protocol NetworkInteracting: AnyObject {
     func respond(topic: String, response: JsonRpcResult, completion: @escaping ((Error?)->()))
     func respondSuccess(for payload: WCRequestSubscriptionPayload)
     func respondError(for payload: WCRequestSubscriptionPayload, reason: ReasonCode)
-    func subscribe(topic: String)
-    func subscribe(topic: String) async throws
+//    func subscribe(topic: String)
+    func subscribeA(topic: String) async throws
     func unsubscribe(topic: String)
 }
 
@@ -170,15 +170,15 @@ class NetworkInteractor: NetworkInteracting {
         respond(topic: payload.topic, response: JsonRpcResult.error(response)) { _ in } // TODO: Move error handling to relayer package
     }
     
-    func subscribe(topic: String)  {
-        networkRelayer.subscribe(topic: topic) { [weak self] error in
-            if let error = error {
-                self?.logger.error(error)
-            }
-        }
-    }
+//    func subscribe(topic: String)  {
+//        networkRelayer.subscribe(topic: topic) { [weak self] error in
+//            if let error = error {
+//                self?.logger.error(error)
+//            }
+//        }
+//    }
     
-    func subscribe(topic: String) async throws {
+    func subscribeA(topic: String) async throws {
         try await networkRelayer.subscribe(topic: topic)
     }
 
