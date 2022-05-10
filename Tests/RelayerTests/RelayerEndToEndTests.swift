@@ -5,6 +5,7 @@ import XCTest
 import WalletConnectUtils
 import TestingUtils
 @testable import Relayer
+import Starscream
 
 final class RelayerEndToEndTests: XCTestCase {
     
@@ -14,11 +15,9 @@ final class RelayerEndToEndTests: XCTestCase {
     
     func makeRelayer() -> Relayer {
         let logger = ConsoleLogger()
-        let socketConnectionObserver = SocketConnectionObserver()
-        let urlSession = URLSession(configuration: .default, delegate: socketConnectionObserver, delegateQueue: OperationQueue())
         let url = Relayer.makeRelayUrl(host: relayHost, projectId: projectId)
-        let socket = WebSocketSession(session: urlSession, url: url)
-        let dispatcher = Dispatcher(socket: socket, socketConnectionObserver: socketConnectionObserver, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket))
+        let socket = WebSocket(url: url)
+        let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket), logger: logger)
         return Relayer(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
     
@@ -26,10 +25,15 @@ final class RelayerEndToEndTests: XCTestCase {
         let relayer = makeRelayer()
         try! relayer.connect()
         let subscribeExpectation = expectation(description: "subscribe call succeeds")
-        relayer.subscribe(topic: "qwerty") { error in
-            XCTAssertNil(error)
-            subscribeExpectation.fulfill()
-        }
+        subscribeExpectation.assertForOverFulfill = true
+        relayer.socketConnectionStatusPublisher.sink { status in
+            if status == .connected {
+                relayer.subscribe(topic: "qwerty") { error in
+                    XCTAssertNil(error)
+                    subscribeExpectation.fulfill()
+                }
+            }
+        }.store(in: &publishers)
         waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
@@ -47,32 +51,36 @@ final class RelayerEndToEndTests: XCTestCase {
         var subscriptionAPayload: String!
         var subscriptionBPayload: String!
 
-        let expectation = expectation(description: "publish payloads send and receive successfuly")
-        expectation.expectedFulfillmentCount = 2
+        let expectationA = expectation(description: "publish payloads send and receive successfuly")
+        let expectationB = expectation(description: "publish payloads send and receive successfuly")
         
-        //TODO -remove this line when request rebound is resolved
-        expectation.assertForOverFulfill = false
+        expectationA.assertForOverFulfill = false
+        expectationB.assertForOverFulfill = false
 
         relayA.onMessage = { topic, payload in
             (subscriptionATopic, subscriptionAPayload) = (topic, payload)
-            expectation.fulfill()
+            expectationA.fulfill()
         }
         relayB.onMessage = { topic, payload in
             (subscriptionBTopic, subscriptionBPayload) = (topic, payload)
-            expectation.fulfill()
+            expectationB.fulfill()
         }
-        relayA.publish(topic: randomTopic, payload: payloadA, onNetworkAcknowledge: { error in
-            XCTAssertNil(error)
-        })
-        relayB.publish(topic: randomTopic, payload: payloadB, onNetworkAcknowledge: { error in
-            XCTAssertNil(error)
-        })
-        relayA.subscribe(topic: randomTopic) { error in
-            XCTAssertNil(error)
-        }
-        relayB.subscribe(topic: randomTopic) { error in
-            XCTAssertNil(error)
-        }
+        relayA.socketConnectionStatusPublisher.sink {  _ in
+            relayA.publish(topic: randomTopic, payload: payloadA, onNetworkAcknowledge: { error in
+                XCTAssertNil(error)
+            })
+            relayA.subscribe(topic: randomTopic) { error in
+                XCTAssertNil(error)
+            }
+        }.store(in: &publishers)
+        relayB.socketConnectionStatusPublisher.sink {  _ in
+            relayB.publish(topic: randomTopic, payload: payloadB, onNetworkAcknowledge: { error in
+                XCTAssertNil(error)
+            })
+            relayB.subscribe(topic: randomTopic) { error in
+                XCTAssertNil(error)
+            }
+        }.store(in: &publishers)
 
         waitForExpectations(timeout: defaultTimeout, handler: nil)
         XCTAssertEqual(subscriptionATopic, randomTopic)

@@ -2,8 +2,6 @@ import WalletConnect
 import Relayer
 
 class ClientDelegate: WalletConnectClientDelegate {
-
-    
     var client: WalletConnectClient
     var onSessionSettled: ((Session)->())?
     var onSessionResponse: ((Response)->())?
@@ -20,6 +18,10 @@ class ClientDelegate: WalletConnectClientDelegate {
         self.client = WalletConnectClient(metadata: metadata, relayer: relayer)
         client.logger.setLogging(level: .debug)
         client.delegate = self
+    }
+    
+    func didConnect() {
+        print("Client connected")
     }
 	
     func didSettle(session: Session) {

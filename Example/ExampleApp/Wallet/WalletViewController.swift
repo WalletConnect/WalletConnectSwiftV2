@@ -170,6 +170,10 @@ extension WalletViewController: ProposalViewControllerDelegate {
 }
 
 extension WalletViewController: WalletConnectClientDelegate {
+    func didConnect() {
+        print("Client connected")
+    }
+    
     
     // TODO: Adapt proposal data to be used on the view
     func didReceive(sessionProposal: Session.Proposal) {

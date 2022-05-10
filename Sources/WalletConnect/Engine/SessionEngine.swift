@@ -61,9 +61,9 @@ final class SessionEngine {
     
     func delete(topic: String, reason: Reason) async throws {
         logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
+        try await networkingInteractor.request(.wcSessionDelete(reason.internalRepresentation()), onTopic: topic)
         sessionStore.delete(topic: topic)
         networkingInteractor.unsubscribe(topic: topic)
-        try await networkingInteractor.request(.wcSessionDelete(reason.internalRepresentation()), onTopic: topic)
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
@@ -102,7 +102,7 @@ final class SessionEngine {
             if let error = error {
                 self?.logger.debug("Could not send session payload, error: \(error.localizedDescription)")
             } else {
-                self?.logger.debug("Sent Session Payload Response")
+                self?.logger.debug("Sent Session Request Response")
             }
         }
     }
@@ -163,7 +163,7 @@ final class SessionEngine {
             peerParticipant: proposal.proposer,
             settleParams: settleParams,
             acknowledged: false)
-        
+        logger.debug("Sending session settle request")
         networkingInteractor.subscribe(topic: topic)
         sessionStore.setSession(session)
         
@@ -287,6 +287,7 @@ final class SessionEngine {
         guard let session = sessionStore.getSession(forTopic: topic) else {return}
         switch result {
         case .response:
+            logger.debug("Received session settle response")
             guard var session = sessionStore.getSession(forTopic: topic) else {return}
             session.acknowledge()
             sessionStore.setSession(session)

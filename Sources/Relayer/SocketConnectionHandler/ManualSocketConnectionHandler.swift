@@ -1,4 +1,5 @@
 
+import Starscream
 import Foundation
 
 class ManualSocketConnectionHandler: SocketConnectionHandler {
@@ -13,6 +14,6 @@ class ManualSocketConnectionHandler: SocketConnectionHandler {
     }
     
     func handleDisconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
-        socket.disconnect(with: closeCode)
+        socket.disconnect()
     }
 }

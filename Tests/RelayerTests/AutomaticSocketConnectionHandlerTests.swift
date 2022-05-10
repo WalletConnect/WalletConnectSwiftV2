@@ -5,16 +5,14 @@ import XCTest
 
 final class AutomaticSocketConnectionHandlerTests: XCTestCase {
     var sut: AutomaticSocketConnectionHandler!
-    var webSocketSession: WebSocketSessionMock!
+    var webSocketSession: WebSocketConnecting!
     var networkMonitor: NetworkMonitoringMock!
-    var socketConnectionObserver: SocketConnectionObserverMock!
     var appStateObserver: AppStateObserving!
     var backgroundTaskRegistrar: BackgroundTaskRegistrarMock!
     override func setUp() {
-        webSocketSession = WebSocketSessionMock()
+        webSocketSession = WebSocketMock()
         networkMonitor = NetworkMonitoringMock()
         appStateObserver = AppStateObserverMock()
-        socketConnectionObserver = SocketConnectionObserverMock()
         backgroundTaskRegistrar = BackgroundTaskRegistrarMock()
         sut = AutomaticSocketConnectionHandler(
             networkMonitor: networkMonitor,
@@ -22,16 +20,9 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
             appStateObserver: appStateObserver,
         backgroundTaskRegistrar: backgroundTaskRegistrar)
     }
-    
-    func testDisconnectOnConnectionLoss() {
-        webSocketSession.connect()
-        XCTAssertTrue(sut.socket.isConnected)
-        networkMonitor.onUnsatisfied?()
-        XCTAssertFalse(sut.socket.isConnected)
-    }
 
     func testConnectsOnConnectionSatisfied() {
-        webSocketSession.disconnect(with: .normalClosure)
+        webSocketSession.disconnect()
         XCTAssertFalse(sut.socket.isConnected)
         networkMonitor.onSatisfied?()
         XCTAssertTrue(sut.socket.isConnected)
@@ -46,7 +37,7 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
     }
     
     func testReconnectsOnEnterForeground() {
-        webSocketSession.disconnect(with: .normalClosure)
+        webSocketSession.disconnect()
         appStateObserver.onWillEnterForeground?()
         XCTAssertTrue(sut.socket.isConnected)
     }

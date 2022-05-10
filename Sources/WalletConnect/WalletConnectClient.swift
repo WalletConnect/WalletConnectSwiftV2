@@ -3,6 +3,7 @@ import Foundation
 import Relayer
 import WalletConnectUtils
 import WalletConnectKMS
+import Combine
 #if os(iOS)
 import UIKit
 #endif
@@ -22,6 +23,7 @@ import UIKit
 public final class WalletConnectClient {
     public weak var delegate: WalletConnectClientDelegate?
     public let logger: ConsoleLogging
+    private var publishers = [AnyCancellable]()
     private let metadata: AppMetadata
     private let pairingEngine: PairingEngine
     private let sessionEngine: SessionEngine
@@ -58,13 +60,12 @@ public final class WalletConnectClient {
         self.networkingInteractor = NetworkInteractor(networkRelayer: relayer, serializer: serializer, logger: logger, jsonRpcHistory: history)
         let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue))
         let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue))
-        
-        
         let sessionToPairingTopic = KeyValueStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
         self.pairingEngine = PairingEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
         self.sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
+        setUpConnectionObserving(relayClient: relayer)
         setUpEnginesCallbacks()
     }
     
@@ -76,8 +77,8 @@ public final class WalletConnectClient {
     ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults but if for some reasons you want to provide your own storage you can inject it here.
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
-    public convenience init(metadata: AppMetadata, relayer: Relayer, keyValueStorage: KeyValueStorage = UserDefaults.standard) {
-        self.init(metadata: metadata, relayer: relayer, logger: ConsoleLogger(loggingLevel: .off), kms: KeyManagementService(serviceIdentifier:  "com.walletconnect.sdk"), keyValueStorage: keyValueStorage)
+    public convenience init(metadata: AppMetadata, relayer: Relayer, keyValueStorage: KeyValueStorage = UserDefaults.standard, kms: KeyManagementService = KeyManagementService(serviceIdentifier:  "com.walletconnect.sdk")) {
+        self.init(metadata: metadata, relayer: relayer, logger: ConsoleLogger(loggingLevel: .off), kms: kms, keyValueStorage: keyValueStorage)
     }
     
     init(metadata: AppMetadata, relayer: Relayer, logger: ConsoleLogging, kms: KeyManagementService, keyValueStorage: KeyValueStorage) {
@@ -90,14 +91,25 @@ public final class WalletConnectClient {
         let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue))
         let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(storage: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue))
         let sessionToPairingTopic = KeyValueStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
-        
         self.pairingEngine = PairingEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
         self.sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
+        setUpConnectionObserving(relayClient: relayer)
         setUpEnginesCallbacks()
     }
     
+    func setUpConnectionObserving(relayClient: Relayer) {
+        relayClient.socketConnectionStatusPublisher.sink { [weak self] status in
+            switch status {
+            case .connected:
+                self?.delegate?.didConnect()
+            case .disconnected:
+                self?.delegate?.didDisconnect()
+            }
+        }.store(in: &publishers)
+    }
+
     // MARK: - Public interface
 
     /// For the Proposer to propose a session to a responder.
@@ -105,7 +117,6 @@ public final class WalletConnectClient {
     /// - Parameter sessionPermissions: The session permissions the responder will be requested for.
     /// - Parameter topic: Optional parameter - use it if you already have an established pairing with peer client.
     /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
-    @available(*, renamed: "connect(sessionPermissions:topic:)")
     public func connect(namespaces: Set<Namespace>, topic: String? = nil, completion: @escaping ((Result<String?, Error>)->())) {
         logger.debug("Connecting Application")
         if let topic = topic {

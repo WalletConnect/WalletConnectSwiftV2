@@ -5,6 +5,7 @@ import Foundation
 class ClientDelegate: WalletConnectClientDelegate {
     var client: WalletConnectClient
     var onSessionSettled: ((Session)->())?
+    var onConnected: (()->())?
     var onSessionProposal: ((Session.Proposal)->())?
     var onSessionRequest: ((Request)->())?
     var onSessionResponse: ((Response)->())?
@@ -52,4 +53,8 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didReceive(sessionResponse: Response) {
         onSessionResponse?(sessionResponse)
     }
+    func didConnect() {
+        onConnected?()
+    }
+    func didDisconnect() {}
 }

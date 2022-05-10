@@ -1,5 +1,6 @@
 import Foundation
 import WalletConnectUtils
+import Starscream
 
 protocol Dispatching {
     var onConnect: (()->())? {get set}
@@ -15,29 +16,32 @@ final class Dispatcher: NSObject, Dispatching {
     var onDisconnect: (() -> ())?
     var onMessage: ((String) -> ())?
     private var textFramesQueue = Queue<String>()
-    var socket: WebSocketSessionProtocol
-    var socketConnectionObserver: SocketConnectionObserving
+    private let logger: ConsoleLogging
+    var socket: WebSocketProtocol
     var socketConnectionHandler: SocketConnectionHandler
     
-    init(socket: WebSocketSessionProtocol,
-         socketConnectionObserver: SocketConnectionObserving,
-         socketConnectionHandler: SocketConnectionHandler) {
+    init(socket: WebSocketProtocol,
+         socketConnectionHandler: SocketConnectionHandler,
+         logger: ConsoleLogging) {
         self.socket = socket
-        self.socketConnectionObserver = socketConnectionObserver
+        self.logger = logger
         self.socketConnectionHandler = socketConnectionHandler
         super.init()
         setUpWebSocketSession()
         setUpSocketConnectionObserving()
     }
-
+    
     func send(_ string: String, completion: @escaping (Error?) -> Void) {
         //TODO - add policy for retry and "single try"
-        //        if socket.isConnected {
-        self.socket.send(string, completionHandler: completion)
-        //TODO - enqueue     if fails
-        //        } else {
-        //            textFramesQueue.enqueue(string)
-        //        }
+        if socket.isConnected {
+            self.socket.write(string: string) {
+                completion(nil)
+            }
+            //TODO - enqueue     if fails
+        } else {
+            completion(NetworkError.webSocketNotConnected)
+//            textFramesQueue.enqueue(string)
+        }
     }
     
     func connect() throws {
@@ -49,20 +53,17 @@ final class Dispatcher: NSObject, Dispatching {
     }
     
     private func setUpWebSocketSession() {
-        socket.onMessageReceived = { [weak self] in
+        socket.onText = { [weak self] in
             self?.onMessage?($0)
-        }
-        socket.onMessageError = { error in
-            print("WebSocket Error \(error)")
         }
     }
     
     private func setUpSocketConnectionObserving() {
-        socketConnectionObserver.onConnect = { [weak self] in
+        socket.onConnect = { [weak self] in
             self?.dequeuePendingTextFrames()
             self?.onConnect?()
         }
-        socketConnectionObserver.onDisconnect = { [weak self] in
+        socket.onDisconnect = { [weak self] error in
             self?.onDisconnect?()
         }
     }

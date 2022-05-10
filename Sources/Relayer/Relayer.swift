@@ -2,8 +2,11 @@
 import Foundation
 import Combine
 import WalletConnectUtils
-
-
+import Starscream
+public enum SocketConnectionStatus {
+    case connected
+    case disconnected
+}
 public final class Relayer {
     enum RelyerError: Error {
         case subscriptionIdNotFound
@@ -13,12 +16,16 @@ public final class Relayer {
     private typealias RequestAcknowledgement = JSONRPCResponse<Bool>
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.relayer",
                                                 attributes: .concurrent)
-    public var onConnect: (() -> ())?
     let jsonRpcSubscriptionsHistory: JsonRpcHistory<RelayJSONRPC.SubscriptionParams>
     public var onMessage: ((String, String) -> ())?
     private var dispatcher: Dispatching
     var subscriptions: [String: String] = [:]
     let defaultTtl = 6*Time.hour
+    
+    public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
+        socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
+    }
+    private let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
 
     private var subscriptionResponsePublisher: AnyPublisher<JSONRPCResponse<String>, Never> {
         subscriptionResponsePublisherSubject.eraseToAnyPublisher()
@@ -55,18 +62,16 @@ public final class Relayer {
                             uniqueIdentifier: String? = nil,
                             socketConnectionType: SocketConnectionType = .automatic,
                             logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off)) {
-        let socketConnectionObserver = SocketConnectionObserver()
-        let urlSession = URLSession(configuration: .default, delegate: socketConnectionObserver, delegateQueue: OperationQueue())
         let url = Self.makeRelayUrl(host: relayHost, projectId: projectId)
-        let socket = WebSocketSession(session: urlSession, url: url)
         var socketConnectionHandler: SocketConnectionHandler
+        let socket = WebSocket(url: url)
         switch socketConnectionType {
         case .automatic:
             socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket)
         case .manual:
             socketConnectionHandler = ManualSocketConnectionHandler(socket: socket)
         }
-        let dispatcher = Dispatcher(socket: socket, socketConnectionObserver: socketConnectionObserver, socketConnectionHandler: socketConnectionHandler)
+        let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: socketConnectionHandler, logger: logger)
         self.init(dispatcher: dispatcher,
                   logger: logger,
                   keyValueStorage: keyValueStorage)
@@ -191,7 +196,7 @@ public final class Relayer {
             self?.handlePayloadMessage(payload)
         }
         dispatcher.onConnect = { [unowned self] in
-            self.onConnect?()
+            self.socketConnectionStatusPublisherSubject.send(.connected)
         }
     }
     

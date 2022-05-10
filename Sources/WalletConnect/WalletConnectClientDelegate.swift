@@ -55,6 +55,12 @@ public protocol WalletConnectClientDelegate: AnyObject {
     ///
     /// Function will be executed on proposer client only.
     func didReject(proposal: Session.Proposal, reason: Reason)
+    
+    /// Tells the delegate that client has connected WebSocket
+    func didConnect()
+    
+    /// Tells the delegate that client has disconnected WebSocket
+    func didDisconnect()
 }
 
 public extension WalletConnectClientDelegate {
@@ -64,4 +70,5 @@ public extension WalletConnectClientDelegate {
     func didReceive(sessionProposal: Session.Proposal) {}
     func didReceive(sessionResponse: Response) {}
     func didUpdate(sessionTopic: String, expiry: Date) {}
+    func didDisconnect() {}
 }
