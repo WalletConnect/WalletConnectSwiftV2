@@ -292,7 +292,7 @@ final class ClientTests: XCTestCase {
     
     func testSessionEventSucceeds() async {
         let proposerReceivesEventExpectation = expectation(description: "Proposer receives event")
-        let namespace = Namespace(chains: [], methods: [], events: ["type1"]) // TODO: Fix namespace with empty chain array / protocol change
+        let namespace = Namespace(chains: [Blockchain("eip155:1")!], methods: [], events: ["type1"]) // TODO: Fix namespace with empty chain array / protocol change
         let uri = try! await proposer.client.connect(namespaces: [namespace])!
 
         try! responder.client.pair(uri: uri)
