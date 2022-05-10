@@ -48,7 +48,9 @@ final class SessionEngine {
     }
     
     func setSubscription(topic: String) {
-        networkingInteractor.subscribe(topic: topic)
+        Task {
+            try? await networkingInteractor.subscribeA(topic: topic)
+        }
     }
     
     func hasSession(for topic: String) -> Bool {
@@ -164,7 +166,9 @@ final class SessionEngine {
             settleParams: settleParams,
             acknowledged: false)
         logger.debug("Sending session settle request")
-        networkingInteractor.subscribe(topic: topic)
+        Task {
+            try? await networkingInteractor.subscribeA(topic: topic)
+        }
         sessionStore.setSession(session)
         
         networkingInteractor.request(.wcSessionSettle(settleParams), onTopic: topic)
@@ -267,7 +271,7 @@ final class SessionEngine {
         networkingInteractor.transportConnectionPublisher
             .sink { [unowned self] (_) in
                 let topics = sessionStore.getAll().map{$0.topic}
-                topics.forEach{networkingInteractor.subscribe(topic: $0)}
+                topics.forEach{ topic in Task{try? await networkingInteractor.subscribeA(topic: topic)}}
             }.store(in: &publishers)
     }
     

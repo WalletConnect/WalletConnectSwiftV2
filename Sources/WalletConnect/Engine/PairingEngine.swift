@@ -59,16 +59,17 @@ final class PairingEngine {
             .map {Pairing(topic: $0.topic, peer: $0.peerMetadata, expiryDate: $0.expiryDate)}
     }
     
-    func create() -> WalletConnectURI? {
+    func create() async throws -> WalletConnectURI {
         let topic = topicInitializer()
         let symKey = try! kms.createSymmetricKey(topic)
         let pairing = WCPairing(topic: topic)
         let uri = WalletConnectURI(topic: topic, symKey: symKey.hexRepresentation, relay: pairing.relay)
+        try await networkingInteractor.subscribeA(topic: topic)
         pairingStore.setPairing(pairing)
-        networkingInteractor.subscribe(topic: topic)
         return uri
     }
-    func propose(pairingTopic: String, namespaces: Set<Namespace>, relay: RelayProtocolOptions, completion: @escaping ((Error?) -> ())) {
+    
+    func propose(pairingTopic: String, namespaces: Set<Namespace>, relay: RelayProtocolOptions) async throws {
         logger.debug("Propose Session on topic: \(pairingTopic)")
         let publicKey = try! kms.createX25519KeyPair()
         let proposer = Participant(
@@ -78,9 +79,14 @@ final class PairingEngine {
             relays: [relay],
             proposer: proposer,
             namespaces: namespaces)
-        networkingInteractor.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { [unowned self] error in
-            logger.debug("Received propose acknowledgement from network")
-            completion(error)
+        return try await withCheckedThrowingContinuation { continuation in
+            networkingInteractor.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
         }
     }
 
@@ -168,7 +174,7 @@ final class PairingEngine {
             .sink { [unowned self] (_) in
                 let topics = pairingStore.getAll()
                     .map{$0.topic}
-                topics.forEach{networkingInteractor.subscribe(topic: $0)}
+                topics.forEach{ topic in Task{try? await networkingInteractor.subscribeA(topic: topic)}}
             }.store(in: &publishers)
     }
     

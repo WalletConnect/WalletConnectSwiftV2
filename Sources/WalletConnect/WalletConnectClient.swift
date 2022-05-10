@@ -119,44 +119,19 @@ public final class WalletConnectClient {
     /// - Parameter sessionPermissions: The session permissions the responder will be requested for.
     /// - Parameter topic: Optional parameter - use it if you already have an established pairing with peer client.
     /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
-    public func connect(namespaces: Set<Namespace>, topic: String? = nil, completion: @escaping ((Result<String?, Error>)->())) {
+    public func connect(namespaces: Set<Namespace>, topic: String? = nil) async throws {
         logger.debug("Connecting Application")
         if let topic = topic {
             guard let pairing = pairingEngine.getSettledPairing(for: topic) else {
-                completion(.failure(WalletConnectError.noPairingMatchingTopic(topic)))
-                return
+                throw WalletConnectError.noPairingMatchingTopic(topic)
             }
             logger.debug("Proposing session on existing pairing")
-            pairingEngine.propose(pairingTopic: topic, namespaces: namespaces, relay: pairing.relay) { error in
-                if let error = error {
-                    completion(.failure(error))
-                } else {
-                    completion(.success(nil))
-                }
-            }
+            try await pairingEngine.propose(pairingTopic: topic, namespaces: namespaces, relay: pairing.relay)
         } else {
-            guard let pairingURI = pairingEngine.create() else {
-                completion(.failure(WalletConnectError.pairingProposalFailed))
-                return
-            }
-            pairingEngine.propose(pairingTopic: pairingURI.topic, namespaces: namespaces ,relay: pairingURI.relay) { error in
-                if let error = error {
-                    completion(.failure(error))
-                } else {
-                    completion(.success(pairingURI.absoluteString))
-                }
-            }
+            let pairingURI = try await pairingEngine.create()
+            try await pairingEngine.propose(pairingTopic: pairingURI.topic, namespaces: namespaces ,relay: pairingURI.relay)
         }
     }
-    
-    public func connect(namespaces: Set<Namespace>, topic: String? = nil) async throws -> String? {
-        return try await withCheckedThrowingContinuation { continuation in
-            connect(namespaces: namespaces, topic: topic) { result in
-                continuation.resume(with: result)
-            }
-        }
-    }
-    
     
     /// For responder to receive a session proposal from a proposer
     /// Responder should call this function in order to accept peer's pairing proposal and be able to subscribe for future session proposals.
