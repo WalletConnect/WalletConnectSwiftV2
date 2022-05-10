@@ -31,6 +31,7 @@ protocol NetworkInteracting: AnyObject {
     func respondSuccess(for payload: WCRequestSubscriptionPayload)
     func respondError(for payload: WCRequestSubscriptionPayload, reason: ReasonCode)
     func subscribe(topic: String)
+    func subscribe(topic: String) async throws
     func unsubscribe(topic: String)
 }
 
@@ -175,6 +176,10 @@ class NetworkInteractor: NetworkInteracting {
                 self?.logger.error(error)
             }
         }
+    }
+    
+    func subscribe(topic: String) async throws {
+        try await networkRelayer.subscribe(topic: topic)
     }
 
     func unsubscribe(topic: String) {

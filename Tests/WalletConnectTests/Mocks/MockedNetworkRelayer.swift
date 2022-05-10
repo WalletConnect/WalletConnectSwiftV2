@@ -4,6 +4,8 @@ import Foundation
 @testable import WalletConnect
 
 class MockedNetworkRelayer: NetworkRelaying {
+    func subscribe(topic: String) async throws {}
+    
     var socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
@@ -11,7 +13,6 @@ class MockedNetworkRelayer: NetworkRelaying {
     
     func publish(topic: String, payload: String, prompt: Bool) async throws {
         self.prompt = prompt
-
     }
     
     var onMessage: ((String, String) -> ())?
@@ -23,8 +24,7 @@ class MockedNetworkRelayer: NetworkRelaying {
         return 0
     }
     
-    func subscribe(topic: String, completion: @escaping (Error?) -> ()) -> Int64 {
-        return 0
+    func subscribe(topic: String, completion: @escaping (Error?) -> ()) {
     }
     
     func unsubscribe(topic: String, completion: @escaping ((Error?) -> ())) -> Int64? {

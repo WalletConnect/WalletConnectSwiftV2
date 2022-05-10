@@ -31,7 +31,6 @@ public final class WalletConnectClient {
     private let controllerSessionStateMachine: ControllerSessionStateMachine
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementService
-    private let pairingQueue = DispatchQueue(label: "com.walletconnect.sdk.client.pairing", qos: .userInitiated)
     private let history: JsonRpcHistory
 
     // MARK: - Initializers
@@ -163,13 +162,11 @@ public final class WalletConnectClient {
     /// Should Error:
     /// - When URI is invalid format or missing params
     /// - When topic is already in use
-    public func pair(uri: String) throws {
+    public func pair(uri: String) async throws {
         guard let pairingURI = WalletConnectURI(string: uri) else {
             throw WalletConnectError.malformedPairingURI
         }
-        try pairingQueue.sync {
-            try pairingEngine.pair(pairingURI)
-        }
+        try await pairingEngine.pair(pairingURI)
     }
     
     /// For the responder to approve a session proposal.

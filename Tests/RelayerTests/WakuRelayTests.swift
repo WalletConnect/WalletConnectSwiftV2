@@ -36,19 +36,6 @@ class WakuRelayTests: XCTestCase {
         waitForExpectations(timeout: 0.001, handler: nil)
     }
     
-    func testCompletionOnSubscribe() {
-        let subscribeExpectation = expectation(description: "subscribe completes with no error")
-        let topic = "0987"
-        let requestId = wakuRelay.subscribe(topic: topic) { error in
-            XCTAssertNil(error)
-            subscribeExpectation.fulfill()
-        }
-        let subscriptionId = "sub-id"
-        let subscribeResponse = JSONRPCResponse<String>(id: requestId, result: subscriptionId)
-        dispatcher.onMessage?(try! subscribeResponse.json())
-        waitForExpectations(timeout: 0.001, handler: nil)
-    }
-    
     func testPublishRequestAcknowledge() {
         let acknowledgeExpectation = expectation(description: "completion with no error on waku request acknowledge after publish")
         let requestId = wakuRelay.publish(topic: "", payload: "{}", onNetworkAcknowledge: { error in

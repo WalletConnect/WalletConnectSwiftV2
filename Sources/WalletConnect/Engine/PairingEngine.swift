@@ -83,17 +83,39 @@ final class PairingEngine {
             completion(error)
         }
     }
+    actor PairingActor {
+        var can: Bool = true
+        func canPair() async throws {
+            if !can {
+                throw WalletConnectError.pairingAlreadyExist
+            } else {
+                can = false
+                await lock()
+            }
+        }
+        func lock() async {
+            can = false
+        }
+        func unlock() async {
+            can = true
+        }
+    }
+    var pact = PairingActor()
     
-    func pair(_ uri: WalletConnectURI) throws {
+    func pair(_ uri: WalletConnectURI) async throws {
+        print("trying")
+        try await pact.canPair()
         guard !hasPairing(for: uri.topic) else {
             throw WalletConnectError.pairingAlreadyExist
         }
         var pairing = WCPairing(uri: uri)
+        print("Pairing")
+        try await networkingInteractor.subscribe(topic: pairing.topic)
         let symKey = try! SymmetricKey(hex: uri.symKey) // FIXME: Malformed QR code from external source can crash the SDK
         try! kms.setSymmetricKey(symKey, for: pairing.topic)
         pairing.activate()
-        networkingInteractor.subscribe(topic: pairing.topic)
         pairingStore.setPairing(pairing)
+        await pact.unlock()
     }
     
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
