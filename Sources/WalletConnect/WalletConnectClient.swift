@@ -247,8 +247,8 @@ public final class WalletConnectClient {
     ///   - topic: Session topic
     ///   - params: Event Parameters
     ///   - completion: calls a handler upon completion
-    public func emit(topic: String, event: Session.Event, chainId: Blockchain?, completion: ((Error?)->())?) {
-        sessionEngine.emit(topic: topic, event: event.internalRepresentation(), chainId: chainId, completion: completion)
+    public func emit(topic: String, event: Session.Event, chainId: Blockchain?) async throws {
+        try await sessionEngine.emit(topic: topic, event: event.internalRepresentation(), chainId: chainId)
     }
     
     /// For the proposer and responder to terminate a session

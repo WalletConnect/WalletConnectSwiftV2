@@ -109,21 +109,16 @@ final class SessionEngine {
         }
     }
     
-    func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain?, completion: ((Error?)->())?) {
+    func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain?) async throws {
         guard let session = sessionStore.getSession(forTopic: topic), session.acknowledged else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
         let params = SessionType.EventParams(event: event, chainId: chainId)
-        do {
-            guard session.hasNamespace(for: chainId, event: event.name) else {
-                throw WalletConnectError.invalidEvent
-            }
-            networkingInteractor.request(.wcSessionEvent(params), onTopic: topic)
-        } catch let error as WalletConnectError {
-            logger.error(error)
-            completion?(error)
-        } catch {}
+        guard session.hasNamespace(for: chainId, event: event.name) else {
+            throw WalletConnectError.invalidEvent
+        }
+        try await networkingInteractor.request(.wcSessionEvent(params), onTopic: topic)
     }
 
     //MARK: - Private

@@ -328,7 +328,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [namespace])
         }
         responder.onSessionSettled = { [unowned self] session in
-            responder.client.emit(topic: session.topic, event: event, chainId: nil, completion: nil)
+            Task{try? await responder.client.emit(topic: session.topic, event: event, chainId: nil)}
         }
         proposer.onEventReceived = { event, _ in
             XCTAssertEqual(event, event)
@@ -349,9 +349,7 @@ final class ClientTests: XCTestCase {
             self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [])
         }
         proposer.onSessionSettled = { [unowned self] session in
-            proposer.client.emit(topic: session.topic, event: event, chainId: nil) { error in
-                XCTAssertNotNil(error)
-            }
+            Task {await XCTAssertThrowsErrorAsync(try await proposer.client.emit(topic: session.topic, event: event, chainId: nil))}
         }
         responder.onEventReceived = { _, _ in
             XCTFail()

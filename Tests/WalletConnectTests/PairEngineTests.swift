@@ -4,23 +4,8 @@ import XCTest
 @testable import WalletConnectKMS
 import WalletConnectUtils
 
-fileprivate extension XCTest {
-    func XCTAssertThrowsError<T: Sendable>(
-        _ expression: @autoclosure () async throws -> T,
-        _ message: @autoclosure () -> String = "",
-        file: StaticString = #filePath,
-        line: UInt = #line,
-        _ errorHandler: (_ error: Error) -> Void = { _ in }
-    ) async {
-        do {
-            _ = try await expression()
-            XCTFail(message(), file: file, line: line)
-        } catch {
-            errorHandler(error)
-        }
-    }
-}
-final class PairMethodEngineTests: XCTestCase {
+
+final class PairEngineTests: XCTestCase {
     
     var engine: PairEngine!
     
@@ -61,7 +46,7 @@ final class PairMethodEngineTests: XCTestCase {
             if i == 1 {
                 XCTAssertNoThrow(Task{try await engine.pair(uri)})
             } else {
-                await XCTAssertThrowsError(try await engine.pair(uri))
+                await XCTAssertThrowsErrorAsync(try await engine.pair(uri))
             }
         }
     }
