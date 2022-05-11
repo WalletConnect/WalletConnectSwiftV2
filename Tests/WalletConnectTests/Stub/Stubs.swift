@@ -71,7 +71,7 @@ extension WCRequestSubscriptionPayload {
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: method.asRequest())
     }
     
-    static func stubRequest(topic: String, method: String, chainId: Blockchain?) -> WCRequestSubscriptionPayload {
+    static func stubRequest(topic: String, method: String, chainId: Blockchain) -> WCRequestSubscriptionPayload {
         let params = SessionType.RequestParams(
             request: SessionType.RequestParams.Request(method: method, params: AnyCodable(EmptyCodable())),
             chainId: chainId)

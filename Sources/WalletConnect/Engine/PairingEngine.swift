@@ -70,6 +70,12 @@ final class PairingEngine {
     }
     func propose(pairingTopic: String, namespaces: Set<Namespace>, relay: RelayProtocolOptions, completion: @escaping ((Error?) -> ())) {
         logger.debug("Propose Session on topic: \(pairingTopic)")
+        do {
+            try Namespace.validate(namespaces)
+        } catch {
+            completion(error)
+            return
+        }
         let publicKey = try! kms.createX25519KeyPair()
         let proposer = Participant(
             publicKey: publicKey.hexRepresentation,
