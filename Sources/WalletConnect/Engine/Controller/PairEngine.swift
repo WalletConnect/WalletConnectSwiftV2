@@ -2,7 +2,7 @@
 import Foundation
 import WalletConnectKMS
 
-actor PairMethodEngine {
+actor PairEngine {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private let pairingStore: WCPairingStorage

@@ -22,7 +22,7 @@ fileprivate extension XCTest {
 }
 final class PairMethodEngineTests: XCTestCase {
     
-    var engine: PairMethodEngine!
+    var engine: PairEngine!
     
     var networkingInteractor: MockedWCRelay!
     var storageMock: WCPairingStorageMock!
@@ -48,7 +48,7 @@ final class PairMethodEngineTests: XCTestCase {
     }
     
     func setupEngine() {
-        engine = PairMethodEngine(
+        engine = PairEngine(
             networkingInteractor: networkingInteractor,
             kms: cryptoMock,
             pairingStore: storageMock)
