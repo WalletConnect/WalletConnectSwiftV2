@@ -101,7 +101,7 @@ public final class WalletConnectClient {
         setUpEnginesCallbacks()
     }
     
-    func setUpConnectionObserving(relayClient: Relayer) {
+    private func setUpConnectionObserving(relayClient: Relayer) {
         relayClient.socketConnectionStatusPublisher.sink { [weak self] status in
             switch status {
             case .connected:
