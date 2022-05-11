@@ -49,7 +49,7 @@ final class SessionEngine {
     
     func setSubscription(topic: String) {
         Task {
-            try? await networkingInteractor.subscribeA(topic: topic)
+            try? await networkingInteractor.subscribe(topic: topic)
         }
     }
     
@@ -167,7 +167,7 @@ final class SessionEngine {
             acknowledged: false)
         logger.debug("Sending session settle request")
         Task {
-            try? await networkingInteractor.subscribeA(topic: topic)
+            try? await networkingInteractor.subscribe(topic: topic)
         }
         sessionStore.setSession(session)
         
@@ -271,7 +271,7 @@ final class SessionEngine {
         networkingInteractor.transportConnectionPublisher
             .sink { [unowned self] (_) in
                 let topics = sessionStore.getAll().map{$0.topic}
-                topics.forEach{ topic in Task{try? await networkingInteractor.subscribeA(topic: topic)}}
+                topics.forEach{ topic in Task{try? await networkingInteractor.subscribe(topic: topic)}}
             }.store(in: &publishers)
     }
     

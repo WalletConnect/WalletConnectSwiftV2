@@ -57,6 +57,7 @@ final class PairMethodEngineTests: XCTestCase {
     func testPairMultipleTimesOnSameURIThrows() async {
         let uri = WalletConnectURI.stub()
         for i in 1...10 {
+            usleep(1)
             if i == 1 {
                 XCTAssertNoThrow(Task{try await engine.pair(uri)})
             } else {

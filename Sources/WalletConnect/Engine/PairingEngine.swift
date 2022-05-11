@@ -61,10 +61,10 @@ final class PairingEngine {
     
     func create() async throws -> WalletConnectURI {
         let topic = topicInitializer()
+        try await networkingInteractor.subscribe(topic: topic)
         let symKey = try! kms.createSymmetricKey(topic)
         let pairing = WCPairing(topic: topic)
         let uri = WalletConnectURI(topic: topic, symKey: symKey.hexRepresentation, relay: pairing.relay)
-        try await networkingInteractor.subscribeA(topic: topic)
         pairingStore.setPairing(pairing)
         return uri
     }
@@ -174,7 +174,7 @@ final class PairingEngine {
             .sink { [unowned self] (_) in
                 let topics = pairingStore.getAll()
                     .map{$0.topic}
-                topics.forEach{ topic in Task{try? await networkingInteractor.subscribeA(topic: topic)}}
+                topics.forEach{ topic in Task{try? await networkingInteractor.subscribe(topic: topic)}}
             }.store(in: &publishers)
     }
     

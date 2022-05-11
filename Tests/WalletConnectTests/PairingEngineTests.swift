@@ -51,20 +51,20 @@ final class PairingEngineTests: XCTestCase {
             proposalPayloadsStore: proposalPayloadsStore)
     }
     
-    func testCreate() {
-        let uri = engine.create()!
+    func testCreate() async {
+        let uri = try! await engine.create()
         XCTAssert(cryptoMock.hasSymmetricKey(for: uri.topic), "Proposer must store the symmetric key matching the URI.")
         XCTAssert(storageMock.hasPairing(forTopic: uri.topic), "The engine must store a pairing after creating one")
         XCTAssert(networkingInteractor.didSubscribe(to: uri.topic), "Proposer must subscribe to pairing topic.")
         XCTAssert(storageMock.getPairing(forTopic: uri.topic)?.active == false, "Recently created pairing must be inactive.")
     }
     
-    func testPropose() {
+    func testPropose() async {
         let pairing = Pairing.stub()
         let topicA = pairing.topic
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
         
-        engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions) {_ in}
+        try! await engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions)
         
         guard let publishTopic = networkingInteractor.requests.first?.topic,
               let proposal = networkingInteractor.requests.first?.request.sessionProposal else {
@@ -105,14 +105,14 @@ final class PairingEngineTests: XCTestCase {
         XCTAssertEqual(networkingInteractor.didRespondOnTopic!, topicA, "Responder must respond on topic A")
     }
     
-    func testHandleSessionProposeResponse() {
-        let uri = engine.create()!
+    func testHandleSessionProposeResponse() async {
+        let uri = try! await engine.create()
         let pairing = storageMock.getPairing(forTopic: uri.topic)!
         let topicA = pairing.topic
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
         
         // Client proposes session
-        engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions){_ in}
+        try! await engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions)
         
         guard let request = networkingInteractor.requests.first?.request,
               let proposal = networkingInteractor.requests.first?.request.sessionProposal else {
@@ -145,14 +145,14 @@ final class PairingEngineTests: XCTestCase {
         XCTAssertEqual(topicB, sessionTopic, "Responder engine calls back with session topic")
     }
     
-    func testSessionProposeError() {
-        let uri = engine.create()!
+    func testSessionProposeError() async {
+        let uri = try! await engine.create()
         let pairing = storageMock.getPairing(forTopic: uri.topic)!
         let topicA = pairing.topic
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
         
         // Client propose session
-        engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions){_ in}
+        try! await engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions)
         
         guard let request = networkingInteractor.requests.first?.request,
               let proposal = networkingInteractor.requests.first?.request.sessionProposal else {
@@ -168,14 +168,14 @@ final class PairingEngineTests: XCTestCase {
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must remove private key for rejected session")
     }
     
-    func testSessionProposeErrorOnActivePairing() {
-        let uri = engine.create()!
+    func testSessionProposeErrorOnActivePairing() async {
+        let uri = try! await engine.create()
         let pairing = storageMock.getPairing(forTopic: uri.topic)!
         let topicA = pairing.topic
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
         
         // Client propose session
-        engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions){_ in}
+        try? await engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions)
         
         guard let request = networkingInteractor.requests.first?.request,
               let proposal = networkingInteractor.requests.first?.request.sessionProposal else {
@@ -195,8 +195,8 @@ final class PairingEngineTests: XCTestCase {
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must remove private key for rejected session")
     }
 
-    func testPairingExpiration() {
-        let uri = engine.create()!
+    func testPairingExpiration() async {
+        let uri = try! await engine.create()
         let pairing = storageMock.getPairing(forTopic: uri.topic)!
         storageMock.onPairingExpiration?(pairing)
         XCTAssertFalse(cryptoMock.hasSymmetricKey(for: uri.topic))
