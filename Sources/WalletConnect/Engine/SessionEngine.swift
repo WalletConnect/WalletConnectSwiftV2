@@ -145,7 +145,8 @@ final class SessionEngine {
         }.store(in: &publishers)
     }
 
-    func settle(topic: String, proposal: SessionProposal, accounts: Set<Account>, namespaces: Set<Namespace>) {
+    func settle(topic: String, proposal: SessionProposal, accounts: Set<Account>, namespaces: Set<Namespace>) throws {
+        try Namespace.validate(namespaces)
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!
         
         let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)

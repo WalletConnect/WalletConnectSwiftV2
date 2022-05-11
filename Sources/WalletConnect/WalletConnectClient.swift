@@ -170,10 +170,11 @@ public final class WalletConnectClient {
     public func approve(
         proposalId: String,
         accounts: Set<Account>,
-        namespaces: Set<Namespace>) {
+        namespaces: Set<Namespace>
+    ) throws {
             //TODO - accounts should be validated for matching namespaces
         guard let (sessionTopic, proposal) = pairingEngine.respondSessionPropose(proposerPubKey: proposalId) else {return}
-            sessionEngine.settle(topic: sessionTopic, proposal: proposal, accounts: accounts, namespaces: namespaces)
+        try sessionEngine.settle(topic: sessionTopic, proposal: proposal, accounts: accounts, namespaces: namespaces)
     }
     
     /// For the responder to reject a session proposal.
