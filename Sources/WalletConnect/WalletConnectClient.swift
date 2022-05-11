@@ -26,7 +26,7 @@ public final class WalletConnectClient {
     private var publishers = [AnyCancellable]()
     private let metadata: AppMetadata
     private let pairingEngine: PairingEngine
-    private let pairMathodEngine: PairEngine
+    private let pairEngine: PairEngine
     private let sessionEngine: SessionEngine
     private let nonControllerSessionStateMachine: NonControllerSessionStateMachine
     private let controllerSessionStateMachine: ControllerSessionStateMachine
@@ -65,7 +65,7 @@ public final class WalletConnectClient {
         self.sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
-        self.pairMathodEngine = PairEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore)
+        self.pairEngine = PairEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore)
         setUpConnectionObserving(relayClient: relayer)
         setUpEnginesCallbacks()
     }
@@ -96,7 +96,7 @@ public final class WalletConnectClient {
         self.sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
-        self.pairMathodEngine = PairEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore)
+        self.pairEngine = PairEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore)
         setUpConnectionObserving(relayClient: relayer)
         setUpEnginesCallbacks()
     }
@@ -146,7 +146,7 @@ public final class WalletConnectClient {
         guard let pairingURI = WalletConnectURI(string: uri) else {
             throw WalletConnectError.malformedPairingURI
         }
-        try await pairMathodEngine.pair(pairingURI)
+        try await pairEngine.pair(pairingURI)
     }
     
     /// For the responder to approve a session proposal.
