@@ -59,23 +59,19 @@ final class PairingEngine {
             .map {Pairing(topic: $0.topic, peer: $0.peerMetadata, expiryDate: $0.expiryDate)}
     }
     
-    func create() -> WalletConnectURI? {
+    func create() async throws -> WalletConnectURI {
         let topic = topicInitializer()
+        try await networkingInteractor.subscribe(topic: topic)
         let symKey = try! kms.createSymmetricKey(topic)
         let pairing = WCPairing(topic: topic)
         let uri = WalletConnectURI(topic: topic, symKey: symKey.hexRepresentation, relay: pairing.relay)
         pairingStore.setPairing(pairing)
-        networkingInteractor.subscribe(topic: topic)
         return uri
     }
-    func propose(pairingTopic: String, namespaces: Set<Namespace>, relay: RelayProtocolOptions, completion: @escaping ((Error?) -> ())) {
+    
+    func propose(pairingTopic: String, namespaces: Set<Namespace>, relay: RelayProtocolOptions) async throws {
         logger.debug("Propose Session on topic: \(pairingTopic)")
-        do {
-            try Namespace.validate(namespaces)
-        } catch {
-            completion(error)
-            return
-        }
+        try Namespace.validate(namespaces)
         let publicKey = try! kms.createX25519KeyPair()
         let proposer = Participant(
             publicKey: publicKey.hexRepresentation,
@@ -84,24 +80,17 @@ final class PairingEngine {
             relays: [relay],
             proposer: proposer,
             namespaces: namespaces)
-        networkingInteractor.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { [unowned self] error in
-            logger.debug("Received propose acknowledgement from network")
-            completion(error)
+        return try await withCheckedThrowingContinuation { continuation in
+            networkingInteractor.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
         }
     }
-    
-    func pair(_ uri: WalletConnectURI) throws {
-        guard !hasPairing(for: uri.topic) else {
-            throw WalletConnectError.pairingAlreadyExist
-        }
-        var pairing = WCPairing(uri: uri)
-        let symKey = try! SymmetricKey(hex: uri.symKey) // FIXME: Malformed QR code from external source can crash the SDK
-        try! kms.setSymmetricKey(symKey, for: pairing.topic)
-        pairing.activate()
-        networkingInteractor.subscribe(topic: pairing.topic)
-        pairingStore.setPairing(pairing)
-    }
-    
+
     func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
         guard pairingStore.hasPairing(forTopic: topic) else {
             logger.debug("Could not find pairing to ping for topic \(topic)")
@@ -186,7 +175,7 @@ final class PairingEngine {
             .sink { [unowned self] (_) in
                 let topics = pairingStore.getAll()
                     .map{$0.topic}
-                topics.forEach{networkingInteractor.subscribe(topic: $0)}
+                topics.forEach{ topic in Task{try? await networkingInteractor.subscribe(topic: topic)}}
             }.store(in: &publishers)
     }
     

@@ -13,8 +13,8 @@ protocol NetworkRelaying {
     func publish(topic: String, payload: String, prompt: Bool) async throws
     /// - returns: request id
     @discardableResult func publish(topic: String, payload: String, prompt: Bool, onNetworkAcknowledge: @escaping ((Error?)->())) -> Int64
-    /// - returns: request id
-    @discardableResult func subscribe(topic: String, completion: @escaping (Error?)->()) -> Int64
+    func subscribe(topic: String, completion: @escaping (Error?)->())
+    func subscribe(topic: String) async throws 
     /// - returns: request id
     @discardableResult func unsubscribe(topic: String, completion: @escaping ((Error?)->())) -> Int64?
 }

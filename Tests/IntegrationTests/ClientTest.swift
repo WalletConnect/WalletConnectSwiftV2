@@ -8,14 +8,14 @@ import TestingUtils
 
 
 final class ClientTests: XCTestCase {
-    
+
     let defaultTimeout: TimeInterval = 5.0
-    
+
     let relayHost = "relay.walletconnect.com"
     let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
     var proposer: ClientDelegate!
     var responder: ClientDelegate!
-    
+
     override func setUp() {
         proposer = Self.makeClientDelegate(isController: false, relayHost: relayHost, prefix: "🍏P", projectId: projectId)
         responder = Self.makeClientDelegate(isController: true, relayHost: relayHost, prefix: "🍎R", projectId: projectId)
@@ -33,7 +33,7 @@ final class ClientTests: XCTestCase {
             keyValueStorage: RuntimeKeyValueStorage())
         return ClientDelegate(client: client)
     }
-    
+
     private func waitClientsConnected() async {
         let group = DispatchGroup()
         group.enter()
@@ -47,14 +47,14 @@ final class ClientTests: XCTestCase {
         group.wait()
         return
     }
-    
+
     func testNewPairingPing() async {
         let responderReceivesPingResponseExpectation = expectation(description: "Responder receives ping response")
         await waitClientsConnected()
 
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
-        
-        try! responder.client.pair(uri: uri)
+
+        try! await responder.client.pair(uri: uri)
         let pairing = responder.client.getSettledPairings().first!
         responder.client.ping(topic: pairing.topic) { response in
             XCTAssertTrue(response.isSuccess)
@@ -68,9 +68,9 @@ final class ClientTests: XCTestCase {
         let proposerSettlesSessionExpectation = expectation(description: "Proposer settles session")
         let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
         let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
-        
+
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
-        try! responder.client.pair(uri: uri)
+        try! await responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
             try? self.responder.client.approve(proposalId: proposal.id, accounts: [account], namespaces: [])
         }
@@ -86,7 +86,7 @@ final class ClientTests: XCTestCase {
         }
         wait(for: [proposerSettlesSessionExpectation, responderSettlesSessionExpectation], timeout: defaultTimeout)
     }
-    
+
     func testNewSessionOnExistingPairing() async {
         await waitClientsConnected()
         let proposerSettlesSessionExpectation = expectation(description: "Proposer settles session")
@@ -96,7 +96,7 @@ final class ClientTests: XCTestCase {
         var initiatedSecondSession = false
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
 
-        try! responder.client.pair(uri: uri)
+        try! await responder.client.pair(uri: uri)
 
         responder.onSessionProposal = { [unowned self] proposal in
             try? responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [])
@@ -121,7 +121,7 @@ final class ClientTests: XCTestCase {
         await waitClientsConnected()
         let sessionRejectExpectation = expectation(description: "Proposer is notified on session rejection")
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
-        _ = try! responder.client.pair(uri: uri)
+        _ = try! await responder.client.pair(uri: uri)
 
         responder.onSessionProposal = {[unowned self] proposal in
             self.responder.client.reject(proposal: proposal, reason: .disapprovedChains)
@@ -132,12 +132,12 @@ final class ClientTests: XCTestCase {
         }
         wait(for: [sessionRejectExpectation], timeout: defaultTimeout)
     }
-    
+
     func testDeleteSession() async {
         await waitClientsConnected()
         let sessionDeleteExpectation = expectation(description: "Responder is notified on session deletion")
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
-        _ = try! responder.client.pair(uri: uri)
+        _ = try! await responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
             try? self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [])
         }
@@ -151,7 +151,7 @@ final class ClientTests: XCTestCase {
         }
         wait(for: [sessionDeleteExpectation], timeout: defaultTimeout)
     }
-    
+
     func testProposerRequestSessionRequest() async {
         await waitClientsConnected()
         let requestExpectation = expectation(description: "Responder receives request")
@@ -161,7 +161,7 @@ final class ClientTests: XCTestCase {
         let responseParams = "0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c"
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub(methods: [method])])!
 
-        _ = try! responder.client.pair(uri: uri)
+        _ = try! await responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
             try? self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: proposal.namespaces)
         }
@@ -191,8 +191,8 @@ final class ClientTests: XCTestCase {
         }
         wait(for: [requestExpectation, responseExpectation], timeout: defaultTimeout)
     }
-    
-    
+
+
     func testSessionRequestFailureResponse() async {
         await waitClientsConnected()
         let failureResponseExpectation = expectation(description: "Proposer receives failure response")
@@ -200,7 +200,7 @@ final class ClientTests: XCTestCase {
         let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]
         let error = JSONRPCErrorResponse.Error(code: 0, message: "error_message")
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub(methods: [method])])!
-        _ = try! responder.client.pair(uri: uri)
+        _ = try! await responder.client.pair(uri: uri)
         responder.onSessionProposal = {[unowned self]  proposal in
             try? self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: proposal.namespaces)
         }
@@ -226,13 +226,13 @@ final class ClientTests: XCTestCase {
         }
         wait(for: [failureResponseExpectation], timeout: defaultTimeout)
     }
-    
+
     func testSessionPing() async {
         await waitClientsConnected()
         let proposerReceivesPingResponseExpectation = expectation(description: "Proposer receives ping response")
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
 
-        try! responder.client.pair(uri: uri)
+        try! await responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
             try? self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [])
         }
@@ -244,7 +244,7 @@ final class ClientTests: XCTestCase {
         }
         wait(for: [proposerReceivesPingResponseExpectation], timeout: defaultTimeout)
     }
-    
+
     func testSuccessfulSessionUpdateAccounts() async {
         await waitClientsConnected()
         let proposerSessionUpdateExpectation = expectation(description: "Proposer updates session on responder request")
@@ -252,7 +252,7 @@ final class ClientTests: XCTestCase {
         let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
         let updateAccounts: Set<Account> = [Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdf")!]
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
-        try! responder.client.pair(uri: uri)
+        try! await responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
             try? self.responder.client.approve(proposalId: proposal.id, accounts: [account], namespaces: [])
         }
@@ -269,14 +269,14 @@ final class ClientTests: XCTestCase {
         }
         wait(for: [proposerSessionUpdateExpectation, responderSessionUpdateExpectation], timeout: defaultTimeout)
     }
-    
+
     func testSuccessfulSessionUpdateNamespaces() async {
         await waitClientsConnected()
         let proposerSessionUpdateExpectation = expectation(description: "Proposer updates session methods on responder request")
         let responderSessionUpdateExpectation = expectation(description: "Responder updates session methods on proposer response")
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
         let namespacesToUpdateWith: Set<Namespace> = [Namespace(chains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], methods: ["xyz"], events: ["abc"])]
-        try! responder.client.pair(uri: uri)
+        try! await responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
             try? self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [])
         }
@@ -293,13 +293,13 @@ final class ClientTests: XCTestCase {
         }
         wait(for: [proposerSessionUpdateExpectation, responderSessionUpdateExpectation], timeout: defaultTimeout)
     }
-    
+
     func testSuccessfulSessionUpdateExpiry() async {
         await waitClientsConnected()
         let proposerSessionUpdateExpectation = expectation(description: "Proposer updates session expiry on responder request")
         let responderSessionUpdateExpectation = expectation(description: "Responder updates session expiry on proposer response")
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
-        try! responder.client.pair(uri: uri)
+        try! await responder.client.pair(uri: uri)
         responder.onSessionProposal = { [unowned self] proposal in
             try? self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [])
         }
@@ -315,20 +315,20 @@ final class ClientTests: XCTestCase {
         }
         wait(for: [proposerSessionUpdateExpectation, responderSessionUpdateExpectation], timeout: defaultTimeout)
     }
-    
+
     func testSessionEventSucceeds() async {
         await waitClientsConnected()
         let proposerReceivesEventExpectation = expectation(description: "Proposer receives event")
         let namespace = Namespace(chains: [Blockchain("eip155:1")!], methods: [], events: ["type1"]) // TODO: Fix namespace with empty chain array / protocol change
         let uri = try! await proposer.client.connect(namespaces: [namespace])!
 
-        try! responder.client.pair(uri: uri)
+        try! await responder.client.pair(uri: uri)
         let event = Session.Event(name: "type1", data: AnyCodable("event_data"))
         responder.onSessionProposal = { [unowned self] proposal in
             try? self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [namespace])
         }
         responder.onSessionSettled = { [unowned self] session in
-            responder.client.emit(topic: session.topic, event: event, chainId: Blockchain("eip155:1")!, completion: nil)
+            Task{try? await responder.client.emit(topic: session.topic, event: event, chainId: Blockchain("eip155:1")!)}
         }
         proposer.onEventReceived = { event, _ in
             XCTAssertEqual(event, event)
@@ -336,22 +336,20 @@ final class ClientTests: XCTestCase {
         }
         wait(for: [proposerReceivesEventExpectation], timeout: defaultTimeout)
     }
-    
+
     func testSessionEventFails() async {
         await waitClientsConnected()
         let proposerReceivesEventExpectation = expectation(description: "Proposer receives event")
         proposerReceivesEventExpectation.isInverted = true
         let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
 
-        try! responder.client.pair(uri: uri)
+        try! await responder.client.pair(uri: uri)
         let event = Session.Event(name: "type2", data: AnyCodable("event_data"))
         responder.onSessionProposal = { [unowned self] proposal in
             try? self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [])
         }
         proposer.onSessionSettled = { [unowned self] session in
-            proposer.client.emit(topic: session.topic, event: event, chainId: Blockchain("eip155:1")!) { error in
-                XCTAssertNotNil(error)
-            }
+            Task {await XCTAssertThrowsErrorAsync(try await proposer.client.emit(topic: session.topic, event: event, chainId: Blockchain("eip155:1")!))}
         }
         responder.onEventReceived = { _, _ in
             XCTFail()

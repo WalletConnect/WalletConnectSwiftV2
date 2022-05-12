@@ -26,12 +26,12 @@ public final class WalletConnectClient {
     private var publishers = [AnyCancellable]()
     private let metadata: AppMetadata
     private let pairingEngine: PairingEngine
+    private let pairEngine: PairEngine
     private let sessionEngine: SessionEngine
     private let nonControllerSessionStateMachine: NonControllerSessionStateMachine
     private let controllerSessionStateMachine: ControllerSessionStateMachine
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementService
-    private let pairingQueue = DispatchQueue(label: "com.walletconnect.sdk.client.pairing", qos: .userInitiated)
     private let history: JsonRpcHistory
 
     // MARK: - Initializers
@@ -65,6 +65,7 @@ public final class WalletConnectClient {
         self.sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
+        self.pairEngine = PairEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore)
         setUpConnectionObserving(relayClient: relayer)
         setUpEnginesCallbacks()
     }
@@ -95,11 +96,12 @@ public final class WalletConnectClient {
         self.sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
+        self.pairEngine = PairEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore)
         setUpConnectionObserving(relayClient: relayer)
         setUpEnginesCallbacks()
     }
     
-    func setUpConnectionObserving(relayClient: Relayer) {
+    private func setUpConnectionObserving(relayClient: Relayer) {
         relayClient.socketConnectionStatusPublisher.sink { [weak self] status in
             switch status {
             case .connected:
@@ -117,44 +119,21 @@ public final class WalletConnectClient {
     /// - Parameter sessionPermissions: The session permissions the responder will be requested for.
     /// - Parameter topic: Optional parameter - use it if you already have an established pairing with peer client.
     /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
-    public func connect(namespaces: Set<Namespace>, topic: String? = nil, completion: @escaping ((Result<String?, Error>)->())) {
+    public func connect(namespaces: Set<Namespace>, topic: String? = nil) async throws -> String? {
         logger.debug("Connecting Application")
         if let topic = topic {
             guard let pairing = pairingEngine.getSettledPairing(for: topic) else {
-                completion(.failure(WalletConnectError.noPairingMatchingTopic(topic)))
-                return
+                throw WalletConnectError.noPairingMatchingTopic(topic)
             }
             logger.debug("Proposing session on existing pairing")
-            pairingEngine.propose(pairingTopic: topic, namespaces: namespaces, relay: pairing.relay) { error in
-                if let error = error {
-                    completion(.failure(error))
-                } else {
-                    completion(.success(nil))
-                }
-            }
+            try await pairingEngine.propose(pairingTopic: topic, namespaces: namespaces, relay: pairing.relay)
+            return nil
         } else {
-            guard let pairingURI = pairingEngine.create() else {
-                completion(.failure(WalletConnectError.pairingProposalFailed))
-                return
-            }
-            pairingEngine.propose(pairingTopic: pairingURI.topic, namespaces: namespaces ,relay: pairingURI.relay) { error in
-                if let error = error {
-                    completion(.failure(error))
-                } else {
-                    completion(.success(pairingURI.absoluteString))
-                }
-            }
+            let pairingURI = try await pairingEngine.create()
+            try await pairingEngine.propose(pairingTopic: pairingURI.topic, namespaces: namespaces ,relay: pairingURI.relay)
+            return pairingURI.absoluteString
         }
     }
-    
-    public func connect(namespaces: Set<Namespace>, topic: String? = nil) async throws -> String? {
-        return try await withCheckedThrowingContinuation { continuation in
-            connect(namespaces: namespaces, topic: topic) { result in
-                continuation.resume(with: result)
-            }
-        }
-    }
-    
     
     /// For responder to receive a session proposal from a proposer
     /// Responder should call this function in order to accept peer's pairing proposal and be able to subscribe for future session proposals.
@@ -163,13 +142,11 @@ public final class WalletConnectClient {
     /// Should Error:
     /// - When URI is invalid format or missing params
     /// - When topic is already in use
-    public func pair(uri: String) throws {
+    public func pair(uri: String) async throws {
         guard let pairingURI = WalletConnectURI(string: uri) else {
             throw WalletConnectError.malformedPairingURI
         }
-        try pairingQueue.sync {
-            try pairingEngine.pair(pairingURI)
-        }
+        try await pairEngine.pair(pairingURI)
     }
     
     /// For the responder to approve a session proposal.
@@ -271,8 +248,8 @@ public final class WalletConnectClient {
     ///   - topic: Session topic
     ///   - params: Event Parameters
     ///   - completion: calls a handler upon completion
-    public func emit(topic: String, event: Session.Event, chainId: Blockchain, completion: ((Error?)->())?) {
-        sessionEngine.emit(topic: topic, event: event.internalRepresentation(), chainId: chainId, completion: completion)
+    public func emit(topic: String, event: Session.Event, chainId: Blockchain) async throws {
+        try await sessionEngine.emit(topic: topic, event: event.internalRepresentation(), chainId: chainId)
     }
     
     /// For the proposer and responder to terminate a session

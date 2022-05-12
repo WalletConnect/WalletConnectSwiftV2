@@ -51,6 +51,7 @@ class MockedWCRelay: NetworkInteracting {
     func requestNetworkAck(_ wcMethod: WCMethod, onTopic topic: String, completion: @escaping ((Error?) -> ())) {
         requestCallCount += 1
         requests.append((topic, wcMethod.asRequest()))
+        completion(nil)
     }
     
     func requestPeerResponse(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ())?) {

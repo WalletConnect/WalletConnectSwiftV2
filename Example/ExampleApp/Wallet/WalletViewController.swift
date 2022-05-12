@@ -21,6 +21,7 @@ final class WalletViewController: UIViewController {
     lazy  var account = Signer.privateKey.address.hex(eip55: true)
     var sessionItems: [ActiveSessionItem] = []
     var currentProposal: Session.Proposal?
+    var onClientConnected: (()->())?
     
     private let walletView: WalletView = {
         WalletView()
@@ -94,10 +95,12 @@ final class WalletViewController: UIViewController {
     
     private func pairClient(uri: String) {
         print("[RESPONDER] Pairing to: \(uri)")
-        do {
-            try client.pair(uri: uri)
-        } catch {
-            print("[PROPOSER] Pairing connect error: \(error)")
+        Task {
+            do {
+                try await client.pair(uri: uri)
+            } catch {
+                print("[PROPOSER] Pairing connect error: \(error)")
+            }
         }
     }
 }
@@ -152,7 +155,7 @@ extension WalletViewController: ScannerViewControllerDelegate {
 }
 
 extension WalletViewController: ProposalViewControllerDelegate {
-    
+        
     func didApproveSession() {
         print("[RESPONDER] Approving session...")
         let proposal = currentProposal!
@@ -171,6 +174,7 @@ extension WalletViewController: ProposalViewControllerDelegate {
 
 extension WalletViewController: WalletConnectClientDelegate {
     func didConnect() {
+        onClientConnected?()
         print("Client connected")
     }
     

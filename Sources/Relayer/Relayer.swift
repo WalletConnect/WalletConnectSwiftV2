@@ -132,7 +132,8 @@ public final class Relayer {
         return request.id
     }
     
-    @discardableResult public func subscribe(topic: String, completion: @escaping (Error?) -> ()) -> Int64 {
+    @available(*, renamed: "subscribe(topic:)")
+    public func subscribe(topic: String, completion: @escaping (Error?) -> ()) {
         logger.debug("waku: Subscribing on Topic: \(topic)")
         let params = RelayJSONRPC.SubscribeParams(topic: topic)
         let request = JSONRPCRequest(method: RelayJSONRPC.Method.subscribe.rawValue, params: params)
@@ -154,10 +155,21 @@ public final class Relayer {
                 self?.concurrentQueue.async(flags: .barrier) {
                     self?.subscriptions[topic] = subscriptionResponse.result
                 }
-                completion(nil)
         }
-        return request.id
     }
+    
+    public func subscribe(topic: String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            subscribe(topic: topic) { error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                continuation.resume(returning: ())
+            }
+        }
+    }
+    
     
     @discardableResult public func unsubscribe(topic: String, completion: @escaping ((Error?) -> ())) -> Int64? {
         guard let subscriptionId = subscriptions[topic] else {
