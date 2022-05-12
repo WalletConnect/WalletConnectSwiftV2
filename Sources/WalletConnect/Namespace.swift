@@ -31,3 +31,29 @@ internal extension Namespace {
         }
     }
 }
+
+public struct ProposalNamespace {
+    public let chains: Set<Blockchain>
+    public let methods: Set<String>
+    public let events: Set<String>
+    public let `extension`: [Extension]?
+    
+    public struct Extension {
+        public let chains: Set<Blockchain>
+        public let methods: Set<String>
+        public let events: Set<String>
+    }
+}
+
+public struct SessionNamespace {
+    public let accounts: Set<Account>
+    public let methods: Set<String>
+    public let events: Set<String>
+    public let `extension`: [Extension]?
+    
+    public struct Extension {
+        public let chains: Set<Account>
+        public let methods: Set<String>
+        public let events: Set<String>
+    }
+}
