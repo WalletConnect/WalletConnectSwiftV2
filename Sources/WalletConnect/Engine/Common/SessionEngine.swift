@@ -107,7 +107,7 @@ final class SessionEngine {
         }
     }
     
-    func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain?) async throws {
+    func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain) async throws {
         guard let session = sessionStore.getSession(forTopic: topic), session.acknowledged else {
             logger.debug("Could not find session for topic \(topic)")
             return
@@ -140,7 +140,8 @@ final class SessionEngine {
         }.store(in: &publishers)
     }
 
-    func settle(topic: String, proposal: SessionProposal, accounts: Set<Account>, namespaces: Set<Namespace>) {
+    func settle(topic: String, proposal: SessionProposal, accounts: Set<Account>, namespaces: Set<Namespace>) throws {
+        try Namespace.validate(namespaces)
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!
         
         let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
@@ -212,20 +213,14 @@ final class SessionEngine {
             networkingInteractor.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
             return
         }
-        if let chain = request.chainId {
-            guard session.hasNamespace(for: chain) else {
-                networkingInteractor.respondError(for: payload, reason: .unauthorizedTargetChain(chain.absoluteString))
-                return
-            }
-            guard session.hasNamespace(for: chain, method: request.method) else {
-                networkingInteractor.respondError(for: payload, reason: .unauthorizedMethod(request.method))
-                return
-            }
-        } else {
-            guard session.hasNamespace(for: nil, method: request.method) else {
-                networkingInteractor.respondError(for: payload, reason: .unauthorizedMethod(request.method))
-                return
-            }
+        let chain = request.chainId
+        guard session.hasNamespace(for: chain) else {
+            networkingInteractor.respondError(for: payload, reason: .unauthorizedTargetChain(chain.absoluteString))
+            return
+        }
+        guard session.hasNamespace(for: chain, method: request.method) else {
+            networkingInteractor.respondError(for: payload, reason: .unauthorizedMethod(request.method))
+            return
         }
         onSessionRequest?(request)
     }
