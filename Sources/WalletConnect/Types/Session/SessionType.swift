@@ -14,11 +14,11 @@ internal enum SessionType {
     struct SettleParams: Codable, Equatable {
         let relay: RelayProtocolOptions
         let controller: Participant
-        let accounts: Set<Account>
-        let namespaces: Set<Namespace>
+        let namespaces: [String: SessionNamespace]
         let expiry: Int64
     }
     
+    // TODO: Delete
     struct UpdateAccountsParams: Codable, Equatable {
         private let accounts: Set<String>
         

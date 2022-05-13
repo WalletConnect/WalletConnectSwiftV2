@@ -45,13 +45,13 @@ public struct ProposalNamespace: Equatable, Codable {
     }
 }
 
-public struct SessionNamespace {
+public struct SessionNamespace: Equatable, Codable {
     public let accounts: Set<Account>
     public let methods: Set<String>
     public let events: Set<String>
     public let `extension`: [Extension]?
     
-    public struct Extension {
+    public struct Extension: Equatable, Codable {
         public let chains: Set<Account>
         public let methods: Set<String>?
         public let events: Set<String>?
@@ -61,6 +61,11 @@ public struct SessionNamespace {
 enum Validator {
     
     static func validate(_ namespaces: [String: ProposalNamespace]) throws {
+        // TODO
+        fatalError()
+    }
+    
+    static func validate(_ namespaces: [String: SessionNamespace]) throws {
         // TODO
         fatalError()
     }

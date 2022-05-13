@@ -7,8 +7,7 @@ import Foundation
 public struct Session {
     public let topic: String
     public let peer: AppMetadata
-    public let namespaces: Set<Namespace>
-    public let accounts: Set<Account>
+    public let namespaces: [String: SessionNamespace]
     public let expiryDate: Date
     public static var defaultTimeToLive: Int64 {
         WCSession.defaultTimeToLive

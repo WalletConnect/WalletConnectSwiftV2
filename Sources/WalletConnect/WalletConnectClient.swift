@@ -157,12 +157,11 @@ public final class WalletConnectClient {
     ///   - events: A Set of events
     public func approve(
         proposalId: String,
-        accounts: Set<Account>,
-        namespaces: Set<Namespace>
+        namespaces: [String: SessionNamespace]
     ) throws {
             //TODO - accounts should be validated for matching namespaces
         guard let (sessionTopic, proposal) = pairingEngine.respondSessionPropose(proposerPubKey: proposalId) else {return}
-        try sessionEngine.settle(topic: sessionTopic, proposal: proposal, accounts: accounts, namespaces: namespaces)
+        try sessionEngine.settle(topic: sessionTopic, proposal: proposal, namespaces: namespaces)
     }
     
     /// For the responder to reject a session proposal.
@@ -177,9 +176,9 @@ public final class WalletConnectClient {
     /// - Parameters:
     ///   - topic: Topic of the session that is intended to be updated.
     ///   - accounts: Set of accounts that will be allowed to be used by the session after the update.
-    public func updateAccounts(topic: String, accounts: Set<Account>) throws {
-        try controllerSessionStateMachine.updateAccounts(topic: topic, accounts: accounts)
-    }
+//    public func updateAccounts(topic: String, accounts: Set<Account>) throws {
+//        try controllerSessionStateMachine.updateAccounts(topic: topic, accounts: accounts)
+//    }
     
     /// For the responder to update session methods
     /// - Parameters:

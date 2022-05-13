@@ -140,8 +140,8 @@ final class SessionEngine {
         }.store(in: &publishers)
     }
 
-    func settle(topic: String, proposal: SessionProposal, accounts: Set<Account>, namespaces: Set<Namespace>) throws {
-        try Namespace.validate(namespaces)
+    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace]) throws {
+        try Validator.validate(namespaces)
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!
         
         let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
@@ -150,7 +150,7 @@ final class SessionEngine {
         guard let relay = proposal.relays.first else {return}
         let settleParams = SessionType.SettleParams(
             relay: relay,
-            controller: selfParticipant, accounts: accounts,
+            controller: selfParticipant,
             namespaces: namespaces,
             expiry: Int64(expectedExpiryTimeStamp.timeIntervalSince1970))//todo - test expiration times
         let session = WCSession(

@@ -28,20 +28,20 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         }.store(in: &publishers)
     }
     
-    func updateAccounts(topic: String, accounts: Set<Account>) throws {
-        var session = try getSession(for: topic)
-        try validateControlledAcknowledged(session)
-        session.updateAccounts(accounts)
-        sessionStore.setSession(session)
-        networkingInteractor.request(.wcSessionUpdateAccounts(SessionType.UpdateAccountsParams(accounts: accounts)), onTopic: topic)
-    }
+//    func updateAccounts(topic: String, accounts: Set<Account>) throws {
+//        var session = try getSession(for: topic)
+//        try validateControlledAcknowledged(session)
+//        session.updateAccounts(accounts)
+//        sessionStore.setSession(session)
+//        networkingInteractor.request(.wcSessionUpdateAccounts(SessionType.UpdateAccountsParams(accounts: accounts)), onTopic: topic)
+//    }
     
     func updateNamespaces(topic: String, namespaces: Set<Namespace>) throws {
         var session = try getSession(for: topic)
         try validateControlledAcknowledged(session)
         try validateNamespaces(namespaces)
         logger.debug("Controller will update methods")
-        session.updateNamespaces(namespaces)
+//        session.updateNamespaces(namespaces)
         sessionStore.setSession(session)
         networkingInteractor.request(.wcSessionUpdateNamespaces(SessionType.UpdateNamespaceParams(namespaces: namespaces)), onTopic: topic)
     }
@@ -60,7 +60,8 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
     private func handleResponse(_ response: WCResponse) {
         switch response.requestParams {
         case .sessionUpdateAccounts:
-            handleUpdateAccountsResponse(topic: response.topic, result: response.result)
+//            handleUpdateAccountsResponse(topic: response.topic, result: response.result)
+            break
         case .sessionUpdateNamespaces:
             handleUpdateNamespacesResponse(topic: response.topic, result: response.result)
         case .sessionUpdateExpiry:
@@ -70,18 +71,18 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         }
     }
     
-    private func handleUpdateAccountsResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sessionStore.getSession(forTopic: topic) else {
-            return
-        }
-        let accounts = session.accounts
-        switch result {
-        case .response:
-            onAccountsUpdate?(topic, accounts)
-        case .error:
-            logger.error("Peer failed to update state.")
-        }
-    }
+//    private func handleUpdateAccountsResponse(topic: String, result: JsonRpcResult) {
+//        guard let session = sessionStore.getSession(forTopic: topic) else {
+//            return
+//        }
+//        let accounts = session.accounts
+//        switch result {
+//        case .response:
+//            onAccountsUpdate?(topic, accounts)
+//        case .error:
+//            logger.error("Peer failed to update state.")
+//        }
+//    }
     
     private func handleUpdateNamespacesResponse(topic: String, result: JsonRpcResult) {
         guard let session = sessionStore.getSession(forTopic: topic) else {
@@ -90,7 +91,8 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         switch result {
         case .response:
             //TODO - state sync
-            onNamespacesUpdate?(session.topic, session.namespaces)
+//            onNamespacesUpdate?(session.topic, session.namespaces)
+            break
         case .error:
             //TODO - state sync
             logger.error("Peer failed to update methods.")
