@@ -172,14 +172,6 @@ public final class WalletConnectClient {
         pairingEngine.reject(proposal: proposal.proposal, reason: reason.internalRepresentation())
     }
     
-    /// For the responder to update the accounts
-    /// - Parameters:
-    ///   - topic: Topic of the session that is intended to be updated.
-    ///   - accounts: Set of accounts that will be allowed to be used by the session after the update.
-//    public func updateAccounts(topic: String, accounts: Set<Account>) throws {
-//        try controllerSessionStateMachine.updateAccounts(topic: topic, accounts: accounts)
-//    }
-    
     /// For the responder to update session methods
     /// - Parameters:
     ///   - topic: Topic of the session that is intended to be updated.

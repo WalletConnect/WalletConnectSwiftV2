@@ -59,9 +59,6 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
     
     private func handleResponse(_ response: WCResponse) {
         switch response.requestParams {
-        case .sessionUpdateAccounts:
-//            handleUpdateAccountsResponse(topic: response.topic, result: response.result)
-            break
         case .sessionUpdateNamespaces:
             handleUpdateNamespacesResponse(topic: response.topic, result: response.result)
         case .sessionUpdateExpiry:

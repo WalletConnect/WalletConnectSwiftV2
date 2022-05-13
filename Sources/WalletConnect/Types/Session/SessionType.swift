@@ -18,30 +18,7 @@ internal enum SessionType {
         let expiry: Int64
     }
     
-    // TODO: Delete
-    struct UpdateAccountsParams: Codable, Equatable {
-        private let accounts: Set<String>
-        
-        init(accounts: Set<Account>) {
-            self.accounts = Set(accounts.map{$0.absoluteString})
-        }
-#if DEBUG
-        init(accounts: Set<String>) {
-            self.accounts = accounts
-        }
-#endif
-
-        var isValidParam: Bool {
-            return accounts.allSatisfy{String.conformsToCAIP10($0)}
-        }
-        
-        func getAccounts() -> Set<Account> {
-            return Set(accounts.compactMap{Account($0)})
-        }
-    }
-    
-    
-    
+    // TODO: Change name
     struct UpdateNamespaceParams: Codable, Equatable {
         let namespaces: Set<Namespace>
     }

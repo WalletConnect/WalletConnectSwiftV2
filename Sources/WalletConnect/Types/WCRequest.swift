@@ -38,9 +38,6 @@ struct WCRequest: Codable {
         case .sessionSettle:
             let paramsValue = try container.decode(SessionType.SettleParams.self, forKey: .params)
             params = .sessionSettle(paramsValue)
-        case .sessionUpdateAccounts:
-            let paramsValue = try container.decode(SessionType.UpdateAccountsParams.self, forKey: .params)
-            params = .sessionUpdateAccounts(paramsValue)
         case .sessionUpdateNamespaces:
             let paramsValue = try container.decode(SessionType.UpdateNamespaceParams.self, forKey: .params)
             params = .sessionUpdateNamespaces(paramsValue)
@@ -76,8 +73,6 @@ struct WCRequest: Codable {
             try container.encode(params, forKey: .params)
         case .sessionSettle(let params):
             try container.encode(params, forKey: .params)
-        case .sessionUpdateAccounts(let params):
-            try container.encode(params, forKey: .params)
         case .sessionUpdateNamespaces(let params):
             try container.encode(params, forKey: .params)
         case .sessionUpdateExpiry(let params):
@@ -105,8 +100,7 @@ extension WCRequest {
         case pairingPing = "wc_pairingPing"
         case sessionPropose = "wc_sessionPropose"
         case sessionSettle = "wc_sessionSettle"
-        case sessionUpdateAccounts = "wc_sessionUpdateAccounts"
-        case sessionUpdateNamespaces = "wc_sessionUpdateNamespaces"
+        case sessionUpdateNamespaces = "wc_sessionUpdateNamespaces" // TODO: Rename
         case sessionUpdateExpiry = "wc_sessionUpdateExpiry"
         case sessionDelete = "wc_sessionDelete"
         case sessionRequest = "wc_sessionRequest"
@@ -121,7 +115,6 @@ extension WCRequest {
         case pairingPing(PairingType.PingParams)
         case sessionPropose(SessionType.ProposeParams)
         case sessionSettle(SessionType.SettleParams)
-        case sessionUpdateAccounts(SessionType.UpdateAccountsParams)
         case sessionUpdateNamespaces(SessionType.UpdateNamespaceParams)
         case sessionUpdateExpiry(SessionType.UpdateExpiryParams)
         case sessionDelete(SessionType.DeleteParams)
@@ -136,8 +129,6 @@ extension WCRequest {
             case (.sessionPropose(let lhsParam), sessionPropose(let rhsParam)):
                 return lhsParam == rhsParam
             case (.sessionSettle(let lhsParam), sessionSettle(let rhsParam)):
-                return lhsParam == rhsParam
-            case (.sessionUpdateAccounts(let lhsParam), sessionUpdateAccounts(let rhsParam)):
                 return lhsParam == rhsParam
             case (.sessionUpdateNamespaces(let lhsParam), sessionUpdateNamespaces(let rhsParam)):
                 return lhsParam == rhsParam
