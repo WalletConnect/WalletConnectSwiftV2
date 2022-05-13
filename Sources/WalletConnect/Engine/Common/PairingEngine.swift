@@ -69,9 +69,9 @@ final class PairingEngine {
         return uri
     }
     
-    func propose(pairingTopic: String, namespaces: Set<Namespace>, relay: RelayProtocolOptions) async throws {
+    func propose(pairingTopic: String, namespaces: [String: ProposalNamespace], relay: RelayProtocolOptions) async throws {
         logger.debug("Propose Session on topic: \(pairingTopic)")
-        try Namespace.validate(namespaces)
+        try Validator.validate(namespaces)
         let publicKey = try! kms.createX25519KeyPair()
         let proposer = Participant(
             publicKey: publicKey.hexRepresentation,
@@ -79,7 +79,7 @@ final class PairingEngine {
         let proposal = SessionProposal(
             relays: [relay],
             proposer: proposer,
-            namespaces: namespaces)
+            requiredNamespaces: namespaces)
         return try await withCheckedThrowingContinuation { continuation in
             networkingInteractor.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { error in
                 if let error = error {

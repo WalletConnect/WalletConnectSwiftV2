@@ -32,6 +32,12 @@ extension Namespace {
     }
 }
 
+extension ProposalNamespace {
+    static func stub() -> ProposalNamespace {
+        fatalError()
+    }
+}
+
 extension RelayProtocolOptions {
     static func stub() -> RelayProtocolOptions {
         RelayProtocolOptions(protocol: "", data: nil)
@@ -83,10 +89,11 @@ extension WCRequestSubscriptionPayload {
 extension SessionProposal {
     static func stub(proposerPubKey: String) -> SessionProposal {
         let relayOptions = RelayProtocolOptions(protocol: "waku", data: nil)
-        return SessionType.ProposeParams(
-            relays: [relayOptions],
-            proposer: Participant(publicKey: proposerPubKey, metadata: AppMetadata.stub()),
-            namespaces: [Namespace.stub()])
+        fatalError()
+//        return SessionType.ProposeParams(
+//            relays: [relayOptions],
+//            proposer: Participant(publicKey: proposerPubKey, metadata: AppMetadata.stub()),
+//            namespaces: [Namespace.stub()])
     }
 }
 

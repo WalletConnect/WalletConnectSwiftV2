@@ -119,18 +119,18 @@ public final class WalletConnectClient {
     /// - Parameter sessionPermissions: The session permissions the responder will be requested for.
     /// - Parameter topic: Optional parameter - use it if you already have an established pairing with peer client.
     /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
-    public func connect(namespaces: Set<Namespace>, topic: String? = nil) async throws -> String? {
+    public func connect(requiredNamespaces: [String: ProposalNamespace], topic: String? = nil) async throws -> String? {
         logger.debug("Connecting Application")
         if let topic = topic {
             guard let pairing = pairingEngine.getSettledPairing(for: topic) else {
                 throw WalletConnectError.noPairingMatchingTopic(topic)
             }
             logger.debug("Proposing session on existing pairing")
-            try await pairingEngine.propose(pairingTopic: topic, namespaces: namespaces, relay: pairing.relay)
+            try await pairingEngine.propose(pairingTopic: topic, namespaces: requiredNamespaces, relay: pairing.relay)
             return nil
         } else {
             let pairingURI = try await pairingEngine.create()
-            try await pairingEngine.propose(pairingTopic: pairingURI.topic, namespaces: namespaces ,relay: pairingURI.relay)
+            try await pairingEngine.propose(pairingTopic: pairingURI.topic, namespaces: requiredNamespaces ,relay: pairingURI.relay)
             return pairingURI.absoluteString
         }
     }

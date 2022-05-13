@@ -32,16 +32,16 @@ internal extension Namespace {
     }
 }
 
-public struct ProposalNamespace {
+public struct ProposalNamespace: Equatable, Codable {
     public let chains: Set<Blockchain>
     public let methods: Set<String>
     public let events: Set<String>
     public let `extension`: [Extension]?
     
-    public struct Extension {
+    public struct Extension: Equatable, Codable {
         public let chains: Set<Blockchain>
-        public let methods: Set<String>
-        public let events: Set<String>
+        public let methods: Set<String>?
+        public let events: Set<String>?
     }
 }
 
@@ -53,7 +53,15 @@ public struct SessionNamespace {
     
     public struct Extension {
         public let chains: Set<Account>
-        public let methods: Set<String>
-        public let events: Set<String>
+        public let methods: Set<String>?
+        public let events: Set<String>?
+    }
+}
+
+enum Validator {
+    
+    static func validate(_ namespaces: [String: ProposalNamespace]) throws {
+        // TODO
+        fatalError()
     }
 }
