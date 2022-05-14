@@ -62,7 +62,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
 //        onAccountsUpdate?(topic, updateParams.getAccounts())
 //    }
     
-    private func onSessionUpdateNamespacesRequest(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateNamespaceParams) {
+    private func onSessionUpdateNamespacesRequest(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {
         do {
             try validateNamespaces(updateParams.namespaces)
         } catch {

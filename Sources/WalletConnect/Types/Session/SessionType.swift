@@ -19,8 +19,8 @@ internal enum SessionType {
     }
     
     // TODO: Change name
-    struct UpdateNamespaceParams: Codable, Equatable {
-        let namespaces: Set<Namespace>
+    struct UpdateParams: Codable, Equatable {
+        let namespaces: Set<Namespace> // TODO: Update schema from spec
     }
 
     typealias DeleteParams = SessionType.Reason

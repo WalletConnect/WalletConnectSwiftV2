@@ -63,7 +63,7 @@ extension WCRequestSubscriptionPayload {
     }
     
     static func stubUpdateNamespaces(topic: String, namespaces: Set<Namespace> = [Namespace.stub()]) -> WCRequestSubscriptionPayload {
-        let updateMethod = WCMethod.wcSessionUpdateNamespaces(SessionType.UpdateNamespaceParams(namespaces: namespaces)).asRequest()
+        let updateMethod = WCMethod.wcSessionUpdateNamespaces(SessionType.UpdateParams(namespaces: namespaces)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
     }
     

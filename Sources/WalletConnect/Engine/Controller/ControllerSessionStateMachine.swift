@@ -43,7 +43,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         logger.debug("Controller will update methods")
 //        session.updateNamespaces(namespaces)
         sessionStore.setSession(session)
-        networkingInteractor.request(.wcSessionUpdateNamespaces(SessionType.UpdateNamespaceParams(namespaces: namespaces)), onTopic: topic)
+        networkingInteractor.request(.wcSessionUpdateNamespaces(SessionType.UpdateParams(namespaces: namespaces)), onTopic: topic)
     }
     
    func updateExpiry(topic: String, by ttl: Int64) throws {

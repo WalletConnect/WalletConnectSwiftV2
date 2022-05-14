@@ -39,7 +39,7 @@ struct WCRequest: Codable {
             let paramsValue = try container.decode(SessionType.SettleParams.self, forKey: .params)
             params = .sessionSettle(paramsValue)
         case .sessionUpdateNamespaces:
-            let paramsValue = try container.decode(SessionType.UpdateNamespaceParams.self, forKey: .params)
+            let paramsValue = try container.decode(SessionType.UpdateParams.self, forKey: .params)
             params = .sessionUpdateNamespaces(paramsValue)
         case .sessionDelete:
             let paramsValue = try container.decode(SessionType.DeleteParams.self, forKey: .params)
@@ -100,7 +100,7 @@ extension WCRequest {
         case pairingPing = "wc_pairingPing"
         case sessionPropose = "wc_sessionPropose"
         case sessionSettle = "wc_sessionSettle"
-        case sessionUpdateNamespaces = "wc_sessionUpdateNamespaces" // TODO: Rename
+        case sessionUpdateNamespaces = "wc_sessionUpdate"
         case sessionUpdateExpiry = "wc_sessionUpdateExpiry"
         case sessionDelete = "wc_sessionDelete"
         case sessionRequest = "wc_sessionRequest"
@@ -115,7 +115,7 @@ extension WCRequest {
         case pairingPing(PairingType.PingParams)
         case sessionPropose(SessionType.ProposeParams)
         case sessionSettle(SessionType.SettleParams)
-        case sessionUpdateNamespaces(SessionType.UpdateNamespaceParams)
+        case sessionUpdateNamespaces(SessionType.UpdateParams)
         case sessionUpdateExpiry(SessionType.UpdateExpiryParams)
         case sessionDelete(SessionType.DeleteParams)
         case sessionRequest(SessionType.RequestParams)

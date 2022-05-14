@@ -2,7 +2,7 @@ enum WCMethod {
     case wcPairingPing
     case wcSessionPropose(SessionType.ProposeParams)
     case wcSessionSettle(SessionType.SettleParams)
-    case wcSessionUpdateNamespaces(SessionType.UpdateNamespaceParams)
+    case wcSessionUpdateNamespaces(SessionType.UpdateParams)
     case wcSessionUpdateExpiry(SessionType.UpdateExpiryParams)
     case wcSessionDelete(SessionType.DeleteParams)
     case wcSessionRequest(SessionType.RequestParams)
