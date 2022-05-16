@@ -30,8 +30,6 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
     private func setUpWCRequestHandling() {
         networkingInteractor.wcRequestPublisher.sink { [unowned self] subscriptionPayload in
             switch subscriptionPayload.wcRequest.params {
-//            case .sessionUpdateAccounts(let updateParams):
-//                onSessionUpdateAccounts(payload: subscriptionPayload, updateParams: updateParams)
             case .sessionUpdateNamespaces(let updateParams):
                 onSessionUpdateNamespacesRequest(payload: subscriptionPayload, updateParams: updateParams)
             case .sessionUpdateExpiry(let updateExpiryParams):
@@ -42,26 +40,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
         }.store(in: &publishers)
     }
     
-//    private func onSessionUpdateAccounts(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateAccountsParams) {
-//        if !updateParams.isValidParam {
-//            networkingInteractor.respondError(for: payload, reason: .invalidUpdateAccountsRequest)
-//            return
-//        }
-//        let topic = payload.topic
-//        guard var session = sessionStore.getSession(forTopic: topic) else {
-//            networkingInteractor.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
-//                  return
-//              }
-//        guard session.peerIsController else {
-//            networkingInteractor.respondError(for: payload, reason: .unauthorizedUpdateAccountRequest)
-//            return
-//        }
-//        session.updateAccounts(updateParams.getAccounts())
-//        sessionStore.setSession(session)
-//        networkingInteractor.respondSuccess(for: payload)
-//        onAccountsUpdate?(topic, updateParams.getAccounts())
-//    }
-    
+    // TODO: Update stored session namespaces
     private func onSessionUpdateNamespacesRequest(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {
         do {
             try validateNamespaces(updateParams.namespaces)

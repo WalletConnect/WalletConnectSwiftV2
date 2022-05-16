@@ -28,14 +28,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         }.store(in: &publishers)
     }
     
-//    func updateAccounts(topic: String, accounts: Set<Account>) throws {
-//        var session = try getSession(for: topic)
-//        try validateControlledAcknowledged(session)
-//        session.updateAccounts(accounts)
-//        sessionStore.setSession(session)
-//        networkingInteractor.request(.wcSessionUpdateAccounts(SessionType.UpdateAccountsParams(accounts: accounts)), onTopic: topic)
-//    }
-    
+    // TODO: Change to new namespace spec
     func updateNamespaces(topic: String, namespaces: Set<Namespace>) throws {
         var session = try getSession(for: topic)
         try validateControlledAcknowledged(session)
@@ -68,19 +61,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         }
     }
     
-//    private func handleUpdateAccountsResponse(topic: String, result: JsonRpcResult) {
-//        guard let session = sessionStore.getSession(forTopic: topic) else {
-//            return
-//        }
-//        let accounts = session.accounts
-//        switch result {
-//        case .response:
-//            onAccountsUpdate?(topic, accounts)
-//        case .error:
-//            logger.error("Peer failed to update state.")
-//        }
-//    }
-    
+    // TODO: Re-enable callback
     private func handleUpdateNamespacesResponse(topic: String, result: JsonRpcResult) {
         guard let session = sessionStore.getSession(forTopic: topic) else {
             return
