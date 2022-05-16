@@ -1,3 +1,4 @@
+// TODO: Remove type
 public struct Namespace: Codable, Equatable, Hashable {
     
     public let chains: Set<Blockchain>
