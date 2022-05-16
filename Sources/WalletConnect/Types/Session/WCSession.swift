@@ -12,8 +12,6 @@ struct WCSession: ExpirableSequence {
     private (set) var expiryDate: Date
     var acknowledged: Bool
     let controller: AgreementPeer
-//    private(set) var accounts: Set<Account>
-//    private(set) var namespaces: Set<Namespace>
     private(set) var namespaces: [String: SessionNamespace]
     
     static var defaultTimeToLive: Int64 {
@@ -35,7 +33,6 @@ struct WCSession: ExpirableSequence {
         self.selfParticipant = selfParticipant
         self.peerParticipant = peerParticipant
         self.namespaces = settleParams.namespaces
-//        self.accounts = settleParams.accounts
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(settleParams.expiry))
     }
@@ -48,7 +45,6 @@ struct WCSession: ExpirableSequence {
         self.selfParticipant = selfParticipant
         self.peerParticipant = peerParticipant
         self.namespaces = namespaces
-//        self.accounts = accounts
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
     }
@@ -66,10 +62,11 @@ struct WCSession: ExpirableSequence {
         return controller.publicKey == peerParticipant.publicKey
     }
     
+    // FIXME
     func hasNamespace(for chain: Blockchain) -> Bool {
         // TODO
 //        namespaces.contains{$0.chains.contains(chain)}
-        fatalError()
+        return true
     }
     
     // TODO: Remove optional for chain param, it's required now / protocol change
@@ -85,7 +82,7 @@ struct WCSession: ExpirableSequence {
 //                .flatMap { $0.methods }
 //                .contains(method)
 //        }
-        fatalError()
+        return true
     }
     
     func hasNamespace(for chain: Blockchain?,  event: String) -> Bool {
@@ -105,11 +102,9 @@ struct WCSession: ExpirableSequence {
 //                return false
 //            }
 //        }
-        fatalError()
+        return true
     }
 
-//    mutating func updateAccounts(_ accounts: [String: SessionNamespace]
-    
     mutating func updateNamespaces(_ namespaces: [String: SessionNamespace]) {
         self.namespaces = namespaces
     }

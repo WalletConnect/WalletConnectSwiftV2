@@ -62,11 +62,9 @@ enum Validator {
     
     static func validate(_ namespaces: [String: ProposalNamespace]) throws {
         // TODO
-        fatalError()
     }
     
     static func validate(_ namespaces: [String: SessionNamespace]) throws {
         // TODO
-        fatalError()
     }
 }

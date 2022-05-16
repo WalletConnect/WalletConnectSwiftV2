@@ -159,7 +159,7 @@ public final class WalletConnectClient {
         proposalId: String,
         namespaces: [String: SessionNamespace]
     ) throws {
-            //TODO - accounts should be validated for matching namespaces
+        //TODO - accounts should be validated for matching namespaces BEFORE responding proposal
         guard let (sessionTopic, proposal) = pairingEngine.respondSessionPropose(proposerPubKey: proposalId) else {return}
         try sessionEngine.settle(topic: sessionTopic, proposal: proposal, namespaces: namespaces)
     }

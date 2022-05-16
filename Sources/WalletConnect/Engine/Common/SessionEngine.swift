@@ -141,7 +141,7 @@ final class SessionEngine {
     }
 
     func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace]) throws {
-        try Validator.validate(namespaces)
+        try Validator.validate(namespaces) // FIXME: Validation should happen before responding proposal, before settlement
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!
         
         let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
@@ -177,6 +177,7 @@ final class SessionEngine {
             updatePairingMetadata(topic: pairingTopic, metadata: settleParams.controller.metadata)
         }
         
+        // TODO: Validate namespaces
         let session = WCSession(topic: topic,
                                       selfParticipant: selfParticipant,
                                       peerParticipant: settleParams.controller,
