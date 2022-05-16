@@ -6,8 +6,7 @@ import Combine
 
 final class NonControllerSessionStateMachine: SessionStateMachineValidating {
     
-    var onAccountsUpdate: ((String, Set<Account>)->())?
-    var onNamespacesUpdate: ((String, Set<Namespace>)->())?
+    var onNamespacesUpdate: ((String, [String: SessionNamespace])->())?
     var onExpiryUpdate: ((String, Date) -> ())?
     
     private let sessionStore: WCSessionStorage
@@ -30,9 +29,9 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
     private func setUpWCRequestHandling() {
         networkingInteractor.wcRequestPublisher.sink { [unowned self] subscriptionPayload in
             switch subscriptionPayload.wcRequest.params {
-            case .sessionUpdateNamespaces(let updateParams):
+            case .sessionUpdate(let updateParams):
                 onSessionUpdateNamespacesRequest(payload: subscriptionPayload, updateParams: updateParams)
-            case .sessionUpdateExpiry(let updateExpiryParams):
+            case .sessionExtend(let updateExpiryParams):
                 onSessionUpdateExpiry(subscriptionPayload, updateExpiryParams: updateExpiryParams)
             default:
                 return
@@ -43,7 +42,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
     // TODO: Update stored session namespaces
     private func onSessionUpdateNamespacesRequest(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {
         do {
-            try validateNamespaces(updateParams.namespaces)
+            try Validator.validate(updateParams.namespaces)
         } catch {
             networkingInteractor.respondError(for: payload, reason: .invalidUpdateNamespaceRequest)
             return

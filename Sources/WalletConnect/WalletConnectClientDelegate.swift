@@ -28,15 +28,10 @@ public protocol WalletConnectClientDelegate: AnyObject {
     /// Function can be executed on any type of the client.
     func didDelete(sessionTopic: String, reason: Reason)
     
-    /// Tells the delegate that accounts has been updated in session
-    ///
-    /// Function is executed on controller and non-controller client when both communicating peers have successfully updated accounts requested by the controller client.
-    func didUpdate(sessionTopic: String, accounts: Set<Account>)
-    
     /// Tells the delegate that methods has been updated in session
     ///
     /// Function is executed on controller and non-controller client when both communicating peers have successfully updated methods requested by the controller client.
-    func didUpdate(sessionTopic: String, namespaces: Set<Namespace>)
+    func didUpdate(sessionTopic: String, namespaces: [String: SessionNamespace])
     
     /// Tells the delegate that session expiry has been updated
     ///

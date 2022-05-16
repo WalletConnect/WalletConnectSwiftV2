@@ -245,31 +245,6 @@
 //        wait(for: [proposerReceivesPingResponseExpectation], timeout: defaultTimeout)
 //    }
 //
-//    func testSuccessfulSessionUpdateAccounts() async {
-//        await waitClientsConnected()
-//        let proposerSessionUpdateExpectation = expectation(description: "Proposer updates session on responder request")
-//        let responderSessionUpdateExpectation = expectation(description: "Responder updates session on proposer response")
-//        let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
-//        let updateAccounts: Set<Account> = [Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdf")!]
-//        let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
-//        try! await responder.client.pair(uri: uri)
-//        responder.onSessionProposal = { [unowned self] proposal in
-//            try? self.responder.client.approve(proposalId: proposal.id, accounts: [account], namespaces: [])
-//        }
-//        responder.onSessionSettled = { [unowned self] sessionSettled in
-//            try? responder.client.updateAccounts(topic: sessionSettled.topic, accounts: updateAccounts)
-//        }
-//        responder.onSessionUpdateAccounts = { _, accounts in
-//            XCTAssertEqual(accounts, updateAccounts)
-//            responderSessionUpdateExpectation.fulfill()
-//        }
-//        proposer.onSessionUpdateAccounts = { _, accounts in
-//            XCTAssertEqual(accounts, updateAccounts)
-//            proposerSessionUpdateExpectation.fulfill()
-//        }
-//        wait(for: [proposerSessionUpdateExpectation, responderSessionUpdateExpectation], timeout: defaultTimeout)
-//    }
-//
 //    func testSuccessfulSessionUpdateNamespaces() async {
 //        await waitClientsConnected()
 //        let proposerSessionUpdateExpectation = expectation(description: "Proposer updates session methods on responder request")

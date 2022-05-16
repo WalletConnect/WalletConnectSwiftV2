@@ -76,13 +76,13 @@ extension AgreementPeer {
 
 extension WCRequestSubscriptionPayload {
     
-    static func stubUpdateNamespaces(topic: String, namespaces: Set<Namespace> = [Namespace.stub()]) -> WCRequestSubscriptionPayload {
-        let updateMethod = WCMethod.wcSessionUpdateNamespaces(SessionType.UpdateParams(namespaces: namespaces)).asRequest()
+    static func stubUpdateNamespaces(topic: String, namespaces: [String: SessionNamespace] = SessionNamespace.stubDictionary()) -> WCRequestSubscriptionPayload {
+        let updateMethod = WCMethod.wcSessionUpdate(SessionType.UpdateParams(namespaces: namespaces)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
     }
     
     static func stubUpdateExpiry(topic: String, expiry: Int64) -> WCRequestSubscriptionPayload {
-        let updateExpiryMethod = WCMethod.wcSessionUpdateExpiry(SessionType.UpdateExpiryParams(expiry: expiry)).asRequest()
+        let updateExpiryMethod = WCMethod.wcSessionExtend(SessionType.UpdateExpiryParams(expiry: expiry)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateExpiryMethod)
     }
     

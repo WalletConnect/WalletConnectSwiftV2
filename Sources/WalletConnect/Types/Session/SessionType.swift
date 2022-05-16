@@ -18,9 +18,8 @@ internal enum SessionType {
         let expiry: Int64
     }
     
-    // TODO: Change name
     struct UpdateParams: Codable, Equatable {
-        let namespaces: Set<Namespace> // TODO: Update schema from spec
+        let namespaces: [String: SessionNamespace]
     }
 
     typealias DeleteParams = SessionType.Reason

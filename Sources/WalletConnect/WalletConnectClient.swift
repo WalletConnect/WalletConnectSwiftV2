@@ -176,17 +176,18 @@ public final class WalletConnectClient {
     /// - Parameters:
     ///   - topic: Topic of the session that is intended to be updated.
     ///   - methods: Sets of methods that will replace existing ones.
-    public func updateNamespaces(topic: String, namespaces: Set<Namespace>) throws {
-        try controllerSessionStateMachine.updateNamespaces(topic: topic, namespaces: namespaces)
+    public func update(topic: String, namespaces: [String: SessionNamespace]) throws {
+        try controllerSessionStateMachine.update(topic: topic, namespaces: namespaces)
     }
     
     /// For controller to update expiry of a session
     /// - Parameters:
     ///   - topic: Topic of the Session, it can be a pairing or a session topic.
     ///   - ttl: Time in seconds that a target session is expected to be extended for. Must be greater than current time to expire and than 7 days
-    public func updateExpiry(topic: String, ttl: Int64 = Session.defaultTimeToLive) throws {
+    public func extend(topic: String) throws {
+        let ttl: Int64 = Session.defaultTimeToLive
         if sessionEngine.hasSession(for: topic) {
-            try controllerSessionStateMachine.updateExpiry(topic: topic, by: ttl)
+            try controllerSessionStateMachine.extend(topic: topic, by: ttl)
         }
     }
     
@@ -311,9 +312,6 @@ public final class WalletConnectClient {
         controllerSessionStateMachine.onNamespacesUpdate = { [unowned self] topic, namespaces in
             delegate?.didUpdate(sessionTopic: topic, namespaces: namespaces)
         }
-        controllerSessionStateMachine.onAccountsUpdate = { [unowned self] topic, accounts in
-            delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
-        }
         controllerSessionStateMachine.onExpiryUpdate = { [unowned self] topic, expiry in
             delegate?.didUpdate(sessionTopic: topic, expiry: expiry)
         }
@@ -322,9 +320,6 @@ public final class WalletConnectClient {
         }
         nonControllerSessionStateMachine.onExpiryUpdate = { [unowned self] topic, expiry in
             delegate?.didUpdate(sessionTopic: topic, expiry: expiry)
-        }
-        nonControllerSessionStateMachine.onAccountsUpdate = { [unowned self] topic, accounts in
-            delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
         }
         sessionEngine.onEventReceived = { [unowned self] topic, event, chainId in
             delegate?.didReceive(event: event, sessionTopic: topic, chainId: chainId)

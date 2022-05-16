@@ -5,8 +5,7 @@ import WalletConnectKMS
 import Combine
 
 final class ControllerSessionStateMachine: SessionStateMachineValidating {
-    var onAccountsUpdate: ((String, Set<Account>)->())?
-    var onNamespacesUpdate: ((String, Set<Namespace>)->())?
+    var onNamespacesUpdate: ((String, [String: SessionNamespace])->())?
     var onExpiryUpdate: ((String, Date)->())?
 
     private let sessionStore: WCSessionStorage
@@ -29,32 +28,32 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
     }
     
     // TODO: Change to new namespace spec
-    func updateNamespaces(topic: String, namespaces: Set<Namespace>) throws {
+    func update(topic: String, namespaces: [String: SessionNamespace]) throws {
         var session = try getSession(for: topic)
         try validateControlledAcknowledged(session)
-        try validateNamespaces(namespaces)
+        try Validator.validate(namespaces)
         logger.debug("Controller will update methods")
-//        session.updateNamespaces(namespaces)
+        session.updateNamespaces(namespaces)
         sessionStore.setSession(session)
-        networkingInteractor.request(.wcSessionUpdateNamespaces(SessionType.UpdateParams(namespaces: namespaces)), onTopic: topic)
+        networkingInteractor.request(.wcSessionUpdate(SessionType.UpdateParams(namespaces: namespaces)), onTopic: topic)
     }
     
-   func updateExpiry(topic: String, by ttl: Int64) throws {
+   func extend(topic: String, by ttl: Int64) throws {
        var session = try getSession(for: topic)
        try validateControlledAcknowledged(session)
        try session.updateExpiry(by: ttl)
        let newExpiry = Int64(session.expiryDate.timeIntervalSince1970 )
        sessionStore.setSession(session)
-       networkingInteractor.request(.wcSessionUpdateExpiry(SessionType.UpdateExpiryParams(expiry: newExpiry)), onTopic: topic)
+       networkingInteractor.request(.wcSessionExtend(SessionType.UpdateExpiryParams(expiry: newExpiry)), onTopic: topic)
    }
     
     // MARK: - Handle Response
     
     private func handleResponse(_ response: WCResponse) {
         switch response.requestParams {
-        case .sessionUpdateNamespaces:
-            handleUpdateNamespacesResponse(topic: response.topic, result: response.result)
-        case .sessionUpdateExpiry:
+        case .sessionUpdate:
+            handleUpdateResponse(topic: response.topic, result: response.result)
+        case .sessionExtend:
             handleUpdateExpiryResponse(topic: response.topic, result: response.result)
         default:
             break
@@ -62,7 +61,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
     }
     
     // TODO: Re-enable callback
-    private func handleUpdateNamespacesResponse(topic: String, result: JsonRpcResult) {
+    private func handleUpdateResponse(topic: String, result: JsonRpcResult) {
         guard let session = sessionStore.getSession(forTopic: topic) else {
             return
         }

@@ -40,14 +40,14 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         XCTAssertTrue(networkingInteractor.didRespondSuccess)
     }
     
-    func testUpdateMethodsPeerErrorInvalidType() {
-        let session = WCSession.stub(isSelfController: false)
-        storageMock.setSession(session)
-        networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateNamespaces(topic: session.topic, namespaces: [
-            Namespace(chains: [Blockchain("eip155:11")!], methods: ["", "m2"], events: ["e1", "e2"])]
-))
-        XCTAssertEqual(networkingInteractor.lastErrorCode, 1004)
-    }
+//    func testUpdateMethodsPeerErrorInvalidType() {
+//        let session = WCSession.stub(isSelfController: false)
+//        storageMock.setSession(session)
+//        networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateNamespaces(topic: session.topic, namespaces: [
+//            Namespace(chains: [Blockchain("eip155:11")!], methods: ["", "m2"], events: ["e1", "e2"])]
+//))
+//        XCTAssertEqual(networkingInteractor.lastErrorCode, 1004)
+//    }
 
     func testUpdateMethodPeerErrorSessionNotFound() {
         networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateNamespaces(topic: ""))
