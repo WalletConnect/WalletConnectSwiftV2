@@ -1,8 +1,8 @@
 
 import Foundation
 
-/// A protocol that defines methods that WalletConnectClient instance call on it's delegate to handle sequences level events
-public protocol WalletConnectClientDelegate: AnyObject {
+/// A protocol that defines methods that AuthClient instance call on it's delegate to handle sequences level events
+public protocol AuthClientDelegate: AnyObject {
     
     /// Tells the delegate that session proposal has been received.
     ///
@@ -58,7 +58,7 @@ public protocol WalletConnectClientDelegate: AnyObject {
     func didDisconnect()
 }
 
-public extension WalletConnectClientDelegate {
+public extension AuthClientDelegate {
     func didReceive(event: Session.Event, sessionTopic: String, chainId: Blockchain?) {}
     func didReject(proposal: Session.Proposal, reason: Reason) {}
     func didReceive(sessionRequest: Request) {}

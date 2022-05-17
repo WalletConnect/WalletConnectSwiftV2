@@ -14,14 +14,14 @@ import UIKit
 ///
 /// ```swift
 /// let metadata = AppMetadata(name: String?, description: String?, url: String?, icons: [String]?)
-/// let client = WalletConnectClient(metadata: AppMetadata, projectId: String, relayHost: String)
+/// let client = AuthClient(metadata: AppMetadata, projectId: String, relayHost: String)
 /// ```
 ///
 /// - Parameters:
 ///     - delegate: The object that acts as the delegate of WalletConnect Client
 ///     - logger: An object for logging messages
-public final class WalletConnectClient {
-    public weak var delegate: WalletConnectClientDelegate?
+public final class AuthClient {
+    public weak var delegate: AuthClientDelegate?
     public let logger: ConsoleLogging
     private var publishers = [AnyCancellable]()
     private let metadata: AppMetadata

@@ -7,9 +7,9 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
         SessionDetailsView()
     }()
     private var sessionInfo: SessionInfo
-    private let client: WalletConnectClient
+    private let client: AuthClient
     private let session: Session
-    init(_ session: Session, _ client: WalletConnectClient) {
+    init(_ session: Session, _ client: AuthClient) {
         let pendingRequests = client.getPendingRequests(topic: session.topic).map{$0.method}
         self.sessionInfo = SessionInfo(name: session.peer.name,
                                        descriptionText: session.peer.description,
