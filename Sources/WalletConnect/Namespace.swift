@@ -65,4 +65,8 @@ enum Namespace {
             }
         }
     }
+    
+    static func validateApproved(_ sessionNamespaces: [String: SessionNamespace], against proposalNamespaces: [String: ProposalNamespace]) throws {
+        
+    }
 }

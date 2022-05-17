@@ -27,7 +27,6 @@ final class ControllerSessionStateMachine {
         }.store(in: &publishers)
     }
     
-    // TODO: Change to new namespace spec
     func update(topic: String, namespaces: [String: SessionNamespace]) throws {
         var session = try getSession(for: topic)
         try validateControlledAcknowledged(session)
