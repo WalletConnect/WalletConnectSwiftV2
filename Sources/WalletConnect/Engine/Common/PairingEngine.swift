@@ -116,33 +116,35 @@ final class PairingEngine {
 //        todo - delete pairing if inactive
     }
     
-    func respondSessionPropose(proposerPubKey: String) -> (String, SessionProposal)? {
+    func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace]) -> (String, SessionProposal)? {
         guard let payload = try? proposalPayloadsStore.get(key: proposerPubKey),
               case .sessionPropose(let proposal) = payload.wcRequest.params else {
                   //TODO - throws
             return nil
         }
+        let proposedNamespaces = proposal.requiredNamespaces
         proposalPayloadsStore.delete(forKey: proposerPubKey)
-
-        let selfPublicKey = try! kms.createX25519KeyPair()
-        var agreementKey: AgreementKeys!
         
         do {
-            agreementKey = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposal.proposer.publicKey)
+            try Namespace.validate(proposedNamespaces)
+            try Namespace.validate(sessionNamespaces)
+            try Namespace.validateApproved(sessionNamespaces, against: proposedNamespaces)
+            let selfPublicKey = try! kms.createX25519KeyPair()
+            let agreementKey = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposal.proposer.publicKey)
+            //todo - extend pairing
+            let sessionTopic = agreementKey.derivedTopic()
+
+            try! kms.setAgreementSecret(agreementKey, topic: sessionTopic)
+            guard let relay = proposal.relays.first else {return nil}
+            let proposeResponse = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
+            let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
+            logger.debug("Responding session propose")
+            networkingInteractor.respond(topic: payload.topic, response: .response(response)) { _ in }
+            return (sessionTopic, proposal)
         } catch {
             networkingInteractor.respondError(for: payload, reason: .missingOrInvalid("agreement keys"))
             return nil
         }
-        //todo - extend pairing
-        let sessionTopic = agreementKey.derivedTopic()
-
-        try! kms.setAgreementSecret(agreementKey, topic: sessionTopic)
-        guard let relay = proposal.relays.first else {return nil}
-        let proposeResponse = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
-        let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
-        logger.debug("Responding session propose")
-        networkingInteractor.respond(topic: payload.topic, response: .response(response)) { _ in }
-        return (sessionTopic, proposal)
     }
 
     //MARK: - Private
