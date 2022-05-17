@@ -3,7 +3,7 @@ import Foundation
 @testable import Relayer
 @testable import WalletConnect
 
-class MockedNetworkRelayer: NetworkRelaying {
+class MockedRelayClient: NetworkRelaying {
     func subscribe(topic: String) async throws {}
     
     var socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()

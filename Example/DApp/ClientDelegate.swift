@@ -14,8 +14,8 @@ class ClientDelegate: AuthClientDelegate {
             description: "a description",
             url: "wallet.connect",
             icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])
-        let relayer = Relayer(relayHost: "relay.walletconnect.com", projectId: "8ba9ee138960775e5231b70cc5ef1c3a")
-        self.client = AuthClient(metadata: metadata, relayer: relayer)
+        let relayClient = RelayClient(relayHost: "relay.walletconnect.com", projectId: "8ba9ee138960775e5231b70cc5ef1c3a")
+        self.client = AuthClient(metadata: metadata, relayClient: relayClient)
         client.logger.setLogging(level: .debug)
         client.delegate = self
     }

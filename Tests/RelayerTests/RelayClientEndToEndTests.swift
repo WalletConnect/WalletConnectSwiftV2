@@ -7,28 +7,28 @@ import TestingUtils
 @testable import Relayer
 import Starscream
 
-final class RelayerEndToEndTests: XCTestCase {
+final class RelayClientEndToEndTests: XCTestCase {
     
     let relayHost = "relay.walletconnect.com"
     let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
     private var publishers = [AnyCancellable]()
     
-    func makeRelayer() -> Relayer {
+    func makeRelayClient() -> RelayClient {
         let logger = ConsoleLogger()
-        let url = Relayer.makeRelayUrl(host: relayHost, projectId: projectId)
+        let url = RelayClient.makeRelayUrl(host: relayHost, projectId: projectId)
         let socket = WebSocket(url: url)
         let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket), logger: logger)
-        return Relayer(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
+        return RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
     
     func testSubscribe() {
-        let relayer = makeRelayer()
-        try! relayer.connect()
+        let relayClient = makeRelayClient()
+        try! relayClient.connect()
         let subscribeExpectation = expectation(description: "subscribe call succeeds")
         subscribeExpectation.assertForOverFulfill = true
-        relayer.socketConnectionStatusPublisher.sink { status in
+        relayClient.socketConnectionStatusPublisher.sink { status in
             if status == .connected {
-                relayer.subscribe(topic: "qwerty") { error in
+                relayClient.subscribe(topic: "qwerty") { error in
                     XCTAssertNil(error)
                     subscribeExpectation.fulfill()
                 }
@@ -38,8 +38,8 @@ final class RelayerEndToEndTests: XCTestCase {
     }
     
     func testEndToEndPayload() {
-        let relayA = makeRelayer()
-        let relayB = makeRelayer()
+        let relayA = makeRelayClient()
+        let relayB = makeRelayClient()
         try! relayA.connect()
         try! relayB.connect()
 

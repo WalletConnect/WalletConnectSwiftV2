@@ -3,7 +3,7 @@ import Foundation
 import Relayer
 import Combine
 
-extension Relayer: NetworkRelaying {}
+extension RelayClient: NetworkRelaying {}
 
 protocol NetworkRelaying {
     var onMessage: ((_ topic: String, _ message: String) -> ())? {get set}
