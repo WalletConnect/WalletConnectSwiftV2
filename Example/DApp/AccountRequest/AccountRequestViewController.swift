@@ -2,12 +2,12 @@
 
 import Foundation
 import UIKit
-import WalletConnect
+import WalletConnectAuth
 import WalletConnectUtils
 
 class AccountRequestViewController: UIViewController, UITableViewDelegate, UITableViewDataSource  {
     private let session: Session
-    private let client: WalletConnectClient = ClientDelegate.shared.client
+    private let client: AuthClient = ClientDelegate.shared.client
     private let chainId: String
     private let account: String
     private let methods = ["eth_sendTransaction", "personal_sign", "eth_signTypedData"]

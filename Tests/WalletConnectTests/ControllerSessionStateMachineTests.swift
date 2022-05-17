@@ -2,7 +2,7 @@ import XCTest
 import WalletConnectUtils
 @testable import TestingUtils
 import WalletConnectKMS
-@testable import WalletConnect
+@testable import WalletConnectAuth
 
 
 class ControllerSessionStateMachineTests: XCTestCase {

@@ -47,7 +47,7 @@ class NetworkInteractor: NetworkInteracting {
     private var publishers = [AnyCancellable]()
 
     
-    private var networkRelayer: NetworkRelaying
+    private var relayClient: NetworkRelaying
     private let serializer: Serializing
     private let jsonRpcHistory: JsonRpcHistoryRecording
     
@@ -69,11 +69,11 @@ class NetworkInteractor: NetworkInteracting {
 
     let logger: ConsoleLogging
     
-    init(networkRelayer: NetworkRelaying,
+    init(relayClient: NetworkRelaying,
          serializer: Serializing,
          logger: ConsoleLogging,
          jsonRpcHistory: JsonRpcHistoryRecording) {
-        self.networkRelayer = networkRelayer
+        self.relayClient = relayClient
         self.serializer = serializer
         self.logger = logger
         self.jsonRpcHistory = jsonRpcHistory
@@ -89,7 +89,7 @@ class NetworkInteractor: NetworkInteracting {
         try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
         let message = try serializer.serialize(topic: topic, encodable: payload)
         let prompt = shouldPrompt(payload.method)
-        try await networkRelayer.publish(topic: topic, payload: message, prompt: prompt)
+        try await relayClient.publish(topic: topic, payload: message, prompt: prompt)
     }
 
     func requestPeerResponse(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> ())?) {
@@ -98,7 +98,7 @@ class NetworkInteractor: NetworkInteracting {
             try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
             let message = try serializer.serialize(topic: topic, encodable: payload)
             let prompt = shouldPrompt(payload.method)
-            networkRelayer.publish(topic: topic, payload: message, prompt: prompt) { [weak self] error in
+            relayClient.publish(topic: topic, payload: message, prompt: prompt) { [weak self] error in
                 guard let self = self else {return}
                 if let error = error {
                     self.logger.error(error)
@@ -134,7 +134,7 @@ class NetworkInteractor: NetworkInteracting {
             try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
             let message = try serializer.serialize(topic: topic, encodable: payload)
             let prompt = shouldPrompt(payload.method)
-            networkRelayer.publish(topic: topic, payload: message, prompt: prompt) { error in
+            relayClient.publish(topic: topic, payload: message, prompt: prompt) { error in
                 completion(error)
             }
         } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
@@ -149,7 +149,7 @@ class NetworkInteractor: NetworkInteracting {
             _ = try jsonRpcHistory.resolve(response: response)
             let message = try serializer.serialize(topic: topic, encodable: response.value)
             logger.debug("Responding....topic: \(topic)")
-            networkRelayer.publish(topic: topic, payload: message, prompt: false) { error in
+            relayClient.publish(topic: topic, payload: message, prompt: false) { error in
                 completion(error)
             }
         } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
@@ -170,11 +170,11 @@ class NetworkInteractor: NetworkInteracting {
     }
     
     func subscribe(topic: String) async throws {
-        try await networkRelayer.subscribe(topic: topic)
+        try await relayClient.subscribe(topic: topic)
     }
 
     func unsubscribe(topic: String) {
-        networkRelayer.unsubscribe(topic: topic) { [weak self] error in
+        relayClient.unsubscribe(topic: topic) { [weak self] error in
             if let error = error {
                 self?.logger.error(error)
             } else {
@@ -185,12 +185,12 @@ class NetworkInteractor: NetworkInteracting {
     
     //MARK: - Private
     private func setUpPublishers() {
-        networkRelayer.socketConnectionStatusPublisher.sink { [weak self] status in
+        relayClient.socketConnectionStatusPublisher.sink { [weak self] status in
             if status == .connected {
                 self?.transportConnectionPublisherSubject.send()
             }
         }.store(in: &publishers)
-        networkRelayer.onMessage = { [unowned self] topic, message in
+        relayClient.onMessage = { [unowned self] topic, message in
             manageSubscription(topic, message)
         }
     }

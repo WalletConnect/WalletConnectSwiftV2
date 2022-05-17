@@ -1,6 +1,6 @@
 import XCTest
 import WalletConnectUtils
-@testable import WalletConnect
+@testable import WalletConnectAuth
 
 struct ExpirableSequenceStub: ExpirableSequence, Equatable {
     let topic: String
