@@ -1,7 +1,7 @@
 import XCTest
 @testable import WalletConnect
 
-final class NamespaceValidationTests: XCTestCase {
+final class ProposalNamespaceValidationTests: XCTestCase {
     
     func testValidNamespace() {
         let namespace = [
