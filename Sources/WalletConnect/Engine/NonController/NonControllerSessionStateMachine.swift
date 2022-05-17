@@ -42,7 +42,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
     // TODO: Update stored session namespaces
     private func onSessionUpdateNamespacesRequest(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {
         do {
-            try Validator.validate(updateParams.namespaces)
+            try NamespaceValidator.validate(updateParams.namespaces)
         } catch {
             networkingInteractor.respondError(for: payload, reason: .invalidUpdateNamespaceRequest)
             return

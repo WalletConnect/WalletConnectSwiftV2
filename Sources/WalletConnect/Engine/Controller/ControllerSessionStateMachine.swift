@@ -31,7 +31,7 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
     func update(topic: String, namespaces: [String: SessionNamespace]) throws {
         var session = try getSession(for: topic)
         try validateControlledAcknowledged(session)
-        try Validator.validate(namespaces)
+        try NamespaceValidator.validate(namespaces)
         logger.debug("Controller will update methods")
         session.updateNamespaces(namespaces)
         sessionStore.setSession(session)

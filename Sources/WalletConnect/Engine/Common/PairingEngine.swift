@@ -71,7 +71,7 @@ final class PairingEngine {
     
     func propose(pairingTopic: String, namespaces: [String: ProposalNamespace], relay: RelayProtocolOptions) async throws {
         logger.debug("Propose Session on topic: \(pairingTopic)")
-        try Validator.validate(namespaces)
+        try NamespaceValidator.validate(namespaces)
         let publicKey = try! kms.createX25519KeyPair()
         let proposer = Participant(
             publicKey: publicKey.hexRepresentation,

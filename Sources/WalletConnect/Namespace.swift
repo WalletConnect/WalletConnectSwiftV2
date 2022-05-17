@@ -37,7 +37,7 @@ public struct ProposalNamespace: Equatable, Codable {
     public let chains: Set<Blockchain>
     public let methods: Set<String>
     public let events: Set<String>
-    public let `extension`: [Extension]?
+    public let extensions: [Extension]?
     
     public struct Extension: Equatable, Codable {
         public let chains: Set<Blockchain>
@@ -50,7 +50,7 @@ public struct SessionNamespace: Equatable, Codable {
     public let accounts: Set<Account>
     public let methods: Set<String>
     public let events: Set<String>
-    public let `extension`: [Extension]?
+    public let extensions: [Extension]?
     
     public struct Extension: Equatable, Codable {
         public let chains: Set<Account>
@@ -59,7 +59,7 @@ public struct SessionNamespace: Equatable, Codable {
     }
 }
 
-enum Validator {
+enum NamespaceValidator {
     
     static func validate(_ namespaces: [String: ProposalNamespace]) throws {
         // TODO
