@@ -14,7 +14,7 @@ final class ProposalNamespaceValidationTests: XCTestCase {
                 ]
             )
         ]
-        XCTAssertNoThrow(try NamespaceValidator.validate(namespace))
+        XCTAssertNoThrow(try Namespace.validate(namespace))
     }
     
     func testChainsMustNotNotBeEmpty() {
@@ -25,7 +25,7 @@ final class ProposalNamespaceValidationTests: XCTestCase {
                 events: ["event"],
                 extensions: nil)
         ]
-        XCTAssertThrowsError(try NamespaceValidator.validate(namespace))
+        XCTAssertThrowsError(try Namespace.validate(namespace))
     }
     
     func testAllowsEmptyMethods() {
@@ -36,7 +36,7 @@ final class ProposalNamespaceValidationTests: XCTestCase {
                 events: ["event"],
                 extensions: nil)
         ]
-        XCTAssertNoThrow(try NamespaceValidator.validate(namespace))
+        XCTAssertNoThrow(try Namespace.validate(namespace))
     }
     
     func testAllowsEmptyEvents() {
@@ -47,7 +47,7 @@ final class ProposalNamespaceValidationTests: XCTestCase {
                 events: [],
                 extensions: nil)
         ]
-        XCTAssertNoThrow(try NamespaceValidator.validate(namespace))
+        XCTAssertNoThrow(try Namespace.validate(namespace))
     }
     
     func testAllChainsContainsNamespacePrefix() {
@@ -65,8 +65,8 @@ final class ProposalNamespaceValidationTests: XCTestCase {
                 events: ["event"],
                 extensions: nil)
         ]
-        XCTAssertNoThrow(try NamespaceValidator.validate(validNamespace))
-        XCTAssertThrowsError(try NamespaceValidator.validate(invalidNamespace))
+        XCTAssertNoThrow(try Namespace.validate(validNamespace))
+        XCTAssertThrowsError(try Namespace.validate(invalidNamespace))
     }
     
     func testExtensionChainsMustNotBeEmpty() {
@@ -80,7 +80,7 @@ final class ProposalNamespaceValidationTests: XCTestCase {
                 ]
             )
         ]
-        XCTAssertThrowsError(try NamespaceValidator.validate(namespace))
+        XCTAssertThrowsError(try Namespace.validate(namespace))
     }
     
     func testValidateAllNamespaces() {
@@ -93,6 +93,6 @@ final class ProposalNamespaceValidationTests: XCTestCase {
             "cosmos": ProposalNamespace(
                 chains: [], methods: [], events: [], extensions: nil)
         ]
-        XCTAssertThrowsError(try NamespaceValidator.validate(namespace))
+        XCTAssertThrowsError(try Namespace.validate(namespace))
     }
 }

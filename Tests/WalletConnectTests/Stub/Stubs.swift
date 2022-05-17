@@ -26,12 +26,6 @@ extension WCPairing {
     }
 }
 
-extension Namespace {
-    static func stub() -> Namespace {
-        Namespace(chains: [Blockchain("eip155:1")!], methods: ["method"], events: ["event"])
-    }
-}
-
 extension ProposalNamespace {
     static func stubDictionary() -> [String: ProposalNamespace] {
         return [

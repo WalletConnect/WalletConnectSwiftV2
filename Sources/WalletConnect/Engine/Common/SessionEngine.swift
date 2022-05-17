@@ -141,7 +141,7 @@ final class SessionEngine {
     }
 
     func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace]) throws {
-        try NamespaceValidator.validate(namespaces) // FIXME: Validation should happen before responding proposal, before settlement
+        try Namespace.validate(namespaces) // FIXME: Validation should happen before responding proposal, before settlement
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!
         
         let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
