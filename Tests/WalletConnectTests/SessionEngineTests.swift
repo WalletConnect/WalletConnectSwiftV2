@@ -72,8 +72,8 @@ final class SessionEngineTests: XCTestCase {
             didCallBackOnSessionApproved = true
         }
         
+        engine.settlingProposal = SessionProposal.stub()
         networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubSettle(topic: sessionTopic))
-        
         
         XCTAssertTrue(storageMock.getSession(forTopic: sessionTopic)!.acknowledged, "Proposer must store acknowledged session on topic B")
         XCTAssertTrue(networkingInteractor.didRespondSuccess, "Proposer must send acknowledge on settle request")

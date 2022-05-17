@@ -330,5 +330,8 @@ public final class WalletConnectClient {
         pairingEngine.onProposeResponse = { [unowned self] sessionTopic in
             sessionEngine.setSubscription(topic: sessionTopic)
         }
+        pairingEngine.onApprovalResponse = { [unowned self] proposal in
+            sessionEngine.settlingProposal = proposal
+        }
     }
 }

@@ -8,6 +8,7 @@ final class PairingEngine {
     var onSessionProposal: ((Session.Proposal)->())?
     var onProposeResponse: ((String)->())?
     var onSessionRejected: ((Session.Proposal, SessionType.Reason)->())?
+    var onApprovalResponse: ((SessionProposal) -> Void)?
 
     private let proposalPayloadsStore: KeyValueStore<WCRequestSubscriptionPayload>
     private let networkingInteractor: NetworkInteracting
@@ -211,6 +212,7 @@ final class PairingEngine {
                 try? pairing.updateExpiry()
             }
             
+            onApprovalResponse?(proposal) // FIXME: This proposal needs to be stored on creation and retrieved from cache here. Don't use proposal from response.
             pairingStore.setPairing(pairing)
             
             let selfPublicKey = try! AgreementPublicKey(hex: proposal.proposer.publicKey)

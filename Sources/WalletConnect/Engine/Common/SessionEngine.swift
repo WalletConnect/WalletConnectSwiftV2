@@ -12,6 +12,8 @@ final class SessionEngine {
     var onSessionDelete: ((String, SessionType.Reason)->())?
     var onEventReceived: ((String, Session.Event, Blockchain?)->())?
     
+    var settlingProposal: SessionProposal?
+    
     private let sessionStore: WCSessionStorage
     private let pairingStore: WCPairingStorage
     private let sessionToPairingTopic: KeyValueStore<String>
@@ -164,9 +166,23 @@ final class SessionEngine {
             }
         }.store(in: &publishers)
     }
-
+    
     private func onSessionSettle(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
         logger.debug("Did receive session settle request")
+        guard let proposedNamespaces = settlingProposal?.requiredNamespaces else {
+            // TODO: respond error
+            return
+        }
+        let sessionNamespaces = settleParams.namespaces
+        do {
+            try Namespace.validate(proposedNamespaces)
+            try Namespace.validate(sessionNamespaces)
+            try Namespace.validateApproved(sessionNamespaces, against: proposedNamespaces)
+        } catch {
+            // TODO: respond error
+            return
+        }
+                
         let topic = payload.topic
         
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!
@@ -177,12 +193,12 @@ final class SessionEngine {
             updatePairingMetadata(topic: pairingTopic, metadata: settleParams.controller.metadata)
         }
         
-        // TODO: Validate namespaces
-        let session = WCSession(topic: topic,
-                                      selfParticipant: selfParticipant,
-                                      peerParticipant: settleParams.controller,
-                                      settleParams: settleParams,
-                                      acknowledged: true)
+        let session = WCSession(
+            topic: topic,
+            selfParticipant: selfParticipant,
+            peerParticipant: settleParams.controller,
+            settleParams: settleParams,
+            acknowledged: true)
         sessionStore.setSession(session)
         networkingInteractor.respondSuccess(for: payload)
         onSessionSettle?(session.publicRepresentation())
