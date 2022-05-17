@@ -17,7 +17,7 @@ class NetworkingInteractorTests: XCTestCase {
         let logger = ConsoleLoggerMock()
         serializer = SerializerMock()
         relayClient = MockedRelayClient()
-        networkingInteractor = NetworkInteractor(relayClient: relayClient, serializer: serializer, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<WalletConnect.JsonRpcRecord>(defaults: RuntimeKeyValueStorage(), identifier: "")))
+        networkingInteractor = NetworkInteractor(relayClient: relayClient, serializer: serializer, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<WalletConnectAuth.JsonRpcRecord>(defaults: RuntimeKeyValueStorage(), identifier: "")))
     }
 
     override func tearDown() {

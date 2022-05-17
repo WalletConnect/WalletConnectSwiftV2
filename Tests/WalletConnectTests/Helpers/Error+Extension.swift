@@ -1,5 +1,5 @@
 import Foundation
-@testable import WalletConnect
+@testable import WalletConnectAuth
 
 extension NSError {
     

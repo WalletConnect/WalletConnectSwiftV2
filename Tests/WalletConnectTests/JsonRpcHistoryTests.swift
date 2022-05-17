@@ -7,10 +7,10 @@ import WalletConnectUtils
 
 final class JsonRpcHistoryTests: XCTestCase {
     
-    var sut: WalletConnect.JsonRpcHistory!
+    var sut: WalletConnectAuth.JsonRpcHistory!
             
     override func setUp() {
-        sut = JsonRpcHistory(logger: ConsoleLoggerMock(), keyValueStore: KeyValueStore<WalletConnect.JsonRpcRecord>(defaults: RuntimeKeyValueStorage(), identifier: ""))
+        sut = JsonRpcHistory(logger: ConsoleLoggerMock(), keyValueStore: KeyValueStore<WalletConnectAuth.JsonRpcRecord>(defaults: RuntimeKeyValueStorage(), identifier: ""))
     }
     
     override func tearDown() {
