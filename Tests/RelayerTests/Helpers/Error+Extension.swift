@@ -1,5 +1,5 @@
 import Foundation
-@testable import Relayer
+@testable import WalletConnectRelay
 
 extension NSError {
     

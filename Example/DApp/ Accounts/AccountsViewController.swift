@@ -1,5 +1,5 @@
 import UIKit
-import WalletConnect
+import WalletConnectAuth
 
 struct AccountDetails {
     let chain: String

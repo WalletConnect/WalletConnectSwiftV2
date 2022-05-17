@@ -1,6 +1,6 @@
 
 import Foundation
-import Relayer
+import WalletConnectRelay
 import Combine
 
 extension RelayClient: NetworkRelaying {}

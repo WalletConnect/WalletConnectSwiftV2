@@ -4,7 +4,7 @@ import Combine
 import XCTest
 import WalletConnectUtils
 @testable import TestingUtils
-@testable import WalletConnect
+@testable import WalletConnectAuth
 
 class NetworkingInteractorTests: XCTestCase {
     var networkingInteractor: NetworkInteractor!

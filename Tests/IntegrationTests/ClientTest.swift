@@ -3,7 +3,7 @@
 //import XCTest
 //import WalletConnectUtils
 //import TestingUtils
-//@testable import WalletConnect
+//@testable import WalletConnectAuth
 //@testable import WalletConnectKMS
 //
 //

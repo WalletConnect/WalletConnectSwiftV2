@@ -1,7 +1,7 @@
 import Combine
 import Foundation
-@testable import Relayer
-@testable import WalletConnect
+@testable import WalletConnectRelay
+@testable import WalletConnectAuth
 
 class MockedRelayClient: NetworkRelaying {
     func subscribe(topic: String) async throws {}

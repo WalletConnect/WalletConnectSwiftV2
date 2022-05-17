@@ -3,7 +3,7 @@ import WalletConnectUtils
 import Foundation
 import Combine
 import XCTest
-@testable import Relayer
+@testable import WalletConnectRelay
 
 class WakuRelayTests: XCTestCase {
     var wakuRelay: RelayClient!

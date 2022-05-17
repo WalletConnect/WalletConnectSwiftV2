@@ -1,5 +1,5 @@
 import UIKit
-import WalletConnect
+import WalletConnectAuth
 import WalletConnectUtils
 
 final class SessionDetailsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {

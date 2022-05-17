@@ -18,13 +18,13 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "WalletConnect",
-            dependencies: ["Relayer", "WalletConnectUtils", "WalletConnectKMS"],
-            path: "Sources/WalletConnect"),
+            name: "WalletConnectAuth",
+            dependencies: ["WalletConnectRelay", "WalletConnectUtils", "WalletConnectKMS"],
+            path: "Sources/WalletConnectAuth"),
         .target(
-            name: "Relayer",
+            name: "WalletConnectRelay",
             dependencies: ["WalletConnectUtils", "Starscream"],
-            path: "Sources/Relayer"),
+            path: "Sources/WalletConnectRelay"),
         .target(
             name: "WalletConnectKMS",
             dependencies: ["WalletConnectUtils"],
@@ -40,7 +40,7 @@ let package = Package(
             dependencies: ["WalletConnect", "TestingUtils", "WalletConnectKMS"]),
         .testTarget(
             name: "RelayerTests",
-            dependencies: ["Relayer", "WalletConnectUtils", "TestingUtils"]),
+            dependencies: ["WalletConnectRelay", "WalletConnectUtils", "TestingUtils"]),
         .testTarget(
             name: "WalletConnectKMSTests",
             dependencies: ["WalletConnectKMS", "WalletConnectUtils", "TestingUtils"]),

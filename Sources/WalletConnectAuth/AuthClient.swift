@@ -1,6 +1,6 @@
 
 import Foundation
-import Relayer
+import WalletConnectRelay
 import WalletConnectUtils
 import WalletConnectKMS
 import Combine

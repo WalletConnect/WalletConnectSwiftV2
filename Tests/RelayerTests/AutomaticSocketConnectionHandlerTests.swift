@@ -1,7 +1,7 @@
 
 import Foundation
 import XCTest
-@testable import Relayer
+@testable import WalletConnectRelay
 
 final class AutomaticSocketConnectionHandlerTests: XCTestCase {
     var sut: AutomaticSocketConnectionHandler!

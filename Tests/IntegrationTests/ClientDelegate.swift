@@ -1,6 +1,6 @@
 
 import Foundation
-@testable import WalletConnect
+@testable import WalletConnectAuth
 
 class ClientDelegate: AuthClientDelegate {
     var client: AuthClient

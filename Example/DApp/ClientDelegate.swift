@@ -1,5 +1,5 @@
-import WalletConnect
-import Relayer
+import WalletConnectAuth
+import WalletConnectRelay
 
 class ClientDelegate: AuthClientDelegate {
     var client: AuthClient
