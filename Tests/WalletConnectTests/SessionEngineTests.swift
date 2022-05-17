@@ -57,7 +57,7 @@ final class SessionEngineTests: XCTestCase {
         let topicB = String.generateTopic()
         cryptoMock.setAgreementSecret(agreementKeys, topic: topicB)
         let proposal = SessionProposal.stub(proposerPubKey: AgreementPrivateKey().publicKey.hexRepresentation)
-        try? engine.settle(topic: topicB, proposal: proposal, accounts: [], namespaces: [Namespace.stub()])
+        try? engine.settle(topic: topicB, proposal: proposal, namespaces: SessionNamespace.stubDictionary())
         usleep(100)
         XCTAssertTrue(storageMock.hasSession(forTopic: topicB), "Responder must persist session on topic B")
         XCTAssert(networkingInteractor.didSubscribe(to: topicB), "Responder must subscribe for topic B")
@@ -120,70 +120,5 @@ final class SessionEngineTests: XCTestCase {
         XCTAssertTrue(networkingInteractor.didUnsubscribe(to: session.topic), "Responder must unsubscribe topic B")
         XCTAssertFalse(cryptoMock.hasAgreementSecret(for: session.topic), "Responder must remove agreement secret")
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: session.self.publicKey!), "Responder must remove private key")
-    }
-    
-    func testSessionRequestDefinedChainMatchingMethod() {
-        var didTriggerRequest = false
-        engine.onSessionRequest = { _ in didTriggerRequest = true }
-        
-        var session = WCSession.stub(isSelfController: true)
-        session.updateNamespaces([Namespace(chains: [Blockchain("eip155:1")!], methods: ["someMethod"], events: [])])
-        storageMock.setSession(session)
-        
-        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: Blockchain("eip155:1")!)
-        networkingInteractor.wcRequestPublisherSubject.send(payload)
-        
-        XCTAssertFalse(networkingInteractor.didRespondError)
-        XCTAssertTrue(didTriggerRequest)
-    }
-    
-    func testSessionRequestDefinedChainUnmatchingMethod() {
-        var didTriggerRequest = false
-        engine.onSessionRequest = { _ in didTriggerRequest = true }
-        
-        var session = WCSession.stub(isSelfController: true)
-        session.updateNamespaces([Namespace(chains: [Blockchain("eip155:1")!], methods: ["someMethod"], events: [])])
-        storageMock.setSession(session)
-        
-        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someOtherMethod", chainId: Blockchain("eip155:1")!)
-        networkingInteractor.wcRequestPublisherSubject.send(payload)
-        
-        XCTAssertTrue(networkingInteractor.didRespondError)
-        XCTAssertFalse(didTriggerRequest)
-    }
-    
-    func testSessionRequestMultiNamespaceDefinedChainMatchingMethod() {
-        var didTriggerRequest = false
-        engine.onSessionRequest = { _ in didTriggerRequest = true }
-        
-        var session = WCSession.stub(isSelfController: true)
-        session.updateNamespaces([
-            Namespace(chains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], methods: ["someMethod"], events: []),
-            Namespace(chains: [Blockchain("eip155:1")!], methods: ["someOtherMethod"], events: [])
-        ])
-        storageMock.setSession(session)
-        
-        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someOtherMethod", chainId: Blockchain("eip155:1")!)
-        networkingInteractor.wcRequestPublisherSubject.send(payload)
-        
-        XCTAssertFalse(networkingInteractor.didRespondError)
-        XCTAssertTrue(didTriggerRequest)
-    }
-    
-    func testSessionRequestMultiChainNamespaceDefinedChainMatchingMethod() {
-        var didTriggerRequest = false
-        engine.onSessionRequest = { _ in didTriggerRequest = true }
-        
-        var session = WCSession.stub(isSelfController: true)
-        session.updateNamespaces([
-            Namespace(chains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!, Blockchain("cosmos:cosmoshub4")!], methods: ["someMethod"], events: []),
-        ])
-        storageMock.setSession(session)
-        
-        let payload = WCRequestSubscriptionPayload.stubRequest(topic: session.topic, method: "someMethod", chainId: Blockchain("cosmos:cosmoshub4")!)
-        networkingInteractor.wcRequestPublisherSubject.send(payload)
-        
-        XCTAssertFalse(networkingInteractor.didRespondError)
-        XCTAssertTrue(didTriggerRequest)
     }
 }

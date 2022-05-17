@@ -64,7 +64,8 @@ final class PairingEngineTests: XCTestCase {
         let topicA = pairing.topic
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
         
-        try! await engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions)
+        // FIXME: namespace stub
+        try! await engine.propose(pairingTopic: pairing.topic, namespaces: ProposalNamespace.stubDictionary(), relay: relayOptions)
         
         guard let publishTopic = networkingInteractor.requests.first?.topic,
               let proposal = networkingInteractor.requests.first?.request.sessionProposal else {
@@ -112,7 +113,8 @@ final class PairingEngineTests: XCTestCase {
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
         
         // Client proposes session
-        try! await engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions)
+        // FIXME: namespace stub
+        try! await engine.propose(pairingTopic: pairing.topic, namespaces: ProposalNamespace.stubDictionary(), relay: relayOptions)
         
         guard let request = networkingInteractor.requests.first?.request,
               let proposal = networkingInteractor.requests.first?.request.sessionProposal else {
@@ -152,7 +154,8 @@ final class PairingEngineTests: XCTestCase {
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
         
         // Client propose session
-        try! await engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions)
+        // FIXME: namespace stub
+        try! await engine.propose(pairingTopic: pairing.topic, namespaces: ProposalNamespace.stubDictionary(), relay: relayOptions)
         
         guard let request = networkingInteractor.requests.first?.request,
               let proposal = networkingInteractor.requests.first?.request.sessionProposal else {
@@ -175,7 +178,8 @@ final class PairingEngineTests: XCTestCase {
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
         
         // Client propose session
-        try? await engine.propose(pairingTopic: pairing.topic, namespaces: [Namespace.stub()], relay: relayOptions)
+        // FIXME: namespace stub
+        try? await engine.propose(pairingTopic: pairing.topic, namespaces: ProposalNamespace.stubDictionary(), relay: relayOptions)
         
         guard let request = networkingInteractor.requests.first?.request,
               let proposal = networkingInteractor.requests.first?.request.sessionProposal else {

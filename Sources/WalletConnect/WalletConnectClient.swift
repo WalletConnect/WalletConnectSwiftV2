@@ -119,18 +119,18 @@ public final class WalletConnectClient {
     /// - Parameter sessionPermissions: The session permissions the responder will be requested for.
     /// - Parameter topic: Optional parameter - use it if you already have an established pairing with peer client.
     /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
-    public func connect(namespaces: Set<Namespace>, topic: String? = nil) async throws -> String? {
+    public func connect(requiredNamespaces: [String: ProposalNamespace], topic: String? = nil) async throws -> String? {
         logger.debug("Connecting Application")
         if let topic = topic {
             guard let pairing = pairingEngine.getSettledPairing(for: topic) else {
                 throw WalletConnectError.noPairingMatchingTopic(topic)
             }
             logger.debug("Proposing session on existing pairing")
-            try await pairingEngine.propose(pairingTopic: topic, namespaces: namespaces, relay: pairing.relay)
+            try await pairingEngine.propose(pairingTopic: topic, namespaces: requiredNamespaces, relay: pairing.relay)
             return nil
         } else {
             let pairingURI = try await pairingEngine.create()
-            try await pairingEngine.propose(pairingTopic: pairingURI.topic, namespaces: namespaces ,relay: pairingURI.relay)
+            try await pairingEngine.propose(pairingTopic: pairingURI.topic, namespaces: requiredNamespaces ,relay: pairingURI.relay)
             return pairingURI.absoluteString
         }
     }
@@ -157,12 +157,11 @@ public final class WalletConnectClient {
     ///   - events: A Set of events
     public func approve(
         proposalId: String,
-        accounts: Set<Account>,
-        namespaces: Set<Namespace>
+        namespaces: [String: SessionNamespace]
     ) throws {
-            //TODO - accounts should be validated for matching namespaces
+        //TODO - accounts should be validated for matching namespaces BEFORE responding proposal
         guard let (sessionTopic, proposal) = pairingEngine.respondSessionPropose(proposerPubKey: proposalId) else {return}
-        try sessionEngine.settle(topic: sessionTopic, proposal: proposal, accounts: accounts, namespaces: namespaces)
+        try sessionEngine.settle(topic: sessionTopic, proposal: proposal, namespaces: namespaces)
     }
     
     /// For the responder to reject a session proposal.
@@ -173,29 +172,22 @@ public final class WalletConnectClient {
         pairingEngine.reject(proposal: proposal.proposal, reason: reason.internalRepresentation())
     }
     
-    /// For the responder to update the accounts
-    /// - Parameters:
-    ///   - topic: Topic of the session that is intended to be updated.
-    ///   - accounts: Set of accounts that will be allowed to be used by the session after the update.
-    public func updateAccounts(topic: String, accounts: Set<Account>) throws {
-        try controllerSessionStateMachine.updateAccounts(topic: topic, accounts: accounts)
-    }
-    
     /// For the responder to update session methods
     /// - Parameters:
     ///   - topic: Topic of the session that is intended to be updated.
     ///   - methods: Sets of methods that will replace existing ones.
-    public func updateNamespaces(topic: String, namespaces: Set<Namespace>) throws {
-        try controllerSessionStateMachine.updateNamespaces(topic: topic, namespaces: namespaces)
+    public func update(topic: String, namespaces: [String: SessionNamespace]) throws {
+        try controllerSessionStateMachine.update(topic: topic, namespaces: namespaces)
     }
     
     /// For controller to update expiry of a session
     /// - Parameters:
     ///   - topic: Topic of the Session, it can be a pairing or a session topic.
     ///   - ttl: Time in seconds that a target session is expected to be extended for. Must be greater than current time to expire and than 7 days
-    public func updateExpiry(topic: String, ttl: Int64 = Session.defaultTimeToLive) throws {
+    public func extend(topic: String) throws {
+        let ttl: Int64 = Session.defaultTimeToLive
         if sessionEngine.hasSession(for: topic) {
-            try controllerSessionStateMachine.updateExpiry(topic: topic, by: ttl)
+            try controllerSessionStateMachine.extend(topic: topic, by: ttl)
         }
     }
     
@@ -320,9 +312,6 @@ public final class WalletConnectClient {
         controllerSessionStateMachine.onNamespacesUpdate = { [unowned self] topic, namespaces in
             delegate?.didUpdate(sessionTopic: topic, namespaces: namespaces)
         }
-        controllerSessionStateMachine.onAccountsUpdate = { [unowned self] topic, accounts in
-            delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
-        }
         controllerSessionStateMachine.onExpiryUpdate = { [unowned self] topic, expiry in
             delegate?.didUpdate(sessionTopic: topic, expiry: expiry)
         }
@@ -331,9 +320,6 @@ public final class WalletConnectClient {
         }
         nonControllerSessionStateMachine.onExpiryUpdate = { [unowned self] topic, expiry in
             delegate?.didUpdate(sessionTopic: topic, expiry: expiry)
-        }
-        nonControllerSessionStateMachine.onAccountsUpdate = { [unowned self] topic, accounts in
-            delegate?.didUpdate(sessionTopic: topic, accounts: accounts)
         }
         sessionEngine.onEventReceived = { [unowned self] topic, event, chainId in
             delegate?.didReceive(event: event, sessionTopic: topic, chainId: chainId)

@@ -11,8 +11,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     var onSessionResponse: ((Response)->())?
     var onSessionRejected: ((Session.Proposal, Reason)->())?
     var onSessionDelete: (()->())?
-    var onSessionUpdateAccounts: ((String, Set<Account>)->())?
-    var onSessionUpdateNamespaces: ((String, Set<Namespace>)->())?
+    var onSessionUpdateNamespaces: ((String, [String : SessionNamespace])->())?
     var onSessionUpdateEvents: ((String, Set<String>)->())?
     var onSessionUpdateExpiry: ((String, Date)->())?
     var onEventReceived: ((Session.Event, String)->())?
@@ -38,10 +37,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didDelete(sessionTopic: String, reason: Reason) {
         onSessionDelete?()
     }
-    func didUpdate(sessionTopic: String, accounts: Set<Account>) {
-        onSessionUpdateAccounts?(sessionTopic, accounts)
-    }
-    func didUpdate(sessionTopic: String, namespaces: Set<Namespace>) {
+    func didUpdate(sessionTopic: String, namespaces: [String : SessionNamespace]) {
         onSessionUpdateNamespaces?(sessionTopic, namespaces)
     }
     func didUpdate(sessionTopic: String, expiry: Date) {

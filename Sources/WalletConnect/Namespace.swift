@@ -1,3 +1,4 @@
+// TODO: Remove type
 public struct Namespace: Codable, Equatable, Hashable {
     
     public let chains: Set<Blockchain>
@@ -29,5 +30,42 @@ internal extension Namespace {
                 }
             }
         }
+    }
+}
+
+public struct ProposalNamespace: Equatable, Codable {
+    public let chains: Set<Blockchain>
+    public let methods: Set<String>
+    public let events: Set<String>
+    public let `extension`: [Extension]?
+    
+    public struct Extension: Equatable, Codable {
+        public let chains: Set<Blockchain>
+        public let methods: Set<String>?
+        public let events: Set<String>?
+    }
+}
+
+public struct SessionNamespace: Equatable, Codable {
+    public let accounts: Set<Account>
+    public let methods: Set<String>
+    public let events: Set<String>
+    public let `extension`: [Extension]?
+    
+    public struct Extension: Equatable, Codable {
+        public let chains: Set<Account>
+        public let methods: Set<String>?
+        public let events: Set<String>?
+    }
+}
+
+enum Validator {
+    
+    static func validate(_ namespaces: [String: ProposalNamespace]) throws {
+        // TODO
+    }
+    
+    static func validate(_ namespaces: [String: SessionNamespace]) throws {
+        // TODO
     }
 }

@@ -17,7 +17,7 @@ extension WCSession {
                 controller: AgreementPeer(publicKey: controllerKey),
                 selfParticipant: Participant.stub(publicKey: selfKey),
                 peerParticipant: Participant.stub(publicKey: peerKey),
-                namespaces: [],
+                namespaces: [:],
                 events: [],
                 accounts: Account.stubSet(),
                 acknowledged: acknowledged,
@@ -35,8 +35,8 @@ extension SessionType.SettleParams {
     static func stub() -> SessionType.SettleParams {
         return SessionType.SettleParams(
             relay: RelayProtocolOptions.stub(),
-            controller: Participant.stub(), accounts: Account.stubSet(),
-            namespaces: [],
+            controller: Participant.stub(),
+            namespaces: [:],
             expiry: Int64(Date.distantFuture.timeIntervalSince1970))
     }
 }

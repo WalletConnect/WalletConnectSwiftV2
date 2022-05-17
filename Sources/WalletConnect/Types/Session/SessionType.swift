@@ -14,36 +14,12 @@ internal enum SessionType {
     struct SettleParams: Codable, Equatable {
         let relay: RelayProtocolOptions
         let controller: Participant
-        let accounts: Set<Account>
-        let namespaces: Set<Namespace>
+        let namespaces: [String: SessionNamespace]
         let expiry: Int64
     }
     
-    struct UpdateAccountsParams: Codable, Equatable {
-        private let accounts: Set<String>
-        
-        init(accounts: Set<Account>) {
-            self.accounts = Set(accounts.map{$0.absoluteString})
-        }
-#if DEBUG
-        init(accounts: Set<String>) {
-            self.accounts = accounts
-        }
-#endif
-
-        var isValidParam: Bool {
-            return accounts.allSatisfy{String.conformsToCAIP10($0)}
-        }
-        
-        func getAccounts() -> Set<Account> {
-            return Set(accounts.compactMap{Account($0)})
-        }
-    }
-    
-    
-    
-    struct UpdateNamespaceParams: Codable, Equatable {
-        let namespaces: Set<Namespace>
+    struct UpdateParams: Codable, Equatable {
+        let namespaces: [String: SessionNamespace]
     }
 
     typealias DeleteParams = SessionType.Reason

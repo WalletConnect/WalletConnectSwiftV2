@@ -32,6 +32,30 @@ extension Namespace {
     }
 }
 
+extension ProposalNamespace {
+    static func stubDictionary() -> [String: ProposalNamespace] {
+        return [
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:1")!],
+                methods: ["method"],
+                events: ["event"],
+                extension: nil)
+        ]
+    }
+}
+
+extension SessionNamespace {
+    static func stubDictionary() -> [String: SessionNamespace] {
+        return [
+            "eip155": SessionNamespace(
+                accounts: [Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!],
+                methods: ["method"],
+                events: ["event"],
+                extension: nil)
+        ]
+    }
+}
+
 extension RelayProtocolOptions {
     static func stub() -> RelayProtocolOptions {
         RelayProtocolOptions(protocol: "", data: nil)
@@ -51,18 +75,14 @@ extension AgreementPeer {
 }
 
 extension WCRequestSubscriptionPayload {
-    static func stubUpdateAccounts(topic: String, accounts: Set<String> = ["std:0:0"]) -> WCRequestSubscriptionPayload {
-        let updateMethod = WCMethod.wcSessionUpdateAccounts(SessionType.UpdateAccountsParams(accounts: accounts)).asRequest()
-        return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
-    }
     
-    static func stubUpdateNamespaces(topic: String, namespaces: Set<Namespace> = [Namespace.stub()]) -> WCRequestSubscriptionPayload {
-        let updateMethod = WCMethod.wcSessionUpdateNamespaces(SessionType.UpdateNamespaceParams(namespaces: namespaces)).asRequest()
+    static func stubUpdateNamespaces(topic: String, namespaces: [String: SessionNamespace] = SessionNamespace.stubDictionary()) -> WCRequestSubscriptionPayload {
+        let updateMethod = WCMethod.wcSessionUpdate(SessionType.UpdateParams(namespaces: namespaces)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
     }
     
     static func stubUpdateExpiry(topic: String, expiry: Int64) -> WCRequestSubscriptionPayload {
-        let updateExpiryMethod = WCMethod.wcSessionUpdateExpiry(SessionType.UpdateExpiryParams(expiry: expiry)).asRequest()
+        let updateExpiryMethod = WCMethod.wcSessionExtend(SessionType.UpdateExpiryParams(expiry: expiry)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateExpiryMethod)
     }
     
@@ -86,7 +106,7 @@ extension SessionProposal {
         return SessionType.ProposeParams(
             relays: [relayOptions],
             proposer: Participant(publicKey: proposerPubKey, metadata: AppMetadata.stub()),
-            namespaces: [Namespace.stub()])
+            requiredNamespaces: ProposalNamespace.stubDictionary())
     }
 }
 

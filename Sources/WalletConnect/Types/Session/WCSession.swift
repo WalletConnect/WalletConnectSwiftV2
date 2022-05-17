@@ -12,8 +12,7 @@ struct WCSession: ExpirableSequence {
     private (set) var expiryDate: Date
     var acknowledged: Bool
     let controller: AgreementPeer
-    private(set) var accounts: Set<Account>
-    private(set) var namespaces: Set<Namespace>
+    private(set) var namespaces: [String: SessionNamespace]
     
     static var defaultTimeToLive: Int64 {
         Int64(7*Time.day)
@@ -34,20 +33,18 @@ struct WCSession: ExpirableSequence {
         self.selfParticipant = selfParticipant
         self.peerParticipant = peerParticipant
         self.namespaces = settleParams.namespaces
-        self.accounts = settleParams.accounts
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(settleParams.expiry))
     }
     
 #if DEBUG
-    internal init(topic: String, relay: RelayProtocolOptions, controller: AgreementPeer, selfParticipant: Participant, peerParticipant: Participant, namespaces: Set<Namespace>, events: Set<String>, accounts: Set<Account>, acknowledged: Bool, expiry: Int64) {
+    internal init(topic: String, relay: RelayProtocolOptions, controller: AgreementPeer, selfParticipant: Participant, peerParticipant: Participant, namespaces: [String: SessionNamespace], events: Set<String>, accounts: Set<Account>, acknowledged: Bool, expiry: Int64) {
         self.topic = topic
         self.relay = relay
         self.controller = controller
         self.selfParticipant = selfParticipant
         self.peerParticipant = peerParticipant
         self.namespaces = namespaces
-        self.accounts = accounts
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
     }
@@ -65,47 +62,50 @@ struct WCSession: ExpirableSequence {
         return controller.publicKey == peerParticipant.publicKey
     }
     
+    // FIXME
     func hasNamespace(for chain: Blockchain) -> Bool {
-        namespaces.contains{$0.chains.contains(chain)}
+        // TODO
+//        namespaces.contains{$0.chains.contains(chain)}
+        return true
     }
     
     // TODO: Remove optional for chain param, it's required now / protocol change
     func hasNamespace(for chain: Blockchain?, method: String) -> Bool {
-        if let chain = chain {
-            let namespacesIncludingChain = namespaces.filter{$0.chains.contains(chain)}
-            let methods = namespacesIncludingChain.flatMap{$0.methods}
-            return methods.contains(method)
-        } else {
-            return namespaces
-                .filter { $0.chains.isEmpty }
-                .flatMap { $0.methods }
-                .contains(method)
-        }
+        // TODO
+//        if let chain = chain {
+//            let namespacesIncludingChain = namespaces.filter{$0.chains.contains(chain)}
+//            let methods = namespacesIncludingChain.flatMap{$0.methods}
+//            return methods.contains(method)
+//        } else {
+//            return namespaces
+//                .filter { $0.chains.isEmpty }
+//                .flatMap { $0.methods }
+//                .contains(method)
+//        }
+        return true
     }
     
     func hasNamespace(for chain: Blockchain?,  event: String) -> Bool {
-        if let chain = chain {
-            if let namespace = namespaces.first(where: {$0.chains.contains(chain)}),
-               namespace.events.contains(event) {
-                return true
-            } else {
-                return false
-            }
-        } else {
-            if let namespace = namespaces.first(where: {$0.chains.isEmpty}),
-               namespace.events.contains(event) {
-                return true
-            } else {
-                return false
-            }
-        }
+        // TODO
+//        if let chain = chain {
+//            if let namespace = namespaces.first(where: {$0.chains.contains(chain)}),
+//               namespace.events.contains(event) {
+//                return true
+//            } else {
+//                return false
+//            }
+//        } else {
+//            if let namespace = namespaces.first(where: {$0.chains.isEmpty}),
+//               namespace.events.contains(event) {
+//                return true
+//            } else {
+//                return false
+//            }
+//        }
+        return true
     }
 
-    mutating func updateAccounts(_ accounts: Set<Account>) {
-        self.accounts = accounts
-    }
-    
-    mutating func updateNamespaces(_ namespaces: Set<Namespace>) {
+    mutating func updateNamespaces(_ namespaces: [String: SessionNamespace]) {
         self.namespaces = namespaces
     }
     
@@ -136,7 +136,6 @@ struct WCSession: ExpirableSequence {
             topic: topic,
             peer: peerParticipant.metadata,
             namespaces: namespaces,
-            accounts: accounts,
             expiryDate: expiryDate)
     }
 }
