@@ -66,7 +66,29 @@ enum Namespace {
         }
     }
     
-    static func validateApproved(_ sessionNamespaces: [String: SessionNamespace], against proposalNamespaces: [String: ProposalNamespace]) throws {
-        
+    static func validateApproved(
+        _ sessionNamespaces: [String: SessionNamespace],
+        against proposalNamespaces: [String: ProposalNamespace]
+    ) throws {
+        for (key, proposedNamespace) in proposalNamespaces {
+            guard let approvedNamespace = sessionNamespaces[key] else {
+                throw WalletConnectError.invalidNamespaceMatch
+            }
+            try proposedNamespace.chains.forEach { chain in
+                if !approvedNamespace.accounts.contains(where: { $0.blockchain == chain }) {
+                    throw WalletConnectError.invalidNamespaceMatch
+                }
+            }
+            try proposedNamespace.methods.forEach {
+                if !approvedNamespace.methods.contains($0) {
+                    throw WalletConnectError.invalidNamespaceMatch
+                }
+            }
+            try proposedNamespace.events.forEach {
+                if !approvedNamespace.events.contains($0) {
+                    throw WalletConnectError.invalidNamespaceMatch
+                }
+            }
+        }
     }
 }
