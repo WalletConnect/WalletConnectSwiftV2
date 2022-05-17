@@ -1,4 +1,4 @@
-@testable import WalletConnect
+@testable import WalletConnectAuth
 import Foundation
 import WalletConnectKMS
 import WalletConnectUtils

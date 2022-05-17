@@ -1,4 +1,4 @@
-@testable import WalletConnect
+@testable import WalletConnectAuth
 @testable import WalletConnectKMS
 import CryptoKit
 

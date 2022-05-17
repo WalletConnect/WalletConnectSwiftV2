@@ -4,11 +4,11 @@ import Combine
 import XCTest
 import WalletConnectUtils
 @testable import TestingUtils
-@testable import WalletConnect
+@testable import WalletConnectAuth
 
 class NetworkingInteractorTests: XCTestCase {
     var networkingInteractor: NetworkInteractor!
-    var networkRelayer: MockedNetworkRelayer!
+    var relayClient: MockedRelayClient!
     var serializer: SerializerMock!
 
     private var publishers = [AnyCancellable]()
@@ -16,13 +16,13 @@ class NetworkingInteractorTests: XCTestCase {
     override func setUp() {
         let logger = ConsoleLoggerMock()
         serializer = SerializerMock()
-        networkRelayer = MockedNetworkRelayer()
-        networkingInteractor = NetworkInteractor(networkRelayer: networkRelayer, serializer: serializer, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<WalletConnect.JsonRpcRecord>(defaults: RuntimeKeyValueStorage(), identifier: "")))
+        relayClient = MockedRelayClient()
+        networkingInteractor = NetworkInteractor(relayClient: relayClient, serializer: serializer, logger: logger, jsonRpcHistory: JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<WalletConnectAuth.JsonRpcRecord>(defaults: RuntimeKeyValueStorage(), identifier: "")))
     }
 
     override func tearDown() {
         networkingInteractor = nil
-        networkRelayer = nil
+        relayClient = nil
         serializer = nil
     }
     
@@ -33,16 +33,16 @@ class NetworkingInteractorTests: XCTestCase {
             requestExpectation.fulfill()
         }.store(in: &publishers)
         serializer.deserialized = request
-        networkRelayer.onMessage?(topic, testPayload)
+        relayClient.onMessage?(topic, testPayload)
         waitForExpectations(timeout: 1.001, handler: nil)
     }
 
     func testPromptOnSessionRequest() async {
         let topic = "fefc3dc39cacbc562ed58f92b296e2d65a6b07ef08992b93db5b3cb86280635a"
         let method = getWCSessionMethod()
-        networkRelayer.prompt = false
+        relayClient.prompt = false
         try! await networkingInteractor.request(topic: topic, payload: method.asRequest())
-        XCTAssertTrue(networkRelayer.prompt)
+        XCTAssertTrue(relayClient.prompt)
     }
 }
 

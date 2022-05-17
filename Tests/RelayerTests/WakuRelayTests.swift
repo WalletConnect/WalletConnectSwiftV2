@@ -3,16 +3,16 @@ import WalletConnectUtils
 import Foundation
 import Combine
 import XCTest
-@testable import Relayer
+@testable import WalletConnectRelay
 
 class WakuRelayTests: XCTestCase {
-    var wakuRelay: Relayer!
+    var wakuRelay: RelayClient!
     var dispatcher: DispatcherMock!
 
     override func setUp() {
         dispatcher = DispatcherMock()
         let logger = ConsoleLogger()
-        wakuRelay = Relayer(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
+        wakuRelay = RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
 
     override func tearDown() {

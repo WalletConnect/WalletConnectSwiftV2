@@ -1,5 +1,5 @@
 import XCTest
-@testable import WalletConnect
+@testable import WalletConnectAuth
 @testable import TestingUtils
 @testable import WalletConnectKMS
 import WalletConnectUtils

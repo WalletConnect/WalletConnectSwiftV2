@@ -3,7 +3,7 @@
 import Foundation
 import WalletConnectUtils
 @testable import WalletConnectKMS
-@testable import WalletConnect
+@testable import WalletConnectAuth
 
 
 class SerializerMock: Serializing {

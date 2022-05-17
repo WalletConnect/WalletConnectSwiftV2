@@ -1,6 +1,6 @@
 
 import Foundation
-@testable import Relayer
+@testable import WalletConnectRelay
 
 class NetworkMonitoringMock: NetworkMonitoring {
     var onSatisfied: (() -> ())?

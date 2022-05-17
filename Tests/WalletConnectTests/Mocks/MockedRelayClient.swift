@@ -1,9 +1,9 @@
 import Combine
 import Foundation
-@testable import Relayer
-@testable import WalletConnect
+@testable import WalletConnectRelay
+@testable import WalletConnectAuth
 
-class MockedNetworkRelayer: NetworkRelaying {
+class MockedRelayClient: NetworkRelaying {
     func subscribe(topic: String) async throws {}
     
     var socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()

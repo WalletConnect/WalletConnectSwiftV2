@@ -7,14 +7,14 @@ public enum SocketConnectionStatus {
     case connected
     case disconnected
 }
-public final class Relayer {
+public final class RelayClient {
     enum RelyerError: Error {
         case subscriptionIdNotFound
     }
     private typealias SubscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>
     private typealias SubscriptionResponse = JSONRPCResponse<String>
     private typealias RequestAcknowledgement = JSONRPCResponse<Bool>
-    private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.relayer",
+    private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.relay_client",
                                                 attributes: .concurrent)
     let jsonRpcSubscriptionsHistory: JsonRpcHistory<RelayJSONRPC.SubscriptionParams>
     public var onMessage: ((String, String) -> ())?
@@ -36,7 +36,7 @@ public final class Relayer {
     }
     private let requestAcknowledgePublisherSubject = PassthroughSubject<JSONRPCResponse<Bool>, Never>()
     let logger: ConsoleLogging
-    static let historyIdentifier = "com.walletconnect.sdk.relayer.subscription_json_rpc_record"
+    static let historyIdentifier = "com.walletconnect.sdk.relayer_client.subscription_json_rpc_record"
     
     init(dispatcher: Dispatching,
          logger: ConsoleLogging,
@@ -48,12 +48,12 @@ public final class Relayer {
         setUpBindings()
     }
     
-    /// Instantiates Relayer
+    /// Instantiates Relay Client
     /// - Parameters:
     ///   - relayHost: proxy server host that your application will use to connect to Waku Network. If you register your project at `www.walletconnect.com` you can use `relay.walletconnect.com`
     ///   - projectId: an optional parameter used to access the public WalletConnect infrastructure. Go to `www.walletconnect.com` for info.
     ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults
-    ///   - uniqueIdentifier: if your app requires more than one relayer instances you are required to call identify them
+    ///   - uniqueIdentifier: if your app requires more than one relay client instances you are required to identify them
     ///   - socketConnectionType: socket connection type
     ///   - logger: logger instance
     public convenience init(relayHost: String,
@@ -220,7 +220,7 @@ public final class Relayer {
                 onMessage?(request.params.data.topic, request.params.data.message)
                 acknowledgeSubscription(requestId: request.id)
             } catch {
-                logger.info("Relayer Info: Json Rpc Duplicate Detected")
+                logger.info("Relay Client Info: Json Rpc Duplicate Detected")
             }
         } else if let response = tryDecode(RequestAcknowledgement.self, from: payload) {
             requestAcknowledgePublisherSubject.send(response)

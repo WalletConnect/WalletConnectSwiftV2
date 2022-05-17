@@ -22,7 +22,7 @@ You usually want to have a single instance of a client in you app.
                                    description: String?,
                                    url: String?,
                                    icons: [String]?)
-        let client = WalletConnectClient(metadata: AppMetadata,
+        let client = AuthClient(metadata: AppMetadata,
                             projectId: String,
                             relayHost: String)
 ```
@@ -37,7 +37,7 @@ try! client.pair(uri: uri)
 #### Approve Session
 Sessions are always proposed by the `Proposer` client so `Responder` client needs either reject or approve a session proposal.
 ```Swift
-class ClientDelegate: WalletConnectClientDelegate {
+class ClientDelegate: AuthClientDelegate {
 ...
     func didReceive(sessionProposal: Session.Proposal) {
         client.approve(proposal: proposal, accounts: [String])

@@ -1,9 +1,9 @@
 
 import Foundation
-@testable import WalletConnect
+@testable import WalletConnectAuth
 
-class ClientDelegate: WalletConnectClientDelegate {
-    var client: WalletConnectClient
+class ClientDelegate: AuthClientDelegate {
+    var client: AuthClient
     var onSessionSettled: ((Session)->())?
     var onConnected: (()->())?
     var onSessionProposal: ((Session.Proposal)->())?
@@ -17,7 +17,7 @@ class ClientDelegate: WalletConnectClientDelegate {
     var onEventReceived: ((Session.Event, String)->())?
     var onPairingUpdate: ((Pairing)->())?
     
-    internal init(client: WalletConnectClient) {
+    internal init(client: AuthClient) {
         self.client = client
         client.delegate = self
     }

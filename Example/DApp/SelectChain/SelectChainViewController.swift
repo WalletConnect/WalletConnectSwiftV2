@@ -1,7 +1,7 @@
 
 
 import Foundation
-import WalletConnect
+import WalletConnectAuth
 import UIKit
 
 struct Chain {

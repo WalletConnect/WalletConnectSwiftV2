@@ -1,7 +1,7 @@
 import Web3
 import Foundation
 import WalletConnectUtils
-import WalletConnect
+import WalletConnectAuth
 
 class Signer {
     static let privateKey: EthereumPrivateKey = try! EthereumPrivateKey(hexPrivateKey: "0xe56da0e170b5e09a8bb8f1b693392c7d56c3739a9c75740fbc558a2877868540")

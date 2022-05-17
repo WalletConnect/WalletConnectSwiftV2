@@ -1,6 +1,6 @@
 import Foundation
 import WalletConnectKMS
-@testable import WalletConnect
+@testable import WalletConnectAuth
 
 extension WCSession {
     static func stub(

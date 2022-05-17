@@ -1,18 +1,18 @@
 import UIKit
-import WalletConnect
+import WalletConnectAuth
 import WalletConnectUtils
 import Web3
 import CryptoSwift
 
 final class WalletViewController: UIViewController {
 
-    let client: WalletConnectClient = {
+    let client: AuthClient = {
         let metadata = AppMetadata(
             name: "Example Wallet",
             description: "wallet description",
             url: "example.wallet",
             icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])
-        return WalletConnectClient(
+        return AuthClient(
             metadata: metadata,
             projectId: "8ba9ee138960775e5231b70cc5ef1c3a",
             relayHost: "relay.walletconnect.com"
@@ -172,7 +172,7 @@ extension WalletViewController: ProposalViewControllerDelegate {
     }
 }
 
-extension WalletViewController: WalletConnectClientDelegate {
+extension WalletViewController: AuthClientDelegate {
     func didConnect() {
         onClientConnected?()
         print("Client connected")
