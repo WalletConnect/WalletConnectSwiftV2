@@ -176,18 +176,18 @@ public final class AuthClient {
     /// - Parameters:
     ///   - topic: Topic of the session that is intended to be updated.
     ///   - methods: Sets of methods that will replace existing ones.
-    public func update(topic: String, namespaces: [String: SessionNamespace]) throws {
-        try controllerSessionStateMachine.update(topic: topic, namespaces: namespaces)
+    public func update(topic: String, namespaces: [String: SessionNamespace]) async throws {
+        try await controllerSessionStateMachine.update(topic: topic, namespaces: namespaces)
     }
     
     /// For controller to update expiry of a session
     /// - Parameters:
     ///   - topic: Topic of the Session, it can be a pairing or a session topic.
     ///   - ttl: Time in seconds that a target session is expected to be extended for. Must be greater than current time to expire and than 7 days
-    public func extend(topic: String) throws {
+    public func extend(topic: String) async throws {
         let ttl: Int64 = Session.defaultTimeToLive
         if sessionEngine.hasSession(for: topic) {
-            try controllerSessionStateMachine.extend(topic: topic, by: ttl)
+            try await controllerSessionStateMachine.extend(topic: topic, by: ttl)
         }
     }
     
