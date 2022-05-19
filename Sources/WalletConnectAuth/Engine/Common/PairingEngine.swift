@@ -127,7 +127,6 @@ final class PairingEngine {
         proposalPayloadsStore.delete(forKey: proposerPubKey)
         
         do {
-            try Namespace.validate(proposedNamespaces)
             try Namespace.validate(sessionNamespaces)
             try Namespace.validateApproved(sessionNamespaces, against: proposedNamespaces)
             let selfPublicKey = try! kms.createX25519KeyPair()
@@ -165,6 +164,12 @@ final class PairingEngine {
     
     private func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
         logger.debug("Received Session Proposal")
+        do {
+            try Namespace.validate(proposal.requiredNamespaces)
+        } catch {
+            // TODO: respond error
+            return
+        }
         try? proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
         onSessionProposal?(proposal.publicRepresentation())
     }
