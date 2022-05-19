@@ -66,7 +66,7 @@ struct WCSession: ExpirableSequence {
         return namespaces[chain.namespace] != nil
     }
     
-    func hasPermission(for method: String, onChain chain: Blockchain) -> Bool {
+    func hasPermission(forMethod method: String, onChain chain: Blockchain) -> Bool {
         if let namespace = namespaces[chain.namespace] {
             if namespace.accounts.contains(where: { $0.blockchain == chain }) {
                 if namespace.methods.contains(method) {
@@ -85,24 +85,23 @@ struct WCSession: ExpirableSequence {
         return false
     }
     
-    func hasNamespace(for chain: Blockchain?,  event: String) -> Bool {
-        // TODO
-//        if let chain = chain {
-//            if let namespace = namespaces.first(where: {$0.chains.contains(chain)}),
-//               namespace.events.contains(event) {
-//                return true
-//            } else {
-//                return false
-//            }
-//        } else {
-//            if let namespace = namespaces.first(where: {$0.chains.isEmpty}),
-//               namespace.events.contains(event) {
-//                return true
-//            } else {
-//                return false
-//            }
-//        }
-        return true
+    func hasPermission(forEvent event: String, onChain chain: Blockchain) -> Bool {
+        if let namespace = namespaces[chain.namespace] {
+            if namespace.accounts.contains(where: { $0.blockchain == chain }) {
+                if namespace.events.contains(event) {
+                    return true
+                }
+            } else if let extensions = namespace.extensions {
+                for extended in extensions {
+                    if extended.accounts.contains(where: { $0.blockchain == chain }) {
+                        if extended.events.contains(event) {
+                            return true
+                        }
+                    }
+                }
+            }
+        }
+        return false
     }
 
     mutating func updateNamespaces(_ namespaces: [String: SessionNamespace]) {

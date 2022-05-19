@@ -114,7 +114,7 @@ final class SessionEngine {
             logger.debug("Could not find session for topic \(request.topic)")
             return // TODO: Marked to review on developer facing error cases
         }
-        guard session.hasPermission(for: request.method, onChain: request.chainId) else {
+        guard session.hasPermission(forMethod: request.method, onChain: request.chainId) else {
             throw WalletConnectError.invalidPermissions
         }
         let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params)
@@ -141,10 +141,10 @@ final class SessionEngine {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
-        let params = SessionType.EventParams(event: event, chainId: chainId)
-        guard session.hasNamespace(for: chainId, event: event.name) else {
+        guard session.hasPermission(forEvent: event.name, onChain: chainId) else {
             throw WalletConnectError.invalidEvent
         }
+        let params = SessionType.EventParams(event: event, chainId: chainId)
         try await networkingInteractor.request(.wcSessionEvent(params), onTopic: topic)
     }
 
@@ -238,7 +238,7 @@ final class SessionEngine {
             networkingInteractor.respondError(for: payload, reason: .unauthorizedTargetChain(chain.absoluteString))
             return
         }
-        guard session.hasPermission(for: request.method, onChain: chain) else {
+        guard session.hasPermission(forMethod: request.method, onChain: chain) else {
             networkingInteractor.respondError(for: payload, reason: .unauthorizedMethod(request.method))
             return
         }
@@ -256,8 +256,10 @@ final class SessionEngine {
             networkingInteractor.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
             return
         }
-        guard session.peerIsController,
-              session.hasNamespace(for: eventParams.chainId, event: event.name) else {
+        guard
+            session.peerIsController,
+            session.hasPermission(forEvent: event.name, onChain: eventParams.chainId)
+        else {
             networkingInteractor.respondError(for: payload, reason: .unauthorizedEvent(event.name))
             return
         }
