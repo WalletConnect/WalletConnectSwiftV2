@@ -172,6 +172,7 @@ final class SessionEngine {
             // TODO: respond error
             return
         }
+        settlingProposal = nil
         let sessionNamespaces = settleParams.namespaces
         do {
             try Namespace.validate(proposedNamespaces)
