@@ -4,7 +4,7 @@ import WalletConnectUtils
 import WalletConnectKMS
 import Combine
 
-final class NonControllerSessionStateMachine: SessionStateMachineValidating {
+final class NonControllerSessionStateMachine {
     
     var onNamespacesUpdate: ((String, [String: SessionNamespace])->())?
     var onExpiryUpdate: ((String, Date) -> ())?
@@ -42,7 +42,7 @@ final class NonControllerSessionStateMachine: SessionStateMachineValidating {
     // TODO: Update stored session namespaces
     private func onSessionUpdateNamespacesRequest(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) {
         do {
-            try Validator.validate(updateParams.namespaces)
+            try Namespace.validate(updateParams.namespaces)
         } catch {
             networkingInteractor.respondError(for: payload, reason: .invalidUpdateNamespaceRequest)
             return

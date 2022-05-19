@@ -26,12 +26,6 @@ extension WCPairing {
     }
 }
 
-extension Namespace {
-    static func stub() -> Namespace {
-        Namespace(chains: [Blockchain("eip155:1")!], methods: ["method"], events: ["event"])
-    }
-}
-
 extension ProposalNamespace {
     static func stubDictionary() -> [String: ProposalNamespace] {
         return [
@@ -39,7 +33,7 @@ extension ProposalNamespace {
                 chains: [Blockchain("eip155:1")!],
                 methods: ["method"],
                 events: ["event"],
-                extension: nil)
+                extensions: nil)
         ]
     }
 }
@@ -51,7 +45,7 @@ extension SessionNamespace {
                 accounts: [Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!],
                 methods: ["method"],
                 events: ["event"],
-                extension: nil)
+                extensions: nil)
         ]
     }
 }
@@ -101,7 +95,7 @@ extension WCRequestSubscriptionPayload {
 }
 
 extension SessionProposal {
-    static func stub(proposerPubKey: String) -> SessionProposal {
+    static func stub(proposerPubKey: String = "") -> SessionProposal {
         let relayOptions = RelayProtocolOptions(protocol: "waku", data: nil)
         return SessionType.ProposeParams(
             relays: [relayOptions],

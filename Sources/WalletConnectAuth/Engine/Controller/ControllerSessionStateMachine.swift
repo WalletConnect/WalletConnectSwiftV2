@@ -4,7 +4,7 @@ import WalletConnectUtils
 import WalletConnectKMS
 import Combine
 
-final class ControllerSessionStateMachine: SessionStateMachineValidating {
+final class ControllerSessionStateMachine {
     var onNamespacesUpdate: ((String, [String: SessionNamespace])->())?
     var onExpiryUpdate: ((String, Date)->())?
 
@@ -27,11 +27,10 @@ final class ControllerSessionStateMachine: SessionStateMachineValidating {
         }.store(in: &publishers)
     }
     
-    // TODO: Change to new namespace spec
     func update(topic: String, namespaces: [String: SessionNamespace]) async throws {
         var session = try getSession(for: topic)
         try validateControlledAcknowledged(session)
-        try Validator.validate(namespaces)
+        try Namespace.validate(namespaces)
         logger.debug("Controller will update methods")
         session.updateNamespaces(namespaces)
         sessionStore.setSession(session)

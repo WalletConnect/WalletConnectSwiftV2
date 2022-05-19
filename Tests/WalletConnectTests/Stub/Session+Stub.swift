@@ -36,7 +36,7 @@ extension SessionType.SettleParams {
         return SessionType.SettleParams(
             relay: RelayProtocolOptions.stub(),
             controller: Participant.stub(),
-            namespaces: [:],
+            namespaces: SessionNamespace.stubDictionary(),
             expiry: Int64(Date.distantFuture.timeIntervalSince1970))
     }
 }
