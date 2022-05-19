@@ -15,6 +15,7 @@ enum WalletConnectError: Error {
     case pairingAlreadyExist
     case topicGenerationFailed
     case invalidNamespaceMatch // TODO: Refactor into actual cases
+    case invalidPermissions // TODO: Same
     
     case `internal`(_ reason: InternalReason)
     
@@ -58,6 +59,8 @@ extension WalletConnectError {
             return "Pairing already exist"
         case .invalidNamespaceMatch:
             return "Invalid namespace approval."
+        case .invalidPermissions:
+            return "Invalid permissions for call."
         case .internal(_): // TODO: Remove internal case
             return ""
         }

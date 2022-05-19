@@ -108,15 +108,18 @@ final class SessionEngine {
         }
     }
     
-    func request(params: Request) async throws {
-        print("will request on session topic: \(params.topic)")
-        guard sessionStore.hasSession(forTopic: params.topic) else {
-            logger.debug("Could not find session for topic \(params.topic)")
-            return
+    func request(_ request: Request) async throws {
+        print("will request on session topic: \(request.topic)")
+        guard let session = sessionStore.getSession(forTopic: request.topic), session.acknowledged else {
+            logger.debug("Could not find session for topic \(request.topic)")
+            return // TODO: Marked to review on developer facing error cases
         }
-        let request = SessionType.RequestParams.Request(method: params.method, params: params.params)
-        let sessionRequestParams = SessionType.RequestParams(request: request, chainId: params.chainId)
-        try await networkingInteractor.request(.wcSessionRequest(sessionRequestParams), onTopic: params.topic)
+        guard session.hasPermission(for: request.method, onChain: request.chainId) else {
+            throw WalletConnectError.invalidPermissions
+        }
+        let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params)
+        let sessionRequestParams = SessionType.RequestParams(request: chainRequest, chainId: request.chainId)
+        try await networkingInteractor.request(.wcSessionRequest(sessionRequestParams), onTopic: request.topic)
     }
     
     func respondSessionRequest(topic: String, response: JsonRpcResult) {
@@ -235,7 +238,7 @@ final class SessionEngine {
             networkingInteractor.respondError(for: payload, reason: .unauthorizedTargetChain(chain.absoluteString))
             return
         }
-        guard session.hasNamespace(for: chain, method: request.method) else {
+        guard session.hasPermission(for: request.method, onChain: chain) else {
             networkingInteractor.respondError(for: payload, reason: .unauthorizedMethod(request.method))
             return
         }

@@ -62,27 +62,27 @@ struct WCSession: ExpirableSequence {
         return controller.publicKey == peerParticipant.publicKey
     }
     
-    // FIXME
     func hasNamespace(for chain: Blockchain) -> Bool {
-        // TODO
-//        namespaces.contains{$0.chains.contains(chain)}
-        return true
+        return namespaces[chain.namespace] != nil
     }
     
-    // TODO: Remove optional for chain param, it's required now / protocol change
-    func hasNamespace(for chain: Blockchain?, method: String) -> Bool {
-        // TODO
-//        if let chain = chain {
-//            let namespacesIncludingChain = namespaces.filter{$0.chains.contains(chain)}
-//            let methods = namespacesIncludingChain.flatMap{$0.methods}
-//            return methods.contains(method)
-//        } else {
-//            return namespaces
-//                .filter { $0.chains.isEmpty }
-//                .flatMap { $0.methods }
-//                .contains(method)
-//        }
-        return true
+    func hasPermission(for method: String, onChain chain: Blockchain) -> Bool {
+        if let namespace = namespaces[chain.namespace] {
+            if namespace.accounts.contains(where: { $0.blockchain == chain }) {
+                if namespace.methods.contains(method) {
+                    return true
+                }
+            } else if let extensions = namespace.extensions {
+                for extended in extensions {
+                    if extended.accounts.contains(where: { $0.blockchain == chain }) {
+                        if extended.methods.contains(method) {
+                            return true
+                        }
+                    }
+                }
+            }
+        }
+        return false
     }
     
     func hasNamespace(for chain: Blockchain?,  event: String) -> Bool {
