@@ -217,7 +217,7 @@ final class PairingEngine {
                 try? pairing.updateExpiry()
             }
             
-            onApprovalResponse?(proposal) // FIXME: This proposal needs to be stored on creation and retrieved from cache here. Don't use proposal from response.
+            onApprovalResponse?(proposal)
             pairingStore.setPairing(pairing)
             
             let selfPublicKey = try! AgreementPublicKey(hex: proposal.proposer.publicKey)
