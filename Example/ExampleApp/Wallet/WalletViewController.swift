@@ -188,8 +188,12 @@ extension WalletViewController: AuthClientDelegate {
     func didConnect() {
         onClientConnected?()
         print("Client connected")
+        
     }
     
+    func didUpdate(sessionTopic: String, namespaces: [String : SessionNamespace]) {
+        
+    }
     
     // TODO: Adapt proposal data to be used on the view
     func didReceive(sessionProposal: Session.Proposal) {
@@ -217,14 +221,6 @@ extension WalletViewController: AuthClientDelegate {
             self?.showSessionRequest(sessionRequest)
         }
         print("[RESPONDER] WC: Did receive session request")
-    }
-
-    func didUpdate(sessionTopic: String, accounts: Set<Account>) {
-
-    }
-    
-    func didUpdate(sessionTopic: String, namespaces: Set<Namespace>) {
-        
     }
     
     func didDelete(sessionTopic: String, reason: Reason) {

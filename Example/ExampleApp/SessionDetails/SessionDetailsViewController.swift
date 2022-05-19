@@ -11,12 +11,14 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
     private let session: Session
     init(_ session: Session, _ client: AuthClient) {
         let pendingRequests = client.getPendingRequests(topic: session.topic).map{$0.method}
+        let chains = Array(session.namespaces.values.flatMap { n in n.accounts.map{$0.blockchain.absoluteString}})
+        let methods = Array(session.namespaces.values.first?.methods ?? []) // TODO: Rethink how to show this info on example app
         self.sessionInfo = SessionInfo(name: session.peer.name,
                                        descriptionText: session.peer.description,
                                        dappURL: session.peer.description,
                                        iconURL: session.peer.icons.first ?? "",
-                                       chains: Array(session.accounts.map { $0.blockchainIdentifier }),
-                                       methods: Array(session.namespaces.first?.methods ?? []), // TODO: Rethink how to show this info on example app
+                                       chains: chains,
+                                       methods: methods,
                                        pendingRequests: pendingRequests)
         self.client = client
         self.session = session
@@ -121,12 +123,14 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
     
     func reloadTable() {
         let pendingRequests = client.getPendingRequests(topic: session.topic).map{$0.method}
+        let chains = Array(session.namespaces.values.flatMap { n in n.accounts.map{$0.blockchain.absoluteString}})
+        let methods = Array(session.namespaces.values.first?.methods ?? []) // TODO: Rethink how to show this info on example app
         self.sessionInfo = SessionInfo(name: session.peer.name,
                                        descriptionText: session.peer.description,
                                        dappURL: session.peer.description,
                                        iconURL: session.peer.icons.first ?? "",
-                                       chains: Array(session.accounts.map { $0.blockchainIdentifier }),
-                                       methods: Array(session.namespaces.first?.methods ?? []),
+                                       chains: chains,
+                                       methods: methods,
                                        pendingRequests: pendingRequests)
         sessiondetailsView.tableView.reloadData()
     }
