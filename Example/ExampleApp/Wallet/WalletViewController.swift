@@ -160,8 +160,20 @@ extension WalletViewController: ProposalViewControllerDelegate {
         print("[RESPONDER] Approving session...")
         let proposal = currentProposal!
         currentProposal = nil
-        let accounts = Set(proposal.namespaces.first?.chains.compactMap { Account($0.absoluteString + ":\(account)") } ?? [])
-        try! client.approve(proposalId: proposal.id, accounts: accounts, namespaces: proposal.namespaces)
+        var sessionNamespaces = [String: SessionNamespace]()
+        proposal.requiredNamespaces.forEach {
+            let caip2Namespace = $0.key
+            let proposalNamespace = $0.value
+            let accounts = Set(proposalNamespace.chains.compactMap { Account($0.absoluteString + ":\(account)") } )
+            
+            let extensions: [SessionNamespace.Extension]? = proposalNamespace.extension?.map { element in
+                let accounts = Set(element.chains.compactMap { Account($0.absoluteString + ":\(account)") } )
+                return SessionNamespace.Extension(accounts: accounts, methods: element.methods, events: element.events)
+            }
+            let sessionNamespace = SessionNamespace(accounts: accounts, methods: proposalNamespace.methods, events: proposalNamespace.events, extension: extensions)
+            sessionNamespaces[caip2Namespace] = sessionNamespace
+        }
+        try! client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
     }
     
     func didRejectSession() {
