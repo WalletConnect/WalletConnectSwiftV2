@@ -27,11 +27,10 @@ final class ControllerSessionStateMachine {
         }.store(in: &publishers)
     }
     
-    // TODO: Change to new namespace spec
     func update(topic: String, namespaces: [String: SessionNamespace]) async throws {
         var session = try getSession(for: topic)
         try validateControlledAcknowledged(session)
-        try Validator.validate(namespaces)
+        try Namespace.validate(namespaces)
         logger.debug("Controller will update methods")
         session.updateNamespaces(namespaces)
         sessionStore.setSession(session)
