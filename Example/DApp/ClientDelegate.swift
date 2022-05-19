@@ -39,11 +39,11 @@ class ClientDelegate: AuthClientDelegate {
     func didUpdate(sessionTopic: String, accounts: Set<Account>) {
     }
     
-    func didUpdate(sessionTopic: String, namespaces: Set<Namespace>) {
+    func didReject(proposal: Session.Proposal, reason: Reason) {
         
     }
     
-    func didReject(proposal: Session.Proposal, reason: Reason) {
+    func didUpdate(sessionTopic: String, namespaces: [String : SessionNamespace]) {
         
     }
 }

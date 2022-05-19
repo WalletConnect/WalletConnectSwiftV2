@@ -37,9 +37,9 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
         print("[PROPOSER] Connecting to a pairing...")
         let methods: Set<String> = ["eth_sendTransaction", "personal_sign", "eth_signTypedData"]
         let blockchains: Set<Blockchain> = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
-        let namespaces: Set<Namespace> = [Namespace(chains: blockchains, methods: methods, events: [])]
+        let namespaces: [String: ProposalNamespace] = ["eip155": ProposalNamespace(chains: blockchains, methods: methods, events: [], extension: nil)]
         Task {
-            let uri = try await client.connect(namespaces: namespaces)
+            let uri = try await client.connect(requiredNamespaces: namespaces)
             showConnectScreen(uriString: uri!)
         }
     }

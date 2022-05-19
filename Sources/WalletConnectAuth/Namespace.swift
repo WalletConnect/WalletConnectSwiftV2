@@ -1,5 +1,6 @@
 
 public struct ProposalNamespace: Equatable, Codable {
+    
     public let chains: Set<Blockchain>
     public let methods: Set<String>
     public let events: Set<String>
@@ -9,6 +10,19 @@ public struct ProposalNamespace: Equatable, Codable {
         public let chains: Set<Blockchain>
         public let methods: Set<String>?
         public let events: Set<String>?
+        
+        public init(chains: Set<Blockchain>, methods: Set<String>?, events: Set<String>?) {
+            self.chains = chains
+            self.methods = methods
+            self.events = events
+        }
+    }
+    
+    public init(chains: Set<Blockchain>, methods: Set<String>, events: Set<String>, extension: [ProposalNamespace.Extension]?) {
+        self.chains = chains
+        self.methods = methods
+        self.events = events
+        self.`extension` = `extension`
     }
 }
 
