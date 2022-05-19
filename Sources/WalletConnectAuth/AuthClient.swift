@@ -327,11 +327,9 @@ public final class AuthClient {
         sessionEngine.onSessionResponse = { [unowned self] response in
             delegate?.didReceive(sessionResponse: response)
         }
-        pairingEngine.onProposeResponse = { [unowned self] sessionTopic in
-            sessionEngine.setSubscription(topic: sessionTopic)
-        }
-        pairingEngine.onApprovalResponse = { [unowned self] proposal in
+        pairingEngine.onProposeResponse = { [unowned self] sessionTopic, proposal in
             sessionEngine.settlingProposal = proposal
+            sessionEngine.setSubscription(topic: sessionTopic)
         }
     }
 }

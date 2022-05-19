@@ -6,9 +6,8 @@ import WalletConnectKMS
 
 final class PairingEngine {
     var onSessionProposal: ((Session.Proposal)->())?
-    var onProposeResponse: ((String)->())?
+    var onProposeResponse: ((String, SessionProposal)->())?
     var onSessionRejected: ((Session.Proposal, SessionType.Reason)->())?
-    var onApprovalResponse: ((SessionProposal) -> Void)?
 
     private let proposalPayloadsStore: KeyValueStore<WCRequestSubscriptionPayload>
     private let networkingInteractor: NetworkInteracting
@@ -217,7 +216,6 @@ final class PairingEngine {
                 try? pairing.updateExpiry()
             }
             
-            onApprovalResponse?(proposal)
             pairingStore.setPairing(pairing)
             
             let selfPublicKey = try! AgreementPublicKey(hex: proposal.proposer.publicKey)
@@ -237,7 +235,7 @@ final class PairingEngine {
             
             try? kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
             try! sessionToPairingTopic.set(pairingTopic, forKey: sessionTopic)
-            onProposeResponse?(sessionTopic)
+            onProposeResponse?(sessionTopic, proposal)
             
         case .error(let error):
             if !pairing.active {

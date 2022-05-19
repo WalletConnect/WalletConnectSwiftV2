@@ -134,7 +134,7 @@ final class PairingEngineTests: XCTestCase {
         
         var sessionTopic: String!
         
-        engine.onProposeResponse = { topic in
+        engine.onProposeResponse = { topic, _ in
             sessionTopic = topic
         }
         networkingInteractor.onPairingResponse?(response)
