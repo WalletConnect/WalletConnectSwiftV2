@@ -1,12 +1,9 @@
 
 import Foundation
 import WalletConnectUtils
+import WalletConnectRelay
 
 public class Auth {
-    struct Config {
-        let metadata: AppMetadata
-        let projectId: String
-    }
     static let instance = Auth()
     private let client: AuthClient
     private static var config: Config?
@@ -15,7 +12,8 @@ public class Auth {
         guard let config = Auth.config else {
             fatalError("Error - you must configure before accessing Auth.instance")
         }
-        client = AuthClient(metadata: config.metadata, projectId: config.projectId, relayHost: "relay.walletconnect.com")
+        let relayClient = RelayClient(relayHost: "relay.walletconnect.com", projectId: config.projectId, socketConnectionType: config.socketConnectionType)
+        client = AuthClient(metadata: config.metadata, relayClient: relayClient)
     }
     
     static func configure(_ config: Config) {
