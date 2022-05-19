@@ -4,7 +4,7 @@ import WalletConnectUtils
 import WalletConnectKMS
 import Combine
 
-final class ControllerSessionStateMachine: SessionStateMachineValidating {
+final class ControllerSessionStateMachine {
     var onNamespacesUpdate: ((String, [String: SessionNamespace])->())?
     var onExpiryUpdate: ((String, Date)->())?
 
