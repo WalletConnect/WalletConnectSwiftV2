@@ -16,6 +16,7 @@ public class Auth {
         }
         let relayClient = RelayClient(relayHost: "relay.walletconnect.com", projectId: config.projectId, socketConnectionType: config.socketConnectionType)
         client = AuthClient(metadata: config.metadata, relayClient: relayClient)
+        client.delegate = self
     }
     
     static public func configure(_ config: Config) {
@@ -74,6 +75,14 @@ extension Auth: AuthClientDelegate {
     
     public func didSettle(session: Session) {
         sessionSettlePublisherSubject.send(session)
+    }
+    
+    public func didReceive(sessionResponse: Response) {
+        sessionResponsePublisherSubject.send(sessionResponse)
+    }
+    
+    public func didReject(proposal: Session.Proposal, reason: Reason) {
+        
     }
 
 }
