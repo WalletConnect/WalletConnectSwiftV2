@@ -21,9 +21,9 @@ public class Auth {
         Auth.config = config
     }
     
-    var connectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
-    var connectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
-        connectionStatusPublisherSubject.eraseToAnyPublisher()
+    var socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
+    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
+        socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
     }
     
     var sessionProposalPublisherSubject = PassthroughSubject<Session.Proposal, Never>()
@@ -59,6 +59,10 @@ public class Auth {
 }
 
 extension Auth: AuthClientDelegate {
+    public func didChangeSocketConnectionStatus(_ status: SocketConnectionStatus) {
+        socketConnectionStatusPublisherSubject.send(status)
+    }
+    
     public func didUpdate(sessionTopic: String, namespaces: [String : SessionNamespace]) {
         sessionUpdatePublisherSubject.send((sessionTopic, namespaces))
     }
@@ -70,12 +74,7 @@ extension Auth: AuthClientDelegate {
     public func didSettle(session: Session) {
         sessionSettlePublisherSubject.send(session)
     }
-    
-    public func didConnect() {
-        
-    }
-    
-    
+
 }
 
 extension Auth {

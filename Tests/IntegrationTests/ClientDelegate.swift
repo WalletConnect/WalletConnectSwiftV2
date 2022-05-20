@@ -49,7 +49,7 @@ class ClientDelegate: AuthClientDelegate {
     func didReceive(sessionResponse: Response) {
         onSessionResponse?(sessionResponse)
     }
-    func didConnect() {
+    func didChangeSocketConnectionStatus() {
         onConnected?()
     }
     func didDisconnect() {}

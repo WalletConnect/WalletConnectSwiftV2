@@ -185,7 +185,7 @@ extension WalletViewController: ProposalViewControllerDelegate {
 }
 
 extension WalletViewController: AuthClientDelegate {
-    func didConnect() {
+    func didChangeSocketConnectionStatus() {
         onClientConnected?()
         print("Client connected")
         

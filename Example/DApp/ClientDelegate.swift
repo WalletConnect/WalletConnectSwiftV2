@@ -20,7 +20,7 @@ class ClientDelegate: AuthClientDelegate {
         client.delegate = self
     }
     
-    func didConnect() {
+    func didChangeSocketConnectionStatus() {
         print("Client connected")
     }
 	
