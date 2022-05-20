@@ -8,6 +8,7 @@ public class Auth {
     static public let instance = Auth()
     private let client: AuthClient
     private static var config: Config?
+    public let logger: ConsoleLogging
     
     private init() {
         guard let config = Auth.config else {
@@ -15,6 +16,7 @@ public class Auth {
         }
         let relayClient = RelayClient(relayHost: "relay.walletconnect.com", projectId: config.projectId, socketConnectionType: config.socketConnectionType)
         client = AuthClient(metadata: config.metadata, relayClient: relayClient)
+        self.logger = client.logger
         client.delegate = self
     }
     

@@ -1,10 +1,19 @@
 import UIKit
+import WalletConnectAuth
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+        
+        let metadata = AppMetadata(
+            name: "Example Wallet",
+            description: "wallet description",
+            url: "example.wallet",
+            icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])
+        Auth.configure(Auth.Config(metadata: metadata, projectId: "8ba9ee138960775e5231b70cc5ef1c3a"))
+        
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = UITabBarController.createExampleApp()
@@ -21,7 +30,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         vc.onClientConnected = {
             Task {
                 do {
-                    try await vc.client.pair(uri: wcUri)
+                    try await Auth.instance.pair(uri: wcUri)
                 } catch {
                     print(error)
                 }
