@@ -7,7 +7,6 @@ import WalletConnectUtils
 
 class AccountRequestViewController: UIViewController, UITableViewDelegate, UITableViewDataSource  {
     private let session: Session
-    private let client: AuthClient = ClientDelegate.shared.client
     private let chainId: String
     private let account: String
     private let methods = ["eth_sendTransaction", "personal_sign", "eth_signTypedData"]
@@ -61,7 +60,7 @@ class AccountRequestViewController: UIViewController, UITableViewDelegate, UITab
         let request = Request(topic: session.topic, method: method, params: requestParams, chainId: Blockchain(chainId)!)
         Task {
             do {
-                try await client.request(params: request)
+                try await Auth.instance.request(params: request)
                 DispatchQueue.main.async { [weak self] in
                     self?.presentConfirmationAlert()
                 }
