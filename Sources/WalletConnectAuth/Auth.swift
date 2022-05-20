@@ -2,6 +2,7 @@
 import Foundation
 import WalletConnectUtils
 import WalletConnectRelay
+import Combine
 
 public class Auth {
     static let instance = Auth()
@@ -19,6 +20,57 @@ public class Auth {
     static func configure(_ config: Config) {
         Auth.config = config
     }
+    
+    var sessionProposalPublisherSubject = PassthroughSubject<Session.Proposal, Never>()
+    var sessionProposalPublisher: AnyPublisher<Session.Proposal, Never> {
+        sessionProposalPublisherSubject.eraseToAnyPublisher()
+    }
+    
+    var sessionSettlePublisherSubject = PassthroughSubject<Session, Never>()
+    var sessionSettlePublisher: AnyPublisher<Session, Never> {
+        sessionSettlePublisherSubject.eraseToAnyPublisher()
+    }
+    
+    var sessionDeletePublisherSubject = PassthroughSubject<(String, Reason), Never>()
+    var sessionDeletePublisher: AnyPublisher<(String, Reason), Never> {
+        sessionDeletePublisherSubject.eraseToAnyPublisher()
+    }
+    
+    var sessionResponsePublisherSubject = PassthroughSubject<Response, Never>()
+    var sessionResponsePublisher: AnyPublisher<Response, Never> {
+        sessionResponsePublisherSubject.eraseToAnyPublisher()
+    }
+    
+    var sessionRejectionPublisherSubject = PassthroughSubject<(Session.Proposal, Reason), Never>()
+    var sessionRejectionPublisher: AnyPublisher<(Session.Proposal, Reason), Never> {
+        sessionRejectionPublisherSubject.eraseToAnyPublisher()
+    }
+    
+    var sessionUpdatePublisherSubject = PassthroughSubject<(String, [String : SessionNamespace]), Never>()
+    var sessionUpdatePublisher: AnyPublisher<(String, [String : SessionNamespace]), Never> {
+        sessionUpdatePublisherSubject.eraseToAnyPublisher()
+    }
+    
+}
+
+extension Auth: AuthClientDelegate {
+    public func didUpdate(sessionTopic: String, namespaces: [String : SessionNamespace]) {
+        <#code#>
+    }
+    
+    public func didDelete(sessionTopic: String, reason: Reason) {
+        <#code#>
+    }
+    
+    public func didSettle(session: Session) {
+        <#code#>
+    }
+    
+    public func didConnect() {
+        <#code#>
+    }
+    
+    
 }
 
 extension Auth {

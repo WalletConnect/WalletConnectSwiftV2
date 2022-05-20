@@ -36,9 +36,6 @@ class ClientDelegate: AuthClientDelegate {
         onSessionResponse?(sessionResponse)
     }
     
-    func didUpdate(sessionTopic: String, accounts: Set<Account>) {
-    }
-    
     func didReject(proposal: Session.Proposal, reason: Reason) {
         
     }
