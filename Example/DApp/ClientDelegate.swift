@@ -2,6 +2,10 @@ import WalletConnectAuth
 import WalletConnectRelay
 
 class ClientDelegate: AuthClientDelegate {
+    func didChangeSocketConnectionStatus(_ status: SocketConnectionStatus) {
+        print(status)
+    }
+    
     var client: AuthClient
     var onSessionSettled: ((Session)->())?
     var onSessionResponse: ((Response)->())?
@@ -20,10 +24,6 @@ class ClientDelegate: AuthClientDelegate {
         client.delegate = self
     }
     
-    func didChangeSocketConnectionStatus() {
-        print("Client connected")
-    }
-	
     func didSettle(session: Session) {
         onSessionSettled?(session)
     }
