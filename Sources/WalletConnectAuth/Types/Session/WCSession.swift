@@ -72,11 +72,12 @@ struct WCSession: ExpirableSequence {
                 if namespace.methods.contains(method) {
                     return true
                 }
-            } else if let extensions = namespace.extensions {
-                for extended in extensions {
-                    if extended.accounts.contains(where: { $0.blockchain == chain }) {
-                        if extended.methods.contains(method) {
-                            return true
+                if let extensions = namespace.extensions {
+                    for extended in extensions {
+                        if extended.accounts.contains(where: { $0.blockchain == chain }) {
+                            if extended.methods.contains(method) {
+                                return true
+                            }
                         }
                     }
                 }
@@ -91,11 +92,12 @@ struct WCSession: ExpirableSequence {
                 if namespace.events.contains(event) {
                     return true
                 }
-            } else if let extensions = namespace.extensions {
-                for extended in extensions {
-                    if extended.accounts.contains(where: { $0.blockchain == chain }) {
-                        if extended.events.contains(event) {
-                            return true
+                if let extensions = namespace.extensions {
+                    for extended in extensions {
+                        if extended.accounts.contains(where: { $0.blockchain == chain }) {
+                            if extended.events.contains(event) {
+                                return true
+                            }
                         }
                     }
                 }
