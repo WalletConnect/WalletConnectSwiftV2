@@ -23,14 +23,19 @@ public class Auth {
         Auth.config = config
     }
     
-    var socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
-    public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
-        socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
-    }
-    
     var sessionProposalPublisherSubject = PassthroughSubject<Session.Proposal, Never>()
     public var sessionProposalPublisher: AnyPublisher<Session.Proposal, Never> {
         sessionProposalPublisherSubject.eraseToAnyPublisher()
+    }
+    
+    var sessionRequestPublisherSubject = PassthroughSubject<Request, Never>()
+    public var sessionRequestPublisher: AnyPublisher<Request, Never> {
+        sessionRequestPublisherSubject.eraseToAnyPublisher()
+    }
+    
+    var socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
+    public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
+        socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
     }
     
     var sessionSettlePublisherSubject = PassthroughSubject<Session, Never>()
@@ -53,21 +58,30 @@ public class Auth {
         sessionRejectionPublisherSubject.eraseToAnyPublisher()
     }
     
-    var sessionUpdatePublisherSubject = PassthroughSubject<(String, [String : SessionNamespace]), Never>()
-    public var sessionUpdatePublisher: AnyPublisher<(String, [String : SessionNamespace]), Never> {
+    var sessionUpdatePublisherSubject = PassthroughSubject<(sessionTopic: String, namespaces: [String : SessionNamespace]), Never>()
+    public var sessionUpdatePublisher: AnyPublisher<(sessionTopic: String, namespaces: [String : SessionNamespace]), Never> {
         sessionUpdatePublisherSubject.eraseToAnyPublisher()
     }
     
+    var sessionEventPublisherSubject = PassthroughSubject<(event: Session.Event, sessionTopic: String, chainId: Blockchain?), Never>()
+    public var sessionEventPublisher: AnyPublisher<(event: Session.Event, sessionTopic: String, chainId: Blockchain?), Never> {
+        sessionEventPublisherSubject.eraseToAnyPublisher()
+    }
+    
+    var sessionUpdateExpiryPublisherSubject = PassthroughSubject<(sessionTopic: String, expiry: Date), Never>()
+    public var sessionUpdateExpiryPublisher: AnyPublisher<(sessionTopic: String, expiry: Date), Never> {
+        sessionUpdateExpiryPublisherSubject.eraseToAnyPublisher()
+    }
 }
 
 extension Auth: AuthClientDelegate {
     
     public func didReceive(sessionProposal: Session.Proposal) {
-        
+        sessionProposalPublisherSubject.send(sessionProposal)
     }
 
     public func didReceive(sessionRequest: Request) {
-        
+        sessionRequestPublisherSubject.send(sessionRequest)
     }
     
     public func didReceive(sessionResponse: Response) {
@@ -78,13 +92,12 @@ extension Auth: AuthClientDelegate {
         sessionDeletePublisherSubject.send((sessionTopic, reason))
     }
     
-    
     public func didUpdate(sessionTopic: String, namespaces: [String : SessionNamespace]) {
         sessionUpdatePublisherSubject.send((sessionTopic, namespaces))
     }
     
     public func didUpdate(sessionTopic: String, expiry: Date) {
-        
+        sessionUpdateExpiryPublisherSubject.send((sessionTopic, expiry))
     }
     
     public func didSettle(session: Session) {
@@ -92,11 +105,11 @@ extension Auth: AuthClientDelegate {
     }
     
     public func didReceive(event: Session.Event, sessionTopic: String, chainId: Blockchain?) {
-        
+        sessionEventPublisherSubject.send((event, sessionTopic, chainId))
     }
     
     public func didReject(proposal: Session.Proposal, reason: Reason) {
-        
+        sessionRejectionPublisherSubject.send((proposal, reason))
     }
     
     public func didChangeSocketConnectionStatus(_ status: SocketConnectionStatus) {
