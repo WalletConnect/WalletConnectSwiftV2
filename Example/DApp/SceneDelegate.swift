@@ -13,9 +13,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
-        ClientDelegate.shared.onSessionDelete = { [unowned self] in
+        let metadata = AppMetadata(
+            name: "Swift Dapp",
+            description: "a description",
+            url: "wallet.connect",
+            icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])
+        Auth.configure(Auth.Config(metadata: metadata, projectId: "8ba9ee138960775e5231b70cc5ef1c3a"))
+        Auth.instance.sessionDeletePublisher.sink { [unowned self] in
             showSelectChainScreen()
         }
+        
         ClientDelegate.shared.onSessionResponse = { [unowned self] response in
             presentResponse(for: response)
         }

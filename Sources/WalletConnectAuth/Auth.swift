@@ -6,7 +6,7 @@ import Combine
 
 public typealias SocketConnectionStatus = WalletConnectRelay.SocketConnectionStatus
 public class Auth {
-    static let instance = Auth()
+    static public let instance = Auth()
     private let client: AuthClient
     private static var config: Config?
     
@@ -18,42 +18,42 @@ public class Auth {
         client = AuthClient(metadata: config.metadata, relayClient: relayClient)
     }
     
-    static func configure(_ config: Config) {
+    static public func configure(_ config: Config) {
         Auth.config = config
     }
     
     var socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
-    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
+    public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
     }
     
     var sessionProposalPublisherSubject = PassthroughSubject<Session.Proposal, Never>()
-    var sessionProposalPublisher: AnyPublisher<Session.Proposal, Never> {
+    public var sessionProposalPublisher: AnyPublisher<Session.Proposal, Never> {
         sessionProposalPublisherSubject.eraseToAnyPublisher()
     }
     
     var sessionSettlePublisherSubject = PassthroughSubject<Session, Never>()
-    var sessionSettlePublisher: AnyPublisher<Session, Never> {
+    public var sessionSettlePublisher: AnyPublisher<Session, Never> {
         sessionSettlePublisherSubject.eraseToAnyPublisher()
     }
     
     var sessionDeletePublisherSubject = PassthroughSubject<(String, Reason), Never>()
-    var sessionDeletePublisher: AnyPublisher<(String, Reason), Never> {
+    public var sessionDeletePublisher: AnyPublisher<(String, Reason), Never> {
         sessionDeletePublisherSubject.eraseToAnyPublisher()
     }
     
     var sessionResponsePublisherSubject = PassthroughSubject<Response, Never>()
-    var sessionResponsePublisher: AnyPublisher<Response, Never> {
+    public var sessionResponsePublisher: AnyPublisher<Response, Never> {
         sessionResponsePublisherSubject.eraseToAnyPublisher()
     }
     
     var sessionRejectionPublisherSubject = PassthroughSubject<(Session.Proposal, Reason), Never>()
-    var sessionRejectionPublisher: AnyPublisher<(Session.Proposal, Reason), Never> {
+    public var sessionRejectionPublisher: AnyPublisher<(Session.Proposal, Reason), Never> {
         sessionRejectionPublisherSubject.eraseToAnyPublisher()
     }
     
     var sessionUpdatePublisherSubject = PassthroughSubject<(String, [String : SessionNamespace]), Never>()
-    var sessionUpdatePublisher: AnyPublisher<(String, [String : SessionNamespace]), Never> {
+    public var sessionUpdatePublisher: AnyPublisher<(String, [String : SessionNamespace]), Never> {
         sessionUpdatePublisherSubject.eraseToAnyPublisher()
     }
     
