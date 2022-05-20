@@ -61,30 +61,47 @@ public class Auth {
 }
 
 extension Auth: AuthClientDelegate {
-    public func didChangeSocketConnectionStatus(_ status: SocketConnectionStatus) {
-        socketConnectionStatusPublisherSubject.send(status)
-    }
     
-    public func didUpdate(sessionTopic: String, namespaces: [String : SessionNamespace]) {
-        sessionUpdatePublisherSubject.send((sessionTopic, namespaces))
+    public func didReceive(sessionProposal: Session.Proposal) {
+        
     }
-    
-    public func didDelete(sessionTopic: String, reason: Reason) {
-        sessionDeletePublisherSubject.send((sessionTopic, reason))
-    }
-    
-    public func didSettle(session: Session) {
-        sessionSettlePublisherSubject.send(session)
+
+    public func didReceive(sessionRequest: Request) {
+        
     }
     
     public func didReceive(sessionResponse: Response) {
         sessionResponsePublisherSubject.send(sessionResponse)
     }
     
+    public func didDelete(sessionTopic: String, reason: Reason) {
+        sessionDeletePublisherSubject.send((sessionTopic, reason))
+    }
+    
+    
+    public func didUpdate(sessionTopic: String, namespaces: [String : SessionNamespace]) {
+        sessionUpdatePublisherSubject.send((sessionTopic, namespaces))
+    }
+    
+    public func didUpdate(sessionTopic: String, expiry: Date) {
+        
+    }
+    
+    public func didSettle(session: Session) {
+        sessionSettlePublisherSubject.send(session)
+    }
+    
+    public func didReceive(event: Session.Event, sessionTopic: String, chainId: Blockchain?) {
+        
+    }
+    
     public func didReject(proposal: Session.Proposal, reason: Reason) {
         
     }
-
+    
+    public func didChangeSocketConnectionStatus(_ status: SocketConnectionStatus) {
+        socketConnectionStatusPublisherSubject.send(status)
+    }
 }
 
 extension Auth {
