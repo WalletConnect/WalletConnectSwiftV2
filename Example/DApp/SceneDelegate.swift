@@ -21,10 +21,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             url: "wallet.connect",
             icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])
         Auth.configure(Auth.Config(metadata: metadata, projectId: "8ba9ee138960775e5231b70cc5ef1c3a"))
-        Auth.instance.sessionDeletePublisher.sink { [unowned self] _ in
-            showSelectChainScreen()
-        }.store(in: &publishers)
-
+        Auth.instance.sessionDeletePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] _ in
+                showSelectChainScreen()
+            }.store(in: &publishers)
+        
         Auth.instance.sessionResponsePublisher.sink { [unowned self] response in
             presentResponse(for: response)
         }.store(in: &publishers)
