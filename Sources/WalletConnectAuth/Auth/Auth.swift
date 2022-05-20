@@ -4,7 +4,6 @@ import WalletConnectUtils
 import WalletConnectRelay
 import Combine
 
-public typealias SocketConnectionStatus = WalletConnectRelay.SocketConnectionStatus
 public class Auth {
     static public let instance = Auth()
     private let client: AuthClient
