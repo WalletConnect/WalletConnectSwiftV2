@@ -72,7 +72,7 @@ extension Auth: AuthClientDelegate {
     }
     
     public func didConnect() {
-        <#code#>
+        
     }
     
     
