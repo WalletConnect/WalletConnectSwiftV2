@@ -6,7 +6,8 @@ let package = Package(
     name: "WalletConnect",
     platforms: [
         .iOS(.v13),
-        .macOS(.v10_15)
+        .macOS(.v10_15),
+        .tvOS(.v13),
     ],
     products: [
         .library(
