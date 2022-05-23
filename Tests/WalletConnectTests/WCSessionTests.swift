@@ -3,47 +3,44 @@ import XCTest
 
 final class WCSessionTests: XCTestCase {
     
+    let ethAccount = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
+    let polyAccount = Account("eip155:137:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
+    let cosmosAccount = Account("cosmos:cosmoshub-4:cosmos1t2uflqwqe0fsj0shcfkrvpukewcw40yjj6hdc0")!
+    
     func testHasPermissionForMethod() {
-        let chain = Blockchain("eip155:1")!
-        let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
         let namespace = [
             "eip155": SessionNamespace(
-                accounts: [account],
+                accounts: [ethAccount],
                 methods: ["method"],
                 events: [],
                 extensions: nil)
         ]
         var session = WCSession.stub()
         session.updateNamespaces(namespace)
-        XCTAssertTrue(session.hasPermission(forMethod: "method", onChain: chain))
+        XCTAssertTrue(session.hasPermission(forMethod: "method", onChain: ethAccount.blockchain))
     }
     
     func testHasPermissionForMethodInExtension() {
-        let chain = Blockchain("eip155:1")!
-        let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
         let namespace = [
             "eip155": SessionNamespace(
-                accounts: [account],
+                accounts: [ethAccount],
                 methods: [],
                 events: [],
                 extensions: [
                     SessionNamespace.Extension(
-                        accounts: [account],
+                        accounts: [ethAccount],
                         methods: ["method"],
                         events: [])])
         ]
         var session = WCSession.stub()
         session.updateNamespaces(namespace)
-        XCTAssertTrue(session.hasPermission(forMethod: "method", onChain: chain))
+        XCTAssertTrue(session.hasPermission(forMethod: "method", onChain: ethAccount.blockchain))
     }
     
     func testDenyPermissionForMethodInOtherChain() {
-        let chain = Blockchain("eip155:1")!
-        let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
-        let cosmosAccount = Account("cosmos:cosmoshub-4:cosmos1t2uflqwqe0fsj0shcfkrvpukewcw40yjj6hdc0")!
         let namespace = [
             "eip155": SessionNamespace(
-                accounts: [account],
+                accounts: [ethAccount],
                 methods: [],
                 events: [],
                 extensions: nil),
@@ -55,16 +52,13 @@ final class WCSessionTests: XCTestCase {
         ]
         var session = WCSession.stub()
         session.updateNamespaces(namespace)
-        XCTAssertFalse(session.hasPermission(forMethod: "method", onChain: chain))
+        XCTAssertFalse(session.hasPermission(forMethod: "method", onChain: ethAccount.blockchain))
     }
     
     func testDenyPermissionForMethodInOtherChainExtension() {
-        let chain = Blockchain("eip155:1")!
-        let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
-        let polyAccount = Account("eip155:137:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
         let namespace = [
             "eip155": SessionNamespace(
-                accounts: [account, polyAccount],
+                accounts: [ethAccount, polyAccount],
                 methods: [],
                 events: [],
                 extensions: [
@@ -75,49 +69,43 @@ final class WCSessionTests: XCTestCase {
         ]
         var session = WCSession.stub()
         session.updateNamespaces(namespace)
-        XCTAssertFalse(session.hasPermission(forMethod: "method", onChain: chain))
+        XCTAssertFalse(session.hasPermission(forMethod: "method", onChain: ethAccount.blockchain))
     }
     
     func testHasPermissionForEvent() {
-        let chain = Blockchain("eip155:1")!
         let namespace = [
             "eip155": SessionNamespace(
-                accounts: [Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!],
+                accounts: [ethAccount],
                 methods: [],
                 events: ["event"],
                 extensions: nil)
         ]
         var session = WCSession.stub()
         session.updateNamespaces(namespace)
-        XCTAssertTrue(session.hasPermission(forEvent: "event", onChain: chain))
+        XCTAssertTrue(session.hasPermission(forEvent: "event", onChain: ethAccount.blockchain))
     }
     
     func testHasPermissionForEventInExtension() {
-        let chain = Blockchain("eip155:1")!
-        let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
         let namespace = [
             "eip155": SessionNamespace(
-                accounts: [account],
+                accounts: [ethAccount],
                 methods: [],
                 events: [],
                 extensions: [
                     SessionNamespace.Extension(
-                        accounts: [account],
+                        accounts: [ethAccount],
                         methods: [],
                         events: ["event"])])
         ]
         var session = WCSession.stub()
         session.updateNamespaces(namespace)
-        XCTAssertTrue(session.hasPermission(forEvent: "event", onChain: chain))
+        XCTAssertTrue(session.hasPermission(forEvent: "event", onChain: ethAccount.blockchain))
     }
     
     func testDenyPermissionForEventInOtherChain() {
-        let chain = Blockchain("eip155:1")!
-        let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
-        let cosmosAccount = Account("cosmos:cosmoshub-4:cosmos1t2uflqwqe0fsj0shcfkrvpukewcw40yjj6hdc0")!
         let namespace = [
             "eip155": SessionNamespace(
-                accounts: [account],
+                accounts: [ethAccount],
                 methods: [],
                 events: [],
                 extensions: nil),
@@ -129,16 +117,13 @@ final class WCSessionTests: XCTestCase {
         ]
         var session = WCSession.stub()
         session.updateNamespaces(namespace)
-        XCTAssertFalse(session.hasPermission(forEvent: "event", onChain: chain))
+        XCTAssertFalse(session.hasPermission(forEvent: "event", onChain: ethAccount.blockchain))
     }
     
     func testDenyPermissionForEventInOtherChainExtension() {
-        let chain = Blockchain("eip155:1")!
-        let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
-        let polyAccount = Account("eip155:137:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
         let namespace = [
             "eip155": SessionNamespace(
-                accounts: [account, polyAccount],
+                accounts: [ethAccount, polyAccount],
                 methods: [],
                 events: [],
                 extensions: [
@@ -149,6 +134,6 @@ final class WCSessionTests: XCTestCase {
         ]
         var session = WCSession.stub()
         session.updateNamespaces(namespace)
-        XCTAssertFalse(session.hasPermission(forEvent: "event", onChain: chain))
+        XCTAssertFalse(session.hasPermission(forEvent: "event", onChain: ethAccount.blockchain))
     }
 }
