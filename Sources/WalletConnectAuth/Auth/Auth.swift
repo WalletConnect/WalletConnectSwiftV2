@@ -9,12 +9,13 @@ public class Auth {
     private let client: AuthClient
     private static var config: Config?
     public let logger: ConsoleLogging
+    private let relayClient: RelayClient
     
     private init() {
         guard let config = Auth.config else {
             fatalError("Error - you must configure before accessing Auth.instance")
         }
-        let relayClient = RelayClient(relayHost: "relay.walletconnect.com", projectId: config.projectId, socketConnectionType: config.socketConnectionType)
+        relayClient = RelayClient(relayHost: "relay.walletconnect.com", projectId: config.projectId, socketConnectionType: config.socketConnectionType)
         client = AuthClient(metadata: config.metadata, relayClient: relayClient)
         self.logger = client.logger
         client.delegate = self
@@ -238,5 +239,13 @@ extension Auth {
     /// - Returns: json rpc record object for given id or nil if record for give id does not exits
     public func getSessionRequestRecord(id: Int64) -> WalletConnectUtils.JsonRpcRecord? {
         client.getSessionRequestRecord(id: id)
+    }
+    
+    public func connect() throws {
+        try relayClient.connect()
+    }
+    
+    public func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
+        try relayClient.disconnect(closeCode: closeCode)
     }
 }
