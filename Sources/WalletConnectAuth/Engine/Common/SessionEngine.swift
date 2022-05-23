@@ -12,6 +12,8 @@ final class SessionEngine {
     var onSessionDelete: ((String, SessionType.Reason)->())?
     var onEventReceived: ((String, Session.Event, Blockchain?)->())?
     
+    var settlingProposal: SessionProposal?
+    
     private let sessionStore: WCSessionStorage
     private let pairingStore: WCPairingStorage
     private let sessionToPairingTopic: KeyValueStore<String>
@@ -57,6 +59,30 @@ final class SessionEngine {
     
     func getAcknowledgedSessions() -> [Session] {
         sessionStore.getAcknowledgedSessions().map{$0.publicRepresentation()}
+    }
+    
+    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace]) throws {
+        let agreementKeys = try! kms.getAgreementSecret(for: topic)!
+        
+        let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
+        
+        let expectedExpiryTimeStamp = Date().addingTimeInterval(TimeInterval(WCSession.defaultTimeToLive))
+        guard let relay = proposal.relays.first else {return}
+        let settleParams = SessionType.SettleParams(
+            relay: relay,
+            controller: selfParticipant,
+            namespaces: namespaces,
+            expiry: Int64(expectedExpiryTimeStamp.timeIntervalSince1970))//todo - test expiration times
+        let session = WCSession(
+            topic: topic,
+            selfParticipant: selfParticipant,
+            peerParticipant: proposal.proposer,
+            settleParams: settleParams,
+            acknowledged: false)
+        logger.debug("Sending session settle request")
+        Task { try? await networkingInteractor.subscribe(topic: topic) }
+        sessionStore.setSession(session)
+        networkingInteractor.request(.wcSessionSettle(settleParams), onTopic: topic)
     }
     
     func delete(topic: String, reason: Reason) async throws {
@@ -139,34 +165,24 @@ final class SessionEngine {
             }
         }.store(in: &publishers)
     }
-
-    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace]) throws {
-        try Validator.validate(namespaces) // FIXME: Validation should happen before responding proposal, before settlement
-        let agreementKeys = try! kms.getAgreementSecret(for: topic)!
-        
-        let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
-        
-        let expectedExpiryTimeStamp = Date().addingTimeInterval(TimeInterval(WCSession.defaultTimeToLive))
-        guard let relay = proposal.relays.first else {return}
-        let settleParams = SessionType.SettleParams(
-            relay: relay,
-            controller: selfParticipant,
-            namespaces: namespaces,
-            expiry: Int64(expectedExpiryTimeStamp.timeIntervalSince1970))//todo - test expiration times
-        let session = WCSession(
-            topic: topic,
-            selfParticipant: selfParticipant,
-            peerParticipant: proposal.proposer,
-            settleParams: settleParams,
-            acknowledged: false)
-        logger.debug("Sending session settle request")
-        Task { try? await networkingInteractor.subscribe(topic: topic) }
-        sessionStore.setSession(session)
-        networkingInteractor.request(.wcSessionSettle(settleParams), onTopic: topic)
-    }
-
+    
     private func onSessionSettle(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
         logger.debug("Did receive session settle request")
+        guard let proposedNamespaces = settlingProposal?.requiredNamespaces else {
+            // TODO: respond error
+            return
+        }
+        settlingProposal = nil
+        let sessionNamespaces = settleParams.namespaces
+        do {
+            try Namespace.validate(proposedNamespaces)
+            try Namespace.validate(sessionNamespaces)
+            try Namespace.validateApproved(sessionNamespaces, against: proposedNamespaces)
+        } catch {
+            // TODO: respond error
+            return
+        }
+                
         let topic = payload.topic
         
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!
@@ -177,12 +193,12 @@ final class SessionEngine {
             updatePairingMetadata(topic: pairingTopic, metadata: settleParams.controller.metadata)
         }
         
-        // TODO: Validate namespaces
-        let session = WCSession(topic: topic,
-                                      selfParticipant: selfParticipant,
-                                      peerParticipant: settleParams.controller,
-                                      settleParams: settleParams,
-                                      acknowledged: true)
+        let session = WCSession(
+            topic: topic,
+            selfParticipant: selfParticipant,
+            peerParticipant: settleParams.controller,
+            settleParams: settleParams,
+            acknowledged: true)
         sessionStore.setSession(session)
         networkingInteractor.respondSuccess(for: payload)
         onSessionSettle?(session.publicRepresentation())

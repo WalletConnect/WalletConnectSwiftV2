@@ -100,7 +100,7 @@ final class PairingEngineTests: XCTestCase {
         let request = WCRequest(method: .sessionPropose, params: .sessionPropose(proposal))
         let payload = WCRequestSubscriptionPayload(topic: topicA, wcRequest: request)
         networkingInteractor.wcRequestPublisherSubject.send(payload)
-        let (topicB, _) = engine.respondSessionPropose(proposerPubKey: proposal.proposer.publicKey)!
+        let (topicB, _) = engine.approveProposal(proposerPubKey: proposal.proposer.publicKey, validating: SessionNamespace.stubDictionary())!
         
         XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must store agreement key for topic B")
         XCTAssertEqual(networkingInteractor.didRespondOnTopic!, topicA, "Responder must respond on topic A")
@@ -134,7 +134,7 @@ final class PairingEngineTests: XCTestCase {
         
         var sessionTopic: String!
         
-        engine.onProposeResponse = { topic in
+        engine.onProposeResponse = { topic, _ in
             sessionTopic = topic
         }
         networkingInteractor.onPairingResponse?(response)

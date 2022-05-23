@@ -97,7 +97,7 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
         let pairingTopic = activePairings[indexPath.row].topic
         let blockchains: Set<Blockchain> = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
         let methods: Set<String> = ["eth_sendTransaction", "personal_sign", "eth_signTypedData"]
-        let namespaces: [String: ProposalNamespace] = ["eip155": ProposalNamespace(chains: blockchains, methods: methods, events: [], extension: nil)]
+        let namespaces: [String: ProposalNamespace] = ["eip155": ProposalNamespace(chains: blockchains, methods: methods, events: [], extensions: nil)]
         Task {
             _ = try await Auth.instance.connect(requiredNamespaces: namespaces, topic: pairingTopic)
             connectWithExampleWallet()
