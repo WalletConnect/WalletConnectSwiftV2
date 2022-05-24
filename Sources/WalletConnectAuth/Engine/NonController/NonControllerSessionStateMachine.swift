@@ -55,7 +55,7 @@ final class NonControllerSessionStateMachine {
             networkingInteractor.respondError(for: payload, reason: .unauthorizedUpdateNamespacesRequest)
             return
         }
-//        session.updateNamespaces(updateParams.namespaces)
+        session.updateNamespaces(updateParams.namespaces)
         sessionStore.setSession(session)
         networkingInteractor.respondSuccess(for: payload)
         onNamespacesUpdate?(session.topic, updateParams.namespaces)
