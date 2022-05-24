@@ -4,8 +4,22 @@ import WalletConnectUtils
 import Web3
 import CryptoSwift
 import Combine
+import SwiftUI
 
 final class WalletViewController: UIViewController {
+
+    let client: AuthClient = {
+        let metadata = AppMetadata(
+            name: "Example Wallet",
+            description: "wallet description",
+            url: "example.wallet",
+            icons: ["https://avatars.githubusercontent.com/u/37784886"])
+        return AuthClient(
+            metadata: metadata,
+            projectId: "8ba9ee138960775e5231b70cc5ef1c3a",
+            relayHost: "relay.walletconnect.com"
+        )
+    }()
     lazy  var account = Signer.privateKey.address.hex(eip55: true)
     var sessionItems: [ActiveSessionItem] = []
     var currentProposal: Session.Proposal?
@@ -54,9 +68,16 @@ final class WalletViewController: UIViewController {
         present(proposalViewController, animated: true)
     }
     
-    private func showSessionDetailsViewController(_ session: Session) {
-        let vc = SessionDetailsViewController(session)
-        navigationController?.pushViewController(vc, animated: true)
+//    private func showSessionDetailsViewController(_ session: Session) {
+//        let vc = SessionDetailsViewController(session, client)
+//        navigationController?.pushViewController(vc, animated: true)
+//    }
+    
+    private func showSessionDetails(with session: Session) {
+        let viewModel = SessionDetailViewModel(session: session, client: client)
+        let view = SessionDetailView(viewModel: viewModel)
+        let viewController = UIHostingController(rootView: view)
+        navigationController?.present(viewController, animated: true)
     }
     
     private func showSessionRequest(_ sessionRequest: Request) {
@@ -130,7 +151,7 @@ extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
         print("did select row \(indexPath)")
         let itemTopic = sessionItems[indexPath.row].topic
         if let session = Auth.instance.getSessions().first{$0.topic == itemTopic} {
-            showSessionDetailsViewController(session)
+            showSessionDetails(with: session)
         }
     }
 }
