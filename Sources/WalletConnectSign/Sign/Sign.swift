@@ -13,7 +13,7 @@ public class Sign {
     
     private init() {
         guard let config = Sign.config else {
-            fatalError("Error - you must configure before accessing Auth.instance")
+            fatalError("Error - you must call configure(_:) before accessing the shared instance.")
         }
         relayClient = RelayClient(relayHost: "relay.walletconnect.com", projectId: config.projectId, socketConnectionType: config.socketConnectionType)
         client = SignClient(metadata: config.metadata, relayClient: relayClient)
