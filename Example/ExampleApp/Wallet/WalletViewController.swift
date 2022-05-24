@@ -30,7 +30,6 @@ final class WalletViewController: UIViewController {
         walletView.tableView.delegate = self
         let settledSessions = Auth.instance.getSettledSessions()
         sessionItems = getActiveSessionItem(for: settledSessions)
-        Auth.instance.logger.setLogging(level: .debug)
         setUpAuthSubscribing()
     }
     
