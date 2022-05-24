@@ -24,7 +24,7 @@
 //    static func makeClientDelegate(isController: Bool, relayHost: String, prefix: String, projectId: String) -> ClientDelegate {
 //        let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
 //        let keychain = KeychainStorage(keychainService: KeychainServiceFake(), serviceIdentifier: "")
-//        let client = AuthClient(
+//        let client = SignClient(
 //            metadata: AppMetadata(name: prefix, description: "", url: "", icons: [""]),
 //            projectId: projectId,
 //            relayHost: relayHost,

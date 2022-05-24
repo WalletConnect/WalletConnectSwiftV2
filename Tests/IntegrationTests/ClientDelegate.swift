@@ -2,12 +2,12 @@
 import Foundation
 @testable import WalletConnectSign
 
-class ClientDelegate: AuthClientDelegate {
+class ClientDelegate: SignClientDelegate {
     func didChangeSocketConnectionStatus(_ status: SocketConnectionStatus) {
         onConnected?()
     }
     
-    var client: AuthClient
+    var client: SignClient
     var onSessionSettled: ((Session)->())?
     var onConnected: (()->())?
     var onSessionProposal: ((Session.Proposal)->())?
@@ -21,7 +21,7 @@ class ClientDelegate: AuthClientDelegate {
     var onEventReceived: ((Session.Event, String)->())?
     var onPairingUpdate: ((Pairing)->())?
     
-    internal init(client: AuthClient) {
+    internal init(client: SignClient) {
         self.client = client
         client.delegate = self
     }

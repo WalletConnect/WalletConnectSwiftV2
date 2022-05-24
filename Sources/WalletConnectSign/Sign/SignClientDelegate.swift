@@ -2,8 +2,8 @@
 import Foundation
 import WalletConnectRelay
 
-/// A protocol that defines methods that AuthClient instance call on it's delegate to handle sequences level events
-public protocol AuthClientDelegate: AnyObject {
+/// A protocol that defines methods that SignClient instance call on it's delegate to handle sequences level events
+public protocol SignClientDelegate: AnyObject {
     
     /// Tells the delegate that session proposal has been received.
     ///
@@ -56,7 +56,7 @@ public protocol AuthClientDelegate: AnyObject {
     func didChangeSocketConnectionStatus(_ status: SocketConnectionStatus)
 }
 
-public extension AuthClientDelegate {
+public extension SignClientDelegate {
     func didReceive(event: Session.Event, sessionTopic: String, chainId: Blockchain?) {}
     func didReject(proposal: Session.Proposal, reason: Reason) {}
     func didReceive(sessionRequest: Request) {}

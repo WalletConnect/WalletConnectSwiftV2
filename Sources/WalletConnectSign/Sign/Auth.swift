@@ -8,7 +8,7 @@ public class Auth {
     public static let instance = Auth()
     
     private static var config: Config?
-    private let client: AuthClient
+    private let client: SignClient
     private let relayClient: RelayClient
     
     private init() {
@@ -16,7 +16,7 @@ public class Auth {
             fatalError("Error - you must configure before accessing Auth.instance")
         }
         relayClient = RelayClient(relayHost: "relay.walletconnect.com", projectId: config.projectId, socketConnectionType: config.socketConnectionType)
-        client = AuthClient(metadata: config.metadata, relayClient: relayClient)
+        client = SignClient(metadata: config.metadata, relayClient: relayClient)
         client.delegate = self
     }
     
@@ -75,7 +75,7 @@ public class Auth {
     }
 }
 
-extension Auth: AuthClientDelegate {
+extension Auth: SignClientDelegate {
     
     public func didReceive(sessionProposal: Session.Proposal) {
         sessionProposalPublisherSubject.send(sessionProposal)
