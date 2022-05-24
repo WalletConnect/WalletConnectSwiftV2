@@ -40,6 +40,12 @@ struct SessionDetailView: View {
                     }
                 }
             }
+
+            Section(header: Text("Pending requests")) {
+                ForEach(viewModel.pendingRequests, id: \.self) { request in
+                    plainRow(request)
+                }
+            }
         }
         .listStyle(.insetGrouped)
     }

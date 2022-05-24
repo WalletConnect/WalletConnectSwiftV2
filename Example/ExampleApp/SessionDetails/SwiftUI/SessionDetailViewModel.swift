@@ -37,6 +37,9 @@ final class SessionDetailViewModel: ObservableObject {
     var chains: [String] {
         namespaces.keys.sorted()
     }
+    var pendingRequests: [String] {
+        client.getPendingRequests(topic: session.topic).map { $0.method }
+    }
     
     func remove(field: Fields, at indices: IndexSet = [], for chain: String) async {
         let backup = namespaces
