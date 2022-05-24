@@ -7,13 +7,17 @@ final class SessionDetailViewController: UIHostingController<SessionDetailView> 
     
     private let viewModel: SessionDetailViewModel
         
-    init(session: Session, client: AuthClient) {
+    init(session: Session, client: Auth) {
         self.viewModel = SessionDetailViewModel(session: session, client: client)
         super.init(rootView: SessionDetailView(viewModel: viewModel))
         
         rootView.didPressSessionRequest = { [weak self] request in
             self?.showSessionRequest(request)
         }
+    }
+    
+    func reload() {
+        viewModel.objectWillChange.send()
     }
                    
     private func showSessionRequest(_ request: Request) {
@@ -22,7 +26,7 @@ final class SessionDetailViewController: UIHostingController<SessionDetailView> 
             let result = Signer.signEth(request: request)
             let response = JSONRPCResponse<AnyCodable>(id: request.id, result: result)
             Auth.instance.respond(topic: request.topic, response: .response(response))
-            viewModel.objectWillChange.send()
+            reload()
         }
         viewController.onReject = { [unowned self] in
             Auth.instance.respond(
@@ -32,7 +36,7 @@ final class SessionDetailViewController: UIHostingController<SessionDetailView> 
                     error: JSONRPCErrorResponse.Error(code: 0, message: ""))
                 )
             )
-            viewModel.objectWillChange.send()
+            reload()
         }
         present(viewController, animated: true)
     }

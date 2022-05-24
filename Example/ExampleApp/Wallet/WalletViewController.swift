@@ -7,19 +7,6 @@ import Combine
 import SwiftUI
 
 final class WalletViewController: UIViewController {
-
-    let client: AuthClient = {
-        let metadata = AppMetadata(
-            name: "Example Wallet",
-            description: "wallet description",
-            url: "example.wallet",
-            icons: ["https://avatars.githubusercontent.com/u/37784886"])
-        return AuthClient(
-            metadata: metadata,
-            projectId: "8ba9ee138960775e5231b70cc5ef1c3a",
-            relayHost: "relay.walletconnect.com"
-        )
-    }()
     lazy  var account = Signer.privateKey.address.hex(eip55: true)
     var sessionItems: [ActiveSessionItem] = []
     var currentProposal: Session.Proposal?
@@ -69,7 +56,7 @@ final class WalletViewController: UIViewController {
     }
 
     private func showSessionDetails(with session: Session) {
-        let viewController = SessionDetailViewController(session: session, client: client)
+        let viewController = SessionDetailViewController(session: session, client: Auth.instance)
         navigationController?.present(viewController, animated: true)
     }
     
@@ -90,8 +77,8 @@ final class WalletViewController: UIViewController {
     }
     
     func reloadSessionDetailsIfNeeded() {
-        if let sessionDetailsViewController = navigationController?.viewControllers.first(where: {$0 is SessionDetailsViewController}) as? SessionDetailsViewController {
-            sessionDetailsViewController.reloadTable()
+        if let viewController = navigationController?.presentedViewController as? SessionDetailViewController {
+            viewController.reload()
         }
     }
     

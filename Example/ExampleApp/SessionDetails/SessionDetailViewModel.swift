@@ -5,7 +5,7 @@ import WalletConnectAuth
 @MainActor
 final class SessionDetailViewModel: ObservableObject {
     private let session: Session
-    private let client: AuthClient
+    private let client: Auth
     
     enum Fields {
         case accounts
@@ -16,7 +16,7 @@ final class SessionDetailViewModel: ObservableObject {
     
     @Published var namespaces: [String: SessionNamespace]
     
-    init(session: Session, client: AuthClient) {
+    init(session: Session, client: Auth) {
         self.session = session
         self.client = client
         self.namespaces = session.namespaces
