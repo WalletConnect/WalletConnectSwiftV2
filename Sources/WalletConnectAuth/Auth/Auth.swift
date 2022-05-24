@@ -6,7 +6,6 @@ import Combine
 
 public class Auth {
     public static let instance = Auth()
-    public let logger: ConsoleLogging
     
     private static var config: Config?
     private let client: AuthClient
@@ -18,7 +17,6 @@ public class Auth {
         }
         relayClient = RelayClient(relayHost: "relay.walletconnect.com", projectId: config.projectId, socketConnectionType: config.socketConnectionType)
         client = AuthClient(metadata: config.metadata, relayClient: relayClient)
-        self.logger = client.logger
         client.delegate = self
     }
     
