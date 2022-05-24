@@ -3,26 +3,15 @@ import WalletConnectAuth
 import WalletConnectUtils
 import Web3
 import CryptoSwift
+import Combine
 
 final class WalletViewController: UIViewController {
-
-    let client: AuthClient = {
-        let metadata = AppMetadata(
-            name: "Example Wallet",
-            description: "wallet description",
-            url: "example.wallet",
-            icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])
-        return AuthClient(
-            metadata: metadata,
-            projectId: "8ba9ee138960775e5231b70cc5ef1c3a",
-            relayHost: "relay.walletconnect.com"
-        )
-    }()
     lazy  var account = Signer.privateKey.address.hex(eip55: true)
     var sessionItems: [ActiveSessionItem] = []
     var currentProposal: Session.Proposal?
     var onClientConnected: (()->())?
-    
+    private var publishers = [AnyCancellable]()
+
     private let walletView: WalletView = {
         WalletView()
     }()
@@ -39,10 +28,9 @@ final class WalletViewController: UIViewController {
         
         walletView.tableView.dataSource = self
         walletView.tableView.delegate = self
-        let settledSessions = client.getSettledSessions()
+        let settledSessions = Auth.instance.getSettledSessions()
         sessionItems = getActiveSessionItem(for: settledSessions)
-        client.delegate = self
-        client.logger.setLogging(level: .debug)
+        setUpAuthSubscribing()
     }
     
     @objc
@@ -67,7 +55,7 @@ final class WalletViewController: UIViewController {
     }
     
     private func showSessionDetailsViewController(_ session: Session) {
-        let vc = SessionDetailsViewController(session, client)
+        let vc = SessionDetailsViewController(session)
         navigationController?.pushViewController(vc, animated: true)
     }
     
@@ -76,11 +64,11 @@ final class WalletViewController: UIViewController {
         requestVC.onSign = { [unowned self] in
             let result = Signer.signEth(request: sessionRequest)
             let response = JSONRPCResponse<AnyCodable>(id: sessionRequest.id, result: result)
-            client.respond(topic: sessionRequest.topic, response: .response(response))
+            Auth.instance.respond(topic: sessionRequest.topic, response: .response(response))
             reloadSessionDetailsIfNeeded()
         }
         requestVC.onReject = { [unowned self] in
-            client.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
+            Auth.instance.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
             reloadSessionDetailsIfNeeded()
         }
         reloadSessionDetailsIfNeeded()
@@ -97,7 +85,7 @@ final class WalletViewController: UIViewController {
         print("[RESPONDER] Pairing to: \(uri)")
         Task {
             do {
-                try await client.pair(uri: uri)
+                try await Auth.instance.pair(uri: uri)
             } catch {
                 print("[PROPOSER] Pairing connect error: \(error)")
             }
@@ -122,7 +110,7 @@ extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
             let item = sessionItems[indexPath.row]
             Task {
                 do {
-                    try await client.disconnect(topic: item.topic, reason: Reason(code: 0, message: "disconnect"))
+                    try await Auth.instance.disconnect(topic: item.topic, reason: Reason(code: 0, message: "disconnect"))
                     DispatchQueue.main.async { [weak self] in
                         self?.sessionItems.remove(at: indexPath.row)
                         tableView.deleteRows(at: [indexPath], with: .automatic)
@@ -141,7 +129,7 @@ extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("did select row \(indexPath)")
         let itemTopic = sessionItems[indexPath.row].topic
-        if let session = client.getSettledSessions().first{$0.topic == itemTopic} {
+        if let session = Auth.instance.getSettledSessions().first{$0.topic == itemTopic} {
             showSessionDetailsViewController(session)
         }
     }
@@ -160,66 +148,69 @@ extension WalletViewController: ProposalViewControllerDelegate {
         print("[RESPONDER] Approving session...")
         let proposal = currentProposal!
         currentProposal = nil
-        let accounts = Set(proposal.namespaces.first?.chains.compactMap { Account($0.absoluteString + ":\(account)") } ?? [])
-        try! client.approve(proposalId: proposal.id, accounts: accounts, namespaces: proposal.namespaces)
+        var sessionNamespaces = [String: SessionNamespace]()
+        proposal.requiredNamespaces.forEach {
+            let caip2Namespace = $0.key
+            let proposalNamespace = $0.value
+            let accounts = Set(proposalNamespace.chains.compactMap { Account($0.absoluteString + ":\(account)") } )
+            
+            let extensions: [SessionNamespace.Extension]? = proposalNamespace.extensions?.map { element in
+                let accounts = Set(element.chains.compactMap { Account($0.absoluteString + ":\(account)") } )
+                return SessionNamespace.Extension(accounts: accounts, methods: element.methods, events: element.events)
+            }
+            let sessionNamespace = SessionNamespace(accounts: accounts, methods: proposalNamespace.methods, events: proposalNamespace.events, extensions: extensions)
+            sessionNamespaces[caip2Namespace] = sessionNamespace
+        }
+        try! Auth.instance.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
     }
     
     func didRejectSession() {
         print("did reject session")
         let proposal = currentProposal!
         currentProposal = nil
-        client.reject(proposal: proposal, reason: .disapprovedChains)
+        Auth.instance.reject(proposal: proposal, reason: .disapprovedChains)
     }
 }
 
-extension WalletViewController: AuthClientDelegate {
-    func didConnect() {
-        onClientConnected?()
-        print("Client connected")
-    }
-    
-    
-    // TODO: Adapt proposal data to be used on the view
-    func didReceive(sessionProposal: Session.Proposal) {
-        print("[RESPONDER] WC: Did receive session proposal")
-//        let appMetadata = sessionProposal.proposer
-//        let info = SessionInfo(
-//            name: appMetadata.name,
-//            descriptionText: appMetadata.description,
-//            dappURL: appMetadata.url,
-//            iconURL: appMetadata.icons.first ?? "",
-//            chains: Array(sessionProposal.namespaces.first?.chains.map { $0.absoluteString } ?? []),
-//            methods: Array(sessionProposal.namespaces.first?.methods ?? []), pendingRequests: [])
-        currentProposal = sessionProposal
-        DispatchQueue.main.async { // FIXME: Delegate being called from background thread
-            self.showSessionProposal(Proposal(proposal: sessionProposal)) // FIXME: Remove mock
-        }
-    }
+extension WalletViewController {
+    func setUpAuthSubscribing() {
+        Auth.instance.socketConnectionStatusPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] status in
+                if status == .connected {
+                    self?.onClientConnected?()
+                    print("Client connected")
+                }
+            }.store(in: &publishers)
 
-    func didSettle(session: Session) {
-        reloadActiveSessions()
-    }
+        // TODO: Adapt proposal data to be used on the view
+        Auth.instance.sessionProposalPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] sessionProposal in
+                print("[RESPONDER] WC: Did receive session proposal")
+                self?.currentProposal = sessionProposal
+                    self?.showSessionProposal(Proposal(proposal: sessionProposal)) // FIXME: Remove mock
+            }.store(in: &publishers)
 
-    func didReceive(sessionRequest: Request) {
-        DispatchQueue.main.async { [weak self] in
-            self?.showSessionRequest(sessionRequest)
-        }
-        print("[RESPONDER] WC: Did receive session request")
-    }
+        Auth.instance.sessionSettlePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.reloadActiveSessions()
+            }.store(in: &publishers)
 
-    func didUpdate(sessionTopic: String, accounts: Set<Account>) {
+        Auth.instance.sessionRequestPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] sessionRequest in
+                print("[RESPONDER] WC: Did receive session request")
+                self?.showSessionRequest(sessionRequest)
+            }.store(in: &publishers)
 
-    }
-    
-    func didUpdate(sessionTopic: String, namespaces: Set<Namespace>) {
-        
-    }
-    
-    func didDelete(sessionTopic: String, reason: Reason) {
-        reloadActiveSessions()
-        DispatchQueue.main.async { [unowned self] in
-            navigationController?.popToRootViewController(animated: true)
-        }
+        Auth.instance.sessionDeletePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] sessionRequest in
+                self?.reloadActiveSessions()
+                self?.navigationController?.popToRootViewController(animated: true)
+            }.store(in: &publishers)
     }
 
     private func getActiveSessionItem(for settledSessions: [Session]) -> [ActiveSessionItem] {
@@ -234,7 +225,7 @@ extension WalletViewController: AuthClientDelegate {
     }
 
     private func reloadActiveSessions() {
-        let settledSessions = client.getSettledSessions()
+        let settledSessions = Auth.instance.getSettledSessions()
         let activeSessions = getActiveSessionItem(for: settledSessions)
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread
             self.sessionItems = activeSessions

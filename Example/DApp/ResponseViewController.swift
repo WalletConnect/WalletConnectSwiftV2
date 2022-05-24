@@ -24,7 +24,7 @@ class ResponseViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let record = ClientDelegate.shared.client.getSessionRequestRecord(id: response.result.id)!
+        let record = Auth.instance.getSessionRequestRecord(id: response.result.id)!
         switch response.result {
         case  .response(let response):
             responseView.nameLabel.text = "Received Response\n\(record.request.method)"

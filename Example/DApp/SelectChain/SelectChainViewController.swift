@@ -3,6 +3,7 @@
 import Foundation
 import WalletConnectAuth
 import UIKit
+import Combine
 
 struct Chain {
     let name: String
@@ -13,23 +14,22 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
     private let selectChainView: SelectChainView = {
         SelectChainView()
     }()
+    private var publishers = [AnyCancellable]()
+
     let chains = [Chain(name: "Ethereum", id: "eip155:1"), Chain(name: "Polygon", id: "eip155:137")]
-    let client = ClientDelegate.shared.client
     var onSessionSettled: ((Session)->())?
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Available Chains"
         selectChainView.tableView.dataSource = self
         selectChainView.connectButton.addTarget(self, action: #selector(connect), for: .touchUpInside)
-        ClientDelegate.shared.onSessionSettled = { [unowned self] session in
+        Auth.instance.sessionSettlePublisher.sink {[unowned self] session in
             onSessionSettled?(session)
-        }
+        }.store(in: &publishers)
     }
     
     override func loadView() {
         view = selectChainView
-        
-
     }
 
     @objc
@@ -37,9 +37,9 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
         print("[PROPOSER] Connecting to a pairing...")
         let methods: Set<String> = ["eth_sendTransaction", "personal_sign", "eth_signTypedData"]
         let blockchains: Set<Blockchain> = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
-        let namespaces: Set<Namespace> = [Namespace(chains: blockchains, methods: methods, events: [])]
+        let namespaces: [String: ProposalNamespace] = ["eip155": ProposalNamespace(chains: blockchains, methods: methods, events: [], extensions: nil)]
         Task {
-            let uri = try await client.connect(namespaces: namespaces)
+            let uri = try await Auth.instance.connect(requiredNamespaces: namespaces)
             showConnectScreen(uriString: uri!)
         }
     }

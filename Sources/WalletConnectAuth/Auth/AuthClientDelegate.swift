@@ -1,5 +1,6 @@
 
 import Foundation
+import WalletConnectRelay
 
 /// A protocol that defines methods that AuthClient instance call on it's delegate to handle sequences level events
 public protocol AuthClientDelegate: AnyObject {
@@ -52,10 +53,7 @@ public protocol AuthClientDelegate: AnyObject {
     func didReject(proposal: Session.Proposal, reason: Reason)
     
     /// Tells the delegate that client has connected WebSocket
-    func didConnect()
-    
-    /// Tells the delegate that client has disconnected WebSocket
-    func didDisconnect()
+    func didChangeSocketConnectionStatus(_ status: SocketConnectionStatus)
 }
 
 public extension AuthClientDelegate {

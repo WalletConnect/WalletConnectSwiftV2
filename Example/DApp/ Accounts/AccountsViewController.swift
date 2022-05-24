@@ -9,7 +9,6 @@ struct AccountDetails {
 
 final class AccountsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate  {
     
-    let client = ClientDelegate.shared.client
     let session: Session
     var accountsDetails: [AccountDetails] = []
     var onDisconnect: (()->())?
@@ -43,8 +42,10 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
         )
         accountsView.tableView.dataSource = self
         accountsView.tableView.delegate = self
-        session.accounts.forEach { account in
-            accountsDetails.append(AccountDetails(chain: account.blockchainIdentifier, methods: Array(session.namespaces.first?.methods ?? []), account: account.address)) // TODO: Rethink how this info is displayed on example
+        session.namespaces.values.forEach { namespace in
+            namespace.accounts.forEach { account in
+                accountsDetails.append(AccountDetails(chain: account.blockchainIdentifier, methods: Array(namespace.methods), account: account.address)) // TODO: Rethink how this info is displayed on example
+            }
         }
     }
     
@@ -52,7 +53,7 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
     private func disconnect() {
         Task {
             do {
-                try await client.disconnect(topic: session.topic, reason: Reason(code: 0, message: "disconnect"))
+                try await Auth.instance.disconnect(topic: session.topic, reason: Reason(code: 0, message: "disconnect"))
                 DispatchQueue.main.async { [weak self] in
                     self?.onDisconnect?()
                 }
