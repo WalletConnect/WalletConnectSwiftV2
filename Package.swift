@@ -12,16 +12,16 @@ let package = Package(
     products: [
         .library(
             name: "WalletConnect",
-            targets: ["WalletConnectAuth"]),
+            targets: ["WalletConnectSign"]),
     ],
     dependencies: [
         .package(url: "https://github.com/daltoniam/Starscream.git", .upToNextMajor(from: "3.0.0")),
     ],
     targets: [
         .target(
-            name: "WalletConnectAuth",
+            name: "WalletConnectSign",
             dependencies: ["WalletConnectRelay", "WalletConnectUtils", "WalletConnectKMS"],
-            path: "Sources/WalletConnectAuth"),
+            path: "Sources/WalletConnectSign"),
         .target(
             name: "WalletConnectRelay",
             dependencies: ["WalletConnectUtils", "Starscream"],
@@ -34,11 +34,11 @@ let package = Package(
             name: "WalletConnectUtils",
             dependencies: []),
         .testTarget(
-            name: "WalletConnectTests",
-            dependencies: ["WalletConnectAuth", "TestingUtils", "WalletConnectKMS"]),
+            name: "WalletConnectSignTests",
+            dependencies: ["WalletConnectSign", "TestingUtils", "WalletConnectKMS"]),
         .testTarget(
             name: "IntegrationTests",
-            dependencies: ["WalletConnectAuth", "TestingUtils", "WalletConnectKMS"]),
+            dependencies: ["WalletConnectSign", "TestingUtils", "WalletConnectKMS"]),
         .testTarget(
             name: "RelayerTests",
             dependencies: ["WalletConnectRelay", "WalletConnectUtils", "TestingUtils"]),

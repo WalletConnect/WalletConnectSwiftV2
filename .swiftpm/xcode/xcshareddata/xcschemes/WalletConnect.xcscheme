@@ -118,6 +118,20 @@
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "WalletConnectSign"
+               BuildableName = "WalletConnectSign"
+               BlueprintName = "WalletConnectSign"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -173,6 +187,16 @@
                BlueprintIdentifier = "WalletConnectKMSTests"
                BuildableName = "WalletConnectKMSTests"
                BlueprintName = "WalletConnectKMSTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "WalletConnectSignTests"
+               BuildableName = "WalletConnectSignTests"
+               BlueprintName = "WalletConnectSignTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>
