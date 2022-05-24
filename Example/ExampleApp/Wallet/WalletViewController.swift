@@ -4,7 +4,6 @@ import WalletConnectUtils
 import Web3
 import CryptoSwift
 import Combine
-import SwiftUI
 
 final class WalletViewController: UIViewController {
     lazy  var account = Signer.privateKey.address.hex(eip55: true)
