@@ -40,7 +40,6 @@
 		84CE64392798228D00142511 /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = 84CE64382798228D00142511 /* Web3 */; };
 		84CE643D2798322600142511 /* ConnectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE643C2798322600142511 /* ConnectViewController.swift */; };
 		84CE6444279AB5AD00142511 /* SelectChainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE6443279AB5AD00142511 /* SelectChainViewController.swift */; };
-		84CE6446279ABBF300142511 /* ClientDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE6445279ABBF300142511 /* ClientDelegate.swift */; };
 		84CE6448279AE68600142511 /* AccountRequestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE6447279AE68600142511 /* AccountRequestViewController.swift */; };
 		84CE644B279EA1FA00142511 /* AccountRequestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE644A279EA1FA00142511 /* AccountRequestView.swift */; };
 		84CE644E279ED2FF00142511 /* SelectChainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE644D279ED2FF00142511 /* SelectChainView.swift */; };
@@ -113,7 +112,6 @@
 		84CE642C27981DF000142511 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		84CE643C2798322600142511 /* ConnectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectViewController.swift; sourceTree = "<group>"; };
 		84CE6443279AB5AD00142511 /* SelectChainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectChainViewController.swift; sourceTree = "<group>"; };
-		84CE6445279ABBF300142511 /* ClientDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientDelegate.swift; sourceTree = "<group>"; };
 		84CE6447279AE68600142511 /* AccountRequestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountRequestViewController.swift; sourceTree = "<group>"; };
 		84CE644A279EA1FA00142511 /* AccountRequestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountRequestView.swift; sourceTree = "<group>"; };
 		84CE644D279ED2FF00142511 /* SelectChainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectChainView.swift; sourceTree = "<group>"; };
@@ -276,7 +274,6 @@
 				84CE642027981DED00142511 /* SceneDelegate.swift */,
 				84CE645427A29D4C00142511 /* ResponseViewController.swift */,
 				84CE6449279EA1E600142511 /* AccountRequest */,
-				84CE6445279ABBF300142511 /* ClientDelegate.swift */,
 				84CE644C279ED2EC00142511 /* SelectChain */,
 				84CE6450279ED41D00142511 /* Connect */,
 				84CE644F279ED3FB00142511 /*  Accounts */,
@@ -540,7 +537,6 @@
 			files = (
 				84CE6430279820F600142511 /* AccountsViewController.swift in Sources */,
 				84CE645527A29D4D00142511 /* ResponseViewController.swift in Sources */,
-				84CE6446279ABBF300142511 /* ClientDelegate.swift in Sources */,
 				84CE641F27981DED00142511 /* AppDelegate.swift in Sources */,
 				84CE6452279ED42B00142511 /* ConnectView.swift in Sources */,
 				84CE6448279AE68600142511 /* AccountRequestViewController.swift in Sources */,
@@ -733,7 +729,7 @@
 				CODE_SIGN_ENTITLEMENTS = Wallet.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = W5R8AG9K22;
 				INFOPLIST_FILE = ExampleApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -758,7 +754,7 @@
 				CODE_SIGN_ENTITLEMENTS = Wallet.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = W5R8AG9K22;
 				INFOPLIST_FILE = ExampleApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -783,7 +779,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = W5R8AG9K22;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DApp/Info.plist;
@@ -817,7 +813,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = W5R8AG9K22;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DApp/Info.plist;

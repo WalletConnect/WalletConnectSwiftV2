@@ -103,12 +103,7 @@ public final class AuthClient {
     
     private func setUpConnectionObserving(relayClient: RelayClient) {
         relayClient.socketConnectionStatusPublisher.sink { [weak self] status in
-            switch status {
-            case .connected:
-                self?.delegate?.didConnect()
-            case .disconnected:
-                self?.delegate?.didDisconnect()
-            }
+            self?.delegate?.didChangeSocketConnectionStatus(status)
         }.store(in: &publishers)
     }
 

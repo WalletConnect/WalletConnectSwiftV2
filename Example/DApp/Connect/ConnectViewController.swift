@@ -5,7 +5,7 @@ import WalletConnectAuth
 
 class ConnectViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     let uriString: String
-    let activePairings: [Pairing] = ClientDelegate.shared.client.getSettledPairings()
+    let activePairings: [Pairing] = Auth.instance.getSettledPairings()
     let segmentedControl = UISegmentedControl(items: ["Pairings", "New Pairing"])
 
     init(uri: String) {
@@ -99,7 +99,7 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
         let methods: Set<String> = ["eth_sendTransaction", "personal_sign", "eth_signTypedData"]
         let namespaces: [String: ProposalNamespace] = ["eip155": ProposalNamespace(chains: blockchains, methods: methods, events: [], extensions: nil)]
         Task {
-            _ = try await ClientDelegate.shared.client.connect(requiredNamespaces: namespaces, topic: pairingTopic)
+            _ = try await Auth.instance.connect(requiredNamespaces: namespaces, topic: pairingTopic)
             connectWithExampleWallet()
         }
     }

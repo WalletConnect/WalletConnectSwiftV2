@@ -3,6 +3,10 @@ import Foundation
 @testable import WalletConnectAuth
 
 class ClientDelegate: AuthClientDelegate {
+    func didChangeSocketConnectionStatus(_ status: SocketConnectionStatus) {
+        onConnected?()
+    }
+    
     var client: AuthClient
     var onSessionSettled: ((Session)->())?
     var onConnected: (()->())?
@@ -49,8 +53,6 @@ class ClientDelegate: AuthClientDelegate {
     func didReceive(sessionResponse: Response) {
         onSessionResponse?(sessionResponse)
     }
-    func didConnect() {
-        onConnected?()
-    }
+
     func didDisconnect() {}
 }
