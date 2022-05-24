@@ -46,7 +46,7 @@ public final class AuthClient {
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
     public convenience init(metadata: AppMetadata, projectId: String, relayHost: String, keyValueStorage: KeyValueStorage = UserDefaults.standard) {
-        self.init(metadata: metadata, projectId: projectId, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .debug), kms: KeyManagementService(serviceIdentifier:  "com.walletconnect.sdk"), keyValueStorage: keyValueStorage)
+        self.init(metadata: metadata, projectId: projectId, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), kms: KeyManagementService(serviceIdentifier:  "com.walletconnect.sdk"), keyValueStorage: keyValueStorage)
     }
     
     init(metadata: AppMetadata, projectId: String, relayHost: String, logger: ConsoleLogging, kms: KeyManagementService, keyValueStorage: KeyValueStorage) {
@@ -79,7 +79,7 @@ public final class AuthClient {
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
     public convenience init(metadata: AppMetadata, relayClient: RelayClient, keyValueStorage: KeyValueStorage = UserDefaults.standard, kms: KeyManagementService = KeyManagementService(serviceIdentifier:  "com.walletconnect.sdk")) {
-        self.init(metadata: metadata, relayClient: relayClient, logger: ConsoleLogger(loggingLevel: .debug), kms: kms, keyValueStorage: keyValueStorage)
+        self.init(metadata: metadata, relayClient: relayClient, logger: ConsoleLogger(loggingLevel: .off), kms: kms, keyValueStorage: keyValueStorage)
     }
     
     init(metadata: AppMetadata, relayClient: RelayClient, logger: ConsoleLogging, kms: KeyManagementService, keyValueStorage: KeyValueStorage) {
