@@ -218,9 +218,9 @@ extension Auth {
         try await client.disconnect(topic: topic, reason: reason)
     }
 
-    /// - Returns: All settled sessions that are active
-    public func getSettledSessions() -> [Session] {
-        client.getSettledSessions()
+    /// - Returns: All sessions
+    public func getSessions() -> [Session] {
+        client.getSessions()
     }
 
     /// - Returns: All settled pairings that are active
