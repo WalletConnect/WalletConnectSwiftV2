@@ -72,7 +72,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         let twoDaysFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 2).timeIntervalSince1970)
         
         networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateExpiry(topic: session.topic, expiry: twoDaysFromNowTimestamp))
-        let extendedSession = storageMock.getAcknowledgedSessions().first{$0.topic == session.topic}!
+        let extendedSession = storageMock.getAll().first{$0.topic == session.topic}!
         print(extendedSession.expiryDate)
         
         XCTAssertEqual(extendedSession.expiryDate.timeIntervalSince1970, TimeTraveler.dateByAdding(days: 2).timeIntervalSince1970, accuracy: 1)
@@ -88,7 +88,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateExpiry(topic: session.topic, expiry: twoDaysFromNowTimestamp))
 
         
-        let potentiallyExtendedSession = storageMock.getAcknowledgedSessions().first{$0.topic == session.topic}!
+        let potentiallyExtendedSession = storageMock.getAll().first{$0.topic == session.topic}!
         XCTAssertEqual(potentiallyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, accuracy: 1, "expiry date has been extended for peer non controller request ")
     }
     
@@ -99,7 +99,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         let tenDaysFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 10).timeIntervalSince1970)
         networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateExpiry(topic: session.topic, expiry: tenDaysFromNowTimestamp))
 
-        let potentaillyExtendedSession = storageMock.getAcknowledgedSessions().first{$0.topic == session.topic}!
+        let potentaillyExtendedSession = storageMock.getAll().first{$0.topic == session.topic}!
         XCTAssertEqual(potentaillyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, accuracy: 1, "expiry date has been extended despite ttl to high")
     }
 
@@ -110,7 +110,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         let oneDayFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 10).timeIntervalSince1970)
 
         networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateExpiry(topic: session.topic, expiry: oneDayFromNowTimestamp))
-        let potentaillyExtendedSession = storageMock.getAcknowledgedSessions().first{$0.topic == session.topic}!
+        let potentaillyExtendedSession = storageMock.getAll().first{$0.topic == session.topic}!
         XCTAssertEqual(potentaillyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, accuracy: 1, "expiry date has been extended despite ttl to low")
     }
 }

@@ -57,13 +57,12 @@ final class SessionEngine {
         return sessionStore.hasSession(forTopic: topic)
     }
     
-    func getAcknowledgedSessions() -> [Session] {
-        sessionStore.getAcknowledgedSessions().map{$0.publicRepresentation()}
+    func getSessions() -> [Session] {
+        sessionStore.getAll().map{$0.publicRepresentation()}
     }
     
     func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace]) throws {
         let agreementKeys = try! kms.getAgreementSecret(for: topic)!
-        
         let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
         
         let expectedExpiryTimeStamp = Date().addingTimeInterval(TimeInterval(WCSession.defaultTimeToLive))
@@ -83,6 +82,7 @@ final class SessionEngine {
         Task { try? await networkingInteractor.subscribe(topic: topic) }
         sessionStore.setSession(session)
         networkingInteractor.request(.wcSessionSettle(settleParams), onTopic: topic)
+        onSessionSettle?(session.publicRepresentation())
     }
     
     func delete(topic: String, reason: Reason) async throws {
@@ -134,7 +134,7 @@ final class SessionEngine {
     }
     
     func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain) async throws {
-        guard let session = sessionStore.getSession(forTopic: topic), session.acknowledged else {
+        guard let session = sessionStore.getSession(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             return
         }
@@ -297,7 +297,6 @@ final class SessionEngine {
             guard var session = sessionStore.getSession(forTopic: topic) else {return}
             session.acknowledge()
             sessionStore.setSession(session)
-            onSessionSettle?(session.publicRepresentation())
         case .error(let error):
             logger.error("Error - session rejected, Reason: \(error)")
             networkingInteractor.unsubscribe(topic: topic)

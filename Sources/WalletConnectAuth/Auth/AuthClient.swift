@@ -253,7 +253,7 @@ public final class AuthClient {
     
     /// - Returns: All settled sessions that are active
     public func getSettledSessions() -> [Session] {
-        sessionEngine.getAcknowledgedSessions()
+        sessionEngine.getSessions()
     }
     
     /// - Returns: All settled pairings that are active
