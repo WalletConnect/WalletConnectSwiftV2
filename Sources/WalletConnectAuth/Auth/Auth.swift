@@ -5,10 +5,11 @@ import WalletConnectRelay
 import Combine
 
 public class Auth {
-    static public let instance = Auth()
-    private let client: AuthClient
-    private static var config: Config?
+    public static let instance = Auth()
     public let logger: ConsoleLogging
+    
+    private static var config: Config?
+    private let client: AuthClient
     private let relayClient: RelayClient
     
     private init() {
