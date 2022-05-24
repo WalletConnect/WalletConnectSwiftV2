@@ -29,8 +29,6 @@
 		84494388278D9C1B00CC26BB /* UIAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84494387278D9C1B00CC26BB /* UIAlertController.swift */; };
 		844943A1278EC49700CC26BB /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = 844943A0278EC49700CC26BB /* Web3 */; };
 		8460DCFC274F98A10081F94C /* RequestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8460DCFB274F98A10081F94C /* RequestViewController.swift */; };
-		8460DD002750D6F50081F94C /* SessionDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8460DCFF2750D6F50081F94C /* SessionDetailsViewController.swift */; };
-		8460DD022750D7020081F94C /* SessionDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8460DD012750D7020081F94C /* SessionDetailsView.swift */; };
 		84CE641F27981DED00142511 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE641E27981DED00142511 /* AppDelegate.swift */; };
 		84CE642127981DED00142511 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE642027981DED00142511 /* SceneDelegate.swift */; };
 		84CE642827981DF000142511 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 84CE642727981DF000142511 /* Assets.xcassets */; };
@@ -52,6 +50,8 @@
 		A5A4FC56283CBB7800BBEC1E /* SessionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC55283CBB7800BBEC1E /* SessionDetailView.swift */; };
 		A5A4FC58283CBB9F00BBEC1E /* SessionDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC57283CBB9F00BBEC1E /* SessionDetailViewModel.swift */; };
 		A5A4FC5A283CC08600BBEC1E /* SessionNamespaceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC59283CC08600BBEC1E /* SessionNamespaceViewModel.swift */; };
+		A5A4FC5C283D1F6700BBEC1E /* SessionDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC5B283D1F6700BBEC1E /* SessionDetailViewController.swift */; };
+		A5A4FC5E283D23CA00BBEC1E /* Array.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC5D283D23CA00BBEC1E /* Array.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -105,8 +105,6 @@
 		76B6E39E2807A3B6004DF775 /* WalletViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WalletViewController.swift; sourceTree = "<group>"; };
 		84494387278D9C1B00CC26BB /* UIAlertController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIAlertController.swift; sourceTree = "<group>"; };
 		8460DCFB274F98A10081F94C /* RequestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestViewController.swift; sourceTree = "<group>"; };
-		8460DCFF2750D6F50081F94C /* SessionDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailsViewController.swift; sourceTree = "<group>"; };
-		8460DD012750D7020081F94C /* SessionDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailsView.swift; sourceTree = "<group>"; };
 		84CE641C27981DED00142511 /* DApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		84CE641E27981DED00142511 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		84CE642027981DED00142511 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -130,6 +128,8 @@
 		A5A4FC55283CBB7800BBEC1E /* SessionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailView.swift; sourceTree = "<group>"; };
 		A5A4FC57283CBB9F00BBEC1E /* SessionDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailViewModel.swift; sourceTree = "<group>"; };
 		A5A4FC59283CC08600BBEC1E /* SessionNamespaceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionNamespaceViewModel.swift; sourceTree = "<group>"; };
+		A5A4FC5B283D1F6700BBEC1E /* SessionDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailViewController.swift; sourceTree = "<group>"; };
+		A5A4FC5D283D23CA00BBEC1E /* Array.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Array.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -185,6 +185,7 @@
 			children = (
 				761C64A526FCB0AA004239D1 /* SessionInfo.swift */,
 				84F568C32795832A00D0A289 /* EthereumTransaction.swift */,
+				A5A4FC5D283D23CA00BBEC1E /* Array.swift */,
 				84F568C1279582D200D0A289 /* Signer.swift */,
 				765056262821989600F9AE79 /* Color+Extension.swift */,
 				84494387278D9C1B00CC26BB /* UIAlertController.swift */,
@@ -267,9 +268,10 @@
 		8460DCFE2750D6DF0081F94C /* SessionDetails */ = {
 			isa = PBXGroup;
 			children = (
-				A5A4FC4F283CB8F300BBEC1E /* SwiftUI */,
-				8460DCFF2750D6F50081F94C /* SessionDetailsViewController.swift */,
-				8460DD012750D7020081F94C /* SessionDetailsView.swift */,
+				A5A4FC55283CBB7800BBEC1E /* SessionDetailView.swift */,
+				A5A4FC5B283D1F6700BBEC1E /* SessionDetailViewController.swift */,
+				A5A4FC57283CBB9F00BBEC1E /* SessionDetailViewModel.swift */,
+				A5A4FC59283CC08600BBEC1E /* SessionNamespaceViewModel.swift */,
 			);
 			path = SessionDetails;
 			sourceTree = "<group>";
@@ -341,16 +343,6 @@
 				84CE646F27A2CD6B00142511 /* WalletTests.swift */,
 			);
 			path = WalletTests;
-			sourceTree = "<group>";
-		};
-		A5A4FC4F283CB8F300BBEC1E /* SwiftUI */ = {
-			isa = PBXGroup;
-			children = (
-				A5A4FC55283CBB7800BBEC1E /* SessionDetailView.swift */,
-				A5A4FC57283CBB9F00BBEC1E /* SessionDetailViewModel.swift */,
-				A5A4FC59283CC08600BBEC1E /* SessionNamespaceViewModel.swift */,
-			);
-			path = SwiftUI;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -529,10 +521,10 @@
 				765056272821989600F9AE79 /* Color+Extension.swift in Sources */,
 				76235E8D28202043004ED0AA /* RequestView.swift in Sources */,
 				8460DCFC274F98A10081F94C /* RequestViewController.swift in Sources */,
-				8460DD002750D6F50081F94C /* SessionDetailsViewController.swift in Sources */,
 				76744CF926FE4D7400B77ED9 /* ActiveSessionCell.swift in Sources */,
 				764E1D4026F8D3FC00A1FB15 /* AppDelegate.swift in Sources */,
 				761C64A626FCB0AA004239D1 /* SessionInfo.swift in Sources */,
+				A5A4FC5E283D23CA00BBEC1E /* Array.swift in Sources */,
 				76235E8B28201C9C004ED0AA /* Utilities.swift in Sources */,
 				76744CF726FE4D5400B77ED9 /* ActiveSessionItem.swift in Sources */,
 				A5A4FC5A283CC08600BBEC1E /* SessionNamespaceViewModel.swift in Sources */,
@@ -541,13 +533,13 @@
 				A5A4FC56283CBB7800BBEC1E /* SessionDetailView.swift in Sources */,
 				7600223B2819FC0B0011DD38 /* ProposalView.swift in Sources */,
 				761248172819F9E600CB6D48 /* WalletView.swift in Sources */,
-				8460DD022750D7020081F94C /* SessionDetailsView.swift in Sources */,
 				A5A4FC58283CBB9F00BBEC1E /* SessionDetailViewModel.swift in Sources */,
 				76B6E39F2807A3B6004DF775 /* WalletViewController.swift in Sources */,
 				764E1D5A26F8DF1B00A1FB15 /* ScannerViewController.swift in Sources */,
 				760022392819FBF90011DD38 /* ProposalViewController.swift in Sources */,
 				84494388278D9C1B00CC26BB /* UIAlertController.swift in Sources */,
 				84F568C42795832A00D0A289 /* EthereumTransaction.swift in Sources */,
+				A5A4FC5C283D1F6700BBEC1E /* SessionDetailViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

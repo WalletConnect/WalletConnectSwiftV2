@@ -67,16 +67,9 @@ final class WalletViewController: UIViewController {
         proposalViewController.delegate = self
         present(proposalViewController, animated: true)
     }
-    
-//    private func showSessionDetailsViewController(_ session: Session) {
-//        let vc = SessionDetailsViewController(session, client)
-//        navigationController?.pushViewController(vc, animated: true)
-//    }
-    
+
     private func showSessionDetails(with session: Session) {
-        let viewModel = SessionDetailViewModel(session: session, client: client)
-        let view = SessionDetailView(viewModel: viewModel)
-        let viewController = UIHostingController(rootView: view)
+        let viewController = SessionDetailViewController(session: session, client: client)
         navigationController?.present(viewController, animated: true)
     }
     

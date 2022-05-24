@@ -37,8 +37,8 @@ final class SessionDetailViewModel: ObservableObject {
     var chains: [String] {
         namespaces.keys.sorted()
     }
-    var pendingRequests: [String] {
-        client.getPendingRequests(topic: session.topic).map { $0.method }
+    var requests: [Request] {
+        client.getPendingRequests(topic: session.topic)
     }
     
     func remove(field: Fields, at indices: IndexSet = [], for chain: String) async {
@@ -59,7 +59,18 @@ final class SessionDetailViewModel: ObservableObject {
         }
         catch {
             namespaces = backup
-            print("[PROPOSER] Namespaces update failed with: \(error.localizedDescription)")
+            print("[RESPONDER] Namespaces update failed with: \(error.localizedDescription)")
+        }
+    }
+    
+    func ping() {
+        client.ping(topic: session.topic) {  result in
+            switch result {
+            case .success:
+                print("[RESPONDER] Received ping response")
+            case .failure(let error):
+                print("[RESPONDER] Ping failed with: \(error.localizedDescription)")
+            }
         }
     }
     
