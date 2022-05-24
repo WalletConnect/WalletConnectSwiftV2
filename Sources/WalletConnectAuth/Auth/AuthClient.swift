@@ -190,7 +190,7 @@ public final class AuthClient {
     /// - Parameters:
     ///   - params: Parameters defining request and related session
     public func request(params: Request) async throws {
-        try await sessionEngine.request(params: params)
+        try await sessionEngine.request(params)
     }
     
     /// For the responder to respond on pending peer's session JSON-RPC Request
