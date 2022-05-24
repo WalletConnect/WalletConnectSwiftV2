@@ -2,7 +2,7 @@
 import Foundation
 import Combine
 import WalletConnectUtils
-@testable import WalletConnectAuth
+@testable import WalletConnectSign
 @testable import TestingUtils
 
 class MockedWCRelay: NetworkInteracting {

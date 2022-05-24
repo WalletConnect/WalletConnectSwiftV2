@@ -2,7 +2,7 @@ import XCTest
 import WalletConnectUtils
 @testable import TestingUtils
 import WalletConnectKMS
-@testable import WalletConnectAuth
+@testable import WalletConnectSign
 
 extension Collection where Self.Element == String {
     func toAccountSet() -> Set<Account> {

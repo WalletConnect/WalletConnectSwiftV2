@@ -1,4 +1,4 @@
-@testable import WalletConnectAuth
+@testable import WalletConnectSign
 
 extension WCRequest {
 

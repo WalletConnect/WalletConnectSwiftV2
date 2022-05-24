@@ -1,4 +1,4 @@
-@testable import WalletConnectAuth
+@testable import WalletConnectSign
 import Foundation
 
 final class WCSessionStorageMock: WCSessionStorage {

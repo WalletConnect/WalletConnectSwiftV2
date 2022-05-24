@@ -1,7 +1,7 @@
 
 import Foundation
 import UIKit
-import WalletConnectAuth
+import WalletConnectSign
 
 class ConnectViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     let uriString: String

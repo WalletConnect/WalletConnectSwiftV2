@@ -2,7 +2,7 @@
 
 import Foundation
 import UIKit
-import WalletConnectAuth
+import WalletConnectSign
 import WalletConnectUtils
 
 class AccountRequestViewController: UIViewController, UITableViewDelegate, UITableViewDataSource  {

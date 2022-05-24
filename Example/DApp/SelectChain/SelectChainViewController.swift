@@ -1,7 +1,7 @@
 
 
 import Foundation
-import WalletConnectAuth
+import WalletConnectSign
 import UIKit
 import Combine
 

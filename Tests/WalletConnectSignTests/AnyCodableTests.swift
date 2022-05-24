@@ -1,7 +1,7 @@
 import XCTest
 import WalletConnectUtils
 import TestingUtils
-@testable import WalletConnectAuth
+@testable import WalletConnectSign
 
 fileprivate struct SampleStruct: Codable, Equatable {
     

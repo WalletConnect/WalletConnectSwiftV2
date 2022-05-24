@@ -1,5 +1,5 @@
 import UIKit
-import WalletConnectAuth
+import WalletConnectSign
 import WalletConnectUtils
 import Web3
 import CryptoSwift

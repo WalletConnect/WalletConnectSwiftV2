@@ -1,5 +1,5 @@
 import XCTest
-@testable import WalletConnectAuth
+@testable import WalletConnectSign
 
 fileprivate let stubTopic = "8097df5f14871126866252c1b7479a14aefb980188fc35ec97d130d24bd887c8"
 fileprivate let stubSymKey = "587d5484ce2a2a6ee3ba1962fdd7e8588e06200c46823bd18fbd67def96ad303"

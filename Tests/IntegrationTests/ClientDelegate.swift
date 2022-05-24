@@ -1,6 +1,6 @@
 
 import Foundation
-@testable import WalletConnectAuth
+@testable import WalletConnectSign
 
 class ClientDelegate: AuthClientDelegate {
     func didChangeSocketConnectionStatus(_ status: SocketConnectionStatus) {

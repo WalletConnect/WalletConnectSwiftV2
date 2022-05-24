@@ -1,6 +1,6 @@
 
 import Foundation
-import WalletConnectAuth
+import WalletConnectSign
 import UIKit
 
 class ResponseViewController: UIViewController {

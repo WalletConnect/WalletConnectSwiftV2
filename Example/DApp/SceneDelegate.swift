@@ -1,6 +1,6 @@
 
 import UIKit
-import WalletConnectAuth
+import WalletConnectSign
 import Combine
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
