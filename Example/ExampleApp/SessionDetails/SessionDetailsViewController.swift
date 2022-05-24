@@ -9,7 +9,7 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
     private var sessionInfo: SessionInfo
     private let session: Session
     init(_ session: Session) {
-        let pendingRequests = Auth.instance.getPendingRequests(topic: session.topic).map{$0.method}
+        let pendingRequests = Sign.instance.getPendingRequests(topic: session.topic).map{$0.method}
         let chains = Array(session.namespaces.values.flatMap { n in n.accounts.map{$0.blockchain.absoluteString}})
         let methods = Array(session.namespaces.values.first?.methods ?? []) // TODO: Rethink how to show this info on example app
         self.sessionInfo = SessionInfo(name: session.peer.name,
@@ -49,7 +49,7 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
     
     @objc
     private func ping() {
-        Auth.instance.ping(topic: session.topic) { result in
+        Sign.instance.ping(topic: session.topic) { result in
             switch result {
             case .success():
                 print("received ping response")
@@ -99,7 +99,7 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.section == 2 {
-            let pendingRequests = Auth.instance.getPendingRequests(topic: session.topic)
+            let pendingRequests = Sign.instance.getPendingRequests(topic: session.topic)
             showSessionRequest(pendingRequests[indexPath.row])
         }
     }
@@ -109,18 +109,18 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
         requestVC.onSign = { [unowned self] in
             let result = Signer.signEth(request: sessionRequest)
             let response = JSONRPCResponse<AnyCodable>(id: sessionRequest.id, result: result)
-            Auth.instance.respond(topic: sessionRequest.topic, response: .response(response))
+            Sign.instance.respond(topic: sessionRequest.topic, response: .response(response))
             reloadTable()
         }
         requestVC.onReject = { [unowned self] in
-            Auth.instance.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
+            Sign.instance.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
             reloadTable()
         }
         present(requestVC, animated: true)
     }
     
     func reloadTable() {
-        let pendingRequests = Auth.instance.getPendingRequests(topic: session.topic).map{$0.method}
+        let pendingRequests = Sign.instance.getPendingRequests(topic: session.topic).map{$0.method}
         let chains = Array(session.namespaces.values.flatMap { n in n.accounts.map{$0.blockchain.absoluteString}})
         let methods = Array(session.namespaces.values.first?.methods ?? []) // TODO: Rethink how to show this info on example app
         self.sessionInfo = SessionInfo(name: session.peer.name,

@@ -4,15 +4,15 @@ import WalletConnectUtils
 import WalletConnectRelay
 import Combine
 
-public class Auth {
-    public static let instance = Auth()
+public class Sign {
+    public static let instance = Sign()
     
     private static var config: Config?
     private let client: SignClient
     private let relayClient: RelayClient
     
     private init() {
-        guard let config = Auth.config else {
+        guard let config = Sign.config else {
             fatalError("Error - you must configure before accessing Auth.instance")
         }
         relayClient = RelayClient(relayHost: "relay.walletconnect.com", projectId: config.projectId, socketConnectionType: config.socketConnectionType)
@@ -21,7 +21,7 @@ public class Auth {
     }
     
     static public func configure(_ config: Config) {
-        Auth.config = config
+        Sign.config = config
     }
     
     var sessionProposalPublisherSubject = PassthroughSubject<Session.Proposal, Never>()
@@ -75,7 +75,7 @@ public class Auth {
     }
 }
 
-extension Auth: SignClientDelegate {
+extension Sign: SignClientDelegate {
     
     public func didReceive(sessionProposal: Session.Proposal) {
         sessionProposalPublisherSubject.send(sessionProposal)
@@ -118,7 +118,7 @@ extension Auth: SignClientDelegate {
     }
 }
 
-extension Auth {
+extension Sign {
     
     /// For the Proposer to propose a session to a responder.
     /// Function will create pending pairing sequence or propose a session on existing pairing. When responder client approves pairing, session is be proposed automatically by your client.

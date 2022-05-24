@@ -1,7 +1,7 @@
 import WalletConnectRelay
 import Foundation
 
-public extension Auth {
+public extension Sign {
     struct Config {
         let metadata: AppMetadata
         let projectId: String

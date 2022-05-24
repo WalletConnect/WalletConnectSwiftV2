@@ -60,7 +60,7 @@ class AccountRequestViewController: UIViewController, UITableViewDelegate, UITab
         let request = Request(topic: session.topic, method: method, params: requestParams, chainId: Blockchain(chainId)!)
         Task {
             do {
-                try await Auth.instance.request(params: request)
+                try await Sign.instance.request(params: request)
                 DispatchQueue.main.async { [weak self] in
                     self?.presentConfirmationAlert()
                 }

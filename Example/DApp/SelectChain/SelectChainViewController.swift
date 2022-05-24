@@ -23,7 +23,7 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
         navigationItem.title = "Available Chains"
         selectChainView.tableView.dataSource = self
         selectChainView.connectButton.addTarget(self, action: #selector(connect), for: .touchUpInside)
-        Auth.instance.sessionSettlePublisher.sink {[unowned self] session in
+        Sign.instance.sessionSettlePublisher.sink {[unowned self] session in
             onSessionSettled?(session)
         }.store(in: &publishers)
     }
@@ -39,7 +39,7 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
         let blockchains: Set<Blockchain> = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
         let namespaces: [String: ProposalNamespace] = ["eip155": ProposalNamespace(chains: blockchains, methods: methods, events: [], extensions: nil)]
         Task {
-            let uri = try await Auth.instance.connect(requiredNamespaces: namespaces)
+            let uri = try await Sign.instance.connect(requiredNamespaces: namespaces)
             showConnectScreen(uriString: uri!)
         }
     }

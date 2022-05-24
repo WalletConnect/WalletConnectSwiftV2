@@ -28,7 +28,7 @@ final class WalletViewController: UIViewController {
         
         walletView.tableView.dataSource = self
         walletView.tableView.delegate = self
-        let settledSessions = Auth.instance.getSettledSessions()
+        let settledSessions = Sign.instance.getSettledSessions()
         sessionItems = getActiveSessionItem(for: settledSessions)
         setUpAuthSubscribing()
     }
@@ -64,11 +64,11 @@ final class WalletViewController: UIViewController {
         requestVC.onSign = { [unowned self] in
             let result = Signer.signEth(request: sessionRequest)
             let response = JSONRPCResponse<AnyCodable>(id: sessionRequest.id, result: result)
-            Auth.instance.respond(topic: sessionRequest.topic, response: .response(response))
+            Sign.instance.respond(topic: sessionRequest.topic, response: .response(response))
             reloadSessionDetailsIfNeeded()
         }
         requestVC.onReject = { [unowned self] in
-            Auth.instance.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
+            Sign.instance.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
             reloadSessionDetailsIfNeeded()
         }
         reloadSessionDetailsIfNeeded()
@@ -85,7 +85,7 @@ final class WalletViewController: UIViewController {
         print("[RESPONDER] Pairing to: \(uri)")
         Task {
             do {
-                try await Auth.instance.pair(uri: uri)
+                try await Sign.instance.pair(uri: uri)
             } catch {
                 print("[PROPOSER] Pairing connect error: \(error)")
             }
@@ -110,7 +110,7 @@ extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
             let item = sessionItems[indexPath.row]
             Task {
                 do {
-                    try await Auth.instance.disconnect(topic: item.topic, reason: Reason(code: 0, message: "disconnect"))
+                    try await Sign.instance.disconnect(topic: item.topic, reason: Reason(code: 0, message: "disconnect"))
                     DispatchQueue.main.async { [weak self] in
                         self?.sessionItems.remove(at: indexPath.row)
                         tableView.deleteRows(at: [indexPath], with: .automatic)
@@ -129,7 +129,7 @@ extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("did select row \(indexPath)")
         let itemTopic = sessionItems[indexPath.row].topic
-        if let session = Auth.instance.getSettledSessions().first{$0.topic == itemTopic} {
+        if let session = Sign.instance.getSettledSessions().first{$0.topic == itemTopic} {
             showSessionDetailsViewController(session)
         }
     }
@@ -161,20 +161,20 @@ extension WalletViewController: ProposalViewControllerDelegate {
             let sessionNamespace = SessionNamespace(accounts: accounts, methods: proposalNamespace.methods, events: proposalNamespace.events, extensions: extensions)
             sessionNamespaces[caip2Namespace] = sessionNamespace
         }
-        try! Auth.instance.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+        try! Sign.instance.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
     }
     
     func didRejectSession() {
         print("did reject session")
         let proposal = currentProposal!
         currentProposal = nil
-        Auth.instance.reject(proposal: proposal, reason: .disapprovedChains)
+        Sign.instance.reject(proposal: proposal, reason: .disapprovedChains)
     }
 }
 
 extension WalletViewController {
     func setUpAuthSubscribing() {
-        Auth.instance.socketConnectionStatusPublisher
+        Sign.instance.socketConnectionStatusPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] status in
                 if status == .connected {
@@ -184,7 +184,7 @@ extension WalletViewController {
             }.store(in: &publishers)
 
         // TODO: Adapt proposal data to be used on the view
-        Auth.instance.sessionProposalPublisher
+        Sign.instance.sessionProposalPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] sessionProposal in
                 print("[RESPONDER] WC: Did receive session proposal")
@@ -192,20 +192,20 @@ extension WalletViewController {
                     self?.showSessionProposal(Proposal(proposal: sessionProposal)) // FIXME: Remove mock
             }.store(in: &publishers)
 
-        Auth.instance.sessionSettlePublisher
+        Sign.instance.sessionSettlePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.reloadActiveSessions()
             }.store(in: &publishers)
 
-        Auth.instance.sessionRequestPublisher
+        Sign.instance.sessionRequestPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] sessionRequest in
                 print("[RESPONDER] WC: Did receive session request")
                 self?.showSessionRequest(sessionRequest)
             }.store(in: &publishers)
 
-        Auth.instance.sessionDeletePublisher
+        Sign.instance.sessionDeletePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] sessionRequest in
                 self?.reloadActiveSessions()
@@ -225,7 +225,7 @@ extension WalletViewController {
     }
 
     private func reloadActiveSessions() {
-        let settledSessions = Auth.instance.getSettledSessions()
+        let settledSessions = Sign.instance.getSettledSessions()
         let activeSessions = getActiveSessionItem(for: settledSessions)
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread
             self.sessionItems = activeSessions
