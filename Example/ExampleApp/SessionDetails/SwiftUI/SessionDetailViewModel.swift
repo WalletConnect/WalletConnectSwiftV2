@@ -2,17 +2,19 @@ import Foundation
 import Combine
 import WalletConnectAuth
 
+@MainActor
 final class SessionDetailViewModel: ObservableObject {
     private let session: Session
     private let client: AuthClient
     
-    @Published var isLoading: Bool = false
-    @Published var namespaces: [String: SessionNamespace] {
-        didSet {
-            guard namespaces != oldValue else { return }
-            Task { await updateNamespaces() }
-        }
+    enum Fields {
+        case accounts
+        case methods
+        case events
+        case chain
     }
+    
+    @Published var namespaces: [String: SessionNamespace]
     
     init(session: Session, client: AuthClient) {
         self.session = session
@@ -20,23 +22,50 @@ final class SessionDetailViewModel: ObservableObject {
         self.namespaces = session.namespaces
     }
     
-    var peerName: String { session.peer.name }
-    var peerDescription: String { session.peer.description }
-    var peerURL: String { session.peer.url }
-    var peerIconURL: URL? { session.peer.icons.first.flatMap { URL(string: $0) } }
-    
+    var peerName: String {
+        session.peer.name
+    }
+    var peerDescription: String {
+        session.peer.description
+    }
+    var peerURL: String {
+        session.peer.url
+    }
+    var peerIconURL: URL? {
+        session.peer.icons.first.flatMap { URL(string: $0) }
+    }
     var chains: [String] {
         namespaces.keys.sorted()
     }
     
-    @MainActor
-    func updateNamespaces() async {
-        try? await client.update(topic: session.topic, namespaces: namespaces)
+    func remove(field: Fields, at indices: IndexSet = [], for chain: String) async {
+        let backup = namespaces
+
+        do {
+            switch field {
+            case .accounts: removeAccounts(at: indices, chain: chain)
+            case .methods: removeMethods(at: indices, chain: chain)
+            case .events: removeEvents(at: indices, chain: chain)
+            case .chain: removeChain(chain)
+            }
+            
+            try await client.update(
+                topic: session.topic,
+                namespaces: namespaces
+            )
+        }
+        catch {
+            namespaces = backup
+            print("[PROPOSER] Namespaces update failed with: \(error.localizedDescription)")
+        }
     }
     
     func namespace(for chain: String) -> SessionNamespaceViewModel? {
         namespaces[chain].map { SessionNamespaceViewModel(namespace: $0) }
     }
+}
+
+private extension SessionDetailViewModel {
     
     func removeAccounts(at offsets: IndexSet, chain: String) {
         guard let viewModel = namespace(for: chain) else { return }

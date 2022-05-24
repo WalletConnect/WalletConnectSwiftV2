@@ -15,21 +15,27 @@ struct SessionDetailView: View {
                             ForEach(namespace.accounts, id: \.self) { account in
                                 plainRow(account.absoluteString)
                             }
-                            .onDelete { viewModel.removeAccounts(at: $0, chain: chain) }
+                            .onDelete { indices in Task {
+                                await viewModel.remove(field: .accounts, at: indices, for: chain)
+                            }}
                         }
                         
                         Section(header: headerRow("Methods")) {
                             ForEach(namespace.methods, id: \.self) { method in
                                 plainRow(method)
                             }
-                            .onDelete { viewModel.removeMethods(at: $0, chain: chain) }
+                            .onDelete { indices in Task {
+                                await viewModel.remove(field: .methods, at: indices, for: chain)
+                            }}
                         }
                         
                         Section(header: headerRow("Events")) {
                             ForEach(namespace.events, id: \.self) { event in
                                 plainRow(event)
                             }
-                            .onDelete { viewModel.removeEvents(at: $0, chain: chain) }
+                            .onDelete { indices in Task {
+                                await viewModel.remove(field: .events, at: indices, for: chain)
+                            }}
                         }
                     }
                 }
@@ -83,9 +89,9 @@ private extension SessionDetailView {
         HStack {
             Text(chain)
             Spacer()
-            Button("Delete Chain") {
-                viewModel.removeChain(chain)
-            }
+            Button("Delete Chain") { Task {
+                await viewModel.remove(field: .chain, for: chain)
+            }}
         }
     }
 }
