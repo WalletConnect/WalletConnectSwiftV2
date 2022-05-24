@@ -126,7 +126,7 @@ extension Auth {
     /// - Parameter topic: Optional parameter - use it if you already have an established pairing with peer client.
     /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
     public func connect(requiredNamespaces: [String : ProposalNamespace], topic: String? = nil) async throws -> String? {
-        try await client.connect(requiredNamespaces: requiredNamespaces)
+        try await client.connect(requiredNamespaces: requiredNamespaces, topic: topic)
     }
 
     /// For responder to receive a session proposal from a proposer
