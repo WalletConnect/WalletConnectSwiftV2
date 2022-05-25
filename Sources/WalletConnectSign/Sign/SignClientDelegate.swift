@@ -37,7 +37,7 @@ public protocol SignClientDelegate: AnyObject {
     /// Tells the delegate that session expiry has been updated
     ///
     /// Function will be executed on controller and non-controller clients.
-    func didUpdate(sessionTopic: String, expiry: Date)
+    func didExtend(sessionTopic: String, to date: Date)
 
     /// Tells the delegate that the client has settled a session.
     ///
@@ -62,6 +62,6 @@ public extension SignClientDelegate {
     func didReceive(sessionRequest: Request) {}
     func didReceive(sessionProposal: Session.Proposal) {}
     func didReceive(sessionResponse: Response) {}
-    func didUpdate(sessionTopic: String, expiry: Date) {}
+    func didExtend(sessionTopic: String, to date: Date) {}
     func didDisconnect() {}
 }

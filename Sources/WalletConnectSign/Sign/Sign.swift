@@ -69,9 +69,9 @@ public class Sign {
         sessionEventPublisherSubject.eraseToAnyPublisher()
     }
     
-    var sessionUpdateExpiryPublisherSubject = PassthroughSubject<(sessionTopic: String, expiry: Date), Never>()
-    public var sessionUpdateExpiryPublisher: AnyPublisher<(sessionTopic: String, expiry: Date), Never> {
-        sessionUpdateExpiryPublisherSubject.eraseToAnyPublisher()
+    var sessionExtendPublisherSubject = PassthroughSubject<(sessionTopic: String, date: Date), Never>()
+    public var sessionExtendPublisher: AnyPublisher<(sessionTopic: String, date: Date), Never> {
+        sessionExtendPublisherSubject.eraseToAnyPublisher()
     }
 }
 
@@ -97,8 +97,8 @@ extension Sign: SignClientDelegate {
         sessionUpdatePublisherSubject.send((sessionTopic, namespaces))
     }
     
-    public func didUpdate(sessionTopic: String, expiry: Date) {
-        sessionUpdateExpiryPublisherSubject.send((sessionTopic, expiry))
+    public func didExtend(sessionTopic: String, to date: Date) {
+        sessionExtendPublisherSubject.send((sessionTopic, date))
     }
     
     public func didSettle(session: Session) {
