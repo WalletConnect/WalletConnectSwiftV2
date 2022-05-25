@@ -32,7 +32,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }.store(in: &publishers)
 
         
-        if let session = Auth.instance.getSettledSessions().first {
+        if let session = Auth.instance.getSessions().first {
             showAccountsScreen(session)
         } else {
             showSelectChainScreen()

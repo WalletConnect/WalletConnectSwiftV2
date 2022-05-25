@@ -28,7 +28,7 @@ final class WalletViewController: UIViewController {
         
         walletView.tableView.dataSource = self
         walletView.tableView.delegate = self
-        let settledSessions = Auth.instance.getSettledSessions()
+        let settledSessions = Auth.instance.getSessions()
         sessionItems = getActiveSessionItem(for: settledSessions)
         setUpAuthSubscribing()
     }
@@ -129,7 +129,7 @@ extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("did select row \(indexPath)")
         let itemTopic = sessionItems[indexPath.row].topic
-        if let session = Auth.instance.getSettledSessions().first{$0.topic == itemTopic} {
+        if let session = Auth.instance.getSessions().first{$0.topic == itemTopic} {
             showSessionDetailsViewController(session)
         }
     }
@@ -225,7 +225,7 @@ extension WalletViewController {
     }
 
     private func reloadActiveSessions() {
-        let settledSessions = Auth.instance.getSettledSessions()
+        let settledSessions = Auth.instance.getSessions()
         let activeSessions = getActiveSessionItem(for: settledSessions)
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread
             self.sessionItems = activeSessions

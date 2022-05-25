@@ -251,9 +251,9 @@ public final class AuthClient {
         try await sessionEngine.delete(topic: topic, reason: reason)
     }
     
-    /// - Returns: All settled sessions that are active
-    public func getSettledSessions() -> [Session] {
-        sessionEngine.getAcknowledgedSessions()
+    /// - Returns: All sessions
+    public func getSessions() -> [Session] {
+        sessionEngine.getSessions()
     }
     
     /// - Returns: All settled pairings that are active
