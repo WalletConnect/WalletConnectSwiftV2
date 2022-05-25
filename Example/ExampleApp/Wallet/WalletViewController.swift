@@ -28,7 +28,7 @@ final class WalletViewController: UIViewController {
         
         walletView.tableView.dataSource = self
         walletView.tableView.delegate = self
-        let settledSessions = Sign.instance.getSettledSessions()
+        let settledSessions = Sign.instance.getSessions()
         sessionItems = getActiveSessionItem(for: settledSessions)
         setUpAuthSubscribing()
     }
@@ -53,10 +53,10 @@ final class WalletViewController: UIViewController {
         proposalViewController.delegate = self
         present(proposalViewController, animated: true)
     }
-    
-    private func showSessionDetailsViewController(_ session: Session) {
-        let vc = SessionDetailsViewController(session)
-        navigationController?.pushViewController(vc, animated: true)
+
+    private func showSessionDetails(with session: Session) {
+        let viewController = SessionDetailViewController(session: session, client: Sign.instance)
+        navigationController?.present(viewController, animated: true)
     }
     
     private func showSessionRequest(_ sessionRequest: Request) {
@@ -76,8 +76,8 @@ final class WalletViewController: UIViewController {
     }
     
     func reloadSessionDetailsIfNeeded() {
-        if let sessionDetailsViewController = navigationController?.viewControllers.first(where: {$0 is SessionDetailsViewController}) as? SessionDetailsViewController {
-            sessionDetailsViewController.reloadTable()
+        if let viewController = navigationController?.presentedViewController as? SessionDetailViewController {
+            viewController.reload()
         }
     }
     
@@ -129,8 +129,8 @@ extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("did select row \(indexPath)")
         let itemTopic = sessionItems[indexPath.row].topic
-        if let session = Sign.instance.getSettledSessions().first{$0.topic == itemTopic} {
-            showSessionDetailsViewController(session)
+        if let session = Sign.instance.getSessions().first{$0.topic == itemTopic} {
+            showSessionDetails(with: session)
         }
     }
 }
@@ -225,7 +225,7 @@ extension WalletViewController {
     }
 
     private func reloadActiveSessions() {
-        let settledSessions = Sign.instance.getSettledSessions()
+        let settledSessions = Sign.instance.getSessions()
         let activeSessions = getActiveSessionItem(for: settledSessions)
         DispatchQueue.main.async { // FIXME: Delegate being called from background thread
             self.sessionItems = activeSessions

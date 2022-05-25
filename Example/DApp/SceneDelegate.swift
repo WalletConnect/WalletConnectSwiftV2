@@ -19,7 +19,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             name: "Swift Dapp",
             description: "a description",
             url: "wallet.connect",
-            icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])
+            icons: ["https://avatars.githubusercontent.com/u/37784886"])
         Sign.configure(Sign.Config(metadata: metadata, projectId: "8ba9ee138960775e5231b70cc5ef1c3a"))
         Sign.instance.sessionDeletePublisher
             .receive(on: DispatchQueue.main)
@@ -32,7 +32,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }.store(in: &publishers)
 
         
-        if let session = Sign.instance.getSettledSessions().first {
+        if let session = Sign.instance.getSessions().first {
             showAccountsScreen(session)
         } else {
             showSelectChainScreen()

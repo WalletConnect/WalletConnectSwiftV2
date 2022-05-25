@@ -98,7 +98,6 @@ final class SessionEngineTests: XCTestCase {
         networkingInteractor.onResponse?(response)
 
         XCTAssertTrue(storageMock.getSession(forTopic: session.topic)!.acknowledged, "Responder must acknowledged session")
-        XCTAssertTrue(didCallBackOnSessionApproved, "Responder's engine must call back with session")
     }
     
     func testHandleSessionSettleError() {

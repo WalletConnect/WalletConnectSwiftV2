@@ -25,12 +25,5 @@ final class WCSessionStorageMock: WCSessionStorage {
     func delete(topic: String) {
         sessions[topic] = nil
     }
-    
-    func getAcknowledgedSessions() -> [WCSession] {
-        getAll().compactMap {
-            guard $0.acknowledged else { return nil }
-            return $0
-        }
-    }
 }
 

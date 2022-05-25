@@ -76,7 +76,7 @@ class ControllerSessionStateMachineTests: XCTestCase {
         storageMock.setSession(session)
         let twoDays = 2*Time.day
         await XCTAssertNoThrowAsync(try await sut.extend(topic: session.topic, by: Int64(twoDays)))
-        let extendedSession = storageMock.getAcknowledgedSessions().first{$0.topic == session.topic}!
+        let extendedSession = storageMock.getAll().first{$0.topic == session.topic}!
         XCTAssertEqual(extendedSession.expiryDate.timeIntervalSinceReferenceDate, TimeTraveler.dateByAdding(days: 2).timeIntervalSinceReferenceDate, accuracy: 1)
     }
     
