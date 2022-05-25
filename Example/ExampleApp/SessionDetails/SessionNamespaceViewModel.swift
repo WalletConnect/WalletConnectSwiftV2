@@ -1,5 +1,5 @@
 import Foundation
-import WalletConnectAuth
+import WalletConnectSign
 
 struct SessionNamespaceViewModel {
     let namespace: SessionNamespace

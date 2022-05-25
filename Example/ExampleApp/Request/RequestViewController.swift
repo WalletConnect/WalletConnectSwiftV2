@@ -1,7 +1,7 @@
 
 import Foundation
 import UIKit
-import WalletConnectAuth
+import WalletConnectSign
 import Web3
 
 class RequestViewController: UIViewController {

@@ -1,4 +1,4 @@
-import WalletConnectAuth
+import WalletConnectSign
 
 struct Proposal {
     let proposerName: String

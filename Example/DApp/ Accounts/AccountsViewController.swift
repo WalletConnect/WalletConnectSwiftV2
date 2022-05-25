@@ -1,5 +1,5 @@
 import UIKit
-import WalletConnectAuth
+import WalletConnectSign
 
 struct AccountDetails {
     let chain: String
@@ -53,7 +53,7 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
     private func disconnect() {
         Task {
             do {
-                try await Auth.instance.disconnect(topic: session.topic, reason: Reason(code: 0, message: "disconnect"))
+                try await Sign.instance.disconnect(topic: session.topic, reason: Reason(code: 0, message: "disconnect"))
                 DispatchQueue.main.async { [weak self] in
                     self?.onDisconnect?()
                 }

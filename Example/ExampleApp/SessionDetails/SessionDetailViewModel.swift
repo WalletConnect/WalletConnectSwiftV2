@@ -1,11 +1,11 @@
 import Foundation
 import Combine
-import WalletConnectAuth
+import WalletConnectSign
 
 @MainActor
 final class SessionDetailViewModel: ObservableObject {
     private let session: Session
-    private let client: Auth
+    private let client: Sign
     
     enum Fields {
         case accounts
@@ -16,7 +16,7 @@ final class SessionDetailViewModel: ObservableObject {
     
     @Published var namespaces: [String: SessionNamespace]
     
-    init(session: Session, client: Auth) {
+    init(session: Session, client: Sign) {
         self.session = session
         self.client = client
         self.namespaces = session.namespaces

@@ -1,5 +1,5 @@
 import UIKit
-import WalletConnectAuth
+import WalletConnectSign
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -12,7 +12,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             description: "wallet description",
             url: "example.wallet",
             icons: ["https://avatars.githubusercontent.com/u/37784886"])
-        Auth.configure(Auth.Config(metadata: metadata, projectId: "8ba9ee138960775e5231b70cc5ef1c3a"))
+        Sign.configure(Sign.Config(metadata: metadata, projectId: "8ba9ee138960775e5231b70cc5ef1c3a"))
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
@@ -30,7 +30,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         vc.onClientConnected = {
             Task {
                 do {
-                    try await Auth.instance.pair(uri: wcUri)
+                    try await Sign.instance.pair(uri: wcUri)
                 } catch {
                     print(error)
                 }

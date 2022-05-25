@@ -1,5 +1,5 @@
 import SwiftUI
-import WalletConnectAuth
+import WalletConnectSign
 
 struct SessionDetailView: View {
     
