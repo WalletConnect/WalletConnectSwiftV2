@@ -1,11 +1,11 @@
 
 import Foundation
 import UIKit
-import WalletConnect
+import WalletConnectSign
 
 class ConnectViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     let uriString: String
-    let activePairings: [Pairing] = ClientDelegate.shared.client.getSettledPairings()
+    let activePairings: [Pairing] = Sign.instance.getSettledPairings()
     let segmentedControl = UISegmentedControl(items: ["Pairings", "New Pairing"])
 
     init(uri: String) {
@@ -66,7 +66,8 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
         let data = string.data(using: .ascii)
         if let filter = CIFilter(name: "CIQRCodeGenerator") {
             filter.setValue(data, forKey: "inputMessage")
-            if let output = filter.outputImage {
+            let transform = CGAffineTransform(scaleX: 4, y: 4)
+            if let output = filter.outputImage?.transformed(by: transform) {
                 return UIImage(ciImage: output)
             }
         }
@@ -75,8 +76,10 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
     
     @objc func connectWithExampleWallet() {
         let url = URL(string: "https://walletconnect.com/wc?uri=\(uriString)")!
-        UIApplication.shared.open(url, options: [:]) { [weak self] _ in
-            self?.dismiss(animated: true, completion: nil)
+        DispatchQueue.main.async {
+            UIApplication.shared.open(url, options: [:]) { [weak self] _ in
+                self?.dismiss(animated: true, completion: nil)
+            }
         }
     }
     
@@ -92,12 +95,12 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let pairingTopic = activePairings[indexPath.row].topic
-        let permissions = Session.Permissions(
-            blockchains: ["eip155:1", "eip155:137"],
-            methods: ["eth_sendTransaction", "personal_sign", "eth_signTypedData"],
-            notifications: []
-        )
-        _ = try! ClientDelegate.shared.client.connect(sessionPermissions: permissions, topic: pairingTopic)
-        connectWithExampleWallet()
+        let blockchains: Set<Blockchain> = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
+        let methods: Set<String> = ["eth_sendTransaction", "personal_sign", "eth_signTypedData"]
+        let namespaces: [String: ProposalNamespace] = ["eip155": ProposalNamespace(chains: blockchains, methods: methods, events: [], extensions: nil)]
+        Task {
+            _ = try await Sign.instance.connect(requiredNamespaces: namespaces, topic: pairingTopic)
+            connectWithExampleWallet()
+        }
     }
 }

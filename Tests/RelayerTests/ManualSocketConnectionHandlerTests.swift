@@ -2,28 +2,27 @@
 
 import Foundation
 import XCTest
-@testable import Relayer
+@testable import WalletConnectRelay
 
 final class ManualSocketConnectionHandlerTests: XCTestCase {
     var sut: ManualSocketConnectionHandler!
-    var webSocketSession: WebSocketSessionMock!
+    var socket: WebSocketConnecting!
     var networkMonitor: NetworkMonitoringMock!
-    var socketConnectionObserver: SocketConnectionObserverMock!
     override func setUp() {
-        webSocketSession = WebSocketSessionMock()
-        sut = ManualSocketConnectionHandler(socket: webSocketSession)
+        socket = WebSocketMock()
+        sut = ManualSocketConnectionHandler(socket: socket)
     }
     
     func testHandleDisconnect() {
-        webSocketSession.connect()
-        XCTAssertTrue(webSocketSession.isConnected)
+        socket.connect()
+        XCTAssertTrue(socket.isConnected)
         try! sut.handleDisconnect(closeCode: .normalClosure)
-        XCTAssertFalse(webSocketSession.isConnected)
+        XCTAssertFalse(socket.isConnected)
     }
     
     func testHandleConnect() {
-        XCTAssertFalse(webSocketSession.isConnected)
+        XCTAssertFalse(socket.isConnected)
         try! sut.handleConnect()
-        XCTAssertTrue(webSocketSession.isConnected)
+        XCTAssertTrue(socket.isConnected)
     }
 }

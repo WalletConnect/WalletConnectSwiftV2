@@ -1,10 +1,19 @@
 import UIKit
+import WalletConnectSign
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+        
+        let metadata = AppMetadata(
+            name: "Example Wallet",
+            description: "wallet description",
+            url: "example.wallet",
+            icons: ["https://avatars.githubusercontent.com/u/37784886"])
+        Sign.configure(Sign.Config(metadata: metadata, projectId: "8ba9ee138960775e5231b70cc5ef1c3a"))
+        
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = UITabBarController.createExampleApp()
@@ -17,15 +26,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                   return
               }
         let wcUri = incomingURL.absoluteString.deletingPrefix("https://walletconnect.com/wc?uri=")
-        let client = ((window!.rootViewController as! UINavigationController).viewControllers[0] as! ResponderViewController).client
-        try? client.pair(uri: wcUri)
+        let vc = ((window!.rootViewController as! UINavigationController).viewControllers[0] as! WalletViewController)
+        vc.onClientConnected = {
+            Task {
+                do {
+                    try await Sign.instance.pair(uri: wcUri)
+                } catch {
+                    print(error)
+                }
+            }
+        }
     }
 }
 
 extension UITabBarController {
     
     static func createExampleApp() -> UINavigationController    {
-        let responderController = UINavigationController(rootViewController: ResponderViewController())
+        let responderController = UINavigationController(rootViewController: WalletViewController())
         return responderController
     }
 }

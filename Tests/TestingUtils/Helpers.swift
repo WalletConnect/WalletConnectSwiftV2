@@ -1,6 +1,21 @@
 import Foundation
+import WalletConnectUtils
 
 public let defaultTimeout: TimeInterval = 5.0
+
+public extension Int {
+    static func random() -> Int {
+        random(in: Int.min...Int.max)
+    }
+}
+
+public extension Double {
+    
+    // Do not use this function when testing Codables: https://bugs.swift.org/browse/SR-7054
+    static func random() -> Double {
+        random(in: 0...1)
+    }
+}
 
 public extension String {
     static func randomTopic() -> String {
@@ -21,3 +36,9 @@ public extension Result {
     }
 }
 
+extension AnyCodable {
+    static func decoded<C>(_ codable: C) -> AnyCodable where C: Codable {
+        let encoded = try! JSONEncoder().encode(codable)
+        return try! JSONDecoder().decode(AnyCodable.self, from: encoded)
+    }
+}

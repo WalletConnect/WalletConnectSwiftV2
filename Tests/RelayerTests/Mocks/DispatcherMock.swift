@@ -1,7 +1,7 @@
 // 
 
 import Foundation
-@testable import Relayer
+@testable import WalletConnectRelay
 
 class DispatcherMock: Dispatching {
     var onConnect: (() -> ())?

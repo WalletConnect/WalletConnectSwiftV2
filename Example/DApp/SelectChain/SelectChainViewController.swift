@@ -1,8 +1,9 @@
 
 
 import Foundation
-import WalletConnect
+import WalletConnectSign
 import UIKit
+import Combine
 
 struct Chain {
     let name: String
@@ -13,39 +14,33 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
     private let selectChainView: SelectChainView = {
         SelectChainView()
     }()
+    private var publishers = [AnyCancellable]()
+
     let chains = [Chain(name: "Ethereum", id: "eip155:1"), Chain(name: "Polygon", id: "eip155:137")]
-    let client = ClientDelegate.shared.client
     var onSessionSettled: ((Session)->())?
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Available Chains"
         selectChainView.tableView.dataSource = self
         selectChainView.connectButton.addTarget(self, action: #selector(connect), for: .touchUpInside)
-        ClientDelegate.shared.onSessionSettled = { [unowned self] session in
+        Sign.instance.sessionSettlePublisher.sink {[unowned self] session in
             onSessionSettled?(session)
-        }
+        }.store(in: &publishers)
     }
     
     override func loadView() {
         view = selectChainView
-        
-
     }
-    
+
     @objc
     private func connect() {
         print("[PROPOSER] Connecting to a pairing...")
-        let permissions = Session.Permissions(
-            blockchains: ["eip155:1", "eip155:137"],
-            methods: ["eth_sendTransaction", "personal_sign", "eth_signTypedData"],
-            notifications: []
-        )
-        do {
-            if let uri = try client.connect(sessionPermissions: permissions) {
-                showConnectScreen(uriString: uri)
-            }
-        } catch {
-            print("[PROPOSER] Pairing connect error: \(error)")
+        let methods: Set<String> = ["eth_sendTransaction", "personal_sign", "eth_signTypedData"]
+        let blockchains: Set<Blockchain> = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
+        let namespaces: [String: ProposalNamespace] = ["eip155": ProposalNamespace(chains: blockchains, methods: methods, events: [], extensions: nil)]
+        Task {
+            let uri = try await Sign.instance.connect(requiredNamespaces: namespaces)
+            showConnectScreen(uriString: uri!)
         }
     }
     

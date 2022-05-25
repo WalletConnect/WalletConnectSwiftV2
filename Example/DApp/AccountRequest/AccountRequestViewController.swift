@@ -2,12 +2,11 @@
 
 import Foundation
 import UIKit
-import WalletConnect
+import WalletConnectSign
 import WalletConnectUtils
 
 class AccountRequestViewController: UIViewController, UITableViewDelegate, UITableViewDataSource  {
     private let session: Session
-    private let client: WalletConnectClient = ClientDelegate.shared.client
     private let chainId: String
     private let account: String
     private let methods = ["eth_sendTransaction", "personal_sign", "eth_signTypedData"]
@@ -58,9 +57,18 @@ class AccountRequestViewController: UIViewController, UITableViewDelegate, UITab
         let requestParams = getRequest(for: method)
         
         
-        let request = Request(topic: session.topic, method: method, params: requestParams, chainId: chainId)
-        client.request(params: request) 
-        presentConfirmationAlert()
+        let request = Request(topic: session.topic, method: method, params: requestParams, chainId: Blockchain(chainId)!)
+        Task {
+            do {
+                try await Sign.instance.request(params: request)
+                DispatchQueue.main.async { [weak self] in
+                    self?.presentConfirmationAlert()
+                }
+            } catch {
+                print(error)
+                //show failure alert
+            }
+        }
     }
     
     private func presentConfirmationAlert() {
@@ -71,12 +79,12 @@ class AccountRequestViewController: UIViewController, UITableViewDelegate, UITab
     }
     
     private func getRequest(for method: String) -> AnyCodable {
-        let account = "0x9b2055d370f73ec7d8a03e965129118dc8f5bf83"
+        let account = session.namespaces.first!.value.accounts.first!.absoluteString
         if method == "eth_sendTransaction" {
             let tx = Stub.tx
             return AnyCodable(tx)
         } else if method == "personal_sign" {
-            return AnyCodable(["0xdeadbeaf", account])
+            return AnyCodable(["0x4d7920656d61696c206973206a6f686e40646f652e636f6d202d2031363533333933373535313531", account])
         } else if method == "eth_signTypedData" {
             return AnyCodable([account, Stub.eth_signTypedData])
         }

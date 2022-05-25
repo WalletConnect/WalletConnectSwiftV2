@@ -6,22 +6,26 @@ let package = Package(
     name: "WalletConnect",
     platforms: [
         .iOS(.v13),
-        .macOS(.v10_15)
+        .macOS(.v10_15),
+        .tvOS(.v13),
     ],
     products: [
         .library(
             name: "WalletConnect",
-            targets: ["WalletConnect"]),
+            targets: ["WalletConnectSign"]),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/daltoniam/Starscream.git", .upToNextMajor(from: "3.0.0")),
     ],
     targets: [
         .target(
-            name: "WalletConnect",
-            dependencies: ["Relayer", "WalletConnectUtils", "WalletConnectKMS"],
-            path: "Sources/WalletConnect"),
+            name: "WalletConnectSign",
+            dependencies: ["WalletConnectRelay", "WalletConnectUtils", "WalletConnectKMS"],
+            path: "Sources/WalletConnectSign"),
         .target(
-            name: "Relayer",
-            dependencies: ["WalletConnectUtils"],
-            path: "Sources/Relayer"),
+            name: "WalletConnectRelay",
+            dependencies: ["WalletConnectUtils", "Starscream"],
+            path: "Sources/WalletConnectRelay"),
         .target(
             name: "WalletConnectKMS",
             dependencies: ["WalletConnectUtils"],
@@ -30,14 +34,14 @@ let package = Package(
             name: "WalletConnectUtils",
             dependencies: []),
         .testTarget(
-            name: "WalletConnectTests",
-            dependencies: ["WalletConnect", "TestingUtils", "WalletConnectKMS"]),
+            name: "WalletConnectSignTests",
+            dependencies: ["WalletConnectSign", "TestingUtils", "WalletConnectKMS"]),
         .testTarget(
             name: "IntegrationTests",
-            dependencies: ["WalletConnect", "TestingUtils", "WalletConnectKMS"]),
+            dependencies: ["WalletConnectSign", "TestingUtils", "WalletConnectKMS"]),
         .testTarget(
             name: "RelayerTests",
-            dependencies: ["Relayer", "WalletConnectUtils", "TestingUtils"]),
+            dependencies: ["WalletConnectRelay", "WalletConnectUtils", "TestingUtils"]),
         .testTarget(
             name: "WalletConnectKMSTests",
             dependencies: ["WalletConnectKMS", "WalletConnectUtils", "TestingUtils"]),

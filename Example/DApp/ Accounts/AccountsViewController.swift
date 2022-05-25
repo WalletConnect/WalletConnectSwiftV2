@@ -1,5 +1,5 @@
 import UIKit
-import WalletConnect
+import WalletConnectSign
 
 struct AccountDetails {
     let chain: String
@@ -9,7 +9,6 @@ struct AccountDetails {
 
 final class AccountsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate  {
     
-    let client = ClientDelegate.shared.client
     let session: Session
     var accountsDetails: [AccountDetails] = []
     var onDisconnect: (()->())?
@@ -43,19 +42,26 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
         )
         accountsView.tableView.dataSource = self
         accountsView.tableView.delegate = self
-        client.logger.setLogging(level: .debug)
-        session.accounts.forEach { account in
-            let splits = account.split(separator: ":", omittingEmptySubsequences: false)
-            guard splits.count == 3 else { return }
-            let chain = String(splits[0] + ":" + splits[1])
-            accountsDetails.append(AccountDetails(chain: chain, methods: Array(session.permissions.methods), account: account))
+        session.namespaces.values.forEach { namespace in
+            namespace.accounts.forEach { account in
+                accountsDetails.append(AccountDetails(chain: account.blockchainIdentifier, methods: Array(namespace.methods), account: account.address)) // TODO: Rethink how this info is displayed on example
+            }
         }
     }
     
     @objc
     private func disconnect() {
-        client.disconnect(topic: session.topic, reason: Reason(code: 0, message: "disconnect"))
-        onDisconnect?()
+        Task {
+            do {
+                try await Sign.instance.disconnect(topic: session.topic, reason: Reason(code: 0, message: "disconnect"))
+                DispatchQueue.main.async { [weak self] in
+                    self?.onDisconnect?()
+                }
+            } catch {
+                print(error)
+                //show failure alert
+            }
+        }
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

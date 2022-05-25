@@ -1,34 +1,36 @@
 
 import Foundation
-@testable import WalletConnect
+@testable import WalletConnectSign
 
-class ClientDelegate: WalletConnectClientDelegate {
-    var client: WalletConnectClient
+class ClientDelegate: SignClientDelegate {
+    func didChangeSocketConnectionStatus(_ status: SocketConnectionStatus) {
+        onConnected?()
+    }
+    
+    var client: SignClient
     var onSessionSettled: ((Session)->())?
-    var onPairingSettled: ((Pairing)->())?
+    var onConnected: (()->())?
     var onSessionProposal: ((Session.Proposal)->())?
     var onSessionRequest: ((Request)->())?
     var onSessionResponse: ((Response)->())?
-    var onSessionRejected: ((String, Reason)->())?
+    var onSessionRejected: ((Session.Proposal, Reason)->())?
     var onSessionDelete: (()->())?
-    var onSessionUpgrade: ((String, Session.Permissions)->())?
-    var onSessionUpdate: ((String, Set<Account>)->())?
-    var onNotificationReceived: ((Session.Notification, String)->())?
-    var onPairingUpdate: ((String, AppMetadata)->())?
+    var onSessionUpdateNamespaces: ((String, [String : SessionNamespace])->())?
+    var onSessionUpdateEvents: ((String, Set<String>)->())?
+    var onSessionExtend: ((String, Date)->())?
+    var onEventReceived: ((Session.Event, String)->())?
+    var onPairingUpdate: ((Pairing)->())?
     
-    internal init(client: WalletConnectClient) {
+    internal init(client: SignClient) {
         self.client = client
         client.delegate = self
     }
     
-    func didReject(pendingSessionTopic: String, reason: Reason) {
-        onSessionRejected?(pendingSessionTopic, reason)
+    func didReject(proposal: Session.Proposal, reason: Reason) {
+        onSessionRejected?(proposal, reason)
     }
     func didSettle(session: Session) {
         onSessionSettled?(session)
-    }
-    func didSettle(pairing: Pairing) {
-        onPairingSettled?(pairing)
     }
     func didReceive(sessionProposal: Session.Proposal) {
         onSessionProposal?(sessionProposal)
@@ -39,19 +41,18 @@ class ClientDelegate: WalletConnectClientDelegate {
     func didDelete(sessionTopic: String, reason: Reason) {
         onSessionDelete?()
     }
-    func didUpgrade(sessionTopic: String, permissions: Session.Permissions) {
-        onSessionUpgrade?(sessionTopic, permissions)
+    func didUpdate(sessionTopic: String, namespaces: [String : SessionNamespace]) {
+        onSessionUpdateNamespaces?(sessionTopic, namespaces)
     }
-    func didUpdate(sessionTopic: String, accounts: Set<Account>) {
-        onSessionUpdate?(sessionTopic, accounts)
+    func didExtend(sessionTopic: String, to date: Date) {
+        onSessionExtend?(sessionTopic, date)
     }
-    func didReceive(notification: Session.Notification, sessionTopic: String) {
-        onNotificationReceived?(notification, sessionTopic)
-    }
-    func didUpdate(pairingTopic: String, appMetadata: AppMetadata) {
-        onPairingUpdate?(pairingTopic, appMetadata)
+    func didReceive(event: Session.Event, sessionTopic: String, chainId: Blockchain?) {
+        onEventReceived?(event, sessionTopic)
     }
     func didReceive(sessionResponse: Response) {
         onSessionResponse?(sessionResponse)
     }
+
+    func didDisconnect() {}
 }

@@ -3,16 +3,16 @@ import WalletConnectUtils
 import Foundation
 import Combine
 import XCTest
-@testable import Relayer
+@testable import WalletConnectRelay
 
 class WakuRelayTests: XCTestCase {
-    var wakuRelay: Relayer!
+    var wakuRelay: RelayClient!
     var dispatcher: DispatcherMock!
 
     override func setUp() {
         dispatcher = DispatcherMock()
         let logger = ConsoleLogger()
-        wakuRelay = Relayer(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
+        wakuRelay = RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
 
     override func tearDown() {
@@ -36,25 +36,12 @@ class WakuRelayTests: XCTestCase {
         waitForExpectations(timeout: 0.001, handler: nil)
     }
     
-    func testCompletionOnSubscribe() {
-        let subscribeExpectation = expectation(description: "subscribe completes with no error")
-        let topic = "0987"
-        let requestId = wakuRelay.subscribe(topic: topic) { error in
-            XCTAssertNil(error)
-            subscribeExpectation.fulfill()
-        }
-        let subscriptionId = "sub-id"
-        let subscribeResponse = JSONRPCResponse<String>(id: requestId, result: subscriptionId)
-        dispatcher.onMessage?(try! subscribeResponse.json())
-        waitForExpectations(timeout: 0.001, handler: nil)
-    }
-    
     func testPublishRequestAcknowledge() {
         let acknowledgeExpectation = expectation(description: "completion with no error on waku request acknowledge after publish")
-        let requestId = wakuRelay.publish(topic: "", payload: "{}") { error in
+        let requestId = wakuRelay.publish(topic: "", payload: "{}", onNetworkAcknowledge: { error in
             acknowledgeExpectation.fulfill()
             XCTAssertNil(error)
-        }
+        })
         let response = try! JSONRPCResponse<Bool>(id: requestId, result: true).json()
         dispatcher.onMessage?(response)
         waitForExpectations(timeout: 0.001, handler: nil)
@@ -86,7 +73,7 @@ class WakuRelayTests: XCTestCase {
     }
     
     func testSendOnPublish() {
-        wakuRelay.publish(topic: "", payload: "") {_ in }
+        wakuRelay.publish(topic: "", payload: "", onNetworkAcknowledge: { _ in})
         XCTAssertTrue(dispatcher.sent)
     }
     
