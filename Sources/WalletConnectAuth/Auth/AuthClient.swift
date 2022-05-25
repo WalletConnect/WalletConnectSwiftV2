@@ -167,10 +167,10 @@ public final class AuthClient {
         pairingEngine.reject(proposal: proposal.proposal, reason: reason.internalRepresentation())
     }
     
-    /// For the responder to update session methods
+    /// For the responder to update session namespaces
     /// - Parameters:
     ///   - topic: Topic of the session that is intended to be updated.
-    ///   - methods: Sets of methods that will replace existing ones.
+    ///   - namespaces: Dictionary of namespaces that will replace existing ones.
     public func update(topic: String, namespaces: [String: SessionNamespace]) async throws {
         try await controllerSessionStateMachine.update(topic: topic, namespaces: namespaces)
     }

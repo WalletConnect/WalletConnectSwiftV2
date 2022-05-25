@@ -53,10 +53,10 @@ final class WalletViewController: UIViewController {
         proposalViewController.delegate = self
         present(proposalViewController, animated: true)
     }
-    
-    private func showSessionDetailsViewController(_ session: Session) {
-        let vc = SessionDetailsViewController(session)
-        navigationController?.pushViewController(vc, animated: true)
+
+    private func showSessionDetails(with session: Session) {
+        let viewController = SessionDetailViewController(session: session, client: Auth.instance)
+        navigationController?.present(viewController, animated: true)
     }
     
     private func showSessionRequest(_ sessionRequest: Request) {
@@ -76,8 +76,8 @@ final class WalletViewController: UIViewController {
     }
     
     func reloadSessionDetailsIfNeeded() {
-        if let sessionDetailsViewController = navigationController?.viewControllers.first(where: {$0 is SessionDetailsViewController}) as? SessionDetailsViewController {
-            sessionDetailsViewController.reloadTable()
+        if let viewController = navigationController?.presentedViewController as? SessionDetailViewController {
+            viewController.reload()
         }
     }
     
@@ -130,7 +130,7 @@ extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
         print("did select row \(indexPath)")
         let itemTopic = sessionItems[indexPath.row].topic
         if let session = Auth.instance.getSessions().first{$0.topic == itemTopic} {
-            showSessionDetailsViewController(session)
+            showSessionDetails(with: session)
         }
     }
 }

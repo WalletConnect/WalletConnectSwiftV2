@@ -11,7 +11,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             name: "Example Wallet",
             description: "wallet description",
             url: "example.wallet",
-            icons: ["https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"])
+            icons: ["https://avatars.githubusercontent.com/u/37784886"])
         Auth.configure(Auth.Config(metadata: metadata, projectId: "8ba9ee138960775e5231b70cc5ef1c3a"))
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
