@@ -6,7 +6,7 @@ import Combine
 
 final class ControllerSessionStateMachine {
     var onNamespacesUpdate: ((String, [String: SessionNamespace])->())?
-    var onExpiryUpdate: ((String, Date)->())?
+    var onExtend: ((String, Date)->())?
 
     private let sessionStore: WCSessionStorage
     private let networkingInteractor: NetworkInteracting
@@ -82,7 +82,7 @@ final class ControllerSessionStateMachine {
         switch result {
         case .response:
             //TODO - state sync
-            onExpiryUpdate?(session.topic, session.expiryDate)
+            onExtend?(session.topic, session.expiryDate)
         case .error:
             //TODO - state sync
             logger.error("Peer failed to update events.")

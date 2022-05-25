@@ -17,7 +17,7 @@ class ClientDelegate: SignClientDelegate {
     var onSessionDelete: (()->())?
     var onSessionUpdateNamespaces: ((String, [String : SessionNamespace])->())?
     var onSessionUpdateEvents: ((String, Set<String>)->())?
-    var onSessionUpdateExpiry: ((String, Date)->())?
+    var onSessionExtend: ((String, Date)->())?
     var onEventReceived: ((Session.Event, String)->())?
     var onPairingUpdate: ((Pairing)->())?
     
@@ -44,8 +44,8 @@ class ClientDelegate: SignClientDelegate {
     func didUpdate(sessionTopic: String, namespaces: [String : SessionNamespace]) {
         onSessionUpdateNamespaces?(sessionTopic, namespaces)
     }
-    func didUpdate(sessionTopic: String, expiry: Date) {
-        onSessionUpdateExpiry?(sessionTopic, expiry)
+    func didExtend(sessionTopic: String, to date: Date) {
+        onSessionExtend?(sessionTopic, date)
     }
     func didReceive(event: Session.Event, sessionTopic: String, chainId: Blockchain?) {
         onEventReceived?(event, sessionTopic)

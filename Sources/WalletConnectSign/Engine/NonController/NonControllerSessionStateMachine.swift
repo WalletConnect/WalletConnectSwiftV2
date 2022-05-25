@@ -7,7 +7,7 @@ import Combine
 final class NonControllerSessionStateMachine {
     
     var onNamespacesUpdate: ((String, [String: SessionNamespace])->())?
-    var onExpiryUpdate: ((String, Date) -> ())?
+    var onExtend: ((String, Date) -> ())?
     
     private let sessionStore: WCSessionStorage
     private let networkingInteractor: NetworkInteracting
@@ -80,6 +80,6 @@ final class NonControllerSessionStateMachine {
         }
         sessionStore.setSession(session)
         networkingInteractor.respondSuccess(for: payload)
-        onExpiryUpdate?(session.topic, session.expiryDate)
+        onExtend?(session.topic, session.expiryDate)
     }
 }

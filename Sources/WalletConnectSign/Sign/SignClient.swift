@@ -307,14 +307,14 @@ public final class SignClient {
         controllerSessionStateMachine.onNamespacesUpdate = { [unowned self] topic, namespaces in
             delegate?.didUpdate(sessionTopic: topic, namespaces: namespaces)
         }
-        controllerSessionStateMachine.onExpiryUpdate = { [unowned self] topic, expiry in
-            delegate?.didUpdate(sessionTopic: topic, expiry: expiry)
+        controllerSessionStateMachine.onExtend = { [unowned self] topic, date in
+            delegate?.didExtend(sessionTopic: topic, to: date)
         }
         nonControllerSessionStateMachine.onNamespacesUpdate = { [unowned self] topic, namespaces in
             delegate?.didUpdate(sessionTopic: topic, namespaces: namespaces)
         }
-        nonControllerSessionStateMachine.onExpiryUpdate = { [unowned self] topic, expiry in
-            delegate?.didUpdate(sessionTopic: topic, expiry: expiry)
+        nonControllerSessionStateMachine.onExtend = { [unowned self] topic, date in
+            delegate?.didExtend(sessionTopic: topic, to: date)
         }
         sessionEngine.onEventReceived = { [unowned self] topic, event, chainId in
             delegate?.didReceive(event: event, sessionTopic: topic, chainId: chainId)
