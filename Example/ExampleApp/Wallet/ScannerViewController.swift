@@ -50,12 +50,14 @@ extension ScannerViewController: AVCaptureMetadataOutputObjectsDelegate {
         _ output: AVCaptureMetadataOutput,
         didOutput metadataObjects: [AVMetadataObject],
         from connection: AVCaptureConnection) {
-
+            
         if let metadata = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
             metadata.type == .qr,
             let qrCode = metadata.stringValue {
-            delegate?.didScan(qrCode)
-            dismiss(animated: true)
+            captureSession.stopRunning()
+            dismiss(animated: true)  { [weak self] in
+                self?.delegate?.didScan(qrCode)
+            }
         }
     }
 }
