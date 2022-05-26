@@ -24,10 +24,10 @@ Anyone who registers a project into the cloud application will be granted a Proj
 
 ## Documentation & Usage
 To dive deeper into the protocol concepts, check out our documentation:
-- [Getting started with wallet integration](https://docs.walletconnect.com/2.0/quick-start/wallets/swift)
-- [Protocol Documentation](https://docs.walletconnect.com/2.0/protocol/client-communication)
+- [Getting started with wallet integration](https://docs.walletconnect.com/2.0/swift/sign/installation)
+- [Protocol Documentation](https://github.com/WalletConnect/walletconnect-specs)
 - [Beginner guide to WalletConnect v2.0 for iOS Developers](https://medium.com/walletconnect/beginner-guide-to-walletconnect-v2-0-for-swift-developers-4534b0975218)
-- [Glossary](https://docs.walletconnect.com/2.0/protocol/glossary)
+- [Glossary](https://docs.walletconnect.com/2.0/introduction/glossary)
 - To build the docs for the native client's API, go to **XCode > Product > Build Documentation**
 
 
