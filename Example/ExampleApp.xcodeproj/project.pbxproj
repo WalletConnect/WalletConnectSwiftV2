@@ -52,7 +52,7 @@
 		A5A4FC5A283CC08600BBEC1E /* SessionNamespaceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC59283CC08600BBEC1E /* SessionNamespaceViewModel.swift */; };
 		A5A4FC5C283D1F6700BBEC1E /* SessionDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC5B283D1F6700BBEC1E /* SessionDetailViewController.swift */; };
 		A5A4FC5E283D23CA00BBEC1E /* Array.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC5D283D23CA00BBEC1E /* Array.swift */; };
-		A5A4FC772840C12C00BBEC1E /* PairingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC762840C12C00BBEC1E /* PairingTests.swift */; };
+		A5A4FC772840C12C00BBEC1E /* RegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC762840C12C00BBEC1E /* RegressionTests.swift */; };
 		A5E22D1A2840C62A00E36487 /* Engine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D192840C62A00E36487 /* Engine.swift */; };
 		A5E22D1C2840C85D00E36487 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D1B2840C85D00E36487 /* App.swift */; };
 		A5E22D1E2840C8BF00E36487 /* RoutingEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D1D2840C8BF00E36487 /* RoutingEngine.swift */; };
@@ -153,7 +153,7 @@
 		A5A4FC5B283D1F6700BBEC1E /* SessionDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailViewController.swift; sourceTree = "<group>"; };
 		A5A4FC5D283D23CA00BBEC1E /* Array.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Array.swift; sourceTree = "<group>"; };
 		A5A4FC722840C12C00BBEC1E /* UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		A5A4FC762840C12C00BBEC1E /* PairingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingTests.swift; sourceTree = "<group>"; };
+		A5A4FC762840C12C00BBEC1E /* RegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegressionTests.swift; sourceTree = "<group>"; };
 		A5E22D192840C62A00E36487 /* Engine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Engine.swift; sourceTree = "<group>"; };
 		A5E22D1B2840C85D00E36487 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		A5E22D1D2840C8BF00E36487 /* RoutingEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutingEngine.swift; sourceTree = "<group>"; };
@@ -411,7 +411,7 @@
 		A5E22D252840D08B00E36487 /* Regression */ = {
 			isa = PBXGroup;
 			children = (
-				A5A4FC762840C12C00BBEC1E /* PairingTests.swift */,
+				A5A4FC762840C12C00BBEC1E /* RegressionTests.swift */,
 			);
 			path = Regression;
 			sourceTree = "<group>";
@@ -694,7 +694,7 @@
 				A5E22D1E2840C8BF00E36487 /* RoutingEngine.swift in Sources */,
 				A5E22D222840C8D300E36487 /* WalletEngine.swift in Sources */,
 				A5E22D1C2840C85D00E36487 /* App.swift in Sources */,
-				A5A4FC772840C12C00BBEC1E /* PairingTests.swift in Sources */,
+				A5A4FC772840C12C00BBEC1E /* RegressionTests.swift in Sources */,
 				A5E22D242840C8DB00E36487 /* SafariEngine.swift in Sources */,
 				A5E22D1A2840C62A00E36487 /* Engine.swift in Sources */,
 				A5E22D2C2840EAC300E36487 /* XCUIElement.swift in Sources */,
