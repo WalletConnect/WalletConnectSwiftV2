@@ -41,8 +41,7 @@ final class SequenceStore<T> where T: ExpirableSequence {
     }
 
     func getAll() -> [T] {
-        return storage.dictionaryRepresentation().compactMap {
-            guard $0.key.hasPrefix(identifier) else {return nil}
+        return dictionaryForIdentifier().compactMap {
             if let data = $0.value as? Data, let sequence = try? JSONDecoder().decode(T.self, from: data) {
                 return verifyExpiry(on: sequence)
             }
@@ -52,6 +51,11 @@ final class SequenceStore<T> where T: ExpirableSequence {
 
     func delete(topic: String) {
         storage.removeObject(forKey: getKey(for: topic))
+    }
+    
+    func deleteAll() {
+        dictionaryForIdentifier()
+            .forEach { storage.removeObject(forKey: $0.key) }
     }
     
     private func verifyExpiry(on sequence: T) -> T? {
@@ -66,5 +70,10 @@ final class SequenceStore<T> where T: ExpirableSequence {
     
     private func getKey(for topic: String) -> String {
         return "\(identifier).\(topic)"
+    }
+    
+    private func dictionaryForIdentifier() -> [String : Any] {
+        return storage.dictionaryRepresentation()
+            .filter { $0.key.hasPrefix("\(identifier).") }
     }
 }

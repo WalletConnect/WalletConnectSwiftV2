@@ -33,6 +33,7 @@ public final class SignClient {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementService
     private let history: JsonRpcHistory
+    private let cleanupService: CleanupService
 
     // MARK: - Initializers
 
@@ -52,7 +53,6 @@ public final class SignClient {
     init(metadata: AppMetadata, projectId: String, relayHost: String, logger: ConsoleLogging, kms: KeyManagementService, keyValueStorage: KeyValueStorage) {
         self.metadata = metadata
         self.logger = logger
-//        try? keychain.deleteAll() // Use for cleanup while lifecycles are not handled yet, but FIXME whenever
         self.kms = kms
         let relayClient = RelayClient(relayHost: relayHost, projectId: projectId, keyValueStorage: keyValueStorage, logger: logger)
         let serializer = Serializer(kms: kms)
@@ -66,6 +66,7 @@ public final class SignClient {
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.pairEngine = PairEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore)
+        self.cleanupService = CleanupService(pairingStore: pairingStore, sessionStore: sessionStore, kms: kms)
         setUpConnectionObserving(relayClient: relayClient)
         setUpEnginesCallbacks()
     }
@@ -97,6 +98,7 @@ public final class SignClient {
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.pairEngine = PairEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore)
+        self.cleanupService = CleanupService(pairingStore: pairingStore, sessionStore: sessionStore, kms: kms)
         setUpConnectionObserving(relayClient: relayClient)
         setUpEnginesCallbacks()
     }
@@ -327,4 +329,13 @@ public final class SignClient {
             sessionEngine.setSubscription(topic: sessionTopic)
         }
     }
+
+#if DEBUG
+    /// Delete all stored data sach as: pairings, sessions, keys
+    ///
+    /// - Note: Doesn't unsubscribe from topics
+    public func cleanup() throws {
+        try cleanupService.cleanup()
+    }
+#endif
 }

@@ -5,6 +5,7 @@ protocol WCSessionStorage: AnyObject {
     func getSession(forTopic topic: String) -> WCSession?
     func getAll() -> [WCSession]
     func delete(topic: String)
+    func deleteAll()
 }
 
 final class SessionStorage: WCSessionStorage {
@@ -38,5 +39,9 @@ final class SessionStorage: WCSessionStorage {
     
     func delete(topic: String) {
         storage.delete(topic: topic)
+    }
+    
+    func deleteAll() {
+        storage.deleteAll()
     }
 }

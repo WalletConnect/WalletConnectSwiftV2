@@ -21,7 +21,7 @@ final class SequenceStoreTests: XCTestCase {
     override func setUp() {
         timeTraveler = TimeTraveler()
         storageFake = RuntimeKeyValueStorage()
-        sut = SequenceStore<ExpirableSequenceStub>(storage: storageFake, identifier: "", dateInitializer: timeTraveler.generateDate)
+        sut = makeStore("test")
         sut.onSequenceExpiration = { _ in
             XCTFail("Unexpected expiration call")
         }
@@ -31,6 +31,14 @@ final class SequenceStoreTests: XCTestCase {
         timeTraveler = nil
         storageFake = nil
         sut = nil
+    }
+    
+    private func makeStore(_ identifier: String) -> SequenceStore<ExpirableSequenceStub> {
+        return SequenceStore<ExpirableSequenceStub>(
+            storage: storageFake,
+            identifier: identifier,
+            dateInitializer: timeTraveler.generateDate
+        )
     }
     
     private func stubSequence(expiry: TimeInterval? = nil) -> ExpirableSequenceStub {
@@ -71,6 +79,22 @@ final class SequenceStoreTests: XCTestCase {
         let retrieved = try? sut.getSequence(forTopic: sequence.topic)
         XCTAssertFalse(sut.hasSequence(forTopic: sequence.topic))
         XCTAssertNil(retrieved)
+    }
+    
+    func testDeleteAll() {
+        let sequence = stubSequence()
+        sut.setSequence(sequence)
+        
+        let sut2 = makeStore("test2")
+        sut2.setSequence(sequence)
+        
+        XCTAssertFalse(sut.getAll().isEmpty)
+        XCTAssertFalse(sut2.getAll().isEmpty)
+
+        sut.deleteAll()
+
+        XCTAssertTrue(sut.getAll().isEmpty)
+        XCTAssertFalse(sut2.getAll().isEmpty)
     }
     
     // MARK: - Expiration Tests

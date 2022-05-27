@@ -5,6 +5,7 @@ protocol WCPairingStorage: AnyObject {
     func getPairing(forTopic topic: String) -> WCPairing?
     func getAll() -> [WCPairing]
     func delete(topic: String)
+    func deleteAll()
 }
 
 final class PairingStorage: WCPairingStorage {
@@ -38,5 +39,9 @@ final class PairingStorage: WCPairingStorage {
     
     func delete(topic: String) {
         storage.delete(topic: topic)
+    }
+    
+    func deleteAll() {
+        storage.deleteAll()
     }
 }
