@@ -113,6 +113,12 @@ private extension SessionDetailView {
         }
         .background(Color(.systemGroupedBackground))
         .listRowInsets(EdgeInsets())
+        .alert("Received ping response", isPresented: $viewModel.pingSuccess) {
+            Button("OK", role: .cancel) { }
+        }
+        .alert("Ping failed", isPresented: $viewModel.pingFailed) {
+            Button("OK", role: .cancel) { }
+        }
     }
     
     func headerRow(_ text: String) -> some View {

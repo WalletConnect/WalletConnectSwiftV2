@@ -38,4 +38,14 @@ struct WalletEngine {
     var rejectButton: XCUIElement {
         instance.buttons["Reject"]
     }
+    
+    // SessionDetails
+    
+    var pingButton: XCUIElement {
+        instance.buttons["Ping"]
+    }
+    
+    var pingAlert: XCUIElement {
+        instance.alerts.element.staticTexts["Received ping response"]
+    }
 }

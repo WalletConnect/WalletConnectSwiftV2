@@ -4,7 +4,8 @@ class PairingTests: XCTestCase {
     
     private let engine: Engine = Engine()
     
-    override func setUp() {
+    override class func setUp() {
+        let engine = Engine()
         engine.routing.delete(app: .wallet)
         engine.routing.delete(app: .dapp)
     }
@@ -40,5 +41,16 @@ class PairingTests: XCTestCase {
         
         XCTAssertTrue(engine.dapp.accountRow.exists)
         XCTAssertTrue(engine.dapp.disconnectButton.exists)
+    }
+    
+    func testPingResponse() {
+        engine.routing.open(app: .dapp)
+        engine.routing.open(app: .wallet)
+        
+        engine.wallet.sessionRow.tap()
+        engine.wallet.pingButton.tap()
+        
+        engine.wallet.pingAlert.waitForAppearence()
+        XCTAssertTrue(engine.wallet.pingAlert.exists)
     }
 }
