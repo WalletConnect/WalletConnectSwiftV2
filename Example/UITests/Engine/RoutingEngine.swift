@@ -7,8 +7,14 @@ struct RoutingEngine {
         return App.springboard.instance
     }
     
-    func open(app: App) {
+    func launch(app: App) {
         app.instance.launch()
+        app.instance.waitForAppearence()
+    }
+    
+    func activate(app: App) {
+        app.instance.activate()
+        app.instance.waitForAppearence()
     }
     
     func home() {

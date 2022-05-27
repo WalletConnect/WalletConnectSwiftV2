@@ -10,47 +10,63 @@ class PairingTests: XCTestCase {
         engine.routing.delete(app: .dapp)
     }
     
-    func testPairingCreation() {
-        engine.routing.open(app: .dapp)
+    override func setUp() {
+        engine.routing.launch(app: .dapp)
+        engine.routing.launch(app: .wallet)
+    }
 
-        // Connect button doesn't work without it for some reasons
+    /// Check pairing proposal approval via QR code or uri
+    /// - TU001
+    func test01PairingCreation() {
+        engine.routing.activate(app: .dapp)
+
+        // TODO: Figure out why you need to wait here
         engine.routing.wait(for: 2)
 
-        engine.dapp.connectButton.tap()
-        engine.dapp.newPairingButton.tap()
-        engine.dapp.copyURIButton.tap()
+        engine.dapp.connectButton.waitTap()
 
-        engine.routing.open(app: .wallet)
+        engine.dapp.newPairingButton.waitTap()
+        engine.dapp.copyURIButton.waitTap()
 
-        XCTAssertFalse(engine.wallet.sessionRow.exists)
+        engine.routing.activate(app: .wallet)
 
-        engine.wallet.pasteURIButton.tap()
-        engine.wallet.uriTextfield.typeText(UIPasteboard.general.string!)
+        XCTAssertFalse(engine.wallet.sessionRow.waitExists())
+
+        engine.wallet.pasteURIButton.waitTap()
+        engine.wallet.uriTextfield.waitTypeText(UIPasteboard.general.string!)
 
         let uri = engine.wallet.uriTextfield.value as? String
         XCTAssertEqual(uri!.prefix(3), "wc:")
         XCTAssertEqual(uri!.suffix(20), "&relay-protocol=waku")
 
-        engine.wallet.connectButton.tap()
-        engine.wallet.approveButton.tap()
+        engine.wallet.connectButton.waitTap()
 
-        XCTAssertTrue(engine.wallet.sessionRow.exists)
-        
-        engine.routing.open(app: .dapp)
-        engine.dapp.accountRow.waitForAppearence()
-        
-        XCTAssertTrue(engine.dapp.accountRow.exists)
-        XCTAssertTrue(engine.dapp.disconnectButton.exists)
+        engine.approveSessionAndCheck()
     }
     
-    func testPingResponse() {
-        engine.routing.open(app: .dapp)
-        engine.routing.open(app: .wallet)
+    /// Check session ping on Wallet
+    /// - TU002
+    func test02PingResponse() {
+        engine.routing.activate(app: .wallet)
         
-        engine.wallet.sessionRow.tap()
-        engine.wallet.pingButton.tap()
+        engine.wallet.sessionRow.waitTap()
+        engine.wallet.pingButton.waitTap()
         
-        engine.wallet.pingAlert.waitForAppearence()
-        XCTAssertTrue(engine.wallet.pingAlert.exists)
+        XCTAssertTrue(engine.wallet.pingAlert.waitExists())
+    }
+    
+    /// Approve session on existing pairing
+    /// - TU004
+    func test04ApproveSessionExistingPairing() {
+        engine.routing.activate(app: .dapp)
+
+        engine.dapp.disconnectButton.waitTap()
+        engine.dapp.connectButton.waitTap()
+        engine.dapp.pairingRow.waitTap()
+        
+        // TODO: Figure out why you need to wait here
+        engine.routing.wait(for: 2)
+        
+        engine.approveSessionAndCheck()
     }
 }

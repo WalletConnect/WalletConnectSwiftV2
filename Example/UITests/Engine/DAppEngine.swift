@@ -13,14 +13,6 @@ struct DAppEngine {
         instance.buttons["Connect"]
     }
     
-    var newPairingButton: XCUIElement {
-        instance.buttons["New Pairing"]
-    }
-    
-    var copyURIButton: XCUIElement {
-        instance.buttons["Copy"]
-    }
-    
     // Accounts screen
     
     var accountRow: XCUIElement {
@@ -29,5 +21,19 @@ struct DAppEngine {
     
     var disconnectButton: XCUIElement {
         instance.buttons["Disconnect"]
+    }
+    
+    // Pairing screen
+    
+    var pairingRow: XCUIElement {
+        instance.staticTexts["Example Wallet"]
+    }
+    
+    var newPairingButton: XCUIElement {
+        instance.buttons["New Pairing"]
+    }
+    
+    var copyURIButton: XCUIElement {
+        instance.buttons["Copy"]
     }
 }

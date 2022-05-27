@@ -32,4 +32,19 @@ extension XCUIElement {
             tap()
         }
     }
+    
+    func waitTap() {
+        waitForAppearence()
+        tap()
+    }
+    
+    func waitTypeText(_ text: String) {
+        waitForAppearence()
+        typeText(text)
+    }
+    
+    func waitExists() -> Bool {
+        waitForAppearence()
+        return exists
+    }
 }
