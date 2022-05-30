@@ -2,7 +2,7 @@
 import Foundation
 import WalletConnectUtils
 
-struct MessagingRequest: Codable {
+struct ChatRequest: Codable {
     let id: Int64
     let jsonrpc: String
     let method: Method
@@ -56,13 +56,13 @@ struct MessagingRequest: Codable {
     }
 }
 
-extension MessagingRequest {
+extension ChatRequest {
     enum Method: String, Codable {
         case invite = "wc_messaging_invite"
         case message = "wv_messaging_message"
     }
 }
-extension MessagingRequest {
+extension ChatRequest {
     enum Params: Codable {
         case invite(Invite)
         case message(String)

@@ -1,8 +1,8 @@
 
 import Foundation
 import WalletConnectUtils
-import Relayer
 import WalletConnectKMS
+import WalletConnectRelay
 
 
 protocol MessagingDelegate: AnyObject {
@@ -18,7 +18,7 @@ class Chat {
     public weak var delegate: MessagingDelegate?
 
     init(registry: Registry,
-         relayClient: Relayer,
+         relayClient: RelayClient,
          kms: KeyManagementService) {
         self.registry = registry
         
@@ -35,7 +35,6 @@ class Chat {
     
     func register(account: Account) {
         engine.register(account: account)
-
     }
     
     func invite(account: Account) {

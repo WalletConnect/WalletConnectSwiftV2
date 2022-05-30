@@ -2,7 +2,7 @@
 import Foundation
 import WalletConnectKMS
 import WalletConnectUtils
-import Relayer
+import WalletConnectRelay
 import Combine
 
 class Engine {
@@ -42,8 +42,8 @@ class Engine {
         let pubKey = try! kms.createX25519KeyPair()
         let invite = Invite(pubKey: pubKey.hexRepresentation, message: "hello")
         let topic = try! AgreementPublicKey(hex: peerPubKeyHex).rawRepresentation.sha256().toHexString()
-        let request = MessagingRequest(method: .invite, params: .invite(invite))
-        networkingInteractor.request(request, topic: topic)
+        let request = ChatRequest(method: .invite, params: .invite(invite))
+        networkingInteractor.requestUnencrypted(request, topic: topic)
         let agreementKeys = try! kms.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: peerPubKeyHex)
         let threadTopic = agreementKeys.derivedTopic()
         networkingInteractor.subscribe(topic: threadTopic)
@@ -70,8 +70,9 @@ class Engine {
     private func handleResponse(_ response: MessagingResponse) {
         switch response.requestParams {
         case .invite(let invite):
-            let thread = Thread(topic: <#T##String#>, pubKey: <#T##String#>)
-            onNewThread?()
+            fatalError("thread to fix")
+            let thread = Thread(topic: "topic-todo", pubKey: "")
+            onNewThread?(thread)
             print("invite response: \(invite)")
         case .message(let message):
             print("received message response: \(message)")
@@ -87,13 +88,13 @@ class Engine {
 
 struct RequestSubscriptionPayload: Codable {
     let topic: String
-    let request: MessagingRequest
+    let request: ChatRequest
 }
 
 struct MessagingResponse: Codable {
     let topic: String
-    let requestMethod: MessagingRequest.Method
-    let requestParams: MessagingRequest.Params
+    let requestMethod: ChatRequest.Method
+    let requestParams: ChatRequest.Params
     let result: JsonRpcResult
 }
 

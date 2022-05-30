@@ -1,12 +1,12 @@
 
 import Foundation
 import Combine
-import Relayer
+import WalletConnectRelay
 import WalletConnectUtils
 
 
 class NetworkingInteractor {
-    let networkRelayer: Relayer
+    let networkRelayer: RelayClient
     private let serializer: Serializing
     var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {
         requestPublisherSubject.eraseToAnyPublisher()
@@ -18,7 +18,7 @@ class NetworkingInteractor {
     }
     private let responsePublisherSubject = PassthroughSubject<MessagingResponse, Never>()
 
-    init(relayClient: Relayer,
+    init(relayClient: RelayClient,
          serializer: Serializing) {
         self.networkRelayer = relayClient
         self.serializer = serializer
@@ -28,10 +28,19 @@ class NetworkingInteractor {
         }
     }
     
-    func request(_ request: MessagingRequest, topic: String) {
+    func requestUnencrypted(_ request: ChatRequest, topic: String) {
+        let message = try! request.json()
+        networkRelayer.publish(topic: topic, payload: message) {error in
+            print(error)
+        }
+    }
+    
+    func request(_ request: ChatRequest, topic: String) {
+        
+        
         let message = try! serializer.serialize(topic: topic, encodable: request)
-                networkRelayer.publish(topic: topic, payload: message) {error in
-                    print(error)
+        networkRelayer.publish(topic: topic, payload: message) {error in
+            print(error)
         }
     }
     
@@ -44,7 +53,7 @@ class NetworkingInteractor {
     }
     
     private func manageSubscription(_ topic: String, _ message: String) {
-        if let deserializedJsonRpcRequest: MessagingRequest = serializer.tryDeserialize(topic: topic, message: message) {
+        if let deserializedJsonRpcRequest: ChatRequest = serializer.tryDeserialize(topic: topic, message: message) {
             handleWCRequest(topic: topic, request: deserializedJsonRpcRequest)
         } else if let deserializedJsonRpcResponse: JSONRPCResponse<AnyCodable> = serializer.tryDeserialize(topic: topic, message: message) {
             handleJsonRpcResponse(response: deserializedJsonRpcResponse)
@@ -58,7 +67,7 @@ class NetworkingInteractor {
     
     
     
-    private func handleWCRequest(topic: String, request: MessagingRequest) {
+    private func handleWCRequest(topic: String, request: ChatRequest) {
         do {
             let payload = RequestSubscriptionPayload(topic: topic, request: request)
             requestPublisherSubject.send(payload)

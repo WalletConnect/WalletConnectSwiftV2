@@ -11,10 +11,9 @@ final class ChatTests: XCTestCase {
     var client1: Chat!
     var client2: Chat!
     var registry: KeyValueRegistry!
+    
     override func setUp() {
         registry = KeyValueRegistry()
-
-        
         client1 = makeClient()
         client2 = makeClient()
     }
@@ -38,7 +37,8 @@ final class ChatTests: XCTestCase {
             client1.accept(invite: invite)
             inviteExpectation.fulfill()
         }
-        client1.message(threadTopic: <#T##String#>, message: <#T##String#>)
+        client1
+        client1.message(threadTopic: , message: "test message")
         waitForExpectations(timeout: 20, handler: nil)
 
     }
