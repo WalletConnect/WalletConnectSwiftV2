@@ -55,6 +55,9 @@ class NetworkingInteractor {
     private func manageSubscription(_ topic: String, _ message: String) {
         if let deserializedJsonRpcRequest: ChatRequest = serializer.tryDeserialize(topic: topic, message: message) {
             handleWCRequest(topic: topic, request: deserializedJsonRpcRequest)
+        } else if let decodedJsonRpcRequest: ChatRequest = tryDecodeRequest(message: message) {
+            handleWCRequest(topic: topic, request: decodedJsonRpcRequest)
+
         } else if let deserializedJsonRpcResponse: JSONRPCResponse<AnyCodable> = serializer.tryDeserialize(topic: topic, message: message) {
             handleJsonRpcResponse(response: deserializedJsonRpcResponse)
         } else if let deserializedJsonRpcError: JSONRPCErrorResponse = serializer.tryDeserialize(topic: topic, message: message) {
@@ -65,7 +68,12 @@ class NetworkingInteractor {
     }
     
     
-    
+    private func tryDecodeRequest(message: String) -> ChatRequest? {
+        guard let messageData = message.data(using: .utf8) else {
+            return nil
+        }
+        return try? JSONDecoder().decode(ChatRequest.self, from: messageData)
+    }
     
     private func handleWCRequest(topic: String, request: ChatRequest) {
         do {

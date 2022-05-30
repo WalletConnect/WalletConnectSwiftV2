@@ -14,32 +14,51 @@ final class ChatTests: XCTestCase {
     
     override func setUp() {
         registry = KeyValueRegistry()
-        client1 = makeClient()
-        client2 = makeClient()
+        client1 = makeClient(prefix: "🦖")
+        client2 = makeClient(prefix: "🍄")
     }
     
-    func makeClient() -> Chat {
+    private func waitClientsConnected() async {
+        let group = DispatchGroup()
+        group.enter()
+        client1.onConnected = {
+            group.leave()
+        }
+        group.enter()
+        client2.onConnected = {
+            group.leave()
+        }
+        group.wait()
+        return
+    }
+    
+    func makeClient(prefix: String) -> Chat {
+        let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let relayHost = "relay.walletconnect.com"
         let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
-        let relayClient = RelayClient(relayHost: relayHost, projectId: projectId)
+        let relayClient = RelayClient(relayHost: relayHost, projectId: projectId, logger: logger)
         let keychain = KeychainStorage(keychainService: KeychainServiceFake(), serviceIdentifier: "")
 
-        return Chat(registry: registry, relayClient: relayClient, kms: KeyManagementService(keychain: keychain))
+        return Chat(registry: registry, relayClient: relayClient, kms: KeyManagementService(keychain: keychain), logger: logger)
     }
     
-    func testInvite() {
-        let inviteExpectation = expectation(description: "Proposer settles session")
+    func testNewThread() async {
+        await waitClientsConnected()
+
+        let newThreadExpectation = expectation(description: "new thread expectation")
 
         let account = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
         client1.register(account: account)
         client2.invite(account: account)
         client1.onInvite = { [unowned self] invite in
-            client1.accept(invite: invite)
-            inviteExpectation.fulfill()
+//            client1.accept(invite: invite)
+            newThreadExpectation.fulfill()
         }
-        client1
-        client1.message(threadTopic: , message: "test message")
-        waitForExpectations(timeout: 20, handler: nil)
+        client1.onNewThread = { [unowned self] thread in
+            
+        }
+//        client1.message(threadTopic: , message: "test message")
+        await waitForExpectations(timeout: 4, handler: nil)
 
     }
 }

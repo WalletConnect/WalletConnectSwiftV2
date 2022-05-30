@@ -10,6 +10,7 @@ class Engine {
     var onNewThread: ((Thread)->())?
     let networkingInteractor: NetworkingInteractor
     let registry: Registry
+    let logger: ConsoleLogging
     let kms: KeyManagementService
     let threadsStore = KeyValueStore<Thread>(defaults: RuntimeKeyValueStorage(), identifier: "threads")
     private var publishers = [AnyCancellable]()
@@ -17,11 +18,12 @@ class Engine {
     
     init(registry: Registry,
          networkingInteractor: NetworkingInteractor,
-         kms: KeyManagementService) {
+         kms: KeyManagementService,
+         logger: ConsoleLogging) {
         self.registry = registry
         self.kms = kms
         self.networkingInteractor = networkingInteractor
-        
+        self.logger = logger
         networkingInteractor.responsePublisher.sink { [unowned self] response in
             handleResponse(response)
         }.store(in: &publishers)
