@@ -4,6 +4,9 @@ import WalletConnectUtils
 import WalletConnectRelay
 import Combine
 
+public typealias Account = WalletConnectUtils.Account
+public typealias Blockchain = WalletConnectUtils.Blockchain
+
 public class Sign {
     public static let instance = Sign()
     

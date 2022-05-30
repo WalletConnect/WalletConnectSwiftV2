@@ -23,6 +23,10 @@ let package = Package(
             dependencies: ["WalletConnectRelay", "WalletConnectUtils", "WalletConnectKMS"],
             path: "Sources/WalletConnectSign"),
         .target(
+            name: "Chat",
+            dependencies: ["WalletConnectRelay", "WalletConnectUtils", "WalletConnectKMS"],
+            path: "Sources/Chat"),
+        .target(
             name: "WalletConnectRelay",
             dependencies: ["WalletConnectUtils", "Starscream"],
             path: "Sources/WalletConnectRelay"),
@@ -40,6 +44,9 @@ let package = Package(
             name: "IntegrationTests",
             dependencies: ["WalletConnectSign", "TestingUtils", "WalletConnectKMS"]),
         .testTarget(
+            name: "ChatTests",
+            dependencies: ["Chat", "WalletConnectUtils", "TestingUtils"]),
+        .testTarget(
             name: "RelayerTests",
             dependencies: ["WalletConnectRelay", "WalletConnectUtils", "TestingUtils"]),
         .testTarget(
@@ -49,6 +56,9 @@ let package = Package(
             name: "TestingUtils",
             dependencies: ["WalletConnectUtils", "WalletConnectKMS"],
             path: "Tests/TestingUtils"),
+        .testTarget(
+            name: "WalletConnectUtilsTests",
+            dependencies: ["WalletConnectUtils"]),
     ],
     swiftLanguageVersions: [.v5]
 )
