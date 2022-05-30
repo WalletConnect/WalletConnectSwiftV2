@@ -58,7 +58,9 @@ final class ChatTests: XCTestCase {
             
         }
 //        client1.message(threadTopic: , message: "test message")
-        await waitForExpectations(timeout: 4, handler: nil)
+        
+        wait(for: [newThreadExpectation], timeout: 4)
+
 
     }
 }
