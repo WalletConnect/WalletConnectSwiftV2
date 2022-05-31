@@ -85,6 +85,12 @@ final class KeyManagementServiceMock: KeyManagementServiceProtocol {
     func deleteAgreementSecret(for topic: String) {
         agreementKeys[topic] = nil
     }
+    
+    func deleteAll() throws {
+        privateKeys = [:]
+        symmetricKeys = [:]
+        agreementKeys = [:]
+    }
 }
 
 extension KeyManagementServiceMock {

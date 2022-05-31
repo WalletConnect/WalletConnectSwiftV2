@@ -25,5 +25,9 @@ final class WCSessionStorageMock: WCSessionStorage {
     func delete(topic: String) {
         sessions[topic] = nil
     }
+    
+    func deleteAll() {
+        sessions = [:]
+    }
 }
 

@@ -13,6 +13,7 @@ public protocol KeyManagementServiceProtocol {
     func deletePrivateKey(for publicKey: String)
     func deleteAgreementSecret(for topic: String)
     func deleteSymmetricKey(for topic: String)
+    func deleteAll() throws
     func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementKeys
 }
 
@@ -122,7 +123,9 @@ public class KeyManagementService: KeyManagementServiceProtocol {
         return try KeyManagementService.generateAgreementKey(from: privateKey, peerPublicKey: hexRepresentation)
     }
     
-    
+    public func deleteAll() throws {
+        try keychain.deleteAll()
+    }
     
     static func generateAgreementKey(from privateKey: AgreementPrivateKey, peerPublicKey hexRepresentation: String) throws -> AgreementKeys {
         let peerPublicKey = try AgreementPublicKey(rawRepresentation: Data(hex: hexRepresentation))
