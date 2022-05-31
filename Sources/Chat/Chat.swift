@@ -5,11 +5,6 @@ import WalletConnectKMS
 import WalletConnectRelay
 import Combine
 
-enum StorageDomainIdentifiers: String {
-    case topicToInvitationPubKey = "com.walletconnect.chat.topicToInvitationPubKey"
-    case invite = "com.walletconnect.chat.invite"
-}
-
 
 class Chat {
     private var publishers = [AnyCancellable]()
