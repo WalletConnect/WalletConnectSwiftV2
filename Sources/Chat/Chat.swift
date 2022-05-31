@@ -32,6 +32,9 @@ class Chat {
         engine.onInvite = { [unowned self] invite in
             onInvite?(invite)
         }
+        engine.onNewThread = { [unowned self] `thread` in
+            onNewThread?(`thread`)
+        }
     }
     
     func register(account: Account) {

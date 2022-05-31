@@ -4,48 +4,65 @@ import Combine
 import WalletConnectRelay
 import WalletConnectUtils
 
-
 class NetworkingInteractor {
-    let networkRelayer: RelayClient
+    let relayClient: RelayClient
     private let serializer: Serializing
     var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
     private let requestPublisherSubject = PassthroughSubject<RequestSubscriptionPayload, Never>()
     
-    var responsePublisher: AnyPublisher<MessagingResponse, Never> {
+    var responsePublisher: AnyPublisher<ChatResponse, Never> {
         responsePublisherSubject.eraseToAnyPublisher()
     }
-    private let responsePublisherSubject = PassthroughSubject<MessagingResponse, Never>()
+    private let responsePublisherSubject = PassthroughSubject<ChatResponse, Never>()
 
     init(relayClient: RelayClient,
          serializer: Serializing) {
-        self.networkRelayer = relayClient
+        self.relayClient = relayClient
         self.serializer = serializer
         
-        networkRelayer.onMessage = { [unowned self] topic, message in
+        relayClient.onMessage = { [unowned self] topic, message in
             manageSubscription(topic, message)
         }
     }
     
     func requestUnencrypted(_ request: ChatRequest, topic: String) {
         let message = try! request.json()
-        networkRelayer.publish(topic: topic, payload: message) {error in
+        relayClient.publish(topic: topic, payload: message) {error in
             print(error)
         }
     }
     
     func request(_ request: ChatRequest, topic: String) {
-        
-        
         let message = try! serializer.serialize(topic: topic, encodable: request)
-        networkRelayer.publish(topic: topic, payload: message) {error in
+        relayClient.publish(topic: topic, payload: message) {error in
             print(error)
         }
     }
     
+//    func respondSuccess(for payload: RequestSubscriptionPayload) {
+//        let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(true))
+//        respond(topic: payload.topic, response: JsonRpcResult.response(response)) { _ in }
+//    }
+//
+//    func respond(topic: String, response: JsonRpcResult, completion: @escaping ((Error?)->())) {
+//        do {
+//            _ = try jsonRpcHistory.resolve(response: response)
+//            let message = try serializer.serialize(topic: topic, encodable: response.value)
+//            logger.debug("Responding....topic: \(topic)")
+//            relayClient.publish(topic: topic, payload: message, prompt: false) { error in
+//                completion(error)
+//            }
+//        } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
+//            logger.info("Info: Json Rpc Duplicate Detected")
+//        } catch {
+//            completion(error)
+//        }
+//    }
+    
     func subscribe(topic: String)  {
-        networkRelayer.subscribe(topic: topic) { [weak self] error in
+        relayClient.subscribe(topic: topic) { [weak self] error in
             if let error = error {
                 print(error)
             }

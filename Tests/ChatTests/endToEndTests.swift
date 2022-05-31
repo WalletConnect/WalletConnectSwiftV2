@@ -42,25 +42,31 @@ final class ChatTests: XCTestCase {
         return Chat(registry: registry, relayClient: relayClient, kms: KeyManagementService(keychain: keychain), logger: logger)
     }
     
-    func testNewThread() async {
+    func testInvite() async {
         await waitClientsConnected()
-
-        let newThreadExpectation = expectation(description: "new thread expectation")
-
+        let inviteExpectation = expectation(description: "invitation expectation")
         let account = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
         client1.register(account: account)
         client2.invite(account: account)
-        client1.onInvite = { [unowned self] invite in
-//            client1.accept(invite: invite)
-            newThreadExpectation.fulfill()
+        client1.onInvite = { invite in
+            inviteExpectation.fulfill()
         }
-        client1.onNewThread = { [unowned self] thread in
-            
-        }
-//        client1.message(threadTopic: , message: "test message")
-        
-        wait(for: [newThreadExpectation], timeout: 4)
-
-
+        wait(for: [inviteExpectation], timeout: 4)
     }
+    
+    
+//    func testNewThread() async {
+//        await waitClientsConnected()
+//        let newThreadExpectation = expectation(description: "new thread expectation")
+//        let account = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
+//        client1.register(account: account)
+//        client2.invite(account: account)
+//        client1.onInvite = { [unowned self] invite in
+//            client1.accept(invite: invite)
+//        }
+//        client1.onNewThread = { [unowned self] thread in
+//            newThreadExpectation.fulfill()
+//        }
+//        wait(for: [newThreadExpectation], timeout: 4)
+//    }
 }

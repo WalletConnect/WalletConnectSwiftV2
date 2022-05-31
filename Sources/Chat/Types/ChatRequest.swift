@@ -58,8 +58,8 @@ struct ChatRequest: Codable {
 
 extension ChatRequest {
     enum Method: String, Codable {
-        case invite = "wc_messaging_invite"
-        case message = "wv_messaging_message"
+        case invite = "wc_chatInvite"
+        case message = "wc_chatMessage"
     }
 }
 extension ChatRequest {

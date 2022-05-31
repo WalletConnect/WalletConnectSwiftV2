@@ -52,7 +52,7 @@ class Engine {
         print("invite sent on topic: \(topic)")
     }
     
-    var pubKey: AgreementPublicKey!
+//    var pubKey: AgreementPublicKey!
     
     func accept(invite: Invite) {
         let agreementKeys = try! kms.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: invite.pubKey)
@@ -69,10 +69,9 @@ class Engine {
         print("did register and is subscribing on topic: \(topic)")
     }
     
-    private func handleResponse(_ response: MessagingResponse) {
+    private func handleResponse(_ response: ChatResponse) {
         switch response.requestParams {
         case .invite(let invite):
-            fatalError("thread to fix")
             let thread = Thread(topic: "topic-todo", pubKey: "")
             onNewThread?(thread)
             print("invite response: \(invite)")
@@ -83,38 +82,7 @@ class Engine {
     
     func handleInvite(_ invite: Invite) {
         onInvite?(invite)
+//        networkingInteractor.respondSuccess(for: RequestSubscriptionPayload)
     }
     
 }
-
-
-struct RequestSubscriptionPayload: Codable {
-    let topic: String
-    let request: ChatRequest
-}
-
-struct MessagingResponse: Codable {
-    let topic: String
-    let requestMethod: ChatRequest.Method
-    let requestParams: ChatRequest.Params
-    let result: JsonRpcResult
-}
-
-
-struct Invite: Codable {
-    let pubKey: String
-    let message: String
-}
-
-
-struct Thread: Codable {
-    let topic: String
-    let pubKey: String
-    //let peerName: String
-}
-public protocol Serializing {
-    func serialize(topic: String, encodable: Encodable) throws -> String
-    func tryDeserialize<T: Codable>(topic: String, message: String) -> T?
-}
-
-extension Serializer: Serializing {}
