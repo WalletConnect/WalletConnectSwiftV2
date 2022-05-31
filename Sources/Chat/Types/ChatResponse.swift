@@ -1,5 +1,6 @@
 
 import Foundation
+import WalletConnectUtils
 
 struct ChatResponse: Codable {
     let topic: String

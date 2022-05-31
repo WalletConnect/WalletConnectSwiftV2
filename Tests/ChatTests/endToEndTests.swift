@@ -39,7 +39,7 @@ final class ChatTests: XCTestCase {
         let relayClient = RelayClient(relayHost: relayHost, projectId: projectId, logger: logger)
         let keychain = KeychainStorage(keychainService: KeychainServiceFake(), serviceIdentifier: "")
 
-        return Chat(registry: registry, relayClient: relayClient, kms: KeyManagementService(keychain: keychain), logger: logger)
+        return Chat(registry: registry, relayClient: relayClient, kms: KeyManagementService(keychain: keychain), logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
     
     func testInvite() async {

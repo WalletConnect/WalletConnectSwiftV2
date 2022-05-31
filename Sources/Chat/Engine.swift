@@ -9,6 +9,8 @@ class Engine {
     var onInvite: ((Invite)->())?
     var onNewThread: ((Thread)->())?
     let networkingInteractor: NetworkingInteractor
+    let inviteStore: KeyValueStore<(Invite)>
+    let topicToInvitationPubKeyStore: KeyValueStore<String>
     let registry: Registry
     let logger: ConsoleLogging
     let kms: KeyManagementService
@@ -19,11 +21,15 @@ class Engine {
     init(registry: Registry,
          networkingInteractor: NetworkingInteractor,
          kms: KeyManagementService,
-         logger: ConsoleLogging) {
+         logger: ConsoleLogging,
+         topicToInvitationPubKeyStore: KeyValueStore<String>,
+         inviteStore: KeyValueStore<Invite>) {
         self.registry = registry
         self.kms = kms
         self.networkingInteractor = networkingInteractor
         self.logger = logger
+        self.inviteStore = inviteStore
+        self.topicToInvitationPubKeyStore = topicToInvitationPubKeyStore
         networkingInteractor.responsePublisher.sink { [unowned self] response in
             handleResponse(response)
         }.store(in: &publishers)
@@ -51,20 +57,29 @@ class Engine {
         networkingInteractor.subscribe(topic: threadTopic)
         print("invite sent on topic: \(topic)")
     }
+        
     
-//    var pubKey: AgreementPublicKey!
-    
-    func accept(invite: Invite) {
+    func accept(inviteId: String) throws {
+        guard let hexPubKey = try topicToInvitationPubKeyStore.get(key: "todo-topic") else {
+            throw ChatError.noPublicKeyForInviteId
+        }
+        let pubKey = try! AgreementPublicKey(hex: hexPubKey)
+        guard let invite = try inviteStore.get(key: inviteId) else {
+            throw ChatError.noInviteForId
+        }
         let agreementKeys = try! kms.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: invite.pubKey)
         let topic = agreementKeys.derivedTopic()
         networkingInteractor.subscribe(topic: topic)
+        //TODO
     }
-    
+        
     func register(account: Account) {
-        pubKey = try! kms.createX25519KeyPair()
-        print("registered pubKey: \(pubKey.hexRepresentation)")
-        registry.register(account: account, pubKey: pubKey.hexRepresentation)
+        let pubKey = try! kms.createX25519KeyPair()
+        let pubKeyHex = pubKey.hexRepresentation
+        print("registered pubKey: \(pubKeyHex)")
+        registry.register(account: account, pubKey: pubKeyHex)
         let topic = pubKey.rawRepresentation.sha256().toHexString()
+        try! topicToInvitationPubKeyStore.set(pubKeyHex, forKey: topic)
         networkingInteractor.subscribe(topic: topic)
         print("did register and is subscribing on topic: \(topic)")
     }
@@ -82,7 +97,7 @@ class Engine {
     
     func handleInvite(_ invite: Invite) {
         onInvite?(invite)
+        try? inviteStore.set(invite, forKey: invite.id)
 //        networkingInteractor.respondSuccess(for: RequestSubscriptionPayload)
     }
-    
 }
