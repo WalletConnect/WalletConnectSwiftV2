@@ -30,3 +30,8 @@ jobs:
       run: xcodebuild -project Example/ExampleApp.xcodeproj -scheme Wallet -sdk iphonesimulator
     - name: Build Example Dapp
       run: xcodebuild -project Example/ExampleApp.xcodeproj -scheme DApp -sdk iphonesimulator
+
+# UI tests
+    - name: UI Tests
+      run: xcodebuild -project Example/ExampleApp.xcodeproj -scheme UITests -destination 'platform=iOS Simulator,name=iPhone 13' test
+      continue-on-error: true
