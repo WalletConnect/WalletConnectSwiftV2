@@ -7,9 +7,15 @@ struct RoutingEngine {
         return App.springboard.instance
     }
     
+    func cleanLaunch(app: App) {
+        let app = app.instance
+        app.launchArguments = ["-cleanInstall"]
+        app.launch()
+        app.waitForAppearence()
+    }
+    
     func launch(app: App) {
         app.instance.launch()
-        app.instance.waitForAppearence()
     }
     
     func activate(app: App) {
@@ -23,36 +29,5 @@ struct RoutingEngine {
     
     func wait(for interval: TimeInterval) {
         Thread.sleep(forTimeInterval: interval)
-    }
-    
-    func delete(app: App) {
-        app.instance.terminate()
-
-        let icon = springboard.icons[app.displayName]
-
-        if icon.exists {
-            icon.press(forDuration: 1)
-
-            let buttonRemoveApp = springboard.buttons["Remove App"]
-            if buttonRemoveApp.waitForExistence(timeout: 5) {
-                buttonRemoveApp.tap()
-            } else {
-                XCTFail("Button \"Remove App\" not found")
-            }
-
-            let buttonDeleteApp = springboard.alerts.buttons["Delete App"]
-            if buttonDeleteApp.waitForExistence(timeout: 5) {
-                buttonDeleteApp.tap()
-            } else {
-                XCTFail("Button \"Delete App\" not found")
-            }
-
-            let buttonDelete = springboard.alerts.buttons["Delete"]
-            if buttonDelete.waitForExistence(timeout: 5) {
-                buttonDelete.tap()
-            } else {
-                XCTFail("Button \"Delete\" not found")
-            }
-        }
     }
 }

@@ -14,6 +14,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             icons: ["https://avatars.githubusercontent.com/u/37784886"])
         Sign.configure(Sign.Config(metadata: metadata, projectId: "8ba9ee138960775e5231b70cc5ef1c3a"))
         
+        if CommandLine.arguments.contains("-cleanInstall") {
+            try? Sign.instance.cleanup()
+        }
+        
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = UITabBarController.createExampleApp()

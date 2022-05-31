@@ -21,6 +21,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             url: "wallet.connect",
             icons: ["https://avatars.githubusercontent.com/u/37784886"])
         Sign.configure(Sign.Config(metadata: metadata, projectId: "8ba9ee138960775e5231b70cc5ef1c3a"))
+        
+        if CommandLine.arguments.contains("-cleanInstall") {
+            try? Sign.instance.cleanup()
+        }
+        
         Sign.instance.sessionDeletePublisher
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] _ in

@@ -3,11 +3,11 @@ import XCTest
 class PairingTests: XCTestCase {
     
     private let engine: Engine = Engine()
-    
+
     override class func setUp() {
         let engine = Engine()
-        engine.routing.delete(app: .wallet)
-        engine.routing.delete(app: .dapp)
+        engine.routing.cleanLaunch(app: .dapp)
+        engine.routing.cleanLaunch(app: .wallet)
     }
     
     override func setUp() {
