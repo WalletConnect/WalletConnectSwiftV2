@@ -10,8 +10,9 @@ public final class KeyValueStore<T> where T: Codable {
         self.prefix = identifier
     }
 
-    public func set(_ item: T, forKey key: String) throws {
-        let encoded = try JSONEncoder().encode(item)
+    public func set(_ item: T, forKey key: String) {
+        // This force-unwrap is safe because T are JSON Encodable
+        let encoded = try! JSONEncoder().encode(item)
         defaults.set(encoded, forKey: getContextPrefixedKey(for: key))
     }
 

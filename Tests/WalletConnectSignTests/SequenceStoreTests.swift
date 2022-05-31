@@ -20,7 +20,6 @@ final class SequenceStoreTests: XCTestCase {
     
     override func setUp() {
         timeTraveler = TimeTraveler()
-        storageFake = RuntimeKeyValueStorage()
         sut = makeStore("test")
         sut.onSequenceExpiration = { _ in
             XCTFail("Unexpected expiration call")
@@ -35,8 +34,7 @@ final class SequenceStoreTests: XCTestCase {
     
     private func makeStore(_ identifier: String) -> SequenceStore<ExpirableSequenceStub> {
         return SequenceStore<ExpirableSequenceStub>(
-            storage: storageFake,
-            identifier: identifier,
+            store: .init(defaults: RuntimeKeyValueStorage(), identifier: identifier),
             dateInitializer: timeTraveler.generateDate
         )
     }
