@@ -16,7 +16,7 @@ final class PairingEngineTests: XCTestCase {
     var networkingInteractor: MockedWCRelay!
     var storageMock: WCPairingStorageMock!
     var cryptoMock: KeyManagementServiceMock!
-    var proposalPayloadsStore: KeyValueStore<WCRequestSubscriptionPayload>!
+    var proposalPayloadsStore: CodableStore<WCRequestSubscriptionPayload>!
     
     var topicGenerator: TopicGenerator!
     
@@ -25,7 +25,7 @@ final class PairingEngineTests: XCTestCase {
         storageMock = WCPairingStorageMock()
         cryptoMock = KeyManagementServiceMock()
         topicGenerator = TopicGenerator()
-        proposalPayloadsStore = KeyValueStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: "")
+        proposalPayloadsStore = CodableStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: "")
         setupEngine()
     }
     
@@ -44,7 +44,7 @@ final class PairingEngineTests: XCTestCase {
             networkingInteractor: networkingInteractor,
             kms: cryptoMock,
             pairingStore: storageMock,
-            sessionToPairingTopic: KeyValueStore<String>(defaults: RuntimeKeyValueStorage(), identifier: ""),
+            sessionToPairingTopic: CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: ""),
             metadata: meta,
             logger: logger,
             topicGenerator: topicGenerator.getTopic,

@@ -44,7 +44,7 @@ public final class RelayClient {
         self.logger = logger
         self.dispatcher = dispatcher
         
-        self.jsonRpcSubscriptionsHistory = JsonRpcHistory<RelayJSONRPC.SubscriptionParams>(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: Self.historyIdentifier))
+        self.jsonRpcSubscriptionsHistory = JsonRpcHistory<RelayJSONRPC.SubscriptionParams>(logger: logger, keyValueStore: CodableStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: Self.historyIdentifier))
         setUpBindings()
     }
     

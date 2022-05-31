@@ -56,11 +56,11 @@ public final class SignClient {
         self.kms = kms
         let relayClient = RelayClient(relayHost: relayHost, projectId: projectId, keyValueStorage: keyValueStorage, logger: logger)
         let serializer = Serializer(kms: kms)
-        self.history = JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
+        self.history = JsonRpcHistory(logger: logger, keyValueStore: CodableStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
         self.networkingInteractor = NetworkInteractor(relayClient: relayClient, serializer: serializer, logger: logger, jsonRpcHistory: history)
         let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue)))
         let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue)))
-        let sessionToPairingTopic = KeyValueStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
+        let sessionToPairingTopic = CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
         self.pairingEngine = PairingEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
         self.sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
@@ -88,11 +88,11 @@ public final class SignClient {
         self.logger = logger
         self.kms = kms
         let serializer = Serializer(kms: kms)
-        self.history = JsonRpcHistory(logger: logger, keyValueStore: KeyValueStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
+        self.history = JsonRpcHistory(logger: logger, keyValueStore: CodableStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
         self.networkingInteractor = NetworkInteractor(relayClient: relayClient, serializer: serializer, logger: logger, jsonRpcHistory: history)
         let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue)))
         let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue)))
-        let sessionToPairingTopic = KeyValueStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
+        let sessionToPairingTopic = CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
         self.pairingEngine = PairingEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
         self.sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)

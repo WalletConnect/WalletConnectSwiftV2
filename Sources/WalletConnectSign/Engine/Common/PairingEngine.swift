@@ -9,11 +9,11 @@ final class PairingEngine {
     var onProposeResponse: ((String, SessionProposal)->())?
     var onSessionRejected: ((Session.Proposal, SessionType.Reason)->())?
 
-    private let proposalPayloadsStore: KeyValueStore<WCRequestSubscriptionPayload>
+    private let proposalPayloadsStore: CodableStore<WCRequestSubscriptionPayload>
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private let pairingStore: WCPairingStorage
-    private let sessionToPairingTopic: KeyValueStore<String>
+    private let sessionToPairingTopic: CodableStore<String>
     private var metadata: AppMetadata
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
@@ -22,11 +22,11 @@ final class PairingEngine {
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
          pairingStore: WCPairingStorage,
-         sessionToPairingTopic: KeyValueStore<String>,
+         sessionToPairingTopic: CodableStore<String>,
          metadata: AppMetadata,
          logger: ConsoleLogging,
          topicGenerator: @escaping () -> String = String.generateTopic,
-         proposalPayloadsStore: KeyValueStore<WCRequestSubscriptionPayload> = KeyValueStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.proposals.rawValue)) {
+         proposalPayloadsStore: CodableStore<WCRequestSubscriptionPayload> = CodableStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.proposals.rawValue)) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.metadata = metadata

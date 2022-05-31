@@ -46,7 +46,7 @@ final class SessionEngineTests: XCTestCase {
             kms: cryptoMock,
             pairingStore: WCPairingStorageMock(),
             sessionStore: storageMock,
-            sessionToPairingTopic: KeyValueStore<String>(defaults: RuntimeKeyValueStorage(), identifier: ""),
+            sessionToPairingTopic: CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: ""),
             metadata: metadata,
             logger: logger,
             topicGenerator: topicGenerator.getTopic)

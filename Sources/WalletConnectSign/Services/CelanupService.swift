@@ -7,9 +7,9 @@ final class CleanupService {
     private let pairingStore: WCPairingStorage
     private let sessionStore: WCSessionStorage
     private let kms: KeyManagementServiceProtocol
-    private let sessionToPairingTopic: KeyValueStore<String>
+    private let sessionToPairingTopic: CodableStore<String>
     
-    init(pairingStore: WCPairingStorage, sessionStore: WCSessionStorage, kms: KeyManagementServiceProtocol, sessionToPairingTopic: KeyValueStore<String>) {
+    init(pairingStore: WCPairingStorage, sessionStore: WCSessionStorage, kms: KeyManagementServiceProtocol, sessionToPairingTopic: CodableStore<String>) {
         self.pairingStore = pairingStore
         self.sessionStore = sessionStore
         self.sessionToPairingTopic = sessionToPairingTopic

@@ -1,7 +1,7 @@
 
 import Foundation
 
-public final class KeyValueStore<T> where T: Codable {
+public final class CodableStore<T> where T: Codable {
     private let defaults: KeyValueStorage
     private let prefix: String
 

@@ -14,10 +14,10 @@ final class SequenceStore<T> where T: ExpirableSequence {
 
     var onSequenceExpiration: ((_ sequence: T) -> Void)?
     
-    private let store: KeyValueStore<T>
+    private let store: CodableStore<T>
     private let dateInitializer: () -> Date
 
-    init(store: KeyValueStore<T>, dateInitializer: @escaping () -> Date = Date.init) {
+    init(store: CodableStore<T>, dateInitializer: @escaping () -> Date = Date.init) {
         self.store = store
         self.dateInitializer = dateInitializer
     }

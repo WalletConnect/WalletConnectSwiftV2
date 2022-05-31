@@ -16,7 +16,7 @@ final class SessionEngine {
     
     private let sessionStore: WCSessionStorage
     private let pairingStore: WCPairingStorage
-    private let sessionToPairingTopic: KeyValueStore<String>
+    private let sessionToPairingTopic: CodableStore<String>
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private var metadata: AppMetadata
@@ -28,7 +28,7 @@ final class SessionEngine {
          kms: KeyManagementServiceProtocol,
          pairingStore: WCPairingStorage,
          sessionStore: WCSessionStorage,
-         sessionToPairingTopic: KeyValueStore<String>,
+         sessionToPairingTopic: CodableStore<String>,
          metadata: AppMetadata,
          logger: ConsoleLogging,
          topicGenerator: @escaping () -> String = String.generateTopic) {

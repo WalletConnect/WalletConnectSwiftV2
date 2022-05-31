@@ -6,10 +6,10 @@ public class JsonRpcHistory<T> where T: Codable&Equatable {
         case jsonRpcDuplicateDetected
         case noJsonRpcRequestMatchingResponse
     }
-    private let storage: KeyValueStore<JsonRpcRecord>
+    private let storage: CodableStore<JsonRpcRecord>
     private let logger: ConsoleLogging
 
-    public init(logger: ConsoleLogging, keyValueStore: KeyValueStore<JsonRpcRecord>) {
+    public init(logger: ConsoleLogging, keyValueStore: CodableStore<JsonRpcRecord>) {
         self.logger = logger
         self.storage = keyValueStore
     }

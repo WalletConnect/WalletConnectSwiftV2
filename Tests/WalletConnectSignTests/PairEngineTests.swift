@@ -12,7 +12,7 @@ final class PairEngineTests: XCTestCase {
     var networkingInteractor: MockedWCRelay!
     var storageMock: WCPairingStorageMock!
     var cryptoMock: KeyManagementServiceMock!
-    var proposalPayloadsStore: KeyValueStore<WCRequestSubscriptionPayload>!
+    var proposalPayloadsStore: CodableStore<WCRequestSubscriptionPayload>!
     
     var topicGenerator: TopicGenerator!
     
@@ -21,7 +21,7 @@ final class PairEngineTests: XCTestCase {
         storageMock = WCPairingStorageMock()
         cryptoMock = KeyManagementServiceMock()
         topicGenerator = TopicGenerator()
-        proposalPayloadsStore = KeyValueStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: "")
+        proposalPayloadsStore = CodableStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: "")
         setupEngine()
     }
     
