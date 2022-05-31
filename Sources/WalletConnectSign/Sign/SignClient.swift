@@ -66,7 +66,7 @@ public final class SignClient {
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.pairEngine = PairEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore)
-        self.cleanupService = CleanupService(pairingStore: pairingStore, sessionStore: sessionStore, kms: kms)
+        self.cleanupService = CleanupService(pairingStore: pairingStore, sessionStore: sessionStore, kms: kms, sessionToPairingTopic: sessionToPairingTopic)
         setUpConnectionObserving(relayClient: relayClient)
         setUpEnginesCallbacks()
     }
@@ -98,7 +98,7 @@ public final class SignClient {
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.pairEngine = PairEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore)
-        self.cleanupService = CleanupService(pairingStore: pairingStore, sessionStore: sessionStore, kms: kms)
+        self.cleanupService = CleanupService(pairingStore: pairingStore, sessionStore: sessionStore, kms: kms, sessionToPairingTopic: sessionToPairingTopic)
         setUpConnectionObserving(relayClient: relayClient)
         setUpEnginesCallbacks()
     }

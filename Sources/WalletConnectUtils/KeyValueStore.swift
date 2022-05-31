@@ -22,8 +22,7 @@ public final class KeyValueStore<T> where T: Codable {
     }
 
     public func getAll() -> [T] {
-        return defaults.dictionaryRepresentation().compactMap {
-            guard $0.key.hasPrefix(prefix) else {return nil}
+        return dictionaryForIdentifier().compactMap {
             if let data = $0.value as? Data,
                let item = try? JSONDecoder().decode(T.self, from: data) {
                 return item
@@ -36,7 +35,17 @@ public final class KeyValueStore<T> where T: Codable {
         defaults.removeObject(forKey: getContextPrefixedKey(for: key))
     }
     
+    public func deleteAll() {
+        dictionaryForIdentifier()
+            .forEach { defaults.removeObject(forKey: $0.key) }
+    }
+    
     private func getContextPrefixedKey(for key: String) -> String {
         return "\(prefix).\(key)"
+    }
+    
+    private func dictionaryForIdentifier() -> [String : Any] {
+        return defaults.dictionaryRepresentation()
+            .filter { $0.key.hasPrefix("\(prefix).") }
     }
 }
