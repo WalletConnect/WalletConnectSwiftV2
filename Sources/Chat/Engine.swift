@@ -55,7 +55,7 @@ class Engine {
         let agreementKeys = try! kms.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: peerPubKeyHex)
         let threadTopic = agreementKeys.derivedTopic()
         networkingInteractor.subscribe(topic: threadTopic)
-        print("invite sent on topic: \(topic)")
+        logger.debug("invite sent on topic: \(topic)")
     }
         
     
@@ -67,6 +67,7 @@ class Engine {
         guard let invite = try inviteStore.get(key: inviteId) else {
             throw ChatError.noInviteForId
         }
+        logger.debug("accepting an invitation")
         let agreementKeys = try! kms.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: invite.pubKey)
         let topic = agreementKeys.derivedTopic()
         networkingInteractor.subscribe(topic: topic)
@@ -97,6 +98,7 @@ class Engine {
     
     func handleInvite(_ invite: Invite) {
         onInvite?(invite)
+        logger.debug("did receive an invite")
         try? inviteStore.set(invite, forKey: invite.id)
 //        networkingInteractor.respondSuccess(for: RequestSubscriptionPayload)
     }
