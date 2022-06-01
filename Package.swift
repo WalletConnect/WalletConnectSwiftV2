@@ -36,7 +36,7 @@ let package = Package(
             path: "Sources/WalletConnectKMS"),
         .target(
             name: "WalletConnectUtils",
-            dependencies: []),
+            dependencies: ["Commons"]),
         .target(
             name: "JSONRPC",
             dependencies: []),
@@ -70,7 +70,7 @@ let package = Package(
             dependencies: []),
         .testTarget(
             name: "CommonsTests",
-            dependencies: []),
+            dependencies: ["Commons", "TestingUtils"]),
     ],
     swiftLanguageVersions: [.v5]
 )
