@@ -6,16 +6,18 @@ struct RoutingEngine {
     private var springboard: XCUIApplication {
         return App.springboard.instance
     }
-    
-    func cleanLaunch(app: App) {
-        let app = app.instance
-        app.launchArguments = ["-cleanInstall"]
-        app.launch()
-        app.waitForAppearence()
-    }
-    
-    func launch(app: App) {
-        app.instance.launch()
+
+    func launch(app: App, clean: Bool) {
+        if clean {
+            let app = app.instance
+            app.launchArguments = ["-cleanInstall"]
+            app.launch()
+            app.waitForAppearence()
+        } else {
+            let app = app.instance
+            app.launch()
+            app.waitForAppearence()
+        }
     }
     
     func activate(app: App) {

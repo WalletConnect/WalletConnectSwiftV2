@@ -3,16 +3,14 @@ import XCTest
 class PairingTests: XCTestCase {
     
     private let engine: Engine = Engine()
-
-    override class func setUp() {
-        let engine = Engine()
-        engine.routing.cleanLaunch(app: .dapp)
-        engine.routing.cleanLaunch(app: .wallet)
-    }
     
+    private static var cleanLaunch: Bool = true
+
     override func setUp() {
-        engine.routing.launch(app: .dapp)
-        engine.routing.launch(app: .wallet)
+        engine.routing.launch(app: .dapp, clean: PairingTests.cleanLaunch)
+        engine.routing.launch(app: .wallet, clean: PairingTests.cleanLaunch)
+        
+        PairingTests.cleanLaunch = false
     }
 
     /// Check pairing proposal approval via QR code or uri
@@ -33,13 +31,7 @@ class PairingTests: XCTestCase {
         XCTAssertFalse(engine.wallet.sessionRow.waitExists())
 
         engine.wallet.pasteURIButton.waitTap()
-        engine.wallet.uriTextfield.waitTypeText(UIPasteboard.general.string!)
-
-        let uri = engine.wallet.uriTextfield.value as? String
-        XCTAssertEqual(uri!.prefix(3), "wc:")
-        XCTAssertEqual(uri!.suffix(20), "&relay-protocol=waku")
-
-        engine.wallet.connectButton.waitTap()
+        engine.wallet.pasteAndConnect.waitTap()
 
         engine.approveSessionAndCheck()
     }

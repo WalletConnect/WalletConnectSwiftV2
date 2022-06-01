@@ -21,8 +21,8 @@ struct WalletEngine {
         alert.textFields.firstMatch
     }
     
-    var connectButton: XCUIElement {
-        alert.buttons["Connect"]
+    var pasteAndConnect: XCUIElement {
+        alert.buttons["Paste and Connect"]
     }
 
     var sessionRow: XCUIElement {
