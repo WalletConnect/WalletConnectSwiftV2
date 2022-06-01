@@ -37,6 +37,12 @@ let package = Package(
         .target(
             name: "WalletConnectUtils",
             dependencies: []),
+        .target(
+            name: "JSONRPC",
+            dependencies: []),
+        .target(
+            name: "Commons",
+            dependencies: []),
         .testTarget(
             name: "WalletConnectSignTests",
             dependencies: ["WalletConnectSign", "TestingUtils", "WalletConnectKMS"]),
@@ -59,6 +65,12 @@ let package = Package(
         .testTarget(
             name: "WalletConnectUtilsTests",
             dependencies: ["WalletConnectUtils"]),
+        .testTarget(
+            name: "JSONRPCTests",
+            dependencies: []),
+        .testTarget(
+            name: "CommonsTests",
+            dependencies: []),
     ],
     swiftLanguageVersions: [.v5]
 )
