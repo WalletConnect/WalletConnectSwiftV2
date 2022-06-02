@@ -36,6 +36,28 @@ enum ResponseJSON {
 }
 """.data(using: .utf8)!
     
+    static let arrayResult = """
+{
+    "id": 1,
+    "jsonrpc": "2.0",
+    "result": [
+        "very", "array", "wow"
+    ]
+}
+""".data(using: .utf8)!
+    
+    static let objectResult = """
+{
+    "id": 1,
+    "jsonrpc": "2.0",
+    "result": {
+        "int": 0,
+        "string": "0xc0ffee",
+        "bool": false
+    }
+}
+""".data(using: .utf8)!
+    
     static let withStringIdentifier = """
 {
     "jsonrpc": "2.0",

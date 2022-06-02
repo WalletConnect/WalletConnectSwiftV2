@@ -18,38 +18,54 @@ final class RPCResponseTests: XCTestCase {
     }
     
     func testDecodeResultInt() throws {
-        let intResponse = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.intResult)
-        let intValue = try intResponse.result?.get(Int.self)
+        let response = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.intResult)
+        let intValue = try response.result?.get(Int.self)
         XCTAssertEqual(intValue, 69)
-        XCTAssertNotNil(intResponse.id)
-        XCTAssertNil(intResponse.error)
+        XCTAssertNotNil(response.id)
+        XCTAssertNil(response.error)
     }
     
     func testDecodeResultDouble() throws {
-        let doubleResponse = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.doubleResult)
-        let doubleValue = try doubleResponse.result?.get(Double.self) ?? 0.0
+        let response = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.doubleResult)
+        let doubleValue = try response.result?.get(Double.self) ?? 0.0
         XCTAssertEqual(doubleValue, .pi, accuracy: 0.00000001)
-        XCTAssertNotNil(doubleResponse.id)
-        XCTAssertNil(doubleResponse.error)
+        XCTAssertNotNil(response.id)
+        XCTAssertNil(response.error)
     }
     
     func testDecodeResultString() throws {
-        let stringResponse = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.stringResult)
-        let stringValue = try stringResponse.result?.get(String.self)
+        let response = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.stringResult)
+        let stringValue = try response.result?.get(String.self)
         XCTAssertEqual(stringValue, "0xdeadbeef")
-        XCTAssertNotNil(stringResponse.id)
-        XCTAssertNil(stringResponse.error)
+        XCTAssertNotNil(response.id)
+        XCTAssertNil(response.error)
     }
     
     func testDecodeResultBool() throws {
-        let boolResponse = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.boolResult)
-        let boolValue = try boolResponse.result?.get(Bool.self)
+        let response = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.boolResult)
+        let boolValue = try response.result?.get(Bool.self)
         XCTAssertEqual(boolValue, true)
-        XCTAssertNotNil(boolResponse.id)
-        XCTAssertNil(boolResponse.error)
+        XCTAssertNotNil(response.id)
+        XCTAssertNil(response.error)
     }
     
-    // TODO: response with structured values tests
+    func testDecodeResultArray() throws {
+        let response = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.arrayResult)
+        let arrayValue = try response.result?.get([String].self)
+        XCTAssertEqual(arrayValue?.count, 3)
+        XCTAssertNotNil(response.id)
+        XCTAssertNil(response.error)
+    }
+    
+    func testDecodeResultObject() throws {
+        let response = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.objectResult)
+        let objectValue = try response.result?.get([String: AnyCodable].self)
+        XCTAssertNotNil(response.id)
+        XCTAssertNil(response.error)
+        XCTAssertEqual(try? objectValue?["int"]?.get(Int.self), 0)
+        XCTAssertEqual(try? objectValue?["bool"]?.get(Bool.self), false)
+        XCTAssertEqual(try? objectValue?["string"]?.get(String.self), "0xc0ffee")
+    }
     
     func testDecodeResponseIdentifier() throws {
         let numberResponseId = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.intResult).id
