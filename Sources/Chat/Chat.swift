@@ -14,6 +14,7 @@ class Chat {
     var onInvite: ((Invite)->())?
     var onNewThread: ((Thread)->())?
     var onConnected: (()->())?
+    let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
     init(registry: Registry,
          relayClient: RelayClient,
@@ -32,26 +33,18 @@ class Chat {
                              kms: kms,
                              logger: logger,
                              topicToInvitationPubKeyStore: topicToInvitationPubKeyStore,
-                             inviteStore: inviteStore)
-        relayClient.socketConnectionStatusPublisher.sink { [unowned self] status in
-            if status == .connected {
-                onConnected?()
-            }
-        }.store(in: &publishers)
-        engine.onInvite = { [unowned self] invite in
-            onInvite?(invite)
-        }
-        engine.onNewThread = { [unowned self] `thread` in
-            onNewThread?(`thread`)
-        }
+                             inviteStore: inviteStore,
+                             threadsStore: KeyValueStore<Thread>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.threads.rawValue))
+        socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
+        setUpEnginesCallbacks()
     }
     
     func register(account: Account) {
         engine.register(account: account)
     }
     
-    func invite(account: Account) {
-        engine.invite(account: account)
+    func invite(account: Account) throws {
+        try engine.invite(account: account)
     }
     
     func accept(inviteId: String) throws {
@@ -60,6 +53,15 @@ class Chat {
     
     func message(threadTopic: String, message: String) {
         
+    }
+    
+    private func setUpEnginesCallbacks() {
+        engine.onInvite = { [unowned self] invite in
+            onInvite?(invite)
+        }
+        engine.onNewThread = { [unowned self] `thread` in
+            onNewThread?(`thread`)
+        }
     }
 }
 

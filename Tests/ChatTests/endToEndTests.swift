@@ -6,11 +6,13 @@ import WalletConnectUtils
 @testable import WalletConnectKMS
 @testable import TestingUtils
 import WalletConnectRelay
+import Combine
 
 final class ChatTests: XCTestCase {
     var client1: Chat!
     var client2: Chat!
     var registry: KeyValueRegistry!
+    private var publishers = [AnyCancellable]()
     
     override func setUp() {
         registry = KeyValueRegistry()
@@ -21,13 +23,18 @@ final class ChatTests: XCTestCase {
     private func waitClientsConnected() async {
         let group = DispatchGroup()
         group.enter()
-        client1.onConnected = {
-            group.leave()
-        }
+        client1.socketConnectionStatusPublisher.sink { status in
+            if status == .connected {
+                group.leave()
+            }
+        }.store(in: &publishers)
+
         group.enter()
-        client2.onConnected = {
-            group.leave()
-        }
+        client2.socketConnectionStatusPublisher.sink { status in
+            if status == .connected {
+                group.leave()
+            }
+        }.store(in: &publishers)
         group.wait()
         return
     }
@@ -47,7 +54,7 @@ final class ChatTests: XCTestCase {
         let inviteExpectation = expectation(description: "invitation expectation")
         let account = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
         client1.register(account: account)
-        client2.invite(account: account)
+        try! client2.invite(account: account)
         client1.onInvite = { invite in
             inviteExpectation.fulfill()
         }

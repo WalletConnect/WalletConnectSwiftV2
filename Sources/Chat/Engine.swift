@@ -14,45 +14,36 @@ class Engine {
     let registry: Registry
     let logger: ConsoleLogging
     let kms: KeyManagementService
-    let threadsStore = KeyValueStore<Thread>(defaults: RuntimeKeyValueStorage(), identifier: "threads")
+    let threadsStore: KeyValueStore<Thread>
     private var publishers = [AnyCancellable]()
-
     
     init(registry: Registry,
          networkingInteractor: NetworkingInteractor,
          kms: KeyManagementService,
          logger: ConsoleLogging,
          topicToInvitationPubKeyStore: KeyValueStore<String>,
-         inviteStore: KeyValueStore<Invite>) {
+         inviteStore: KeyValueStore<Invite>,
+         threadsStore: KeyValueStore<Thread>) {
         self.registry = registry
         self.kms = kms
         self.networkingInteractor = networkingInteractor
         self.logger = logger
-        self.inviteStore = inviteStore
         self.topicToInvitationPubKeyStore = topicToInvitationPubKeyStore
-        networkingInteractor.responsePublisher.sink { [unowned self] response in
-            handleResponse(response)
-        }.store(in: &publishers)
-        
-        networkingInteractor.requestPublisher.sink { [unowned self] subscriptionPayload in
-            switch subscriptionPayload.request.params {
-            case .invite(let invite):
-                handleInvite(invite)
-            case .message(let message):
-                print("received message: \(message)")
-            }
-        }.store(in: &publishers)
+        self.inviteStore = inviteStore
+        self.threadsStore = threadsStore
+        setUpRequestHandling()
+        setUpResponseHandling()
     }
     
-    func invite(account: Account) {
+    func invite(account: Account) throws {
         let peerPubKeyHex = registry.resolve(account: account)!
         print("resolved pub key: \(peerPubKeyHex)")
-        let pubKey = try! kms.createX25519KeyPair()
+        let pubKey = try kms.createX25519KeyPair()
         let invite = Invite(pubKey: pubKey.hexRepresentation, message: "hello")
-        let topic = try! AgreementPublicKey(hex: peerPubKeyHex).rawRepresentation.sha256().toHexString()
+        let topic = try AgreementPublicKey(hex: peerPubKeyHex).rawRepresentation.sha256().toHexString()
         let request = ChatRequest(method: .invite, params: .invite(invite))
         networkingInteractor.requestUnencrypted(request, topic: topic)
-        let agreementKeys = try! kms.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: peerPubKeyHex)
+        let agreementKeys = try kms.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: peerPubKeyHex)
         let threadTopic = agreementKeys.derivedTopic()
         networkingInteractor.subscribe(topic: threadTopic)
         logger.debug("invite sent on topic: \(topic)")
@@ -71,7 +62,7 @@ class Engine {
         let agreementKeys = try! kms.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: invite.pubKey)
         let topic = agreementKeys.derivedTopic()
         networkingInteractor.subscribe(topic: topic)
-        //TODO
+        fatalError("not implemented")
     }
         
     func register(account: Account) {
@@ -85,21 +76,32 @@ class Engine {
         print("did register and is subscribing on topic: \(topic)")
     }
     
-    private func handleResponse(_ response: ChatResponse) {
-        switch response.requestParams {
-        case .invite(let invite):
-            let thread = Thread(topic: "topic-todo", pubKey: "")
-            onNewThread?(thread)
-            print("invite response: \(invite)")
-        case .message(let message):
-            print("received message response: \(message)")
-        }
-    }
-    
-    func handleInvite(_ invite: Invite) {
+    private func handleInvite(_ invite: Invite) {
         onInvite?(invite)
         logger.debug("did receive an invite")
         try? inviteStore.set(invite, forKey: invite.id)
 //        networkingInteractor.respondSuccess(for: RequestSubscriptionPayload)
+    }
+    
+    private func setUpRequestHandling() {
+        networkingInteractor.requestPublisher.sink { [unowned self] subscriptionPayload in
+            switch subscriptionPayload.request.params {
+            case .invite(let invite):
+                handleInvite(invite)
+            case .message(let message):
+                print("received message: \(message)")
+            }
+        }.store(in: &publishers)
+    }
+    
+    private func setUpResponseHandling() {
+        networkingInteractor.responsePublisher.sink { [unowned self] response in
+            switch response.requestParams {
+            case .invite(let invite):
+                fatalError("not implemented")
+            case .message(let message):
+                print("received message response: \(message)")
+            }
+        }.store(in: &publishers)
     }
 }
