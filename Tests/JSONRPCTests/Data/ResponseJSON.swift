@@ -44,6 +44,17 @@ enum ResponseJSON {
     
     // MARK: - Error Responses
     
+    static let plainError = """
+{
+    "jsonrpc": "2.0",
+    "error": {
+        "code": -32600,
+        "message": "Invalid Request"
+    },
+    "id": 0
+}
+""".data(using: .utf8)!
+    
     static let errorWithExplicitNullIdentifier = """
 {
     "jsonrpc": "2.0",
@@ -62,6 +73,34 @@ enum ResponseJSON {
         "code": -32600,
         "message": "Invalid Request"
     }
+}
+""".data(using: .utf8)!
+    
+    static let errorWithPrimitiveData = """
+{
+    "jsonrpc": "2.0",
+    "error": {
+        "code": -32600,
+        "message": "Invalid Request",
+        "data": "much data wow"
+    },
+    "id": 0
+}
+""".data(using: .utf8)!
+    
+    static let errorWithStructuredData = """
+{
+    "jsonrpc": "2.0",
+    "error": {
+        "code": -32600,
+        "message": "Invalid Request",
+        "data": [
+            69,
+            true,
+            "please don't use heterogeneus arrays :("
+        ]
+    },
+    "id": 0
 }
 """.data(using: .utf8)!
 }

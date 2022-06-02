@@ -1,4 +1,5 @@
 import XCTest
+import Commons
 @testable import JSONRPC
 
 final class RPCResponseTests: XCTestCase {
@@ -62,5 +63,29 @@ final class RPCResponseTests: XCTestCase {
 
         let implicitNullResponseId = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.errorWithImplicitNullIdentifier).id
         XCTAssertNil(implicitNullResponseId)
+    }
+    
+    func testDecodeError() throws {
+        let response = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.plainError)
+        XCTAssertNil(response.result)
+        XCTAssertNotNil(response.error)
+        XCTAssertEqual(response.error?.code, -32600)
+    }
+    
+    func testDecodeErrorWithPrimitiveData() throws {
+        let response = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.errorWithPrimitiveData)
+        XCTAssertNil(response.result)
+        XCTAssertNotNil(response.error?.data)
+        XCTAssertNotNil(try response.error?.data?.get(String.self))
+    }
+
+    func testDecodeErrorWithStructuredData() throws {
+        let response = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.errorWithStructuredData)
+        XCTAssertNil(response.result)
+        XCTAssertNotNil(response.error?.data)
+        let heterogeneousArray = try response.error?.data?.get([AnyCodable].self)
+        XCTAssertNotNil(try heterogeneousArray?[0].get(Int.self))
+        XCTAssertNotNil(try heterogeneousArray?[1].get(Bool.self))
+        XCTAssertNotNil(try heterogeneousArray?[2].get(String.self))
     }
 }
