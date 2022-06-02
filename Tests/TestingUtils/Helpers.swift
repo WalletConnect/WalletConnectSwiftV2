@@ -18,6 +18,11 @@ public extension Double {
 }
 
 public extension String {
+    
+    static func random() -> String {
+        randomTopic()
+    }
+    
     static func randomTopic() -> String {
         "\(UUID().uuidString)\(UUID().uuidString)".replacingOccurrences(of: "-", with: "").lowercased()
     }

@@ -34,6 +34,26 @@ public struct RPCResponse: Equatable {
     public init<C>(id: String, result: C) where C: Codable {
         self.init(id: ID(id), outcome: .success(AnyCodable(result)))
     }
+    
+    public init(id: Int, error: JSONRPCError) {
+        self.init(id: ID(id), outcome: .failure(error))
+    }
+    
+    public init(id: String, error: JSONRPCError) {
+        self.init(id: ID(id), outcome: .failure(error))
+    }
+    
+    public init(id: Int, errorCode: Int, message: String, associatedData: AnyCodable? = nil) {
+        self.init(id: ID(id), outcome: .failure(JSONRPCError(code: errorCode, message: message, data: associatedData)))
+    }
+    
+    public init(id: String, errorCode: Int, message: String, associatedData: AnyCodable? = nil) {
+        self.init(id: ID(id), outcome: .failure(JSONRPCError(code: errorCode, message: message, data: associatedData)))
+    }
+    
+    public init(errorWithoutID: JSONRPCError) {
+        self.init(id: nil, outcome: .failure(errorWithoutID))
+    }
 }
 
 extension RPCResponse: Codable {

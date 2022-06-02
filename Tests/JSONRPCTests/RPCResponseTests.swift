@@ -1,21 +1,82 @@
 import XCTest
 import Commons
+import TestingUtils
 @testable import JSONRPC
+
+fileprivate func makeResultResponses() -> [RPCResponse] {
+    return [
+        RPCResponse(id: Int.random(), result: Int.random()),
+        RPCResponse(id: Int.random(), result: Bool.random()),
+        RPCResponse(id: Int.random(), result: String.random()),
+        RPCResponse(id: Int.random(), result: (1...10).map { String($0) }),
+        RPCResponse(id: Int.random(), result: EmptyCodable()),
+        RPCResponse(id: String.random(), result: Int.random())
+    ]
+}
+
+fileprivate func makeErrorResponses() -> [RPCResponse] {
+    return [
+        RPCResponse(id: Int.random(), error: JSONRPCError.stub()),
+        RPCResponse(id: String.random(), error: JSONRPCError.stub(data: AnyCodable(Int.random()))),
+        RPCResponse(id: Int.random(), errorCode: Int.random(), message: String.random(), associatedData: AnyCodable(String.random())),
+        RPCResponse(id: String.random(), errorCode: Int.random(), message: String.random(), associatedData: nil)
+    ]
+}
 
 final class RPCResponseTests: XCTestCase {
 
-    func testRoundTripCoding() throws {
-        let responses = [
-            RPCResponse(id: 0, result: 420),
-            RPCResponse(id: "0", result: true),
-            RPCResponse(id: 0, result: "string")
-        ]
+    // MARK: - Init & Codable Tests
+    
+    func testInitWithResult() {
+        let responses = makeResultResponses()
+        responses.forEach { response in
+            XCTAssertEqual(response.jsonrpc, "2.0")
+            XCTAssertNotNil(response.id)
+            XCTAssertNotNil(response.result)
+            XCTAssertNil(response.error)
+        }
+    }
+    
+    func testInitWithError() {
+        let responses = makeErrorResponses()
+        responses.forEach { response in
+            XCTAssertEqual(response.jsonrpc, "2.0")
+            XCTAssertNotNil(response.id)
+            XCTAssertNil(response.result)
+            XCTAssertNotNil(response.error)
+        }
+    }
+    
+    func testRoundTripResultCoding() throws {
+        let responses = makeResultResponses()
         try responses.forEach { response in
             let encoded = try JSONEncoder().encode(response)
             let decoded = try JSONDecoder().decode(RPCResponse.self, from: encoded)
             XCTAssertEqual(decoded, response)
         }
     }
+    
+    func testRoundTripErrorCoding() throws {
+        let responses = makeErrorResponses()
+        try responses.forEach { response in
+            let encoded = try JSONEncoder().encode(response)
+            let decoded = try JSONDecoder().decode(RPCResponse.self, from: encoded)
+            XCTAssertEqual(decoded, response)
+        }
+    }
+    
+    func testNullIdentifierError() throws {
+        let response = RPCResponse(errorWithoutID: JSONRPCError.stub())
+        XCTAssertEqual(response.jsonrpc, "2.0")
+        XCTAssertNil(response.id)
+        XCTAssertNil(response.result)
+        XCTAssertNotNil(response.error)
+        let encoded = try JSONEncoder().encode(response)
+        let decoded = try JSONDecoder().decode(RPCResponse.self, from: encoded)
+        XCTAssertEqual(decoded, response)
+    }
+    
+    // MARK: - Decode Result Tests
     
     func testDecodeResultInt() throws {
         let response = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.intResult)
@@ -81,6 +142,8 @@ final class RPCResponseTests: XCTestCase {
         XCTAssertNil(implicitNullResponseId)
     }
     
+    // MARK: - Decode Error Tests
+    
     func testDecodeError() throws {
         let response = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.plainError)
         XCTAssertNil(response.result)
@@ -104,6 +167,8 @@ final class RPCResponseTests: XCTestCase {
         XCTAssertNotNil(try heterogeneousArray?[1].get(Bool.self))
         XCTAssertNotNil(try heterogeneousArray?[2].get(String.self))
     }
+    
+    // MARK: - Invalid Data Tests
     
     func testInvalidResponseDecode() {
         XCTAssertThrowsError(try JSONDecoder().decode(RPCResponse.self, from: InvalidResponseJSON.ambiguousResult), "A response must not include both result and error members.")

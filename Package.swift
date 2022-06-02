@@ -67,7 +67,7 @@ let package = Package(
             dependencies: ["WalletConnectUtils"]),
         .testTarget(
             name: "JSONRPCTests",
-            dependencies: ["JSONRPC"]),
+            dependencies: ["JSONRPC", "TestingUtils"]),
         .testTarget(
             name: "CommonsTests",
             dependencies: ["Commons", "TestingUtils"]),
