@@ -1,41 +1,6 @@
 import XCTest
 @testable import JSONRPC
 
-enum ResponseJSON {
-    
-    static let intResult = """
-{
-    "jsonrpc": "2.0",
-    "result": 69,
-    "id": 1
-}
-""".data(using: .utf8)!
-    
-    static let doubleResult = """
-{
-    "jsonrpc": "2.0",
-    "result": 3.14159265,
-    "id": 1
-}
-""".data(using: .utf8)!
-    
-    static let stringResult = """
-{
-    "id": 1,
-    "jsonrpc": "2.0",
-    "result": "0xdeadbeef"
-}
-""".data(using: .utf8)!
-    
-    static let boolResult = """
-{
-    "jsonrpc": "2.0",
-    "result": true,
-    "id": 1
-}
-""".data(using: .utf8)!
-}
-
 final class JSONRPCTests: XCTestCase {
 
     // Response Tests
@@ -79,4 +44,18 @@ final class JSONRPCTests: XCTestCase {
     }
     
     // TODO: response with structured values tests
+    
+    func testResponseIdentifierDecode() throws {
+        let numberResponseId = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.intResult).id
+        XCTAssert(numberResponseId?.isNumber == true)
+
+        let stringResponseId = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.withStringIdentifier).id
+        XCTAssert(stringResponseId?.isString == true)
+
+        let explicitNullResponseId = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.errorWithExplicitNullIdentifier).id
+        XCTAssertNil(explicitNullResponseId)
+
+        let implicitNullResponseId = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.errorWithImplicitNullIdentifier).id
+        XCTAssertNil(implicitNullResponseId)
+    }
 }
