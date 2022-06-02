@@ -1,3 +1,5 @@
+// MARK: - Valid Response Data
+
 enum ResponseJSON {
     
     // MARK: - Success Responses
@@ -101,6 +103,45 @@ enum ResponseJSON {
         ]
     },
     "id": 0
+}
+""".data(using: .utf8)!
+}
+
+// MARK: - Invalid Response Data
+
+enum InvalidResponseJSON {
+    
+    static let ambiguousResult = """
+{
+    "id": 1,
+    "jsonrpc": "2.0",
+    "result": true,
+    "error": {
+        "code": -32600,
+        "message": "Invalid Request"
+    }
+}
+""".data(using: .utf8)!
+    
+    static let absentResult = """
+{
+    "id": 1,
+    "jsonrpc": "2.0"
+}
+""".data(using: .utf8)!
+    
+    static let badVersion = """
+{
+    "id": 1,
+    "jsonrpc": "1.0",
+    "result": true
+}
+""".data(using: .utf8)!
+    
+    static let successWithoutIdentifier = """
+{
+    "jsonrpc": "2.0",
+    "result": true
 }
 """.data(using: .utf8)!
 }

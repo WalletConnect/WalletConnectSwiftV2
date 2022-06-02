@@ -88,4 +88,11 @@ final class RPCResponseTests: XCTestCase {
         XCTAssertNotNil(try heterogeneousArray?[1].get(Bool.self))
         XCTAssertNotNil(try heterogeneousArray?[2].get(String.self))
     }
+    
+    func testInvalidResponseDecode() {
+        XCTAssertThrowsError(try JSONDecoder().decode(RPCResponse.self, from: InvalidResponseJSON.ambiguousResult), "A response must not include both result and error members.")
+        XCTAssertThrowsError(try JSONDecoder().decode(RPCResponse.self, from: InvalidResponseJSON.absentResult), "A response must include either a result or an error member.")
+        XCTAssertThrowsError(try JSONDecoder().decode(RPCResponse.self, from: InvalidResponseJSON.badVersion), "JSON-RPC version must be exactly '2.0'.")
+        XCTAssertThrowsError(try JSONDecoder().decode(RPCResponse.self, from: InvalidResponseJSON.successWithoutIdentifier), "A success response must have an 'id' member.")
+    }
 }
