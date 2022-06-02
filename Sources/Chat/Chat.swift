@@ -11,10 +11,18 @@ class Chat {
     let registry: Registry
     let engine: Engine
     let kms: KeyManagementService
-    var onInvite: ((Invite)->())?
-    var onNewThread: ((Thread)->())?
     var onConnected: (()->())?
     let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
+    
+    var newThreadPublisherSubject = PassthroughSubject<Thread, Never>()
+    public var newThreadPublisher: AnyPublisher<Thread, Never> {
+        newThreadPublisherSubject.eraseToAnyPublisher()
+    }
+    
+    var invitePublisherSubject = PassthroughSubject<Invite, Never>()
+    public var invitePublisher: AnyPublisher<Invite, Never> {
+        invitePublisherSubject.eraseToAnyPublisher()
+    }
 
     init(registry: Registry,
          relayClient: RelayClient,
@@ -57,10 +65,10 @@ class Chat {
     
     private func setUpEnginesCallbacks() {
         engine.onInvite = { [unowned self] invite in
-            onInvite?(invite)
+            invitePublisherSubject.send(invite)
         }
-        engine.onNewThread = { [unowned self] `thread` in
-            onNewThread?(`thread`)
+        engine.onNewThread = { [unowned self] newThread in
+            newThreadPublisherSubject.send(newThread)
         }
     }
 }

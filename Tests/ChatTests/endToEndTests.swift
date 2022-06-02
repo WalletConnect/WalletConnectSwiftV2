@@ -55,9 +55,9 @@ final class ChatTests: XCTestCase {
         let account = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
         client1.register(account: account)
         try! client2.invite(account: account)
-        client1.onInvite = { invite in
+        client1.invitePublisher.sink { invite in
             inviteExpectation.fulfill()
-        }
+        }.store(in: &publishers)
         wait(for: [inviteExpectation], timeout: 4)
     }
     
