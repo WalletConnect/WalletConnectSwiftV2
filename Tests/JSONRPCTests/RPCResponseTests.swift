@@ -4,10 +4,16 @@ import XCTest
 final class RPCResponseTests: XCTestCase {
 
     func testRoundTripCoding() throws {
-        let response = RPCResponse(id: 0, result: true)
-        let encoded = try JSONEncoder().encode(response)
-        let decoded = try JSONDecoder().decode(RPCResponse.self, from: encoded)
-        XCTAssertEqual(decoded, response)
+        let responses = [
+            RPCResponse(id: 0, result: 420),
+            RPCResponse(id: "0", result: true),
+            RPCResponse(id: 0, result: "string")
+        ]
+        try responses.forEach { response in
+            let encoded = try JSONEncoder().encode(response)
+            let decoded = try JSONDecoder().decode(RPCResponse.self, from: encoded)
+            XCTAssertEqual(decoded, response)
+        }
     }
     
     func testDecodeResultInt() throws {
