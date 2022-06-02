@@ -8,15 +8,15 @@ struct RoutingEngine {
     }
 
     func launch(app: App, clean: Bool) {
+        app.instance.terminate()
+
         if clean {
             let app = app.instance
             app.launchArguments = ["-cleanInstall"]
             app.launch()
-            app.waitForAppearence()
         } else {
             let app = app.instance
             app.launch()
-            app.waitForAppearence()
         }
     }
     
