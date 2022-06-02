@@ -1,9 +1,8 @@
 import XCTest
 @testable import JSONRPC
 
-final class JSONRPCTests: XCTestCase {
+final class RPCResponseTests: XCTestCase {
 
-    // Response Tests
     func testRoundTripCoding() throws {
         let response = RPCResponse(id: 0, result: true)
         let encoded = try JSONEncoder().encode(response)
@@ -11,7 +10,7 @@ final class JSONRPCTests: XCTestCase {
         XCTAssertEqual(decoded, response)
     }
     
-    func testResponseDecodeInt() throws {
+    func testDecodeResultInt() throws {
         let intResponse = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.intResult)
         let intValue = try intResponse.result?.get(Int.self)
         XCTAssertEqual(intValue, 69)
@@ -19,7 +18,7 @@ final class JSONRPCTests: XCTestCase {
         XCTAssertNil(intResponse.error)
     }
     
-    func testResponseDecodeDouble() throws {
+    func testDecodeResultDouble() throws {
         let doubleResponse = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.doubleResult)
         let doubleValue = try doubleResponse.result?.get(Double.self) ?? 0.0
         XCTAssertEqual(doubleValue, .pi, accuracy: 0.00000001)
@@ -27,7 +26,7 @@ final class JSONRPCTests: XCTestCase {
         XCTAssertNil(doubleResponse.error)
     }
     
-    func testResponseDecodeString() throws {
+    func testDecodeResultString() throws {
         let stringResponse = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.stringResult)
         let stringValue = try stringResponse.result?.get(String.self)
         XCTAssertEqual(stringValue, "0xdeadbeef")
@@ -35,7 +34,7 @@ final class JSONRPCTests: XCTestCase {
         XCTAssertNil(stringResponse.error)
     }
     
-    func testResponseDecodeBool() throws {
+    func testDecodeResultBool() throws {
         let boolResponse = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.boolResult)
         let boolValue = try boolResponse.result?.get(Bool.self)
         XCTAssertEqual(boolValue, true)
@@ -45,7 +44,7 @@ final class JSONRPCTests: XCTestCase {
     
     // TODO: response with structured values tests
     
-    func testResponseIdentifierDecode() throws {
+    func testDecodeResponseIdentifier() throws {
         let numberResponseId = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.intResult).id
         XCTAssert(numberResponseId?.isNumber == true)
 
