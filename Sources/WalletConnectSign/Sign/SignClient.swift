@@ -28,6 +28,7 @@ public final class SignClient {
     private let pairingEngine: PairingEngine
     private let pairEngine: PairEngine
     private let sessionEngine: SessionEngine
+    private let approveEngine: ApproveEngine
     private let nonControllerSessionStateMachine: NonControllerSessionStateMachine
     private let controllerSessionStateMachine: ControllerSessionStateMachine
     private let networkingInteractor: NetworkInteracting
@@ -61,11 +62,13 @@ public final class SignClient {
         let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue)))
         let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue)))
         let sessionToPairingTopic = CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
-        self.pairingEngine = PairingEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
+        let proposalPayloadsStore = CodableStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.proposals.rawValue)
+        self.pairingEngine = PairingEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger, proposalPayloadsStore: proposalPayloadsStore)
         self.sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.pairEngine = PairEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore)
+        self.approveEngine = ApproveEngine(networkingInteractor: networkingInteractor, proposalPayloadsStore: proposalPayloadsStore, kms: kms, logger: logger)
         self.cleanupService = CleanupService(pairingStore: pairingStore, sessionStore: sessionStore, kms: kms, sessionToPairingTopic: sessionToPairingTopic)
         setUpConnectionObserving(relayClient: relayClient)
         setUpEnginesCallbacks()
@@ -93,8 +96,10 @@ public final class SignClient {
         let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue)))
         let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue)))
         let sessionToPairingTopic = CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
-        self.pairingEngine = PairingEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
+        let proposalPayloadsStore = CodableStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.proposals.rawValue)
+        self.pairingEngine = PairingEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger, proposalPayloadsStore: proposalPayloadsStore)
         self.sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
+        self.approveEngine = ApproveEngine(networkingInteractor: networkingInteractor, proposalPayloadsStore: proposalPayloadsStore, kms: kms, logger: logger)
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.pairEngine = PairEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore)
@@ -157,7 +162,7 @@ public final class SignClient {
         namespaces: [String: SessionNamespace]
     ) throws {
         //TODO - accounts should be validated for matching namespaces BEFORE responding proposal
-        guard let (sessionTopic, proposal) = pairingEngine.approveProposal(proposerPubKey: proposalId, validating: namespaces) else {return}
+        let (sessionTopic, proposal) = try approveEngine.approveProposal(proposerPubKey: proposalId, validating: namespaces)
         try sessionEngine.settle(topic: sessionTopic, proposal: proposal, namespaces: namespaces)
     }
     
