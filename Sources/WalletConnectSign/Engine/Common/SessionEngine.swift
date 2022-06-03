@@ -145,10 +145,12 @@ final class SessionEngine {
         let params = SessionType.EventParams(event: event, chainId: chainId)
         try await networkingInteractor.request(.wcSessionEvent(params), onTopic: topic)
     }
+}
+//MARK: - Privates
 
-    //MARK: - Private
+private extension SessionEngine {
     
-    private func setupNetworkingSubscriptions() {
+    func setupNetworkingSubscriptions() {
         networkingInteractor.wcRequestPublisher.sink  { [unowned self] subscriptionPayload in
             switch subscriptionPayload.wcRequest.params {
             case .sessionSettle(let settleParams):
@@ -178,7 +180,7 @@ final class SessionEngine {
             }.store(in: &publishers)
     }
     
-    private func onSessionSettle(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
+    func onSessionSettle(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
         logger.debug("Did receive session settle request")
         guard let proposedNamespaces = settlingProposal?.requiredNamespaces else {
             // TODO: respond error
@@ -216,7 +218,7 @@ final class SessionEngine {
         onSessionSettle?(session.publicRepresentation())
     }
     
-    private func onSessionDelete(_ payload: WCRequestSubscriptionPayload, deleteParams: SessionType.DeleteParams) {
+    func onSessionDelete(_ payload: WCRequestSubscriptionPayload, deleteParams: SessionType.DeleteParams) {
         let topic = payload.topic
         guard sessionStore.hasSession(forTopic: topic) else {
             networkingInteractor.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
@@ -228,7 +230,7 @@ final class SessionEngine {
         onSessionDelete?(topic, deleteParams)
     }
     
-    private func onSessionRequest(_ payload: WCRequestSubscriptionPayload, payloadParams: SessionType.RequestParams) {
+    func onSessionRequest(_ payload: WCRequestSubscriptionPayload, payloadParams: SessionType.RequestParams) {
         let topic = payload.topic
         let jsonRpcRequest = JSONRPCRequest<AnyCodable>(id: payload.wcRequest.id, method: payloadParams.request.method, params: payloadParams.request.params)
         let request = Request(
@@ -254,11 +256,11 @@ final class SessionEngine {
         onSessionRequest?(request)
     }
     
-    private func onSessionPing(_ payload: WCRequestSubscriptionPayload) {
+    func onSessionPing(_ payload: WCRequestSubscriptionPayload) {
         networkingInteractor.respondSuccess(for: payload)
     }
     
-    private func onSessionEvent(_ payload: WCRequestSubscriptionPayload, eventParams: SessionType.EventParams) {
+    func onSessionEvent(_ payload: WCRequestSubscriptionPayload, eventParams: SessionType.EventParams) {
         let event = eventParams.event
         let topic = payload.topic
         guard let session = sessionStore.getSession(forTopic: topic) else {
@@ -276,14 +278,14 @@ final class SessionEngine {
         onEventReceived?(topic, event.publicRepresentation(), eventParams.chainId)
     }
 
-    private func setupExpirationSubscriptions() {
+    func setupExpirationSubscriptions() {
         sessionStore.onSessionExpiration = { [weak self] session in
             self?.kms.deletePrivateKey(for: session.selfParticipant.publicKey)
             self?.kms.deleteAgreementSecret(for: session.topic)
         }
     }
 
-    private func handleResponse(_ response: WCResponse) {
+    func handleResponse(_ response: WCResponse) {
         switch response.requestParams {
         case .sessionSettle:
             handleSessionSettleResponse(topic: response.topic, result: response.result)
@@ -312,7 +314,7 @@ final class SessionEngine {
         }
     }
     
-    private func updatePairingMetadata(topic: String, metadata: AppMetadata) {
+    func updatePairingMetadata(topic: String, metadata: AppMetadata) {
         guard var pairing = pairingStore.getPairing(forTopic: topic) else {return}
         pairing.peerMetadata = metadata
         pairingStore.setPairing(pairing)

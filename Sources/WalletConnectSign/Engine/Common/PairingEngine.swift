@@ -95,10 +95,13 @@ final class PairingEngine {
             }
         }
     }
+}
 
-    //MARK: - Private
+// MARK: Private
 
-    private func setupNetworkingSubscriptions() {
+private extension PairingEngine {
+    
+    func setupNetworkingSubscriptions() {
         networkingInteractor.transportConnectionPublisher
             .sink { [unowned self] (_) in
                 let topics = pairingStore.getAll()
@@ -117,11 +120,11 @@ final class PairingEngine {
             }.store(in: &publishers)
     }
     
-    private func wcPairingPing(_ payload: WCRequestSubscriptionPayload) {
+    func wcPairingPing(_ payload: WCRequestSubscriptionPayload) {
         networkingInteractor.respondSuccess(for: payload)
     }
     
-    private func setupExpirationHandling() {
+    func setupExpirationHandling() {
         pairingStore.onPairingExpiration = { [weak self] pairing in
             self?.kms.deleteSymmetricKey(for: pairing.topic)
             self?.networkingInteractor.unsubscribe(topic: pairing.topic)

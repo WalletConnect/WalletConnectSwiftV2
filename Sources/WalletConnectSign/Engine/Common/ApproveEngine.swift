@@ -20,12 +20,12 @@ final class ApproveEngine {
     
     private var publishers = Set<AnyCancellable>()
     
-    private let channel = PassthroughSubject<Response, Never>()
+    private let approvePublisherSubject = PassthroughSubject<Response, Never>()
 
     var approvePublisher: AnyPublisher<Response, Never> {
-        channel.eraseToAnyPublisher()
+        approvePublisherSubject.eraseToAnyPublisher()
     }
-    
+
     init(
         networkingInteractor: NetworkInteracting,
         proposalPayloadsStore: CodableStore<WCRequestSubscriptionPayload>,
@@ -74,16 +74,21 @@ final class ApproveEngine {
         return (sessionTopic, proposal)
     }
     
-    func reject(proposal: SessionProposal, reason: ReasonCode) {
-        guard let payload = try? proposalPayloadsStore.get(key: proposal.proposer.publicKey) else {
-            return
-        }
+    func reject(proposal: SessionProposal, reason: ReasonCode) throws {
+        guard let payload = try proposalPayloadsStore.get(key: proposal.proposer.publicKey)
+        else { throw ApproveEngineError.proposalPayloadsNotFound }
+
         proposalPayloadsStore.delete(forKey: proposal.proposer.publicKey)
         networkingInteractor.respondError(for: payload, reason: reason)
-//        todo - delete pairing if inactive
+        // TODO: Delete pairing if inactive
     }
+}
+
+// MARK: - Privates
+
+private extension ApproveEngine {
     
-    private func setupNetworkingSubscriptions() {
+    func setupNetworkingSubscriptions() {
         networkingInteractor.responsePublisher
             .sink { [unowned self] response in
                 self.handleResponse(response)
@@ -100,7 +105,7 @@ final class ApproveEngine {
             }.store(in: &publishers)
     }
     
-    private func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
+    func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
         logger.debug("Received Session Proposal")
         do {
             try Namespace.validate(proposal.requiredNamespaces)
@@ -109,10 +114,10 @@ final class ApproveEngine {
             return
         }
         proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
-        channel.send(.sessionProposal(proposal.publicRepresentation()))
+        approvePublisherSubject.send(.sessionProposal(proposal.publicRepresentation()))
     }
     
-    private func handleResponse(_ response: WCResponse) {
+    func handleResponse(_ response: WCResponse) {
         switch response.requestParams {
         case .sessionPropose(let proposal):
             handleProposeResponse(pairingTopic: response.topic, proposal: proposal, result: response.result)
@@ -121,7 +126,7 @@ final class ApproveEngine {
         }
     }
     
-    private func handleProposeResponse(pairingTopic: String, proposal: SessionProposal, result: JsonRpcResult) {
+    func handleProposeResponse(pairingTopic: String, proposal: SessionProposal, result: JsonRpcResult) {
         guard var pairing = pairingStore.getPairing(forTopic: pairingTopic) else {
             return
         }
@@ -154,7 +159,7 @@ final class ApproveEngine {
             
             try? kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
             sessionToPairingTopic.set(pairingTopic, forKey: sessionTopic)
-            channel.send(.proposeResponse(topic: sessionTopic, proposal: proposal))
+            approvePublisherSubject.send(.proposeResponse(topic: sessionTopic, proposal: proposal))
             
         case .error(let error):
             if !pairing.active {
@@ -165,7 +170,7 @@ final class ApproveEngine {
             logger.debug("Session Proposal has been rejected")
             kms.deletePrivateKey(for: proposal.proposer.publicKey)
 
-            channel.send(.sessionRejected(
+            approvePublisherSubject.send(.sessionRejected(
                 proposal: proposal.publicRepresentation(),
                 reason: SessionType.Reason(code: error.error.code, message: error.error.message)
             ))
@@ -176,5 +181,6 @@ final class ApproveEngine {
 enum ApproveEngineError: Error {
     case wrongRequestParams
     case relayNotFound
+    case proposalPayloadsNotFound
     case agreementMissingOrInvalid
 }

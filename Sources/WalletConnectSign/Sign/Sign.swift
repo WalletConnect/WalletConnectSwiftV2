@@ -157,8 +157,8 @@ extension Sign {
     /// - Parameters:
     ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate.
     ///   - reason: Reason why the session proposal was rejected. Conforms to CAIP25.
-    public func reject(proposal: Session.Proposal, reason: RejectionReason) {
-        client.reject(proposal: proposal, reason: reason)
+    public func reject(proposal: Session.Proposal, reason: RejectionReason) throws {
+        try client.reject(proposal: proposal, reason: reason)
     }
 
     /// For the responder to update session methods

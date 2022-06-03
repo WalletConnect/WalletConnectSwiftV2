@@ -170,8 +170,8 @@ public final class SignClient {
     /// - Parameters:
     ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate.
     ///   - reason: Reason why the session proposal was rejected. Conforms to CAIP25.
-    public func reject(proposal: Session.Proposal, reason: RejectionReason) {
-        approveEngine.reject(proposal: proposal.proposal, reason: reason.internalRepresentation())
+    public func reject(proposal: Session.Proposal, reason: RejectionReason) throws {
+        try approveEngine.reject(proposal: proposal.proposal, reason: reason.internalRepresentation())
     }
     
     /// For the responder to update session namespaces
