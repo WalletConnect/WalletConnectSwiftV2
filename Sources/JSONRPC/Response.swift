@@ -69,23 +69,32 @@ extension RPCResponse: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         jsonrpc = try container.decode(String.self, forKey: .jsonrpc)
         guard jsonrpc == "2.0" else {
-            throw DecodingError.dataCorruptedError(forKey: .jsonrpc, in: container, debugDescription: "err1")
+            throw DecodingError.dataCorruptedError(
+                forKey: .jsonrpc,
+                in: container,
+                debugDescription: "The JSON-RPC protocol version must be exactly \"2.0\".")
         }
         id = try? container.decode(ID.self, forKey: .id)
         let result = try? container.decode(AnyCodable.self, forKey: .result)
         let error = try? container.decode(JSONRPCError.self, forKey: .error)
         if let result = result {
-            guard id != nil else {
-                throw DecodingError.dataCorrupted(.init(codingPath: [CodingKeys.result, CodingKeys.id], debugDescription: "err res", underlyingError: nil))
-            }
             guard error == nil else {
-                throw DecodingError.dataCorrupted(.init(codingPath: [CodingKeys.result, CodingKeys.error], debugDescription: "err2", underlyingError: nil))
+                throw DecodingError.dataCorrupted(.init(
+                    codingPath: [CodingKeys.result, CodingKeys.error],
+                    debugDescription: "Response is ambiguous: Both result and error members exists simultaneously."))
+            }
+            guard id != nil else {
+                throw DecodingError.dataCorrupted(.init(
+                    codingPath: [CodingKeys.result, CodingKeys.id],
+                    debugDescription: "A success response must have a valid `id`."))
             }
             internalResult = .success(result)
         } else if let error = error {
             internalResult = .failure(error)
         } else {
-            throw DecodingError.dataCorrupted(.init(codingPath: [CodingKeys.result, CodingKeys.error], debugDescription: "err3", underlyingError: nil))
+            throw DecodingError.dataCorrupted(.init(
+                codingPath: [CodingKeys.result, CodingKeys.error],
+                debugDescription: "Couldn't find neither a result nor an error in the response."))
         }
     }
     
