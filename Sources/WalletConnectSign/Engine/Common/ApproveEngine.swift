@@ -96,71 +96,73 @@ private extension ApproveEngine {
         
         networkingInteractor.wcRequestPublisher
             .sink { [unowned self] subscriptionPayload in
-                switch subscriptionPayload.wcRequest.params {
-                case .sessionPropose(let proposeParams):
-                    wcSessionPropose(subscriptionPayload, proposal: proposeParams)
-                default:
-                    return
-                }
+                guard case .sessionPropose(let proposal) = subscriptionPayload.wcRequest.params else { return }
+                handleSessionPropose(subscriptionPayload, proposal: proposal)
             }.store(in: &publishers)
     }
     
-    func wcSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
-        logger.debug("Received Session Proposal")
+    func handleSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
         do {
+            logger.debug("Received Session Proposal")
             try Namespace.validate(proposal.requiredNamespaces)
-        } catch {
-            // TODO: respond error
-            return
+            proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
+            approvePublisherSubject.send(.sessionProposal(proposal.publicRepresentation()))
         }
-        proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
-        approvePublisherSubject.send(.sessionProposal(proposal.publicRepresentation()))
+        catch {
+            // TODO: Return reasons with 6000 code Issue: #253
+            networkingInteractor.respondError(for: payload, reason: .invalidUpdateNamespaceRequest)
+        }
     }
     
     func handleResponse(_ response: WCResponse) {
-        switch response.requestParams {
-        case .sessionPropose(let proposal):
-            handleProposeResponse(pairingTopic: response.topic, proposal: proposal, result: response.result)
-        default:
-            break
+        guard case .sessionPropose(let proposal) = response.requestParams else { return }
+
+        do {
+            let sessionTopic = try handleProposeResponse(
+                pairingTopic: response.topic,
+                proposal: proposal,
+                result: response.result
+            )
+            approvePublisherSubject.send(.proposeResponse(topic: sessionTopic, proposal: proposal))
+        }
+        catch {
+            guard let error = error as? JSONRPCErrorResponse else {
+                return logger.debug(error.localizedDescription)
+            }
+            approvePublisherSubject.send(.sessionRejected(
+                proposal: proposal.publicRepresentation(),
+                reason: SessionType.Reason(code: error.error.code, message: error.error.message)
+            ))
         }
     }
     
-    func handleProposeResponse(pairingTopic: String, proposal: SessionProposal, result: JsonRpcResult) {
-        guard var pairing = pairingStore.getPairing(forTopic: pairingTopic) else {
-            return
-        }
+    func handleProposeResponse(pairingTopic: String, proposal: SessionProposal, result: JsonRpcResult) throws -> String {
+        guard var pairing = pairingStore.getPairing(forTopic: pairingTopic)
+        else { throw ApproveEngineError.pairingNotFound }
+
         switch result {
         case .response(let response):
-            
             // Activate the pairing
             if !pairing.active {
                 pairing.activate()
             } else {
-                try? pairing.updateExpiry()
+                try pairing.updateExpiry()
             }
             
             pairingStore.setPairing(pairing)
             
-            let selfPublicKey = try! AgreementPublicKey(hex: proposal.proposer.publicKey)
-            var agreementKeys: AgreementKeys!
-            
-            do {
-                let proposeResponse = try response.result.get(SessionType.ProposeResponse.self)
-                agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposeResponse.responderPublicKey)
-            } catch {
-                //TODO - handle error
-                logger.debug(error)
-                return
-            }
+            let selfPublicKey = try AgreementPublicKey(hex: proposal.proposer.publicKey)
+            let proposeResponse = try response.result.get(SessionType.ProposeResponse.self)
+            let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposeResponse.responderPublicKey)
 
             let sessionTopic = agreementKeys.derivedTopic()
             logger.debug("Received Session Proposal response")
             
-            try? kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
+            try kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
             sessionToPairingTopic.set(pairingTopic, forKey: sessionTopic)
-            approvePublisherSubject.send(.proposeResponse(topic: sessionTopic, proposal: proposal))
             
+            return sessionTopic
+
         case .error(let error):
             if !pairing.active {
                 kms.deleteSymmetricKey(for: pairing.topic)
@@ -169,11 +171,7 @@ private extension ApproveEngine {
             }
             logger.debug("Session Proposal has been rejected")
             kms.deletePrivateKey(for: proposal.proposer.publicKey)
-
-            approvePublisherSubject.send(.sessionRejected(
-                proposal: proposal.publicRepresentation(),
-                reason: SessionType.Reason(code: error.error.code, message: error.error.message)
-            ))
+            throw error
         }
     }
 }
@@ -182,5 +180,6 @@ enum ApproveEngineError: Error {
     case wrongRequestParams
     case relayNotFound
     case proposalPayloadsNotFound
+    case pairingNotFound
     case agreementMissingOrInvalid
 }
