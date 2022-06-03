@@ -1,5 +1,5 @@
 import XCTest
-@testable import WalletConnectSign
+@testable import WalletConnectUtils
 
 final class StringExtensionTests: XCTestCase {
     
