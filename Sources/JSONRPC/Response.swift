@@ -10,21 +10,21 @@ public struct RPCResponse: Equatable {
     public let id: ID?
     
     public var result: AnyCodable? {
-        if case .success(let value) = internalResult { return value }
+        if case .success(let value) = outcome { return value }
         return nil
     }
     
     public var error: JSONRPCError? {
-        if case .failure(let error) = internalResult { return error }
+        if case .failure(let error) = outcome { return error }
         return nil
     }
     
-    private let internalResult: Result<AnyCodable, JSONRPCError>
+    private let outcome: Result<AnyCodable, JSONRPCError>
     
     internal init(id: ID?, outcome: Result<AnyCodable, JSONRPCError>) {
         self.jsonrpc = "2.0"
         self.id = id
-        self.internalResult = outcome
+        self.outcome = outcome
     }
     
     public init<C>(id: Int, result: C) where C: Codable {
@@ -88,9 +88,9 @@ extension RPCResponse: Codable {
                     codingPath: [CodingKeys.result, CodingKeys.id],
                     debugDescription: "A success response must have a valid `id`."))
             }
-            internalResult = .success(result)
+            outcome = .success(result)
         } else if let error = error {
-            internalResult = .failure(error)
+            outcome = .failure(error)
         } else {
             throw DecodingError.dataCorrupted(.init(
                 codingPath: [CodingKeys.result, CodingKeys.error],
@@ -102,7 +102,7 @@ extension RPCResponse: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(jsonrpc, forKey: .jsonrpc)
         try container.encode(id, forKey: .id)
-        switch internalResult {
+        switch outcome {
         case .success(let anyCodable):
             try container.encode(anyCodable, forKey: .result)
         case .failure(let rpcError):
