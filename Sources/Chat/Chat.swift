@@ -34,15 +34,15 @@ class Chat {
         self.kms = kms
         let serialiser = Serializer(kms: kms)
         let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serialiser)
-        let topicToInvitationPubKeyStore = KeyValueStore<String>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.topicToInvitationPubKey.rawValue)
-        let inviteStore = KeyValueStore<Invite>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
+        let topicToInvitationPubKeyStore = CodableStore<String>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.topicToInvitationPubKey.rawValue)
+        let inviteStore = CodableStore<Invite>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
         self.engine = Engine(registry: registry,
                              networkingInteractor: networkingInteractor,
                              kms: kms,
                              logger: logger,
                              topicToInvitationPubKeyStore: topicToInvitationPubKeyStore,
                              inviteStore: inviteStore,
-                             threadsStore: KeyValueStore<Thread>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.threads.rawValue))
+                             threadsStore: CodableStore<Thread>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.threads.rawValue))
         socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
         setUpEnginesCallbacks()
     }

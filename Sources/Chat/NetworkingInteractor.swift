@@ -30,42 +30,22 @@ class NetworkingInteractor {
     func requestUnencrypted(_ request: ChatRequest, topic: String) {
         let message = try! request.json()
         relayClient.publish(topic: topic, payload: message) {error in
-            print(error)
+//            print(error)
         }
     }
     
     func request(_ request: ChatRequest, topic: String) {
         let message = try! serializer.serialize(topic: topic, encodable: request)
         relayClient.publish(topic: topic, payload: message) {error in
-            print(error)
+//            print(error)
         }
     }
     
-//    func respondSuccess(for payload: RequestSubscriptionPayload) {
-//        let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(true))
-//        respond(topic: payload.topic, response: JsonRpcResult.response(response)) { _ in }
-//    }
-//
-//    func respond(topic: String, response: JsonRpcResult, completion: @escaping ((Error?)->())) {
-//        do {
-//            _ = try jsonRpcHistory.resolve(response: response)
-//            let message = try serializer.serialize(topic: topic, encodable: response.value)
-//            logger.debug("Responding....topic: \(topic)")
-//            relayClient.publish(topic: topic, payload: message, prompt: false) { error in
-//                completion(error)
-//            }
-//        } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
-//            logger.info("Info: Json Rpc Duplicate Detected")
-//        } catch {
-//            completion(error)
-//        }
-//    }
-    
     func subscribe(topic: String)  {
         relayClient.subscribe(topic: topic) { [weak self] error in
-            if let error = error {
-                print(error)
-            }
+//            if let error = error {
+//                print(error)
+//            }
         }
     }
     
@@ -93,12 +73,8 @@ class NetworkingInteractor {
     }
     
     private func handleWCRequest(topic: String, request: ChatRequest) {
-        do {
-            let payload = RequestSubscriptionPayload(topic: topic, request: request)
-            requestPublisherSubject.send(payload)
-        } catch {
-            print(error)
-        }
+        let payload = RequestSubscriptionPayload(topic: topic, request: request)
+        requestPublisherSubject.send(payload)
     }
     
     private func handleJsonRpcResponse(response: JSONRPCResponse<AnyCodable>) {
