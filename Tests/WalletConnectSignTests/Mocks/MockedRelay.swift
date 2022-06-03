@@ -7,27 +7,21 @@ import WalletConnectUtils
 
 class MockedWCRelay: NetworkInteracting {
 
-    let responsePublisherSubject = PassthroughSubject<WCResponse, Never>()
     private(set) var subscriptions: [String] = []
     private(set) var unsubscriptions: [String] = []
     
-    var responsePublisher: AnyPublisher<WCResponse, Never> {
-        responsePublisherSubject.eraseToAnyPublisher()
-    }
-    
-    var onPairingResponse: ((WCResponse) -> Void)?
-    var onResponse: ((WCResponse) -> Void)?
-    
-    var onPairingApproveResponse: ((String) -> Void)?
+    let transportConnectionPublisherSubject = PassthroughSubject<Void, Never>()
+    let responsePublisherSubject = PassthroughSubject<WCResponse, Never>()
+    let wcRequestPublisherSubject = PassthroughSubject<WCRequestSubscriptionPayload, Never>()
     
     var transportConnectionPublisher: AnyPublisher<Void, Never> {
         transportConnectionPublisherSubject.eraseToAnyPublisher()
     }
-    private let transportConnectionPublisherSubject = PassthroughSubject<Void, Never>()
-    
-    let wcRequestPublisherSubject = PassthroughSubject<WCRequestSubscriptionPayload, Never>()
     var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {
         wcRequestPublisherSubject.eraseToAnyPublisher()
+    }
+    var responsePublisher: AnyPublisher<WCResponse, Never> {
+        responsePublisherSubject.eraseToAnyPublisher()
     }
     
     var didCallSubscribe = false

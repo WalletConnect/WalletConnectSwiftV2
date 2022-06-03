@@ -95,7 +95,7 @@ final class SessionEngineTests: XCTestCase {
             requestMethod: .sessionSettle,
             requestParams: .sessionSettle(SessionType.SettleParams.stub()),
             result: .response(settleResponse))
-        networkingInteractor.onResponse?(response)
+        networkingInteractor.responsePublisherSubject.send(response)
 
         XCTAssertTrue(storageMock.getSession(forTopic: session.topic)!.acknowledged, "Responder must acknowledged session")
     }
@@ -113,7 +113,7 @@ final class SessionEngineTests: XCTestCase {
             requestMethod: .sessionSettle,
             requestParams: .sessionSettle(SessionType.SettleParams.stub()),
             result: .error(JSONRPCErrorResponse(id: 1, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
-        networkingInteractor.onResponse?(response)
+        networkingInteractor.responsePublisherSubject.send(response)
 
         XCTAssertNil(storageMock.getSession(forTopic: session.topic), "Responder must remove session")
         XCTAssertTrue(networkingInteractor.didUnsubscribe(to: session.topic), "Responder must unsubscribe topic B")

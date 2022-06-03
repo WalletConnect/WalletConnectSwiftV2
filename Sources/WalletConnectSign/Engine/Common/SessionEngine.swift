@@ -24,14 +24,16 @@ final class SessionEngine {
     private let logger: ConsoleLogging
     private let topicInitializer: () -> String
 
-    init(networkingInteractor: NetworkInteracting,
-         kms: KeyManagementServiceProtocol,
-         pairingStore: WCPairingStorage,
-         sessionStore: WCSessionStorage,
-         sessionToPairingTopic: CodableStore<String>,
-         metadata: AppMetadata,
-         logger: ConsoleLogging,
-         topicGenerator: @escaping () -> String = String.generateTopic) {
+    init(
+        networkingInteractor: NetworkInteracting,
+        kms: KeyManagementServiceProtocol,
+        pairingStore: WCPairingStorage,
+        sessionStore: WCSessionStorage,
+        sessionToPairingTopic: CodableStore<String>,
+        metadata: AppMetadata,
+        logger: ConsoleLogging,
+        topicGenerator: @escaping () -> String = String.generateTopic
+    ) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.metadata = metadata
@@ -40,13 +42,9 @@ final class SessionEngine {
         self.sessionToPairingTopic = sessionToPairingTopic
         self.logger = logger
         self.topicInitializer = topicGenerator
-        setUpWCRequestHandling()
-        setupExpirationHandling()
-        restoreSubscriptions()
         
-        networkingInteractor.onResponse = { [weak self] in
-            self?.handleResponse($0)
-        }
+        setupNetworkingSubscriptions()
+        setupExpirationSubscriptions()
     }
     
     func setSubscription(topic: String) {
@@ -150,7 +148,7 @@ final class SessionEngine {
 
     //MARK: - Private
     
-    private func setUpWCRequestHandling() {
+    private func setupNetworkingSubscriptions() {
         networkingInteractor.wcRequestPublisher.sink  { [unowned self] subscriptionPayload in
             switch subscriptionPayload.wcRequest.params {
             case .sessionSettle(let settleParams):
@@ -167,6 +165,17 @@ final class SessionEngine {
                 return
             }
         }.store(in: &publishers)
+        
+        networkingInteractor.transportConnectionPublisher
+            .sink { [unowned self] (_) in
+                let topics = sessionStore.getAll().map{$0.topic}
+                topics.forEach{ topic in Task { try? await networkingInteractor.subscribe(topic: topic) } }
+            }.store(in: &publishers)
+        
+        networkingInteractor.responsePublisher
+            .sink { [unowned self] response in
+                self.handleResponse(response)
+            }.store(in: &publishers)
     }
     
     private func onSessionSettle(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
@@ -267,21 +276,13 @@ final class SessionEngine {
         onEventReceived?(topic, event.publicRepresentation(), eventParams.chainId)
     }
 
-    private func setupExpirationHandling() {
+    private func setupExpirationSubscriptions() {
         sessionStore.onSessionExpiration = { [weak self] session in
             self?.kms.deletePrivateKey(for: session.selfParticipant.publicKey)
             self?.kms.deleteAgreementSecret(for: session.topic)
         }
     }
-    
-    private func restoreSubscriptions() {
-        networkingInteractor.transportConnectionPublisher
-            .sink { [unowned self] (_) in
-                let topics = sessionStore.getAll().map{$0.topic}
-                topics.forEach{ topic in Task { try? await networkingInteractor.subscribe(topic: topic) } }
-            }.store(in: &publishers)
-    }
-    
+
     private func handleResponse(_ response: WCResponse) {
         switch response.requestParams {
         case .sessionSettle:

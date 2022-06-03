@@ -13,11 +13,6 @@ struct WCResponse: Codable {
 }
 
 protocol NetworkInteracting: AnyObject {
-    //// TODO - both methods to remove, use Publishers instead
-    var onPairingResponse: ((WCResponse) -> Void)? {get set} // Temporary workaround
-    var onResponse: ((WCResponse) -> Void)? {get set}
-    ///////
-    
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
     var responsePublisher: AnyPublisher<WCResponse, Never> {get}
@@ -41,31 +36,26 @@ extension NetworkInteracting {
 }
 
 class NetworkInteractor: NetworkInteracting {
-    
-    var onPairingResponse: ((WCResponse) -> Void)?
-    var onResponse: ((WCResponse) -> Void)?
-    private var publishers = [AnyCancellable]()
 
+    private var publishers = [AnyCancellable]()
     
     private var relayClient: NetworkRelaying
     private let serializer: Serializing
     private let jsonRpcHistory: JsonRpcHistoryRecording
     
+    private let transportConnectionPublisherSubject = PassthroughSubject<Void, Never>()
+    private let responsePublisherSubject = PassthroughSubject<WCResponse, Never>()
+    private let wcRequestPublisherSubject = PassthroughSubject<WCRequestSubscriptionPayload, Never>()
+    
     var transportConnectionPublisher: AnyPublisher<Void, Never> {
         transportConnectionPublisherSubject.eraseToAnyPublisher()
     }
-    private let transportConnectionPublisherSubject = PassthroughSubject<Void, Never>()
-    
-    //rename to request publisher
     var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {
         wcRequestPublisherSubject.eraseToAnyPublisher()
     }
-    private let wcRequestPublisherSubject = PassthroughSubject<WCRequestSubscriptionPayload, Never>()
-    
     var responsePublisher: AnyPublisher<WCResponse, Never> {
         responsePublisherSubject.eraseToAnyPublisher()
     }
-    private let responsePublisherSubject = PassthroughSubject<WCResponse, Never>()
 
     let logger: ConsoleLogging
     
@@ -184,12 +174,14 @@ class NetworkInteractor: NetworkInteracting {
     }
     
     //MARK: - Private
+
     private func setUpPublishers() {
         relayClient.socketConnectionStatusPublisher.sink { [weak self] status in
             if status == .connected {
                 self?.transportConnectionPublisherSubject.send()
             }
         }.store(in: &publishers)
+
         relayClient.onMessage = { [unowned self] topic, message in
             manageSubscription(topic, message)
         }
@@ -229,8 +221,6 @@ class NetworkInteractor: NetworkInteracting {
                 requestParams: record.request.params,
                 result: JsonRpcResult.response(response))
             responsePublisherSubject.send(wcResponse)
-            onPairingResponse?(wcResponse)
-            onResponse?(wcResponse)
         } catch  {
             logger.info("Info: \(error.localizedDescription)")
         }
@@ -246,8 +236,6 @@ class NetworkInteractor: NetworkInteracting {
                 requestParams: record.request.params,
                 result: JsonRpcResult.error(response))
             responsePublisherSubject.send(wcResponse)
-            onPairingResponse?(wcResponse)
-            onResponse?(wcResponse)
         } catch {
             logger.info("Info: \(error.localizedDescription)")
         }

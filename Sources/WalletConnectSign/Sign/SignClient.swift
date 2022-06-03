@@ -63,12 +63,12 @@ public final class SignClient {
         let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue)))
         let sessionToPairingTopic = CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
         let proposalPayloadsStore = CodableStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.proposals.rawValue)
-        self.pairingEngine = PairingEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger, proposalPayloadsStore: proposalPayloadsStore)
+        self.pairingEngine = PairingEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, metadata: metadata, logger: logger)
         self.sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.pairEngine = PairEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore)
-        self.approveEngine = ApproveEngine(networkingInteractor: networkingInteractor, proposalPayloadsStore: proposalPayloadsStore, kms: kms, logger: logger)
+        self.approveEngine = ApproveEngine(networkingInteractor: networkingInteractor, proposalPayloadsStore: proposalPayloadsStore, sessionToPairingTopic: sessionToPairingTopic, kms: kms, logger: logger, pairingStore: pairingStore)
         self.cleanupService = CleanupService(pairingStore: pairingStore, sessionStore: sessionStore, kms: kms, sessionToPairingTopic: sessionToPairingTopic)
         setUpConnectionObserving(relayClient: relayClient)
         setUpEnginesCallbacks()
@@ -97,9 +97,9 @@ public final class SignClient {
         let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue)))
         let sessionToPairingTopic = CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
         let proposalPayloadsStore = CodableStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.proposals.rawValue)
-        self.pairingEngine = PairingEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger, proposalPayloadsStore: proposalPayloadsStore)
+        self.pairingEngine = PairingEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, metadata: metadata, logger: logger)
         self.sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, sessionStore: sessionStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, logger: logger)
-        self.approveEngine = ApproveEngine(networkingInteractor: networkingInteractor, proposalPayloadsStore: proposalPayloadsStore, kms: kms, logger: logger)
+        self.approveEngine = ApproveEngine(networkingInteractor: networkingInteractor, proposalPayloadsStore: proposalPayloadsStore, sessionToPairingTopic: sessionToPairingTopic, kms: kms, logger: logger, pairingStore: pairingStore)
         self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         self.pairEngine = PairEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore)
@@ -171,7 +171,7 @@ public final class SignClient {
     ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate.
     ///   - reason: Reason why the session proposal was rejected. Conforms to CAIP25.
     public func reject(proposal: Session.Proposal, reason: RejectionReason) {
-        pairingEngine.reject(proposal: proposal.proposal, reason: reason.internalRepresentation())
+        approveEngine.reject(proposal: proposal.proposal, reason: reason.internalRepresentation())
     }
     
     /// For the responder to update session namespaces
@@ -296,15 +296,22 @@ public final class SignClient {
     // MARK: - Private
     
     private func setUpEnginesCallbacks() {
+        approveEngine.approvePublisher.sink { [unowned self] response in
+            switch response {
+            case .proposeResponse(let topic, let proposal):
+                self.sessionEngine.settlingProposal = proposal
+                self.sessionEngine.setSubscription(topic: topic)
+            case .sessionProposal(let proposal):
+                self.delegate?.didReceive(sessionProposal: proposal)
+            case .sessionRejected(proposal: let proposal, reason: let reason):
+                self.delegate?.didReject(proposal: proposal, reason: reason.publicRepresentation())
+            }
+        }.store(in: &publishers)
+        
         sessionEngine.onSessionSettle = { [unowned self] settledSession in
             delegate?.didSettle(session: settledSession)
         }
-        pairingEngine.onSessionProposal = { [unowned self] proposal in
-            delegate?.didReceive(sessionProposal: proposal)
-        }
-        pairingEngine.onSessionRejected = { [unowned self] proposal, reason in
-            delegate?.didReject(proposal: proposal, reason: reason.publicRepresentation())
-        }
+
         sessionEngine.onSessionRequest = { [unowned self] sessionRequest in
             delegate?.didReceive(sessionRequest: sessionRequest)
         }
@@ -328,10 +335,6 @@ public final class SignClient {
         }
         sessionEngine.onSessionResponse = { [unowned self] response in
             delegate?.didReceive(sessionResponse: response)
-        }
-        pairingEngine.onProposeResponse = { [unowned self] sessionTopic, proposal in
-            sessionEngine.settlingProposal = proposal
-            sessionEngine.setSubscription(topic: sessionTopic)
         }
     }
 
