@@ -250,4 +250,13 @@ extension Sign {
     public func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
         try relayClient.disconnect(closeCode: closeCode)
     }
+    
+#if DEBUG
+    /// Delete all stored data sach as: pairings, sessions, keys
+    ///
+    /// - Note: Doesn't unsubscribe from topics
+    public func cleanup() throws {
+        try client.cleanup()
+    }
+#endif
 }

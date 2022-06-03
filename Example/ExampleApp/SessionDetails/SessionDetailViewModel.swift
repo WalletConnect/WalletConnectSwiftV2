@@ -15,6 +15,8 @@ final class SessionDetailViewModel: ObservableObject {
     }
     
     @Published var namespaces: [String: SessionNamespace]
+    @Published var pingSuccess: Bool = false
+    @Published var pingFailed: Bool = false
     
     init(session: Session, client: Sign) {
         self.session = session
@@ -67,9 +69,9 @@ final class SessionDetailViewModel: ObservableObject {
         client.ping(topic: session.topic) {  result in
             switch result {
             case .success:
-                print("[RESPONDER] Received ping response")
-            case .failure(let error):
-                print("[RESPONDER] Ping failed with: \(error.localizedDescription)")
+                self.pingSuccess = true
+            case .failure:
+                self.pingFailed = true
             }
         }
     }
