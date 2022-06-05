@@ -7,7 +7,7 @@ public struct RPCResponse: Equatable {
     
     public let jsonrpc: String
     
-    public let id: ID?
+    public let id: RPCID?
     
     public var result: AnyCodable? {
         if case .success(let value) = outcome { return value }
@@ -21,34 +21,34 @@ public struct RPCResponse: Equatable {
     
     private let outcome: Result<AnyCodable, JSONRPCError>
     
-    internal init(id: ID?, outcome: Result<AnyCodable, JSONRPCError>) {
+    internal init(id: RPCID?, outcome: Result<AnyCodable, JSONRPCError>) {
         self.jsonrpc = "2.0"
         self.id = id
         self.outcome = outcome
     }
     
     public init<C>(id: Int, result: C) where C: Codable {
-        self.init(id: ID(id), outcome: .success(AnyCodable(result)))
+        self.init(id: RPCID(id), outcome: .success(AnyCodable(result)))
     }
     
     public init<C>(id: String, result: C) where C: Codable {
-        self.init(id: ID(id), outcome: .success(AnyCodable(result)))
+        self.init(id: RPCID(id), outcome: .success(AnyCodable(result)))
     }
     
     public init(id: Int, error: JSONRPCError) {
-        self.init(id: ID(id), outcome: .failure(error))
+        self.init(id: RPCID(id), outcome: .failure(error))
     }
     
     public init(id: String, error: JSONRPCError) {
-        self.init(id: ID(id), outcome: .failure(error))
+        self.init(id: RPCID(id), outcome: .failure(error))
     }
     
     public init(id: Int, errorCode: Int, message: String, associatedData: AnyCodable? = nil) {
-        self.init(id: ID(id), outcome: .failure(JSONRPCError(code: errorCode, message: message, data: associatedData)))
+        self.init(id: RPCID(id), outcome: .failure(JSONRPCError(code: errorCode, message: message, data: associatedData)))
     }
     
     public init(id: String, errorCode: Int, message: String, associatedData: AnyCodable? = nil) {
-        self.init(id: ID(id), outcome: .failure(JSONRPCError(code: errorCode, message: message, data: associatedData)))
+        self.init(id: RPCID(id), outcome: .failure(JSONRPCError(code: errorCode, message: message, data: associatedData)))
     }
     
     public init(errorWithoutID: JSONRPCError) {
@@ -74,7 +74,7 @@ extension RPCResponse: Codable {
                 in: container,
                 debugDescription: "The JSON-RPC protocol version must be exactly \"2.0\".")
         }
-        id = try? container.decode(ID.self, forKey: .id)
+        id = try? container.decode(RPCID.self, forKey: .id)
         let result = try? container.decode(AnyCodable.self, forKey: .result)
         let error = try? container.decode(JSONRPCError.self, forKey: .error)
         if let result = result {
@@ -110,3 +110,5 @@ extension RPCResponse: Codable {
         }
     }
 }
+
+// TODO: String convertible to help logging

@@ -25,9 +25,22 @@ fileprivate func makeNotificationRequests() -> [RPCRequest] {
 
 final class RPCRequestTests: XCTestCase {
     
+    func testIdentifierGeneration() {
+        let idGenerator = TestIdentifierGenerator()
+        let cachedGenerator = RPCRequest.defaultIdentifierGenerator
+        RPCRequest.defaultIdentifierGenerator = idGenerator
+        let requestA = RPCRequest(method: String.random(), params: EmptyCodable())
+        let requestB = RPCRequest(method: String.random())
+        XCTAssertEqual(requestA.id, idGenerator.id)
+        XCTAssertEqual(requestB.id, idGenerator.id)
+        RPCRequest.defaultIdentifierGenerator = cachedGenerator
+    }
+    
     func testCheckedParamsInit() {
+        XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: [0]))
         XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: [0], id: Int.random()))
         XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: [0], id: String.random()))
+        XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: EmptyCodable()))
         XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: EmptyCodable(), id: Int.random()))
         XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: EmptyCodable(), id: String.random()))
     }
@@ -49,6 +62,7 @@ final class RPCRequestTests: XCTestCase {
             let encoded = try JSONEncoder().encode(request)
             let decoded = try JSONDecoder().decode(RPCRequest.self, from: encoded)
             XCTAssertEqual(decoded, request)
+            XCTAssertEqual(request.jsonrpc, "2.0")
             XCTAssertFalse(request.isNotification)
         }
     }
@@ -59,6 +73,7 @@ final class RPCRequestTests: XCTestCase {
             let encoded = try JSONEncoder().encode(request)
             let decoded = try JSONDecoder().decode(RPCRequest.self, from: encoded)
             XCTAssertEqual(decoded, request)
+            XCTAssertEqual(request.jsonrpc, "2.0")
             XCTAssertTrue(request.isNotification)
         }
     }

@@ -1,7 +1,5 @@
 import Commons
 
-public typealias ID = Either<String, Int>
-
 /**
  TODO: Add documentation
  */
@@ -11,7 +9,7 @@ public struct RPCRequest: Equatable {
         case invalidPrimitiveParameter
     }
     
-//    public static var defaultIdentifierGenerator: IdentifierGenerator
+    public static var defaultIdentifierGenerator: IdentifierGenerator = IntIdentifierGenerator()
     
     public let jsonrpc: String
     
@@ -19,20 +17,24 @@ public struct RPCRequest: Equatable {
     
     public let params: AnyCodable?
     
-    public let id: ID?
+    public let id: RPCID?
     
-    internal init(method: String, params: AnyCodable?, id: ID?) {
+    internal init(method: String, params: AnyCodable?, id: RPCID?) {
         self.jsonrpc = "2.0"
         self.method = method
         self.params = params
         self.id = id
     }
     
-    internal init<C>(method: String, checkedParams params: C, id: ID) throws where C: Codable {
+    internal init<C>(method: String, checkedParams params: C, id: RPCID) throws where C: Codable {
         if params is Int || params is Double || params is String || params is Bool {
             throw Error.invalidPrimitiveParameter
         }
         self.init(method: method, params: AnyCodable(params), id: id)
+    }
+    
+    public init<C>(method: String, checkedParams params: C, idGenerator: IdentifierGenerator = defaultIdentifierGenerator) throws where C: Codable {
+        try self.init(method: method, checkedParams: params, id: idGenerator.next())
     }
     
     public init<C>(method: String, checkedParams params: C, id: Int) throws where C: Codable {
@@ -42,6 +44,10 @@ public struct RPCRequest: Equatable {
     public init<C>(method: String, checkedParams params: C, id: String) throws where C: Codable {
         try self.init(method: method, checkedParams: params, id: .left(id))
     }
+    
+    public init<C>(method: String, params: C, idGenerator: IdentifierGenerator = defaultIdentifierGenerator) where C: Codable {
+        self.init(method: method, params: AnyCodable(params), id: idGenerator.next())
+    }
 
     public init<C>(method: String, params: C, id: Int) where C: Codable {
         self.init(method: method, params: AnyCodable(params), id: .right(id))
@@ -49,6 +55,10 @@ public struct RPCRequest: Equatable {
 
     public init<C>(method: String, params: C, id: String) where C: Codable {
         self.init(method: method, params: AnyCodable(params), id: .left(id))
+    }
+    
+    public init(method: String, idGenerator: IdentifierGenerator = defaultIdentifierGenerator) {
+        self.init(method: method, params: nil, id: idGenerator.next())
     }
     
     public init(method: String, id: Int) {
@@ -89,7 +99,7 @@ extension RPCRequest: Codable {
                 in: container,
                 debugDescription: "The JSON-RPC protocol version must be exactly \"2.0\".")
         }
-        id = try container.decodeIfPresent(ID.self, forKey: .id)
+        id = try container.decodeIfPresent(RPCID.self, forKey: .id)
         method = try container.decode(String.self, forKey: .method)
         params = try container.decodeIfPresent(AnyCodable.self, forKey: .params)
         if let decodedParams = params {
@@ -103,32 +113,4 @@ extension RPCRequest: Codable {
     }
 }
 
-// ----------------------------------------------------------------------------
-// TODO: String convertible
-
-
-
-protocol RPCRequestConvertible {
-    func asRPCRequest() -> RPCRequest
-}
-
-// ID gen
-import Foundation
-
-protocol IdentifierGenerator {
-    func next() -> ID
-}
-
-struct StringIdentifierGenerator: IdentifierGenerator {
-    
-    func next() -> ID {
-        return ID(UUID().uuidString.replacingOccurrences(of: "-", with: ""))
-    }
-}
-
-struct IntIdentifierGenerator: IdentifierGenerator {
-    
-    func next() -> ID {
-        return ID(Int.random(in: Int.min...Int.max))
-    }
-}
+// TODO: String convertible to help logging
