@@ -23,6 +23,8 @@ public struct RPCRequest: Codable {
         self.params = AnyCodable(params)
         self.id = id
     }
+    
+    // checked and unchecked init?
 }
 
 extension RPCRequest {
