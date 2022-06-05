@@ -5,7 +5,11 @@ public typealias ID = Either<String, Int>
 /**
  TODO: Add documentation
  */
-public struct RPCRequest: Codable {
+public struct RPCRequest: Equatable {
+    
+    enum Error: Swift.Error {
+        case invalidPrimitiveParameter
+    }
     
 //    public static var defaultIdentifierGenerator: IdentifierGenerator
     
@@ -13,24 +17,57 @@ public struct RPCRequest: Codable {
     
     public let method: String
     
-    public let params: AnyCodable? // must be structured value, MAY be omitted
+    public let params: AnyCodable?
     
     public let id: ID?
     
-    internal init<C>(method: String, params: C, id: ID?) where C: Codable {
+    internal init(method: String, params: AnyCodable?, id: ID?) {
         self.jsonrpc = "2.0"
         self.method = method
-        self.params = AnyCodable(params)
+        self.params = params
         self.id = id
     }
     
-    // checked and unchecked init?
+    internal init<C>(method: String, checkedParams params: C, id: ID) throws where C: Codable {
+        if params is Int || params is Double || params is String || params is Bool {
+            throw Error.invalidPrimitiveParameter
+        }
+        self.init(method: method, params: AnyCodable(params), id: id)
+    }
+    
+    public init<C>(method: String, checkedParams params: C, id: Int) throws where C: Codable {
+        try self.init(method: method, checkedParams: params, id: .right(id))
+    }
+
+    public init<C>(method: String, checkedParams params: C, id: String) throws where C: Codable {
+        try self.init(method: method, checkedParams: params, id: .left(id))
+    }
+
+    public init<C>(method: String, params: C, id: Int) where C: Codable {
+        self.init(method: method, params: AnyCodable(params), id: .right(id))
+    }
+
+    public init<C>(method: String, params: C, id: String) where C: Codable {
+        self.init(method: method, params: AnyCodable(params), id: .left(id))
+    }
+    
+    public init(method: String, id: Int) {
+        self.init(method: method, params: nil, id: .right(id))
+    }
+    
+    public init(method: String, id: String) {
+        self.init(method: method, params: nil, id: .left(id))
+    }
 }
 
 extension RPCRequest {
     
     static func notification<C>(method: String, params: C) -> RPCRequest where C: Codable {
-        return RPCRequest(method: method, params: params, id: nil)
+        return RPCRequest(method: method, params: AnyCodable(params), id: nil)
+    }
+    
+    static func notification(method: String) -> RPCRequest {
+        return RPCRequest(method: method, params: nil, id: nil)
     }
 }
 
@@ -41,14 +78,7 @@ extension RPCRequest {
     }
 }
 
-extension RPCRequest {
-    
-//    enum CodingKeys: CodingKey {
-//        case jsonrpc
-//        case method
-//        case params
-//        case id
-//    }
+extension RPCRequest: Codable {
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -71,10 +101,6 @@ extension RPCRequest {
             }
         }
     }
-    
-//    public func encode(to encoder: Encoder) throws {
-//
-//    }
 }
 
 // ----------------------------------------------------------------------------
