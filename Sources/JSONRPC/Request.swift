@@ -79,9 +79,6 @@ extension RPCRequest {
     static func notification(method: String) -> RPCRequest {
         return RPCRequest(method: method, params: nil, id: nil)
     }
-}
-
-extension RPCRequest {
     
     public var isNotification: Bool {
         return id == nil
