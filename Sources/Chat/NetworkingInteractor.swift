@@ -41,26 +41,6 @@ class NetworkingInteractor {
         }
     }
     
-//    func respondSuccess(for payload: RequestSubscriptionPayload) {
-//        let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(true))
-//        respond(topic: payload.topic, response: JsonRpcResult.response(response)) { _ in }
-//    }
-//
-//    func respond(topic: String, response: JsonRpcResult, completion: @escaping ((Error?)->())) {
-//        do {
-//            _ = try jsonRpcHistory.resolve(response: response)
-//            let message = try serializer.serialize(topic: topic, encodable: response.value)
-//            logger.debug("Responding....topic: \(topic)")
-//            relayClient.publish(topic: topic, payload: message, prompt: false) { error in
-//                completion(error)
-//            }
-//        } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
-//            logger.info("Info: Json Rpc Duplicate Detected")
-//        } catch {
-//            completion(error)
-//        }
-//    }
-    
     func subscribe(topic: String)  {
         relayClient.subscribe(topic: topic) { [weak self] error in
 //            if let error = error {
