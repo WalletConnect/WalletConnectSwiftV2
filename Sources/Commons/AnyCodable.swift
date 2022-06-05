@@ -14,7 +14,7 @@ import Foundation
  */
 public struct AnyCodable {
     
-    private let value: Any
+    public let value: Any
     
     private var dataEncoding: (() throws -> Data)?
     

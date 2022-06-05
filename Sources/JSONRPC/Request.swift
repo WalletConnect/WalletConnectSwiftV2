@@ -13,7 +13,7 @@ public struct RPCRequest: Codable {
     
     public let method: String
     
-    public let params: AnyCodable
+    public let params: AnyCodable? // must be structured value, MAY be omitted
     
     public let id: ID?
     
@@ -32,12 +32,47 @@ extension RPCRequest {
     }
 }
 
-
 extension RPCRequest {
     
     public var isNotification: Bool {
         return id == nil
     }
+}
+
+extension RPCRequest {
+    
+//    enum CodingKeys: CodingKey {
+//        case jsonrpc
+//        case method
+//        case params
+//        case id
+//    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        jsonrpc = try container.decode(String.self, forKey: .jsonrpc)
+        guard jsonrpc == "2.0" else {
+            throw DecodingError.dataCorruptedError(
+                forKey: .jsonrpc,
+                in: container,
+                debugDescription: "The JSON-RPC protocol version must be exactly \"2.0\".")
+        }
+        id = try container.decodeIfPresent(ID.self, forKey: .id)
+        method = try container.decode(String.self, forKey: .method)
+        params = try container.decodeIfPresent(AnyCodable.self, forKey: .params)
+        if let decodedParams = params {
+            if decodedParams.value is Int || decodedParams.value is Double || decodedParams.value is String || decodedParams.value is Bool {
+                throw DecodingError.dataCorruptedError(
+                    forKey: .params,
+                    in: container,
+                    debugDescription: "")
+            }
+        }
+    }
+    
+//    public func encode(to encoder: Encoder) throws {
+//
+//    }
 }
 
 // ----------------------------------------------------------------------------
