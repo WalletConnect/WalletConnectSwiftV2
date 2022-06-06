@@ -5,21 +5,24 @@ import WalletConnectKMS
 
 
 final class SessionEngine {
-    var onSessionRequest: ((Request)->())?
-    var onSessionResponse: ((Response)->())?
-    var onSessionSettle: ((Session)->())?
-    var onSessionRejected: ((String, SessionType.Reason)->())?
-    var onSessionDelete: ((String, SessionType.Reason)->())?
-    var onEventReceived: ((String, Session.Event, Blockchain?)->())?
     
-    var settlingProposal: SessionProposal?
+    typealias SessionRequestCallback = (Request) -> Void
+    typealias SessionResponseCallback = (Response) -> Void
+    typealias SessionRejectedCallback = (String, SessionType.Reason) -> Void
+    typealias SessionDeleteCallback = (String, SessionType.Reason) -> Void
+    typealias EventReceivedCallback = (String, Session.Event, Blockchain?) -> Void
     
+    var onSessionRequest: SessionRequestCallback?
+    var onSessionResponse: SessionResponseCallback?
+    var onSessionRejected: SessionRejectedCallback?
+    var onSessionDelete: SessionDeleteCallback?
+    var onEventReceived: EventReceivedCallback?
+        
     private let sessionStore: WCSessionStorage
     private let pairingStore: WCPairingStorage
     private let sessionToPairingTopic: CodableStore<String>
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
-    private var metadata: AppMetadata
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
     private let topicInitializer: () -> String
@@ -30,13 +33,11 @@ final class SessionEngine {
         pairingStore: WCPairingStorage,
         sessionStore: WCSessionStorage,
         sessionToPairingTopic: CodableStore<String>,
-        metadata: AppMetadata,
         logger: ConsoleLogging,
         topicGenerator: @escaping () -> String = String.generateTopic
     ) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
-        self.metadata = metadata
         self.sessionStore = sessionStore
         self.pairingStore = pairingStore
         self.sessionToPairingTopic = sessionToPairingTopic
@@ -57,30 +58,6 @@ final class SessionEngine {
     
     func getSessions() -> [Session] {
         sessionStore.getAll().map{$0.publicRepresentation()}
-    }
-    
-    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace]) throws {
-        let agreementKeys = try! kms.getAgreementSecret(for: topic)!
-        let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
-        
-        let expectedExpiryTimeStamp = Date().addingTimeInterval(TimeInterval(WCSession.defaultTimeToLive))
-        guard let relay = proposal.relays.first else {return}
-        let settleParams = SessionType.SettleParams(
-            relay: relay,
-            controller: selfParticipant,
-            namespaces: namespaces,
-            expiry: Int64(expectedExpiryTimeStamp.timeIntervalSince1970))//todo - test expiration times
-        let session = WCSession(
-            topic: topic,
-            selfParticipant: selfParticipant,
-            peerParticipant: proposal.proposer,
-            settleParams: settleParams,
-            acknowledged: false)
-        logger.debug("Sending session settle request")
-        Task { try? await networkingInteractor.subscribe(topic: topic) }
-        sessionStore.setSession(session)
-        networkingInteractor.request(.wcSessionSettle(settleParams), onTopic: topic)
-        onSessionSettle?(session.publicRepresentation())
     }
     
     func delete(topic: String, reason: Reason) async throws {
@@ -153,8 +130,6 @@ private extension SessionEngine {
     func setupNetworkingSubscriptions() {
         networkingInteractor.wcRequestPublisher.sink  { [unowned self] subscriptionPayload in
             switch subscriptionPayload.wcRequest.params {
-            case .sessionSettle(let settleParams):
-                onSessionSettle(payload: subscriptionPayload, settleParams: settleParams)
             case .sessionDelete(let deleteParams):
                 onSessionDelete(subscriptionPayload, deleteParams: deleteParams)
             case .sessionRequest(let sessionRequestParams):
@@ -178,44 +153,6 @@ private extension SessionEngine {
             .sink { [unowned self] response in
                 self.handleResponse(response)
             }.store(in: &publishers)
-    }
-    
-    func onSessionSettle(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
-        logger.debug("Did receive session settle request")
-        guard let proposedNamespaces = settlingProposal?.requiredNamespaces else {
-            // TODO: respond error
-            return
-        }
-        settlingProposal = nil
-        let sessionNamespaces = settleParams.namespaces
-        do {
-            try Namespace.validate(proposedNamespaces)
-            try Namespace.validate(sessionNamespaces)
-            try Namespace.validateApproved(sessionNamespaces, against: proposedNamespaces)
-        } catch {
-            // TODO: respond error
-            return
-        }
-                
-        let topic = payload.topic
-        
-        let agreementKeys = try! kms.getAgreementSecret(for: topic)!
-        
-        let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
-        
-        if let pairingTopic = try? sessionToPairingTopic.get(key: topic) {
-            updatePairingMetadata(topic: pairingTopic, metadata: settleParams.controller.metadata)
-        }
-        
-        let session = WCSession(
-            topic: topic,
-            selfParticipant: selfParticipant,
-            peerParticipant: settleParams.controller,
-            settleParams: settleParams,
-            acknowledged: true)
-        sessionStore.setSession(session)
-        networkingInteractor.respondSuccess(for: payload)
-        onSessionSettle?(session.publicRepresentation())
     }
     
     func onSessionDelete(_ payload: WCRequestSubscriptionPayload, deleteParams: SessionType.DeleteParams) {
@@ -312,11 +249,5 @@ private extension SessionEngine {
             kms.deleteAgreementSecret(for: topic)
             kms.deletePrivateKey(for: session.publicKey!)
         }
-    }
-    
-    func updatePairingMetadata(topic: String, metadata: AppMetadata) {
-        guard var pairing = pairingStore.getPairing(forTopic: topic) else {return}
-        pairing.peerMetadata = metadata
-        pairingStore.setPairing(pairing)
     }
 }

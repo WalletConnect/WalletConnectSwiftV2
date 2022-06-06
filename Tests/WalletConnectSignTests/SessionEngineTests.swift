@@ -19,9 +19,7 @@ final class SessionEngineTests: XCTestCase {
     var cryptoMock: KeyManagementServiceMock!
     
     var topicGenerator: TopicGenerator!
-    
-    var metadata: AppMetadata!
-    
+        
     override func setUp() {
         networkingInteractor = MockedWCRelay()
         storageMock = WCSessionStorageMock()
@@ -39,7 +37,6 @@ final class SessionEngineTests: XCTestCase {
     }
     
     func setupEngine() {
-        metadata = AppMetadata.stub()
         let logger = ConsoleLoggerMock()
         engine = SessionEngine(
             networkingInteractor: networkingInteractor,
@@ -47,57 +44,8 @@ final class SessionEngineTests: XCTestCase {
             pairingStore: WCPairingStorageMock(),
             sessionStore: storageMock,
             sessionToPairingTopic: CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: ""),
-            metadata: metadata,
             logger: logger,
             topicGenerator: topicGenerator.getTopic)
-    }
-    
-    func testSessionSettle() {
-        let agreementKeys = AgreementKeys.stub()
-        let topicB = String.generateTopic()
-        cryptoMock.setAgreementSecret(agreementKeys, topic: topicB)
-        let proposal = SessionProposal.stub(proposerPubKey: AgreementPrivateKey().publicKey.hexRepresentation)
-        try? engine.settle(topic: topicB, proposal: proposal, namespaces: SessionNamespace.stubDictionary())
-        usleep(100)
-        XCTAssertTrue(storageMock.hasSession(forTopic: topicB), "Responder must persist session on topic B")
-        XCTAssert(networkingInteractor.didSubscribe(to: topicB), "Responder must subscribe for topic B")
-        XCTAssertTrue(networkingInteractor.didCallRequest, "Responder must send session settle payload on topic B")
-    }
-    
-    func testHandleSessionSettle() {
-        let sessionTopic = String.generateTopic()
-        cryptoMock.setAgreementSecret(AgreementKeys.stub(), topic: sessionTopic)
-        var didCallBackOnSessionApproved = false
-        engine.onSessionSettle = { _ in
-            didCallBackOnSessionApproved = true
-        }
-        
-        engine.settlingProposal = SessionProposal.stub()
-        networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubSettle(topic: sessionTopic))
-        
-        XCTAssertTrue(storageMock.getSession(forTopic: sessionTopic)!.acknowledged, "Proposer must store acknowledged session on topic B")
-        XCTAssertTrue(networkingInteractor.didRespondSuccess, "Proposer must send acknowledge on settle request")
-        XCTAssertTrue(didCallBackOnSessionApproved, "Proposer's engine must call back with session")
-    }
-    
-    func testHandleSessionSettleAcknowledge() {
-        let session = WCSession.stub(isSelfController: true, acknowledged: false)
-        storageMock.setSession(session)
-        var didCallBackOnSessionApproved = false
-        engine.onSessionSettle = { _ in
-            didCallBackOnSessionApproved = true
-        }
-        
-        let settleResponse = JSONRPCResponse(id: 1, result: AnyCodable(true))
-        let response = WCResponse(
-            topic: session.topic,
-            chainId: nil,
-            requestMethod: .sessionSettle,
-            requestParams: .sessionSettle(SessionType.SettleParams.stub()),
-            result: .response(settleResponse))
-        networkingInteractor.responsePublisherSubject.send(response)
-
-        XCTAssertTrue(storageMock.getSession(forTopic: session.topic)!.acknowledged, "Responder must acknowledged session")
     }
     
     func testHandleSessionSettleError() {

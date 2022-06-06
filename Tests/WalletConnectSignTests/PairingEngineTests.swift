@@ -54,9 +54,11 @@ final class PairingEngineTests: XCTestCase {
             networkingInteractor: networkingInteractor,
             proposalPayloadsStore: .init(defaults: RuntimeKeyValueStorage(), identifier: ""),
             sessionToPairingTopic: CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: ""),
+            metadata: meta,
             kms: cryptoMock,
             logger: logger,
-            pairingStore: storageMock
+            pairingStore: storageMock,
+            sessionStore: WCSessionStorageMock()
         )
     }
     
@@ -112,14 +114,9 @@ final class PairingEngineTests: XCTestCase {
         
         var sessionTopic: String!
         
-        approveEngine.approvePublisher.sink { response in
-            switch response {
-            case .proposeResponse(let topic, _):
-                sessionTopic = topic
-            default:
-                XCTFail()
-            }
-        }.store(in: &publishers)
+        approveEngine.onProposeResponse = { topic, _ in
+            sessionTopic = topic
+        }
 
         networkingInteractor.responsePublisherSubject.send(response)
         let privateKey = try! cryptoMock.getPrivateKey(for: proposal.proposer.publicKey)!
