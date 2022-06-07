@@ -48,6 +48,9 @@ class Chat {
         setUpEnginesCallbacks()
     }
     
+    /// Registers a new record on Chat keyserver,
+    /// record is a blockchain account with a client generated public key
+    /// - Parameter account: CAIP10 blockchain account
     func register(account: Account) async throws {
         try await registryManager.register(account: account)
     }
@@ -59,6 +62,10 @@ class Chat {
         try await registry.resolve(account: account)
     }
     
+    /// Sends a chat invite with opening message
+    /// - Parameters:
+    ///   - publicKey: publicKey associated with a peer
+    ///   - oppeningMessage: oppening message for a chat invite
     func invite(publicKey: String, oppeningMessage: String) async throws {
 //        try await engine.invite(account: account)
     }
@@ -67,6 +74,10 @@ class Chat {
         try await engine.accept(inviteId: inviteId)
     }
     
+    /// Sends a chat message to an active chat thread
+    /// - Parameters:
+    ///   - topic: thread topic
+    ///   - message: chat message
     func message(topic: String, message: String) {
         
     }
