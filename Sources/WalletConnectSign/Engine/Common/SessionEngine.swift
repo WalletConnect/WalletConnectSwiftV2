@@ -3,7 +3,6 @@ import Combine
 import WalletConnectUtils
 import WalletConnectKMS
 
-
 final class SessionEngine {
     
     typealias SessionRequestCallback = (Request) -> Void
@@ -110,6 +109,7 @@ final class SessionEngine {
         try await networkingInteractor.request(.wcSessionEvent(params), onTopic: topic)
     }
 }
+
 //MARK: - Privates
 
 private extension SessionEngine {

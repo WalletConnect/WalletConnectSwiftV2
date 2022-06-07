@@ -3,7 +3,6 @@ import Combine
 import WalletConnectUtils
 import WalletConnectKMS
 
-
 final class PairingEngine {
    
     private let networkingInteractor: NetworkInteracting
