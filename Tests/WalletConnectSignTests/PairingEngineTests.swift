@@ -86,6 +86,7 @@ final class PairingEngineTests: XCTestCase {
         XCTAssertEqual(publishTopic, topicA)
     }
     
+    @MainActor
     func testHandleSessionProposeResponse() async {
         let uri = try! await engine.create()
         let pairing = storageMock.getPairing(forTopic: uri.topic)!
@@ -111,19 +112,14 @@ final class PairingEngineTests: XCTestCase {
                                   requestMethod: request.method,
                                   requestParams: request.params,
                                   result: .response(jsonRpcResponse))
-        
-        var sessionTopic: String!
-        
-        approveEngine.onProposeResponse = { topic, _ in
-            sessionTopic = topic
-        }
 
         networkingInteractor.responsePublisherSubject.send(response)
         let privateKey = try! cryptoMock.getPrivateKey(for: proposal.proposer.publicKey)!
         let topicB = deriveTopic(publicKey: responder.publicKey, privateKey: privateKey)
-        
         let storedPairing = storageMock.getPairing(forTopic: topicA)!
+        let sessionTopic = networkingInteractor.subscriptions.last!
 
+        XCTAssertTrue(networkingInteractor.didCallSubscribe)
         XCTAssert(storedPairing.active)
         XCTAssertEqual(topicB, sessionTopic, "Responder engine calls back with session topic")
     }

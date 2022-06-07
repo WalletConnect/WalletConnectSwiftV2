@@ -39,10 +39,6 @@ final class SessionEngine {
         setupExpirationSubscriptions()
     }
     
-    func setSubscription(topic: String) {
-        Task { try? await networkingInteractor.subscribe(topic: topic) }
-    }
-    
     func hasSession(for topic: String) -> Bool {
         return sessionStore.hasSession(forTopic: topic)
     }

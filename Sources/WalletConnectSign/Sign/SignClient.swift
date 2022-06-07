@@ -296,9 +296,6 @@ public final class SignClient {
     // MARK: - Private
     
     private func setUpEnginesCallbacks() {
-        approveEngine.onProposeResponse = { [unowned self] topic, proposal in
-            sessionEngine.setSubscription(topic: topic)
-        }
         approveEngine.onSessionProposal = { [unowned self] proposal in
             delegate?.didReceive(sessionProposal: proposal)
         }

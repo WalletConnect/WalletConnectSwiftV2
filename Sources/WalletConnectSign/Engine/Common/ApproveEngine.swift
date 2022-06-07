@@ -13,12 +13,10 @@ final class ApproveEngine {
         case agreementMissingOrInvalid
     }
     
-    typealias ProposeResponseCallback = (String, SessionProposal) -> Void
     typealias SessionProposalCallback = (Session.Proposal) -> Void
     typealias SessionRejectedCallback = (Session.Proposal, SessionType.Reason) -> Void
     typealias SessionSettleCallback = (Session) -> Void
     
-    var onProposeResponse: ProposeResponseCallback?
     var onSessionProposal: SessionProposalCallback?
     var onSessionRejected: SessionRejectedCallback?
     var onSessionSettle: SessionSettleCallback?
@@ -185,7 +183,8 @@ private extension ApproveEngine {
                 result: response.result
             )
             settlingProposal = proposal
-            onProposeResponse?(sessionTopic, proposal)
+
+            Task { try? await networkingInteractor.subscribe(topic: sessionTopic) }
         }
         catch {
             guard let error = error as? JSONRPCErrorResponse else {
