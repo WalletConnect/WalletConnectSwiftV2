@@ -8,6 +8,7 @@ import Combine
 
 class Chat {
     private var publishers = [AnyCancellable]()
+    let registry: Registry
     let registryManager: RegistryManager
     let engine: Engine
     let kms: KeyManagementService
@@ -30,7 +31,7 @@ class Chat {
          logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off),
          keyValueStorage: KeyValueStorage) {
         let topicToInvitationPubKeyStore = CodableStore<String>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.topicToInvitationPubKey.rawValue)
-        
+        self.registry = registry
         self.kms = kms
         let serialiser = Serializer(kms: kms)
         let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serialiser)
@@ -51,8 +52,11 @@ class Chat {
         try await registryManager.register(account: account)
     }
     
-    func resolve(account: Account) async throws {
-        
+    /// Queries the default keyserver with a blockchain account
+    /// - Parameter account: CAIP10 blockachain account
+    /// - Returns: public key associated with an account in chat's keyserver
+    func resolve(account: Account) async throws -> String {
+        try await registry.resolve(account: account)
     }
     
     func invite(publicKey: String, oppeningMessage: String) async throws {
