@@ -47,7 +47,6 @@ class Engine {
         logger.debug("invite sent on topic: \(topic)")
     }
 
-
     func accept(inviteId: String) async throws {
         guard let hexPubKey = try topicToInvitationPubKeyStore.get(key: "todo-topic") else {
             throw ChatError.noPublicKeyForInviteId

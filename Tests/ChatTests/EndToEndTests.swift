@@ -62,18 +62,19 @@ final class ChatTests: XCTestCase {
     }
     
     
-//    func testNewThread() async {
-//        await waitClientsConnected()
-//        let newThreadExpectation = expectation(description: "new thread expectation")
-//        let account = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
-//        client1.register(account: account)
-//        client2.invite(account: account)
-//        client1.onInvite = { [unowned self] invite in
-//            client1.accept(invite: invite)
-//        }
-//        client1.onNewThread = { [unowned self] thread in
-//            newThreadExpectation.fulfill()
-//        }
-//        wait(for: [newThreadExpectation], timeout: 4)
-//    }
+    func testCreateNewThread() async {
+        await waitClientsConnected()
+        let newThreadInviterExpectation = expectation(description: "new thread on inviting client expectation")
+        let newThreadinviteeExpectation = expectation(description: "new thread on invitee client expectation")
+        let account = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
+        let pubKey = try! await client1.register(account: account)
+        try! await client2.invite(publicKey: pubKey, openingMessage: "opening message")
+        client1.invitePublisher.sink { [unowned self] invite in
+            Task {try! await client1.accept(inviteId: invite.id)}
+        }.store(in: &publishers)
+        client1.newThreadPublisher.sink { thread in
+            newThreadinviteeExpectation.fulfill()
+        }.store(in: &publishers)
+        wait(for: [newThreadInviterExpectation, newThreadinviteeExpectation], timeout: 4)
+    }
 }
