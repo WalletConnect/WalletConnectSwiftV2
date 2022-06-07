@@ -22,7 +22,7 @@ actor RegistryManager {
         self.topicToInvitationPubKeyStore = topicToInvitationPubKeyStore
     }
     
-    func register(account: Account) async throws {
+    func register(account: Account) async throws -> String {
         let pubKey = try kms.createX25519KeyPair()
         let pubKeyHex = pubKey.hexRepresentation
         try await registry.register(account: account, pubKey: pubKeyHex)
@@ -30,5 +30,6 @@ actor RegistryManager {
         topicToInvitationPubKeyStore.set(pubKeyHex, forKey: topic)
         try await networkingInteractor.subscribe(topic: topic)
         logger.debug("Did register an account: \(account) and is subscribing on topic: \(topic)")
+        return pubKeyHex
     }
 }

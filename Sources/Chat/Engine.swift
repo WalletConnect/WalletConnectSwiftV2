@@ -35,15 +35,13 @@ class Engine {
         setUpResponseHandling()
     }
 
-    func invite(account: Account) async throws {
-        let peerPubKeyHex = try await registry.resolve(account: account)!
-        print("resolved pub key: \(peerPubKeyHex)")
+    func invite(peerPubKey: String, openingMessage: String) async throws {
         let pubKey = try kms.createX25519KeyPair()
-        let invite = Invite(pubKey: pubKey.hexRepresentation, message: "hello")
-        let topic = try AgreementPublicKey(hex: peerPubKeyHex).rawRepresentation.sha256().toHexString()
-        let request = ChatRequest(method: .invite, params: .invite(invite))
+        let invite = Invite(pubKey: pubKey.hexRepresentation, openingMessage: openingMessage)
+        let topic = try AgreementPublicKey(hex: peerPubKey).rawRepresentation.sha256().toHexString()
+        let request = ChatRequest(params: .invite(invite))
         networkingInteractor.requestUnencrypted(request, topic: topic)
-        let agreementKeys = try kms.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: peerPubKeyHex)
+        let agreementKeys = try kms.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: peerPubKey)
         let threadTopic = agreementKeys.derivedTopic()
         try await networkingInteractor.subscribe(topic: threadTopic)
         logger.debug("invite sent on topic: \(topic)")

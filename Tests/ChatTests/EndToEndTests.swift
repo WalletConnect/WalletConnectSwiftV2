@@ -53,8 +53,8 @@ final class ChatTests: XCTestCase {
         await waitClientsConnected()
         let inviteExpectation = expectation(description: "invitation expectation")
         let account = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
-        try! await client1.register(account: account)
-        try! await client2.invite(account: account)
+        let pubKey = try! await client1.register(account: account)
+        try! await client2.invite(publicKey: pubKey, openingMessage: "")
         client1.invitePublisher.sink { _ in
             inviteExpectation.fulfill()
         }.store(in: &publishers)
