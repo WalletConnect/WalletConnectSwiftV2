@@ -90,11 +90,11 @@ final class ApproveEngine {
         return (sessionTopic, proposal)
     }
     
-    func reject(proposal: SessionProposal, reason: ReasonCode) throws {
-        guard let payload = try proposalPayloadsStore.get(key: proposal.proposer.publicKey) else {
+    func reject(proposerPubKey: String, reason: ReasonCode) throws {
+        guard let payload = try proposalPayloadsStore.get(key: proposerPubKey) else {
             throw Error.proposalPayloadsNotFound
         }
-        proposalPayloadsStore.delete(forKey: proposal.proposer.publicKey)
+        proposalPayloadsStore.delete(forKey: proposerPubKey)
         networkingInteractor.respondError(for: payload, reason: reason)
         // TODO: Delete pairing if inactive
     }

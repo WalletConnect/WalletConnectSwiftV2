@@ -153,14 +153,11 @@ public final class SignClient {
     
     /// For the responder to approve a session proposal.
     /// - Parameters:
-    ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate function: `didReceive(sessionProposal: Session.Proposal)`
+    ///   - proposalId: Session Proposal Public key received from peer client in a WalletConnect delegate function: `didReceive(sessionProposal: Session.Proposal)`
     ///   - accounts: A Set of accounts that the dapp will be allowed to request methods executions on.
     ///   - methods: A Set of methods that the dapp will be allowed to request.
     ///   - events: A Set of events
-    public func approve(
-        proposalId: String,
-        namespaces: [String: SessionNamespace]
-    ) throws {
+    public func approve(proposalId: String, namespaces: [String: SessionNamespace]) throws {
         //TODO - accounts should be validated for matching namespaces BEFORE responding proposal
         let (sessionTopic, proposal) = try approveEngine.approveProposal(proposerPubKey: proposalId, validating: namespaces)
         try approveEngine.settle(topic: sessionTopic, proposal: proposal, namespaces: namespaces)
@@ -168,10 +165,10 @@ public final class SignClient {
     
     /// For the responder to reject a session proposal.
     /// - Parameters:
-    ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate.
+    ///   - proposalId: Session Proposal Public key received from peer client in a WalletConnect delegate.
     ///   - reason: Reason why the session proposal was rejected. Conforms to CAIP25.
-    public func reject(proposal: Session.Proposal, reason: RejectionReason) throws {
-        try approveEngine.reject(proposal: proposal.proposal, reason: reason.internalRepresentation())
+    public func reject(proposalId: String, reason: RejectionReason) throws {
+        try approveEngine.reject(proposerPubKey: proposalId, reason: reason.internalRepresentation())
     }
     
     /// For the responder to update session namespaces

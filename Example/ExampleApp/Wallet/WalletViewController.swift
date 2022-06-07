@@ -169,7 +169,7 @@ extension WalletViewController: ProposalViewControllerDelegate {
         let proposal = currentProposal!
         currentProposal = nil
         do {
-            try Sign.instance.reject(proposal: proposal, reason: .disapprovedChains)
+            try Sign.instance.reject(proposalId: proposal.id, reason: .disapprovedChains)
         } catch {
             print("Session rejection error: \(error.localizedDescription)")
         }
