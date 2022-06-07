@@ -109,10 +109,6 @@ final class ApproveEngineTests: XCTestCase {
     func testHandleSessionSettleAcknowledge() {
         let session = WCSession.stub(isSelfController: true, acknowledged: false)
         sessionStorageMock.setSession(session)
-        var didCallBackOnSessionApproved = false
-        engine.onSessionSettle = { _ in
-            didCallBackOnSessionApproved = true
-        }
         
         let settleResponse = JSONRPCResponse(id: 1, result: AnyCodable(true))
         let response = WCResponse(
@@ -123,7 +119,27 @@ final class ApproveEngineTests: XCTestCase {
             result: .response(settleResponse))
         networkingInteractor.responsePublisherSubject.send(response)
 
-        XCTAssertTrue(didCallBackOnSessionApproved)
         XCTAssertTrue(sessionStorageMock.getSession(forTopic: session.topic)!.acknowledged, "Responder must acknowledged session")
+    }
+    
+    func testHandleSessionSettleError() {
+        let privateKey = AgreementPrivateKey()
+        let session = WCSession.stub(isSelfController: false, selfPrivateKey: privateKey, acknowledged: false)
+        sessionStorageMock.setSession(session)
+        cryptoMock.setAgreementSecret(AgreementKeys.stub(), topic: session.topic)
+        try! cryptoMock.setPrivateKey(privateKey)
+
+        let response = WCResponse(
+            topic: session.topic,
+            chainId: nil,
+            requestMethod: .sessionSettle,
+            requestParams: .sessionSettle(SessionType.SettleParams.stub()),
+            result: .error(JSONRPCErrorResponse(id: 1, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
+        networkingInteractor.responsePublisherSubject.send(response)
+
+        XCTAssertNil(sessionStorageMock.getSession(forTopic: session.topic), "Responder must remove session")
+        XCTAssertTrue(networkingInteractor.didUnsubscribe(to: session.topic), "Responder must unsubscribe topic B")
+        XCTAssertFalse(cryptoMock.hasAgreementSecret(for: session.topic), "Responder must remove agreement secret")
+        XCTAssertFalse(cryptoMock.hasPrivateKey(for: session.self.publicKey!), "Responder must remove private key")
     }
 }

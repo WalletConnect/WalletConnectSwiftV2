@@ -19,30 +19,21 @@ final class SessionEngine {
     var onEventReceived: EventReceivedCallback?
         
     private let sessionStore: WCSessionStorage
-    private let pairingStore: WCPairingStorage
-    private let sessionToPairingTopic: CodableStore<String>
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
-    private let topicInitializer: () -> String
 
     init(
         networkingInteractor: NetworkInteracting,
         kms: KeyManagementServiceProtocol,
-        pairingStore: WCPairingStorage,
         sessionStore: WCSessionStorage,
-        sessionToPairingTopic: CodableStore<String>,
-        logger: ConsoleLogging,
-        topicGenerator: @escaping () -> String = String.generateTopic
+        logger: ConsoleLogging
     ) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.sessionStore = sessionStore
-        self.pairingStore = pairingStore
-        self.sessionToPairingTopic = sessionToPairingTopic
         self.logger = logger
-        self.topicInitializer = topicGenerator
         
         setupNetworkingSubscriptions()
         setupExpirationSubscriptions()
@@ -224,30 +215,11 @@ private extension SessionEngine {
 
     func handleResponse(_ response: WCResponse) {
         switch response.requestParams {
-        case .sessionSettle:
-            handleSessionSettleResponse(topic: response.topic, result: response.result)
         case .sessionRequest:
             let response = Response(topic: response.topic, chainId: response.chainId, result: response.result)
             onSessionResponse?(response)
         default:
             break
-        }
-    }
-    
-    func handleSessionSettleResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sessionStore.getSession(forTopic: topic) else {return}
-        switch result {
-        case .response:
-            logger.debug("Received session settle response")
-            guard var session = sessionStore.getSession(forTopic: topic) else {return}
-            session.acknowledge()
-            sessionStore.setSession(session)
-        case .error(let error):
-            logger.error("Error - session rejected, Reason: \(error)")
-            networkingInteractor.unsubscribe(topic: topic)
-            sessionStore.delete(topic: topic)
-            kms.deleteAgreementSecret(for: topic)
-            kms.deletePrivateKey(for: session.publicKey!)
         }
     }
 }

@@ -146,38 +146,38 @@ private extension ApproveEngine {
     func setupNetworkingSubscriptions() {
         networkingInteractor.responsePublisher
             .sink { [unowned self] response in
-                self.handleResponse(response)
+                switch response.requestParams {
+                case .sessionPropose(let proposal):
+                    handleSessionProposeResponse(response: response, proposal: proposal)
+                case .sessionSettle:
+                    handleSessionSettleResponse(response: response)
+                default:
+                    break
+                }
             }.store(in: &publishers)
         
         networkingInteractor.wcRequestPublisher
             .sink { [unowned self] subscriptionPayload in
                 switch subscriptionPayload.wcRequest.params {
                 case .sessionPropose(let proposal):
-                    handleSessionPropose(subscriptionPayload, proposal: proposal)
+                    handleSessionProposeRequest(payload: subscriptionPayload, proposal: proposal)
                 case .sessionSettle(let settleParams):
-                    handleSessionSettle(payload: subscriptionPayload, settleParams: settleParams)
+                    handleSessionSettleRequest(payload: subscriptionPayload, settleParams: settleParams)
                 default:
                     return
                 }
             }.store(in: &publishers)
     }
     
-    func handleSessionPropose(_ payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
-        do {
-            logger.debug("Received Session Proposal")
-            try Namespace.validate(proposal.requiredNamespaces)
-            proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
-            onSessionProposal?(proposal.publicRepresentation())
-        }
-        catch {
-            // TODO: Return reasons with 6000 code Issue: #253
-            networkingInteractor.respondError(for: payload, reason: .invalidUpdateNamespaceRequest)
-        }
+    func updatePairingMetadata(topic: String, metadata: AppMetadata) {
+        guard var pairing = pairingStore.getPairing(forTopic: topic) else { return }
+        pairing.peerMetadata = metadata
+        pairingStore.setPairing(pairing)
     }
     
-    func handleResponse(_ response: WCResponse) {
-        guard case .sessionPropose(let proposal) = response.requestParams else { return }
-
+    // MARK: SessionProposeResponse
+    
+    func handleSessionProposeResponse(response: WCResponse, proposal: SessionType.ProposeParams) {
         do {
             let sessionTopic = try handleProposeResponse(
                 pairingTopic: response.topic,
@@ -234,7 +234,43 @@ private extension ApproveEngine {
         }
     }
     
-    func handleSessionSettle(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
+    // MARK: SessionSettleResponse
+    
+    func handleSessionSettleResponse(response: WCResponse) {
+        guard let session = sessionStore.getSession(forTopic: response.topic) else { return }
+        switch response.result {
+        case .response:
+            logger.debug("Received session settle response")
+            guard var session = sessionStore.getSession(forTopic: response.topic) else { return }
+            session.acknowledge()
+            sessionStore.setSession(session)
+        case .error(let error):
+            logger.error("Error - session rejected, Reason: \(error)")
+            networkingInteractor.unsubscribe(topic: response.topic)
+            sessionStore.delete(topic: response.topic)
+            kms.deleteAgreementSecret(for: response.topic)
+            kms.deletePrivateKey(for: session.publicKey!)
+        }
+    }
+    
+    // MARK: SessionProposeRequest
+    
+    func handleSessionProposeRequest(payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
+        do {
+            logger.debug("Received Session Proposal")
+            try Namespace.validate(proposal.requiredNamespaces)
+            proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
+            onSessionProposal?(proposal.publicRepresentation())
+        }
+        catch {
+            // TODO: Return reasons with 6000 code Issue: #253
+            networkingInteractor.respondError(for: payload, reason: .invalidUpdateNamespaceRequest)
+        }
+    }
+    
+    // MARK: SessionSettleRequest
+    
+    func handleSessionSettleRequest(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
         logger.debug("Did receive session settle request")
         guard let proposedNamespaces = settlingProposal?.requiredNamespaces else {
             // TODO: respond error
@@ -270,11 +306,5 @@ private extension ApproveEngine {
         sessionStore.setSession(session)
         networkingInteractor.respondSuccess(for: payload)
         onSessionSettle?(session.publicRepresentation())
-    }
-    
-    func updatePairingMetadata(topic: String, metadata: AppMetadata) {
-        guard var pairing = pairingStore.getPairing(forTopic: topic) else { return }
-        pairing.peerMetadata = metadata
-        pairingStore.setPairing(pairing)
     }
 }
