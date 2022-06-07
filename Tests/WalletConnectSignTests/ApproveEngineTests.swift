@@ -44,7 +44,8 @@ final class ApproveEngineTests: XCTestCase {
         engine = nil
     }
     
-    func testApproveProposal() throws {
+    @MainActor
+    func testApproveProposal() async throws {
         // Client receives a proposal
         let topicA = String.generateTopic()
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
@@ -53,8 +54,13 @@ final class ApproveEngineTests: XCTestCase {
         let payload = WCRequestSubscriptionPayload(topic: topicA, wcRequest: request)
         networkingInteractor.wcRequestPublisherSubject.send(payload)
 
-        let (topicB, _) = try engine.approveProposal(proposerPubKey: proposal.proposer.publicKey, validating: SessionNamespace.stubDictionary())
+        try engine.approveProposal(proposerPubKey: proposal.proposer.publicKey, validating: SessionNamespace.stubDictionary())
+        
+        usleep(100)
+        
+        let topicB = networkingInteractor.subscriptions.last!
     
+        XCTAssertTrue(networkingInteractor.didCallSubscribe)
         XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must store agreement key for topic B")
         XCTAssertEqual(networkingInteractor.didRespondOnTopic!, topicA, "Responder must respond on topic A")
     }

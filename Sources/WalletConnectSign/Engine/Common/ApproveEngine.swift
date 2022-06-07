@@ -56,7 +56,7 @@ final class ApproveEngine {
         setupNetworkingSubscriptions()
     }
     
-    func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace]) throws -> (String, SessionProposal) {
+    func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace]) throws {
         let payload = try proposalPayloadsStore.get(key: proposerPubKey)
 
         guard let payload = payload, case .sessionPropose(let proposal) = payload.wcRequest.params else {
@@ -87,7 +87,7 @@ final class ApproveEngine {
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
         networkingInteractor.respond(topic: payload.topic, response: .response(response)) { _ in }
 
-        return (sessionTopic, proposal)
+        try settle(topic: sessionTopic, proposal: proposal, namespaces: sessionNamespaces)
     }
     
     func reject(proposerPubKey: String, reason: ReasonCode) throws {

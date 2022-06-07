@@ -159,8 +159,7 @@ public final class SignClient {
     ///   - events: A Set of events
     public func approve(proposalId: String, namespaces: [String: SessionNamespace]) throws {
         //TODO - accounts should be validated for matching namespaces BEFORE responding proposal
-        let (sessionTopic, proposal) = try approveEngine.approveProposal(proposerPubKey: proposalId, validating: namespaces)
-        try approveEngine.settle(topic: sessionTopic, proposal: proposal, namespaces: namespaces)
+        try approveEngine.approveProposal(proposerPubKey: proposalId, validating: namespaces)
     }
     
     /// For the responder to reject a session proposal.
