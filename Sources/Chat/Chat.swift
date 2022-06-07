@@ -51,15 +51,25 @@ class Chat {
         try await registryManager.register(account: account)
     }
     
-    func invite(account: Account) async throws {
-        try await engine.invite(account: account)
+    func resolve(account: Account) async throws {
+        
+    }
+    
+    func invite(publicKey: String, oppeningMessage: String) async throws {
+//        try await engine.invite(account: account)
     }
     
     func accept(inviteId: String) async throws {
         try await engine.accept(inviteId: inviteId)
     }
     
-    func message(threadTopic: String, message: String) {
+    func message(topic: String, message: String) {
+        
+    }
+    
+    /// To Ping peer client
+    /// - Parameter topic: chat thread topic
+    func ping(topic: String) {
         
     }
     

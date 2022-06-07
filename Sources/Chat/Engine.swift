@@ -65,8 +65,6 @@ class Engine {
         fatalError("not implemented")
     }
 
-
-
     private func handleInvite(_ invite: Invite) {
         onInvite?(invite)
         logger.debug("did receive an invite")
