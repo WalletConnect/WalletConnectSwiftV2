@@ -9,7 +9,7 @@ final class ApproveEngineTests: XCTestCase {
     
     var engine: ApproveEngine!
     var metadata: AppMetadata!
-    var networkingInteractor: MockedWCRelay!
+    var networkingInteractor: NetworkingInteractorMock!
     var cryptoMock: KeyManagementServiceMock!
     var pairingStorageMock: WCPairingStorageMock!
     var sessionStorageMock: WCSessionStorageMock!
@@ -19,7 +19,7 @@ final class ApproveEngineTests: XCTestCase {
     
     override func setUp() {
         metadata = AppMetadata.stub()
-        networkingInteractor = MockedWCRelay()
+        networkingInteractor = NetworkingInteractorMock()
         cryptoMock = KeyManagementServiceMock()
         pairingStorageMock = WCPairingStorageMock()
         sessionStorageMock = WCSessionStorageMock()

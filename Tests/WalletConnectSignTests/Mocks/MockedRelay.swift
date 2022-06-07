@@ -5,7 +5,7 @@ import WalletConnectUtils
 @testable import WalletConnectSign
 @testable import TestingUtils
 
-class MockedWCRelay: NetworkInteracting {
+class NetworkingInteractorMock: NetworkInteracting {
 
     private(set) var subscriptions: [String] = []
     private(set) var unsubscriptions: [String] = []

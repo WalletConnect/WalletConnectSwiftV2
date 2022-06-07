@@ -8,10 +8,10 @@ import Combine
 
 class Chat {
     private var publishers = [AnyCancellable]()
-    let registry: Registry
+    let registryManager: RegistryManager
     let engine: Engine
     let kms: KeyManagementService
-    var onConnected: (()->())?
+    
     let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
     
     var newThreadPublisherSubject = PassthroughSubject<Thread, Never>()
@@ -29,13 +29,13 @@ class Chat {
          kms: KeyManagementService,
          logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off),
          keyValueStorage: KeyValueStorage) {
-        self.registry = registry
+        let topicToInvitationPubKeyStore = CodableStore<String>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.topicToInvitationPubKey.rawValue)
         
         self.kms = kms
         let serialiser = Serializer(kms: kms)
         let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serialiser)
-        let topicToInvitationPubKeyStore = CodableStore<String>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.topicToInvitationPubKey.rawValue)
         let inviteStore = CodableStore<Invite>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
+        self.registryManager = RegistryManager(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToInvitationPubKeyStore: topicToInvitationPubKeyStore)
         self.engine = Engine(registry: registry,
                              networkingInteractor: networkingInteractor,
                              kms: kms,
@@ -47,16 +47,16 @@ class Chat {
         setUpEnginesCallbacks()
     }
     
-    func register(account: Account) {
-        engine.register(account: account)
+    func register(account: Account) async throws {
+        try await registryManager.register(account: account)
     }
     
-    func invite(account: Account) throws {
-        try engine.invite(account: account)
+    func invite(account: Account) async throws {
+        try await engine.invite(account: account)
     }
     
-    func accept(inviteId: String) throws {
-        try engine.accept(inviteId: inviteId)
+    func accept(inviteId: String) async throws {
+        try await engine.accept(inviteId: inviteId)
     }
     
     func message(threadTopic: String, message: String) {
