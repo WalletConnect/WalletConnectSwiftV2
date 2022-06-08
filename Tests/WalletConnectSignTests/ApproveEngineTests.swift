@@ -44,7 +44,6 @@ final class ApproveEngineTests: XCTestCase {
         engine = nil
     }
     
-    @MainActor
     func testApproveProposal() async throws {
         // Client receives a proposal
         let topicA = String.generateTopic()
@@ -54,9 +53,7 @@ final class ApproveEngineTests: XCTestCase {
         let payload = WCRequestSubscriptionPayload(topic: topicA, wcRequest: request)
         networkingInteractor.wcRequestPublisherSubject.send(payload)
 
-        try engine.approveProposal(proposerPubKey: proposal.proposer.publicKey, validating: SessionNamespace.stubDictionary())
-        
-        usleep(100)
+        try await engine.approveProposal(proposerPubKey: proposal.proposer.publicKey, validating: SessionNamespace.stubDictionary())
         
         let topicB = networkingInteractor.subscriptions.last!
     
@@ -84,13 +81,12 @@ final class ApproveEngineTests: XCTestCase {
         XCTAssertTrue(sessionProposed)
     }
     
-    func testSessionSettle() {
+    func testSessionSettle() async throws {
         let agreementKeys = AgreementKeys.stub()
         let topicB = String.generateTopic()
         cryptoMock.setAgreementSecret(agreementKeys, topic: topicB)
         let proposal = SessionProposal.stub(proposerPubKey: AgreementPrivateKey().publicKey.hexRepresentation)
-        try? engine.settle(topic: topicB, proposal: proposal, namespaces: SessionNamespace.stubDictionary())
-        usleep(100)
+        try await engine.settle(topic: topicB, proposal: proposal, namespaces: SessionNamespace.stubDictionary())
         XCTAssertTrue(sessionStorageMock.hasSession(forTopic: topicB), "Responder must persist session on topic B")
         XCTAssert(networkingInteractor.didSubscribe(to: topicB), "Responder must subscribe for topic B")
         XCTAssertTrue(networkingInteractor.didCallRequest, "Responder must send session settle payload on topic B")

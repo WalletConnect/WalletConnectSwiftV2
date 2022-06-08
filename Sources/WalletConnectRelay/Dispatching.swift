@@ -6,6 +6,7 @@ protocol Dispatching {
     var onConnect: (()->())? {get set}
     var onDisconnect: (()->())? {get set}
     var onMessage: ((String) -> ())? {get set}
+    func send(_ string: String) async throws
     func send(_ string: String, completion: @escaping (Error?)->())
     func connect() throws
     func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws
@@ -29,6 +30,18 @@ final class Dispatcher: NSObject, Dispatching {
         super.init()
         setUpWebSocketSession()
         setUpSocketConnectionObserving()
+    }
+
+    func send(_ string: String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            if socket.isConnected {
+                socket.write(string: string) {
+                    continuation.resume(returning: ())
+                }
+            } else {
+                continuation.resume(throwing: NetworkError.webSocketNotConnected)
+            }
+        }
     }
     
     func send(_ string: String, completion: @escaping (Error?) -> Void) {

@@ -59,16 +59,16 @@ final class WalletViewController: UIViewController {
         navigationController?.present(viewController, animated: true)
     }
     
-    private func showSessionRequest(_ sessionRequest: Request) {
-        let requestVC = RequestViewController(sessionRequest)
+    private func showSessionRequest(_ request: Request) {
+        let requestVC = RequestViewController(request)
         requestVC.onSign = { [unowned self] in
-            let result = Signer.signEth(request: sessionRequest)
-            let response = JSONRPCResponse<AnyCodable>(id: sessionRequest.id, result: result)
-            Sign.instance.respond(topic: sessionRequest.topic, response: .response(response))
+            let result = Signer.signEth(request: request)
+            let response = JSONRPCResponse<AnyCodable>(id: request.id, result: result)
+            respondOnSign(request: request, response: response)
             reloadSessionDetailsIfNeeded()
         }
         requestVC.onReject = { [unowned self] in
-            Sign.instance.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
+            respondOnReject(request: request)
             reloadSessionDetailsIfNeeded()
         }
         reloadSessionDetailsIfNeeded()
@@ -81,13 +81,63 @@ final class WalletViewController: UIViewController {
         }
     }
     
+    private func respondOnSign(request: Request, response: JSONRPCResponse<AnyCodable>) {
+        print("[CONTROLLER] Respond on Sign")
+        Task {
+            do {
+                try await Sign.instance.respond(topic: request.topic, response: .response(response))
+            } catch {
+                print("[NON-CONTROLLER] Respond Error: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    private func respondOnReject(request: Request) {
+        print("[CONTROLLER] Respond on Reject")
+        Task {
+            do {
+                try await Sign.instance.respond(
+                    topic: request.topic,
+                    response: .error(JSONRPCErrorResponse(
+                        id: request.id,
+                        error: JSONRPCErrorResponse.Error(code: 0, message: ""))
+                    )
+                )
+            } catch {
+                print("[NON-CONTROLLER] Respond Error: \(error.localizedDescription)")
+            }
+        }
+    }
+    
     private func pairClient(uri: String) {
-        print("[RESPONDER] Pairing to: \(uri)")
+        print("[CONTROLLER] Pairing to: \(uri)")
         Task {
             do {
                 try await Sign.instance.pair(uri: uri)
             } catch {
-                print("[PROPOSER] Pairing connect error: \(error)")
+                print("[NON-CONTROLLER] Pairing connect error: \(error)")
+            }
+        }
+    }
+    
+    private func approve(proposalId: String, namespaces: [String : SessionNamespace]) {
+        print("[CONTROLLER] Approve Session: \(proposalId)")
+        Task {
+            do {
+                try await Sign.instance.approve(proposalId: proposalId, namespaces: namespaces)
+            } catch {
+                print("[NON-CONTROLLER] Approve Session error: \(error)")
+            }
+        }
+    }
+    
+    private func reject(proposalId: String, reason: RejectionReason) {
+        print("[CONTROLLER] Reject Session: \(proposalId)")
+        Task {
+            do {
+                try await Sign.instance.reject(proposalId: proposalId, reason: reason)
+            } catch {
+                print("[NON-CONTROLLER] Reject Session error: \(error)")
             }
         }
     }
@@ -129,7 +179,7 @@ extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("did select row \(indexPath)")
         let itemTopic = sessionItems[indexPath.row].topic
-        if let session = Sign.instance.getSessions().first{$0.topic == itemTopic} {
+        if let session = Sign.instance.getSessions().first(where: {$0.topic == itemTopic}) {
             showSessionDetails(with: session)
         }
     }
@@ -145,7 +195,6 @@ extension WalletViewController: ScannerViewControllerDelegate {
 extension WalletViewController: ProposalViewControllerDelegate {
         
     func didApproveSession() {
-        print("[RESPONDER] Approving session...")
         let proposal = currentProposal!
         currentProposal = nil
         var sessionNamespaces = [String: SessionNamespace]()
@@ -161,18 +210,13 @@ extension WalletViewController: ProposalViewControllerDelegate {
             let sessionNamespace = SessionNamespace(accounts: accounts, methods: proposalNamespace.methods, events: proposalNamespace.events, extensions: extensions)
             sessionNamespaces[caip2Namespace] = sessionNamespace
         }
-        try! Sign.instance.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+        approve(proposalId: proposal.id, namespaces: sessionNamespaces)
     }
     
     func didRejectSession() {
-        print("did reject session")
         let proposal = currentProposal!
         currentProposal = nil
-        do {
-            try Sign.instance.reject(proposalId: proposal.id, reason: .disapprovedChains)
-        } catch {
-            print("Session rejection error: \(error.localizedDescription)")
-        }
+        reject(proposalId: proposal.id, reason: .disapprovedChains)
     }
 }
 

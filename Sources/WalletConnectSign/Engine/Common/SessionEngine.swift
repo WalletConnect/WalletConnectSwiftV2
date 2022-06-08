@@ -4,6 +4,10 @@ import WalletConnectUtils
 import WalletConnectKMS
 
 final class SessionEngine {
+    
+    enum Errors: Error {
+        case sessionNotFound(topic: String)
+    }
 
     var onSessionRequest: ((Request) -> Void)?
     var onSessionResponse: ((Response) -> Void)?
@@ -47,7 +51,7 @@ final class SessionEngine {
         networkingInteractor.unsubscribe(topic: topic)
     }
     
-    func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
+    func ping(topic: String, completion: @escaping (Result<Void, Error>) -> Void) {
         guard sessionStore.hasSession(forTopic: topic) else {
             logger.debug("Could not find session to ping for topic \(topic)")
             return
@@ -77,18 +81,11 @@ final class SessionEngine {
         try await networkingInteractor.request(.wcSessionRequest(sessionRequestParams), onTopic: request.topic)
     }
     
-    func respondSessionRequest(topic: String, response: JsonRpcResult) {
+    func respondSessionRequest(topic: String, response: JsonRpcResult) async throws {
         guard sessionStore.hasSession(forTopic: topic) else {
-            logger.debug("Could not find session for topic \(topic)")
-            return
+            throw Errors.sessionNotFound(topic: topic)
         }
-        networkingInteractor.respond(topic: topic, response: response) { [weak self] error in
-            if let error = error {
-                self?.logger.debug("Could not send session payload, error: \(error.localizedDescription)")
-            } else {
-                self?.logger.debug("Sent Session Request Response")
-            }
-        }
+        try await networkingInteractor.respond(topic: topic, response: response)
     }
     
     func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain) async throws {

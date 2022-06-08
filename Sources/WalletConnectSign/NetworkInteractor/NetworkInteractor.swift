@@ -22,8 +22,10 @@ protocol NetworkInteracting: AnyObject {
     func requestNetworkAck(_ wcMethod: WCMethod, onTopic topic: String, completion: @escaping ((Error?) -> ()))
     /// Completes with a peer response
     func requestPeerResponse(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
-    func respond(topic: String, response: JsonRpcResult, completion: @escaping ((Error?)->()))
+    func respond(topic: String, response: JsonRpcResult) async throws
+    func respondSuccess(payload: WCRequestSubscriptionPayload) async throws
     func respondSuccess(for payload: WCRequestSubscriptionPayload)
+    func respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode) async throws
     func respondError(for payload: WCRequestSubscriptionPayload, reason: ReasonCode)
     func subscribe(topic: String) async throws
     func unsubscribe(topic: String)
@@ -134,29 +136,38 @@ class NetworkInteractor: NetworkInteracting {
         }
     }
 
-    func respond(topic: String, response: JsonRpcResult, completion: @escaping ((Error?)->())) {
+    func respond(topic: String, response: JsonRpcResult) async throws {
+        _ = try jsonRpcHistory.resolve(response: response)
+
+        let message = try serializer.serialize(topic: topic, encodable: response.value)
+        logger.debug("Responding....topic: \(topic)")
+        
         do {
-            _ = try jsonRpcHistory.resolve(response: response)
-            let message = try serializer.serialize(topic: topic, encodable: response.value)
-            logger.debug("Responding....topic: \(topic)")
-            relayClient.publish(topic: topic, payload: message, prompt: false) { error in
-                completion(error)
-            }
-        } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
+            try await relayClient.publish(topic: topic, payload: message, prompt: false)
+        }
+        catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
             logger.info("Info: Json Rpc Duplicate Detected")
-        } catch {
-            completion(error)
         }
     }
     
-    func respondSuccess(for payload: WCRequestSubscriptionPayload) {
+    func respondSuccess(payload: WCRequestSubscriptionPayload) async throws {
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(true))
-        respond(topic: payload.topic, response: JsonRpcResult.response(response)) { _ in } // TODO: Move error handling to relayer package
+        try await respond(topic: payload.topic, response: JsonRpcResult.response(response))
     }
     
-    func respondError(for payload: WCRequestSubscriptionPayload, reason: ReasonCode) {
+    func respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode) async throws {
         let response = JSONRPCErrorResponse(id: payload.wcRequest.id, error: JSONRPCErrorResponse.Error(code: reason.code, message: reason.message))
-        respond(topic: payload.topic, response: JsonRpcResult.error(response)) { _ in } // TODO: Move error handling to relayer package
+        try await respond(topic: payload.topic, response: JsonRpcResult.error(response))
+    }
+    
+    // TODO: Move to async
+    func respondSuccess(for payload: WCRequestSubscriptionPayload) {
+        Task { try? await respondSuccess(payload: payload) }
+    }
+    
+    // TODO: Move to async
+    func respondError(for payload: WCRequestSubscriptionPayload, reason: ReasonCode) {
+        Task { try? await respondError(payload: payload, reason: reason) }
     }
     
     func subscribe(topic: String) async throws {
@@ -173,7 +184,7 @@ class NetworkInteractor: NetworkInteracting {
         }
     }
     
-    //MARK: - Private
+    // MARK: - Private
 
     private func setUpPublishers() {
         relayClient.socketConnectionStatusPublisher.sink { [weak self] status in
