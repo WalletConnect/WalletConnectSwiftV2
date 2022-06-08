@@ -1,39 +1,69 @@
-//
+import XCTest
 //import Foundation
-//import XCTest
-//import WalletConnectUtils
-//import TestingUtils
-//@testable import WalletConnectSign
-//@testable import WalletConnectKMS
-//
-//
-//final class ClientTests: XCTestCase {
-//
-//    let defaultTimeout: TimeInterval = 5.0
-//
-//    let relayHost = "relay.walletconnect.com"
-//    let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
-//    var proposer: ClientDelegate!
-//    var responder: ClientDelegate!
-//
+import WalletConnectUtils
+import TestingUtils
+@testable import WalletConnectSign
+@testable import WalletConnectKMS
+
+extension ProposalNamespace {
+//    static func stub(methods: Set<String> = ["method"]) -> Namespace {
+//        Namespace(chains: [Blockchain("eip155:1")!], methods: methods, events: ["event"])
+//    }
+    
+    static func stubRequired() -> [String: ProposalNamespace] {
+        return [
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:1")!],
+                methods: ["personal_sign"],
+                events: [])
+        ]
+    }
+}
+
+extension SessionNamespace {
+    static func make(toRespond namespaces: [String: ProposalNamespace]) -> [String: SessionNamespace] {
+        return namespaces.mapValues { proposalNamespace in
+            SessionNamespace(
+                accounts: Set(proposalNamespace.chains.map { Account(blockchain: $0, address: "0x00")! }),
+                methods: proposalNamespace.methods,
+                events: proposalNamespace.events
+            )
+        }
+    }
+}
+
+final class ClientTests: XCTestCase {
+
+    let defaultTimeout: TimeInterval = 5.0
+
+    let relayHost = "relay.walletconnect.com"
+    let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
+    var proposer: ClientDelegate!
+    var responder: ClientDelegate!
+
 //    override func setUp() {
 //        proposer = Self.makeClientDelegate(isController: false, relayHost: relayHost, prefix: "🍏P", projectId: projectId)
 //        responder = Self.makeClientDelegate(isController: true, relayHost: relayHost, prefix: "🍎R", projectId: projectId)
 //    }
 //
-//    static func makeClientDelegate(isController: Bool, relayHost: String, prefix: String, projectId: String) -> ClientDelegate {
-//        let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
-//        let keychain = KeychainStorage(keychainService: KeychainServiceFake(), serviceIdentifier: "")
-//        let client = SignClient(
-//            metadata: AppMetadata(name: prefix, description: "", url: "", icons: [""]),
-//            projectId: projectId,
-//            relayHost: relayHost,
-//            logger: logger,
-//            kms: KeyManagementService(keychain: keychain),
-//            keyValueStorage: RuntimeKeyValueStorage())
-//        return ClientDelegate(client: client)
-//    }
-//
+    static func makeClientDelegate(
+        name: String,
+        isController: Bool,
+        relayHost: String = "relay.walletconnect.com",
+        projectId: String = "8ba9ee138960775e5231b70cc5ef1c3a"
+    ) -> ClientDelegate {
+        let logger = ConsoleLogger(suffix: name, loggingLevel: .debug)
+        let keychain = KeychainStorage(keychainService: KeychainServiceFake(), serviceIdentifier: "")
+        let client = SignClient(
+            metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
+            projectId: projectId,
+            relayHost: relayHost,
+            logger: logger,
+            kms: KeyManagementService(keychain: keychain),
+            keyValueStorage: RuntimeKeyValueStorage())
+        return ClientDelegate(client: client)
+    }
+    
 //    private func waitClientsConnected() async {
 //        let group = DispatchGroup()
 //        group.enter()
@@ -47,22 +77,47 @@
 //        group.wait()
 //        return
 //    }
-//
-//    func testNewPairingPing() async {
-//        let responderReceivesPingResponseExpectation = expectation(description: "Responder receives ping response")
-//        await waitClientsConnected()
-//
-//        let uri = try! await proposer.client.connect(requiredNamespaces: [:])!
-//
-//        try! await responder.client.pair(uri: uri)
-//        let pairing = responder.client.getSettledPairings().first!
-//        responder.client.ping(topic: pairing.topic) { response in
-//            XCTAssertTrue(response.isSuccess)
-//            responderReceivesPingResponseExpectation.fulfill()
-//        }
-//        wait(for: [responderReceivesPingResponseExpectation], timeout: defaultTimeout)
-//    }
-//
+
+    func testSessionPropose() async throws {
+        let dapp = Self.makeClientDelegate(name: "🍏P", isController: false)
+        let wallet = Self.makeClientDelegate(name: "🍎R", isController: true)
+        let group = DispatchGroup()
+        group.enter()
+        dapp.onConnected = {
+            group.leave()
+        }
+        group.enter()
+        wallet.onConnected = {
+            group.leave()
+        }
+        group.wait()
+        //
+        
+        let dappSettlementExpectation = expectation(description: "Dapp expects to settle a session")
+        let walletSettlementExpectation = expectation(description: "Wallet expects to settle a session")
+        
+        let requiredNamespaces = ProposalNamespace.stubRequired()
+        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
+        
+        wallet.onSessionProposal = { proposal in
+            print("RECEIVED PROPOSAL ===========================")
+            do {
+                try dapp.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+            } catch { XCTFail() }
+        }
+        dapp.onSessionSettled = { _ in
+            dappSettlementExpectation.fulfill()
+        }
+        wallet.onSessionSettled = { _ in
+            walletSettlementExpectation.fulfill()
+        }
+        
+        let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces)
+        try await wallet.client.pair(uri: uri!)
+        
+        wait(for: [dappSettlementExpectation, walletSettlementExpectation], timeout: defaultTimeout)
+    }
+    
 //    func testNewSession() async {
 //        await waitClientsConnected()
 //        let proposerSettlesSessionExpectation = expectation(description: "Proposer settles session")
@@ -86,6 +141,23 @@
 //        }
 //        wait(for: [proposerSettlesSessionExpectation, responderSettlesSessionExpectation], timeout: defaultTimeout)
 //    }
+    
+//
+//    func testNewPairingPing() async {
+//        let responderReceivesPingResponseExpectation = expectation(description: "Responder receives ping response")
+//        await waitClientsConnected()
+//
+//        let uri = try! await proposer.client.connect(requiredNamespaces: [:])!
+//
+//        try! await responder.client.pair(uri: uri)
+//        let pairing = responder.client.getSettledPairings().first!
+//        responder.client.ping(topic: pairing.topic) { response in
+//            XCTAssertTrue(response.isSuccess)
+//            responderReceivesPingResponseExpectation.fulfill()
+//        }
+//        wait(for: [responderReceivesPingResponseExpectation], timeout: defaultTimeout)
+//    }
+//
 //
 //    func testNewSessionOnExistingPairing() async {
 //        await waitClientsConnected()
@@ -332,8 +404,8 @@
 //        }
 //        wait(for: [proposerReceivesEventExpectation], timeout: defaultTimeout)
 //    }
-//}
-//
+}
+
 //public struct EthSendTransaction: Codable, Equatable {
 //    public let from: String
 //    public let data: String
@@ -356,8 +428,4 @@
 //   }
 //"""
 //
-//extension Namespace {
-//    static func stub(methods: Set<String> = ["method"]) -> Namespace {
-//        Namespace(chains: [Blockchain("eip155:1")!], methods: methods, events: ["event"])
-//    }
-//}
+
