@@ -12,14 +12,10 @@ final class ApproveEngine {
         case pairingNotFound
         case agreementMissingOrInvalid
     }
-    
-    typealias SessionProposalCallback = (Session.Proposal) -> Void
-    typealias SessionRejectedCallback = (Session.Proposal, SessionType.Reason) -> Void
-    typealias SessionSettleCallback = (Session) -> Void
-    
-    var onSessionProposal: SessionProposalCallback?
-    var onSessionRejected: SessionRejectedCallback?
-    var onSessionSettle: SessionSettleCallback?
+
+    var onSessionProposal: ((Session.Proposal) -> Void)?
+    var onSessionRejected: ((Session.Proposal, SessionType.Reason) -> Void)?
+    var onSessionSettle: ((Session) -> Void)?
     
     var settlingProposal: SessionProposal?
         

@@ -4,18 +4,12 @@ import WalletConnectUtils
 import WalletConnectKMS
 
 final class SessionEngine {
-    
-    typealias SessionRequestCallback = (Request) -> Void
-    typealias SessionResponseCallback = (Response) -> Void
-    typealias SessionRejectedCallback = (String, SessionType.Reason) -> Void
-    typealias SessionDeleteCallback = (String, SessionType.Reason) -> Void
-    typealias EventReceivedCallback = (String, Session.Event, Blockchain?) -> Void
-    
-    var onSessionRequest: SessionRequestCallback?
-    var onSessionResponse: SessionResponseCallback?
-    var onSessionRejected: SessionRejectedCallback?
-    var onSessionDelete: SessionDeleteCallback?
-    var onEventReceived: EventReceivedCallback?
+
+    var onSessionRequest: ((Request) -> Void)?
+    var onSessionResponse: ((Response) -> Void)?
+    var onSessionRejected: ((String, SessionType.Reason) -> Void)?
+    var onSessionDelete: ((String, SessionType.Reason) -> Void)?
+    var onEventReceived: ((String, Session.Event, Blockchain?) -> Void)?
         
     private let sessionStore: WCSessionStorage
     private let networkingInteractor: NetworkInteracting
