@@ -35,7 +35,7 @@ struct ChatRequest: Codable {
         method = try container.decode(Method.self, forKey: .method)
         switch method {
         case .invite:
-            let paramsValue = try container.decode(Invite.self, forKey: .params)
+            let paramsValue = try container.decode(InviteParams.self, forKey: .params)
             params = .invite(paramsValue)
         case .message:
             let paramsValue = try container.decode(String.self, forKey: .params)
@@ -69,7 +69,7 @@ extension ChatRequest {
 }
 extension ChatRequest {
     enum Params: Codable {
-        case invite(Invite)
+        case invite(InviteParams)
         case message(String)
     }
 }

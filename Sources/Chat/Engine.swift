@@ -6,10 +6,10 @@ import WalletConnectRelay
 import Combine
 
 class Engine {
-    var onInvite: ((Invite)->())?
+    var onInvite: ((InviteParams)->())?
     var onNewThread: ((Thread)->())?
     let networkingInteractor: NetworkingInteractor
-    let inviteStore: CodableStore<(Invite)>
+    let inviteStore: CodableStore<(InviteParams)>
     let topicToInvitationPubKeyStore: CodableStore<String>
     let registry: Registry
     let logger: ConsoleLogging
@@ -22,7 +22,7 @@ class Engine {
          kms: KeyManagementService,
          logger: ConsoleLogging,
          topicToInvitationPubKeyStore: CodableStore<String>,
-         inviteStore: CodableStore<Invite>,
+         inviteStore: CodableStore<InviteParams>,
          threadsStore: CodableStore<Thread>) {
         self.registry = registry
         self.kms = kms
@@ -33,18 +33,6 @@ class Engine {
         self.threadsStore = threadsStore
         setUpRequestHandling()
         setUpResponseHandling()
-    }
-
-    func invite(peerPubKey: String, openingMessage: String) async throws {
-        let pubKey = try kms.createX25519KeyPair()
-        let invite = Invite(pubKey: pubKey.hexRepresentation, openingMessage: openingMessage)
-        let topic = try AgreementPublicKey(hex: peerPubKey).rawRepresentation.sha256().toHexString()
-        let request = ChatRequest(params: .invite(invite))
-        networkingInteractor.requestUnencrypted(request, topic: topic)
-        let agreementKeys = try kms.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: peerPubKey)
-        let threadTopic = agreementKeys.derivedTopic()
-        try await networkingInteractor.subscribe(topic: threadTopic)
-        logger.debug("invite sent on topic: \(topic)")
     }
 
     func accept(inviteId: String) async throws {
@@ -62,7 +50,7 @@ class Engine {
         fatalError("not implemented")
     }
 
-    private func handleInvite(_ invite: Invite) {
+    private func handleInvite(_ invite: InviteParams) {
         onInvite?(invite)
         logger.debug("did receive an invite")
         try? inviteStore.set(invite, forKey: invite.id)
@@ -83,10 +71,10 @@ class Engine {
     private func setUpResponseHandling() {
         networkingInteractor.responsePublisher.sink { [unowned self] response in
             switch response.requestParams {
-            case .invite(let invite):
-                fatalError("not implemented")
             case .message(let message):
                 print("received message response: \(message)")
+            default:
+                return
             }
         }.store(in: &publishers)
     }

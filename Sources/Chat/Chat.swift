@@ -11,6 +11,7 @@ class Chat {
     let registry: Registry
     let registryManager: RegistryManager
     let engine: Engine
+    let inviteService: InviteService
     let kms: KeyManagementService
     
     let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
@@ -20,8 +21,8 @@ class Chat {
         newThreadPublisherSubject.eraseToAnyPublisher()
     }
     
-    var invitePublisherSubject = PassthroughSubject<Invite, Never>()
-    public var invitePublisher: AnyPublisher<Invite, Never> {
+    var invitePublisherSubject = PassthroughSubject<InviteParams, Never>()
+    public var invitePublisher: AnyPublisher<InviteParams, Never> {
         invitePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -35,7 +36,7 @@ class Chat {
         self.kms = kms
         let serialiser = Serializer(kms: kms)
         let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serialiser)
-        let inviteStore = CodableStore<Invite>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
+        let inviteStore = CodableStore<InviteParams>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
         self.registryManager = RegistryManager(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToInvitationPubKeyStore: topicToInvitationPubKeyStore)
         self.engine = Engine(registry: registry,
                              networkingInteractor: networkingInteractor,
@@ -44,6 +45,7 @@ class Chat {
                              topicToInvitationPubKeyStore: topicToInvitationPubKeyStore,
                              inviteStore: inviteStore,
                              threadsStore: CodableStore<Thread>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.threads.rawValue))
+        self.inviteService = InviteService(networkingInteractor: networkingInteractor, kms: kms, logger: logger)
         socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
         setUpEnginesCallbacks()
     }
@@ -68,7 +70,10 @@ class Chat {
     ///   - publicKey: publicKey associated with a peer
     ///   - openingMessage: oppening message for a chat invite
     func invite(publicKey: String, openingMessage: String) async throws {
-        try await engine.invite(peerPubKey: publicKey, openingMessage: openingMessage)
+        //TODO - how to provide account?
+        // in init or in invite method's params
+        let tempAccount = Account("eip155:1:33e32e32")!
+        try await inviteService.invite(peerPubKey: publicKey, openingMessage: openingMessage, account: tempAccount)
     }
     
     func accept(inviteId: String) async throws {
