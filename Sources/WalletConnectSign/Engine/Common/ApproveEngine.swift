@@ -170,7 +170,7 @@ private extension ApproveEngine {
     }
     
     // MARK: SessionProposeResponse
-    
+    // TODO: Move to Non-Controller SettleEngine
     func handleSessionProposeResponse(response: WCResponse, proposal: SessionType.ProposeParams) {
         do {
             let sessionTopic = try handleProposeResponse(
@@ -264,7 +264,6 @@ private extension ApproveEngine {
     }
     
     // MARK: SessionSettleRequest
-    
     func handleSessionSettleRequest(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
         logger.debug("Did receive session settle request")
         guard let proposedNamespaces = settlingProposal?.requiredNamespaces else {
