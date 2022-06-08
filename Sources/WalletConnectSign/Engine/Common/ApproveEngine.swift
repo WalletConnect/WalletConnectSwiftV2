@@ -52,7 +52,7 @@ final class ApproveEngine {
         setupNetworkingSubscriptions()
     }
     
-    func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace]) throws {
+    func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace]) async throws {
         let payload = try proposalPayloadsStore.get(key: proposerPubKey)
 
         guard let payload = payload, case .sessionPropose(let proposal) = payload.wcRequest.params else {
@@ -81,21 +81,21 @@ final class ApproveEngine {
 
         let proposeResponse = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
-        networkingInteractor.respond(topic: payload.topic, response: .response(response)) { _ in }
-
-        try settle(topic: sessionTopic, proposal: proposal, namespaces: sessionNamespaces)
+        
+        try await networkingInteractor.respond(topic: payload.topic, response: .response(response))
+        try await settle(topic: sessionTopic, proposal: proposal, namespaces: sessionNamespaces)
     }
     
-    func reject(proposerPubKey: String, reason: ReasonCode) throws {
+    func reject(proposerPubKey: String, reason: ReasonCode) async throws {
         guard let payload = try proposalPayloadsStore.get(key: proposerPubKey) else {
             throw Error.proposalPayloadsNotFound
         }
         proposalPayloadsStore.delete(forKey: proposerPubKey)
-        networkingInteractor.respondError(for: payload, reason: reason)
+        try await networkingInteractor.respondError(for: payload, reason: reason)
         // TODO: Delete pairing if inactive
     }
     
-    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace]) throws {
+    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace]) async throws {
         guard let agreementKeys = try kms.getAgreementSecret(for: topic) else {
             throw Error.agreementMissingOrInvalid
         }
@@ -103,32 +103,34 @@ final class ApproveEngine {
             publicKey: agreementKeys.publicKey.hexRepresentation,
             metadata: metadata
         )
-        let expectedExpiryTimeStamp = Date().addingTimeInterval(TimeInterval(WCSession.defaultTimeToLive))
-        
         guard let relay = proposal.relays.first else {
             throw Error.relayNotFound
         }
 
         // TODO: Test expiration times
+        let expiry = Date()
+            .addingTimeInterval(TimeInterval(WCSession.defaultTimeToLive))
+            .timeIntervalSince1970
+    
         let settleParams = SessionType.SettleParams(
             relay: relay,
             controller: selfParticipant,
             namespaces: namespaces,
-            expiry: Int64(expectedExpiryTimeStamp.timeIntervalSince1970)
-        )
+            expiry: Int64(expiry))
+
         let session = WCSession(
             topic: topic,
             selfParticipant: selfParticipant,
             peerParticipant: proposal.proposer,
             settleParams: settleParams,
-            acknowledged: false
-        )
+            acknowledged: false)
 
         logger.debug("Sending session settle request")
 
-        Task { try? await networkingInteractor.subscribe(topic: topic) }
+        try await networkingInteractor.subscribe(topic: topic)
         sessionStore.setSession(session)
-        networkingInteractor.request(.wcSessionSettle(settleParams), onTopic: topic)
+
+        try await networkingInteractor.request(.wcSessionSettle(settleParams), onTopic: topic)
         onSessionSettle?(session.publicRepresentation())
     }
 }

@@ -49,7 +49,7 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
             throw WalletConnectError.internal(.jsonRpcDuplicateDetected)
         } else {
             record.response = response
-            try storage.set(record, forKey: "\(record.id)")
+            storage.set(record, forKey: "\(record.id)")
             return record
         }
     }

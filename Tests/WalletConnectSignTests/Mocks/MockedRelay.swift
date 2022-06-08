@@ -58,6 +58,10 @@ class MockedWCRelay: NetworkInteracting {
         completion(error)
     }
     
+    func respond(topic: String, response: JsonRpcResult) async throws {
+        didRespondOnTopic = topic
+    }
+    
     func respondSuccess(for payload: WCRequestSubscriptionPayload) {
         didRespondSuccess = true
     }
