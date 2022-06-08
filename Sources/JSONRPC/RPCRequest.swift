@@ -104,7 +104,7 @@ extension RPCRequest: Codable {
                 throw DecodingError.dataCorruptedError(
                     forKey: .params,
                     in: container,
-                    debugDescription: "")
+                    debugDescription: "The params member cannot be a primitive value, it must be an array or an object.")
             }
         }
     }
