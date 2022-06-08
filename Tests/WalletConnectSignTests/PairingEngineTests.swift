@@ -1,4 +1,5 @@
 import XCTest
+import Combine
 @testable import WalletConnectSign
 @testable import TestingUtils
 @testable import WalletConnectKMS
@@ -12,21 +13,21 @@ func deriveTopic(publicKey: String, privateKey: AgreementPrivateKey) -> String {
 final class PairingEngineTests: XCTestCase {
     
     var engine: PairingEngine!
+    var approveEngine: ApproveEngine!
     
     var networkingInteractor: MockedWCRelay!
     var storageMock: WCPairingStorageMock!
     var cryptoMock: KeyManagementServiceMock!
-    var proposalPayloadsStore: CodableStore<WCRequestSubscriptionPayload>!
     
     var topicGenerator: TopicGenerator!
+    var publishers = Set<AnyCancellable>()
     
     override func setUp() {
         networkingInteractor = MockedWCRelay()
         storageMock = WCPairingStorageMock()
         cryptoMock = KeyManagementServiceMock()
         topicGenerator = TopicGenerator()
-        proposalPayloadsStore = CodableStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: "")
-        setupEngine()
+        setupEngines()
     }
     
     override func tearDown() {
@@ -35,20 +36,30 @@ final class PairingEngineTests: XCTestCase {
         cryptoMock = nil
         topicGenerator = nil
         engine = nil
+        approveEngine = nil
     }
     
-    func setupEngine() {
+    func setupEngines() {
         let meta = AppMetadata.stub()
         let logger = ConsoleLoggerMock()
         engine = PairingEngine(
             networkingInteractor: networkingInteractor,
             kms: cryptoMock,
             pairingStore: storageMock,
-            sessionToPairingTopic: CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: ""),
             metadata: meta,
             logger: logger,
-            topicGenerator: topicGenerator.getTopic,
-            proposalPayloadsStore: proposalPayloadsStore)
+            topicGenerator: topicGenerator.getTopic
+        )
+        approveEngine = ApproveEngine(
+            networkingInteractor: networkingInteractor,
+            proposalPayloadsStore: .init(defaults: RuntimeKeyValueStorage(), identifier: ""),
+            sessionToPairingTopic: CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: ""),
+            metadata: meta,
+            kms: cryptoMock,
+            logger: logger,
+            pairingStore: storageMock,
+            sessionStore: WCSessionStorageMock()
+        )
     }
     
     func testCreate() async {
@@ -75,37 +86,7 @@ final class PairingEngineTests: XCTestCase {
         XCTAssertEqual(publishTopic, topicA)
     }
     
-    func testReceiveProposal() {
-        let pairing = WCPairing.stub()
-        let topicA = pairing.topic
-        storageMock.setPairing(pairing)
-        var sessionProposed = false
-        let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
-        let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
-        let request = WCRequest(method: .sessionPropose, params: .sessionPropose(proposal))
-        let payload = WCRequestSubscriptionPayload(topic: topicA, wcRequest: request)
-        engine.onSessionProposal = { _ in
-            sessionProposed = true
-        }
-        networkingInteractor.wcRequestPublisherSubject.send(payload)
-        XCTAssertNotNil(try! proposalPayloadsStore.get(key: proposal.proposer.publicKey), "Proposer must store proposal payload")
-        XCTAssertTrue(sessionProposed)
-    }
-    
-    func testRespondProposal() {
-        // Client receives a proposal
-        let topicA = String.generateTopic()
-        let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
-        let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
-        let request = WCRequest(method: .sessionPropose, params: .sessionPropose(proposal))
-        let payload = WCRequestSubscriptionPayload(topic: topicA, wcRequest: request)
-        networkingInteractor.wcRequestPublisherSubject.send(payload)
-        let (topicB, _) = engine.approveProposal(proposerPubKey: proposal.proposer.publicKey, validating: SessionNamespace.stubDictionary())!
-        
-        XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must store agreement key for topic B")
-        XCTAssertEqual(networkingInteractor.didRespondOnTopic!, topicA, "Responder must respond on topic A")
-    }
-    
+    @MainActor
     func testHandleSessionProposeResponse() async {
         let uri = try! await engine.create()
         let pairing = storageMock.getPairing(forTopic: uri.topic)!
@@ -131,18 +112,14 @@ final class PairingEngineTests: XCTestCase {
                                   requestMethod: request.method,
                                   requestParams: request.params,
                                   result: .response(jsonRpcResponse))
-        
-        var sessionTopic: String!
-        
-        engine.onProposeResponse = { topic, _ in
-            sessionTopic = topic
-        }
-        networkingInteractor.onPairingResponse?(response)
+
+        networkingInteractor.responsePublisherSubject.send(response)
         let privateKey = try! cryptoMock.getPrivateKey(for: proposal.proposer.publicKey)!
         let topicB = deriveTopic(publicKey: responder.publicKey, privateKey: privateKey)
-        
         let storedPairing = storageMock.getPairing(forTopic: topicA)!
+        let sessionTopic = networkingInteractor.subscriptions.last!
 
+        XCTAssertTrue(networkingInteractor.didCallSubscribe)
         XCTAssert(storedPairing.active)
         XCTAssertEqual(topicB, sessionTopic, "Responder engine calls back with session topic")
     }
@@ -163,7 +140,7 @@ final class PairingEngineTests: XCTestCase {
               }
         
         let response = WCResponse.stubError(forRequest: request, topic: topicA)
-        networkingInteractor.onPairingResponse?(response)
+        networkingInteractor.responsePublisherSubject.send(response)
         
         XCTAssert(networkingInteractor.didUnsubscribe(to: pairing.topic), "Proposer must unsubscribe if pairing is inactive.")
         XCTAssertFalse(storageMock.hasPairing(forTopic: pairing.topic), "Proposer must delete an inactive pairing.")
@@ -191,7 +168,7 @@ final class PairingEngineTests: XCTestCase {
         storageMock.setPairing(storedPairing)
         
         let response = WCResponse.stubError(forRequest: request, topic: topicA)
-        networkingInteractor.onPairingResponse?(response)
+        networkingInteractor.responsePublisherSubject.send(response)
         
         XCTAssertFalse(networkingInteractor.didUnsubscribe(to: pairing.topic), "Proposer must not unsubscribe if pairing is active.")
         XCTAssert(storageMock.hasPairing(forTopic: pairing.topic), "Proposer must not delete an active pairing.")
