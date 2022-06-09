@@ -89,8 +89,8 @@ class InvitationHandlingService {
         let selfPubKey = try AgreementPublicKey(hex: selfPubKeyHex)
         
         let symKeyI = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: inviteParams.pubKey)
-        
-        let decryptedData = try codec.decode(sealboxString: inviteParams.invite, symmetricKey: symKeyI.rawRepresentation)
+                
+        let decryptedData = try codec.decode(sealboxString: inviteParams.invite, symmetricKey: symKeyI.sharedKey.rawRepresentation)
         
         let invite = try JSONDecoder().decode(Invite.self, from: decryptedData)
                 

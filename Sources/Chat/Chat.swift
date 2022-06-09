@@ -21,8 +21,8 @@ class Chat {
         newThreadPublisherSubject.eraseToAnyPublisher()
     }
     
-    var invitePublisherSubject = PassthroughSubject<InviteParams, Never>()
-    public var invitePublisher: AnyPublisher<InviteParams, Never> {
+    var invitePublisherSubject = PassthroughSubject<Invite, Never>()
+    public var invitePublisher: AnyPublisher<Invite, Never> {
         invitePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -97,7 +97,7 @@ class Chat {
     
     private func setUpEnginesCallbacks() {
         invitationHandlingService.onInvite = { [unowned self] pubKey, invite in
-//            invitePublisherSubject.send(invite)
+            invitePublisherSubject.send(invite)
         }
 //        engine.onNewThread = { [unowned self] newThread in
 //            newThreadPublisherSubject.send(newThread)
