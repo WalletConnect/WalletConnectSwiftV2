@@ -62,6 +62,14 @@ class MockedWCRelay: NetworkInteracting {
         didRespondOnTopic = topic
     }
     
+    func respondSuccess(payload: WCRequestSubscriptionPayload) async throws {
+        respondSuccess(for: payload)
+    }
+    
+    func respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode) async throws {
+        respondError(for: payload, reason: reason)
+    }
+    
     func respondSuccess(for payload: WCRequestSubscriptionPayload) {
         didRespondSuccess = true
     }
