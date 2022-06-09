@@ -91,7 +91,7 @@ final class ClientTests: XCTestCase {
             group.leave()
         }
         group.wait()
-        //
+        // -----------
         
         let dappSettlementExpectation = expectation(description: "Dapp expects to settle a session")
         let walletSettlementExpectation = expectation(description: "Wallet expects to settle a session")
@@ -100,10 +100,11 @@ final class ClientTests: XCTestCase {
         let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
         
         wallet.onSessionProposal = { proposal in
-            print("RECEIVED PROPOSAL ===========================")
             do {
-                try dapp.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
-            } catch { XCTFail() }
+                try wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+            } catch {
+                XCTFail("\(error)")
+            }
         }
         dapp.onSessionSettled = { _ in
             dappSettlementExpectation.fulfill()

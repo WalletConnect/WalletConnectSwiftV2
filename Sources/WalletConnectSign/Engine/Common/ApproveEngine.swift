@@ -180,7 +180,9 @@ private extension ApproveEngine {
             )
             settlingProposal = proposal
 
-            Task { try? await networkingInteractor.subscribe(topic: sessionTopic) }
+            Task(priority: .background) {
+                try? await networkingInteractor.subscribe(topic: sessionTopic)
+            }
         }
         catch {
             guard let error = error as? JSONRPCErrorResponse else {
