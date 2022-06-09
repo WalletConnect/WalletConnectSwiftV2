@@ -23,6 +23,10 @@ let package = Package(
             dependencies: ["WalletConnectRelay", "WalletConnectUtils", "WalletConnectKMS"],
             path: "Sources/WalletConnectSign"),
         .target(
+            name: "Chat",
+            dependencies: ["WalletConnectRelay", "WalletConnectUtils", "WalletConnectKMS"],
+            path: "Sources/Chat"),
+        .target(
             name: "WalletConnectRelay",
             dependencies: ["WalletConnectUtils", "Starscream"],
             path: "Sources/WalletConnectRelay"),
@@ -32,6 +36,12 @@ let package = Package(
             path: "Sources/WalletConnectKMS"),
         .target(
             name: "WalletConnectUtils",
+            dependencies: ["Commons"]),
+        .target(
+            name: "JSONRPC",
+            dependencies: ["Commons"]),
+        .target(
+            name: "Commons",
             dependencies: []),
         .testTarget(
             name: "WalletConnectSignTests",
@@ -39,6 +49,9 @@ let package = Package(
         .testTarget(
             name: "IntegrationTests",
             dependencies: ["WalletConnectSign", "TestingUtils", "WalletConnectKMS"]),
+        .testTarget(
+            name: "ChatTests",
+            dependencies: ["Chat", "WalletConnectUtils", "TestingUtils"]),
         .testTarget(
             name: "RelayerTests",
             dependencies: ["WalletConnectRelay", "WalletConnectUtils", "TestingUtils"]),
@@ -49,6 +62,15 @@ let package = Package(
             name: "TestingUtils",
             dependencies: ["WalletConnectUtils", "WalletConnectKMS"],
             path: "Tests/TestingUtils"),
+        .testTarget(
+            name: "WalletConnectUtilsTests",
+            dependencies: ["WalletConnectUtils"]),
+        .testTarget(
+            name: "JSONRPCTests",
+            dependencies: ["JSONRPC", "TestingUtils"]),
+        .testTarget(
+            name: "CommonsTests",
+            dependencies: ["Commons", "TestingUtils"]),
     ],
     swiftLanguageVersions: [.v5]
 )

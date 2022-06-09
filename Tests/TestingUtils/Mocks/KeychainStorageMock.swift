@@ -26,4 +26,8 @@ final class KeychainStorageMock: KeychainStorageProtocol {
         didCallDelete = true
         storage[key] = nil
     }
+    
+    func deleteAll() throws {
+        storage = [:]
+    }
 }

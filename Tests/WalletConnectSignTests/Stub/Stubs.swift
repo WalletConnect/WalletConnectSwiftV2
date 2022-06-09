@@ -2,6 +2,7 @@
 import Foundation
 import WalletConnectKMS
 import WalletConnectUtils
+import TestingUtils
 
 extension AppMetadata {
     static func stub() -> AppMetadata {

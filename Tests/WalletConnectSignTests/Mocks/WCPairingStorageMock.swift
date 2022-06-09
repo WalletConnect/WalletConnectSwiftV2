@@ -1,7 +1,7 @@
 @testable import WalletConnectSign
 
 final class WCPairingStorageMock: WCPairingStorage {
-    
+
     var onPairingExpiration: ((WCPairing) -> Void)?
     
     private(set) var pairings: [String: WCPairing] = [:]
@@ -24,5 +24,9 @@ final class WCPairingStorageMock: WCPairingStorage {
     
     func delete(topic: String) {
         pairings[topic] = nil
+    }
+    
+    func deleteAll() {
+        pairings = [:]
     }
 }

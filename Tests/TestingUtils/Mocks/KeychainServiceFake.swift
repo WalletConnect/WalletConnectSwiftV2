@@ -1,15 +1,14 @@
 import Foundation
-@testable import WalletConnectSign
 @testable import WalletConnectKMS
 
 // This file is a copy from the one in unit tests target, would be nice to figure out a way to share it between targets.
-final class KeychainServiceFake: KeychainServiceProtocol {
+final public class KeychainServiceFake: KeychainServiceProtocol {
     
     var errorStatus: OSStatus?
     
     private var storage: [String: Data] = [:]
     
-    func add(_ attributes: CFDictionary, _ result: UnsafeMutablePointer<CFTypeRef?>?) -> OSStatus {
+    public func add(_ attributes: CFDictionary, _ result: UnsafeMutablePointer<CFTypeRef?>?) -> OSStatus {
         if let forceError = errorStatus {
             return forceError
         }
@@ -24,7 +23,7 @@ final class KeychainServiceFake: KeychainServiceProtocol {
         return errSecInternalError
     }
     
-    func copyMatching(_ query: CFDictionary, _ result: UnsafeMutablePointer<CFTypeRef?>?) -> OSStatus {
+    public func copyMatching(_ query: CFDictionary, _ result: UnsafeMutablePointer<CFTypeRef?>?) -> OSStatus {
         if let forceError = errorStatus {
             return forceError
         }
@@ -39,7 +38,7 @@ final class KeychainServiceFake: KeychainServiceProtocol {
         return errSecInternalError
     }
     
-    func update(_ query: CFDictionary, _ attributesToUpdate: CFDictionary) -> OSStatus {
+    public func update(_ query: CFDictionary, _ attributesToUpdate: CFDictionary) -> OSStatus {
         if let forceError = errorStatus {
             return forceError
         }
@@ -55,7 +54,7 @@ final class KeychainServiceFake: KeychainServiceProtocol {
         return errSecInternalError
     }
     
-    func delete(_ query: CFDictionary) -> OSStatus {
+    public func delete(_ query: CFDictionary) -> OSStatus {
         if let forceError = errorStatus {
             return forceError
         }

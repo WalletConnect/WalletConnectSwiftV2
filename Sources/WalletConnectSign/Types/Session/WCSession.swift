@@ -1,5 +1,6 @@
 import Foundation
 import WalletConnectKMS
+import WalletConnectUtils
 
 struct WCSession: ExpirableSequence {
     enum Error: Swift.Error {

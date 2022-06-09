@@ -1,5 +1,6 @@
 
 import Foundation
+import WalletConnectUtils
 import WalletConnectRelay
 
 /// A protocol that defines methods that SignClient instance call on it's delegate to handle sequences level events

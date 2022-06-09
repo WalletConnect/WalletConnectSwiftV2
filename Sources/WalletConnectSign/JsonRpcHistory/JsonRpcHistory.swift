@@ -11,10 +11,10 @@ protocol JsonRpcHistoryRecording {
 }
 //TODO -remove and use jsonrpc history only from utils
 class JsonRpcHistory: JsonRpcHistoryRecording {
-    let storage: KeyValueStore<JsonRpcRecord>
+    let storage: CodableStore<JsonRpcRecord>
     let logger: ConsoleLogging
     
-    init(logger: ConsoleLogging, keyValueStore: KeyValueStore<JsonRpcRecord>) {
+    init(logger: ConsoleLogging, keyValueStore: CodableStore<JsonRpcRecord>) {
         self.logger = logger
         self.storage = keyValueStore
     }

@@ -4,6 +4,9 @@ import WalletConnectUtils
 import WalletConnectRelay
 import Combine
 
+public typealias Account = WalletConnectUtils.Account
+public typealias Blockchain = WalletConnectUtils.Blockchain
+
 public class Sign {
     public static let instance = Sign()
     
@@ -142,7 +145,7 @@ extension Sign {
 
     /// For the responder to approve a session proposal.
     /// - Parameters:
-    ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate function: `didReceive(sessionProposal: Session.Proposal)`
+    ///   - proposalId: Session Proposal Public key received from peer client in a WalletConnect delegate function: `didReceive(sessionProposal: Session.Proposal)`
     ///   - accounts: A Set of accounts that the dapp will be allowed to request methods executions on.
     ///   - methods: A Set of methods that the dapp will be allowed to request.
     ///   - events: A Set of events
@@ -152,10 +155,10 @@ extension Sign {
 
     /// For the responder to reject a session proposal.
     /// - Parameters:
-    ///   - proposal: Session Proposal received from peer client in a WalletConnect delegate.
+    ///   - proposalId: Session Proposal Public key received from peer client in a WalletConnect delegate.
     ///   - reason: Reason why the session proposal was rejected. Conforms to CAIP25.
-    public func reject(proposal: Session.Proposal, reason: RejectionReason) {
-        client.reject(proposal: proposal, reason: reason)
+    public func reject(proposalId: String, reason: RejectionReason) throws {
+        try client.reject(proposalId: proposalId, reason: reason)
     }
 
     /// For the responder to update session methods
@@ -247,4 +250,13 @@ extension Sign {
     public func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
         try relayClient.disconnect(closeCode: closeCode)
     }
+    
+#if DEBUG
+    /// Delete all stored data sach as: pairings, sessions, keys
+    ///
+    /// - Note: Doesn't unsubscribe from topics
+    public func cleanup() throws {
+        try client.cleanup()
+    }
+#endif
 }

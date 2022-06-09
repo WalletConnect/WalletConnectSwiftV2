@@ -2,7 +2,6 @@ import Foundation
 import WalletConnectUtils
 
 
-
 public class Serializer {
     enum Error: String, Swift.Error {
         case symmetricKeyForTopicNotFound

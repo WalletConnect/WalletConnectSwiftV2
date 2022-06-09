@@ -4,6 +4,7 @@ protocol KeychainStorageProtocol {
     func add<T: GenericPasswordConvertible>(_ item: T, forKey key: String) throws
     func read<T: GenericPasswordConvertible>(key: String) throws -> T
     func delete(key: String) throws
+    func deleteAll() throws
 }
 
 final class KeychainStorage: KeychainStorageProtocol {
