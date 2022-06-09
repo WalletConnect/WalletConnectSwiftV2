@@ -10,18 +10,18 @@ class InviteService {
     let networkingInteractor: NetworkingInteractor
     let logger: ConsoleLogging
     let kms: KeyManagementService
-    let serializer: Serializing
+    let codec: Codec
     
     var onInvite: ((InviteParams)->())?
 
     init(networkingInteractor: NetworkingInteractor,
          kms: KeyManagementService,
          logger: ConsoleLogging,
-         serializer: Serializing) {
+         codec: Codec) {
         self.kms = kms
         self.networkingInteractor = networkingInteractor
         self.logger = logger
-        self.serializer = serializer
+        self.codec = codec
         setUpResponseHandling()
     }
         
@@ -32,11 +32,11 @@ class InviteService {
         let symKeyI = try kms.performKeyAgreement(selfPublicKey: selfPubKeyY, peerPublicKey: peerPubKey)
         let inviteTopic = try AgreementPublicKey(hex: peerPubKey).rawRepresentation.sha256().toHexString()
         
-        let encodedInvite = try serializer.serialize(topic: inviteTopic, encodable: invite)
-        
+        try kms.setSymmetricKey(symKeyI.sharedKey, for: inviteTopic)
+
+        let encodedInvite = try codec.encode(plaintext: invite.json(), symmetricKey: symKeyI.sharedKey.rawRepresentation)
         let inviteRequestParams = InviteParams(pubKey: selfPubKeyY.hexRepresentation, invite: encodedInvite)
         
-        try kms.setSymmetricKey(symKeyI.sharedKey, for: inviteTopic)
         
         let request = ChatRequest(params: .invite(inviteRequestParams))
         
@@ -78,5 +78,6 @@ class InviteService {
         let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey)
         let threadTopic = agreementKeys.derivedTopic()
         try await networkingInteractor.subscribe(topic: threadTopic)
+        //TODO - remove symKeyI
     }
 }
