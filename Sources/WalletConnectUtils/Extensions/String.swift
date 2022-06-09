@@ -1,5 +1,3 @@
-
-
 import Foundation
 
 public extension String {
@@ -12,7 +10,7 @@ public extension String {
         return keyData.toHexString()
     }
     
-    public init<D>(rawRepresentation data: D) throws where D : ContiguousBytes {
+    init<D>(rawRepresentation data: D) throws where D : ContiguousBytes {
         let bytes = data.withUnsafeBytes { Data(Array($0)) }
         guard let string = String(data: bytes, encoding: .utf8) else {
             fatalError() // FIXME: Throw error
@@ -20,7 +18,7 @@ public extension String {
         self = string
     }
     
-    public var rawRepresentation: Data {
+    var rawRepresentation: Data {
         self.data(using: .utf8) ?? Data()
     }
 }

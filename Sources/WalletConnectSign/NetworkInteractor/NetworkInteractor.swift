@@ -23,9 +23,9 @@ protocol NetworkInteracting: AnyObject {
     /// Completes with a peer response
     func requestPeerResponse(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>)->())?)
     func respond(topic: String, response: JsonRpcResult) async throws
-    func respondSuccess(for payload: WCRequestSubscriptionPayload) async throws
+    func respondSuccess(payload: WCRequestSubscriptionPayload) async throws
     func respondSuccess(for payload: WCRequestSubscriptionPayload)
-    func respondError(for payload: WCRequestSubscriptionPayload, reason: ReasonCode) async throws
+    func respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode) async throws
     func respondError(for payload: WCRequestSubscriptionPayload, reason: ReasonCode)
     func subscribe(topic: String) async throws
     func unsubscribe(topic: String)
@@ -150,24 +150,24 @@ class NetworkInteractor: NetworkInteracting {
         }
     }
     
-    func respondSuccess(for payload: WCRequestSubscriptionPayload) async throws {
+    func respondSuccess(payload: WCRequestSubscriptionPayload) async throws {
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(true))
         try await respond(topic: payload.topic, response: JsonRpcResult.response(response))
     }
     
-    func respondError(for payload: WCRequestSubscriptionPayload, reason: ReasonCode) async throws {
+    func respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode) async throws {
         let response = JSONRPCErrorResponse(id: payload.wcRequest.id, error: JSONRPCErrorResponse.Error(code: reason.code, message: reason.message))
         try await respond(topic: payload.topic, response: JsonRpcResult.error(response))
     }
     
     // TODO: Move to async
     func respondSuccess(for payload: WCRequestSubscriptionPayload) {
-        Task { try? await respondSuccess(for: payload) }
+        Task { try? await respondSuccess(payload: payload) }
     }
     
     // TODO: Move to async
     func respondError(for payload: WCRequestSubscriptionPayload, reason: ReasonCode) {
-        Task { try? await respondError(for: payload, reason: reason) }
+        Task { try? await respondError(payload: payload, reason: reason) }
     }
     
     func subscribe(topic: String) async throws {

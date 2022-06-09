@@ -91,7 +91,7 @@ final class ApproveEngine {
             throw Error.proposalPayloadsNotFound
         }
         proposalPayloadsStore.delete(forKey: proposerPubKey)
-        try await networkingInteractor.respondError(for: payload, reason: reason)
+        try await networkingInteractor.respondError(payload: payload, reason: reason)
         // TODO: Delete pairing if inactive
     }
     
