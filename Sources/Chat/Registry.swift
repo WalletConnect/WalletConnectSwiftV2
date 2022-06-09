@@ -9,11 +9,12 @@ protocol Registry {
 
 actor KeyValueRegistry: Registry  {
     
-    var registryStore: [Account: String] = [:]
+    private var registryStore: [Account: String] = [:]
     
     func register(account address: Account, pubKey: String) async throws {
         registryStore[address] = pubKey
     }
+    
     func resolve(account: Account) async throws -> String {
         guard let record = registryStore[account] else { throw ChatError.recordNotFound}
         return record
