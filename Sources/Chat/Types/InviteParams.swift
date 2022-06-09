@@ -11,6 +11,10 @@ struct InviteParams: Codable {
     }
 }
 
+struct InviteResponse: Codable {
+    let pubKey: String
+}
+
 
 struct Invite: Codable {
     let message: String
