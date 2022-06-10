@@ -4,7 +4,7 @@ import TestingUtils
 @testable import WalletConnectKMS
 @testable import WalletConnectSign
 
-final class ClientTests: XCTestCase {
+final class SignClientTests: XCTestCase {
 
     let defaultTimeout: TimeInterval = 5.0
 
