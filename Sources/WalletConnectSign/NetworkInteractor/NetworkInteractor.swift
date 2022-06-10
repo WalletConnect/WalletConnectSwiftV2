@@ -26,7 +26,6 @@ protocol NetworkInteracting: AnyObject {
     func respondSuccess(payload: WCRequestSubscriptionPayload) async throws
     func respondSuccess(for payload: WCRequestSubscriptionPayload)
     func respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode) async throws
-    func respondError(for payload: WCRequestSubscriptionPayload, reason: ReasonCode)
     func subscribe(topic: String) async throws
     func unsubscribe(topic: String)
 }
@@ -163,11 +162,6 @@ class NetworkInteractor: NetworkInteracting {
     // TODO: Move to async
     func respondSuccess(for payload: WCRequestSubscriptionPayload) {
         Task { try? await respondSuccess(payload: payload) }
-    }
-    
-    // TODO: Move to async
-    func respondError(for payload: WCRequestSubscriptionPayload, reason: ReasonCode) {
-        Task { try? await respondError(payload: payload, reason: reason) }
     }
     
     func subscribe(topic: String) async throws {

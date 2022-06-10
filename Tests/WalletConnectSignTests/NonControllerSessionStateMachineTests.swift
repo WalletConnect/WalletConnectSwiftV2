@@ -51,6 +51,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
 
     func testUpdateMethodPeerErrorSessionNotFound() {
         networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateNamespaces(topic: ""))
+        usleep(100)
         XCTAssertFalse(networkingInteractor.didRespondSuccess)
         XCTAssertEqual(networkingInteractor.lastErrorCode, 1301)
     }
@@ -59,6 +60,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         let session = WCSession.stub(isSelfController: true) // Peer is not a controller
         storageMock.setSession(session)
         networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateNamespaces(topic: session.topic))
+        usleep(100)
         XCTAssertFalse(networkingInteractor.didRespondSuccess)
         XCTAssertEqual(networkingInteractor.lastErrorCode, 3004)
     }

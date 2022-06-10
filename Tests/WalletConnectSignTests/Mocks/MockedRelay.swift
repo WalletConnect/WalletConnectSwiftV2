@@ -67,16 +67,12 @@ class NetworkingInteractorMock: NetworkInteracting {
     }
     
     func respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode) async throws {
-        respondError(for: payload, reason: reason)
+        lastErrorCode = reason.code
+        didRespondError = true
     }
     
     func respondSuccess(for payload: WCRequestSubscriptionPayload) {
         didRespondSuccess = true
-    }
-    
-    func respondError(for payload: WCRequestSubscriptionPayload, reason: ReasonCode) {
-        lastErrorCode = reason.code
-        didRespondError = true
     }
     
     func subscribe(topic: String) {
