@@ -9,7 +9,7 @@ class InvitationHandlingService {
     var onInvite: ((String, Invite)->())?
     var onNewThread: ((Thread)->())?
     private let networkingInteractor: NetworkingInteractor
-    private let inviteStore: CodableStore<(InviteParams)>
+    private let invitePayloadStore: CodableStore<(RequestSubscriptionPayload)>
     private let topicToInvitationPubKeyStore: CodableStore<String>
     private let registry: Registry
     private let logger: ConsoleLogging
@@ -23,7 +23,7 @@ class InvitationHandlingService {
          kms: KeyManagementService,
          logger: ConsoleLogging,
          topicToInvitationPubKeyStore: CodableStore<String>,
-         inviteStore: CodableStore<InviteParams>,
+         invitePayloadStore: CodableStore<RequestSubscriptionPayload>,
          threadsStore: CodableStore<Thread>,
          codec: Codec) {
         self.registry = registry
@@ -31,7 +31,7 @@ class InvitationHandlingService {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.topicToInvitationPubKeyStore = topicToInvitationPubKeyStore
-        self.inviteStore = inviteStore
+        self.invitePayloadStore = invitePayloadStore
         self.threadsStore = threadsStore
         self.codec = codec
         setUpRequestHandling()
@@ -39,18 +39,14 @@ class InvitationHandlingService {
     }
 
     func accept(inviteId: String) async throws {
-//        guard let hexPubKey = try topicToInvitationPubKeyStore.get(key: "todo-topic") else {
-//            throw ChatError.noPublicKeyForInviteId
-//        }
-//        let pubKey = try! AgreementPublicKey(hex: hexPubKey)
-//        guard let invite = try inviteStore.get(key: inviteId) else {
-//            throw ChatError.noInviteForId
-//        }
-//        logger.debug("accepting an invitation")
-//        let agreementKeys = try! kms.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: invite.pubKey)
-//        let topic = agreementKeys.derivedTopic()
-//        try await networkingInteractor.subscribe(topic: topic)
-//        fatalError("not implemented")
+        
+        let inviteStoreItem = try invitePayloadStore.get(key: inviteId)
+        
+        let selfThreadPubKey = try kms.createX25519KeyPair()
+        let inviteResponse = InviteResponse(pubKey: selfThreadPubKey.hexRepresentation)
+        
+        let response = JsonRpcResult.response(JSONRPCResponse<AnyCodable>())
+        networkingInteractor.respond(topic: inviteStoreItem?.topic, response: <#T##JsonRpcResult#>)
     }
 
     private func setUpRequestHandling() {
@@ -85,16 +81,18 @@ class InvitationHandlingService {
             logger.debug("PubKey for invitation topic not found")
             return
         }
-
+        
         let selfPubKey = try AgreementPublicKey(hex: selfPubKeyHex)
         
-        let symKeyI = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: inviteParams.pubKey)
-                
-        let decryptedData = try codec.decode(sealboxString: inviteParams.invite, symmetricKey: symKeyI.sharedKey.rawRepresentation)
+        let agreementKeysI = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: inviteParams.pubKey)
+                        
+        let decryptedData = try codec.decode(sealboxString: inviteParams.invite, symmetricKey: agreementKeysI.sharedKey.rawRepresentation)
         
         let invite = try JSONDecoder().decode(Invite.self, from: decryptedData)
-                
-        inviteStore.set(inviteParams, forKey: inviteParams.id)
+        
+        try kms.setSymmetricKey(agreementKeysI.sharedKey, for: payload.topic)
+        
+        invitePayloadStore.set(payload, forKey: inviteParams.id)
                 
         onInvite?(inviteParams.pubKey, invite)
     }

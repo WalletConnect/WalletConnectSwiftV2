@@ -45,6 +45,20 @@ class NetworkingInteractor: NetworkInteracting {
         }
     }
     
+    func respond(topic: String, response: JsonRpcResult) {
+        do {
+            let message = try serializer.serialize(topic: topic, encodable: response.value)
+            logger.debug("Responding....topic: \(topic)")
+            relayClient.publish(topic: topic, payload: message, prompt: false) { error in
+                completion(error)
+            }
+        } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
+            logger.info("Info: Json Rpc Duplicate Detected")
+        } catch {
+            completion(error)
+        }
+    }
+    
     func subscribe(topic: String) async throws {
         try await relayClient.subscribe(topic: topic)
     }
