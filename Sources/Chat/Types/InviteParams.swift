@@ -20,3 +20,8 @@ struct Invite: Codable {
     let message: String
     let account: Account
 }
+
+public struct InviteEnvelope: Codable {
+    let pubKey: String
+    let invite: Invite
+}

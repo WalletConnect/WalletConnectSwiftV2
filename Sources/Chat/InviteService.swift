@@ -7,14 +7,14 @@ import Combine
 
 class InviteService {
     private var publishers = [AnyCancellable]()
-    let networkingInteractor: NetworkingInteractor
+    let networkingInteractor: NetworkInteracting
     let logger: ConsoleLogging
     let kms: KeyManagementService
     let codec: Codec
     
     var onInvite: ((InviteParams)->())?
 
-    init(networkingInteractor: NetworkingInteractor,
+    init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementService,
          logger: ConsoleLogging,
          codec: Codec) {
@@ -40,7 +40,7 @@ class InviteService {
         
         let request = ChatRequest(params: .invite(inviteRequestParams))
         
-        networkingInteractor.requestUnencrypted(request, topic: inviteTopic)
+        try await networkingInteractor.requestUnencrypted(request, topic: inviteTopic)
         logger.debug("invite sent on topic: \(inviteTopic)")
     }
     

@@ -5,7 +5,13 @@ import WalletConnectRelay
 import WalletConnectUtils
 
 protocol NetworkInteracting {
-    func subscribe(topic: String) async throws 
+    var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {get}
+    var responsePublisher: AnyPublisher<ChatResponse, Never> {get}
+    func subscribe(topic: String) async throws
+    func requestUnencrypted(_ request: ChatRequest, topic: String) async throws
+    func request(_ request: ChatRequest, topic: String) async throws
+    func respond(topic: String, response: JsonRpcResult) async throws
+
 }
 
 class NetworkingInteractor: NetworkInteracting {
@@ -31,32 +37,19 @@ class NetworkingInteractor: NetworkInteracting {
         }
     }
     
-    func requestUnencrypted(_ request: ChatRequest, topic: String) {
+    func requestUnencrypted(_ request: ChatRequest, topic: String) async throws {
         let message = try! request.json()
-        relayClient.publish(topic: topic, payload: message) {error in
-//            print(error)
-        }
+        try await relayClient.publish(topic: topic, payload: message)
     }
     
-    func request(_ request: ChatRequest, topic: String) {
+    func request(_ request: ChatRequest, topic: String) async throws {
         let message = try! serializer.serialize(topic: topic, encodable: request)
-        relayClient.publish(topic: topic, payload: message) {error in
-//            print(error)
-        }
+        try await relayClient.publish(topic: topic, payload: message)
     }
     
-    func respond(topic: String, response: JsonRpcResult) {
-        do {
-            let message = try serializer.serialize(topic: topic, encodable: response.value)
-            logger.debug("Responding....topic: \(topic)")
-            relayClient.publish(topic: topic, payload: message, prompt: false) { error in
-                completion(error)
-            }
-        } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
-            logger.info("Info: Json Rpc Duplicate Detected")
-        } catch {
-            completion(error)
-        }
+    func respond(topic: String, response: JsonRpcResult) async throws {
+        let message = try serializer.serialize(topic: topic, encodable: response.value)
+        try await relayClient.publish(topic: topic, payload: message, prompt: false)
     }
     
     func subscribe(topic: String) async throws {

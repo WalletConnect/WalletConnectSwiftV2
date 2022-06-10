@@ -6,9 +6,12 @@ import WalletConnectRelay
 import Combine
 
 class InvitationHandlingService {
-    var onInvite: ((String, Invite)->())?
-    var onNewThread: ((Thread)->())?
-    private let networkingInteractor: NetworkingInteractor
+    enum Error: Swift.Error {
+        case inviteForIdNotFound
+    }
+    var onInvite: ((InviteEnvelope)->())?
+    var onNewThread: ((String)->())?
+    private let networkingInteractor: NetworkInteracting
     private let invitePayloadStore: CodableStore<(RequestSubscriptionPayload)>
     private let topicToInvitationPubKeyStore: CodableStore<String>
     private let registry: Registry
@@ -19,7 +22,7 @@ class InvitationHandlingService {
     private let codec: Codec
     
     init(registry: Registry,
-         networkingInteractor: NetworkingInteractor,
+         networkingInteractor: NetworkInteracting,
          kms: KeyManagementService,
          logger: ConsoleLogging,
          topicToInvitationPubKeyStore: CodableStore<String>,
@@ -40,13 +43,25 @@ class InvitationHandlingService {
 
     func accept(inviteId: String) async throws {
         
-        let inviteStoreItem = try invitePayloadStore.get(key: inviteId)
+        guard let payload = try invitePayloadStore.get(key: inviteId) else { throw Error.inviteForIdNotFound }
         
         let selfThreadPubKey = try kms.createX25519KeyPair()
+        
         let inviteResponse = InviteResponse(pubKey: selfThreadPubKey.hexRepresentation)
         
-        let response = JsonRpcResult.response(JSONRPCResponse<AnyCodable>())
-        networkingInteractor.respond(topic: inviteStoreItem?.topic, response: <#T##JsonRpcResult#>)
+        let response = JsonRpcResult.response(JSONRPCResponse<AnyCodable>(id: payload.request.id, result: AnyCodable(inviteResponse)))
+        
+        try await networkingInteractor.respond(topic: payload.topic, response: response)
+        
+        guard case .invite(let inviteParams) = payload.request.params else {return}
+        
+        let threadAgreementKeys = try kms.performKeyAgreement(selfPublicKey: selfThreadPubKey, peerPublicKey: inviteParams.pubKey)
+        
+        let threadTopic = threadAgreementKeys.derivedTopic()
+        
+        try await networkingInteractor.subscribe(topic: threadTopic)
+                
+        onNewThread?(threadTopic)
     }
 
     private func setUpRequestHandling() {
@@ -94,6 +109,6 @@ class InvitationHandlingService {
         
         invitePayloadStore.set(payload, forKey: inviteParams.id)
                 
-        onInvite?(inviteParams.pubKey, invite)
+        onInvite?(InviteEnvelope(pubKey: inviteParams.pubKey, invite: invite))
     }
 }

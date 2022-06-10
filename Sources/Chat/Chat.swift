@@ -16,13 +16,13 @@ class Chat {
     
     let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
     
-    var newThreadPublisherSubject = PassthroughSubject<Thread, Never>()
-    public var newThreadPublisher: AnyPublisher<Thread, Never> {
+    var newThreadPublisherSubject = PassthroughSubject<String, Never>()
+    public var newThreadPublisher: AnyPublisher<String, Never> {
         newThreadPublisherSubject.eraseToAnyPublisher()
     }
     
-    var invitePublisherSubject = PassthroughSubject<Invite, Never>()
-    public var invitePublisher: AnyPublisher<Invite, Never> {
+    var invitePublisherSubject = PassthroughSubject<InviteEnvelope, Never>()
+    public var invitePublisher: AnyPublisher<InviteEnvelope, Never> {
         invitePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -36,15 +36,15 @@ class Chat {
         self.kms = kms
         let serialiser = Serializer(kms: kms)
         let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serialiser)
-        let inviteStore = CodableStore<InviteParams>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
+        let invitePayloadStore = CodableStore<RequestSubscriptionPayload>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
         self.registryManager = RegistryManager(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToInvitationPubKeyStore: topicToInvitationPubKeyStore)
         let codec = ChaChaPolyCodec()
         self.invitationHandlingService = InvitationHandlingService(registry: registry,
                              networkingInteractor: networkingInteractor,
-                             kms: kms,
-                             logger: logger,
-                             topicToInvitationPubKeyStore: topicToInvitationPubKeyStore,
-                             inviteStore: inviteStore,
+                                                                   kms: kms,
+                                                                   logger: logger,
+                                                                   topicToInvitationPubKeyStore: topicToInvitationPubKeyStore,
+                                                                   invitePayloadStore: invitePayloadStore,
                                                                    threadsStore: CodableStore<Thread>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.threads.rawValue), codec: codec)
         self.inviteService = InviteService(networkingInteractor: networkingInteractor, kms: kms, logger: logger, codec: codec)
         socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
@@ -96,12 +96,12 @@ class Chat {
     }
     
     private func setUpEnginesCallbacks() {
-        invitationHandlingService.onInvite = { [unowned self] pubKey, invite in
-            invitePublisherSubject.send(invite)
+        invitationHandlingService.onInvite = { [unowned self] inviteEnvelope in
+            invitePublisherSubject.send(inviteEnvelope)
         }
-//        engine.onNewThread = { [unowned self] newThread in
-//            newThreadPublisherSubject.send(newThread)
-//        }
+        invitationHandlingService.onNewThread = { [unowned self] newThread in
+            newThreadPublisherSubject.send(newThread)
+        }
     }
 }
 
