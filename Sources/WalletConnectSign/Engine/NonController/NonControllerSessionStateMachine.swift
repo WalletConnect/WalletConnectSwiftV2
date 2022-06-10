@@ -51,9 +51,9 @@ final class NonControllerSessionStateMachine {
     private func respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode) {
         Task {
             do {
-                try await self.networkingInteractor.respondError(payload: payload, reason: reason)
+                try await networkingInteractor.respondError(payload: payload, reason: reason)
             } catch {
-                self.logger.error("Respond Error: \(error.localizedDescription)")
+                logger.error("Respond Error failed with: \(error.localizedDescription)")
             }
         }
     }

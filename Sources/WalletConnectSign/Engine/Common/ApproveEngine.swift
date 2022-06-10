@@ -175,7 +175,7 @@ private extension ApproveEngine {
             do {
                 try await networkingInteractor.respondError(payload: payload, reason: reason)
             } catch {
-                logger.error("Respond Error: \(error.localizedDescription)")
+                logger.error("Respond Error failed with: \(error.localizedDescription)")
             }
         }
     }

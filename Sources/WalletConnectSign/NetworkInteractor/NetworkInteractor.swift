@@ -161,7 +161,14 @@ class NetworkInteractor: NetworkInteracting {
     
     // TODO: Move to async
     func respondSuccess(for payload: WCRequestSubscriptionPayload) {
-        Task { try? await respondSuccess(payload: payload) }
+        Task {
+            do {
+                try await respondSuccess(payload: payload)
+            } catch {
+                self.logger.error("Respond Success failed with: \(error.localizedDescription)")
+            }
+        }
+        
     }
     
     func subscribe(topic: String) async throws {
