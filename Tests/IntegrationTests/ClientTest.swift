@@ -1,52 +1,17 @@
 import XCTest
-//import Foundation
 import WalletConnectUtils
 import TestingUtils
-@testable import WalletConnectSign
 @testable import WalletConnectKMS
-
-extension ProposalNamespace {
-//    static func stub(methods: Set<String> = ["method"]) -> Namespace {
-//        Namespace(chains: [Blockchain("eip155:1")!], methods: methods, events: ["event"])
-//    }
-    
-    static func stubRequired() -> [String: ProposalNamespace] {
-        return [
-            "eip155": ProposalNamespace(
-                chains: [Blockchain("eip155:1")!],
-                methods: ["personal_sign"],
-                events: [])
-        ]
-    }
-}
-
-extension SessionNamespace {
-    static func make(toRespond namespaces: [String: ProposalNamespace]) -> [String: SessionNamespace] {
-        return namespaces.mapValues { proposalNamespace in
-            SessionNamespace(
-                accounts: Set(proposalNamespace.chains.map { Account(blockchain: $0, address: "0x00")! }),
-                methods: proposalNamespace.methods,
-                events: proposalNamespace.events
-            )
-        }
-    }
-}
+@testable import WalletConnectSign
 
 final class ClientTests: XCTestCase {
 
     let defaultTimeout: TimeInterval = 5.0
 
-    let relayHost = "relay.walletconnect.com"
-    let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
     var proposer: ClientDelegate!
     var responder: ClientDelegate!
 
-//    override func setUp() {
-//        proposer = Self.makeClientDelegate(isController: false, relayHost: relayHost, prefix: "🍏P", projectId: projectId)
-//        responder = Self.makeClientDelegate(isController: true, relayHost: relayHost, prefix: "🍎R", projectId: projectId)
-//    }
-//
-    static func makeClientDelegate(
+    static private func makeClientDelegate(
         name: String,
         isController: Bool,
         relayHost: String = "relay.walletconnect.com",
@@ -64,47 +29,42 @@ final class ClientTests: XCTestCase {
         return ClientDelegate(client: client)
     }
     
-//    private func waitClientsConnected() async {
-//        let group = DispatchGroup()
-//        group.enter()
-//        proposer.onConnected = {
-//            group.leave()
-//        }
-//        group.enter()
-//        responder.onConnected = {
-//            group.leave()
-//        }
-//        group.wait()
-//        return
-//    }
-
-    func testSessionPropose() async throws {
-        let dapp = Self.makeClientDelegate(name: "🍏P", isController: false)
-        let wallet = Self.makeClientDelegate(name: "🍎R", isController: true)
+    private func listenForConnection() async {
         let group = DispatchGroup()
         group.enter()
-        dapp.onConnected = {
+        proposer.onConnected = {
             group.leave()
         }
         group.enter()
-        wallet.onConnected = {
+        responder.onConnected = {
             group.leave()
         }
         group.wait()
-        // -----------
-        
+        return
+    }
+    
+    override func setUp() async throws {
+        proposer = Self.makeClientDelegate(name: "🍏P", isController: false)
+        responder = Self.makeClientDelegate(name: "🍎R", isController: true)
+        await listenForConnection()
+    }
+    
+    override func tearDown() {
+        proposer = nil
+        responder = nil
+    }
+    
+    func testSessionPropose() async throws {
+        let dapp = proposer!
+        let wallet = responder!
         let dappSettlementExpectation = expectation(description: "Dapp expects to settle a session")
         let walletSettlementExpectation = expectation(description: "Wallet expects to settle a session")
-        
         let requiredNamespaces = ProposalNamespace.stubRequired()
         let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
         
         wallet.onSessionProposal = { proposal in
-            do {
-                try wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
-            } catch {
-                XCTFail("\(error)")
-            }
+            do { try wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces) }
+            catch { XCTFail("\(error)") }
         }
         dapp.onSessionSettled = { _ in
             dappSettlementExpectation.fulfill()
@@ -115,34 +75,8 @@ final class ClientTests: XCTestCase {
         
         let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces)
         try await wallet.client.pair(uri: uri!)
-        
         wait(for: [dappSettlementExpectation, walletSettlementExpectation], timeout: defaultTimeout)
     }
-    
-//    func testNewSession() async {
-//        await waitClientsConnected()
-//        let proposerSettlesSessionExpectation = expectation(description: "Proposer settles session")
-//        let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
-//        let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
-//
-//        let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
-//        try! await responder.client.pair(uri: uri)
-//        responder.onSessionProposal = { [unowned self] proposal in
-//            try? self.responder.client.approve(proposalId: proposal.id, accounts: [account], namespaces: [])
-//        }
-//        responder.onSessionSettled = { sessionSettled in
-//            // FIXME: Commented assertion
-////            XCTAssertEqual(account, sessionSettled.state.accounts[0])
-//            responderSettlesSessionExpectation.fulfill()
-//        }
-//        proposer.onSessionSettled = { sessionSettled in
-//            // FIXME: Commented assertion
-////            XCTAssertEqual(account, sessionSettled.state.accounts[0])
-//            proposerSettlesSessionExpectation.fulfill()
-//        }
-//        wait(for: [proposerSettlesSessionExpectation, responderSettlesSessionExpectation], timeout: defaultTimeout)
-//    }
-    
 //
 //    func testNewPairingPing() async {
 //        let responderReceivesPingResponseExpectation = expectation(description: "Responder receives ping response")
