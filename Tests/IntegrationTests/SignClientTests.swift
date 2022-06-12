@@ -76,6 +76,28 @@ final class SignClientTests: XCTestCase {
         try await wallet.client.pair(uri: uri!)
         wait(for: [dappSettlementExpectation, walletSettlementExpectation], timeout: defaultTimeout)
     }
+    
+    func testSessionReject() async throws {
+        let dapp = proposer!
+        let wallet = responder!
+        let sessionRejectExpectation = expectation(description: "Proposer is notified on session rejection")
+        var rejectedProposal: Session.Proposal?
+        
+        let uri = try await dapp.client.connect(requiredNamespaces: ProposalNamespace.stubRequired())
+        try await wallet.client.pair(uri: uri!)
+        
+        wallet.onSessionProposal = { proposal in
+            do {
+                try wallet.client.reject(proposalId: proposal.id, reason: .disapprovedChains) // TODO: Review reason
+                rejectedProposal = proposal
+            } catch { XCTFail("\(error)") }
+        }
+        dapp.onSessionRejected = { proposal, _ in
+            XCTAssertEqual(rejectedProposal, proposal)
+            sessionRejectExpectation.fulfill() // TODO: Assert reason code
+        }
+        wait(for: [sessionRejectExpectation], timeout: defaultTimeout)
+    }
 //
 //    func testNewPairingPing() async {
 //        let responderReceivesPingResponseExpectation = expectation(description: "Responder receives ping response")
@@ -121,22 +143,6 @@ final class SignClientTests: XCTestCase {
 //            }
 //        }
 //        wait(for: [proposerSettlesSessionExpectation, responderSettlesSessionExpectation], timeout: defaultTimeout)
-//    }
-//
-//    func testResponderRejectsSession() async {
-//        await waitClientsConnected()
-//        let sessionRejectExpectation = expectation(description: "Proposer is notified on session rejection")
-//        let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
-//        _ = try! await responder.client.pair(uri: uri)
-//
-//        responder.onSessionProposal = {[unowned self] proposal in
-//            self.responder.client.reject(proposal: proposal, reason: .disapprovedChains)
-//        }
-//        proposer.onSessionRejected = { _, reason in
-//            XCTAssertEqual(reason.code, 5000)
-//            sessionRejectExpectation.fulfill()
-//        }
-//        wait(for: [sessionRejectExpectation], timeout: defaultTimeout)
 //    }
 //
 //    func testDeleteSession() async {
