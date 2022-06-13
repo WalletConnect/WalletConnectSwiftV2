@@ -35,22 +35,20 @@ class Engine {
         setUpResponseHandling()
     }
 
-    func invite(account: Account) throws {
-        let peerPubKeyHex = registry.resolve(account: account)!
-        print("resolved pub key: \(peerPubKeyHex)")
+    func invite(peerPubKey: String, openingMessage: String) async throws {
         let pubKey = try kms.createX25519KeyPair()
-        let invite = Invite(pubKey: pubKey.hexRepresentation, message: "hello")
-        let topic = try AgreementPublicKey(hex: peerPubKeyHex).rawRepresentation.sha256().toHexString()
-        let request = ChatRequest(method: .invite, params: .invite(invite))
+        let invite = Invite(pubKey: pubKey.hexRepresentation, openingMessage: openingMessage)
+        let topic = try AgreementPublicKey(hex: peerPubKey).rawRepresentation.sha256().toHexString()
+        let request = ChatRequest(params: .invite(invite))
         networkingInteractor.requestUnencrypted(request, topic: topic)
-        let agreementKeys = try kms.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: peerPubKeyHex)
+        let agreementKeys = try kms.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: peerPubKey)
         let threadTopic = agreementKeys.derivedTopic()
-        networkingInteractor.subscribe(topic: threadTopic)
+        try await networkingInteractor.subscribe(topic: threadTopic)
         logger.debug("invite sent on topic: \(topic)")
     }
 
 
-    func accept(inviteId: String) throws {
+    func accept(inviteId: String) async throws {
         guard let hexPubKey = try topicToInvitationPubKeyStore.get(key: "todo-topic") else {
             throw ChatError.noPublicKeyForInviteId
         }
@@ -61,19 +59,8 @@ class Engine {
         logger.debug("accepting an invitation")
         let agreementKeys = try! kms.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: invite.pubKey)
         let topic = agreementKeys.derivedTopic()
-        networkingInteractor.subscribe(topic: topic)
+        try await networkingInteractor.subscribe(topic: topic)
         fatalError("not implemented")
-    }
-
-    func register(account: Account) {
-        let pubKey = try! kms.createX25519KeyPair()
-        let pubKeyHex = pubKey.hexRepresentation
-        print("registered pubKey: \(pubKeyHex)")
-        registry.register(account: account, pubKey: pubKeyHex)
-        let topic = pubKey.rawRepresentation.sha256().toHexString()
-        try! topicToInvitationPubKeyStore.set(pubKeyHex, forKey: topic)
-        networkingInteractor.subscribe(topic: topic)
-        print("did register and is subscribing on topic: \(topic)")
     }
 
     private func handleInvite(_ invite: Invite) {

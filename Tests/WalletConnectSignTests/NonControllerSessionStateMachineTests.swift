@@ -7,12 +7,12 @@ import WalletConnectKMS
 
 class NonControllerSessionStateMachineTests: XCTestCase {
     var sut: NonControllerSessionStateMachine!
-    var networkingInteractor: MockedWCRelay!
+    var networkingInteractor: NetworkingInteractorMock!
     var storageMock: WCSessionStorageMock!
     var cryptoMock: KeyManagementServiceMock!
     
     override func setUp() {
-        networkingInteractor = MockedWCRelay()
+        networkingInteractor = NetworkingInteractorMock()
         storageMock = WCSessionStorageMock()
         cryptoMock = KeyManagementServiceMock()
         sut = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: cryptoMock, sessionStore: storageMock, logger: ConsoleLoggerMock())

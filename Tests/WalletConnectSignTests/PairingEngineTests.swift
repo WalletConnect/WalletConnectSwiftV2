@@ -15,7 +15,7 @@ final class PairingEngineTests: XCTestCase {
     var engine: PairingEngine!
     var approveEngine: ApproveEngine!
     
-    var networkingInteractor: MockedWCRelay!
+    var networkingInteractor: NetworkingInteractorMock!
     var storageMock: WCPairingStorageMock!
     var cryptoMock: KeyManagementServiceMock!
     
@@ -23,7 +23,7 @@ final class PairingEngineTests: XCTestCase {
     var publishers = Set<AnyCancellable>()
     
     override func setUp() {
-        networkingInteractor = MockedWCRelay()
+        networkingInteractor = NetworkingInteractorMock()
         storageMock = WCPairingStorageMock()
         cryptoMock = KeyManagementServiceMock()
         topicGenerator = TopicGenerator()
