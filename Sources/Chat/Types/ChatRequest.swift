@@ -2,7 +2,7 @@
 import Foundation
 import WalletConnectUtils
 
-struct ChatRequest: Codable {
+struct ChatRequest: Codable, Equatable {
     let id: Int64
     let jsonrpc: String
     let method: Method
@@ -62,13 +62,13 @@ struct ChatRequest: Codable {
 }
 
 extension ChatRequest {
-    enum Method: String, Codable {
+    enum Method: String, Codable, Equatable {
         case invite = "wc_chatInvite"
         case message = "wc_chatMessage"
     }
 }
 extension ChatRequest {
-    enum Params: Codable {
+    enum Params: Codable, Equatable {
         case invite(InviteParams)
         case message(String)
     }

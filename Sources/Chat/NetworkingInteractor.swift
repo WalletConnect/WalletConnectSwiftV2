@@ -15,8 +15,13 @@ protocol NetworkInteracting {
 }
 
 class NetworkingInteractor: NetworkInteracting {
-    let relayClient: RelayClient
+    enum Error: Swift.Error {
+        case failedToInitialiseMethodFromRecord
+    }
+    //TODO - must be injectible
+    private let jsonRpcHistory: JsonRpcHistory<ChatRequest>
     private let serializer: Serializing
+    private let relayClient: RelayClient
     var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
@@ -85,7 +90,22 @@ class NetworkingInteractor: NetworkInteracting {
     }
     
     private func handleJsonRpcResponse(response: JSONRPCResponse<AnyCodable>) {
-        //todo
+        do {
+            let record = try jsonRpcHistory.resolve(response: JsonRpcResult.response(response))
+            guard let method = ChatRequest.Method(rawValue: record.request.method) else {
+                throw Error.failedToInitialiseMethodFromRecord
+            }
+            let params = try record.request.params.get(ChatRequest.Params.self)
+            
+            let chatResponse = ChatResponse(
+                topic: record.topic,
+                requestMethod: method,
+                requestParams: params,
+                result: JsonRpcResult.response(response))
+            responsePublisherSubject.send(chatResponse)
+        } catch {
+            
+        }
     }
     
     private func handleJsonRpcErrorResponse(response: JSONRPCErrorResponse) {

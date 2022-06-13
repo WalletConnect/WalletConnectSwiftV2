@@ -2,7 +2,7 @@
 import WalletConnectUtils
 import Foundation
 
-struct InviteParams: Codable {
+struct InviteParams: Codable, Equatable {
     let pubKey: String
     let invite: String
     

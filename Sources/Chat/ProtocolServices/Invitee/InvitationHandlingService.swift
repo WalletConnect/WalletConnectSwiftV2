@@ -60,7 +60,9 @@ class InvitationHandlingService {
         let threadTopic = threadAgreementKeys.derivedTopic()
         
         try await networkingInteractor.subscribe(topic: threadTopic)
-                
+        
+        logger.debug("Accepting an invite")
+        
         onNewThread?(threadTopic)
     }
 

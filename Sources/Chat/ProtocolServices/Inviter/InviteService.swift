@@ -40,7 +40,10 @@ class InviteService {
         
         let request = ChatRequest(params: .invite(inviteRequestParams))
         
-        try await networkingInteractor.requestUnencrypted(request, topic: inviteTopic)
+        try await networkingInteractor.subscribe(topic: inviteTopic)
+
+        try await networkingInteractor.requestUnencrypted(request, topic: inviteTopic)        
+        
         logger.debug("invite sent on topic: \(inviteTopic)")
     }
     

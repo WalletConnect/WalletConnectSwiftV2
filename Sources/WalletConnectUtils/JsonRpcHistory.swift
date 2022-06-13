@@ -24,7 +24,7 @@ public class JsonRpcHistory<T> where T: Codable&Equatable {
         }
         logger.debug("Setting JSON-RPC request history record")
         let record = JsonRpcRecord(id: request.id, topic: topic, request: JsonRpcRecord.Request(method: request.method, params: AnyCodable(request.params)), response: nil, chainId: chainId)
-        try storage.set(record, forKey: "\(request.id)")
+        storage.set(record, forKey: "\(request.id)")
     }
     
     public func delete(topic: String) {
@@ -44,7 +44,7 @@ public class JsonRpcHistory<T> where T: Codable&Equatable {
             throw RecordingError.jsonRpcDuplicateDetected
         } else {
             record.response = response
-            try storage.set(record, forKey: "\(record.id)")
+            storage.set(record, forKey: "\(record.id)")
             return record
         }
     }
