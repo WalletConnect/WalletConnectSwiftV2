@@ -9,9 +9,10 @@ import Combine
 class Chat {
     private var publishers = [AnyCancellable]()
     let registry: Registry
+    let registryManager: RegistryManager
     let engine: Engine
     let kms: KeyManagementService
-    var onConnected: (()->())?
+    
     let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
     
     var newThreadPublisherSubject = PassthroughSubject<Thread, Never>()
@@ -29,13 +30,13 @@ class Chat {
          kms: KeyManagementService,
          logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off),
          keyValueStorage: KeyValueStorage) {
+        let topicToInvitationPubKeyStore = CodableStore<String>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.topicToInvitationPubKey.rawValue)
         self.registry = registry
-        
         self.kms = kms
         let serialiser = Serializer(kms: kms)
         let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serialiser)
-        let topicToInvitationPubKeyStore = CodableStore<String>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.topicToInvitationPubKey.rawValue)
         let inviteStore = CodableStore<Invite>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
+        self.registryManager = RegistryManager(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToInvitationPubKeyStore: topicToInvitationPubKeyStore)
         self.engine = Engine(registry: registry,
                              networkingInteractor: networkingInteractor,
                              kms: kms,
@@ -47,19 +48,44 @@ class Chat {
         setUpEnginesCallbacks()
     }
     
-    func register(account: Account) {
-        engine.register(account: account)
+    /// Registers a new record on Chat keyserver,
+    /// record is a blockchain account with a client generated public key
+    /// - Parameter account: CAIP10 blockchain account
+    /// - Returns: public key
+    func register(account: Account) async throws -> String {
+        try await registryManager.register(account: account)
     }
     
-    func invite(account: Account) throws {
-        try engine.invite(account: account)
+    /// Queries the default keyserver with a blockchain account
+    /// - Parameter account: CAIP10 blockachain account
+    /// - Returns: public key associated with an account in chat's keyserver
+    func resolve(account: Account) async throws -> String {
+        try await registry.resolve(account: account)
     }
     
-    func accept(inviteId: String) throws {
-        try engine.accept(inviteId: inviteId)
+    /// Sends a chat invite with opening message
+    /// - Parameters:
+    ///   - publicKey: publicKey associated with a peer
+    ///   - openingMessage: oppening message for a chat invite
+    func invite(publicKey: String, openingMessage: String) async throws {
+        try await engine.invite(peerPubKey: publicKey, openingMessage: openingMessage)
     }
     
-    func message(threadTopic: String, message: String) {
+    func accept(inviteId: String) async throws {
+        try await engine.accept(inviteId: inviteId)
+    }
+    
+    /// Sends a chat message to an active chat thread
+    /// - Parameters:
+    ///   - topic: thread topic
+    ///   - message: chat message
+    func message(topic: String, message: String) {
+        
+    }
+    
+    /// To Ping peer client
+    /// - Parameter topic: chat thread topic
+    func ping(topic: String) {
         
     }
     

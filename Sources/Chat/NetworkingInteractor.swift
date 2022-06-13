@@ -4,7 +4,11 @@ import Combine
 import WalletConnectRelay
 import WalletConnectUtils
 
-class NetworkingInteractor {
+protocol NetworkInteracting {
+    func subscribe(topic: String) async throws 
+}
+
+class NetworkingInteractor: NetworkInteracting {
     let relayClient: RelayClient
     private let serializer: Serializing
     var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {
@@ -41,12 +45,8 @@ class NetworkingInteractor {
         }
     }
     
-    func subscribe(topic: String)  {
-        relayClient.subscribe(topic: topic) { [weak self] error in
-//            if let error = error {
-//                print(error)
-//            }
-        }
+    func subscribe(topic: String) async throws {
+        try await relayClient.subscribe(topic: topic)
     }
     
     private func manageSubscription(_ topic: String, _ message: String) {

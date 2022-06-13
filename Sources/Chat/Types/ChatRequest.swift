@@ -15,11 +15,16 @@ struct ChatRequest: Codable {
         case params
     }
     
-    internal init(id: Int64 = generateId(), jsonrpc: String = "2.0", method: Method, params: Params) {
+    internal init(id: Int64 = generateId(), jsonrpc: String = "2.0", params: Params) {
         self.id = id
         self.jsonrpc = jsonrpc
-        self.method = method
         self.params = params
+        switch params {
+        case .invite(_):
+            self.method = Method.invite
+        case .message(_):
+            self.method = Method.message
+        }
     }
     
     
