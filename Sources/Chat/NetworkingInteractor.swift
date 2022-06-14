@@ -8,8 +8,8 @@ protocol NetworkInteracting {
     var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {get}
     var responsePublisher: AnyPublisher<ChatResponse, Never> {get}
     func subscribe(topic: String) async throws
-    func requestUnencrypted(_ request: ChatRequest, topic: String) async throws
-    func request(_ request: ChatRequest, topic: String) async throws
+    func requestUnencrypted(_ request: JSONRPCRequest<ChatRequestParams>, topic: String) async throws
+    func request(_ request: JSONRPCRequest<ChatRequestParams>, topic: String) async throws
     func respond(topic: String, response: JsonRpcResult) async throws
 
 }
@@ -18,7 +18,7 @@ class NetworkingInteractor: NetworkInteracting {
     enum Error: Swift.Error {
         case failedToInitialiseMethodFromRecord
     }
-    private let jsonRpcHistory: JsonRpcHistory<ChatRequest>
+    private let jsonRpcHistory: JsonRpcHistory<ChatRequestParams>
     private let serializer: Serializing
     private let relayClient: RelayClient
     private let logger: ConsoleLogging
@@ -35,7 +35,7 @@ class NetworkingInteractor: NetworkInteracting {
     init(relayClient: RelayClient,
          serializer: Serializing,
          logger: ConsoleLogging,
-         jsonRpcHistory: JsonRpcHistory<ChatRequest>
+         jsonRpcHistory: JsonRpcHistory<ChatRequestParams>
     ) {
         self.relayClient = relayClient
         self.serializer = serializer
@@ -46,13 +46,12 @@ class NetworkingInteractor: NetworkInteracting {
         }
     }
     
-    func requestUnencrypted(_ request: ChatRequest, topic: String) async throws {
+    func requestUnencrypted(_ request: JSONRPCRequest<ChatRequestParams>, topic: String) async throws {
         let message = try! request.json()
         try await relayClient.publish(topic: topic, payload: message)
     }
     
-    func request(_ request: ChatRequest, topic: String) async throws {
-        let jsrpcRequest = JSONRPCRequest<ChatRequest>()
+    func request(_ request: JSONRPCRequest<ChatRequestParams>, topic: String) async throws {
         try jsonRpcHistory.set(topic: topic, request: request)
         let message = try! serializer.serialize(topic: topic, encodable: request)
         try await relayClient.publish(topic: topic, payload: message)
@@ -68,9 +67,9 @@ class NetworkingInteractor: NetworkInteracting {
     }
     
     private func manageSubscription(_ topic: String, _ message: String) {
-        if let deserializedJsonRpcRequest: ChatRequest = serializer.tryDeserialize(topic: topic, message: message) {
+        if let deserializedJsonRpcRequest: JSONRPCRequest<ChatRequestParams> = serializer.tryDeserialize(topic: topic, message: message) {
             handleWCRequest(topic: topic, request: deserializedJsonRpcRequest)
-        } else if let decodedJsonRpcRequest: ChatRequest = tryDecodeRequest(message: message) {
+        } else if let decodedJsonRpcRequest: JSONRPCRequest<ChatRequestParams> = tryDecodeRequest(message: message) {
             handleWCRequest(topic: topic, request: decodedJsonRpcRequest)
 
         } else if let deserializedJsonRpcResponse: JSONRPCResponse<AnyCodable> = serializer.tryDeserialize(topic: topic, message: message) {
@@ -83,14 +82,14 @@ class NetworkingInteractor: NetworkInteracting {
     }
     
     
-    private func tryDecodeRequest(message: String) -> ChatRequest? {
+    private func tryDecodeRequest(message: String) -> JSONRPCRequest<ChatRequestParams>? {
         guard let messageData = message.data(using: .utf8) else {
             return nil
         }
-        return try? JSONDecoder().decode(ChatRequest.self, from: messageData)
+        return try? JSONDecoder().decode(JSONRPCRequest<ChatRequestParams>.self, from: messageData)
     }
     
-    private func handleWCRequest(topic: String, request: ChatRequest) {
+    private func handleWCRequest(topic: String, request: JSONRPCRequest<ChatRequestParams>) {
         let payload = RequestSubscriptionPayload(topic: topic, request: request)
         requestPublisherSubject.send(payload)
     }
@@ -98,15 +97,11 @@ class NetworkingInteractor: NetworkInteracting {
     private func handleJsonRpcResponse(response: JSONRPCResponse<AnyCodable>) {
         do {
             let record = try jsonRpcHistory.resolve(response: JsonRpcResult.response(response))
-            guard let method = ChatRequest.Method(rawValue: record.request.method) else {
-                throw Error.failedToInitialiseMethodFromRecord
-            }
-            let params = try record.request.params.get(ChatRequest.Params.self)
             
             let chatResponse = ChatResponse(
                 topic: record.topic,
-                requestMethod: method,
-                requestParams: params,
+                requestMethod: record.request.method,
+                requestParams: record.request.params,
                 result: JsonRpcResult.response(response))
             responsePublisherSubject.send(chatResponse)
         } catch {

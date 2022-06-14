@@ -1,8 +1,9 @@
 
 
 import Foundation
+import WalletConnectUtils
 
 struct RequestSubscriptionPayload: Codable {
     let topic: String
-    let request: ChatRequest
+    let request: JSONRPCRequest<ChatRequestParams>
 }

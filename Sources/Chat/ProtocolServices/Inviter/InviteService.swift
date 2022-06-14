@@ -38,11 +38,11 @@ class InviteService {
         let inviteRequestParams = InviteParams(pubKey: selfPubKeyY.hexRepresentation, invite: encodedInvite)
         
         
-        let request = ChatRequest(params: .invite(inviteRequestParams))
+        let request = JSONRPCRequest<ChatRequestParams>(params: .invite(inviteRequestParams))
         
         try await networkingInteractor.subscribe(topic: inviteTopic)
 
-        try await networkingInteractor.requestUnencrypted(request, topic: inviteTopic)        
+        try await networkingInteractor.requestUnencrypted(request, topic: inviteTopic)
         
         logger.debug("invite sent on topic: \(inviteTopic)")
     }
