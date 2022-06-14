@@ -81,17 +81,6 @@ class InvitationHandlingService {
         }.store(in: &publishers)
     }
 
-    private func setUpResponseHandling() {
-//        networkingInteractor.responsePublisher.sink { [unowned self] response in
-//            switch response.requestParams {
-//            case .message(let message):
-//                print("received message response: \(message)")
-//            default:
-//                return
-//            }
-//        }.store(in: &publishers)
-    }
-
     private func handleInvite(_ inviteParams: InviteParams, _ payload: RequestSubscriptionPayload) throws {
         logger.debug("did receive an invite")
         guard let selfPubKeyHex = try? topicToInvitationPubKeyStore.get(key: payload.topic) else {

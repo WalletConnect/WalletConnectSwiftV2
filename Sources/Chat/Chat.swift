@@ -9,7 +9,7 @@ import Combine
 class Chat {
     private var publishers = [AnyCancellable]()
     let registry: Registry
-    let registryManager: RegistryManager
+    let registryService: RegistryService
     let invitationHandlingService: InvitationHandlingService
     let inviteService: InviteService
     let kms: KeyManagementService
@@ -42,7 +42,7 @@ class Chat {
             logger: logger,
             jsonRpcHistory: jsonRpcHistory)
         let invitePayloadStore = CodableStore<RequestSubscriptionPayload>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
-        self.registryManager = RegistryManager(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToInvitationPubKeyStore: topicToInvitationPubKeyStore)
+        self.registryService = RegistryService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToInvitationPubKeyStore: topicToInvitationPubKeyStore)
         let codec = ChaChaPolyCodec()
         self.invitationHandlingService = InvitationHandlingService(registry: registry,
                              networkingInteractor: networkingInteractor,
@@ -61,7 +61,7 @@ class Chat {
     /// - Parameter account: CAIP10 blockchain account
     /// - Returns: public key
     func register(account: Account) async throws -> String {
-        try await registryManager.register(account: account)
+        try await registryService.register(account: account)
     }
     
     /// Queries the default keyserver with a blockchain account

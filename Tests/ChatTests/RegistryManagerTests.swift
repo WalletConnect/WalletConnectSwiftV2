@@ -6,7 +6,7 @@ import WalletConnectUtils
 @testable import TestingUtils
 
 final class RegistryManagerTests: XCTestCase {
-    var registryManager: RegistryManager!
+    var registryManager: RegistryService!
     var networkingInteractor: NetworkingInteractorMock!
     var topicToInvitationPubKeyStore: CodableStore<String>!
     var registry: Registry!
@@ -17,7 +17,7 @@ final class RegistryManagerTests: XCTestCase {
         networkingInteractor = NetworkingInteractorMock()
         kms = KeyManagementServiceMock()
         topicToInvitationPubKeyStore = CodableStore(defaults: RuntimeKeyValueStorage(), identifier: "")
-        registryManager = RegistryManager(
+        registryManager = RegistryService(
             registry: registry,
             networkingInteractor: networkingInteractor,
             kms: kms,
