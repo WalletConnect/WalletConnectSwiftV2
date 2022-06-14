@@ -35,7 +35,12 @@ class Chat {
         self.registry = registry
         self.kms = kms
         let serialiser = Serializer(kms: kms)
-        let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serialiser)
+        let jsonRpcHistory = JsonRpcHistory<ChatRequest>(logger: logger, keyValueStore: CodableStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
+        let networkingInteractor = NetworkingInteractor(
+            relayClient: relayClient,
+            serializer: serialiser,
+            logger: logger,
+            jsonRpcHistory: jsonRpcHistory)
         let invitePayloadStore = CodableStore<RequestSubscriptionPayload>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
         self.registryManager = RegistryManager(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToInvitationPubKeyStore: topicToInvitationPubKeyStore)
         let codec = ChaChaPolyCodec()

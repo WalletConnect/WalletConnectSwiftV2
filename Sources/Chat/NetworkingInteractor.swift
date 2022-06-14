@@ -18,10 +18,10 @@ class NetworkingInteractor: NetworkInteracting {
     enum Error: Swift.Error {
         case failedToInitialiseMethodFromRecord
     }
-    //TODO - must be injectible
     private let jsonRpcHistory: JsonRpcHistory<ChatRequest>
     private let serializer: Serializing
     private let relayClient: RelayClient
+    private let logger: ConsoleLogging
     var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
@@ -31,12 +31,16 @@ class NetworkingInteractor: NetworkInteracting {
         responsePublisherSubject.eraseToAnyPublisher()
     }
     private let responsePublisherSubject = PassthroughSubject<ChatResponse, Never>()
-
+    
     init(relayClient: RelayClient,
-         serializer: Serializing) {
+         serializer: Serializing,
+         logger: ConsoleLogging,
+         jsonRpcHistory: JsonRpcHistory<ChatRequest>
+    ) {
         self.relayClient = relayClient
         self.serializer = serializer
-        
+        self.jsonRpcHistory = jsonRpcHistory
+        self.logger = logger
         relayClient.onMessage = { [unowned self] topic, message in
             manageSubscription(topic, message)
         }
@@ -48,6 +52,8 @@ class NetworkingInteractor: NetworkInteracting {
     }
     
     func request(_ request: ChatRequest, topic: String) async throws {
+        let jsrpcRequest = JSONRPCRequest<ChatRequest>()
+        try jsonRpcHistory.set(topic: topic, request: request)
         let message = try! serializer.serialize(topic: topic, encodable: request)
         try await relayClient.publish(topic: topic, payload: message)
     }
@@ -104,7 +110,7 @@ class NetworkingInteractor: NetworkInteracting {
                 result: JsonRpcResult.response(response))
             responsePublisherSubject.send(chatResponse)
         } catch {
-            
+            logger.debug("Handle json rpc response error: \(error)")
         }
     }
     

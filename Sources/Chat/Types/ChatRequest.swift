@@ -27,7 +27,6 @@ struct ChatRequest: Codable, Equatable {
         }
     }
     
-    
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(Int64.self, forKey: .id)
