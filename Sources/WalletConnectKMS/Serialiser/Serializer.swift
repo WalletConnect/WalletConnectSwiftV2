@@ -1,6 +1,17 @@
 import Foundation
 import WalletConnectUtils
 
+/// A type representing serialization policy
+/// tp = type byte (1 byte)
+/// pk = public key (32 bytes)
+/// iv = initialization vector (12 bytes)
+/// ct = ciphertext (N bytes)
+public enum SerializationPolicy {
+    /// type 0 = tp + iv + ct + tag
+    case type0
+    /// type 1 = tp + pk + iv + ct + tag
+    case type1
+}
 
 public class Serializer {
     enum Error: String, Swift.Error {
@@ -24,7 +35,7 @@ public class Serializer {
     ///   - topic: Topic that is associated with a symetric key for encrypting particular codable object
     ///   - message: Message to encrypt and serialize
     /// - Returns: Serialized String
-    public func serialize(topic: String, encodable: Encodable) throws -> String {
+    public func serialize(topic: String, encodable: Encodable, policy: SerializationPolicy = SerializationPolicy.type0) throws -> String {
         let messageJson = try encodable.json()
         if let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) {
             return try codec.encode(plaintext: messageJson, symmetricKey: symmetricKey)
