@@ -13,7 +13,6 @@ final class SignClientTests: XCTestCase {
 
     static private func makeClientDelegate(
         name: String,
-        isController: Bool,
         relayHost: String = "relay.walletconnect.com",
         projectId: String = "8ba9ee138960775e5231b70cc5ef1c3a"
     ) -> ClientDelegate {
@@ -44,8 +43,8 @@ final class SignClientTests: XCTestCase {
     }
     
     override func setUp() async throws {
-        proposer = Self.makeClientDelegate(name: "🍏P", isController: false)
-        responder = Self.makeClientDelegate(name: "🍎R", isController: true)
+        proposer = Self.makeClientDelegate(name: "🍏P")
+        responder = Self.makeClientDelegate(name: "🍎R")
         await listenForConnection()
     }
     
