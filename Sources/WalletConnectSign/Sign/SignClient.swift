@@ -21,9 +21,10 @@ import UIKit
 ///     - delegate: The object that acts as the delegate of WalletConnect Client
 ///     - logger: An object for logging messages
 public final class SignClient {
+    
     public weak var delegate: SignClientDelegate?
+    
     public let logger: ConsoleLogging
-    private var publishers = [AnyCancellable]()
     private let metadata: AppMetadata
     private let pairingEngine: PairingEngine
     private let pairEngine: PairEngine
@@ -35,6 +36,7 @@ public final class SignClient {
     private let kms: KeyManagementService
     private let history: JsonRpcHistory
     private let cleanupService: CleanupService
+    private var publishers = [AnyCancellable]()
 
     // MARK: - Initializers
 

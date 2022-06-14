@@ -16,7 +16,6 @@ public protocol KeyValueStorage {
 
 extension UserDefaults: KeyValueStorage {}
 
-// TODO: Move to test target
 public final class RuntimeKeyValueStorage: KeyValueStorage {
     private var storage: [String : Any] = [:]
     private let queue = DispatchQueue(label: "com.walletconnect.sdk.runtimestorage")

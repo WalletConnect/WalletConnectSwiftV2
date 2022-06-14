@@ -19,7 +19,7 @@ public struct ProposalNamespace: Equatable, Codable {
         }
     }
     
-    public init(chains: Set<Blockchain>, methods: Set<String>, events: Set<String>, extensions: [ProposalNamespace.Extension]?) {
+    public init(chains: Set<Blockchain>, methods: Set<String>, events: Set<String>, extensions: [ProposalNamespace.Extension]? = nil) {
         self.chains = chains
         self.methods = methods
         self.events = events
@@ -46,7 +46,7 @@ public struct SessionNamespace: Equatable, Codable {
         }
     }
     
-    public init(accounts: Set<Account>, methods: Set<String>, events: Set<String>, extensions: [SessionNamespace.Extension]?) {
+    public init(accounts: Set<Account>, methods: Set<String>, events: Set<String>, extensions: [SessionNamespace.Extension]? = nil) {
         self.accounts = accounts
         self.methods = methods
         self.events = events
