@@ -7,15 +7,38 @@ import WalletConnectUtils
 /// iv = initialization vector (12 bytes)
 /// ct = ciphertext (N bytes)
 public enum SerializationPolicy {
+    enum Errors: Error {
+        case unsupportedPolicyType
+    }
     /// type 0 = tp + iv + ct + tag
     case type0
     /// type 1 = tp + pk + iv + ct + tag
     case type1
+
+    var representingByte: Int8 {
+        switch self {
+        case .type0:
+            return 0
+        case .type1:
+            return 1
+        }
+    }
+
+    init(byte: Int8) throws {
+        if byte == 0 {
+            self = .type0
+        } else if byte == 1 {
+            self = .type1
+        } else {
+            throw Errors.unsupportedPolicyType
+        }
+    }
 }
 
 public class Serializer {
-    enum Error: String, Swift.Error {
+    enum Errors: String, Error {
         case symmetricKeyForTopicNotFound
+        case malformedEnvelope
     }
     private let kms: KeyManagementServiceProtocol
     private let codec: Codec
@@ -40,7 +63,7 @@ public class Serializer {
         if let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) {
             return try codec.encode(plaintext: messageJson, symmetricKey: symmetricKey)
         } else {
-            throw Error.symmetricKeyForTopicNotFound
+            throw Errors.symmetricKeyForTopicNotFound
         }
     }
     
@@ -51,11 +74,11 @@ public class Serializer {
     /// - Returns: Deserialized object
     public func tryDeserialize<T: Codable>(topic: String, message: String) -> T? {
         do {
-            let deserializedCodable: T
+            let _: T
             if let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) {
                 return try deserialize(message: message, symmetricKey: symmetricKey)
             } else {
-                throw Error.symmetricKeyForTopicNotFound
+                throw Errors.symmetricKeyForTopicNotFound
             }
         } catch {
             return nil
@@ -63,7 +86,13 @@ public class Serializer {
     }
     
     private func deserialize<T: Codable>(message: String, symmetricKey: Data) throws -> T {
-        let decryptedData = try codec.decode(sealboxString: message, symmetricKey: symmetricKey)
+        guard let envelopeData = Data(base64Encoded: message) else {
+            throw Errors.malformedEnvelope
+        }
+        let policy = SerializationPolicy(byte: <#T##Int8#>)
+
+
+        let decryptedData = try codec.decode(sealboxData: <#T##Data#>, symmetricKey: symmetricKey)
         return try JSONDecoder().decode(T.self, from: decryptedData)
     }
 }
