@@ -17,11 +17,11 @@ class NetworkingInteractorMock: NetworkInteracting {
         responsePublisherSubject.eraseToAnyPublisher()
     }
     
-    func requestUnencrypted(_ request: ChatRequest, topic: String) async throws {
+    func requestUnencrypted(_ request: JSONRPCRequest<ChatRequestParams>, topic: String) async throws {
         
     }
     
-    func request(_ request: ChatRequest, topic: String) async throws {
+    func request(_ request: JSONRPCRequest<ChatRequestParams>, topic: String) async throws {
         
     }
     

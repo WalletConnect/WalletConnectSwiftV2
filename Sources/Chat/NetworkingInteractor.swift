@@ -97,11 +97,11 @@ class NetworkingInteractor: NetworkInteracting {
     private func handleJsonRpcResponse(response: JSONRPCResponse<AnyCodable>) {
         do {
             let record = try jsonRpcHistory.resolve(response: JsonRpcResult.response(response))
-            
+            let params = try record.request.params.get(ChatRequestParams.self)
             let chatResponse = ChatResponse(
                 topic: record.topic,
                 requestMethod: record.request.method,
-                requestParams: record.request.params,
+                requestParams: params,
                 result: JsonRpcResult.response(response))
             responsePublisherSubject.send(chatResponse)
         } catch {

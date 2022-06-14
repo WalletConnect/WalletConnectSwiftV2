@@ -35,7 +35,7 @@ class Chat {
         self.registry = registry
         self.kms = kms
         let serialiser = Serializer(kms: kms)
-        let jsonRpcHistory = JsonRpcHistory<ChatRequest>(logger: logger, keyValueStore: CodableStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
+        let jsonRpcHistory = JsonRpcHistory<ChatRequestParams>(logger: logger, keyValueStore: CodableStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
         let networkingInteractor = NetworkingInteractor(
             relayClient: relayClient,
             serializer: serialiser,

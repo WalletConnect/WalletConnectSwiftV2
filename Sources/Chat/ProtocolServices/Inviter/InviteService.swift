@@ -50,7 +50,7 @@ class InviteService {
     private func setUpResponseHandling() {
         networkingInteractor.responsePublisher
             .sink { [unowned self] response in
-                switch response.requestMethod {
+                switch response.requestParams {
                 case .invite:
                     handleInviteResponse(response)
                 default:
