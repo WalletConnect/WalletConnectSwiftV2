@@ -38,7 +38,6 @@ class InvitationHandlingService {
         self.threadsStore = threadsStore
         self.codec = codec
         setUpRequestHandling()
-        setUpResponseHandling()
     }
 
     func accept(inviteId: String) async throws {
