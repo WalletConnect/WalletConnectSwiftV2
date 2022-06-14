@@ -46,7 +46,9 @@ class NetworkingInteractor: NetworkInteracting {
         }
     }
     
+    // TODO - remove the method
     func requestUnencrypted(_ request: JSONRPCRequest<ChatRequestParams>, topic: String) async throws {
+        try jsonRpcHistory.set(topic: topic, request: request)
         let message = try! request.json()
         try await relayClient.publish(topic: topic, payload: message)
     }

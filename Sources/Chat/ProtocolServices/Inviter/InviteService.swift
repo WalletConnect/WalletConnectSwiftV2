@@ -12,6 +12,7 @@ class InviteService {
     let kms: KeyManagementService
     let codec: Codec
     
+    var onNewThread: ((String)->())?
     var onInvite: ((InviteParams)->())?
 
     init(networkingInteractor: NetworkInteracting,
@@ -61,9 +62,6 @@ class InviteService {
     
     private func handleInviteResponse(_ response: ChatResponse) {
         switch response.result {
-        case .error(_):
-            logger.debug("Invite has been rejected")
-            //TODO - remove keys, clean storage
         case .response(let jsonrpc):
             do {
                 let inviteResponse = try jsonrpc.result.get(InviteResponse.self)
@@ -73,6 +71,9 @@ class InviteService {
             } catch {
                 logger.debug("Handling invite response has failed")
             }
+        case .error(_):
+            logger.debug("Invite has been rejected")
+            //TODO - remove keys, clean storage
         }
     }
     
@@ -81,6 +82,7 @@ class InviteService {
         let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey)
         let threadTopic = agreementKeys.derivedTopic()
         try await networkingInteractor.subscribe(topic: threadTopic)
+        onNewThread?(threadTopic)
         //TODO - remove symKeyI
     }
 }

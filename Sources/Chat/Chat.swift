@@ -107,6 +107,9 @@ class Chat {
         invitationHandlingService.onNewThread = { [unowned self] newThread in
             newThreadPublisherSubject.send(newThread)
         }
+        inviteService.onNewThread = { [unowned self] newThread in
+            newThreadPublisherSubject.send(newThread)
+        }
     }
 }
 
