@@ -2,16 +2,16 @@ import Foundation
 
 // TODO: Integrate with WalletConnectError
 struct KeychainError: Error {
-    
+
     let status: OSStatus
-    
+
     init(_ status: OSStatus) {
         self.status = status
     }
 }
 
 extension KeychainError: CustomStringConvertible {
-    
+
     var description: String {
         status.message
     }

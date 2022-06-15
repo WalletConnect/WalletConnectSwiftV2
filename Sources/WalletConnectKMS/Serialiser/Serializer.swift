@@ -1,24 +1,23 @@
 import Foundation
 import WalletConnectUtils
 
-
 public class Serializer {
     enum Error: String, Swift.Error {
         case symmetricKeyForTopicNotFound
     }
     private let kms: KeyManagementServiceProtocol
     private let codec: Codec
-    
+
     init(kms: KeyManagementServiceProtocol, codec: Codec = ChaChaPolyCodec()) {
         self.kms = kms
         self.codec = codec
     }
-    
+
     public init(kms: KeyManagementService) {
         self.kms = kms
         self.codec = ChaChaPolyCodec()
     }
-    
+
     /// Encrypts and serializes an object
     /// - Parameters:
     ///   - topic: Topic that is associated with a symetric key for encrypting particular codable object
@@ -32,7 +31,7 @@ public class Serializer {
             throw Error.symmetricKeyForTopicNotFound
         }
     }
-    
+
     /// Deserializes and decrypts an object
     /// - Parameters:
     ///   - topic: Topic that is associated with a symetric key for decrypting particular codable object
@@ -49,10 +48,9 @@ public class Serializer {
             return nil
         }
     }
-    
+
     private func deserialize<T: Codable>(message: String, symmetricKey: Data) throws -> T {
         let decryptedData = try codec.decode(sealboxString: message, symmetricKey: symmetricKey)
         return try JSONDecoder().decode(T.self, from: decryptedData)
     }
 }
-

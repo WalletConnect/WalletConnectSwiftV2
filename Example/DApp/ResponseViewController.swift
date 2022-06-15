@@ -1,4 +1,3 @@
-
 import Foundation
 import WalletConnectSign
 import UIKit
@@ -8,20 +7,20 @@ class ResponseViewController: UIViewController {
     private let responseView = {
         ResponseView()
     }()
-    
+
     init(response: Response) {
         self.response = response
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     override func loadView() {
         view = responseView
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         let record = Sign.instance.getSessionRequestRecord(id: response.result.id)!
@@ -35,12 +34,11 @@ class ResponseViewController: UIViewController {
         }
         responseView.dismissButton.addTarget(self, action: #selector(dismissSelf), for: .touchUpInside)
     }
-    
+
     @objc func dismissSelf() {
         dismiss(animated: true, completion: nil)
     }
 }
-
 
 final class ResponseView: UIView {
 
@@ -50,7 +48,7 @@ final class ResponseView: UIView {
         label.font = UIFont.systemFont(ofSize: 17.0, weight: .heavy)
         return label
     }()
-    
+
     let descriptionLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.preferredFont(forTextStyle: .subheadline)
@@ -59,7 +57,7 @@ final class ResponseView: UIView {
         label.textAlignment = .center
         return label
     }()
-    
+
     let dismissButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Dismiss", for: .normal)
@@ -77,24 +75,24 @@ final class ResponseView: UIView {
         stackView.alignment = .center
         return stackView
     }()
-    
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .systemBackground
-        
+
         addSubview(headerStackView)
         addSubview(dismissButton)
         headerStackView.addArrangedSubview(nameLabel)
         headerStackView.addArrangedSubview(descriptionLabel)
-        
+
         subviews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
-        
+
         NSLayoutConstraint.activate([
-            
+
             headerStackView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 32),
             headerStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
             headerStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
-            
+
             dismissButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -16),
             dismissButton.centerXAnchor.constraint(equalTo: safeAreaLayoutGuide.centerXAnchor, constant: 16),
             dismissButton.heightAnchor.constraint(equalToConstant: 44),
@@ -106,4 +104,3 @@ final class ResponseView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 }
-

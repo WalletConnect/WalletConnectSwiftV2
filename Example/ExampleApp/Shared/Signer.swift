@@ -5,7 +5,7 @@ import WalletConnectSign
 
 class Signer {
     static let privateKey: EthereumPrivateKey = try! EthereumPrivateKey(hexPrivateKey: "0xe56da0e170b5e09a8bb8f1b693392c7d56c3739a9c75740fbc558a2877868540")
-    private init(){}
+    private init() {}
     static func signEth(request: Request) -> AnyCodable {
         let method = request.method
         if method == "personal_sign" {
@@ -16,7 +16,7 @@ class Signer {
             let result = "0x" + r.toHexString() + s.toHexString() + String(v + 27, radix: 16)
             return AnyCodable(result)
         } else if method == "eth_signTypedData" {
-            //TODO
+            // TODO
             let result = "0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c"
             return AnyCodable(result)
         } else if method == "eth_sendTransaction" {
@@ -31,7 +31,7 @@ class Signer {
         }
         fatalError("not implemented")
     }
-    
+
     private static func dataToHash(_ message: String) -> Bytes {
         let prefix = "\u{19}Ethereum Signed Message:\n"
         let messageData = Data(hex: message)

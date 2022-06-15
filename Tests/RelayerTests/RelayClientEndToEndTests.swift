@@ -1,4 +1,3 @@
-
 import Foundation
 import Combine
 import XCTest
@@ -8,11 +7,11 @@ import TestingUtils
 import Starscream
 
 final class RelayClientEndToEndTests: XCTestCase {
-    
+
     let relayHost = "relay.walletconnect.com"
     let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
     private var publishers = [AnyCancellable]()
-    
+
     func makeRelayClient() -> RelayClient {
         let logger = ConsoleLogger()
         let url = RelayClient.makeRelayUrl(host: relayHost, projectId: projectId)
@@ -20,7 +19,7 @@ final class RelayClientEndToEndTests: XCTestCase {
         let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket), logger: logger)
         return RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
-    
+
     func testSubscribe() {
         let relayClient = makeRelayClient()
         try! relayClient.connect()
@@ -36,7 +35,7 @@ final class RelayClientEndToEndTests: XCTestCase {
         }.store(in: &publishers)
         waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
-    
+
     func testEndToEndPayload() {
         let relayA = makeRelayClient()
         let relayB = makeRelayClient()
@@ -53,7 +52,7 @@ final class RelayClientEndToEndTests: XCTestCase {
 
         let expectationA = expectation(description: "publish payloads send and receive successfuly")
         let expectationB = expectation(description: "publish payloads send and receive successfuly")
-        
+
         expectationA.assertForOverFulfill = false
         expectationB.assertForOverFulfill = false
 
@@ -85,8 +84,8 @@ final class RelayClientEndToEndTests: XCTestCase {
         waitForExpectations(timeout: defaultTimeout, handler: nil)
         XCTAssertEqual(subscriptionATopic, randomTopic)
         XCTAssertEqual(subscriptionBTopic, randomTopic)
-        
-        //TODO - uncomment lines when request rebound is resolved
+
+        // TODO - uncomment lines when request rebound is resolved
 //        XCTAssertEqual(subscriptionBPayload, payloadA)
 //        XCTAssertEqual(subscriptionAPayload, payloadB)
     }

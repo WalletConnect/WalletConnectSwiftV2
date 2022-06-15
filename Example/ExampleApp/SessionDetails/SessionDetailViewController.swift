@@ -4,22 +4,22 @@ import WalletConnectSign
 import WalletConnectUtils
 
 final class SessionDetailViewController: UIHostingController<SessionDetailView> {
-    
+
     private let viewModel: SessionDetailViewModel
-        
+
     init(session: Session, client: Sign) {
         self.viewModel = SessionDetailViewModel(session: session, client: client)
         super.init(rootView: SessionDetailView(viewModel: viewModel))
-        
+
         rootView.didPressSessionRequest = { [weak self] request in
             self?.showSessionRequest(request)
         }
     }
-    
+
     func reload() {
         viewModel.objectWillChange.send()
     }
-                   
+
     private func showSessionRequest(_ request: Request) {
         let viewController = RequestViewController(request)
         viewController.onSign = { [unowned self] in
@@ -34,7 +34,7 @@ final class SessionDetailViewController: UIHostingController<SessionDetailView> 
         }
         present(viewController, animated: true)
     }
-    
+
     private func respondOnSign(request: Request, response: JSONRPCResponse<AnyCodable>) {
         print("[WALLET] Respond on Sign")
         Task {
@@ -45,7 +45,7 @@ final class SessionDetailViewController: UIHostingController<SessionDetailView> 
             }
         }
     }
-    
+
     private func respondOnReject(request: Request) {
         print("[WALLET] Respond on Reject")
         Task {

@@ -3,7 +3,7 @@
 import CryptoKit
 
 extension WalletConnectURI {
-    
+
     static func stub(isController: Bool = false) -> WalletConnectURI {
         WalletConnectURI(
             topic: String.generateTopic(),

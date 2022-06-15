@@ -5,20 +5,20 @@ import CryptoKit
 extension Curve25519.KeyAgreement.PrivateKey: GenericPasswordConvertible {}
 
 final class KeychainStorageTests: XCTestCase {
-    
+
     var sut: KeychainStorage!
-    
+
     var fakeKeychain: KeychainServiceFake!
-    
+
     let defaultIdentifier = "key"
-    
+
     override func setUp() {
         fakeKeychain = KeychainServiceFake()
         sut = KeychainStorage(
             keychainService: fakeKeychain,
             serviceIdentifier: "")
     }
-    
+
     override func tearDown() {
         try? sut.deleteAll()
         sut = nil
@@ -30,7 +30,7 @@ final class KeychainStorageTests: XCTestCase {
         XCTAssertNoThrow(try sut.add(privateKey, forKey: "id-1"))
         XCTAssertNoThrow(try sut.add(privateKey, forKey: "id-2"))
     }
-    
+
     func testAddDuplicateItemError() {
         let privateKey = Curve25519.KeyAgreement.PrivateKey()
         try? sut.add(privateKey, forKey: defaultIdentifier)
@@ -39,7 +39,7 @@ final class KeychainStorageTests: XCTestCase {
             XCTAssertEqual(error.status, errSecDuplicateItem)
         }
     }
-    
+
     func testAddUnknownFailure() {
         fakeKeychain.errorStatus = errSecMissingEntitlement
         let privateKey = Curve25519.KeyAgreement.PrivateKey()
@@ -47,7 +47,7 @@ final class KeychainStorageTests: XCTestCase {
             XCTAssert(error is KeychainError)
         }
     }
-    
+
     func testRead() {
         let privateKey = Curve25519.KeyAgreement.PrivateKey()
         do {
@@ -58,7 +58,7 @@ final class KeychainStorageTests: XCTestCase {
             XCTFail()
         }
     }
-    
+
     func testReadItemNotFoundFails() {
         do {
             let _: Curve25519.KeyAgreement.PrivateKey = try sut.read(key: "")
@@ -68,7 +68,7 @@ final class KeychainStorageTests: XCTestCase {
             XCTAssertEqual(error.status, errSecItemNotFound)
         }
     }
-    
+
     func testReadUnknownFailure() {
         let privateKey = Curve25519.KeyAgreement.PrivateKey()
         do {
@@ -80,7 +80,7 @@ final class KeychainStorageTests: XCTestCase {
             XCTAssert(error is KeychainError)
         }
     }
-    
+
     func testUpdate() {
         let privateKeyA = Curve25519.KeyAgreement.PrivateKey()
         let privateKeyB = Curve25519.KeyAgreement.PrivateKey()
@@ -93,7 +93,7 @@ final class KeychainStorageTests: XCTestCase {
             XCTFail()
         }
     }
-    
+
     func testUpdateItemNotFoundFails() {
         let privateKey = Curve25519.KeyAgreement.PrivateKey()
         XCTAssertThrowsError(try sut.update(privateKey, forKey: defaultIdentifier)) { error in
@@ -101,7 +101,7 @@ final class KeychainStorageTests: XCTestCase {
             XCTAssertEqual(error.status, errSecItemNotFound)
         }
     }
-    
+
     func testUpdateUnknownFailure() {
         let privateKeyA = Curve25519.KeyAgreement.PrivateKey()
         let privateKeyB = Curve25519.KeyAgreement.PrivateKey()
@@ -114,7 +114,7 @@ final class KeychainStorageTests: XCTestCase {
             XCTAssert(error is KeychainError)
         }
     }
-    
+
     func testDelete() {
         let privateKey = Curve25519.KeyAgreement.PrivateKey()
         try? sut.add(privateKey, forKey: defaultIdentifier)
@@ -125,11 +125,11 @@ final class KeychainStorageTests: XCTestCase {
             XCTFail()
         }
     }
-    
+
     func testDeleteNotFoundDoesntThrowError() {
         XCTAssertNoThrow(try sut.delete(key: defaultIdentifier))
     }
-    
+
     func testDeleteUnknownFailure() {
         fakeKeychain.errorStatus = errSecMissingEntitlement
         let privateKey = Curve25519.KeyAgreement.PrivateKey()
@@ -141,7 +141,7 @@ final class KeychainStorageTests: XCTestCase {
             XCTAssert(error is KeychainError)
         }
     }
-    
+
     func testDeleteAll() {
         do {
             let keys = (1...10).map { "key-\($0)" }
@@ -157,7 +157,7 @@ final class KeychainStorageTests: XCTestCase {
             XCTFail()
         }
     }
-    
+
     func testDeleteAllFromCleanKeychain() {
         XCTAssertThrowsError(try sut.deleteAll()) { error in
             XCTAssert(error is KeychainError)

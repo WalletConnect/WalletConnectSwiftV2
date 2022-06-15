@@ -7,15 +7,15 @@ let package = Package(
     platforms: [
         .iOS(.v13),
         .macOS(.v10_15),
-        .tvOS(.v13),
+        .tvOS(.v13)
     ],
     products: [
         .library(
             name: "WalletConnect",
-            targets: ["WalletConnectSign"]),
+            targets: ["WalletConnectSign"])
     ],
     dependencies: [
-        .package(url: "https://github.com/daltoniam/Starscream.git", .upToNextMajor(from: "3.0.0")),
+        .package(url: "https://github.com/daltoniam/Starscream.git", .upToNextMajor(from: "3.0.0"))
     ],
     targets: [
         .target(
@@ -70,7 +70,7 @@ let package = Package(
             dependencies: ["JSONRPC", "TestingUtils"]),
         .testTarget(
             name: "CommonsTests",
-            dependencies: ["Commons", "TestingUtils"]),
+            dependencies: ["Commons", "TestingUtils"])
     ],
     swiftLanguageVersions: [.v5]
 )

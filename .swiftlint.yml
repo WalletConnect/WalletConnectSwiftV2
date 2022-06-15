@@ -1,0 +1,20 @@
+disabled_rules:
+  - line_length
+  - force_try
+  - force_cast
+  - todo
+  - identifier_name
+  - nesting
+  - for_where
+  - large_tuple
+  - xctfail_message
+  - redundant_string_enum_value
+  - orphaned_doc_comment
+  - file_length
+  - type_name
+  - type_body_length
+  - multiple_closures_with_trailing_closure
+  - unused_optional_binding
+
+  # Rules descriptions: https://realm.github.io/SwiftLint/rule-directory.html
+

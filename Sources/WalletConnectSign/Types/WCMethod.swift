@@ -8,7 +8,7 @@ enum WCMethod {
     case wcSessionRequest(SessionType.RequestParams)
     case wcSessionPing
     case wcSessionEvent(SessionType.EventParams)
-    
+
     func asRequest() -> WCRequest {
         switch self {
         case .wcPairingPing:

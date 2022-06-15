@@ -9,8 +9,8 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
     private var sessionInfo: SessionInfo
     private let session: Session
     init(_ session: Session) {
-        let pendingRequests = Sign.instance.getPendingRequests(topic: session.topic).map{$0.method}
-        let chains = Array(session.namespaces.values.flatMap { n in n.accounts.map{$0.blockchain.absoluteString}})
+        let pendingRequests = Sign.instance.getPendingRequests(topic: session.topic).map {$0.method}
+        let chains = Array(session.namespaces.values.flatMap { n in n.accounts.map {$0.blockchain.absoluteString}})
         let methods = Array(session.namespaces.values.first?.methods ?? []) // TODO: Rethink how to show this info on example app
         self.sessionInfo = SessionInfo(name: session.peer.name,
                                        descriptionText: session.peer.description,
@@ -22,11 +22,11 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
         self.session = session
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     override func viewDidLoad() {
         show(sessionInfo)
         super.viewDidLoad()
@@ -35,7 +35,7 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
         sessiondetailsView.tableView.dataSource = self
         sessiondetailsView.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
     }
-    
+
     override func loadView() {
         view = sessiondetailsView
     }
@@ -46,21 +46,21 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
         sessiondetailsView.urlLabel.text = sessionInfo.dappURL
         sessiondetailsView.loadImage(at: sessionInfo.iconURL)
     }
-    
+
     @objc
     private func ping() {
         Sign.instance.ping(topic: session.topic) { result in
             switch result {
-            case .success():
+            case .success:
                 print("received ping response")
             case .failure(let error):
                 print(error)
             }
         }
     }
-    
-    //MARK: - Table View
-    
+
+    // MARK: - Table View
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 0 {
             return sessionInfo.chains.count
@@ -70,7 +70,7 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
             return sessionInfo.pendingRequests.count
         }
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         if indexPath.section == 0 {
@@ -82,11 +82,11 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
         }
         return cell
     }
-    
+
     func numberOfSections(in tableView: UITableView) -> Int {
         return 3
     }
-    
+
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         if section == 0 {
             return "Chains"
@@ -96,14 +96,14 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
             return "Pending Requests"
         }
     }
-    
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.section == 2 {
             let pendingRequests = Sign.instance.getPendingRequests(topic: session.topic)
             showSessionRequest(pendingRequests[indexPath.row])
         }
     }
-    
+
     private func showSessionRequest(_ sessionRequest: Request) {
         let requestVC = RequestViewController(sessionRequest)
         requestVC.onSign = { [unowned self] in
@@ -118,10 +118,10 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
         }
         present(requestVC, animated: true)
     }
-    
+
     func reloadTable() {
-        let pendingRequests = Sign.instance.getPendingRequests(topic: session.topic).map{$0.method}
-        let chains = Array(session.namespaces.values.flatMap { n in n.accounts.map{$0.blockchain.absoluteString}})
+        let pendingRequests = Sign.instance.getPendingRequests(topic: session.topic).map {$0.method}
+        let chains = Array(session.namespaces.values.flatMap { n in n.accounts.map {$0.blockchain.absoluteString}})
         let methods = Array(session.namespaces.values.first?.methods ?? []) // TODO: Rethink how to show this info on example app
         self.sessionInfo = SessionInfo(name: session.peer.name,
                                        descriptionText: session.peer.description,

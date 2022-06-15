@@ -1,4 +1,3 @@
-
 import UIKit
 import WalletConnectSign
 import Combine
@@ -7,7 +6,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
     private var publishers = [AnyCancellable]()
-
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
@@ -21,22 +19,21 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             url: "wallet.connect",
             icons: ["https://avatars.githubusercontent.com/u/37784886"])
         Sign.configure(Sign.Config(metadata: metadata, projectId: "8ba9ee138960775e5231b70cc5ef1c3a"))
-        
+
         if CommandLine.arguments.contains("-cleanInstall") {
             try? Sign.instance.cleanup()
         }
-        
+
         Sign.instance.sessionDeletePublisher
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] _ in
                 showSelectChainScreen()
             }.store(in: &publishers)
-        
+
         Sign.instance.sessionResponsePublisher.sink { [unowned self] response in
             presentResponse(for: response)
         }.store(in: &publishers)
 
-        
         if let session = Sign.instance.getSessions().first {
             showAccountsScreen(session)
         } else {
@@ -54,7 +51,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             window?.makeKeyAndVisible()
         }
     }
-    
+
     func showAccountsScreen(_ session: Session) {
         DispatchQueue.main.async { [unowned self] in
             let vc = AccountsViewController(session: session)
@@ -65,7 +62,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             window?.makeKeyAndVisible()
         }
     }
-    
+
     func presentResponse(for response: Response) {
         DispatchQueue.main.async { [unowned self] in
             let vc = UINavigationController(rootViewController: ResponseViewController(response: response))
@@ -73,4 +70,3 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
     }
 }
-

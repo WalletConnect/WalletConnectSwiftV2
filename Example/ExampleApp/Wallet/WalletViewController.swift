@@ -9,37 +9,37 @@ final class WalletViewController: UIViewController {
     lazy  var account = Signer.privateKey.address.hex(eip55: true)
     var sessionItems: [ActiveSessionItem] = []
     var currentProposal: Session.Proposal?
-    var onClientConnected: (()->())?
+    var onClientConnected: (() -> Void)?
     private var publishers = [AnyCancellable]()
 
     private let walletView: WalletView = {
         WalletView()
     }()
-    
+
     override func loadView() {
         view = walletView
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Wallet"
         walletView.scanButton.addTarget(self, action: #selector(showScanner), for: .touchUpInside)
         walletView.pasteButton.addTarget(self, action: #selector(showTextInput), for: .touchUpInside)
-        
+
         walletView.tableView.dataSource = self
         walletView.tableView.delegate = self
         let settledSessions = Sign.instance.getSessions()
         sessionItems = getActiveSessionItem(for: settledSessions)
         setUpAuthSubscribing()
     }
-    
+
     @objc
     private func showScanner() {
         let scannerViewController = ScannerViewController()
         scannerViewController.delegate = self
         present(scannerViewController, animated: true)
     }
-    
+
     @objc
     private func showTextInput() {
         let alert = UIAlertController.createInputAlert { [weak self] inputText in
@@ -47,7 +47,7 @@ final class WalletViewController: UIViewController {
         }
         present(alert, animated: true)
     }
-    
+
     private func showSessionProposal(_ proposal: Proposal) {
         let proposalViewController = ProposalViewController(proposal: proposal)
         proposalViewController.delegate = self
@@ -58,7 +58,7 @@ final class WalletViewController: UIViewController {
         let viewController = SessionDetailViewController(session: session, client: Sign.instance)
         navigationController?.present(viewController, animated: true)
     }
-    
+
     private func showSessionRequest(_ request: Request) {
         let requestVC = RequestViewController(request)
         requestVC.onSign = { [unowned self] in
@@ -74,7 +74,7 @@ final class WalletViewController: UIViewController {
         reloadSessionDetailsIfNeeded()
         present(requestVC, animated: true)
     }
-    
+
     func reloadSessionDetailsIfNeeded() {
         if let viewController = navigationController?.presentedViewController as? SessionDetailViewController {
             viewController.reload()
@@ -124,7 +124,7 @@ final class WalletViewController: UIViewController {
     }
 
     @MainActor
-    private func approve(proposalId: String, namespaces: [String : SessionNamespace]) {
+    private func approve(proposalId: String, namespaces: [String: SessionNamespace]) {
         print("[WALLET] Approve Session: \(proposalId)")
         Task {
             do {
@@ -149,11 +149,11 @@ final class WalletViewController: UIViewController {
 }
 
 extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
-    
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         sessionItems.count
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "sessionCell", for: indexPath) as! ActiveSessionCell
         cell.item = sessionItems[indexPath.row]
@@ -177,11 +177,11 @@ extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
             }
         }
     }
-    
+
     func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
         "Disconnect"
     }
-    
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("did select row \(indexPath)")
         let itemTopic = sessionItems[indexPath.row].topic
@@ -192,14 +192,14 @@ extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
 }
 
 extension WalletViewController: ScannerViewControllerDelegate {
-    
+
     func didScan(_ code: String) {
         pairClient(uri: code)
     }
 }
 
 extension WalletViewController: ProposalViewControllerDelegate {
-        
+
     func didApproveSession() {
         let proposal = currentProposal!
         currentProposal = nil
@@ -207,10 +207,10 @@ extension WalletViewController: ProposalViewControllerDelegate {
         proposal.requiredNamespaces.forEach {
             let caip2Namespace = $0.key
             let proposalNamespace = $0.value
-            let accounts = Set(proposalNamespace.chains.compactMap { Account($0.absoluteString + ":\(account)") } )
-            
+            let accounts = Set(proposalNamespace.chains.compactMap { Account($0.absoluteString + ":\(account)") })
+
             let extensions: [SessionNamespace.Extension]? = proposalNamespace.extensions?.map { element in
-                let accounts = Set(element.chains.compactMap { Account($0.absoluteString + ":\(account)") } )
+                let accounts = Set(element.chains.compactMap { Account($0.absoluteString + ":\(account)") })
                 return SessionNamespace.Extension(accounts: accounts, methods: element.methods, events: element.events)
             }
             let sessionNamespace = SessionNamespace(accounts: accounts, methods: proposalNamespace.methods, events: proposalNamespace.events, extensions: extensions)
@@ -218,7 +218,7 @@ extension WalletViewController: ProposalViewControllerDelegate {
         }
         approve(proposalId: proposal.id, namespaces: sessionNamespaces)
     }
-    
+
     func didRejectSession() {
         let proposal = currentProposal!
         currentProposal = nil
@@ -261,7 +261,7 @@ extension WalletViewController {
 
         Sign.instance.sessionDeletePublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] sessionRequest in
+            .sink { [weak self] _ in
                 self?.reloadActiveSessions()
                 self?.navigationController?.popToRootViewController(animated: true)
             }.store(in: &publishers)

@@ -1,4 +1,3 @@
-
 import Foundation
 import XCTest
 import TestingUtils
@@ -6,31 +5,31 @@ import WalletConnectUtils
 @testable import WalletConnectSign
 
 final class JsonRpcHistoryTests: XCTestCase {
-    
+
     var sut: WalletConnectSign.JsonRpcHistory!
-            
+
     override func setUp() {
         sut = JsonRpcHistory(logger: ConsoleLoggerMock(), keyValueStore: CodableStore<WalletConnectSign.JsonRpcRecord>(defaults: RuntimeKeyValueStorage(), identifier: ""))
     }
-    
+
     override func tearDown() {
         sut = nil
     }
-    
+
     func testSetRecord() {
         let recordinput = getTestJsonRpcRecordInput()
         XCTAssertFalse(sut.exist(id: recordinput.request.id))
         try! sut.set(topic: recordinput.topic, request: recordinput.request)
         XCTAssertTrue(sut.exist(id: recordinput.request.id))
     }
-    
+
     func testGetRecord() {
         let recordinput = getTestJsonRpcRecordInput()
         XCTAssertNil(sut.get(id: recordinput.request.id))
         try! sut.set(topic: recordinput.topic, request: recordinput.request)
         XCTAssertNotNil(sut.get(id: recordinput.request.id))
     }
-    
+
     func testResolve() {
         let recordinput = getTestJsonRpcRecordInput()
         try! sut.set(topic: recordinput.topic, request: recordinput.request)
@@ -40,7 +39,7 @@ final class JsonRpcHistoryTests: XCTestCase {
         _ = try! sut.resolve(response: response)
         XCTAssertNotNil(sut.get(id: jsonRpcResponse.id)?.response)
     }
-    
+
     func testThrowsOnResolveDuplicate() {
         let recordinput = getTestJsonRpcRecordInput()
         try! sut.set(topic: recordinput.topic, request: recordinput.request)
@@ -49,13 +48,13 @@ final class JsonRpcHistoryTests: XCTestCase {
         _ = try! sut.resolve(response: response)
         XCTAssertThrowsError(try sut.resolve(response: response))
     }
-    
+
     func testThrowsOnSetDuplicate() {
         let recordinput = getTestJsonRpcRecordInput()
         try! sut.set(topic: recordinput.topic, request: recordinput.request)
         XCTAssertThrowsError(try sut.set(topic: recordinput.topic, request: recordinput.request))
     }
-    
+
     func testDelete() {
         let recordinput = getTestJsonRpcRecordInput()
         try! sut.set(topic: recordinput.topic, request: recordinput.request)
@@ -63,7 +62,7 @@ final class JsonRpcHistoryTests: XCTestCase {
         sut.delete(topic: testTopic)
         XCTAssertNil(sut.get(id: recordinput.request.id))
     }
-    
+
     func testGetPending() {
         let recordinput1 = getTestJsonRpcRecordInput(id: 1)
         let recordinput2 = getTestJsonRpcRecordInput(id: 2)
