@@ -13,32 +13,43 @@ public enum EnvelopeType {
     /// type 0 = tp + iv + ct + tag
     case type0
     /// type 1 = tp + pk + iv + ct + tag
-    case type1
+    case type1(pubKey: AgreementPublicKey)
+}
 
-    var representingByte: UInt8 {
-        switch self {
-        case .type0:
-            return 0
-        case .type1:
-            return 1
-        }
+public struct Envelope {
+    enum Errors: String, Error {
+        case malformedEnvelope
+        case unsupportedEnvelopeType
     }
 
-    init(byte: UInt8) throws {
-        if byte == 0 {
-            self = .type0
-        } else if byte == 1 {
-            self = .type1
+    let type: EnvelopeType
+    let sealbox: Data
+
+    init(_ base64encoded: String) throws {
+        guard let envelopeData = Data(base64Encoded: base64encoded) else {
+            throw Errors.malformedEnvelope
+        }
+
+        let envelopeTypeByte = envelopeData.subdata(in: 0..<1).uint8
+
+        if envelopeTypeByte == 0 {
+            self.type = .type0
+        } else if envelopeTypeByte == 1 {
+            let pubKey = try AgreementPublicKey(hex: envelopeData.subdata(in: 0..<33))
+            self.type = .type1(pubkey)
         } else {
-            throw Errors.unsupportedPolicyType
+            throw Errors.unsupportedEnvelopeType
         }
+
+
+
     }
+
 }
 
 public class Serializer {
     enum Errors: String, Error {
         case symmetricKeyForTopicNotFound
-        case malformedEnvelope
     }
     private let kms: KeyManagementServiceProtocol
     private let codec: Codec
@@ -84,15 +95,6 @@ public class Serializer {
         }
     }
 
-    func getEnvelopeType(for message: String) -> EnvelopeType throws {
-        guard let envelopeData = Data(base64Encoded: message) else {
-            throw Errors.malformedEnvelope
-        }
-
-        let envelopeTypeData = envelopeData.subdata(in: 0..<1)
-
-        return try EnvelopeType(byte: envelopeTypeData.uint8)
-    }
     
     private func deserialize<T: Codable>(message: String, symmetricKey: Data) throws -> T {
         guard let envelopeData = Data(base64Encoded: message) else {
