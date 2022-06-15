@@ -62,8 +62,10 @@ final class SignClientTests: XCTestCase {
         let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
         
         wallet.onSessionProposal = { proposal in
-            do { try wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces) }
-            catch { XCTFail("\(error)") }
+            Task {
+                do { try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces) }
+                catch { XCTFail("\(error)") }
+            }
         }
         dapp.onSessionSettled = { _ in
             dappSettlementExpectation.fulfill()
@@ -81,19 +83,23 @@ final class SignClientTests: XCTestCase {
         let dapp = proposer!
         let wallet = responder!
         let sessionRejectExpectation = expectation(description: "Proposer is notified on session rejection")
-        var rejectedProposal: Session.Proposal?
+
+        class Store { var rejectedProposal: Session.Proposal? }
+        let store = Store()
         
         let uri = try await dapp.client.connect(requiredNamespaces: ProposalNamespace.stubRequired())
         try await wallet.client.pair(uri: uri!)
         
         wallet.onSessionProposal = { proposal in
-            do {
-                try wallet.client.reject(proposalId: proposal.id, reason: .disapprovedChains) // TODO: Review reason
-                rejectedProposal = proposal
-            } catch { XCTFail("\(error)") }
+            Task {
+                do {
+                    try await wallet.client.reject(proposalId: proposal.id, reason: .disapprovedChains) // TODO: Review reason
+                    store.rejectedProposal = proposal
+                } catch { XCTFail("\(error)") }
+            }
         }
         dapp.onSessionRejected = { proposal, _ in
-            XCTAssertEqual(rejectedProposal, proposal)
+            XCTAssertEqual(store.rejectedProposal, proposal)
             sessionRejectExpectation.fulfill() // TODO: Assert reason code
         }
         wait(for: [sessionRejectExpectation], timeout: defaultTimeout)
