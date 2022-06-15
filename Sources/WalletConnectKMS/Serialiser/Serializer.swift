@@ -31,10 +31,10 @@ public struct Envelope {
         case unsupportedEnvelopeType
     }
 
-    let type: EnvelopeType
-    let sealbox: Data
+    public let type: EnvelopeType
+    public let sealbox: Data
 
-    init(_ base64encoded: String) throws {
+    public init(_ base64encoded: String) throws {
         guard let envelopeData = Data(base64Encoded: base64encoded) else {
             throw Errors.malformedEnvelope
         }
