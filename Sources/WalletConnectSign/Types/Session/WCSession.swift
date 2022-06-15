@@ -3,9 +3,12 @@ import WalletConnectKMS
 import WalletConnectUtils
 
 struct WCSession: ExpirableSequence {
+
     enum Error: Swift.Error {
         case controllerNotSet
+//        case
     }
+
     let topic: String
     let relay: RelayProtocolOptions
     let selfParticipant: Participant
@@ -111,6 +114,16 @@ struct WCSession: ExpirableSequence {
     }
 
     mutating func updateNamespaces(_ namespaces: [String: SessionNamespace]) {
+        for item in requiredNamespaces {
+            guard
+                let compliantNamespace = namespaces[item.key],
+                compliantNamespace.accounts.isSuperset(of: item.value.accounts),
+                compliantNamespace.methods.isSuperset(of: item.value.methods),
+                compliantNamespace.events.isSuperset(of: item.value.events)
+            else {
+                fatalError()
+            }
+        }
         self.namespaces = namespaces
     }
 
