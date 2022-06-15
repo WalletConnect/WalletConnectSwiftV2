@@ -36,6 +36,9 @@ extension NetworkInteracting {
 }
 
 class NetworkInteractor: NetworkInteracting {
+    enum Errors: Error {
+        case unsupportedEnvelopeType
+    }
 
     private var publishers = [AnyCancellable]()
     
@@ -186,13 +189,25 @@ class NetworkInteractor: NetworkInteracting {
             manageSubscription(topic, message)
         }
     }
+
+    private func getSealBox(from encodedEnvelope: String) -> String? {
+        do {
+            let envelope = try Envelope(encodedEnvelope)
+            guard envelope.type == .type0 else {throw Errors.unsupportedEnvelopeType}
+            return envelope.sealbox.base64EncodedString()
+        } catch {
+            logger.debug(error)
+            return nil
+        }
+    }
     
-    private func manageSubscription(_ topic: String, _ message: String) {
-        if let deserializedJsonRpcRequest: WCRequest = serializer.tryDeserialize(topic: topic, message: message) {
+    private func manageSubscription(_ topic: String, _ encodedEnvelope: String) {
+        guard let sealbox = getSealBox(from: encodedEnvelope) else {return}
+        if let deserializedJsonRpcRequest: WCRequest = serializer.tryDeserialize(topic: topic, message: sealbox) {
             handleWCRequest(topic: topic, request: deserializedJsonRpcRequest)
-        } else if let deserializedJsonRpcResponse: JSONRPCResponse<AnyCodable> = serializer.tryDeserialize(topic: topic, message: message) {
+        } else if let deserializedJsonRpcResponse: JSONRPCResponse<AnyCodable> = serializer.tryDeserialize(topic: topic, message: sealbox) {
             handleJsonRpcResponse(response: deserializedJsonRpcResponse)
-        } else if let deserializedJsonRpcError: JSONRPCErrorResponse = serializer.tryDeserialize(topic: topic, message: message) {
+        } else if let deserializedJsonRpcError: JSONRPCErrorResponse = serializer.tryDeserialize(topic: topic, message: sealbox) {
             handleJsonRpcErrorResponse(response: deserializedJsonRpcError)
         } else {
             logger.warn("Warning: WalletConnect Relay - Received unknown object type from networking relay")

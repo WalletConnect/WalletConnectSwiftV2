@@ -6,7 +6,7 @@ import WalletConnectUtils
 /// pk = public key (32 bytes)
 /// iv = initialization vector (12 bytes)
 /// ct = ciphertext (N bytes)
-public enum EnvelopeType {
+public enum EnvelopeType: Equatable {
     enum Errors: Error {
         case unsupportedPolicyType
     }
