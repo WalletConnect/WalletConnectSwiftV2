@@ -6,24 +6,24 @@ import WalletConnectSign
 final class SessionDetailViewModel: ObservableObject {
     private let session: Session
     private let client: Sign
-    
+
     enum Fields {
         case accounts
         case methods
         case events
         case chain
     }
-    
+
     @Published var namespaces: [String: SessionNamespace]
     @Published var pingSuccess: Bool = false
     @Published var pingFailed: Bool = false
-    
+
     init(session: Session, client: Sign) {
         self.session = session
         self.client = client
         self.namespaces = session.namespaces
     }
-    
+
     var peerName: String {
         session.peer.name
     }
@@ -42,7 +42,7 @@ final class SessionDetailViewModel: ObservableObject {
     var requests: [Request] {
         client.getPendingRequests(topic: session.topic)
     }
-    
+
     func remove(field: Fields, at indices: IndexSet = [], for chain: String) async {
         let backup = namespaces
 
@@ -53,18 +53,17 @@ final class SessionDetailViewModel: ObservableObject {
             case .events: removeEvents(at: indices, chain: chain)
             case .chain: removeChain(chain)
             }
-            
+
             try await client.update(
                 topic: session.topic,
                 namespaces: namespaces
             )
-        }
-        catch {
+        } catch {
             namespaces = backup
             print("[RESPONDER] Namespaces update failed with: \(error.localizedDescription)")
         }
     }
-    
+
     func ping() {
         client.ping(topic: session.topic) {  result in
             switch result {
@@ -75,14 +74,14 @@ final class SessionDetailViewModel: ObservableObject {
             }
         }
     }
-    
+
     func namespace(for chain: String) -> SessionNamespaceViewModel? {
         namespaces[chain].map { SessionNamespaceViewModel(namespace: $0) }
     }
 }
 
 private extension SessionDetailViewModel {
-    
+
     func removeAccounts(at offsets: IndexSet, chain: String) {
         guard let viewModel = namespace(for: chain) else { return }
 
@@ -91,7 +90,7 @@ private extension SessionDetailViewModel {
             namespace: viewModel.namespace
         )
     }
-    
+
     func removeMethods(at offsets: IndexSet, chain: String) {
         guard let viewModel = namespace(for: chain) else { return }
 
@@ -100,23 +99,23 @@ private extension SessionDetailViewModel {
             namespace: viewModel.namespace
         )
     }
-    
+
     func removeEvents(at offsets: IndexSet, chain: String) {
         guard let viewModel = namespace(for: chain) else { return }
-        
+
         namespaces[chain] = SessionNamespace(
             events: Set(viewModel.events.removing(atOffsets: offsets)),
             namespace: viewModel.namespace
         )
     }
-    
+
     func removeChain(_ chain: String) {
         namespaces.removeValue(forKey: chain)
     }
 }
 
 private extension Array {
-    
+
     func removing(atOffsets offsets: IndexSet) -> Self {
         var array = self
         array.remove(atOffsets: offsets)
@@ -125,7 +124,7 @@ private extension Array {
 }
 
 private extension SessionNamespace {
-    
+
     init(
         accounts: Set<Account>? = nil,
         methods: Set<String>? = nil,

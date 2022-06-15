@@ -1,4 +1,3 @@
-
 import WalletConnectUtils
 import Foundation
 import Combine
@@ -19,7 +18,7 @@ class WakuRelayTests: XCTestCase {
         wakuRelay = nil
         dispatcher = nil
     }
-    
+
     func testNotifyOnSubscriptionRequest() {
         let subscriptionExpectation = expectation(description: "notifies with encoded message on a waku subscription event")
         let topic = "0987"
@@ -35,7 +34,7 @@ class WakuRelayTests: XCTestCase {
         dispatcher.onMessage?(try! subscriptionRequest.json())
         waitForExpectations(timeout: 0.001, handler: nil)
     }
-    
+
     func testPublishRequestAcknowledge() {
         let acknowledgeExpectation = expectation(description: "completion with no error on waku request acknowledge after publish")
         let requestId = wakuRelay.publish(topic: "", payload: "{}", onNetworkAcknowledge: { error in
@@ -46,7 +45,7 @@ class WakuRelayTests: XCTestCase {
         dispatcher.onMessage?(response)
         waitForExpectations(timeout: 0.001, handler: nil)
     }
-    
+
     func testUnsubscribeRequestAcknowledge() {
         let acknowledgeExpectation = expectation(description: "completion with no error on waku request acknowledge after unsubscribe")
         let topic = "1234"
@@ -59,7 +58,7 @@ class WakuRelayTests: XCTestCase {
         dispatcher.onMessage?(response)
         waitForExpectations(timeout: 0.001, handler: nil)
     }
-    
+
     func testSubscriptionRequestDeliveredOnce() {
         let expectation = expectation(description: "Request duplicate not delivered")
         let subscriptionParams = RelayJSONRPC.SubscriptionParams(id: "sub_id", data: RelayJSONRPC.SubscriptionData(topic: "topic", message: "message"))
@@ -71,17 +70,17 @@ class WakuRelayTests: XCTestCase {
         dispatcher.onMessage?(try! subscriptionRequest.json())
         waitForExpectations(timeout: 0.001, handler: nil)
     }
-    
+
     func testSendOnPublish() {
         wakuRelay.publish(topic: "", payload: "", onNetworkAcknowledge: { _ in})
         XCTAssertTrue(dispatcher.sent)
     }
-    
+
     func testSendOnSubscribe() {
         wakuRelay.subscribe(topic: "") {_ in }
         XCTAssertTrue(dispatcher.sent)
     }
-    
+
     func testSendOnUnsubscribe() {
         let topic = "123"
         wakuRelay.subscriptions[topic] = ""
@@ -89,4 +88,3 @@ class WakuRelayTests: XCTestCase {
         XCTAssertTrue(dispatcher.sent)
     }
 }
-

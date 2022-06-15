@@ -6,7 +6,7 @@ import Combine
 import WalletConnectUtils
 
 final class ApproveEngineTests: XCTestCase {
-    
+
     var engine: ApproveEngine!
     var metadata: AppMetadata!
     var networkingInteractor: NetworkingInteractorMock!
@@ -14,9 +14,9 @@ final class ApproveEngineTests: XCTestCase {
     var pairingStorageMock: WCPairingStorageMock!
     var sessionStorageMock: WCSessionStorageMock!
     var proposalPayloadsStore: CodableStore<WCRequestSubscriptionPayload>!
-    
+
     var publishers = Set<AnyCancellable>()
-    
+
     override func setUp() {
         metadata = AppMetadata.stub()
         networkingInteractor = NetworkingInteractorMock()
@@ -35,7 +35,7 @@ final class ApproveEngineTests: XCTestCase {
             sessionStore: sessionStorageMock
         )
     }
-    
+
     override func tearDown() {
         networkingInteractor = nil
         metadata = nil
@@ -43,7 +43,7 @@ final class ApproveEngineTests: XCTestCase {
         pairingStorageMock = nil
         engine = nil
     }
-    
+
     func testApproveProposal() async throws {
         // Client receives a proposal
         let topicA = String.generateTopic()
@@ -54,14 +54,14 @@ final class ApproveEngineTests: XCTestCase {
         networkingInteractor.wcRequestPublisherSubject.send(payload)
 
         try await engine.approveProposal(proposerPubKey: proposal.proposer.publicKey, validating: SessionNamespace.stubDictionary())
-        
+
         let topicB = networkingInteractor.subscriptions.last!
-    
+
         XCTAssertTrue(networkingInteractor.didCallSubscribe)
         XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must store agreement key for topic B")
         XCTAssertEqual(networkingInteractor.didRespondOnTopic!, topicA, "Responder must respond on topic A")
     }
-    
+
     func testReceiveProposal() {
         let pairing = WCPairing.stub()
         let topicA = pairing.topic
@@ -80,7 +80,7 @@ final class ApproveEngineTests: XCTestCase {
         XCTAssertNotNil(try! proposalPayloadsStore.get(key: proposal.proposer.publicKey), "Proposer must store proposal payload")
         XCTAssertTrue(sessionProposed)
     }
-    
+
     func testSessionSettle() async throws {
         let agreementKeys = AgreementKeys.stub()
         let topicB = String.generateTopic()
@@ -91,7 +91,7 @@ final class ApproveEngineTests: XCTestCase {
         XCTAssert(networkingInteractor.didSubscribe(to: topicB), "Responder must subscribe for topic B")
         XCTAssertTrue(networkingInteractor.didCallRequest, "Responder must send session settle payload on topic B")
     }
-    
+
     func testHandleSessionSettle() {
         let sessionTopic = String.generateTopic()
         cryptoMock.setAgreementSecret(AgreementKeys.stub(), topic: sessionTopic)
@@ -99,19 +99,19 @@ final class ApproveEngineTests: XCTestCase {
         engine.onSessionSettle = { _ in
             didCallBackOnSessionApproved = true
         }
-        
+
         engine.settlingProposal = SessionProposal.stub()
         networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubSettle(topic: sessionTopic))
-        
+
         XCTAssertTrue(sessionStorageMock.getSession(forTopic: sessionTopic)!.acknowledged, "Proposer must store acknowledged session on topic B")
         XCTAssertTrue(networkingInteractor.didRespondSuccess, "Proposer must send acknowledge on settle request")
         XCTAssertTrue(didCallBackOnSessionApproved, "Proposer's engine must call back with session")
     }
-    
+
     func testHandleSessionSettleAcknowledge() {
         let session = WCSession.stub(isSelfController: true, acknowledged: false)
         sessionStorageMock.setSession(session)
-        
+
         let settleResponse = JSONRPCResponse(id: 1, result: AnyCodable(true))
         let response = WCResponse(
             topic: session.topic,
@@ -123,7 +123,7 @@ final class ApproveEngineTests: XCTestCase {
 
         XCTAssertTrue(sessionStorageMock.getSession(forTopic: session.topic)!.acknowledged, "Responder must acknowledged session")
     }
-    
+
     func testHandleSessionSettleError() {
         let privateKey = AgreementPrivateKey()
         let session = WCSession.stub(isSelfController: false, selfPrivateKey: privateKey, acknowledged: false)

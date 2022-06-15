@@ -11,7 +11,7 @@ final class RegistryManagerTests: XCTestCase {
     var topicToInvitationPubKeyStore: CodableStore<String>!
     var registry: Registry!
     var kms: KeyManagementServiceMock!
-    
+
     override func setUp() {
         registry = KeyValueRegistry()
         networkingInteractor = NetworkingInteractorMock()
@@ -24,7 +24,7 @@ final class RegistryManagerTests: XCTestCase {
             logger: ConsoleLoggerMock(),
             topicToInvitationPubKeyStore: topicToInvitationPubKeyStore)
     }
-    
+
     func testRegister() async {
         let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
         try! await registryManager.register(account: account)
@@ -34,4 +34,3 @@ final class RegistryManagerTests: XCTestCase {
         XCTAssertFalse(topicToInvitationPubKeyStore.getAll().isEmpty, "stores topic to invitation")
     }
 }
-

@@ -1,4 +1,3 @@
-
 import Foundation
 import XCTest
 @testable import Chat
@@ -13,13 +12,13 @@ final class ChatTests: XCTestCase {
     var client2: Chat!
     var registry: KeyValueRegistry!
     private var publishers = [AnyCancellable]()
-    
+
     override func setUp() {
         registry = KeyValueRegistry()
         client1 = makeClient(prefix: "🦖")
         client2 = makeClient(prefix: "🍄")
     }
-    
+
     private func waitClientsConnected() async {
         let group = DispatchGroup()
         group.enter()
@@ -38,7 +37,7 @@ final class ChatTests: XCTestCase {
         group.wait()
         return
     }
-    
+
     func makeClient(prefix: String) -> Chat {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let relayHost = "relay.walletconnect.com"
@@ -48,7 +47,7 @@ final class ChatTests: XCTestCase {
 
         return Chat(registry: registry, relayClient: relayClient, kms: KeyManagementService(keychain: keychain), logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
-    
+
     func testInvite() async {
         await waitClientsConnected()
         let inviteExpectation = expectation(description: "invitation expectation")
@@ -60,8 +59,7 @@ final class ChatTests: XCTestCase {
         }.store(in: &publishers)
         wait(for: [inviteExpectation], timeout: 4)
     }
-    
-    
+
 //    func testNewThread() async {
 //        await waitClientsConnected()
 //        let newThreadExpectation = expectation(description: "new thread expectation")

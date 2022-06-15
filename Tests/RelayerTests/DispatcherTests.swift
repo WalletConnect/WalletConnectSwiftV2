@@ -1,14 +1,12 @@
-
 import Foundation
 import XCTest
 @testable import WalletConnectRelay
 import TestingUtils
 
-
 class WebSocketMock: WebSocketProtocol, WebSocketConnecting {
-    var onText: ((String) -> ())?
-    var onConnect: (() -> ())?
-    var onDisconnect: ((Error?) -> ())?
+    var onText: ((String) -> Void)?
+    var onConnect: (() -> Void)?
+    var onDisconnect: ((Error?) -> Void)?
     var sendCallCount: Int = 0
     var isConnected: Bool = false
 
@@ -22,7 +20,7 @@ class WebSocketMock: WebSocketProtocol, WebSocketConnecting {
         onDisconnect?(nil)
     }
 
-    func write(string: String, completion: (() -> ())?) {
+    func write(string: String, completion: (() -> Void)?) {
         sendCallCount+=1
     }
 }
@@ -39,7 +37,7 @@ final class DispatcherTests: XCTestCase {
 
     func testSendWhileConnected() {
         try! sut.connect()
-        sut.send("1"){_ in}
+        sut.send("1") {_ in}
         XCTAssertEqual(webSocket.sendCallCount, 1)
     }
 

@@ -21,7 +21,7 @@ class ChaChaPolyCodec: Codec {
         let sealBox = try ChaChaPoly.seal(dataToSeal, using: key, nonce: nonce)
         return sealBox.combined.base64EncodedString()
     }
-    
+
     func decode(sealboxString: String, symmetricKey: Data) throws -> Data {
         guard let sealboxData = Data(base64Encoded: sealboxString) else {
             throw CodecError.malformedSealbox

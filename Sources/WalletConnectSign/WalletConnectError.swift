@@ -1,5 +1,5 @@
 enum WalletConnectError: Error {
-    
+
     case pairingProposalFailed
     case malformedPairingURI
     case noPairingMatchingTopic(String)
@@ -14,9 +14,9 @@ enum WalletConnectError: Error {
     case topicGenerationFailed
     case invalidPermissions // TODO: Refactor into actual cases
     case unsupportedNamespace(ReasonCode)
-    
+
     case `internal`(_ reason: InternalReason)
-    
+
     enum InternalReason: Error {
         case jsonRpcDuplicateDetected
         case noJsonRpcRequestMatchingResponse
@@ -24,7 +24,7 @@ enum WalletConnectError: Error {
 }
 
 extension WalletConnectError {
-    
+
     var localizedDescription: String {
         switch self {
         case .pairingProposalFailed:
@@ -55,7 +55,7 @@ extension WalletConnectError {
             return "Invalid permissions for call."
         case .unsupportedNamespace(let reason):
             return reason.message
-        case .internal(_): // TODO: Remove internal case
+        case .internal: // TODO: Remove internal case
             return ""
         }
     }

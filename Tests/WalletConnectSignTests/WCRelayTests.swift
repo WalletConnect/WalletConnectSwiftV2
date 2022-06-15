@@ -1,4 +1,3 @@
-
 import Foundation
 import Combine
 import XCTest
@@ -25,11 +24,11 @@ class NetworkingInteractorTests: XCTestCase {
         relayClient = nil
         serializer = nil
     }
-    
+
     func testNotifiesOnEncryptedWCJsonRpcRequest() {
         let requestExpectation = expectation(description: "notifies with request")
         let topic = "fefc3dc39cacbc562ed58f92b296e2d65a6b07ef08992b93db5b3cb86280635a"
-        networkingInteractor.wcRequestPublisher.sink { (request) in
+        networkingInteractor.wcRequestPublisher.sink { (_) in
             requestExpectation.fulfill()
         }.store(in: &publishers)
         serializer.deserialized = request
@@ -53,7 +52,7 @@ extension NetworkingInteractorTests {
     }
 }
 
-fileprivate let testPayload =
+private let testPayload =
 """
 {
    "id":1630300527198334,
@@ -68,5 +67,5 @@ fileprivate let testPayload =
    }
 }
 """
-//TODO - change for different request
-fileprivate let request = WCRequest(id: 1, jsonrpc: "2.0", method: .pairingPing, params: WCRequest.Params.pairingPing(PairingType.PingParams()))
+// TODO - change for different request
+private let request = WCRequest(id: 1, jsonrpc: "2.0", method: .pairingPing, params: WCRequest.Params.pairingPing(PairingType.PingParams()))

@@ -7,7 +7,7 @@ public enum DataConversionError: Error {
     case dataToStringFailed
 }
 
-public extension Encodable  {
+public extension Encodable {
     func json() throws -> String {
         let data = try JSONEncoder().encode(self)
         guard let string = String(data: data, encoding: .utf8) else {

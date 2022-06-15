@@ -1,4 +1,3 @@
-
 import Foundation
 import WalletConnectUtils
 import WalletConnectKMS
@@ -9,8 +8,8 @@ final class NonControllerSessionStateMachine {
         case respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode)
     }
 
-    var onNamespacesUpdate: ((String, [String: SessionNamespace])->())?
-    var onExtend: ((String, Date) -> ())?
+    var onNamespacesUpdate: ((String, [String: SessionNamespace]) -> Void)?
+    var onExtend: ((String, Date) -> Void)?
 
     private let sessionStore: WCSessionStorage
     private let networkingInteractor: NetworkInteracting
@@ -28,7 +27,7 @@ final class NonControllerSessionStateMachine {
         self.logger = logger
         setUpWCRequestHandling()
     }
-    
+
     private func setUpWCRequestHandling() {
         networkingInteractor.wcRequestPublisher
             .sink { [unowned self] subscriptionPayload in
@@ -47,7 +46,7 @@ final class NonControllerSessionStateMachine {
                 }
             }.store(in: &publishers)
     }
-    
+
     private func respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode) {
         Task {
             do {
@@ -57,7 +56,7 @@ final class NonControllerSessionStateMachine {
             }
         }
     }
-    
+
     // TODO: Update stored session namespaces
     private func onSessionUpdateNamespacesRequest(payload: WCRequestSubscriptionPayload, updateParams: SessionType.UpdateParams) throws {
         do {

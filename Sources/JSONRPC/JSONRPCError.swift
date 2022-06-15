@@ -4,7 +4,7 @@ public struct JSONRPCError: Error, Equatable, Codable {
     public let code: Int
     public let message: String
     public let data: AnyCodable?
-    
+
     public init(code: Int, message: String, data: AnyCodable? = nil) {
         self.code = code
         self.message = message

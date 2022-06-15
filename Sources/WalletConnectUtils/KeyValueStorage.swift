@@ -11,16 +11,16 @@ public protocol KeyValueStorage {
     /// Removes the value of the specified default key.
     func removeObject(forKey defaultName: String)
     /// Returns a dictionary that contains a union of all key-value pairs in the domains in the search list.
-    func dictionaryRepresentation() -> [String : Any]
+    func dictionaryRepresentation() -> [String: Any]
 }
 
 extension UserDefaults: KeyValueStorage {}
 
 public final class RuntimeKeyValueStorage: KeyValueStorage {
-    private var storage: [String : Any] = [:]
+    private var storage: [String: Any] = [:]
     private let queue = DispatchQueue(label: "com.walletconnect.sdk.runtimestorage")
-    
-    public init(storage: [String : Any] = [:]) {
+
+    public init(storage: [String: Any] = [:]) {
         self.storage = storage
     }
 
@@ -48,7 +48,7 @@ public final class RuntimeKeyValueStorage: KeyValueStorage {
         }
     }
 
-    public func dictionaryRepresentation() -> [String : Any] {
+    public func dictionaryRepresentation() -> [String: Any] {
         queue.sync {
             return storage
         }

@@ -13,7 +13,7 @@ protocol ExpirableSequence: Codable, Expirable {
 final class SequenceStore<T> where T: ExpirableSequence {
 
     var onSequenceExpiration: ((_ sequence: T) -> Void)?
-    
+
     private let store: CodableStore<T>
     private let dateInitializer: () -> Date
 
@@ -21,11 +21,11 @@ final class SequenceStore<T> where T: ExpirableSequence {
         self.store = store
         self.dateInitializer = dateInitializer
     }
-    
+
     func hasSequence(forTopic topic: String) -> Bool {
         (try? getSequence(forTopic: topic)) != nil
     }
-    
+
     func setSequence(_ sequence: T) {
         store.set(sequence, forKey: sequence.topic)
     }
@@ -43,11 +43,11 @@ final class SequenceStore<T> where T: ExpirableSequence {
     func delete(topic: String) {
         store.delete(forKey: topic)
     }
-    
+
     func deleteAll() {
         store.deleteAll()
     }
-    
+
     private func verifyExpiry(on sequence: T) -> T? {
         let now = dateInitializer()
         if now >= sequence.expiryDate {

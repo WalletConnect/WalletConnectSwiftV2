@@ -1,20 +1,20 @@
 enum ReasonCode {
-    
+
     enum Context: String {
         case pairing = "pairing"
         case session = "session"
     }
-    
+
     // 0 (Generic)
     case generic(message: String)
-    
+
     // 1000 (Internal)
     case missingOrInvalid(String)
     case invalidUpdateAccountsRequest
     case invalidUpdateNamespaceRequest
     case invalidUpdateExpiryRequest
     case noContextWithTopic(context: Context, topic: String)
-    
+
     // 3000 (Unauthorized)
     case unauthorizedTargetChain(String)
     case unauthorizedMethod(String)
@@ -23,7 +23,7 @@ enum ReasonCode {
     case unauthorizedUpdateNamespacesRequest
     case unauthorizedUpdateExpiryRequest
     case unauthorizedMatchingController(isController: Bool)
-    
+
     // 5000
     case disapprovedChains
     case disapprovedMethods
@@ -33,21 +33,21 @@ enum ReasonCode {
     case unsupportedEvents
     case unsupportedAccounts
     case unsupportedNamespaceKey
-    
+
     var code: Int {
         switch self {
         case .generic: return 0
         case .missingOrInvalid: return 1000
-            
+
         case .invalidUpdateAccountsRequest: return 1003
         case .invalidUpdateNamespaceRequest: return 1004
         case .invalidUpdateExpiryRequest: return 1005
         case .noContextWithTopic: return 1301
-            
+
         case .unauthorizedTargetChain: return 3000
         case .unauthorizedMethod: return 3001
         case .unauthorizedEvent: return 3002
-            
+
         case .unauthorizedUpdateAccountRequest: return 3003
         case .unauthorizedUpdateNamespacesRequest: return 3004
         case .unauthorizedUpdateExpiryRequest: return 3005
@@ -55,7 +55,7 @@ enum ReasonCode {
         case .disapprovedChains: return 5000
         case .disapprovedMethods: return 5001
         case .disapprovedEventTypes: return 5002
-            
+
         case .unsupportedChains: return 5100
         case .unsupportedMethods: return 5101
         case .unsupportedEvents: return 5102
@@ -63,7 +63,7 @@ enum ReasonCode {
         case .unsupportedNamespaceKey: return 5104
         }
     }
-    
+
     var message: String {
         switch self {
         case .generic(let message):

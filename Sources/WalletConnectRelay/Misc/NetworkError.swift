@@ -5,7 +5,7 @@ enum NetworkError: Error {
 }
 
 extension NetworkError {
-    
+
     var localizedDescription: String {
         switch self {
         case .webSocketNotConnected:

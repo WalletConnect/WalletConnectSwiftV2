@@ -1,6 +1,4 @@
-
 import Foundation
-
 
 public enum JsonRpcResult: Codable {
     case error(JSONRPCErrorResponse)
