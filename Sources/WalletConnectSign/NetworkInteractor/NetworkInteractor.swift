@@ -190,11 +190,11 @@ class NetworkInteractor: NetworkInteracting {
         }
     }
 
-    private func getSealBox(from encodedEnvelope: String) -> String? {
+    private func getSealBox(from encodedEnvelope: String) -> Data? {
         do {
             let envelope = try Envelope(encodedEnvelope)
             guard envelope.type == .type0 else {throw Errors.unsupportedEnvelopeType}
-            return envelope.sealbox.base64EncodedString()
+            return envelope.sealbox
         } catch {
             logger.debug(error)
             return nil
@@ -203,6 +203,7 @@ class NetworkInteractor: NetworkInteracting {
     
     private func manageSubscription(_ topic: String, _ encodedEnvelope: String) {
         guard let sealbox = getSealBox(from: encodedEnvelope) else {return}
+
         if let deserializedJsonRpcRequest: WCRequest = serializer.tryDeserialize(topic: topic, message: sealbox) {
             handleWCRequest(topic: topic, request: deserializedJsonRpcRequest)
         } else if let deserializedJsonRpcResponse: JSONRPCResponse<AnyCodable> = serializer.tryDeserialize(topic: topic, message: sealbox) {

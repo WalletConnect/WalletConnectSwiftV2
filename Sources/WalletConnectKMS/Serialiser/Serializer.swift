@@ -24,7 +24,7 @@ public class Serializer {
     ///   - topic: Topic that is associated with a symetric key for encrypting particular codable object
     ///   - message: Message to encrypt and serialize
     /// - Returns: Serialized String
-    public func serialize(topic: String, encodable: Encodable, envelopeType: EnvelopeType = EnvelopeType.type0) throws -> String {
+    public func serialize(topic: String, encodable: Encodable, envelopeType: Envelope.EnvelopeType = .type0) throws -> String {
         let messageJson = try encodable.json()
         guard let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) else {
             throw Errors.symmetricKeyForTopicNotFound
@@ -38,16 +38,34 @@ public class Serializer {
             return (envelopeTypeByte.data + pubKey.rawRepresentation + sealbox).base64EncodedString()
         }
     }
-    
+
     /// Deserializes and decrypts an object
     /// - Parameters:
     ///   - topic: Topic that is associated with a symetric key for decrypting particular codable object
     ///   - message: Message to deserialize and decrypt
     /// - Returns: Deserialized object
-    public func tryDeserialize<T: Codable>(topic: String, message: String) -> T? {
+    public func tryDeserialize<T: Codable>(topic: String, encodedEnvelope: String) throws -> T? {
+
+        let envelope = try Envelope(encodedEnvelope)
+
+        switch envelope.type {
+        case .type0:
+            let decodedType: T? = handleType0Envelope(topic, envelope)
+            return decodedType
+        case .type1(pubKey: let pubKey):
+            let decodedType: T? = handleType1Envelope(topic, envelope)
+            return decodedType
+        }
+    }
+
+    private func handleType1Envelope<T: Codable>(_ topic: String, _ envelope: Envelope) -> T? {
+        kms.set
+    }
+
+    private func handleType0Envelope<T: Codable>(_ topic: String, _ envelope: Envelope) -> T? {
         do {
             if let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) {
-                return try deserialize(message: message, symmetricKey: symmetricKey)
+                return try deserialize(sealbox: envelope.sealbox, symmetricKey: symmetricKey)
             } else {
                 throw Errors.symmetricKeyForTopicNotFound
             }
@@ -55,28 +73,10 @@ public class Serializer {
             return nil
         }
     }
-
     
-    private func deserialize<T: Codable>(message: String, symmetricKey: Data) throws -> T {
-        guard let envelopeData = Data(base64Encoded: message) else {
-            throw Errors.malformedEnvelope
-        }
-
-        let envelopeTypeData = envelopeData.subdata(in: 0..<1)
-
-        let envelopeType = try EnvelopeType(byte: envelopeTypeData.uint8)
-        var sealBoxData: Data!
-        switch envelopeType {
-        case .type0:
-            sealBoxData =
-        case .type1:
-            sealBoxData =
-            let pubKey =
-        }
-
-
-        let decryptedData = try codec.decode(sealboxData: sealBoxData, symmetricKey: symmetricKey)
+    private func deserialize<T: Codable>(sealbox: Data, symmetricKey: Data) throws -> T {
+        let decryptedData = try codec.decode(sealbox: sealbox, symmetricKey: symmetricKey)
         return try JSONDecoder().decode(T.self, from: decryptedData)
     }
-}
 
+}

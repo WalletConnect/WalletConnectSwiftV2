@@ -5,7 +5,7 @@ import CryptoKit
 
 protocol Codec {
     func encode(plaintext: String, symmetricKey: Data, nonce: ChaChaPoly.Nonce) throws -> Data
-    func decode(sealboxData: Data, symmetricKey: Data) throws -> Data 
+    func decode(sealbox: Data, symmetricKey: Data) throws -> Data
 }
 extension Codec {
     func encode(plaintext: String, symmetricKey: Data, nonce: ChaChaPoly.Nonce = ChaChaPoly.Nonce()) throws -> Data {
@@ -25,10 +25,10 @@ class ChaChaPolyCodec: Codec {
         return sealBox.combined
     }
     
-    func decode(sealboxData: Data, symmetricKey: Data) throws -> Data {
-
+    func decode(sealbox: Data, symmetricKey: Data) throws -> Data {
+        let sealboxCombined = sealbox
         let key = CryptoKit.SymmetricKey(data: symmetricKey)
-        let sealBox = try ChaChaPoly.SealedBox(combined: sealboxData)
+        let sealBox = try ChaChaPoly.SealedBox(combined: sealboxCombined)
         return try ChaChaPoly.open(sealBox, using: key)
     }
 

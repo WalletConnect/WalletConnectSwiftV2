@@ -2,7 +2,7 @@ import Foundation
 import WalletConnectUtils
 
 /// A type representing envelope with it's serialization policy
-public struct Envelope {
+public struct Envelope: Equatable {
     enum Errors: String, Error {
         case malformedEnvelope
         case unsupportedEnvelopeType
@@ -39,7 +39,7 @@ public struct Envelope {
 }
 
 public extension Envelope {
-    enum EnvelopeType {
+    enum EnvelopeType: Equatable {
         enum Errors: Error {
             case unsupportedPolicyType
         }
