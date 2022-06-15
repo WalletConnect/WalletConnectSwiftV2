@@ -6,16 +6,14 @@ enum WalletConnectError: Error {
     case noSessionMatchingTopic(String)
     case sessionNotAcknowledged(String)
     case pairingNotSettled(String)
-    case invalidNamespace
-    case namespaceHasEmptyChains
     case invalidMethod
     case invalidEvent
     case invalidUpdateExpiryValue
     case unauthorizedNonControllerCall
     case pairingAlreadyExist
     case topicGenerationFailed
-    case invalidNamespaceMatch // TODO: Refactor into actual cases
-    case invalidPermissions // TODO: Same
+    case invalidPermissions // TODO: Refactor into actual cases
+    case unsupportedNamespace(ReasonCode)
     
     case `internal`(_ reason: InternalReason)
     
@@ -43,10 +41,6 @@ extension WalletConnectError {
             return "Pairing is not settled on topic \(topic)."
         case .invalidUpdateExpiryValue:
             return "Update expiry time is out of expected range"
-        case .invalidNamespace:
-            return "Namespace structure is invalid."
-        case .namespaceHasEmptyChains:
-            return "Namespace has an empty list of chain IDs."
         case .invalidMethod:
             return "Methods set is invalid."
         case .invalidEvent:
@@ -57,10 +51,10 @@ extension WalletConnectError {
             return "Failed to generate topic from random bytes."
         case .pairingAlreadyExist:
             return "Pairing already exist"
-        case .invalidNamespaceMatch:
-            return "Invalid namespace approval."
         case .invalidPermissions:
             return "Invalid permissions for call."
+        case .unsupportedNamespace(let reason):
+            return reason.message
         case .internal(_): // TODO: Remove internal case
             return ""
         }

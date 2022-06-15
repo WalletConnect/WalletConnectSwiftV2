@@ -19,7 +19,7 @@ class PairingTests: XCTestCase {
         engine.routing.activate(app: .dapp)
 
         // TODO: Figure out why you need to wait here
-        engine.routing.wait(for: 2)
+        engine.routing.wait(for: 3)
 
         engine.dapp.connectButton.waitTap()
 

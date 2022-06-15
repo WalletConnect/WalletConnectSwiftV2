@@ -59,17 +59,17 @@ enum Namespace {
     static func validate(_ namespaces: [String: ProposalNamespace]) throws {
         for (key, namespace) in namespaces {
             if namespace.chains.isEmpty {
-                throw WalletConnectError.namespaceHasEmptyChains
+                throw WalletConnectError.unsupportedNamespace(.unsupportedChains)
             }
             for chain in namespace.chains {
                 if key != chain.namespace {
-                    throw WalletConnectError.invalidNamespace
+                    throw WalletConnectError.unsupportedNamespace(.unsupportedChains)
                 }
             }
             if let extensions = namespace.extensions {
                 for ext in extensions {
                     if ext.chains.isEmpty {
-                        throw WalletConnectError.namespaceHasEmptyChains
+                        throw WalletConnectError.unsupportedNamespace(.unsupportedChains)
                     }
                 }
             }
@@ -79,17 +79,17 @@ enum Namespace {
     static func validate(_ namespaces: [String: SessionNamespace]) throws {
         for (key, namespace) in namespaces {
             if namespace.accounts.isEmpty {
-                throw WalletConnectError.invalidNamespace
+                throw WalletConnectError.unsupportedNamespace(.unsupportedAccounts)
             }
             for account in namespace.accounts {
                 if key != account.namespace {
-                    throw WalletConnectError.invalidNamespace
+                    throw WalletConnectError.unsupportedNamespace(.unsupportedAccounts)
                 }
             }
             if let extensions = namespace.extensions {
                 for ext in extensions {
                     if ext.accounts.isEmpty {
-                        throw WalletConnectError.invalidNamespace
+                        throw WalletConnectError.unsupportedNamespace(.unsupportedAccounts)
                     }
                 }
             }
@@ -102,21 +102,21 @@ enum Namespace {
     ) throws {
         for (key, proposedNamespace) in proposalNamespaces {
             guard let approvedNamespace = sessionNamespaces[key] else {
-                throw WalletConnectError.invalidNamespaceMatch
+                throw WalletConnectError.unsupportedNamespace(.unsupportedNamespaceKey)
             }
             try proposedNamespace.chains.forEach { chain in
                 if !approvedNamespace.accounts.contains(where: { $0.blockchain == chain }) {
-                    throw WalletConnectError.invalidNamespaceMatch
+                    throw WalletConnectError.unsupportedNamespace(.unsupportedChains)
                 }
             }
             try proposedNamespace.methods.forEach {
                 if !approvedNamespace.methods.contains($0) {
-                    throw WalletConnectError.invalidNamespaceMatch
+                    throw WalletConnectError.unsupportedNamespace(.unsupportedMethods)
                 }
             }
             try proposedNamespace.events.forEach {
                 if !approvedNamespace.events.contains($0) {
-                    throw WalletConnectError.invalidNamespaceMatch
+                    throw WalletConnectError.unsupportedNamespace(.unsupportedEvents)
                 }
             }
         }

@@ -40,7 +40,6 @@ public class Serializer {
     /// - Returns: Deserialized object
     public func tryDeserialize<T: Codable>(topic: String, message: String) -> T? {
         do {
-            let deserializedCodable: T
             if let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) {
                 return try deserialize(message: message, symmetricKey: symmetricKey)
             } else {

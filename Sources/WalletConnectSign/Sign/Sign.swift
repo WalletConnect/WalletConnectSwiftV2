@@ -149,16 +149,16 @@ extension Sign {
     ///   - accounts: A Set of accounts that the dapp will be allowed to request methods executions on.
     ///   - methods: A Set of methods that the dapp will be allowed to request.
     ///   - events: A Set of events
-    public func approve(proposalId: String, namespaces: [String : SessionNamespace]) throws {
-        try client.approve(proposalId: proposalId, namespaces: namespaces)
+    public func approve(proposalId: String, namespaces: [String : SessionNamespace]) async throws {
+        try await client.approve(proposalId: proposalId, namespaces: namespaces)
     }
 
     /// For the responder to reject a session proposal.
     /// - Parameters:
     ///   - proposalId: Session Proposal Public key received from peer client in a WalletConnect delegate.
     ///   - reason: Reason why the session proposal was rejected. Conforms to CAIP25.
-    public func reject(proposalId: String, reason: RejectionReason) throws {
-        try client.reject(proposalId: proposalId, reason: reason)
+    public func reject(proposalId: String, reason: RejectionReason) async throws {
+        try await client.reject(proposalId: proposalId, reason: reason)
     }
 
     /// For the responder to update session methods
@@ -188,8 +188,8 @@ extension Sign {
     /// - Parameters:
     ///   - topic: Topic of the session for which the request was received.
     ///   - response: Your JSON RPC response or an error.
-    public func respond(topic: String, response: JsonRpcResult) {
-        client.respond(topic: topic, response: response)
+    public func respond(topic: String, response: JsonRpcResult) async throws {
+        try await client.respond(topic: topic, response: response)
     }
 
     /// Ping method allows to check if client's peer is online and is subscribing for your sequence topic

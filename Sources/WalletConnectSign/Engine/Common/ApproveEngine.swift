@@ -4,13 +4,13 @@ import WalletConnectUtils
 import WalletConnectKMS
 
 final class ApproveEngine {
-
-    enum Error: String, Swift.Error {
+    enum Errors: Error {
         case wrongRequestParams
         case relayNotFound
         case proposalPayloadsNotFound
         case pairingNotFound
         case agreementMissingOrInvalid
+        case respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode)
     }
 
     var onSessionProposal: ((Session.Proposal) -> Void)?
@@ -52,11 +52,11 @@ final class ApproveEngine {
         setupNetworkingSubscriptions()
     }
     
-    func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace]) throws {
+    func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace]) async throws {
         let payload = try proposalPayloadsStore.get(key: proposerPubKey)
 
         guard let payload = payload, case .sessionPropose(let proposal) = payload.wcRequest.params else {
-            throw Error.wrongRequestParams
+            throw Errors.wrongRequestParams
         }
 
         proposalPayloadsStore.delete(forKey: proposerPubKey)
@@ -69,66 +69,68 @@ final class ApproveEngine {
         guard let agreementKey = try? kms.performKeyAgreement(
             selfPublicKey: selfPublicKey,
             peerPublicKey: proposal.proposer.publicKey
-        ) else { throw Error.agreementMissingOrInvalid }
+        ) else { throw Errors.agreementMissingOrInvalid }
 
         // TODO: Extend pairing
         let sessionTopic = agreementKey.derivedTopic()
         try kms.setAgreementSecret(agreementKey, topic: sessionTopic)
 
         guard let relay = proposal.relays.first else {
-            throw Error.relayNotFound
+            throw Errors.relayNotFound
         }
 
         let proposeResponse = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
-        networkingInteractor.respond(topic: payload.topic, response: .response(response)) { _ in }
-
-        try settle(topic: sessionTopic, proposal: proposal, namespaces: sessionNamespaces)
+        
+        try await networkingInteractor.respond(topic: payload.topic, response: .response(response))
+        try await settle(topic: sessionTopic, proposal: proposal, namespaces: sessionNamespaces)
     }
     
-    func reject(proposerPubKey: String, reason: ReasonCode) throws {
+    func reject(proposerPubKey: String, reason: ReasonCode) async throws {
         guard let payload = try proposalPayloadsStore.get(key: proposerPubKey) else {
-            throw Error.proposalPayloadsNotFound
+            throw Errors.proposalPayloadsNotFound
         }
         proposalPayloadsStore.delete(forKey: proposerPubKey)
-        networkingInteractor.respondError(for: payload, reason: reason)
+        try await networkingInteractor.respondError(payload: payload, reason: reason)
         // TODO: Delete pairing if inactive
     }
     
-    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace]) throws {
+    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace]) async throws {
         guard let agreementKeys = try kms.getAgreementSecret(for: topic) else {
-            throw Error.agreementMissingOrInvalid
+            throw Errors.agreementMissingOrInvalid
         }
         let selfParticipant = Participant(
             publicKey: agreementKeys.publicKey.hexRepresentation,
             metadata: metadata
         )
-        let expectedExpiryTimeStamp = Date().addingTimeInterval(TimeInterval(WCSession.defaultTimeToLive))
-        
         guard let relay = proposal.relays.first else {
-            throw Error.relayNotFound
+            throw Errors.relayNotFound
         }
 
         // TODO: Test expiration times
+        let expiry = Date()
+            .addingTimeInterval(TimeInterval(WCSession.defaultTimeToLive))
+            .timeIntervalSince1970
+    
         let settleParams = SessionType.SettleParams(
             relay: relay,
             controller: selfParticipant,
             namespaces: namespaces,
-            expiry: Int64(expectedExpiryTimeStamp.timeIntervalSince1970)
-        )
+            expiry: Int64(expiry))
+
         let session = WCSession(
             topic: topic,
             selfParticipant: selfParticipant,
             peerParticipant: proposal.proposer,
             settleParams: settleParams,
-            acknowledged: false
-        )
+            acknowledged: false)
 
         logger.debug("Sending session settle request")
 
-        Task { try? await networkingInteractor.subscribe(topic: topic) }
+        try await networkingInteractor.subscribe(topic: topic)
         sessionStore.setSession(session)
-        networkingInteractor.request(.wcSessionSettle(settleParams), onTopic: topic)
+
+        try await networkingInteractor.request(.wcSessionSettle(settleParams), onTopic: topic)
         onSessionSettle?(session.publicRepresentation())
     }
 }
@@ -152,15 +154,30 @@ private extension ApproveEngine {
         
         networkingInteractor.wcRequestPublisher
             .sink { [unowned self] subscriptionPayload in
-                switch subscriptionPayload.wcRequest.params {
-                case .sessionPropose(let proposal):
-                    handleSessionProposeRequest(payload: subscriptionPayload, proposal: proposal)
-                case .sessionSettle(let settleParams):
-                    handleSessionSettleRequest(payload: subscriptionPayload, settleParams: settleParams)
-                default:
-                    return
+                do {
+                    switch subscriptionPayload.wcRequest.params {
+                    case .sessionPropose(let proposal):
+                        try handleSessionProposeRequest(payload: subscriptionPayload, proposal: proposal)
+                    case .sessionSettle(let settleParams):
+                        try handleSessionSettleRequest(payload: subscriptionPayload, settleParams: settleParams)
+                    default: return
+                    }
+                } catch Errors.respondError(let payload, let reason) {
+                    respondError(payload: payload, reason: reason)
+                } catch {
+                    logger.error("Unexpected Error: \(error.localizedDescription)")
                 }
             }.store(in: &publishers)
+    }
+    
+    func respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode) {
+        Task {
+            do {
+                try await networkingInteractor.respondError(payload: payload, reason: reason)
+            } catch {
+                logger.error("Respond Error failed with: \(error.localizedDescription)")
+            }
+        }
     }
     
     func updatePairingMetadata(topic: String, metadata: AppMetadata) {
@@ -194,7 +211,7 @@ private extension ApproveEngine {
     
     func handleProposeResponse(pairingTopic: String, proposal: SessionProposal, result: JsonRpcResult) throws -> String {
         guard var pairing = pairingStore.getPairing(forTopic: pairingTopic)
-        else { throw Error.pairingNotFound }
+        else { throw Errors.pairingNotFound }
 
         switch result {
         case .response(let response):
@@ -252,43 +269,39 @@ private extension ApproveEngine {
     
     // MARK: SessionProposeRequest
     
-    func handleSessionProposeRequest(payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) {
-        do {
-            logger.debug("Received Session Proposal")
-            try Namespace.validate(proposal.requiredNamespaces)
-            proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
-            onSessionProposal?(proposal.publicRepresentation())
-        }
-        catch {
-            // TODO: Return reasons with 6000 code Issue: #253
-            networkingInteractor.respondError(for: payload, reason: .invalidUpdateNamespaceRequest)
-        }
+    func handleSessionProposeRequest(payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) throws {
+        logger.debug("Received Session Proposal")
+        do { try Namespace.validate(proposal.requiredNamespaces) }
+        catch { throw Errors.respondError(payload: payload, reason: .invalidUpdateNamespaceRequest) }
+        proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
+        onSessionProposal?(proposal.publicRepresentation())
     }
     
     // MARK: SessionSettleRequest
-    func handleSessionSettleRequest(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) {
+    func handleSessionSettleRequest(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) throws {
         logger.debug("Did receive session settle request")
-        guard let proposedNamespaces = settlingProposal?.requiredNamespaces else {
-            // TODO: respond error
-            return
-        }
+        
+        guard let proposedNamespaces = settlingProposal?.requiredNamespaces
+        else { throw Errors.respondError(payload: payload, reason: .invalidUpdateNamespaceRequest) }
+        
         settlingProposal = nil
+        
         let sessionNamespaces = settleParams.namespaces
+        
         do {
-            try Namespace.validate(proposedNamespaces)
             try Namespace.validate(sessionNamespaces)
             try Namespace.validateApproved(sessionNamespaces, against: proposedNamespaces)
-        } catch {
-            // TODO: respond error
-            return
+        }
+        catch WalletConnectError.unsupportedNamespace(let reason) {
+            throw Errors.respondError(payload: payload, reason: reason)
         }
                 
         let topic = payload.topic
-        
-        let agreementKeys = try! kms.getAgreementSecret(for: topic)!
-        
-        let selfParticipant = Participant(publicKey: agreementKeys.publicKey.hexRepresentation, metadata: metadata)
-        
+        let agreementKeys = try kms.getAgreementSecret(for: topic)!
+        let selfParticipant = Participant(
+            publicKey: agreementKeys.publicKey.hexRepresentation,
+            metadata: metadata
+        )
         if let pairingTopic = try? sessionToPairingTopic.get(key: topic) {
             updatePairingMetadata(topic: pairingTopic, metadata: settleParams.controller.metadata)
         }
@@ -298,7 +311,8 @@ private extension ApproveEngine {
             selfParticipant: selfParticipant,
             peerParticipant: settleParams.controller,
             settleParams: settleParams,
-            acknowledged: true)
+            acknowledged: true
+        )
         sessionStore.setSession(session)
         networkingInteractor.respondSuccess(for: payload)
         onSessionSettle?(session.publicRepresentation())

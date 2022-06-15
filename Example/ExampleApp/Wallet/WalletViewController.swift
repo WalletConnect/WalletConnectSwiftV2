@@ -59,16 +59,16 @@ final class WalletViewController: UIViewController {
         navigationController?.present(viewController, animated: true)
     }
     
-    private func showSessionRequest(_ sessionRequest: Request) {
-        let requestVC = RequestViewController(sessionRequest)
+    private func showSessionRequest(_ request: Request) {
+        let requestVC = RequestViewController(request)
         requestVC.onSign = { [unowned self] in
-            let result = Signer.signEth(request: sessionRequest)
-            let response = JSONRPCResponse<AnyCodable>(id: sessionRequest.id, result: result)
-            Sign.instance.respond(topic: sessionRequest.topic, response: .response(response))
+            let result = Signer.signEth(request: request)
+            let response = JSONRPCResponse<AnyCodable>(id: request.id, result: result)
+            respondOnSign(request: request, response: response)
             reloadSessionDetailsIfNeeded()
         }
         requestVC.onReject = { [unowned self] in
-            Sign.instance.respond(topic: sessionRequest.topic, response: .error(JSONRPCErrorResponse(id: sessionRequest.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
+            respondOnReject(request: request)
             reloadSessionDetailsIfNeeded()
         }
         reloadSessionDetailsIfNeeded()
@@ -80,14 +80,69 @@ final class WalletViewController: UIViewController {
             viewController.reload()
         }
     }
-    
+
+    @MainActor
+    private func respondOnSign(request: Request, response: JSONRPCResponse<AnyCodable>) {
+        print("[WALLET] Respond on Sign")
+        Task {
+            do {
+                try await Sign.instance.respond(topic: request.topic, response: .response(response))
+            } catch {
+                print("[DAPP] Respond Error: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    @MainActor
+    private func respondOnReject(request: Request) {
+        print("[WALLET] Respond on Reject")
+        Task {
+            do {
+                try await Sign.instance.respond(
+                    topic: request.topic,
+                    response: .error(JSONRPCErrorResponse(
+                        id: request.id,
+                        error: JSONRPCErrorResponse.Error(code: 0, message: ""))
+                    )
+                )
+            } catch {
+                print("[DAPP] Respond Error: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    @MainActor
     private func pairClient(uri: String) {
-        print("[RESPONDER] Pairing to: \(uri)")
+        print("[WALLET] Pairing to: \(uri)")
         Task {
             do {
                 try await Sign.instance.pair(uri: uri)
             } catch {
-                print("[PROPOSER] Pairing connect error: \(error)")
+                print("[DAPP] Pairing connect error: \(error)")
+            }
+        }
+    }
+
+    @MainActor
+    private func approve(proposalId: String, namespaces: [String : SessionNamespace]) {
+        print("[WALLET] Approve Session: \(proposalId)")
+        Task {
+            do {
+                try await Sign.instance.approve(proposalId: proposalId, namespaces: namespaces)
+            } catch {
+                print("[DAPP] Approve Session error: \(error)")
+            }
+        }
+    }
+
+    @MainActor
+    private func reject(proposalId: String, reason: RejectionReason) {
+        print("[WALLET] Reject Session: \(proposalId)")
+        Task {
+            do {
+                try await Sign.instance.reject(proposalId: proposalId, reason: reason)
+            } catch {
+                print("[DAPP] Reject Session error: \(error)")
             }
         }
     }
@@ -104,7 +159,8 @@ extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
         cell.item = sessionItems[indexPath.row]
         return cell
     }
-    
+
+    @MainActor
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let item = sessionItems[indexPath.row]
@@ -129,7 +185,7 @@ extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("did select row \(indexPath)")
         let itemTopic = sessionItems[indexPath.row].topic
-        if let session = Sign.instance.getSessions().first{$0.topic == itemTopic} {
+        if let session = Sign.instance.getSessions().first(where: {$0.topic == itemTopic}) {
             showSessionDetails(with: session)
         }
     }
@@ -145,7 +201,6 @@ extension WalletViewController: ScannerViewControllerDelegate {
 extension WalletViewController: ProposalViewControllerDelegate {
         
     func didApproveSession() {
-        print("[RESPONDER] Approving session...")
         let proposal = currentProposal!
         currentProposal = nil
         var sessionNamespaces = [String: SessionNamespace]()
@@ -161,18 +216,13 @@ extension WalletViewController: ProposalViewControllerDelegate {
             let sessionNamespace = SessionNamespace(accounts: accounts, methods: proposalNamespace.methods, events: proposalNamespace.events, extensions: extensions)
             sessionNamespaces[caip2Namespace] = sessionNamespace
         }
-        try! Sign.instance.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+        approve(proposalId: proposal.id, namespaces: sessionNamespaces)
     }
     
     func didRejectSession() {
-        print("did reject session")
         let proposal = currentProposal!
         currentProposal = nil
-        do {
-            try Sign.instance.reject(proposalId: proposal.id, reason: .disapprovedChains)
-        } catch {
-            print("Session rejection error: \(error.localizedDescription)")
-        }
+        reject(proposalId: proposal.id, reason: .disapprovedChains)
     }
 }
 

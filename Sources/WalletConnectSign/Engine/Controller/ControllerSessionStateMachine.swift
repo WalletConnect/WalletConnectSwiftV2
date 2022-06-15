@@ -5,6 +5,7 @@ import WalletConnectKMS
 import Combine
 
 final class ControllerSessionStateMachine {
+
     var onNamespacesUpdate: ((String, [String: SessionNamespace])->())?
     var onExtend: ((String, Date)->())?
 
@@ -61,7 +62,7 @@ final class ControllerSessionStateMachine {
     
     // TODO: Re-enable callback
     private func handleUpdateResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sessionStore.getSession(forTopic: topic) else {
+        guard let _ = sessionStore.getSession(forTopic: topic) else {
             return
         }
         switch result {
