@@ -80,7 +80,8 @@ final class WalletViewController: UIViewController {
             viewController.reload()
         }
     }
-    
+
+    @MainActor
     private func respondOnSign(request: Request, response: JSONRPCResponse<AnyCodable>) {
         print("[WALLET] Respond on Sign")
         Task {
@@ -91,7 +92,8 @@ final class WalletViewController: UIViewController {
             }
         }
     }
-    
+
+    @MainActor
     private func respondOnReject(request: Request) {
         print("[WALLET] Respond on Reject")
         Task {
@@ -108,7 +110,8 @@ final class WalletViewController: UIViewController {
             }
         }
     }
-    
+
+    @MainActor
     private func pairClient(uri: String) {
         print("[WALLET] Pairing to: \(uri)")
         Task {
@@ -119,7 +122,8 @@ final class WalletViewController: UIViewController {
             }
         }
     }
-    
+
+    @MainActor
     private func approve(proposalId: String, namespaces: [String : SessionNamespace]) {
         print("[WALLET] Approve Session: \(proposalId)")
         Task {
@@ -130,7 +134,8 @@ final class WalletViewController: UIViewController {
             }
         }
     }
-    
+
+    @MainActor
     private func reject(proposalId: String, reason: RejectionReason) {
         print("[WALLET] Reject Session: \(proposalId)")
         Task {
@@ -154,7 +159,8 @@ extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
         cell.item = sessionItems[indexPath.row]
         return cell
     }
-    
+
+    @MainActor
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let item = sessionItems[indexPath.row]
