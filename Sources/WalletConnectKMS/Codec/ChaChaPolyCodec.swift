@@ -8,7 +8,7 @@ protocol Codec {
     func decode(sealboxData: Data, symmetricKey: Data) throws -> Data 
 }
 extension Codec {
-    func encode(plaintext: String, symmetricKey: Data, nonce: ChaChaPoly.Nonce = ChaChaPoly.Nonce()) throws -> String {
+    func encode(plaintext: String, symmetricKey: Data, nonce: ChaChaPoly.Nonce = ChaChaPoly.Nonce()) throws -> Data {
         try encode(plaintext: plaintext, symmetricKey: symmetricKey, nonce: nonce)
     }
 }

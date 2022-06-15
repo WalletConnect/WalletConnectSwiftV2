@@ -14,6 +14,15 @@ public enum EnvelopeType {
     case type0
     /// type 1 = tp + pk + iv + ct + tag
     case type1(pubKey: AgreementPublicKey)
+
+    var representingByte: UInt8 {
+        switch self {
+        case .type0:
+            return 0
+        case .type1:
+            return 1
+        }
+    }
 }
 
 public struct Envelope {
@@ -29,20 +38,17 @@ public struct Envelope {
         guard let envelopeData = Data(base64Encoded: base64encoded) else {
             throw Errors.malformedEnvelope
         }
-
         let envelopeTypeByte = envelopeData.subdata(in: 0..<1).uint8
-
         if envelopeTypeByte == 0 {
             self.type = .type0
+            self.sealbox =
         } else if envelopeTypeByte == 1 {
-            let pubKey = try AgreementPublicKey(hex: envelopeData.subdata(in: 0..<33))
-            self.type = .type1(pubkey)
+            let pubKey = try AgreementPublicKey(hex: envelopeData.subdata(in: 0..<33).toHexString())
+            self.type = .type1(pubKey: pubKey)
+            self.sealbox =
         } else {
             throw Errors.unsupportedEnvelopeType
         }
-
-
-
     }
 
 }
@@ -69,12 +75,18 @@ public class Serializer {
     ///   - topic: Topic that is associated with a symetric key for encrypting particular codable object
     ///   - message: Message to encrypt and serialize
     /// - Returns: Serialized String
-    public func serialize(topic: String, encodable: Encodable, policy: EnvelopeType = EnvelopeType.type0) throws -> String {
+    public func serialize(topic: String, encodable: Encodable, envelopeType: EnvelopeType = EnvelopeType.type0) throws -> String {
         let messageJson = try encodable.json()
-        if let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) {
-            return try codec.encode(plaintext: messageJson, symmetricKey: symmetricKey)
-        } else {
+        guard let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) else {
             throw Errors.symmetricKeyForTopicNotFound
+        }
+        let sealbox = try codec.encode(plaintext: messageJson, symmetricKey: symmetricKey)
+        let envelopeTypeByte = envelopeType.representingByte
+        switch envelopeType {
+        case .type0:
+            return (envelopeTypeByte.data + sealbox).base64EncodedString()
+        case .type1(let pubKey):
+            return (envelopeTypeByte.data + pubKey.rawRepresentation + sealbox).base64EncodedString()
         }
     }
     
