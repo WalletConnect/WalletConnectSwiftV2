@@ -1,12 +1,12 @@
 import Foundation
 import WalletConnectUtils
 
-/// A type representing serialization policy
+/// A type representing envelope serialization policy
 /// tp = type byte (1 byte)
 /// pk = public key (32 bytes)
 /// iv = initialization vector (12 bytes)
 /// ct = ciphertext (N bytes)
-public enum SerializationPolicy {
+public enum EnvelopeType {
     enum Errors: Error {
         case unsupportedPolicyType
     }
@@ -15,7 +15,7 @@ public enum SerializationPolicy {
     /// type 1 = tp + pk + iv + ct + tag
     case type1
 
-    var representingByte: Int8 {
+    var representingByte: UInt8 {
         switch self {
         case .type0:
             return 0
@@ -24,7 +24,7 @@ public enum SerializationPolicy {
         }
     }
 
-    init(byte: Int8) throws {
+    init(byte: UInt8) throws {
         if byte == 0 {
             self = .type0
         } else if byte == 1 {
@@ -58,7 +58,7 @@ public class Serializer {
     ///   - topic: Topic that is associated with a symetric key for encrypting particular codable object
     ///   - message: Message to encrypt and serialize
     /// - Returns: Serialized String
-    public func serialize(topic: String, encodable: Encodable, policy: SerializationPolicy = SerializationPolicy.type0) throws -> String {
+    public func serialize(topic: String, encodable: Encodable, policy: EnvelopeType = EnvelopeType.type0) throws -> String {
         let messageJson = try encodable.json()
         if let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) {
             return try codec.encode(plaintext: messageJson, symmetricKey: symmetricKey)
@@ -74,7 +74,6 @@ public class Serializer {
     /// - Returns: Deserialized object
     public func tryDeserialize<T: Codable>(topic: String, message: String) -> T? {
         do {
-            let _: T
             if let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) {
                 return try deserialize(message: message, symmetricKey: symmetricKey)
             } else {
@@ -84,15 +83,36 @@ public class Serializer {
             return nil
         }
     }
+
+    func getEnvelopeType(for message: String) -> EnvelopeType throws {
+        guard let envelopeData = Data(base64Encoded: message) else {
+            throw Errors.malformedEnvelope
+        }
+
+        let envelopeTypeData = envelopeData.subdata(in: 0..<1)
+
+        return try EnvelopeType(byte: envelopeTypeData.uint8)
+    }
     
     private func deserialize<T: Codable>(message: String, symmetricKey: Data) throws -> T {
         guard let envelopeData = Data(base64Encoded: message) else {
             throw Errors.malformedEnvelope
         }
-        let policy = SerializationPolicy(byte: <#T##Int8#>)
+
+        let envelopeTypeData = envelopeData.subdata(in: 0..<1)
+
+        let envelopeType = try EnvelopeType(byte: envelopeTypeData.uint8)
+        var sealBoxData: Data!
+        switch envelopeType {
+        case .type0:
+            sealBoxData =
+        case .type1:
+            sealBoxData =
+            let pubKey =
+        }
 
 
-        let decryptedData = try codec.decode(sealboxData: <#T##Data#>, symmetricKey: symmetricKey)
+        let decryptedData = try codec.decode(sealboxData: sealBoxData, symmetricKey: symmetricKey)
         return try JSONDecoder().decode(T.self, from: decryptedData)
     }
 }
