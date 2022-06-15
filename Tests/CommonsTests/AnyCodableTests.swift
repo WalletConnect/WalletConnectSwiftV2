@@ -2,18 +2,18 @@ import XCTest
 import TestingUtils
 @testable import Commons
 
-fileprivate struct SampleStruct: Codable, Equatable {
-    
+private struct SampleStruct: Codable, Equatable {
+
     let bool: Bool
     let int: Int
     let double: Double
     let string: String
     let object: SubObject?
-    
+
     struct SubObject: Codable, Equatable {
         let string: String
     }
-    
+
     static func stubRandom() -> SampleStruct {
         SampleStruct(
             bool: Bool.random(),
@@ -23,7 +23,7 @@ fileprivate struct SampleStruct: Codable, Equatable {
             object: SubObject(string: UUID().uuidString)
         )
     }
-    
+
     static func stubFixed() -> SampleStruct {
         SampleStruct(
             bool: true,
@@ -35,7 +35,7 @@ fileprivate struct SampleStruct: Codable, Equatable {
             )
         )
     }
-    
+
     static let sampleJSONData = """
 {
     "bool": true,
@@ -47,7 +47,7 @@ fileprivate struct SampleStruct: Codable, Equatable {
     }
 }
 """.data(using: .utf8)!
-   
+
     static let invalidJSONData = """
 {
     "bool": ****,
@@ -58,7 +58,7 @@ fileprivate struct SampleStruct: Codable, Equatable {
 """.data(using: .utf8)!
 }
 
-fileprivate let heterogeneousArrayJSON = """
+private let heterogeneousArrayJSON = """
 [
     420,
     3.14,
@@ -72,7 +72,7 @@ fileprivate let heterogeneousArrayJSON = """
 """.data(using: .utf8)!
 
 final class AnyCodableTests: XCTestCase {
-    
+
     func testInitGet() throws {
         XCTAssertNoThrow(try AnyCodable(Int.random(in: Int.min...Int.max)).get(Int.self))
         XCTAssertNoThrow(try AnyCodable(Double.pi).get(Double.self))
@@ -81,7 +81,7 @@ final class AnyCodableTests: XCTestCase {
         XCTAssertNoThrow(try AnyCodable((1...10).map { _ in UUID().uuidString }).get([String].self))
         XCTAssertNoThrow(try AnyCodable(SampleStruct.stubRandom()).get(SampleStruct.self))
     }
-    
+
     func testEqualityInt() {
         let int = Int.random()
         let intA = AnyCodable(int)
@@ -91,26 +91,26 @@ final class AnyCodableTests: XCTestCase {
         XCTAssertNotEqual(intA, intC)
         XCTAssertNotEqual(intB, intC)
     }
-    
+
     func testEqualityObject() {
         let a = AnyCodable(SampleStruct.stubRandom())
         let b = AnyCodable(SampleStruct.stubRandom())
         XCTAssertEqual(a, a)
         XCTAssertNotEqual(a, b)
     }
-    
+
     func testEqualityEmptyObject() {
         let a = AnyCodable(EmptyCodable())
         let b = AnyCodable(EmptyCodable())
         XCTAssertEqual(a, b)
     }
-    
+
     func testEqualityFailIfCodingFails() {
         let a = AnyCodable(FailableCodable())
         let b = AnyCodable(FailableCodable())
         XCTAssertNotEqual(a, b)
     }
-    
+
     func testTwoWayDataRepresentation() throws {
         let fromInit = AnyCodable(SampleStruct.stubFixed())
         let fromJSON = try JSONDecoder().decode(AnyCodable.self, from: SampleStruct.sampleJSONData)
@@ -121,7 +121,7 @@ final class AnyCodableTests: XCTestCase {
         XCTAssertEqual(fromInit, fromJSON, "An AnyCodable initialized both ways with the same data must have a consistent representation.")
         XCTAssertEqual(encodedFromInit, encodedFromJSON, "Encoded JSON (with sorted keys) must be the same.")
     }
-    
+
     func testCodingBool() {
         [true, false].forEach { bool in
             do {
@@ -135,7 +135,7 @@ final class AnyCodableTests: XCTestCase {
             }
         }
     }
-    
+
     func testCodingInt() {
         do {
             let int = Int.random()
@@ -148,7 +148,7 @@ final class AnyCodableTests: XCTestCase {
             XCTFail()
         }
     }
-    
+
     func testCodingDouble() {
         do {
             let double = Double.pi // Value is constant to workaround a JSONDecoder bug: https://bugs.swift.org/browse/SR-7054
@@ -161,7 +161,7 @@ final class AnyCodableTests: XCTestCase {
             XCTFail()
         }
     }
-    
+
     func testCodingString() {
         do {
             let string = UUID().uuidString
@@ -174,7 +174,7 @@ final class AnyCodableTests: XCTestCase {
             XCTFail()
         }
     }
-    
+
     func testCodingArray() {
         do {
             let array = (1...10).map { _ in UUID().uuidString }
@@ -187,7 +187,7 @@ final class AnyCodableTests: XCTestCase {
             XCTFail()
         }
     }
-    
+
     func testCodingStruct() {
         do {
             let object = SampleStruct.stubRandom()
@@ -200,7 +200,7 @@ final class AnyCodableTests: XCTestCase {
             XCTFail()
         }
     }
-    
+
     func testCodingStructArray() {
         do {
             let objects = (1...10).map { _ in SampleStruct.stubRandom() }
@@ -213,7 +213,7 @@ final class AnyCodableTests: XCTestCase {
             XCTFail()
         }
     }
-    
+
     func testDecodingObject() {
         do {
             let data = SampleStruct.sampleJSONData
@@ -224,7 +224,7 @@ final class AnyCodableTests: XCTestCase {
             XCTFail()
         }
     }
-    
+
     func testDecodingHeterogeneousArray() throws {
         let decoded = try JSONDecoder().decode(AnyCodable.self, from: heterogeneousArrayJSON)
         let array = try decoded.get([AnyCodable].self)
@@ -235,7 +235,7 @@ final class AnyCodableTests: XCTestCase {
         XCTAssertNoThrow(try array[4].get([Int].self))
         XCTAssertNoThrow(try array[5].get([String: String].self))
     }
-    
+
     func testDecodeFail() {
         let data = SampleStruct.invalidJSONData
         XCTAssertThrowsError(try JSONDecoder().decode(AnyCodable.self, from: data)) { error in

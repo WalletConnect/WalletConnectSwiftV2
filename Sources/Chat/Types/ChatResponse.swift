@@ -1,4 +1,3 @@
-
 import Foundation
 import WalletConnectUtils
 
@@ -8,4 +7,3 @@ struct ChatResponse: Codable {
     let requestParams: ChatRequest.Params
     let result: JsonRpcResult
 }
-

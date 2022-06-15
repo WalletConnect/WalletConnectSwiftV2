@@ -1,24 +1,24 @@
 import WalletConnectUtils
 
 public struct ProposalNamespace: Equatable, Codable {
-    
+
     public let chains: Set<Blockchain>
     public let methods: Set<String>
     public let events: Set<String>
     public let extensions: [Extension]?
-    
+
     public struct Extension: Equatable, Codable {
         public let chains: Set<Blockchain>
         public let methods: Set<String>
         public let events: Set<String>
-        
+
         public init(chains: Set<Blockchain>, methods: Set<String>, events: Set<String>) {
             self.chains = chains
             self.methods = methods
             self.events = events
         }
     }
-    
+
     public init(chains: Set<Blockchain>, methods: Set<String>, events: Set<String>, extensions: [ProposalNamespace.Extension]? = nil) {
         self.chains = chains
         self.methods = methods
@@ -28,24 +28,24 @@ public struct ProposalNamespace: Equatable, Codable {
 }
 
 public struct SessionNamespace: Equatable, Codable {
-    
+
     public let accounts: Set<Account>
     public let methods: Set<String>
     public let events: Set<String>
     public let extensions: [Extension]?
-    
+
     public struct Extension: Equatable, Codable {
         public let accounts: Set<Account>
         public let methods: Set<String>
         public let events: Set<String>
-        
+
         public init(accounts: Set<Account>, methods: Set<String>, events: Set<String>) {
             self.accounts = accounts
             self.methods = methods
             self.events = events
         }
     }
-    
+
     public init(accounts: Set<Account>, methods: Set<String>, events: Set<String>, extensions: [SessionNamespace.Extension]? = nil) {
         self.accounts = accounts
         self.methods = methods
@@ -55,7 +55,7 @@ public struct SessionNamespace: Equatable, Codable {
 }
 
 enum Namespace {
-    
+
     static func validate(_ namespaces: [String: ProposalNamespace]) throws {
         for (key, namespace) in namespaces {
             if namespace.chains.isEmpty {
@@ -75,7 +75,7 @@ enum Namespace {
             }
         }
     }
-    
+
     static func validate(_ namespaces: [String: SessionNamespace]) throws {
         for (key, namespace) in namespaces {
             if namespace.accounts.isEmpty {
@@ -95,7 +95,7 @@ enum Namespace {
             }
         }
     }
-    
+
     static func validateApproved(
         _ sessionNamespaces: [String: SessionNamespace],
         against proposalNamespaces: [String: ProposalNamespace]

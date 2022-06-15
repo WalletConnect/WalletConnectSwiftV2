@@ -13,17 +13,17 @@ import Foundation
  You can call `get(_:)` to transform the underlying value back to the type you specify.
  */
 public struct AnyCodable {
-    
+
     public let value: Any
-    
+
     private var dataEncoding: (() throws -> Data)?
-    
+
     private var genericEncoding: ((Encoder) throws -> Void)?
-    
+
     private init(_ value: Any) {
         self.value = value
     }
-    
+
     /**
      Creates a type-erased codable value that wraps the given instance.
      
@@ -40,9 +40,9 @@ public struct AnyCodable {
         genericEncoding = { encoder in
             try codable.encode(to: encoder)
         }
-        
+
     }
-    
+
     /**
      Returns the underlying value, provided it matches the type spcified.
      
@@ -66,7 +66,7 @@ public struct AnyCodable {
         let valueData = try getDataRepresentation()
         return try JSONDecoder().decode(type, from: valueData)
     }
-    
+
     /// A textual representation of the underlying encoded data. Returns an empty string if the type fails to encode.
     public var stringRepresentation: String {
         guard
@@ -77,7 +77,7 @@ public struct AnyCodable {
         }
         return string
     }
-    
+
     private func getDataRepresentation() throws -> Data {
         if let encodeToData = dataEncoding {
             return try encodeToData()
@@ -88,7 +88,7 @@ public struct AnyCodable {
 }
 
 extension AnyCodable: Equatable {
-    
+
     public static func == (lhs: AnyCodable, rhs: AnyCodable) -> Bool {
         do {
             let lhsData = try lhs.getDataRepresentation()
@@ -107,7 +107,7 @@ extension AnyCodable: Hashable {
 }
 
 extension AnyCodable: CustomStringConvertible {
-    
+
     public var description: String {
         let stringSelf = stringRepresentation
         let description = stringSelf.isEmpty ? "invalid data" : stringSelf
@@ -116,23 +116,23 @@ extension AnyCodable: CustomStringConvertible {
 }
 
 extension AnyCodable: Decodable, Encodable {
-    
+
     struct CodingKeys: CodingKey {
-        
+
         let stringValue: String
         let intValue: Int?
-        
+
         init?(intValue: Int) {
             self.stringValue = String(intValue)
             self.intValue = intValue
         }
-        
+
         init?(stringValue: String) {
             self.stringValue = stringValue
             self.intValue = Int(stringValue)
         }
     }
-    
+
     public init(from decoder: Decoder) throws {
         if let container = try? decoder.container(keyedBy: CodingKeys.self) {
             var result = [String: Any]()
@@ -140,15 +140,13 @@ extension AnyCodable: Decodable, Encodable {
                 result[key.stringValue] = try container.decode(AnyCodable.self, forKey: key).value
             }
             value = result
-        }
-        else if var container = try? decoder.unkeyedContainer() {
+        } else if var container = try? decoder.unkeyedContainer() {
             var result = [Any]()
             while !container.isAtEnd {
                 result.append(try container.decode(AnyCodable.self).value)
             }
             value = result
-        }
-        else if let container = try? decoder.singleValueContainer() {
+        } else if let container = try? decoder.singleValueContainer() {
             if let intVal = try? container.decode(Int.self) {
                 value = intVal
             } else if let doubleVal = try? container.decode(Double.self) {
@@ -164,7 +162,7 @@ extension AnyCodable: Decodable, Encodable {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "No data found in the decoder."))
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         if let encoding = genericEncoding {
             try encoding(encoder)

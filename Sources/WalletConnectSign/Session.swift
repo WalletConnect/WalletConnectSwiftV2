@@ -15,12 +15,12 @@ public struct Session {
 }
 
 extension Session {
-    
+
     public struct Proposal: Equatable {
         public var id: String
         public let proposer: AppMetadata
         public let requiredNamespaces: [String: ProposalNamespace]
-        
+
         // TODO: Refactor internal objects to manage only needed data
         internal let proposal: SessionProposal
     }
@@ -28,10 +28,10 @@ extension Session {
     public struct Event: Equatable, Hashable {
         public let name: String
         public let data: AnyCodable
-        
-        internal func internalRepresentation() -> SessionType.EventParams.Event{
+
+        internal func internalRepresentation() -> SessionType.EventParams.Event {
             SessionType.EventParams.Event(name: name, data: data)
         }
     }
-    
+
 }

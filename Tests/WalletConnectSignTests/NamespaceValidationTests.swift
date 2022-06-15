@@ -2,17 +2,17 @@ import XCTest
 @testable import WalletConnectSign
 
 final class NamespaceValidationTests: XCTestCase {
-    
+
     let ethChain = Blockchain("eip155:1")!
     let polyChain = Blockchain("eip155:137")!
     let cosmosChain = Blockchain("cosmos:cosmoshub-4")!
-    
+
     let ethAccount = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
     let polyAccount = Account("eip155:137:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
     let cosmosAccount = Account("cosmos:cosmoshub-4:cosmos1t2uflqwqe0fsj0shcfkrvpukewcw40yjj6hdc0")!
 
     // MARK: - Proposal namespace validation
-    
+
     func testValidProposalNamespace() {
         let namespace = [
             "eip155": ProposalNamespace(
@@ -32,7 +32,7 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertNoThrow(try Namespace.validate(namespace))
     }
-    
+
     func testChainsMustNotNotBeEmpty() {
         let namespace = [
             "eip155": ProposalNamespace(
@@ -43,7 +43,7 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertThrowsError(try Namespace.validate(namespace))
     }
-    
+
     func testChainAllowsEmptyMethods() {
         let namespace = [
             "eip155": ProposalNamespace(
@@ -54,7 +54,7 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertNoThrow(try Namespace.validate(namespace))
     }
-    
+
     func testChainAllowsEmptyEvents() {
         let namespace = [
             "eip155": ProposalNamespace(
@@ -65,7 +65,7 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertNoThrow(try Namespace.validate(namespace))
     }
-    
+
     func testAllChainsContainsNamespacePrefix() {
         let validNamespace = [
             "eip155": ProposalNamespace(
@@ -84,7 +84,7 @@ final class NamespaceValidationTests: XCTestCase {
         XCTAssertNoThrow(try Namespace.validate(validNamespace))
         XCTAssertThrowsError(try Namespace.validate(invalidNamespace))
     }
-    
+
     func testExtensionChainsMustNotBeEmpty() {
         let namespace = [
             "eip155": ProposalNamespace(
@@ -98,7 +98,7 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertThrowsError(try Namespace.validate(namespace))
     }
-    
+
     func testValidateAllProposalNamespaces() {
         let namespace = [
             "eip155": ProposalNamespace(
@@ -111,9 +111,9 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertThrowsError(try Namespace.validate(namespace))
     }
-    
+
     // MARK: - Session namespace validation
-    
+
     func testValidSessionNamespace() {
         let namespace = [
             "eip155": SessionNamespace(
@@ -127,7 +127,7 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertNoThrow(try Namespace.validate(namespace))
     }
-    
+
     func testAccountsMustNotNotBeEmpty() {
         let namespace = [
             "eip155": SessionNamespace(
@@ -138,7 +138,7 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertThrowsError(try Namespace.validate(namespace))
     }
-    
+
     func testAccountAllowsEmptyMethods() {
         let namespace = [
             "eip155": SessionNamespace(
@@ -149,7 +149,7 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertNoThrow(try Namespace.validate(namespace))
     }
-    
+
     func testAccountAllowsEmptyEvents() {
         let namespace = [
             "eip155": SessionNamespace(
@@ -160,7 +160,7 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertNoThrow(try Namespace.validate(namespace))
     }
-    
+
     func testAllAccountsContainsNamespacePrefix() {
         let validNamespace = [
             "eip155": SessionNamespace(
@@ -179,7 +179,7 @@ final class NamespaceValidationTests: XCTestCase {
         XCTAssertNoThrow(try Namespace.validate(validNamespace))
         XCTAssertThrowsError(try Namespace.validate(invalidNamespace))
     }
-    
+
     func testExtensionAccountsMustNotBeEmpty() {
         let namespace = [
             "eip155": SessionNamespace(
@@ -193,7 +193,7 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertThrowsError(try Namespace.validate(namespace))
     }
-    
+
     func testValidateAllSessionNamespaces() {
         let namespace = [
             "eip155": SessionNamespace(
@@ -206,9 +206,9 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertThrowsError(try Namespace.validate(namespace))
     }
-    
+
     // MARK: - Approval namespace validation
-    
+
     func testNamespaceMustApproveAllMethods() {
         let proposalNamespace = [
             "eip155": ProposalNamespace(
@@ -234,7 +234,7 @@ final class NamespaceValidationTests: XCTestCase {
         XCTAssertNoThrow(try Namespace.validateApproved(validSessionNamespace, against: proposalNamespace))
         XCTAssertThrowsError(try Namespace.validateApproved(invalidSessionNamespace, against: proposalNamespace))
     }
-    
+
     func testApprovalMustHaveAtLeastOneAccountPerProposedChain() {
         let proposalNamespace = [
             "eip155": ProposalNamespace(
@@ -260,7 +260,7 @@ final class NamespaceValidationTests: XCTestCase {
         XCTAssertNoThrow(try Namespace.validateApproved(validSessionNamespace, against: proposalNamespace))
         XCTAssertThrowsError(try Namespace.validateApproved(invalidSessionNamespace, against: proposalNamespace))
     }
-    
+
     func testApprovalMayContainMultipleAccountsForSingleChain() {
         let proposalNamespace = [
             "eip155": ProposalNamespace(
@@ -282,7 +282,7 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertNoThrow(try Namespace.validateApproved(sessionNamespace, against: proposalNamespace))
     }
-    
+
     func testApprovalMayExtendProposedMethodsAndEvents() {
         let proposalNamespace = [
             "eip155": ProposalNamespace(
@@ -300,7 +300,7 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertNoThrow(try Namespace.validateApproved(sessionNamespace, against: proposalNamespace))
     }
-    
+
     func testApprovalMayContainNonProposedChainAccounts() {
         let proposalNamespace = [
             "eip155": ProposalNamespace(
@@ -318,7 +318,7 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertNoThrow(try Namespace.validateApproved(sessionNamespace, against: proposalNamespace))
     }
-    
+
     func testApprovalMustContainAllProposedNamespaces() {
         let proposalNamespace = [
             "eip155": ProposalNamespace(
@@ -354,7 +354,7 @@ final class NamespaceValidationTests: XCTestCase {
         XCTAssertNoThrow(try Namespace.validateApproved(validNamespace, against: proposalNamespace))
         XCTAssertThrowsError(try Namespace.validateApproved(invalidNamespace, against: proposalNamespace))
     }
-    
+
     func testExtensionsMayBeMerged() {
         let proposalNamespace = [
             "eip155": ProposalNamespace(
@@ -375,7 +375,7 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertNoThrow(try Namespace.validateApproved(sessionNamespace, against: proposalNamespace))
     }
-    
+
     func testApprovalMustContainAllEvents() {
         let proposalNamespace = [
             "eip155": ProposalNamespace(
@@ -393,7 +393,7 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertThrowsError(try Namespace.validateApproved(sessionNamespace, against: proposalNamespace))
     }
-    
+
     func testApprovalMayExtendoMethodsAndEventsInExtensions() {
         let proposalNamespace = [
             "eip155": ProposalNamespace(
@@ -421,7 +421,7 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertNoThrow(try Namespace.validateApproved(sessionNamespace, against: proposalNamespace))
     }
-    
+
     func testApprovalExtensionsMayContainAccountsNotDefinedInProposal() {
         let proposalNamespace = [
             "eip155": ProposalNamespace(
@@ -449,7 +449,7 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertNoThrow(try Namespace.validateApproved(sessionNamespace, against: proposalNamespace))
     }
-    
+
     func testApprovalMayAddExtensionsNotDefinedInProposal() {
         let proposalNamespace = [
             "eip155": ProposalNamespace(

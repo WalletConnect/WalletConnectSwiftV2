@@ -27,7 +27,7 @@ final class SignClientTests: XCTestCase {
             keyValueStorage: RuntimeKeyValueStorage())
         return ClientDelegate(client: client)
     }
-    
+
     private func listenForConnection() async {
         let group = DispatchGroup()
         group.enter()
@@ -41,18 +41,18 @@ final class SignClientTests: XCTestCase {
         group.wait()
         return
     }
-    
+
     override func setUp() async throws {
         proposer = Self.makeClientDelegate(name: "🍏P")
         responder = Self.makeClientDelegate(name: "🍎R")
         await listenForConnection()
     }
-    
+
     override func tearDown() {
         proposer = nil
         responder = nil
     }
-    
+
     func testSessionPropose() async throws {
         let dapp = proposer!
         let wallet = responder!
@@ -60,11 +60,10 @@ final class SignClientTests: XCTestCase {
         let walletSettlementExpectation = expectation(description: "Wallet expects to settle a session")
         let requiredNamespaces = ProposalNamespace.stubRequired()
         let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
-        
+
         wallet.onSessionProposal = { proposal in
             Task {
-                do { try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces) }
-                catch { XCTFail("\(error)") }
+                do { try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch { XCTFail("\(error)") }
             }
         }
         dapp.onSessionSettled = { _ in
@@ -73,12 +72,12 @@ final class SignClientTests: XCTestCase {
         wallet.onSessionSettled = { _ in
             walletSettlementExpectation.fulfill()
         }
-        
+
         let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces)
         try await wallet.client.pair(uri: uri!)
         wait(for: [dappSettlementExpectation, walletSettlementExpectation], timeout: defaultTimeout)
     }
-    
+
     func testSessionReject() async throws {
         let dapp = proposer!
         let wallet = responder!
@@ -86,10 +85,10 @@ final class SignClientTests: XCTestCase {
 
         class Store { var rejectedProposal: Session.Proposal? }
         let store = Store()
-        
+
         let uri = try await dapp.client.connect(requiredNamespaces: ProposalNamespace.stubRequired())
         try await wallet.client.pair(uri: uri!)
-        
+
         wallet.onSessionProposal = { proposal in
             Task {
                 do {
@@ -352,17 +351,17 @@ final class SignClientTests: XCTestCase {
 //    }
 }
 
-//public struct EthSendTransaction: Codable, Equatable {
+// public struct EthSendTransaction: Codable, Equatable {
 //    public let from: String
 //    public let data: String
 //    public let value: String
 //    public let to: String
 //    public let gasPrice: String
 //    public let nonce: String
-//}
+// }
 //
 //
-//fileprivate let ethSendTransaction = """
+// fileprivate let ethSendTransaction = """
 //   {
 //      "from":"0xb60e8dd61c5d32be8058bb8eb970870f07233155",
 //      "to":"0xd46e8dd67c5d32be8058bb8eb970870f07244567",
@@ -372,6 +371,5 @@ final class SignClientTests: XCTestCase {
 //      "value":"0x9184e72a",
 //      "nonce":"0x117"
 //   }
-//"""
+// """
 //
-

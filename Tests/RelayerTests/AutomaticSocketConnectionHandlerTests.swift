@@ -1,4 +1,3 @@
-
 import Foundation
 import XCTest
 @testable import WalletConnectRelay
@@ -27,7 +26,7 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
         networkMonitor.onSatisfied?()
         XCTAssertTrue(sut.socket.isConnected)
     }
-    
+
     func testHandleConnectThrows() {
         XCTAssertThrowsError(try sut.handleConnect())
     }
@@ -35,19 +34,19 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
     func testHandleDisconnectThrows() {
         XCTAssertThrowsError(try sut.handleDisconnect(closeCode: .normalClosure))
     }
-    
+
     func testReconnectsOnEnterForeground() {
         webSocketSession.disconnect()
         appStateObserver.onWillEnterForeground?()
         XCTAssertTrue(sut.socket.isConnected)
     }
-    
+
     func testRegisterTaskOnEnterBackground() {
         XCTAssertNil(backgroundTaskRegistrar.completion)
         appStateObserver.onWillEnterBackground?()
         XCTAssertNotNil(backgroundTaskRegistrar.completion)
     }
-    
+
     func testDisconnectOnEndBackgroundTask() {
         appStateObserver.onWillEnterBackground?()
         XCTAssertTrue(sut.socket.isConnected)

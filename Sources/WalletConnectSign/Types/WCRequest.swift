@@ -5,21 +5,21 @@ struct WCRequest: Codable {
     let jsonrpc: String
     let method: Method
     let params: Params
-    
+
     enum CodingKeys: CodingKey {
         case id
         case jsonrpc
         case method
         case params
     }
-    
+
     internal init(id: Int64 = generateId(), jsonrpc: String = "2.0", method: Method, params: Params) {
         self.id = id
         self.jsonrpc = jsonrpc
         self.method = method
         self.params = params
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(Int64.self, forKey: .id)
@@ -58,7 +58,7 @@ struct WCRequest: Codable {
             params = .sessionEvent(paramsValue)
         }
     }
-    
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(id, forKey: .id)

@@ -1,4 +1,3 @@
-
 import Foundation
 
 public final class CodableStore<T> where T: Codable {
@@ -35,17 +34,17 @@ public final class CodableStore<T> where T: Codable {
     public func delete(forKey key: String) {
         defaults.removeObject(forKey: getContextPrefixedKey(for: key))
     }
-    
+
     public func deleteAll() {
         dictionaryForIdentifier()
             .forEach { defaults.removeObject(forKey: $0.key) }
     }
-    
+
     private func getContextPrefixedKey(for key: String) -> String {
         return "\(prefix).\(key)"
     }
-    
-    private func dictionaryForIdentifier() -> [String : Any] {
+
+    private func dictionaryForIdentifier() -> [String: Any] {
         return defaults.dictionaryRepresentation()
             .filter { $0.key.hasPrefix("\(prefix).") }
     }

@@ -1,4 +1,3 @@
-
 import Foundation
 import WalletConnectKMS
 import WalletConnectUtils
@@ -6,8 +5,8 @@ import WalletConnectRelay
 import Combine
 
 class Engine {
-    var onInvite: ((Invite)->())?
-    var onNewThread: ((Thread)->())?
+    var onInvite: ((Invite) -> Void)?
+    var onNewThread: ((Thread) -> Void)?
     let networkingInteractor: NetworkingInteractor
     let inviteStore: CodableStore<(Invite)>
     let topicToInvitationPubKeyStore: CodableStore<String>
@@ -16,7 +15,7 @@ class Engine {
     let kms: KeyManagementService
     let threadsStore: CodableStore<Thread>
     private var publishers = [AnyCancellable]()
-    
+
     init(registry: Registry,
          networkingInteractor: NetworkingInteractor,
          kms: KeyManagementService,
@@ -46,7 +45,6 @@ class Engine {
         try await networkingInteractor.subscribe(topic: threadTopic)
         logger.debug("invite sent on topic: \(topic)")
     }
-
 
     func accept(inviteId: String) async throws {
         guard let hexPubKey = try topicToInvitationPubKeyStore.get(key: "todo-topic") else {

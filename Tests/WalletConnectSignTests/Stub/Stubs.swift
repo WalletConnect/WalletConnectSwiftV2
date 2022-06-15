@@ -70,22 +70,22 @@ extension AgreementPeer {
 }
 
 extension WCRequestSubscriptionPayload {
-    
+
     static func stubUpdateNamespaces(topic: String, namespaces: [String: SessionNamespace] = SessionNamespace.stubDictionary()) -> WCRequestSubscriptionPayload {
         let updateMethod = WCMethod.wcSessionUpdate(SessionType.UpdateParams(namespaces: namespaces)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
     }
-    
+
     static func stubUpdateExpiry(topic: String, expiry: Int64) -> WCRequestSubscriptionPayload {
         let updateExpiryMethod = WCMethod.wcSessionExtend(SessionType.UpdateExpiryParams(expiry: expiry)).asRequest()
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateExpiryMethod)
     }
-    
+
     static func stubSettle(topic: String) -> WCRequestSubscriptionPayload {
         let method = WCMethod.wcSessionSettle(SessionType.SettleParams.stub())
         return WCRequestSubscriptionPayload(topic: topic, wcRequest: method.asRequest())
     }
-    
+
     static func stubRequest(topic: String, method: String, chainId: Blockchain) -> WCRequestSubscriptionPayload {
         let params = SessionType.RequestParams(
             request: SessionType.RequestParams.Request(method: method, params: AnyCodable(EmptyCodable())),
