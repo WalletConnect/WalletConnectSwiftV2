@@ -14,6 +14,7 @@ struct WCSession: ExpirableSequence {
     var acknowledged: Bool
     let controller: AgreementPeer
     private(set) var namespaces: [String: SessionNamespace]
+    private(set) var requiredNamespaces: [String: SessionNamespace]
 
     static var defaultTimeToLive: Int64 {
         Int64(7*Time.day)
@@ -34,6 +35,7 @@ struct WCSession: ExpirableSequence {
         self.selfParticipant = selfParticipant
         self.peerParticipant = peerParticipant
         self.namespaces = settleParams.namespaces
+        self.requiredNamespaces = settleParams.namespaces
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(settleParams.expiry))
     }
@@ -46,6 +48,7 @@ struct WCSession: ExpirableSequence {
         self.selfParticipant = selfParticipant
         self.peerParticipant = peerParticipant
         self.namespaces = namespaces
+        self.requiredNamespaces = namespaces
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
     }
