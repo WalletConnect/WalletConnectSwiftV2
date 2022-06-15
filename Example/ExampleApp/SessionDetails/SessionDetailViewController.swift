@@ -36,18 +36,18 @@ final class SessionDetailViewController: UIHostingController<SessionDetailView> 
     }
     
     private func respondOnSign(request: Request, response: JSONRPCResponse<AnyCodable>) {
-        print("[CONTROLLER] Respond on Sign")
+        print("[WALLET] Respond on Sign")
         Task {
             do {
                 try await Sign.instance.respond(topic: request.topic, response: .response(response))
             } catch {
-                print("[NON-CONTROLLER] Respond Error: \(error.localizedDescription)")
+                print("[DAPP] Respond Error: \(error.localizedDescription)")
             }
         }
     }
     
     private func respondOnReject(request: Request) {
-        print("[CONTROLLER] Respond on Reject")
+        print("[WALLET] Respond on Reject")
         Task {
             do {
                 try await Sign.instance.respond(
@@ -58,7 +58,7 @@ final class SessionDetailViewController: UIHostingController<SessionDetailView> 
                     )
                 )
             } catch {
-                print("[NON-CONTROLLER] Respond Error: \(error.localizedDescription)")
+                print("[DAPP] Respond Error: \(error.localizedDescription)")
             }
         }
     }

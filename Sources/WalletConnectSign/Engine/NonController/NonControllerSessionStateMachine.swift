@@ -11,7 +11,7 @@ final class NonControllerSessionStateMachine {
 
     var onNamespacesUpdate: ((String, [String: SessionNamespace])->())?
     var onExtend: ((String, Date) -> ())?
-    
+
     private let sessionStore: WCSessionStorage
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
