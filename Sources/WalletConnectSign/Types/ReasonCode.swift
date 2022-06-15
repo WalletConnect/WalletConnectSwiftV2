@@ -28,6 +28,11 @@ enum ReasonCode {
     case disapprovedChains
     case disapprovedMethods
     case disapprovedEventTypes
+    case unsupportedChains
+    case unsupportedMethods
+    case unsupportedEvents
+    case unsupportedAccounts
+    case unsupportedNamespaceKey
     
     var code: Int {
         switch self {
@@ -50,6 +55,12 @@ enum ReasonCode {
         case .disapprovedChains: return 5000
         case .disapprovedMethods: return 5001
         case .disapprovedEventTypes: return 5002
+            
+        case .unsupportedChains: return 5100
+        case .unsupportedMethods: return 5101
+        case .unsupportedEvents: return 5102
+        case .unsupportedAccounts: return 5103
+        case .unsupportedNamespaceKey: return 5104
         }
     }
     
@@ -87,6 +98,16 @@ enum ReasonCode {
             return "User disapproved requested json-rpc methods"
         case .disapprovedEventTypes:
             return "User disapproved requested event types"
+        case .unsupportedChains:
+            return "Unsupported or empty chains for namespace"
+        case .unsupportedMethods:
+            return "Unsupported methods for namespace"
+        case .unsupportedEvents:
+            return "Unsupported events for namespace"
+        case .unsupportedAccounts:
+            return "Unsupported or empty accounts for namespace"
+        case .unsupportedNamespaceKey:
+            return "Unsupported namespace key"
         }
     }
 }

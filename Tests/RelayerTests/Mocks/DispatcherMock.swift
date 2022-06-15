@@ -11,6 +11,9 @@ class DispatcherMock: Dispatching {
     func send(_ string: String, completion: @escaping (Error?) -> ()) {
         sent = true
     }
+    func send(_ string: String) async throws {
+        send(string, completion: { _ in })
+    }
     func connect() {}
     func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) {}
 }

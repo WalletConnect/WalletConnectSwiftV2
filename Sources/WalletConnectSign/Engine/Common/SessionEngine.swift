@@ -4,6 +4,10 @@ import WalletConnectUtils
 import WalletConnectKMS
 
 final class SessionEngine {
+    enum Errors: Error {
+        case respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode)
+        case sessionNotFound(topic: String)
+    }
 
     var onSessionRequest: ((Request) -> Void)?
     var onSessionResponse: ((Response) -> Void)?
@@ -47,7 +51,7 @@ final class SessionEngine {
         networkingInteractor.unsubscribe(topic: topic)
     }
     
-    func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
+    func ping(topic: String, completion: @escaping (Result<Void, Error>) -> Void) {
         guard sessionStore.hasSession(forTopic: topic) else {
             logger.debug("Could not find session to ping for topic \(topic)")
             return
@@ -77,18 +81,11 @@ final class SessionEngine {
         try await networkingInteractor.request(.wcSessionRequest(sessionRequestParams), onTopic: request.topic)
     }
     
-    func respondSessionRequest(topic: String, response: JsonRpcResult) {
+    func respondSessionRequest(topic: String, response: JsonRpcResult) async throws {
         guard sessionStore.hasSession(forTopic: topic) else {
-            logger.debug("Could not find session for topic \(topic)")
-            return
+            throw Errors.sessionNotFound(topic: topic)
         }
-        networkingInteractor.respond(topic: topic, response: response) { [weak self] error in
-            if let error = error {
-                self?.logger.debug("Could not send session payload, error: \(error.localizedDescription)")
-            } else {
-                self?.logger.debug("Sent Session Request Response")
-            }
-        }
+        try await networkingInteractor.respond(topic: topic, response: response)
     }
     
     func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain) async throws {
@@ -110,17 +107,22 @@ private extension SessionEngine {
     
     func setupNetworkingSubscriptions() {
         networkingInteractor.wcRequestPublisher.sink  { [unowned self] subscriptionPayload in
-            switch subscriptionPayload.wcRequest.params {
-            case .sessionDelete(let deleteParams):
-                onSessionDelete(subscriptionPayload, deleteParams: deleteParams)
-            case .sessionRequest(let sessionRequestParams):
-                onSessionRequest(subscriptionPayload, payloadParams: sessionRequestParams)
-            case .sessionPing(_):
-                onSessionPing(subscriptionPayload)
-            case .sessionEvent(let eventParams):
-                onSessionEvent(subscriptionPayload, eventParams: eventParams)
-            default:
-                return
+            do {
+                switch subscriptionPayload.wcRequest.params {
+                case .sessionDelete(let deleteParams):
+                    try onSessionDelete(subscriptionPayload, deleteParams: deleteParams)
+                case .sessionRequest(let sessionRequestParams):
+                    try onSessionRequest(subscriptionPayload, payloadParams: sessionRequestParams)
+                case .sessionPing(_):
+                    onSessionPing(subscriptionPayload)
+                case .sessionEvent(let eventParams):
+                    try onSessionEvent(subscriptionPayload, eventParams: eventParams)
+                default: return
+                }
+            } catch Errors.respondError(let payload, let reason) {
+                respondError(payload: payload, reason: reason)
+            } catch {
+                logger.error("Unexpected Error: \(error.localizedDescription)")
             }
         }.store(in: &publishers)
         
@@ -136,11 +138,20 @@ private extension SessionEngine {
             }.store(in: &publishers)
     }
     
-    func onSessionDelete(_ payload: WCRequestSubscriptionPayload, deleteParams: SessionType.DeleteParams) {
+    func respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode) {
+        Task {
+            do {
+                try await networkingInteractor.respondError(payload: payload, reason: reason)
+            } catch {
+                logger.error("Respond Error failed with: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    func onSessionDelete(_ payload: WCRequestSubscriptionPayload, deleteParams: SessionType.DeleteParams) throws {
         let topic = payload.topic
         guard sessionStore.hasSession(forTopic: topic) else {
-            networkingInteractor.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
-            return
+            throw Errors.respondError(payload: payload, reason: .noContextWithTopic(context: .session, topic: topic))
         }
         sessionStore.delete(topic: topic)
         networkingInteractor.unsubscribe(topic: topic)
@@ -148,7 +159,7 @@ private extension SessionEngine {
         onSessionDelete?(topic, deleteParams)
     }
     
-    func onSessionRequest(_ payload: WCRequestSubscriptionPayload, payloadParams: SessionType.RequestParams) {
+    func onSessionRequest(_ payload: WCRequestSubscriptionPayload, payloadParams: SessionType.RequestParams) throws {
         let topic = payload.topic
         let jsonRpcRequest = JSONRPCRequest<AnyCodable>(id: payload.wcRequest.id, method: payloadParams.request.method, params: payloadParams.request.params)
         let request = Request(
@@ -159,17 +170,14 @@ private extension SessionEngine {
             chainId: payloadParams.chainId)
         
         guard let session = sessionStore.getSession(forTopic: topic) else {
-            networkingInteractor.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: topic))
-            return
+            throw Errors.respondError(payload: payload, reason: .noContextWithTopic(context: .session, topic: topic))
         }
         let chain = request.chainId
         guard session.hasNamespace(for: chain) else {
-            networkingInteractor.respondError(for: payload, reason: .unauthorizedTargetChain(chain.absoluteString))
-            return
+            throw Errors.respondError(payload: payload, reason: .unauthorizedTargetChain(chain.absoluteString))
         }
         guard session.hasPermission(forMethod: request.method, onChain: chain) else {
-            networkingInteractor.respondError(for: payload, reason: .unauthorizedMethod(request.method))
-            return
+            throw Errors.respondError(payload: payload, reason: .unauthorizedMethod(request.method))
         }
         onSessionRequest?(request)
     }
@@ -178,19 +186,17 @@ private extension SessionEngine {
         networkingInteractor.respondSuccess(for: payload)
     }
     
-    func onSessionEvent(_ payload: WCRequestSubscriptionPayload, eventParams: SessionType.EventParams) {
+    func onSessionEvent(_ payload: WCRequestSubscriptionPayload, eventParams: SessionType.EventParams) throws {
         let event = eventParams.event
         let topic = payload.topic
         guard let session = sessionStore.getSession(forTopic: topic) else {
-            networkingInteractor.respondError(for: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
-            return
+            throw Errors.respondError(payload: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
         }
         guard
             session.peerIsController,
             session.hasPermission(forEvent: event.name, onChain: eventParams.chainId)
         else {
-            networkingInteractor.respondError(for: payload, reason: .unauthorizedEvent(event.name))
-            return
+            throw Errors.respondError(payload: payload, reason: .unauthorizedEvent(event.name))
         }
         networkingInteractor.respondSuccess(for: payload)
         onEventReceived?(topic, event.publicRepresentation(), eventParams.chainId)

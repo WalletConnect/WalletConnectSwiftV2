@@ -30,7 +30,7 @@ final class BlockchainTests: XCTestCase {
         let blockchain = Blockchain(chainString)!
         XCTAssertEqual(blockchain.absoluteString, chainString)
     }
-    
+
     func testCodable() throws {
         let blockchain = Blockchain("chainstd:8c3444cf8970a9e41a706fab93e7a6c4")!
         let encoded = try JSONEncoder().encode(blockchain)
