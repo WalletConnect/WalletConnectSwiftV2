@@ -1,57 +1,6 @@
 import Foundation
 import WalletConnectUtils
 
-/// A type representing envelope serialization policy
-/// tp = type byte (1 byte)
-/// pk = public key (32 bytes)
-/// iv = initialization vector (12 bytes)
-/// ct = ciphertext (N bytes)
-public enum EnvelopeType: Equatable {
-    enum Errors: Error {
-        case unsupportedPolicyType
-    }
-    /// type 0 = tp + iv + ct + tag
-    case type0
-    /// type 1 = tp + pk + iv + ct + tag
-    case type1(pubKey: AgreementPublicKey)
-
-    var representingByte: UInt8 {
-        switch self {
-        case .type0:
-            return 0
-        case .type1:
-            return 1
-        }
-    }
-}
-
-public struct Envelope {
-    enum Errors: String, Error {
-        case malformedEnvelope
-        case unsupportedEnvelopeType
-    }
-
-    public let type: EnvelopeType
-    public let sealbox: Data
-
-    public init(_ base64encoded: String) throws {
-        guard let envelopeData = Data(base64Encoded: base64encoded) else {
-            throw Errors.malformedEnvelope
-        }
-        let envelopeTypeByte = envelopeData.subdata(in: 0..<1).uint8
-        if envelopeTypeByte == 0 {
-            self.type = .type0
-            self.sealbox =
-        } else if envelopeTypeByte == 1 {
-            let pubKey = try AgreementPublicKey(hex: envelopeData.subdata(in: 0..<33).toHexString())
-            self.type = .type1(pubKey: pubKey)
-            self.sealbox =
-        } else {
-            throw Errors.unsupportedEnvelopeType
-        }
-    }
-
-}
 
 public class Serializer {
     enum Errors: String, Error {
