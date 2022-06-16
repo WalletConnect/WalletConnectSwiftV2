@@ -156,11 +156,60 @@ final class WCSessionTests: XCTestCase {
         XCTAssertNoThrow(try session.updateNamespaces(namespace))
     }
 
-    func testUpdateNamespaces() {
-        
+    func testUpdateNamespacesOverRequirement() {
+        let namespace = [
+            "eip155": SessionNamespace(
+                accounts: [ethAccount],
+                methods: ["method"],
+                events: ["event"],
+                extensions: [
+                    SessionNamespace.Extension(
+                        accounts: [ethAccount],
+                        methods: ["method-2"],
+                        events: ["event-2"])])]
+        let newNamespace = [
+            "eip155": SessionNamespace(
+                accounts: [ethAccount, polyAccount],
+                methods: ["method", "newMethod"],
+                events: ["event", "newEvent"],
+                extensions: [
+                    SessionNamespace.Extension(
+                        accounts: [ethAccount, polyAccount],
+                        methods: ["method-2", "newMethod-2"],
+                        events: ["event-2", "newEvent-2"])])]
+        var session = WCSession.stub(namespaces: namespace)
+        XCTAssertNoThrow(try session.updateNamespaces(newNamespace))
     }
 
-    func testUpdateLessThanRequiredNamespaces() {
-        
+//    func testUpdateLessThanRequiredChains() {
+//        let namespace = [
+//            "eip155": SessionNamespace(
+//                accounts: [ethAccount],
+//                methods: ["method"],
+//                events: ["event"],
+//                extensions: [
+//                    SessionNamespace.Extension(
+//                        accounts: [ethAccount],
+//                        methods: ["method-2"],
+//                        events: ["event-2"])])]
+//        var session = WCSession.stub(namespaces: namespace)
+////        XCTAssertThrowsError()
+//    }
+    
+    func testUpdateLessThanRequiredAccounts() {
+        let required = [
+            "eip155": SessionNamespace(
+                accounts: [ethAccount, polyAccount],
+                methods: ["method", "method-2"],
+                events: ["event", "event-2"],
+                extensions: nil)]
+        let invalid = [
+            "eip155": SessionNamespace(
+                accounts: [ethAccount],
+                methods: ["method", "method-2"],
+                events: ["event", "event-2"],
+                extensions: nil)]
+        var session = WCSession.stub(namespaces: required)
+        XCTAssertThrowsError(try session.updateNamespaces(invalid))
     }
 }
