@@ -6,7 +6,7 @@ struct WCSession: ExpirableSequence {
 
     enum Error: Swift.Error {
         case controllerNotSet
-//        case
+        case unsatisfiedUpdateNamespaceRequirement
     }
 
     let topic: String
@@ -113,7 +113,7 @@ struct WCSession: ExpirableSequence {
         return false
     }
 
-    mutating func updateNamespaces(_ namespaces: [String: SessionNamespace]) {
+    mutating func updateNamespaces(_ namespaces: [String: SessionNamespace]) throws {
         for item in requiredNamespaces {
             guard
                 let compliantNamespace = namespaces[item.key],
@@ -121,7 +121,7 @@ struct WCSession: ExpirableSequence {
                 compliantNamespace.methods.isSuperset(of: item.value.methods),
                 compliantNamespace.events.isSuperset(of: item.value.events)
             else {
-                fatalError()
+                throw Error.unsatisfiedUpdateNamespaceRequirement
             }
         }
         self.namespaces = namespaces

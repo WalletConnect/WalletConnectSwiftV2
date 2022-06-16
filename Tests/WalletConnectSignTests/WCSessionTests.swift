@@ -18,7 +18,7 @@ final class WCSessionTests: XCTestCase {
                 extensions: nil)
         ]
         var session = WCSession.stub()
-        session.updateNamespaces(namespace)
+        XCTAssertNoThrow(try session.updateNamespaces(namespace))
         XCTAssertTrue(session.hasPermission(forMethod: "method", onChain: ethAccount.blockchain))
     }
 
@@ -35,7 +35,7 @@ final class WCSessionTests: XCTestCase {
                         events: [])])
         ]
         var session = WCSession.stub()
-        session.updateNamespaces(namespace)
+        XCTAssertNoThrow(try session.updateNamespaces(namespace))
         XCTAssertTrue(session.hasPermission(forMethod: "method", onChain: ethAccount.blockchain))
     }
 
@@ -53,7 +53,7 @@ final class WCSessionTests: XCTestCase {
                 extensions: nil)
         ]
         var session = WCSession.stub()
-        session.updateNamespaces(namespace)
+        XCTAssertNoThrow(try session.updateNamespaces(namespace))
         XCTAssertFalse(session.hasPermission(forMethod: "method", onChain: ethAccount.blockchain))
     }
 
@@ -70,7 +70,7 @@ final class WCSessionTests: XCTestCase {
                         events: [])])
         ]
         var session = WCSession.stub()
-        session.updateNamespaces(namespace)
+        XCTAssertNoThrow(try session.updateNamespaces(namespace))
         XCTAssertFalse(session.hasPermission(forMethod: "method", onChain: ethAccount.blockchain))
     }
 
@@ -83,7 +83,7 @@ final class WCSessionTests: XCTestCase {
                 extensions: nil)
         ]
         var session = WCSession.stub()
-        session.updateNamespaces(namespace)
+        XCTAssertNoThrow(try session.updateNamespaces(namespace))
         XCTAssertTrue(session.hasPermission(forEvent: "event", onChain: ethAccount.blockchain))
     }
 
@@ -100,7 +100,7 @@ final class WCSessionTests: XCTestCase {
                         events: ["event"])])
         ]
         var session = WCSession.stub()
-        session.updateNamespaces(namespace)
+        XCTAssertNoThrow(try session.updateNamespaces(namespace))
         XCTAssertTrue(session.hasPermission(forEvent: "event", onChain: ethAccount.blockchain))
     }
 
@@ -118,7 +118,7 @@ final class WCSessionTests: XCTestCase {
                 extensions: nil)
         ]
         var session = WCSession.stub()
-        session.updateNamespaces(namespace)
+        XCTAssertNoThrow(try session.updateNamespaces(namespace))
         XCTAssertFalse(session.hasPermission(forEvent: "event", onChain: ethAccount.blockchain))
     }
 
@@ -135,7 +135,7 @@ final class WCSessionTests: XCTestCase {
                         events: ["event"])])
         ]
         var session = WCSession.stub()
-        session.updateNamespaces(namespace)
+        XCTAssertNoThrow(try session.updateNamespaces(namespace))
         XCTAssertFalse(session.hasPermission(forEvent: "event", onChain: ethAccount.blockchain))
     }
 
@@ -151,10 +151,9 @@ final class WCSessionTests: XCTestCase {
                     SessionNamespace.Extension(
                         accounts: [ethAccount],
                         methods: ["method-2"],
-                        events: ["event-2"])
-                ]
-            )
-        ]
+                        events: ["event-2"])])]
+        var session = WCSession.stub(namespaces: namespace)
+        XCTAssertNoThrow(try session.updateNamespaces(namespace))
     }
 
     func testUpdateNamespaces() {
