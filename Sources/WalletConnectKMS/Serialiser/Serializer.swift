@@ -71,8 +71,8 @@ public class Serializer {
     }
 
     private func handleType1Envelope<T: Codable>(_ topic: String, _ envelope: Envelope) throws -> T? {
-        let pubKey = try kms.getPublicKey(for: topic)
-        guard case let .type1(peerPubKey) = envelope.type else { return nil }
+        guard let pubKey = kms.getPublicKey(for: topic),
+              case let .type1(peerPubKey) = envelope.type else { return nil }
         let agreementKeys = try kms.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: peerPubKey)
         let decodedType: T? = try decode(sealbox: envelope.sealbox, symmetricKey: agreementKeys.sharedKey.rawRepresentation)
         let newTopic = agreementKeys.derivedTopic()

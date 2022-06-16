@@ -3,8 +3,13 @@ import Foundation
 import WalletConnectKMS
 
 public protocol Serializing {
-    func serialize(topic: String, encodable: Encodable) throws -> String
-    func tryDeserialize<T: Codable>(topic: String, message: String) -> T?
+    func serialize(topic: String, encodable: Encodable, envelopeType: Envelope.EnvelopeType) throws -> String
+    func tryDeserialize<T: Codable>(topic: String, encodedEnvelope: String) -> T?
 }
 
-extension Serializer: Serializing {}
+extension Serializer: Serializing {
+    public func serialize(topic: String, encodable: Encodable, envelopeType: Envelope.EnvelopeType = .type0) throws -> String {
+        try serialize(topic: topic, encodable: encodable, envelopeType: envelopeType)
+    }
+
+}

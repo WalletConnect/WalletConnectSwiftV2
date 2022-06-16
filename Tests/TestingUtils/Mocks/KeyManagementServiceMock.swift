@@ -2,11 +2,17 @@ import Foundation
 @testable import WalletConnectKMS
 
 final class KeyManagementServiceMock: KeyManagementServiceProtocol {
+    var privateKeyStub = AgreementPrivateKey()
+    private(set) var privateKeys: [String: AgreementPrivateKey] = [:]
+    private(set) var symmetricKeys: [String: SymmetricKey] = [:]
+    private(set) var agreementKeys: [String: AgreementKeys] = [:]
+    private(set) var publicKeys: [String: AgreementPublicKey] = [:]
+
     func getSymmetricKeyRepresentable(for topic: String) -> Data? {
         if let key = getAgreementSecret(for: topic) {
             return key.rawRepresentation
         } else {
-            return try? getSymmetricKey(for: topic)?.rawRepresentation
+            return getSymmetricKey(for: topic)?.rawRepresentation
         }
     }
     
@@ -20,14 +26,17 @@ final class KeyManagementServiceMock: KeyManagementServiceProtocol {
         symmetricKeys[topic] = symmetricKey
     }
     
-    func getSymmetricKey(for topic: String) throws -> SymmetricKey? {
+    func getSymmetricKey(for topic: String) -> SymmetricKey? {
         symmetricKeys[topic]
     }
     
     func deleteSymmetricKey(for topic: String) {
         symmetricKeys[topic] = nil
     }
-    
+
+    func getPublicKey(for topic: String) -> AgreementPublicKey? {
+        publicKeys[topic]
+    }
     
     func createX25519KeyPair() throws -> AgreementPublicKey {
         defer { privateKeyStub = AgreementPrivateKey() }
@@ -45,13 +54,6 @@ final class KeyManagementServiceMock: KeyManagementServiceProtocol {
         let sharedKey = sharedSecret.deriveSymmetricKey()
         return AgreementKeys(sharedKey: sharedKey, publicKey: privateKey.publicKey)
     }
-    
-    
-    var privateKeyStub = AgreementPrivateKey()
-    
-    private(set) var privateKeys: [String: AgreementPrivateKey] = [:]
-    private(set) var symmetricKeys: [String: SymmetricKey] = [:]
-    private(set) var agreementKeys: [String: AgreementKeys] = [:]
     
     func makePrivateKey() -> AgreementPrivateKey {
         defer { privateKeyStub = AgreementPrivateKey() }
