@@ -25,7 +25,7 @@ public class Serializer {
     ///   - encodable: Object to encrypt and serialize
     ///   - envelopeType: type of envelope
     /// - Returns: Serialized String
-    public func serialize(topic: String, encodable: Encodable, envelopeType: Envelope.EnvelopeType = .type0) throws -> String {
+    public func serialize(topic: String, encodable: Encodable, envelopeType: Envelope.EnvelopeType) throws -> String {
         let messageJson = try encodable.json()
         guard let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) else {
             throw Errors.symmetricKeyForTopicNotFound

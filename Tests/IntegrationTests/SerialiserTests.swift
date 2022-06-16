@@ -18,14 +18,22 @@ final class SerializerTests: XCTestCase {
         serializer = nil
     }
     
-//    TODO - change pairing serialisation for sessions
-    func testSerializeDeserialize() {
+    func testSerializeDeserializeType0Envelope() {
         let topic = TopicGenerator().topic
         _ = try! kms.createSymmetricKey(topic)
         let messageToSerialize = "todo - change for request object"
-        let serializedMessage = try! serializer.serialize(topic: topic, encodable: messageToSerialize)
-        let deserializedMessage: String? = serializer.tryDeserialize(topic: topic, message: serializedMessage)
+        let serializedMessage = try! serializer.serialize(topic: topic, encodable: messageToSerialize, envelopeType: .type0)
+        let deserializedMessage: String? = serializer.tryDeserialize(topic: topic, encodedEnvelope: serializedMessage)
         XCTAssertEqual(messageToSerialize, deserializedMessage)
     }
+
+//    func testSerializeDeserializeType1Envelope() {
+//        let topic = TopicGenerator().topic
+//        _ = try! kms.createSymmetricKey(topic)
+//        let messageToSerialize = "todo - change for request object"
+//        let serializedMessage = try! serializer.serialize(topic: topic, encodable: messageToSerialize, envelopeType: .type0)
+//        let deserializedMessage: String? = serializer.tryDeserialize(topic: topic, encodedEnvelope: serializedMessage)
+//        XCTAssertEqual(messageToSerialize, deserializedMessage)
+//    }
 }
 
