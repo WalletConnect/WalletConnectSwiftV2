@@ -24,7 +24,13 @@ class ChaChaPolyCodec: Codec {
         let sealBox = try ChaChaPoly.seal(dataToSeal, using: key, nonce: nonce)
         return sealBox.combined
     }
-    
+
+
+    /// Decrypts the message and verifies its authenticity.
+    /// - Parameters:
+    ///   - sealbox: The sealed box to open.
+    ///   - symmetricKey: The cryptographic key that was used to seal the message.
+    /// - Returns: The original plaintext message that was sealed in the box, as long as the correct key is used and authentication succeeds. The call throws an error if decryption or authentication fail.
     func decode(sealbox: Data, symmetricKey: Data) throws -> Data {
         let sealboxCombined = sealbox
         let key = CryptoKit.SymmetricKey(data: symmetricKey)
