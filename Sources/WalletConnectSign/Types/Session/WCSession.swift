@@ -123,6 +123,16 @@ struct WCSession: ExpirableSequence {
             else {
                 throw Error.unsatisfiedUpdateNamespaceRequirement
             }
+            if let extensions = item.value.extensions {
+                guard let compliantExtensions = compliantNamespace.extensions else {
+                    throw Error.unsatisfiedUpdateNamespaceRequirement
+                }
+                for existingExtension in extensions {
+                    guard compliantExtensions.contains(where: { $0.isSuperset(of: existingExtension) }) else {
+                        throw Error.unsatisfiedUpdateNamespaceRequirement
+                    }
+                }
+            }
         }
         self.namespaces = namespaces
     }
