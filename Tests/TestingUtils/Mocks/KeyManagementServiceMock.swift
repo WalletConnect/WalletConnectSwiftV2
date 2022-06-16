@@ -2,14 +2,13 @@ import Foundation
 @testable import WalletConnectKMS
 
 final class KeyManagementServiceMock: KeyManagementServiceProtocol {
-    var privateKeyStub = AgreementPrivateKey()
     private(set) var privateKeys: [String: AgreementPrivateKey] = [:]
     private(set) var symmetricKeys: [String: SymmetricKey] = [:]
     private(set) var agreementKeys: [String: AgreementKeys] = [:]
     private(set) var publicKeys: [String: AgreementPublicKey] = [:]
 
     func getSymmetricKeyRepresentable(for topic: String) -> Data? {
-        if let key = getAgreementSecret(for: topic) {
+        if let key = getAgreementSecret(for: topic)?.sharedKey {
             return key.rawRepresentation
         } else {
             return getSymmetricKey(for: topic)?.rawRepresentation
@@ -39,9 +38,9 @@ final class KeyManagementServiceMock: KeyManagementServiceProtocol {
     }
     
     func createX25519KeyPair() throws -> AgreementPublicKey {
-        defer { privateKeyStub = AgreementPrivateKey() }
-        try setPrivateKey(privateKeyStub)
-        return privateKeyStub.publicKey
+        let privateKey = AgreementPrivateKey()
+        try setPrivateKey(privateKey)
+        return privateKey.publicKey
     }
     
     func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementKeys {
@@ -54,12 +53,7 @@ final class KeyManagementServiceMock: KeyManagementServiceProtocol {
         let sharedKey = sharedSecret.deriveSymmetricKey()
         return AgreementKeys(sharedKey: sharedKey, publicKey: privateKey.publicKey)
     }
-    
-    func makePrivateKey() -> AgreementPrivateKey {
-        defer { privateKeyStub = AgreementPrivateKey() }
-        return privateKeyStub
-    }
-    
+
     func setPrivateKey(_ privateKey: AgreementPrivateKey) throws {
         privateKeys[privateKey.publicKey.rawRepresentation.toHexString()] = privateKey
     }
@@ -70,6 +64,10 @@ final class KeyManagementServiceMock: KeyManagementServiceProtocol {
     
     func getPrivateKey(for publicKey: String) throws -> AgreementPrivateKey? {
         privateKeys[publicKey]
+    }
+
+    func setPublicKey(publicKey: AgreementPublicKey, for topic: String) throws {
+        publicKeys[topic] = publicKey
     }
     
     func setAgreementSecret(_ agreementKeys: AgreementKeys, topic: String) {

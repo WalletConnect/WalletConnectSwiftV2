@@ -4,6 +4,7 @@ public protocol KeyManagementServiceProtocol {
     func createX25519KeyPair() throws -> AgreementPublicKey
     func createSymmetricKey(_ topic: String) throws -> SymmetricKey
     func setPrivateKey(_ privateKey: AgreementPrivateKey) throws
+    func setPublicKey(publicKey: AgreementPublicKey, for topic: String) throws
     func setAgreementSecret(_ agreementSecret: AgreementKeys, topic: String) throws
     func setSymmetricKey(_ symmetricKey: SymmetricKey, for topic: String) throws
     func getPrivateKey(for publicKey: AgreementPublicKey) throws -> AgreementPrivateKey?
@@ -52,7 +53,12 @@ public class KeyManagementService: KeyManagementServiceProtocol {
     public func setPrivateKey(_ privateKey: AgreementPrivateKey) throws {
         try keychain.add(privateKey, forKey: privateKey.publicKey.hexRepresentation)
     }
-    
+
+    public func setPublicKey(publicKey: AgreementPublicKey, for topic: String) throws {
+        try keychain.add(publicKey, forKey: topic)
+    }
+
+
     public func setAgreementSecret(_ agreementSecret: AgreementKeys, topic: String) throws {
         try keychain.add(agreementSecret, forKey: topic)
     }
@@ -66,10 +72,10 @@ public class KeyManagementService: KeyManagementServiceProtocol {
     }
     
     public func getSymmetricKeyRepresentable(for topic: String) -> Data? {
-        if let key = try? getAgreementSecret(for: topic)?.sharedKey {
+        if let key = getAgreementSecret(for: topic)?.sharedKey {
             return key.rawRepresentation
         } else {
-            return try? getSymmetricKey(for: topic)?.rawRepresentation
+            return getSymmetricKey(for: topic)?.rawRepresentation
         }
     }
     

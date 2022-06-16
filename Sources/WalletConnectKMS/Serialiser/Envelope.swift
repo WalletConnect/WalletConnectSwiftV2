@@ -28,7 +28,7 @@ public struct Envelope: Equatable {
             self.type = .type0
             self.sealbox = envelopeData.subdata(in: 1..<envelopeData.count)
         } else if envelopeTypeByte == 1 {
-            let pubKey = envelopeData.subdata(in: 0..<33).toHexString()
+            let pubKey = envelopeData.subdata(in: 1..<33).toHexString()
             self.type = .type1(pubKey: pubKey)
             self.sealbox = envelopeData.subdata(in: 33..<envelopeData.count)
         } else {
