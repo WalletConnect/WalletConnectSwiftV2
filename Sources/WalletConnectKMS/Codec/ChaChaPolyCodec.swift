@@ -36,7 +36,7 @@ class ChaChaPolyCodec: Codec {
         if let data = string.data(using: .utf8) {
             return data
         } else {
-            throw CodecError.stringToDataFailed(string)
+            throw Errors.stringToDataFailed(string)
         }
     }
 }
