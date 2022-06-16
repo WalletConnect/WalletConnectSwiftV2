@@ -8,8 +8,8 @@ public struct Envelope: Equatable {
         case unsupportedEnvelopeType
     }
 
-    public let type: EnvelopeType
-    public let sealbox: Data
+    let type: EnvelopeType
+    let sealbox: Data
 
     /// - Parameter base64encoded: base64encoded envelope
     /// tp = type byte (1 byte)
@@ -19,7 +19,7 @@ public struct Envelope: Equatable {
     /// sealbox = iv + ct + tag
     /// type0: tp + sealbox
     /// type1: tp + pk + sealbox
-    public init(_ base64encoded: String) throws {
+    init(_ base64encoded: String) throws {
         guard let envelopeData = Data(base64Encoded: base64encoded) else {
             throw Errors.malformedEnvelope
         }
@@ -29,10 +29,25 @@ public struct Envelope: Equatable {
             self.sealbox = envelopeData.subdata(in: 1..<envelopeData.count)
         } else if envelopeTypeByte == 1 {
             let pubKey = envelopeData.subdata(in: 1..<33).toHexString()
+            print("peer pub key from envelope: \(pubKey)")
             self.type = .type1(pubKey: pubKey)
             self.sealbox = envelopeData.subdata(in: 33..<envelopeData.count)
         } else {
             throw Errors.unsupportedEnvelopeType
+        }
+    }
+
+    init(type: EnvelopeType, sealbox: Data) {
+        self.type = type
+        self.sealbox = sealbox
+    }
+
+    func serialised() -> String {
+        switch type {
+        case .type0:
+            return (type.representingByte.data + sealbox).base64EncodedString()
+        case .type1(let pubKey):
+            return (type.representingByte.data + pubKey.rawRepresentation + sealbox).base64EncodedString()
         }
     }
 
