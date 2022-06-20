@@ -77,5 +77,4 @@ public class Serializer {
         let decryptedData = try codec.decode(sealbox: sealbox, symmetricKey: symmetricKey)
         return try JSONDecoder().decode(T.self, from: decryptedData)
     }
-
 }

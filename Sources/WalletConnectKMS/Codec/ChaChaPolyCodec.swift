@@ -17,7 +17,13 @@ class ChaChaPolyCodec: Codec {
     enum Errors: Error {
         case stringToDataFailed(String)
     }
-    /// nonce should always be random, exposed in parameter for testing purpose only
+    /// Secures the given plaintext message with encryption and an authentication tag.
+    /// - Parameters:
+    ///   - plaintext: plaintext to to encrypt
+    ///   - symmetricKey: symmetric key for encryption
+    ///   - nonce: nonce should always be random, exposed in parameter for testing purpose only
+    /// - Returns: A combined element composed of the tag, the nonce, and the ciphertext.
+    /// The data layout of the combined representation is: nonce, ciphertext, then tag.
     func encode(plaintext: String, symmetricKey: Data, nonce: ChaChaPoly.Nonce) throws -> Data {
         let key = CryptoKit.SymmetricKey(data: symmetricKey)
         let dataToSeal = try data(string: plaintext)
