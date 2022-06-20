@@ -3,7 +3,7 @@ import WalletConnectUtils
 
 struct ChatResponse: Codable {
     let topic: String
-    let requestMethod: ChatRequest.Method
-    let requestParams: ChatRequest.Params
+    let requestMethod: String
+    let requestParams: ChatRequestParams
     let result: JsonRpcResult
 }
