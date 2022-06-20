@@ -1,5 +1,3 @@
-
-
 import Foundation
 import XCTest
 @testable import WalletConnectRelay
@@ -12,14 +10,14 @@ final class ManualSocketConnectionHandlerTests: XCTestCase {
         socket = WebSocketMock()
         sut = ManualSocketConnectionHandler(socket: socket)
     }
-    
+
     func testHandleDisconnect() {
         socket.connect()
         XCTAssertTrue(socket.isConnected)
         try! sut.handleDisconnect(closeCode: .normalClosure)
         XCTAssertFalse(socket.isConnected)
     }
-    
+
     func testHandleConnect() {
         XCTAssertFalse(socket.isConnected)
         try! sut.handleConnect()

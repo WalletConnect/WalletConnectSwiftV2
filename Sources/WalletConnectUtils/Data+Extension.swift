@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Random data generation
 
 extension Data {
-    
+
     public static func randomBytes(count: Int) -> Data {
         var buffer = [UInt8](repeating: 0, count: count)
         let status = SecRandomCopyBytes(kSecRandomDefault, count, &buffer)

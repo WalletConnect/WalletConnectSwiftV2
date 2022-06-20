@@ -9,15 +9,15 @@ struct ExpirableSequenceStub: ExpirableSequence, Equatable {
 }
 
 final class SequenceStoreTests: XCTestCase {
-    
+
     var sut: SequenceStore<ExpirableSequenceStub>!
-    
+
     var storageFake: RuntimeKeyValueStorage!
-    
+
     var timeTraveler: TimeTraveler!
-    
+
     let defaultTime = TimeInterval(Time.day)
-    
+
     override func setUp() {
         timeTraveler = TimeTraveler()
         sut = makeStore("test")
@@ -25,20 +25,20 @@ final class SequenceStoreTests: XCTestCase {
             XCTFail("Unexpected expiration call")
         }
     }
-    
+
     override func tearDown() {
         timeTraveler = nil
         storageFake = nil
         sut = nil
     }
-    
+
     private func makeStore(_ identifier: String) -> SequenceStore<ExpirableSequenceStub> {
         return SequenceStore<ExpirableSequenceStub>(
             store: .init(defaults: RuntimeKeyValueStorage(), identifier: identifier),
             dateInitializer: timeTraveler.generateDate
         )
     }
-    
+
     private func stubSequence(expiry: TimeInterval? = nil) -> ExpirableSequenceStub {
         ExpirableSequenceStub(
             topic: String.generateTopic(),
@@ -46,9 +46,9 @@ final class SequenceStoreTests: XCTestCase {
             expiryDate: timeTraveler.referenceDate.addingTimeInterval(expiry ?? defaultTime)
         )
     }
-    
+
     // MARK: - CRUD Tests
-    
+
     func testRoundTrip() {
         let sequence = stubSequence()
         sut.setSequence(sequence)
@@ -56,7 +56,7 @@ final class SequenceStoreTests: XCTestCase {
         XCTAssertTrue(sut.hasSequence(forTopic: sequence.topic))
         XCTAssertEqual(retrieved, sequence)
     }
-    
+
     func testGetAll() {
         let sequenceArray = (1...10).map { _ -> ExpirableSequenceStub in
             let sequence = stubSequence()
@@ -69,7 +69,7 @@ final class SequenceStoreTests: XCTestCase {
             XCTAssert(retrieved.contains($0))
         }
     }
-    
+
     func testDelete() {
         let sequence = stubSequence()
         sut.setSequence(sequence)
@@ -78,14 +78,14 @@ final class SequenceStoreTests: XCTestCase {
         XCTAssertFalse(sut.hasSequence(forTopic: sequence.topic))
         XCTAssertNil(retrieved)
     }
-    
+
     func testDeleteAll() {
         let sequence = stubSequence()
         sut.setSequence(sequence)
-        
+
         let sut2 = makeStore("test2")
         sut2.setSequence(sequence)
-        
+
         XCTAssertFalse(sut.getAll().isEmpty)
         XCTAssertFalse(sut2.getAll().isEmpty)
 
@@ -94,34 +94,34 @@ final class SequenceStoreTests: XCTestCase {
         XCTAssertTrue(sut.getAll().isEmpty)
         XCTAssertFalse(sut2.getAll().isEmpty)
     }
-    
+
     // MARK: - Expiration Tests
-    
+
     func testHasSequenceExpiration() {
         let sequence = stubSequence()
-        var expired: ExpirableSequenceStub? = nil
+        var expired: ExpirableSequenceStub?
         sut.onSequenceExpiration = { expired = $0 }
-        
+
         sut.setSequence(sequence)
         timeTraveler.travel(by: defaultTime)
-        
+
         XCTAssertFalse(sut.hasSequence(forTopic: sequence.topic))
         XCTAssertEqual(expired?.topic, sequence.topic)
     }
-    
+
     func testGetSequenceExpiration() {
         let sequence = stubSequence()
-        var expired: ExpirableSequenceStub? = nil
+        var expired: ExpirableSequenceStub?
         sut.onSequenceExpiration = { expired = $0 }
-        
+
         sut.setSequence(sequence)
         timeTraveler.travel(by: defaultTime)
         let retrieved = try? sut.getSequence(forTopic: sequence.topic)
-        
+
         XCTAssertNil(retrieved)
         XCTAssertEqual(expired?.topic, sequence.topic)
     }
-    
+
     func testGetAllExpiration() {
         let sequenceCount = 10
         var expiredCount = 0
@@ -130,14 +130,14 @@ final class SequenceStoreTests: XCTestCase {
             let sequence = stubSequence()
             sut.setSequence(sequence)
         }
-        
+
         timeTraveler.travel(by: defaultTime)
         let retrieved = sut.getAll()
-        
+
         XCTAssert(retrieved.isEmpty)
         XCTAssert(expiredCount == sequenceCount)
     }
-    
+
     func testGetAllPartialExpiration() {
         var expiredCount = 0
         sut.onSequenceExpiration = { _ in expiredCount += 1 }
@@ -151,10 +151,10 @@ final class SequenceStoreTests: XCTestCase {
             let sequence = stubSequence()
             sut.setSequence(sequence)
         }
-        
+
         timeTraveler.travel(by: defaultTime)
         let retrievedCount = sut.getAll().count
-        
+
         XCTAssert(retrievedCount == persistentCount)
         XCTAssert(expiredCount == expirableCount)
     }

@@ -1,4 +1,3 @@
-
 import Foundation
 import WalletConnectUtils
 import WalletConnectKMS
@@ -9,7 +8,7 @@ actor RegistryService {
     let registry: Registry
     let logger: ConsoleLogging
     let kms: KeyManagementServiceProtocol
-    
+
     init(registry: Registry,
          networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
@@ -21,7 +20,7 @@ actor RegistryService {
         self.logger = logger
         self.topicToInvitationPubKeyStore = topicToInvitationPubKeyStore
     }
-    
+
     func register(account: Account) async throws -> String {
         let pubKey = try kms.createX25519KeyPair()
         let pubKeyHex = pubKey.hexRepresentation

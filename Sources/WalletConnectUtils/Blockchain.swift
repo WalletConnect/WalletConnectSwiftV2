@@ -9,18 +9,18 @@
  [CAIP-2]:https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-2.md
  */
 public struct Blockchain: Equatable, Hashable {
-    
+
     /// A blockchain namespace. Usually describes an ecosystem or standard.
     public let namespace: String
-    
+
     /// A reference string that identifies a blockchain within a given namespace.
     public let reference: String
-    
+
     /// The CAIP-2 blockchain identifier string.
     public var absoluteString: String {
         "\(namespace):\(reference)"
     }
-    
+
     /**
      Creates an instance of a blockchain reference from a string.
      
@@ -33,7 +33,7 @@ public struct Blockchain: Equatable, Hashable {
         self.namespace = String(splits[0])
         self.reference = String(splits[1])
     }
-    
+
     /**
      Creates an instance of a blockchain reference from a namespace and a reference string.
      
@@ -52,7 +52,7 @@ extension Blockchain: LosslessStringConvertible {
 }
 
 extension Blockchain: Codable {
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let absoluteString = try container.decode(String.self)
@@ -61,7 +61,7 @@ extension Blockchain: Codable {
         }
         self = blockchain
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(absoluteString)

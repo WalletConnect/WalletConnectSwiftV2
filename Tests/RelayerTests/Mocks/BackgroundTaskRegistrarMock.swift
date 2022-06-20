@@ -1,10 +1,9 @@
-
 import Foundation
 @testable import WalletConnectRelay
 
 class BackgroundTaskRegistrarMock: BackgroundTaskRegistering {
-    var completion: (()->())?
-    func register(name: String, completion: @escaping () -> ()) {
+    var completion: (() -> Void)?
+    func register(name: String, completion: @escaping () -> Void) {
         self.completion = completion
     }
 }

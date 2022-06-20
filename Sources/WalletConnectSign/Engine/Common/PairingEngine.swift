@@ -4,7 +4,7 @@ import WalletConnectUtils
 import WalletConnectKMS
 
 final class PairingEngine {
-   
+
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private let pairingStore: WCPairingStorage
@@ -30,23 +30,23 @@ final class PairingEngine {
         setupNetworkingSubscriptions()
         setupExpirationHandling()
     }
-    
+
     func hasPairing(for topic: String) -> Bool {
         return pairingStore.hasPairing(forTopic: topic)
     }
-    
+
     func getSettledPairing(for topic: String) -> WCPairing? {
         guard let pairing = pairingStore.getPairing(forTopic: topic) else {
             return nil
         }
         return pairing
     }
-    
+
     func getSettledPairings() -> [Pairing] {
         pairingStore.getAll()
             .map {Pairing(topic: $0.topic, peer: $0.peerMetadata, expiryDate: $0.expiryDate)}
     }
-    
+
     func create() async throws -> WalletConnectURI {
         let topic = topicInitializer()
         try await networkingInteractor.subscribe(topic: topic)
@@ -56,7 +56,7 @@ final class PairingEngine {
         pairingStore.setPairing(pairing)
         return uri
     }
-    
+
     func propose(pairingTopic: String, namespaces: [String: ProposalNamespace], relay: RelayProtocolOptions) async throws {
         logger.debug("Propose Session on topic: \(pairingTopic)")
         try Namespace.validate(namespaces)
@@ -79,14 +79,14 @@ final class PairingEngine {
         }
     }
 
-    func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
+    func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> Void)) {
         guard pairingStore.hasPairing(forTopic: topic) else {
             logger.debug("Could not find pairing to ping for topic \(topic)")
             return
         }
         networkingInteractor.requestPeerResponse(.wcPairingPing, onTopic: topic) { [unowned self] result in
             switch result {
-            case .success(_):
+            case .success:
                 logger.debug("Did receive ping response")
                 completion(.success(()))
             case .failure(let error):
@@ -99,30 +99,30 @@ final class PairingEngine {
 // MARK: Private
 
 private extension PairingEngine {
-    
+
     func setupNetworkingSubscriptions() {
         networkingInteractor.transportConnectionPublisher
             .sink { [unowned self] (_) in
                 let topics = pairingStore.getAll()
-                    .map{$0.topic}
-                topics.forEach{ topic in Task{try? await networkingInteractor.subscribe(topic: topic)}}
+                    .map {$0.topic}
+                topics.forEach { topic in Task {try? await networkingInteractor.subscribe(topic: topic)}}
             }.store(in: &publishers)
-        
+
         networkingInteractor.wcRequestPublisher
             .sink { [unowned self] subscriptionPayload in
                 switch subscriptionPayload.wcRequest.params {
-                case .pairingPing(_):
+                case .pairingPing:
                     wcPairingPing(subscriptionPayload)
                 default:
                     return
                 }
             }.store(in: &publishers)
     }
-    
+
     func wcPairingPing(_ payload: WCRequestSubscriptionPayload) {
         networkingInteractor.respondSuccess(for: payload)
     }
-    
+
     func setupExpirationHandling() {
         pairingStore.onPairingExpiration = { [weak self] pairing in
             self?.kms.deleteSymmetricKey(for: pairing.topic)

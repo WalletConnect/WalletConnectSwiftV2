@@ -1,12 +1,12 @@
-
 import Foundation
 import WalletConnectUtils
 import WalletConnectKMS
 import Combine
 
 final class ControllerSessionStateMachine {
-    var onNamespacesUpdate: ((String, [String: SessionNamespace])->())?
-    var onExtend: ((String, Date)->())?
+
+    var onNamespacesUpdate: ((String, [String: SessionNamespace]) -> Void)?
+    var onExtend: ((String, Date) -> Void)?
 
     private let sessionStore: WCSessionStorage
     private let networkingInteractor: NetworkInteracting
@@ -26,7 +26,7 @@ final class ControllerSessionStateMachine {
             handleResponse(response)
         }.store(in: &publishers)
     }
-    
+
     func update(topic: String, namespaces: [String: SessionNamespace]) async throws {
         var session = try getSession(for: topic)
         try validateControlledAcknowledged(session)
@@ -36,7 +36,7 @@ final class ControllerSessionStateMachine {
         sessionStore.setSession(session)
         try await networkingInteractor.request(.wcSessionUpdate(SessionType.UpdateParams(namespaces: namespaces)), onTopic: topic)
     }
-    
+
    func extend(topic: String, by ttl: Int64) async throws {
        var session = try getSession(for: topic)
        try validateControlledAcknowledged(session)
@@ -45,9 +45,9 @@ final class ControllerSessionStateMachine {
        sessionStore.setSession(session)
        try await networkingInteractor.request(.wcSessionExtend(SessionType.UpdateExpiryParams(expiry: newExpiry)), onTopic: topic)
    }
-    
+
     // MARK: - Handle Response
-    
+
     private func handleResponse(_ response: WCResponse) {
         switch response.requestParams {
         case .sessionUpdate:
@@ -58,37 +58,37 @@ final class ControllerSessionStateMachine {
             break
         }
     }
-    
+
     // TODO: Re-enable callback
     private func handleUpdateResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sessionStore.getSession(forTopic: topic) else {
+        guard let _ = sessionStore.getSession(forTopic: topic) else {
             return
         }
         switch result {
         case .response:
-            //TODO - state sync
+            // TODO - state sync
 //            onNamespacesUpdate?(session.topic, session.namespaces)
             break
         case .error:
-            //TODO - state sync
+            // TODO - state sync
             logger.error("Peer failed to update methods.")
         }
     }
-    
+
     private func handleUpdateExpiryResponse(topic: String, result: JsonRpcResult) {
         guard let session = sessionStore.getSession(forTopic: topic) else {
             return
         }
         switch result {
         case .response:
-            //TODO - state sync
+            // TODO - state sync
             onExtend?(session.topic, session.expiryDate)
         case .error:
-            //TODO - state sync
+            // TODO - state sync
             logger.error("Peer failed to update events.")
         }
     }
-    
+
     // MARK: - Private
     private func getSession(for topic: String) throws -> WCSession {
         if let session = sessionStore.getSession(forTopic: topic) {
@@ -97,7 +97,7 @@ final class ControllerSessionStateMachine {
             throw WalletConnectError.noSessionMatchingTopic(topic)
         }
     }
-    
+
     private func validateControlledAcknowledged(_ session: WCSession) throws {
         guard session.acknowledged else {
             throw WalletConnectError.sessionNotAcknowledged(session.topic)

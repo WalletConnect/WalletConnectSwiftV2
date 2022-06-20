@@ -1,4 +1,3 @@
-
 import UIKit
 import Foundation
 
@@ -10,7 +9,7 @@ class AccountRequestView: UIView {
         imageView.layer.cornerRadius = 32
         return imageView
     }()
-    
+
     let chainLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 17.0, weight: .heavy)
@@ -32,9 +31,9 @@ class AccountRequestView: UIView {
         stackView.alignment = .center
         return stackView
     }()
-    
+
     let tableView = UITableView()
-    
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .systemBackground
@@ -45,21 +44,21 @@ class AccountRequestView: UIView {
 
         headerStackView.addArrangedSubview(chainLabel)
         headerStackView.addArrangedSubview(accountLabel)
-        
+
         subviews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
-        
+
         NSLayoutConstraint.activate([
             iconView.topAnchor.constraint(equalTo: topAnchor, constant: 64),
             iconView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            
+
             headerStackView.topAnchor.constraint(equalTo: iconView.bottomAnchor, constant: 32),
             headerStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
             headerStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
-            
+
             tableView.topAnchor.constraint(equalTo: headerStackView.bottomAnchor, constant: 0),
             tableView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 0),
             tableView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 0),
-            tableView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
+            tableView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
         ])
     }
 

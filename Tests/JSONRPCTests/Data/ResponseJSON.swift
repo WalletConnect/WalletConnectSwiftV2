@@ -1,9 +1,9 @@
 // MARK: - Valid Response Data
 
 enum ResponseJSON {
-    
+
     // MARK: - Success Responses
-    
+
     static let intResult = """
 {
     "jsonrpc": "2.0",
@@ -11,7 +11,7 @@ enum ResponseJSON {
     "id": 1
 }
 """.data(using: .utf8)!
-    
+
     static let doubleResult = """
 {
     "jsonrpc": "2.0",
@@ -19,7 +19,7 @@ enum ResponseJSON {
     "id": 1
 }
 """.data(using: .utf8)!
-    
+
     static let stringResult = """
 {
     "id": 1,
@@ -27,7 +27,7 @@ enum ResponseJSON {
     "result": "0xdeadbeef"
 }
 """.data(using: .utf8)!
-    
+
     static let boolResult = """
 {
     "jsonrpc": "2.0",
@@ -35,7 +35,7 @@ enum ResponseJSON {
     "id": 1
 }
 """.data(using: .utf8)!
-    
+
     static let arrayResult = """
 {
     "id": 1,
@@ -45,7 +45,7 @@ enum ResponseJSON {
     ]
 }
 """.data(using: .utf8)!
-    
+
     static let objectResult = """
 {
     "id": 1,
@@ -57,7 +57,7 @@ enum ResponseJSON {
     }
 }
 """.data(using: .utf8)!
-    
+
     static let withStringIdentifier = """
 {
     "jsonrpc": "2.0",
@@ -65,9 +65,9 @@ enum ResponseJSON {
     "id": "0xdeadbeef"
 }
 """.data(using: .utf8)!
-    
+
     // MARK: - Error Responses
-    
+
     static let plainError = """
 {
     "jsonrpc": "2.0",
@@ -78,7 +78,7 @@ enum ResponseJSON {
     "id": 0
 }
 """.data(using: .utf8)!
-    
+
     static let errorWithExplicitNullIdentifier = """
 {
     "jsonrpc": "2.0",
@@ -89,7 +89,7 @@ enum ResponseJSON {
     "id": null
 }
 """.data(using: .utf8)!
-    
+
     static let errorWithImplicitNullIdentifier = """
 {
     "jsonrpc": "2.0",
@@ -99,7 +99,7 @@ enum ResponseJSON {
     }
 }
 """.data(using: .utf8)!
-    
+
     static let errorWithPrimitiveData = """
 {
     "jsonrpc": "2.0",
@@ -111,7 +111,7 @@ enum ResponseJSON {
     "id": 0
 }
 """.data(using: .utf8)!
-    
+
     static let errorWithStructuredData = """
 {
     "jsonrpc": "2.0",
@@ -132,7 +132,7 @@ enum ResponseJSON {
 // MARK: - Invalid Response Data
 
 enum InvalidResponseJSON {
-    
+
     static let ambiguousResult = """
 {
     "id": 1,
@@ -144,14 +144,14 @@ enum InvalidResponseJSON {
     }
 }
 """.data(using: .utf8)!
-    
+
     static let absentResult = """
 {
     "id": 1,
     "jsonrpc": "2.0"
 }
 """.data(using: .utf8)!
-    
+
     static let badVersion = """
 {
     "id": 1,
@@ -159,7 +159,7 @@ enum InvalidResponseJSON {
     "result": true
 }
 """.data(using: .utf8)!
-    
+
     static let successWithoutIdentifier = """
 {
     "jsonrpc": "2.0",

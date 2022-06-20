@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 
 struct RoutingEngine {
-    
+
     private var springboard: XCUIApplication {
         return App.springboard.instance
     }
@@ -19,16 +19,17 @@ struct RoutingEngine {
             app.launch()
         }
     }
-    
+
     func activate(app: App) {
-        app.instance.activate()
-        app.instance.waitForAppearence()
+        let app = app.instance
+        app.activate()
+        app.waitForAppearence()
     }
-    
+
     func home() {
         XCUIDevice.shared.press(.home)
     }
-    
+
     func wait(for interval: TimeInterval) {
         Thread.sleep(forTimeInterval: interval)
     }

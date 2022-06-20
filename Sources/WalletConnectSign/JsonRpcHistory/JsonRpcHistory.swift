@@ -1,4 +1,3 @@
-
 import Foundation
 import WalletConnectUtils
 
@@ -9,29 +8,29 @@ protocol JsonRpcHistoryRecording {
     func resolve(response: JsonRpcResult) throws -> JsonRpcRecord
     func exist(id: Int64) -> Bool
 }
-//TODO -remove and use jsonrpc history only from utils
+// TODO -remove and use jsonrpc history only from utils
 class JsonRpcHistory: JsonRpcHistoryRecording {
     let storage: CodableStore<JsonRpcRecord>
     let logger: ConsoleLogging
-    
+
     init(logger: ConsoleLogging, keyValueStore: CodableStore<JsonRpcRecord>) {
         self.logger = logger
         self.storage = keyValueStore
     }
-    
+
     func get(id: Int64) -> JsonRpcRecord? {
         try? storage.get(key: "\(id)")
     }
-    
+
     func set(topic: String, request: WCRequest, chainId: String? = nil) throws {
         guard !exist(id: request.id) else {
             throw WalletConnectError.internal(.jsonRpcDuplicateDetected)
         }
         logger.debug("Setting JSON-RPC request history record - ID: \(request.id)")
         let record = JsonRpcRecord(id: request.id, topic: topic, request: JsonRpcRecord.Request(method: request.method, params: request.params), response: nil, chainId: chainId)
-        try storage.set(record, forKey: "\(request.id)")
+        storage.set(record, forKey: "\(request.id)")
     }
-    
+
     func delete(topic: String) {
         storage.getAll().forEach { record in
             if record.topic == topic {
@@ -39,7 +38,7 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
             }
         }
     }
-    
+
     func resolve(response: JsonRpcResult) throws -> JsonRpcRecord {
         logger.debug("Resolving JSON-RPC response - ID: \(response.id)")
         guard var record = try? storage.get(key: "\(response.id)") else {
@@ -49,16 +48,16 @@ class JsonRpcHistory: JsonRpcHistoryRecording {
             throw WalletConnectError.internal(.jsonRpcDuplicateDetected)
         } else {
             record.response = response
-            try storage.set(record, forKey: "\(record.id)")
+            storage.set(record, forKey: "\(record.id)")
             return record
         }
     }
-    
+
     func exist(id: Int64) -> Bool {
         return (try? storage.get(key: "\(id)")) != nil
     }
-    
+
     public func getPending() -> [JsonRpcRecord] {
-        storage.getAll().filter{$0.response == nil}
+        storage.getAll().filter {$0.response == nil}
     }
 }

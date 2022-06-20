@@ -5,35 +5,35 @@ import Foundation
 
 class MockedRelayClient: NetworkRelaying {
     func subscribe(topic: String) async throws {}
-    
+
     var socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
     }
-    
+
     func publish(topic: String, payload: String, prompt: Bool) async throws {
         self.prompt = prompt
     }
-    
-    var onMessage: ((String, String) -> ())?
+
+    var onMessage: ((String, String) -> Void)?
     var error: Error?
     var prompt = false
-    func publish(topic: String, payload: String, prompt: Bool, onNetworkAcknowledge: @escaping ((Error?) -> ())) -> Int64 {
+    func publish(topic: String, payload: String, prompt: Bool, onNetworkAcknowledge: @escaping ((Error?) -> Void)) -> Int64 {
         self.prompt = prompt
         onNetworkAcknowledge(error)
         return 0
     }
-    
-    func subscribe(topic: String, completion: @escaping (Error?) -> ()) {
+
+    func subscribe(topic: String, completion: @escaping (Error?) -> Void) {
     }
-    
-    func unsubscribe(topic: String, completion: @escaping ((Error?) -> ())) -> Int64? {
+
+    func unsubscribe(topic: String, completion: @escaping ((Error?) -> Void)) -> Int64? {
         return 0
     }
     func connect() {
     }
-    
+
     func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) {
     }
-    
+
 }

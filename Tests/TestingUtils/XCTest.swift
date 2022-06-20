@@ -1,4 +1,3 @@
-
 import Foundation
 import XCTest
 
@@ -17,7 +16,7 @@ extension XCTest {
             errorHandler(error)
         }
     }
-    
+
     public func XCTAssertNoThrowAsync<T: Sendable>(
         _ expression: @autoclosure () async throws -> T,
         _ message: @autoclosure () -> String = "",

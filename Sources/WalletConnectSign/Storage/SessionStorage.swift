@@ -9,38 +9,38 @@ protocol WCSessionStorage: AnyObject {
 }
 
 final class SessionStorage: WCSessionStorage {
-    
+
     var onSessionExpiration: ((WCSession) -> Void)?
-    
+
     private let storage: SequenceStore<WCSession>
-    
+
     init(storage: SequenceStore<WCSession>) {
         self.storage = storage
         storage.onSequenceExpiration = { [unowned self] session in
             onSessionExpiration?(session)
         }
     }
-    
+
     func hasSession(forTopic topic: String) -> Bool {
         storage.hasSequence(forTopic: topic)
     }
-    
+
     func setSession(_ session: WCSession) {
         storage.setSequence(session)
     }
-    
+
     func getSession(forTopic topic: String) -> WCSession? {
         return try? storage.getSequence(forTopic: topic)
     }
-    
+
     func getAll() -> [WCSession] {
         storage.getAll()
     }
-    
+
     func delete(topic: String) {
         storage.delete(topic: topic)
     }
-    
+
     func deleteAll() {
         storage.deleteAll()
     }

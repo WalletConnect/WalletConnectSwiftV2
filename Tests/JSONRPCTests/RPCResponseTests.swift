@@ -3,7 +3,7 @@ import Commons
 import TestingUtils
 @testable import JSONRPC
 
-fileprivate func makeResultResponses() -> [RPCResponse] {
+private func makeResultResponses() -> [RPCResponse] {
     return [
         RPCResponse(id: Int.random(), result: Int.random()),
         RPCResponse(id: Int.random(), result: Bool.random()),
@@ -14,7 +14,7 @@ fileprivate func makeResultResponses() -> [RPCResponse] {
     ]
 }
 
-fileprivate func makeErrorResponses() -> [RPCResponse] {
+private func makeErrorResponses() -> [RPCResponse] {
     return [
         RPCResponse(id: Int.random(), error: JSONRPCError.stub()),
         RPCResponse(id: String.random(), error: JSONRPCError.stub(data: AnyCodable(Int.random()))),
@@ -26,7 +26,7 @@ fileprivate func makeErrorResponses() -> [RPCResponse] {
 final class RPCResponseTests: XCTestCase {
 
     // MARK: - Init & Codable Tests
-    
+
     func testInitWithResult() {
         let responses = makeResultResponses()
         responses.forEach { response in
@@ -36,7 +36,7 @@ final class RPCResponseTests: XCTestCase {
             XCTAssertNil(response.error)
         }
     }
-    
+
     func testInitWithError() {
         let responses = makeErrorResponses()
         responses.forEach { response in
@@ -46,7 +46,7 @@ final class RPCResponseTests: XCTestCase {
             XCTAssertNotNil(response.error)
         }
     }
-    
+
     func testRoundTripResultCoding() throws {
         let responses = makeResultResponses()
         try responses.forEach { response in
@@ -55,7 +55,7 @@ final class RPCResponseTests: XCTestCase {
             XCTAssertEqual(decoded, response)
         }
     }
-    
+
     func testRoundTripErrorCoding() throws {
         let responses = makeErrorResponses()
         try responses.forEach { response in
@@ -64,7 +64,7 @@ final class RPCResponseTests: XCTestCase {
             XCTAssertEqual(decoded, response)
         }
     }
-    
+
     func testNullIdentifierError() throws {
         let response = RPCResponse(errorWithoutID: JSONRPCError.stub())
         XCTAssertEqual(response.jsonrpc, "2.0")
@@ -75,9 +75,9 @@ final class RPCResponseTests: XCTestCase {
         let decoded = try JSONDecoder().decode(RPCResponse.self, from: encoded)
         XCTAssertEqual(decoded, response)
     }
-    
+
     // MARK: - Decode Result Tests
-    
+
     func testDecodeResultInt() throws {
         let response = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.intResult)
         let intValue = try response.result?.get(Int.self)
@@ -85,7 +85,7 @@ final class RPCResponseTests: XCTestCase {
         XCTAssertNotNil(response.id)
         XCTAssertNil(response.error)
     }
-    
+
     func testDecodeResultDouble() throws {
         let response = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.doubleResult)
         let doubleValue = try response.result?.get(Double.self) ?? 0.0
@@ -93,7 +93,7 @@ final class RPCResponseTests: XCTestCase {
         XCTAssertNotNil(response.id)
         XCTAssertNil(response.error)
     }
-    
+
     func testDecodeResultString() throws {
         let response = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.stringResult)
         let stringValue = try response.result?.get(String.self)
@@ -101,7 +101,7 @@ final class RPCResponseTests: XCTestCase {
         XCTAssertNotNil(response.id)
         XCTAssertNil(response.error)
     }
-    
+
     func testDecodeResultBool() throws {
         let response = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.boolResult)
         let boolValue = try response.result?.get(Bool.self)
@@ -109,7 +109,7 @@ final class RPCResponseTests: XCTestCase {
         XCTAssertNotNil(response.id)
         XCTAssertNil(response.error)
     }
-    
+
     func testDecodeResultArray() throws {
         let response = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.arrayResult)
         let arrayValue = try response.result?.get([String].self)
@@ -117,7 +117,7 @@ final class RPCResponseTests: XCTestCase {
         XCTAssertNotNil(response.id)
         XCTAssertNil(response.error)
     }
-    
+
     func testDecodeResultObject() throws {
         let response = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.objectResult)
         let objectValue = try response.result?.get([String: AnyCodable].self)
@@ -127,7 +127,7 @@ final class RPCResponseTests: XCTestCase {
         XCTAssertEqual(try? objectValue?["bool"]?.get(Bool.self), false)
         XCTAssertEqual(try? objectValue?["string"]?.get(String.self), "0xc0ffee")
     }
-    
+
     func testDecodeResponseIdentifier() throws {
         let numberResponseId = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.intResult).id
         XCTAssert(numberResponseId?.isNumber == true)
@@ -141,16 +141,16 @@ final class RPCResponseTests: XCTestCase {
         let implicitNullResponseId = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.errorWithImplicitNullIdentifier).id
         XCTAssertNil(implicitNullResponseId)
     }
-    
+
     // MARK: - Decode Error Tests
-    
+
     func testDecodeError() throws {
         let response = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.plainError)
         XCTAssertNil(response.result)
         XCTAssertNotNil(response.error)
         XCTAssertEqual(response.error?.code, -32600)
     }
-    
+
     func testDecodeErrorWithPrimitiveData() throws {
         let response = try JSONDecoder().decode(RPCResponse.self, from: ResponseJSON.errorWithPrimitiveData)
         XCTAssertNil(response.result)
@@ -167,9 +167,9 @@ final class RPCResponseTests: XCTestCase {
         XCTAssertNotNil(try heterogeneousArray?[1].get(Bool.self))
         XCTAssertNotNil(try heterogeneousArray?[2].get(String.self))
     }
-    
+
     // MARK: - Invalid Data Tests
-    
+
     func testInvalidResponseDecode() {
         XCTAssertThrowsError(try JSONDecoder().decode(RPCResponse.self, from: InvalidResponseJSON.ambiguousResult), "A response must not include both result and error members.")
         XCTAssertThrowsError(try JSONDecoder().decode(RPCResponse.self, from: InvalidResponseJSON.absentResult), "A response must include either a result or an error member.")

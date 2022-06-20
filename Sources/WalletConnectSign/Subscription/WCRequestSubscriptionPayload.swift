@@ -1,4 +1,3 @@
-
 import Foundation
 
 struct WCRequestSubscriptionPayload: Codable {
