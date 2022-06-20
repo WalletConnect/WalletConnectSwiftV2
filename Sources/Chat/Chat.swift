@@ -7,19 +7,20 @@ import Combine
 class Chat {
     private var publishers = [AnyCancellable]()
     let registry: Registry
-    let registryManager: RegistryManager
-    let engine: Engine
+    let registryService: RegistryService
+    let invitationHandlingService: InvitationHandlingService
+    let inviteService: InviteService
     let kms: KeyManagementService
 
     let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
-    var newThreadPublisherSubject = PassthroughSubject<Thread, Never>()
-    public var newThreadPublisher: AnyPublisher<Thread, Never> {
+    var newThreadPublisherSubject = PassthroughSubject<String, Never>()
+    public var newThreadPublisher: AnyPublisher<String, Never> {
         newThreadPublisherSubject.eraseToAnyPublisher()
     }
 
-    var invitePublisherSubject = PassthroughSubject<Invite, Never>()
-    public var invitePublisher: AnyPublisher<Invite, Never> {
+    var invitePublisherSubject = PassthroughSubject<InviteEnvelope, Never>()
+    public var invitePublisher: AnyPublisher<InviteEnvelope, Never> {
         invitePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -32,16 +33,23 @@ class Chat {
         self.registry = registry
         self.kms = kms
         let serialiser = Serializer(kms: kms)
-        let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serialiser)
-        let inviteStore = CodableStore<Invite>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
-        self.registryManager = RegistryManager(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToInvitationPubKeyStore: topicToInvitationPubKeyStore)
-        self.engine = Engine(registry: registry,
+        let jsonRpcHistory = JsonRpcHistory<ChatRequestParams>(logger: logger, keyValueStore: CodableStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
+        let networkingInteractor = NetworkingInteractor(
+            relayClient: relayClient,
+            serializer: serialiser,
+            logger: logger,
+            jsonRpcHistory: jsonRpcHistory)
+        let invitePayloadStore = CodableStore<RequestSubscriptionPayload>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
+        self.registryService = RegistryService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToInvitationPubKeyStore: topicToInvitationPubKeyStore)
+        let codec = ChaChaPolyCodec()
+        self.invitationHandlingService = InvitationHandlingService(registry: registry,
                              networkingInteractor: networkingInteractor,
-                             kms: kms,
-                             logger: logger,
-                             topicToInvitationPubKeyStore: topicToInvitationPubKeyStore,
-                             inviteStore: inviteStore,
-                             threadsStore: CodableStore<Thread>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.threads.rawValue))
+                                                                   kms: kms,
+                                                                   logger: logger,
+                                                                   topicToInvitationPubKeyStore: topicToInvitationPubKeyStore,
+                                                                   invitePayloadStore: invitePayloadStore,
+                                                                   threadsStore: CodableStore<Thread>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.threads.rawValue), codec: codec)
+        self.inviteService = InviteService(networkingInteractor: networkingInteractor, kms: kms, logger: logger, codec: codec)
         socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
         setUpEnginesCallbacks()
     }
@@ -51,7 +59,7 @@ class Chat {
     /// - Parameter account: CAIP10 blockchain account
     /// - Returns: public key
     func register(account: Account) async throws -> String {
-        try await registryManager.register(account: account)
+        try await registryService.register(account: account)
     }
 
     /// Queries the default keyserver with a blockchain account
@@ -66,11 +74,14 @@ class Chat {
     ///   - publicKey: publicKey associated with a peer
     ///   - openingMessage: oppening message for a chat invite
     func invite(publicKey: String, openingMessage: String) async throws {
-        try await engine.invite(peerPubKey: publicKey, openingMessage: openingMessage)
+        // TODO - how to provide account?
+        // in init or in invite method's params
+        let tempAccount = Account("eip155:1:33e32e32")!
+        try await inviteService.invite(peerPubKey: publicKey, openingMessage: openingMessage, account: tempAccount)
     }
 
     func accept(inviteId: String) async throws {
-        try await engine.accept(inviteId: inviteId)
+        try await invitationHandlingService.accept(inviteId: inviteId)
     }
 
     /// Sends a chat message to an active chat thread
@@ -88,10 +99,13 @@ class Chat {
     }
 
     private func setUpEnginesCallbacks() {
-        engine.onInvite = { [unowned self] invite in
-            invitePublisherSubject.send(invite)
+        invitationHandlingService.onInvite = { [unowned self] inviteEnvelope in
+            invitePublisherSubject.send(inviteEnvelope)
         }
-        engine.onNewThread = { [unowned self] newThread in
+        invitationHandlingService.onNewThread = { [unowned self] newThread in
+            newThreadPublisherSubject.send(newThread)
+        }
+        inviteService.onNewThread = { [unowned self] newThread in
             newThreadPublisherSubject.send(newThread)
         }
     }

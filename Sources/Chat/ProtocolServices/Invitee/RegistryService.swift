@@ -2,7 +2,7 @@ import Foundation
 import WalletConnectUtils
 import WalletConnectKMS
 
-actor RegistryManager {
+actor RegistryService {
     let networkingInteractor: NetworkInteracting
     let topicToInvitationPubKeyStore: CodableStore<String>
     let registry: Registry
