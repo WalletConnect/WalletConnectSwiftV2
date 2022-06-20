@@ -1,4 +1,3 @@
-
 import Foundation
 import WalletConnectKMS
 import WalletConnectUtils
@@ -9,8 +8,8 @@ class InvitationHandlingService {
     enum Error: Swift.Error {
         case inviteForIdNotFound
     }
-    var onInvite: ((InviteEnvelope)->())?
-    var onNewThread: ((String)->())?
+    var onInvite: ((InviteEnvelope)->Void)?
+    var onNewThread: ((String)->Void)?
     private let networkingInteractor: NetworkInteracting
     private let invitePayloadStore: CodableStore<(RequestSubscriptionPayload)>
     private let topicToInvitationPubKeyStore: CodableStore<String>
@@ -20,7 +19,7 @@ class InvitationHandlingService {
     private let threadsStore: CodableStore<Thread>
     private var publishers = [AnyCancellable]()
     private let codec: Codec
-    
+
     init(registry: Registry,
          networkingInteractor: NetworkInteracting,
          kms: KeyManagementService,
@@ -41,27 +40,27 @@ class InvitationHandlingService {
     }
 
     func accept(inviteId: String) async throws {
-        
+
         guard let payload = try invitePayloadStore.get(key: inviteId) else { throw Error.inviteForIdNotFound }
-        
+
         let selfThreadPubKey = try kms.createX25519KeyPair()
-        
+
         let inviteResponse = InviteResponse(pubKey: selfThreadPubKey.hexRepresentation)
-        
+
         let response = JsonRpcResult.response(JSONRPCResponse<AnyCodable>(id: payload.request.id, result: AnyCodable(inviteResponse)))
-        
+
         try await networkingInteractor.respond(topic: payload.topic, response: response)
-        
+
         guard case .invite(let inviteParams) = payload.request.params else {return}
-        
+
         let threadAgreementKeys = try kms.performKeyAgreement(selfPublicKey: selfThreadPubKey, peerPublicKey: inviteParams.pubKey)
-        
+
         let threadTopic = threadAgreementKeys.derivedTopic()
-        
+
         try await networkingInteractor.subscribe(topic: threadTopic)
-        
+
         logger.debug("Accepting an invite")
-        
+
         onNewThread?(threadTopic)
     }
 
@@ -86,19 +85,19 @@ class InvitationHandlingService {
             logger.debug("PubKey for invitation topic not found")
             return
         }
-        
+
         let selfPubKey = try AgreementPublicKey(hex: selfPubKeyHex)
-        
+
         let agreementKeysI = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: inviteParams.pubKey)
-                        
+
         let decryptedData = try codec.decode(sealboxString: inviteParams.invite, symmetricKey: agreementKeysI.sharedKey.rawRepresentation)
-        
+
         let invite = try JSONDecoder().decode(Invite.self, from: decryptedData)
-        
+
         try kms.setSymmetricKey(agreementKeysI.sharedKey, for: payload.topic)
-        
+
         invitePayloadStore.set(payload, forKey: inviteParams.id)
-                
+
         onInvite?(InviteEnvelope(pubKey: inviteParams.pubKey, invite: invite))
     }
 }

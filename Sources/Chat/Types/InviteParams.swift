@@ -1,11 +1,10 @@
-
 import WalletConnectUtils
 import Foundation
 
 struct InviteParams: Codable, Equatable {
     let pubKey: String
     let invite: String
-    
+
     var id: String {
         return pubKey
     }
@@ -14,7 +13,6 @@ struct InviteParams: Codable, Equatable {
 struct InviteResponse: Codable {
     let pubKey: String
 }
-
 
 struct Invite: Codable {
     let message: String

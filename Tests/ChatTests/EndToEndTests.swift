@@ -1,4 +1,3 @@
-
 import Foundation
 import XCTest
 @testable import Chat
@@ -13,13 +12,13 @@ final class ChatTests: XCTestCase {
     var inviter: Chat!
     var registry: KeyValueRegistry!
     private var publishers = [AnyCancellable]()
-    
+
     override func setUp() {
         registry = KeyValueRegistry()
         invitee = makeClient(prefix: "🦖 Registered")
         inviter = makeClient(prefix: "🍄 Inviter")
     }
-    
+
     private func waitClientsConnected() async {
         let group = DispatchGroup()
         group.enter()
@@ -38,7 +37,7 @@ final class ChatTests: XCTestCase {
         group.wait()
         return
     }
-    
+
     func makeClient(prefix: String) -> Chat {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let relayHost = "relay.walletconnect.com"
@@ -48,7 +47,7 @@ final class ChatTests: XCTestCase {
 
         return Chat(registry: registry, relayClient: relayClient, kms: KeyManagementService(keychain: keychain), logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
-    
+
     func testInvite() async {
         await waitClientsConnected()
         let inviteExpectation = expectation(description: "invitation expectation")
@@ -60,7 +59,7 @@ final class ChatTests: XCTestCase {
         }.store(in: &publishers)
         wait(for: [inviteExpectation], timeout: 4)
     }
-    
+
     func testAcceptAndCreateNewThread() async {
         await waitClientsConnected()
         let newThreadInviterExpectation = expectation(description: "new thread on inviting client expectation")
@@ -68,19 +67,19 @@ final class ChatTests: XCTestCase {
         let account = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
         let pubKey = try! await invitee.register(account: account)
         try! await inviter.invite(publicKey: pubKey, openingMessage: "opening message")
-        
+
         invitee.invitePublisher.sink { [unowned self] inviteEnvelope in
             Task {try! await invitee.accept(inviteId: inviteEnvelope.pubKey)}
         }.store(in: &publishers)
-        
-        invitee.newThreadPublisher.sink { thread in
+
+        invitee.newThreadPublisher.sink { _ in
             newThreadinviteeExpectation.fulfill()
         }.store(in: &publishers)
-        
-        inviter.newThreadPublisher.sink { thread in
+
+        inviter.newThreadPublisher.sink { _ in
             newThreadInviterExpectation.fulfill()
         }.store(in: &publishers)
-        
+
         wait(for: [newThreadinviteeExpectation, newThreadInviterExpectation], timeout: 4)
     }
 }

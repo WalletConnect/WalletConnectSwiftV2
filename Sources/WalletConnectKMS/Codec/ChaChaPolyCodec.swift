@@ -14,7 +14,7 @@ public extension Codec {
 }
 
 public class ChaChaPolyCodec: Codec {
-    
+
     public init() {}
     /// nonce should always be random, exposed in parameter for testing purpose only
     public func encode(plaintext: String, symmetricKey: Data, nonce: ChaChaPoly.Nonce) throws -> String {
@@ -23,7 +23,7 @@ public class ChaChaPolyCodec: Codec {
         let sealBox = try ChaChaPoly.seal(dataToSeal, using: key, nonce: nonce)
         return sealBox.combined.base64EncodedString()
     }
-    
+
     public func decode(sealboxString: String, symmetricKey: Data) throws -> Data {
         guard let sealboxData = Data(base64Encoded: sealboxString) else {
             throw CodecError.malformedSealbox
