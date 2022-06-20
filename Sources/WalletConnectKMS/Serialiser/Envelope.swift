@@ -29,7 +29,6 @@ public struct Envelope: Equatable {
             self.sealbox = envelopeData.subdata(in: 1..<envelopeData.count)
         } else if envelopeTypeByte == 1 {
             let pubKey = envelopeData.subdata(in: 1..<33)
-            print("peer pub key from envelope: \(pubKey)")
             self.type = .type1(pubKey: pubKey)
             self.sealbox = envelopeData.subdata(in: 33..<envelopeData.count)
         } else {
