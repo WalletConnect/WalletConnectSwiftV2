@@ -36,10 +36,6 @@ extension NetworkInteracting {
 }
 
 class NetworkInteractor: NetworkInteracting {
-    enum Errors: Error {
-        case unsupportedEnvelopeType
-    }
-
     private var publishers = [AnyCancellable]()
     
     private var relayClient: NetworkRelaying
