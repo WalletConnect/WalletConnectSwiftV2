@@ -70,7 +70,7 @@ public class Serializer {
               case let .type1(peerPubKey) = envelope.type else { return nil }
         print("my pub key: \(pubKey.hexRepresentation)")
         print("peer pub key: \(peerPubKey)")
-        let agreementKeys = try kms.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: peerPubKey)
+        let agreementKeys = try kms.performKeyAgreement(selfPublicKey: pubKey, peerPublicKey: peerPubKey.toHexString())
         let decodedType: T? = try decode(sealbox: envelope.sealbox, symmetricKey: agreementKeys.sharedKey.rawRepresentation)
         let newTopic = agreementKeys.derivedTopic()
         try kms.setAgreementSecret(agreementKeys, topic: newTopic)

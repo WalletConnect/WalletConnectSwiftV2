@@ -28,7 +28,7 @@ public struct Envelope: Equatable {
             self.type = .type0
             self.sealbox = envelopeData.subdata(in: 1..<envelopeData.count)
         } else if envelopeTypeByte == 1 {
-            let pubKey = envelopeData.subdata(in: 1..<33).toHexString()
+            let pubKey = envelopeData.subdata(in: 1..<33)
             print("peer pub key from envelope: \(pubKey)")
             self.type = .type1(pubKey: pubKey)
             self.sealbox = envelopeData.subdata(in: 33..<envelopeData.count)
@@ -47,7 +47,7 @@ public struct Envelope: Equatable {
         case .type0:
             return (type.representingByte.data + sealbox).base64EncodedString()
         case .type1(let pubKey):
-            return (type.representingByte.data + pubKey.rawRepresentation + sealbox).base64EncodedString()
+            return (type.representingByte.data + pubKey + sealbox).base64EncodedString()
         }
     }
 
@@ -61,7 +61,7 @@ public extension Envelope {
         /// type 0 = tp + iv + ct + tag
         case type0
         /// type 1 = tp + pk + iv + ct + tag
-        case type1(pubKey: String)
+        case type1(pubKey: Data)
 
         var representingByte: UInt8 {
             switch self {

@@ -33,20 +33,14 @@ final class SerializerTests: XCTestCase {
         let myPubKey = try! myKms.createX25519KeyPair()
         let topic = myPubKey.rawRepresentation.sha256().toHexString()
         try! myKms.setPublicKey(publicKey: myPubKey, for: topic)
-        print("test.my pub key: \(myPubKey.hexRepresentation)")
-
-        // Actions on Peer
-        print("----------------Peer Serialising------------------")
+        //----------------Peer Serialising------------------
         let messageToSerialize = "todo - change for request object"
         let peerPubKey = try! peerKms.createX25519KeyPair()
-
-        print("test.peer pub key: \(peerPubKey.hexRepresentation)")
-
         let agreementKeys = try! peerKms.performKeyAgreement(selfPublicKey: peerPubKey, peerPublicKey: myPubKey.hexRepresentation)
         try! peerKms.setAgreementSecret(agreementKeys, topic: topic)
-        let serializedMessage = try! peerSerializer.serialize(topic: topic, encodable: messageToSerialize, envelopeType: .type1(pubKey: peerPubKey.hexRepresentation))
+        let serializedMessage = try! peerSerializer.serialize(topic: topic, encodable: messageToSerialize, envelopeType: .type1(pubKey: peerPubKey.rawRepresentation))
         print(agreementKeys.sharedKey.hexRepresentation)
-        print("-----------ME Deserialising -------------------")
+        //-----------Me Deserialising -------------------
         let deserializedMessage: String? = mySerializer.tryDeserialize(topic: topic, encodedEnvelope: serializedMessage)
         XCTAssertEqual(messageToSerialize, deserializedMessage)
     }
