@@ -8,7 +8,7 @@ import Starscream
 
 final class RelayClientEndToEndTests: XCTestCase {
 
-    let relayHost = "relay.walletconnect.com"
+    let relayHost = "beta.relay.walletconnect.com"
     let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
     private var publishers = [AnyCancellable]()
 
