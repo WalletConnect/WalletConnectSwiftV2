@@ -54,9 +54,6 @@ public struct Envelope: Equatable {
 
 public extension Envelope {
     enum EnvelopeType: Equatable {
-        enum Errors: Error {
-            case unsupportedPolicyType
-        }
         /// type 0 = tp + iv + ct + tag
         case type0
         /// type 1 = tp + pk + iv + ct + tag
