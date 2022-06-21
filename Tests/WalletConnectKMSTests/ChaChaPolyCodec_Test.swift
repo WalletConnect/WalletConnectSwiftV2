@@ -1,4 +1,3 @@
-
 import Foundation
 import XCTest
 @testable import WalletConnectKMS
@@ -33,9 +32,9 @@ class ChaChaPolyCodec_Test: XCTestCase {
         let encryptedPayload = try! codec.encode(plaintext: message, symmetricKey: symmetricKey)
         XCTAssertNoThrow(try codec.decode(sealbox: encryptedPayload, symmetricKey: symmetricKey))
     }
-    
+
     // MARK: - Tests cohesion with Kotlin and JS
-    
+
     func testEncodeCohesion() {
         let plaintext = "WalletConnect"
         let nonceString = "qwecfaasdads"
@@ -43,7 +42,7 @@ class ChaChaPolyCodec_Test: XCTestCase {
         let serializedMessage = try! codec.encode(plaintext: plaintext, symmetricKey: symmetricKey, nonce: nonce).base64EncodedString()
         XCTAssertEqual(serializedMessage, "cXdlY2ZhYXNkYWRzVhkbjHqli8hN0rFbAtMPIsJho4zLvWskMTQKSGw=")
     }
-    
+
     func testDecodeCohesion() {
         let combinedSealBox = Data(base64Encoded: "cXdlY2ZhYXNkYWRzVhkbjHqli8hN0rFbAtMPIsJho4zLvWskMTQKSGw=")!
         let decryptedData = try! codec.decode(sealbox: combinedSealBox, symmetricKey: symmetricKey)

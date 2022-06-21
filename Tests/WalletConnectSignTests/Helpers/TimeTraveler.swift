@@ -1,17 +1,17 @@
 import Foundation
 
 final class TimeTraveler {
-    
+
     private(set) var referenceDate = Date()
-    
+
     func generateDate() -> Date {
         return referenceDate
     }
-    
+
     func travel(by timeInterval: TimeInterval) {
         referenceDate = referenceDate.addingTimeInterval(timeInterval)
     }
-    
+
     static func dateByAdding(days: Int) -> Date {
         Calendar.current.date(byAdding: .day, value: days, to: Date())!
     }

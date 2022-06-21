@@ -1,4 +1,3 @@
-
 import Foundation
 import WalletConnectRelay
 import WalletConnectUtils
@@ -21,9 +20,10 @@ import UIKit
 ///     - delegate: The object that acts as the delegate of WalletConnect Client
 ///     - logger: An object for logging messages
 public final class SignClient {
+
     public weak var delegate: SignClientDelegate?
+
     public let logger: ConsoleLogging
-    private var publishers = [AnyCancellable]()
     private let metadata: AppMetadata
     private let pairingEngine: PairingEngine
     private let pairEngine: PairEngine
@@ -35,6 +35,7 @@ public final class SignClient {
     private let kms: KeyManagementService
     private let history: JsonRpcHistory
     private let cleanupService: CleanupService
+    private var publishers = [AnyCancellable]()
 
     // MARK: - Initializers
 
@@ -48,9 +49,9 @@ public final class SignClient {
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
     public convenience init(metadata: AppMetadata, projectId: String, relayHost: String, keyValueStorage: KeyValueStorage = UserDefaults.standard) {
-        self.init(metadata: metadata, projectId: projectId, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), kms: KeyManagementService(serviceIdentifier:  "com.walletconnect.sdk"), keyValueStorage: keyValueStorage)
+        self.init(metadata: metadata, projectId: projectId, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), kms: KeyManagementService(serviceIdentifier: "com.walletconnect.sdk"), keyValueStorage: keyValueStorage)
     }
-    
+
     init(metadata: AppMetadata, projectId: String, relayHost: String, logger: ConsoleLogging, kms: KeyManagementService, keyValueStorage: KeyValueStorage) {
         self.metadata = metadata
         self.logger = logger
@@ -73,7 +74,7 @@ public final class SignClient {
         setUpConnectionObserving(relayClient: relayClient)
         setUpEnginesCallbacks()
     }
-    
+
     /// Initializes and returns newly created WalletConnect Client Instance. Establishes a network connection with the relay
     ///
     /// - Parameters:
@@ -82,10 +83,10 @@ public final class SignClient {
     ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults but if for some reasons you want to provide your own storage you can inject it here.
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
-    public convenience init(metadata: AppMetadata, relayClient: RelayClient, keyValueStorage: KeyValueStorage = UserDefaults.standard, kms: KeyManagementService = KeyManagementService(serviceIdentifier:  "com.walletconnect.sdk")) {
+    public convenience init(metadata: AppMetadata, relayClient: RelayClient, keyValueStorage: KeyValueStorage = UserDefaults.standard, kms: KeyManagementService = KeyManagementService(serviceIdentifier: "com.walletconnect.sdk")) {
         self.init(metadata: metadata, relayClient: relayClient, logger: ConsoleLogger(loggingLevel: .off), kms: kms, keyValueStorage: keyValueStorage)
     }
-    
+
     init(metadata: AppMetadata, relayClient: RelayClient, logger: ConsoleLogging, kms: KeyManagementService, keyValueStorage: KeyValueStorage) {
         self.metadata = metadata
         self.logger = logger
@@ -107,7 +108,7 @@ public final class SignClient {
         setUpConnectionObserving(relayClient: relayClient)
         setUpEnginesCallbacks()
     }
-    
+
     private func setUpConnectionObserving(relayClient: RelayClient) {
         relayClient.socketConnectionStatusPublisher.sink { [weak self] status in
             self?.delegate?.didChangeSocketConnectionStatus(status)
@@ -132,11 +133,11 @@ public final class SignClient {
             return nil
         } else {
             let pairingURI = try await pairingEngine.create()
-            try await pairingEngine.propose(pairingTopic: pairingURI.topic, namespaces: requiredNamespaces ,relay: pairingURI.relay)
+            try await pairingEngine.propose(pairingTopic: pairingURI.topic, namespaces: requiredNamespaces, relay: pairingURI.relay)
             return pairingURI.absoluteString
         }
     }
-    
+
     /// For responder to receive a session proposal from a proposer
     /// Responder should call this function in order to accept peer's pairing proposal and be able to subscribe for future session proposals.
     /// - Parameter uri: Pairing URI that is commonly presented as a QR code by a dapp.
@@ -150,26 +151,26 @@ public final class SignClient {
         }
         try await pairEngine.pair(pairingURI)
     }
-    
+
     /// For the responder to approve a session proposal.
     /// - Parameters:
     ///   - proposalId: Session Proposal Public key received from peer client in a WalletConnect delegate function: `didReceive(sessionProposal: Session.Proposal)`
     ///   - accounts: A Set of accounts that the dapp will be allowed to request methods executions on.
     ///   - methods: A Set of methods that the dapp will be allowed to request.
     ///   - events: A Set of events
-    public func approve(proposalId: String, namespaces: [String: SessionNamespace]) throws {
-        //TODO - accounts should be validated for matching namespaces BEFORE responding proposal
-        try approveEngine.approveProposal(proposerPubKey: proposalId, validating: namespaces)
+    public func approve(proposalId: String, namespaces: [String: SessionNamespace]) async throws {
+        // TODO - accounts should be validated for matching namespaces BEFORE responding proposal
+        try await approveEngine.approveProposal(proposerPubKey: proposalId, validating: namespaces)
     }
-    
+
     /// For the responder to reject a session proposal.
     /// - Parameters:
     ///   - proposalId: Session Proposal Public key received from peer client in a WalletConnect delegate.
     ///   - reason: Reason why the session proposal was rejected. Conforms to CAIP25.
-    public func reject(proposalId: String, reason: RejectionReason) throws {
-        try approveEngine.reject(proposerPubKey: proposalId, reason: reason.internalRepresentation())
+    public func reject(proposalId: String, reason: RejectionReason) async throws {
+        try await approveEngine.reject(proposerPubKey: proposalId, reason: reason.internalRepresentation())
     }
-    
+
     /// For the responder to update session namespaces
     /// - Parameters:
     ///   - topic: Topic of the session that is intended to be updated.
@@ -177,7 +178,7 @@ public final class SignClient {
     public func update(topic: String, namespaces: [String: SessionNamespace]) async throws {
         try await controllerSessionStateMachine.update(topic: topic, namespaces: namespaces)
     }
-    
+
     /// For controller to update expiry of a session
     /// - Parameters:
     ///   - topic: Topic of the Session, it can be a pairing or a session topic.
@@ -188,22 +189,22 @@ public final class SignClient {
             try await controllerSessionStateMachine.extend(topic: topic, by: ttl)
         }
     }
-    
+
     /// For the proposer to send JSON-RPC requests to responding peer.
     /// - Parameters:
     ///   - params: Parameters defining request and related session
     public func request(params: Request) async throws {
         try await sessionEngine.request(params)
     }
-    
+
     /// For the responder to respond on pending peer's session JSON-RPC Request
     /// - Parameters:
     ///   - topic: Topic of the session for which the request was received.
     ///   - response: Your JSON RPC response or an error.
-    public func respond(topic: String, response: JsonRpcResult) {
-        sessionEngine.respondSessionRequest(topic: topic, response: response)
+    public func respond(topic: String, response: JsonRpcResult) async throws {
+        try await sessionEngine.respondSessionRequest(topic: topic, response: response)
     }
-    
+
     /// Ping method allows to check if client's peer is online and is subscribing for your sequence topic
     ///
     ///  Should Error:
@@ -214,7 +215,7 @@ public final class SignClient {
     /// - Parameters:
     ///   - topic: Topic of the sequence, it can be a pairing or a session topic.
     ///   - completion: Result will be success on response or error on timeout. -- TODO: timeout
-    public func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> ())) {
+    public func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> Void)) {
         if pairingEngine.hasPairing(for: topic) {
             pairingEngine.ping(topic: topic) { result in
                 completion(result)
@@ -225,7 +226,7 @@ public final class SignClient {
             }
         }
     }
-    
+
     /// For the proposer and responder to emits an event on the peer for an existing session
     ///
     /// When:  a client wants to emit an event to its peer client (eg. chain changed or tx replaced)
@@ -241,7 +242,7 @@ public final class SignClient {
     public func emit(topic: String, event: Session.Event, chainId: Blockchain) async throws {
         try await sessionEngine.emit(topic: topic, event: event.internalRepresentation(), chainId: chainId)
     }
-    
+
     /// For the proposer and responder to terminate a session
     ///
     /// Should Error:
@@ -253,33 +254,33 @@ public final class SignClient {
     public func disconnect(topic: String, reason: Reason) async throws {
         try await sessionEngine.delete(topic: topic, reason: reason)
     }
-    
+
     /// - Returns: All sessions
     public func getSessions() -> [Session] {
         sessionEngine.getSessions()
     }
-    
+
     /// - Returns: All settled pairings that are active
     public func getSettledPairings() -> [Pairing] {
         pairingEngine.getSettledPairings()
     }
-    
+
     /// - Returns: Pending requests received with wc_sessionRequest
     /// - Parameter topic: topic representing session for which you want to get pending requests. If nil, you will receive pending requests for all active sessions.
     public func getPendingRequests(topic: String? = nil) -> [Request] {
         let pendingRequests: [Request] = history.getPending()
-            .filter{$0.request.method == .sessionRequest}
+            .filter {$0.request.method == .sessionRequest}
             .compactMap {
                 guard case let .sessionRequest(payloadRequest) = $0.request.params else {return nil}
                 return Request(id: $0.id, topic: $0.topic, method: payloadRequest.request.method, params: payloadRequest.request.params, chainId: payloadRequest.chainId)
             }
         if let topic = topic {
-            return pendingRequests.filter{$0.topic == topic}
+            return pendingRequests.filter {$0.topic == topic}
         } else {
             return pendingRequests
         }
     }
-    
+
     /// - Parameter id: id of a wc_sessionRequest jsonrpc request
     /// - Returns: json rpc record object for given id or nil if record for give id does not exits
     public func getSessionRequestRecord(id: Int64) -> WalletConnectUtils.JsonRpcRecord? {
@@ -290,7 +291,7 @@ public final class SignClient {
     }
 
     // MARK: - Private
-    
+
     private func setUpEnginesCallbacks() {
         approveEngine.onSessionProposal = { [unowned self] proposal in
             delegate?.didReceive(sessionProposal: proposal)

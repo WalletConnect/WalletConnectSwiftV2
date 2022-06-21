@@ -31,7 +31,6 @@ class ChaChaPolyCodec: Codec {
         return sealBox.combined
     }
 
-
     /// Decrypts the message and verifies its authenticity.
     /// - Parameters:
     ///   - sealbox: The sealed box to open.

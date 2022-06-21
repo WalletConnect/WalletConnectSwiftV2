@@ -1,4 +1,3 @@
-
 import Foundation
 import XCTest
 @testable import Chat
@@ -9,28 +8,28 @@ import WalletConnectRelay
 import Combine
 
 final class ChatTests: XCTestCase {
-    var client1: Chat!
-    var client2: Chat!
+    var invitee: Chat!
+    var inviter: Chat!
     var registry: KeyValueRegistry!
     private var publishers = [AnyCancellable]()
-    
+
     override func setUp() {
         registry = KeyValueRegistry()
-        client1 = makeClient(prefix: "🦖")
-        client2 = makeClient(prefix: "🍄")
+        invitee = makeClient(prefix: "🦖 Registered")
+        inviter = makeClient(prefix: "🍄 Inviter")
     }
-    
+
     private func waitClientsConnected() async {
         let group = DispatchGroup()
         group.enter()
-        client1.socketConnectionStatusPublisher.sink { status in
+        invitee.socketConnectionStatusPublisher.sink { status in
             if status == .connected {
                 group.leave()
             }
         }.store(in: &publishers)
 
         group.enter()
-        client2.socketConnectionStatusPublisher.sink { status in
+        inviter.socketConnectionStatusPublisher.sink { status in
             if status == .connected {
                 group.leave()
             }
@@ -38,7 +37,7 @@ final class ChatTests: XCTestCase {
         group.wait()
         return
     }
-    
+
     func makeClient(prefix: String) -> Chat {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let relayHost = "relay.walletconnect.com"
@@ -48,32 +47,39 @@ final class ChatTests: XCTestCase {
 
         return Chat(registry: registry, relayClient: relayClient, kms: KeyManagementService(keychain: keychain), logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
-    
+
     func testInvite() async {
-        await waitClientsConnected()
-        let inviteExpectation = expectation(description: "invitation expectation")
-        let account = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
-        let pubKey = try! await client1.register(account: account)
-        try! await client2.invite(publicKey: pubKey, openingMessage: "")
-        client1.invitePublisher.sink { _ in
-            inviteExpectation.fulfill()
-        }.store(in: &publishers)
-        wait(for: [inviteExpectation], timeout: 4)
-    }
-    
-    
-//    func testNewThread() async {
 //        await waitClientsConnected()
-//        let newThreadExpectation = expectation(description: "new thread expectation")
+//        let inviteExpectation = expectation(description: "invitation expectation")
 //        let account = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
-//        client1.register(account: account)
-//        client2.invite(account: account)
-//        client1.onInvite = { [unowned self] invite in
-//            client1.accept(invite: invite)
-//        }
-//        client1.onNewThread = { [unowned self] thread in
-//            newThreadExpectation.fulfill()
-//        }
-//        wait(for: [newThreadExpectation], timeout: 4)
-//    }
+//        let pubKey = try! await invitee.register(account: account)
+//        try! await inviter.invite(publicKey: pubKey, openingMessage: "")
+//        invitee.invitePublisher.sink { _ in
+//            inviteExpectation.fulfill()
+//        }.store(in: &publishers)
+//        wait(for: [inviteExpectation], timeout: 4)
+    }
+
+    func testAcceptAndCreateNewThread() async {
+//        await waitClientsConnected()
+//        let newThreadInviterExpectation = expectation(description: "new thread on inviting client expectation")
+//        let newThreadinviteeExpectation = expectation(description: "new thread on invitee client expectation")
+//        let account = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
+//        let pubKey = try! await invitee.register(account: account)
+//        try! await inviter.invite(publicKey: pubKey, openingMessage: "opening message")
+//
+//        invitee.invitePublisher.sink { [unowned self] inviteEnvelope in
+//            Task {try! await invitee.accept(inviteId: inviteEnvelope.pubKey)}
+//        }.store(in: &publishers)
+//
+//        invitee.newThreadPublisher.sink { _ in
+//            newThreadinviteeExpectation.fulfill()
+//        }.store(in: &publishers)
+//
+//        inviter.newThreadPublisher.sink { _ in
+//            newThreadInviterExpectation.fulfill()
+//        }.store(in: &publishers)
+//
+//        wait(for: [newThreadinviteeExpectation, newThreadInviterExpectation], timeout: 4)
+    }
 }

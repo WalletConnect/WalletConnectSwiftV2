@@ -1,15 +1,15 @@
 import XCTest
 
 class PairingTests: XCTestCase {
-    
+
     private let engine: Engine = Engine()
-    
+
     private static var cleanLaunch: Bool = true
 
     override func setUp() {
         engine.routing.launch(app: .dapp, clean: PairingTests.cleanLaunch)
         engine.routing.launch(app: .wallet, clean: PairingTests.cleanLaunch)
-        
+
         PairingTests.cleanLaunch = false
     }
 
@@ -19,7 +19,7 @@ class PairingTests: XCTestCase {
         engine.routing.activate(app: .dapp)
 
         // TODO: Figure out why you need to wait here
-        engine.routing.wait(for: 2)
+        engine.routing.wait(for: 3)
 
         engine.dapp.connectButton.waitTap()
 
@@ -35,18 +35,18 @@ class PairingTests: XCTestCase {
 
         engine.approveSessionAndCheck()
     }
-    
+
     /// Check session ping on Wallet
     /// - TU002
     func test02PingResponse() {
         engine.routing.activate(app: .wallet)
-        
+
         engine.wallet.sessionRow.waitTap()
         engine.wallet.pingButton.waitTap()
-        
+
         XCTAssertTrue(engine.wallet.pingAlert.waitExists())
     }
-    
+
     /// Approve session on existing pairing
     /// - TU004
     func test04ApproveSessionExistingPairing() {
@@ -55,10 +55,10 @@ class PairingTests: XCTestCase {
         engine.dapp.disconnectButton.waitTap()
         engine.dapp.connectButton.waitTap()
         engine.dapp.pairingRow.waitTap()
-        
+
         // TODO: Figure out why you need to wait here
         engine.routing.wait(for: 2)
-        
+
         engine.approveSessionAndCheck()
     }
 }

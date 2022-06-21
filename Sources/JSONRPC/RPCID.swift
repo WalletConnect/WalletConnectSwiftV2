@@ -7,7 +7,7 @@ public protocol IdentifierGenerator {
 }
 
 struct IntIdentifierGenerator: IdentifierGenerator {
-    
+
     func next() -> RPCID {
         return RPCID(Int.random(in: Int.min...Int.max))
     }

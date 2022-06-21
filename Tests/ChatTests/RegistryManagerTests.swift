@@ -6,25 +6,25 @@ import WalletConnectUtils
 @testable import TestingUtils
 
 final class RegistryManagerTests: XCTestCase {
-    var registryManager: RegistryManager!
+    var registryManager: RegistryService!
     var networkingInteractor: NetworkingInteractorMock!
     var topicToInvitationPubKeyStore: CodableStore<String>!
     var registry: Registry!
     var kms: KeyManagementServiceMock!
-    
+
     override func setUp() {
         registry = KeyValueRegistry()
         networkingInteractor = NetworkingInteractorMock()
         kms = KeyManagementServiceMock()
         topicToInvitationPubKeyStore = CodableStore(defaults: RuntimeKeyValueStorage(), identifier: "")
-        registryManager = RegistryManager(
+        registryManager = RegistryService(
             registry: registry,
             networkingInteractor: networkingInteractor,
             kms: kms,
             logger: ConsoleLoggerMock(),
             topicToInvitationPubKeyStore: topicToInvitationPubKeyStore)
     }
-    
+
     func testRegister() async {
         let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
         try! await registryManager.register(account: account)
@@ -34,4 +34,3 @@ final class RegistryManagerTests: XCTestCase {
         XCTAssertFalse(topicToInvitationPubKeyStore.getAll().isEmpty, "stores topic to invitation")
     }
 }
-

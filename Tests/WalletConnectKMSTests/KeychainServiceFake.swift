@@ -2,11 +2,11 @@ import Foundation
 @testable import WalletConnectKMS
 
 final class KeychainServiceFake: KeychainServiceProtocol {
-    
+
     var errorStatus: OSStatus?
-    
+
     private var storage: [String: Data] = [:]
-    
+
     func add(_ attributes: CFDictionary, _ result: UnsafeMutablePointer<CFTypeRef?>?) -> OSStatus {
         if let forceError = errorStatus {
             return forceError
@@ -21,7 +21,7 @@ final class KeychainServiceFake: KeychainServiceProtocol {
         }
         return errSecInternalError
     }
-    
+
     func copyMatching(_ query: CFDictionary, _ result: UnsafeMutablePointer<CFTypeRef?>?) -> OSStatus {
         if let forceError = errorStatus {
             return forceError
@@ -36,7 +36,7 @@ final class KeychainServiceFake: KeychainServiceProtocol {
         }
         return errSecInternalError
     }
-    
+
     func update(_ query: CFDictionary, _ attributesToUpdate: CFDictionary) -> OSStatus {
         if let forceError = errorStatus {
             return forceError
@@ -52,7 +52,7 @@ final class KeychainServiceFake: KeychainServiceProtocol {
         }
         return errSecInternalError
     }
-    
+
     func delete(_ query: CFDictionary) -> OSStatus {
         if let forceError = errorStatus {
             return forceError
@@ -73,7 +73,7 @@ final class KeychainServiceFake: KeychainServiceProtocol {
             }
         }
     }
-    
+
     private func getKeyAndData(from attributes: CFDictionary) -> (key: String, data: Data)? {
         let dict = (attributes as NSDictionary)
         if let data = dict[kSecValueData] as? Data,

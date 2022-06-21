@@ -6,13 +6,13 @@ struct Proposal {
     let proposerURL: String
     let iconURL: String
     let permissions: [Namespace]
-        
+
     struct Namespace: Hashable {
         let chains: [String]
         let methods: [String]
         let events: [String]
     }
-    
+
     internal init(proposal: Session.Proposal) {
         self.proposerName = proposal.proposer.name
         self.proposerDescription = proposal.proposer.description
@@ -24,7 +24,7 @@ struct Proposal {
                 methods: ["eth_sendTransaction", "personal_sign", "eth_signTypedData"],
                 events: ["accountsChanged", "chainChanged"])]
     }
-    
+
     internal init(proposerName: String, proposerDescription: String, proposerURL: String, iconURL: String, permissions: [Proposal.Namespace]) {
         self.proposerName = proposerName
         self.proposerDescription = proposerDescription
@@ -32,7 +32,7 @@ struct Proposal {
         self.iconURL = iconURL
         self.permissions = permissions
     }
-    
+
     static func mock() -> Proposal {
         Proposal(
             proposerName: "Example name",
