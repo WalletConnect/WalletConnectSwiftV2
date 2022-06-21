@@ -3,6 +3,7 @@ import Foundation
 import Combine
 import WalletConnectRelay
 import WalletConnectUtils
+import WalletConnectKMS
 
 protocol NetworkInteracting {
     func subscribe(topic: String) async throws 
@@ -39,7 +40,7 @@ class NetworkingInteractor: NetworkInteracting {
     }
     
     func request(_ request: ChatRequest, topic: String) {
-        let message = try! serializer.serialize(topic: topic, encodable: request)
+        let message = try! serializer.serialize(topic: topic, encodable: request, envelopeType: .type0)
         relayClient.publish(topic: topic, payload: message) {error in
 //            print(error)
         }
@@ -49,15 +50,14 @@ class NetworkingInteractor: NetworkInteracting {
         try await relayClient.subscribe(topic: topic)
     }
     
-    private func manageSubscription(_ topic: String, _ message: String) {
-        if let deserializedJsonRpcRequest: ChatRequest = serializer.tryDeserialize(topic: topic, message: message) {
+    private func manageSubscription(_ topic: String, _ encodedEnvelope: String) {
+        if let deserializedJsonRpcRequest: ChatRequest = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleWCRequest(topic: topic, request: deserializedJsonRpcRequest)
-        } else if let decodedJsonRpcRequest: ChatRequest = tryDecodeRequest(message: message) {
+        } else if let decodedJsonRpcRequest: ChatRequest = tryDecodeRequest(message: encodedEnvelope) {
             handleWCRequest(topic: topic, request: decodedJsonRpcRequest)
-
-        } else if let deserializedJsonRpcResponse: JSONRPCResponse<AnyCodable> = serializer.tryDeserialize(topic: topic, message: message) {
+        } else if let deserializedJsonRpcResponse: JSONRPCResponse<AnyCodable> = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleJsonRpcResponse(response: deserializedJsonRpcResponse)
-        } else if let deserializedJsonRpcError: JSONRPCErrorResponse = serializer.tryDeserialize(topic: topic, message: message) {
+        } else if let deserializedJsonRpcError: JSONRPCErrorResponse = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleJsonRpcErrorResponse(response: deserializedJsonRpcError)
         } else {
             print("Warning: WalletConnect Relay - Received unknown object type from networking relay")
