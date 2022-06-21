@@ -4,12 +4,14 @@ public protocol KeyManagementServiceProtocol {
     func createX25519KeyPair() throws -> AgreementPublicKey
     func createSymmetricKey(_ topic: String) throws -> SymmetricKey
     func setPrivateKey(_ privateKey: AgreementPrivateKey) throws
+    func setPublicKey(publicKey: AgreementPublicKey, for topic: String) throws
     func setAgreementSecret(_ agreementSecret: AgreementKeys, topic: String) throws
     func setSymmetricKey(_ symmetricKey: SymmetricKey, for topic: String) throws
     func getPrivateKey(for publicKey: AgreementPublicKey) throws -> AgreementPrivateKey?
-    func getAgreementSecret(for topic: String) throws -> AgreementKeys?
-    func getSymmetricKey(for topic: String) throws -> SymmetricKey?
+    func getAgreementSecret(for topic: String) -> AgreementKeys?
+    func getSymmetricKey(for topic: String) -> SymmetricKey?
     func getSymmetricKeyRepresentable(for topic: String) -> Data?
+    func getPublicKey(for topic: String) -> AgreementPublicKey?
     func deletePrivateKey(for publicKey: String)
     func deleteAgreementSecret(for topic: String)
     func deleteSymmetricKey(for topic: String)
@@ -18,7 +20,6 @@ public protocol KeyManagementServiceProtocol {
 }
 
 public class KeyManagementService: KeyManagementServiceProtocol {
-
     enum Error: Swift.Error {
         case keyNotFound
     }
@@ -53,11 +54,15 @@ public class KeyManagementService: KeyManagementServiceProtocol {
         try keychain.add(privateKey, forKey: privateKey.publicKey.hexRepresentation)
     }
 
+    public func setPublicKey(publicKey: AgreementPublicKey, for topic: String) throws {
+        try keychain.add(publicKey, forKey: topic)
+    }
+
     public func setAgreementSecret(_ agreementSecret: AgreementKeys, topic: String) throws {
         try keychain.add(agreementSecret, forKey: topic)
     }
 
-    public func getSymmetricKey(for topic: String) throws -> SymmetricKey? {
+    public func getSymmetricKey(for topic: String) -> SymmetricKey? {
         do {
             return try keychain.read(key: topic) as SymmetricKey
         } catch {
@@ -66,10 +71,10 @@ public class KeyManagementService: KeyManagementServiceProtocol {
     }
 
     public func getSymmetricKeyRepresentable(for topic: String) -> Data? {
-        if let key = try? getAgreementSecret(for: topic)?.sharedKey {
+        if let key = getAgreementSecret(for: topic)?.sharedKey {
             return key.rawRepresentation
         } else {
-            return try? getSymmetricKey(for: topic)?.rawRepresentation
+            return getSymmetricKey(for: topic)?.rawRepresentation
         }
     }
 
@@ -83,9 +88,17 @@ public class KeyManagementService: KeyManagementServiceProtocol {
         }
     }
 
-    public func getAgreementSecret(for topic: String) throws -> AgreementKeys? {
+    public func getAgreementSecret(for topic: String) -> AgreementKeys? {
         do {
             return try keychain.read(key: topic) as AgreementKeys
+        } catch {
+            return nil
+        }
+    }
+
+    public func getPublicKey(for topic: String) -> AgreementPublicKey? {
+        do {
+            return try keychain.read(key: topic) as AgreementPublicKey
         } catch {
             return nil
         }

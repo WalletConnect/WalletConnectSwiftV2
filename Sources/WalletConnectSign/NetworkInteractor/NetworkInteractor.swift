@@ -197,12 +197,12 @@ class NetworkInteractor: NetworkInteracting {
         }
     }
 
-    private func manageSubscription(_ topic: String, _ message: String) {
-        if let deserializedJsonRpcRequest: WCRequest = serializer.tryDeserialize(topic: topic, message: message) {
+    private func manageSubscription(_ topic: String, _ encodedEnvelope: String) {
+        if let deserializedJsonRpcRequest: WCRequest = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleWCRequest(topic: topic, request: deserializedJsonRpcRequest)
-        } else if let deserializedJsonRpcResponse: JSONRPCResponse<AnyCodable> = serializer.tryDeserialize(topic: topic, message: message) {
+        } else if let deserializedJsonRpcResponse: JSONRPCResponse<AnyCodable> = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleJsonRpcResponse(response: deserializedJsonRpcResponse)
-        } else if let deserializedJsonRpcError: JSONRPCErrorResponse = serializer.tryDeserialize(topic: topic, message: message) {
+        } else if let deserializedJsonRpcError: JSONRPCErrorResponse = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleJsonRpcErrorResponse(response: deserializedJsonRpcError)
         } else {
             logger.warn("Warning: WalletConnect Relay - Received unknown object type from networking relay")

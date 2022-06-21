@@ -9,11 +9,11 @@ class SerializerMock: Serializing {
     var deserialized: Any!
     var serialized: String = ""
 
-    func serialize(topic: String, encodable: Encodable) throws -> String {
+    func serialize(topic: String, encodable: Encodable, envelopeType: Envelope.EnvelopeType) throws -> String {
         try serialize(json: try encodable.json(), agreementKeys: AgreementKeys.stub())
     }
-    func tryDeserialize<T: Codable>(topic: String, message: String) -> T? {
-        try? deserialize(message: message, symmetricKey: Data())
+    func tryDeserialize<T: Codable>(topic: String, encodedEnvelope: String) -> T? {
+        try? deserialize(message: encodedEnvelope, symmetricKey: Data())
     }
     func deserializeJsonRpc(topic: String, message: String) throws -> Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse> {
         .success(try deserialize(message: message, symmetricKey: Data()))
