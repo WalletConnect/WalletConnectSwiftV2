@@ -3,9 +3,12 @@ import WalletConnectKMS
 import WalletConnectUtils
 
 struct WCSession: ExpirableSequence {
+
     enum Error: Swift.Error {
         case controllerNotSet
+        case unsatisfiedUpdateNamespaceRequirement
     }
+
     let topic: String
     let relay: RelayProtocolOptions
     let selfParticipant: Participant
@@ -14,6 +17,7 @@ struct WCSession: ExpirableSequence {
     var acknowledged: Bool
     let controller: AgreementPeer
     private(set) var namespaces: [String: SessionNamespace]
+    private(set) var requiredNamespaces: [String: SessionNamespace]
 
     static var defaultTimeToLive: Int64 {
         Int64(7*Time.day)
@@ -34,6 +38,7 @@ struct WCSession: ExpirableSequence {
         self.selfParticipant = selfParticipant
         self.peerParticipant = peerParticipant
         self.namespaces = settleParams.namespaces
+        self.requiredNamespaces = settleParams.namespaces
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(settleParams.expiry))
     }
@@ -46,6 +51,7 @@ struct WCSession: ExpirableSequence {
         self.selfParticipant = selfParticipant
         self.peerParticipant = peerParticipant
         self.namespaces = namespaces
+        self.requiredNamespaces = namespaces
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
     }
@@ -107,7 +113,27 @@ struct WCSession: ExpirableSequence {
         return false
     }
 
-    mutating func updateNamespaces(_ namespaces: [String: SessionNamespace]) {
+    mutating func updateNamespaces(_ namespaces: [String: SessionNamespace]) throws {
+        for item in requiredNamespaces {
+            guard
+                let compliantNamespace = namespaces[item.key],
+                compliantNamespace.accounts.isSuperset(of: item.value.accounts),
+                compliantNamespace.methods.isSuperset(of: item.value.methods),
+                compliantNamespace.events.isSuperset(of: item.value.events)
+            else {
+                throw Error.unsatisfiedUpdateNamespaceRequirement
+            }
+            if let extensions = item.value.extensions {
+                guard let compliantExtensions = compliantNamespace.extensions else {
+                    throw Error.unsatisfiedUpdateNamespaceRequirement
+                }
+                for existingExtension in extensions {
+                    guard compliantExtensions.contains(where: { $0.isSuperset(of: existingExtension) }) else {
+                        throw Error.unsatisfiedUpdateNamespaceRequirement
+                    }
+                }
+            }
+        }
         self.namespaces = namespaces
     }
 
