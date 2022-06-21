@@ -23,17 +23,17 @@ public class KeyManagementService: KeyManagementServiceProtocol {
     enum Error: Swift.Error {
         case keyNotFound
     }
-    
+
     private var keychain: KeychainStorageProtocol
-    
+
     public init(serviceIdentifier: String) {
-        self.keychain =  KeychainStorage(serviceIdentifier:  serviceIdentifier)
+        self.keychain =  KeychainStorage(serviceIdentifier: serviceIdentifier)
     }
-    
+
     init(keychain: KeychainStorageProtocol) {
         self.keychain = keychain
     }
-    
+
     public func createX25519KeyPair() throws -> AgreementPublicKey {
         let privateKey = AgreementPrivateKey()
         try setPrivateKey(privateKey)
@@ -45,11 +45,11 @@ public class KeyManagementService: KeyManagementServiceProtocol {
         try setSymmetricKey(key, for: topic)
         return key
     }
-    
+
     public func setSymmetricKey(_ symmetricKey: SymmetricKey, for topic: String) throws {
         try keychain.add(symmetricKey, forKey: topic)
     }
-    
+
     public func setPrivateKey(_ privateKey: AgreementPrivateKey) throws {
         try keychain.add(privateKey, forKey: privateKey.publicKey.hexRepresentation)
     }
@@ -58,11 +58,10 @@ public class KeyManagementService: KeyManagementServiceProtocol {
         try keychain.add(publicKey, forKey: topic)
     }
 
-
     public func setAgreementSecret(_ agreementSecret: AgreementKeys, topic: String) throws {
         try keychain.add(agreementSecret, forKey: topic)
     }
-    
+
     public func getSymmetricKey(for topic: String) -> SymmetricKey? {
         do {
             return try keychain.read(key: topic) as SymmetricKey
@@ -70,7 +69,7 @@ public class KeyManagementService: KeyManagementServiceProtocol {
             return nil
         }
     }
-    
+
     public func getSymmetricKeyRepresentable(for topic: String) -> Data? {
         if let key = getAgreementSecret(for: topic)?.sharedKey {
             return key.rawRepresentation
@@ -78,7 +77,7 @@ public class KeyManagementService: KeyManagementServiceProtocol {
             return getSymmetricKey(for: topic)?.rawRepresentation
         }
     }
-    
+
     public func getPrivateKey(for publicKey: AgreementPublicKey) throws -> AgreementPrivateKey? {
         do {
             return try keychain.read(key: publicKey.hexRepresentation) as AgreementPrivateKey
@@ -88,7 +87,7 @@ public class KeyManagementService: KeyManagementServiceProtocol {
             throw error
         }
     }
-    
+
     public func getAgreementSecret(for topic: String) -> AgreementKeys? {
         do {
             return try keychain.read(key: topic) as AgreementKeys
@@ -104,7 +103,7 @@ public class KeyManagementService: KeyManagementServiceProtocol {
             return nil
         }
     }
-    
+
     public func deletePrivateKey(for publicKey: String) {
         do {
             try keychain.delete(key: publicKey)
@@ -112,7 +111,7 @@ public class KeyManagementService: KeyManagementServiceProtocol {
             print("Error deleting private key: \(error)")
         }
     }
-    
+
     public func deleteAgreementSecret(for topic: String) {
         do {
             try keychain.delete(key: topic)
@@ -120,7 +119,7 @@ public class KeyManagementService: KeyManagementServiceProtocol {
             print("Error deleting agreement key: \(error)")
         }
     }
-    
+
     public func deleteSymmetricKey(for topic: String) {
         do {
             try keychain.delete(key: topic)
@@ -128,7 +127,7 @@ public class KeyManagementService: KeyManagementServiceProtocol {
             print("Error deleting symmetric key: \(error)")
         }
     }
-    
+
     public func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementKeys {
         guard let privateKey = try getPrivateKey(for: selfPublicKey) else {
             print("Key Agreement Error: Private key not found for public key: \(selfPublicKey.hexRepresentation)")
@@ -136,11 +135,11 @@ public class KeyManagementService: KeyManagementServiceProtocol {
         }
         return try KeyManagementService.generateAgreementKey(from: privateKey, peerPublicKey: hexRepresentation)
     }
-    
+
     public func deleteAll() throws {
         try keychain.deleteAll()
     }
-    
+
     static func generateAgreementKey(from privateKey: AgreementPrivateKey, peerPublicKey hexRepresentation: String) throws -> AgreementKeys {
         let peerPublicKey = try AgreementPublicKey(rawRepresentation: Data(hex: hexRepresentation))
         let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: peerPublicKey)
@@ -148,5 +147,3 @@ public class KeyManagementService: KeyManagementServiceProtocol {
         return AgreementKeys(sharedKey: sharedKey, publicKey: privateKey.publicKey)
     }
 }
-
-

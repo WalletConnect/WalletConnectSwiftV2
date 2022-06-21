@@ -9,8 +9,8 @@ class InviteService {
     let logger: ConsoleLogging
     let kms: KeyManagementService
 
-    var onNewThread: ((String)->Void)?
-    var onInvite: ((InviteParams)->Void)?
+    var onNewThread: ((String) -> Void)?
+    var onInvite: ((InviteParams) -> Void)?
 
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementService,

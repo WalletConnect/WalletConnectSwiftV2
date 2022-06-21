@@ -8,8 +8,8 @@ class InvitationHandlingService {
     enum Error: Swift.Error {
         case inviteForIdNotFound
     }
-    var onInvite: ((InviteEnvelope)->Void)?
-    var onNewThread: ((String)->Void)?
+    var onInvite: ((InviteEnvelope) -> Void)?
+    var onNewThread: ((String) -> Void)?
     private let networkingInteractor: NetworkInteracting
     private let invitePayloadStore: CodableStore<(RequestSubscriptionPayload)>
     private let topicToInvitationPubKeyStore: CodableStore<String>

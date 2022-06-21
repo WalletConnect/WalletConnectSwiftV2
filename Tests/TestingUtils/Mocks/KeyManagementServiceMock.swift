@@ -14,21 +14,21 @@ final class KeyManagementServiceMock: KeyManagementServiceProtocol {
             return getSymmetricKey(for: topic)?.rawRepresentation
         }
     }
-    
+
     func createSymmetricKey(_ topic: String) throws -> SymmetricKey {
         let key = SymmetricKey()
         try setSymmetricKey(key, for: topic)
         return key
     }
-    
+
     func setSymmetricKey(_ symmetricKey: SymmetricKey, for topic: String) throws {
         symmetricKeys[topic] = symmetricKey
     }
-    
+
     func getSymmetricKey(for topic: String) -> SymmetricKey? {
         symmetricKeys[topic]
     }
-    
+
     func deleteSymmetricKey(for topic: String) {
         symmetricKeys[topic] = nil
     }
@@ -36,13 +36,13 @@ final class KeyManagementServiceMock: KeyManagementServiceProtocol {
     func getPublicKey(for topic: String) -> AgreementPublicKey? {
         publicKeys[topic]
     }
-    
+
     func createX25519KeyPair() throws -> AgreementPublicKey {
         let privateKey = AgreementPrivateKey()
         try setPrivateKey(privateKey)
         return privateKey.publicKey
     }
-    
+
     func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementKeys {
         // TODO: Fix mock
         guard let privateKey = try getPrivateKey(for: selfPublicKey) else {
@@ -57,11 +57,11 @@ final class KeyManagementServiceMock: KeyManagementServiceProtocol {
     func setPrivateKey(_ privateKey: AgreementPrivateKey) throws {
         privateKeys[privateKey.publicKey.rawRepresentation.toHexString()] = privateKey
     }
-    
+
     func getPrivateKey(for publicKey: AgreementPublicKey) throws -> AgreementPrivateKey? {
         privateKeys[publicKey.rawRepresentation.toHexString()]
     }
-    
+
     func getPrivateKey(for publicKey: String) throws -> AgreementPrivateKey? {
         privateKeys[publicKey]
     }
@@ -69,23 +69,23 @@ final class KeyManagementServiceMock: KeyManagementServiceProtocol {
     func setPublicKey(publicKey: AgreementPublicKey, for topic: String) throws {
         publicKeys[topic] = publicKey
     }
-    
+
     func setAgreementSecret(_ agreementKeys: AgreementKeys, topic: String) {
         self.agreementKeys[topic] = agreementKeys
     }
-    
+
     func getAgreementSecret(for topic: String) -> AgreementKeys? {
         agreementKeys[topic]
     }
-    
+
     func deletePrivateKey(for publicKey: String) {
         privateKeys[publicKey] = nil
     }
-    
+
     func deleteAgreementSecret(for topic: String) {
         agreementKeys[topic] = nil
     }
-    
+
     func deleteAll() throws {
         privateKeys = [:]
         symmetricKeys = [:]
@@ -94,15 +94,15 @@ final class KeyManagementServiceMock: KeyManagementServiceProtocol {
 }
 
 extension KeyManagementServiceMock {
-    
+
     func hasPrivateKey(for publicKeyHex: String) -> Bool {
         privateKeys[publicKeyHex] != nil
     }
-    
+
     func hasAgreementSecret(for topic: String) -> Bool {
         agreementKeys[topic] != nil
     }
-    
+
     func hasSymmetricKey(for topic: String) -> Bool {
         symmetricKeys[topic] != nil
     }

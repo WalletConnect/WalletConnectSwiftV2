@@ -196,7 +196,7 @@ class NetworkInteractor: NetworkInteracting {
             manageSubscription(topic, message)
         }
     }
-    
+
     private func manageSubscription(_ topic: String, _ encodedEnvelope: String) {
         if let deserializedJsonRpcRequest: WCRequest = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleWCRequest(topic: topic, request: deserializedJsonRpcRequest)
@@ -208,7 +208,7 @@ class NetworkInteractor: NetworkInteracting {
             logger.warn("Warning: WalletConnect Relay - Received unknown object type from networking relay")
         }
     }
-    
+
     private func handleWCRequest(topic: String, request: WCRequest) {
         do {
             try jsonRpcHistory.set(topic: topic, request: request, chainId: getChainId(request))
