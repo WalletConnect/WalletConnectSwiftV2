@@ -23,11 +23,12 @@ public struct Envelope: Equatable {
         guard let envelopeData = Data(base64Encoded: base64encoded) else {
             throw Errors.malformedEnvelope
         }
-        let envelopeTypeByte = envelopeData.subdata(in: 0..<1).uint8
+        let envelopeTypeByte = envelopeData.subdata(in: 0..<1).first
         if envelopeTypeByte == 0 {
             self.type = .type0
             self.sealbox = envelopeData.subdata(in: 1..<envelopeData.count)
         } else if envelopeTypeByte == 1 {
+            guard envelopeData.count > 33 else {throw Errors.malformedEnvelope}
             let pubKey = envelopeData.subdata(in: 1..<33)
             self.type = .type1(pubKey: pubKey)
             self.sealbox = envelopeData.subdata(in: 33..<envelopeData.count)
