@@ -19,6 +19,13 @@ jobs:
       with:
         xcode-version: '13.2'
 
+    - uses: actions/cache@v2
+      with:
+        path: .build
+        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-
+
     # Package builds
     - name: Build Package
       run: swift build -v
