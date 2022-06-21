@@ -47,10 +47,10 @@ class KeyManagementServiceTests: XCTestCase {
 
     func testAgreementSecretRoundTrip() throws {
         let topic = "topic"
-        XCTAssertNil(try kms.getAgreementSecret(for: topic))
+        XCTAssertNil(kms.getAgreementSecret(for: topic))
         let agreementKeys = AgreementKeys.stub()
         try? kms.setAgreementSecret(agreementKeys, topic: topic)
-        let storedAgreementSecret = try kms.getAgreementSecret(for: topic)
+        let storedAgreementSecret = kms.getAgreementSecret(for: topic)
         XCTAssertEqual(agreementKeys, storedAgreementSecret)
     }
 
@@ -59,7 +59,7 @@ class KeyManagementServiceTests: XCTestCase {
         let agreementKeys = AgreementKeys.stub()
         try? kms.setAgreementSecret(agreementKeys, topic: topic)
         kms.deleteAgreementSecret(for: topic)
-        XCTAssertNil(try kms.getAgreementSecret(for: topic))
+        XCTAssertNil(kms.getAgreementSecret(for: topic))
     }
 
     func testGenerateX25519Agreement() throws {
@@ -100,7 +100,7 @@ class KeyManagementServiceTests: XCTestCase {
     func testCreateSymmetricKey() {
         let topic = "topic"
         let key = try! kms.createSymmetricKey(topic)
-        let retrievedKey = try! kms.getSymmetricKey(for: topic)
+        let retrievedKey = kms.getSymmetricKey(for: topic)
         XCTAssertEqual(key, retrievedKey)
     }
 
@@ -108,7 +108,7 @@ class KeyManagementServiceTests: XCTestCase {
         let topic = "topic"
         let key = SymmetricKey()
         try! kms.setSymmetricKey(key, for: topic)
-        let retrievedKey = try! kms.getSymmetricKey(for: topic)
+        let retrievedKey = kms.getSymmetricKey(for: topic)
         XCTAssertEqual(key, retrievedKey)
     }
 
@@ -116,8 +116,8 @@ class KeyManagementServiceTests: XCTestCase {
         let topic = "topic"
         let key = SymmetricKey()
         try! kms.setSymmetricKey(key, for: topic)
-        XCTAssertNotNil(try! kms.getSymmetricKey(for: topic))
+        XCTAssertNotNil(kms.getSymmetricKey(for: topic))
         kms.deleteSymmetricKey(for: topic)
-        XCTAssertNil(try! kms.getSymmetricKey(for: topic))
+        XCTAssertNil(kms.getSymmetricKey(for: topic))
     }
 }

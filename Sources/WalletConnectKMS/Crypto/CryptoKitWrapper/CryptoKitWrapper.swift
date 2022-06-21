@@ -17,7 +17,7 @@ extension Curve25519.KeyAgreement.PrivateKey: Equatable {
 
 // MARK: - Public Key
 
-public struct AgreementPublicKey: Equatable {
+public struct AgreementPublicKey: GenericPasswordConvertible, Equatable {
 
     fileprivate let key: Curve25519.KeyAgreement.PublicKey
 

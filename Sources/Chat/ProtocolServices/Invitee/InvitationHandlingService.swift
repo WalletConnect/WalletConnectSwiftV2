@@ -8,8 +8,8 @@ class InvitationHandlingService {
     enum Error: Swift.Error {
         case inviteForIdNotFound
     }
-    var onInvite: ((InviteEnvelope)->Void)?
-    var onNewThread: ((String)->Void)?
+    var onInvite: ((InviteEnvelope) -> Void)?
+    var onNewThread: ((String) -> Void)?
     private let networkingInteractor: NetworkInteracting
     private let invitePayloadStore: CodableStore<(RequestSubscriptionPayload)>
     private let topicToInvitationPubKeyStore: CodableStore<String>
@@ -18,7 +18,6 @@ class InvitationHandlingService {
     private let kms: KeyManagementService
     private let threadsStore: CodableStore<Thread>
     private var publishers = [AnyCancellable]()
-    private let codec: Codec
 
     init(registry: Registry,
          networkingInteractor: NetworkInteracting,
@@ -26,8 +25,7 @@ class InvitationHandlingService {
          logger: ConsoleLogging,
          topicToInvitationPubKeyStore: CodableStore<String>,
          invitePayloadStore: CodableStore<RequestSubscriptionPayload>,
-         threadsStore: CodableStore<Thread>,
-         codec: Codec) {
+         threadsStore: CodableStore<Thread>) {
         self.registry = registry
         self.kms = kms
         self.networkingInteractor = networkingInteractor
@@ -35,7 +33,6 @@ class InvitationHandlingService {
         self.topicToInvitationPubKeyStore = topicToInvitationPubKeyStore
         self.invitePayloadStore = invitePayloadStore
         self.threadsStore = threadsStore
-        self.codec = codec
         setUpRequestHandling()
     }
 
@@ -90,14 +87,15 @@ class InvitationHandlingService {
 
         let agreementKeysI = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: inviteParams.pubKey)
 
-        let decryptedData = try codec.decode(sealboxString: inviteParams.invite, symmetricKey: agreementKeysI.sharedKey.rawRepresentation)
-
-        let invite = try JSONDecoder().decode(Invite.self, from: decryptedData)
-
-        try kms.setSymmetricKey(agreementKeysI.sharedKey, for: payload.topic)
-
-        invitePayloadStore.set(payload, forKey: inviteParams.id)
-
-        onInvite?(InviteEnvelope(pubKey: inviteParams.pubKey, invite: invite))
+        // TODO - fix with new specs
+//        let decryptedData = try codec.decode(sealboxString: inviteParams.invite, symmetricKey: agreementKeysI.sharedKey.rawRepresentation)
+//
+//        let invite = try JSONDecoder().decode(Invite.self, from: decryptedData)
+//
+//        try kms.setSymmetricKey(agreementKeysI.sharedKey, for: payload.topic)
+//
+//        invitePayloadStore.set(payload, forKey: inviteParams.id)
+//
+//        onInvite?(InviteEnvelope(pubKey: inviteParams.pubKey, invite: invite))
     }
 }

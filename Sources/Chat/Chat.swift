@@ -41,15 +41,14 @@ class Chat {
             jsonRpcHistory: jsonRpcHistory)
         let invitePayloadStore = CodableStore<RequestSubscriptionPayload>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
         self.registryService = RegistryService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToInvitationPubKeyStore: topicToInvitationPubKeyStore)
-        let codec = ChaChaPolyCodec()
         self.invitationHandlingService = InvitationHandlingService(registry: registry,
                              networkingInteractor: networkingInteractor,
                                                                    kms: kms,
                                                                    logger: logger,
                                                                    topicToInvitationPubKeyStore: topicToInvitationPubKeyStore,
                                                                    invitePayloadStore: invitePayloadStore,
-                                                                   threadsStore: CodableStore<Thread>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.threads.rawValue), codec: codec)
-        self.inviteService = InviteService(networkingInteractor: networkingInteractor, kms: kms, logger: logger, codec: codec)
+                                                                   threadsStore: CodableStore<Thread>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.threads.rawValue))
+        self.inviteService = InviteService(networkingInteractor: networkingInteractor, kms: kms, logger: logger)
         socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
         setUpEnginesCallbacks()
     }

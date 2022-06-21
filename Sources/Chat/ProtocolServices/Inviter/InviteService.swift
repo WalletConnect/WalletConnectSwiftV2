@@ -8,39 +8,35 @@ class InviteService {
     let networkingInteractor: NetworkInteracting
     let logger: ConsoleLogging
     let kms: KeyManagementService
-    let codec: Codec
 
-    var onNewThread: ((String)->Void)?
-    var onInvite: ((InviteParams)->Void)?
+    var onNewThread: ((String) -> Void)?
+    var onInvite: ((InviteParams) -> Void)?
 
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementService,
-         logger: ConsoleLogging,
-         codec: Codec) {
+         logger: ConsoleLogging) {
         self.kms = kms
         self.networkingInteractor = networkingInteractor
         self.logger = logger
-        self.codec = codec
         setUpResponseHandling()
     }
 
     func invite(peerPubKey: String, openingMessage: String, account: Account) async throws {
         let selfPubKeyY = try kms.createX25519KeyPair()
         let invite = Invite(message: openingMessage, account: account)
-
+        let peerPublicKeyRaw = Data(hex: peerPubKey)
         let symKeyI = try kms.performKeyAgreement(selfPublicKey: selfPubKeyY, peerPublicKey: peerPubKey)
         let inviteTopic = try AgreementPublicKey(hex: peerPubKey).rawRepresentation.sha256().toHexString()
 
         try kms.setSymmetricKey(symKeyI.sharedKey, for: inviteTopic)
 
-        let encodedInvite = try codec.encode(plaintext: invite.json(), symmetricKey: symKeyI.sharedKey.rawRepresentation)
-        let inviteRequestParams = InviteParams(pubKey: selfPubKeyY.hexRepresentation, invite: encodedInvite)
+        let inviteRequestParams = InviteParams(pubKey: selfPubKeyY.hexRepresentation, invite: invite)
 
         let request = JSONRPCRequest<ChatRequestParams>(params: .invite(inviteRequestParams))
 
         try await networkingInteractor.subscribe(topic: inviteTopic)
 
-        try await networkingInteractor.requestUnencrypted(request, topic: inviteTopic)
+        try await networkingInteractor.request(request, topic: inviteTopic, envelopeType: .type1(pubKey: peerPublicKeyRaw))
 
         logger.debug("invite sent on topic: \(inviteTopic)")
     }
