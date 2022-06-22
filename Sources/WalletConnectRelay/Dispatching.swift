@@ -1,6 +1,5 @@
 import Foundation
 import WalletConnectUtils
-import Starscream
 
 protocol Dispatching {
     var onConnect: (() -> Void)? {get set}
@@ -18,10 +17,10 @@ final class Dispatcher: NSObject, Dispatching {
     var onMessage: ((String) -> Void)?
     private var textFramesQueue = Queue<String>()
     private let logger: ConsoleLogging
-    var socket: WebSocketProtocol
+    var socket: WebSocketConnecting
     var socketConnectionHandler: SocketConnectionHandler
 
-    init(socket: WebSocketProtocol,
+    init(socket: WebSocketConnecting,
          socketConnectionHandler: SocketConnectionHandler,
          logger: ConsoleLogging) {
         self.socket = socket

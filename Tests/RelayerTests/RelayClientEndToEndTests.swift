@@ -4,7 +4,6 @@ import XCTest
 import WalletConnectUtils
 import TestingUtils
 @testable import WalletConnectRelay
-import Starscream
 
 final class RelayClientEndToEndTests: XCTestCase {
 

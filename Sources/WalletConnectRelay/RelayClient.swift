@@ -1,7 +1,7 @@
 import Foundation
 import Combine
 import WalletConnectUtils
-import Starscream
+
 public enum SocketConnectionStatus {
     case connected
     case disconnected
@@ -59,11 +59,12 @@ public final class RelayClient {
                             projectId: String,
                             keyValueStorage: KeyValueStorage = UserDefaults.standard,
                             uniqueIdentifier: String? = nil,
+                            socketImplementation: WebSocketConnecting.Type,
                             socketConnectionType: SocketConnectionType = .automatic,
                             logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off)) {
         let url = Self.makeRelayUrl(host: relayHost, projectId: projectId)
         var socketConnectionHandler: SocketConnectionHandler
-        let socket = WebSocket(url: url)
+        let socket = socketImplementation.instance(with: url)
         switch socketConnectionType {
         case .automatic:
             socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket)

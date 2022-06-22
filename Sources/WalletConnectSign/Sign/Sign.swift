@@ -17,13 +17,28 @@ public class Sign {
         guard let config = Sign.config else {
             fatalError("Error - you must call configure(_:) before accessing the shared instance.")
         }
-        relayClient = RelayClient(relayHost: "relay.walletconnect.com", projectId: config.projectId, socketConnectionType: config.socketConnectionType)
+        relayClient = RelayClient(
+            relayHost: "relay.walletconnect.com",
+            projectId: config.projectId,
+            socketImplementation: config.socketImplementation,
+            socketConnectionType: config.socketConnectionType
+        )
         client = SignClient(metadata: config.metadata, relayClient: relayClient)
         client.delegate = self
     }
 
-    static public func configure(_ config: Config) {
-        Sign.config = config
+    static public func configure(
+        metadata: AppMetadata,
+        projectId: String,
+        socketImplementation: WebSocketConnecting.Type,
+        socketConnectionType: SocketConnectionType = .automatic
+    ) {
+        Sign.config = Sign.Config(
+            metadata: metadata,
+            projectId: projectId,
+            socketImplementation: socketImplementation,
+            socketConnectionType: socketConnectionType
+        )
     }
 
     var sessionProposalPublisherSubject = PassthroughSubject<Session.Proposal, Never>()

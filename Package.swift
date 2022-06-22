@@ -14,9 +14,7 @@ let package = Package(
             name: "WalletConnect",
             targets: ["WalletConnectSign"])
     ],
-    dependencies: [
-        .package(url: "https://github.com/daltoniam/Starscream.git", .upToNextMajor(from: "3.0.0"))
-    ],
+    dependencies: [],
     targets: [
         .target(
             name: "WalletConnectSign",
@@ -28,7 +26,7 @@ let package = Package(
             path: "Sources/Chat"),
         .target(
             name: "WalletConnectRelay",
-            dependencies: ["WalletConnectUtils", "Starscream", "WalletConnectKMS"],
+            dependencies: ["WalletConnectUtils", "WalletConnectKMS"],
             path: "Sources/WalletConnectRelay"),
         .target(
             name: "WalletConnectKMS",

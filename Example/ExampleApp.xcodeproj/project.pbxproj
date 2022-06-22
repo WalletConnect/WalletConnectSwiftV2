@@ -53,6 +53,8 @@
 		A5A4FC5C283D1F6700BBEC1E /* SessionDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC5B283D1F6700BBEC1E /* SessionDetailViewController.swift */; };
 		A5A4FC5E283D23CA00BBEC1E /* Array.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC5D283D23CA00BBEC1E /* Array.swift */; };
 		A5A4FC772840C12C00BBEC1E /* RegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC762840C12C00BBEC1E /* RegressionTests.swift */; };
+		A5D85226286333D500DAF5C3 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5D85225286333D500DAF5C3 /* Starscream */; };
+		A5D85228286333E300DAF5C3 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5D85227286333E300DAF5C3 /* Starscream */; };
 		A5E22D1A2840C62A00E36487 /* Engine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D192840C62A00E36487 /* Engine.swift */; };
 		A5E22D1C2840C85D00E36487 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D1B2840C85D00E36487 /* App.swift */; };
 		A5E22D1E2840C8BF00E36487 /* RoutingEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D1D2840C8BF00E36487 /* RoutingEngine.swift */; };
@@ -170,6 +172,7 @@
 			files = (
 				764E1D5826F8DBAB00A1FB15 /* WalletConnect in Frameworks */,
 				844943A1278EC49700CC26BB /* Web3 in Frameworks */,
+				A5D85226286333D500DAF5C3 /* Starscream in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -179,6 +182,7 @@
 			files = (
 				8448F1D427E4726F0000B866 /* WalletConnect in Frameworks */,
 				84CE64392798228D00142511 /* Web3 in Frameworks */,
+				A5D85228286333E300DAF5C3 /* Starscream in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -443,6 +447,7 @@
 			packageProductDependencies = (
 				764E1D5726F8DBAB00A1FB15 /* WalletConnect */,
 				844943A0278EC49700CC26BB /* Web3 */,
+				A5D85225286333D500DAF5C3 /* Starscream */,
 			);
 			productName = ExampleApp;
 			productReference = 764E1D3C26F8D3FC00A1FB15 /* WalletConnect Wallet.app */;
@@ -464,6 +469,7 @@
 			packageProductDependencies = (
 				84CE64382798228D00142511 /* Web3 */,
 				8448F1D327E4726F0000B866 /* WalletConnect */,
+				A5D85227286333E300DAF5C3 /* Starscream */,
 			);
 			productName = DApp;
 			productReference = 84CE641C27981DED00142511 /* DApp.app */;
@@ -564,6 +570,7 @@
 			mainGroup = 764E1D3326F8D3FC00A1FB15;
 			packageReferences = (
 				8449439F278EC49700CC26BB /* XCRemoteSwiftPackageReference "Web3" */,
+				A5D85224286333D500DAF5C3 /* XCRemoteSwiftPackageReference "Starscream" */,
 			);
 			productRefGroup = 764E1D3D26F8D3FC00A1FB15 /* Products */;
 			projectDirPath = "";
@@ -1171,6 +1178,14 @@
 				minimumVersion = 0.5.3;
 			};
 		};
+		A5D85224286333D500DAF5C3 /* XCRemoteSwiftPackageReference "Starscream" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/daltoniam/Starscream";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1191,6 +1206,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8449439F278EC49700CC26BB /* XCRemoteSwiftPackageReference "Web3" */;
 			productName = Web3;
+		};
+		A5D85225286333D500DAF5C3 /* Starscream */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A5D85224286333D500DAF5C3 /* XCRemoteSwiftPackageReference "Starscream" */;
+			productName = Starscream;
+		};
+		A5D85227286333E300DAF5C3 /* Starscream */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A5D85224286333D500DAF5C3 /* XCRemoteSwiftPackageReference "Starscream" */;
+			productName = Starscream;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
