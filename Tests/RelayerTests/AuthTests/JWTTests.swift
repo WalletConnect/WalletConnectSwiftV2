@@ -7,11 +7,11 @@ final class JWTTests: XCTestCase {
     var sut: JWT!
 
 
-    func test {
-        let issuer = "did:key"
-        let claims = JWT.Claims(iss: <#T##String#>, sub: <#T##String#>)
+    func test() {
 
-        sut = JWT(claims: <#T##JWT.Claims#>)
+//        let claims = JWT.Claims(iss: <#T##String#>, sub: <#T##String#>)
+//
+//        sut = JWT(claims: <#T##JWT.Claims#>)
     }
 
 }

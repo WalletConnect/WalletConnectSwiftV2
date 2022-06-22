@@ -3,6 +3,7 @@ import Foundation
 struct JWT {
     public var header: Header
     public var claims: Claims
+    var signature: Data? = nil
 
     public init(header: Header = Header(), claims: Claims) {
         self.header = header
@@ -10,27 +11,18 @@ struct JWT {
     }
 
     public mutating func sign(using jwtSigner: JWTSigning) throws {
-        var tempHeader = header
-        tempHeader.alg = jwtSigner.alg
-        let headerString = try tempHeader.encode()
-        let claimsString = try claims.encode()
-        header.alg = tempHeader.alg
-        return try jwtSigner.sign(header: headerString, claims: claimsString)
+        fatalError("not implemented")
+
+//        var tempHeader = header
+//        tempHeader.alg = jwtSigner.alg
+//        let headerString = try tempHeader.encode()
+//        let claimsString = try claims.encode()
+//        header.alg = tempHeader.alg
+//        return try jwtSigner.sign(header: headerString, claims: claimsString)
     }
 
     func encoded() -> String {
-
-    }
-}
-
-protocol JWTSigning {
-    var alg: String {get}
-    func sign(header: String, claims: String) throws
-}
-
-struct EdDSASigner: JWTSigning {
-    var alg = "EdDSA"
-    func sign(header: String, claims: String) throws {
+        fatalError("not implemented")
 
     }
 }

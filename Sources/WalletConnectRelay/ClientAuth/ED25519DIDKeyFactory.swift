@@ -27,10 +27,10 @@ struct ED25519DIDKeyFactoryImpl: ED25519DIDKeyFactory {
 
     // base58-btc encoded value that is a concatenation of the Multicodec [MULTICODEC] identifier for the public key type and the raw bytes associated with the public key format.
     private func multibase(multicodec: String) -> String {
-
+        fatalError("not implemented")
     }
 
     private func multicodec() -> String {
-
+        fatalError("not implemented")
     }
 }
