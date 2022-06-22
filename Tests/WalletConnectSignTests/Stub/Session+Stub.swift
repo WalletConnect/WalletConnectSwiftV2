@@ -4,27 +4,30 @@ import WalletConnectKMS
 
 extension WCSession {
     static func stub(
+        topic: String = .generateTopic(),
         isSelfController: Bool = false,
         expiryDate: Date = Date.distantFuture,
         selfPrivateKey: AgreementPrivateKey = AgreementPrivateKey(),
         namespaces: [String: SessionNamespace] = [:],
-        acknowledged: Bool = true
+        acknowledged: Bool = true,
+        timestamp: Date = Date()
     ) -> WCSession {
-        let peerKey = selfPrivateKey.publicKey.hexRepresentation
-        let selfKey = AgreementPrivateKey().publicKey.hexRepresentation
-        let controllerKey = isSelfController ? selfKey : peerKey
-        return WCSession(
-            topic: String.generateTopic(),
-            relay: RelayProtocolOptions.stub(),
-            controller: AgreementPeer(publicKey: controllerKey),
-            selfParticipant: Participant.stub(publicKey: selfKey),
-            peerParticipant: Participant.stub(publicKey: peerKey),
-            namespaces: namespaces,
-            events: [],
-            accounts: Account.stubSet(),
-            acknowledged: acknowledged,
-            expiry: Int64(expiryDate.timeIntervalSince1970))
-    }
+            let peerKey = selfPrivateKey.publicKey.hexRepresentation
+            let selfKey = AgreementPrivateKey().publicKey.hexRepresentation
+            let controllerKey = isSelfController ? selfKey : peerKey
+            return WCSession(
+                topic: topic,
+                timestamp: timestamp,
+                relay: RelayProtocolOptions.stub(),
+                controller: AgreementPeer(publicKey: controllerKey),
+                selfParticipant: Participant.stub(publicKey: selfKey),
+                peerParticipant: Participant.stub(publicKey: peerKey),
+                namespaces: namespaces,
+                events: [],
+                accounts: Account.stubSet(),
+                acknowledged: acknowledged,
+                expiry: Int64(expiryDate.timeIntervalSince1970))
+        }
 }
 
 extension Account {

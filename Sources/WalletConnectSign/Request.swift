@@ -17,14 +17,10 @@ public struct Request: Codable, Equatable {
     }
 
     public init(topic: String, method: String, params: AnyCodable, chainId: Blockchain) {
-        self.id = Self.generateId()
+        self.id = JsonRpcID.generate()
         self.topic = topic
         self.method = method
         self.params = params
         self.chainId = chainId
-    }
-
-    public static func generateId() -> Int64 {
-        return Int64(Date().timeIntervalSince1970 * 1000)*1000 + Int64.random(in: 0..<1000)
     }
 }

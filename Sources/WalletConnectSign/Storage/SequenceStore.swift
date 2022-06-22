@@ -5,12 +5,13 @@ protocol Expirable {
     var expiryDate: Date { get }
 }
 
-protocol ExpirableSequence: Codable, Expirable {
+protocol Entitled {
     var topic: String { get }
 }
 
-// TODO: Find replacement for 'Sequence' prefix
-final class SequenceStore<T> where T: ExpirableSequence {
+typealias SequenceObject = Entitled & Expirable & Codable
+
+final class SequenceStore<T> where T: SequenceObject {
 
     var onSequenceExpiration: ((_ sequence: T) -> Void)?
 
@@ -47,8 +48,13 @@ final class SequenceStore<T> where T: ExpirableSequence {
     func deleteAll() {
         store.deleteAll()
     }
+}
 
-    private func verifyExpiry(on sequence: T) -> T? {
+// MARK: Privates
+
+private extension SequenceStore {
+
+    func verifyExpiry(on sequence: T) -> T? {
         let now = dateInitializer()
         if now >= sequence.expiryDate {
             store.delete(forKey: sequence.topic)

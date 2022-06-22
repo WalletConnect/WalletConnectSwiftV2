@@ -2,12 +2,20 @@
 import Foundation
 
 final class WCSessionStorageMock: WCSessionStorage {
+
     var onSessionExpiration: ((WCSession) -> Void)?
 
     private(set) var sessions: [String: WCSession] = [:]
 
     func hasSession(forTopic topic: String) -> Bool {
         sessions[topic] != nil
+    }
+
+    @discardableResult
+    func setSessionIfNewer(_ session: WCSession) -> Bool {
+        guard isNeedToReplace(session) else { return false }
+        sessions[session.topic] = session
+        return true
     }
 
     func setSession(_ session: WCSession) {
@@ -28,5 +36,15 @@ final class WCSessionStorageMock: WCSessionStorage {
 
     func deleteAll() {
         sessions = [:]
+    }
+}
+
+// MARK: Privates
+
+private extension WCSessionStorageMock {
+
+    func isNeedToReplace(_ session: WCSession) -> Bool {
+        guard let old = getSession(forTopic: session.topic) else { return true }
+        return session.timestamp > old.timestamp
     }
 }

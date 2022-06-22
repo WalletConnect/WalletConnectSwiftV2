@@ -1,4 +1,5 @@
 import Foundation
+import WalletConnectUtils
 
 struct WCRequest: Codable {
     let id: Int64
@@ -13,7 +14,7 @@ struct WCRequest: Codable {
         case params
     }
 
-    internal init(id: Int64 = generateId(), jsonrpc: String = "2.0", method: Method, params: Params) {
+    internal init(id: Int64 = JsonRpcID.generate(), jsonrpc: String = "2.0", method: Method, params: Params) {
         self.id = id
         self.jsonrpc = jsonrpc
         self.method = method
@@ -87,11 +88,6 @@ struct WCRequest: Codable {
             try container.encode(params, forKey: .params)
         }
     }
-
-    private static func generateId() -> Int64 {
-        return Int64(Date().timeIntervalSince1970 * 1000)*1000 + Int64.random(in: 0..<1000)
-    }
-
 }
 
 extension WCRequest {

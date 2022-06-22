@@ -140,7 +140,7 @@ final class WCSessionTests: XCTestCase {
     }
 
     // MARK: Namespace Update Tests
-    
+
     private func stubRequiredNamespaces() -> [String: SessionNamespace] {
         return [
             "eip155": SessionNamespace(
@@ -149,7 +149,7 @@ final class WCSessionTests: XCTestCase {
                 events: ["event", "event-2"],
                 extensions: nil)]
     }
-    
+
     private func stubRequiredNamespacesWithExtension() -> [String: SessionNamespace] {
         return [
             "eip155": SessionNamespace(
@@ -198,7 +198,7 @@ final class WCSessionTests: XCTestCase {
         var session = WCSession.stub(namespaces: stubRequiredNamespaces())
         XCTAssertThrowsError(try session.updateNamespaces([:]))
     }
-    
+
     func testUpdateLessThanRequiredAccounts() {
         let invalid = [
             "eip155": SessionNamespace(
@@ -209,7 +209,7 @@ final class WCSessionTests: XCTestCase {
         var session = WCSession.stub(namespaces: stubRequiredNamespaces())
         XCTAssertThrowsError(try session.updateNamespaces(invalid))
     }
-    
+
     func testUpdateLessThanRequiredMethods() {
         let invalid = [
             "eip155": SessionNamespace(
@@ -220,7 +220,7 @@ final class WCSessionTests: XCTestCase {
         var session = WCSession.stub(namespaces: stubRequiredNamespaces())
         XCTAssertThrowsError(try session.updateNamespaces(invalid))
     }
-    
+
     func testUpdateLessThanRequiredEvents() {
         let invalid = [
             "eip155": SessionNamespace(
@@ -231,7 +231,7 @@ final class WCSessionTests: XCTestCase {
         var session = WCSession.stub(namespaces: stubRequiredNamespaces())
         XCTAssertThrowsError(try session.updateNamespaces(invalid))
     }
-    
+
     func testUpdateLessThanRequiredExtension() {
         let invalid = [
             "eip155": SessionNamespace(
@@ -242,7 +242,7 @@ final class WCSessionTests: XCTestCase {
         var session = WCSession.stub(namespaces: stubRequiredNamespacesWithExtension())
         XCTAssertThrowsError(try session.updateNamespaces(invalid))
     }
-    
+
     func testUpdateLessThanRequiredExtensionAccounts() {
         let invalid = [
             "eip155": SessionNamespace(
@@ -257,7 +257,7 @@ final class WCSessionTests: XCTestCase {
         var session = WCSession.stub(namespaces: stubRequiredNamespacesWithExtension())
         XCTAssertThrowsError(try session.updateNamespaces(invalid))
     }
-    
+
     func testUpdateLessThanRequiredExtensionMethods() {
         let invalid = [
             "eip155": SessionNamespace(
@@ -272,7 +272,7 @@ final class WCSessionTests: XCTestCase {
         var session = WCSession.stub(namespaces: stubRequiredNamespacesWithExtension())
         XCTAssertThrowsError(try session.updateNamespaces(invalid))
     }
-    
+
     func testUpdateLessThanRequiredExtensionEvents() {
         let invalid = [
             "eip155": SessionNamespace(

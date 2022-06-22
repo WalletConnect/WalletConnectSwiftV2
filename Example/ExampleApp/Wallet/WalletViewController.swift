@@ -271,8 +271,8 @@ extension WalletViewController {
         return settledSessions.map { session -> ActiveSessionItem in
             let app = session.peer
             return ActiveSessionItem(
-                dappName: app.name ?? "",
-                dappURL: app.url ?? "",
+                dappName: app.name ,
+                dappURL: app.url ,
                 iconURL: app.icons.first ?? "",
                 topic: session.topic)
         }

@@ -1,7 +1,7 @@
 import Foundation
 import WalletConnectKMS
 
-struct WCPairing: ExpirableSequence {
+struct WCPairing: SequenceObject {
     let topic: String
     let relay: RelayProtocolOptions
     var peerMetadata: AppMetadata?
