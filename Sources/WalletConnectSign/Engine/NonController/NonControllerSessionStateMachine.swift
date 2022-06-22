@@ -71,7 +71,7 @@ final class NonControllerSessionStateMachine {
             throw Errors.respondError(payload: payload, reason: .unauthorizedUpdateNamespacesRequest)
         }
         do {
-            try session.updateNamespaces(updateParams.namespaces)
+            try session.updateNamespaces(updateParams.namespaces, timestamp: payload.timestamp)
         } catch {
             throw Errors.respondError(payload: payload, reason: .invalidUpdateNamespaceRequest)
         }

@@ -7,7 +7,7 @@ enum ChatRequestParams: Codable, Equatable {
 }
 
 extension JSONRPCRequest {
-    init(id: Int64 = JSONRPCRequest.generateId(), params: T) where T == ChatRequestParams {
+    init(id: Int64 = JsonRpcID.generate(), params: T) where T == ChatRequestParams {
         var method: String!
         switch params {
         case .invite:

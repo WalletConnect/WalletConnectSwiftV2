@@ -2,10 +2,22 @@ import XCTest
 import WalletConnectUtils
 @testable import WalletConnectSign
 
-struct ExpirableSequenceStub: ExpirableSequence, Equatable {
+struct ExpirableSequenceStub: SequenceObject, Equatable {
     let topic: String
     let publicKey: String?
     let expiryDate: Date
+
+    var timestamp: Date {
+        return .distantPast
+    }
+
+    func isNewer(than date: Date) -> Bool {
+        return true
+    }
+
+    func isExpired(now: Date) -> Bool {
+        return now >= expiryDate
+    }
 }
 
 final class SequenceStoreTests: XCTestCase {
