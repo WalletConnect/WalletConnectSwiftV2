@@ -9,10 +9,14 @@ protocol SocketAuthenticationg {
 actor SocketAuthenticator: SocketAuthenticationg {
     let authChallengeProvider: AuthChallengeProviding
     let clientIdStorage: ClientIdStoring
+    let didKeyFactory: ED25519DIDKeyFactory
 
-    init(authChallengeProvider: AuthChallengeProviding, clientIdStorage: ClientIdStoring) {
+    init(authChallengeProvider: AuthChallengeProviding = AuthChallengeProvider(),
+         clientIdStorage: ClientIdStoring = ClientIdStorage(),
+         didKeyFactory: ED25519DIDKeyFactory = ED25519DIDKeyFactoryImpl()) {
         self.authChallengeProvider = authChallengeProvider
         self.clientIdStorage = clientIdStorage
+        self.didKeyFactory = didKeyFactory
     }
 
     func createAuthToken() async throws -> String {
@@ -22,7 +26,10 @@ actor SocketAuthenticator: SocketAuthenticationg {
     }
 
     private func signJWT(subject: String, keyPair: SigningPrivateKey) throws -> String {
-        fatalError("not implemented")
+        let issuer = didKeyFactory.make(pubKey: keyPair.publicKey.rawRepresentation)
+        let claims = JWT.Claims(iss: issuer, sub: subject)
+        var jwt = JWT(claims: claims)
+        try jwt.sign(using: EdDSASigner())
+        return jwt.encoded()
     }
 }
-
