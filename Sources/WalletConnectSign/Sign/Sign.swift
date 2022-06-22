@@ -20,7 +20,7 @@ public class Sign {
         relayClient = RelayClient(
             relayHost: "relay.walletconnect.com",
             projectId: config.projectId,
-            socketImplementation: config.socketImplementation,
+            socketFactory: config.socketFactory,
             socketConnectionType: config.socketConnectionType
         )
         client = SignClient(metadata: config.metadata, relayClient: relayClient)
@@ -30,13 +30,13 @@ public class Sign {
     static public func configure(
         metadata: AppMetadata,
         projectId: String,
-        socketImplementation: WebSocketConnecting.Type,
+        socketFactory: WebSocketFactory,
         socketConnectionType: SocketConnectionType = .automatic
     ) {
         Sign.config = Sign.Config(
             metadata: metadata,
             projectId: projectId,
-            socketImplementation: socketImplementation,
+            socketFactory: socketFactory,
             socketConnectionType: socketConnectionType
         )
     }

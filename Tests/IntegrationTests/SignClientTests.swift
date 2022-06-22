@@ -24,7 +24,8 @@ final class SignClientTests: XCTestCase {
             relayHost: relayHost,
             logger: logger,
             kms: KeyManagementService(keychain: keychain),
-            keyValueStorage: RuntimeKeyValueStorage())
+            keyValueStorage: RuntimeKeyValueStorage(),
+            socketFactory: SocketFactory())
         return ClientDelegate(client: client)
     }
 
