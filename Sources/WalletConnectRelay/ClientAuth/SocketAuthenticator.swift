@@ -29,6 +29,6 @@ actor SocketAuthenticator: SocketAuthenticationg {
         let claims = JWT.Claims(iss: issuer, sub: subject)
         var jwt = JWT(claims: claims)
         try jwt.sign(using: EdDSASigner(keyPair))
-        return jwt.encoded()
+        return try jwt.encoded()
     }
 }
