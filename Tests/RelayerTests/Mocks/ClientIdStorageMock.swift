@@ -3,9 +3,9 @@ import WalletConnectKMS
 import Foundation
 
 class ClientIdStorageMock: ClientIdStoring {
-    var keyPair: AgreementPrivateKey!
+    var keyPair: SigningPrivateKey!
 
-    func getOrCreateKeyPair() async throws -> AgreementPrivateKey {
+    func getOrCreateKeyPair() async throws -> SigningPrivateKey {
         return keyPair
     }
 }
