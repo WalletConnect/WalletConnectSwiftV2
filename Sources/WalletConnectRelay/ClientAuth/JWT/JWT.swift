@@ -4,7 +4,7 @@ struct JWT: Codable, Equatable {
     enum Errors: Error {
         case jwtNotSigned
     }
-    
+
     var header: Header
     var claims: Claims
     var signature: String? = nil

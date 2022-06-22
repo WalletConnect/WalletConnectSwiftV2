@@ -78,7 +78,7 @@ public struct SigningPrivateKey: GenericPasswordConvertible, Equatable {
         SigningPublicKey(publicKey: key.publicKey)
     }
 
-    func signature(for data: Data) throws -> Data {
+    public func signature(for data: Data) throws -> Data {
         try key.signature(for: data)
     }
 }

@@ -8,12 +8,12 @@ protocol JWTSigning {
 
 struct EdDSASigner: JWTSigning {
     var alg = "EdDSA"
-    let keys: SigningPrivateKey
+    let privateKey: SigningPrivateKey
 
     init(_ keys: SigningPrivateKey) {
-        self.keys = keys
+        self.privateKey = keys
     }
     func sign(header: String, claims: String) throws  -> String {
-        fatalError("not implemented")
+        try privateKey.signature(for: <#T##Data#>)
     }
 }
