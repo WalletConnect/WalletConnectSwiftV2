@@ -21,7 +21,7 @@ actor SocketAuthenticator: SocketAuthenticationg {
         return try signJWT(subject: challenge, keyPair: clientIdKeyPair)
     }
 
-    func signJWT(subject: String, keyPair: AgreementPrivateKey) throws -> String {
+    private func signJWT(subject: String, keyPair: AgreementPrivateKey) throws -> String {
         fatalError("not implemented")
     }
 }

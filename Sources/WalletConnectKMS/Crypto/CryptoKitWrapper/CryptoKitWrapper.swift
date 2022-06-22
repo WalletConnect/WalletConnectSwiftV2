@@ -68,6 +68,7 @@ public struct AgreementPrivateKey: GenericPasswordConvertible, Equatable {
     }
 
     public init<D>(rawRepresentation: D) throws where D: ContiguousBytes {
+
         self.key = try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: rawRepresentation)
     }
 
@@ -83,4 +84,33 @@ public struct AgreementPrivateKey: GenericPasswordConvertible, Equatable {
         let sharedSecret = try key.sharedSecretFromKeyAgreement(with: publicKeyShare.key)
         return SharedSecret(sharedSecret: sharedSecret)
     }
+}
+
+public struct SigningPrivateKey: GenericPasswordConvertible, Equatable {
+    public init<D>(rawRepresentation data: D) throws where D : ContiguousBytes {
+        self.key = try Curve25519.Signing.PrivateKey(rawRepresentation: rawRepresentation)
+    }
+
+    private let key: Curve25519.Signing.PrivateKey
+
+    public init() {
+        self.key = Curve25519.Signing.PrivateKey()
+    }
+
+    public var rawRepresentation: Data {
+        key.rawRepresentation
+    }
+
+    public var publicKey: SigningPublicKey {
+        SigningPublicKey(publicKey: key.publicKey)
+    }
+
+    func signature(for data: Data) throws -> Data {
+        try key.signature(for: data)
+    }
+}
+
+public struct SigningPublicKey: GenericPasswordConvertible, Equatable {
+
+
 }

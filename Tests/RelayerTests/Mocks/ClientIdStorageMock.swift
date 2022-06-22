@@ -2,7 +2,7 @@ import WalletConnectKMS
 @testable import WalletConnectRelay
 import Foundation
 
-actor ClientIdStorageMock: ClientIdStoring {
+class ClientIdStorageMock: ClientIdStoring {
     var keyPair: AgreementPrivateKey!
 
     func getOrCreateKeyPair() async throws -> AgreementPrivateKey {
