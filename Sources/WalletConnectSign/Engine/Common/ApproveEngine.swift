@@ -92,11 +92,11 @@ final class ApproveEngine {
         }
         proposalPayloadsStore.delete(forKey: proposerPubKey)
         try await networkingInteractor.respondError(payload: payload, reason: reason)
-        // TODO: Delete pairing if inactive
+        // TODO: Delete pairing if inactive 
     }
 
     func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace]) async throws {
-        guard let agreementKeys = try kms.getAgreementSecret(for: topic) else {
+        guard let agreementKeys = kms.getAgreementSecret(for: topic) else {
             throw Errors.agreementMissingOrInvalid
         }
         let selfParticipant = Participant(
@@ -120,6 +120,7 @@ final class ApproveEngine {
 
         let session = WCSession(
             topic: topic,
+            timestamp: Date(),
             selfParticipant: selfParticipant,
             peerParticipant: proposal.proposer,
             settleParams: settleParams,
@@ -294,7 +295,7 @@ private extension ApproveEngine {
         }
 
         let topic = payload.topic
-        let agreementKeys = try kms.getAgreementSecret(for: topic)!
+        let agreementKeys = kms.getAgreementSecret(for: topic)!
         let selfParticipant = Participant(
             publicKey: agreementKeys.publicKey.hexRepresentation,
             metadata: metadata
@@ -305,6 +306,7 @@ private extension ApproveEngine {
 
         let session = WCSession(
             topic: topic,
+            timestamp: Date(),
             selfParticipant: selfParticipant,
             peerParticipant: settleParams.controller,
             settleParams: settleParams,
