@@ -15,10 +15,7 @@ let package = Package(
             targets: ["WalletConnectSign"]),
         .library(
             name: "WalletConnectChat",
-            targets: ["Chat"]),
-        .library(
-            name: "TestingUtils",
-            targets: ["TestingUtils"])
+            targets: ["Chat"])
     ],
     dependencies: [],
     targets: [

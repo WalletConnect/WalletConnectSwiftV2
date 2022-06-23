@@ -45,7 +45,6 @@
 		84CE645527A29D4D00142511 /* ResponseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE645427A29D4C00142511 /* ResponseViewController.swift */; };
 		84F568C2279582D200D0A289 /* Signer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C1279582D200D0A289 /* Signer.swift */; };
 		84F568C42795832A00D0A289 /* EthereumTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C32795832A00D0A289 /* EthereumTransaction.swift */; };
-		A50FFDBD286473D500F76E06 /* TestingUtils in Frameworks */ = {isa = PBXBuildFile; productRef = A50FFDBC286473D500F76E06 /* TestingUtils */; };
 		A5A4FC56283CBB7800BBEC1E /* SessionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC55283CBB7800BBEC1E /* SessionDetailView.swift */; };
 		A5A4FC58283CBB9F00BBEC1E /* SessionDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC57283CBB9F00BBEC1E /* SessionDetailViewModel.swift */; };
 		A5A4FC5A283CC08600BBEC1E /* SessionNamespaceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC59283CC08600BBEC1E /* SessionNamespaceViewModel.swift */; };
@@ -192,7 +191,6 @@
 				A5E03DFF2864662500888481 /* WalletConnect in Frameworks */,
 				A5E03DF52864651200888481 /* Starscream in Frameworks */,
 				A5E03E01286466EA00888481 /* WalletConnectChat in Frameworks */,
-				A50FFDBD286473D500F76E06 /* TestingUtils in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -528,7 +526,6 @@
 				A5E03DF42864651200888481 /* Starscream */,
 				A5E03DFE2864662500888481 /* WalletConnect */,
 				A5E03E00286466EA00888481 /* WalletConnectChat */,
-				A50FFDBC286473D500F76E06 /* TestingUtils */,
 			);
 			productName = IntegrationTests;
 			productReference = A5E03DED286464DB00888481 /* IntegrationTests.xctest */;
@@ -1126,10 +1123,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8449439F278EC49700CC26BB /* XCRemoteSwiftPackageReference "Web3" */;
 			productName = Web3;
-		};
-		A50FFDBC286473D500F76E06 /* TestingUtils */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = TestingUtils;
 		};
 		A5D85225286333D500DAF5C3 /* Starscream */ = {
 			isa = XCSwiftPackageProductDependency;

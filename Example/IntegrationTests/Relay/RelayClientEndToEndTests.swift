@@ -2,13 +2,14 @@ import Foundation
 import Combine
 import XCTest
 import WalletConnectUtils
-import TestingUtils
 import Starscream
 @testable import WalletConnectRelay
 
 final class RelayClientEndToEndTests: XCTestCase {
 
-    let relayHost = "relay.walletconnect.com"
+    let defaultTimeout: TimeInterval = 5
+
+    let relayHost = "dev.relay.walletconnect.com"
     let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
     private var publishers = [AnyCancellable]()
 
@@ -88,5 +89,11 @@ final class RelayClientEndToEndTests: XCTestCase {
         // TODO - uncomment lines when request rebound is resolved
 //        XCTAssertEqual(subscriptionBPayload, payloadA)
 //        XCTAssertEqual(subscriptionAPayload, payloadB)
+    }
+}
+
+extension String {
+    static func randomTopic() -> String {
+        "\(UUID().uuidString)\(UUID().uuidString)".replacingOccurrences(of: "-", with: "").lowercased()
     }
 }
