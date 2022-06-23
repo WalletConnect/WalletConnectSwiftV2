@@ -7,12 +7,11 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  build:
+  build:    
     runs-on: macos-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v2
       
     - name: Setup Xcode Version
       uses: maxim-lobanov/setup-xcode@v1
@@ -21,26 +20,50 @@ jobs:
 
     - uses: actions/cache@v2
       with:
-        path: .build
+        path: |
+          .build
+          SourcePackages
         key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
         restore-keys: |
           ${{ runner.os }}-spm-
 
     # Package builds
-    - name: Build Package
-      run: swift build -v
     - name: Run tests
-      run: swift test -v
-    - name: Run integration tests
-      run: xcodebuild -project Example/ExampleApp.xcodeproj -scheme IntegrationTests -destination 'platform=iOS Simulator,name=iPhone 13' test
+      run: "xcodebuild \
+        -project Example/ExampleApp.xcodeproj \ 
+        -scheme WalletConnect \
+        -clonedSourcePackagesDirPath SourcePackages \
+        -sdk iphonesimulator"
 
-    # Example app builds
+    # Integration tests
+    - name: Run integration tests
+      run: "xcodebuild \
+        -project Example/ExampleApp.xcodeproj \ 
+        -scheme IntegrationTests \
+        -clonedSourcePackagesDirPath SourcePackages \
+        -destination 'platform=iOS Simulator,name=iPhone 13' test"
+
+    # Wallet build
     - name: Build Example Wallet
-      run: xcodebuild -project Example/ExampleApp.xcodeproj -scheme Wallet -sdk iphonesimulator
+      run: "xcodebuild \
+       -project Example/ExampleApp.xcodeproj \
+       -scheme Wallet \
+       -clonedSourcePackagesDirPath SourcePackages \
+       -sdk iphonesimulator"
+
+    # DApp build
     - name: Build Example Dapp
-      run: xcodebuild -project Example/ExampleApp.xcodeproj -scheme DApp -sdk iphonesimulator
+      run: "xcodebuild \
+        -project Example/ExampleApp.xcodeproj \
+        -scheme DApp \
+        -clonedSourcePackagesDirPath SourcePackages \
+        -sdk iphonesimulator"
 
     # UI tests
     - name: UI Tests
-      run: xcodebuild -project Example/ExampleApp.xcodeproj -scheme UITests -destination 'platform=iOS Simulator,name=iPhone 13' test
+      run: "xcodebuild \
+        -project Example/ExampleApp.xcodeproj \
+        -scheme UITests \
+        -clonedSourcePackagesDirPath SourcePackages \
+        -destination 'platform=iOS Simulator,name=iPhone 13' test"
       continue-on-error: true
