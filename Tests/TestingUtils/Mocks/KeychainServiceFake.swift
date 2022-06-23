@@ -3,7 +3,7 @@ import Foundation
 
 final public class KeychainServiceFake: KeychainServiceProtocol {
 
-    var errorStatus: OSStatus?
+    public var errorStatus: OSStatus?
 
     private var storage: [String: Data]
 

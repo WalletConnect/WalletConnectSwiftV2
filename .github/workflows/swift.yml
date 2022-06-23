@@ -31,6 +31,8 @@ jobs:
       run: swift build -v
     - name: Run tests
       run: swift test -v
+    - name: Run integration tests
+      run: xcodebuild -project Example/ExampleApp.xcodeproj -scheme IntegrationTests -destination 'platform=iOS Simulator,name=iPhone 13' test
 
     # Example app builds
     - name: Build Example Wallet
