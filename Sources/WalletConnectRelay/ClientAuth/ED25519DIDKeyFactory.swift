@@ -15,8 +15,6 @@ struct ED25519DIDKeyFactoryImpl: ED25519DIDKeyFactory {
 
     func make(pubKey: Data) -> String {
         fatalError("not implemented")
-//        let header = (MULTICODEC_ED25519_HEADER + MULTICODEC_ED25519_ENCODING)
-//        let multicodec =  MULTICODEC_ED25519_BASE + pubKey
 
         let multicodec = multicodec()
 
@@ -25,7 +23,6 @@ struct ED25519DIDKeyFactoryImpl: ED25519DIDKeyFactory {
         return [Self.DID_PREFIX, Self.DID_METHOD, multibase].joined(separator: Self.DID_DELIMITER)
     }
 
-    // base58-btc encoded value that is a concatenation of the Multicodec [MULTICODEC] identifier for the public key type and the raw bytes associated with the public key format.
     private func multibase(multicodec: String) -> String {
         fatalError("not implemented")
     }
