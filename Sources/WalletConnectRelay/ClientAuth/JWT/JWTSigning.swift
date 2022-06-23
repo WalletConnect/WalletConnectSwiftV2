@@ -16,6 +16,7 @@ struct EdDSASigner: JWTSigning {
     init(_ keys: SigningPrivateKey) {
         self.privateKey = keys
     }
+
     func sign(header: String, claims: String) throws  -> String {
         let unsignedJWT = header + "." + claims
         guard let unsignedData = unsignedJWT.data(using: .utf8) else {

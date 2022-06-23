@@ -6,9 +6,9 @@ protocol SocketAuthenticationg {
 }
 
 actor SocketAuthenticator: SocketAuthenticationg {
-    let authChallengeProvider: AuthChallengeProviding
-    let clientIdStorage: ClientIdStoring
-    let didKeyFactory: ED25519DIDKeyFactory
+    private let authChallengeProvider: AuthChallengeProviding
+    private let clientIdStorage: ClientIdStoring
+    private let didKeyFactory: ED25519DIDKeyFactory
 
     init(authChallengeProvider: AuthChallengeProviding = AuthChallengeProvider(),
          clientIdStorage: ClientIdStoring = ClientIdStorage(),
