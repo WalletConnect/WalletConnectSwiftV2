@@ -17,7 +17,14 @@ jobs:
     - name: Setup Xcode Version
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '13.4.1'
+        xcode-version: '13.2'
+
+    - uses: actions/cache@v2
+      with:
+        path: .build
+        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-
 
     # Package builds
     - name: Build Package
