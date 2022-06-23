@@ -5,7 +5,7 @@ import WalletConnectUtils
 
 final class SignClientTests: XCTestCase {
 
-    let defaultTimeout: TimeInterval = 5.0
+    let defaultTimeout: TimeInterval = 5
 
     var proposer: ClientDelegate!
     var responder: ClientDelegate!
@@ -62,7 +62,7 @@ final class SignClientTests: XCTestCase {
         let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
 
         wallet.onSessionProposal = { proposal in
-            Task {
+            Task(priority: .high) {
                 do { try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch { XCTFail("\(error)") }
             }
         }
@@ -90,7 +90,7 @@ final class SignClientTests: XCTestCase {
         try await wallet.client.pair(uri: uri!)
 
         wallet.onSessionProposal = { proposal in
-            Task {
+            Task(priority: .high) {
                 do {
                     try await wallet.client.reject(proposalId: proposal.id, reason: .disapprovedChains) // TODO: Review reason
                     store.rejectedProposal = proposal
