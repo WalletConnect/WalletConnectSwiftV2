@@ -10,7 +10,7 @@ extension JWT {
             typ  = "JWT"
         }
 
-        func encode() throws -> String  {
+        func encode() throws -> String {
             let jsonEncoder = JSONEncoder()
             jsonEncoder.dateEncodingStrategy = .secondsSince1970
             let data = try jsonEncoder.encode(self)

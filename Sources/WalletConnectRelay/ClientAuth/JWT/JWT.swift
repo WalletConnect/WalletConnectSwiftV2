@@ -7,7 +7,7 @@ struct JWT: Codable, Equatable {
 
     var header: Header
     var claims: Claims
-    var signature: String? = nil
+    var signature: String?
 
     public init(header: Header = Header(), claims: Claims) {
         self.header = header
