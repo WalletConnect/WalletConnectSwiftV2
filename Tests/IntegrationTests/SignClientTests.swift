@@ -13,7 +13,7 @@ final class SignClientTests: XCTestCase {
 
     static private func makeClientDelegate(
         name: String,
-        relayHost: String = "relay.walletconnect.com",
+        relayHost: String = "dev.relay.walletconnect.com",
         projectId: String = "8ba9ee138960775e5231b70cc5ef1c3a"
     ) -> ClientDelegate {
         let logger = ConsoleLogger(suffix: name, loggingLevel: .debug)
