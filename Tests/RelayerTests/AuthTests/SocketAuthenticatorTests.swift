@@ -30,10 +30,3 @@ final class SocketAuthenticatorTests: XCTestCase {
         XCTAssertNotNil(token)
     }
 }
-
-struct ED25519DIDKeyFactoryMock: ED25519DIDKeyFactory {
-    var did: String!
-    func make(pubKey: Data) -> String {
-        return did
-    }
-}
