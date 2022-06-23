@@ -44,6 +44,12 @@ public struct SessionNamespace: Equatable, Codable {
             self.methods = methods
             self.events = events
         }
+
+        func isSuperset(of other: Extension) -> Bool {
+            self.accounts.isSuperset(of: other.accounts) &&
+            self.methods.isSuperset(of: other.methods) &&
+            self.events.isSuperset(of: other.events)
+        }
     }
 
     public init(accounts: Set<Account>, methods: Set<String>, events: Set<String>, extensions: [SessionNamespace.Extension]? = nil) {

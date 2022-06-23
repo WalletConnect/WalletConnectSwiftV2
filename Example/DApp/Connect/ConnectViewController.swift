@@ -28,9 +28,9 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
         super.viewDidLoad()
         DispatchQueue.global().async { [unowned self] in
             if let qrImage = generateQRCode(from: uriString) {
-                DispatchQueue.main.async {
-                    connectView.qrCodeView.image = qrImage
-                    connectView.copyButton.isHidden = false
+                DispatchQueue.main.async { [self] in
+                    self.connectView.qrCodeView.image = qrImage
+                    self.connectView.copyButton.isHidden = false
                 }
             }
         }

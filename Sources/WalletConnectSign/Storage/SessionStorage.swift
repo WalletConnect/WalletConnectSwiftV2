@@ -1,7 +1,9 @@
 protocol WCSessionStorage: AnyObject {
     var onSessionExpiration: ((WCSession) -> Void)? { get set }
-    func hasSession(forTopic topic: String) -> Bool
+    @discardableResult
+    func setSessionIfNewer(_ session: WCSession) -> Bool
     func setSession(_ session: WCSession)
+    func hasSession(forTopic topic: String) -> Bool
     func getSession(forTopic topic: String) -> WCSession?
     func getAll() -> [WCSession]
     func delete(topic: String)
@@ -29,6 +31,13 @@ final class SessionStorage: WCSessionStorage {
         storage.setSequence(session)
     }
 
+    @discardableResult
+    func setSessionIfNewer(_ session: WCSession) -> Bool {
+        guard isNeedToReplace(session) else { return false }
+        storage.setSequence(session)
+        return true
+    }
+
     func getSession(forTopic topic: String) -> WCSession? {
         return try? storage.getSequence(forTopic: topic)
     }
@@ -43,5 +52,15 @@ final class SessionStorage: WCSessionStorage {
 
     func deleteAll() {
         storage.deleteAll()
+    }
+}
+
+// MARK: Privates
+
+private extension SessionStorage {
+
+    func isNeedToReplace(_ session: WCSession) -> Bool {
+        guard let old = getSession(forTopic: session.topic) else { return true }
+        return session.timestamp > old.timestamp
     }
 }

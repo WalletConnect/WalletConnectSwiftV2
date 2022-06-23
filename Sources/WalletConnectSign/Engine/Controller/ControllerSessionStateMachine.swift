@@ -32,7 +32,7 @@ final class ControllerSessionStateMachine {
         try validateControlledAcknowledged(session)
         try Namespace.validate(namespaces)
         logger.debug("Controller will update methods")
-        session.updateNamespaces(namespaces)
+        try session.updateNamespaces(namespaces)
         sessionStore.setSession(session)
         try await networkingInteractor.request(.wcSessionUpdate(SessionType.UpdateParams(namespaces: namespaces)), onTopic: topic)
     }
@@ -50,42 +50,46 @@ final class ControllerSessionStateMachine {
 
     private func handleResponse(_ response: WCResponse) {
         switch response.requestParams {
-        case .sessionUpdate:
-            handleUpdateResponse(topic: response.topic, result: response.result)
-        case .sessionExtend:
-            handleUpdateExpiryResponse(topic: response.topic, result: response.result)
+        case .sessionUpdate(let payload):
+            handleUpdateResponse(response: response, payload: payload)
+        case .sessionExtend(let payload):
+            handleUpdateExpiryResponse(response: response, payload: payload)
         default:
             break
         }
     }
 
-    // TODO: Re-enable callback
-    private func handleUpdateResponse(topic: String, result: JsonRpcResult) {
-        guard let _ = sessionStore.getSession(forTopic: topic) else {
-            return
-        }
-        switch result {
+    private func handleUpdateResponse(response: WCResponse, payload: SessionType.UpdateParams) {
+        guard var session = sessionStore.getSession(forTopic: response.topic) else { return }
+        switch response.result {
         case .response:
-            // TODO - state sync
-//            onNamespacesUpdate?(session.topic, session.namespaces)
-            break
+            do {
+                try session.updateNamespaces(payload.namespaces, timestamp: response.timestamp)
+
+                if sessionStore.setSessionIfNewer(session) {
+                    onNamespacesUpdate?(session.topic, session.namespaces)
+                }
+            } catch {
+                logger.error("Update namespaces error: \(error.localizedDescription)")
+            }
         case .error:
-            // TODO - state sync
-            logger.error("Peer failed to update methods.")
+            logger.error("Peer failed to update session")
         }
     }
 
-    private func handleUpdateExpiryResponse(topic: String, result: JsonRpcResult) {
-        guard let session = sessionStore.getSession(forTopic: topic) else {
-            return
-        }
-        switch result {
+    private func handleUpdateExpiryResponse(response: WCResponse, payload: SessionType.UpdateExpiryParams) {
+        guard var session = sessionStore.getSession(forTopic: response.topic) else { return }
+        switch response.result {
         case .response:
-            // TODO - state sync
-            onExtend?(session.topic, session.expiryDate)
+            do {
+                try session.updateExpiry(to: payload.expiry)
+                sessionStore.setSession(session)
+                onExtend?(session.topic, session.expiryDate)
+            } catch {
+                logger.error("Update expiry error: \(error.localizedDescription)")
+            }
         case .error:
-            // TODO - state sync
-            logger.error("Peer failed to update events.")
+            logger.error("Peer failed to extend session")
         }
     }
 

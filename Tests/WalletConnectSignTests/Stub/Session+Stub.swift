@@ -4,20 +4,25 @@ import WalletConnectKMS
 
 extension WCSession {
     static func stub(
+        topic: String = .generateTopic(),
         isSelfController: Bool = false,
         expiryDate: Date = Date.distantFuture,
         selfPrivateKey: AgreementPrivateKey = AgreementPrivateKey(),
-        acknowledged: Bool = true) -> WCSession {
+        namespaces: [String: SessionNamespace] = [:],
+        acknowledged: Bool = true,
+        timestamp: Date = Date()
+    ) -> WCSession {
             let peerKey = selfPrivateKey.publicKey.hexRepresentation
             let selfKey = AgreementPrivateKey().publicKey.hexRepresentation
             let controllerKey = isSelfController ? selfKey : peerKey
             return WCSession(
-                topic: String.generateTopic(),
+                topic: topic,
+                timestamp: timestamp,
                 relay: RelayProtocolOptions.stub(),
                 controller: AgreementPeer(publicKey: controllerKey),
                 selfParticipant: Participant.stub(publicKey: selfKey),
                 peerParticipant: Participant.stub(publicKey: peerKey),
-                namespaces: [:],
+                namespaces: namespaces,
                 events: [],
                 accounts: Account.stubSet(),
                 acknowledged: acknowledged,

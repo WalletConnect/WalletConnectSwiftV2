@@ -70,7 +70,11 @@ final class NonControllerSessionStateMachine {
         guard session.peerIsController else {
             throw Errors.respondError(payload: payload, reason: .unauthorizedUpdateNamespacesRequest)
         }
-        session.updateNamespaces(updateParams.namespaces)
+        do {
+            try session.updateNamespaces(updateParams.namespaces, timestamp: payload.timestamp)
+        } catch {
+            throw Errors.respondError(payload: payload, reason: .invalidUpdateNamespaceRequest)
+        }
         sessionStore.setSession(session)
         networkingInteractor.respondSuccess(for: payload)
         onNamespacesUpdate?(session.topic, updateParams.namespaces)

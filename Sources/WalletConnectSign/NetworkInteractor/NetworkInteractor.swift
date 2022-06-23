@@ -3,14 +3,6 @@ import Combine
 import WalletConnectUtils
 import WalletConnectKMS
 
-struct WCResponse: Codable {
-    let topic: String
-    let chainId: String?
-    let requestMethod: WCRequest.Method
-    let requestParams: WCRequest.Params
-    let result: JsonRpcResult
-}
-
 protocol NetworkInteracting: AnyObject {
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
