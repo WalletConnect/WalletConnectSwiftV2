@@ -22,7 +22,7 @@ struct EdDSASigner: JWTSigning {
         guard let unsignedData = unsignedJWT.data(using: .utf8) else {
             throw Errors.invalidJWTString
         }
-        let signature = try privateKey.signature(for: unsignedData)
+        let signature = try privateKey.signature(unsignedData)
         let signatureString = JWTEncoder.base64urlEncodedString(data: signature)
         return signatureString
     }
