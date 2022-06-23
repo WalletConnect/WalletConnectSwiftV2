@@ -7,6 +7,9 @@ protocol JWTSigning {
 }
 
 struct EdDSASigner: JWTSigning {
+    enum Errors: Error {
+        case invalidJWTString
+    }
     var alg = "EdDSA"
     let privateKey: SigningPrivateKey
 
@@ -14,6 +17,12 @@ struct EdDSASigner: JWTSigning {
         self.privateKey = keys
     }
     func sign(header: String, claims: String) throws  -> String {
-        try privateKey.signature(for: <#T##Data#>)
+        let unsignedJWT = header + "." + claims
+        guard let unsignedData = unsignedJWT.data(using: .utf8) else {
+            throw Errors.invalidJWTString
+        }
+        let signature = try privateKey.signature(for: unsignedData)
+        let signatureString = JWTEncoder.base64urlEncodedString(data: signature)
+        return signatureString
     }
 }
