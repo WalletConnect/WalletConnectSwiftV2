@@ -18,7 +18,7 @@ extension Curve25519.Signing.PrivateKey: Equatable {
 // MARK: - Public Key
 
 public struct SigningPublicKey: GenericPasswordConvertible, Equatable {
-    public init<D>(rawRepresentation data: D) throws where D : ContiguousBytes {
+    public init<D>(rawRepresentation data: D) throws where D: ContiguousBytes {
         self.key = try Curve25519.Signing.PublicKey(rawRepresentation: data)
     }
 
