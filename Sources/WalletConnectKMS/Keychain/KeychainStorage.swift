@@ -1,28 +1,28 @@
 import Foundation
 
-protocol KeychainStorageProtocol {
+public protocol KeychainStorageProtocol {
     func add<T: GenericPasswordConvertible>(_ item: T, forKey key: String) throws
     func read<T: GenericPasswordConvertible>(key: String) throws -> T
     func delete(key: String) throws
     func deleteAll() throws
 }
 
-final class KeychainStorage: KeychainStorageProtocol {
+public final class KeychainStorage: KeychainStorageProtocol {
 
     private let service: String
 
     private let secItem: KeychainServiceProtocol
 
-    init(keychainService: KeychainServiceProtocol = KeychainServiceWrapper(), serviceIdentifier: String) {
+    public init(keychainService: KeychainServiceProtocol = KeychainServiceWrapper(), serviceIdentifier: String) {
         self.secItem = keychainService
         service = serviceIdentifier
     }
 
-    func add<T>(_ item: T, forKey key: String) throws where T: GenericPasswordConvertible {
+    public func add<T>(_ item: T, forKey key: String) throws where T: GenericPasswordConvertible {
         try add(data: item.rawRepresentation, forKey: key)
     }
 
-    func add(data: Data, forKey key: String) throws {
+    public func add(data: Data, forKey key: String) throws {
         var query = buildBaseServiceQuery(for: key)
         query[kSecValueData] = data
 
@@ -33,14 +33,14 @@ final class KeychainStorage: KeychainStorageProtocol {
         }
     }
 
-    func read<T>(key: String) throws -> T where T: GenericPasswordConvertible {
+    public func read<T>(key: String) throws -> T where T: GenericPasswordConvertible {
         guard let data = try readData(key: key) else {
             throw KeychainError(errSecItemNotFound)
         }
         return try T(rawRepresentation: data)
     }
 
-    func readData(key: String) throws -> Data? {
+    public func readData(key: String) throws -> Data? {
         var query = buildBaseServiceQuery(for: key)
         query[kSecReturnData] = true
 
@@ -57,11 +57,11 @@ final class KeychainStorage: KeychainStorageProtocol {
         }
     }
 
-    func update<T>(_ item: T, forKey key: String) throws where T: GenericPasswordConvertible {
+    public func update<T>(_ item: T, forKey key: String) throws where T: GenericPasswordConvertible {
         try update(data: item.rawRepresentation, forKey: key)
     }
 
-    func update(data: Data, forKey key: String) throws {
+    public func update(data: Data, forKey key: String) throws {
         let query = buildBaseServiceQuery(for: key)
         let attributes = [kSecValueData: data]
 
@@ -72,7 +72,7 @@ final class KeychainStorage: KeychainStorageProtocol {
         }
     }
 
-    func delete(key: String) throws {
+    public func delete(key: String) throws {
         let query = buildBaseServiceQuery(for: key)
 
         let status = secItem.delete(query as CFDictionary)
@@ -82,7 +82,7 @@ final class KeychainStorage: KeychainStorageProtocol {
         }
     }
 
-    func deleteAll() throws {
+    public func deleteAll() throws {
         let query = [
             kSecClass: kSecClassGenericPassword,
             kSecAttrService: service
