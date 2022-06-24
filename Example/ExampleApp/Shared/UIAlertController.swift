@@ -1,7 +1,7 @@
 import UIKit
 
 extension UIAlertController {
-    
+
     static func createInputAlert(confirmHandler: @escaping (String) -> Void) -> UIAlertController {
         let alert = UIAlertController(title: "Paste URI", message: "Enter a WalletConnect URI to connect.", preferredStyle: .alert)
         let connect: () -> Void = {

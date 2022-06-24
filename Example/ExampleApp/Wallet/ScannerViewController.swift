@@ -6,15 +6,15 @@ protocol ScannerViewControllerDelegate: AnyObject {
 }
 
 final class ScannerViewController: UIViewController {
-    
+
     weak var delegate: ScannerViewControllerDelegate?
-    
+
     private let captureSession = AVCaptureSession()
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
-        
+
         guard let captureDevice = AVCaptureDevice.default(for: .video) else {
             return
         }
@@ -26,7 +26,7 @@ final class ScannerViewController: UIViewController {
             print("Error on capture setup: \(error)")
         }
     }
-    
+
     private func startCaptureSession(with input: AVCaptureDeviceInput) {
         captureSession.addInput(input)
         let metadataOutput = AVCaptureMetadataOutput()
@@ -35,7 +35,7 @@ final class ScannerViewController: UIViewController {
         metadataOutput.metadataObjectTypes = [.qr]
         captureSession.startRunning()
     }
-    
+
     private func startVideoPreview() {
         let videoLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         videoLayer.videoGravity = .resizeAspectFill
@@ -45,17 +45,17 @@ final class ScannerViewController: UIViewController {
 }
 
 extension ScannerViewController: AVCaptureMetadataOutputObjectsDelegate {
-    
+
     func metadataOutput(
         _ output: AVCaptureMetadataOutput,
         didOutput metadataObjects: [AVMetadataObject],
         from connection: AVCaptureConnection) {
-            
+
         if let metadata = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
             metadata.type == .qr,
             let qrCode = metadata.stringValue {
             captureSession.stopRunning()
-            dismiss(animated: true)  { [weak self] in
+            dismiss(animated: true) { [weak self] in
                 self?.delegate?.didScan(qrCode)
             }
         }

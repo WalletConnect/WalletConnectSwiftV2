@@ -1,52 +1,108 @@
-//
-//import Foundation
-//import XCTest
-//import WalletConnectUtils
-//import TestingUtils
-//@testable import WalletConnectSign
-//@testable import WalletConnectKMS
-//
-//
-//final class ClientTests: XCTestCase {
-//
-//    let defaultTimeout: TimeInterval = 5.0
-//
-//    let relayHost = "relay.walletconnect.com"
-//    let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
-//    var proposer: ClientDelegate!
-//    var responder: ClientDelegate!
-//
-//    override func setUp() {
-//        proposer = Self.makeClientDelegate(isController: false, relayHost: relayHost, prefix: "🍏P", projectId: projectId)
-//        responder = Self.makeClientDelegate(isController: true, relayHost: relayHost, prefix: "🍎R", projectId: projectId)
-//    }
-//
-//    static func makeClientDelegate(isController: Bool, relayHost: String, prefix: String, projectId: String) -> ClientDelegate {
-//        let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
-//        let keychain = KeychainStorage(keychainService: KeychainServiceFake(), serviceIdentifier: "")
-//        let client = SignClient(
-//            metadata: AppMetadata(name: prefix, description: "", url: "", icons: [""]),
-//            projectId: projectId,
-//            relayHost: relayHost,
-//            logger: logger,
-//            kms: KeyManagementService(keychain: keychain),
-//            keyValueStorage: RuntimeKeyValueStorage())
-//        return ClientDelegate(client: client)
-//    }
-//
-//    private func waitClientsConnected() async {
-//        let group = DispatchGroup()
-//        group.enter()
-//        proposer.onConnected = {
-//            group.leave()
-//        }
-//        group.enter()
-//        responder.onConnected = {
-//            group.leave()
-//        }
-//        group.wait()
-//        return
-//    }
+import XCTest
+import WalletConnectUtils
+import TestingUtils
+@testable import WalletConnectKMS
+@testable import WalletConnectSign
+
+final class SignClientTests: XCTestCase {
+
+    let defaultTimeout: TimeInterval = 5.0
+
+    var proposer: ClientDelegate!
+    var responder: ClientDelegate!
+
+    static private func makeClientDelegate(
+        name: String,
+        relayHost: String = "beta.relay.walletconnect.com",
+        projectId: String = "8ba9ee138960775e5231b70cc5ef1c3a"
+    ) -> ClientDelegate {
+        let logger = ConsoleLogger(suffix: name, loggingLevel: .debug)
+        let keychain = KeychainStorage(keychainService: KeychainServiceFake(), serviceIdentifier: "")
+        let client = SignClient(
+            metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
+            projectId: projectId,
+            relayHost: relayHost,
+            logger: logger,
+            kms: KeyManagementService(keychain: keychain),
+            keyValueStorage: RuntimeKeyValueStorage())
+        return ClientDelegate(client: client)
+    }
+
+    private func listenForConnection() async {
+        let group = DispatchGroup()
+        group.enter()
+        proposer.onConnected = {
+            group.leave()
+        }
+        group.enter()
+        responder.onConnected = {
+            group.leave()
+        }
+        group.wait()
+        return
+    }
+
+    override func setUp() async throws {
+        proposer = Self.makeClientDelegate(name: "🍏P")
+        responder = Self.makeClientDelegate(name: "🍎R")
+        await listenForConnection()
+    }
+
+    override func tearDown() {
+        proposer = nil
+        responder = nil
+    }
+
+    func testSessionPropose() async throws {
+        let dapp = proposer!
+        let wallet = responder!
+        let dappSettlementExpectation = expectation(description: "Dapp expects to settle a session")
+        let walletSettlementExpectation = expectation(description: "Wallet expects to settle a session")
+        let requiredNamespaces = ProposalNamespace.stubRequired()
+        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
+
+        wallet.onSessionProposal = { proposal in
+            Task {
+                do { try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch { XCTFail("\(error)") }
+            }
+        }
+        dapp.onSessionSettled = { _ in
+            dappSettlementExpectation.fulfill()
+        }
+        wallet.onSessionSettled = { _ in
+            walletSettlementExpectation.fulfill()
+        }
+
+        let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces)
+        try await wallet.client.pair(uri: uri!)
+        wait(for: [dappSettlementExpectation, walletSettlementExpectation], timeout: defaultTimeout)
+    }
+
+    func testSessionReject() async throws {
+        let dapp = proposer!
+        let wallet = responder!
+        let sessionRejectExpectation = expectation(description: "Proposer is notified on session rejection")
+
+        class Store { var rejectedProposal: Session.Proposal? }
+        let store = Store()
+
+        let uri = try await dapp.client.connect(requiredNamespaces: ProposalNamespace.stubRequired())
+        try await wallet.client.pair(uri: uri!)
+
+        wallet.onSessionProposal = { proposal in
+            Task {
+                do {
+                    try await wallet.client.reject(proposalId: proposal.id, reason: .disapprovedChains) // TODO: Review reason
+                    store.rejectedProposal = proposal
+                } catch { XCTFail("\(error)") }
+            }
+        }
+        dapp.onSessionRejected = { proposal, _ in
+            XCTAssertEqual(store.rejectedProposal, proposal)
+            sessionRejectExpectation.fulfill() // TODO: Assert reason code
+        }
+        wait(for: [sessionRejectExpectation], timeout: defaultTimeout)
+    }
 //
 //    func testNewPairingPing() async {
 //        let responderReceivesPingResponseExpectation = expectation(description: "Responder receives ping response")
@@ -63,29 +119,6 @@
 //        wait(for: [responderReceivesPingResponseExpectation], timeout: defaultTimeout)
 //    }
 //
-//    func testNewSession() async {
-//        await waitClientsConnected()
-//        let proposerSettlesSessionExpectation = expectation(description: "Proposer settles session")
-//        let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
-//        let account = Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!
-//
-//        let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
-//        try! await responder.client.pair(uri: uri)
-//        responder.onSessionProposal = { [unowned self] proposal in
-//            try? self.responder.client.approve(proposalId: proposal.id, accounts: [account], namespaces: [])
-//        }
-//        responder.onSessionSettled = { sessionSettled in
-//            // FIXME: Commented assertion
-////            XCTAssertEqual(account, sessionSettled.state.accounts[0])
-//            responderSettlesSessionExpectation.fulfill()
-//        }
-//        proposer.onSessionSettled = { sessionSettled in
-//            // FIXME: Commented assertion
-////            XCTAssertEqual(account, sessionSettled.state.accounts[0])
-//            proposerSettlesSessionExpectation.fulfill()
-//        }
-//        wait(for: [proposerSettlesSessionExpectation, responderSettlesSessionExpectation], timeout: defaultTimeout)
-//    }
 //
 //    func testNewSessionOnExistingPairing() async {
 //        await waitClientsConnected()
@@ -115,22 +148,6 @@
 //            }
 //        }
 //        wait(for: [proposerSettlesSessionExpectation, responderSettlesSessionExpectation], timeout: defaultTimeout)
-//    }
-//
-//    func testResponderRejectsSession() async {
-//        await waitClientsConnected()
-//        let sessionRejectExpectation = expectation(description: "Proposer is notified on session rejection")
-//        let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
-//        _ = try! await responder.client.pair(uri: uri)
-//
-//        responder.onSessionProposal = {[unowned self] proposal in
-//            self.responder.client.reject(proposal: proposal, reason: .disapprovedChains)
-//        }
-//        proposer.onSessionRejected = { _, reason in
-//            XCTAssertEqual(reason.code, 5000)
-//            sessionRejectExpectation.fulfill()
-//        }
-//        wait(for: [sessionRejectExpectation], timeout: defaultTimeout)
 //    }
 //
 //    func testDeleteSession() async {
@@ -332,19 +349,19 @@
 //        }
 //        wait(for: [proposerReceivesEventExpectation], timeout: defaultTimeout)
 //    }
-//}
-//
-//public struct EthSendTransaction: Codable, Equatable {
+}
+
+// public struct EthSendTransaction: Codable, Equatable {
 //    public let from: String
 //    public let data: String
 //    public let value: String
 //    public let to: String
 //    public let gasPrice: String
 //    public let nonce: String
-//}
+// }
 //
 //
-//fileprivate let ethSendTransaction = """
+// fileprivate let ethSendTransaction = """
 //   {
 //      "from":"0xb60e8dd61c5d32be8058bb8eb970870f07233155",
 //      "to":"0xd46e8dd67c5d32be8058bb8eb970870f07244567",
@@ -354,10 +371,5 @@
 //      "value":"0x9184e72a",
 //      "nonce":"0x117"
 //   }
-//"""
+// """
 //
-//extension Namespace {
-//    static func stub(methods: Set<String> = ["method"]) -> Namespace {
-//        Namespace(chains: [Blockchain("eip155:1")!], methods: methods, events: ["event"])
-//    }
-//}

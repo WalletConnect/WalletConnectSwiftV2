@@ -10,7 +10,7 @@ public extension Int {
 }
 
 public extension Double {
-    
+
     // Do not use this function when testing Codables: https://bugs.swift.org/browse/SR-7054
     static func random() -> Double {
         random(in: 0...1)
@@ -18,23 +18,23 @@ public extension Double {
 }
 
 public extension String {
-    
+
     static func random() -> String {
         randomTopic()
     }
-    
+
     static func randomTopic() -> String {
         "\(UUID().uuidString)\(UUID().uuidString)".replacingOccurrences(of: "-", with: "").lowercased()
     }
 }
 
 public extension Result {
-    
+
     var isSuccess: Bool {
         if case .success = self { return true }
         return false
     }
-    
+
     var isFailure: Bool {
         if case .failure = self { return true }
         return false

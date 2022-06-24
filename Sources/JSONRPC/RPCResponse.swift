@@ -4,67 +4,67 @@ import Commons
  TODO: Add documentation
  */
 public struct RPCResponse: Equatable {
-    
+
     public let jsonrpc: String
-    
+
     public let id: RPCID?
-    
+
     public var result: AnyCodable? {
         if case .success(let value) = outcome { return value }
         return nil
     }
-    
+
     public var error: JSONRPCError? {
         if case .failure(let error) = outcome { return error }
         return nil
     }
-    
+
     private let outcome: Result<AnyCodable, JSONRPCError>
-    
+
     internal init(id: RPCID?, outcome: Result<AnyCodable, JSONRPCError>) {
         self.jsonrpc = "2.0"
         self.id = id
         self.outcome = outcome
     }
-    
+
     public init<C>(id: Int, result: C) where C: Codable {
         self.init(id: RPCID(id), outcome: .success(AnyCodable(result)))
     }
-    
+
     public init<C>(id: String, result: C) where C: Codable {
         self.init(id: RPCID(id), outcome: .success(AnyCodable(result)))
     }
-    
+
     public init(id: Int, error: JSONRPCError) {
         self.init(id: RPCID(id), outcome: .failure(error))
     }
-    
+
     public init(id: String, error: JSONRPCError) {
         self.init(id: RPCID(id), outcome: .failure(error))
     }
-    
+
     public init(id: Int, errorCode: Int, message: String, associatedData: AnyCodable? = nil) {
         self.init(id: RPCID(id), outcome: .failure(JSONRPCError(code: errorCode, message: message, data: associatedData)))
     }
-    
+
     public init(id: String, errorCode: Int, message: String, associatedData: AnyCodable? = nil) {
         self.init(id: RPCID(id), outcome: .failure(JSONRPCError(code: errorCode, message: message, data: associatedData)))
     }
-    
+
     public init(errorWithoutID: JSONRPCError) {
         self.init(id: nil, outcome: .failure(errorWithoutID))
     }
 }
 
 extension RPCResponse: Codable {
-    
+
     enum CodingKeys: CodingKey {
         case jsonrpc
         case result
         case error
         case id
     }
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         jsonrpc = try container.decode(String.self, forKey: .jsonrpc)
@@ -97,7 +97,7 @@ extension RPCResponse: Codable {
                 debugDescription: "Couldn't find neither a result nor an error in the response."))
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(jsonrpc, forKey: .jsonrpc)

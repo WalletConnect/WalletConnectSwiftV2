@@ -1,20 +1,19 @@
-
 import Foundation
 import Network
 
 protocol NetworkMonitoring {
-    var onSatisfied: (()->())? {get set}
-    var onUnsatisfied: (()->())? {get set}
+    var onSatisfied: (() -> Void)? {get set}
+    var onUnsatisfied: (() -> Void)? {get set}
     func startMonitoring()
 }
 
 class NetworkMonitor: NetworkMonitoring {
-    var onSatisfied: (() -> ())?
-    var onUnsatisfied: (() -> ())?
-    
+    var onSatisfied: (() -> Void)?
+    var onUnsatisfied: (() -> Void)?
+
     private let monitor = NWPathMonitor()
     private let monitorQueue = DispatchQueue(label: "com.walletconnect.sdk.network.monitor")
-    
+
     func startMonitoring() {
         monitor.pathUpdateHandler = { [weak self] path in
             if path.status == .satisfied {
@@ -26,4 +25,3 @@ class NetworkMonitor: NetworkMonitoring {
         monitor.start(queue: monitorQueue)
     }
 }
-

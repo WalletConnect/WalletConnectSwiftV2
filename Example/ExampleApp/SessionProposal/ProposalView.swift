@@ -1,12 +1,12 @@
 import SwiftUI
 
 struct ProposalView: View {
-    
+
     var didPressApprove: (() -> Void)?
     var didPressReject: (() -> Void)?
-    
+
     let proposal: Proposal
-    
+
     var body: some View {
         VStack {
             headerView
@@ -18,7 +18,7 @@ struct ProposalView: View {
                 .padding(16)
         }
     }
-    
+
     func asyncImage(urlString: String) -> some View {
         AsyncImage(url: URL(string: urlString)) { phase in
             if case .success(let image) = phase {
@@ -28,7 +28,7 @@ struct ProposalView: View {
             }
         }
     }
-    
+
     // App metadata for the session
     var headerView: some View {
         VStack(alignment: .center, spacing: 12) {
@@ -49,7 +49,7 @@ struct ProposalView: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
-    
+
     // Scrollable view with permissions text
     var permissionsView: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -72,7 +72,7 @@ struct ProposalView: View {
             .background(Color.secondarySystemBackground)
         }
     }
-    
+
     // Displays a chain's methods and events
     func sectionView(for namespace: Proposal.Namespace) -> some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -104,7 +104,7 @@ struct ProposalView: View {
             }
         }
     }
-    
+
     // Approve and reject buttons
     var footerView: some View {
         HStack {
@@ -119,7 +119,7 @@ struct ProposalView: View {
             }
             .background(Color.blue)
             .cornerRadius(8)
-            
+
             Button {
                 didPressReject?()
             } label: {
@@ -136,7 +136,7 @@ struct ProposalView: View {
 }
 
 struct ProposalView_Previews: PreviewProvider {
-    
+
     static var previews: some View {
         ProposalView(proposal: Proposal.mock())
         ProposalView(proposal: Proposal.mock()).preferredColorScheme(.dark)

@@ -6,7 +6,7 @@ enum App {
     case wallet
     case safari
     case springboard
-    
+
     var bundleID: String {
         switch self {
         case .dapp:
@@ -19,7 +19,7 @@ enum App {
             return "com.apple.springboard"
         }
     }
-    
+
     var displayName: String {
         switch self {
         case .dapp:
@@ -32,7 +32,7 @@ enum App {
             fatalError()
         }
     }
-    
+
     var instance: XCUIApplication {
         return XCUIApplication(bundleIdentifier: bundleID)
     }

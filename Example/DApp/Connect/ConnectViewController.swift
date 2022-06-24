@@ -1,4 +1,3 @@
-
 import Foundation
 import UIKit
 import WalletConnectSign
@@ -12,26 +11,26 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
         self.uriString = uri
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     private let connectView: ConnectView = {
         ConnectView()
     }()
-    
+
     override func loadView() {
         view = connectView
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         DispatchQueue.global().async { [unowned self] in
             if let qrImage = generateQRCode(from: uriString) {
-                DispatchQueue.main.async {
-                    connectView.qrCodeView.image = qrImage
-                    connectView.copyButton.isHidden = false
+                DispatchQueue.main.async { [self] in
+                    self.connectView.qrCodeView.image = qrImage
+                    self.connectView.copyButton.isHidden = false
                 }
             }
         }
@@ -42,13 +41,13 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
         connectView.copyButton.isHidden = true
         setUpSegmentedControl()
     }
-    
+
     func setUpSegmentedControl() {
         segmentedControl.selectedSegmentIndex = 0
         self.navigationItem.titleView = segmentedControl
         segmentedControl.addTarget(self, action: #selector(segmentAction), for: .valueChanged)
     }
-    
+
     @objc func segmentAction() {
         if segmentedControl.selectedSegmentIndex == 0 {
             connectView.tableView.isHidden = false
@@ -56,12 +55,11 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
             connectView.tableView.isHidden = true
         }
     }
-    
+
     @objc func copyURI() {
         UIPasteboard.general.string = uriString
     }
-    
-    
+
     private func generateQRCode(from string: String) -> UIImage? {
         let data = string.data(using: .ascii)
         if let filter = CIFilter(name: "CIQRCodeGenerator") {
@@ -73,7 +71,7 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
         }
         return nil
     }
-    
+
     @objc func connectWithExampleWallet() {
         let url = URL(string: "https://walletconnect.com/wc?uri=\(uriString)")!
         DispatchQueue.main.async {
@@ -82,7 +80,7 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
             }
         }
     }
-    
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         activePairings.count
     }
@@ -92,7 +90,7 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
         cell.textLabel?.text = activePairings[indexPath.row].peer?.name ?? ""
         return cell
     }
-    
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let pairingTopic = activePairings[indexPath.row].topic
         let blockchains: Set<Blockchain> = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]

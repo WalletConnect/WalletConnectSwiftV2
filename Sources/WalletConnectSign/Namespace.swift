@@ -1,25 +1,25 @@
 import WalletConnectUtils
 
 public struct ProposalNamespace: Equatable, Codable {
-    
+
     public let chains: Set<Blockchain>
     public let methods: Set<String>
     public let events: Set<String>
     public let extensions: [Extension]?
-    
+
     public struct Extension: Equatable, Codable {
         public let chains: Set<Blockchain>
         public let methods: Set<String>
         public let events: Set<String>
-        
+
         public init(chains: Set<Blockchain>, methods: Set<String>, events: Set<String>) {
             self.chains = chains
             self.methods = methods
             self.events = events
         }
     }
-    
-    public init(chains: Set<Blockchain>, methods: Set<String>, events: Set<String>, extensions: [ProposalNamespace.Extension]?) {
+
+    public init(chains: Set<Blockchain>, methods: Set<String>, events: Set<String>, extensions: [ProposalNamespace.Extension]? = nil) {
         self.chains = chains
         self.methods = methods
         self.events = events
@@ -28,25 +28,31 @@ public struct ProposalNamespace: Equatable, Codable {
 }
 
 public struct SessionNamespace: Equatable, Codable {
-    
+
     public let accounts: Set<Account>
     public let methods: Set<String>
     public let events: Set<String>
     public let extensions: [Extension]?
-    
+
     public struct Extension: Equatable, Codable {
         public let accounts: Set<Account>
         public let methods: Set<String>
         public let events: Set<String>
-        
+
         public init(accounts: Set<Account>, methods: Set<String>, events: Set<String>) {
             self.accounts = accounts
             self.methods = methods
             self.events = events
         }
+
+        func isSuperset(of other: Extension) -> Bool {
+            self.accounts.isSuperset(of: other.accounts) &&
+            self.methods.isSuperset(of: other.methods) &&
+            self.events.isSuperset(of: other.events)
+        }
     }
-    
-    public init(accounts: Set<Account>, methods: Set<String>, events: Set<String>, extensions: [SessionNamespace.Extension]?) {
+
+    public init(accounts: Set<Account>, methods: Set<String>, events: Set<String>, extensions: [SessionNamespace.Extension]? = nil) {
         self.accounts = accounts
         self.methods = methods
         self.events = events
@@ -55,68 +61,68 @@ public struct SessionNamespace: Equatable, Codable {
 }
 
 enum Namespace {
-    
+
     static func validate(_ namespaces: [String: ProposalNamespace]) throws {
         for (key, namespace) in namespaces {
             if namespace.chains.isEmpty {
-                throw WalletConnectError.namespaceHasEmptyChains
+                throw WalletConnectError.unsupportedNamespace(.unsupportedChains)
             }
             for chain in namespace.chains {
                 if key != chain.namespace {
-                    throw WalletConnectError.invalidNamespace
+                    throw WalletConnectError.unsupportedNamespace(.unsupportedChains)
                 }
             }
             if let extensions = namespace.extensions {
                 for ext in extensions {
                     if ext.chains.isEmpty {
-                        throw WalletConnectError.namespaceHasEmptyChains
+                        throw WalletConnectError.unsupportedNamespace(.unsupportedChains)
                     }
                 }
             }
         }
     }
-    
+
     static func validate(_ namespaces: [String: SessionNamespace]) throws {
         for (key, namespace) in namespaces {
             if namespace.accounts.isEmpty {
-                throw WalletConnectError.invalidNamespace
+                throw WalletConnectError.unsupportedNamespace(.unsupportedAccounts)
             }
             for account in namespace.accounts {
                 if key != account.namespace {
-                    throw WalletConnectError.invalidNamespace
+                    throw WalletConnectError.unsupportedNamespace(.unsupportedAccounts)
                 }
             }
             if let extensions = namespace.extensions {
                 for ext in extensions {
                     if ext.accounts.isEmpty {
-                        throw WalletConnectError.invalidNamespace
+                        throw WalletConnectError.unsupportedNamespace(.unsupportedAccounts)
                     }
                 }
             }
         }
     }
-    
+
     static func validateApproved(
         _ sessionNamespaces: [String: SessionNamespace],
         against proposalNamespaces: [String: ProposalNamespace]
     ) throws {
         for (key, proposedNamespace) in proposalNamespaces {
             guard let approvedNamespace = sessionNamespaces[key] else {
-                throw WalletConnectError.invalidNamespaceMatch
+                throw WalletConnectError.unsupportedNamespace(.unsupportedNamespaceKey)
             }
             try proposedNamespace.chains.forEach { chain in
                 if !approvedNamespace.accounts.contains(where: { $0.blockchain == chain }) {
-                    throw WalletConnectError.invalidNamespaceMatch
+                    throw WalletConnectError.unsupportedNamespace(.unsupportedChains)
                 }
             }
             try proposedNamespace.methods.forEach {
                 if !approvedNamespace.methods.contains($0) {
-                    throw WalletConnectError.invalidNamespaceMatch
+                    throw WalletConnectError.unsupportedNamespace(.unsupportedMethods)
                 }
             }
             try proposedNamespace.events.forEach {
                 if !approvedNamespace.events.contains($0) {
-                    throw WalletConnectError.invalidNamespaceMatch
+                    throw WalletConnectError.unsupportedNamespace(.unsupportedEvents)
                 }
             }
         }

@@ -6,7 +6,7 @@ struct Engine {
     let dapp = DAppEngine()
     let wallet = WalletEngine()
     let safari = SafariEngine()
-    
+
     /// Approve session request
     /// - Context:
     ///     - wallet opened

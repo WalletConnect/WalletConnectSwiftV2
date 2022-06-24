@@ -1,4 +1,3 @@
-
 import Foundation
 
 /**
@@ -11,19 +10,19 @@ import Foundation
  suitable place to briefly communicate your brand.
  */
 public struct AppMetadata: Codable, Equatable {
-    
+
     /// The name of the app.
     public let name: String
-    
+
     /// A brief textual description of the app that can be displayed to peers.
     public let description: String
-    
+
     /// The URL string that identifies the official domain of the app.
     public let url: String
-    
+
     /// An array of URL strings pointing to the icon assets on the web.
     public let icons: [String]
-    
+
     /**
      Creates a new metadata object with the specified information.
      

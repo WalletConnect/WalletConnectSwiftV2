@@ -4,27 +4,26 @@ import XCTest
 @testable import WalletConnectKMS
 import WalletConnectUtils
 
-
 final class PairEngineTests: XCTestCase {
-    
+
     var engine: PairEngine!
-    
-    var networkingInteractor: MockedWCRelay!
+
+    var networkingInteractor: NetworkingInteractorMock!
     var storageMock: WCPairingStorageMock!
     var cryptoMock: KeyManagementServiceMock!
     var proposalPayloadsStore: CodableStore<WCRequestSubscriptionPayload>!
-    
+
     var topicGenerator: TopicGenerator!
-    
+
     override func setUp() {
-        networkingInteractor = MockedWCRelay()
+        networkingInteractor = NetworkingInteractorMock()
         storageMock = WCPairingStorageMock()
         cryptoMock = KeyManagementServiceMock()
         topicGenerator = TopicGenerator()
         proposalPayloadsStore = CodableStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: "")
         setupEngine()
     }
-    
+
     override func tearDown() {
         networkingInteractor = nil
         storageMock = nil
@@ -33,14 +32,14 @@ final class PairEngineTests: XCTestCase {
         proposalPayloadsStore = nil
         engine = nil
     }
-    
+
     func setupEngine() {
         engine = PairEngine(
             networkingInteractor: networkingInteractor,
             kms: cryptoMock,
             pairingStore: storageMock)
     }
-    
+
     func testPairMultipleTimesOnSameURIThrows() async {
         let uri = WalletConnectURI.stub()
         for i in 1...10 {
@@ -53,8 +52,7 @@ final class PairEngineTests: XCTestCase {
             }
         }
     }
-    
-    
+
     func testPair() async {
         let uri = WalletConnectURI.stub()
         let topic = uri.topic

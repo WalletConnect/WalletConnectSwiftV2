@@ -1,5 +1,3 @@
-
-
 import Foundation
 import WalletConnectSign
 import UIKit
@@ -17,7 +15,7 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
     private var publishers = [AnyCancellable]()
 
     let chains = [Chain(name: "Ethereum", id: "eip155:1"), Chain(name: "Polygon", id: "eip155:137")]
-    var onSessionSettled: ((Session)->())?
+    var onSessionSettled: ((Session) -> Void)?
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Available Chains"
@@ -27,7 +25,7 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
             onSessionSettled?(session)
         }.store(in: &publishers)
     }
-    
+
     override func loadView() {
         view = selectChainView
     }
@@ -43,18 +41,18 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
             showConnectScreen(uriString: uri!)
         }
     }
-    
+
     private func showConnectScreen(uriString: String) {
         DispatchQueue.main.async { [unowned self] in
             let vc = UINavigationController(rootViewController: ConnectViewController(uri: uriString))
             present(vc, animated: true, completion: nil)
         }
     }
-    
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         chains.count
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "chain_cell", for: indexPath)
         let chain = chains[indexPath.row]
