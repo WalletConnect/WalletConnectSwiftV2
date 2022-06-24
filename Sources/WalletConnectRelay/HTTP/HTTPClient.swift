@@ -1,14 +1,35 @@
 import Foundation
 
-actor HTTPClient {
+final class HTTPClient {
 
-    private let session: URLSession = .shared
+    let host: String
 
-    func request(_ url: URL) {
-        let request = URLRequest(url: url)
+    private let session: URLSession
+
+    init(host: String, session: URLSession = .shared) {
+        self.host = host
+        self.session = session
+    }
+
+    func request<T: Decodable>(_ endpoint: Endpoint, completion: @escaping (HTTPResponse<T>) -> Void) {
+        let request = makeRequest(for: endpoint)
         session.dataTask(with: request) { data, response, error in
-//            HTTPResponse(request: request, data: data, response: response, error: error)
+            completion(HTTPResponse(request: request, data: data, response: response, error: error))
         }.resume()
+    }
+
+    func makeRequest(for endpoint: Endpoint) -> URLRequest {
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = host
+        components.path = endpoint.path
+        components.queryItems = []
+        guard let url = components.url else {
+            fatalError()
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        return request
     }
 }
 
