@@ -20,11 +20,29 @@ actor PairEngine {
             throw WalletConnectError.pairingAlreadyExist
         }
         var pairing = WCPairing(uri: uri)
-        try await networkingInteractor.subscribe(topic: pairing.topic)
-        let symKey = try! SymmetricKey(hex: uri.symKey) // FIXME: Malformed QR code from external source can crash the SDK
-        try! kms.setSymmetricKey(symKey, for: pairing.topic)
+        
+        try await subscribe(to: uri.topic)
+        try await setSymmetricKey(uri.symKey, topic: pairing.topic)
+
         pairing.activate()
         pairingStore.setPairing(pairing)
+    }
+    
+    private func setSymmetricKey(_ uriSymKey: String, topic: String) async throws {
+        do {
+            let symKey = try SymmetricKey(hex: uriSymKey)
+            try kms.setSymmetricKey(symKey, for: topic)
+        } catch {
+            throw WalletConnectError.malformedPairingURI
+        }
+    }
+    
+    private func subscribe(to topic: String) async throws {
+        do {
+            try await networkingInteractor.subscribe(topic: topic)
+        } catch {
+            throw WalletConnectError.noPairingMatchingTopic(topic)
+        }
     }
     
     func hasPairing(for topic: String) -> Bool {

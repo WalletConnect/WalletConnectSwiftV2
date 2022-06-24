@@ -1,4 +1,4 @@
-enum WalletConnectError: Error {
+enum WalletConnectError: Error, Equatable {
     
     case pairingProposalFailed
     case malformedPairingURI
