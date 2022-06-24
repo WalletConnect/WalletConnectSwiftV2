@@ -1,11 +1,11 @@
 import Foundation
 import WalletConnectKMS
 
-protocol SocketAuthenticationg {
+protocol SocketAuthenticating {
     func createAuthToken() async throws -> String
 }
 
-actor SocketAuthenticator: SocketAuthenticationg {
+actor SocketAuthenticator: SocketAuthenticating {
     private let authChallengeProvider: AuthChallengeProviding
     private let clientIdStorage: ClientIdStoring
     private let didKeyFactory: ED25519DIDKeyFactory
