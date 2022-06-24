@@ -35,28 +35,28 @@ final class HTTPResponseTests: XCTestCase {
         let response: HTTPResponse<String> = HTTPResponse(request: request, data: validData, response: nil, error: nil)
         XCTAssertNil(response.urlResponse)
         XCTAssertThrowsError(try response.result.get()) { error in
-            XCTAssert((error as? HTTPError)?.isNoResponseError == true)
+            XCTAssert(error.asHttpError?.isNoResponseError == true)
         }
     }
 
     func testInitWithBadResponse() {
         let response: HTTPResponse<String> = HTTPResponse(request: request, data: validData, response: failureResponse, error: nil)
         XCTAssertThrowsError(try response.result.get()) { error in
-            XCTAssert((error as? HTTPError)?.isBadStatusCodeError == true)
+            XCTAssert(error.asHttpError?.isBadStatusCodeError == true)
         }
     }
 
     func testInitWithNoData() {
         let response: HTTPResponse<String> = HTTPResponse(request: request, data: nil, response: successResponse, error: nil)
         XCTAssertThrowsError(try response.result.get()) { error in
-            XCTAssert((error as? HTTPError)?.isNilDataError == true)
+            XCTAssert(error.asHttpError?.isNilDataError == true)
         }
     }
 
     func testInitWithInvalidData() {
         let response: HTTPResponse<Int> = HTTPResponse(request: request, data: validData, response: successResponse, error: nil)
         XCTAssertThrowsError(try response.result.get()) { error in
-            XCTAssert((error as? HTTPError)?.isDecodeError == true)
+            XCTAssert(error.asHttpError?.isDecodeError == true)
         }
     }
 }

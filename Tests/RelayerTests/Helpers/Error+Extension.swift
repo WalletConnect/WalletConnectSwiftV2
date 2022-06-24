@@ -13,6 +13,10 @@ extension Error {
     var asNetworkError: NetworkError? {
         return self as? NetworkError
     }
+
+    var asHttpError: HTTPError? {
+        return self as? HTTPError
+    }
 }
 
 extension NetworkError {
