@@ -7,8 +7,12 @@ final class ED25519DIDKeyFactoryTests: XCTestCase {
     let pubKey = Data(hex: "884ab67f787b69e534bfdba8d5beb4e719700e90ac06317ed177d49e5a33be5a")
     var sut: ED25519DIDKeyFactoryImpl!
 
+    override func setUp() {
+        sut = ED25519DIDKeyFactoryImpl()
+    }
+
     func test() {
-        let did = sut.make(pubKey: pubKey)
+//        let did = sut.make(pubKey: pubKey)
 //        XCTAssertEqual(expectedDid, did)
     }
 
