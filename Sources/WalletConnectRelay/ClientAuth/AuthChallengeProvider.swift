@@ -5,19 +5,21 @@ protocol AuthChallengeProviding {
 }
 
 actor AuthChallengeProvider: AuthChallengeProviding {
-    func getChallenge(for clientId: String) async throws -> String {
-        fatalError("not implemented")
-//        let endpoint = Endpoint(
-//            path: "/auth-nonce",
-//            queryParameters: [URLQueryItem(name: "idd", value: clientId)])
+
+    struct AuthNonce: Decodable {
+        let nonce: String
     }
-}
 
-struct Endpoint {
-    let path: String
-    let queryParameters: [URLQueryItem]
-}
+    var client: HTTPClient
 
-struct AuthNonce: Decodable {
-    let nonce: String
+    init(client: HTTPClient) {
+        self.client = client
+    }
+
+    func getChallenge(for clientId: String) async throws -> String {
+        let endpoint = Endpoint(
+            path: "/auth-nonce",
+            queryParameters: [URLQueryItem(name: "idd", value: clientId)])
+        return try await client.request(AuthNonce.self, at: endpoint).nonce
+    }
 }
