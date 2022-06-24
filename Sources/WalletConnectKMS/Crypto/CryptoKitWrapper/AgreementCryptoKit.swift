@@ -68,6 +68,7 @@ public struct AgreementPrivateKey: GenericPasswordConvertible, Equatable {
     }
 
     public init<D>(rawRepresentation: D) throws where D: ContiguousBytes {
+
         self.key = try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: rawRepresentation)
     }
 

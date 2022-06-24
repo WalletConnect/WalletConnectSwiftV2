@@ -28,7 +28,7 @@ let package = Package(
             path: "Sources/Chat"),
         .target(
             name: "WalletConnectRelay",
-            dependencies: ["WalletConnectUtils", "Starscream"],
+            dependencies: ["WalletConnectUtils", "Starscream", "WalletConnectKMS"],
             path: "Sources/WalletConnectRelay"),
         .target(
             name: "WalletConnectKMS",
