@@ -5,7 +5,7 @@ struct Endpoint {
     let queryParameters: [URLQueryItem]
 }
 
-final class HTTPClient {
+actor HTTPClient {
 
     let host: String
 
@@ -41,9 +41,9 @@ final class HTTPClient {
         components.scheme = "https"
         components.host = host
         components.path = endpoint.path
-        components.queryItems = []
+        components.queryItems = endpoint.queryParameters
         guard let url = components.url else {
-            fatalError()
+            fatalError() // TODO: Remove fatal error when url fails to build
         }
         var request = URLRequest(url: url)
         request.httpMethod = "GET"

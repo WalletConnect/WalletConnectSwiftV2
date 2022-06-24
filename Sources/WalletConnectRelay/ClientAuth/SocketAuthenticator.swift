@@ -10,7 +10,7 @@ struct SocketAuthenticator: SocketAuthenticating {
     private let clientIdStorage: ClientIdStoring
     private let didKeyFactory: DIDKeyFactory
 
-    init(authChallengeProvider: AuthChallengeProviding = AuthChallengeProvider(),
+    init(authChallengeProvider: AuthChallengeProviding,
          clientIdStorage: ClientIdStoring,
          didKeyFactory: DIDKeyFactory = ED25519DIDKeyFactory()) {
         self.authChallengeProvider = authChallengeProvider
@@ -18,10 +18,10 @@ struct SocketAuthenticator: SocketAuthenticating {
         self.didKeyFactory = didKeyFactory
     }
 
-    func createAuthToken() throws -> String {
-        let clientIdKeyPair = try clientIdStorage.getOrCreateKeyPair()
-        let challenge = try authChallengeProvider.getChallenge(for: clientIdKeyPair.publicKey.hexRepresentation)
-        return try signJWT(subject: challenge, keyPair: clientIdKeyPair)
+    func createAuthToken() async throws -> String {
+        let clientIdKeyPair = try await clientIdStorage.getOrCreateKeyPair()
+        let challenge = try await authChallengeProvider.getChallenge(for: clientIdKeyPair.publicKey.hexRepresentation)
+        return try signJWT(subject: challenge.nonce, keyPair: clientIdKeyPair)
     }
 
     private func signJWT(subject: String, keyPair: SigningPrivateKey) throws -> String {
