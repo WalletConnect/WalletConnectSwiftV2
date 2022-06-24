@@ -33,4 +33,27 @@ extension NetworkError {
     }
 }
 
+extension HTTPError {
+
+    var isNoResponseError: Bool {
+        if case .noResponse = self { return true }
+        return false
+    }
+
+    var isBadStatusCodeError: Bool {
+        if case .badStatusCode = self { return true }
+        return false
+    }
+
+    var isNilDataError: Bool {
+        if case .responseDataNil = self { return true }
+        return false
+    }
+
+    var isDecodeError: Bool {
+        if case .jsonDecodeFailed = self { return true }
+        return false
+    }
+}
+
 extension String: Error {}

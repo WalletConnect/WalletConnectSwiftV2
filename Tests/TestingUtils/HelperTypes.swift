@@ -1,4 +1,6 @@
-public struct AnyError: Error {}
+public struct AnyError: Error {
+    public init() {}
+}
 
 public struct EmptyCodable: Codable {
     public init() {}
