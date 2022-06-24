@@ -11,7 +11,7 @@ actor SocketAuthenticator: SocketAuthenticating {
     private let didKeyFactory: ED25519DIDKeyFactory
 
     init(authChallengeProvider: AuthChallengeProviding = AuthChallengeProvider(),
-         clientIdStorage: ClientIdStoring = ClientIdStorage(),
+         clientIdStorage: ClientIdStoring,
          didKeyFactory: ED25519DIDKeyFactory = ED25519DIDKeyFactoryImpl()) {
         self.authChallengeProvider = authChallengeProvider
         self.clientIdStorage = clientIdStorage

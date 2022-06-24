@@ -1,20 +1,24 @@
 import Foundation
 @testable import WalletConnectKMS
 
-final class KeychainStorageMock: KeychainStorageProtocol {
+public final class KeychainStorageMock: KeychainStorageProtocol {
 
-    var storage: [String: Data] = [:]
+    public var storage: [String: Data]
 
     private(set) var didCallAdd = false
     private(set) var didCallRead = false
     private(set) var didCallDelete = false
 
-    func add<T>(_ item: T, forKey key: String) throws where T: GenericPasswordConvertible {
+    public init(storage: [String: Data] = [:]) {
+        self.storage = storage
+    }
+
+    public func add<T>(_ item: T, forKey key: String) throws where T: GenericPasswordConvertible {
         didCallAdd = true
         storage[key] = item.rawRepresentation
     }
 
-    func read<T>(key: String) throws -> T where T: GenericPasswordConvertible {
+    public func read<T>(key: String) throws -> T where T: GenericPasswordConvertible {
         didCallRead = true
         if let data = storage[key] {
             return try T(rawRepresentation: data)
@@ -22,12 +26,12 @@ final class KeychainStorageMock: KeychainStorageProtocol {
         throw KeychainError(errSecItemNotFound)
     }
 
-    func delete(key: String) throws {
+    public func delete(key: String) throws {
         didCallDelete = true
         storage[key] = nil
     }
 
-    func deleteAll() throws {
+    public func deleteAll() throws {
         storage = [:]
     }
 }
