@@ -10,12 +10,12 @@ final class ClientIdStorageTests: XCTestCase {
         let keychain = KeychainStorageMock()
         let storage = ClientIdStorage(keychain: keychain)
 
-        XCTAssertThrowsError(try keychain.read(key: "signingPrivateKey") as SigningPrivateKey)
+        XCTAssertThrowsError(try keychain.read(key: "com.walletconnect.iridium.client_id") as SigningPrivateKey)
 
         let saved = try await storage.getOrCreateKeyPair()
-        XCTAssertEqual(saved, try keychain.read(key: "signingPrivateKey"))
+        XCTAssertEqual(saved, try keychain.read(key: "com.walletconnect.iridium.client_id"))
 
-        let restoredAgain = try await storage.getOrCreateKeyPair()
-        XCTAssertEqual(saved, restoredAgain)
+        let restored = try await storage.getOrCreateKeyPair()
+        XCTAssertEqual(saved, restored)
     }
 }

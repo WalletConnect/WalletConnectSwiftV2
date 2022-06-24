@@ -6,7 +6,7 @@ protocol ClientIdStoring {
 }
 
 actor ClientIdStorage: ClientIdStoring {
-    private let key = "signingPrivateKey"
+    private let key = "com.walletconnect.iridium.client_id"
     private let keychain: KeychainStorageProtocol
 
     init(keychain: KeychainStorageProtocol) {
