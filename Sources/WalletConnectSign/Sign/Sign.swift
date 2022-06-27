@@ -18,7 +18,7 @@ public class Sign {
             fatalError("Error - you must call configure(_:) before accessing the shared instance.")
         }
         relayClient = RelayClient(
-            relayHost: "dev.relay.walletconnect.com",
+            relayHost: "relay.walletconnect.com",
             projectId: config.projectId,
             socketFactory: config.socketFactory,
             socketConnectionType: config.socketConnectionType
