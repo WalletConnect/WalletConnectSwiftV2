@@ -1,4 +1,3 @@
-import Starscream
 import Foundation
 
 class ManualSocketConnectionHandler: SocketConnectionHandler {

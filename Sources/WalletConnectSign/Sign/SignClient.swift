@@ -48,15 +48,15 @@ public final class SignClient {
     ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
-    public convenience init(metadata: AppMetadata, projectId: String, relayHost: String, keyValueStorage: KeyValueStorage = UserDefaults.standard) {
-        self.init(metadata: metadata, projectId: projectId, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), kms: KeyManagementService(serviceIdentifier: "com.walletconnect.sdk"), keyValueStorage: keyValueStorage)
+    public convenience init(metadata: AppMetadata, projectId: String, relayHost: String, socketFactory: WebSocketFactory, keyValueStorage: KeyValueStorage = UserDefaults.standard) {
+        self.init(metadata: metadata, projectId: projectId, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), kms: KeyManagementService(serviceIdentifier: "com.walletconnect.sdk"), keyValueStorage: keyValueStorage, socketFactory: socketFactory)
     }
 
-    init(metadata: AppMetadata, projectId: String, relayHost: String, logger: ConsoleLogging, kms: KeyManagementService, keyValueStorage: KeyValueStorage) {
+    init(metadata: AppMetadata, projectId: String, relayHost: String, logger: ConsoleLogging, kms: KeyManagementService, keyValueStorage: KeyValueStorage, socketFactory: WebSocketFactory) {
         self.metadata = metadata
         self.logger = logger
         self.kms = kms
-        let relayClient = RelayClient(relayHost: relayHost, projectId: projectId, keyValueStorage: keyValueStorage, logger: logger)
+        let relayClient = RelayClient(relayHost: relayHost, projectId: projectId, keyValueStorage: keyValueStorage, socketFactory: socketFactory, logger: logger)
         let serializer = Serializer(kms: kms)
         self.history = JsonRpcHistory(logger: logger, keyValueStore: CodableStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
         self.networkingInteractor = NetworkInteractor(relayClient: relayClient, serializer: serializer, logger: logger, jsonRpcHistory: history)
