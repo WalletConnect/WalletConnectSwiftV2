@@ -196,26 +196,6 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "WalletConnectTests"
-               BuildableName = "WalletConnectTests"
-               BlueprintName = "WalletConnectTests"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "IntegrationTests"
-               BuildableName = "IntegrationTests"
-               BlueprintName = "IntegrationTests"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "RelayerTests"
                BuildableName = "RelayerTests"
                BlueprintName = "RelayerTests"
@@ -269,6 +249,16 @@
                BlueprintIdentifier = "JSONRPCTests"
                BuildableName = "JSONRPCTests"
                BlueprintName = "JSONRPCTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "ChatTests"
+               BuildableName = "ChatTests"
+               BlueprintName = "ChatTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>
