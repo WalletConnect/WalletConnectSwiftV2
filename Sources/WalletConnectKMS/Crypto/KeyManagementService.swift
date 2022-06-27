@@ -26,11 +26,7 @@ public class KeyManagementService: KeyManagementServiceProtocol {
 
     private var keychain: KeychainStorageProtocol
 
-    public init(serviceIdentifier: String) {
-        self.keychain =  KeychainStorage(serviceIdentifier: serviceIdentifier)
-    }
-
-    init(keychain: KeychainStorageProtocol) {
+    public init(keychain: KeychainStorageProtocol) {
         self.keychain = keychain
     }
 
