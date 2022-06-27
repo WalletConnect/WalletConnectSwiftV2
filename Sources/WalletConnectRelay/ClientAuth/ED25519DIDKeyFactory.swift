@@ -4,30 +4,25 @@ protocol ED25519DIDKeyFactory {
     func make(pubKey: Data) -> String
 }
 
+/// A DID Method for Static Cryptographic Keys
 /// did-key-format := did:key:MULTIBASE(base58-btc, MULTICODEC(public-key-type, raw-public-key-bytes))
 struct ED25519DIDKeyFactoryImpl: ED25519DIDKeyFactory {
-    private static let DID_DELIMITER = ":"
-    private static let DID_PREFIX = "did"
-    private static let DID_METHOD = "key"
-    private static let MULTICODEC_ED25519_HEADER = "K36"
-    private static let MULTICODEC_ED25519_ENCODING = "base58btc"
-    private static let MULTICODEC_ED25519_BASE = "z"
+    private let DID_DELIMITER = ":"
+    private let DID_PREFIX = "did"
+    private let DID_METHOD = "key"
+    private let MULTICODEC_ED25519_HEADER: [UInt8] = [0xed, 0x01]
+    private let MULTICODEC_ED25519_BASE = "z"
 
     func make(pubKey: Data) -> String {
-        fatalError("not implemented")
-
-        let multicodec = multicodec()
-
-        let multibase = multibase(multicodec: multicodec)
-
-        return [Self.DID_PREFIX, Self.DID_METHOD, multibase].joined(separator: Self.DID_DELIMITER)
+        return [
+            DID_PREFIX,
+            DID_METHOD,
+            multibase(pubKey: pubKey)
+        ].joined(separator: DID_DELIMITER)
     }
 
-    private func multibase(multicodec: String) -> String {
-        fatalError("not implemented")
-    }
-
-    private func multicodec() -> String {
-        fatalError("not implemented")
+    private func multibase(pubKey: Data) -> String {
+        let multicodec = Data(MULTICODEC_ED25519_HEADER) + pubKey
+        return MULTICODEC_ED25519_BASE + Base58.encode(multicodec)
     }
 }
