@@ -69,7 +69,7 @@ public final class RelayClient {
         let socketAuthenticator = SocketAuthenticator(
             authChallengeProvider: AuthChallengeProvider(),
             clientIdStorage: ClientIdStorage(keychain: keychainStorage),
-            didKeyFactory: ED25519DIDKeyFactoryImpl()
+            didKeyFactory: ED25519DIDKeyFactory()
         )
         let socket = socketFactory.create(with: Self.makeRelayUrl(
             host: relayHost,

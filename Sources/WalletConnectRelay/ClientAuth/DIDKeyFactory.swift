@@ -1,12 +1,12 @@
 import Foundation
 
-protocol ED25519DIDKeyFactory {
+protocol DIDKeyFactory {
     func make(pubKey: Data) -> String
 }
 
 /// A DID Method for Static Cryptographic Keys
 /// did-key-format := did:key:MULTIBASE(base58-btc, MULTICODEC(public-key-type, raw-public-key-bytes))
-struct ED25519DIDKeyFactoryImpl: ED25519DIDKeyFactory {
+struct ED25519DIDKeyFactory: DIDKeyFactory {
     private let DID_DELIMITER = ":"
     private let DID_PREFIX = "did"
     private let DID_METHOD = "key"
