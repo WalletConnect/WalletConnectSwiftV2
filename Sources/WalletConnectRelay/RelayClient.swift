@@ -113,7 +113,7 @@ public final class RelayClient {
         tag: PublishTag,
         prompt: Bool = false,
         onNetworkAcknowledge: @escaping ((Error?) -> Void)) -> Int64 {
-            let params = RelayJSONRPC.PublishParams(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag.rawValue)
+        let params = RelayJSONRPC.PublishParams(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag.rawValue)
         let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.method, params: params)
         let requestJson = try! request.json()
         logger.debug("iridium: Publishing Payload on Topic: \(topic)")
