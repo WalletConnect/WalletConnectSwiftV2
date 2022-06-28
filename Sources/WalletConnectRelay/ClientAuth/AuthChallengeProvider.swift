@@ -19,7 +19,7 @@ actor AuthChallengeProvider: AuthChallengeProviding {
     func getChallenge(for clientId: String) async throws -> AuthChallenge {
         let endpoint = Endpoint(
             path: "/auth-nonce",
-            queryParameters: [URLQueryItem(name: "idd", value: clientId)])
+            queryParameters: [URLQueryItem(name: "did", value: clientId)])
         return try await client.request(AuthChallenge.self, at: endpoint)
     }
 }

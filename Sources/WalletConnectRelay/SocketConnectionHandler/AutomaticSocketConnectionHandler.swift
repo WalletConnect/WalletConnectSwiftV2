@@ -2,6 +2,7 @@
 import UIKit
 #endif
 import Foundation
+import Combine
 
 class AutomaticSocketConnectionHandler: SocketConnectionHandler {
     enum Error: Swift.Error {
@@ -9,12 +10,14 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
         case manualSocketDisconnectionForbidden
     }
     private var appStateObserver: AppStateObserving
-    let socket: WebSocketConnecting
+    let socket: WebSocketProxy
     private var networkMonitor: NetworkMonitoring
     private let backgroundTaskRegistrar: BackgroundTaskRegistering
 
+    private var publishers = Set<AnyCancellable>()
+
     init(networkMonitor: NetworkMonitoring = NetworkMonitor(),
-         socket: WebSocketConnecting,
+         socket: WebSocketProxy,
          appStateObserver: AppStateObserving = AppStateObserver(),
          backgroundTaskRegistrar: BackgroundTaskRegistering = BackgroundTaskRegistrar()) {
         self.appStateObserver = appStateObserver
@@ -23,7 +26,13 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
         self.backgroundTaskRegistrar = backgroundTaskRegistrar
         setUpStateObserving()
         setUpNetworkMonitoring()
-        socket.connect()
+        setUpOnSocketCreation()
+    }
+
+    private func setUpOnSocketCreation() {
+        socket.socketCreationPublisher.sink { socket in
+            socket.connect()
+        }.store(in: &publishers)
     }
 
     private func setUpStateObserving() {

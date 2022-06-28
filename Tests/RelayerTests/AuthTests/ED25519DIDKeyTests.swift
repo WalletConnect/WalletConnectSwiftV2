@@ -12,8 +12,8 @@ final class ED25519DIDKeyFactoryTests: XCTestCase {
         sut = ED25519DIDKeyFactory()
     }
 
-    func testKeyCreation() {
-        let did = sut.make(pubKey: pubKey)
+    func testKeyCreation() async {
+        let did = await sut.make(pubKey: pubKey)
         XCTAssertEqual(expectedDid, did)
     }
 }

@@ -7,7 +7,7 @@ final class HTTPResponseTests: XCTestCase {
     static let url = URL(string: "https://httpbin.org/")!
     let request = URLRequest(url: url)
     let validData = try! JSONEncoder().encode("data")
-    
+
     let successResponse = HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: nil)
     let failureResponse = HTTPURLResponse(url: url, statusCode: 400, httpVersion: "HTTP/1.1", headerFields: nil)
 

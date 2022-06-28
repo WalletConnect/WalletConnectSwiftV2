@@ -21,12 +21,12 @@ final class SocketAuthenticatorTests: XCTestCase {
         didKeyFactory: DIDKeyFactory)
     }
 
-    func test() async {
+    func test() async throws {
         authChallengeProvider.challenge = AuthChallenge(nonce: "c479fe5dc464e771e78b193d239a65b58d278cad1c34bfb0b5716e5bb514928e")
         let keyRaw = Data(hex: "58e0254c211b858ef7896b00e3f36beeb13d568d47c6031c4218b87718061295")
-        let signingKey = try! SigningPrivateKey(rawRepresentation: keyRaw)
+        let signingKey = try SigningPrivateKey(rawRepresentation: keyRaw)
         clientIdStorage.keyPair = signingKey
-        let token = try! sut.createAuthToken()
+        let token = try await sut.createAuthToken()
         XCTAssertNotNil(token)
     }
 }
