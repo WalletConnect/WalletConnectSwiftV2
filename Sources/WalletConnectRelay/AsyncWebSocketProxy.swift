@@ -50,20 +50,20 @@ final class AsyncWebSocketProxy: WebSocketProxy {
     }
 
     private func makeRelayUrl() async -> URL {
+        var components = URLComponents()
+        components.scheme = "wss"
+        components.host = host
+        components.queryItems = [
+            URLQueryItem(name: "projectId", value: projectId)
+        ]
         do {
             let authToken = try await socketAuthenticator.createAuthToken()
-
-            var components = URLComponents()
-            components.scheme = "wss"
-            components.host = host
-            components.queryItems = [
-                URLQueryItem(name: "projectId", value: projectId),
-                URLQueryItem(name: "auth", value: authToken)
-            ]
-            return components.url!
+            components.queryItems?.append(URLQueryItem(name: "auth", value: authToken))
         } catch {
-            fatalError("Auth token creation error: \(error.localizedDescription)")
+            // TODO: Handle token creation errors
+            print("Auth token creation error: \(error.localizedDescription)")
         }
+        return components.url!
     }
 }
 
