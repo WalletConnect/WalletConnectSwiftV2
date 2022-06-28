@@ -25,7 +25,7 @@ class IridiumRelayTests: XCTestCase {
         let message = "qwerty"
         let subscriptionId = "sub-id"
         let subscriptionParams = RelayJSONRPC.SubscriptionParams(id: subscriptionId, data: RelayJSONRPC.SubscriptionData(topic: topic, message: message))
-        let subscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>(id: 12345, method: RelayJSONRPC.Method.subscription.rawValue, params: subscriptionParams)
+        let subscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>(id: 12345, method: RelayJSONRPC.Method.subscription.method, params: subscriptionParams)
         iridiumRelay.onMessage = { subscriptionTopic, subscriptionMessage in
             XCTAssertEqual(subscriptionMessage, message)
             XCTAssertEqual(subscriptionTopic, topic)
@@ -37,7 +37,7 @@ class IridiumRelayTests: XCTestCase {
 
     func testPublishRequestAcknowledge() {
         let acknowledgeExpectation = expectation(description: "completion with no error on iridium request acknowledge after publish")
-        let requestId = iridiumRelay.publish(topic: "", payload: "{}", onNetworkAcknowledge: { error in
+        let requestId = iridiumRelay.publish(topic: "", payload: "{}", tag: .unknown, onNetworkAcknowledge: { error in
             acknowledgeExpectation.fulfill()
             XCTAssertNil(error)
         })
@@ -72,7 +72,7 @@ class IridiumRelayTests: XCTestCase {
     }
 
     func testSendOnPublish() {
-        iridiumRelay.publish(topic: "", payload: "", onNetworkAcknowledge: { _ in})
+        iridiumRelay.publish(topic: "", payload: "", tag: .unknown, onNetworkAcknowledge: { _ in})
         XCTAssertTrue(dispatcher.sent)
     }
 
