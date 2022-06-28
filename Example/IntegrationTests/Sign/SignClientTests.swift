@@ -2,6 +2,7 @@ import XCTest
 import WalletConnectUtils
 @testable import WalletConnectKMS
 @testable import WalletConnectSign
+@testable import WalletConnectRelay
 
 final class SignClientTests: XCTestCase {
 
@@ -16,15 +17,23 @@ final class SignClientTests: XCTestCase {
         projectId: String = "8ba9ee138960775e5231b70cc5ef1c3a"
     ) -> ClientDelegate {
         let logger = ConsoleLogger(suffix: name, loggingLevel: .debug)
-        let keychain = KeychainStorage(keychainService: KeychainServiceFake(), serviceIdentifier: "")
+        let keychain = KeychainStorageMock()
+        let relayClient = RelayClient(
+            relayHost: relayHost,
+            projectId: projectId,
+            keyValueStorage: RuntimeKeyValueStorage(),
+            keychainStorage: keychain,
+            socketFactory: SocketFactory(),
+            socketConnectionType: .automatic,
+            logger: logger
+        )
         let client = SignClient(
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
-            projectId: projectId,
-            relayHost: relayHost,
             logger: logger,
-            kms: KeyManagementService(keychain: keychain),
             keyValueStorage: RuntimeKeyValueStorage(),
-            socketFactory: SocketFactory())
+            keychainStorage: keychain,
+            relayClient: relayClient
+        )
         return ClientDelegate(client: client)
     }
 

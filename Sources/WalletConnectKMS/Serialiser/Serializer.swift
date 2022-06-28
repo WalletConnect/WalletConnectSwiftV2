@@ -14,7 +14,7 @@ public class Serializer: Serializing {
         self.codec = codec
     }
 
-    public init(kms: KeyManagementService) {
+    public init(kms: KeyManagementServiceProtocol) {
         self.kms = kms
         self.codec = ChaChaPolyCodec()
     }

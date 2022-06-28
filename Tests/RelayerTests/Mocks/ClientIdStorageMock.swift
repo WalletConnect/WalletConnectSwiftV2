@@ -5,7 +5,7 @@ import Foundation
 class ClientIdStorageMock: ClientIdStoring {
     var keyPair: SigningPrivateKey!
 
-    func getOrCreateKeyPair() async throws -> SigningPrivateKey {
+    func getOrCreateKeyPair() throws -> SigningPrivateKey {
         return keyPair
     }
 }

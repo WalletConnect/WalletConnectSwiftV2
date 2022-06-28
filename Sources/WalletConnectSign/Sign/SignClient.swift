@@ -24,15 +24,12 @@ public final class SignClient {
     public weak var delegate: SignClientDelegate?
 
     public let logger: ConsoleLogging
-    private let metadata: AppMetadata
     private let pairingEngine: PairingEngine
     private let pairEngine: PairEngine
     private let sessionEngine: SessionEngine
     private let approveEngine: ApproveEngine
     private let nonControllerSessionStateMachine: NonControllerSessionStateMachine
     private let controllerSessionStateMachine: ControllerSessionStateMachine
-    private let networkingInteractor: NetworkInteracting
-    private let kms: KeyManagementService
     private let history: JsonRpcHistory
     private let cleanupService: CleanupService
     private var publishers = [AnyCancellable]()
@@ -48,18 +45,25 @@ public final class SignClient {
     ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
-    public convenience init(metadata: AppMetadata, projectId: String, relayHost: String, socketFactory: WebSocketFactory, keyValueStorage: KeyValueStorage = UserDefaults.standard) {
-        self.init(metadata: metadata, projectId: projectId, relayHost: relayHost, logger: ConsoleLogger(loggingLevel: .off), kms: KeyManagementService(serviceIdentifier: "com.walletconnect.sdk"), keyValueStorage: keyValueStorage, socketFactory: socketFactory)
+    public convenience init(metadata: AppMetadata, relayClient: RelayClient) {
+        let logger = ConsoleLogger(loggingLevel: .off)
+        let keyValueStorage = UserDefaults.standard
+        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
+        self.init(
+            metadata: metadata,
+            logger: logger,
+            keyValueStorage: keyValueStorage,
+            keychainStorage: keychainStorage,
+            relayClient: relayClient
+        )
     }
 
-    init(metadata: AppMetadata, projectId: String, relayHost: String, logger: ConsoleLogging, kms: KeyManagementService, keyValueStorage: KeyValueStorage, socketFactory: WebSocketFactory) {
-        self.metadata = metadata
+    init(metadata: AppMetadata, logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, relayClient: RelayClient) {
         self.logger = logger
-        self.kms = kms
-        let relayClient = RelayClient(relayHost: relayHost, projectId: projectId, keyValueStorage: keyValueStorage, socketFactory: socketFactory, logger: logger)
+        let kms = KeyManagementService(keychain: keychainStorage)
         let serializer = Serializer(kms: kms)
         self.history = JsonRpcHistory(logger: logger, keyValueStore: CodableStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
-        self.networkingInteractor = NetworkInteractor(relayClient: relayClient, serializer: serializer, logger: logger, jsonRpcHistory: history)
+        let networkingInteractor = NetworkInteractor(relayClient: relayClient, serializer: serializer, logger: logger, jsonRpcHistory: history)
         let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue)))
         let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue)))
         let sessionToPairingTopic = CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
@@ -73,46 +77,6 @@ public final class SignClient {
         self.cleanupService = CleanupService(pairingStore: pairingStore, sessionStore: sessionStore, kms: kms, sessionToPairingTopic: sessionToPairingTopic)
         setUpConnectionObserving(relayClient: relayClient)
         setUpEnginesCallbacks()
-    }
-
-    /// Initializes and returns newly created WalletConnect Client Instance. Establishes a network connection with the relay
-    ///
-    /// - Parameters:
-    ///   - metadata: describes your application and will define pairing appearance in a web browser.
-    ///   - relayClient: RelayClient instance
-    ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults but if for some reasons you want to provide your own storage you can inject it here.
-    ///
-    /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
-    public convenience init(metadata: AppMetadata, relayClient: RelayClient, keyValueStorage: KeyValueStorage = UserDefaults.standard, kms: KeyManagementService = KeyManagementService(serviceIdentifier: "com.walletconnect.sdk")) {
-        self.init(metadata: metadata, relayClient: relayClient, logger: ConsoleLogger(loggingLevel: .off), kms: kms, keyValueStorage: keyValueStorage)
-    }
-
-    init(metadata: AppMetadata, relayClient: RelayClient, logger: ConsoleLogging, kms: KeyManagementService, keyValueStorage: KeyValueStorage) {
-        self.metadata = metadata
-        self.logger = logger
-        self.kms = kms
-        let serializer = Serializer(kms: kms)
-        self.history = JsonRpcHistory(logger: logger, keyValueStore: CodableStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
-        self.networkingInteractor = NetworkInteractor(relayClient: relayClient, serializer: serializer, logger: logger, jsonRpcHistory: history)
-        let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue)))
-        let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue)))
-        let sessionToPairingTopic = CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
-        let proposalPayloadsStore = CodableStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.proposals.rawValue)
-        self.pairingEngine = PairingEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, metadata: metadata, logger: logger)
-        self.sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
-        self.approveEngine = ApproveEngine(networkingInteractor: networkingInteractor, proposalPayloadsStore: proposalPayloadsStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, kms: kms, logger: logger, pairingStore: pairingStore, sessionStore: sessionStore)
-        self.nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
-        self.controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
-        self.pairEngine = PairEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore)
-        self.cleanupService = CleanupService(pairingStore: pairingStore, sessionStore: sessionStore, kms: kms, sessionToPairingTopic: sessionToPairingTopic)
-        setUpConnectionObserving(relayClient: relayClient)
-        setUpEnginesCallbacks()
-    }
-
-    private func setUpConnectionObserving(relayClient: RelayClient) {
-        relayClient.socketConnectionStatusPublisher.sink { [weak self] status in
-            self?.delegate?.didChangeSocketConnectionStatus(status)
-        }.store(in: &publishers)
     }
 
     // MARK: - Public interface
@@ -326,6 +290,12 @@ public final class SignClient {
         sessionEngine.onSessionResponse = { [unowned self] response in
             delegate?.didReceive(sessionResponse: response)
         }
+    }
+
+    private func setUpConnectionObserving(relayClient: RelayClient) {
+        relayClient.socketConnectionStatusPublisher.sink { [weak self] status in
+            self?.delegate?.didChangeSocketConnectionStatus(status)
+        }.store(in: &publishers)
     }
 
 #if DEBUG
