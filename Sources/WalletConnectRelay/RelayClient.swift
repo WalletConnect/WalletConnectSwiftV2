@@ -66,8 +66,9 @@ public final class RelayClient {
         socketConnectionType: SocketConnectionType = .automatic,
         logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off)
     ) {
+        let client = HTTPClient(host: relayHost)
         let socketAuthenticator = SocketAuthenticator(
-            authChallengeProvider: AuthChallengeProvider(),
+            authChallengeProvider: AuthChallengeProvider(client: client),
             clientIdStorage: ClientIdStorage(keychain: keychainStorage),
             didKeyFactory: ED25519DIDKeyFactory()
         )
@@ -252,7 +253,7 @@ public final class RelayClient {
     }
 
     internal static func makeRelayUrl(host: String, projectId: String, socketAuthenticator: SocketAuthenticating) -> URL {
-        guard let authToken = try? socketAuthenticator.createAuthToken()
+        guard let authToken = try? socketAuthenticator.createAuthToken() 
         else { fatalError("Auth token creation error") }
 
         var components = URLComponents()

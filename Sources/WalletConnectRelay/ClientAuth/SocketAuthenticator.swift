@@ -2,10 +2,10 @@ import Foundation
 import WalletConnectKMS
 
 protocol SocketAuthenticating {
-    func createAuthToken() throws -> String
+    func createAuthToken() async throws -> String
 }
 
-struct SocketAuthenticator: SocketAuthenticating {
+actor SocketAuthenticator: SocketAuthenticating {
     private let authChallengeProvider: AuthChallengeProviding
     private let clientIdStorage: ClientIdStoring
     private let didKeyFactory: DIDKeyFactory
@@ -21,11 +21,11 @@ struct SocketAuthenticator: SocketAuthenticating {
     func createAuthToken() async throws -> String {
         let clientIdKeyPair = try await clientIdStorage.getOrCreateKeyPair()
         let challenge = try await authChallengeProvider.getChallenge(for: clientIdKeyPair.publicKey.hexRepresentation)
-        return try signJWT(subject: challenge.nonce, keyPair: clientIdKeyPair)
+        return try await signJWT(subject: challenge.nonce, keyPair: clientIdKeyPair)
     }
 
-    private func signJWT(subject: String, keyPair: SigningPrivateKey) throws -> String {
-        let issuer = didKeyFactory.make(pubKey: keyPair.publicKey.rawRepresentation)
+    private func signJWT(subject: String, keyPair: SigningPrivateKey) async throws -> String {
+        let issuer = await didKeyFactory.make(pubKey: keyPair.publicKey.rawRepresentation)
         let claims = JWT.Claims(iss: issuer, sub: subject)
         var jwt = JWT(claims: claims)
         try jwt.sign(using: EdDSASigner(keyPair))
