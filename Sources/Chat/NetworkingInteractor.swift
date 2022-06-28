@@ -55,18 +55,18 @@ class NetworkingInteractor: NetworkInteracting {
     func requestUnencrypted(_ request: JSONRPCRequest<ChatRequestParams>, topic: String) async throws {
         try jsonRpcHistory.set(topic: topic, request: request)
         let message = try! request.json()
-        try await relayClient.publish(topic: topic, payload: message)
+        try await relayClient.publish(topic: topic, payload: message, tag: .chat)
     }
 
     func request(_ request: JSONRPCRequest<ChatRequestParams>, topic: String, envelopeType: Envelope.EnvelopeType) async throws {
         try jsonRpcHistory.set(topic: topic, request: request)
         let message = try! serializer.serialize(topic: topic, encodable: request, envelopeType: envelopeType)
-        try await relayClient.publish(topic: topic, payload: message)
+        try await relayClient.publish(topic: topic, payload: message, tag: .chat)
     }
 
     func respond(topic: String, response: JsonRpcResult) async throws {
         let message = try serializer.serialize(topic: topic, encodable: response.value)
-        try await relayClient.publish(topic: topic, payload: message, prompt: false)
+        try await relayClient.publish(topic: topic, payload: message, tag: .chat, prompt: false)
     }
 
     func subscribe(topic: String) async throws {
