@@ -7,7 +7,7 @@ import Starscream
 
 final class RelayClientEndToEndTests: XCTestCase {
 
-    let defaultTimeout: TimeInterval = 5
+    let defaultTimeout: TimeInterval = 10
 
     let relayHost = "relay.walletconnect.com"
     let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
@@ -125,7 +125,6 @@ final class RelayClientEndToEndTests: XCTestCase {
         }.store(in: &publishers)
 
         wait(for: [createExpectation], timeout: defaultTimeout)
-
     }
 }
 

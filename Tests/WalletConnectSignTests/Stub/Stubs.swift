@@ -97,7 +97,7 @@ extension WCRequestSubscriptionPayload {
 
 extension SessionProposal {
     static func stub(proposerPubKey: String = "") -> SessionProposal {
-        let relayOptions = RelayProtocolOptions(protocol: "waku", data: nil)
+        let relayOptions = RelayProtocolOptions(protocol: "iridium", data: nil)
         return SessionType.ProposeParams(
             relays: [relayOptions],
             proposer: Participant(publicKey: proposerPubKey, metadata: AppMetadata.stub()),
