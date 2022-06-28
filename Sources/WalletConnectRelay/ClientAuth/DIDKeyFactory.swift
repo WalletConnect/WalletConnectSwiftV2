@@ -1,7 +1,7 @@
 import Foundation
 
 protocol DIDKeyFactory {
-    func make(pubKey: Data) async -> String
+    func make(pubKey: Data, prefix: Bool) async -> String
 }
 
 /// A DID Method for Static Cryptographic Keys
@@ -13,11 +13,15 @@ actor ED25519DIDKeyFactory: DIDKeyFactory {
     private let MULTICODEC_ED25519_HEADER: [UInt8] = [0xed, 0x01]
     private let MULTICODEC_ED25519_BASE = "z"
 
-    func make(pubKey: Data) async -> String {
+    func make(pubKey: Data, prefix: Bool) async -> String {
+        let multibase = multibase(pubKey: pubKey)
+
+        guard prefix else { return multibase }
+
         return [
             DID_PREFIX,
             DID_METHOD,
-            multibase(pubKey: pubKey)
+            multibase
         ].joined(separator: DID_DELIMITER)
     }
 

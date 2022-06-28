@@ -20,12 +20,13 @@ actor SocketAuthenticator: SocketAuthenticating {
 
     func createAuthToken() async throws -> String {
         let clientIdKeyPair = try await clientIdStorage.getOrCreateKeyPair()
-        let challenge = try await authChallengeProvider.getChallenge(for: clientIdKeyPair.publicKey.hexRepresentation)
+        let clientId = await didKeyFactory.make(pubKey: clientIdKeyPair.publicKey.rawRepresentation, prefix: false)
+        let challenge = try await authChallengeProvider.getChallenge(for: clientId)
         return try await signJWT(subject: challenge.nonce, keyPair: clientIdKeyPair)
     }
 
     private func signJWT(subject: String, keyPair: SigningPrivateKey) async throws -> String {
-        let issuer = await didKeyFactory.make(pubKey: keyPair.publicKey.rawRepresentation)
+        let issuer = await didKeyFactory.make(pubKey: keyPair.publicKey.rawRepresentation, prefix: true)
         let claims = JWT.Claims(iss: issuer, sub: subject)
         var jwt = JWT(claims: claims)
         try jwt.sign(using: EdDSASigner(keyPair))
