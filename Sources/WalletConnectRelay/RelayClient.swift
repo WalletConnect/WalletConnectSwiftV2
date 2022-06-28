@@ -260,7 +260,7 @@ public final class RelayClient {
         components.host = host
         components.queryItems = [
             URLQueryItem(name: "projectId", value: projectId),
-            URLQueryItem(name: "auth", value: authToken),
+            URLQueryItem(name: "auth", value: authToken)
         ]
         return components.url!
     }

@@ -65,7 +65,6 @@ public struct SigningPrivateKey: GenericPasswordConvertible, Equatable {
     }
 
     public init<D>(rawRepresentation: D) throws where D: ContiguousBytes {
-
         self.key = try Curve25519.Signing.PrivateKey(rawRepresentation: rawRepresentation)
     }
 

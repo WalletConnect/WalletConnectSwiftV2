@@ -87,7 +87,7 @@ final class PairingEngineTests: XCTestCase {
 
     @MainActor
     func testHandleSessionProposeResponse() async {
-        let uri = try! await engine.create() 
+        let uri = try! await engine.create()
         let pairing = storageMock.getPairing(forTopic: uri.topic)!
         let topicA = pairing.topic
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
