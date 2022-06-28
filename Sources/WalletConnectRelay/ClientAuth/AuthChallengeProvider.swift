@@ -1,11 +1,12 @@
 import Foundation
 
 protocol AuthChallengeProviding {
-    func getChallenge(for clientId: String) async throws -> String
+    func getChallenge(for clientId: String) throws -> String
 }
 
-actor AuthChallengeProvider: AuthChallengeProviding {
-    func getChallenge(for clientId: String) async throws -> String {
-        fatalError("not implemented")
+struct AuthChallengeProvider: AuthChallengeProviding {
+    func getChallenge(for clientId: String) throws -> String {
+        // TODO: Implement me
+        return "AuthChallenge"
     }
 }

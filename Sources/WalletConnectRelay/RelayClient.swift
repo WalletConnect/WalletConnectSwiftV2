@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import WalletConnectUtils
+import WalletConnectKMS
 
 public enum SocketConnectionStatus {
     case connected
@@ -37,9 +38,11 @@ public final class RelayClient {
     let logger: ConsoleLogging
     static let historyIdentifier = "com.walletconnect.sdk.relayer_client.subscription_json_rpc_record"
 
-    init(dispatcher: Dispatching,
-         logger: ConsoleLogging,
-         keyValueStorage: KeyValueStorage) {
+    init(
+        dispatcher: Dispatching,
+        logger: ConsoleLogging,
+        keyValueStorage: KeyValueStorage
+    ) {
         self.logger = logger
         self.dispatcher = dispatcher
 
@@ -52,19 +55,28 @@ public final class RelayClient {
     ///   - relayHost: proxy server host that your application will use to connect to Waku Network. If you register your project at `www.walletconnect.com` you can use `relay.walletconnect.com`
     ///   - projectId: an optional parameter used to access the public WalletConnect infrastructure. Go to `www.walletconnect.com` for info.
     ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults
-    ///   - uniqueIdentifier: if your app requires more than one relay client instances you are required to identify them
     ///   - socketConnectionType: socket connection type
     ///   - logger: logger instance
-    public convenience init(relayHost: String,
-                            projectId: String,
-                            keyValueStorage: KeyValueStorage = UserDefaults.standard,
-                            uniqueIdentifier: String? = nil,
-                            socketFactory: WebSocketFactory,
-                            socketConnectionType: SocketConnectionType = .automatic,
-                            logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off)) {
-        let url = Self.makeRelayUrl(host: relayHost, projectId: projectId)
-        var socketConnectionHandler: SocketConnectionHandler
-        let socket = socketFactory.create(with: url)
+    public convenience init(
+        relayHost: String,
+        projectId: String,
+        keyValueStorage: KeyValueStorage = UserDefaults.standard,
+        keychainStorage: KeychainStorageProtocol = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk"),
+        socketFactory: WebSocketFactory,
+        socketConnectionType: SocketConnectionType = .automatic,
+        logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off)
+    ) {
+        let socketAuthenticator = SocketAuthenticator(
+            authChallengeProvider: AuthChallengeProvider(),
+            clientIdStorage: ClientIdStorage(keychain: keychainStorage),
+            didKeyFactory: ED25519DIDKeyFactory()
+        )
+        let socket = socketFactory.create(with: Self.makeRelayUrl(
+            host: relayHost,
+            projectId: projectId,
+            socketAuthenticator: socketAuthenticator
+        ))
+        let socketConnectionHandler: SocketConnectionHandler
         switch socketConnectionType {
         case .automatic:
             socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket)
@@ -72,9 +84,7 @@ public final class RelayClient {
             socketConnectionHandler = ManualSocketConnectionHandler(socket: socket)
         }
         let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: socketConnectionHandler, logger: logger)
-        self.init(dispatcher: dispatcher,
-                  logger: logger,
-                  keyValueStorage: keyValueStorage)
+        self.init(dispatcher: dispatcher, logger: logger, keyValueStorage: keyValueStorage)
     }
 
     public func connect() throws {
@@ -241,11 +251,17 @@ public final class RelayClient {
         }
     }
 
-    static func makeRelayUrl(host: String, projectId: String) -> URL {
+    internal static func makeRelayUrl(host: String, projectId: String, socketAuthenticator: SocketAuthenticating) -> URL {
+        guard let authToken = try? socketAuthenticator.createAuthToken()
+        else { fatalError("Auth token creation error") }
+
         var components = URLComponents()
         components.scheme = "wss"
         components.host = host
-        components.queryItems = [URLQueryItem(name: "projectId", value: projectId)]
+        components.queryItems = [
+            URLQueryItem(name: "projectId", value: projectId),
+            URLQueryItem(name: "auth", value: authToken)
+        ]
         return components.url!
     }
 }

@@ -15,7 +15,9 @@ final class RelayClientEndToEndTests: XCTestCase {
 
     func makeRelayClient() -> RelayClient {
         let logger = ConsoleLogger()
-        let url = RelayClient.makeRelayUrl(host: relayHost, projectId: projectId)
+        let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock())
+        let socketAuthenticator = SocketAuthenticator(clientIdStorage: clientIdStorage)
+        let url = RelayClient.makeRelayUrl(host: relayHost, projectId: projectId, socketAuthenticator: socketAuthenticator)
         let socket = WebSocket(url: url)
         let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket), logger: logger)
         return RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
