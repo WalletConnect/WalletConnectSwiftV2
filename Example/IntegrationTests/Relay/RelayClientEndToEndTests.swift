@@ -11,7 +11,7 @@ final class RelayClientEndToEndTests: XCTestCase {
 
     let relayHost = "relay.walletconnect.com"
     let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
-    private var publishers = [AnyCancellable]()
+    private var publishers = Set<AnyCancellable>()
 
     func makeSocket() -> WebSocketProxy {
         let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock())
