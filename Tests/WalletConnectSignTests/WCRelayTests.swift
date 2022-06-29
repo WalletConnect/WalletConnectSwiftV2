@@ -57,7 +57,7 @@ private let testPayload =
 {
    "id":1630300527198334,
    "jsonrpc":"2.0",
-   "method":"waku_subscription",
+   "method":"iridium_subscription",
    "params":{
       "id":"0847f4e1dd19cf03a43dc7525f39896b630e9da33e4683c8efbc92ea671b5e07",
       "data":{
