@@ -66,16 +66,18 @@ public final class RelayClient {
         socketConnectionType: SocketConnectionType = .automatic,
         logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off)
     ) {
+        let client = HTTPClient(host: relayHost)
         let socketAuthenticator = SocketAuthenticator(
-            authChallengeProvider: AuthChallengeProvider(),
+            authChallengeProvider: AuthChallengeProvider(client: client),
             clientIdStorage: ClientIdStorage(keychain: keychainStorage),
             didKeyFactory: ED25519DIDKeyFactory()
         )
-        let socket = socketFactory.create(with: Self.makeRelayUrl(
+        let socket = AsyncWebSocketProxy(
             host: relayHost,
             projectId: projectId,
+            socketFactory: socketFactory,
             socketAuthenticator: socketAuthenticator
-        ))
+        )
         let socketConnectionHandler: SocketConnectionHandler
         switch socketConnectionType {
         case .automatic:
@@ -249,19 +251,5 @@ public final class RelayClient {
                 self?.logger.debug("Failed to Respond for request id: \(requestId), error: \(error)")
             }
         }
-    }
-
-    internal static func makeRelayUrl(host: String, projectId: String, socketAuthenticator: SocketAuthenticating) -> URL {
-        guard let authToken = try? socketAuthenticator.createAuthToken()
-        else { fatalError("Auth token creation error") }
-
-        var components = URLComponents()
-        components.scheme = "wss"
-        components.host = host
-        components.queryItems = [
-            URLQueryItem(name: "projectId", value: projectId),
-            URLQueryItem(name: "auth", value: authToken)
-        ]
-        return components.url!
     }
 }

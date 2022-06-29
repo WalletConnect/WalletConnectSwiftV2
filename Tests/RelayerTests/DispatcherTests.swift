@@ -2,8 +2,16 @@ import Foundation
 import XCTest
 @testable import WalletConnectRelay
 import TestingUtils
+import Combine
 
-class WebSocketMock: WebSocketConnecting {
+class WebSocketMock: WebSocketProxy {
+
+    let socketCreationSubject = PassthroughSubject<WebSocketConnecting, Never>()
+
+    var socketCreationPublisher: AnyPublisher<WebSocketConnecting, Never> {
+        return socketCreationSubject.eraseToAnyPublisher()
+    }
+
     var onText: ((String) -> Void)?
     var onConnect: (() -> Void)?
     var onDisconnect: ((Error?) -> Void)?

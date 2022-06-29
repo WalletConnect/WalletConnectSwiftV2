@@ -3,9 +3,9 @@ import Foundation
 import Foundation
 
 class AuthChallengeProviderMock: AuthChallengeProviding {
-    var challange: String!
+    var challenge: AuthChallenge!
 
-    func getChallenge(for clientId: String) throws -> String {
-        return challange
+    func getChallenge(for clientId: String) async throws -> AuthChallenge {
+        return challenge
     }
 }

@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol WebSocketConnecting {
+public protocol WebSocketConnecting: AnyObject {
     var isConnected: Bool { get }
     var onConnect: (() -> Void)? { get set }
     var onDisconnect: ((Error?) -> Void)? { get set }

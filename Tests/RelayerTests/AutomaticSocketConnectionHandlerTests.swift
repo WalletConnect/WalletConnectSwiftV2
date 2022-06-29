@@ -4,7 +4,7 @@ import XCTest
 
 final class AutomaticSocketConnectionHandlerTests: XCTestCase {
     var sut: AutomaticSocketConnectionHandler!
-    var webSocketSession: WebSocketConnecting!
+    var webSocketSession: WebSocketMock!
     var networkMonitor: NetworkMonitoringMock!
     var appStateObserver: AppStateObserving!
     var backgroundTaskRegistrar: BackgroundTaskRegistrarMock!
@@ -48,6 +48,7 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
     }
 
     func testDisconnectOnEndBackgroundTask() {
+        webSocketSession.socketCreationSubject.send(webSocketSession)
         appStateObserver.onWillEnterBackground?()
         XCTAssertTrue(sut.socket.isConnected)
         backgroundTaskRegistrar.completion!()
