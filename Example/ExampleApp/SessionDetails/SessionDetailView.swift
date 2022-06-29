@@ -136,6 +136,9 @@ private extension SessionDetailView {
         HStack {
             Text(chain)
             Spacer()
+            Button("Add Account") { Task {
+                await viewModel.add(chain: chain)
+            }}
             Button("Delete") { Task {
                 await viewModel.remove(field: .chain, for: chain)
             }}
