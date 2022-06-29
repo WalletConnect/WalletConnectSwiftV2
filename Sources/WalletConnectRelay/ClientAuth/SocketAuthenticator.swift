@@ -2,15 +2,15 @@ import Foundation
 import WalletConnectKMS
 
 protocol SocketAuthenticating {
-    func createAuthToken() throws -> String
+    func createAuthToken() async throws -> String
 }
 
-struct SocketAuthenticator: SocketAuthenticating {
+actor SocketAuthenticator: SocketAuthenticating {
     private let authChallengeProvider: AuthChallengeProviding
     private let clientIdStorage: ClientIdStoring
     private let didKeyFactory: DIDKeyFactory
 
-    init(authChallengeProvider: AuthChallengeProviding = AuthChallengeProvider(),
+    init(authChallengeProvider: AuthChallengeProviding,
          clientIdStorage: ClientIdStoring,
          didKeyFactory: DIDKeyFactory = ED25519DIDKeyFactory()) {
         self.authChallengeProvider = authChallengeProvider
@@ -18,14 +18,15 @@ struct SocketAuthenticator: SocketAuthenticating {
         self.didKeyFactory = didKeyFactory
     }
 
-    func createAuthToken() throws -> String {
-        let clientIdKeyPair = try clientIdStorage.getOrCreateKeyPair()
-        let challenge = try authChallengeProvider.getChallenge(for: clientIdKeyPair.publicKey.hexRepresentation)
-        return try signJWT(subject: challenge, keyPair: clientIdKeyPair)
+    func createAuthToken() async throws -> String {
+        let clientIdKeyPair = try await clientIdStorage.getOrCreateKeyPair()
+        let clientId = await didKeyFactory.make(pubKey: clientIdKeyPair.publicKey.rawRepresentation, prefix: false)
+        let challenge = try await authChallengeProvider.getChallenge(for: clientId)
+        return try await signJWT(subject: challenge.nonce, keyPair: clientIdKeyPair)
     }
 
-    private func signJWT(subject: String, keyPair: SigningPrivateKey) throws -> String {
-        let issuer = didKeyFactory.make(pubKey: keyPair.publicKey.rawRepresentation)
+    private func signJWT(subject: String, keyPair: SigningPrivateKey) async throws -> String {
+        let issuer = await didKeyFactory.make(pubKey: keyPair.publicKey.rawRepresentation, prefix: true)
         let claims = JWT.Claims(iss: issuer, sub: subject)
         var jwt = JWT(claims: claims)
         try jwt.sign(using: EdDSASigner(keyPair))

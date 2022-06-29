@@ -13,18 +13,34 @@ final class RelayClientEndToEndTests: XCTestCase {
     let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
     private var publishers = [AnyCancellable]()
 
-    func makeRelayClient() -> RelayClient {
-        let logger = ConsoleLogger()
+    func makeSocket() -> WebSocketProxy {
         let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock())
-        let socketAuthenticator = SocketAuthenticator(clientIdStorage: clientIdStorage)
-        let url = RelayClient.makeRelayUrl(host: relayHost, projectId: projectId, socketAuthenticator: socketAuthenticator)
-        let socket = WebSocket(url: url)
+        let client = HTTPClient(host: relayHost)
+        let authChallengeProvider = AuthChallengeProvider(client: client)
+        let socketAuthenticator = SocketAuthenticator(
+            authChallengeProvider: authChallengeProvider,
+            clientIdStorage: clientIdStorage
+        )
+        return AsyncWebSocketProxy(
+            host: relayHost,
+            projectId: projectId,
+            socketFactory: SocketFactory(),
+            socketAuthenticator: socketAuthenticator
+        )
+    }
+
+    func makeRelayClient(socket: WebSocketProxy) -> RelayClient {
+        let logger = ConsoleLogger()
         let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket), logger: logger)
         return RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
 
     func testSubscribe() {
-        let relayClient = makeRelayClient()
+        let socket = makeSocket()
+        let relayClient = makeRelayClient(socket: socket)
+
+        waitSocketCreation(socket: socket)
+
         try! relayClient.connect()
         let subscribeExpectation = expectation(description: "subscribe call succeeds")
         subscribeExpectation.assertForOverFulfill = true
@@ -36,12 +52,19 @@ final class RelayClientEndToEndTests: XCTestCase {
                 }
             }
         }.store(in: &publishers)
-        waitForExpectations(timeout: defaultTimeout, handler: nil)
+
+        wait(for: [subscribeExpectation], timeout: defaultTimeout)
     }
 
     func testEndToEndPayload() {
-        let relayA = makeRelayClient()
-        let relayB = makeRelayClient()
+        let socketA = makeSocket()
+        let socketB = makeSocket()
+        let relayA = makeRelayClient(socket: socketA)
+        let relayB = makeRelayClient(socket: socketB)
+
+        waitSocketCreation(socket: socketA)
+        waitSocketCreation(socket: socketB)
+
         try! relayA.connect()
         try! relayB.connect()
 
@@ -84,13 +107,25 @@ final class RelayClientEndToEndTests: XCTestCase {
             }
         }.store(in: &publishers)
 
-        waitForExpectations(timeout: defaultTimeout, handler: nil)
+        wait(for: [expectationA, expectationB], timeout: defaultTimeout)
+
         XCTAssertEqual(subscriptionATopic, randomTopic)
         XCTAssertEqual(subscriptionBTopic, randomTopic)
 
         // TODO - uncomment lines when request rebound is resolved
 //        XCTAssertEqual(subscriptionBPayload, payloadA)
 //        XCTAssertEqual(subscriptionAPayload, payloadB)
+    }
+
+    private func waitSocketCreation(socket: WebSocketProxy) {
+        let createExpectation = expectation(description: "socket created")
+
+        socket.socketCreationPublisher.sink { _ in
+            createExpectation.fulfill()
+        }.store(in: &publishers)
+
+        wait(for: [createExpectation], timeout: defaultTimeout)
+
     }
 }
 

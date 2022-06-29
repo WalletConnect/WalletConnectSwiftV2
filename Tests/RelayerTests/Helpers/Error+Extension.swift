@@ -13,6 +13,10 @@ extension Error {
     var asNetworkError: NetworkError? {
         return self as? NetworkError
     }
+
+    var asHttpError: HTTPError? {
+        return self as? HTTPError
+    }
 }
 
 extension NetworkError {
@@ -30,6 +34,29 @@ extension NetworkError {
     var isReceiveMessageError: Bool {
         guard case .receiveMessageFailure = self else { return false }
         return true
+    }
+}
+
+extension HTTPError {
+
+    var isNoResponseError: Bool {
+        if case .noResponse = self { return true }
+        return false
+    }
+
+    var isBadStatusCodeError: Bool {
+        if case .badStatusCode = self { return true }
+        return false
+    }
+
+    var isNilDataError: Bool {
+        if case .responseDataNil = self { return true }
+        return false
+    }
+
+    var isDecodeError: Bool {
+        if case .jsonDecodeFailed = self { return true }
+        return false
     }
 }
 
