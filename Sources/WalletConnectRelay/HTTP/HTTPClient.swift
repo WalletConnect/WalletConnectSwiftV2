@@ -19,7 +19,7 @@ actor HTTPClient {
     func request<T: Decodable>(_ type: T.Type, at endpoint: Endpoint) async throws -> T {
         return try await withCheckedThrowingContinuation { continuation in
             request(T.self, at: endpoint) { response in
-                do {
+                do { 
                     let value = try response.result.get()
                     continuation.resume(returning: value)
                 } catch {

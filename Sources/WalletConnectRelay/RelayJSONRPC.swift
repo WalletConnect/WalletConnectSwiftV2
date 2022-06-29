@@ -3,11 +3,11 @@
 import Foundation
 
 enum RelayJSONRPC {
-    enum Method: String {
-        case subscribe = "waku_subscribe"
-        case publish = "waku_publish"
-        case subscription = "waku_subscription"
-        case unsubscribe = "waku_unsubscribe"
+    enum Method {
+        case subscribe
+        case publish
+        case subscription
+        case unsubscribe
     }
 
     struct PublishParams: Codable, Equatable {
@@ -34,5 +34,29 @@ enum RelayJSONRPC {
     struct UnsubscribeParams: Codable, Equatable {
         let id: String
         let topic: String
+    }
+}
+
+extension RelayJSONRPC.Method {
+
+    var prefix: String {
+        return "iridium"
+    }
+
+    var name: String {
+        switch self {
+        case .subscribe:
+            return "subscribe"
+        case .publish:
+            return "publish"
+        case .subscription:
+            return "subscription"
+        case .unsubscribe:
+            return "unsubscribe"
+        }
+    }
+
+    var method: String {
+        return "\(prefix)_\(name)"
     }
 }

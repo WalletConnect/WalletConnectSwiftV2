@@ -4,29 +4,29 @@ import Combine
 import XCTest
 @testable import WalletConnectRelay
 
-class WakuRelayTests: XCTestCase {
-    var wakuRelay: RelayClient!
+class IridiumRelayTests: XCTestCase {
+    var iridiumRelay: RelayClient!
     var dispatcher: DispatcherMock!
 
     override func setUp() {
         dispatcher = DispatcherMock()
         let logger = ConsoleLogger()
-        wakuRelay = RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
+        iridiumRelay = RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
 
     override func tearDown() {
-        wakuRelay = nil
+        iridiumRelay = nil
         dispatcher = nil
     }
 
     func testNotifyOnSubscriptionRequest() {
-        let subscriptionExpectation = expectation(description: "notifies with encoded message on a waku subscription event")
+        let subscriptionExpectation = expectation(description: "notifies with encoded message on a iridium subscription event")
         let topic = "0987"
         let message = "qwerty"
         let subscriptionId = "sub-id"
         let subscriptionParams = RelayJSONRPC.SubscriptionParams(id: subscriptionId, data: RelayJSONRPC.SubscriptionData(topic: topic, message: message))
         let subscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>(id: 12345, method: RelayJSONRPC.Method.subscription.rawValue, params: subscriptionParams)
-        wakuRelay.onMessage = { subscriptionTopic, subscriptionMessage in
+        iridiumRelay.onMessage = { subscriptionTopic, subscriptionMessage in
             XCTAssertEqual(subscriptionMessage, message)
             XCTAssertEqual(subscriptionTopic, topic)
             subscriptionExpectation.fulfill()
@@ -36,8 +36,8 @@ class WakuRelayTests: XCTestCase {
     }
 
     func testPublishRequestAcknowledge() {
-        let acknowledgeExpectation = expectation(description: "completion with no error on waku request acknowledge after publish")
-        let requestId = wakuRelay.publish(topic: "", payload: "{}", onNetworkAcknowledge: { error in
+        let acknowledgeExpectation = expectation(description: "completion with no error on iridium request acknowledge after publish")
+        let requestId = iridiumRelay.publish(topic: "", payload: "{}", onNetworkAcknowledge: { error in
             acknowledgeExpectation.fulfill()
             XCTAssertNil(error)
         })
@@ -47,10 +47,10 @@ class WakuRelayTests: XCTestCase {
     }
 
     func testUnsubscribeRequestAcknowledge() {
-        let acknowledgeExpectation = expectation(description: "completion with no error on waku request acknowledge after unsubscribe")
+        let acknowledgeExpectation = expectation(description: "completion with no error on iridium request acknowledge after unsubscribe")
         let topic = "1234"
-        wakuRelay.subscriptions[topic] = ""
-        let requestId = wakuRelay.unsubscribe(topic: topic) { error in
+        iridiumRelay.subscriptions[topic] = ""
+        let requestId = iridiumRelay.unsubscribe(topic: topic) { error in
             XCTAssertNil(error)
             acknowledgeExpectation.fulfill()
         }
@@ -63,7 +63,7 @@ class WakuRelayTests: XCTestCase {
         let expectation = expectation(description: "Request duplicate not delivered")
         let subscriptionParams = RelayJSONRPC.SubscriptionParams(id: "sub_id", data: RelayJSONRPC.SubscriptionData(topic: "topic", message: "message"))
         let subscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>(id: 12345, method: RelayJSONRPC.Method.subscription.rawValue, params: subscriptionParams)
-        wakuRelay.onMessage = { _, _ in
+        iridiumRelay.onMessage = { _, _ in
             expectation.fulfill()
         }
         dispatcher.onMessage?(try! subscriptionRequest.json())
@@ -72,19 +72,19 @@ class WakuRelayTests: XCTestCase {
     }
 
     func testSendOnPublish() {
-        wakuRelay.publish(topic: "", payload: "", onNetworkAcknowledge: { _ in})
+        iridiumRelay.publish(topic: "", payload: "", onNetworkAcknowledge: { _ in})
         XCTAssertTrue(dispatcher.sent)
     }
 
     func testSendOnSubscribe() {
-        wakuRelay.subscribe(topic: "") {_ in }
+        iridiumRelay.subscribe(topic: "") {_ in }
         XCTAssertTrue(dispatcher.sent)
     }
 
     func testSendOnUnsubscribe() {
         let topic = "123"
-        wakuRelay.subscriptions[topic] = ""
-        wakuRelay.unsubscribe(topic: topic) {_ in }
+        iridiumRelay.subscriptions[topic] = ""
+        iridiumRelay.unsubscribe(topic: topic) {_ in }
         XCTAssertTrue(dispatcher.sent)
     }
 }
