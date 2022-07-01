@@ -6,16 +6,16 @@ import WalletConnectKMS
 
 final class ClientIdStorageTests: XCTestCase {
 
-    func testGetOrCreate() async throws {
+    func testGetOrCreate() throws {
         let keychain = KeychainStorageMock()
         let storage = ClientIdStorage(keychain: keychain)
 
         XCTAssertThrowsError(try keychain.read(key: "com.walletconnect.iridium.client_id") as SigningPrivateKey)
 
-        let saved = try await storage.getOrCreateKeyPair()
+        let saved = try storage.getOrCreateKeyPair()
         XCTAssertEqual(saved, try keychain.read(key: "com.walletconnect.iridium.client_id"))
 
-        let restored = try await storage.getOrCreateKeyPair()
+        let restored = try storage.getOrCreateKeyPair()
         XCTAssertEqual(saved, restored)
     }
 }

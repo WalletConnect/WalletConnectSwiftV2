@@ -9,7 +9,7 @@ struct SocketAuthenticator: SocketAuthenticating {
     private let clientIdStorage: ClientIdStoring
     private let didKeyFactory: DIDKeyFactory
 
-    init(clientIdStorage: ClientIdStoring, didKeyFactory: DIDKeyFactory = ED25519DIDKeyFactory()) {
+    init(clientIdStorage: ClientIdStoring, didKeyFactory: DIDKeyFactory) {
         self.clientIdStorage = clientIdStorage
         self.didKeyFactory = didKeyFactory
     }
