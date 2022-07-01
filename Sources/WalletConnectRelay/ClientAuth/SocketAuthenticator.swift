@@ -2,34 +2,33 @@ import Foundation
 import WalletConnectKMS
 
 protocol SocketAuthenticating {
-    func createAuthToken() async throws -> String
+    func createAuthToken() throws -> String
 }
 
-actor SocketAuthenticator: SocketAuthenticating {
-    private let authChallengeProvider: AuthChallengeProviding
+struct SocketAuthenticator: SocketAuthenticating {
     private let clientIdStorage: ClientIdStoring
     private let didKeyFactory: DIDKeyFactory
 
-    init(authChallengeProvider: AuthChallengeProviding,
-         clientIdStorage: ClientIdStoring,
-         didKeyFactory: DIDKeyFactory = ED25519DIDKeyFactory()) {
-        self.authChallengeProvider = authChallengeProvider
+    init(clientIdStorage: ClientIdStoring, didKeyFactory: DIDKeyFactory = ED25519DIDKeyFactory()) {
         self.clientIdStorage = clientIdStorage
         self.didKeyFactory = didKeyFactory
     }
 
-    func createAuthToken() async throws -> String {
-        let clientIdKeyPair = try await clientIdStorage.getOrCreateKeyPair()
-        let clientId = await didKeyFactory.make(pubKey: clientIdKeyPair.publicKey.rawRepresentation, prefix: false)
-        let challenge = try await authChallengeProvider.getChallenge(for: clientId)
-        return try await signJWT(subject: challenge.nonce, keyPair: clientIdKeyPair)
+    func createAuthToken() throws -> String {
+        let clientIdKeyPair = try clientIdStorage.getOrCreateKeyPair()
+        let subject = generateSubject()
+        return try signJWT(subject: subject, keyPair: clientIdKeyPair)
     }
 
-    private func signJWT(subject: String, keyPair: SigningPrivateKey) async throws -> String {
-        let issuer = await didKeyFactory.make(pubKey: keyPair.publicKey.rawRepresentation, prefix: true)
+    private func signJWT(subject: String, keyPair: SigningPrivateKey) throws -> String {
+        let issuer = didKeyFactory.make(pubKey: keyPair.publicKey.rawRepresentation, prefix: true)
         let claims = JWT.Claims(iss: issuer, sub: subject)
         var jwt = JWT(claims: claims)
         try jwt.sign(using: EdDSASigner(keyPair))
         return try jwt.encoded()
+    }
+
+    private func generateSubject() -> String {
+        return Data.randomBytes(count: 32).toHexString()
     }
 }
