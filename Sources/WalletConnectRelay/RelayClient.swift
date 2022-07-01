@@ -70,12 +70,11 @@ public final class RelayClient {
             clientIdStorage: ClientIdStorage(keychain: keychainStorage),
             didKeyFactory: ED25519DIDKeyFactory()
         )
-        let socket = AsyncWebSocketProxy(
+        let relayUrlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)
+        let socket = socketFactory.create(with: relayUrlFactory.create(
             host: relayHost,
-            projectId: projectId,
-            socketFactory: socketFactory,
-            socketAuthenticator: socketAuthenticator
-        )
+            projectId: projectId
+        ))
         let socketConnectionHandler: SocketConnectionHandler
         switch socketConnectionType {
         case .automatic:
