@@ -8,11 +8,12 @@ protocol SocketAuthenticating {
 struct SocketAuthenticator: SocketAuthenticating {
     private let clientIdStorage: ClientIdStoring
     private let didKeyFactory: DIDKeyFactory
-    private let audience = "wss://relay.walletconnect.com"
+    private let relayHost: String
 
-    init(clientIdStorage: ClientIdStoring, didKeyFactory: DIDKeyFactory) {
+    init(clientIdStorage: ClientIdStoring, didKeyFactory: DIDKeyFactory, relayHost: String) {
         self.clientIdStorage = clientIdStorage
         self.didKeyFactory = didKeyFactory
+        self.relayHost = relayHost
     }
 
     func createAuthToken() throws -> String {
@@ -23,7 +24,7 @@ struct SocketAuthenticator: SocketAuthenticating {
 
     private func createAndSignJWT(subject: String, keyPair: SigningPrivateKey) throws -> String {
         let issuer = didKeyFactory.make(pubKey: keyPair.publicKey.rawRepresentation, prefix: true)
-        let claims = JWT.Claims(iss: issuer, sub: subject, aud: audience, iat: Date(), exp: getExpiry())
+        let claims = JWT.Claims(iss: issuer, sub: subject, aud: getAudience(), iat: Date(), exp: getExpiry())
         var jwt = JWT(claims: claims)
         try jwt.sign(using: EdDSASigner(keyPair))
         return try jwt.encoded()
@@ -38,5 +39,9 @@ struct SocketAuthenticator: SocketAuthenticating {
         components.setValue(1, for: .day)
         // safe to unwrap as the date must be calculated
         return Calendar.current.date(byAdding: components, to: Date())!
+    }
+
+    private func getAudience() -> String {
+        return "wss://\(relayHost)"
     }
 }
