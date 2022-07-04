@@ -15,6 +15,7 @@ enum RelayJSONRPC {
         let message: String
         let ttl: Int
         let prompt: Bool?
+        let tag: Int?
     }
 
     struct SubscribeParams: Codable, Equatable {

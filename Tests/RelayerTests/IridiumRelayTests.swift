@@ -37,7 +37,7 @@ class IridiumRelayTests: XCTestCase {
 
     func testPublishRequestAcknowledge() {
         let acknowledgeExpectation = expectation(description: "completion with no error on iridium request acknowledge after publish")
-        let requestId = iridiumRelay.publish(topic: "", payload: "{}", onNetworkAcknowledge: { error in
+        let requestId = iridiumRelay.publish(topic: "", payload: "{}", tag: .unknown, onNetworkAcknowledge: { error in
             acknowledgeExpectation.fulfill()
             XCTAssertNil(error)
         })
@@ -72,7 +72,7 @@ class IridiumRelayTests: XCTestCase {
     }
 
     func testSendOnPublish() {
-        iridiumRelay.publish(topic: "", payload: "", onNetworkAcknowledge: { _ in})
+        iridiumRelay.publish(topic: "", payload: "", tag: .unknown, onNetworkAcknowledge: { _ in})
         XCTAssertTrue(dispatcher.sent)
     }
 
