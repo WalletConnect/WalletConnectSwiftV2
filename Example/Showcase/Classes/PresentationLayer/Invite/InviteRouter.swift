@@ -1,6 +1,6 @@
 import UIKit
 
-final class ___VARIABLE_ModuleName___Router {
+final class InviteRouter {
 
     weak var viewController: UIViewController!
 

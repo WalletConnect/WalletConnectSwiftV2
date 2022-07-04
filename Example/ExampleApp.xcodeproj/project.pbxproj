@@ -45,6 +45,27 @@
 		84CE645527A29D4D00142511 /* ResponseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE645427A29D4C00142511 /* ResponseViewController.swift */; };
 		84F568C2279582D200D0A289 /* Signer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C1279582D200D0A289 /* Signer.swift */; };
 		84F568C42795832A00D0A289 /* EthereumTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C32795832A00D0A289 /* EthereumTransaction.swift */; };
+		A5629AA92876A23100094373 /* ChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AA82876A23100094373 /* ChatService.swift */; };
+		A5629ABD2876CBC000094373 /* ChatListModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AB82876CBC000094373 /* ChatListModule.swift */; };
+		A5629ABE2876CBC000094373 /* ChatListPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AB92876CBC000094373 /* ChatListPresenter.swift */; };
+		A5629ABF2876CBC000094373 /* ChatListRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629ABA2876CBC000094373 /* ChatListRouter.swift */; };
+		A5629AC02876CBC000094373 /* ChatListInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629ABB2876CBC000094373 /* ChatListInteractor.swift */; };
+		A5629AC12876CBC000094373 /* ChatListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629ABC2876CBC000094373 /* ChatListView.swift */; };
+		A5629AD32876CC5700094373 /* InviteModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629ACE2876CC5700094373 /* InviteModule.swift */; };
+		A5629AD42876CC5700094373 /* InvitePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629ACF2876CC5700094373 /* InvitePresenter.swift */; };
+		A5629AD52876CC5700094373 /* InviteRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AD02876CC5700094373 /* InviteRouter.swift */; };
+		A5629AD62876CC5700094373 /* InviteInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AD12876CC5700094373 /* InviteInteractor.swift */; };
+		A5629AD72876CC5700094373 /* InviteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AD22876CC5700094373 /* InviteView.swift */; };
+		A5629ADE2876CC6E00094373 /* InviteListModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AD92876CC6E00094373 /* InviteListModule.swift */; };
+		A5629ADF2876CC6E00094373 /* InviteListPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629ADA2876CC6E00094373 /* InviteListPresenter.swift */; };
+		A5629AE02876CC6E00094373 /* InviteListRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629ADB2876CC6E00094373 /* InviteListRouter.swift */; };
+		A5629AE12876CC6E00094373 /* InviteListInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629ADC2876CC6E00094373 /* InviteListInteractor.swift */; };
+		A5629AE22876CC6E00094373 /* InviteListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629ADD2876CC6E00094373 /* InviteListView.swift */; };
+		A578FA322873036400AA7720 /* InputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA312873036400AA7720 /* InputView.swift */; };
+		A578FA35287304A300AA7720 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA34287304A300AA7720 /* Color.swift */; };
+		A578FA372873D8EE00AA7720 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA362873D8EE00AA7720 /* UIColor.swift */; };
+		A578FA392873FCE000AA7720 /* ChatScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA382873FCE000AA7720 /* ChatScrollView.swift */; };
+		A578FA3D2874002400AA7720 /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA3C2874002400AA7720 /* View.swift */; };
 		A58E7CEB28729F550082D443 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58E7CEA28729F550082D443 /* AppDelegate.swift */; };
 		A58E7CED28729F550082D443 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58E7CEC28729F550082D443 /* SceneDelegate.swift */; };
 		A58E7CF428729F550082D443 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A58E7CF328729F550082D443 /* Assets.xcassets */; };
@@ -68,6 +89,9 @@
 		A58E7D3C2872D55F0082D443 /* ChatPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58E7D372872D55F0082D443 /* ChatPresenter.swift */; };
 		A58E7D3D2872D55F0082D443 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58E7D382872D55F0082D443 /* ChatView.swift */; };
 		A58E7D3F2872E99A0082D443 /* TabPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58E7D3E2872E99A0082D443 /* TabPage.swift */; };
+		A58E7D432872EE320082D443 /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58E7D422872EE320082D443 /* MessageView.swift */; };
+		A58E7D452872EE570082D443 /* ContentMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58E7D442872EE570082D443 /* ContentMessageView.swift */; };
+		A58E7D482872EF610082D443 /* MessageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58E7D472872EF610082D443 /* MessageViewModel.swift */; };
 		A5A4FC56283CBB7800BBEC1E /* SessionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC55283CBB7800BBEC1E /* SessionDetailView.swift */; };
 		A5A4FC58283CBB9F00BBEC1E /* SessionDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC57283CBB9F00BBEC1E /* SessionDetailViewModel.swift */; };
 		A5A4FC5A283CC08600BBEC1E /* SessionNamespaceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC59283CC08600BBEC1E /* SessionNamespaceViewModel.swift */; };
@@ -155,6 +179,27 @@
 		84CE645427A29D4C00142511 /* ResponseViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseViewController.swift; sourceTree = "<group>"; };
 		84F568C1279582D200D0A289 /* Signer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Signer.swift; sourceTree = "<group>"; };
 		84F568C32795832A00D0A289 /* EthereumTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthereumTransaction.swift; sourceTree = "<group>"; };
+		A5629AA82876A23100094373 /* ChatService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatService.swift; sourceTree = "<group>"; };
+		A5629AB82876CBC000094373 /* ChatListModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListModule.swift; sourceTree = "<group>"; };
+		A5629AB92876CBC000094373 /* ChatListPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListPresenter.swift; sourceTree = "<group>"; };
+		A5629ABA2876CBC000094373 /* ChatListRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListRouter.swift; sourceTree = "<group>"; };
+		A5629ABB2876CBC000094373 /* ChatListInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListInteractor.swift; sourceTree = "<group>"; };
+		A5629ABC2876CBC000094373 /* ChatListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListView.swift; sourceTree = "<group>"; };
+		A5629ACE2876CC5700094373 /* InviteModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteModule.swift; sourceTree = "<group>"; };
+		A5629ACF2876CC5700094373 /* InvitePresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvitePresenter.swift; sourceTree = "<group>"; };
+		A5629AD02876CC5700094373 /* InviteRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteRouter.swift; sourceTree = "<group>"; };
+		A5629AD12876CC5700094373 /* InviteInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteInteractor.swift; sourceTree = "<group>"; };
+		A5629AD22876CC5700094373 /* InviteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteView.swift; sourceTree = "<group>"; };
+		A5629AD92876CC6E00094373 /* InviteListModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteListModule.swift; sourceTree = "<group>"; };
+		A5629ADA2876CC6E00094373 /* InviteListPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteListPresenter.swift; sourceTree = "<group>"; };
+		A5629ADB2876CC6E00094373 /* InviteListRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteListRouter.swift; sourceTree = "<group>"; };
+		A5629ADC2876CC6E00094373 /* InviteListInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteListInteractor.swift; sourceTree = "<group>"; };
+		A5629ADD2876CC6E00094373 /* InviteListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteListView.swift; sourceTree = "<group>"; };
+		A578FA312873036400AA7720 /* InputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputView.swift; sourceTree = "<group>"; };
+		A578FA34287304A300AA7720 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
+		A578FA362873D8EE00AA7720 /* UIColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
+		A578FA382873FCE000AA7720 /* ChatScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatScrollView.swift; sourceTree = "<group>"; };
+		A578FA3C2874002400AA7720 /* View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
 		A58E7CE828729F550082D443 /* Showcase.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Showcase.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A58E7CEA28729F550082D443 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A58E7CEC28729F550082D443 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -180,6 +225,9 @@
 		A58E7D372872D55F0082D443 /* ChatPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatPresenter.swift; sourceTree = "<group>"; };
 		A58E7D382872D55F0082D443 /* ChatView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		A58E7D3E2872E99A0082D443 /* TabPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabPage.swift; sourceTree = "<group>"; };
+		A58E7D422872EE320082D443 /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
+		A58E7D442872EE570082D443 /* ContentMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentMessageView.swift; sourceTree = "<group>"; };
+		A58E7D472872EF610082D443 /* MessageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageViewModel.swift; sourceTree = "<group>"; };
 		A5A4FC55283CBB7800BBEC1E /* SessionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailView.swift; sourceTree = "<group>"; };
 		A5A4FC57283CBB9F00BBEC1E /* SessionDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailViewModel.swift; sourceTree = "<group>"; };
 		A5A4FC59283CC08600BBEC1E /* SessionNamespaceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionNamespaceViewModel.swift; sourceTree = "<group>"; };
@@ -415,6 +463,76 @@
 			path = Connect;
 			sourceTree = "<group>";
 		};
+		A5629AA42876A19D00094373 /* DomainLayer */ = {
+			isa = PBXGroup;
+			children = (
+				A5629AA82876A23100094373 /* ChatService.swift */,
+			);
+			path = DomainLayer;
+			sourceTree = "<group>";
+		};
+		A5629AB72876CBA700094373 /* ChatList */ = {
+			isa = PBXGroup;
+			children = (
+				A5629AB82876CBC000094373 /* ChatListModule.swift */,
+				A5629AB92876CBC000094373 /* ChatListPresenter.swift */,
+				A5629ABA2876CBC000094373 /* ChatListRouter.swift */,
+				A5629ABB2876CBC000094373 /* ChatListInteractor.swift */,
+				A5629ABC2876CBC000094373 /* ChatListView.swift */,
+			);
+			path = ChatList;
+			sourceTree = "<group>";
+		};
+		A5629ACD2876CC4A00094373 /* Invite */ = {
+			isa = PBXGroup;
+			children = (
+				A5629ACE2876CC5700094373 /* InviteModule.swift */,
+				A5629ACF2876CC5700094373 /* InvitePresenter.swift */,
+				A5629AD02876CC5700094373 /* InviteRouter.swift */,
+				A5629AD12876CC5700094373 /* InviteInteractor.swift */,
+				A5629AD22876CC5700094373 /* InviteView.swift */,
+			);
+			path = Invite;
+			sourceTree = "<group>";
+		};
+		A5629AD82876CC5B00094373 /* InviteList */ = {
+			isa = PBXGroup;
+			children = (
+				A5629AD92876CC6E00094373 /* InviteListModule.swift */,
+				A5629ADA2876CC6E00094373 /* InviteListPresenter.swift */,
+				A5629ADB2876CC6E00094373 /* InviteListRouter.swift */,
+				A5629ADC2876CC6E00094373 /* InviteListInteractor.swift */,
+				A5629ADD2876CC6E00094373 /* InviteListView.swift */,
+			);
+			path = InviteList;
+			sourceTree = "<group>";
+		};
+		A578FA332873049400AA7720 /* Style */ = {
+			isa = PBXGroup;
+			children = (
+				A578FA34287304A300AA7720 /* Color.swift */,
+			);
+			path = Style;
+			sourceTree = "<group>";
+		};
+		A578FA3A2874001100AA7720 /* UIKit */ = {
+			isa = PBXGroup;
+			children = (
+				A58E7D142872A5410082D443 /* UIViewController.swift */,
+				A58E7D022872A1630082D443 /* String.swift */,
+				A578FA362873D8EE00AA7720 /* UIColor.swift */,
+			);
+			path = UIKit;
+			sourceTree = "<group>";
+		};
+		A578FA3B2874001900AA7720 /* SwiftUI */ = {
+			isa = PBXGroup;
+			children = (
+				A578FA3C2874002400AA7720 /* View.swift */,
+			);
+			path = SwiftUI;
+			sourceTree = "<group>";
+		};
 		A58E7CE928729F550082D443 /* Showcase */ = {
 			isa = PBXGroup;
 			children = (
@@ -438,6 +556,7 @@
 		A58E7CFD2872A0F80082D443 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				A578FA332873049400AA7720 /* Style */,
 				A58E7D012872A1430082D443 /* Extensions */,
 				A58E7CFE2872A1050082D443 /* VIPER */,
 			);
@@ -455,8 +574,8 @@
 		A58E7D012872A1430082D443 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				A58E7D142872A5410082D443 /* UIViewController.swift */,
-				A58E7D022872A1630082D443 /* String.swift */,
+				A578FA3B2874001900AA7720 /* SwiftUI */,
+				A578FA3A2874001100AA7720 /* UIKit */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -464,6 +583,7 @@
 		A58E7D052872A4330082D443 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				A5629AA42876A19D00094373 /* DomainLayer */,
 				A58E7D112872A49E0082D443 /* ApplicationLayer */,
 				A58E7D062872A4390082D443 /* PresentationLayer */,
 			);
@@ -473,6 +593,9 @@
 		A58E7D062872A4390082D443 /* PresentationLayer */ = {
 			isa = PBXGroup;
 			children = (
+				A5629AD82876CC5B00094373 /* InviteList */,
+				A5629ACD2876CC4A00094373 /* Invite */,
+				A5629AB72876CBA700094373 /* ChatList */,
 				A58E7D332872D55F0082D443 /* Chat */,
 				A58E7D282872D52A0082D443 /* Main */,
 			);
@@ -517,6 +640,8 @@
 		A58E7D332872D55F0082D443 /* Chat */ = {
 			isa = PBXGroup;
 			children = (
+				A58E7D462872EF5B0082D443 /* Models */,
+				A58E7D412872EE270082D443 /* Views */,
 				A58E7D342872D55F0082D443 /* ChatModule.swift */,
 				A58E7D352872D55F0082D443 /* ChatRouter.swift */,
 				A58E7D362872D55F0082D443 /* ChatInteractor.swift */,
@@ -532,6 +657,25 @@
 				A58E7D3E2872E99A0082D443 /* TabPage.swift */,
 			);
 			path = Model;
+			sourceTree = "<group>";
+		};
+		A58E7D412872EE270082D443 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A58E7D422872EE320082D443 /* MessageView.swift */,
+				A58E7D442872EE570082D443 /* ContentMessageView.swift */,
+				A578FA312873036400AA7720 /* InputView.swift */,
+				A578FA382873FCE000AA7720 /* ChatScrollView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A58E7D462872EF5B0082D443 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A58E7D472872EF610082D443 /* MessageViewModel.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		A5A4FC732840C12C00BBEC1E /* UITests */ = {
@@ -876,24 +1020,48 @@
 			files = (
 				A58E7D3B2872D55F0082D443 /* ChatInteractor.swift in Sources */,
 				A58E7D1F2872A57B0082D443 /* ApplicationConfigurator.swift in Sources */,
+				A58E7D452872EE570082D443 /* ContentMessageView.swift in Sources */,
+				A5629ADF2876CC6E00094373 /* InviteListPresenter.swift in Sources */,
 				A58E7D392872D55F0082D443 /* ChatModule.swift in Sources */,
 				A58E7D222872A57B0082D443 /* AppearanceConfigurator.swift in Sources */,
 				A58E7D212872A57B0082D443 /* MigrationConfigurator.swift in Sources */,
+				A5629ABE2876CBC000094373 /* ChatListPresenter.swift in Sources */,
 				A58E7D0E2872A45B0082D443 /* MainRouter.swift in Sources */,
+				A58E7D432872EE320082D443 /* MessageView.swift in Sources */,
 				A58E7D3F2872E99A0082D443 /* TabPage.swift in Sources */,
 				A58E7D3C2872D55F0082D443 /* ChatPresenter.swift in Sources */,
 				A58E7D152872A5410082D443 /* UIViewController.swift in Sources */,
 				A58E7D132872A4A80082D443 /* Application.swift in Sources */,
 				A58E7D002872A1050082D443 /* SceneViewController.swift in Sources */,
 				A58E7D242872AB130082D443 /* MainViewController.swift in Sources */,
+				A5629AE02876CC6E00094373 /* InviteListRouter.swift in Sources */,
 				A58E7D032872A1630082D443 /* String.swift in Sources */,
 				A58E7D3D2872D55F0082D443 /* ChatView.swift in Sources */,
+				A5629ABD2876CBC000094373 /* ChatListModule.swift in Sources */,
 				A58E7CEB28729F550082D443 /* AppDelegate.swift in Sources */,
+				A578FA35287304A300AA7720 /* Color.swift in Sources */,
+				A5629ADE2876CC6E00094373 /* InviteListModule.swift in Sources */,
+				A578FA322873036400AA7720 /* InputView.swift in Sources */,
 				A58E7D0C2872A45B0082D443 /* MainModule.swift in Sources */,
 				A58E7D0D2872A45B0082D443 /* MainPresenter.swift in Sources */,
+				A5629AD62876CC5700094373 /* InviteInteractor.swift in Sources */,
+				A5629AE12876CC6E00094373 /* InviteListInteractor.swift in Sources */,
 				A58E7CED28729F550082D443 /* SceneDelegate.swift in Sources */,
+				A578FA372873D8EE00AA7720 /* UIColor.swift in Sources */,
+				A5629AA92876A23100094373 /* ChatService.swift in Sources */,
+				A5629AC02876CBC000094373 /* ChatListInteractor.swift in Sources */,
+				A5629AE22876CC6E00094373 /* InviteListView.swift in Sources */,
+				A578FA3D2874002400AA7720 /* View.swift in Sources */,
+				A5629AD72876CC5700094373 /* InviteView.swift in Sources */,
 				A58E7D1D2872A57B0082D443 /* Configurator.swift in Sources */,
+				A58E7D482872EF610082D443 /* MessageViewModel.swift in Sources */,
+				A5629AD32876CC5700094373 /* InviteModule.swift in Sources */,
+				A5629AD52876CC5700094373 /* InviteRouter.swift in Sources */,
+				A5629ABF2876CBC000094373 /* ChatListRouter.swift in Sources */,
+				A5629AC12876CBC000094373 /* ChatListView.swift in Sources */,
+				A578FA392873FCE000AA7720 /* ChatScrollView.swift in Sources */,
 				A58E7D1E2872A57B0082D443 /* ThirdPartyConfigurator.swift in Sources */,
+				A5629AD42876CC5700094373 /* InvitePresenter.swift in Sources */,
 				A58E7D3A2872D55F0082D443 /* ChatRouter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1219,7 +1387,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1248,7 +1416,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

@@ -1,5 +1,5 @@
 protocol Configurator {
-    func configure() 
+    func configure()
 }
 
 extension Array where Element == Configurator {

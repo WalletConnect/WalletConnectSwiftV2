@@ -2,10 +2,33 @@ import SwiftUI
 
 struct ChatView: View {
 
-    @EnvironmentObject var viewModel: ChatPresenter
+    @EnvironmentObject var presenter: ChatPresenter
 
     var body: some View {
-        Text("Chat module")
+        ZStack {
+            ChatScrollView {
+                // TODO: Replace id
+                ForEach(presenter.messages, id: \.text) { message in
+                    MessageView(message: message)
+                }
+
+                Spacer().frame(height: 72)
+            }
+
+            VStack {
+                Spacer()
+
+                HStack {
+                    InputView(title: "Message...", text: $presenter.input) {
+                        presenter.didPressSend()
+                    }
+                    .padding(16.0)
+                }
+            }
+        }
+        .task {
+            await presenter.setupInitialState()
+        }
     }
 }
 

@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ___VARIABLE_ModuleName___View: View {
 
-    @EnvironmentObject var viewModel: ___VARIABLE_ModuleName___Presenter
+    @EnvironmentObject var presenter: ___VARIABLE_ModuleName___Presenter
 
     var body: some View {
         Text("___VARIABLE_ModuleName___ module")

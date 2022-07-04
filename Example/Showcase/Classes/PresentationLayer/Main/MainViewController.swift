@@ -25,7 +25,7 @@ final class MainViewController: UITabBarController {
             item.image = model.icon
             item.isEnabled = TabPage.enabledTabs.contains(model)
             viewController.tabBarItem = item
-            viewController.view.backgroundColor = .systemBackground
+            viewController.view.backgroundColor = .w_background
         }
 
         self.viewControllers = viewControllers

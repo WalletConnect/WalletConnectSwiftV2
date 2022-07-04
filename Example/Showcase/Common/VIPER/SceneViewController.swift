@@ -27,7 +27,7 @@ extension SceneViewModel {
         return .none
     }
     var navigationBarStyle: NavigationBarStyle {
-        return .color(.systemBackground)
+        return .color(.w_background)
     }
     var preferredStatusBarStyle: UIStatusBarStyle {
         return .default
@@ -35,7 +35,7 @@ extension SceneViewModel {
 }
 
 class SceneViewController<ViewModel: SceneViewModel, Content: View>: UIHostingController<Content> {
-    
+
     private let viewModel: ViewModel
 
     init(viewModel: ViewModel, content: Content) {
@@ -46,7 +46,7 @@ class SceneViewController<ViewModel: SceneViewModel, Content: View>: UIHostingCo
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return viewModel.preferredStatusBarStyle
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
@@ -62,11 +62,11 @@ class SceneViewController<ViewModel: SceneViewModel, Content: View>: UIHostingCo
 // MARK: Privates
 
 private extension SceneViewController {
-    
+
     func setupView() {
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .w_background
     }
-    
+
     func setupNavigation() {
         navigationItem.title = viewModel.sceneTitle
         navigationItem.backButtonTitle = .empty
@@ -74,7 +74,7 @@ private extension SceneViewController {
         navigationItem.rightBarButtonItem = viewModel.rightBarButtonItem
         navigationItem.leftBarButtonItem = viewModel.leftBarButtonItem
     }
-    
+
     func setupNavigationBarStyle() {
         switch viewModel.navigationBarStyle {
         case .color(let color):

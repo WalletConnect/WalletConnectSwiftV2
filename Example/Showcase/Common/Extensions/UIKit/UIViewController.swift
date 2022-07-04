@@ -15,23 +15,23 @@ extension UIViewController {
     func present() {
         currentWindow.rootViewController = self
     }
-    
+
     func push(from viewController: UIViewController) {
         viewController.navigationController?.pushViewController(self, animated: true)
     }
-    
+
     func present(from viewController: UIViewController) {
         viewController.present(self, animated: true, completion: nil)
     }
-    
+
     func pop() {
-        let _ = navigationController?.popViewController(animated: true)
+        _ = navigationController?.popViewController(animated: true)
     }
-    
+
     func dismiss() {
         dismiss(animated: true, completion: nil)
     }
-    
+
     func popToRoot() {
         navigationController?.popToRootViewController(animated: true)
     }
@@ -44,7 +44,7 @@ extension UIViewController {
 }
 
 private extension UIViewController {
-    
+
     var currentWindow: UIWindow {
         return UIApplication.shared.connectedScenes
             .compactMap { $0.delegate as? SceneDelegate }
