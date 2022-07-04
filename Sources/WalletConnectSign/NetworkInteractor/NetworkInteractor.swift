@@ -71,7 +71,7 @@ class NetworkInteractor: NetworkInteracting {
         try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
         let message = try serializer.serialize(topic: topic, encodable: payload)
         let prompt = shouldPrompt(payload.method)
-        try await relayClient.publish(topic: topic, payload: message, prompt: prompt)
+        try await relayClient.publish(topic: topic, payload: message, tag: .sign, prompt: prompt)
     }
 
     func requestPeerResponse(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> Void)?) {
@@ -80,7 +80,7 @@ class NetworkInteractor: NetworkInteracting {
             try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
             let message = try serializer.serialize(topic: topic, encodable: payload)
             let prompt = shouldPrompt(payload.method)
-            relayClient.publish(topic: topic, payload: message, prompt: prompt) { [weak self] error in
+            relayClient.publish(topic: topic, payload: message, tag: .sign, prompt: prompt) { [weak self] error in
                 guard let self = self else {return}
                 if let error = error {
                     self.logger.error(error)
@@ -116,7 +116,7 @@ class NetworkInteractor: NetworkInteracting {
             try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
             let message = try serializer.serialize(topic: topic, encodable: payload)
             let prompt = shouldPrompt(payload.method)
-            relayClient.publish(topic: topic, payload: message, prompt: prompt) { error in
+            relayClient.publish(topic: topic, payload: message, tag: .sign, prompt: prompt) { error in
                 completion(error)
             }
         } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
@@ -133,7 +133,7 @@ class NetworkInteractor: NetworkInteracting {
         logger.debug("Responding....topic: \(topic)")
 
         do {
-            try await relayClient.publish(topic: topic, payload: message, prompt: false)
+            try await relayClient.publish(topic: topic, payload: message, tag: .sign, prompt: false)
         } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
             logger.info("Info: Json Rpc Duplicate Detected")
         }
