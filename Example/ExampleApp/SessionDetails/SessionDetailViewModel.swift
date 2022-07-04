@@ -68,7 +68,7 @@ final class SessionDetailViewModel: ObservableObject {
         let backup = namespaces
 
         do {
-            addBinanceAccount(for: chain)
+            addTestAccount(for: chain)
 
             try await client.update(
                 topic: session.topic,
@@ -98,7 +98,7 @@ final class SessionDetailViewModel: ObservableObject {
 
 private extension SessionDetailViewModel {
 
-    func addBinanceAccount(for chain: String) {
+    func addTestAccount(for chain: String) {
         guard let viewModel = namespace(for: chain) else { return }
 
         let account = Account("eip155:56:0xe5EeF1368781911d265fDB6946613dA61915a501")!
