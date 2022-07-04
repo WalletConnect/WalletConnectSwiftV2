@@ -4,13 +4,7 @@ import XCTest
 import TestingUtils
 import Combine
 
-class WebSocketMock: WebSocketProxy {
-
-    let socketCreationSubject = PassthroughSubject<WebSocketConnecting, Never>()
-
-    var socketCreationPublisher: AnyPublisher<WebSocketConnecting, Never> {
-        return socketCreationSubject.eraseToAnyPublisher()
-    }
+class WebSocketMock: WebSocketConnecting {
 
     var onText: ((String) -> Void)?
     var onConnect: (() -> Void)?

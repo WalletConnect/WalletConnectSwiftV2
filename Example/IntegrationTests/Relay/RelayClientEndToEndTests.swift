@@ -13,33 +13,21 @@ final class RelayClientEndToEndTests: XCTestCase {
     let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
     private var publishers = Set<AnyCancellable>()
 
-    func makeSocket() -> WebSocketProxy {
+    func makeRelayClient() -> RelayClient {
         let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock())
-        let client = HTTPClient(host: relayHost)
-        let authChallengeProvider = AuthChallengeProvider(client: client)
         let socketAuthenticator = SocketAuthenticator(
-            authChallengeProvider: authChallengeProvider,
-            clientIdStorage: clientIdStorage
+            clientIdStorage: clientIdStorage,
+            didKeyFactory: ED25519DIDKeyFactory()
         )
-        return AsyncWebSocketProxy(
-            host: relayHost,
-            projectId: projectId,
-            socketFactory: SocketFactory(),
-            socketAuthenticator: socketAuthenticator
-        )
-    }
-
-    func makeRelayClient(socket: WebSocketProxy) -> RelayClient {
+        let urlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)
+        let socket = WebSocket(url: urlFactory.create(host: relayHost, projectId: projectId))
         let logger = ConsoleLogger()
         let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket), logger: logger)
         return RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
 
     func testSubscribe() {
-        let socket = makeSocket()
-        let relayClient = makeRelayClient(socket: socket)
-
-        waitSocketCreation(socket: socket)
+        let relayClient = makeRelayClient()
 
         try! relayClient.connect()
         let subscribeExpectation = expectation(description: "subscribe call succeeds")
@@ -57,13 +45,8 @@ final class RelayClientEndToEndTests: XCTestCase {
     }
 
     func testEndToEndPayload() {
-        let socketA = makeSocket()
-        let socketB = makeSocket()
-        let relayA = makeRelayClient(socket: socketA)
-        let relayB = makeRelayClient(socket: socketB)
-
-        waitSocketCreation(socket: socketA)
-        waitSocketCreation(socket: socketB)
+        let relayA = makeRelayClient()
+        let relayB = makeRelayClient()
 
         try! relayA.connect()
         try! relayB.connect()
@@ -115,16 +98,6 @@ final class RelayClientEndToEndTests: XCTestCase {
         // TODO - uncomment lines when request rebound is resolved
 //        XCTAssertEqual(subscriptionBPayload, payloadA)
 //        XCTAssertEqual(subscriptionAPayload, payloadB)
-    }
-
-    private func waitSocketCreation(socket: WebSocketProxy) {
-        let createExpectation = expectation(description: "socket created")
-
-        socket.socketCreationPublisher.sink { _ in
-            createExpectation.fulfill()
-        }.store(in: &publishers)
-
-        wait(for: [createExpectation], timeout: defaultTimeout)
     }
 }
 
