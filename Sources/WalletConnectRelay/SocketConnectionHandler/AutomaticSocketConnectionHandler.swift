@@ -10,14 +10,14 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
         case manualSocketDisconnectionForbidden
     }
     private var appStateObserver: AppStateObserving
-    let socket: WebSocketProxy
+    let socket: WebSocketConnecting
     private var networkMonitor: NetworkMonitoring
     private let backgroundTaskRegistrar: BackgroundTaskRegistering
 
     private var publishers = Set<AnyCancellable>()
 
     init(networkMonitor: NetworkMonitoring = NetworkMonitor(),
-         socket: WebSocketProxy,
+         socket: WebSocketConnecting,
          appStateObserver: AppStateObserving = AppStateObserver(),
          backgroundTaskRegistrar: BackgroundTaskRegistering = BackgroundTaskRegistrar()) {
         self.appStateObserver = appStateObserver
@@ -26,13 +26,8 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
         self.backgroundTaskRegistrar = backgroundTaskRegistrar
         setUpStateObserving()
         setUpNetworkMonitoring()
-        setUpOnSocketCreation()
-    }
 
-    private func setUpOnSocketCreation() {
-        socket.socketCreationPublisher.sink { socket in
-            socket.connect()
-        }.store(in: &publishers)
+        socket.connect()
     }
 
     private func setUpStateObserving() {

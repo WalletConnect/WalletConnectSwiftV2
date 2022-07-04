@@ -13,13 +13,13 @@ final class ED25519DIDKeyFactoryTests: XCTestCase {
         sut = ED25519DIDKeyFactory()
     }
 
-    func testKeyCreationWithoutPrefix() async {
-        let did = await sut.make(pubKey: pubKey, prefix: false)
+    func testKeyCreationWithoutPrefix() {
+        let did = sut.make(pubKey: pubKey, prefix: false)
         XCTAssertEqual(expectedDidWithoutPrefix, did)
     }
 
-    func testKeyCreationWithPrefix() async {
-        let did = await sut.make(pubKey: pubKey, prefix: true)
+    func testKeyCreationWithPrefix() {
+        let did = sut.make(pubKey: pubKey, prefix: true)
         XCTAssertEqual(expectedDidWithPrefix, did)
     }
 }
