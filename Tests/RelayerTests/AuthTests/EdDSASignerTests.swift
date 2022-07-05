@@ -11,10 +11,7 @@ final class EdDSASignerTests: XCTestCase {
         let signingKey = try! SigningPrivateKey(rawRepresentation: keyRaw)
         sut = EdDSASigner(signingKey)
         let header = try! JWT.Header(alg: "EdDSA").encode()
-        let claims = try! JWT.Claims(
-            iss: "did:key:z6MkodHZwneVRShtaLf8JKYkxpDGp1vGZnpGmdBpX8M2exxH",
-            sub: "c479fe5dc464e771e78b193d239a65b58d278cad1c34bfb0b5716e5bb514928e")
-            .encode()
+        let claims = try! JWT.Claims.stub().encode()
         let signature = try! sut.sign(header: header, claims: claims)
         XCTAssertNotNil(signature)
     }

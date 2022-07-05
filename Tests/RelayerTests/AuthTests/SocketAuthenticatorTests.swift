@@ -15,7 +15,8 @@ final class SocketAuthenticatorTests: XCTestCase {
         DIDKeyFactory.did = "did:key:z6MkodHZwneVRShtaLf8JKYkxpDGp1vGZnpGmdBpX8M2exxH"
         sut = SocketAuthenticator(
             clientIdStorage: clientIdStorage,
-            didKeyFactory: DIDKeyFactory
+            didKeyFactory: DIDKeyFactory,
+            relayHost: "relay.walletconnect.com"
         )
     }
 
