@@ -20,11 +20,13 @@ extension JWT.Claims {
     static func stub() -> JWT.Claims {
         let iss = "did:key:z6MkodHZwneVRShtaLf8JKYkxpDGp1vGZnpGmdBpX8M2exxH"
         let sub = "c479fe5dc464e771e78b193d239a65b58d278cad1c34bfb0b5716e5bb514928e"
-        let iat = Date(timeIntervalSince1970: 1656910097)
+        let iatDate = Date(timeIntervalSince1970: 1656910097)
+        let iat = Int(iatDate.timeIntervalSince1970)
         var components = DateComponents()
         components.setValue(1, for: .day)
         let aud = "wss://relay.walletconnect.com"
-        let exp = Calendar.current.date(byAdding: components, to: iat)!
+        let expDate = Calendar.current.date(byAdding: components, to: iatDate)!
+        let exp = Int(expDate.timeIntervalSince1970)
         return JWT.Claims(iss: iss, sub: sub, aud: aud, iat: iat, exp: exp)
     }
 }
