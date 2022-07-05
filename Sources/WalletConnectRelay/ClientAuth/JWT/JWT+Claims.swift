@@ -5,8 +5,8 @@ extension JWT {
         let iss: String
         let sub: String
         let aud: String
-        let iat: Date
-        let exp: Date
+        let iat: Int
+        let exp: Int
 
         func encode() throws -> String {
             let jsonEncoder = JSONEncoder()
