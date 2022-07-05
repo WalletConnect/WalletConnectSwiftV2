@@ -64,6 +64,22 @@ final class SessionDetailViewModel: ObservableObject {
         }
     }
 
+    func add(chain: String) async {
+        let backup = namespaces
+
+        do {
+            addTestAccount(for: chain)
+
+            try await client.update(
+                topic: session.topic,
+                namespaces: namespaces
+            )
+        } catch {
+            namespaces = backup
+            print("[RESPONDER] Namespaces update failed with: \(error.localizedDescription)")
+        }
+    }
+
     func ping() {
         client.ping(topic: session.topic) {  result in
             switch result {
@@ -81,6 +97,17 @@ final class SessionDetailViewModel: ObservableObject {
 }
 
 private extension SessionDetailViewModel {
+
+    func addTestAccount(for chain: String) {
+        guard let viewModel = namespace(for: chain) else { return }
+
+        let account = Account("eip155:56:0xe5EeF1368781911d265fDB6946613dA61915a501")!
+
+        namespaces[chain] = SessionNamespace(
+            accounts: Set(viewModel.accounts.appending(account)),
+            namespace: viewModel.namespace
+        )
+    }
 
     func removeAccounts(at offsets: IndexSet, chain: String) {
         guard let viewModel = namespace(for: chain) else { return }
@@ -119,6 +146,12 @@ private extension Array {
     func removing(atOffsets offsets: IndexSet) -> Self {
         var array = self
         array.remove(atOffsets: offsets)
+        return array
+    }
+
+    func appending(_ element: Element) -> Self {
+        var array = self
+        array.append(element)
         return array
     }
 }
