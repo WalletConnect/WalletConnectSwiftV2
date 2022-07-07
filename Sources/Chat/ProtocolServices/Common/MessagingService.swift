@@ -4,13 +4,16 @@ import Combine
 
 class MessagingService {
     let networkingInteractor: NetworkInteracting
+    let messagesStore: CodableStore<Message>
     let logger: ConsoleLogging
     var onMessage: ((Message) -> Void)?
     private var publishers = [AnyCancellable]()
 
     init(networkingInteractor: NetworkInteracting,
+         messagesStore: CodableStore<Message>,
          logger: ConsoleLogging) {
         self.networkingInteractor = networkingInteractor
+        self.messagesStore = messagesStore
         self.logger = logger
         setUpResponseHandling()
         setUpRequestHandling()

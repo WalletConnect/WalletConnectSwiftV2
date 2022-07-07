@@ -11,8 +11,9 @@ class Chat {
     private let messagingService: MessagingService
     private let invitationHandlingService: InvitationHandlingService
     private let inviteService: InviteService
-    let kms: KeyManagementService
-    let threadStore: CodableStore<Thread>
+    private let kms: KeyManagementService
+    private let threadStore: CodableStore<Thread>
+    private let messagesStore: CodableStore<Message>
 
     let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
@@ -57,7 +58,8 @@ class Chat {
                                                                    invitePayloadStore: invitePayloadStore,
                                                                    threadsStore: threadStore)
         self.inviteService = InviteService(networkingInteractor: networkingInteractor, kms: kms, logger: logger)
-        self.messagingService = MessagingService(networkingInteractor: networkingInteractor, logger: logger)
+        self.messagesStore = CodableStore<Message>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.messages.rawValue)
+        self.messagingService = MessagingService(networkingInteractor: networkingInteractor, messagesStore: messagesStore, logger: logger)
         socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
         setUpEnginesCallbacks()
     }
@@ -119,11 +121,11 @@ class Chat {
     }
 
     public func getThreads(account: Account) -> [Thread] {
-        fatalError("not implemented")
+        threadStore.getAll()
     }
 
     public func getMessages(topic: String) -> [Message] {
-        fatalError("not implemented")
+        messagesStore.getAll()
     }
 
     private func setUpEnginesCallbacks() {
