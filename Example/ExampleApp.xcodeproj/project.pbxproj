@@ -61,6 +61,7 @@
 		A5629AE02876CC6E00094373 /* InviteListRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629ADB2876CC6E00094373 /* InviteListRouter.swift */; };
 		A5629AE12876CC6E00094373 /* InviteListInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629ADC2876CC6E00094373 /* InviteListInteractor.swift */; };
 		A5629AE22876CC6E00094373 /* InviteListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629ADD2876CC6E00094373 /* InviteListView.swift */; };
+		A5629AE42876E6D200094373 /* ThreadViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AE32876E6D200094373 /* ThreadViewModel.swift */; };
 		A578FA322873036400AA7720 /* InputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA312873036400AA7720 /* InputView.swift */; };
 		A578FA35287304A300AA7720 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA34287304A300AA7720 /* Color.swift */; };
 		A578FA372873D8EE00AA7720 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA362873D8EE00AA7720 /* UIColor.swift */; };
@@ -195,6 +196,7 @@
 		A5629ADB2876CC6E00094373 /* InviteListRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteListRouter.swift; sourceTree = "<group>"; };
 		A5629ADC2876CC6E00094373 /* InviteListInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteListInteractor.swift; sourceTree = "<group>"; };
 		A5629ADD2876CC6E00094373 /* InviteListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteListView.swift; sourceTree = "<group>"; };
+		A5629AE32876E6D200094373 /* ThreadViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadViewModel.swift; sourceTree = "<group>"; };
 		A578FA312873036400AA7720 /* InputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputView.swift; sourceTree = "<group>"; };
 		A578FA34287304A300AA7720 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		A578FA362873D8EE00AA7720 /* UIColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
@@ -674,6 +676,7 @@
 			isa = PBXGroup;
 			children = (
 				A58E7D472872EF610082D443 /* MessageViewModel.swift */,
+				A5629AE32876E6D200094373 /* ThreadViewModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1042,6 +1045,7 @@
 				A578FA35287304A300AA7720 /* Color.swift in Sources */,
 				A5629ADE2876CC6E00094373 /* InviteListModule.swift in Sources */,
 				A578FA322873036400AA7720 /* InputView.swift in Sources */,
+				A5629AE42876E6D200094373 /* ThreadViewModel.swift in Sources */,
 				A58E7D0C2872A45B0082D443 /* MainModule.swift in Sources */,
 				A58E7D0D2872A45B0082D443 /* MainPresenter.swift in Sources */,
 				A5629AD62876CC5700094373 /* InviteInteractor.swift in Sources */,

@@ -19,12 +19,10 @@ final class ChatPresenter: ObservableObject {
 
     @MainActor
     func setupInitialState() async {
-        let account = await interactor.getCurrentAccount()
-
         for await messages in interactor.getMessages(topic: topic) {
             self.messages = messages
                 .sorted(by: { $0.timestamp < $1.timestamp })
-                .map { MessageViewModel(message: $0, currentAccount: account) }
+                .map { MessageViewModel(message: $0, currentAccount: "TODO") }
         }
     }
 

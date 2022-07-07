@@ -6,11 +6,7 @@ final class ChatInteractor {
         self.chatService = chatService
     }
 
-    func getCurrentAccount() async -> String {
-        return await chatService.getAuthorAccount()
-    }
-
-    func getMessages(topic: String) -> MessageStream {
+    func getMessages(topic: String) -> Stream<[Message]> {
         return chatService.getMessages(topic: topic)
     }
 

@@ -17,4 +17,8 @@ final class ChatListRouter {
     func presentInviteList() {
         InviteListModule.create(app: app).push(from: viewController)
     }
+
+    func presentChat(topic: String) {
+        ChatModule.create(topic: topic, app: app).push(from: viewController)
+    }
 }

@@ -7,6 +7,8 @@ final class ChatListPresenter: ObservableObject {
     private let router: ChatListRouter
     private var disposeBag = Set<AnyCancellable>()
 
+    @Published var threads: [ThreadViewModel] = []
+
     init(interactor: ChatListInteractor, router: ChatListRouter) {
         self.interactor = interactor
         self.router = router
@@ -14,7 +16,15 @@ final class ChatListPresenter: ObservableObject {
 
     @MainActor
     func setupInitialState() async {
+        for await threads in interactor.getThreads() {
+            self.threads = threads
+                .sorted(by: { $0.topic < $1.topic })
+                .map { ThreadViewModel(thread: $0) }
+        }
+    }
 
+    func didPressThread(_ thread: ThreadViewModel) {
+        router.presentChat(topic: thread.topic)
     }
 
     func didPressChatRequests() {
