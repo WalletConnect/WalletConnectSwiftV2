@@ -112,22 +112,23 @@ final class SignClientTests: XCTestCase {
         }
         wait(for: [sessionRejectExpectation], timeout: defaultTimeout)
     }
-//
-//    func testNewPairingPing() async {
-//        let responderReceivesPingResponseExpectation = expectation(description: "Responder receives ping response")
-//        await waitClientsConnected()
-//
-//        let uri = try! await proposer.client.connect(requiredNamespaces: [:])!
-//
-//        try! await responder.client.pair(uri: uri)
-//        let pairing = responder.client.getSettledPairings().first!
-//        responder.client.ping(topic: pairing.topic) { response in
-//            XCTAssertTrue(response.isSuccess)
-//            responderReceivesPingResponseExpectation.fulfill()
-//        }
-//        wait(for: [responderReceivesPingResponseExpectation], timeout: defaultTimeout)
-//    }
-//
+
+    func testNewPairingPing() async throws {
+        let dapp = proposer!
+        let wallet = responder!
+        let pongResponseExpectation = expectation(description: "Ping sender receives a pong response")
+
+        let uri = try await dapp.client.connect(requiredNamespaces: ProposalNamespace.stubRequired())!
+        try await wallet.client.pair(uri: uri)
+
+        let pairing = wallet.client.getSettledPairings().first!
+        wallet.client.ping(topic: pairing.topic) { result in
+            if case .failure = result { XCTFail() }
+            pongResponseExpectation.fulfill()
+        }
+        wait(for: [pongResponseExpectation], timeout: defaultTimeout)
+    }
+
 //
 //    func testNewSessionOnExistingPairing() async {
 //        await waitClientsConnected()
