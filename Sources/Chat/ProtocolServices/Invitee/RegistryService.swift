@@ -26,6 +26,8 @@ actor RegistryService {
         let pubKeyHex = pubKey.hexRepresentation
         try await registry.register(account: account, pubKey: pubKeyHex)
         let topic = pubKey.rawRepresentation.sha256().toHexString()
+        try kms.setPublicKey(publicKey: pubKey, for: topic)
+
         topicToInvitationPubKeyStore.set(pubKeyHex, forKey: topic)
         try await networkingInteractor.subscribe(topic: topic)
         logger.debug("Did register an account: \(account) and is subscribing on topic: \(topic)")

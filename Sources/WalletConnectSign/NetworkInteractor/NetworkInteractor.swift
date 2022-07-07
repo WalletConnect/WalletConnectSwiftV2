@@ -158,7 +158,6 @@ class NetworkInteractor: NetworkInteracting {
                 self.logger.error("Respond Success failed with: \(error.localizedDescription)")
             }
         }
-
     }
 
     func subscribe(topic: String) async throws {
@@ -197,7 +196,7 @@ class NetworkInteractor: NetworkInteracting {
         } else if let deserializedJsonRpcError: JSONRPCErrorResponse = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleJsonRpcErrorResponse(response: deserializedJsonRpcError)
         } else {
-            logger.warn("Warning: WalletConnect Relay - Received unknown object type from networking relay")
+            logger.warn("Warning: Networking Interactor - Received unknown object type from networking relay")
         }
     }
 

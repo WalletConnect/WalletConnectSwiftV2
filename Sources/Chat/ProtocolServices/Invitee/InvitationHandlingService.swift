@@ -9,7 +9,7 @@ class InvitationHandlingService {
         case inviteForIdNotFound
     }
     var onInvite: ((InviteEnvelope) -> Void)?
-    var onNewThread: ((String) -> Void)?
+    var onNewThread: ((Thread) -> Void)?
     private let networkingInteractor: NetworkInteracting
     private let invitePayloadStore: CodableStore<(RequestSubscriptionPayload)>
     private let topicToInvitationPubKeyStore: CodableStore<String>
@@ -46,19 +46,23 @@ class InvitationHandlingService {
 
         let response = JsonRpcResult.response(JSONRPCResponse<AnyCodable>(id: payload.request.id, result: AnyCodable(inviteResponse)))
 
-        try await networkingInteractor.respond(topic: payload.topic, response: response)
+        guard case .invite(let invite) = payload.request.params else {return}
 
-        guard case .invite(let inviteParams) = payload.request.params else {return}
+        let responseTopic = try getInviteResponseTopic(payload, invite)
 
-        let threadAgreementKeys = try kms.performKeyAgreement(selfPublicKey: selfThreadPubKey, peerPublicKey: inviteParams.pubKey)
+        try await networkingInteractor.respond(topic: responseTopic, response: response)
+
+        let threadAgreementKeys = try kms.performKeyAgreement(selfPublicKey: selfThreadPubKey, peerPublicKey: invite.pubKey)
 
         let threadTopic = threadAgreementKeys.derivedTopic()
+
+        try kms.setSymmetricKey(threadAgreementKeys.sharedKey, for: threadTopic)
 
         try await networkingInteractor.subscribe(topic: threadTopic)
 
         logger.debug("Accepting an invite")
 
-        onNewThread?(threadTopic)
+        onNewThread?(Thread(topic: threadTopic))
     }
 
     private func setUpRequestHandling() {
@@ -70,32 +74,33 @@ class InvitationHandlingService {
                 } catch {
                     logger.debug("Did not handle invite, error: \(error)")
                 }
-            case .message(let message):
-                print("received message: \(message)")
+            default:
+                return
             }
         }.store(in: &publishers)
     }
 
-    private func handleInvite(_ inviteParams: InviteParams, _ payload: RequestSubscriptionPayload) throws {
+    private func handleInvite(_ invite: Invite, _ payload: RequestSubscriptionPayload) throws {
         logger.debug("did receive an invite")
+        invitePayloadStore.set(payload, forKey: invite.pubKey)
+        onInvite?(InviteEnvelope(pubKey: invite.pubKey, invite: invite))
+    }
+
+    private func getInviteResponseTopic(_ payload: RequestSubscriptionPayload, _ invite: Invite) throws -> String {
+        //todo - remove topicToInvitationPubKeyStore ?
+
         guard let selfPubKeyHex = try? topicToInvitationPubKeyStore.get(key: payload.topic) else {
             logger.debug("PubKey for invitation topic not found")
-            return
+            fatalError("todo")
         }
 
         let selfPubKey = try AgreementPublicKey(hex: selfPubKeyHex)
 
-        let agreementKeysI = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: inviteParams.pubKey)
+        let agreementKeysI = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: invite.pubKey)
 
-        // TODO - fix with new specs
-//        let decryptedData = try codec.decode(sealboxString: inviteParams.invite, symmetricKey: agreementKeysI.sharedKey.rawRepresentation)
-//
-//        let invite = try JSONDecoder().decode(Invite.self, from: decryptedData)
-//
-//        try kms.setSymmetricKey(agreementKeysI.sharedKey, for: payload.topic)
-//
-//        invitePayloadStore.set(payload, forKey: inviteParams.id)
-//
-//        onInvite?(InviteEnvelope(pubKey: inviteParams.pubKey, invite: invite))
+        // agreement keys already stored by serializer
+        let responseTopic = agreementKeysI.derivedTopic()
+        return responseTopic
     }
+
 }
