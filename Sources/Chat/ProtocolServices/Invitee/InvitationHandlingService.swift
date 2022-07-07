@@ -16,7 +16,7 @@ class InvitationHandlingService {
     private let registry: Registry
     private let logger: ConsoleLogging
     private let kms: KeyManagementService
-    private let threadsStore: CodableStore<Thread>
+    private let threadsStore: Database<Thread>
     private var publishers = [AnyCancellable]()
 
     init(registry: Registry,
@@ -25,7 +25,7 @@ class InvitationHandlingService {
          logger: ConsoleLogging,
          topicToInvitationPubKeyStore: CodableStore<String>,
          invitePayloadStore: CodableStore<RequestSubscriptionPayload>,
-         threadsStore: CodableStore<Thread>) {
+         threadsStore: Database<Thread>) {
         self.registry = registry
         self.kms = kms
         self.networkingInteractor = networkingInteractor

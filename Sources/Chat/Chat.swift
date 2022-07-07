@@ -12,8 +12,8 @@ class Chat {
     private let invitationHandlingService: InvitationHandlingService
     private let inviteService: InviteService
     private let kms: KeyManagementService
-    private let threadStore: CodableStore<Thread>
-    private let messagesStore: CodableStore<Message>
+    private let threadStore: Database<Thread>
+    private let messagesStore: Database<Message>
 
     let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
@@ -49,7 +49,7 @@ class Chat {
             jsonRpcHistory: jsonRpcHistory)
         let invitePayloadStore = CodableStore<RequestSubscriptionPayload>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
         self.registryService = RegistryService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToInvitationPubKeyStore: topicToInvitationPubKeyStore)
-        threadStore = CodableStore<Thread>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.threads.rawValue)
+        threadStore = Database<Thread>()
         self.invitationHandlingService = InvitationHandlingService(registry: registry,
                              networkingInteractor: networkingInteractor,
                                                                    kms: kms,
@@ -58,7 +58,7 @@ class Chat {
                                                                    invitePayloadStore: invitePayloadStore,
                                                                    threadsStore: threadStore)
         self.inviteService = InviteService(networkingInteractor: networkingInteractor, kms: kms, logger: logger)
-        self.messagesStore = CodableStore<Message>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.messages.rawValue)
+        self.messagesStore = Database<Message>()
         self.messagingService = MessagingService(networkingInteractor: networkingInteractor, messagesStore: messagesStore, logger: logger)
         socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
         setUpEnginesCallbacks()
@@ -120,12 +120,12 @@ class Chat {
         fatalError("not implemented")
     }
 
-    public func getThreads(account: Account) -> [Thread] {
-        threadStore.getAll()
+    public func getThreads() async -> [Thread] {
+        await threadStore.getAll()
     }
 
-    public func getMessages(topic: String) -> [Message] {
-        messagesStore.getAll()
+    public func getMessages(topic: String) async -> [Message] {
+        await messagesStore.filter{$0.topic == topic} ?? []
     }
 
     private func setUpEnginesCallbacks() {
@@ -144,3 +144,27 @@ class Chat {
     }
 }
 
+
+public class Database<Element> {
+
+    private var array = [Element]()
+
+    public init() { }
+
+    public convenience init(_ array: [Element]) {
+        self.init()
+        self.array = array
+    }
+
+    public func filter(_ isIncluded: (Element) -> Bool) async -> Array<Element>? {
+        return Array(self.array.filter(isIncluded))
+    }
+
+    public func getAll() async -> [Element] {
+        array
+    }
+
+    func add(_ element: Element) async {
+        self.array.append(element)
+    }
+}

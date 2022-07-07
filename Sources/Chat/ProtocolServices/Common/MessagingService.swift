@@ -4,13 +4,13 @@ import Combine
 
 class MessagingService {
     let networkingInteractor: NetworkInteracting
-    let messagesStore: CodableStore<Message>
+    var messagesStore: Database<Message>
     let logger: ConsoleLogging
     var onMessage: ((Message) -> Void)?
     private var publishers = [AnyCancellable]()
 
     init(networkingInteractor: NetworkInteracting,
-         messagesStore: CodableStore<Message>,
+         messagesStore: Database<Message>,
          logger: ConsoleLogging) {
         self.networkingInteractor = networkingInteractor
         self.messagesStore = messagesStore
@@ -22,7 +22,7 @@ class MessagingService {
     func send(topic: String, messageString: String) async throws {
         //TODO - manage author account
         let authorAccount = "TODO"
-        let message = Message(message: messageString, authorAccount: authorAccount, timestamp: JsonRpcID.generate())
+        let message = Message(topic: topic, message: messageString, authorAccount: authorAccount, timestamp: JsonRpcID.generate())
         let request = JSONRPCRequest<ChatRequestParams>(params: .message(message))
         try await networkingInteractor.request(request, topic: topic, envelopeType: .type0)
     }
@@ -51,8 +51,9 @@ class MessagingService {
     }
 
     private func handleMessage(_ message: Message) {
-        onMessage?(message)
+        Task(priority: .background) { await messagesStore.add(message) }
         logger.debug("Received message")
+        onMessage?(message)
     }
 
     private func handleMessageResponse(_ response: ChatResponse) {
