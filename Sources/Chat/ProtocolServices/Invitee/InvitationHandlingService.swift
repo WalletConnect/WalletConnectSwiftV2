@@ -62,7 +62,12 @@ class InvitationHandlingService {
 
         logger.debug("Accepting an invite")
 
-        onNewThread?(Thread(topic: threadTopic))
+        let thread = Thread(topic: threadTopic)
+        Task(priority: .background) {
+            threadsStore.add(thread)
+        }
+
+        onNewThread?(thread)
     }
 
     private func setUpRequestHandling() {

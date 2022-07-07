@@ -25,6 +25,9 @@ class MessagingService {
         let message = Message(topic: topic, message: messageString, authorAccount: authorAccount, timestamp: JsonRpcID.generate())
         let request = JSONRPCRequest<ChatRequestParams>(params: .message(message))
         try await networkingInteractor.request(request, topic: topic, envelopeType: .type0)
+        Task(priority: .background) {
+            await messagesStore.add(message)
+        }
     }
 
     private func setUpResponseHandling() {

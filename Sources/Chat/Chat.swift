@@ -57,7 +57,11 @@ class Chat {
                                                                    topicToInvitationPubKeyStore: topicToInvitationPubKeyStore,
                                                                    invitePayloadStore: invitePayloadStore,
                                                                    threadsStore: threadStore)
-        self.inviteService = InviteService(networkingInteractor: networkingInteractor, kms: kms, logger: logger)
+        self.inviteService = InviteService(
+            networkingInteractor: networkingInteractor,
+            kms: kms,
+            threadStore: threadStore,
+            logger: logger)
         self.messagesStore = Database<Message>()
         self.messagingService = MessagingService(networkingInteractor: networkingInteractor, messagesStore: messagesStore, logger: logger)
         socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher

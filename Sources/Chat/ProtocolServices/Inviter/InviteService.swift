@@ -5,19 +5,22 @@ import Combine
 
 class InviteService {
     private var publishers = [AnyCancellable]()
-    let networkingInteractor: NetworkInteracting
-    let logger: ConsoleLogging
-    let kms: KeyManagementService
+    private let networkingInteractor: NetworkInteracting
+    private let logger: ConsoleLogging
+    private let kms: KeyManagementService
+    private let threadStore: Database<Thread>
 
     var onNewThread: ((Thread) -> Void)?
     var onInvite: ((Invite) -> Void)?
 
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementService,
+         threadStore: Database<Thread>,
          logger: ConsoleLogging) {
         self.kms = kms
         self.networkingInteractor = networkingInteractor
         self.logger = logger
+        self.threadStore = threadStore
         setUpResponseHandling()
     }
 
@@ -77,7 +80,11 @@ class InviteService {
         let threadTopic = agreementKeys.derivedTopic()
         try kms.setSymmetricKey(agreementKeys.sharedKey, for: threadTopic)
         try await networkingInteractor.subscribe(topic: threadTopic)
-        onNewThread?(Thread(topic: threadTopic))
+        let thread = Thread(topic: threadTopic)
+        Task(priority: .background) {
+            await threadStore.add(thread)
+        }
+        onNewThread?(thread)
         // TODO - remove symKeyI
     }
 }
