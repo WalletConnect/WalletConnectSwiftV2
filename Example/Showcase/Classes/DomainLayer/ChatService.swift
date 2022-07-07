@@ -28,12 +28,22 @@ final class ChatService {
         ])
     }()
 
+    private let invitesSubject: CurrentValueSubject<[Invite], Never> = {
+        return CurrentValueSubject([
+            Invite(message: "In a few minutes, bitch.", pubKey: "slava.eth")
+        ])
+    }()
+
     func getMessages(topic: String) -> Stream<[Message]> {
         return messagesSubject.eraseToAnyPublisher().values
     }
 
     func getThreads() -> Stream<[Thread]> {
         return threadsSubject.eraseToAnyPublisher().values
+    }
+
+    func getInvites() -> Stream<[Invite]> {
+        return invitesSubject.eraseToAnyPublisher().values
     }
 
     func sendMessage(text: String) async throws {
@@ -43,5 +53,13 @@ final class ChatService {
             timestamp: Int64(Date().timeIntervalSince1970)
         )
         messagesSubject.send(messagesSubject.value + [message])
+    }
+
+    func accept(invite: Invite) async throws {
+
+    }
+
+    func reject(invite: Invite) async throws {
+
     }
 }

@@ -5,10 +5,61 @@ struct InviteListView: View {
     @EnvironmentObject var presenter: InviteListPresenter
 
     var body: some View {
-        Text("InviteList module")
-            .task {
-                await presenter.setupInitialState()
+        ScrollView {
+            VStack {
+                Spacer()
+                    .frame(height: 16.0)
+
+                ForEach(presenter.invites, id: \.subtitle) { invite in
+                    HStack(spacing: 16.0) {
+                        Image("avatar")
+                            .resizable()
+                            .frame(width: 64.0, height: 64.0)
+
+                        VStack(alignment: .leading) {
+                            Text(invite.title)
+                                .font(.title3)
+                                .foregroundColor(.w_foreground)
+                                .lineLimit(1)
+
+                            Text(invite.subtitle)
+                                .font(.subheadline)
+                                .foregroundColor(.w_secondaryForeground)
+                                .multilineTextAlignment(.leading)
+                        }
+
+                        Spacer()
+
+                        HStack(spacing: 8.0) {
+                            Button(action: { presenter.didPressAccept(invite: invite) }) {
+                                Image("checkmark_icon")
+                                    .resizable()
+                                    .frame(width: 32, height: 32)
+                            }
+                            Button(action: { presenter.didPressReject(invite: invite) }) {
+                                Image("cross_icon")
+                                    .resizable()
+                                    .frame(width: 32, height: 32)
+                            }
+                        }
+                        .padding(4.0)
+                        .background(
+                            Capsule()
+                                .foregroundColor(.w_secondaryBackground)
+                        )
+                        .overlay(
+                            Capsule()
+                                .stroke(Color.w_tertiaryBackground, lineWidth: 0.5)
+                        )
+                    }
+                    .frame(height: 64.0)
+                }
+                .padding(16.0)
             }
+        }
+        .task {
+            await presenter.setupInitialState()
+        }
     }
 }
 
