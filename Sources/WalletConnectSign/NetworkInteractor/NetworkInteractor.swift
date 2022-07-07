@@ -151,7 +151,7 @@ class NetworkInteractor: NetworkInteracting {
 
     // TODO: Move to async
     func respondSuccess(for payload: WCRequestSubscriptionPayload) {
-        Task {
+        Task(priority: .background) {
             do {
                 try await respondSuccess(payload: payload)
             } catch {
