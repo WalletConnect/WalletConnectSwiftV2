@@ -13,6 +13,7 @@ extension JWT {
         func encode() throws -> String {
             let jsonEncoder = JSONEncoder()
             jsonEncoder.dateEncodingStrategy = .secondsSince1970
+            jsonEncoder.outputFormatting = .withoutEscapingSlashes
             let data = try jsonEncoder.encode(self)
             return JWTEncoder.base64urlEncodedString(data: data)
         }
