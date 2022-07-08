@@ -6,12 +6,12 @@ struct InviteResponse: Codable {
 }
 
 public struct Invite: Codable, Equatable {
-    let message: String
-    let account: Account
-    let pubKey: String
+    public let message: String
+    public let account: Account
+    public let pubKey: String
 }
 
 public struct InviteEnvelope: Codable {
-    let pubKey: String
-    let invite: Invite
+    public let pubKey: String
+    public let invite: Invite
 }

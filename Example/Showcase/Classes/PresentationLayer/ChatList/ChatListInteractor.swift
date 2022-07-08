@@ -1,3 +1,5 @@
+import Chat
+
 final class ChatListInteractor {
 
     private let chatService: ChatService
@@ -6,7 +8,11 @@ final class ChatListInteractor {
         self.chatService = chatService
     }
 
-    func getThreads() -> Stream<[Thread]> {
-        return chatService.getThreads()
+    func getThreads() async -> [Chat.Thread] {
+        return await chatService.getThreads()
+    }
+
+    func threadsSubscription() -> Stream<Chat.Thread> {
+        return chatService.threadPublisher
     }
 }

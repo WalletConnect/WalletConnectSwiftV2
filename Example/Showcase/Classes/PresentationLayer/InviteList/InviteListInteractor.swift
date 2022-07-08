@@ -1,3 +1,6 @@
+import Chat
+import WalletConnectUtils
+
 final class InviteListInteractor {
     private let chatService: ChatService
 
@@ -5,8 +8,12 @@ final class InviteListInteractor {
         self.chatService = chatService
     }
 
-    func getInvites() -> Stream<[Invite]> {
-        return chatService.getInvites()
+    func getInvites() async -> [Invite] {
+        return await chatService.getInvites(account: ChatService.selfAccount)
+    }
+
+    func invitesSubscription() -> Stream<Invite> {
+        return chatService.invitePublisher
     }
 
     func accept(invite: Invite) async {

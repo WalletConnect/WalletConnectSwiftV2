@@ -1,9 +1,10 @@
 import UIKit
 import Combine
+import Chat
 
 final class ChatPresenter: ObservableObject {
 
-    private let topic: String
+    private let thread: Chat.Thread
     private let interactor: ChatInteractor
     private let router: ChatRouter
     private var disposeBag = Set<AnyCancellable>()
@@ -11,18 +12,18 @@ final class ChatPresenter: ObservableObject {
     @Published var messages: [MessageViewModel] = []
     @Published var input: String = .empty
 
-    init(topic: String, interactor: ChatInteractor, router: ChatRouter) {
-        self.topic = topic
+    init(thread: Chat.Thread, interactor: ChatInteractor, router: ChatRouter) {
+        self.thread = thread
         self.interactor = interactor
         self.router = router
     }
 
     @MainActor
     func setupInitialState() async {
-        for await messages in interactor.getMessages(topic: topic) {
-            self.messages = messages
-                .sorted(by: { $0.timestamp < $1.timestamp })
-                .map { MessageViewModel(message: $0, currentAccount: "TODO") }
+        await loadMessages()
+
+        for await _ in interactor.messagesSubscription() {
+            await loadMessages()
         }
     }
 
@@ -44,9 +45,15 @@ extension ChatPresenter: SceneViewModel {
 
 private extension ChatPresenter {
 
+    func loadMessages() async {
+        let messages = await interactor.getMessages(thread: thread)
+        self.messages = messages.sorted(by: { $0.timestamp < $1.timestamp })
+            .map { MessageViewModel(message: $0, thread: thread) }
+    }
+
     func sendMessage() {
         Task {
-            try! await interactor.sendMessage(text: input)
+            try! await interactor.sendMessage(topic: thread.topic, message: input)
             input = .empty
         }
     }

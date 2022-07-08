@@ -16,15 +16,15 @@ final class ChatListPresenter: ObservableObject {
 
     @MainActor
     func setupInitialState() async {
-        for await threads in interactor.getThreads() {
-            self.threads = threads
-                .sorted(by: { $0.topic < $1.topic })
-                .map { ThreadViewModel(thread: $0) }
+        await loadThreads()
+
+        for await _ in interactor.threadsSubscription() {
+            await loadThreads()
         }
     }
 
     func didPressThread(_ thread: ThreadViewModel) {
-        router.presentChat(topic: thread.topic)
+        router.presentChat(thread: thread.thread)
     }
 
     func didPressChatRequests() {
@@ -56,6 +56,12 @@ extension ChatListPresenter: SceneViewModel {
 // MARK: Privates
 
 private extension ChatListPresenter {
+
+    func loadThreads() async {
+        let threads = await interactor.getThreads()
+        self.threads = threads.sorted(by: { $0.topic < $1.topic })
+            .map { ThreadViewModel(thread: $0) }
+    }
 
     @objc func presentInvite() {
         router.presentInvite()

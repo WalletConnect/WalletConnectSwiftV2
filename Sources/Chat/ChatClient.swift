@@ -4,7 +4,7 @@ import WalletConnectKMS
 import WalletConnectRelay
 import Combine
 
-class Chat {
+public class ChatClient {
     private var publishers = [AnyCancellable]()
     private let registry: Registry
     private let registryService: RegistryService
@@ -33,7 +33,7 @@ class Chat {
         messagePublisherSubject.eraseToAnyPublisher()
     }
 
-    init(registry: Registry,
+    public init(registry: Registry,
          relayClient: RelayClient,
          kms: KeyManagementService,
          logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off),

@@ -7,8 +7,8 @@ import WalletConnectRelay
 import Combine
 
 final class ChatTests: XCTestCase {
-    var invitee: Chat!
-    var inviter: Chat!
+    var invitee: ChatClient!
+    var inviter: ChatClient!
     var registry: KeyValueRegistry!
     private var publishers = [AnyCancellable]()
 
@@ -37,13 +37,13 @@ final class ChatTests: XCTestCase {
         return
     }
 
-    func makeClient(prefix: String) -> Chat {
+    func makeClient(prefix: String) -> ChatClient {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let relayHost = "relay.walletconnect.com"
         let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
         let keychain = KeychainStorageMock()
         let relayClient = RelayClient(relayHost: relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
-        return Chat(registry: registry, relayClient: relayClient, kms: KeyManagementService(keychain: keychain), logger: logger, keyValueStorage: RuntimeKeyValueStorage())
+        return ChatClient(registry: registry, relayClient: relayClient, kms: KeyManagementService(keychain: keychain), logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
 
     func testInvite() async {
