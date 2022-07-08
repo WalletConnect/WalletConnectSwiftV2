@@ -62,7 +62,7 @@ class InvitationHandlingService {
 
         logger.debug("Accepting an invite")
 
-        let thread = Thread(topic: threadTopic, selfAccount: <#Account#>)
+        let thread = Thread(topic: threadTopic, selfAccount: <#Account#>, peerAccount: invite.account)
         Task(priority: .background) {
             await threadsStore.add(thread)
         }

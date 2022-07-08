@@ -3,6 +3,9 @@ import WalletConnectUtils
 import Combine
 
 class MessagingService {
+    enum Errors: Error {
+        case threadDoNotExist
+    }
     let networkingInteractor: NetworkInteracting
     var messagesStore: Database<Message>
     let logger: ConsoleLogging
@@ -23,7 +26,7 @@ class MessagingService {
     func send(topic: String, messageString: String) async throws {
         //TODO - manage author account
         let thread = await threadStore.first{$0.topic == topic}
-        let authorAccount = thread?.selfAccount
+        guard let authorAccount = thread?.selfAccount else { throw Errors.threadDoNotExist}
         let message = Message(topic: topic, message: messageString, authorAccount: authorAccount, timestamp: JsonRpcID.generate())
         let request = JSONRPCRequest<ChatRequestParams>(params: .message(message))
         try await networkingInteractor.request(request, topic: topic, envelopeType: .type0)
