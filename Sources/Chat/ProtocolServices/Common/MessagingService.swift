@@ -7,6 +7,7 @@ class MessagingService {
     var messagesStore: Database<Message>
     let logger: ConsoleLogging
     var onMessage: ((Message) -> Void)?
+    var threadStore: Database<Thread>
     private var publishers = [AnyCancellable]()
 
     init(networkingInteractor: NetworkInteracting,
@@ -21,7 +22,8 @@ class MessagingService {
 
     func send(topic: String, messageString: String) async throws {
         //TODO - manage author account
-        let authorAccount = "TODO"
+        let thread = await threadStore.first{$0.topic == topic}
+        let authorAccount = thread?.selfAccount
         let message = Message(topic: topic, message: messageString, authorAccount: authorAccount, timestamp: JsonRpcID.generate())
         let request = JSONRPCRequest<ChatRequestParams>(params: .message(message))
         try await networkingInteractor.request(request, topic: topic, envelopeType: .type0)

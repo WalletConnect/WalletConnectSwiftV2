@@ -64,7 +64,7 @@ class InviteService {
                 let inviteResponse = try jsonrpc.result.get(InviteResponse.self)
                 logger.debug("Invite has been accepted")
                 guard case .invite(let inviteParams) = response.requestParams else { return }
-                Task { try await createThread(selfPubKeyHex: inviteParams.pubKey, peerPubKey: inviteResponse.pubKey)}
+                Task { try await createThread(selfPubKeyHex: inviteParams.pubKey, peerPubKey: inviteResponse.pubKey, account: inviteParams.account)}
             } catch {
                 logger.debug("Handling invite response has failed")
             }
@@ -74,13 +74,13 @@ class InviteService {
         }
     }
 
-    private func createThread(selfPubKeyHex: String, peerPubKey: String) async throws {
+    private func createThread(selfPubKeyHex: String, peerPubKey: String, account: Account) async throws {
         let selfPubKey = try AgreementPublicKey(hex: selfPubKeyHex)
         let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey)
         let threadTopic = agreementKeys.derivedTopic()
         try kms.setSymmetricKey(agreementKeys.sharedKey, for: threadTopic)
         try await networkingInteractor.subscribe(topic: threadTopic)
-        let thread = Thread(topic: threadTopic)
+        let thread = Thread(topic: threadTopic, selfAccount: account)
         Task(priority: .background) {
             await threadStore.add(thread)
         }

@@ -22,4 +22,8 @@ public class Database<Element> {
     func add(_ element: Element) async {
         self.array.append(element)
     }
+
+    func first(where predicate: (Element) -> Bool) async -> Element? {
+        self.array.first(where: predicate)
+    }
 }
