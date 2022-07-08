@@ -14,6 +14,7 @@ class Chat {
     private let kms: KeyManagementService
     private let threadStore: Database<Thread>
     private let messagesStore: Database<Message>
+    private let invitesStore: Database<Invite>
 
     let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
@@ -62,6 +63,7 @@ class Chat {
             kms: kms,
             threadStore: threadStore,
             logger: logger)
+        self.invitesStore = Database<Invite>()
         self.messagesStore = Database<Message>()
         self.messagingService = MessagingService(networkingInteractor: networkingInteractor, messagesStore: messagesStore, logger: logger)
         socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
@@ -145,30 +147,5 @@ class Chat {
         messagingService.onMessage = { [unowned self] message in
             messagePublisherSubject.send(message)
         }
-    }
-}
-
-
-public class Database<Element> {
-
-    private var array = [Element]()
-
-    public init() { }
-
-    public convenience init(_ array: [Element]) {
-        self.init()
-        self.array = array
-    }
-
-    public func filter(_ isIncluded: (Element) -> Bool) async -> Array<Element>? {
-        return Array(self.array.filter(isIncluded))
-    }
-
-    public func getAll() async -> [Element] {
-        array
-    }
-
-    func add(_ element: Element) async {
-        self.array.append(element)
     }
 }

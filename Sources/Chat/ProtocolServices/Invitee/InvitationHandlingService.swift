@@ -107,5 +107,4 @@ class InvitationHandlingService {
         let responseTopic = agreementKeysI.derivedTopic()
         return responseTopic
     }
-
 }
