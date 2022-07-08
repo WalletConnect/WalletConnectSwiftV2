@@ -113,6 +113,32 @@ final class SignClientTests: XCTestCase {
         wait(for: [sessionRejectExpectation], timeout: defaultTimeout)
     }
 
+    func testSessionDelete() async throws {
+        let dapp = proposer!
+        let wallet = responder!
+        let sessionDeleteExpectation = expectation(description: "Wallet expects session to be deleted")
+        let requiredNamespaces = ProposalNamespace.stubRequired()
+        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
+
+        wallet.onSessionProposal = { proposal in
+            Task(priority: .high) {
+                do { try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch { XCTFail("\(error)") }
+            }
+        }
+        dapp.onSessionSettled = { settledSession in
+            Task(priority: .high) {
+                try await dapp.client.disconnect(topic: settledSession.topic, reason: Reason(code: 5900, message: "User disconnected session"))
+            }
+        }
+        wallet.onSessionDelete = {
+            sessionDeleteExpectation.fulfill()
+        }
+
+        let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces)
+        try await wallet.client.pair(uri: uri!)
+        wait(for: [sessionDeleteExpectation], timeout: defaultTimeout)
+    }
+
     func testNewPairingPing() async throws {
         let dapp = proposer!
         let wallet = responder!
@@ -160,24 +186,6 @@ final class SignClientTests: XCTestCase {
 //        wait(for: [proposerSettlesSessionExpectation, responderSettlesSessionExpectation], timeout: defaultTimeout)
 //    }
 //
-//    func testDeleteSession() async {
-//        await waitClientsConnected()
-//        let sessionDeleteExpectation = expectation(description: "Responder is notified on session deletion")
-//        let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
-//        _ = try! await responder.client.pair(uri: uri)
-//        responder.onSessionProposal = {[unowned self]  proposal in
-//            try? self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [])
-//        }
-//        proposer.onSessionSettled = {[unowned self]  settledSession in
-//            Task {
-//                try await self.proposer.client.disconnect(topic: settledSession.topic, reason: Reason(code: 5900, message: "User disconnected session"))
-//            }
-//        }
-//        responder.onSessionDelete = {
-//            sessionDeleteExpectation.fulfill()
-//        }
-//        wait(for: [sessionDeleteExpectation], timeout: defaultTimeout)
-//    }
 //
 //    func testProposerRequestSessionRequest() async {
 //        await waitClientsConnected()
