@@ -9,4 +9,8 @@ final class InviteRouter {
     init(app: Application) {
         self.app = app
     }
+
+    func dismiss() {
+        viewController.dismiss()
+    }
 }

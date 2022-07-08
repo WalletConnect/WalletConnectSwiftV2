@@ -62,6 +62,8 @@
 		A5629AE02876CC6E00094373 /* InviteListRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629ADB2876CC6E00094373 /* InviteListRouter.swift */; };
 		A5629AE12876CC6E00094373 /* InviteListInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629ADC2876CC6E00094373 /* InviteListInteractor.swift */; };
 		A5629AE22876CC6E00094373 /* InviteListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629ADD2876CC6E00094373 /* InviteListView.swift */; };
+		A5629AE42876E6D200094373 /* ThreadViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AE32876E6D200094373 /* ThreadViewModel.swift */; };
+		A5629AE828772A0100094373 /* InviteViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AE728772A0100094373 /* InviteViewModel.swift */; };
 		A578FA322873036400AA7720 /* InputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA312873036400AA7720 /* InputView.swift */; };
 		A578FA35287304A300AA7720 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA34287304A300AA7720 /* Color.swift */; };
 		A578FA372873D8EE00AA7720 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA362873D8EE00AA7720 /* UIColor.swift */; };
@@ -197,6 +199,8 @@
 		A5629ADB2876CC6E00094373 /* InviteListRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteListRouter.swift; sourceTree = "<group>"; };
 		A5629ADC2876CC6E00094373 /* InviteListInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteListInteractor.swift; sourceTree = "<group>"; };
 		A5629ADD2876CC6E00094373 /* InviteListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteListView.swift; sourceTree = "<group>"; };
+		A5629AE32876E6D200094373 /* ThreadViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadViewModel.swift; sourceTree = "<group>"; };
+		A5629AE728772A0100094373 /* InviteViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteViewModel.swift; sourceTree = "<group>"; };
 		A578FA312873036400AA7720 /* InputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputView.swift; sourceTree = "<group>"; };
 		A578FA34287304A300AA7720 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		A578FA362873D8EE00AA7720 /* UIColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
@@ -476,6 +480,7 @@
 		A5629AB72876CBA700094373 /* ChatList */ = {
 			isa = PBXGroup;
 			children = (
+				A5629AE5287729EF00094373 /* Models */,
 				A5629AB82876CBC000094373 /* ChatListModule.swift */,
 				A5629AB92876CBC000094373 /* ChatListPresenter.swift */,
 				A5629ABA2876CBC000094373 /* ChatListRouter.swift */,
@@ -500,6 +505,7 @@
 		A5629AD82876CC5B00094373 /* InviteList */ = {
 			isa = PBXGroup;
 			children = (
+				A5629AE6287729F800094373 /* Models */,
 				A5629AD92876CC6E00094373 /* InviteListModule.swift */,
 				A5629ADA2876CC6E00094373 /* InviteListPresenter.swift */,
 				A5629ADB2876CC6E00094373 /* InviteListRouter.swift */,
@@ -507,6 +513,22 @@
 				A5629ADD2876CC6E00094373 /* InviteListView.swift */,
 			);
 			path = InviteList;
+			sourceTree = "<group>";
+		};
+		A5629AE5287729EF00094373 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A5629AE32876E6D200094373 /* ThreadViewModel.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		A5629AE6287729F800094373 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A5629AE728772A0100094373 /* InviteViewModel.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		A578FA332873049400AA7720 /* Style */ = {
@@ -1045,12 +1067,14 @@
 				A578FA35287304A300AA7720 /* Color.swift in Sources */,
 				A5629ADE2876CC6E00094373 /* InviteListModule.swift in Sources */,
 				A578FA322873036400AA7720 /* InputView.swift in Sources */,
+				A5629AE42876E6D200094373 /* ThreadViewModel.swift in Sources */,
 				A58E7D0C2872A45B0082D443 /* MainModule.swift in Sources */,
 				A58E7D0D2872A45B0082D443 /* MainPresenter.swift in Sources */,
 				A5629AD62876CC5700094373 /* InviteInteractor.swift in Sources */,
 				A5629AE12876CC6E00094373 /* InviteListInteractor.swift in Sources */,
 				A58E7CED28729F550082D443 /* SceneDelegate.swift in Sources */,
 				A578FA372873D8EE00AA7720 /* UIColor.swift in Sources */,
+				A5629AE828772A0100094373 /* InviteViewModel.swift in Sources */,
 				A5629AA92876A23100094373 /* ChatService.swift in Sources */,
 				A5629AC02876CBC000094373 /* ChatListInteractor.swift in Sources */,
 				A5629AE22876CC6E00094373 /* InviteListView.swift in Sources */,

@@ -11,6 +11,9 @@ extension Color {
 
     static let w_purpleBackground: Color = Color(UIColor.w_purpleBackground)
     static let w_purpleForeground: Color = Color(UIColor.w_purpleForeground)
+
+    static let w_greenBackground: Color = Color(UIColor.w_greenBackground)
+    static let w_greenForground: Color = Color(UIColor.w_greenForground)
 }
 
 extension UIColor {
@@ -23,4 +26,7 @@ extension UIColor {
 
     static let w_purpleBackground: UIColor = UIColor(rgb: 0x794CFF)
     static let w_purpleForeground: UIColor = UIColor(rgb: 0x987DE8)
+
+    static let w_greenBackground: UIColor = UIColor(rgb: 0x1B3229)
+    static let w_greenForground: UIColor = UIColor(rgb: 0x2BEE6C)
 }
