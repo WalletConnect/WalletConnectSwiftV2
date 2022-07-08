@@ -16,7 +16,7 @@ public class ChatClient {
     private let messagesStore: Database<Message>
     private let invitePayloadStore: CodableStore<(RequestSubscriptionPayload)>
 
-    let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
+    public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
     private var newThreadPublisherSubject = PassthroughSubject<Thread, Never>()
     public var newThreadPublisher: AnyPublisher<Thread, Never> {
