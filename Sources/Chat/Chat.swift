@@ -64,7 +64,11 @@ class Chat {
             threadStore: threadStore,
             logger: logger)
         self.messagesStore = Database<Message>()
-        self.messagingService = MessagingService(networkingInteractor: networkingInteractor, messagesStore: messagesStore, logger: logger)
+        self.messagingService = MessagingService(
+            networkingInteractor: networkingInteractor,
+            messagesStore: messagesStore,
+            threadStore: threadStore,
+            logger: logger)
         socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
         setUpEnginesCallbacks()
     }
@@ -88,8 +92,9 @@ class Chat {
     /// - Parameters:
     ///   - publicKey: publicKey associated with a peer
     ///   - openingMessage: oppening message for a chat invite
-    public func invite(publicKey: String, openingMessage: String, account: Account) async throws {
-        try await inviteService.invite(peerPubKey: publicKey, openingMessage: openingMessage, account: account)
+    ///   TODO - peerAccount should be derived
+    public func invite(publicKey: String, peerAccount: Account, openingMessage: String, account: Account) async throws {
+        try await inviteService.invite(peerPubKey: publicKey, peerAccount: peerAccount, openingMessage: openingMessage, account: account)
     }
 
     public func accept(inviteId: String) async throws {

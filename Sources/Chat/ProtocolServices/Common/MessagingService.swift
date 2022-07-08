@@ -15,10 +15,12 @@ class MessagingService {
 
     init(networkingInteractor: NetworkInteracting,
          messagesStore: Database<Message>,
+         threadStore: Database<Thread>,
          logger: ConsoleLogging) {
         self.networkingInteractor = networkingInteractor
         self.messagesStore = messagesStore
         self.logger = logger
+        self.threadStore = threadStore
         setUpResponseHandling()
         setUpRequestHandling()
     }
