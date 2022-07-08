@@ -9,7 +9,6 @@ final class InviteListInteractor {
         return chatService.getInvites()
     }
 
-
     func accept(invite: Invite) async {
         try! await chatService.accept(invite: invite)
     }

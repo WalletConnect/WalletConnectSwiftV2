@@ -1,7 +1,7 @@
 import Foundation
 
 // TODO: Delete after Chat SDK integration
-struct Invite{
+struct Invite {
     let message: String
     let pubKey: String
 }

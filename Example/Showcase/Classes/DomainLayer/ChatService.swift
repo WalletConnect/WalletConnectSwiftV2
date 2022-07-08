@@ -62,4 +62,8 @@ final class ChatService {
     func reject(invite: Invite) async throws {
 
     }
+
+    func invite(account: String) async throws {
+
+    }
 }
