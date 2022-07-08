@@ -69,8 +69,8 @@ final class ChatTests: XCTestCase {
 //
 //        try! await inviter.invite(publicKey: pubKey, peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
 //
-//        invitee.invitePublisher.sink { [unowned self] inviteEnvelope in
-//            Task {try! await invitee.accept(inviteId: inviteEnvelope.pubKey)}
+//        invitee.invitePublisher.sink { [unowned self] invite in
+//            Task {try! await invitee.accept(inviteId: invite.pubKey)}
 //        }.store(in: &publishers)
 //
 //        invitee.newThreadPublisher.sink { _ in
@@ -94,8 +94,8 @@ final class ChatTests: XCTestCase {
 //        let pubKey = try! await invitee.register(account: inviteeAccount)
 //        try! await inviter.invite(publicKey: pubKey, peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
 //
-//        invitee.invitePublisher.sink { [unowned self] inviteEnvelope in
-//            Task {try! await invitee.accept(inviteId: inviteEnvelope.pubKey)}
+//        invitee.invitePublisher.sink { [unowned self] invite in
+//            Task {try! await invitee.accept(inviteId: invite.pubKey)}
 //        }.store(in: &publishers)
 //
 //        invitee.newThreadPublisher.sink { [unowned self] thread in

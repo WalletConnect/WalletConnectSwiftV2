@@ -23,8 +23,8 @@ public class ChatClient {
         newThreadPublisherSubject.eraseToAnyPublisher()
     }
 
-    private var invitePublisherSubject = PassthroughSubject<InviteEnvelope, Never>()
-    public var invitePublisher: AnyPublisher<InviteEnvelope, Never> {
+    private var invitePublisherSubject = PassthroughSubject<Invite, Never>()
+    public var invitePublisher: AnyPublisher<Invite, Never> {
         invitePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -141,8 +141,8 @@ public class ChatClient {
     }
 
     private func setUpEnginesCallbacks() {
-        invitationHandlingService.onInvite = { [unowned self] inviteEnvelope in
-            invitePublisherSubject.send(inviteEnvelope)
+        invitationHandlingService.onInvite = { [unowned self] invite in
+            invitePublisherSubject.send(invite)
         }
         invitationHandlingService.onNewThread = { [unowned self] newThread in
             newThreadPublisherSubject.send(newThread)

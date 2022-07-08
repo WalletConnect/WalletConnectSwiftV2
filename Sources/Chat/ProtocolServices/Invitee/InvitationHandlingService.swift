@@ -8,7 +8,7 @@ class InvitationHandlingService {
     enum Error: Swift.Error {
         case inviteForIdNotFound
     }
-    var onInvite: ((InviteEnvelope) -> Void)?
+    var onInvite: ((Invite) -> Void)?
     var onNewThread: ((Thread) -> Void)?
     private let networkingInteractor: NetworkInteracting
     private let invitePayloadStore: CodableStore<(RequestSubscriptionPayload)>
@@ -88,7 +88,7 @@ class InvitationHandlingService {
     private func handleInvite(_ invite: Invite, _ payload: RequestSubscriptionPayload) throws {
         logger.debug("did receive an invite")
         invitePayloadStore.set(payload, forKey: invite.pubKey)
-        onInvite?(InviteEnvelope(pubKey: invite.pubKey, invite: invite))
+        onInvite?(invite)
     }
 
     private func getInviteResponseTopic(_ payload: RequestSubscriptionPayload, _ invite: Invite) throws -> String {
