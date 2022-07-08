@@ -17,7 +17,7 @@ struct RegisterService: HTTPService {
         try? JSONEncoder().encode(userAccount)
     }
 
-    var queryParameters: [String : String]? {
+    var queryParameters: [String: String]? {
         nil
     }
 }

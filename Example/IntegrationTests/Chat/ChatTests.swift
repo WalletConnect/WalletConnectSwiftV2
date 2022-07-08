@@ -49,9 +49,10 @@ final class ChatTests: XCTestCase {
     func testInvite() async {
         await waitClientsConnected()
         let inviteExpectation = expectation(description: "invitation expectation")
-        let account = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
-        let pubKey = try! await invitee.register(account: account)
-        try! await inviter.invite(publicKey: pubKey, openingMessage: "")
+        let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
+        let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
+        let pubKey = try! await invitee.register(account: inviteeAccount)
+        try! await inviter.invite(publicKey: pubKey, peerAccount: inviteeAccount, openingMessage: "", account: inviterAccount)
         invitee.invitePublisher.sink { _ in
             inviteExpectation.fulfill()
         }.store(in: &publishers)
@@ -62,9 +63,11 @@ final class ChatTests: XCTestCase {
 //        await waitClientsConnected()
 //        let newThreadInviterExpectation = expectation(description: "new thread on inviting client expectation")
 //        let newThreadinviteeExpectation = expectation(description: "new thread on invitee client expectation")
-//        let account = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
-//        let pubKey = try! await invitee.register(account: account)
-//        try! await inviter.invite(publicKey: pubKey, openingMessage: "opening message")
+//        let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
+//        let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
+//        let pubKey = try! await invitee.register(account: inviteeAccount)
+//
+//        try! await inviter.invite(publicKey: pubKey, peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
 //
 //        invitee.invitePublisher.sink { [unowned self] inviteEnvelope in
 //            Task {try! await invitee.accept(inviteId: inviteEnvelope.pubKey)}
@@ -86,10 +89,10 @@ final class ChatTests: XCTestCase {
 //        let messageExpectation = expectation(description: "message received")
 //        messageExpectation.expectedFulfillmentCount = 2
 //        let message = "message"
-//
-//        let account = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
-//        let pubKey = try! await invitee.register(account: account)
-//        try! await inviter.invite(publicKey: pubKey, openingMessage: "opening message")
+//        let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
+//        let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
+//        let pubKey = try! await invitee.register(account: inviteeAccount)
+//        try! await inviter.invite(publicKey: pubKey, peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
 //
 //        invitee.invitePublisher.sink { [unowned self] inviteEnvelope in
 //            Task {try! await invitee.accept(inviteId: inviteEnvelope.pubKey)}
@@ -103,11 +106,11 @@ final class ChatTests: XCTestCase {
 //            Task {try! await inviter.message(topic: thread.topic, message: message)}
 //        }.store(in: &publishers)
 //
-//        inviter.messagePublisher.sink { message in
+//        inviter.messagePublisher.sink { _ in
 //            messageExpectation.fulfill()
 //        }.store(in: &publishers)
 //
-//        invitee.messagePublisher.sink { message in
+//        invitee.messagePublisher.sink { _ in
 //            messageExpectation.fulfill()
 //        }.store(in: &publishers)
 //

@@ -16,7 +16,7 @@ class InvitationHandlingService {
     private let registry: Registry
     private let logger: ConsoleLogging
     private let kms: KeyManagementService
-    private let threadsStore: CodableStore<Thread>
+    private let threadsStore: Database<Thread>
     private var publishers = [AnyCancellable]()
 
     init(registry: Registry,
@@ -25,7 +25,7 @@ class InvitationHandlingService {
          logger: ConsoleLogging,
          topicToInvitationPubKeyStore: CodableStore<String>,
          invitePayloadStore: CodableStore<RequestSubscriptionPayload>,
-         threadsStore: CodableStore<Thread>) {
+         threadsStore: Database<Thread>) {
         self.registry = registry
         self.kms = kms
         self.networkingInteractor = networkingInteractor
@@ -62,7 +62,12 @@ class InvitationHandlingService {
 
         logger.debug("Accepting an invite")
 
-        onNewThread?(Thread(topic: threadTopic))
+        // TODO - derive account
+        let selfAccount = Account("eip155:56:0xe5EeF1368781911d265fDB6946613dA61915a501")!
+        let thread = Thread(topic: threadTopic, selfAccount: selfAccount, peerAccount: invite.account)
+        await threadsStore.add(thread)
+
+        onNewThread?(thread)
     }
 
     private func setUpRequestHandling() {
@@ -102,5 +107,4 @@ class InvitationHandlingService {
         let responseTopic = agreementKeysI.derivedTopic()
         return responseTopic
     }
-
 }

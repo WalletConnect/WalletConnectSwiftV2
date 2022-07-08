@@ -3,25 +3,38 @@ import WalletConnectUtils
 import Combine
 
 class MessagingService {
+    enum Errors: Error {
+        case threadDoNotExist
+    }
     let networkingInteractor: NetworkInteracting
+    var messagesStore: Database<Message>
     let logger: ConsoleLogging
     var onMessage: ((Message) -> Void)?
+    var threadStore: Database<Thread>
     private var publishers = [AnyCancellable]()
 
     init(networkingInteractor: NetworkInteracting,
+         messagesStore: Database<Message>,
+         threadStore: Database<Thread>,
          logger: ConsoleLogging) {
         self.networkingInteractor = networkingInteractor
+        self.messagesStore = messagesStore
         self.logger = logger
+        self.threadStore = threadStore
         setUpResponseHandling()
         setUpRequestHandling()
     }
 
     func send(topic: String, messageString: String) async throws {
-        //TODO - manage author account
-        let authorAccount = "TODO"
-        let message = Message(message: messageString, authorAccount: authorAccount, timestamp: JsonRpcID.generate())
+        // TODO - manage author account
+        let thread = await threadStore.first {$0.topic == topic}
+        guard let authorAccount = thread?.selfAccount else { throw Errors.threadDoNotExist}
+        let message = Message(topic: topic, message: messageString, authorAccount: authorAccount, timestamp: JsonRpcID.generate())
         let request = JSONRPCRequest<ChatRequestParams>(params: .message(message))
         try await networkingInteractor.request(request, topic: topic, envelopeType: .type0)
+        Task(priority: .background) {
+            await messagesStore.add(message)
+        }
     }
 
     private func setUpResponseHandling() {
@@ -48,8 +61,11 @@ class MessagingService {
     }
 
     private func handleMessage(_ message: Message) {
-        onMessage?(message)
-        logger.debug("Received message")
+        Task(priority: .background) {
+            await messagesStore.add(message)
+            logger.debug("Received message")
+            onMessage?(message)
+        }
     }
 
     private func handleMessageResponse(_ response: ChatResponse) {

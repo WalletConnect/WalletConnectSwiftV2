@@ -11,8 +11,10 @@ class Chat {
     private let messagingService: MessagingService
     private let invitationHandlingService: InvitationHandlingService
     private let inviteService: InviteService
-    let kms: KeyManagementService
-    let threadStore: CodableStore<Thread>
+    private let kms: KeyManagementService
+    private let threadStore: Database<Thread>
+    private let messagesStore: Database<Message>
+    private let invitePayloadStore: CodableStore<(RequestSubscriptionPayload)>
 
     let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
@@ -46,9 +48,9 @@ class Chat {
             serializer: serialiser,
             logger: logger,
             jsonRpcHistory: jsonRpcHistory)
-        let invitePayloadStore = CodableStore<RequestSubscriptionPayload>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
+        self.invitePayloadStore = CodableStore<RequestSubscriptionPayload>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
         self.registryService = RegistryService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToInvitationPubKeyStore: topicToInvitationPubKeyStore)
-        threadStore = CodableStore<Thread>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.threads.rawValue)
+        threadStore = Database<Thread>()
         self.invitationHandlingService = InvitationHandlingService(registry: registry,
                              networkingInteractor: networkingInteractor,
                                                                    kms: kms,
@@ -56,8 +58,17 @@ class Chat {
                                                                    topicToInvitationPubKeyStore: topicToInvitationPubKeyStore,
                                                                    invitePayloadStore: invitePayloadStore,
                                                                    threadsStore: threadStore)
-        self.inviteService = InviteService(networkingInteractor: networkingInteractor, kms: kms, logger: logger)
-        self.messagingService = MessagingService(networkingInteractor: networkingInteractor, logger: logger)
+        self.inviteService = InviteService(
+            networkingInteractor: networkingInteractor,
+            kms: kms,
+            threadStore: threadStore,
+            logger: logger)
+        self.messagesStore = Database<Message>()
+        self.messagingService = MessagingService(
+            networkingInteractor: networkingInteractor,
+            messagesStore: messagesStore,
+            threadStore: threadStore,
+            logger: logger)
         socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
         setUpEnginesCallbacks()
     }
@@ -81,11 +92,9 @@ class Chat {
     /// - Parameters:
     ///   - publicKey: publicKey associated with a peer
     ///   - openingMessage: oppening message for a chat invite
-    public func invite(publicKey: String, openingMessage: String) async throws {
-        // TODO - how to provide account?
-        // in init or in invite method's params
-        let tempAccount = Account("eip155:1:33e32e32")!
-        try await inviteService.invite(peerPubKey: publicKey, openingMessage: openingMessage, account: tempAccount)
+    ///   TODO - peerAccount should be derived
+    public func invite(publicKey: String, peerAccount: Account, openingMessage: String, account: Account) async throws {
+        try await inviteService.invite(peerPubKey: publicKey, peerAccount: peerAccount, openingMessage: openingMessage, account: account)
     }
 
     public func accept(inviteId: String) async throws {
@@ -115,15 +124,20 @@ class Chat {
     }
 
     public func getInvites(account: Account) -> [Invite] {
-        fatalError("not implemented")
+        var invites = [Invite]()
+        invitePayloadStore.getAll().forEach {
+            guard case .invite(let invite) = $0.request.params else {return}
+            invites.append(invite)
+        }
+        return invites
     }
 
-    public func getThreads(account: Account) -> [Thread] {
-        fatalError("not implemented")
+    public func getThreads() async -> [Thread] {
+        await threadStore.getAll()
     }
 
-    public func getMessages(topic: String) -> [Message] {
-        fatalError("not implemented")
+    public func getMessages(topic: String) async -> [Message] {
+        await messagesStore.filter {$0.topic == topic} ?? []
     }
 
     private func setUpEnginesCallbacks() {

@@ -5,23 +5,29 @@ import Combine
 
 class InviteService {
     private var publishers = [AnyCancellable]()
-    let networkingInteractor: NetworkInteracting
-    let logger: ConsoleLogging
-    let kms: KeyManagementService
+    private let networkingInteractor: NetworkInteracting
+    private let logger: ConsoleLogging
+    private let kms: KeyManagementService
+    private let threadStore: Database<Thread>
 
     var onNewThread: ((Thread) -> Void)?
     var onInvite: ((Invite) -> Void)?
 
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementService,
+         threadStore: Database<Thread>,
          logger: ConsoleLogging) {
         self.kms = kms
         self.networkingInteractor = networkingInteractor
         self.logger = logger
+        self.threadStore = threadStore
         setUpResponseHandling()
     }
 
-    func invite(peerPubKey: String, openingMessage: String, account: Account) async throws {
+    var peerAccount: Account!
+    func invite(peerPubKey: String, peerAccount: Account, openingMessage: String, account: Account) async throws {
+        // TODO ad storage
+        self.peerAccount = peerAccount
         let selfPubKeyY = try kms.createX25519KeyPair()
         let invite = Invite(message: openingMessage, account: account, pubKey: selfPubKeyY.hexRepresentation)
         let symKeyI = try kms.performKeyAgreement(selfPublicKey: selfPubKeyY, peerPublicKey: peerPubKey)
@@ -61,7 +67,7 @@ class InviteService {
                 let inviteResponse = try jsonrpc.result.get(InviteResponse.self)
                 logger.debug("Invite has been accepted")
                 guard case .invite(let inviteParams) = response.requestParams else { return }
-                Task { try await createThread(selfPubKeyHex: inviteParams.pubKey, peerPubKey: inviteResponse.pubKey)}
+                Task { try await createThread(selfPubKeyHex: inviteParams.pubKey, peerPubKey: inviteResponse.pubKey, account: inviteParams.account, peerAccount: peerAccount)}
             } catch {
                 logger.debug("Handling invite response has failed")
             }
@@ -71,13 +77,15 @@ class InviteService {
         }
     }
 
-    private func createThread(selfPubKeyHex: String, peerPubKey: String) async throws {
+    private func createThread(selfPubKeyHex: String, peerPubKey: String, account: Account, peerAccount: Account) async throws {
         let selfPubKey = try AgreementPublicKey(hex: selfPubKeyHex)
         let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey)
         let threadTopic = agreementKeys.derivedTopic()
         try kms.setSymmetricKey(agreementKeys.sharedKey, for: threadTopic)
         try await networkingInteractor.subscribe(topic: threadTopic)
-        onNewThread?(Thread(topic: threadTopic))
+        let thread = Thread(topic: threadTopic, selfAccount: account, peerAccount: peerAccount)
+        await threadStore.add(thread)
+        onNewThread?(thread)
         // TODO - remove symKeyI
     }
 }
