@@ -64,7 +64,7 @@ class InvitationHandlingService {
 
         let thread = Thread(topic: threadTopic)
         Task(priority: .background) {
-            threadsStore.add(thread)
+            await threadsStore.add(thread)
         }
 
         onNewThread?(thread)

@@ -14,7 +14,7 @@ class Chat {
     private let kms: KeyManagementService
     private let threadStore: Database<Thread>
     private let messagesStore: Database<Message>
-    private let invitesStore: Database<Invite>
+    private let invitePayloadStore: CodableStore<(RequestSubscriptionPayload)>
 
     let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
@@ -48,7 +48,7 @@ class Chat {
             serializer: serialiser,
             logger: logger,
             jsonRpcHistory: jsonRpcHistory)
-        let invitePayloadStore = CodableStore<RequestSubscriptionPayload>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
+        self.invitePayloadStore = CodableStore<RequestSubscriptionPayload>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
         self.registryService = RegistryService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToInvitationPubKeyStore: topicToInvitationPubKeyStore)
         threadStore = Database<Thread>()
         self.invitationHandlingService = InvitationHandlingService(registry: registry,
@@ -63,7 +63,6 @@ class Chat {
             kms: kms,
             threadStore: threadStore,
             logger: logger)
-        self.invitesStore = Database<Invite>()
         self.messagesStore = Database<Message>()
         self.messagingService = MessagingService(networkingInteractor: networkingInteractor, messagesStore: messagesStore, logger: logger)
         socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
@@ -123,7 +122,12 @@ class Chat {
     }
 
     public func getInvites(account: Account) -> [Invite] {
-        fatalError("not implemented")
+        var invites = [Invite]()
+        invitePayloadStore.getAll().forEach {
+            guard case .invite(let invite) = $0.request.params else {return}
+            invites.append(invite)
+        }
+        return invites
     }
 
     public func getThreads() async -> [Thread] {
