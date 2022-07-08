@@ -10,8 +10,3 @@ public struct Invite: Codable, Equatable {
     let account: Account
     let pubKey: String
 }
-
-public struct InviteEnvelope: Codable {
-    let pubKey: String
-    let invite: Invite
-}
