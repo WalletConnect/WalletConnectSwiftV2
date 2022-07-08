@@ -84,9 +84,7 @@ class InviteService {
         try kms.setSymmetricKey(agreementKeys.sharedKey, for: threadTopic)
         try await networkingInteractor.subscribe(topic: threadTopic)
         let thread = Thread(topic: threadTopic, selfAccount: account, peerAccount: peerAccount)
-        Task(priority: .background) {
-            await threadStore.add(thread)
-        }
+        await threadStore.add(thread)
         onNewThread?(thread)
         // TODO - remove symKeyI
     }
