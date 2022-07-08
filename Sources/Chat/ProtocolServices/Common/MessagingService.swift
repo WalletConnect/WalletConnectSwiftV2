@@ -61,9 +61,11 @@ class MessagingService {
     }
 
     private func handleMessage(_ message: Message) {
-        Task(priority: .background) { await messagesStore.add(message) }
-        logger.debug("Received message")
-        onMessage?(message)
+        Task(priority: .background) {
+            await messagesStore.add(message)
+            logger.debug("Received message")
+            onMessage?(message)
+        }
     }
 
     private func handleMessageResponse(_ response: ChatResponse) {
