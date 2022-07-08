@@ -88,11 +88,8 @@ class Chat {
     /// - Parameters:
     ///   - publicKey: publicKey associated with a peer
     ///   - openingMessage: oppening message for a chat invite
-    public func invite(publicKey: String, openingMessage: String) async throws {
-        // TODO - how to provide account?
-        // in init or in invite method's params
-        let tempAccount = Account("eip155:1:33e32e32")!
-        try await inviteService.invite(peerPubKey: publicKey, openingMessage: openingMessage, account: tempAccount)
+    public func invite(publicKey: String, openingMessage: String, account: Account) async throws {
+        try await inviteService.invite(peerPubKey: publicKey, openingMessage: openingMessage, account: account)
     }
 
     public func accept(inviteId: String) async throws {
