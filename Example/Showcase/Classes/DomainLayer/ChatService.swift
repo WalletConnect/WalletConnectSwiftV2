@@ -1,9 +1,11 @@
 import Foundation
 import Combine
 
-typealias MessageStream = AsyncPublisher<AnyPublisher<[Message], Never>>
+typealias Stream<T> = AsyncPublisher<AnyPublisher<T, Never>>
 
 final class ChatService {
+
+    static let authorAccount: String = "TODO"
 
     private let messagesSubject: CurrentValueSubject<[Message], Never> = {
         return CurrentValueSubject([
@@ -19,21 +21,49 @@ final class ChatService {
         ])
     }()
 
-    func getMessages(topic: String) -> MessageStream {
+    private let threadsSubject: CurrentValueSubject<[Thread], Never> = {
+        return CurrentValueSubject([
+            Thread(topic: "topic1"),
+            Thread(topic: "topic2")
+        ])
+    }()
+
+    private let invitesSubject: CurrentValueSubject<[Invite], Never> = {
+        return CurrentValueSubject([
+            Invite(message: "In a few minutes, bitch.", pubKey: "slava.eth")
+        ])
+    }()
+
+    func getMessages(topic: String) -> Stream<[Message]> {
         return messagesSubject.eraseToAnyPublisher().values
     }
 
-    func getAuthorAccount() async -> String {
-        return "1"
+    func getThreads() -> Stream<[Thread]> {
+        return threadsSubject.eraseToAnyPublisher().values
+    }
+
+    func getInvites() -> Stream<[Invite]> {
+        return invitesSubject.eraseToAnyPublisher().values
     }
 
     func sendMessage(text: String) async throws {
-        let authorAccount = await getAuthorAccount()
         let message = Message(
             message: text,
-            authorAccount: authorAccount,
+            authorAccount: ChatService.authorAccount,
             timestamp: Int64(Date().timeIntervalSince1970)
         )
         messagesSubject.send(messagesSubject.value + [message])
+    }
+
+    func accept(invite: Invite) async throws {
+
+    }
+
+    func reject(invite: Invite) async throws {
+
+    }
+
+    func invite(account: String) async throws {
+
     }
 }

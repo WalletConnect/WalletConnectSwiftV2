@@ -87,7 +87,7 @@ class InvitationHandlingService {
     }
 
     private func getInviteResponseTopic(_ payload: RequestSubscriptionPayload, _ invite: Invite) throws -> String {
-        //todo - remove topicToInvitationPubKeyStore ?
+        // todo - remove topicToInvitationPubKeyStore ?
 
         guard let selfPubKeyHex = try? topicToInvitationPubKeyStore.get(key: payload.topic) else {
             logger.debug("PubKey for invitation topic not found")

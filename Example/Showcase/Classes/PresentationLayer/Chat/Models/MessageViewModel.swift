@@ -1,6 +1,6 @@
 import Foundation
 
-// TODO: After Chat SDK integration
+// TODO: Delete after Chat SDK integration
 struct Message: Codable, Equatable {
     let message: String
     let authorAccount: String

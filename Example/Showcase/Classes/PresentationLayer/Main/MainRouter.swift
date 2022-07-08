@@ -7,7 +7,7 @@ final class MainRouter {
     private let app: Application
 
     var chatViewController: UIViewController {
-        return ChatModule.create(app: app).wrapToNavigationController()
+        return ChatListModule.create(app: app).wrapToNavigationController()
     }
 
     init(app: Application) {

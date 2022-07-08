@@ -68,7 +68,7 @@ public class Serializer: Serializing {
         guard let selfPubKey = kms.getPublicKey(for: topic),
               case let .type1(peerPubKey) = envelope.type else { return nil }
         do {
-            //self pub key is good
+            // self pub key is good
             let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey.toHexString())
             let decodedType: T? = try decode(sealbox: envelope.sealbox, symmetricKey: agreementKeys.sharedKey.rawRepresentation)
             let newTopic = agreementKeys.derivedTopic()

@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum NavigationBarStyle {
-    case color(UIColor)
+    case translucent(UIColor)
 }
 
 protocol SceneViewModel {
@@ -11,6 +11,8 @@ protocol SceneViewModel {
     var rightBarButtonItem: UIBarButtonItem? { get }
     var navigationBarStyle: NavigationBarStyle { get }
     var preferredStatusBarStyle: UIStatusBarStyle { get }
+    var isNavigationBarTranslucent: Bool { get }
+
 }
 
 extension SceneViewModel {
@@ -27,10 +29,13 @@ extension SceneViewModel {
         return .none
     }
     var navigationBarStyle: NavigationBarStyle {
-        return .color(.w_background)
+        return .translucent(.w_background)
     }
     var preferredStatusBarStyle: UIStatusBarStyle {
         return .default
+    }
+    var isNavigationBarTranslucent: Bool {
+        return true
     }
 }
 
@@ -77,8 +82,9 @@ private extension SceneViewController {
 
     func setupNavigationBarStyle() {
         switch viewModel.navigationBarStyle {
-        case .color(let color):
+        case .translucent(let color):
             navigationController?.navigationBar.barTintColor = color
+            navigationController?.navigationBar.isTranslucent = true
         }
     }
 }
