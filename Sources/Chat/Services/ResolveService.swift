@@ -18,7 +18,7 @@ struct ResolveService: HTTPService {
         nil
     }
 
-    var queryParameters: [String : String]? {
+    var queryParameters: [String: String]? {
         ["account": account.absoluteString]
     }
 }

@@ -26,8 +26,8 @@ class MessagingService {
     }
 
     func send(topic: String, messageString: String) async throws {
-        //TODO - manage author account
-        let thread = await threadStore.first{$0.topic == topic}
+        // TODO - manage author account
+        let thread = await threadStore.first {$0.topic == topic}
         guard let authorAccount = thread?.selfAccount else { throw Errors.threadDoNotExist}
         let message = Message(topic: topic, message: messageString, authorAccount: authorAccount, timestamp: JsonRpcID.generate())
         let request = JSONRPCRequest<ChatRequestParams>(params: .message(message))

@@ -137,7 +137,7 @@ class Chat {
     }
 
     public func getMessages(topic: String) async -> [Message] {
-        await messagesStore.filter{$0.topic == topic} ?? []
+        await messagesStore.filter {$0.topic == topic} ?? []
     }
 
     private func setUpEnginesCallbacks() {

@@ -26,7 +26,7 @@ class InviteService {
 
     var peerAccount: Account!
     func invite(peerPubKey: String, peerAccount: Account, openingMessage: String, account: Account) async throws {
-        //TODO ad storage
+        // TODO ad storage
         self.peerAccount = peerAccount
         let selfPubKeyY = try kms.createX25519KeyPair()
         let invite = Invite(message: openingMessage, account: account, pubKey: selfPubKeyY.hexRepresentation)

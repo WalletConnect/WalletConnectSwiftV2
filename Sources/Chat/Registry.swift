@@ -27,7 +27,6 @@ actor KeyserverRegistryProvider: Registry {
     }
 }
 
-
 actor KeyValueRegistry: Registry {
 
     private var registryStore: [Account: String] = [:]

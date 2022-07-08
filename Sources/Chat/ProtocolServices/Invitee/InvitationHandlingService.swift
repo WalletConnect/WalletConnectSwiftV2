@@ -62,7 +62,7 @@ class InvitationHandlingService {
 
         logger.debug("Accepting an invite")
 
-        //TODO - derive account
+        // TODO - derive account
         let selfAccount = Account("eip155:56:0xe5EeF1368781911d265fDB6946613dA61915a501")!
         let thread = Thread(topic: threadTopic, selfAccount: selfAccount, peerAccount: invite.account)
         await threadsStore.add(thread)
@@ -92,7 +92,7 @@ class InvitationHandlingService {
     }
 
     private func getInviteResponseTopic(_ payload: RequestSubscriptionPayload, _ invite: Invite) throws -> String {
-        //todo - remove topicToInvitationPubKeyStore ?
+        // todo - remove topicToInvitationPubKeyStore ?
 
         guard let selfPubKeyHex = try? topicToInvitationPubKeyStore.get(key: payload.topic) else {
             logger.debug("PubKey for invitation topic not found")

@@ -11,7 +11,7 @@ public class Database<Element> {
         self.array = array
     }
 
-    public func filter(_ isIncluded: (Element) -> Bool) async -> Array<Element>? {
+    public func filter(_ isIncluded: (Element) -> Bool) async -> [Element]? {
         return Array(self.array.filter(isIncluded))
     }
 

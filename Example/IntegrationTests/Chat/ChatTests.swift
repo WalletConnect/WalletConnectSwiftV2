@@ -106,11 +106,11 @@ final class ChatTests: XCTestCase {
             Task {try! await inviter.message(topic: thread.topic, message: message)}
         }.store(in: &publishers)
 
-        inviter.messagePublisher.sink { message in
+        inviter.messagePublisher.sink { _ in
             messageExpectation.fulfill()
         }.store(in: &publishers)
 
-        invitee.messagePublisher.sink { message in
+        invitee.messagePublisher.sink { _ in
             messageExpectation.fulfill()
         }.store(in: &publishers)
 
