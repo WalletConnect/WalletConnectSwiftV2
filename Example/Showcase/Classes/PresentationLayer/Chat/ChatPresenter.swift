@@ -28,7 +28,9 @@ final class ChatPresenter: ObservableObject {
     }
 
     func didPressSend() {
-        sendMessage()
+        Task(priority: .userInitiated) {
+            await sendMessage()
+        }
     }
 }
 
@@ -51,10 +53,9 @@ private extension ChatPresenter {
             .map { MessageViewModel(message: $0, thread: thread) }
     }
 
-    func sendMessage() {
-        Task {
-            try! await interactor.sendMessage(topic: thread.topic, message: input)
-            input = .empty
-        }
+    @MainActor
+    func sendMessage() async {
+        try! await interactor.sendMessage(topic: thread.topic, message: input)
+        input = .empty
     }
 }
