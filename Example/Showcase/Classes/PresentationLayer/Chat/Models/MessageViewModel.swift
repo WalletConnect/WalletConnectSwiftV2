@@ -1,19 +1,18 @@
 import Foundation
-
-// TODO: Delete after Chat SDK integration
-struct Message: Codable, Equatable {
-    let message: String
-    let authorAccount: String
-    let timestamp: Int64
-}
+import WalletConnectUtils
+import Chat
 
 struct MessageViewModel {
     private let message: Message
-    private let currentAccount: String
+    private let thread: Chat.Thread
 
-    init(message: Message, currentAccount: String) {
+    init(message: Message, thread: Chat.Thread) {
         self.message = message
-        self.currentAccount = currentAccount
+        self.thread = thread
+    }
+
+    var currentAccount: Account {
+        return thread.selfAccount
     }
 
     var isCurrentUser: Bool {

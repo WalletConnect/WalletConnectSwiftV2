@@ -1,16 +1,8 @@
 import Foundation
-
-// TODO: Delete after Chat SDK integration
-struct Thread: Codable {
-    let topic: String
-}
+import Chat
 
 struct ThreadViewModel: Identifiable {
-    private let thread: Thread
-
-    init(thread: Thread) {
-        self.thread = thread
-    }
+    let thread: Chat.Thread
 
     var topic: String {
         return thread.topic

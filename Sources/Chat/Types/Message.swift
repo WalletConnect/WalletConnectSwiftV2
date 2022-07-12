@@ -1,9 +1,9 @@
 import Foundation
 import WalletConnectUtils
 
-struct Message: Codable, Equatable {
-    var topic: String
-    let message: String
-    let authorAccount: Account
-    let timestamp: Int64
+public struct Message: Codable, Equatable {
+    public var topic: String
+    public let message: String
+    public let authorAccount: Account
+    public let timestamp: Int64
 }

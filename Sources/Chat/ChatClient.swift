@@ -4,7 +4,7 @@ import WalletConnectKMS
 import WalletConnectRelay
 import Combine
 
-class Chat {
+public class ChatClient {
     private var publishers = [AnyCancellable]()
     private let registry: Registry
     private let registryService: RegistryService
@@ -16,15 +16,15 @@ class Chat {
     private let messagesStore: Database<Message>
     private let invitePayloadStore: CodableStore<(RequestSubscriptionPayload)>
 
-    let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
+    public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
     private var newThreadPublisherSubject = PassthroughSubject<Thread, Never>()
     public var newThreadPublisher: AnyPublisher<Thread, Never> {
         newThreadPublisherSubject.eraseToAnyPublisher()
     }
 
-    private var invitePublisherSubject = PassthroughSubject<InviteEnvelope, Never>()
-    public var invitePublisher: AnyPublisher<InviteEnvelope, Never> {
+    private var invitePublisherSubject = PassthroughSubject<Invite, Never>()
+    public var invitePublisher: AnyPublisher<Invite, Never> {
         invitePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -33,7 +33,7 @@ class Chat {
         messagePublisherSubject.eraseToAnyPublisher()
     }
 
-    init(registry: Registry,
+    public init(registry: Registry,
          relayClient: RelayClient,
          kms: KeyManagementService,
          logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off),
@@ -141,8 +141,8 @@ class Chat {
     }
 
     private func setUpEnginesCallbacks() {
-        invitationHandlingService.onInvite = { [unowned self] inviteEnvelope in
-            invitePublisherSubject.send(inviteEnvelope)
+        invitationHandlingService.onInvite = { [unowned self] invite in
+            invitePublisherSubject.send(invite)
         }
         invitationHandlingService.onNewThread = { [unowned self] newThread in
             newThreadPublisherSubject.send(newThread)
