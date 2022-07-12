@@ -13,6 +13,10 @@ struct RegisterService: HTTPService {
         .post
     }
 
+    var scheme: String {
+        return "https"
+    }
+
     var body: Data? {
         try? JSONEncoder().encode(userAccount)
     }

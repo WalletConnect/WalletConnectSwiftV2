@@ -14,6 +14,10 @@ struct ResolveService: HTTPService {
         .get
     }
 
+    var scheme: String {
+        return "https"
+    }
+
     var body: Data? {
         nil
     }
