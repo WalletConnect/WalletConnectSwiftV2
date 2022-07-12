@@ -102,7 +102,7 @@ class Chat {
     }
 
     public func reject(inviteId: String) async throws {
-
+        try await invitationHandlingService.reject(inviteId: inviteId)
     }
 
     /// Sends a chat message to an active chat thread

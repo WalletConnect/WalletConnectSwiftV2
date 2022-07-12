@@ -70,6 +70,23 @@ class InvitationHandlingService {
         onNewThread?(thread)
     }
 
+    func reject(inviteId: String) async throws {
+
+        guard let payload = try invitePayloadStore.get(key: inviteId) else { throw Error.inviteForIdNotFound }
+
+        guard case .invite(let invite) = payload.request.params else {return}
+
+        let responseTopic = try getInviteResponseTopic(payload, invite)
+
+        //TODO - error not in specs yet
+        let error = JSONRPCErrorResponse.Error(code: 0, message: "user rejected")
+        let response = JsonRpcResult.error(JSONRPCErrorResponse(id: payload.request.id, error: error))
+
+        try await networkingInteractor.respond(topic: responseTopic, response: response)
+
+        invitePayloadStore.delete(forKey: inviteId)
+    }
+
     private func setUpRequestHandling() {
         networkingInteractor.requestPublisher.sink { [unowned self] subscriptionPayload in
             switch subscriptionPayload.request.params {
