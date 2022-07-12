@@ -127,7 +127,7 @@ final class SignClientTests: XCTestCase {
         }
         dapp.onSessionSettled = { settledSession in
             Task(priority: .high) {
-                try await dapp.client.disconnect(topic: settledSession.topic, reason: Reason(code: 5900, message: "User disconnected session"))
+                try await dapp.client.disconnect(topic: settledSession.topic)
             }
         }
         wallet.onSessionDelete = {
