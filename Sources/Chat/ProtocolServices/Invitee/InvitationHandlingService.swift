@@ -67,6 +67,8 @@ class InvitationHandlingService {
         let thread = Thread(topic: threadTopic, selfAccount: selfAccount, peerAccount: invite.account)
         await threadsStore.add(thread)
 
+        invitePayloadStore.delete(forKey: inviteId)
+
         onNewThread?(thread)
     }
 
