@@ -13,9 +13,7 @@ struct ApplicationConfigurator: Configurator {
     func configure() {
         registerAccount()
 
-        ChatListModule.create(app: app)
-            .wrapToNavigationController()
-            .present()
+        WelcomeModule.create(app: app).present()
     }
 }
 
@@ -29,7 +27,6 @@ private extension ApplicationConfigurator {
                 }
 
                 print("Socket connected")
-
                 try! await app.chatService.register(account: ChatService.selfAccount)
             }
         }
