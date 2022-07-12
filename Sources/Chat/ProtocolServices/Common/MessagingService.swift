@@ -34,6 +34,7 @@ class MessagingService {
         try await networkingInteractor.request(request, topic: topic, envelopeType: .type0)
         Task(priority: .background) {
             await messagesStore.add(message)
+            onMessage?(message)
         }
     }
 
