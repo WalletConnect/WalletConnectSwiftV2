@@ -1,10 +1,5 @@
 import Foundation
-
-// TODO: Delete after Chat SDK integration
-struct Invite {
-    let message: String
-    let pubKey: String
-}
+import Chat
 
 struct InviteViewModel {
     let invite: Invite
@@ -14,7 +9,7 @@ struct InviteViewModel {
     }
 
     var title: String {
-        return invite.pubKey
+        return invite.account.absoluteString
     }
 
     var subtitle: String {

@@ -61,7 +61,7 @@ private extension InvitePresenter {
     @MainActor
     @objc func invite() {
         Task(priority: .userInitiated) {
-            await interactor.invite(account: input)
+            await interactor.invite(account: input, message: "Hi, welcome!")
             router.dismiss()
         }
     }

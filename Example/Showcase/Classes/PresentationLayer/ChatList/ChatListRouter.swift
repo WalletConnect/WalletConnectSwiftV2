@@ -1,4 +1,5 @@
 import UIKit
+import Chat
 
 final class ChatListRouter {
 
@@ -20,7 +21,7 @@ final class ChatListRouter {
         InviteListModule.create(app: app).push(from: viewController)
     }
 
-    func presentChat(topic: String) {
-        ChatModule.create(topic: topic, app: app).push(from: viewController)
+    func presentChat(thread: Chat.Thread) {
+        ChatModule.create(thread: thread, app: app).push(from: viewController)
     }
 }
