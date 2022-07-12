@@ -29,7 +29,8 @@ class MessagingService {
         // TODO - manage author account
         let thread = await threadStore.first {$0.topic == topic}
         guard let authorAccount = thread?.selfAccount else { throw Errors.threadDoNotExist}
-        let message = Message(topic: topic, message: messageString, authorAccount: authorAccount, timestamp: JsonRpcID.generate())
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let message = Message(topic: topic, message: messageString, authorAccount: authorAccount, timestamp: timestamp)
         let request = JSONRPCRequest<ChatRequestParams>(params: .message(message))
         try await networkingInteractor.request(request, topic: topic, envelopeType: .type0)
         Task(priority: .background) {
