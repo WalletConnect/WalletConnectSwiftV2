@@ -42,7 +42,7 @@ class InvitationHandlingService {
 
         let selfThreadPubKey = try kms.createX25519KeyPair()
 
-        let inviteResponse = InviteResponse(pubKey: selfThreadPubKey.hexRepresentation)
+        let inviteResponse = InviteResponse(publicKey: selfThreadPubKey.hexRepresentation)
 
         let response = JsonRpcResult.response(JSONRPCResponse<AnyCodable>(id: payload.request.id, result: AnyCodable(inviteResponse)))
 
@@ -60,7 +60,7 @@ class InvitationHandlingService {
 
         try await networkingInteractor.subscribe(topic: threadTopic)
 
-        logger.debug("Accepting an invite")
+        logger.debug("Accepting an invite on topic: \(threadTopic)")
 
         // TODO - derive account
         let selfAccount = Account("eip155:56:0xe5EeF1368781911d265fDB6946613dA61915a501")!

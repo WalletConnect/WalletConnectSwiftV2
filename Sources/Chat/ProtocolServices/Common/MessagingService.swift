@@ -52,7 +52,8 @@ class MessagingService {
     private func setUpRequestHandling() {
         networkingInteractor.requestPublisher.sink { [unowned self] subscriptionPayload in
             switch subscriptionPayload.request.params {
-            case .message(let message):
+            case .message(var message):
+                message.topic = subscriptionPayload.topic
                 handleMessage(message)
             default:
                 return
