@@ -11,6 +11,7 @@ public class ChatClient {
     private let messagingService: MessagingService
     private let invitationHandlingService: InvitationHandlingService
     private let inviteService: InviteService
+    private let leaveService: LeaveService
     private let kms: KeyManagementService
     private let threadStore: Database<Thread>
     private let messagesStore: Database<Message>
@@ -36,7 +37,7 @@ public class ChatClient {
     public init(registry: Registry,
          relayClient: RelayClient,
          kms: KeyManagementService,
-         logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off),
+                logger: ConsoleLogging = ConsoleLogger(loggingLevel: .debug),
          keyValueStorage: KeyValueStorage) {
         let topicToInvitationPubKeyStore = CodableStore<String>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.topicToInvitationPubKey.rawValue)
         self.registry = registry
@@ -63,6 +64,7 @@ public class ChatClient {
             kms: kms,
             threadStore: threadStore,
             logger: logger)
+        self.leaveService = LeaveService()
         self.messagesStore = Database<Message>()
         self.messagingService = MessagingService(
             networkingInteractor: networkingInteractor,
@@ -102,7 +104,7 @@ public class ChatClient {
     }
 
     public func reject(inviteId: String) async throws {
-
+        try await invitationHandlingService.reject(inviteId: inviteId)
     }
 
     /// Sends a chat message to an active chat thread
@@ -120,7 +122,7 @@ public class ChatClient {
     }
 
     public func leave(topic: String) async throws {
-        fatalError("not implemented")
+        try await leaveService.leave(topic: topic)
     }
 
     public func getInvites(account: Account) -> [Invite] {

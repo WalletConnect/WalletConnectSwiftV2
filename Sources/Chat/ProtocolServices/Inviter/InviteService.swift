@@ -25,13 +25,16 @@ class InviteService {
     }
 
     var peerAccount: Account!
+
     func invite(peerPubKey: String, peerAccount: Account, openingMessage: String, account: Account) async throws {
         // TODO ad storage
         self.peerAccount = peerAccount
         let selfPubKeyY = try kms.createX25519KeyPair()
-        let invite = Invite(message: openingMessage, account: account, pubKey: selfPubKeyY.hexRepresentation)
+        let invite = Invite(message: openingMessage, account: account, publicKey: selfPubKeyY.hexRepresentation)
         let symKeyI = try kms.performKeyAgreement(selfPublicKey: selfPubKeyY, peerPublicKey: peerPubKey)
         let inviteTopic = try AgreementPublicKey(hex: peerPubKey).rawRepresentation.sha256().toHexString()
+
+        // overrides on invite toipic
         try kms.setSymmetricKey(symKeyI.sharedKey, for: inviteTopic)
 
         let request = JSONRPCRequest<ChatRequestParams>(params: .invite(invite))
@@ -42,7 +45,6 @@ class InviteService {
         try kms.setSymmetricKey(symKeyI.sharedKey, for: responseTopic)
 
         try await networkingInteractor.subscribe(topic: responseTopic)
-
         try await networkingInteractor.request(request, topic: inviteTopic, envelopeType: .type1(pubKey: selfPubKeyY.rawRepresentation))
 
         logger.debug("invite sent on topic: \(inviteTopic)")
@@ -67,7 +69,9 @@ class InviteService {
                 let inviteResponse = try jsonrpc.result.get(InviteResponse.self)
                 logger.debug("Invite has been accepted")
                 guard case .invite(let inviteParams) = response.requestParams else { return }
-                Task { try await createThread(selfPubKeyHex: inviteParams.pubKey, peerPubKey: inviteResponse.pubKey, account: inviteParams.account, peerAccount: peerAccount)}
+                Task(priority: .background) {
+                    try await createThread(selfPubKeyHex: inviteParams.publicKey, peerPubKey: inviteResponse.publicKey, account: inviteParams.account, peerAccount: peerAccount)
+                }
             } catch {
                 logger.debug("Handling invite response has failed")
             }

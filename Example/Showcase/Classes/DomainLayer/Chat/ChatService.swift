@@ -49,11 +49,11 @@ final class ChatService {
     }
 
     func accept(invite: Invite) async throws {
-        try await client.accept(inviteId: invite.pubKey)
+        try await client.accept(inviteId: invite.id)
     }
 
     func reject(invite: Invite) async throws {
-        try await client.reject(inviteId: invite.pubKey)
+        try await client.reject(inviteId: invite.id)
     }
 
     func invite(peerPubkey publicKey: String, peerAccount: Account, message: String, selfAccount: Account) async throws {

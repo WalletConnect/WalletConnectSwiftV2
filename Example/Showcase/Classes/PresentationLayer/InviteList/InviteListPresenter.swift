@@ -56,7 +56,7 @@ private extension InviteListPresenter {
 
     func loadInvites() async {
         let invites = await interactor.getInvites()
-        self.invites = invites.sorted(by: { $0.pubKey < $1.pubKey })
+        self.invites = invites.sorted(by: { $0.publicKey < $1.publicKey })
             .map { InviteViewModel(invite: $0) }
     }
 }
