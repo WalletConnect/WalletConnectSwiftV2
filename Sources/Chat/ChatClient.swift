@@ -36,7 +36,7 @@ public class ChatClient {
     public init(registry: Registry,
          relayClient: RelayClient,
          kms: KeyManagementService,
-         logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off),
+                logger: ConsoleLogging = ConsoleLogger(loggingLevel: .debug),
          keyValueStorage: KeyValueStorage) {
         let topicToInvitationPubKeyStore = CodableStore<String>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.topicToInvitationPubKey.rawValue)
         self.registry = registry

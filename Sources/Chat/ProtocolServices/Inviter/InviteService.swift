@@ -33,6 +33,8 @@ class InviteService {
         let invite = Invite(message: openingMessage, account: account, publicKey: selfPubKeyY.hexRepresentation)
         let symKeyI = try kms.performKeyAgreement(selfPublicKey: selfPubKeyY, peerPublicKey: peerPubKey)
         let inviteTopic = try AgreementPublicKey(hex: peerPubKey).rawRepresentation.sha256().toHexString()
+
+        // overrides on invite toipic
         try kms.setSymmetricKey(symKeyI.sharedKey, for: inviteTopic)
 
         let request = JSONRPCRequest<ChatRequestParams>(params: .invite(invite))

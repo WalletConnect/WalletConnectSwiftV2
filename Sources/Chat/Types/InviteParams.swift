@@ -6,10 +6,10 @@ struct InviteResponse: Codable {
 }
 
 public struct Invite: Codable, Equatable {
-    var id: String {
+    public var id: String {
         return publicKey
     }
-    let message: String
-    let account: Account
-    let publicKey: String
+    public let message: String
+    public let account: Account
+    public let publicKey: String
 }
