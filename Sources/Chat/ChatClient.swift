@@ -11,6 +11,7 @@ public class ChatClient {
     private let messagingService: MessagingService
     private let invitationHandlingService: InvitationHandlingService
     private let inviteService: InviteService
+    private let leaveService: LeaveService
     private let kms: KeyManagementService
     private let threadStore: Database<Thread>
     private let messagesStore: Database<Message>
@@ -63,6 +64,7 @@ public class ChatClient {
             kms: kms,
             threadStore: threadStore,
             logger: logger)
+        self.leaveService = LeaveService()
         self.messagesStore = Database<Message>()
         self.messagingService = MessagingService(
             networkingInteractor: networkingInteractor,
@@ -120,7 +122,7 @@ public class ChatClient {
     }
 
     public func leave(topic: String) async throws {
-        fatalError("not implemented")
+        try await leaveService.leave(topic: topic)
     }
 
     public func getInvites(account: Account) -> [Invite] {

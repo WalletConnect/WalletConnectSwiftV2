@@ -69,7 +69,9 @@ class InviteService {
                 let inviteResponse = try jsonrpc.result.get(InviteResponse.self)
                 logger.debug("Invite has been accepted")
                 guard case .invite(let inviteParams) = response.requestParams else { return }
-                Task { try await createThread(selfPubKeyHex: inviteParams.publicKey, peerPubKey: inviteResponse.publicKey, account: inviteParams.account, peerAccount: peerAccount)}
+                Task(priority: .background) {
+                    try await createThread(selfPubKeyHex: inviteParams.publicKey, peerPubKey: inviteResponse.publicKey, account: inviteParams.account, peerAccount: peerAccount)
+                }
             } catch {
                 logger.debug("Handling invite response has failed")
             }

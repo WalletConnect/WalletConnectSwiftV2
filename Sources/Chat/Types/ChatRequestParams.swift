@@ -30,7 +30,6 @@ enum ChatRequestParams: Codable, Equatable {
         } else {
             throw Errors.decoding
         }
-
     }
 }
 
