@@ -8,5 +8,5 @@ struct InviteResponse: Codable {
 public struct Invite: Codable, Equatable {
     let message: String
     let account: Account
-    let pubKey: String
+    let publicKey: String
 }

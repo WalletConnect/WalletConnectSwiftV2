@@ -70,7 +70,7 @@ final class ChatTests: XCTestCase {
         try! await inviter.invite(publicKey: pubKey, peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
 
         invitee.invitePublisher.sink { [unowned self] invite in
-            Task {try! await invitee.accept(inviteId: invite.pubKey)}
+            Task {try! await invitee.accept(inviteId: invite.publicKey)}
         }.store(in: &publishers)
 
         invitee.newThreadPublisher.sink { _ in
@@ -95,7 +95,7 @@ final class ChatTests: XCTestCase {
         try! await inviter.invite(publicKey: pubKey, peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
 
         invitee.invitePublisher.sink { [unowned self] invite in
-            Task {try! await invitee.accept(inviteId: invite.pubKey)}
+            Task {try! await invitee.accept(inviteId: invite.publicKey)}
         }.store(in: &publishers)
 
         invitee.newThreadPublisher.sink { [unowned self] thread in

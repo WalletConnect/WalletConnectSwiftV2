@@ -20,6 +20,4 @@ public struct JSONRPCRequest<T: Codable&Equatable>: Codable, Equatable {
         self.method = method
         self.params = params
     }
-
-    
 }

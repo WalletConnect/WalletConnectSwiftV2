@@ -30,7 +30,7 @@ class InviteService {
         // TODO ad storage
         self.peerAccount = peerAccount
         let selfPubKeyY = try kms.createX25519KeyPair()
-        let invite = Invite(message: openingMessage, account: account, pubKey: selfPubKeyY.hexRepresentation)
+        let invite = Invite(message: openingMessage, account: account, publicKey: selfPubKeyY.hexRepresentation)
         let symKeyI = try kms.performKeyAgreement(selfPublicKey: selfPubKeyY, peerPublicKey: peerPubKey)
         let inviteTopic = try AgreementPublicKey(hex: peerPubKey).rawRepresentation.sha256().toHexString()
         try kms.setSymmetricKey(symKeyI.sharedKey, for: inviteTopic)
@@ -68,7 +68,7 @@ class InviteService {
                 let inviteResponse = try jsonrpc.result.get(InviteResponse.self)
                 logger.debug("Invite has been accepted")
                 guard case .invite(let inviteParams) = response.requestParams else { return }
-                Task { try await createThread(selfPubKeyHex: inviteParams.pubKey, peerPubKey: inviteResponse.pubKey, account: inviteParams.account, peerAccount: peerAccount)}
+                Task { try await createThread(selfPubKeyHex: inviteParams.publicKey, peerPubKey: inviteResponse.pubKey, account: inviteParams.account, peerAccount: peerAccount)}
             } catch {
                 logger.debug("Handling invite response has failed")
             }

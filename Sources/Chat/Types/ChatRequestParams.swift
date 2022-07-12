@@ -23,7 +23,6 @@ enum ChatRequestParams: Codable, Equatable {
     }
 
     init(from decoder: Decoder) throws {
-
         if let invite = try? Invite(from: decoder) {
             self = .invite(invite)
         } else if let massage = try? Message(from: decoder) {

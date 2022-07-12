@@ -52,7 +52,7 @@ class InvitationHandlingService {
 
         try await networkingInteractor.respond(topic: responseTopic, response: response)
 
-        let threadAgreementKeys = try kms.performKeyAgreement(selfPublicKey: selfThreadPubKey, peerPublicKey: invite.pubKey)
+        let threadAgreementKeys = try kms.performKeyAgreement(selfPublicKey: selfThreadPubKey, peerPublicKey: invite.publicKey)
 
         let threadTopic = threadAgreementKeys.derivedTopic()
 
@@ -87,7 +87,7 @@ class InvitationHandlingService {
 
     private func handleInvite(_ invite: Invite, _ payload: RequestSubscriptionPayload) throws {
         logger.debug("did receive an invite")
-        invitePayloadStore.set(payload, forKey: invite.pubKey)
+        invitePayloadStore.set(payload, forKey: invite.publicKey)
         onInvite?(invite)
     }
 
@@ -101,7 +101,7 @@ class InvitationHandlingService {
 
         let selfPubKey = try AgreementPublicKey(hex: selfPubKeyHex)
 
-        let agreementKeysI = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: invite.pubKey)
+        let agreementKeysI = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: invite.publicKey)
 
         // agreement keys already stored by serializer
         let responseTopic = agreementKeysI.derivedTopic()
