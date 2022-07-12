@@ -2,8 +2,37 @@ import Foundation
 import WalletConnectUtils
 
 enum ChatRequestParams: Codable, Equatable {
+    enum Errors: Error {
+        case decoding
+    }
     case invite(Invite)
     case message(Message)
+
+    private enum CodingKeys: String, CodingKey {
+        case invite
+        case message
+    }
+
+    func encode(to encoder: Encoder) throws {
+        switch self {
+        case .invite(let invite):
+            try invite.encode(to: encoder)
+        case .message(let message):
+            try message.encode(to: encoder)
+        }
+    }
+
+    init(from decoder: Decoder) throws {
+
+        if let invite = try? Invite(from: decoder) {
+            self = .invite(invite)
+        } else if let massage = try? Message(from: decoder) {
+            self = .message(massage)
+        } else {
+            throw Errors.decoding
+        }
+
+    }
 }
 
 extension JSONRPCRequest {
@@ -16,21 +45,5 @@ extension JSONRPCRequest {
             method = "wc_chatMessage"
         }
         self.init(id: id, method: method, params: params)
-    }
-
-    func encode(to encoder: Encoder) throws where T == ChatRequestParams {
-      var container = encoder.container(keyedBy: CodingKeys.self)
-      try container.encode(id, forKey: .id)
-        try container.encode(jsonrpc, forKey: .jsonrpc)
-        try container.encode(method, forKey: .method)
-
-        switch params {
-        case .invite(let value):
-            try container.encode(value, forKey: .params)
-        case .message(let message):
-            try container.encode(message, forKey: .params)
-        }
-
-
     }
 }
