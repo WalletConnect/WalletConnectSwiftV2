@@ -1,26 +1,35 @@
 import Foundation
+import WalletConnectUtils
 
-public class Database<Element> {
+class Database<Element> where Element: Codable {
 
     private var array = [Element]()
+    private let keyValueStorage: KeyValueStorage
+    private let identifier: String
 
-    public init() { }
+    init(keyValueStorage: KeyValueStorage,
+         identifier: String) {
+        self.keyValueStorage = keyValueStorage
+        self.identifier = identifier
+        if let data =  keyValueStorage.object(forKey: identifier) as? Data,
+            let decoded = try? JSONDecoder().decode([Element].self, from: data) {
+                array = decoded
+            }
+        }
 
-    public convenience init(_ array: [Element]) {
-        self.init()
-        self.array = array
-    }
-
-    public func filter(_ isIncluded: (Element) -> Bool) async -> [Element]? {
+    func filter(_ isIncluded: (Element) -> Bool) async -> [Element]? {
         return Array(self.array.filter(isIncluded))
     }
 
-    public func getAll() async -> [Element] {
+    func getAll() async -> [Element] {
         array
     }
 
     func add(_ element: Element) async {
         self.array.append(element)
+        if let encoded = try? JSONEncoder().encode(array) {
+            keyValueStorage.set(encoded, forKey: identifier)
+        }
     }
 
     func first(where predicate: (Element) -> Bool) async -> Element? {

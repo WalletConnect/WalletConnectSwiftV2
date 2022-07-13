@@ -51,7 +51,7 @@ public class ChatClient {
             jsonRpcHistory: jsonRpcHistory)
         self.invitePayloadStore = CodableStore<RequestSubscriptionPayload>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
         self.registryService = RegistryService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToInvitationPubKeyStore: topicToInvitationPubKeyStore)
-        threadStore = Database<Thread>()
+        threadStore = Database<Thread>(keyValueStorage: keyValueStorage, identifier: StorageDomainIdentifiers.threads.rawValue)
         self.invitationHandlingService = InvitationHandlingService(registry: registry,
                              networkingInteractor: networkingInteractor,
                                                                    kms: kms,
@@ -65,7 +65,7 @@ public class ChatClient {
             threadStore: threadStore,
             logger: logger)
         self.leaveService = LeaveService()
-        self.messagesStore = Database<Message>()
+        self.messagesStore = Database<Message>(keyValueStorage: keyValueStorage, identifier: StorageDomainIdentifiers.messages.rawValue)
         self.messagingService = MessagingService(
             networkingInteractor: networkingInteractor,
             messagesStore: messagesStore,
