@@ -5,6 +5,7 @@ import WalletConnectUtils
 import WalletConnectKMS
 
 protocol NetworkInteracting {
+    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> { get }
     var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {get}
     var responsePublisher: AnyPublisher<ChatResponse, Never> {get}
     func subscribe(topic: String) async throws
@@ -35,6 +36,7 @@ class NetworkingInteractor: NetworkInteracting {
         responsePublisherSubject.eraseToAnyPublisher()
     }
     private let responsePublisherSubject = PassthroughSubject<ChatResponse, Never>()
+    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> 
 
     init(relayClient: RelayClient,
          serializer: Serializing,
@@ -45,6 +47,7 @@ class NetworkingInteractor: NetworkInteracting {
         self.serializer = serializer
         self.jsonRpcHistory = jsonRpcHistory
         self.logger = logger
+        self.socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
         relayClient.onMessage = { [unowned self] topic, message in
             manageSubscription(topic, message)
         }
