@@ -81,7 +81,7 @@ final class ChatTests: XCTestCase {
             newThreadInviterExpectation.fulfill()
         }.store(in: &publishers)
 
-        wait(for: [newThreadinviteeExpectation, newThreadInviterExpectation], timeout: 30)
+        wait(for: [newThreadinviteeExpectation, newThreadInviterExpectation], timeout: 4)
     }
 
     func testMessage() async {

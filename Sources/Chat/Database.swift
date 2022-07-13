@@ -1,7 +1,7 @@
 import Foundation
 import WalletConnectUtils
 
-class Database<Element> {
+class Database<Element> where Element: Codable {
 
     private var array = [Element]()
     private let keyValueStorage: KeyValueStorage
@@ -11,12 +11,11 @@ class Database<Element> {
          identifier: String) {
         self.keyValueStorage = keyValueStorage
         self.identifier = identifier
-        array = keyValueStorage.object(forKey: identifier) as? [Element] ?? [Element]()
-    }
-
-    deinit {
-        keyValueStorage.set(array, forKey: identifier)
-    }
+        if let data =  keyValueStorage.object(forKey: identifier) as? Data,
+            let decoded = try? JSONDecoder().decode([Element].self, from: data) {
+                array = decoded
+            }
+        }
 
     func filter(_ isIncluded: (Element) -> Bool) async -> [Element]? {
         return Array(self.array.filter(isIncluded))
@@ -28,6 +27,9 @@ class Database<Element> {
 
     func add(_ element: Element) async {
         self.array.append(element)
+        if let encoded = try? JSONEncoder().encode(array) {
+            keyValueStorage.set(encoded, forKey: identifier)
+        }
     }
 
     func first(where predicate: (Element) -> Bool) async -> Element? {
