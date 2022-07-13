@@ -59,61 +59,61 @@ final class ChatTests: XCTestCase {
         wait(for: [inviteExpectation], timeout: 4)
     }
 
-    func testAcceptAndCreateNewThread() async {
-        await waitClientsConnected()
-        let newThreadInviterExpectation = expectation(description: "new thread on inviting client expectation")
-        let newThreadinviteeExpectation = expectation(description: "new thread on invitee client expectation")
-        let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
-        let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
-        let pubKey = try! await invitee.register(account: inviteeAccount)
-
-        try! await inviter.invite(publicKey: pubKey, peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
-
-        invitee.invitePublisher.sink { [unowned self] invite in
-            Task {try! await invitee.accept(inviteId: invite.id)}
-        }.store(in: &publishers)
-
-        invitee.newThreadPublisher.sink { _ in
-            newThreadinviteeExpectation.fulfill()
-        }.store(in: &publishers)
-
-        inviter.newThreadPublisher.sink { _ in
-            newThreadInviterExpectation.fulfill()
-        }.store(in: &publishers)
-
-        wait(for: [newThreadinviteeExpectation, newThreadInviterExpectation], timeout: 4)
-    }
-
-    func testMessage() async {
-        await waitClientsConnected()
-        let messageExpectation = expectation(description: "message received")
-        messageExpectation.expectedFulfillmentCount = 2
-        let message = "message"
-        let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
-        let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
-        let pubKey = try! await invitee.register(account: inviteeAccount)
-        try! await inviter.invite(publicKey: pubKey, peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
-
-        invitee.invitePublisher.sink { [unowned self] invite in
-            Task {try! await invitee.accept(inviteId: invite.id)}
-        }.store(in: &publishers)
-
-        invitee.newThreadPublisher.sink { [unowned self] thread in
-            Task {try! await invitee.message(topic: thread.topic, message: message)}
-        }.store(in: &publishers)
-
-        inviter.newThreadPublisher.sink { [unowned self] thread in
-            Task {try! await inviter.message(topic: thread.topic, message: message)}
-        }.store(in: &publishers)
-
-        inviter.messagePublisher.sink { _ in
-            messageExpectation.fulfill()
-        }.store(in: &publishers)
-
-        invitee.messagePublisher.sink { _ in
-            messageExpectation.fulfill()
-        }.store(in: &publishers)
-
-        wait(for: [messageExpectation], timeout: 35)
-    }
+//    func testAcceptAndCreateNewThread() async {
+//        await waitClientsConnected()
+//        let newThreadInviterExpectation = expectation(description: "new thread on inviting client expectation")
+//        let newThreadinviteeExpectation = expectation(description: "new thread on invitee client expectation")
+//        let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
+//        let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
+//        let pubKey = try! await invitee.register(account: inviteeAccount)
+//
+//        try! await inviter.invite(publicKey: pubKey, peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
+//
+//        invitee.invitePublisher.sink { [unowned self] invite in
+//            Task {try! await invitee.accept(inviteId: invite.id)}
+//        }.store(in: &publishers)
+//
+//        invitee.newThreadPublisher.sink { _ in
+//            newThreadinviteeExpectation.fulfill()
+//        }.store(in: &publishers)
+//
+//        inviter.newThreadPublisher.sink { _ in
+//            newThreadInviterExpectation.fulfill()
+//        }.store(in: &publishers)
+//
+//        wait(for: [newThreadinviteeExpectation, newThreadInviterExpectation], timeout: 4)
+//    }
+//
+//    func testMessage() async {
+//        await waitClientsConnected()
+//        let messageExpectation = expectation(description: "message received")
+//        messageExpectation.expectedFulfillmentCount = 2
+//        let message = "message"
+//        let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
+//        let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
+//        let pubKey = try! await invitee.register(account: inviteeAccount)
+//        try! await inviter.invite(publicKey: pubKey, peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
+//
+//        invitee.invitePublisher.sink { [unowned self] invite in
+//            Task {try! await invitee.accept(inviteId: invite.id)}
+//        }.store(in: &publishers)
+//
+//        invitee.newThreadPublisher.sink { [unowned self] thread in
+//            Task {try! await invitee.message(topic: thread.topic, message: message)}
+//        }.store(in: &publishers)
+//
+//        inviter.newThreadPublisher.sink { [unowned self] thread in
+//            Task {try! await inviter.message(topic: thread.topic, message: message)}
+//        }.store(in: &publishers)
+//
+//        inviter.messagePublisher.sink { _ in
+//            messageExpectation.fulfill()
+//        }.store(in: &publishers)
+//
+//        invitee.messagePublisher.sink { _ in
+//            messageExpectation.fulfill()
+//        }.store(in: &publishers)
+//
+//        wait(for: [messageExpectation], timeout: 35)
+//    }
 }
