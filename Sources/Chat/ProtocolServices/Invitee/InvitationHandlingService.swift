@@ -80,7 +80,7 @@ class InvitationHandlingService {
 
         let responseTopic = try getInviteResponseTopic(payload, invite)
 
-        //TODO - error not in specs yet
+        // TODO - error not in specs yet
         let error = JSONRPCErrorResponse.Error(code: 0, message: "user rejected")
         let response = JsonRpcResult.error(JSONRPCErrorResponse(id: payload.request.id, error: error))
 

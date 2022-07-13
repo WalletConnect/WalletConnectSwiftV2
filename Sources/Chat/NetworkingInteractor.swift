@@ -36,7 +36,7 @@ class NetworkingInteractor: NetworkInteracting {
         responsePublisherSubject.eraseToAnyPublisher()
     }
     private let responsePublisherSubject = PassthroughSubject<ChatResponse, Never>()
-    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> 
+    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
     init(relayClient: RelayClient,
          serializer: Serializing,

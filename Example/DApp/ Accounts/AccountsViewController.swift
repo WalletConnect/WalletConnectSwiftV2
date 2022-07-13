@@ -58,7 +58,7 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
                     self?.onDisconnect?()
                 }
             } catch {
-                print(error) 
+                print(error)
                 // show failure alert
             }
         }
