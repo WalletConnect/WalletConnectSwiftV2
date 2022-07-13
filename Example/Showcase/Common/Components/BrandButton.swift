@@ -11,7 +11,7 @@ struct BrandButton: View {
                 .foregroundColor(.w_foreground)
                 .font(.system(size: 20, weight: .bold))
         })
-        .disabled(!isEnabled.wrappedValue)
+//        .disabled(!isEnabled.wrappedValue)
         .frame(maxWidth: .infinity)
         .frame(height: 56)
         .background(

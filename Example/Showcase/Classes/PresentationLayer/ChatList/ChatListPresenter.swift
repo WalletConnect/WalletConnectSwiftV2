@@ -13,7 +13,6 @@ final class ChatListPresenter: ObservableObject {
     @Published var invites: [InviteViewModel] = []
 
     init(account: Account, interactor: ChatListInteractor, router: ChatListRouter) {
-        defer { setupInitialState() }
         self.account = account
         self.interactor = interactor
         self.router = router
@@ -95,7 +94,9 @@ private extension ChatListPresenter {
 
     func loadThreads() async {
         let threads = await interactor.getThreads()
-        self.threads = threads.sorted(by: { $0.topic < $1.topic })
+        self.threads = threads
+            .filter { $0.selfAccount == account }
+            .sorted(by: { $0.topic < $1.topic })
             .map { ThreadViewModel(thread: $0) }
     }
 

@@ -1,5 +1,5 @@
 import Chat
-import WalletConnectSign
+import WalletConnectUtils
 
 final class ChatListInteractor {
 

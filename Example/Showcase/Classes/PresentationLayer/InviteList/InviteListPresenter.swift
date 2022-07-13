@@ -30,14 +30,14 @@ final class InviteListPresenter: ObservableObject {
     func didPressAccept(invite: InviteViewModel) {
         Task(priority: .userInitiated) {
             await interactor.accept(invite: invite.invite)
-            await loadInvites(account: account)
+            await dismiss()
         }
     }
 
     func didPressReject(invite: InviteViewModel) {
         Task(priority: .userInitiated) {
             await interactor.reject(invite: invite.invite)
-            await loadInvites(account: account)
+            await dismiss()
         }
     }
 }
@@ -59,9 +59,15 @@ extension InviteListPresenter: SceneViewModel {
 
 private extension InviteListPresenter {
 
+    @MainActor
     func loadInvites(account: Account) async {
         let invites = await interactor.getInvites(account: account)
         self.invites = invites.sorted(by: { $0.publicKey < $1.publicKey })
             .map { InviteViewModel(invite: $0) }
+    }
+
+    @MainActor
+    func dismiss() {
+        router.dismiss()
     }
 }

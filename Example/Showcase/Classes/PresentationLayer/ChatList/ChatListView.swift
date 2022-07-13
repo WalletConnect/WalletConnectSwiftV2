@@ -65,6 +65,9 @@ struct ChatListView: View {
                 .foregroundColor(.red)
             }
         }
+        .onAppear {
+            presenter.setupInitialState()
+        }
     }
 }
 
