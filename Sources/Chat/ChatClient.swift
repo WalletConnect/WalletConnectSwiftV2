@@ -12,6 +12,7 @@ public class ChatClient {
     private let invitationHandlingService: InvitationHandlingService
     private let inviteService: InviteService
     private let leaveService: LeaveService
+    private let resubscriptionService: ResubscriptionService
     private let kms: KeyManagementService
     private let threadStore: Database<Thread>
     private let messagesStore: Database<Message>
@@ -52,6 +53,7 @@ public class ChatClient {
         self.invitePayloadStore = CodableStore<RequestSubscriptionPayload>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
         self.registryService = RegistryService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToInvitationPubKeyStore: topicToInvitationPubKeyStore)
         threadStore = Database<Thread>(keyValueStorage: keyValueStorage, identifier: StorageDomainIdentifiers.threads.rawValue)
+        self.resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, threadStore: threadStore, logger: logger)
         self.invitationHandlingService = InvitationHandlingService(registry: registry,
                              networkingInteractor: networkingInteractor,
                                                                    kms: kms,
