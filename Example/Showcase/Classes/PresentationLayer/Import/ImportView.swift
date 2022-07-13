@@ -12,12 +12,12 @@ struct ImportView: View {
                 .padding(.top, 24.0)
 
             TextFieldView(title: "Username", placeholder: "username.eth or 0x0…", input: $presenter.input)
-
+            
             Spacer()
 
-            BrandButton(title: "Ok, done") {
+            BrandButton(title: "Ok, done", action: {
                 presenter.didPressImport()
-            }
+            }, isEnabled: .constant(true))
             .padding(16.0)
         }
     }

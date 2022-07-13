@@ -9,7 +9,7 @@ struct InviteViewModel {
     }
 
     var title: String {
-        return invite.account.absoluteString
+        return AccountNameResolver.resolveName(invite.account)
     }
 
     var subtitle: String {

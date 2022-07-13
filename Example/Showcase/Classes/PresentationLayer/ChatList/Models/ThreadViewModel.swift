@@ -13,10 +13,10 @@ struct ThreadViewModel: Identifiable {
     }
 
     var title: String {
-        return thread.topic
+        return AccountNameResolver.resolveName(thread.peerAccount) 
     }
 
     var subtitle: String {
-        return "Chicken, Peter, you’re just a little chicken. Cheep, cheep, cheep, cheep…"
+        return thread.topic
     }
 }

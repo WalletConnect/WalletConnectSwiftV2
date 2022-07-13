@@ -1,4 +1,5 @@
 import UIKit
+import WalletConnectUtils
 
 final class WelcomeRouter {
 
@@ -12,5 +13,9 @@ final class WelcomeRouter {
 
     func presentImport() {
         ImportModule.create(app: app).wrapToNavigationController().present()
+    }
+
+    func presentChats(account: Account) {
+        ChatListModule.create(app: app, account: account).wrapToNavigationController().present()
     }
 }

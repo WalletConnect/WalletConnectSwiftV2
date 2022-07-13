@@ -1,5 +1,6 @@
 import UIKit
 import Combine
+import WalletConnectUtils
 
 final class ImportPresenter: ObservableObject {
 
@@ -16,7 +17,11 @@ final class ImportPresenter: ObservableObject {
     }
 
     func didPressImport() {
-        
+        guard let account = AccountNameResolver.resolveAccount(input)
+        else { return input = .empty }
+        interactor.save(account: account)
+        register(account: account)
+        router.presentChat(account: account)
     }
 }
 
@@ -39,5 +44,11 @@ private extension ImportPresenter {
 
     func setupInitialState() {
 
+    }
+
+    func register(account: Account) {
+        Task(priority: .high) {
+            await interactor.register(account: account)
+        }
     }
 }

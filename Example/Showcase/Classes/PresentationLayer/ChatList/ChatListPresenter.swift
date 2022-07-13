@@ -1,26 +1,39 @@
 import UIKit
 import Combine
+import WalletConnectUtils
 
 final class ChatListPresenter: ObservableObject {
 
     private let interactor: ChatListInteractor
     private let router: ChatListRouter
+    private let account: Account
     private var disposeBag = Set<AnyCancellable>()
 
     @Published var threads: [ThreadViewModel] = []
+    @Published var invites: [InviteViewModel] = []
 
-    init(interactor: ChatListInteractor, router: ChatListRouter) {
+    init(account: Account, interactor: ChatListInteractor, router: ChatListRouter) {
+        defer { setupInitialState() }
+        self.account = account
         self.interactor = interactor
         self.router = router
     }
 
-    @MainActor
-    func setupInitialState() async {
-        await loadThreads()
-
-        for await _ in interactor.threadsSubscription() {
-            await loadThreads()
+    func setupInitialState() {
+        Task(priority: .userInitiated) {
+            await setupThreads()
         }
+        Task(priority: .userInitiated) {
+            await setupInvites()
+        }
+    }
+
+    var requestsCount: String {
+        return String(invites.count)
+    }
+
+    var showRequests: Bool {
+        return !invites.isEmpty
     }
 
     func didPressThread(_ thread: ThreadViewModel) {
@@ -28,7 +41,12 @@ final class ChatListPresenter: ObservableObject {
     }
 
     func didPressChatRequests() {
-        router.presentInviteList()
+        router.presentInviteList(account: account)
+    }
+
+    func didLogoutPress() {
+        interactor.logout()
+        router.presentWelcome()
     }
 }
 
@@ -57,13 +75,37 @@ extension ChatListPresenter: SceneViewModel {
 
 private extension ChatListPresenter {
 
+    @MainActor
+    func setupThreads() async {
+        await loadThreads()
+
+        for await _ in interactor.threadsSubscription() {
+            await loadThreads()
+        }
+    }
+
+    @MainActor
+    func setupInvites() async {
+        await loadInvites()
+
+        for await _ in interactor.invitesSubscription() {
+            await loadInvites()
+        }
+    }
+
     func loadThreads() async {
         let threads = await interactor.getThreads()
         self.threads = threads.sorted(by: { $0.topic < $1.topic })
             .map { ThreadViewModel(thread: $0) }
     }
 
+    func loadInvites() async {
+        let invites = await interactor.getInvites(account: account)
+        self.invites = invites.sorted(by: { $0.publicKey < $1.publicKey })
+            .map { InviteViewModel(invite: $0) }
+    }
+
     @objc func presentInvite() {
-        router.presentInvite()
+        router.presentInvite(account: account)
     }
 }

@@ -8,8 +8,6 @@ typealias Stream<T> = AsyncPublisher<AnyPublisher<T, Never>>
 
 final class ChatService {
 
-    static let selfAccount = Account("eip155:1:0xab16ad96d39ec26a11e2c2b3d8f8b8942d5bfcdb")!
-
     private let client: ChatClient
 
     init(client: ChatClient) {

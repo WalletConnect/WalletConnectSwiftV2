@@ -31,9 +31,9 @@ struct WelcomeView: View {
                         .foregroundColor(.w_foreground)
                         .multilineTextAlignment(.center)
 
-                    BrandButton(title: "Import account") {
+                    BrandButton(title: presenter.buttonTitle, action: {
                         presenter.didPressImport()
-                    }
+                    }, isEnabled: $presenter.connected)
 
                     Text("By connecting your wallet you agree with our\nTerms of Service")
                         .font(.footnote)
@@ -47,6 +47,9 @@ struct WelcomeView: View {
                 withAnimation(.spring()) {
                     offset = -(UIScreen.main.bounds.height / 4)
                 }
+            }
+            .task {
+                await presenter.setupInitialState()
             }
         }
     }

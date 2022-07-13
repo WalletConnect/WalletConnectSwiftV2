@@ -116,6 +116,10 @@
 		A5C2021D287E1FD8007E3188 /* ImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20218287E1FD8007E3188 /* ImportView.swift */; };
 		A5C20221287EA5B8007E3188 /* TextFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20220287EA5B8007E3188 /* TextFieldView.swift */; };
 		A5C20223287EA7E2007E3188 /* BrandButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20222287EA7E2007E3188 /* BrandButton.swift */; };
+		A5C20226287EB099007E3188 /* AccountNameResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20225287EB099007E3188 /* AccountNameResolver.swift */; };
+		A5C20229287EB34C007E3188 /* AccountStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20228287EB34C007E3188 /* AccountStorage.swift */; };
+		A5C2022B287EB89A007E3188 /* WelcomeInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C2022A287EB89A007E3188 /* WelcomeInteractor.swift */; };
+		A5C2022D287EC3F0007E3188 /* RegisterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C2022C287EC3F0007E3188 /* RegisterService.swift */; };
 		A5D85226286333D500DAF5C3 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5D85225286333D500DAF5C3 /* Starscream */; };
 		A5D85228286333E300DAF5C3 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5D85227286333E300DAF5C3 /* Starscream */; };
 		A5E03DF52864651200888481 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5E03DF42864651200888481 /* Starscream */; };
@@ -269,6 +273,10 @@
 		A5C20218287E1FD8007E3188 /* ImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportView.swift; sourceTree = "<group>"; };
 		A5C20220287EA5B8007E3188 /* TextFieldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldView.swift; sourceTree = "<group>"; };
 		A5C20222287EA7E2007E3188 /* BrandButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandButton.swift; sourceTree = "<group>"; };
+		A5C20225287EB099007E3188 /* AccountNameResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountNameResolver.swift; sourceTree = "<group>"; };
+		A5C20228287EB34C007E3188 /* AccountStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountStorage.swift; sourceTree = "<group>"; };
+		A5C2022A287EB89A007E3188 /* WelcomeInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeInteractor.swift; sourceTree = "<group>"; };
+		A5C2022C287EC3F0007E3188 /* RegisterService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterService.swift; sourceTree = "<group>"; };
 		A5E03DED286464DB00888481 /* IntegrationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IntegrationTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5E03DF8286465C700888481 /* ClientDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientDelegate.swift; sourceTree = "<group>"; };
 		A5E03DF9286465C700888481 /* SignClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignClientTests.swift; sourceTree = "<group>"; };
@@ -502,6 +510,7 @@
 		A5629AA42876A19D00094373 /* DomainLayer */ = {
 			isa = PBXGroup;
 			children = (
+				A5C20227287EB342007E3188 /* AccountStorage */,
 				A5629AEE2877F72B00094373 /* SocketFactory */,
 				A5629AEB2877F69C00094373 /* Chat */,
 			);
@@ -567,6 +576,8 @@
 			children = (
 				A5629AA82876A23100094373 /* ChatService.swift */,
 				A5629AEC2877F6A600094373 /* ChatFactory.swift */,
+				A5C20225287EB099007E3188 /* AccountNameResolver.swift */,
+				A5C2022C287EC3F0007E3188 /* RegisterService.swift */,
 			);
 			path = Chat;
 			sourceTree = "<group>";
@@ -780,6 +791,7 @@
 			children = (
 				A5C20206287D9DEE007E3188 /* WelcomeModule.swift */,
 				A5C20207287D9DEE007E3188 /* WelcomePresenter.swift */,
+				A5C2022A287EB89A007E3188 /* WelcomeInteractor.swift */,
 				A5C20208287D9DEE007E3188 /* WelcomeRouter.swift */,
 				A5C2020A287D9DEE007E3188 /* WelcomeView.swift */,
 			);
@@ -806,6 +818,14 @@
 				A5C20222287EA7E2007E3188 /* BrandButton.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		A5C20227287EB342007E3188 /* AccountStorage */ = {
+			isa = PBXGroup;
+			children = (
+				A5C20228287EB34C007E3188 /* AccountStorage.swift */,
+			);
+			path = AccountStorage;
 			sourceTree = "<group>";
 		};
 		A5E03DEE286464DB00888481 /* IntegrationTests */ = {
@@ -1136,6 +1156,7 @@
 				A5C20223287EA7E2007E3188 /* BrandButton.swift in Sources */,
 				A5629ADF2876CC6E00094373 /* InviteListPresenter.swift in Sources */,
 				A58E7D392872D55F0082D443 /* ChatModule.swift in Sources */,
+				A5C2022D287EC3F0007E3188 /* RegisterService.swift in Sources */,
 				A58E7D222872A57B0082D443 /* AppearanceConfigurator.swift in Sources */,
 				A58E7D212872A57B0082D443 /* MigrationConfigurator.swift in Sources */,
 				A5629ABE2876CBC000094373 /* ChatListPresenter.swift in Sources */,
@@ -1166,12 +1187,14 @@
 				A5629AE12876CC6E00094373 /* InviteListInteractor.swift in Sources */,
 				A58E7CED28729F550082D443 /* SceneDelegate.swift in Sources */,
 				A5C2020F287D9DEE007E3188 /* WelcomeView.swift in Sources */,
+				A5C20226287EB099007E3188 /* AccountNameResolver.swift in Sources */,
 				A5C2020D287D9DEE007E3188 /* WelcomeRouter.swift in Sources */,
 				A578FA372873D8EE00AA7720 /* UIColor.swift in Sources */,
 				A5C2021D287E1FD8007E3188 /* ImportView.swift in Sources */,
 				A5C2021A287E1FD8007E3188 /* ImportPresenter.swift in Sources */,
 				A5629AE828772A0100094373 /* InviteViewModel.swift in Sources */,
 				A5629AA92876A23100094373 /* ChatService.swift in Sources */,
+				A5C20229287EB34C007E3188 /* AccountStorage.swift in Sources */,
 				A5629AC02876CBC000094373 /* ChatListInteractor.swift in Sources */,
 				A5629AE22876CC6E00094373 /* InviteListView.swift in Sources */,
 				A578FA3D2874002400AA7720 /* View.swift in Sources */,
@@ -1179,6 +1202,7 @@
 				A5629AF02877F73000094373 /* SocketFactory.swift in Sources */,
 				A5629AED2877F6A600094373 /* ChatFactory.swift in Sources */,
 				A5C20221287EA5B8007E3188 /* TextFieldView.swift in Sources */,
+				A5C2022B287EB89A007E3188 /* WelcomeInteractor.swift in Sources */,
 				A5C2020C287D9DEE007E3188 /* WelcomePresenter.swift in Sources */,
 				A58E7D1D2872A57B0082D443 /* Configurator.swift in Sources */,
 				A58E7D482872EF610082D443 /* MessageViewModel.swift in Sources */,
