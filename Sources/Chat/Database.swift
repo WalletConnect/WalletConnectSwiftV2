@@ -1,21 +1,28 @@
 import Foundation
+import WalletConnectUtils
 
-public class Database<Element> {
+class Database<Element> {
 
     private var array = [Element]()
+    private let keyValueStorage: KeyValueStorage
+    private let identifier: String
 
-    public init() { }
-
-    public convenience init(_ array: [Element]) {
-        self.init()
-        self.array = array
+    init(keyValueStorage: KeyValueStorage,
+         identifier: String) {
+        self.keyValueStorage = keyValueStorage
+        self.identifier = identifier
+        array = keyValueStorage.object(forKey: identifier) as? [Element] ?? [Element]()
     }
 
-    public func filter(_ isIncluded: (Element) -> Bool) async -> [Element]? {
+    deinit {
+        keyValueStorage.set(array, forKey: identifier)
+    }
+
+    func filter(_ isIncluded: (Element) -> Bool) async -> [Element]? {
         return Array(self.array.filter(isIncluded))
     }
 
-    public func getAll() async -> [Element] {
+    func getAll() async -> [Element] {
         array
     }
 
