@@ -27,17 +27,9 @@ final class InvitePresenter: ObservableObject {
         self.router = router
     }
 
-    var isClearVisible: Bool {
-        return input.count > 0
-    }
-
     @MainActor
     func setupInitialState() async {
 
-    }
-
-    func didPressClear() {
-        input = .empty
     }
 }
 

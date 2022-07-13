@@ -27,6 +27,7 @@ private extension ApplicationConfigurator {
                 }
 
                 print("Socket connected")
+
                 try! await app.chatService.register(account: ChatService.selfAccount)
             }
         }

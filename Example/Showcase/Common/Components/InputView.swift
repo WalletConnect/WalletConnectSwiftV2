@@ -9,6 +9,7 @@ struct InputView: View {
     var body: some View {
         ZStack {
             TextField(title, text: text)
+                .disableAutocorrection(true)
                 .frame(minHeight: 44.0)
                 .padding(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                 .background(

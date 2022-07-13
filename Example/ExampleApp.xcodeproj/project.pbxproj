@@ -114,6 +114,8 @@
 		A5C2021B287E1FD8007E3188 /* ImportRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20216287E1FD8007E3188 /* ImportRouter.swift */; };
 		A5C2021C287E1FD8007E3188 /* ImportInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20217287E1FD8007E3188 /* ImportInteractor.swift */; };
 		A5C2021D287E1FD8007E3188 /* ImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20218287E1FD8007E3188 /* ImportView.swift */; };
+		A5C20221287EA5B8007E3188 /* TextFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20220287EA5B8007E3188 /* TextFieldView.swift */; };
+		A5C20223287EA7E2007E3188 /* BrandButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20222287EA7E2007E3188 /* BrandButton.swift */; };
 		A5D85226286333D500DAF5C3 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5D85225286333D500DAF5C3 /* Starscream */; };
 		A5D85228286333E300DAF5C3 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5D85227286333E300DAF5C3 /* Starscream */; };
 		A5E03DF52864651200888481 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5E03DF42864651200888481 /* Starscream */; };
@@ -265,6 +267,8 @@
 		A5C20216287E1FD8007E3188 /* ImportRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportRouter.swift; sourceTree = "<group>"; };
 		A5C20217287E1FD8007E3188 /* ImportInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportInteractor.swift; sourceTree = "<group>"; };
 		A5C20218287E1FD8007E3188 /* ImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportView.swift; sourceTree = "<group>"; };
+		A5C20220287EA5B8007E3188 /* TextFieldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldView.swift; sourceTree = "<group>"; };
+		A5C20222287EA7E2007E3188 /* BrandButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandButton.swift; sourceTree = "<group>"; };
 		A5E03DED286464DB00888481 /* IntegrationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IntegrationTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5E03DF8286465C700888481 /* ClientDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientDelegate.swift; sourceTree = "<group>"; };
 		A5E03DF9286465C700888481 /* SignClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignClientTests.swift; sourceTree = "<group>"; };
@@ -624,6 +628,7 @@
 		A58E7CFD2872A0F80082D443 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				A5C2021F287EA5AF007E3188 /* Components */,
 				A578FA332873049400AA7720 /* Style */,
 				A58E7D012872A1430082D443 /* Extensions */,
 				A58E7CFE2872A1050082D443 /* VIPER */,
@@ -734,7 +739,6 @@
 			children = (
 				A58E7D422872EE320082D443 /* MessageView.swift */,
 				A58E7D442872EE570082D443 /* ContentMessageView.swift */,
-				A578FA312873036400AA7720 /* InputView.swift */,
 				A578FA382873FCE000AA7720 /* ChatScrollView.swift */,
 			);
 			path = Views;
@@ -792,6 +796,16 @@
 				A5C20218287E1FD8007E3188 /* ImportView.swift */,
 			);
 			path = Import;
+			sourceTree = "<group>";
+		};
+		A5C2021F287EA5AF007E3188 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				A578FA312873036400AA7720 /* InputView.swift */,
+				A5C20220287EA5B8007E3188 /* TextFieldView.swift */,
+				A5C20222287EA7E2007E3188 /* BrandButton.swift */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 		A5E03DEE286464DB00888481 /* IntegrationTests */ = {
@@ -1119,6 +1133,7 @@
 				A58E7D3B2872D55F0082D443 /* ChatInteractor.swift in Sources */,
 				A58E7D1F2872A57B0082D443 /* ApplicationConfigurator.swift in Sources */,
 				A58E7D452872EE570082D443 /* ContentMessageView.swift in Sources */,
+				A5C20223287EA7E2007E3188 /* BrandButton.swift in Sources */,
 				A5629ADF2876CC6E00094373 /* InviteListPresenter.swift in Sources */,
 				A58E7D392872D55F0082D443 /* ChatModule.swift in Sources */,
 				A58E7D222872A57B0082D443 /* AppearanceConfigurator.swift in Sources */,
@@ -1163,6 +1178,7 @@
 				A5629AD72876CC5700094373 /* InviteView.swift in Sources */,
 				A5629AF02877F73000094373 /* SocketFactory.swift in Sources */,
 				A5629AED2877F6A600094373 /* ChatFactory.swift in Sources */,
+				A5C20221287EA5B8007E3188 /* TextFieldView.swift in Sources */,
 				A5C2020C287D9DEE007E3188 /* WelcomePresenter.swift in Sources */,
 				A58E7D1D2872A57B0082D443 /* Configurator.swift in Sources */,
 				A58E7D482872EF610082D443 /* MessageViewModel.swift in Sources */,

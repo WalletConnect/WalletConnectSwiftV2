@@ -13,7 +13,7 @@ extension UIViewController {
     }
 
     func present() {
-        currentWindow.rootViewController = self
+        UIApplication.currentWindow.rootViewController = self
     }
 
     func push(from viewController: UIViewController) {
@@ -43,9 +43,9 @@ extension UIViewController {
     }
 }
 
-private extension UIViewController {
+extension UIApplication {
 
-    var currentWindow: UIWindow {
+    static var currentWindow: UIWindow {
         return UIApplication.shared.connectedScenes
             .compactMap { $0.delegate as? SceneDelegate }
             .first!.window!

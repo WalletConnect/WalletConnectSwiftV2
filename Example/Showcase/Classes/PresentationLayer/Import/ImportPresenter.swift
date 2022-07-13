@@ -7,10 +7,16 @@ final class ImportPresenter: ObservableObject {
     private let router: ImportRouter
     private var disposeBag = Set<AnyCancellable>()
 
+    @Published var input: String = .empty
+
     init(interactor: ImportInteractor, router: ImportRouter) {
         defer { setupInitialState() }
         self.interactor = interactor
         self.router = router
+    }
+
+    func didPressImport() {
+        
     }
 }
 

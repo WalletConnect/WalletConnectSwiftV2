@@ -28,20 +28,12 @@ struct WelcomeView: View {
 
                     Text("Direct messaging between users, using their web3 wallets.")
                         .font(.title2)
-                        .foregroundColor(.white)
+                        .foregroundColor(.w_foreground)
                         .multilineTextAlignment(.center)
 
-                    Button(action: { presenter.didPressImport() }, label: {
-                        Text("Import account")
-                            .foregroundColor(.white)
-                            .font(.system(size: 20, weight: .bold))
-                    })
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 56)
-                    .background(
-                        Capsule()
-                            .foregroundColor(.w_greenForground)
-                    )
+                    BrandButton(title: "Import account") {
+                        presenter.didPressImport()
+                    }
 
                     Text("By connecting your wallet you agree with our\nTerms of Service")
                         .font(.footnote)
