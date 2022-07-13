@@ -28,14 +28,16 @@ final class InviteListPresenter: ObservableObject {
     }
 
     func didPressAccept(invite: InviteViewModel) {
-        Task {
+        Task(priority: .userInitiated) {
             await interactor.accept(invite: invite.invite)
+            await loadInvites(account: account)
         }
     }
 
     func didPressReject(invite: InviteViewModel) {
-        Task {
+        Task(priority: .userInitiated) {
             await interactor.reject(invite: invite.invite)
+            await loadInvites(account: account)
         }
     }
 }
