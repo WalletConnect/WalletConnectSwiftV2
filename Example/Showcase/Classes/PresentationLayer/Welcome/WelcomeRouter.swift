@@ -11,10 +11,14 @@ final class WelcomeRouter {
     }
 
     func presentImport() {
-        ImportModule.create(app: app).wrapToNavigationController().present()
+        ImportModule.create(app: app)
+            .wrapToNavigationController()
+            .present()
     }
 
     func presentChats(account: Account) {
-        ChatListModule.create(app: app, account: account).wrapToNavigationController().present()
+        ChatListModule.create(app: app, account: account)
+            .wrapToNavigationController()
+            .present()
     }
 }

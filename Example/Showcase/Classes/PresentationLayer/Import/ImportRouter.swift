@@ -11,6 +11,8 @@ final class ImportRouter {
     }
 
     func presentChat(account: Account) {
-        ChatListModule.create(app: app, account: account).push(from: viewController)
+        ChatListModule.create(app: app, account: account)
+            .wrapToNavigationController()
+            .present()
     }
 }
