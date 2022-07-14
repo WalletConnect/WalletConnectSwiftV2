@@ -17,7 +17,7 @@ struct ImportView: View {
 
             BrandButton(title: "Ok, done", action: {
                 presenter.didPressImport()
-            }, isEnabled: .constant(true))
+            })
             .padding(16.0)
         }
     }

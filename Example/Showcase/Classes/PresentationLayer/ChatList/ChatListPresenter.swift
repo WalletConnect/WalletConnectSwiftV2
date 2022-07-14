@@ -46,6 +46,10 @@ final class ChatListPresenter: ObservableObject {
         interactor.logout()
         router.presentWelcome()
     }
+
+    func didPressNewChat() {
+        presentInvite()
+    }
 }
 
 // MARK: SceneViewModel

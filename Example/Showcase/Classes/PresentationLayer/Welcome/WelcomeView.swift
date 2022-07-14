@@ -33,7 +33,7 @@ struct WelcomeView: View {
 
                     BrandButton(title: presenter.buttonTitle, action: {
                         presenter.didPressImport()
-                    }, isEnabled: $presenter.connected)
+                    })
 
                     Text("By connecting your wallet you agree with our\nTerms of Service")
                         .font(.footnote)
