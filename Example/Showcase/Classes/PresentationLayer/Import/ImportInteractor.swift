@@ -1,4 +1,3 @@
-import WalletConnectUtils
 
 final class ImportInteractor {
     private let registerService: RegisterService

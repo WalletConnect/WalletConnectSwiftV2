@@ -1,5 +1,4 @@
 import UIKit
-import WalletConnectUtils
 
 final class ImportRouter {
 

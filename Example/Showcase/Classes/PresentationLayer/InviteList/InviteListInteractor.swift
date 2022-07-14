@@ -1,5 +1,4 @@
 import Chat
-import WalletConnectUtils
 
 final class InviteListInteractor {
     private let chatService: ChatService

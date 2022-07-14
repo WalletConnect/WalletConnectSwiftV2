@@ -1,5 +1,4 @@
 import SwiftUI
-import WalletConnectUtils
 
 final class InviteListModule {
 
