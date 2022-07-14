@@ -2,8 +2,14 @@ import Foundation
 @testable import Chat
 import Combine
 import WalletConnectUtils
+import WalletConnectRelay
 
 class NetworkingInteractorMock: NetworkInteracting {
+    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
+        socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
+    }
+    let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
+
 
     let responsePublisherSubject = PassthroughSubject<ChatResponse, Never>()
     let requestPublisherSubject = PassthroughSubject<RequestSubscriptionPayload, Never>()

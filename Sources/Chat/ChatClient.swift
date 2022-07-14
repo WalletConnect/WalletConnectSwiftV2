@@ -40,7 +40,7 @@ public class ChatClient {
          kms: KeyManagementService,
                 logger: ConsoleLogging = ConsoleLogger(loggingLevel: .debug),
          keyValueStorage: KeyValueStorage) {
-        let topicToInvitationPubKeyStore = CodableStore<String>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.topicToInvitationPubKey.rawValue)
+        let topicToRegistryRecordStore = CodableStore<RegistryRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.topicToInvitationPubKey.rawValue)
         self.registry = registry
         self.kms = kms
         let serialiser = Serializer(kms: kms)
@@ -51,14 +51,14 @@ public class ChatClient {
             logger: logger,
             jsonRpcHistory: jsonRpcHistory)
         self.invitePayloadStore = CodableStore<RequestSubscriptionPayload>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
-        self.registryService = RegistryService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToInvitationPubKeyStore: topicToInvitationPubKeyStore)
+        self.registryService = RegistryService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToRegistryRecordStore: topicToRegistryRecordStore)
         threadStore = Database<Thread>(keyValueStorage: keyValueStorage, identifier: StorageDomainIdentifiers.threads.rawValue)
         self.resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, threadStore: threadStore, logger: logger)
         self.invitationHandlingService = InvitationHandlingService(registry: registry,
                              networkingInteractor: networkingInteractor,
                                                                    kms: kms,
                                                                    logger: logger,
-                                                                   topicToInvitationPubKeyStore: topicToInvitationPubKeyStore,
+                                                                   topicToRegistryRecordStore: topicToRegistryRecordStore,
                                                                    invitePayloadStore: invitePayloadStore,
                                                                    threadsStore: threadStore)
         self.inviteService = InviteService(
