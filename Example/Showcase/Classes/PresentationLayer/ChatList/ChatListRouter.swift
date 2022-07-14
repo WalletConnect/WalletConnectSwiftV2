@@ -1,5 +1,6 @@
 import UIKit
 import Chat
+import WalletConnectUtils
 
 final class ChatListRouter {
 
@@ -11,17 +12,21 @@ final class ChatListRouter {
         self.app = app
     }
 
-    func presentInvite() {
-        InviteModule.create(app: app)
+    func presentInvite(account: Account) {
+        InviteModule.create(app: app, account: account)
             .wrapToNavigationController()
             .present(from: viewController)
     }
 
-    func presentInviteList() {
-        InviteListModule.create(app: app).push(from: viewController)
+    func presentInviteList(account: Account) {
+        InviteListModule.create(app: app, account: account).push(from: viewController)
     }
 
     func presentChat(thread: Chat.Thread) {
         ChatModule.create(thread: thread, app: app).push(from: viewController)
+    }
+
+    func presentWelcome() {
+        WelcomeModule.create(app: app).present()
     }
 }

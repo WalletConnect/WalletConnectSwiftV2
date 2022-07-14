@@ -1,10 +1,12 @@
 import UIKit
 import Combine
+import WalletConnectUtils
 
 final class InvitePresenter: ObservableObject {
 
     private let interactor: InviteInteractor
     private let router: InviteRouter
+    private let account: Account
     private var disposeBag = Set<AnyCancellable>()
 
     @Published var input: String = .empty {
@@ -22,22 +24,15 @@ final class InvitePresenter: ObservableObject {
         return item
     }()
 
-    init(interactor: InviteInteractor, router: InviteRouter) {
+    init(interactor: InviteInteractor, router: InviteRouter, account: Account) {
         self.interactor = interactor
         self.router = router
-    }
-
-    var isClearVisible: Bool {
-        return input.count > 0
+        self.account = account
     }
 
     @MainActor
     func setupInitialState() async {
 
-    }
-
-    func didPressClear() {
-        input = .empty
     }
 }
 
@@ -60,8 +55,9 @@ private extension InvitePresenter {
 
     @MainActor
     @objc func invite() {
+        guard let peerAccount = AccountNameResolver.resolveAccount(input) else { return }
         Task(priority: .userInitiated) {
-            await interactor.invite(account: input, message: "Hi, welcome!")
+            await interactor.invite(peerAccount: peerAccount, message: "Welcome to WalletConnect Chat!", selfAccount: account)
             router.dismiss()
         }
     }

@@ -1,38 +1,43 @@
 import UIKit
 import Combine
 import Chat
+import WalletConnectUtils
 
 final class InviteListPresenter: ObservableObject {
 
     private let interactor: InviteListInteractor
     private let router: InviteListRouter
+    private let account: Account
     private var disposeBag = Set<AnyCancellable>()
 
     @Published var invites: [InviteViewModel] = []
 
-    init(interactor: InviteListInteractor, router: InviteListRouter) {
+    init(interactor: InviteListInteractor, router: InviteListRouter, account: Account) {
         self.interactor = interactor
         self.router = router
+        self.account = account
     }
 
     @MainActor
     func setupInitialState() async {
-        await loadInvites()
+        await loadInvites(account: account)
 
         for await _ in interactor.invitesSubscription() {
-            await loadInvites()
+            await loadInvites(account: account)
         }
     }
 
     func didPressAccept(invite: InviteViewModel) {
-        Task {
+        Task(priority: .userInitiated) {
             await interactor.accept(invite: invite.invite)
+            await dismiss()
         }
     }
 
     func didPressReject(invite: InviteViewModel) {
-        Task {
+        Task(priority: .userInitiated) {
             await interactor.reject(invite: invite.invite)
+            await dismiss()
         }
     }
 }
@@ -54,9 +59,15 @@ extension InviteListPresenter: SceneViewModel {
 
 private extension InviteListPresenter {
 
-    func loadInvites() async {
-        let invites = await interactor.getInvites()
+    @MainActor
+    func loadInvites(account: Account) async {
+        let invites = await interactor.getInvites(account: account)
         self.invites = invites.sorted(by: { $0.publicKey < $1.publicKey })
             .map { InviteViewModel(invite: $0) }
+    }
+
+    @MainActor
+    func dismiss() {
+        router.dismiss()
     }
 }

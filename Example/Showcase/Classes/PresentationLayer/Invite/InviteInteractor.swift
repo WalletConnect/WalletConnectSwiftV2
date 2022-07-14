@@ -7,9 +7,8 @@ final class InviteInteractor {
         self.chatService = chatService
     }
 
-    func invite(account: String, message: String) async {
-        let peerAccount = Account(account)!
+    func invite(peerAccount: Account, message: String, selfAccount: Account) async {
         let publicKey = try! await chatService.resolve(account: peerAccount)
-        try! await chatService.invite(peerPubkey: publicKey, peerAccount: peerAccount, message: message, selfAccount: ChatService.selfAccount)
+        try! await chatService.invite(peerPubkey: publicKey, peerAccount: peerAccount, message: message, selfAccount: selfAccount)
     }
 }

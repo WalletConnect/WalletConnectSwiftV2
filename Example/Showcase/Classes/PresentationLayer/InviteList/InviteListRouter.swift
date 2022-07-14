@@ -9,4 +9,8 @@ final class InviteListRouter {
     init(app: Application) {
         self.app = app
     }
+
+    func dismiss() {
+        viewController.pop()
+    }
 }

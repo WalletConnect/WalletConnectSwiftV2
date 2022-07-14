@@ -105,6 +105,21 @@
 		A5A4FC5C283D1F6700BBEC1E /* SessionDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC5B283D1F6700BBEC1E /* SessionDetailViewController.swift */; };
 		A5A4FC5E283D23CA00BBEC1E /* Array.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC5D283D23CA00BBEC1E /* Array.swift */; };
 		A5A4FC772840C12C00BBEC1E /* RegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC762840C12C00BBEC1E /* RegressionTests.swift */; };
+		A5C2020B287D9DEE007E3188 /* WelcomeModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20206287D9DEE007E3188 /* WelcomeModule.swift */; };
+		A5C2020C287D9DEE007E3188 /* WelcomePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20207287D9DEE007E3188 /* WelcomePresenter.swift */; };
+		A5C2020D287D9DEE007E3188 /* WelcomeRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20208287D9DEE007E3188 /* WelcomeRouter.swift */; };
+		A5C2020F287D9DEE007E3188 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C2020A287D9DEE007E3188 /* WelcomeView.swift */; };
+		A5C20219287E1FD8007E3188 /* ImportModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20214287E1FD8007E3188 /* ImportModule.swift */; };
+		A5C2021A287E1FD8007E3188 /* ImportPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20215287E1FD8007E3188 /* ImportPresenter.swift */; };
+		A5C2021B287E1FD8007E3188 /* ImportRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20216287E1FD8007E3188 /* ImportRouter.swift */; };
+		A5C2021C287E1FD8007E3188 /* ImportInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20217287E1FD8007E3188 /* ImportInteractor.swift */; };
+		A5C2021D287E1FD8007E3188 /* ImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20218287E1FD8007E3188 /* ImportView.swift */; };
+		A5C20221287EA5B8007E3188 /* TextFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20220287EA5B8007E3188 /* TextFieldView.swift */; };
+		A5C20223287EA7E2007E3188 /* BrandButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20222287EA7E2007E3188 /* BrandButton.swift */; };
+		A5C20226287EB099007E3188 /* AccountNameResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20225287EB099007E3188 /* AccountNameResolver.swift */; };
+		A5C20229287EB34C007E3188 /* AccountStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20228287EB34C007E3188 /* AccountStorage.swift */; };
+		A5C2022B287EB89A007E3188 /* WelcomeInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C2022A287EB89A007E3188 /* WelcomeInteractor.swift */; };
+		A5C2022D287EC3F0007E3188 /* RegisterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C2022C287EC3F0007E3188 /* RegisterService.swift */; };
 		A5D85226286333D500DAF5C3 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5D85225286333D500DAF5C3 /* Starscream */; };
 		A5D85228286333E300DAF5C3 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5D85227286333E300DAF5C3 /* Starscream */; };
 		A5E03DF52864651200888481 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5E03DF42864651200888481 /* Starscream */; };
@@ -247,6 +262,21 @@
 		A5A4FC5D283D23CA00BBEC1E /* Array.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Array.swift; sourceTree = "<group>"; };
 		A5A4FC722840C12C00BBEC1E /* UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5A4FC762840C12C00BBEC1E /* RegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegressionTests.swift; sourceTree = "<group>"; };
+		A5C20206287D9DEE007E3188 /* WelcomeModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeModule.swift; sourceTree = "<group>"; };
+		A5C20207287D9DEE007E3188 /* WelcomePresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomePresenter.swift; sourceTree = "<group>"; };
+		A5C20208287D9DEE007E3188 /* WelcomeRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeRouter.swift; sourceTree = "<group>"; };
+		A5C2020A287D9DEE007E3188 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
+		A5C20214287E1FD8007E3188 /* ImportModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportModule.swift; sourceTree = "<group>"; };
+		A5C20215287E1FD8007E3188 /* ImportPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportPresenter.swift; sourceTree = "<group>"; };
+		A5C20216287E1FD8007E3188 /* ImportRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportRouter.swift; sourceTree = "<group>"; };
+		A5C20217287E1FD8007E3188 /* ImportInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportInteractor.swift; sourceTree = "<group>"; };
+		A5C20218287E1FD8007E3188 /* ImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportView.swift; sourceTree = "<group>"; };
+		A5C20220287EA5B8007E3188 /* TextFieldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldView.swift; sourceTree = "<group>"; };
+		A5C20222287EA7E2007E3188 /* BrandButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandButton.swift; sourceTree = "<group>"; };
+		A5C20225287EB099007E3188 /* AccountNameResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountNameResolver.swift; sourceTree = "<group>"; };
+		A5C20228287EB34C007E3188 /* AccountStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountStorage.swift; sourceTree = "<group>"; };
+		A5C2022A287EB89A007E3188 /* WelcomeInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeInteractor.swift; sourceTree = "<group>"; };
+		A5C2022C287EC3F0007E3188 /* RegisterService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterService.swift; sourceTree = "<group>"; };
 		A5E03DED286464DB00888481 /* IntegrationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IntegrationTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5E03DF8286465C700888481 /* ClientDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientDelegate.swift; sourceTree = "<group>"; };
 		A5E03DF9286465C700888481 /* SignClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignClientTests.swift; sourceTree = "<group>"; };
@@ -480,6 +510,7 @@
 		A5629AA42876A19D00094373 /* DomainLayer */ = {
 			isa = PBXGroup;
 			children = (
+				A5C20227287EB342007E3188 /* AccountStorage */,
 				A5629AEE2877F72B00094373 /* SocketFactory */,
 				A5629AEB2877F69C00094373 /* Chat */,
 			);
@@ -545,6 +576,8 @@
 			children = (
 				A5629AA82876A23100094373 /* ChatService.swift */,
 				A5629AEC2877F6A600094373 /* ChatFactory.swift */,
+				A5C20225287EB099007E3188 /* AccountNameResolver.swift */,
+				A5C2022C287EC3F0007E3188 /* RegisterService.swift */,
 			);
 			path = Chat;
 			sourceTree = "<group>";
@@ -606,6 +639,7 @@
 		A58E7CFD2872A0F80082D443 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				A5C2021F287EA5AF007E3188 /* Components */,
 				A578FA332873049400AA7720 /* Style */,
 				A58E7D012872A1430082D443 /* Extensions */,
 				A58E7CFE2872A1050082D443 /* VIPER */,
@@ -643,6 +677,8 @@
 		A58E7D062872A4390082D443 /* PresentationLayer */ = {
 			isa = PBXGroup;
 			children = (
+				A5C20213287E1FC8007E3188 /* Import */,
+				A5C20205287D9DB9007E3188 /* Welcome */,
 				A5629AD82876CC5B00094373 /* InviteList */,
 				A5629ACD2876CC4A00094373 /* Invite */,
 				A5629AB72876CBA700094373 /* ChatList */,
@@ -714,7 +750,6 @@
 			children = (
 				A58E7D422872EE320082D443 /* MessageView.swift */,
 				A58E7D442872EE570082D443 /* ContentMessageView.swift */,
-				A578FA312873036400AA7720 /* InputView.swift */,
 				A578FA382873FCE000AA7720 /* ChatScrollView.swift */,
 			);
 			path = Views;
@@ -749,6 +784,48 @@
 				A5E22D1B2840C85D00E36487 /* App.swift */,
 			);
 			path = Engine;
+			sourceTree = "<group>";
+		};
+		A5C20205287D9DB9007E3188 /* Welcome */ = {
+			isa = PBXGroup;
+			children = (
+				A5C20206287D9DEE007E3188 /* WelcomeModule.swift */,
+				A5C20207287D9DEE007E3188 /* WelcomePresenter.swift */,
+				A5C2022A287EB89A007E3188 /* WelcomeInteractor.swift */,
+				A5C20208287D9DEE007E3188 /* WelcomeRouter.swift */,
+				A5C2020A287D9DEE007E3188 /* WelcomeView.swift */,
+			);
+			path = Welcome;
+			sourceTree = "<group>";
+		};
+		A5C20213287E1FC8007E3188 /* Import */ = {
+			isa = PBXGroup;
+			children = (
+				A5C20214287E1FD8007E3188 /* ImportModule.swift */,
+				A5C20215287E1FD8007E3188 /* ImportPresenter.swift */,
+				A5C20216287E1FD8007E3188 /* ImportRouter.swift */,
+				A5C20217287E1FD8007E3188 /* ImportInteractor.swift */,
+				A5C20218287E1FD8007E3188 /* ImportView.swift */,
+			);
+			path = Import;
+			sourceTree = "<group>";
+		};
+		A5C2021F287EA5AF007E3188 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				A578FA312873036400AA7720 /* InputView.swift */,
+				A5C20220287EA5B8007E3188 /* TextFieldView.swift */,
+				A5C20222287EA7E2007E3188 /* BrandButton.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		A5C20227287EB342007E3188 /* AccountStorage */ = {
+			isa = PBXGroup;
+			children = (
+				A5C20228287EB34C007E3188 /* AccountStorage.swift */,
+			);
+			path = AccountStorage;
 			sourceTree = "<group>";
 		};
 		A5E03DEE286464DB00888481 /* IntegrationTests */ = {
@@ -1076,8 +1153,10 @@
 				A58E7D3B2872D55F0082D443 /* ChatInteractor.swift in Sources */,
 				A58E7D1F2872A57B0082D443 /* ApplicationConfigurator.swift in Sources */,
 				A58E7D452872EE570082D443 /* ContentMessageView.swift in Sources */,
+				A5C20223287EA7E2007E3188 /* BrandButton.swift in Sources */,
 				A5629ADF2876CC6E00094373 /* InviteListPresenter.swift in Sources */,
 				A58E7D392872D55F0082D443 /* ChatModule.swift in Sources */,
+				A5C2022D287EC3F0007E3188 /* RegisterService.swift in Sources */,
 				A58E7D222872A57B0082D443 /* AppearanceConfigurator.swift in Sources */,
 				A58E7D212872A57B0082D443 /* MigrationConfigurator.swift in Sources */,
 				A5629ABE2876CBC000094373 /* ChatListPresenter.swift in Sources */,
@@ -1085,6 +1164,7 @@
 				A58E7D432872EE320082D443 /* MessageView.swift in Sources */,
 				A58E7D3F2872E99A0082D443 /* TabPage.swift in Sources */,
 				A58E7D3C2872D55F0082D443 /* ChatPresenter.swift in Sources */,
+				A5C2020B287D9DEE007E3188 /* WelcomeModule.swift in Sources */,
 				A58E7D152872A5410082D443 /* UIViewController.swift in Sources */,
 				A58E7D132872A4A80082D443 /* Application.swift in Sources */,
 				A58E7D002872A1050082D443 /* SceneViewController.swift in Sources */,
@@ -1097,21 +1177,33 @@
 				A578FA35287304A300AA7720 /* Color.swift in Sources */,
 				A5629ADE2876CC6E00094373 /* InviteListModule.swift in Sources */,
 				A578FA322873036400AA7720 /* InputView.swift in Sources */,
+				A5C2021B287E1FD8007E3188 /* ImportRouter.swift in Sources */,
 				A5629AE42876E6D200094373 /* ThreadViewModel.swift in Sources */,
 				A58E7D0C2872A45B0082D443 /* MainModule.swift in Sources */,
+				A5C2021C287E1FD8007E3188 /* ImportInteractor.swift in Sources */,
 				A58E7D0D2872A45B0082D443 /* MainPresenter.swift in Sources */,
+				A5C20219287E1FD8007E3188 /* ImportModule.swift in Sources */,
 				A5629AD62876CC5700094373 /* InviteInteractor.swift in Sources */,
 				A5629AE12876CC6E00094373 /* InviteListInteractor.swift in Sources */,
 				A58E7CED28729F550082D443 /* SceneDelegate.swift in Sources */,
+				A5C2020F287D9DEE007E3188 /* WelcomeView.swift in Sources */,
+				A5C20226287EB099007E3188 /* AccountNameResolver.swift in Sources */,
+				A5C2020D287D9DEE007E3188 /* WelcomeRouter.swift in Sources */,
 				A578FA372873D8EE00AA7720 /* UIColor.swift in Sources */,
+				A5C2021D287E1FD8007E3188 /* ImportView.swift in Sources */,
+				A5C2021A287E1FD8007E3188 /* ImportPresenter.swift in Sources */,
 				A5629AE828772A0100094373 /* InviteViewModel.swift in Sources */,
 				A5629AA92876A23100094373 /* ChatService.swift in Sources */,
+				A5C20229287EB34C007E3188 /* AccountStorage.swift in Sources */,
 				A5629AC02876CBC000094373 /* ChatListInteractor.swift in Sources */,
 				A5629AE22876CC6E00094373 /* InviteListView.swift in Sources */,
 				A578FA3D2874002400AA7720 /* View.swift in Sources */,
 				A5629AD72876CC5700094373 /* InviteView.swift in Sources */,
 				A5629AF02877F73000094373 /* SocketFactory.swift in Sources */,
 				A5629AED2877F6A600094373 /* ChatFactory.swift in Sources */,
+				A5C20221287EA5B8007E3188 /* TextFieldView.swift in Sources */,
+				A5C2022B287EB89A007E3188 /* WelcomeInteractor.swift in Sources */,
+				A5C2020C287D9DEE007E3188 /* WelcomePresenter.swift in Sources */,
 				A58E7D1D2872A57B0082D443 /* Configurator.swift in Sources */,
 				A58E7D482872EF610082D443 /* MessageViewModel.swift in Sources */,
 				A5629AD32876CC5700094373 /* InviteModule.swift in Sources */,

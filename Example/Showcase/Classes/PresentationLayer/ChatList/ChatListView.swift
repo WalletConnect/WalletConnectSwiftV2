@@ -7,27 +7,29 @@ struct ChatListView: View {
     var body: some View {
         ScrollView {
             VStack {
-                Button(action: {
-                    presenter.didPressChatRequests()
-                }) {
-                    HStack(spacing: 8.0) {
-                        Text("1")
-                            .frame(width: 24.0, height: 24.0)
-                            .background(Color.w_greenForground)
-                            .foregroundColor(.w_greenBackground)
-                            .font(.system(size: 17.0, weight: .bold))
-                            .clipShape(Circle())
+                if presenter.showRequests {
+                    Button(action: {
+                        presenter.didPressChatRequests()
+                    }) {
+                        HStack(spacing: 8.0) {
+                            Text(presenter.requestsCount)
+                                .frame(width: 24.0, height: 24.0)
+                                .background(Color.w_greenForground)
+                                .foregroundColor(.w_greenBackground)
+                                .font(.system(size: 17.0, weight: .bold))
+                                .clipShape(Circle())
 
-                        Text("Chat Requests")
-                            .foregroundColor(.w_greenForground)
-                            .font(.system(size: 17.0, weight: .bold))
+                            Text("Chat Requests")
+                                .foregroundColor(.w_greenForground)
+                                .font(.system(size: 17.0, weight: .bold))
+                        }
                     }
+                    .frame(height: 44.0)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.w_greenBackground)
+                    .clipShape(Capsule())
+                    .padding(16.0)
                 }
-                .frame(height: 44.0)
-                .frame(maxWidth: .infinity)
-                .background(Color.w_greenBackground)
-                .clipShape(Capsule())
-                .padding(16.0)
 
                 ForEach(presenter.threads) { thread in
                     Button(action: {
@@ -54,10 +56,17 @@ struct ChatListView: View {
                     }
                 }
                 .padding(16.0)
+
+                Spacer()
+
+                Button("Log out") {
+                    presenter.didLogoutPress()
+                }
+                .foregroundColor(.red)
             }
         }
-        .task {
-            await presenter.setupInitialState()
+        .onAppear {
+            presenter.setupInitialState()
         }
     }
 }

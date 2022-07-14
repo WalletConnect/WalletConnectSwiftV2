@@ -39,7 +39,7 @@ final class ChatPresenter: ObservableObject {
 extension ChatPresenter: SceneViewModel {
 
     var sceneTitle: String? {
-        return "Chat"
+        return AccountNameResolver.resolveName(thread.peerAccount)
     }
 }
 
