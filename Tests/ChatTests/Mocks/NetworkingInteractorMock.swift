@@ -10,7 +10,6 @@ class NetworkingInteractorMock: NetworkInteracting {
     }
     let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
 
-
     let responsePublisherSubject = PassthroughSubject<ChatResponse, Never>()
     let requestPublisherSubject = PassthroughSubject<RequestSubscriptionPayload, Never>()
 
@@ -30,7 +29,7 @@ class NetworkingInteractorMock: NetworkInteracting {
 
     }
 
-    func respond(topic: String, response: JsonRpcResult) async throws {
+    func respond(topic: String, response: JsonRpcResult, tag: Int) async throws {
 
     }
 
