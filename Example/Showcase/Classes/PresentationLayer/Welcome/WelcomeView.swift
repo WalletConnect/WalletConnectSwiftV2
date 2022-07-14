@@ -7,7 +7,7 @@ struct WelcomeView: View {
     @EnvironmentObject var presenter: WelcomePresenter
 
     var body: some View {
-        GeometryReader { geometry in
+        GeometryReader { _ in
             ZStack {
                 Image("LaunchScreen")
                     .resizable()
