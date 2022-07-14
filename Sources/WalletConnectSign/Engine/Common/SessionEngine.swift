@@ -87,7 +87,7 @@ final class SessionEngine {
         guard sessionStore.hasSession(forTopic: topic) else {
             throw Errors.sessionNotFound(topic: topic)
         }
-        try await networkingInteractor.respond(topic: topic, response: response)
+        try await networkingInteractor.respond(topic: topic, response: response, tag: 1109) // FIXME: Hardcoded tag
     }
 
     func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain) async throws {
