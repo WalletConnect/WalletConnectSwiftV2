@@ -96,10 +96,6 @@ public final class RelayClient {
     }
 
     /// Completes when networking client sends a request, error if it fails on client side
-    public func publish(topic: String, payload: String, tag: PublishTag, prompt: Bool = false) async throws {
-        try await publish(topic: topic, payload: payload, tag: tag.rawValue, prompt: prompt)
-    }
-
     public func publish(topic: String, payload: String, tag: Int, prompt: Bool = false) async throws {
         let params = RelayJSONRPC.PublishParams(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag)
         let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.method, params: params)
@@ -109,16 +105,6 @@ public final class RelayClient {
     }
 
     /// Completes with an acknowledgement from the relay network.
-    @discardableResult public func publish(
-        topic: String,
-        payload: String,
-        tag: PublishTag,
-        prompt: Bool = false,
-        onNetworkAcknowledge: @escaping ((Error?) -> Void)
-    ) -> Int64 {
-        publish(topic: topic, payload: payload, tag: tag.rawValue, prompt: prompt, onNetworkAcknowledge: onNetworkAcknowledge)
-    }
-
     @discardableResult public func publish(
         topic: String,
         payload: String,

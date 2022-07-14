@@ -10,7 +10,7 @@ protocol NetworkInteracting {
     var responsePublisher: AnyPublisher<ChatResponse, Never> {get}
     func subscribe(topic: String) async throws
     func request(_ request: JSONRPCRequest<ChatRequestParams>, topic: String, envelopeType: Envelope.EnvelopeType) async throws
-    func respond(topic: String, response: JsonRpcResult) async throws
+    func respond(topic: String, response: JsonRpcResult, tag: Int) async throws
 }
 
 extension NetworkInteracting {
@@ -56,12 +56,12 @@ class NetworkingInteractor: NetworkInteracting {
     func request(_ request: JSONRPCRequest<ChatRequestParams>, topic: String, envelopeType: Envelope.EnvelopeType) async throws {
         try jsonRpcHistory.set(topic: topic, request: request)
         let message = try! serializer.serialize(topic: topic, encodable: request, envelopeType: envelopeType)
-        try await relayClient.publish(topic: topic, payload: message, tag: .chat)
+        try await relayClient.publish(topic: topic, payload: message, tag: request.params.tag)
     }
 
-    func respond(topic: String, response: JsonRpcResult) async throws {
+    func respond(topic: String, response: JsonRpcResult, tag: Int) async throws {
         let message = try serializer.serialize(topic: topic, encodable: response.value)
-        try await relayClient.publish(topic: topic, payload: message, tag: .chat, prompt: false)
+        try await relayClient.publish(topic: topic, payload: message, tag: tag, prompt: false)
     }
 
     func subscribe(topic: String) async throws {
