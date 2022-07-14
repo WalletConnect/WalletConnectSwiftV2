@@ -5,6 +5,7 @@ import WalletConnectUtils
 import WalletConnectRelay
 
 class NetworkingInteractorMock: NetworkInteracting {
+
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
     }
@@ -30,6 +31,10 @@ class NetworkingInteractorMock: NetworkInteracting {
     }
 
     func respond(topic: String, response: JsonRpcResult, tag: Int) async throws {
+
+    }
+
+    func respondSuccess(payload: RequestSubscriptionPayload) async throws {
 
     }
 

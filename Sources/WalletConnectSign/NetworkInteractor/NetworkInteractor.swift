@@ -226,7 +226,7 @@ class NetworkInteractor: NetworkInteracting {
             logger.info("Info: \(error.localizedDescription)")
         }
     }
-
+    
     private func handleJsonRpcErrorResponse(response: JSONRPCErrorResponse) {
         do {
             let record = try jsonRpcHistory.resolve(response: JsonRpcResult.error(response))
