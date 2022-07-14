@@ -96,8 +96,8 @@ public final class RelayClient {
     }
 
     /// Completes when networking client sends a request, error if it fails on client side
-    public func publish(topic: String, payload: String, tag: PublishTag, prompt: Bool = false) async throws {
-        let params = RelayJSONRPC.PublishParams(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag.rawValue)
+    public func publish(topic: String, payload: String, tag: Int, prompt: Bool = false) async throws {
+        let params = RelayJSONRPC.PublishParams(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag)
         let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.method, params: params)
         logger.debug("Publishing Payload on Topic: \(topic)")
         let requestJson = try request.json()
@@ -108,10 +108,10 @@ public final class RelayClient {
     @discardableResult public func publish(
         topic: String,
         payload: String,
-        tag: PublishTag,
+        tag: Int,
         prompt: Bool = false,
         onNetworkAcknowledge: @escaping ((Error?) -> Void)) -> Int64 {
-        let params = RelayJSONRPC.PublishParams(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag.rawValue)
+        let params = RelayJSONRPC.PublishParams(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag)
         let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.method, params: params)
         let requestJson = try! request.json()
         logger.debug("iridium: Publishing Payload on Topic: \(topic)")

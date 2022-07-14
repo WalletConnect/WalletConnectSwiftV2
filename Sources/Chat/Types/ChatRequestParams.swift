@@ -33,6 +33,22 @@ enum ChatRequestParams: Codable, Equatable {
     }
 }
 
+extension ChatRequestParams {
+
+    var tag: Int {
+        switch self {
+        case .invite:
+            return 2000
+        case .message:
+            return 2002
+        }
+    }
+
+    var responseTag: Int {
+        return tag + 1
+    }
+}
+
 extension JSONRPCRequest {
     init(id: Int64 = JsonRpcID.generate(), params: T) where T == ChatRequestParams {
         var method: String!

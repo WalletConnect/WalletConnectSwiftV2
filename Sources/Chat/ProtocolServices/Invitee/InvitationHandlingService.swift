@@ -50,7 +50,7 @@ class InvitationHandlingService {
 
         let responseTopic = try getInviteResponseTopic(payload, invite)
 
-        try await networkingInteractor.respond(topic: responseTopic, response: response)
+        try await networkingInteractor.respond(topic: responseTopic, response: response, tag: payload.request.params.responseTag)
 
         let threadAgreementKeys = try kms.performKeyAgreement(selfPublicKey: selfThreadPubKey, peerPublicKey: invite.publicKey)
 
@@ -84,7 +84,7 @@ class InvitationHandlingService {
         let error = JSONRPCErrorResponse.Error(code: 0, message: "user rejected")
         let response = JsonRpcResult.error(JSONRPCErrorResponse(id: payload.request.id, error: error))
 
-        try await networkingInteractor.respond(topic: responseTopic, response: response)
+        try await networkingInteractor.respond(topic: responseTopic, response: response, tag: payload.request.params.responseTag)
 
         invitePayloadStore.delete(forKey: inviteId)
     }

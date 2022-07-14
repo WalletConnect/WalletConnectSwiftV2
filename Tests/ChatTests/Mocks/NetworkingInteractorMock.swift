@@ -2,9 +2,12 @@ import Foundation
 @testable import Chat
 import Combine
 import WalletConnectUtils
+import WalletConnectRelay
 
 class NetworkingInteractorMock: NetworkInteracting {
-
+    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
+        fatalError()
+    }
     let responsePublisherSubject = PassthroughSubject<ChatResponse, Never>()
     let requestPublisherSubject = PassthroughSubject<RequestSubscriptionPayload, Never>()
 
@@ -24,7 +27,7 @@ class NetworkingInteractorMock: NetworkInteracting {
 
     }
 
-    func respond(topic: String, response: JsonRpcResult) async throws {
+    func respond(topic: String, response: JsonRpcResult, tag: Int) async throws {
 
     }
 

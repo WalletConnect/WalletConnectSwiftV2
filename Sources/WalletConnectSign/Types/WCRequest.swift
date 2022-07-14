@@ -144,3 +144,35 @@ extension WCRequest {
         }
     }
 }
+
+extension WCRequest {
+
+    var tag: Int {
+        switch method {
+        case .pairingDelete:
+            return 1000
+        case .pairingPing:
+            return 1002
+        case .sessionPropose:
+            return 1100
+        case .sessionSettle:
+            return 1102
+        case .sessionUpdate:
+            return 1104
+        case .sessionExtend:
+            return 1106
+        case .sessionDelete:
+            return 1112
+        case .sessionRequest:
+            return 1108
+        case .sessionPing:
+            return 1114
+        case .sessionEvent:
+            return 1110
+        }
+    }
+
+    var responseTag: Int {
+        return tag + 1
+    }
+}

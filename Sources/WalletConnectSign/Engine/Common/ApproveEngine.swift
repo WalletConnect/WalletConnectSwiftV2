@@ -82,7 +82,7 @@ final class ApproveEngine {
         let proposeResponse = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
 
-        try await networkingInteractor.respond(topic: payload.topic, response: .response(response))
+        try await networkingInteractor.respond(topic: payload.topic, response: .response(response), tag: payload.wcRequest.responseTag)
         try await settle(topic: sessionTopic, proposal: proposal, namespaces: sessionNamespaces)
     }
 
