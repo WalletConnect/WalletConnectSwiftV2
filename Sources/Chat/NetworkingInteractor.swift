@@ -8,6 +8,7 @@ protocol NetworkInteracting {
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> { get }
     var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {get}
     var responsePublisher: AnyPublisher<ChatResponse, Never> {get}
+    func respondSuccess(payload: RequestSubscriptionPayload) async throws
     func subscribe(topic: String) async throws
     func request(_ request: JSONRPCRequest<ChatRequestParams>, topic: String, envelopeType: Envelope.EnvelopeType) async throws
     func respond(topic: String, response: JsonRpcResult, tag: Int) async throws
@@ -59,7 +60,13 @@ class NetworkingInteractor: NetworkInteracting {
         try await relayClient.publish(topic: topic, payload: message, tag: request.params.tag)
     }
 
+    func respondSuccess(payload: RequestSubscriptionPayload) async throws {
+        let response = JSONRPCResponse<AnyCodable>(id: payload.request.id, result: AnyCodable(true))
+        try await respond(topic: payload.topic, response: JsonRpcResult.response(response), tag: payload.request.params.responseTag)
+    }
+
     func respond(topic: String, response: JsonRpcResult, tag: Int) async throws {
+        _ = try jsonRpcHistory.resolve(response: response)
         let message = try serializer.serialize(topic: topic, encodable: response.value)
         try await relayClient.publish(topic: topic, payload: message, tag: tag, prompt: false)
     }
@@ -81,8 +88,13 @@ class NetworkingInteractor: NetworkInteracting {
     }
 
     private func handleChatRequest(topic: String, request: JSONRPCRequest<ChatRequestParams>) {
-        let payload = RequestSubscriptionPayload(topic: topic, request: request)
-        requestPublisherSubject.send(payload)
+        do {
+            try jsonRpcHistory.set(topic: topic, request: request)
+            let payload = RequestSubscriptionPayload(topic: topic, request: request)
+            requestPublisherSubject.send(payload)
+        } catch {
+            logger.debug(error)
+        }
     }
 
     private func handleJsonRpcResponse(response: JSONRPCResponse<AnyCodable>) {

@@ -56,15 +56,16 @@ class MessagingService {
             switch subscriptionPayload.request.params {
             case .message(var message):
                 message.topic = subscriptionPayload.topic
-                handleMessage(message)
+                handleMessage(message, subscriptionPayload)
             default:
                 return
             }
         }.store(in: &publishers)
     }
 
-    private func handleMessage(_ message: Message) {
+    private func handleMessage(_ message: Message, _ payload: RequestSubscriptionPayload) {
         Task(priority: .background) {
+            try await networkingInteractor.respondSuccess(payload: payload)
             await messagesStore.add(message)
             logger.debug("Received message")
             onMessage?(message)
