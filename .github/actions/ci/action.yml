@@ -1,0 +1,60 @@
+name: 'ci'
+description: 'Executes Swift specific CI steps'
+inputs:
+  type:
+    description: 'The type of CI step to run'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    # Package builds
+    - name: Run tests
+      if: inputs.type == 'unit-tests'
+      shell: bash
+      run: "xcodebuild \
+        -project Example/ExampleApp.xcodeproj \ 
+        -scheme WalletConnect \
+        -clonedSourcePackagesDirPath SourcePackages \
+        -sdk iphonesimulator"
+
+    # Integration tests
+    - name: Run integration tests
+      if: inputs.type == 'integration-tests'
+      shell: bash
+      run: "xcodebuild \
+        -project Example/ExampleApp.xcodeproj \ 
+        -scheme IntegrationTests \
+        -clonedSourcePackagesDirPath SourcePackages \
+        -destination 'platform=iOS Simulator,name=iPhone 13' test"
+
+    # Wallet build
+    - name: Build Example Wallet
+      if: inputs.type == 'build-example-wallet'
+      shell: bash
+      run: "xcodebuild \
+       -project Example/ExampleApp.xcodeproj \
+       -scheme Wallet \
+       -clonedSourcePackagesDirPath SourcePackages \
+       -sdk iphonesimulator"
+
+    # DApp build
+    - name: Build Example Dapp
+      if: inputs.type == 'build-example-dapp'
+      shell: bash
+      run: "xcodebuild \
+        -project Example/ExampleApp.xcodeproj \
+        -scheme DApp \
+        -clonedSourcePackagesDirPath SourcePackages \
+        -sdk iphonesimulator"
+
+    # UI tests
+    - name: UI Tests
+      if: inputs.type == 'ui-tests'
+      shell: bash
+      run: "xcodebuild \
+        -project Example/ExampleApp.xcodeproj \
+        -scheme UITests \
+        -clonedSourcePackagesDirPath SourcePackages \
+        -destination 'platform=iOS Simulator,name=iPhone 13' test"
+      continue-on-error: true
