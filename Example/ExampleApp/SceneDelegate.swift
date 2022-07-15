@@ -3,14 +3,6 @@ import WalletConnectSign
 import WalletConnectRelay
 import Starscream
 
-extension WebSocket: WebSocketConnecting { }
-
-struct SocketFactory: WebSocketFactory {
-    func create(with url: URL) -> WebSocketConnecting {
-        return WebSocket(url: url)
-    }
-}
-
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
@@ -23,7 +15,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             url: "example.wallet",
             icons: ["https://avatars.githubusercontent.com/u/37784886"])
 
-        Sign.configure(metadata: metadata, projectId: "8ba9ee138960775e5231b70cc5ef1c3a", socketFactory: SocketFactory())
+        Sign.configure(metadata: metadata, projectId: "8ba9ee138960775e5231b70cc5ef1c3a")
 
         if CommandLine.arguments.contains("-cleanInstall") {
             try? Sign.instance.cleanup()

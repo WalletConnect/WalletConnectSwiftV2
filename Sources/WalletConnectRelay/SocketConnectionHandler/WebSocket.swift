@@ -1,4 +1,5 @@
 import Foundation
+import Starscream
 
 public protocol WebSocketConnecting: AnyObject {
     var isConnected: Bool { get }
@@ -13,4 +14,17 @@ public protocol WebSocketConnecting: AnyObject {
 
 public protocol WebSocketFactory {
     func create(with url: URL) -> WebSocketConnecting
+}
+
+extension WebSocket: WebSocketConnecting {}
+
+public struct SocketFactory: WebSocketFactory {
+
+    public init() {}
+
+    public func create(with url: URL) -> WebSocketConnecting {
+        var request = URLRequest(url: url)
+        request.addValue(EnvironmentInfo.userAgent, forHTTPHeaderField: "User-Agent")
+        return WebSocket(request: request)
+    }
 }

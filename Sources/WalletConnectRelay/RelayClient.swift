@@ -62,7 +62,7 @@ public final class RelayClient {
         projectId: String,
         keyValueStorage: KeyValueStorage = UserDefaults.standard,
         keychainStorage: KeychainStorageProtocol = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk"),
-        socketFactory: WebSocketFactory,
+        socketFactory: WebSocketFactory = SocketFactory(),
         socketConnectionType: SocketConnectionType = .automatic,
         logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off)
     ) {

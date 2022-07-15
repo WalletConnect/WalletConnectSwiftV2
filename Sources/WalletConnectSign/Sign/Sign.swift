@@ -30,7 +30,7 @@ public class Sign {
     static public func configure(
         metadata: AppMetadata,
         projectId: String,
-        socketFactory: WebSocketFactory,
+        socketFactory: WebSocketFactory = SocketFactory(),
         socketConnectionType: SocketConnectionType = .automatic
     ) {
         Sign.config = Sign.Config(

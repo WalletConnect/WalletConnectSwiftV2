@@ -11,7 +11,7 @@ class ChatFactory {
         let keychain = KeychainStorage(serviceIdentifier: "com.walletconnect.showcase")
         let client = HTTPClient(host: "keys.walletconnect.com")
         let registry = KeyserverRegistryProvider(client: client)
-        let relayClient = RelayClient(relayHost: relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory())
+        let relayClient = RelayClient(relayHost: relayHost, projectId: projectId, keychainStorage: keychain)
         return ChatClient(
             registry: registry,
             relayClient: relayClient,
