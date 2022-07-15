@@ -18,7 +18,6 @@ struct WCSession: SequenceObject, Equatable {
     private(set) var expiryDate: Date
     private(set) var timestamp: Date
     private(set) var namespaces: [String: SessionNamespace]
-//    private(set) var requiredNamespaces: [String: SessionNamespace]
     private(set) var requiredNamespaces: [String: ProposalNamespace]
 
     static var defaultTimeToLive: Int64 {
@@ -133,35 +132,10 @@ struct WCSession: SequenceObject, Equatable {
     }
 
     mutating func updateNamespaces(_ namespaces: [String: SessionNamespace], timestamp: Date = Date()) throws {
-        func accountsAreCompliant(_ accounts: Set<Account>, toChains chains: Set<Blockchain>) -> Bool {
-//            for account in accounts {
-//                guard chains.contains(account.blockchain) else {
-//                    return false
-//                }
-//            }
-            for chain in chains {
-                guard accounts.contains(where: { $0.blockchain == chain }) else {
-                    return false
-                }
-            }
-            return true
-        }
-        func extentionIsCompliant(_ newExtension: SessionNamespace.Extension, toExisting existingExtension: ProposalNamespace.Extension) -> Bool {
-            guard
-                accountsAreCompliant(newExtension.accounts, toChains: existingExtension.chains),
-                newExtension.methods.isSuperset(of: existingExtension.methods),
-                newExtension.events.isSuperset(of: existingExtension.events)
-            else {
-                return false
-            }
-            return true
-        }
-
         for item in requiredNamespaces {
             guard
                 let compliantNamespace = namespaces[item.key],
-//                compliantNamespace.accounts.isSuperset(of: item.value.accounts),
-                accountsAreCompliant(compliantNamespace.accounts, toChains: item.value.chains),
+                SessionNamespace.accountsAreCompliant(compliantNamespace.accounts, toChains: item.value.chains),
                 compliantNamespace.methods.isSuperset(of: item.value.methods),
                 compliantNamespace.events.isSuperset(of: item.value.events)
             else {
@@ -172,10 +146,7 @@ struct WCSession: SequenceObject, Equatable {
                     throw Error.unsatisfiedUpdateNamespaceRequirement
                 }
                 for existingExtension in extensions {
-//                    guard compliantExtensions.contains(where: { $0.isSuperset(of: existingExtension) }) else {
-//                        throw Error.unsatisfiedUpdateNamespaceRequirement
-//                    }
-                    guard compliantExtensions.contains(where: { extentionIsCompliant($0, toExisting: existingExtension) }) else {
+                    guard compliantExtensions.contains(where: { $0.isCompliant(to: existingExtension) }) else {
                         throw Error.unsatisfiedUpdateNamespaceRequirement
                     }
                 }

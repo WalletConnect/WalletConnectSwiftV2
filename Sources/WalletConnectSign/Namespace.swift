@@ -45,10 +45,15 @@ public struct SessionNamespace: Equatable, Codable {
             self.events = events
         }
 
-        func isSuperset(of other: Extension) -> Bool {
-            self.accounts.isSuperset(of: other.accounts) &&
-            self.methods.isSuperset(of: other.methods) &&
-            self.events.isSuperset(of: other.events)
+        func isCompliant(to required: ProposalNamespace.Extension) -> Bool {
+            guard
+                SessionNamespace.accountsAreCompliant(accounts, toChains: required.chains),
+                methods.isSuperset(of: required.methods),
+                events.isSuperset(of: required.events)
+            else {
+                return false
+            }
+            return true
         }
     }
 
@@ -57,6 +62,15 @@ public struct SessionNamespace: Equatable, Codable {
         self.methods = methods
         self.events = events
         self.extensions = extensions
+    }
+
+    static func accountsAreCompliant(_ accounts: Set<Account>, toChains chains: Set<Blockchain>) -> Bool {
+        for chain in chains {
+            guard accounts.contains(where: { $0.blockchain == chain }) else {
+                return false
+            }
+        }
+        return true
     }
 }
 
