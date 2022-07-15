@@ -34,6 +34,7 @@ public extension HTTPService {
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
         request.httpBody = body
+        request.addValue(EnvironmentInfo.userAgent, forHTTPHeaderField: "User-Agent")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         return request
     }
