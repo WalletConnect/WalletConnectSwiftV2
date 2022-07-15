@@ -1,7 +1,6 @@
 import Foundation
 import Combine
 import Chat
-import WalletConnectUtils
 import WalletConnectRelay
 
 typealias Stream<T> = AsyncPublisher<AnyPublisher<T, Never>>

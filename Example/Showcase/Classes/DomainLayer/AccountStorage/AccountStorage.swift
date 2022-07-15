@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectUtils
 
 final class AccountStorage {
     private let defaults: UserDefaults

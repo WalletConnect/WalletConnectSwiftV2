@@ -1,6 +1,5 @@
 import UIKit
 import Chat
-import WalletConnectUtils
 
 final class ChatListRouter {
 

@@ -1,6 +1,5 @@
 import UIKit
 import Combine
-import WalletConnectUtils
 
 final class ChatListPresenter: ObservableObject {
 
@@ -46,6 +45,10 @@ final class ChatListPresenter: ObservableObject {
     func didLogoutPress() {
         interactor.logout()
         router.presentWelcome()
+    }
+
+    func didPressNewChat() {
+        presentInvite()
     }
 }
 
