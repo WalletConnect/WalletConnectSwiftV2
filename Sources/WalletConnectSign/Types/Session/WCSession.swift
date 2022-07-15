@@ -18,7 +18,8 @@ struct WCSession: SequenceObject, Equatable {
     private(set) var expiryDate: Date
     private(set) var timestamp: Date
     private(set) var namespaces: [String: SessionNamespace]
-    private(set) var requiredNamespaces: [String: SessionNamespace]
+//    private(set) var requiredNamespaces: [String: SessionNamespace]
+    private(set) var requiredNamespaces: [String: ProposalNamespace]
 
     static var defaultTimeToLive: Int64 {
         Int64(7*Time.day)
@@ -33,6 +34,7 @@ struct WCSession: SequenceObject, Equatable {
          selfParticipant: Participant,
          peerParticipant: Participant,
          settleParams: SessionType.SettleParams,
+         requiredNamespaces: [String: ProposalNamespace],
          acknowledged: Bool) {
         self.topic = topic
         self.timestamp = timestamp
@@ -41,13 +43,26 @@ struct WCSession: SequenceObject, Equatable {
         self.selfParticipant = selfParticipant
         self.peerParticipant = peerParticipant
         self.namespaces = settleParams.namespaces
-        self.requiredNamespaces = settleParams.namespaces
+        self.requiredNamespaces = requiredNamespaces
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(settleParams.expiry))
     }
 
 #if DEBUG
-    internal init(topic: String, timestamp: Date, relay: RelayProtocolOptions, controller: AgreementPeer, selfParticipant: Participant, peerParticipant: Participant, namespaces: [String: SessionNamespace], events: Set<String>, accounts: Set<Account>, acknowledged: Bool, expiry: Int64) {
+    internal init(
+        topic: String,
+        timestamp: Date,
+        relay: RelayProtocolOptions,
+        controller: AgreementPeer,
+        selfParticipant: Participant,
+        peerParticipant: Participant,
+        namespaces: [String: SessionNamespace],
+        requiredNamespaces: [String: ProposalNamespace],
+        events: Set<String>, 
+        accounts: Set<Account>,
+        acknowledged: Bool,
+        expiry: Int64
+    ) {
         self.topic = topic
         self.timestamp = timestamp
         self.relay = relay
@@ -55,7 +70,7 @@ struct WCSession: SequenceObject, Equatable {
         self.selfParticipant = selfParticipant
         self.peerParticipant = peerParticipant
         self.namespaces = namespaces
-        self.requiredNamespaces = namespaces
+        self.requiredNamespaces = requiredNamespaces
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
     }
@@ -118,10 +133,35 @@ struct WCSession: SequenceObject, Equatable {
     }
 
     mutating func updateNamespaces(_ namespaces: [String: SessionNamespace], timestamp: Date = Date()) throws {
+        func accountsAreCompliant(_ accounts: Set<Account>, toChains chains: Set<Blockchain>) -> Bool {
+//            for account in accounts {
+//                guard chains.contains(account.blockchain) else {
+//                    return false
+//                }
+//            }
+            for chain in chains {
+                guard accounts.contains(where: { $0.blockchain == chain }) else {
+                    return false
+                }
+            }
+            return true
+        }
+        func extentionIsCompliant(_ newExtension: SessionNamespace.Extension, toExisting existingExtension: ProposalNamespace.Extension) -> Bool {
+            guard
+                accountsAreCompliant(newExtension.accounts, toChains: existingExtension.chains),
+                newExtension.methods.isSuperset(of: existingExtension.methods),
+                newExtension.events.isSuperset(of: existingExtension.events)
+            else {
+                return false
+            }
+            return true
+        }
+
         for item in requiredNamespaces {
             guard
                 let compliantNamespace = namespaces[item.key],
-                compliantNamespace.accounts.isSuperset(of: item.value.accounts),
+//                compliantNamespace.accounts.isSuperset(of: item.value.accounts),
+                accountsAreCompliant(compliantNamespace.accounts, toChains: item.value.chains),
                 compliantNamespace.methods.isSuperset(of: item.value.methods),
                 compliantNamespace.events.isSuperset(of: item.value.events)
             else {
@@ -132,7 +172,10 @@ struct WCSession: SequenceObject, Equatable {
                     throw Error.unsatisfiedUpdateNamespaceRequirement
                 }
                 for existingExtension in extensions {
-                    guard compliantExtensions.contains(where: { $0.isSuperset(of: existingExtension) }) else {
+//                    guard compliantExtensions.contains(where: { $0.isSuperset(of: existingExtension) }) else {
+//                        throw Error.unsatisfiedUpdateNamespaceRequirement
+//                    }
+                    guard compliantExtensions.contains(where: { extentionIsCompliant($0, toExisting: existingExtension) }) else {
                         throw Error.unsatisfiedUpdateNamespaceRequirement
                     }
                 }
@@ -194,7 +237,7 @@ extension WCSession {
 
         // Migration beta.102
         self.timestamp = try container.decodeIfPresent(Date.self, forKey: .timestamp) ?? .distantPast
-        self.requiredNamespaces = try container.decodeIfPresent([String: SessionNamespace].self, forKey: .requiredNamespaces) ?? [:]
+        self.requiredNamespaces = try container.decodeIfPresent([String: ProposalNamespace].self, forKey: .requiredNamespaces) ?? [:]
     }
 
     func encode(to encoder: Encoder) throws {

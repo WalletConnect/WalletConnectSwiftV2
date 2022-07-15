@@ -9,6 +9,7 @@ extension WCSession {
         expiryDate: Date = Date.distantFuture,
         selfPrivateKey: AgreementPrivateKey = AgreementPrivateKey(),
         namespaces: [String: SessionNamespace] = [:],
+        requiredNamespaces: [String: ProposalNamespace] = [:],
         acknowledged: Bool = true,
         timestamp: Date = Date()
     ) -> WCSession {
@@ -23,6 +24,7 @@ extension WCSession {
                 selfParticipant: Participant.stub(publicKey: selfKey),
                 peerParticipant: Participant.stub(publicKey: peerKey),
                 namespaces: namespaces,
+                requiredNamespaces: requiredNamespaces,
                 events: [],
                 accounts: Account.stubSet(),
                 acknowledged: acknowledged,

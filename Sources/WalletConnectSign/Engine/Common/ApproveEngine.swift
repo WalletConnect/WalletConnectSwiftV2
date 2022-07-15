@@ -124,6 +124,7 @@ final class ApproveEngine {
             selfParticipant: selfParticipant,
             peerParticipant: proposal.proposer,
             settleParams: settleParams,
+            requiredNamespaces: proposal.requiredNamespaces,
             acknowledged: false)
 
         logger.debug("Sending session settle request")
@@ -310,6 +311,7 @@ private extension ApproveEngine {
             selfParticipant: selfParticipant,
             peerParticipant: settleParams.controller,
             settleParams: settleParams,
+            requiredNamespaces: proposedNamespaces,
             acknowledged: true
         )
         sessionStore.setSession(session)
