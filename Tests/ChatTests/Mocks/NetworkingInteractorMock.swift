@@ -6,8 +6,10 @@ import WalletConnectRelay
 
 class NetworkingInteractorMock: NetworkInteracting {
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
-        fatalError()
+        socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
     }
+    let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
+
     let responsePublisherSubject = PassthroughSubject<ChatResponse, Never>()
     let requestPublisherSubject = PassthroughSubject<RequestSubscriptionPayload, Never>()
 

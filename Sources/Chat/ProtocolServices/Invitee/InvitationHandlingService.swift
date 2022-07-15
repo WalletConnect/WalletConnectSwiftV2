@@ -12,7 +12,7 @@ class InvitationHandlingService {
     var onNewThread: ((Thread) -> Void)?
     private let networkingInteractor: NetworkInteracting
     private let invitePayloadStore: CodableStore<(RequestSubscriptionPayload)>
-    private let topicToInvitationPubKeyStore: CodableStore<String>
+    private let topicToRegistryRecordStore: CodableStore<RegistryRecord>
     private let registry: Registry
     private let logger: ConsoleLogging
     private let kms: KeyManagementService
@@ -23,14 +23,14 @@ class InvitationHandlingService {
          networkingInteractor: NetworkInteracting,
          kms: KeyManagementService,
          logger: ConsoleLogging,
-         topicToInvitationPubKeyStore: CodableStore<String>,
+         topicToRegistryRecordStore: CodableStore<RegistryRecord>,
          invitePayloadStore: CodableStore<RequestSubscriptionPayload>,
          threadsStore: Database<Thread>) {
         self.registry = registry
         self.kms = kms
         self.networkingInteractor = networkingInteractor
         self.logger = logger
-        self.topicToInvitationPubKeyStore = topicToInvitationPubKeyStore
+        self.topicToRegistryRecordStore = topicToRegistryRecordStore
         self.invitePayloadStore = invitePayloadStore
         self.threadsStore = threadsStore
         setUpRequestHandling()
@@ -63,7 +63,7 @@ class InvitationHandlingService {
         logger.debug("Accepting an invite on topic: \(threadTopic)")
 
         // TODO - derive account
-        let selfAccount = Account("eip155:56:0xe5EeF1368781911d265fDB6946613dA61915a501")!
+        let selfAccount = try! topicToRegistryRecordStore.get(key: payload.topic)!.account
         let thread = Thread(topic: threadTopic, selfAccount: selfAccount, peerAccount: invite.account)
         await threadsStore.add(thread)
 
@@ -113,12 +113,12 @@ class InvitationHandlingService {
     private func getInviteResponseTopic(_ payload: RequestSubscriptionPayload, _ invite: Invite) throws -> String {
         // todo - remove topicToInvitationPubKeyStore ?
 
-        guard let selfPubKeyHex = try? topicToInvitationPubKeyStore.get(key: payload.topic) else {
+        guard let record = try? topicToRegistryRecordStore.get(key: payload.topic) else {
             logger.debug("PubKey for invitation topic not found")
             fatalError("todo")
         }
 
-        let selfPubKey = try AgreementPublicKey(hex: selfPubKeyHex)
+        let selfPubKey = try AgreementPublicKey(hex: record.pubKey)
 
         let agreementKeysI = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: invite.publicKey)
 
