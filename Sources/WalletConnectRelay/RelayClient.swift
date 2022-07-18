@@ -76,6 +76,7 @@ public final class RelayClient {
             host: relayHost,
             projectId: projectId
         ))
+        socket.request.addValue(EnvironmentInfo.userAgent, forHTTPHeaderField: "User-Agent")
         let socketConnectionHandler: SocketConnectionHandler
         switch socketConnectionType {
         case .automatic:
