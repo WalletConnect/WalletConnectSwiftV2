@@ -34,6 +34,9 @@ enum ReasonCode {
     case unsupportedAccounts
     case unsupportedNamespaceKey
 
+    // 6000
+    case userDisconnected
+
     var code: Int {
         switch self {
         case .generic: return 0
@@ -61,6 +64,8 @@ enum ReasonCode {
         case .unsupportedEvents: return 5102
         case .unsupportedAccounts: return 5103
         case .unsupportedNamespaceKey: return 5104
+
+        case .userDisconnected: return 6000
         }
     }
 
@@ -108,6 +113,8 @@ enum ReasonCode {
             return "Unsupported or empty accounts for namespace"
         case .unsupportedNamespaceKey:
             return "Unsupported namespace key"
+        case .userDisconnected:
+            return "User discconnected"
         }
     }
 }

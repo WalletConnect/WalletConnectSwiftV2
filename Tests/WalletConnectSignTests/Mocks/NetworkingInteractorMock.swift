@@ -57,7 +57,7 @@ class NetworkingInteractorMock: NetworkInteracting {
         completion(error)
     }
 
-    func respond(topic: String, response: JsonRpcResult) async throws {
+    func respond(topic: String, response: JsonRpcResult, tag: Int) async throws {
         didRespondOnTopic = topic
     }
 

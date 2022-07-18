@@ -7,7 +7,7 @@ public struct JSONRPCRequest<T: Codable&Equatable>: Codable, Equatable {
     public let method: String
     public let params: T
 
-    enum CodingKeys: CodingKey {
+    public enum CodingKeys: CodingKey {
         case id
         case jsonrpc
         case method

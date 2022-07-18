@@ -13,7 +13,7 @@ protocol NetworkInteracting: AnyObject {
     func requestNetworkAck(_ wcMethod: WCMethod, onTopic topic: String, completion: @escaping ((Error?) -> Void))
     /// Completes with a peer response
     func requestPeerResponse(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> Void)?)
-    func respond(topic: String, response: JsonRpcResult) async throws
+    func respond(topic: String, response: JsonRpcResult, tag: Int) async throws
     func respondSuccess(payload: WCRequestSubscriptionPayload) async throws
     func respondSuccess(for payload: WCRequestSubscriptionPayload)
     func respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode) async throws
@@ -71,7 +71,7 @@ class NetworkInteractor: NetworkInteracting {
         try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
         let message = try serializer.serialize(topic: topic, encodable: payload)
         let prompt = shouldPrompt(payload.method)
-        try await relayClient.publish(topic: topic, payload: message, tag: .sign, prompt: prompt)
+        try await relayClient.publish(topic: topic, payload: message, tag: payload.tag, prompt: prompt)
     }
 
     func requestPeerResponse(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> Void)?) {
@@ -80,7 +80,7 @@ class NetworkInteractor: NetworkInteracting {
             try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
             let message = try serializer.serialize(topic: topic, encodable: payload)
             let prompt = shouldPrompt(payload.method)
-            relayClient.publish(topic: topic, payload: message, tag: .sign, prompt: prompt) { [weak self] error in
+            relayClient.publish(topic: topic, payload: message, tag: payload.tag, prompt: prompt) { [weak self] error in
                 guard let self = self else {return}
                 if let error = error {
                     self.logger.error(error)
@@ -116,7 +116,7 @@ class NetworkInteractor: NetworkInteracting {
             try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
             let message = try serializer.serialize(topic: topic, encodable: payload)
             let prompt = shouldPrompt(payload.method)
-            relayClient.publish(topic: topic, payload: message, tag: .sign, prompt: prompt) { error in
+            relayClient.publish(topic: topic, payload: message, tag: payload.tag, prompt: prompt) { error in
                 completion(error)
             }
         } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
@@ -126,14 +126,14 @@ class NetworkInteractor: NetworkInteracting {
         }
     }
 
-    func respond(topic: String, response: JsonRpcResult) async throws {
+    func respond(topic: String, response: JsonRpcResult, tag: Int) async throws {
         _ = try jsonRpcHistory.resolve(response: response)
 
         let message = try serializer.serialize(topic: topic, encodable: response.value)
         logger.debug("Responding....topic: \(topic)")
 
         do {
-            try await relayClient.publish(topic: topic, payload: message, tag: .sign, prompt: false)
+            try await relayClient.publish(topic: topic, payload: message, tag: tag, prompt: false)
         } catch WalletConnectError.internal(.jsonRpcDuplicateDetected) {
             logger.info("Info: Json Rpc Duplicate Detected")
         }
@@ -141,24 +141,23 @@ class NetworkInteractor: NetworkInteracting {
 
     func respondSuccess(payload: WCRequestSubscriptionPayload) async throws {
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(true))
-        try await respond(topic: payload.topic, response: JsonRpcResult.response(response))
+        try await respond(topic: payload.topic, response: JsonRpcResult.response(response), tag: payload.wcRequest.responseTag)
     }
 
     func respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode) async throws {
         let response = JSONRPCErrorResponse(id: payload.wcRequest.id, error: JSONRPCErrorResponse.Error(code: reason.code, message: reason.message))
-        try await respond(topic: payload.topic, response: JsonRpcResult.error(response))
+        try await respond(topic: payload.topic, response: JsonRpcResult.error(response), tag: payload.wcRequest.responseTag)
     }
 
     // TODO: Move to async
     func respondSuccess(for payload: WCRequestSubscriptionPayload) {
-        Task {
+        Task(priority: .background) {
             do {
                 try await respondSuccess(payload: payload)
             } catch {
                 self.logger.error("Respond Success failed with: \(error.localizedDescription)")
             }
         }
-
     }
 
     func subscribe(topic: String) async throws {
@@ -197,7 +196,7 @@ class NetworkInteractor: NetworkInteracting {
         } else if let deserializedJsonRpcError: JSONRPCErrorResponse = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleJsonRpcErrorResponse(response: deserializedJsonRpcError)
         } else {
-            logger.warn("Warning: WalletConnect Relay - Received unknown object type from networking relay")
+            logger.warn("Warning: Networking Interactor - Received unknown object type from networking relay")
         }
     }
 

@@ -112,22 +112,49 @@ final class SignClientTests: XCTestCase {
         }
         wait(for: [sessionRejectExpectation], timeout: defaultTimeout)
     }
-//
-//    func testNewPairingPing() async {
-//        let responderReceivesPingResponseExpectation = expectation(description: "Responder receives ping response")
-//        await waitClientsConnected()
-//
-//        let uri = try! await proposer.client.connect(requiredNamespaces: [:])!
-//
-//        try! await responder.client.pair(uri: uri)
-//        let pairing = responder.client.getSettledPairings().first!
-//        responder.client.ping(topic: pairing.topic) { response in
-//            XCTAssertTrue(response.isSuccess)
-//            responderReceivesPingResponseExpectation.fulfill()
-//        }
-//        wait(for: [responderReceivesPingResponseExpectation], timeout: defaultTimeout)
-//    }
-//
+
+    func testSessionDelete() async throws {
+        let dapp = proposer!
+        let wallet = responder!
+        let sessionDeleteExpectation = expectation(description: "Wallet expects session to be deleted")
+        let requiredNamespaces = ProposalNamespace.stubRequired()
+        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
+
+        wallet.onSessionProposal = { proposal in
+            Task(priority: .high) {
+                do { try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch { XCTFail("\(error)") }
+            }
+        }
+        dapp.onSessionSettled = { settledSession in
+            Task(priority: .high) {
+                try await dapp.client.disconnect(topic: settledSession.topic)
+            }
+        }
+        wallet.onSessionDelete = {
+            sessionDeleteExpectation.fulfill()
+        }
+
+        let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces)
+        try await wallet.client.pair(uri: uri!)
+        wait(for: [sessionDeleteExpectation], timeout: defaultTimeout)
+    }
+
+    func testNewPairingPing() async throws {
+        let dapp = proposer!
+        let wallet = responder!
+        let pongResponseExpectation = expectation(description: "Ping sender receives a pong response")
+
+        let uri = try await dapp.client.connect(requiredNamespaces: ProposalNamespace.stubRequired())!
+        try await wallet.client.pair(uri: uri)
+
+        let pairing = wallet.client.getSettledPairings().first!
+        wallet.client.ping(topic: pairing.topic) { result in
+            if case .failure = result { XCTFail() }
+            pongResponseExpectation.fulfill()
+        }
+        wait(for: [pongResponseExpectation], timeout: defaultTimeout)
+    }
+
 //
 //    func testNewSessionOnExistingPairing() async {
 //        await waitClientsConnected()
@@ -159,24 +186,6 @@ final class SignClientTests: XCTestCase {
 //        wait(for: [proposerSettlesSessionExpectation, responderSettlesSessionExpectation], timeout: defaultTimeout)
 //    }
 //
-//    func testDeleteSession() async {
-//        await waitClientsConnected()
-//        let sessionDeleteExpectation = expectation(description: "Responder is notified on session deletion")
-//        let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
-//        _ = try! await responder.client.pair(uri: uri)
-//        responder.onSessionProposal = {[unowned self]  proposal in
-//            try? self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [])
-//        }
-//        proposer.onSessionSettled = {[unowned self]  settledSession in
-//            Task {
-//                try await self.proposer.client.disconnect(topic: settledSession.topic, reason: Reason(code: 5900, message: "User disconnected session"))
-//            }
-//        }
-//        responder.onSessionDelete = {
-//            sessionDeleteExpectation.fulfill()
-//        }
-//        wait(for: [sessionDeleteExpectation], timeout: defaultTimeout)
-//    }
 //
 //    func testProposerRequestSessionRequest() async {
 //        await waitClientsConnected()

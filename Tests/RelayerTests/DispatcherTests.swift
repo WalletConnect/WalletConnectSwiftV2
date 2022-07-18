@@ -5,6 +5,8 @@ import TestingUtils
 import Combine
 
 class WebSocketMock: WebSocketConnecting {
+    var request: URLRequest = URLRequest(url: URL(string: "wss://relay.walletconnect.com")!)
+
 
     var onText: ((String) -> Void)?
     var onConnect: (() -> Void)?

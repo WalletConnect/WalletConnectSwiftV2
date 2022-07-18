@@ -1,7 +1,8 @@
 import Foundation
+import WalletConnectUtils
 
-struct Thread: Codable {
-    let topic: String
-    let pubKey: String
-    // let peerName: String
+public struct Thread: Codable {
+    public let topic: String
+    public let selfAccount: Account
+    public let peerAccount: Account
 }

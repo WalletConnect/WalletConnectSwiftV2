@@ -22,6 +22,7 @@ final class RelayClientEndToEndTests: XCTestCase {
         )
         let urlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)
         let socket = WebSocket(url: urlFactory.create(host: relayHost, projectId: projectId))
+        
         let logger = ConsoleLogger()
         let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket), logger: logger)
         return RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
@@ -75,7 +76,7 @@ final class RelayClientEndToEndTests: XCTestCase {
             expectationB.fulfill()
         }
         relayA.socketConnectionStatusPublisher.sink {  _ in
-            relayA.publish(topic: randomTopic, payload: payloadA, tag: .unknown, onNetworkAcknowledge: { error in
+            relayA.publish(topic: randomTopic, payload: payloadA, tag: 0, onNetworkAcknowledge: { error in
                 XCTAssertNil(error)
             })
             relayA.subscribe(topic: randomTopic) { error in
@@ -83,7 +84,7 @@ final class RelayClientEndToEndTests: XCTestCase {
             }
         }.store(in: &publishers)
         relayB.socketConnectionStatusPublisher.sink {  _ in
-            relayB.publish(topic: randomTopic, payload: payloadB, tag: .unknown, onNetworkAcknowledge: { error in
+            relayB.publish(topic: randomTopic, payload: payloadB, tag: 0, onNetworkAcknowledge: { error in
                 XCTAssertNil(error)
             })
             relayB.subscribe(topic: randomTopic) { error in

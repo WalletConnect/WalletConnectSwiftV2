@@ -230,9 +230,8 @@ extension Sign {
 
     /// - Parameters:
     ///   - topic: Session topic that you want to delete
-    ///   - reason: Reason of session deletion
-    public func disconnect(topic: String, reason: Reason) async throws {
-        try await client.disconnect(topic: topic, reason: reason)
+    public func disconnect(topic: String) async throws {
+        try await client.disconnect(topic: topic)
     }
 
     /// - Returns: All sessions

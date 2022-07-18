@@ -11,14 +11,14 @@ class MockedRelayClient: NetworkRelaying {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
     }
 
-    func publish(topic: String, payload: String, tag: PublishTag, prompt: Bool) async throws {
+    func publish(topic: String, payload: String, tag: Int, prompt: Bool) async throws {
         self.prompt = prompt
     }
 
     var onMessage: ((String, String) -> Void)?
     var error: Error?
     var prompt = false
-    func publish(topic: String, payload: String, tag: PublishTag, prompt: Bool, onNetworkAcknowledge: @escaping ((Error?) -> Void)) -> Int64 {
+    func publish(topic: String, payload: String, tag: Int, prompt: Bool, onNetworkAcknowledge: @escaping ((Error?) -> Void)) -> Int64 {
         self.prompt = prompt
         onNetworkAcknowledge(error)
         return 0

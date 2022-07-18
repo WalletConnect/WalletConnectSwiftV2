@@ -166,7 +166,7 @@ extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
             let item = sessionItems[indexPath.row]
             Task {
                 do {
-                    try await Sign.instance.disconnect(topic: item.topic, reason: Reason(code: 0, message: "disconnect"))
+                    try await Sign.instance.disconnect(topic: item.topic)
                     DispatchQueue.main.async { [weak self] in
                         self?.sessionItems.remove(at: indexPath.row)
                         tableView.deleteRows(at: [indexPath], with: .automatic)

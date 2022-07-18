@@ -1,26 +1,21 @@
 import Foundation
 
-struct Endpoint {
-    let path: String
-    let queryParameters: [URLQueryItem]
-}
-
-actor HTTPClient {
+public actor HTTPClient {
 
     let host: String
 
     private let session: URLSession
 
-    init(host: String, session: URLSession = .shared) {
+    public init(host: String, session: URLSession = .shared) {
         self.host = host
         self.session = session
     }
 
-    func request<T: Decodable>(_ type: T.Type, at endpoint: Endpoint) async throws -> T {
+    public func request<T: Decodable>(_ type: T.Type, at service: HTTPService) async throws -> T {
         return try await withCheckedThrowingContinuation { continuation in
-            request(T.self, at: endpoint) { response in
+            request(T.self, at: service) { result in
                 do {
-                    let value = try response.result.get()
+                    let value = try result.get()
                     continuation.resume(returning: value)
                 } catch {
                     continuation.resume(throwing: error)
@@ -29,24 +24,57 @@ actor HTTPClient {
         }
     }
 
-    func request<T: Decodable>(_ type: T.Type, at endpoint: Endpoint, completion: @escaping (HTTPResponse<T>) -> Void) {
-        let request = makeRequest(for: endpoint)
+    public func request(service: HTTPService) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            request(service: service) { result in
+                continuation.resume(with: result)
+            }
+        }
+    }
+
+    func request<T: Decodable>(_ type: T.Type, at service: HTTPService, completion: @escaping (Result<T, Error>) -> Void) {
+        guard let request = service.resolve(for: host) else {
+            completion(.failure(HTTPError.malformedURL(service)))
+            return
+        }
         session.dataTask(with: request) { data, response, error in
-            completion(HTTPResponse(request: request, data: data, response: response, error: error))
+            do {
+                try HTTPClient.validate(response, error)
+                guard let validData = data else {
+                    throw HTTPError.responseDataNil
+                }
+                let decoded = try JSONDecoder().decode(T.self, from: validData)
+                completion(.success(decoded))
+            } catch {
+                completion(.failure(error))
+            }
         }.resume()
     }
 
-    private func makeRequest(for endpoint: Endpoint) -> URLRequest {
-        var components = URLComponents()
-        components.scheme = "https"
-        components.host = host
-        components.path = endpoint.path
-        components.queryItems = endpoint.queryParameters
-        guard let url = components.url else {
-            fatalError() // TODO: Remove fatal error when url fails to build
+    func request(service: HTTPService, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let request = service.resolve(for: host) else {
+            completion(.failure(HTTPError.malformedURL(service)))
+            return
         }
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        return request
+        session.dataTask(with: request) { _, response, error in
+            do {
+                try HTTPClient.validate(response, error)
+                completion(.success(()))
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+
+    private static func validate(_ urlResponse: URLResponse?, _ error: Error?) throws {
+        if let error = error {
+            throw HTTPError.dataTaskError(error)
+        }
+        guard let httpResponse = urlResponse as? HTTPURLResponse else {
+            throw HTTPError.noResponse
+        }
+        guard (200..<300) ~= httpResponse.statusCode else {
+            throw HTTPError.badStatusCode(httpResponse.statusCode)
+        }
     }
 }

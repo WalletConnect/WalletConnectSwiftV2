@@ -82,7 +82,7 @@ final class ApproveEngine {
         let proposeResponse = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
         let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
 
-        try await networkingInteractor.respond(topic: payload.topic, response: .response(response))
+        try await networkingInteractor.respond(topic: payload.topic, response: .response(response), tag: payload.wcRequest.responseTag)
         try await settle(topic: sessionTopic, proposal: proposal, namespaces: sessionNamespaces)
     }
 
@@ -124,6 +124,7 @@ final class ApproveEngine {
             selfParticipant: selfParticipant,
             peerParticipant: proposal.proposer,
             settleParams: settleParams,
+            requiredNamespaces: proposal.requiredNamespaces,
             acknowledged: false)
 
         logger.debug("Sending session settle request")
@@ -310,6 +311,7 @@ private extension ApproveEngine {
             selfParticipant: selfParticipant,
             peerParticipant: settleParams.controller,
             settleParams: settleParams,
+            requiredNamespaces: proposedNamespaces,
             acknowledged: true
         )
         sessionStore.setSession(session)

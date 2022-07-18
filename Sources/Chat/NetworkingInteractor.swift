@@ -5,12 +5,13 @@ import WalletConnectUtils
 import WalletConnectKMS
 
 protocol NetworkInteracting {
+    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> { get }
     var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {get}
     var responsePublisher: AnyPublisher<ChatResponse, Never> {get}
+    func respondSuccess(payload: RequestSubscriptionPayload) async throws
     func subscribe(topic: String) async throws
-    func requestUnencrypted(_ request: JSONRPCRequest<ChatRequestParams>, topic: String) async throws
     func request(_ request: JSONRPCRequest<ChatRequestParams>, topic: String, envelopeType: Envelope.EnvelopeType) async throws
-    func respond(topic: String, response: JsonRpcResult) async throws
+    func respond(topic: String, response: JsonRpcResult, tag: Int) async throws
 }
 
 extension NetworkInteracting {
@@ -36,6 +37,7 @@ class NetworkingInteractor: NetworkInteracting {
         responsePublisherSubject.eraseToAnyPublisher()
     }
     private let responsePublisherSubject = PassthroughSubject<ChatResponse, Never>()
+    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
     init(relayClient: RelayClient,
          serializer: Serializing,
@@ -46,27 +48,27 @@ class NetworkingInteractor: NetworkInteracting {
         self.serializer = serializer
         self.jsonRpcHistory = jsonRpcHistory
         self.logger = logger
+        self.socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
         relayClient.onMessage = { [unowned self] topic, message in
             manageSubscription(topic, message)
         }
     }
 
-    // TODO - remove the method
-    func requestUnencrypted(_ request: JSONRPCRequest<ChatRequestParams>, topic: String) async throws {
-        try jsonRpcHistory.set(topic: topic, request: request)
-        let message = try! request.json()
-        try await relayClient.publish(topic: topic, payload: message, tag: .chat)
-    }
-
     func request(_ request: JSONRPCRequest<ChatRequestParams>, topic: String, envelopeType: Envelope.EnvelopeType) async throws {
         try jsonRpcHistory.set(topic: topic, request: request)
         let message = try! serializer.serialize(topic: topic, encodable: request, envelopeType: envelopeType)
-        try await relayClient.publish(topic: topic, payload: message, tag: .chat)
+        try await relayClient.publish(topic: topic, payload: message, tag: request.params.tag)
     }
 
-    func respond(topic: String, response: JsonRpcResult) async throws {
+    func respondSuccess(payload: RequestSubscriptionPayload) async throws {
+        let response = JSONRPCResponse<AnyCodable>(id: payload.request.id, result: AnyCodable(true))
+        try await respond(topic: payload.topic, response: JsonRpcResult.response(response), tag: payload.request.params.responseTag)
+    }
+
+    func respond(topic: String, response: JsonRpcResult, tag: Int) async throws {
+        _ = try jsonRpcHistory.resolve(response: response)
         let message = try serializer.serialize(topic: topic, encodable: response.value)
-        try await relayClient.publish(topic: topic, payload: message, tag: .chat, prompt: false)
+        try await relayClient.publish(topic: topic, payload: message, tag: tag, prompt: false)
     }
 
     func subscribe(topic: String) async throws {
@@ -75,28 +77,24 @@ class NetworkingInteractor: NetworkInteracting {
 
     private func manageSubscription(_ topic: String, _ encodedEnvelope: String) {
         if let deserializedJsonRpcRequest: JSONRPCRequest<ChatRequestParams> = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
-            handleWCRequest(topic: topic, request: deserializedJsonRpcRequest)
-        } else if let decodedJsonRpcRequest: JSONRPCRequest<ChatRequestParams> = tryDecodeRequest(message: encodedEnvelope) {
-            handleWCRequest(topic: topic, request: decodedJsonRpcRequest)
+            handleChatRequest(topic: topic, request: deserializedJsonRpcRequest)
         } else if let deserializedJsonRpcResponse: JSONRPCResponse<AnyCodable> = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleJsonRpcResponse(response: deserializedJsonRpcResponse)
         } else if let deserializedJsonRpcError: JSONRPCErrorResponse = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleJsonRpcErrorResponse(response: deserializedJsonRpcError)
         } else {
-            print("Warning: WalletConnect Relay - Received unknown object type from networking relay")
+            print("Warning: Networking Interactor - Received unknown object type from networking relay")
         }
     }
 
-    private func tryDecodeRequest(message: String) -> JSONRPCRequest<ChatRequestParams>? {
-        guard let messageData = message.data(using: .utf8) else {
-            return nil
+    private func handleChatRequest(topic: String, request: JSONRPCRequest<ChatRequestParams>) {
+        do {
+            try jsonRpcHistory.set(topic: topic, request: request)
+            let payload = RequestSubscriptionPayload(topic: topic, request: request)
+            requestPublisherSubject.send(payload)
+        } catch {
+            logger.debug(error)
         }
-        return try? JSONDecoder().decode(JSONRPCRequest<ChatRequestParams>.self, from: messageData)
-    }
-
-    private func handleWCRequest(topic: String, request: JSONRPCRequest<ChatRequestParams>) {
-        let payload = RequestSubscriptionPayload(topic: topic, request: request)
-        requestPublisherSubject.send(payload)
     }
 
     private func handleJsonRpcResponse(response: JSONRPCResponse<AnyCodable>) {
