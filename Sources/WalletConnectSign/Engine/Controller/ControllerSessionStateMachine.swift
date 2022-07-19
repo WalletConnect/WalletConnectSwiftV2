@@ -32,7 +32,6 @@ final class ControllerSessionStateMachine {
         try validateControlledAcknowledged(session)
         try Namespace.validate(namespaces)
         logger.debug("Controller will update methods")
-        try session.updateNamespaces(namespaces)
         sessionStore.setSession(session)
         try await networkingInteractor.request(.wcSessionUpdate(SessionType.UpdateParams(namespaces: namespaces)), onTopic: topic)
     }
