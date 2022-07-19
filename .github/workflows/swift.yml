@@ -6,9 +6,21 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+concurrency:
+  # Support push/pr as event types with different behaviors each:
+  # 1. push: queue up builds by branch
+  # 2. pr: only allow one run per PR
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }}
+  # If there is already a workflow running for the same pull request, cancel it
+  # For non-PR triggers queue up builds
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build:    
     runs-on: macos-latest
+    strategy:
+      matrix:
+        test-type: [unit-tests, integration-tests, build-example-wallet, build-example-dapp, ui-tests]
 
     steps:
     - uses: actions/checkout@v2
@@ -27,43 +39,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-spm-
 
-    # Package builds
-    - name: Run tests
-      run: "xcodebuild \
-        -project Example/ExampleApp.xcodeproj \ 
-        -scheme WalletConnect \
-        -clonedSourcePackagesDirPath SourcePackages \
-        -sdk iphonesimulator"
-
-    # Integration tests
-    - name: Run integration tests
-      run: "xcodebuild \
-        -project Example/ExampleApp.xcodeproj \ 
-        -scheme IntegrationTests \
-        -clonedSourcePackagesDirPath SourcePackages \
-        -destination 'platform=iOS Simulator,name=iPhone 13' test"
-
-    # Wallet build
-    - name: Build Example Wallet
-      run: "xcodebuild \
-       -project Example/ExampleApp.xcodeproj \
-       -scheme Wallet \
-       -clonedSourcePackagesDirPath SourcePackages \
-       -sdk iphonesimulator"
-
-    # DApp build
-    - name: Build Example Dapp
-      run: "xcodebuild \
-        -project Example/ExampleApp.xcodeproj \
-        -scheme DApp \
-        -clonedSourcePackagesDirPath SourcePackages \
-        -sdk iphonesimulator"
-
-    # UI tests
-    - name: UI Tests
-      run: "xcodebuild \
-        -project Example/ExampleApp.xcodeproj \
-        -scheme UITests \
-        -clonedSourcePackagesDirPath SourcePackages \
-        -destination 'platform=iOS Simulator,name=iPhone 13' test"
-      continue-on-error: true
+    - uses: ./.github/actions/ci
+      with:
+        type: ${{ matrix.test-type }}
