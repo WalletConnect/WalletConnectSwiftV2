@@ -1,4 +1,4 @@
-name: Swift
+name: ci
 
 on:
   push:
@@ -20,7 +20,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        test-type: [unit-tests, integration-tests, build-example-wallet, build-example-dapp, ui-tests]
+        test-type: [ui-tests, unit-tests, integration-tests, build-example-wallet, build-example-dapp]
 
     steps:
     - uses: actions/checkout@v2
