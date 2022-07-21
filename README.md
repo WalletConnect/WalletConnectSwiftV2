@@ -1,4 +1,8 @@
 # Wallet Connect v.2 - Swift
+
+![CI main](https://github.com/WalletConnect/WalletConnectSwiftV2/actions/workflows/ci.yml/badge.svg?branch=main)
+![CI develop](https://github.com/WalletConnect/WalletConnectSwiftV2/actions/workflows/ci.yml/badge.svg?branch=develop)
+
 Swift implementation of WalletConnect v.2 protocol for native iOS applications.
 ## Requirements 
 - iOS 13
@@ -27,4 +31,3 @@ open `Example/ExampleApp.xcodeproj`
 ## License
 
 Apache 2.0
-
