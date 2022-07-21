@@ -27,7 +27,7 @@ final class SignClientTests: XCTestCase {
             socketConnectionType: .automatic,
             logger: logger
         )
-        let client = SignClient(
+        let client = SignClientFactory.create(
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
             logger: logger,
             keyValueStorage: RuntimeKeyValueStorage(),
