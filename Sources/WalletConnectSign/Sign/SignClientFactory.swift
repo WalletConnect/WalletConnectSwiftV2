@@ -5,7 +5,7 @@ import WalletConnectKMS
 
 public struct SignClientFactory {
 
-    /// Initializes and returns newly created WalletConnect Client Instance. Establishes a network connection with the relay
+    /// Initializes and returns newly created WalletConnect Client Instance
     ///
     /// - Parameters:
     ///   - metadata: describes your application and will define pairing appearance in a web browser.
