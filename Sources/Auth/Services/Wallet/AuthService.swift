@@ -2,7 +2,7 @@ import Foundation
 
 actor AuthService {
 
-    func pair(_ uri: WalletConnectURI) async throws {
-        fatalError("not implemented")
+    func respond(respondParams: RespondParams) async throws {
+
     }
 }
