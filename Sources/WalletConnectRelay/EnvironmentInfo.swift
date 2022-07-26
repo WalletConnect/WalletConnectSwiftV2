@@ -15,7 +15,7 @@ enum EnvironmentInfo {
     }
 
     static var sdkVersion: String {
-        "2.0.0-rc.0" // HARDCODED!! Is there a runtime way to get this?
+        "v0.9.1-rc.0"
     }
 
     static var operatingSystem: String {
