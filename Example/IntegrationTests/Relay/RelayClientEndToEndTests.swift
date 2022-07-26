@@ -22,7 +22,7 @@ final class RelayClientEndToEndTests: XCTestCase {
         )
         let urlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)
         let socket = WebSocket(url: urlFactory.create(host: relayHost, projectId: projectId))
-        
+
         let logger = ConsoleLogger()
         let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket), logger: logger)
         return RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
