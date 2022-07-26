@@ -28,6 +28,10 @@ let package = Package(
             dependencies: ["WalletConnectRelay", "WalletConnectUtils", "WalletConnectKMS"],
             path: "Sources/Chat"),
         .target(
+            name: "Auth",
+            dependencies: ["WalletConnectRelay", "WalletConnectUtils", "WalletConnectKMS"],
+            path: "Sources/Auth"),
+        .target(
             name: "WalletConnectRelay",
             dependencies: ["WalletConnectUtils", "WalletConnectKMS"],
             path: "Sources/WalletConnectRelay"),
@@ -50,6 +54,9 @@ let package = Package(
         .testTarget(
             name: "ChatTests",
             dependencies: ["Chat", "WalletConnectUtils", "TestingUtils"]),
+        .testTarget(
+            name: "AuthTests",
+            dependencies: ["Auth", "WalletConnectUtils", "TestingUtils"]),
         .testTarget(
             name: "RelayerTests",
             dependencies: ["WalletConnectRelay", "WalletConnectUtils", "TestingUtils"]),
