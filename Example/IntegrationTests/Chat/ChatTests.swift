@@ -47,7 +47,8 @@ final class ChatTests: XCTestCase {
     }
 
     func testInvite() async {
-        await waitClientsConnected()
+        waitClientsConnected()
+
         let inviteExpectation = expectation(description: "invitation expectation")
         let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
         let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
@@ -88,15 +89,19 @@ final class ChatTests: XCTestCase {
         wait(for: [newThreadinviteeExpectation, newThreadInviterExpectation], timeout: 10)
     }
 
-    func testMessage() async {
-        await waitClientsConnected()
+    func testMessage() {
+        waitClientsConnected()
+
         let messageExpectation = expectation(description: "message received")
         messageExpectation.expectedFulfillmentCount = 2
         let message = "message"
         let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
         let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
-        let pubKey = try! await invitee.register(account: inviteeAccount)
-        try! await inviter.invite(publicKey: pubKey, peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
+
+        Task(priority: .background) {
+            let pubKey = try! await invitee.register(account: inviteeAccount)
+            try! await inviter.invite(publicKey: pubKey, peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
+        }
 
         invitee.invitePublisher.sink { [unowned self] invite in
             Task {try! await invitee.accept(inviteId: invite.id)}
@@ -118,6 +123,6 @@ final class ChatTests: XCTestCase {
             messageExpectation.fulfill()
         }.store(in: &publishers)
 
-        wait(for: [messageExpectation], timeout: 35)
+        wait(for: [messageExpectation], timeout: 10)
     }
 }
