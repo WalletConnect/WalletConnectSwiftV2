@@ -35,47 +35,38 @@ public class ChatClient {
         messagePublisherSubject.eraseToAnyPublisher()
     }
 
-    public init(registry: Registry,
-         relayClient: RelayClient,
+    // MARK: - Initialization
+
+    init(registry: Registry,
+         registryService: RegistryService,
+         messagingService: MessagingService,
+         invitationHandlingService: InvitationHandlingService,
+         inviteService: InviteService,
+         leaveService: LeaveService,
+         resubscriptionService: ResubscriptionService,
          kms: KeyManagementService,
-                logger: ConsoleLogging = ConsoleLogger(loggingLevel: .debug),
-         keyValueStorage: KeyValueStorage) {
-        let topicToRegistryRecordStore = CodableStore<RegistryRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.topicToInvitationPubKey.rawValue)
+         threadStore: Database<Thread>,
+         messagesStore: Database<Message>,
+         invitePayloadStore: CodableStore<(RequestSubscriptionPayload)>,
+         socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
+    ) {
         self.registry = registry
+        self.registryService = registryService
+        self.messagingService = messagingService
+        self.invitationHandlingService = invitationHandlingService
+        self.inviteService = inviteService
+        self.leaveService = leaveService
+        self.resubscriptionService = resubscriptionService
         self.kms = kms
-        let serialiser = Serializer(kms: kms)
-        let jsonRpcHistory = JsonRpcHistory<ChatRequestParams>(logger: logger, keyValueStore: CodableStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
-        let networkingInteractor = NetworkingInteractor(
-            relayClient: relayClient,
-            serializer: serialiser,
-            logger: logger,
-            jsonRpcHistory: jsonRpcHistory)
-        self.invitePayloadStore = CodableStore<RequestSubscriptionPayload>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
-        self.registryService = RegistryService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToRegistryRecordStore: topicToRegistryRecordStore)
-        threadStore = Database<Thread>(keyValueStorage: keyValueStorage, identifier: StorageDomainIdentifiers.threads.rawValue)
-        self.resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, threadStore: threadStore, logger: logger)
-        self.invitationHandlingService = InvitationHandlingService(registry: registry,
-                             networkingInteractor: networkingInteractor,
-                                                                   kms: kms,
-                                                                   logger: logger,
-                                                                   topicToRegistryRecordStore: topicToRegistryRecordStore,
-                                                                   invitePayloadStore: invitePayloadStore,
-                                                                   threadsStore: threadStore)
-        self.inviteService = InviteService(
-            networkingInteractor: networkingInteractor,
-            kms: kms,
-            threadStore: threadStore,
-            logger: logger)
-        self.leaveService = LeaveService()
-        self.messagesStore = Database<Message>(keyValueStorage: keyValueStorage, identifier: StorageDomainIdentifiers.messages.rawValue)
-        self.messagingService = MessagingService(
-            networkingInteractor: networkingInteractor,
-            messagesStore: messagesStore,
-            threadStore: threadStore,
-            logger: logger)
-        socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
+        self.threadStore = threadStore
+        self.messagesStore = messagesStore
+        self.invitePayloadStore = invitePayloadStore
+        self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
+
         setUpEnginesCallbacks()
     }
+
+    // MARK: - Public interface
 
     /// Registers a new record on Chat keyserver,
     /// record is a blockchain account with a client generated public key
