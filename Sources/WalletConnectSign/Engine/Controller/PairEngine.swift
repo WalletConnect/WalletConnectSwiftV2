@@ -20,8 +20,8 @@ actor PairEngine {
         }
         var pairing = WCPairing(uri: uri)
         try await networkingInteractor.subscribe(topic: pairing.topic)
-        let symKey = try! SymmetricKey(hex: uri.symKey) // FIXME: Malformed QR code from external source can crash the SDK
-        try! kms.setSymmetricKey(symKey, for: pairing.topic)
+        let symKey = try SymmetricKey(hex: uri.symKey)
+        try kms.setSymmetricKey(symKey, for: pairing.topic)
         pairing.activate()
         pairingStore.setPairing(pairing)
     }
