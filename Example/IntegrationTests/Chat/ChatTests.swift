@@ -16,6 +16,8 @@ final class ChatTests: XCTestCase {
         registry = KeyValueRegistry()
         invitee = makeClient(prefix: "🦖 Registered")
         inviter = makeClient(prefix: "🍄 Inviter")
+
+        waitClientsConnected()
     }
 
     private func waitClientsConnected() {
@@ -47,8 +49,6 @@ final class ChatTests: XCTestCase {
     }
 
     func testInvite() async {
-        waitClientsConnected()
-
         let inviteExpectation = expectation(description: "invitation expectation")
         let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
         let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
@@ -61,8 +61,6 @@ final class ChatTests: XCTestCase {
     }
 
     func testAcceptAndCreateNewThread() {
-        waitClientsConnected()
-
         let newThreadInviterExpectation = expectation(description: "new thread on inviting client expectation")
         let newThreadinviteeExpectation = expectation(description: "new thread on invitee client expectation")
         let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
@@ -90,8 +88,6 @@ final class ChatTests: XCTestCase {
     }
 
     func testMessage() {
-        waitClientsConnected()
-
         let messageExpectation = expectation(description: "message received")
         messageExpectation.expectedFulfillmentCount = 2
         let message = "message"
