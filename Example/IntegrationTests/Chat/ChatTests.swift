@@ -15,7 +15,7 @@ final class ChatTests: XCTestCase {
     override func setUp() {
         registry = KeyValueRegistry()
         invitee = makeClient(prefix: "🦖 Registered")
-        inviter = makeClient(prefix: "🍄 Inviter")
+        inviter = makeClient(prefix: "🍄 Inviter") 
 
         waitClientsConnected()
     }
@@ -89,8 +89,8 @@ final class ChatTests: XCTestCase {
 
     func testMessage() {
         let messageExpectation = expectation(description: "message received")
-        messageExpectation.expectedFulfillmentCount = 2
-        let message = "message"
+        messageExpectation.expectedFulfillmentCount = 4 // expectedFulfillmentCount 4 because onMessage() called on send too
+
         let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
         let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
 
@@ -104,11 +104,11 @@ final class ChatTests: XCTestCase {
         }.store(in: &publishers)
 
         invitee.newThreadPublisher.sink { [unowned self] thread in
-            Task {try! await invitee.message(topic: thread.topic, message: message)}
+            Task {try! await invitee.message(topic: thread.topic, message: "message")}
         }.store(in: &publishers)
 
         inviter.newThreadPublisher.sink { [unowned self] thread in
-            Task {try! await inviter.message(topic: thread.topic, message: message)}
+            Task {try! await inviter.message(topic: thread.topic, message: "message")}
         }.store(in: &publishers)
 
         inviter.messagePublisher.sink { _ in
