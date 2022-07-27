@@ -47,7 +47,7 @@ final class ApproveEngineTests: XCTestCase {
     func testApproveProposal() async throws {
         // Client receives a proposal
         let topicA = String.generateTopic()
-        let pairing = WCPairing.stub(topic: topicA)
+        let pairing = WCPairing.stub(expiryDate: Date(timeIntervalSinceNow: 10000), topic: topicA)
         pairingStorageMock.setPairing(pairing)
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
