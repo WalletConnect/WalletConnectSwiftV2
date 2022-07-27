@@ -16,14 +16,14 @@ extension AppMetadata {
 }
 
 extension Pairing {
-    static func stub(expiryDate: Date = Date(timeIntervalSinceNow: 10000)) -> Pairing {
-        Pairing(topic: String.generateTopic(), peer: nil, expiryDate: expiryDate)
+    static func stub(expiryDate: Date = Date(timeIntervalSinceNow: 10000), topic: String = String.generateTopic()) -> Pairing {
+        Pairing(topic: topic, peer: nil, expiryDate: expiryDate)
     }
 }
 
 extension WCPairing {
-    static func stub(expiryDate: Date = Date(timeIntervalSinceNow: 10000), isActive: Bool = true) -> WCPairing {
-        WCPairing(topic: String.generateTopic(), relay: RelayProtocolOptions.stub(), peerMetadata: AppMetadata.stub(), isActive: isActive, expiryDate: expiryDate)
+    static func stub(expiryDate: Date = Date(timeIntervalSinceNow: 10000), isActive: Bool = true, topic: String = String.generateTopic()) -> WCPairing {
+        WCPairing(topic: topic, relay: RelayProtocolOptions.stub(), peerMetadata: AppMetadata.stub(), isActive: isActive, expiryDate: expiryDate)
     }
 }
 

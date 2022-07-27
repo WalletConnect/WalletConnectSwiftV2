@@ -47,6 +47,8 @@ final class ApproveEngineTests: XCTestCase {
     func testApproveProposal() async throws {
         // Client receives a proposal
         let topicA = String.generateTopic()
+        let pairing = WCPairing.stub(topic: topicA)
+        pairingStorageMock.setPairing(pairing)
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
         let request = WCRequest(method: .sessionPropose, params: .sessionPropose(proposal))
@@ -57,9 +59,11 @@ final class ApproveEngineTests: XCTestCase {
 
         let topicB = networkingInteractor.subscriptions.last!
 
+        let extendedPairing = pairingStorageMock.getPairing(forTopic: topicA)!
         XCTAssertTrue(networkingInteractor.didCallSubscribe)
         XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must store agreement key for topic B")
         XCTAssertEqual(networkingInteractor.didRespondOnTopic!, topicA, "Responder must respond on topic A")
+        XCTAssert(extendedPairing.expiryDate > Date(timeIntervalSinceNow: 2_505_600), "pairing expiry has been extended")
     }
 
     func testReceiveProposal() {
