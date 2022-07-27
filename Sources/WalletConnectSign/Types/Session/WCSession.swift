@@ -57,7 +57,7 @@ struct WCSession: SequenceObject, Equatable {
         peerParticipant: Participant,
         namespaces: [String: SessionNamespace],
         requiredNamespaces: [String: ProposalNamespace],
-        events: Set<String>, 
+        events: Set<String>,
         accounts: Set<Account>,
         acknowledged: Bool,
         expiry: Int64

@@ -1,4 +1,3 @@
-
 final class ImportInteractor {
     private let registerService: RegisterService
     private let accountStorage: AccountStorage
