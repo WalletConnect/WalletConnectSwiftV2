@@ -71,7 +71,6 @@ final class ApproveEngine {
             peerPublicKey: proposal.proposer.publicKey
         ) else { throw Errors.agreementMissingOrInvalid }
 
-        // TODO: Extend pairing
         let sessionTopic = agreementKey.derivedTopic()
         try kms.setAgreementSecret(agreementKey, topic: sessionTopic)
 
