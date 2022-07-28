@@ -1,5 +1,6 @@
 import XCTest
 @testable import WalletConnectSign
+import WalletConnectUtils
 
 final class WCPairingTests: XCTestCase {
 

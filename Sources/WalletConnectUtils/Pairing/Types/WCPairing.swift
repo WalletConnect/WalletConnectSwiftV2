@@ -13,7 +13,7 @@ public struct WCPairing: SequenceObject {
     public private (set) var active: Bool
 
     #if DEBUG
-    static var dateInitializer: () -> Date = Date.init
+    public static var dateInitializer: () -> Date = Date.init
     #else
     private static var dateInitializer: () -> Date = Date.init
     #endif

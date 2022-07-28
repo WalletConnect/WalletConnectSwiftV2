@@ -1,4 +1,5 @@
 @testable import WalletConnectSign
+import WalletConnectUtils
 
 final class WCPairingStorageMock: WCPairingStorage {
 
