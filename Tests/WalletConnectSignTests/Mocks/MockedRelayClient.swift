@@ -18,10 +18,10 @@ class MockedRelayClient: NetworkRelaying {
     var onMessage: ((String, String) -> Void)?
     var error: Error?
     var prompt = false
-    func publish(topic: String, payload: String, tag: Int, prompt: Bool, onNetworkAcknowledge: @escaping ((Error?) -> Void)) -> Int64 {
+    func publish(topic: String, payload: String, tag: Int, prompt: Bool, onNetworkAcknowledge: @escaping ((Error?) -> Void)) {//}-> Int64 {
         self.prompt = prompt
         onNetworkAcknowledge(error)
-        return 0
+//        return 0
     }
 
     func subscribe(topic: String, completion: @escaping (Error?) -> Void) {

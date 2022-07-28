@@ -36,7 +36,7 @@ let package = Package(
             path: "Sources/Auth"),
         .target(
             name: "WalletConnectRelay",
-            dependencies: ["WalletConnectUtils", "WalletConnectKMS"],
+            dependencies: ["WalletConnectUtils", "WalletConnectKMS", "JSONRPC"],
             path: "Sources/WalletConnectRelay"),
         .target(
             name: "WalletConnectKMS",

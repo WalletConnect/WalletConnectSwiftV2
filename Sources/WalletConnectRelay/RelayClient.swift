@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import WalletConnectUtils
 import WalletConnectKMS
+import JSONRPC
 
 public enum SocketConnectionStatus {
     case connected
@@ -31,10 +32,11 @@ public final class RelayClient {
         subscriptionResponsePublisherSubject.eraseToAnyPublisher()
     }
     private let subscriptionResponsePublisherSubject = PassthroughSubject<JSONRPCResponse<String>, Never>()
-    private var requestAcknowledgePublisher: AnyPublisher<JSONRPCResponse<Bool>, Never> {
+
+    private let requestAcknowledgePublisherSubject = PassthroughSubject<RPCID?, Never>()
+    private var requestAcknowledgePublisher: AnyPublisher<RPCID?, Never> {
         requestAcknowledgePublisherSubject.eraseToAnyPublisher()
     }
-    private let requestAcknowledgePublisherSubject = PassthroughSubject<JSONRPCResponse<Bool>, Never>()
     let logger: ConsoleLogging
     static let historyIdentifier = "com.walletconnect.sdk.relayer_client.subscription_json_rpc_record"
 
@@ -111,13 +113,20 @@ public final class RelayClient {
         payload: String,
         tag: Int,
         prompt: Bool = false,
-        onNetworkAcknowledge: @escaping ((Error?) -> Void)) -> Int64 {
-        let params = RelayJSONRPC.PublishParams(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag)
-        let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.method, params: params)
-        let requestJson = try! request.json()
+        onNetworkAcknowledge: @escaping ((Error?) -> Void)
+    ) { //-> Int64 {
+//        let params = RelayJSONRPC.PublishParams(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag)
+//        let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.method, params: params)
+//        let message = try! request.json()
+
+        let rpc = Publish(params: .init(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag))
+        let request = rpc
+            .wrapToIridium()
+            .asRPCRequest()
+        let message = try! request.asJSONEncodedString()
         logger.debug("iridium: Publishing Payload on Topic: \(topic)")
         var cancellable: AnyCancellable?
-        dispatcher.send(requestJson) { [weak self] error in
+        dispatcher.send(message) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to Publish Payload, error: \(error)")
                 cancellable?.cancel()
@@ -125,12 +134,12 @@ public final class RelayClient {
             }
         }
         cancellable = requestAcknowledgePublisher
-            .filter {$0.id == request.id}
+            .filter { $0 == request.id }
             .sink { (_) in
             cancellable?.cancel()
                 onNetworkAcknowledge(nil)
         }
-        return request.id
+//        return Int64(request.id!.right!)
     }
 
     @available(*, renamed: "subscribe(topic:)")
@@ -194,12 +203,12 @@ public final class RelayClient {
                 completion(nil)
             }
         }
-        cancellable = requestAcknowledgePublisher
-            .filter {$0.id == request.id}
-            .sink { (_) in
-                cancellable?.cancel()
-                completion(nil)
-            }
+//        cancellable = requestAcknowledgePublisher
+//            .filter { $0 == request.id }
+//            .sink { (_) in
+//                cancellable?.cancel()
+//                completion(nil)
+//            }
         return request.id
     }
 
@@ -221,8 +230,20 @@ public final class RelayClient {
             } catch {
                 logger.info("Relay Client Info: Json Rpc Duplicate Detected")
             }
-        } else if let response = tryDecode(RequestAcknowledgement.self, from: payload) {
-            requestAcknowledgePublisherSubject.send(response)
+        } else if let response = tryDecode(RPCResponse.self, from: payload) {
+            // use this
+            switch response.outcome {
+            case .success(let anyCodable):
+                if let acknowledgement = try? anyCodable.get(Bool.self) {
+                    requestAcknowledgePublisherSubject.send(response.id)
+                } else if let subscription = try? anyCodable.get(String.self) {
+
+                }
+            case .failure(let rpcError):
+                break
+            }
+//        } else if let response = tryDecode(RequestAcknowledgement.self, from: payload) {
+//            requestAcknowledgePublisherSubject.send(response)
         } else if let response = tryDecode(SubscriptionResponse.self, from: payload) {
             subscriptionResponsePublisherSubject.send(response)
         } else if let response = tryDecode(JSONRPCErrorResponse.self, from: payload) {

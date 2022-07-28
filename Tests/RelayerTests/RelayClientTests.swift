@@ -1,21 +1,23 @@
 import WalletConnectUtils
 import Foundation
 import Combine
+import JSONRPC
 import XCTest
 @testable import WalletConnectRelay
 
-class IridiumRelayTests: XCTestCase {
-    var iridiumRelay: RelayClient!
+final class RelayClientTests: XCTestCase {
+
+    var sut: RelayClient!
     var dispatcher: DispatcherMock!
 
     override func setUp() {
         dispatcher = DispatcherMock()
         let logger = ConsoleLogger()
-        iridiumRelay = RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
+        sut = RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
 
     override func tearDown() {
-        iridiumRelay = nil
+        sut = nil
         dispatcher = nil
     }
 
@@ -26,7 +28,7 @@ class IridiumRelayTests: XCTestCase {
         let subscriptionId = "sub-id"
         let subscriptionParams = RelayJSONRPC.SubscriptionParams(id: subscriptionId, data: RelayJSONRPC.SubscriptionData(topic: topic, message: message))
         let subscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>(id: 12345, method: RelayJSONRPC.Method.subscription.method, params: subscriptionParams)
-        iridiumRelay.onMessage = { subscriptionTopic, subscriptionMessage in
+        sut.onMessage = { subscriptionTopic, subscriptionMessage in
             XCTAssertEqual(subscriptionMessage, message)
             XCTAssertEqual(subscriptionTopic, topic)
             subscriptionExpectation.fulfill()
@@ -37,20 +39,29 @@ class IridiumRelayTests: XCTestCase {
 
     func testPublishRequestAcknowledge() {
         let acknowledgeExpectation = expectation(description: "completion with no error on iridium request acknowledge after publish")
-        let requestId = iridiumRelay.publish(topic: "", payload: "{}", tag: 0, onNetworkAcknowledge: { error in
-            acknowledgeExpectation.fulfill()
+        sut.publish(topic: "", payload: "{}", tag: 0) { error in
             XCTAssertNil(error)
-        })
-        let response = try! JSONRPCResponse<Bool>(id: requestId, result: true).json()
-        dispatcher.onMessage?(response)
+            acknowledgeExpectation.fulfill()
+        }
+        let request = dispatcher.getLastRequestSent()
+        let response = RPCResponse(matchingRequest: request, result: true)
+        dispatcher.onMessage?(try! response.asJSONEncodedString())
         waitForExpectations(timeout: 0.001, handler: nil)
+
+//        let requestId = sut.publish(topic: "", payload: "{}", tag: 0, onNetworkAcknowledge: { error in
+//            acknowledgeExpectation.fulfill()
+//            XCTAssertNil(error)
+//        })
+//        let response = try! JSONRPCResponse<Bool>(id: requestId, result: true).json()
+//        dispatcher.onMessage?(response)
+//        waitForExpectations(timeout: 0.001, handler: nil)
     }
 
     func testUnsubscribeRequestAcknowledge() {
         let acknowledgeExpectation = expectation(description: "completion with no error on iridium request acknowledge after unsubscribe")
         let topic = "1234"
-        iridiumRelay.subscriptions[topic] = ""
-        let requestId = iridiumRelay.unsubscribe(topic: topic) { error in
+        sut.subscriptions[topic] = ""
+        let requestId = sut.unsubscribe(topic: topic) { error in
             XCTAssertNil(error)
             acknowledgeExpectation.fulfill()
         }
@@ -63,7 +74,7 @@ class IridiumRelayTests: XCTestCase {
         let expectation = expectation(description: "Request duplicate not delivered")
         let subscriptionParams = RelayJSONRPC.SubscriptionParams(id: "sub_id", data: RelayJSONRPC.SubscriptionData(topic: "topic", message: "message"))
         let subscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>(id: 12345, method: RelayJSONRPC.Method.subscription.method, params: subscriptionParams)
-        iridiumRelay.onMessage = { _, _ in
+        sut.onMessage = { _, _ in
             expectation.fulfill()
         }
         dispatcher.onMessage?(try! subscriptionRequest.json())
@@ -72,19 +83,19 @@ class IridiumRelayTests: XCTestCase {
     }
 
     func testSendOnPublish() {
-        iridiumRelay.publish(topic: "", payload: "", tag: 0, onNetworkAcknowledge: { _ in})
+        sut.publish(topic: "", payload: "", tag: 0, onNetworkAcknowledge: { _ in})
         XCTAssertTrue(dispatcher.sent)
     }
 
     func testSendOnSubscribe() {
-        iridiumRelay.subscribe(topic: "") {_ in }
+        sut.subscribe(topic: "") {_ in }
         XCTAssertTrue(dispatcher.sent)
     }
 
     func testSendOnUnsubscribe() {
         let topic = "123"
-        iridiumRelay.subscriptions[topic] = ""
-        iridiumRelay.unsubscribe(topic: topic) {_ in }
+        sut.subscriptions[topic] = ""
+        sut.unsubscribe(topic: topic) {_ in }
         XCTAssertTrue(dispatcher.sent)
     }
 }
