@@ -16,9 +16,6 @@ let package = Package(
         .library(
             name: "WalletConnectChat",
             targets: ["Chat"]),
-        .library(
-            name: "WalletConnectAuth",
-            targets: ["Auth"])
     ],
     dependencies: [],
     targets: [
