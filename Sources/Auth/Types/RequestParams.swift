@@ -11,4 +11,3 @@ struct RequestParams {
     let requestId: String?
     let resources: String?
 }
-
