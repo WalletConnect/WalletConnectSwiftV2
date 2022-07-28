@@ -1,10 +1,13 @@
 import Foundation
 
-struct RequestParams {
-    let domain: String
+struct AuthPayloadParams {
+    let type: String
     let chainId: String
-    let nonce: String
+    let domain: String
     let aud: String
+    let version: String
+    let nonce: String
+    let iat: String
     let nbf: String?
     let exp: String?
     let statement: String?
