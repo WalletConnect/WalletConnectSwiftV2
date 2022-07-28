@@ -1,3 +1,5 @@
+import WalletConnectUtils
+
 protocol WCSessionStorage: AnyObject {
     var onSessionExpiration: ((WCSession) -> Void)? { get set }
     @discardableResult

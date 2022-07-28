@@ -1,12 +1,16 @@
 import Foundation
-import WalletConnectKMS
 
-struct WCPairing: SequenceObject {
-    let topic: String
-    let relay: RelayProtocolOptions
-    var peerMetadata: AppMetadata?
-    private (set) var expiryDate: Date
-    private (set) var active: Bool
+public struct WCPairing: SequenceObject {
+    enum Errors: Error {
+        case invalidUpdateExpiryValue
+    }
+
+    public let topic: String
+    public let relay: RelayProtocolOptions
+    public var peerMetadata: AppMetadata?
+
+    public private (set) var expiryDate: Date
+    public private (set) var active: Bool
 
     #if DEBUG
     static var dateInitializer: () -> Date = Date.init
@@ -14,15 +18,15 @@ struct WCPairing: SequenceObject {
     private static var dateInitializer: () -> Date = Date.init
     #endif
 
-    static var timeToLiveInactive: TimeInterval {
+    public static var timeToLiveInactive: TimeInterval {
         5 * .minute
     }
 
-    static var timeToLiveActive: TimeInterval {
+    public static var timeToLiveActive: TimeInterval {
         30 * .day
     }
 
-    init(topic: String, relay: RelayProtocolOptions, peerMetadata: AppMetadata, isActive: Bool = false, expiryDate: Date) {
+    public init(topic: String, relay: RelayProtocolOptions, peerMetadata: AppMetadata, isActive: Bool = false, expiryDate: Date) {
         self.topic = topic
         self.relay = relay
         self.peerMetadata = peerMetadata
@@ -30,31 +34,31 @@ struct WCPairing: SequenceObject {
         self.expiryDate = expiryDate
     }
 
-    init(topic: String) {
+    public init(topic: String) {
         self.topic = topic
         self.relay = RelayProtocolOptions(protocol: "iridium", data: nil)
         self.active = false
         self.expiryDate = Self.dateInitializer().advanced(by: Self.timeToLiveInactive)
     }
 
-    init(uri: WalletConnectURI) {
+    public init(uri: WalletConnectURI) {
         self.topic = uri.topic
         self.relay = uri.relay
         self.active = false
         self.expiryDate = Self.dateInitializer().advanced(by: Self.timeToLiveInactive)
     }
 
-    mutating func activate() {
+    public mutating func activate() {
         active = true
         try? updateExpiry()
     }
 
-    mutating func updateExpiry(_ ttl: TimeInterval = WCPairing.timeToLiveActive) throws {
+    public mutating func updateExpiry(_ ttl: TimeInterval = WCPairing.timeToLiveActive) throws {
         let now = Self.dateInitializer()
         let newExpiryDate = now.advanced(by: ttl)
         let maxExpiryDate = now.advanced(by: Self.timeToLiveActive)
         guard newExpiryDate > expiryDate && newExpiryDate <= maxExpiryDate else {
-            throw WalletConnectError.invalidUpdateExpiryValue
+            throw Errors.invalidUpdateExpiryValue
         }
         expiryDate = newExpiryDate
     }
