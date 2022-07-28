@@ -28,10 +28,11 @@ public final class RelayClient {
     }
     private let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
 
-    private var subscriptionResponsePublisher: AnyPublisher<JSONRPCResponse<String>, Never> {
+
+    private let subscriptionResponsePublisherSubject = PassthroughSubject<(RPCID?, String), Never>()
+    private var subscriptionResponsePublisher: AnyPublisher<(RPCID?, String), Never> {
         subscriptionResponsePublisherSubject.eraseToAnyPublisher()
     }
-    private let subscriptionResponsePublisherSubject = PassthroughSubject<JSONRPCResponse<String>, Never>()
 
     private let requestAcknowledgePublisherSubject = PassthroughSubject<RPCID?, Never>()
     private var requestAcknowledgePublisher: AnyPublisher<RPCID?, Never> {
@@ -108,7 +109,7 @@ public final class RelayClient {
     }
 
     /// Completes with an acknowledgement from the relay network.
-    @discardableResult public func publish(
+    public func publish(
         topic: String,
         payload: String,
         tag: Int,
@@ -122,6 +123,12 @@ public final class RelayClient {
         let message = try! request.asJSONEncodedString()
         logger.debug("iridium: Publishing Payload on Topic: \(topic)")
         var cancellable: AnyCancellable?
+        cancellable = requestAcknowledgePublisher
+            .filter { $0 == request.id }
+            .sink { (_) in
+            cancellable?.cancel()
+                onNetworkAcknowledge(nil)
+        }
         dispatcher.send(message) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to Publish Payload, error: \(error)")
@@ -129,37 +136,32 @@ public final class RelayClient {
                 onNetworkAcknowledge(error)
             }
         }
-        cancellable = requestAcknowledgePublisher
-            .filter { $0 == request.id }
-            .sink { (_) in
-            cancellable?.cancel()
-                onNetworkAcknowledge(nil)
-        }
     }
 
     @available(*, renamed: "subscribe(topic:)")
     public func subscribe(topic: String, completion: @escaping (Error?) -> Void) {
         logger.debug("iridium: Subscribing on Topic: \(topic)")
-        let params = RelayJSONRPC.SubscribeParams(topic: topic)
-        let request = JSONRPCRequest(method: RelayJSONRPC.Method.subscribe.method, params: params)
-        let requestJson = try! request.json()
+        let rpc = Subscribe(params: .init(topic: topic))
+        let request = rpc
+            .wrapToIridium()
+            .asRPCRequest()
+        let message = try! request.asJSONEncodedString()
         var cancellable: AnyCancellable?
-        dispatcher.send(requestJson) { [weak self] error in
+        cancellable = subscriptionResponsePublisher
+            .filter { $0.0 == request.id }
+            .sink { [weak self] subscriptionInfo in
+                cancellable?.cancel()
+                self?.concurrentQueue.async(flags: .barrier) {
+                    self?.subscriptions[topic] = subscriptionInfo.1
+                }
+                completion(nil)
+        }
+        dispatcher.send(message) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to Subscribe on Topic \(error)")
                 cancellable?.cancel()
                 completion(error)
-            } else {
-                completion(nil)
             }
-        }
-        cancellable = subscriptionResponsePublisher
-            .filter {$0.id == request.id}
-            .sink { [weak self] (subscriptionResponse) in
-            cancellable?.cancel()
-                self?.concurrentQueue.async(flags: .barrier) {
-                    self?.subscriptions[topic] = subscriptionResponse.result
-                }
         }
     }
 
@@ -175,7 +177,7 @@ public final class RelayClient {
         }
     }
 
-    @discardableResult public func unsubscribe(topic: String, completion: @escaping ((Error?) -> Void)) {
+    public func unsubscribe(topic: String, completion: @escaping ((Error?) -> Void)) {
         guard let subscriptionId = subscriptions[topic] else {
             completion(RelyerError.subscriptionIdNotFound)
             return
@@ -186,8 +188,14 @@ public final class RelayClient {
             .wrapToIridium()
             .asRPCRequest()
         let message = try! request.asJSONEncodedString()
-        var cancellable: AnyCancellable?
         jsonRpcSubscriptionsHistory.delete(topic: topic)
+        var cancellable: AnyCancellable?
+        cancellable = requestAcknowledgePublisher
+            .filter { $0 == request.id }
+            .sink { (_) in
+                cancellable?.cancel()
+                completion(nil)
+            }
         dispatcher.send(message) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to Unsubscribe on Topic")
@@ -200,12 +208,6 @@ public final class RelayClient {
                 completion(nil)
             }
         }
-        cancellable = requestAcknowledgePublisher
-            .filter { $0 == request.id }
-            .sink { (_) in
-                cancellable?.cancel()
-                completion(nil)
-            }
     }
 
     private func setUpBindings() {
@@ -230,18 +232,18 @@ public final class RelayClient {
             // use this
             switch response.outcome {
             case .success(let anyCodable):
-                if let acknowledgement = try? anyCodable.get(Bool.self) {
+                if let _ = try? anyCodable.get(Bool.self) { // TODO: Handle success vs. error
                     requestAcknowledgePublisherSubject.send(response.id)
-                } else if let subscription = try? anyCodable.get(String.self) {
-
+                } else if let subscriptionId = try? anyCodable.get(String.self) {
+                    subscriptionResponsePublisherSubject.send((response.id, subscriptionId))
                 }
             case .failure(let rpcError):
-                break
+                logger.error("Received error message from iridium network, code: \(rpcError.code), message: \(rpcError.message)")
             }
 //        } else if let response = tryDecode(RequestAcknowledgement.self, from: payload) {
 //            requestAcknowledgePublisherSubject.send(response)
-        } else if let response = tryDecode(SubscriptionResponse.self, from: payload) {
-            subscriptionResponsePublisherSubject.send(response)
+//        } else if let response = tryDecode(SubscriptionResponse.self, from: payload) {
+//            subscriptionResponsePublisherSubject.send(response)
         } else if let response = tryDecode(JSONRPCErrorResponse.self, from: payload) {
             logger.error("Received error message from iridium network, code: \(response.error.code), message: \(response.error.message)")
         } else {

@@ -37,6 +37,18 @@ final class RelayClientTests: XCTestCase {
         waitForExpectations(timeout: 0.001, handler: nil)
     }
 
+    func testSubscribeRequestAcknowledge() {
+        let acknowledgeExpectation = expectation(description: "")
+        sut.subscribe(topic: "") { error in
+            XCTAssertNil(error)
+            acknowledgeExpectation.fulfill()
+        }
+        let request = dispatcher.getLastRequestSent()
+        let response = RPCResponse(matchingRequest: request, result: "id")
+        dispatcher.onMessage?(try! response.asJSONEncodedString())
+        waitForExpectations(timeout: 0.1, handler: nil)
+    }
+
     func testPublishRequestAcknowledge() {
         let acknowledgeExpectation = expectation(description: "completion with no error on iridium request acknowledge after publish")
         sut.publish(topic: "", payload: "{}", tag: 0) { error in
