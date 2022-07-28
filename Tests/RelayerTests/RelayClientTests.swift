@@ -26,14 +26,15 @@ final class RelayClientTests: XCTestCase {
         let topic = "0987"
         let message = "qwerty"
         let subscriptionId = "sub-id"
-        let subscriptionParams = RelayJSONRPC.SubscriptionParams(id: subscriptionId, data: RelayJSONRPC.SubscriptionData(topic: topic, message: message))
-        let subscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>(id: 12345, method: RelayJSONRPC.Method.subscription.method, params: subscriptionParams)
+        let subscription = Subscription(id: subscriptionId, topic: topic, message: message)
+        let request = subscription.asRPCRequest()
+
         sut.onMessage = { subscriptionTopic, subscriptionMessage in
             XCTAssertEqual(subscriptionMessage, message)
             XCTAssertEqual(subscriptionTopic, topic)
             subscriptionExpectation.fulfill()
         }
-        dispatcher.onMessage?(try! subscriptionRequest.json())
+        dispatcher.onMessage?(try! request.asJSONEncodedString())
         waitForExpectations(timeout: 0.001, handler: nil)
     }
 
@@ -77,14 +78,13 @@ final class RelayClientTests: XCTestCase {
 
     func testSubscriptionRequestDeliveredOnce() {
         let expectation = expectation(description: "Request duplicate not delivered")
-        let subscriptionParams = RelayJSONRPC.SubscriptionParams(id: "sub_id", data: RelayJSONRPC.SubscriptionData(topic: "topic", message: "message"))
-        let subscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>(id: 12345, method: RelayJSONRPC.Method.subscription.method, params: subscriptionParams)
+        let request = Subscription.init(id: "sub_id", topic: "topic", message: "message").asRPCRequest()
         sut.onMessage = { _, _ in
             expectation.fulfill()
         }
-        dispatcher.onMessage?(try! subscriptionRequest.json())
-        dispatcher.onMessage?(try! subscriptionRequest.json())
-        waitForExpectations(timeout: 0.001, handler: nil)
+        dispatcher.onMessage?(try! request.asJSONEncodedString())
+        dispatcher.onMessage?(try! request.asJSONEncodedString())
+        waitForExpectations(timeout: 0.1, handler: nil)
     }
 
     func testSendOnPublish() {

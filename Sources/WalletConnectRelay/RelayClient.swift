@@ -110,11 +110,12 @@ public final class RelayClient {
 
     /// Completes when networking client sends a request, error if it fails on client side
     public func publish(topic: String, payload: String, tag: Int, prompt: Bool = false) async throws {
-        let params = RelayJSONRPC.PublishParams(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag)
-        let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.method, params: params)
-        logger.debug("Publishing Payload on Topic: \(topic)")
-        let requestJson = try request.json()
-        try await dispatcher.send(requestJson)
+        let request = Publish(params: .init(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag))
+            .wrapToIridium()
+            .asRPCRequest()
+        let message = try request.asJSONEncodedString()
+        logger.debug("Publishing payload on topic: \(topic)")
+        try await dispatcher.send(message)
     }
 
     /// Completes with an acknowledgement from the relay network.

@@ -58,4 +58,8 @@ struct Subscription: RelayRPC {
     var method: String {
         "subscription"
     }
+
+    init(id: String, topic: String, message: String) {
+        self.params = Params(id: id, data: Params.Contents(topic: topic, message: message))
+    }
 }
