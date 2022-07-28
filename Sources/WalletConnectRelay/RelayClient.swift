@@ -13,8 +13,7 @@ public final class RelayClient {
         case subscriptionIdNotFound
     }
     private typealias SubscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>
-    private typealias SubscriptionResponse = JSONRPCResponse<String>
-    private typealias RequestAcknowledgement = JSONRPCResponse<Bool>
+    
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.relay_client",
                                                 attributes: .concurrent)
     let jsonRpcSubscriptionsHistory: JsonRpcHistory<RelayJSONRPC.SubscriptionParams>
@@ -220,16 +219,24 @@ public final class RelayClient {
     }
 
     private func handlePayloadMessage(_ payload: String) {
-        if let request = tryDecode(SubscriptionRequest.self, from: payload), validate(request: request, method: .subscription) {
-            do {
-                try jsonRpcSubscriptionsHistory.set(topic: request.params.data.topic, request: request)
-                onMessage?(request.params.data.topic, request.params.data.message)
-                acknowledgeSubscription(requestId: request.id)
-            } catch {
-                logger.info("Relay Client Info: Json Rpc Duplicate Detected")
+//        if let request = tryDecode(SubscriptionRequest.self, from: payload), validate(request: request, method: .subscription) {
+//            do {
+//                try jsonRpcSubscriptionsHistory.set(topic: request.params.data.topic, request: request)
+//                onMessage?(request.params.data.topic, request.params.data.message)
+//                acknowledgeSubscription(requestId: request.id)
+//            } catch {
+//                logger.info("Relay Client Info: Json Rpc Duplicate Detected")
+//            }
+//        }
+        if let request = tryDecode(RPCRequest.self, from: payload) {
+            if let params = try? request.params?.get(Subscription.Params.self) {
+                // set history
+                onMessage?(params.data.topic, params.data.message)
+                acknowledgeSubscription(requestId: Int64(request.id!.right!))
+            } else {
+                // not subscription
             }
         } else if let response = tryDecode(RPCResponse.self, from: payload) {
-            // use this
             switch response.outcome {
             case .success(let anyCodable):
                 if let _ = try? anyCodable.get(Bool.self) { // TODO: Handle success vs. error
@@ -240,12 +247,6 @@ public final class RelayClient {
             case .failure(let rpcError):
                 logger.error("Received error message from iridium network, code: \(rpcError.code), message: \(rpcError.message)")
             }
-//        } else if let response = tryDecode(RequestAcknowledgement.self, from: payload) {
-//            requestAcknowledgePublisherSubject.send(response)
-//        } else if let response = tryDecode(SubscriptionResponse.self, from: payload) {
-//            subscriptionResponsePublisherSubject.send(response)
-        } else if let response = tryDecode(JSONRPCErrorResponse.self, from: payload) {
-            logger.error("Received error message from iridium network, code: \(response.error.code), message: \(response.error.message)")
         } else {
             logger.error("Unexpected response from network")
         }

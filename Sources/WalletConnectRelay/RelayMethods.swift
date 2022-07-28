@@ -42,7 +42,18 @@ struct Publish: RelayRPC {
     }
 }
 
-struct Subscription {
+struct Subscription: RelayRPC {
+
+    struct Params: Codable {
+        struct Contents: Codable {
+            let topic: String
+            let message: String
+        }
+        let id: String
+        let data: Contents
+    }
+
+    let params: Params
 
     var method: String {
         "subscription"
