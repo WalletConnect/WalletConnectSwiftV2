@@ -1,11 +1,5 @@
 import JSONRPC
 
-protocol RPCMethod {
-    associatedtype Parameters
-    var method: String { get }
-    var params: Parameters { get }
-}
-
 protocol RelayRPC: RPCMethod {}
 
 extension RelayRPC where Parameters: Codable {
@@ -16,7 +10,10 @@ extension RelayRPC where Parameters: Codable {
 
     func wrapToIridium() -> PrefixDecorator<Self> {
         return PrefixDecorator(rpcMethod: self, prefix: "iridium")
-//        return PrefixDecorator.iridium(rpcMethod: self)
+    }
+
+    func wrapToIRN() -> PrefixDecorator<Self> {
+        return PrefixDecorator(rpcMethod: self, prefix: "irn")
     }
 
     func asRPCRequest() -> RPCRequest {
@@ -37,18 +34,5 @@ struct PrefixDecorator<T>: RelayRPC where T: RelayRPC {
 
     var params: Parameters {
         rpcMethod.params
-    }
-}
-
-
-// TODO: Move
-import Foundation
-
-struct WalletConnectRPCID: IdentifierGenerator {
-
-    func next() -> RPCID {
-        let timestamp = Int64(Date().timeIntervalSince1970 * 1000) * 1000
-        let random = Int64.random(in: 0..<1000)
-        return .right(Int(timestamp + random))
     }
 }
