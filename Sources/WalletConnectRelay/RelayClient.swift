@@ -114,11 +114,7 @@ public final class RelayClient {
         tag: Int,
         prompt: Bool = false,
         onNetworkAcknowledge: @escaping ((Error?) -> Void)
-    ) { //-> Int64 {
-//        let params = RelayJSONRPC.PublishParams(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag)
-//        let request = JSONRPCRequest<RelayJSONRPC.PublishParams>(method: RelayJSONRPC.Method.publish.method, params: params)
-//        let message = try! request.json()
-
+    ) {
         let rpc = Publish(params: .init(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag))
         let request = rpc
             .wrapToIridium()
@@ -139,7 +135,6 @@ public final class RelayClient {
             cancellable?.cancel()
                 onNetworkAcknowledge(nil)
         }
-//        return Int64(request.id!.right!)
     }
 
     @available(*, renamed: "subscribe(topic:)")
@@ -180,18 +175,20 @@ public final class RelayClient {
         }
     }
 
-    @discardableResult public func unsubscribe(topic: String, completion: @escaping ((Error?) -> Void)) -> Int64? {
+    @discardableResult public func unsubscribe(topic: String, completion: @escaping ((Error?) -> Void)) {
         guard let subscriptionId = subscriptions[topic] else {
             completion(RelyerError.subscriptionIdNotFound)
-            return nil
+            return
         }
         logger.debug("iridium: Unsubscribing on Topic: \(topic)")
-        let params = RelayJSONRPC.UnsubscribeParams(id: subscriptionId, topic: topic)
-        let request = JSONRPCRequest(method: RelayJSONRPC.Method.unsubscribe.method, params: params)
-        let requestJson = try! request.json()
+        let rpc = Unsubscribe(params: .init(id: subscriptionId, topic: topic))
+        let request = rpc
+            .wrapToIridium()
+            .asRPCRequest()
+        let message = try! request.asJSONEncodedString()
         var cancellable: AnyCancellable?
         jsonRpcSubscriptionsHistory.delete(topic: topic)
-        dispatcher.send(requestJson) { [weak self] error in
+        dispatcher.send(message) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to Unsubscribe on Topic")
                 cancellable?.cancel()
@@ -203,13 +200,12 @@ public final class RelayClient {
                 completion(nil)
             }
         }
-//        cancellable = requestAcknowledgePublisher
-//            .filter { $0 == request.id }
-//            .sink { (_) in
-//                cancellable?.cancel()
-//                completion(nil)
-//            }
-        return request.id
+        cancellable = requestAcknowledgePublisher
+            .filter { $0 == request.id }
+            .sink { (_) in
+                cancellable?.cancel()
+                completion(nil)
+            }
     }
 
     private func setUpBindings() {

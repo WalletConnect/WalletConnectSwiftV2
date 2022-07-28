@@ -46,28 +46,21 @@ final class RelayClientTests: XCTestCase {
         let request = dispatcher.getLastRequestSent()
         let response = RPCResponse(matchingRequest: request, result: true)
         dispatcher.onMessage?(try! response.asJSONEncodedString())
-        waitForExpectations(timeout: 0.001, handler: nil)
-
-//        let requestId = sut.publish(topic: "", payload: "{}", tag: 0, onNetworkAcknowledge: { error in
-//            acknowledgeExpectation.fulfill()
-//            XCTAssertNil(error)
-//        })
-//        let response = try! JSONRPCResponse<Bool>(id: requestId, result: true).json()
-//        dispatcher.onMessage?(response)
-//        waitForExpectations(timeout: 0.001, handler: nil)
+        waitForExpectations(timeout: 0.1, handler: nil)
     }
 
     func testUnsubscribeRequestAcknowledge() {
         let acknowledgeExpectation = expectation(description: "completion with no error on iridium request acknowledge after unsubscribe")
-        let topic = "1234"
+        let topic = String.randomTopic()
         sut.subscriptions[topic] = ""
-        let requestId = sut.unsubscribe(topic: topic) { error in
+        sut.unsubscribe(topic: topic) { error in
             XCTAssertNil(error)
             acknowledgeExpectation.fulfill()
         }
-        let response = try! JSONRPCResponse<Bool>(id: requestId!, result: true).json()
-        dispatcher.onMessage?(response)
-        waitForExpectations(timeout: 0.001, handler: nil)
+        let request = dispatcher.getLastRequestSent()
+        let response = RPCResponse(matchingRequest: request, result: true)
+        dispatcher.onMessage?(try! response.asJSONEncodedString())
+        waitForExpectations(timeout: 0.1, handler: nil)
     }
 
     func testSubscriptionRequestDeliveredOnce() {
