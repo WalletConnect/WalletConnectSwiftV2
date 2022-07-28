@@ -47,7 +47,7 @@ let package = Package(
             dependencies: ["WalletConnectUtils"]),
         .target(
             name: "WalletConnectUtils",
-            dependencies: ["Commons"]),
+            dependencies: ["Commons", "JSONRPC"]),
         .target(
             name: "JSONRPC",
             dependencies: ["Commons"]),

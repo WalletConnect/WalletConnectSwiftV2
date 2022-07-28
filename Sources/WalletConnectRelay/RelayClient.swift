@@ -13,7 +13,7 @@ public final class RelayClient {
         case subscriptionIdNotFound
     }
     private typealias SubscriptionRequest = JSONRPCRequest<RelayJSONRPC.SubscriptionParams>
-    
+
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.relay_client",
                                                 attributes: .concurrent)
     let jsonRpcSubscriptionsHistory: JsonRpcHistory<RelayJSONRPC.SubscriptionParams>
@@ -218,6 +218,7 @@ public final class RelayClient {
         }
     }
 
+    // FIXME: Parse data to string once before trying to decode -> respond error on fail
     private func handlePayloadMessage(_ payload: String) {
 //        if let request = tryDecode(SubscriptionRequest.self, from: payload), validate(request: request, method: .subscription) {
 //            do {
