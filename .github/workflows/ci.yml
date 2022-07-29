@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   build:    
-    runs-on: macos-12
+    runs-on: macos-latest
     strategy:
       matrix:
         test-type: [ui-tests, unit-tests, integration-tests, build-example-wallet, build-example-dapp]
