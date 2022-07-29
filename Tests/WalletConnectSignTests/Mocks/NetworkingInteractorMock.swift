@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import WalletConnectUtils
+import WalletConnectPairing
 @testable import WalletConnectSign
 @testable import TestingUtils
 

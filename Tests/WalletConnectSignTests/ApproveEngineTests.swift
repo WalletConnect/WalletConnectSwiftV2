@@ -1,9 +1,10 @@
 import XCTest
 import Combine
+import WalletConnectUtils
+import WalletConnectPairing
 @testable import WalletConnectSign
 @testable import TestingUtils
 @testable import WalletConnectKMS
-import WalletConnectUtils
 
 final class ApproveEngineTests: XCTestCase {
 
