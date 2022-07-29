@@ -198,7 +198,7 @@ public final class RelayClient {
             .wrapToIridium()
             .asRPCRequest()
         let message = try! request.asJSONEncodedString()
-        rpcHistory.delete(topic: topic)
+        rpcHistory.deleteAll(forTopic: topic)
         var cancellable: AnyCancellable?
         cancellable = requestAcknowledgePublisher
             .filter { $0 == request.id }
@@ -225,7 +225,7 @@ public final class RelayClient {
         if let request = tryDecode(RPCRequest.self, from: payload) {
             if let params = try? request.params?.get(Subscription.Params.self) {
                 do {
-                    try rpcHistory.set(request, for: params.data.topic, emmitedBy: .remote)
+                    try rpcHistory.set(request, forTopic: params.data.topic, emmitedBy: .remote)
                     try acknowledgeRequest(request)
                     onMessage?(params.data.topic, params.data.message)
                 } catch {

@@ -32,7 +32,7 @@ public final class RPCHistory {
         try? storage.get(key: "\(recordId)")
     }
 
-    public func set(_ request: RPCRequest, for topic: String, emmitedBy origin: Record.Origin) throws {
+    public func set(_ request: RPCRequest, forTopic topic: String, emmitedBy origin: Record.Origin) throws {
         guard let id = request.id else {
             throw HistoryError.unidentifiedRequest
         }
@@ -57,7 +57,7 @@ public final class RPCHistory {
         storage.set(record, forKey: "\(record.id)")
     }
 
-    public func delete(topic: String) {
+    public func deleteAll(forTopic topic: String) {
         storage.getAll().forEach { record in
             if record.topic == topic {
                 storage.delete(forKey: "\(record.id)")
