@@ -6,16 +6,19 @@ class AuthClient {
     }
 
     private let appPairService: AppPairService
+    private let appRequestService: AuthRequestService
 
     private let walletPairService: WalletPairService
 
-    init(appPairService: AppPairService, walletPairService: WalletPairService) {
+    init(appPairService: AppPairService, appRequestService: AuthRequestService, walletPairService: WalletPairService) {
         self.appPairService = appPairService
+        self.appRequestService = appRequestService
         self.walletPairService = walletPairService
     }
 
-    func connect() async throws -> String {
+    func request(params: RequestParams) async throws -> String {
         let uri = try await appPairService.create()
+        try await appRequestService.request(params: params, topic: uri.topic)
         return uri.absoluteString
     }
 
