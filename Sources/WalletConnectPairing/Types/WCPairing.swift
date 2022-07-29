@@ -1,4 +1,5 @@
 import Foundation
+import WalletConnectUtils
 
 public struct WCPairing: SequenceObject {
     enum Errors: Error {

@@ -16,12 +16,15 @@ let package = Package(
         .library(
             name: "WalletConnectChat",
             targets: ["Chat"]),
+        .library(
+            name: "WalletConnectPairing",
+            targets: ["WalletConnectPairing"]),
     ],
     dependencies: [],
     targets: [
         .target(
             name: "WalletConnectSign",
-            dependencies: ["WalletConnectRelay", "WalletConnectUtils", "WalletConnectKMS"],
+            dependencies: ["WalletConnectRelay", "WalletConnectUtils", "WalletConnectKMS", "WalletConnectPairing"],
             path: "Sources/WalletConnectSign"),
         .target(
             name: "Chat",
@@ -29,7 +32,7 @@ let package = Package(
             path: "Sources/Chat"),
         .target(
             name: "Auth",
-            dependencies: ["WalletConnectRelay", "WalletConnectUtils", "WalletConnectKMS"],
+            dependencies: ["WalletConnectRelay", "WalletConnectUtils", "WalletConnectKMS", "WalletConnectPairing"],
             path: "Sources/Auth"),
         .target(
             name: "WalletConnectRelay",
@@ -39,6 +42,9 @@ let package = Package(
             name: "WalletConnectKMS",
             dependencies: ["WalletConnectUtils"],
             path: "Sources/WalletConnectKMS"),
+        .target(
+            name: "WalletConnectPairing",
+            dependencies: ["WalletConnectUtils"]),
         .target(
             name: "WalletConnectUtils",
             dependencies: ["Commons"]),

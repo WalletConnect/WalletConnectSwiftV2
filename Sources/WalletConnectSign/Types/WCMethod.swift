@@ -1,4 +1,5 @@
-import WalletConnectUtils
+import Foundation
+import WalletConnectPairing
 
 enum WCMethod {
     case wcPairingPing

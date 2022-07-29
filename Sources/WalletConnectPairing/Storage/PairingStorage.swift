@@ -1,3 +1,6 @@
+import Foundation
+import WalletConnectUtils
+
 public protocol WCPairingStorage: AnyObject {
     var onPairingExpiration: ((WCPairing) -> Void)? { get set }
     func hasPairing(forTopic topic: String) -> Bool

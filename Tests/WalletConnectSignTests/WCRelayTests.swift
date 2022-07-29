@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import XCTest
 import WalletConnectUtils
+import WalletConnectPairing
 @testable import TestingUtils
 @testable import WalletConnectSign
 

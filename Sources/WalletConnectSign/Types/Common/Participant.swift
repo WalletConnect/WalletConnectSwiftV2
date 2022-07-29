@@ -1,4 +1,4 @@
-import WalletConnectUtils
+import Foundation
 
 struct Participant: Codable, Equatable {
     let publicKey: String

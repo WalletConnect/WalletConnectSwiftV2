@@ -1,6 +1,5 @@
 import Foundation
 import WalletConnectRelay
-import WalletConnectUtils
 
 public extension Sign {
     struct Config {

@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectUtils
 /**
  A representation of an active pairing connection.
  */

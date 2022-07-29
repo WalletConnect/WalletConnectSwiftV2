@@ -2,6 +2,7 @@ import Foundation
 import WalletConnectRelay
 import WalletConnectUtils
 import WalletConnectKMS
+import WalletConnectPairing
 
 public struct SignClientFactory {
 
