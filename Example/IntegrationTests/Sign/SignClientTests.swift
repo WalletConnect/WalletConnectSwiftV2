@@ -4,6 +4,27 @@ import WalletConnectUtils
 @testable import WalletConnectSign
 @testable import WalletConnectRelay
 
+ struct EthSendTransaction: Codable, Equatable {
+    let from: String
+    let data: String
+    let value: String
+    let to: String
+    let gasPrice: String
+    let nonce: String
+ }
+
+ fileprivate let ethSendTransaction = """
+   {
+      "from":"0xb60e8dd61c5d32be8058bb8eb970870f07233155",
+      "to":"0xd46e8dd67c5d32be8058bb8eb970870f07244567",
+      "data":"0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675",
+      "gas":"0x76c0",
+      "gasPrice":"0x9184e72a000",
+      "value":"0x9184e72a",
+      "nonce":"0x117"
+   }
+ """
+
 final class SignClientTests: XCTestCase {
 
     let defaultTimeout: TimeInterval = 5
@@ -155,6 +176,60 @@ final class SignClientTests: XCTestCase {
         wait(for: [pongResponseExpectation], timeout: defaultTimeout)
     }
 
+    func testProposerRequestSessionRequest() async throws {
+        let dapp = proposer!
+        let wallet = responder!
+        let requestExpectation = expectation(description: "Responder receives request")
+        let responseExpectation = expectation(description: "Proposer receives response")
+        let requiredNamespaces = ProposalNamespace.stubRequired()
+        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
+
+        let method = "eth_sendTransaction"
+        let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]
+        let responseParams = "0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c"
+
+        wallet.onSessionProposal = { proposal in
+            print("ON PROPOSAL")
+            Task {
+                do {
+                    try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces) }
+                catch {
+                    XCTFail("\(error)")
+                }
+            }
+        }
+        dapp.onSessionSettled = { settledSession in
+            let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: Blockchain("eip155:1")!)
+            Task {
+                try await dapp.client.request(params: requestParams)
+            }
+        }
+        wallet.onSessionRequest = { sessionRequest in
+            XCTAssertEqual(sessionRequest.method, method)
+            let ethSendTrancastionParams = try! sessionRequest.params.get([EthSendTransaction].self)
+            XCTAssertEqual(ethSendTrancastionParams, params)
+            let jsonrpcResponse = JSONRPCResponse<AnyCodable>(id: sessionRequest.id, result: AnyCodable(responseParams))
+            Task {
+                try await wallet.client.respond(topic: sessionRequest.topic, response: .response(jsonrpcResponse))
+            }
+            requestExpectation.fulfill()
+        }
+        dapp.onSessionResponse = { response in
+            switch response.result {
+            case .response(let jsonRpcResponse):
+                let response = try! jsonRpcResponse.result.get(String.self)
+                XCTAssertEqual(response, responseParams)
+                responseExpectation.fulfill()
+            case .error(_):
+                XCTFail()
+            }
+        }
+
+        let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces)
+        try await wallet.client.pair(uri: uri!)
+        wait(for: [requestExpectation, responseExpectation], timeout: defaultTimeout)
+    }
+
 //
 //    func testNewSessionOnExistingPairing() async {
 //        await waitClientsConnected()
@@ -185,48 +260,6 @@ final class SignClientTests: XCTestCase {
 //        }
 //        wait(for: [proposerSettlesSessionExpectation, responderSettlesSessionExpectation], timeout: defaultTimeout)
 //    }
-//
-//
-//    func testProposerRequestSessionRequest() async {
-//        await waitClientsConnected()
-//        let requestExpectation = expectation(description: "Responder receives request")
-//        let responseExpectation = expectation(description: "Proposer receives response")
-//        let method = "eth_sendTransaction"
-//        let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]
-//        let responseParams = "0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c"
-//        let uri = try! await proposer.client.connect(namespaces: [Namespace.stub(methods: [method])])!
-//
-//        _ = try! await responder.client.pair(uri: uri)
-//        responder.onSessionProposal = {[unowned self]  proposal in
-//            try? self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: proposal.namespaces)
-//        }
-//        proposer.onSessionSettled = {[unowned self]  settledSession in
-//            let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: Blockchain("eip155:1")!)
-//            Task {
-//                try await self.proposer.client.request(params: requestParams)
-//            }
-//        }
-//        proposer.onSessionResponse = { response in
-//            switch response.result {
-//            case .response(let jsonRpcResponse):
-//                let response = try! jsonRpcResponse.result.get(String.self)
-//                XCTAssertEqual(response, responseParams)
-//                responseExpectation.fulfill()
-//            case .error(_):
-//                XCTFail()
-//            }
-//        }
-//        responder.onSessionRequest = {[unowned self]  sessionRequest in
-//            XCTAssertEqual(sessionRequest.method, method)
-//            let ethSendTrancastionParams = try! sessionRequest.params.get([EthSendTransaction].self)
-//            XCTAssertEqual(ethSendTrancastionParams, params)
-//            let jsonrpcResponse = JSONRPCResponse<AnyCodable>(id: sessionRequest.id, result: AnyCodable(responseParams))
-//            self.responder.client.respond(topic: sessionRequest.topic, response: .response(jsonrpcResponse))
-//            requestExpectation.fulfill()
-//        }
-//        wait(for: [requestExpectation, responseExpectation], timeout: defaultTimeout)
-//    }
-//
 //
 //    func testSessionRequestFailureResponse() async {
 //        await waitClientsConnected()
@@ -368,26 +401,3 @@ final class SignClientTests: XCTestCase {
 //        wait(for: [proposerReceivesEventExpectation], timeout: defaultTimeout)
 //    }
 }
-
-// public struct EthSendTransaction: Codable, Equatable {
-//    public let from: String
-//    public let data: String
-//    public let value: String
-//    public let to: String
-//    public let gasPrice: String
-//    public let nonce: String
-// }
-//
-//
-// fileprivate let ethSendTransaction = """
-//   {
-//      "from":"0xb60e8dd61c5d32be8058bb8eb970870f07233155",
-//      "to":"0xd46e8dd67c5d32be8058bb8eb970870f07244567",
-//      "data":"0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675",
-//      "gas":"0x76c0",
-//      "gasPrice":"0x9184e72a000",
-//      "value":"0x9184e72a",
-//      "nonce":"0x117"
-//   }
-// """
-//
