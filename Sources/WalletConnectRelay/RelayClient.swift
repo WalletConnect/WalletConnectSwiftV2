@@ -11,7 +11,7 @@ public enum SocketConnectionStatus {
 
 public final class RelayClient {
 
-    enum RelayerError: Error {
+    enum Errors: Error {
         case subscriptionIdNotFound
     }
 
@@ -189,7 +189,7 @@ public final class RelayClient {
 
     public func unsubscribe(topic: String, completion: @escaping ((Error?) -> Void)) {
         guard let subscriptionId = subscriptions[topic] else {
-            completion(RelayerError.subscriptionIdNotFound)
+            completion(Errors.subscriptionIdNotFound)
             return
         }
         logger.debug("Relay: Unsubscribing from topic: \(topic)")
