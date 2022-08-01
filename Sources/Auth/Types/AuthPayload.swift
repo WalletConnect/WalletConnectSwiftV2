@@ -14,14 +14,14 @@ struct AuthPayload: Codable, Equatable {
     let requestId: String?
     let resources: String?
 
-    init(requestParams: RequestParams) {
-        self.type = requestParams.type
+    init(requestParams: RequestParams, iat: String) {
+        self.type = "eip4361"
         self.chainId = requestParams.chainId
         self.domain = requestParams.domain
         self.aud = requestParams.aud
         self.version = "1"
         self.nonce = requestParams.nonce
-        self.iat = requestParams.iat
+        self.iat = iat
         self.nbf = requestParams.nbf
         self.exp = requestParams.exp
         self.statement = requestParams.statement

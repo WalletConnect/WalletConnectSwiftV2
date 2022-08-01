@@ -1,4 +1,7 @@
+#if os(iOS)
 import UIKit
+#endif
+import Foundation
 
 enum EnvironmentInfo {
 
@@ -19,6 +22,11 @@ enum EnvironmentInfo {
     }
 
     static var operatingSystem: String {
-        "\(UIDevice.current.systemName)-\(UIDevice.current.systemVersion)"
+#if os(iOS)
+        return "\(UIDevice.current.systemName)-\(UIDevice.current.systemVersion)"
+#elseif os(macOS)
+        let systemVersion = ProcessInfo.processInfo.operatingSystemVersion
+        return "macOS-\(systemVersion)"
+#endif
     }
 }

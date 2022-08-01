@@ -1,4 +1,7 @@
-protocol WCPairingStorage: AnyObject {
+import Foundation
+import WalletConnectUtils
+
+public protocol WCPairingStorage: AnyObject {
     var onPairingExpiration: ((WCPairing) -> Void)? { get set }
     func hasPairing(forTopic topic: String) -> Bool
     func setPairing(_ pairing: WCPairing)
@@ -8,40 +11,40 @@ protocol WCPairingStorage: AnyObject {
     func deleteAll()
 }
 
-final class PairingStorage: WCPairingStorage {
+public final class PairingStorage: WCPairingStorage {
 
-    var onPairingExpiration: ((WCPairing) -> Void)? {
+    public var onPairingExpiration: ((WCPairing) -> Void)? {
         get { storage.onSequenceExpiration }
         set { storage.onSequenceExpiration = newValue }
     }
 
     private let storage: SequenceStore<WCPairing>
 
-    init(storage: SequenceStore<WCPairing>) {
+    public init(storage: SequenceStore<WCPairing>) {
         self.storage = storage
     }
 
-    func hasPairing(forTopic topic: String) -> Bool {
+    public func hasPairing(forTopic topic: String) -> Bool {
         storage.hasSequence(forTopic: topic)
     }
 
-    func setPairing(_ pairing: WCPairing) {
+    public func setPairing(_ pairing: WCPairing) {
         storage.setSequence(pairing)
     }
 
-    func getPairing(forTopic topic: String) -> WCPairing? {
+    public func getPairing(forTopic topic: String) -> WCPairing? {
         try? storage.getSequence(forTopic: topic)
     }
 
-    func getAll() -> [WCPairing] {
+    public func getAll() -> [WCPairing] {
         storage.getAll()
     }
 
-    func delete(topic: String) {
+    public func delete(topic: String) {
         storage.delete(topic: topic)
     }
 
-    func deleteAll() {
+    public func deleteAll() {
         storage.deleteAll()
     }
 }

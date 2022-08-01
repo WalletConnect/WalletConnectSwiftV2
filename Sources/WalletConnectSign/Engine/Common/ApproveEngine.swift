@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import WalletConnectUtils
 import WalletConnectKMS
+import WalletConnectPairing
 
 final class ApproveEngine {
     enum Errors: Error {
