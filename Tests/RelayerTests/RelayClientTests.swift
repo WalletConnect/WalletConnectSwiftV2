@@ -22,7 +22,7 @@ final class RelayClientTests: XCTestCase {
     }
 
     func testNotifyOnSubscriptionRequest() {
-        let subscriptionExpectation = expectation(description: "notifies with encoded message on a iridium subscription event")
+        let expectation = expectation(description: "Relay must notify listener on a Subscription request")
         let topic = "0987"
         let message = "qwerty"
         let subscriptionId = "sub-id"
@@ -32,7 +32,7 @@ final class RelayClientTests: XCTestCase {
         sut.onMessage = { subscriptionTopic, subscriptionMessage in
             XCTAssertEqual(subscriptionMessage, message)
             XCTAssertEqual(subscriptionTopic, topic)
-            subscriptionExpectation.fulfill()
+            expectation.fulfill()
         }
         dispatcher.onMessage?(try! request.asJSONEncodedString())
         waitForExpectations(timeout: 0.001, handler: nil)
@@ -51,10 +51,10 @@ final class RelayClientTests: XCTestCase {
     }
 
     func testPublishRequestAcknowledge() {
-        let acknowledgeExpectation = expectation(description: "completion with no error on iridium request acknowledge after publish")
+        let expectation = expectation(description: "Publish must callback on relay server acknowledgement")
         sut.publish(topic: "", payload: "{}", tag: 0) { error in
             XCTAssertNil(error)
-            acknowledgeExpectation.fulfill()
+            expectation.fulfill()
         }
         let request = dispatcher.getLastRequestSent()
         let response = RPCResponse(matchingRequest: request, result: true)
@@ -63,12 +63,12 @@ final class RelayClientTests: XCTestCase {
     }
 
     func testUnsubscribeRequestAcknowledge() {
-        let acknowledgeExpectation = expectation(description: "completion with no error on iridium request acknowledge after unsubscribe")
+        let expectation = expectation(description: "Unsubscribe must callback on relay server acknowledgement")
         let topic = String.randomTopic()
         sut.subscriptions[topic] = ""
         sut.unsubscribe(topic: topic) { error in
             XCTAssertNil(error)
-            acknowledgeExpectation.fulfill()
+            expectation.fulfill()
         }
         let request = dispatcher.getLastRequestSent()
         let response = RPCResponse(matchingRequest: request, result: true)
@@ -77,7 +77,7 @@ final class RelayClientTests: XCTestCase {
     }
 
     func testSubscriptionRequestDeliveredOnce() {
-        let expectation = expectation(description: "Request duplicate not delivered")
+        let expectation = expectation(description: "Duplicate Subscription requests must notify only the first time")
         let request = Subscription.init(id: "sub_id", topic: "topic", message: "message").asRPCRequest()
         sut.onMessage = { _, _ in
             expectation.fulfill()

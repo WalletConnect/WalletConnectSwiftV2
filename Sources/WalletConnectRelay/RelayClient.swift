@@ -64,7 +64,7 @@ public final class RelayClient {
 
     /// Instantiates Relay Client
     /// - Parameters:
-    ///   - relayHost: proxy server host that your application will use to connect to Iridium Network. If you register your project at `www.walletconnect.com` you can use `relay.walletconnect.com`
+    ///   - relayHost: proxy server host that your application will use to connect to Relay Network. If you register your project at `www.walletconnect.com` you can use `relay.walletconnect.com`
     ///   - projectId: an optional parameter used to access the public WalletConnect infrastructure. Go to `www.walletconnect.com` for info.
     ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults
     ///   - socketConnectionType: socket connection type
@@ -131,7 +131,7 @@ public final class RelayClient {
             .wrapToIridium()
             .asRPCRequest()
         let message = try! request.asJSONEncodedString()
-        logger.debug("iridium: Publishing Payload on Topic: \(topic)")
+        logger.debug("Publishing Payload on Topic: \(topic)")
         var cancellable: AnyCancellable?
         cancellable = requestAcknowledgePublisher
             .filter { $0 == request.id }
@@ -243,7 +243,7 @@ public final class RelayClient {
                     subscriptionResponsePublisherSubject.send((response.id, subscriptionId))
                 }
             case .failure(let rpcError):
-                logger.error("Received error message from iridium network, code: \(rpcError.code), message: \(rpcError.message)")
+                logger.error("Received RPC error from relay network: \(rpcError)")
             }
         } else {
             logger.error("Unexpected response from network")
