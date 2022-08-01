@@ -63,3 +63,15 @@ extension Either: Codable where L: Codable, R: Codable {
         }
     }
 }
+
+extension Either: CustomStringConvertible {
+
+    public var description: String {
+        switch self {
+        case let .left(left):
+            return "\(left)"
+        case let .right(right):
+            return "\(right)"
+        }
+    }
+}

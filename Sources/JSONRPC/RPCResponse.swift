@@ -19,12 +19,20 @@ public struct RPCResponse: Equatable {
         return nil
     }
 
-    private let outcome: Result<AnyCodable, JSONRPCError>
+    public let outcome: Result<AnyCodable, JSONRPCError>
 
     internal init(id: RPCID?, outcome: Result<AnyCodable, JSONRPCError>) {
         self.jsonrpc = "2.0"
         self.id = id
         self.outcome = outcome
+    }
+
+    public init<C>(matchingRequest: RPCRequest, result: C) where C: Codable {
+        self.init(id: matchingRequest.id, outcome: .success(AnyCodable(result)))
+    }
+
+    public init(matchingRequest: RPCRequest, error: JSONRPCError) {
+        self.init(id: matchingRequest.id, outcome: .failure(error))
     }
 
     public init<C>(id: Int, result: C) where C: Codable {

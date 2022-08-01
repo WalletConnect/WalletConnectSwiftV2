@@ -72,11 +72,11 @@ public struct RPCRequest: Equatable {
 
 extension RPCRequest {
 
-    static func notification<C>(method: String, params: C) -> RPCRequest where C: Codable {
+    public static func notification<C>(method: String, params: C) -> RPCRequest where C: Codable {
         return RPCRequest(method: method, params: AnyCodable(params), id: nil)
     }
 
-    static func notification(method: String) -> RPCRequest {
+    public static func notification(method: String) -> RPCRequest {
         return RPCRequest(method: method, params: nil, id: nil)
     }
 
