@@ -189,8 +189,7 @@ final class SignClientTests: XCTestCase {
         let responseParams = "0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c"
 
         wallet.onSessionProposal = { proposal in
-            print("ON PROPOSAL")
-            Task {
+            Task(priority: .high) {
                 do {
                     try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces) }
                 catch {
@@ -200,7 +199,7 @@ final class SignClientTests: XCTestCase {
         }
         dapp.onSessionSettled = { settledSession in
             let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: Blockchain("eip155:1")!)
-            Task {
+            Task(priority: .high) {
                 try await dapp.client.request(params: requestParams)
             }
         }
@@ -209,7 +208,7 @@ final class SignClientTests: XCTestCase {
             let ethSendTrancastionParams = try! sessionRequest.params.get([EthSendTransaction].self)
             XCTAssertEqual(ethSendTrancastionParams, params)
             let jsonrpcResponse = JSONRPCResponse<AnyCodable>(id: sessionRequest.id, result: AnyCodable(responseParams))
-            Task {
+            Task(priority: .high) {
                 try await wallet.client.respond(topic: sessionRequest.topic, response: .response(jsonrpcResponse))
             }
             requestExpectation.fulfill()
