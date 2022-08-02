@@ -2,7 +2,7 @@ import Combine
 import Foundation
 import WalletConnectUtils
 
-actor AuthRequstSubscriber {
+class AuthRequstSubscriber {
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging
     private var publishers = [AnyCancellable]()
@@ -26,16 +26,11 @@ actor AuthRequstSubscriber {
             }
             do {
                 let message = try messageFormatter.formatMessage(from: authRequest)
-                onRequest?(subscriptionPayload.request.id!.right!, message)
+                guard let requestId = subscriptionPayload.request.id?.right else { return }
+                onRequest?(requestId, message)
             } catch {
                 logger.debug(error)
             }
         }.store(in: &publishers)
-    }
-}
-
-struct SIWEMessageFormatter {
-    func formatMessage(from request: AuthRequestParams) throws -> String {
-        fatalError("not implemented")
     }
 }
