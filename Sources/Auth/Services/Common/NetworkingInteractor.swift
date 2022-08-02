@@ -19,14 +19,14 @@ extension NetworkInteracting {
 class NetworkingInteractor: NetworkInteracting {
     private let relayClient: RelayClient
     private let serializer: Serializing
-    private let jsonRpcHistory: JsonRpcHistory<AuthRequestParams>
+    private let rpcHistory: RPCHistory
 
     init(relayClient: RelayClient,
          serializer: Serializing,
-         jsonRpcHistory: JsonRpcHistory<AuthRequestParams>) {
+         rpcHistory: RPCHistory) {
         self.relayClient = relayClient
         self.serializer = serializer
-        self.jsonRpcHistory = jsonRpcHistory
+        self.rpcHistory = rpcHistory
     }
 
     func subscribe(topic: String) async throws {
@@ -34,7 +34,7 @@ class NetworkingInteractor: NetworkInteracting {
     }
 
     func request(_ request: RPCRequest, topic: String, envelopeType: Envelope.EnvelopeType) async throws {
-        try jsonRpcHistory.set(topic: topic, request: request)
+        try rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
         let message = try! serializer.serialize(topic: topic, encodable: request, envelopeType: envelopeType)
         try await relayClient.publish(topic: topic, payload: message, tag: AuthRequestParams.tag)
     }
