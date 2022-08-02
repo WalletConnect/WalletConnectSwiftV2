@@ -1,6 +1,6 @@
 import Foundation
 
-actor AuthService {
+actor AuthRespondService {
     private let networkingInteractor: NetworkInteracting
 
     init(networkingInteractor: NetworkInteracting) {

@@ -1,6 +1,6 @@
 import Commons
 
-public typealias RPCID = Either<String, Int>
+public typealias RPCID = Either<String, Int64>
 
 public protocol IdentifierGenerator {
     func next() -> RPCID
@@ -9,6 +9,6 @@ public protocol IdentifierGenerator {
 struct IntIdentifierGenerator: IdentifierGenerator {
 
     func next() -> RPCID {
-        return RPCID(Int.random(in: Int.min...Int.max))
+        return RPCID(Int64.random(in: Int64.min...Int64.max))
     }
 }

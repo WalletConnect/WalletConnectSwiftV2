@@ -1,5 +1,5 @@
 import Foundation
 
-struct CacaoHeader {
+struct CacaoHeader: Codable, Equatable {
     let t: String
 }

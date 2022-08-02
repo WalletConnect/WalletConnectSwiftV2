@@ -35,7 +35,7 @@ public struct RPCResponse: Equatable {
         self.init(id: matchingRequest.id, outcome: .failure(error))
     }
 
-    public init<C>(id: Int, result: C) where C: Codable {
+    public init<C>(id: Int64, result: C) where C: Codable {
         self.init(id: RPCID(id), outcome: .success(AnyCodable(result)))
     }
 
@@ -43,7 +43,7 @@ public struct RPCResponse: Equatable {
         self.init(id: RPCID(id), outcome: .success(AnyCodable(result)))
     }
 
-    public init(id: Int, error: JSONRPCError) {
+    public init(id: Int64, error: JSONRPCError) {
         self.init(id: RPCID(id), outcome: .failure(error))
     }
 
@@ -51,7 +51,7 @@ public struct RPCResponse: Equatable {
         self.init(id: RPCID(id), outcome: .failure(error))
     }
 
-    public init(id: Int, errorCode: Int, message: String, associatedData: AnyCodable? = nil) {
+    public init(id: Int64, errorCode: Int, message: String, associatedData: AnyCodable? = nil) {
         self.init(id: RPCID(id), outcome: .failure(JSONRPCError(code: errorCode, message: message, data: associatedData)))
     }
 
