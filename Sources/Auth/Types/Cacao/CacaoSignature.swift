@@ -1,6 +1,6 @@
 import Foundation
 
-struct CacaoSignature {
+struct CacaoSignature: Codable, Equatable {
     let t: String
     let s: String
     let m: String
