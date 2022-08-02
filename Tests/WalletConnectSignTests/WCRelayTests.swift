@@ -36,14 +36,6 @@ class NetworkingInteractorTests: XCTestCase {
         relayClient.onMessage?(topic, testPayload)
         waitForExpectations(timeout: 1.001, handler: nil)
     }
-
-    func testPromptOnSessionRequest() async {
-        let topic = "fefc3dc39cacbc562ed58f92b296e2d65a6b07ef08992b93db5b3cb86280635a"
-        let method = getWCSessionMethod()
-        relayClient.prompt = false
-        try! await networkingInteractor.request(topic: topic, payload: method.asRequest())
-        XCTAssertTrue(relayClient.prompt)
-    }
 }
 
 extension NetworkingInteractorTests {

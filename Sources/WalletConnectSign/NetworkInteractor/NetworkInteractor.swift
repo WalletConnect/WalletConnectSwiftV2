@@ -7,14 +7,11 @@ protocol NetworkInteracting: AnyObject {
     var transportConnectionPublisher: AnyPublisher<Void, Never> {get}
     var wcRequestPublisher: AnyPublisher<WCRequestSubscriptionPayload, Never> {get}
     var responsePublisher: AnyPublisher<WCResponse, Never> {get}
-    /// Completes when request sent from a networking client
-    func request(_ wcMethod: WCMethod, onTopic topic: String) async throws
     /// Completes with an acknowledgement from the relay network
     func requestNetworkAck(_ wcMethod: WCMethod, onTopic topic: String, completion: @escaping ((Error?) -> Void))
     /// Completes with a peer response
     func requestPeerResponse(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> Void)?)
     func respond(topic: String, response: JsonRpcResult, tag: Int) async throws
-    func respondSuccess(payload: WCRequestSubscriptionPayload) async throws
     func respondSuccess(for payload: WCRequestSubscriptionPayload)
     func respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode) async throws
     func subscribe(topic: String) async throws
@@ -60,18 +57,6 @@ class NetworkInteractor: NetworkInteracting {
         self.logger = logger
         self.jsonRpcHistory = jsonRpcHistory
         setUpPublishers()
-    }
-
-    func request(_ wcMethod: WCMethod, onTopic topic: String) async throws {
-        try await request(topic: topic, payload: wcMethod.asRequest())
-    }
-
-    /// Completes when networking client sends a request
-    func request(topic: String, payload: WCRequest) async throws {
-        try jsonRpcHistory.set(topic: topic, request: payload, chainId: getChainId(payload))
-        let message = try serializer.serialize(topic: topic, encodable: payload)
-        let prompt = shouldPrompt(payload.method)
-        try await relayClient.publish(topic: topic, payload: message, tag: payload.tag, prompt: prompt)
     }
 
     func requestPeerResponse(_ wcMethod: WCMethod, onTopic topic: String, completion: ((Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse>) -> Void)?) {
@@ -139,11 +124,6 @@ class NetworkInteractor: NetworkInteracting {
         }
     }
 
-    func respondSuccess(payload: WCRequestSubscriptionPayload) async throws {
-        let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(true))
-        try await respond(topic: payload.topic, response: JsonRpcResult.response(response), tag: payload.wcRequest.responseTag)
-    }
-
     func respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode) async throws {
         let response = JSONRPCErrorResponse(id: payload.wcRequest.id, error: JSONRPCErrorResponse.Error(code: reason.code, message: reason.message))
         try await respond(topic: payload.topic, response: JsonRpcResult.error(response), tag: payload.wcRequest.responseTag)
@@ -153,7 +133,8 @@ class NetworkInteractor: NetworkInteracting {
     func respondSuccess(for payload: WCRequestSubscriptionPayload) {
         Task(priority: .background) {
             do {
-                try await respondSuccess(payload: payload)
+                let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(true))
+                try await respond(topic: payload.topic, response: JsonRpcResult.response(response), tag: payload.wcRequest.responseTag)
             } catch {
                 self.logger.error("Respond Success failed with: \(error.localizedDescription)")
             }
