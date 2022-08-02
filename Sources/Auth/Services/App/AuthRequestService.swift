@@ -1,6 +1,7 @@
 import Foundation
 import WalletConnectUtils
 import WalletConnectKMS
+import JSONRPC
 
 actor AuthRequestService {
     private let networkingInteractor: NetworkInteracting
@@ -22,7 +23,7 @@ actor AuthRequestService {
         let issueAt = ISO8601DateFormatter().string(from: Date())
         let payload = AuthPayload(requestParams: params, iat: issueAt)
         let params = AuthRequestParams(requester: requester, payloadParams: payload)
-        let request = JSONRPCRequest<AuthRequestParams>(method: "wc_authRequest", params: params)
+        let request = RPCRequest(method: "wc_authRequest", params: params)
         try await networkingInteractor.request(request, topic: topic)
         try await networkingInteractor.subscribe(topic: responseTopic)
     }
