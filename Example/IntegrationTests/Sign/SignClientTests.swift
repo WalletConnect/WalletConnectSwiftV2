@@ -158,8 +158,8 @@ final class SignClientTests: XCTestCase {
     func testSessionRequest() async throws {
         let dapp = proposer!
         let wallet = responder!
-        let requestExpectation = expectation(description: "Responder receives request")
-        let responseExpectation = expectation(description: "Proposer receives response")
+        let requestExpectation = expectation(description: "Wallet expects to receive a request")
+        let responseExpectation = expectation(description: "Dapp expects to receive a response")
         let requiredNamespaces = ProposalNamespace.stubRequired()
         let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
 
@@ -178,8 +178,8 @@ final class SignClientTests: XCTestCase {
             }
         }
         dapp.onSessionSettled = { settledSession in
-            let request = Request(id: 0, topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain)
             Task(priority: .high) {
+                let request = Request(id: 0, topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain)
                 try await dapp.client.request(params: request)
             }
         }
@@ -197,7 +197,7 @@ final class SignClientTests: XCTestCase {
             switch response.result {
             case .response(let response):
                 XCTAssertEqual(try! response.result.get(String.self), responseParams)
-            case .error(_):
+            case .error:
                 XCTFail()
             }
             responseExpectation.fulfill()
@@ -211,46 +211,45 @@ final class SignClientTests: XCTestCase {
     func testSessionRequestFailureResponse() async throws {
         let dapp = proposer!
         let wallet = responder!
-        let failureResponseExpectation = expectation(description: "Proposer receives failure response")
+        let expectation = expectation(description: "Dapp expects to receive an error response")
         let requiredNamespaces = ProposalNamespace.stubRequired()
         let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
 
-        let method = "eth_sendTransaction"
-        let params = [EthSendTransaction.stub()]
+        let requestMethod = "eth_sendTransaction"
+        let requestParams = [EthSendTransaction.stub()]
+        let error = JSONRPCErrorResponse.Error(code: 0, message: "error")
+        let chain = Blockchain("eip155:1")!
 
-        let error = JSONRPCErrorResponse.Error(code: 0, message: "error_message")
-
-        let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces)
-        try await responder.client.pair(uri: uri!)
-
-        responder.onSessionProposal = { [unowned self]  proposal in
+        wallet.onSessionProposal = { proposal in
             Task(priority: .high) {
-                try? await self.responder.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
             }
         }
-        proposer.onSessionSettled = { [unowned self]  settledSession in
-            let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: Blockchain("eip155:1")!)
+        dapp.onSessionSettled = { settledSession in
             Task(priority: .high) {
-                try await self.proposer.client.request(params: requestParams)
+                let request = Request(id: 0, topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain)
+                try await dapp.client.request(params: request)
             }
         }
-        proposer.onSessionResponse = { response in
+        wallet.onSessionRequest = { sessionRequest in
+            Task(priority: .high) {
+                let response = JSONRPCErrorResponse(id: sessionRequest.id, error: error)
+                try await wallet.client.respond(topic: sessionRequest.topic, response: .error(response))
+            }
+        }
+        dapp.onSessionResponse = { response in
             switch response.result {
-            case .response(_):
+            case .response:
                 XCTFail()
             case .error(let errorResponse):
                 XCTAssertEqual(error, errorResponse.error)
-                failureResponseExpectation.fulfill()
             }
+            expectation.fulfill()
+        }
 
-        }
-        responder.onSessionRequest = {[unowned self]  sessionRequest in
-            let jsonrpcErrorResponse = JSONRPCErrorResponse(id: sessionRequest.id, error: error)
-            Task(priority: .high) {
-                try? await self.responder.client.respond(topic: sessionRequest.topic, response: .error(jsonrpcErrorResponse))
-            }
-        }
-        wait(for: [failureResponseExpectation], timeout: defaultTimeout)
+        let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces)
+        try await wallet.client.pair(uri: uri!)
+        wait(for: [expectation], timeout: defaultTimeout)
     }
 
 //
