@@ -155,7 +155,7 @@ final class SignClientTests: XCTestCase {
         wait(for: [pongResponseExpectation], timeout: defaultTimeout)
     }
 
-    func testProposerRequestSessionRequest() async throws {
+    func testSessionRequest() async throws {
         let dapp = proposer!
         let wallet = responder!
         let requestExpectation = expectation(description: "Responder receives request")
@@ -208,6 +208,51 @@ final class SignClientTests: XCTestCase {
         wait(for: [requestExpectation, responseExpectation], timeout: defaultTimeout)
     }
 
+    func testSessionRequestFailureResponse() async throws {
+        let dapp = proposer!
+        let wallet = responder!
+        let failureResponseExpectation = expectation(description: "Proposer receives failure response")
+        let requiredNamespaces = ProposalNamespace.stubRequired()
+        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
+
+        let method = "eth_sendTransaction"
+        let params = [EthSendTransaction.stub()]
+
+        let error = JSONRPCErrorResponse.Error(code: 0, message: "error_message")
+
+        let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces)
+        try await responder.client.pair(uri: uri!)
+
+        responder.onSessionProposal = { [unowned self]  proposal in
+            Task(priority: .high) {
+                try? await self.responder.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+            }
+        }
+        proposer.onSessionSettled = { [unowned self]  settledSession in
+            let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: Blockchain("eip155:1")!)
+            Task(priority: .high) {
+                try await self.proposer.client.request(params: requestParams)
+            }
+        }
+        proposer.onSessionResponse = { response in
+            switch response.result {
+            case .response(_):
+                XCTFail()
+            case .error(let errorResponse):
+                XCTAssertEqual(error, errorResponse.error)
+                failureResponseExpectation.fulfill()
+            }
+
+        }
+        responder.onSessionRequest = {[unowned self]  sessionRequest in
+            let jsonrpcErrorResponse = JSONRPCErrorResponse(id: sessionRequest.id, error: error)
+            Task(priority: .high) {
+                try? await self.responder.client.respond(topic: sessionRequest.topic, response: .error(jsonrpcErrorResponse))
+            }
+        }
+        wait(for: [failureResponseExpectation], timeout: defaultTimeout)
+    }
+
 //
 //    func testNewSessionOnExistingPairing() async {
 //        await waitClientsConnected()
@@ -237,40 +282,6 @@ final class SignClientTests: XCTestCase {
 //            }
 //        }
 //        wait(for: [proposerSettlesSessionExpectation, responderSettlesSessionExpectation], timeout: defaultTimeout)
-//    }
-//
-//    func testSessionRequestFailureResponse() async {
-//        await waitClientsConnected()
-//        let failureResponseExpectation = expectation(description: "Proposer receives failure response")
-//        let method = "eth_sendTransaction"
-//        let params = [try! JSONDecoder().decode(EthSendTransaction.self, from: ethSendTransaction.data(using: .utf8)!)]
-//        let error = JSONRPCErrorResponse.Error(code: 0, message: "error_message")
-//        let uri = try! await proposer.client.connect(namespaces: [Namespace.stub(methods: [method])])!
-//        _ = try! await responder.client.pair(uri: uri)
-//        responder.onSessionProposal = {[unowned self]  proposal in
-//            try? self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: proposal.namespaces)
-//        }
-//        proposer.onSessionSettled = {[unowned self]  settledSession in
-//            let requestParams = Request(id: 0, topic: settledSession.topic, method: method, params: AnyCodable(params), chainId: Blockchain("eip155:1")!)
-//            Task {
-//                try await self.proposer.client.request(params: requestParams)
-//            }
-//        }
-//        proposer.onSessionResponse = { response in
-//            switch response.result {
-//            case .response(_):
-//                XCTFail()
-//            case .error(let errorResponse):
-//                XCTAssertEqual(error, errorResponse.error)
-//                failureResponseExpectation.fulfill()
-//            }
-//
-//        }
-//        responder.onSessionRequest = {[unowned self]  sessionRequest in
-//            let jsonrpcErrorResponse = JSONRPCErrorResponse(id: sessionRequest.id, error: error)
-//            self.responder.client.respond(topic: sessionRequest.topic, response: .error(jsonrpcErrorResponse))
-//        }
-//        wait(for: [failureResponseExpectation], timeout: defaultTimeout)
 //    }
 //
 //    func testSessionPing() async {
