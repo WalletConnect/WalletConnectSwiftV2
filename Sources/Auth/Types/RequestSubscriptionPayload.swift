@@ -2,6 +2,6 @@ import Foundation
 import JSONRPC
 
 struct RequestSubscriptionPayload: Codable {
-    let topic: String
+    let id: String
     let request: RPCRequest
 }
