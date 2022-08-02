@@ -48,7 +48,7 @@ final class SessionEngine {
         let reasonCode = ReasonCode.userDisconnected
         let reason = SessionType.Reason(code: reasonCode.code, message: reasonCode.message)
         logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
-        try await networkingInteractor.request(.wcSessionDelete(reason), onTopic: topic)
+        networkingInteractor.request(.wcSessionDelete(reason), onTopic: topic)
         sessionStore.delete(topic: topic)
         networkingInteractor.unsubscribe(topic: topic)
     }
@@ -80,7 +80,7 @@ final class SessionEngine {
         }
         let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params)
         let sessionRequestParams = SessionType.RequestParams(request: chainRequest, chainId: request.chainId)
-        try await networkingInteractor.request(.wcSessionRequest(sessionRequestParams), onTopic: request.topic)
+        networkingInteractor.request(.wcSessionRequest(sessionRequestParams), onTopic: request.topic)
     }
 
     func respondSessionRequest(topic: String, response: JsonRpcResult) async throws {
@@ -99,7 +99,7 @@ final class SessionEngine {
             throw WalletConnectError.invalidEvent
         }
         let params = SessionType.EventParams(event: event, chainId: chainId)
-        try await networkingInteractor.request(.wcSessionEvent(params), onTopic: topic)
+        networkingInteractor.request(.wcSessionEvent(params), onTopic: topic)
     }
 }
 

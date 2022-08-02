@@ -140,7 +140,7 @@ final class ApproveEngine {
         try await networkingInteractor.subscribe(topic: topic)
         sessionStore.setSession(session)
 
-        try await networkingInteractor.request(.wcSessionSettle(settleParams), onTopic: topic)
+        networkingInteractor.request(.wcSessionSettle(settleParams), onTopic: topic)
         onSessionSettle?(session.publicRepresentation())
     }
 }
