@@ -2,7 +2,7 @@ import Combine
 import Foundation
 import WalletConnectUtils
 
-class AuthRequstSubscriber {
+class AuthRequestSubscriber {
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging
     private var publishers = [AnyCancellable]()
