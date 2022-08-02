@@ -6,15 +6,16 @@ class AuthRequstSubscriber {
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging
     private var publishers = [AnyCancellable]()
-    private let messageFormatter: SIWEMessageFormatter
+    private let messageFormatter: SIWEMessageFormatting
     var onRequest: ((_ id: Int64, _ message: String)->())?
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
-         messageFormatter: SIWEMessageFormatter) {
+         messageFormatter: SIWEMessageFormatting) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.messageFormatter = messageFormatter
+        subscribeForRequest()
     }
 
     private func subscribeForRequest() {
