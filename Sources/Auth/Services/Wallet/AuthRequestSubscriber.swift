@@ -27,7 +27,7 @@ class AuthRequestSubscriber {
             }
             do {
                 let message = try messageFormatter.formatMessage(from: authRequest)
-                guard let requestId = subscriptionPayload.request.id?.right else { return }
+                guard let requestId = subscriptionPayload.request.id else { return }
                 onRequest?(requestId, message)
             } catch {
                 logger.debug(error)
