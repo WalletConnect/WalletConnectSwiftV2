@@ -7,6 +7,8 @@ import JSONRPC
 
 protocol NetworkInteracting {
     var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {get}
+    var responsePublisher: AnyPublisher<RPCResponse, Never> {get}
+
     func subscribe(topic: String) async throws
     func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws
     func respond(topic: String, response: RPCResponse, tag: Int, envelopeType: Envelope.EnvelopeType) async throws
@@ -25,6 +27,10 @@ class NetworkingInteractor: NetworkInteracting {
     var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
+    var responsePublisher: AnyPublisher<RPCResponse, Never> {
+        responsePublisherSubject.eraseToAnyPublisher()
+    }
+    private let responsePublisherSubject = PassthroughSubject<RPCResponse, Never>()
     private let requestPublisherSubject = PassthroughSubject<RequestSubscriptionPayload, Never>()
 
     init(relayClient: RelayClient,

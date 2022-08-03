@@ -5,6 +5,8 @@ import JSONRPC
 import WalletConnectKMS
 
 struct NetworkingInteractorMock: NetworkInteracting {
+    var responsePublisher: AnyPublisher<RPCResponse, Never>
+
 
     let requestPublisherSubject = PassthroughSubject<RequestSubscriptionPayload, Never>()
     var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {
