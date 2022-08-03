@@ -4,6 +4,7 @@ import XCTest
 import WalletConnectUtils
 @testable import WalletConnectKMS
 @testable import TestingUtils
+import JSONRPC
 
 class AuthRequstSubscriberTests: XCTestCase {
     var networkingInteractor: NetworkingInteractorMock!
@@ -21,10 +22,10 @@ class AuthRequstSubscriberTests: XCTestCase {
 
     func testSubscribeRequest() {
         let expectedMessage = "Expected Message"
-        let expectedRequestId: Int64 = 12345
+        let expectedRequestId: RPCID = RPCID(1234)
         let messageExpectation = expectation(description: "receives formatted message")
         messageFormatter.formattedMessage = expectedMessage
-        var messageId: Int64!
+        var messageId: RPCID!
         var message: String!
         sut.onRequest = { id, formattedMessage in
             messageId = id

@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 import WalletConnectUtils
+import JSONRPC
 
 class AuthRequestSubscriber {
     private let networkingInteractor: NetworkInteracting
