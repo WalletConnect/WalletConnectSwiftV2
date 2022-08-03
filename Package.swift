@@ -17,10 +17,13 @@ let package = Package(
             name: "WalletConnectChat",
             targets: ["Chat"]),
         .library(
-            name: "WalletConnectPairing",
-            targets: ["WalletConnectPairing"])
+            name: "WalletConnectAuth",
+            targets: ["Auth"]),
     ],
-    dependencies: [],
+    dependencies: [
+        .package(url: "https://github.com/GigaBitcoin/secp256k1.swift.git", .upToNextMajor(from: "0.6.0")),
+        .package(url: "https://github.com/krzyzanowskim/CryptoSwift", .upToNextMajor(from: "1.5.1"))
+    ],
     targets: [
         .target(
             name: "WalletConnectSign",
@@ -32,7 +35,14 @@ let package = Package(
             path: "Sources/Chat"),
         .target(
             name: "Auth",
-            dependencies: ["WalletConnectRelay", "WalletConnectUtils", "WalletConnectKMS", "WalletConnectPairing"],
+            dependencies: [
+                "WalletConnectRelay",
+                "WalletConnectUtils",
+                "WalletConnectKMS",
+                "WalletConnectPairing",
+                .product(name: "CryptoSwift", package: "CryptoSwift"),
+                .product(name: "secp256k1", package: "secp256k1.swift"),
+            ],
             path: "Sources/Auth"),
         .target(
             name: "WalletConnectRelay",
