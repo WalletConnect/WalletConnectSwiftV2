@@ -1,11 +1,9 @@
 import Combine
 import Foundation
 import WalletConnectUtils
-import WalletConnectKMS
 
 class AuthRequestSubscriber {
     private let networkingInteractor: NetworkInteracting
-    private let kms: KeyManagementService
     private let logger: ConsoleLogging
     private var publishers = [AnyCancellable]()
     private let messageFormatter: SIWEMessageFormatting
@@ -30,7 +28,6 @@ class AuthRequestSubscriber {
             do {
                 let message = try messageFormatter.formatMessage(from: authRequestParams)
                 guard let requestId = subscriptionPayload.request.id?.right else { return }
-                try setKeysForResponse(authRequestParams: authRequestParams)
                 onRequest?(requestId, message)
             } catch {
                 logger.debug(error)
@@ -38,11 +35,5 @@ class AuthRequestSubscriber {
         }.store(in: &publishers)
     }
 
-    private func setKeysForResponse(authRequestParams: AuthRequestParams) throws  {
-        let peerPubKey = authRequestParams.requester.publicKey
-        let responseTopic = peerPubKey.rawRepresentation.sha256().toHexString()
-        let selfPubKey = try kms.createX25519KeyPair()
-        let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey)
-        try kms.setAgreementSecret(agreementKeys, topic: responseTopic)
-    }
+
 }
