@@ -11,7 +11,7 @@ public final class RPCHistory {
         let topic: String
         let origin: Origin
         public let request: RPCRequest
-        var response: RPCResponse? = nil
+        var response: RPCResponse?
     }
 
     enum HistoryError: Error {

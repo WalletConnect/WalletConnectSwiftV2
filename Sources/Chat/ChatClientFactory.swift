@@ -10,8 +10,7 @@ public struct ChatClientFactory {
         relayClient: RelayClient,
         kms: KeyManagementService,
         logger: ConsoleLogging,
-        keyValueStorage: KeyValueStorage) -> ChatClient
-    {
+        keyValueStorage: KeyValueStorage) -> ChatClient {
         let topicToRegistryRecordStore = CodableStore<RegistryRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.topicToInvitationPubKey.rawValue)
         let serialiser = Serializer(kms: kms)
         let jsonRpcHistory = JsonRpcHistory<ChatRequestParams>(logger: logger, keyValueStore: CodableStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))

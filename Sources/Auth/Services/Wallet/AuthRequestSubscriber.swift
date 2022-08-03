@@ -7,7 +7,7 @@ class AuthRequestSubscriber {
     private let logger: ConsoleLogging
     private var publishers = [AnyCancellable]()
     private let messageFormatter: SIWEMessageFormatting
-    var onRequest: ((_ id: Int64, _ message: String)->())?
+    var onRequest: ((_ id: Int64, _ message: String)->Void)?
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
@@ -34,6 +34,5 @@ class AuthRequestSubscriber {
             }
         }.store(in: &publishers)
     }
-
 
 }

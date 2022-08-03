@@ -13,11 +13,10 @@ protocol NetworkInteracting {
 }
 
 extension NetworkInteracting {
-    func request(_ request: RPCRequest, topic: String, envelopeType: Envelope.EnvelopeType = .type0) async throws {
-        try await self.request(request, topic: topic, envelopeType: envelopeType)
+    func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType = .type0) async throws {
+        try await self.request(request, topic: topic, tag: tag, envelopeType: envelopeType)
     }
 }
-
 
 class NetworkingInteractor: NetworkInteracting {
     private let relayClient: RelayClient

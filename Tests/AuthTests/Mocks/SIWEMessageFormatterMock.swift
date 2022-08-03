@@ -7,4 +7,3 @@ class SIWEMessageFormatterMock: SIWEMessageFormatting {
         return formattedMessage
     }
 }
-
