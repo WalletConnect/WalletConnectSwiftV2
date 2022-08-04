@@ -8,13 +8,9 @@ class SignerTest: XCTestCase {
     private let signer = Signer()
 
     private let message = "Message".data(using: .utf8)!
-    private let privateKey = Data(base64Encoded: "bm2GjW0qNRFXv+ezXRx5U3+7VLTKS0o5/iXYMzjI6Xo=")!
-    private let publicKey = Data(base64Encoded: "AxffejKffsmnVBI0fKJ6KPlg6eON+T8ds0ZMlheo6QOg")!
-    private let signature = Data(base64Encoded: "AGZT3nnrhkXdHMivRbnakJMUUXVwUtxMeNy/DWvHq87sgSVu+NbShQJVaBbfYG83A3BOaT+cpNJQuUnTv/MEUwE=")!
-
-    private var address: String {
-        return try! SignerAddress.from(publicKey: publicKey)
-    }
+    private let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
+    private let signature = Data(hex: "f7d00a04559bff462f02194874b1ae7d4a8f0461acbe4be73386ebe982a9b9dc599abf31107e1ba708a3ec72499f1fd73dd390c5ca1a3084abe176de0529d00e00")
+    private var address = "0xc29c1c64576cef6229d501f107faa1090f81ca86"
 
     func testValidSignature() throws {
         let result = try signer.sign(message: message, with: privateKey)
@@ -36,7 +32,7 @@ class SignerTest: XCTestCase {
     }
 
     func testInvalidSignature() throws {
-        let signature = Data(base64Encoded: "U5BxHfW0zjTeoAqT3f3U45djb2pom3GwN6tZKc7yHg1onDBJ/YoZlkQOl3E641zHRu5XKOaSY2jj+IqaNoREIwA=")!
+        let signature = Data(hex: "86deb09d045608f2753ef12f46e8da5fc2559e3a9162e580df3e62c875df7c3f64433462a59bc4ff38ce52412bff10527f4b99cc078f63ef2bb4a6f7427080aa01")
 
         XCTAssertFalse(try signer.isValid(signature: signature, message: message, address: address))
     }

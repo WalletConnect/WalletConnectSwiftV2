@@ -21,7 +21,7 @@ let package = Package(
             targets: ["Auth"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/GigaBitcoin/secp256k1.swift.git", .upToNextMajor(from: "0.6.0")),
+        .package(url: "https://github.com/flypaper0/secp256k1.swift.git", .branch("feature/serialized-compact")),
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift", .upToNextMajor(from: "1.5.1"))
     ],
     targets: [
