@@ -6,7 +6,7 @@ protocol ClientIdStoring {
 }
 
 struct ClientIdStorage: ClientIdStoring {
-    private let key = "com.walletconnect.iridium.client_id"
+    private let key = "com.walletconnect.irn.client_id"
     private let keychain: KeychainStorageProtocol
 
     init(keychain: KeychainStorageProtocol) {
