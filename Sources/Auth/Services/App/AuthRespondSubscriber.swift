@@ -8,7 +8,7 @@ class AuthRespondSubscriber {
     private let logger: ConsoleLogging
     private let rpcHistory: RPCHistory
     private var publishers = [AnyCancellable]()
-    var onResponse: ((_ id: RPCID, _ cacao: Cacao)->Void)?
+    var onResponse: ((_ id: RPCID, _ cacao: Cacao) -> Void)?
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,

@@ -13,4 +13,3 @@ class CacaoSignatureVerifier: CacaoSignatureVerifying {
         fatalError("not implemented")
     }
 }
-
