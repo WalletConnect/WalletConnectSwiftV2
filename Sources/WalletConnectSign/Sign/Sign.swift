@@ -18,7 +18,7 @@ public class Sign {
             fatalError("Error - you must call configure(_:) before accessing the shared instance.")
         }
         relayClient = RelayClient(
-            relayHost: "relay.walletconnect.com",
+            relayHost: config.relayHost,
             projectId: config.projectId,
             socketFactory: config.socketFactory,
             socketConnectionType: config.socketConnectionType
@@ -29,12 +29,14 @@ public class Sign {
 
     static public func configure(
         metadata: AppMetadata,
+        relayHost: String = "relay.walletconnect.com",
         projectId: String,
         socketFactory: WebSocketFactory,
         socketConnectionType: SocketConnectionType = .automatic
     ) {
         Sign.config = Sign.Config(
             metadata: metadata,
+            relayHost: relayHost,
             projectId: projectId,
             socketFactory: socketFactory,
             socketConnectionType: socketConnectionType
