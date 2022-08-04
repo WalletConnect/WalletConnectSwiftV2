@@ -37,7 +37,7 @@ public struct WCPairing: SequenceObject {
 
     public init(topic: String) {
         self.topic = topic
-        self.relay = RelayProtocolOptions(protocol: "iridium", data: nil)
+        self.relay = RelayProtocolOptions(protocol: "irn", data: nil)
         self.active = false
         self.expiryDate = Self.dateInitializer().advanced(by: Self.timeToLiveInactive)
     }
