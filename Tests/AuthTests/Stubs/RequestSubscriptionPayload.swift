@@ -10,6 +10,6 @@ extension RequestSubscriptionPayload {
         let payload = AuthPayload(requestParams: RequestParams.stub(), iat: issueAt)
         let params = AuthRequestParams(requester: requester, payloadParams: payload)
         let request = RPCRequest(method: "wc_authRequest", params: params, id: id)
-        return RequestSubscriptionPayload(id: 123, request: request)
+        return RequestSubscriptionPayload(topic: "123", request: request)
     }
 }
