@@ -6,7 +6,7 @@ import TestingUtils
 class CacaoSignerTest: XCTestCase {
 
     let payload = CacaoPayload(
-        iss: "did:pkh:eip155:1:0xBAc675C310721717Cd4A37F6cbeA1F081b1C2a07",
+        iss: "did:pkh:eip155:1:0x22Fe071b3631f155F0d8f4c9377D3309cB904E10",
         domain: "localhost:3000",
         aud: "http://localhost:3000/login",
         version: 1,
@@ -22,7 +22,7 @@ class CacaoSignerTest: XCTestCase {
         ]
     )
 
-    let sig = CacaoSignature(t: "eip191", s: "11f3715374dbacdec7e51611c9f2a8f13c11d14fd62c9556fb87f09235b8acaa2b3cba50968180da3e8c902086430011229375545eec0264bb431708ae92713201", m: "")
+    let sig = CacaoSignature(t: "eip191", s: "ced1849ff778a1a55a9d5516c11f13d8637859c2af370b178e11e40fed5c239465c32db0e52849fc3638507090fc810f73a354c7a5c72f94ab9673db6085c20301", m: "")
 
 
     func testCacaoSign() async throws {
@@ -33,12 +33,11 @@ class CacaoSignerTest: XCTestCase {
         XCTAssertEqual(signature, sig)
     }
 
-// TODO: Restore test
-//    func testCacaoVerify() async throws {
-//        let signer = CacaoSigner(signer: Signer(), keystore: MockCacaoKeystore())
-//
-//        try await signer.verify(signature: sig, payload: payload)
-//    }
+    func testCacaoVerify() async throws {
+        let signer = CacaoSigner(signer: Signer(), keystore: MockCacaoKeystore())
+
+        try await signer.verify(signature: sig, payload: payload)
+    }
 }
 
 struct MockCacaoKeystore: CacaoSignerKeystore {

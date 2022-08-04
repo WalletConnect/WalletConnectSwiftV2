@@ -6,7 +6,6 @@ protocol CacaoSignerKeystore {
 
 actor CacaoSigner {
     enum Errors: Error {
-        case signatureCorrupted
         case signatureValidationFailed
     }
 
@@ -25,11 +24,9 @@ actor CacaoSigner {
     }
 
     func verify(signature: CacaoSignature, payload: CacaoPayload) async throws {
+        let sig = Data(hex: signature.s)
         let message = try JSONEncoder().encode(payload)
         let address = try SignerAddress.from(iss: payload.iss)
-
-        guard let sig = signature.s.data(using: .utf8)
-        else { throw Errors.signatureCorrupted }
 
         guard try signer.isValid(signature: sig, message: message, address: address)
         else { throw Errors.signatureValidationFailed }
