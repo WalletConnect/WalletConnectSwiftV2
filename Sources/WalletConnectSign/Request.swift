@@ -17,10 +17,10 @@ public struct Request: Codable, Equatable {
     }
 
     public init(topic: String, method: String, params: AnyCodable, chainId: Blockchain) {
-        self.id = JsonRpcID.generate()
-        self.topic = topic
-        self.method = method
-        self.params = params
-        self.chainId = chainId
+        self.init(id: JsonRpcID.generate(), topic: topic, method: method, params: params, chainId: chainId)
+    }
+
+    internal init<C>(id: Int64, topic: String, method: String, params: C, chainId: Blockchain) where C: Codable {
+        self.init(id: id, topic: topic, method: method, params: AnyCodable(params), chainId: chainId)
     }
 }
