@@ -19,7 +19,7 @@ public struct RPCResponse: Equatable {
         return nil
     }
 
-    private let outcome: Result<AnyCodable, JSONRPCError>
+    public let outcome: Result<AnyCodable, JSONRPCError>
 
     internal init(id: RPCID?, outcome: Result<AnyCodable, JSONRPCError>) {
         self.jsonrpc = "2.0"
@@ -27,7 +27,15 @@ public struct RPCResponse: Equatable {
         self.outcome = outcome
     }
 
-    public init<C>(id: Int, result: C) where C: Codable {
+    public init<C>(matchingRequest: RPCRequest, result: C) where C: Codable {
+        self.init(id: matchingRequest.id, outcome: .success(AnyCodable(result)))
+    }
+
+    public init(matchingRequest: RPCRequest, error: JSONRPCError) {
+        self.init(id: matchingRequest.id, outcome: .failure(error))
+    }
+
+    public init<C>(id: Int64, result: C) where C: Codable {
         self.init(id: RPCID(id), outcome: .success(AnyCodable(result)))
     }
 
@@ -35,7 +43,11 @@ public struct RPCResponse: Equatable {
         self.init(id: RPCID(id), outcome: .success(AnyCodable(result)))
     }
 
-    public init(id: Int, error: JSONRPCError) {
+    public init<C>(id: RPCID, result: C) where C: Codable {
+        self.init(id: id, outcome: .success(AnyCodable(result)))
+    }
+
+    public init(id: Int64, error: JSONRPCError) {
         self.init(id: RPCID(id), outcome: .failure(error))
     }
 
@@ -43,7 +55,7 @@ public struct RPCResponse: Equatable {
         self.init(id: RPCID(id), outcome: .failure(error))
     }
 
-    public init(id: Int, errorCode: Int, message: String, associatedData: AnyCodable? = nil) {
+    public init(id: Int64, errorCode: Int, message: String, associatedData: AnyCodable? = nil) {
         self.init(id: RPCID(id), outcome: .failure(JSONRPCError(code: errorCode, message: message, data: associatedData)))
     }
 

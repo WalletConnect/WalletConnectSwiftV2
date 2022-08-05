@@ -1,9 +1,10 @@
 import XCTest
 import Combine
+import WalletConnectUtils
+import WalletConnectPairing
 @testable import WalletConnectSign
 @testable import TestingUtils
 @testable import WalletConnectKMS
-import WalletConnectUtils
 
 final class ApproveEngineTests: XCTestCase {
 
@@ -47,6 +48,8 @@ final class ApproveEngineTests: XCTestCase {
     func testApproveProposal() async throws {
         // Client receives a proposal
         let topicA = String.generateTopic()
+        let pairing = WCPairing.stub(expiryDate: Date(timeIntervalSinceNow: 10000), topic: topicA)
+        pairingStorageMock.setPairing(pairing)
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
         let request = WCRequest(method: .sessionPropose, params: .sessionPropose(proposal))
@@ -57,9 +60,11 @@ final class ApproveEngineTests: XCTestCase {
 
         let topicB = networkingInteractor.subscriptions.last!
 
+        let extendedPairing = pairingStorageMock.getPairing(forTopic: topicA)!
         XCTAssertTrue(networkingInteractor.didCallSubscribe)
         XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must store agreement key for topic B")
         XCTAssertEqual(networkingInteractor.didRespondOnTopic!, topicA, "Responder must respond on topic A")
+        XCTAssertEqual(extendedPairing.expiryDate.timeIntervalSince1970, Date(timeIntervalSinceNow: 2_592_000).timeIntervalSince1970, accuracy: 1, "pairing expiry has been extended by 30 days")
     }
 
     func testReceiveProposal() {

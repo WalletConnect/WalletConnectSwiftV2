@@ -1,3 +1,6 @@
+import Foundation
+import WalletConnectPairing
+
 enum WCMethod {
     case wcPairingPing
     case wcSessionPropose(SessionType.ProposeParams)

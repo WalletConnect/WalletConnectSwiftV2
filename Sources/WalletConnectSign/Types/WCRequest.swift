@@ -1,4 +1,5 @@
 import Foundation
+import WalletConnectPairing
 import WalletConnectUtils
 
 struct WCRequest: Codable {

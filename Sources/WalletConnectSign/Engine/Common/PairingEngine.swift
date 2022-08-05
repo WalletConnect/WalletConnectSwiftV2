@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import WalletConnectPairing
 import WalletConnectUtils
 import WalletConnectKMS
 
