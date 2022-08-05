@@ -6,7 +6,7 @@ public extension RPCRequest {
         RPCRequest(method: "method", params: EmptyCodable())
     }
 
-    static func stub(method: String, id: Int) -> RPCRequest {
+    static func stub(method: String, id: Int64) -> RPCRequest {
         RPCRequest(method: method, params: EmptyCodable(), id: id)
     }
 }

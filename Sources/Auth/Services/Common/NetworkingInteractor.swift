@@ -1,10 +1,12 @@
 import Foundation
 import WalletConnectRelay
 import WalletConnectUtils
+import Combine
 import WalletConnectKMS
 import JSONRPC
 
 protocol NetworkInteracting {
+    var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {get}
     func subscribe(topic: String) async throws
     func request(_ request: RPCRequest, topic: String, envelopeType: Envelope.EnvelopeType) async throws
 }
@@ -20,6 +22,10 @@ class NetworkingInteractor: NetworkInteracting {
     private let relayClient: RelayClient
     private let serializer: Serializing
     private let rpcHistory: RPCHistory
+    var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {
+        requestPublisherSubject.eraseToAnyPublisher()
+    }
+    private let requestPublisherSubject = PassthroughSubject<RequestSubscriptionPayload, Never>()
 
     init(relayClient: RelayClient,
          serializer: Serializing,
