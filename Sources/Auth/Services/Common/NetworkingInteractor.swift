@@ -7,7 +7,9 @@ import JSONRPC
 
 protocol NetworkInteracting {
     var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {get}
+    var responsePublisher: AnyPublisher<ResponseSubscriptionPayload, Never> {get}
     func subscribe(topic: String) async throws
+    func unsubscribe(topic: String)
     func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws
     func respond(topic: String, response: RPCResponse, tag: Int, envelopeType: Envelope.EnvelopeType) async throws
 }
@@ -26,6 +28,10 @@ class NetworkingInteractor: NetworkInteracting {
         requestPublisherSubject.eraseToAnyPublisher()
     }
     private let requestPublisherSubject = PassthroughSubject<RequestSubscriptionPayload, Never>()
+    var responsePublisher: AnyPublisher<ResponseSubscriptionPayload, Never> {
+        responsePublisherSubject.eraseToAnyPublisher()
+    }
+    private let responsePublisherSubject = PassthroughSubject<ResponseSubscriptionPayload, Never>()
 
     init(relayClient: RelayClient,
          serializer: Serializing,
@@ -37,6 +43,10 @@ class NetworkingInteractor: NetworkInteracting {
 
     func subscribe(topic: String) async throws {
         try await relayClient.subscribe(topic: topic)
+    }
+
+    func unsubscribe(topic: String) {
+        fatalError("not implemented")
     }
 
     func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {

@@ -6,12 +6,21 @@ import WalletConnectKMS
 
 struct NetworkingInteractorMock: NetworkInteracting {
 
+    var responsePublisher: AnyPublisher<ResponseSubscriptionPayload, Never> {
+        responsePublisherSubject.eraseToAnyPublisher()
+    }
+    private let responsePublisherSubject = PassthroughSubject<ResponseSubscriptionPayload, Never>()
+
     let requestPublisherSubject = PassthroughSubject<RequestSubscriptionPayload, Never>()
     var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
     func subscribe(topic: String) async throws {
+
+    }
+
+    func unsubscribe(topic: String) {
 
     }
 
