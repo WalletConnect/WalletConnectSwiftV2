@@ -24,8 +24,7 @@ actor AuthRequestService {
         let payload = AuthPayload(requestParams: params, iat: issueAt)
         let params = AuthRequestParams(requester: requester, payloadParams: payload)
         let request = RPCRequest(method: "wc_authRequest", params: params)
-        try await networkingInteractor.request(request, topic: topic)
+        try await networkingInteractor.request(request, topic: topic, tag: AuthRequestParams.tag)
         try await networkingInteractor.subscribe(topic: responseTopic)
     }
 }
-

@@ -43,6 +43,10 @@ public struct RPCResponse: Equatable {
         self.init(id: RPCID(id), outcome: .success(AnyCodable(result)))
     }
 
+    public init<C>(id: RPCID, result: C) where C: Codable {
+        self.init(id: id, outcome: .success(AnyCodable(result)))
+    }
+
     public init(id: Int64, error: JSONRPCError) {
         self.init(id: RPCID(id), outcome: .failure(error))
     }

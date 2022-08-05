@@ -15,7 +15,7 @@ final class ChatTests: XCTestCase {
     override func setUp() {
         registry = KeyValueRegistry()
         invitee = makeClient(prefix: "🦖 Registered")
-        inviter = makeClient(prefix: "🍄 Inviter") 
+        inviter = makeClient(prefix: "🍄 Inviter")
 
         waitClientsConnected()
     }

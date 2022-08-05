@@ -18,7 +18,7 @@ let package = Package(
             targets: ["Chat"]),
         .library(
             name: "WalletConnectPairing",
-            targets: ["WalletConnectPairing"]),
+            targets: ["WalletConnectPairing"])
     ],
     dependencies: [],
     targets: [

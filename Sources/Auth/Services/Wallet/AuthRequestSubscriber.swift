@@ -22,12 +22,12 @@ class AuthRequestSubscriber {
     private func subscribeForRequest() {
         networkingInteractor.requestPublisher.sink { [unowned self] subscriptionPayload in
             guard subscriptionPayload.request.method == "wc_authRequest" else { return }
-            guard let authRequest = try? subscriptionPayload.request.params?.get(AuthRequestParams.self) else {
+            guard let authRequestParams = try? subscriptionPayload.request.params?.get(AuthRequestParams.self) else {
                 logger.debug("Malformed auth request params")
                 return
             }
             do {
-                let message = try messageFormatter.formatMessage(from: authRequest)
+                let message = try messageFormatter.formatMessage(from: authRequestParams)
                 guard let requestId = subscriptionPayload.request.id else { return }
                 onRequest?(requestId, message)
             } catch {
@@ -35,4 +35,5 @@ class AuthRequestSubscriber {
             }
         }.store(in: &publishers)
     }
+
 }
