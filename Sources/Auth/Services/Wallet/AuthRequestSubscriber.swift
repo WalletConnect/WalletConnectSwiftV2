@@ -6,15 +6,18 @@ import JSONRPC
 class AuthRequestSubscriber {
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging
+    private let address: String
     private var publishers = [AnyCancellable]()
     private let messageFormatter: SIWEMessageFormatting
     var onRequest: ((_ id: RPCID, _ message: String)->())?
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
-         messageFormatter: SIWEMessageFormatting) {
+         messageFormatter: SIWEMessageFormatting,
+         address: String) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
+        self.address = address
         self.messageFormatter = messageFormatter
         subscribeForRequest()
     }
@@ -27,7 +30,7 @@ class AuthRequestSubscriber {
                 return
             }
             do {
-                let message = try messageFormatter.formatMessage(from: authRequestParams)
+                let message = try messageFormatter.formatMessage(from: authRequestParams.payloadParams, address: address)
                 guard let requestId = subscriptionPayload.request.id else { return }
                 onRequest?(requestId, message)
             } catch {

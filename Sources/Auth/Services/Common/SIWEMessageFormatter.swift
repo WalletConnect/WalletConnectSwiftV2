@@ -2,11 +2,11 @@ import Foundation
 import WalletConnectUtils
 
 protocol SIWEMessageFormatting {
-    func formatMessage(from authPayload: AuthPayload, address: String) throws -> String 
+    func formatMessage(from authPayload: AuthPayload, address: String) -> String
 }
 
 struct SIWEMessageFormatter: SIWEMessageFormatting {
-    func formatMessage(from authPayload: AuthPayload, address: String) throws -> String {
+    func formatMessage(from authPayload: AuthPayload, address: String) -> String {
         SIWEMessage(domain: authPayload.domain,
                     uri: authPayload.aud,
                     address: address,

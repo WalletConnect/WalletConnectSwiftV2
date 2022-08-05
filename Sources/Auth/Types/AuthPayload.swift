@@ -19,7 +19,7 @@ struct AuthPayload: Codable, Equatable {
         self.chainId = requestParams.chainId
         self.domain = requestParams.domain
         self.aud = requestParams.aud
-        self.version = "1"
+        self.version = 1
         self.nonce = requestParams.nonce
         self.iat = iat
         self.nbf = requestParams.nbf
