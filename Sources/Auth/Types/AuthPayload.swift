@@ -1,12 +1,12 @@
 import Foundation
 
 struct AuthPayload: Codable, Equatable {
-    let type: String
-    let chainId: String
     let domain: String
     let aud: String
     let version: String
     let nonce: String
+    let chainId: String
+    let type: String
     let iat: String
     let nbf: String?
     let exp: String?
