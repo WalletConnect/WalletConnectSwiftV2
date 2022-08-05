@@ -3,7 +3,7 @@ import Foundation
 struct AuthPayload: Codable, Equatable {
     let domain: String
     let aud: String
-    let version: String
+    let version: Int
     let nonce: String
     let chainId: String
     let type: String
@@ -12,7 +12,7 @@ struct AuthPayload: Codable, Equatable {
     let exp: String?
     let statement: String?
     let requestId: String?
-    let resources: String?
+    let resources: [String]?
 
     init(requestParams: RequestParams, iat: String) {
         self.type = "eip4361"

@@ -1,12 +1,24 @@
 import Foundation
+import WalletConnectUtils
 
 protocol SIWEMessageFormatting {
-    func formatMessage(from request: AuthRequestParams) throws -> String
+    func formatMessage(from authPayload: AuthPayload, address: String) throws -> String 
 }
 
 struct SIWEMessageFormatter: SIWEMessageFormatting {
-    func formatMessage(from request: AuthRequestParams) throws -> String {
-        fatalError("not implemented")
+    func formatMessage(from authPayload: AuthPayload, address: String) throws -> String {
+        SIWEMessage(domain: authPayload.domain,
+                    uri: authPayload.aud,
+                    address: address,
+                    version: authPayload.version,
+                    nonce: authPayload.nonce,
+                    chainId: authPayload.chainId,
+                    iat: authPayload.iat,
+                    nbf: authPayload.nbf,
+                    exp: authPayload.exp,
+                    statement: authPayload.statement,
+                    requestId: authPayload.requestId,
+                    resources: authPayload.resources).formatted
     }
 }
 
@@ -14,16 +26,15 @@ struct SIWEMessage: Equatable {
     let domain: String
     let uri: String //aud
     let address: String
-    let version: String
+    let version: Int
     let nonce: String
     let chainId: String
-    let type: String
     let iat: String
     let nbf: String?
     let exp: String?
     let statement: String?
     let requestId: String?
-    let resources: String?
+    let resources: [String]?
 
     var formatted: String {
         return """
@@ -35,29 +46,50 @@ struct SIWEMessage: Equatable {
                     Version: \(version)\n
                     Chain ID: \(chainId)\n
                     Nonce: \(nonce)\n
-                    Issued At: \(iat)\n
+                    Issued At: \(iat)
                     \(expLine)
-                    Not Before: ${not-before}
-                    Request ID: ${request-id}
-                    Resources:
-                    - ${resources[0]}
-                    - ${resources[1]}
-                    ...
-                    - ${resources[n]}
+                    \(nbfLine)
+                    \(requestIdLine)
+                    \(resourcesSection)
                 """
     }
 
     var expLine: String {
         if let exp = exp {
-            return "Expiration Time: \(exp)\n"
+            return "\nExpiration Time: \(exp)"
         }
         return ""
     }
 
     var statementLine: String {
         if let statement = statement {
-            return "\(statement)\n"
+            return "\n\(statement)"
         }
         return ""
+    }
+
+    var nbfLine: String {
+        if let nbf = nbf {
+            return "\nNot Before: \(nbf)"
+        }
+        return ""
+    }
+
+    var requestIdLine: String {
+        if let requestId = requestId {
+            return "\nRequest ID: \(requestId)"
+        }
+        return ""
+    }
+
+    var resourcesSection: String {
+        var section = ""
+        if let resources = resources {
+            section = "\nResources:"
+            resources.forEach {
+                section.append("\n- \($0)")
+            }
+        }
+        return section
     }
 }
