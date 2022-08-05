@@ -22,7 +22,7 @@ struct SIWEMessageFormatter: SIWEMessageFormatting {
     }
 }
 
-struct SIWEMessage: Equatable {
+fileprivate struct SIWEMessage: Equatable {
     let domain: String
     let uri: String //aud
     let address: String
