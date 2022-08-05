@@ -51,40 +51,30 @@ fileprivate struct SIWEMessage: Equatable {
     }
 
     var expLine: String {
-        if let exp = exp {
-            return "\nExpiration Time: \(exp)"
-        }
-        return ""
+        guard  let exp = exp else { return "" }
+        return "\nExpiration Time: \(exp)"
     }
 
     var statementLine: String {
-        if let statement = statement {
-            return "\(statement)\n"
-        }
-        return ""
+        guard let statement = statement else { return "" }
+        return "\(statement)\n"
     }
 
     var nbfLine: String {
-        if let nbf = nbf {
-            return "\nNot Before: \(nbf)"
-        }
-        return ""
+        guard let nbf = nbf else { return "" }
+        return "\nNot Before: \(nbf)"
     }
 
     var requestIdLine: String {
-        if let requestId = requestId {
-            return "\nRequest ID: \(requestId)"
-        }
-        return ""
+        guard let requestId = requestId else { return "" }
+        return "\nRequest ID: \(requestId)"
     }
 
     var resourcesSection: String {
-        var section = ""
-        if let resources = resources {
-            section = "\nResources:"
-            resources.forEach {
-                section.append("\n- \($0)")
-            }
+        guard let resources = resources else { return "" }
+        var section = "\nResources:"
+        resources.forEach {
+            section.append("\n- \($0)")
         }
         return section
     }
