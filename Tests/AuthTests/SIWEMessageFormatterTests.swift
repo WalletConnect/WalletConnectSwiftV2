@@ -28,7 +28,24 @@ class SIWEMessageFormatterTests: XCTestCase {
     func testFormatMessage() {
         let address = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
         let message = sut.formatMessage(from: AuthPayload.stub(), address: address)
-        print(message)
+
         XCTAssertEqual(message, expectedMessage)
+    }
+
+    func testNilOptionalParamsMessage() {
+        let address = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+
+        let message = sut.formatMessage(from: AuthPayload(
+            requestParams: RequestParams(
+                domain: "domain",
+                chainId: "chainId",
+                nonce: "nonce",
+                aud: "aud",
+                nbf: nil, exp: nil, statement: nil, requestId: nil, resources: nil
+            ),
+            iat: "2021-09-30T16:25:24Z"
+        ), address: address)
+
+        XCTAssertEqual(message, "")
     }
 }
