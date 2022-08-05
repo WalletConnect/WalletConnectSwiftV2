@@ -1,13 +1,14 @@
 import Combine
 import Foundation
 import WalletConnectUtils
+import JSONRPC
 
 class AuthRequestSubscriber {
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging
     private var publishers = [AnyCancellable]()
     private let messageFormatter: SIWEMessageFormatting
-    var onRequest: ((_ id: Int64, _ message: String)->Void)?
+    var onRequest: ((_ id: RPCID, _ message: String)->())?
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
@@ -27,7 +28,7 @@ class AuthRequestSubscriber {
             }
             do {
                 let message = try messageFormatter.formatMessage(from: authRequestParams)
-                guard let requestId = subscriptionPayload.request.id?.right else { return }
+                guard let requestId = subscriptionPayload.request.id else { return }
                 onRequest?(requestId, message)
             } catch {
                 logger.debug(error)

@@ -8,10 +8,6 @@ extension RelayRPC where Parameters: Codable {
         return WalletConnectRPCID()
     }
 
-    func wrapToIridium() -> PrefixDecorator<Self> {
-        return PrefixDecorator(rpcMethod: self, prefix: "iridium")
-    }
-
     func wrapToIRN() -> PrefixDecorator<Self> {
         return PrefixDecorator(rpcMethod: self, prefix: "irn")
     }

@@ -5,7 +5,7 @@ extension ProposalNamespace {
         return [
             "eip155": ProposalNamespace(
                 chains: [Blockchain("eip155:1")!],
-                methods: ["personal_sign"],
+                methods: ["personal_sign", "eth_sendTransaction"],
                 events: [])
         ]
     }

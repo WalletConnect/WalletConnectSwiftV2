@@ -111,7 +111,7 @@ public final class RelayClient {
     /// Completes when networking client sends a request, error if it fails on client side
     public func publish(topic: String, payload: String, tag: Int, prompt: Bool = false) async throws {
         let request = Publish(params: .init(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag))
-            .wrapToIridium()
+            .wrapToIRN()
             .asRPCRequest()
         let message = try request.asJSONEncodedString()
         logger.debug("Publishing payload on topic: \(topic)")
@@ -128,7 +128,7 @@ public final class RelayClient {
     ) {
         let rpc = Publish(params: .init(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag))
         let request = rpc
-            .wrapToIridium()
+            .wrapToIRN()
             .asRPCRequest()
         let message = try! request.asJSONEncodedString()
         logger.debug("Publishing Payload on Topic: \(topic)")
@@ -153,7 +153,7 @@ public final class RelayClient {
         logger.debug("Relay: Subscribing to topic: \(topic)")
         let rpc = Subscribe(params: .init(topic: topic))
         let request = rpc
-            .wrapToIridium()
+            .wrapToIRN()
             .asRPCRequest()
         let message = try! request.asJSONEncodedString()
         var cancellable: AnyCancellable?
@@ -195,7 +195,7 @@ public final class RelayClient {
         logger.debug("Relay: Unsubscribing from topic: \(topic)")
         let rpc = Unsubscribe(params: .init(id: subscriptionId, topic: topic))
         let request = rpc
-            .wrapToIridium()
+            .wrapToIRN()
             .asRPCRequest()
         let message = try! request.asJSONEncodedString()
         rpcHistory.deleteAll(forTopic: topic)

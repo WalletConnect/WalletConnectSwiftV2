@@ -23,6 +23,7 @@
 		765056272821989600F9AE79 /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 765056262821989600F9AE79 /* Color+Extension.swift */; };
 		76744CF726FE4D5400B77ED9 /* ActiveSessionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */; };
 		76744CF926FE4D7400B77ED9 /* ActiveSessionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */; };
+		767DC83528997F8E00080FA9 /* EthSendTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 767DC83428997F8E00080FA9 /* EthSendTransaction.swift */; };
 		7694A5262874296A0001257E /* RegistryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7694A5252874296A0001257E /* RegistryTests.swift */; };
 		76B149F02821C03B00F05F91 /* Proposal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76B149EF2821C03B00F05F91 /* Proposal.swift */; };
 		76B6E39F2807A3B6004DF775 /* WalletViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76B6E39E2807A3B6004DF775 /* WalletViewController.swift */; };
@@ -182,6 +183,7 @@
 		765056262821989600F9AE79 /* Color+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extension.swift"; sourceTree = "<group>"; };
 		76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionItem.swift; sourceTree = "<group>"; };
 		76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionCell.swift; sourceTree = "<group>"; };
+		767DC83428997F8E00080FA9 /* EthSendTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthSendTransaction.swift; sourceTree = "<group>"; };
 		7694A5252874296A0001257E /* RegistryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistryTests.swift; sourceTree = "<group>"; };
 		76B149EF2821C03B00F05F91 /* Proposal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Proposal.swift; sourceTree = "<group>"; };
 		76B6E39E2807A3B6004DF775 /* WalletViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WalletViewController.swift; sourceTree = "<group>"; };
@@ -434,6 +436,15 @@
 				764E1D5426F8DAC800A1FB15 /* Package.swift */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		767DC83328997F7600080FA9 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				A5E03DF8286465C700888481 /* ClientDelegate.swift */,
+				767DC83428997F8E00080FA9 /* EthSendTransaction.swift */,
+			);
+			path = Helpers;
 			sourceTree = "<group>";
 		};
 		8460DCFD274F98A90081F94C /* Request */ = {
@@ -862,7 +873,7 @@
 		A5E03E0928646A8100888481 /* Sign */ = {
 			isa = PBXGroup;
 			children = (
-				A5E03DF8286465C700888481 /* ClientDelegate.swift */,
+				767DC83328997F7600080FA9 /* Helpers */,
 				A5E03DF9286465C700888481 /* SignClientTests.swift */,
 			);
 			path = Sign;
@@ -1248,6 +1259,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				767DC83528997F8E00080FA9 /* EthSendTransaction.swift in Sources */,
 				A5E03DFB286465C700888481 /* ClientDelegate.swift in Sources */,
 				A5E03E03286466F400888481 /* ChatTests.swift in Sources */,
 				7694A5262874296A0001257E /* RegistryTests.swift in Sources */,

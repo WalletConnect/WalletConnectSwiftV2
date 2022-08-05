@@ -53,6 +53,10 @@ public struct RPCRequest: Equatable {
         self.init(method: method, params: AnyCodable(params), id: .right(id))
     }
 
+    public init<C>(method: String, params: C, rpcid: RPCID) where C: Codable {
+        self.init(method: method, params: AnyCodable(params), id: rpcid)
+    }
+
     public init<C>(method: String, params: C, id: String) where C: Codable {
         self.init(method: method, params: AnyCodable(params), id: .left(id))
     }
