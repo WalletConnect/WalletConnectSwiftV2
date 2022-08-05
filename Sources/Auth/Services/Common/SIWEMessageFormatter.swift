@@ -72,10 +72,6 @@ fileprivate struct SIWEMessage: Equatable {
 
     var resourcesSection: String {
         guard let resources = resources else { return "" }
-        var section = "\nResources:"
-        resources.forEach {
-            section.append("\n- \($0)")
-        }
-        return section
+        return resources.reduce("\nResources:") { $0 + "\n- \($1)" }
     }
 }
