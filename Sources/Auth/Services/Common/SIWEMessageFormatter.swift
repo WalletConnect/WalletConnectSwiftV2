@@ -38,19 +38,15 @@ struct SIWEMessage: Equatable {
 
     var formatted: String {
         return """
-                    \(domain) wants you to sign in with your Ethereum account:\n
-                    \(address)\n
+                \(domain) wants you to sign in with your Ethereum account:
+                \(address)
 
-                    \(statementLine)
-                    URI: \(uri)\n
-                    Version: \(version)\n
-                    Chain ID: \(chainId)\n
-                    Nonce: \(nonce)\n
-                    Issued At: \(iat)
-                    \(expLine)
-                    \(nbfLine)
-                    \(requestIdLine)
-                    \(resourcesSection)
+                \(statementLine)
+                URI: \(uri)
+                Version: \(version)
+                Chain ID: \(chainId)
+                Nonce: \(nonce)
+                Issued At: \(iat)\(expLine)\(nbfLine)\(requestIdLine)\(resourcesSection)
                 """
     }
 
@@ -63,7 +59,7 @@ struct SIWEMessage: Equatable {
 
     var statementLine: String {
         if let statement = statement {
-            return "\n\(statement)"
+            return "\(statement)\n"
         }
         return ""
     }
