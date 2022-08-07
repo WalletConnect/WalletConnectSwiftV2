@@ -5,6 +5,8 @@ import TestingUtils
 
 class CacaoSignerTest: XCTestCase {
 
+    let privateKey = Data(hex: "8dcbe6f4abf0f558e1c87ad1ab864e9d0fa086dd997d7c7c22616c83728fea9c")
+
     let payload = CacaoPayload(
         iss: "did:pkh:eip155:1:0x22Fe071b3631f155F0d8f4c9377D3309cB904E10",
         domain: "localhost:3000",
@@ -22,29 +24,28 @@ class CacaoSignerTest: XCTestCase {
         ]
     )
 
+    var cacao: Cacao {
+        return Cacao(
+            header: .init(t: ""),
+            payload: payload,
+            signature: sig
+        )
+    }
+
     let sig = CacaoSignature(t: "eip191", s: "ced1849ff778a1a55a9d5516c11f13d8637859c2af370b178e11e40fed5c239465c32db0e52849fc3638507090fc810f73a354c7a5c72f94ab9673db6085c20301", m: "")
 
 
-    func testCacaoSign() async throws {
-        let signer = CacaoSigner(signer: Signer(), keystore: MockCacaoKeystore())
+    func testCacaoSign() throws {
+        let signer = CacaoSigner(signer: Signer())
 
-        let signature = try await signer.sign(payload: payload)
+        let signature = try signer.sign(payload: payload, privateKey: privateKey)
 
         XCTAssertEqual(signature, sig)
     }
 
-    func testCacaoVerify() async throws {
-        let signer = CacaoSigner(signer: Signer(), keystore: MockCacaoKeystore())
+    func testCacaoVerify() throws {
+        let signer = CacaoSigner(signer: Signer())
 
-        try await signer.verify(signature: sig, payload: payload)
-    }
-}
-
-struct MockCacaoKeystore: CacaoSignerKeystore {
-
-    var privateKey: Data {
-        get async {
-            return Data(hex: "8dcbe6f4abf0f558e1c87ad1ab864e9d0fa086dd997d7c7c22616c83728fea9c")
-        }
+        try signer.verifySignature(cacao)
     }
 }

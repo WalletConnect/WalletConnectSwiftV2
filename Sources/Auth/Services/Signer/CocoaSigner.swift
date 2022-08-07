@@ -1,32 +1,31 @@
 import Foundation
 
-protocol CacaoSignerKeystore {
-    var privateKey: Data { get async }
+protocol CacaoSignatureVerifying {
+    func verifySignature(_ cacao: Cacao) throws
 }
 
-actor CacaoSigner {
+struct CacaoSigner: CacaoSignatureVerifying {
+
     enum Errors: Error {
         case signatureValidationFailed
     }
 
     private let signer: Signer
-    private let keystore: CacaoSignerKeystore
 
-    init(signer: Signer, keystore: CacaoSignerKeystore) {
+    init(signer: Signer) {
         self.signer = signer
-        self.keystore = keystore
     }
 
-    func sign(payload: CacaoPayload) async throws -> CacaoSignature {
+    func sign(payload: CacaoPayload, privateKey: Data) throws -> CacaoSignature {
         let message = try JSONEncoder().encode(payload) // TODO: SIWE encoding
-        let signature = try await signer.sign(message: message, with: keystore.privateKey)
-        return CacaoSignature(t: "eip191", s: signature.toHexString(), m: String())
+        let signature = try signer.sign(message: message, with: privateKey)
+        return CacaoSignature(t: "eip191", s: signature.toHexString(), m: String()) 
     }
 
-    func verify(signature: CacaoSignature, payload: CacaoPayload) async throws {
-        let sig = Data(hex: signature.s)
-        let message = try JSONEncoder().encode(payload)
-        let address = try SignerAddress.from(iss: payload.iss)
+    func verifySignature(_ cacao: Cacao) throws {
+        let sig = Data(hex: cacao.signature.s)
+        let message = try JSONEncoder().encode(cacao.payload)
+        let address = try SignerAddress.from(iss: cacao.payload.iss)
 
         guard try signer.isValid(signature: sig, message: message, address: address)
         else { throw Errors.signatureValidationFailed }
