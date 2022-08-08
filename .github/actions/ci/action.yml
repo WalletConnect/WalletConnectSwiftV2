@@ -16,7 +16,8 @@ runs:
         -project Example/ExampleApp.xcodeproj \ 
         -scheme WalletConnect \
         -clonedSourcePackagesDirPath SourcePackages \
-        -sdk iphonesimulator"
+        -sdk iphonesimulator \
+        test"
 
     # Integration tests
     - name: Run integration tests
