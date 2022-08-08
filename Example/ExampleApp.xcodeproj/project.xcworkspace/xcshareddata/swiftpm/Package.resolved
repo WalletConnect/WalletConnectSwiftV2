@@ -24,8 +24,17 @@
         "repositoryURL": "https://github.com/mxcl/PromiseKit.git",
         "state": {
           "branch": null,
-          "revision": "3fd8c77ded8a4bbee548e3bd6c987ffe8c1e3574",
-          "version": "6.17.0"
+          "revision": "ed3192004c0b00b4b3d7baa9578ee655c66faae3",
+          "version": "6.18.0"
+        }
+      },
+      {
+        "package": "secp256k1",
+        "repositoryURL": "https://github.com/Boilertalk/secp256k1.swift.git",
+        "state": {
+          "branch": null,
+          "revision": "45e458ec3be46cf0a6eb68bc947f797852dc65d8",
+          "version": "0.1.6"
         }
       },
       {
@@ -48,11 +57,11 @@
       },
       {
         "package": "Web3",
-        "repositoryURL": "https://github.com/Boilertalk/Web3.swift",
+        "repositoryURL": "https://github.com/flypaper0/Web3.swift",
         "state": {
-          "branch": null,
-          "revision": "1a6830ecc093f0f19054fed4c135dfee7bebe2b2",
-          "version": "0.5.3"
+          "branch": "master",
+          "revision": "23b6940bbda0769d9147bec6696b33a9fee0b120",
+          "version": null
         }
       }
     ]

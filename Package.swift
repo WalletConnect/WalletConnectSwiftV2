@@ -21,8 +21,7 @@ let package = Package(
             targets: ["Auth"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/flypaper0/secp256k1.swift.git", .branch("feature/serialized-compact")),
-        .package(url: "https://github.com/krzyzanowskim/CryptoSwift", .upToNextMajor(from: "1.5.1"))
+        .package(url: "https://github.com/flypaper0/Web3.swift", .branch("master"))
     ],
     targets: [
         .target(
@@ -40,8 +39,7 @@ let package = Package(
                 "WalletConnectUtils",
                 "WalletConnectKMS",
                 "WalletConnectPairing",
-                .product(name: "CryptoSwift", package: "CryptoSwift"),
-                .product(name: "secp256k1", package: "secp256k1.swift"),
+                .product(name: "Web3", package: "Web3.swift"),
             ],
             path: "Sources/Auth"),
         .target(

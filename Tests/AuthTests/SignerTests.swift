@@ -10,7 +10,7 @@ class SignerTest: XCTestCase {
     private let message = "Message".data(using: .utf8)!
     private let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
     private let signature = Data(hex: "f7d00a04559bff462f02194874b1ae7d4a8f0461acbe4be73386ebe982a9b9dc599abf31107e1ba708a3ec72499f1fd73dd390c5ca1a3084abe176de0529d00e00")
-    private var address = "0xc29c1c64576cef6229d501f107faa1090f81ca86"
+    private var address = "0x15bca56b6e2728aec2532df9d436bd1600e86688"
 
     func testValidSignature() throws {
         let result = try signer.sign(message: message, with: privateKey)

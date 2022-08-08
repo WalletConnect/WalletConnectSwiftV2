@@ -5,10 +5,10 @@ import TestingUtils
 
 class CacaoSignerTest: XCTestCase {
 
-    let privateKey = Data(hex: "8dcbe6f4abf0f558e1c87ad1ab864e9d0fa086dd997d7c7c22616c83728fea9c")
+    let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
 
     let payload = CacaoPayload(
-        iss: "did:pkh:eip155:1:0x22Fe071b3631f155F0d8f4c9377D3309cB904E10",
+        iss: "did:pkh:eip155:1:0x15bca56b6e2728aec2532df9d436bd1600e86688",
         domain: "localhost:3000",
         aud: "http://localhost:3000/login",
         version: 1,
@@ -32,7 +32,7 @@ class CacaoSignerTest: XCTestCase {
         )
     }
 
-    let sig = CacaoSignature(t: "eip191", s: "ced1849ff778a1a55a9d5516c11f13d8637859c2af370b178e11e40fed5c239465c32db0e52849fc3638507090fc810f73a354c7a5c72f94ab9673db6085c20301", m: "")
+    let sig = CacaoSignature(t: "eip191", s: "914b8300e471744f506407aa072cdf9a606fd3fe1a6f2a16c9f78009074c69622143c3009f4ccdedc0fdd421e5579c5e11b3a604e0a3e6ae0cb06b5e380879fb00", m: "")
 
 
     func testCacaoSign() throws {
