@@ -5,13 +5,13 @@ import TestingUtils
 
 private func makeRequests() -> [RPCRequest] {
     return [
-        RPCRequest(method: String.random(), id: Int.random()),
+        RPCRequest(method: String.random(), id: Int64.random()),
         RPCRequest(method: String.random(), id: String.random()),
-        RPCRequest(method: String.random(), params: EmptyCodable(), id: Int.random()),
+        RPCRequest(method: String.random(), params: EmptyCodable(), id: Int64.random()),
         RPCRequest(method: String.random(), params: EmptyCodable(), id: String.random()),
-        RPCRequest(method: String.random(), params: [0, 1, 2], id: Int.random()),
+        RPCRequest(method: String.random(), params: [0, 1, 2], id: Int64.random()),
         RPCRequest(method: String.random(), params: ["0", "1", "2"], id: String.random()),
-        RPCRequest(method: String.random(), params: [AnyCodable(0), AnyCodable("0")], id: Int.random()),
+        RPCRequest(method: String.random(), params: [AnyCodable(0), AnyCodable("0")], id: Int64.random()),
         RPCRequest(method: String.random(), params: [AnyCodable(0), AnyCodable("0")], id: String.random())
     ]
 }
@@ -38,21 +38,21 @@ final class RPCRequestTests: XCTestCase {
 
     func testCheckedParamsInit() {
         XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: [0]))
-        XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: [0], id: Int.random()))
+        XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: [0], id: Int64.random()))
         XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: [0], id: String.random()))
         XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: EmptyCodable()))
-        XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: EmptyCodable(), id: Int.random()))
+        XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: EmptyCodable(), id: Int64.random()))
         XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: EmptyCodable(), id: String.random()))
     }
 
     func testCheckedParamsInitFailsWithPrimitives() {
-        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: 0, id: Int.random()))
+        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: 0, id: Int64.random()))
         XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: 0, id: String.random()))
-        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: "string", id: Int.random()))
+        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: "string", id: Int64.random()))
         XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: "string", id: String.random()))
-        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: Double.pi, id: Int.random()))
+        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: Double.pi, id: Int64.random()))
         XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: Double.pi, id: String.random()))
-        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: true, id: Int.random()))
+        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: true, id: Int64.random()))
         XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: true, id: String.random()))
     }
 

@@ -76,8 +76,8 @@ class NetworkingInteractorMock: NetworkInteracting {
     }
 
     func subscribe(topic: String) {
-        didCallSubscribe = true
         subscriptions.append(topic)
+        didCallSubscribe = true
     }
 
     func unsubscribe(topic: String) {

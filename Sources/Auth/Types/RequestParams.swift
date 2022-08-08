@@ -9,5 +9,5 @@ struct RequestParams {
     let exp: String?
     let statement: String?
     let requestId: String?
-    let resources: String?
+    let resources: [String]?
 }

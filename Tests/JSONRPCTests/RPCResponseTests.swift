@@ -5,20 +5,20 @@ import TestingUtils
 
 private func makeResultResponses() -> [RPCResponse] {
     return [
-        RPCResponse(id: Int.random(), result: Int.random()),
-        RPCResponse(id: Int.random(), result: Bool.random()),
-        RPCResponse(id: Int.random(), result: String.random()),
-        RPCResponse(id: Int.random(), result: (1...10).map { String($0) }),
-        RPCResponse(id: Int.random(), result: EmptyCodable()),
+        RPCResponse(id: Int64.random(), result: Int.random()),
+        RPCResponse(id: Int64.random(), result: Bool.random()),
+        RPCResponse(id: Int64.random(), result: String.random()),
+        RPCResponse(id: Int64.random(), result: (1...10).map { String($0) }),
+        RPCResponse(id: Int64.random(), result: EmptyCodable()),
         RPCResponse(id: String.random(), result: Int.random())
     ]
 }
 
 private func makeErrorResponses() -> [RPCResponse] {
     return [
-        RPCResponse(id: Int.random(), error: JSONRPCError.stub()),
+        RPCResponse(id: Int64.random(), error: JSONRPCError.stub()),
         RPCResponse(id: String.random(), error: JSONRPCError.stub(data: AnyCodable(Int.random()))),
-        RPCResponse(id: Int.random(), errorCode: Int.random(), message: String.random(), associatedData: AnyCodable(String.random())),
+        RPCResponse(id: Int64.random(), errorCode: Int.random(), message: String.random(), associatedData: AnyCodable(String.random())),
         RPCResponse(id: String.random(), errorCode: Int.random(), message: String.random(), associatedData: nil)
     ]
 }

@@ -85,8 +85,6 @@ final class PairingEngineTests: XCTestCase {
         XCTAssertEqual(publishTopic, topicA)
     }
 
-    // Flaky test: asserting `topicB` and `sessionTopic` failed once, couldn't reproduce
-    @MainActor
     func testHandleSessionProposeResponse() async {
         let uri = try! await engine.create()
         let pairing = storageMock.getPairing(forTopic: uri.topic)!

@@ -1,7 +1,7 @@
 import Foundation
 import JSONRPC
 
-struct RequestSubscriptionPayload: Codable {
-    let id: Int64
+struct RequestSubscriptionPayload: Codable, Equatable {
+    let topic: String
     let request: RPCRequest
 }
