@@ -65,7 +65,7 @@ final class RPCHistoryTests: XCTestCase {
     func testSetDuplicateRequest() throws {
         let expectedError = RPCHistory.HistoryError.requestDuplicateNotAllowed
 
-        let id = Int.random()
+        let id = Int64.random()
         let requestA = RPCRequest.stub(method: "method-1", id: id)
         let requestB = RPCRequest.stub(method: "method-2", id: id)
         let topic = String.randomTopic()

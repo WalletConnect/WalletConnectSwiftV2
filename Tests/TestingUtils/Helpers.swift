@@ -9,6 +9,12 @@ public extension Int {
     }
 }
 
+public extension Int64 {
+    static func random() -> Int64 {
+        random(in: Int64.min...Int64.max)
+    }
+}
+
 public extension Double {
 
     // Do not use this function when testing Codables: https://bugs.swift.org/browse/SR-7054
