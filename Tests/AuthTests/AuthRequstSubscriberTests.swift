@@ -17,7 +17,7 @@ class AuthRequstSubscriberTests: XCTestCase {
         messageFormatter = SIWEMessageFormatterMock()
         sut = AuthRequestSubscriber(networkingInteractor: networkingInteractor,
                                    logger: ConsoleLoggerMock(),
-                                   messageFormatter: messageFormatter)
+                                    messageFormatter: messageFormatter, address: "")
     }
 
     func testSubscribeRequest() {

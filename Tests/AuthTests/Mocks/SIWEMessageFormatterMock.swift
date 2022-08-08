@@ -3,7 +3,7 @@ import Foundation
 
 class SIWEMessageFormatterMock: SIWEMessageFormatting {
     var formattedMessage: String!
-    func formatMessage(from request: AuthRequestParams) throws -> String {
+    func formatMessage(from authPayload: AuthPayload, address: String) -> String {
         return formattedMessage
     }
 }
