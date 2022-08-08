@@ -40,7 +40,6 @@ fileprivate struct SIWEMessage: Equatable {
         return """
                 \(domain) wants you to sign in with your Ethereum account:
                 \(address)
-
                 \(statementLine)
                 URI: \(uri)
                 Version: \(version)
@@ -57,7 +56,7 @@ fileprivate struct SIWEMessage: Equatable {
 
     var statementLine: String {
         guard let statement = statement else { return "" }
-        return "\(statement)\n"
+        return "\n\(statement)\n"
     }
 
     var nbfLine: String {
