@@ -16,7 +16,7 @@ runs:
         -project Example/ExampleApp.xcodeproj \ 
         -scheme WalletConnect \
         -clonedSourcePackagesDirPath SourcePackages \
-        -sdk iphonesimulator \
+        -destination 'platform=iOS Simulator,name=iPhone 13' \
         test"
 
     # Integration tests
