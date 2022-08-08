@@ -86,43 +86,43 @@ final class PairingEngineTests: XCTestCase {
     }
 
     // Flaky test: asserting `topicB` and `sessionTopic` failed once, couldn't reproduce
-//    @MainActor
-//    func testHandleSessionProposeResponse() async {
-//        let uri = try! await engine.create()
-//        let pairing = storageMock.getPairing(forTopic: uri.topic)!
-//        let topicA = pairing.topic
-//        let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
-//
-//        // Client proposes session
-//        // FIXME: namespace stub
-//        try! await engine.propose(pairingTopic: pairing.topic, namespaces: ProposalNamespace.stubDictionary(), relay: relayOptions)
-//
-//        guard let request = networkingInteractor.requests.first?.request,
-//              let proposal = networkingInteractor.requests.first?.request.sessionProposal else {
-//                  XCTFail("Proposer must publish session proposal request"); return
-//              }
-//
-//        // Client receives proposal response response
-//        let responder = Participant.stub()
-//        let proposalResponse = SessionType.ProposeResponse(relay: relayOptions, responderPublicKey: responder.publicKey)
-//
-//        let jsonRpcResponse = JSONRPCResponse<AnyCodable>(id: request.id, result: AnyCodable.decoded(proposalResponse))
-//        let response = WCResponse(topic: topicA,
-//                                  chainId: nil,
-//                                  requestMethod: request.method,
-//                                  requestParams: request.params,
-//                                  result: .response(jsonRpcResponse))
-//
-//        networkingInteractor.responsePublisherSubject.send(response)
-//        let privateKey = try! cryptoMock.getPrivateKey(for: proposal.proposer.publicKey)!
-//        let topicB = deriveTopic(publicKey: responder.publicKey, privateKey: privateKey)
-//        let storedPairing = storageMock.getPairing(forTopic: topicA)!
-//        let sessionTopic = networkingInteractor.subscriptions.last!
-//
-//        XCTAssertTrue(networkingInteractor.didCallSubscribe)
-//        XCTAssert(storedPairing.active)
+    @MainActor
+    func testHandleSessionProposeResponse() async {
+        let uri = try! await engine.create()
+        let pairing = storageMock.getPairing(forTopic: uri.topic)!
+        let topicA = pairing.topic
+        let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
+
+        // Client proposes session
+        // FIXME: namespace stub
+        try! await engine.propose(pairingTopic: pairing.topic, namespaces: ProposalNamespace.stubDictionary(), relay: relayOptions)
+
+        guard let request = networkingInteractor.requests.first?.request,
+              let proposal = networkingInteractor.requests.first?.request.sessionProposal else {
+                  XCTFail("Proposer must publish session proposal request"); return
+              }
+
+        // Client receives proposal response response
+        let responder = Participant.stub()
+        let proposalResponse = SessionType.ProposeResponse(relay: relayOptions, responderPublicKey: responder.publicKey)
+
+        let jsonRpcResponse = JSONRPCResponse<AnyCodable>(id: request.id, result: AnyCodable.decoded(proposalResponse))
+        let response = WCResponse(topic: topicA,
+                                  chainId: nil,
+                                  requestMethod: request.method,
+                                  requestParams: request.params,
+                                  result: .response(jsonRpcResponse))
+
+        networkingInteractor.responsePublisherSubject.send(response)
+        let privateKey = try! cryptoMock.getPrivateKey(for: proposal.proposer.publicKey)!
+        let topicB = deriveTopic(publicKey: responder.publicKey, privateKey: privateKey)
+        let storedPairing = storageMock.getPairing(forTopic: topicA)!
+        let sessionTopic = networkingInteractor.subscriptions.last!
+
+        XCTAssertTrue(networkingInteractor.didCallSubscribe)
+        XCTAssert(storedPairing.active)
 //        XCTAssertEqual(topicB, sessionTopic, "Responder engine calls back with session topic")
-//    }
+    }
 
     func testSessionProposeError() async {
         let uri = try! await engine.create()
