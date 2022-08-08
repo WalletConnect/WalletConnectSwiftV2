@@ -207,7 +207,7 @@ private extension ApproveEngine {
             )
             settlingProposal = proposal
 
-            Task(priority: .background) {
+            Task(priority: .high) { 
                 try? await networkingInteractor.subscribe(topic: sessionTopic)
             }
         } catch {

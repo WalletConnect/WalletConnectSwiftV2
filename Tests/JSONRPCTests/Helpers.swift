@@ -3,14 +3,14 @@ import Commons
 
 final class TestIdentifierGenerator: IdentifierGenerator {
 
-    var id: RPCID = .right(Int.random())
+    var id: RPCID = .right(Int64.random())
 
     func next() -> RPCID {
         return id
     }
 }
 
-extension Either where L == String, R == Int {
+extension Either where L == String, R == Int64 {
 
     var isString: Bool {
         left != nil
