@@ -61,7 +61,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateNamespaces(topic: session.topic))
         usleep(100)
         XCTAssertFalse(networkingInteractor.didRespondSuccess)
-        XCTAssertEqual(networkingInteractor.lastErrorCode, 3004)
+        XCTAssertEqual(networkingInteractor.lastErrorCode, 3003)
     }
 
     // MARK: - Update Expiry

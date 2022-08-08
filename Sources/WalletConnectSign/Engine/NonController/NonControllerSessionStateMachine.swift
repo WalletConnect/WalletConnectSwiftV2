@@ -62,18 +62,18 @@ final class NonControllerSessionStateMachine {
         do {
             try Namespace.validate(updateParams.namespaces)
         } catch {
-            throw Errors.respondError(payload: payload, reason: .invalidUpdateNamespaceRequest)
+            throw Errors.respondError(payload: payload, reason: .invalidUpdateRequest)
         }
         guard var session = sessionStore.getSession(forTopic: payload.topic) else {
             throw Errors.respondError(payload: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
         }
         guard session.peerIsController else {
-            throw Errors.respondError(payload: payload, reason: .unauthorizedUpdateNamespacesRequest)
+            throw Errors.respondError(payload: payload, reason: .unauthorizedUpdateRequest)
         }
         do {
             try session.updateNamespaces(updateParams.namespaces, timestamp: payload.timestamp)
         } catch {
-            throw Errors.respondError(payload: payload, reason: .invalidUpdateNamespaceRequest)
+            throw Errors.respondError(payload: payload, reason: .invalidUpdateRequest)
         }
         sessionStore.setSession(session)
         networkingInteractor.respondSuccess(for: payload)
@@ -86,12 +86,12 @@ final class NonControllerSessionStateMachine {
             throw Errors.respondError(payload: payload, reason: .noContextWithTopic(context: .session, topic: topic))
         }
         guard session.peerIsController else {
-            throw Errors.respondError(payload: payload, reason: .unauthorizedUpdateExpiryRequest)
+            throw Errors.respondError(payload: payload, reason: .unauthorizedExtendRequest)
         }
         do {
             try session.updateExpiry(to: updateExpiryParams.expiry)
         } catch {
-            throw Errors.respondError(payload: payload, reason: .invalidUpdateExpiryRequest)
+            throw Errors.respondError(payload: payload, reason: .invalidExtendRequest)
         }
         sessionStore.setSession(session)
         networkingInteractor.respondSuccess(for: payload)

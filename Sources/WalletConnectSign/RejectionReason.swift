@@ -11,11 +11,11 @@ internal extension RejectionReason {
     func internalRepresentation() -> ReasonCode {
         switch self {
         case .disapprovedChains:
-            return ReasonCode.disapprovedChains
+            return ReasonCode.userRejectedChains
         case .disapprovedMethods:
-            return ReasonCode.disapprovedMethods
+            return ReasonCode.userRejectedMethods
         case  .disapprovedEventTypes:
-            return ReasonCode.disapprovedEventTypes
+            return ReasonCode.userRejectedEvents
         }
     }
 }
