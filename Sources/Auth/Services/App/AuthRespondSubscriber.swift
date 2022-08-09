@@ -21,16 +21,16 @@ class AuthRespondSubscriber {
 
     private func subscribeForResponse() {
         networkingInteractor.responsePublisher.sink { [unowned self] subscriptionPayload in
-            guard let request = rpcHistory.get(recordId: subscriptionPayload.request.id!)?.request,
+            guard let request = rpcHistory.get(recordId: subscriptionPayload.response.id!)?.request,
                   request.method == "wc_authRequest" else { return }
             networkingInteractor.unsubscribe(topic: subscriptionPayload.topic)
-            guard let cacao = try? subscriptionPayload.request.result?.get(Cacao.self) else {
+            guard let cacao = try? subscriptionPayload.response.result?.get(Cacao.self) else {
                 logger.debug("Malformed auth response params")
                 return
             }
             do {
                 try CacaoSignatureVerifier().verifySignature(cacao)
-                onResponse?(subscriptionPayload.request.id!, cacao)
+                onResponse?(subscriptionPayload.response.id!, cacao)
             } catch {
                 logger.debug("Received response with invalid signature")
             }
