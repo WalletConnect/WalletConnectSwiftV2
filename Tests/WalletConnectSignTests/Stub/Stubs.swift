@@ -2,7 +2,7 @@
 import Foundation
 import WalletConnectKMS
 import WalletConnectUtils
-import TestingUtils
+import Toolbox
 import WalletConnectPairing
 
 extension AppMetadata {

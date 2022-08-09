@@ -1,7 +1,7 @@
 import XCTest
 import Combine
 @testable import WalletConnectSign
-@testable import TestingUtils
+@testable import Toolbox
 @testable import WalletConnectKMS
 import WalletConnectUtils
 

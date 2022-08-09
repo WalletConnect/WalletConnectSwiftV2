@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 @testable import WalletConnectRelay
-import TestingUtils
+import Toolbox
 import Combine
 
 class WebSocketMock: WebSocketConnecting {

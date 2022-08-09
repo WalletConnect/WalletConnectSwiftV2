@@ -1,5 +1,5 @@
 import XCTest
-import TestingUtils
+import Toolbox
 @testable import Commons
 
 private struct SampleStruct: Codable, Equatable {

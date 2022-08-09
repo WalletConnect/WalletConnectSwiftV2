@@ -1,6 +1,6 @@
 import XCTest
 import JSONRPC
-import TestingUtils
+import Toolbox
 @testable import WalletConnectUtils
 
 final class RPCHistoryTests: XCTestCase {

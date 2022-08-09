@@ -3,7 +3,7 @@ import Combine
 import WalletConnectUtils
 import WalletConnectPairing
 @testable import WalletConnectSign
-@testable import TestingUtils
+@testable import Toolbox
 @testable import WalletConnectKMS
 
 final class ApproveEngineTests: XCTestCase {

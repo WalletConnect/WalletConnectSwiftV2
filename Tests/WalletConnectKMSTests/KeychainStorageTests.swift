@@ -1,6 +1,6 @@
 import XCTest
 import CryptoKit
-import TestingUtils
+import Toolbox
 @testable import WalletConnectKMS
 
 extension Curve25519.KeyAgreement.PrivateKey: GenericPasswordConvertible {}

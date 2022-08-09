@@ -1,6 +1,6 @@
 import XCTest
 import Commons
-import TestingUtils
+import Toolbox
 @testable import JSONRPC
 
 private func makeResultResponses() -> [RPCResponse] {

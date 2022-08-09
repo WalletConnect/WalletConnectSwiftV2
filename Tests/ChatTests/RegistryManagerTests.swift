@@ -3,7 +3,7 @@ import XCTest
 @testable import Chat
 import WalletConnectUtils
 @testable import WalletConnectKMS
-@testable import TestingUtils
+@testable import Toolbox
 
 final class RegistryManagerTests: XCTestCase {
     var registryManager: RegistryService!

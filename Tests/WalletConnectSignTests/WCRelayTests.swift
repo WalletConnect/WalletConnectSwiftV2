@@ -3,7 +3,7 @@ import Combine
 import XCTest
 import WalletConnectUtils
 import WalletConnectPairing
-@testable import TestingUtils
+@testable import Toolbox
 @testable import WalletConnectSign
 
 class NetworkingInteractorTests: XCTestCase {

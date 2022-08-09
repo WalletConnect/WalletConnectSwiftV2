@@ -3,7 +3,7 @@ import XCTest
 @testable import Auth
 import WalletConnectUtils
 @testable import WalletConnectKMS
-@testable import TestingUtils
+@testable import Toolbox
 import JSONRPC
 
 class AuthRequstSubscriberTests: XCTestCase {

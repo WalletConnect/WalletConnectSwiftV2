@@ -65,34 +65,34 @@ let package = Package(
         .target(
             name: "WalletConnectRouter",
             dependencies: []),
+        .target(
+            name: "Toolbox",
+            dependencies: ["WalletConnectUtils", "WalletConnectKMS", "JSONRPC"],
+            path: "Tests/Toolbox"),
         .testTarget(
             name: "WalletConnectSignTests",
-            dependencies: ["WalletConnectSign", "TestingUtils"]),
+            dependencies: ["WalletConnectSign", "Toolbox"]),
         .testTarget(
             name: "ChatTests",
-            dependencies: ["Chat", "WalletConnectUtils", "TestingUtils"]),
+            dependencies: ["Chat", "WalletConnectUtils", "Toolbox"]),
         .testTarget(
             name: "AuthTests",
-            dependencies: ["Auth", "WalletConnectUtils", "TestingUtils"]),
+            dependencies: ["Auth", "WalletConnectUtils", "Toolbox"]),
         .testTarget(
             name: "RelayerTests",
-            dependencies: ["WalletConnectRelay", "WalletConnectUtils", "TestingUtils"]),
+            dependencies: ["WalletConnectRelay", "WalletConnectUtils", "Toolbox"]),
         .testTarget(
             name: "WalletConnectKMSTests",
-            dependencies: ["WalletConnectKMS", "WalletConnectUtils", "TestingUtils"]),
-        .target(
-            name: "TestingUtils",
-            dependencies: ["WalletConnectUtils", "WalletConnectKMS", "JSONRPC"],
-            path: "Tests/TestingUtils"),
+            dependencies: ["WalletConnectKMS", "WalletConnectUtils", "Toolbox"]),
         .testTarget(
             name: "WalletConnectUtilsTests",
-            dependencies: ["WalletConnectUtils", "TestingUtils"]),
+            dependencies: ["WalletConnectUtils", "Toolbox"]),
         .testTarget(
             name: "JSONRPCTests",
-            dependencies: ["JSONRPC", "TestingUtils"]),
+            dependencies: ["JSONRPC", "Toolbox"]),
         .testTarget(
             name: "CommonsTests",
-            dependencies: ["Commons", "TestingUtils"])
+            dependencies: ["Commons", "Toolbox"])
     ],
     swiftLanguageVersions: [.v5]
 )

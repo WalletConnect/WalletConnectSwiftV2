@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 @testable import WalletConnectKMS
-@testable import TestingUtils
+@testable import Toolbox
 
 final class SerializerTests: XCTestCase {
     var mySerializer: Serializer!

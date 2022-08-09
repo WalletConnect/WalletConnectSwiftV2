@@ -1,6 +1,6 @@
 import XCTest
 import WalletConnectUtils
-@testable import TestingUtils
+@testable import Toolbox
 import WalletConnectKMS
 @testable import WalletConnectSign
 
