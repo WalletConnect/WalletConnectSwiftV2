@@ -73,10 +73,11 @@ class NetworkingInteractor: NetworkInteracting {
             let message = try serializer.serialize(topic: topic, encodable: request)
             return try await withCheckedThrowingContinuation { continuation in
                 relayClient.publish(topic: topic, payload: message, tag: tag) { error in
-                    guard let error1 = error else {
-                        fatalError("Expected non-nil result 'error1' in the non-error case")
+                    if let error = error {
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume()
                     }
-                    continuation.resume(throwing: error1)
                 }
             }
         } catch {
