@@ -52,7 +52,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateNamespaces(topic: ""))
         usleep(100)
         XCTAssertFalse(networkingInteractor.didRespondSuccess)
-        XCTAssertEqual(networkingInteractor.lastErrorCode, 1301)
+        XCTAssertEqual(networkingInteractor.lastErrorCode, 7001)
     }
 
     func testUpdateMethodPeerErrorUnauthorized() {
