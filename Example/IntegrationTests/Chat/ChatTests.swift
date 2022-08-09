@@ -66,7 +66,7 @@ final class ChatTests: XCTestCase {
         let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
         let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
 
-        Task(priority: .background) {
+        Task(priority: .high) {
             let pubKey = try! await invitee.register(account: inviteeAccount)
 
             try! await inviter.invite(publicKey: pubKey, peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
@@ -94,7 +94,7 @@ final class ChatTests: XCTestCase {
         let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
         let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
 
-        Task(priority: .background) {
+        Task(priority: .high) {
             let pubKey = try! await invitee.register(account: inviteeAccount)
             try! await inviter.invite(publicKey: pubKey, peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
         }
