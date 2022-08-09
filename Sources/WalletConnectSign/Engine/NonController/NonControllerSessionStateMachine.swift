@@ -65,7 +65,7 @@ final class NonControllerSessionStateMachine {
             throw Errors.respondError(payload: payload, reason: .invalidUpdateRequest)
         }
         guard var session = sessionStore.getSession(forTopic: payload.topic) else {
-            throw Errors.respondError(payload: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
+            throw Errors.respondError(payload: payload, reason: .noSessionForTopic)
         }
         guard session.peerIsController else {
             throw Errors.respondError(payload: payload, reason: .unauthorizedUpdateRequest)
@@ -83,7 +83,7 @@ final class NonControllerSessionStateMachine {
     private func onSessionUpdateExpiry(_ payload: WCRequestSubscriptionPayload, updateExpiryParams: SessionType.UpdateExpiryParams) throws {
         let topic = payload.topic
         guard var session = sessionStore.getSession(forTopic: topic) else {
-            throw Errors.respondError(payload: payload, reason: .noContextWithTopic(context: .session, topic: topic))
+            throw Errors.respondError(payload: payload, reason: .noSessionForTopic)
         }
         guard session.peerIsController else {
             throw Errors.respondError(payload: payload, reason: .unauthorizedExtendRequest)

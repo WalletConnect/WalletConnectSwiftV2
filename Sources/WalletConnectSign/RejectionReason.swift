@@ -2,19 +2,22 @@ import Foundation
 
 /// https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-25.md
 public enum RejectionReason {
-    case disapprovedChains
-    case disapprovedMethods
-    case disapprovedEventTypes
+    case userRejected
+    case userRejectedChains
+    case userRejectedMethods
+    case userRejectedEvents
 }
 
 internal extension RejectionReason {
     func internalRepresentation() -> ReasonCode {
         switch self {
-        case .disapprovedChains:
+        case .userRejected:
+            return ReasonCode.userRejected
+        case .userRejectedChains:
             return ReasonCode.userRejectedChains
-        case .disapprovedMethods:
+        case .userRejectedMethods:
             return ReasonCode.userRejectedMethods
-        case  .disapprovedEventTypes:
+        case  .userRejectedEvents:
             return ReasonCode.userRejectedEvents
         }
     }

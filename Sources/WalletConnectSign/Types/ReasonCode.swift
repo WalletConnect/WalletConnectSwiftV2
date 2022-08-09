@@ -1,6 +1,6 @@
-enum ReasonCode {
+enum ReasonCode: Codable, Equatable {
 
-    enum Context: String {
+    enum Context: String, Codable {
         case pairing = "pairing"
         case session = "session"
     }
@@ -10,14 +10,14 @@ enum ReasonCode {
     case invalidEvent
     case invalidUpdateRequest
     case invalidExtendRequest
-    case noContextWithTopic(context: Context, topic: String)
+    case noSessionForTopic
 
     // 3000 - (Unauthorized)
     case unauthorizedMethod(String)
     case unauthorizedEvent(String)
     case unauthorizedUpdateRequest
     case unauthorizedExtendRequest
-    case unauthorizedTargetChain(String)
+    case unauthorizedChain
 
     // 4001 - (EIP-1193)
     case userRejectedRequest
@@ -43,13 +43,12 @@ enum ReasonCode {
         case .invalidEvent: return 1002
         case .invalidUpdateRequest: return 1003
         case .invalidExtendRequest: return 1004
-        case .noContextWithTopic: return 1301
 
         case .unauthorizedMethod: return 3001
         case .unauthorizedEvent: return 3002
         case .unauthorizedUpdateRequest: return 3003
         case .unauthorizedExtendRequest: return 3004
-        case .unauthorizedTargetChain: return 3005
+        case .unauthorizedChain: return 3005
 
         case .userRejectedRequest: return 4001
 
@@ -65,6 +64,8 @@ enum ReasonCode {
         case .unsupportedNamespaceKey: return 5104
 
         case .userDisconnected: return 6000
+
+        case .noSessionForTopic: return 7001
         }
     }
 
@@ -78,8 +79,8 @@ enum ReasonCode {
             return "Invalid update namespace request"
         case .invalidExtendRequest:
             return "Invalid update expiry request"
-        case .noContextWithTopic(let context, let topic):
-            return "No matching \(context) with topic: \(topic)"
+        case .noSessionForTopic:
+            return "No matching session matching topic"
 
         case .unauthorizedMethod(let method):
             return "Unauthorized JSON-RPC method requested: \(method)"
@@ -89,8 +90,8 @@ enum ReasonCode {
             return "Unauthorized update request"
         case .unauthorizedExtendRequest:
             return "Unauthorized extend request"
-        case .unauthorizedTargetChain(let chainId):
-            return "Unauthorized target chain id requested: \(chainId)"
+        case .unauthorizedChain:
+            return "Unauthorized target chain id requested"
 
         case .userRejectedRequest:
             return "User rejected request"
