@@ -34,7 +34,6 @@ class CacaoSignerTest: XCTestCase {
 
     let sig = CacaoSignature(t: "eip191", s: "914b8300e471744f506407aa072cdf9a606fd3fe1a6f2a16c9f78009074c69622143c3009f4ccdedc0fdd421e5579c5e11b3a604e0a3e6ae0cb06b5e380879fb00", m: "")
 
-
     func testCacaoSign() throws {
         let signer = CacaoSigner(signer: Signer())
 

@@ -19,7 +19,7 @@ struct CacaoSigner: CacaoSignatureVerifying {
     func sign(payload: CacaoPayload, privateKey: Data) throws -> CacaoSignature {
         let message = try JSONEncoder().encode(payload) // TODO: SIWE encoding
         let signature = try signer.sign(message: message, with: privateKey)
-        return CacaoSignature(t: "eip191", s: signature.toHexString(), m: String()) 
+        return CacaoSignature(t: "eip191", s: signature.toHexString(), m: String())
     }
 
     func verifySignature(_ cacao: Cacao) throws {
