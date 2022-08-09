@@ -21,6 +21,7 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
         navigationItem.title = "Available Chains"
         selectChainView.tableView.dataSource = self
         selectChainView.connectButton.addTarget(self, action: #selector(connect), for: .touchUpInside)
+        selectChainView.openWallet.addTarget(self, action: #selector(openWallet), for: .touchUpInside)
         Sign.instance.sessionSettlePublisher.sink {[unowned self] session in
             onSessionSettled?(session)
         }.store(in: &publishers)
@@ -40,6 +41,11 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
             let uri = try await Sign.instance.connect(requiredNamespaces: namespaces)
             showConnectScreen(uriString: uri!)
         }
+    }
+
+    @objc
+    private func openWallet() {
+        UIApplication.shared.open(URL(string: "walletconnectwallet://")!)
     }
 
     private func showConnectScreen(uriString: String) {

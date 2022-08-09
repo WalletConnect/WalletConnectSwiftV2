@@ -17,8 +17,8 @@ let package = Package(
             name: "WalletConnectChat",
             targets: ["Chat"]),
         .library(
-            name: "WalletConnectAuth",
-            targets: ["Auth"])
+            name: "WalletConnectRouter",
+            targets: ["WalletConnectRouter"]),
     ],
     dependencies: [
         .package(url: "https://github.com/flypaper0/Web3.swift", .branch("master"))
@@ -61,6 +61,9 @@ let package = Package(
             dependencies: ["Commons"]),
         .target(
             name: "Commons",
+            dependencies: []),
+        .target(
+            name: "WalletConnectRouter",
             dependencies: []),
         .testTarget(
             name: "WalletConnectSignTests",
