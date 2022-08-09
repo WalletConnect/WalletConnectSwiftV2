@@ -19,7 +19,7 @@ struct Signer {
             r: EthereumQuantity(sig.r),
             s: EthereumQuantity(sig.s)
         )
-        return publicKey.address.hex(eip55: false) == address
+        return publicKey.address.hex(eip55: false) == address.lowercased()
     }
 
     private func decompose(signature: Data) -> Signature {

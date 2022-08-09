@@ -25,8 +25,7 @@ struct CacaoSigner: CacaoSignatureVerifying {
     func verifySignature(_ cacao: Cacao) throws {
         let sig = Data(hex: cacao.signature.s)
         let message = try JSONEncoder().encode(cacao.payload)
-        let address = try SignerAddress.from(iss: cacao.payload.iss)
-
+        let address = try DIDPKH(iss: cacao.payload.iss).account.address
         guard try signer.isValid(signature: sig, message: message, address: address)
         else { throw Errors.signatureValidationFailed }
     }

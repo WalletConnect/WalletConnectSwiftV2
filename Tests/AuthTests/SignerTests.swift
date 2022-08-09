@@ -2,6 +2,8 @@ import Foundation
 import XCTest
 @testable import Auth
 import secp256k1
+import Web3
+import WalletConnectUtils
 
 class SignerTest: XCTestCase {
 
@@ -26,7 +28,7 @@ class SignerTest: XCTestCase {
     }
 
     func testInvalidPubKey() throws {
-        let address = try SignerAddress.from(publicKey: .randomBytes(count: 32))
+        let address = "0xBAc675C310721717Cd4A37F6cbeA1F081b1C2a07"
 
         XCTAssertFalse(try signer.isValid(signature: signature, message: message, address: address))
     }
@@ -37,15 +39,15 @@ class SignerTest: XCTestCase {
         XCTAssertFalse(try signer.isValid(signature: signature, message: message, address: address))
     }
 
-    func testSignerAddressFromPublicKey() throws {
-        let publicKey = Data(hex: "aa931f5ee58735270821b3722866d8882d1948909532cf8ac2b3ef144ae8043363d1d3728b49f10c7cd78c38289c8012477473879f3b53169f2a677b7fbed0c7")
-
-        XCTAssertEqual(try SignerAddress.from(publicKey: publicKey), "0xe16c1623c1aa7d919cd2241d8b36d9e79c1be2a2")
-    }
-
-    func testSignerAddressFomIss() throws {
+    func testSignerAddressFromIss() throws {
         let iss = "did:pkh:eip155:1:0xBAc675C310721717Cd4A37F6cbeA1F081b1C2a07"
 
-        XCTAssertEqual(try SignerAddress.from(iss: iss), "0xbac675c310721717cd4a37f6cbea1f081b1c2a07")
+        XCTAssertEqual(try DIDPKH(iss: iss).account, Account("eip155:1:0xBAc675C310721717Cd4A37F6cbeA1F081b1C2a07")!)
+    }
+
+    func testSignerAddressFromAccount() throws {
+        let account = Account("eip155:1:0xBAc675C310721717Cd4A37F6cbeA1F081b1C2a07")!
+
+        XCTAssertEqual(DIDPKH(account: account).iss, "did:pkh:eip155:1:0xBAc675C310721717Cd4A37F6cbeA1F081b1C2a07")
     }
 }
