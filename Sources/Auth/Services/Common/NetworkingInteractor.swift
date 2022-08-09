@@ -11,6 +11,7 @@ protocol NetworkInteracting {
     func subscribe(topic: String) async throws
     func unsubscribe(topic: String)
     func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws
+    func requestNetworkAck(_ request: RPCRequest, topic: String, tag: Int) async throws 
     func respond(topic: String, response: RPCResponse, tag: Int, envelopeType: Envelope.EnvelopeType) async throws
 }
 
@@ -61,6 +62,26 @@ class NetworkingInteractor: NetworkInteracting {
         try rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
         let message = try! serializer.serialize(topic: topic, encodable: request, envelopeType: envelopeType)
         try await relayClient.publish(topic: topic, payload: message, tag: tag)
+    }
+
+    /// Completes with an acknowledgement from the relay network.
+    /// completes with error if networking client was not able to send a message
+    /// TODO - relay client should provide async function - continualion should be removed from here
+    func requestNetworkAck(_ request: RPCRequest, topic: String, tag: Int) async throws {
+        do {
+            try rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
+            let message = try serializer.serialize(topic: topic, encodable: request)
+            return try await withCheckedThrowingContinuation { continuation in
+                relayClient.publish(topic: topic, payload: message, tag: tag) { error in
+                    guard let error1 = error else {
+                        fatalError("Expected non-nil result 'error1' in the non-error case")
+                    }
+                    continuation.resume(throwing: error1)
+                }
+            }
+        } catch {
+            logger.error(error)
+        }
     }
 
     func respond(topic: String, response: RPCResponse, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {
