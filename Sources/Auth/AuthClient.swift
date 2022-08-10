@@ -1,7 +1,13 @@
 import Foundation
 import Combine
+import JSONRPC
+import WalletConnectUtils
 
 class AuthClient {
+    enum Errors: Error {
+        case malformedPairingURI
+        case UnknownWalletAddress
+    }
     private var authRequestPublisherSubject = PassthroughSubject<(id: RPCID, message: String), Never>()
     public var authRequestPublisher: AnyPublisher<(id: RPCID, message: String), Never> {
         authRequestPublisherSubject.eraseToAnyPublisher()
@@ -11,10 +17,7 @@ class AuthClient {
     public var authResponsePublisher: AnyPublisher<(id: RPCID, cacao: Cacao), Never> {
         authResponsePublisherSubject.eraseToAnyPublisher()
     }
-
-    enum Errors: Error {
-        case malformedPairingURI
-    }
+    private let rpcHistory: RPCHistory
 
     private let appPairService: AppPairService
     private let appRequestService: AppRequestService
@@ -24,18 +27,24 @@ class AuthClient {
     private let walletRequestSubscriber: WalletRequestSubscriber
     private let walletRespondService: WalletRespondService
 
+    private var account: Account?
+
     init(appPairService: AppPairService,
          appRequestService: AppRequestService,
          appRespondSubscriber: AppRespondSubscriber,
          walletPairService: WalletPairService,
          walletRequestSubscriber: WalletRequestSubscriber,
-         walletRespondService: WalletRespondService) {
+         walletRespondService: WalletRespondService,
+         account: Account,
+         rpcHistory: RPCHistory) {
         self.appPairService = appPairService
         self.appRequestService = appRequestService
         self.walletPairService = walletPairService
         self.walletRequestSubscriber = walletRequestSubscriber
         self.walletRespondService = walletRespondService
         self.appRespondSubscriber = appRespondSubscriber
+        self.account = account
+        self.rpcHistory = rpcHistory
     }
 
     public func pair(uri: String) async throws {
@@ -52,14 +61,19 @@ class AuthClient {
     }
 
     public func respond(_ params: RespondParams) async throws {
-        fatalError("not implemented")
+        guard let account = account else { throw Errors.UnknownWalletAddress }
+        try await walletRespondService.respond(respondParams: params, account: account)
     }
 
-    public func getPendingRequests() -> [AuthRequest] {
-        fatalError("not implemented")
+    public func getPendingRequests() throws -> [AuthRequest] {
+        guard let account = account else { throw Errors.UnknownWalletAddress }
+        let pendingRequests: [AuthRequest] = rpcHistory.getPending()
+            .filter {$0.request.method == "wc_authRequest"}
+            .compactMap {
+                guard let params = try? $0.request.params?.get(AuthRequestParams.self) else {return nil}
+                let message = SIWEMessageFormatter().formatMessage(from: params.payloadParams, address: account.address)
+                return AuthRequest(id: $0.request.id!, message: message)
+            }
+        return pendingRequests
     }
-}
-
-public struct AuthRequest: Equatable, Codable {
-
 }
