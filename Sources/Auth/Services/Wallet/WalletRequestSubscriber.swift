@@ -3,7 +3,7 @@ import Foundation
 import WalletConnectUtils
 import JSONRPC
 
-class AuthRequestSubscriber {
+class WalletRequestSubscriber {
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging
     private let address: String

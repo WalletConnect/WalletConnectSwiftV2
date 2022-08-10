@@ -1,8 +1,5 @@
 import Foundation
-import JSONRPC
 import Combine
-
-typealias RPCID = JSONRPC.RPCID
 
 class AuthClient {
     private var authRequestPublisherSubject = PassthroughSubject<(id: RPCID, message: String), Never>()
@@ -20,14 +17,25 @@ class AuthClient {
     }
 
     private let appPairService: AppPairService
-    private let appRequestService: AuthRequestService
+    private let appRequestService: AppRequestService
+    private let appRespondSubscriber: AppRespondSubscriber
 
     private let walletPairService: WalletPairService
+    private let walletRequestSubscriber: WalletRequestSubscriber
+    private let walletRespondService: WalletRespondService
 
-    init(appPairService: AppPairService, appRequestService: AuthRequestService, walletPairService: WalletPairService) {
+    init(appPairService: AppPairService,
+         appRequestService: AppRequestService,
+         appRespondSubscriber: AppRespondSubscriber,
+         walletPairService: WalletPairService,
+         walletRequestSubscriber: WalletRequestSubscriber,
+         walletRespondService: WalletRespondService) {
         self.appPairService = appPairService
         self.appRequestService = appRequestService
         self.walletPairService = walletPairService
+        self.walletRequestSubscriber = walletRequestSubscriber
+        self.walletRespondService = walletRespondService
+        self.appRespondSubscriber = appRespondSubscriber
     }
 
     public func pair(uri: String) async throws {
@@ -47,7 +55,11 @@ class AuthClient {
         fatalError("not implemented")
     }
 
-    public func getPendingRequests() -> [Request] {
+    public func getPendingRequests() -> [AuthRequest] {
         fatalError("not implemented")
     }
+}
+
+public struct AuthRequest: Equatable, Codable {
+
 }

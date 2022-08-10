@@ -3,7 +3,7 @@ import WalletConnectKMS
 import JSONRPC
 import WalletConnectUtils
 
-actor AuthRespondService {
+actor WalletRespondService {
     enum Errors: Error {
         case recordForIdNotFound
         case malformedAuthRequestParams
