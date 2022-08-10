@@ -45,6 +45,7 @@ class AuthClient {
         self.appRespondSubscriber = appRespondSubscriber
         self.account = account
         self.rpcHistory = rpcHistory
+        setUpPublishers()
     }
 
     public func pair(uri: String) async throws {
@@ -76,4 +77,15 @@ class AuthClient {
             }
         return pendingRequests
     }
+
+    private func setUpPublishers() {
+        appRespondSubscriber.onResponse = { [unowned self] (id, cacao) in
+            authResponsePublisherSubject.send((id, cacao))
+        }
+
+        walletRequestSubscriber.onRequest = { [unowned self] (id, message) in
+            authRequestPublisherSubject.send((id, message))
+        }
+    }
+
 }
