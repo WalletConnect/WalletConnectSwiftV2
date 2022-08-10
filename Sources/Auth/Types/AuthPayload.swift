@@ -28,4 +28,19 @@ struct AuthPayload: Codable, Equatable {
         self.requestId = requestParams.requestId
         self.resources = requestParams.resources
     }
+
+    init(payload: CacaoPayload) {
+        self.type = "eip4361"
+        self.chainId = "1" // TODO: Check this!
+        self.domain = payload.domain
+        self.aud = payload.aud
+        self.version = payload.version
+        self.nonce = payload.nonce
+        self.iat = payload.iat
+        self.nbf = payload.nbf
+        self.exp = payload.exp
+        self.statement = payload.statement
+        self.requestId = payload.requestId
+        self.resources = payload.resources
+    }
 }
