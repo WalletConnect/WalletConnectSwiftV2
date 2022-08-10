@@ -165,8 +165,7 @@ final class SignClientTests: XCTestCase {
         wallet.onSessionProposal = { [unowned self] proposal in
             Task(priority: .high) {
                 do {
-                    try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces) }
-                catch {
+                    try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch {
                     XCTFail("\(error)")
                 }
             }
