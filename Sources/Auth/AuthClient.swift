@@ -26,6 +26,7 @@ class AuthClient {
     private let walletPairService: WalletPairService
     private let walletRequestSubscriber: WalletRequestSubscriber
     private let walletRespondService: WalletRespondService
+    private let cleanupService: CleanupService
 
     private var account: Account?
 
@@ -36,7 +37,8 @@ class AuthClient {
          walletRequestSubscriber: WalletRequestSubscriber,
          walletRespondService: WalletRespondService,
          account: Account,
-         rpcHistory: RPCHistory) {
+         rpcHistory: RPCHistory,
+         cleanupService: CleanupService) {
         self.appPairService = appPairService
         self.appRequestService = appRequestService
         self.walletPairService = walletPairService
@@ -45,6 +47,8 @@ class AuthClient {
         self.appRespondSubscriber = appRespondSubscriber
         self.account = account
         self.rpcHistory = rpcHistory
+        self.cleanupService = cleanupService
+
         setUpPublishers()
     }
 
@@ -78,6 +82,15 @@ class AuthClient {
         return pendingRequests
     }
 
+#if DEBUG
+    /// Delete all stored data sach as: pairings, sessions, keys
+    ///
+    /// - Note: Doesn't unsubscribe from topics
+    public func cleanup() throws {
+        try cleanupService.cleanup()
+    }
+#endif
+
     private func setUpPublishers() {
         appRespondSubscriber.onResponse = { [unowned self] (id, cacao) in
             authResponsePublisherSubject.send((id, cacao))
@@ -87,5 +100,4 @@ class AuthClient {
             authRequestPublisherSubject.send((id, message))
         }
     }
-
 }
