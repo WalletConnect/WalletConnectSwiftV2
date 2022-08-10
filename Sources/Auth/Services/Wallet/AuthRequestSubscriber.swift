@@ -9,7 +9,7 @@ class AuthRequestSubscriber {
     private let address: String
     private var publishers = [AnyCancellable]()
     private let messageFormatter: SIWEMessageFormatting
-    var onRequest: ((_ id: RPCID, _ message: String)->())?
+    var onRequest: ((_ id: RPCID, _ message: String)->Void)?
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,

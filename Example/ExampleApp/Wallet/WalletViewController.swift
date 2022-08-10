@@ -222,7 +222,7 @@ extension WalletViewController: ProposalViewControllerDelegate {
     func didRejectSession() {
         let proposal = currentProposal!
         currentProposal = nil
-        reject(proposalId: proposal.id, reason: .disapprovedChains)
+        reject(proposalId: proposal.id, reason: .userRejectedChains)
     }
 }
 

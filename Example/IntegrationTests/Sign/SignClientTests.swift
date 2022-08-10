@@ -101,7 +101,7 @@ final class SignClientTests: XCTestCase {
         wallet.onSessionProposal = { [unowned self] proposal in
             Task(priority: .high) {
                 do {
-                    try await wallet.client.reject(proposalId: proposal.id, reason: .disapprovedChains) // TODO: Review reason
+                    try await wallet.client.reject(proposalId: proposal.id, reason: .userRejectedChains) // TODO: Review reason
                     store.rejectedProposal = proposal
                 } catch { XCTFail("\(error)") }
             }
@@ -165,8 +165,7 @@ final class SignClientTests: XCTestCase {
         wallet.onSessionProposal = { [unowned self] proposal in
             Task(priority: .high) {
                 do {
-                    try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces) }
-                catch {
+                    try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch {
                     XCTFail("\(error)")
                 }
             }
