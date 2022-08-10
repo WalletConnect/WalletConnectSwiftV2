@@ -36,7 +36,7 @@ class AuthClient {
          walletPairService: WalletPairService,
          walletRequestSubscriber: WalletRequestSubscriber,
          walletRespondService: WalletRespondService,
-         account: Account,
+         account: Account?,
          rpcHistory: RPCHistory,
          cleanupService: CleanupService) {
         self.appPairService = appPairService
