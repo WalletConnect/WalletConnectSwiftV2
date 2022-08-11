@@ -121,6 +121,7 @@
 		A5C20229287EB34C007E3188 /* AccountStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20228287EB34C007E3188 /* AccountStorage.swift */; };
 		A5C2022B287EB89A007E3188 /* WelcomeInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C2022A287EB89A007E3188 /* WelcomeInteractor.swift */; };
 		A5C2022D287EC3F0007E3188 /* RegisterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C2022C287EC3F0007E3188 /* RegisterService.swift */; };
+		A5C4DD8728A2DE88006A626D /* WalletConnectRouter in Frameworks */ = {isa = PBXBuildFile; productRef = A5C4DD8628A2DE88006A626D /* WalletConnectRouter */; };
 		A5D85226286333D500DAF5C3 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5D85225286333D500DAF5C3 /* Starscream */; };
 		A5D85228286333E300DAF5C3 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5D85227286333E300DAF5C3 /* Starscream */; };
 		A5E03DF52864651200888481 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5E03DF42864651200888481 /* Starscream */; };
@@ -305,6 +306,7 @@
 				A5AE354728A1A2AC0059AE8A /* Web3 in Frameworks */,
 				764E1D5826F8DBAB00A1FB15 /* WalletConnect in Frameworks */,
 				A5D85226286333D500DAF5C3 /* Starscream in Frameworks */,
+				A5C4DD8728A2DE88006A626D /* WalletConnectRouter in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -931,6 +933,7 @@
 				764E1D5726F8DBAB00A1FB15 /* WalletConnect */,
 				A5D85225286333D500DAF5C3 /* Starscream */,
 				A5AE354628A1A2AC0059AE8A /* Web3 */,
+				A5C4DD8628A2DE88006A626D /* WalletConnectRouter */,
 			);
 			productName = ExampleApp;
 			productReference = 764E1D3C26F8D3FC00A1FB15 /* WalletConnect Wallet.app */;
@@ -1777,6 +1780,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A5AE354528A1A2AC0059AE8A /* XCRemoteSwiftPackageReference "Web3" */;
 			productName = Web3;
+		};
+		A5C4DD8628A2DE88006A626D /* WalletConnectRouter */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = WalletConnectRouter;
 		};
 		A5D85225286333D500DAF5C3 /* Starscream */ = {
 			isa = XCSwiftPackageProductDependency;
