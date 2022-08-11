@@ -29,13 +29,9 @@ class WalletRequestSubscriber {
                 logger.debug("Malformed auth request params")
                 return
             }
-            do {
-                let message = try messageFormatter.formatMessage(from: authRequestParams.payloadParams, address: address)
-                guard let requestId = subscriptionPayload.request.id else { return }
-                onRequest?(requestId, message)
-            } catch {
-                logger.debug(error)
-            }
+            let message = messageFormatter.formatMessage(from: authRequestParams.payloadParams, address: address)
+            guard let requestId = subscriptionPayload.request.id else { return }
+            onRequest?(requestId, message)
         }.store(in: &publishers)
     }
 
