@@ -23,7 +23,10 @@ public class Sign {
             socketFactory: config.socketFactory,
             socketConnectionType: config.socketConnectionType
         )
-        client = SignClient(metadata: config.metadata, relayClient: relayClient)
+        client = SignClientFactory.create(
+            metadata: config.metadata,
+            relayClient: relayClient
+        )
         client.delegate = self
     }
 

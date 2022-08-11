@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import WalletConnectUtils
+import WalletConnectPairing
 @testable import WalletConnectSign
 @testable import TestingUtils
 
@@ -75,8 +76,8 @@ class NetworkingInteractorMock: NetworkInteracting {
     }
 
     func subscribe(topic: String) {
-        didCallSubscribe = true
         subscriptions.append(topic)
+        didCallSubscribe = true
     }
 
     func unsubscribe(topic: String) {

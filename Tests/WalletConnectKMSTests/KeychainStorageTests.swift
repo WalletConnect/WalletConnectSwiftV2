@@ -32,13 +32,12 @@ final class KeychainStorageTests: XCTestCase {
         XCTAssertNoThrow(try sut.add(privateKey, forKey: "id-2"))
     }
 
-    func testAddDuplicateItemError() {
+    func testAddDuplicateItem() throws {
         let privateKey = Curve25519.KeyAgreement.PrivateKey()
-        try? sut.add(privateKey, forKey: defaultIdentifier)
-        XCTAssertThrowsError(try sut.add(privateKey, forKey: defaultIdentifier)) { error in
-            guard let error = error as? KeychainError else { XCTFail(); return }
-            XCTAssertEqual(error.status, errSecDuplicateItem)
-        }
+        try sut.add(privateKey, forKey: defaultIdentifier)
+        let newPrivateKey = Curve25519.KeyAgreement.PrivateKey()
+        XCTAssertNoThrow(try sut.add(newPrivateKey, forKey: defaultIdentifier))
+        XCTAssertEqual(try sut.read(key: defaultIdentifier), newPrivateKey)
     }
 
     func testAddUnknownFailure() {

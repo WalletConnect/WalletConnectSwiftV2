@@ -2,6 +2,7 @@ import Foundation
 import Chat
 import WalletConnectKMS
 import WalletConnectRelay
+import WalletConnectUtils
 
 class ChatFactory {
 
@@ -12,10 +13,11 @@ class ChatFactory {
         let client = HTTPClient(host: "keys.walletconnect.com")
         let registry = KeyserverRegistryProvider(client: client)
         let relayClient = RelayClient(relayHost: relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory())
-        return ChatClient(
+        return ChatClientFactory.create(
             registry: registry,
             relayClient: relayClient,
             kms: KeyManagementService(keychain: keychain),
+            logger: ConsoleLogger(),
             keyValueStorage: UserDefaults.standard
         )
     }

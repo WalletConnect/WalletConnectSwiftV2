@@ -28,6 +28,10 @@ public final class KeychainStorage: KeychainStorageProtocol {
 
         let status = secItem.add(query as CFDictionary, nil)
 
+        guard status != errSecDuplicateItem else {
+            return try update(data: data, forKey: key)
+        }
+
         guard status == errSecSuccess else {
             throw KeychainError(status)
         }

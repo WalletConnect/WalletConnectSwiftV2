@@ -1,3 +1,5 @@
+import Foundation
+
 struct Participant: Codable, Equatable {
     let publicKey: String
     let metadata: AppMetadata

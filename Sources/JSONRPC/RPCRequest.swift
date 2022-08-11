@@ -37,7 +37,7 @@ public struct RPCRequest: Equatable {
         try self.init(method: method, checkedParams: params, id: idGenerator.next())
     }
 
-    public init<C>(method: String, checkedParams params: C, id: Int) throws where C: Codable {
+    public init<C>(method: String, checkedParams params: C, id: Int64) throws where C: Codable {
         try self.init(method: method, checkedParams: params, id: .right(id))
     }
 
@@ -49,8 +49,12 @@ public struct RPCRequest: Equatable {
         self.init(method: method, params: AnyCodable(params), id: idGenerator.next())
     }
 
-    public init<C>(method: String, params: C, id: Int) where C: Codable {
+    public init<C>(method: String, params: C, id: Int64) where C: Codable {
         self.init(method: method, params: AnyCodable(params), id: .right(id))
+    }
+
+    public init<C>(method: String, params: C, rpcid: RPCID) where C: Codable {
+        self.init(method: method, params: AnyCodable(params), id: rpcid)
     }
 
     public init<C>(method: String, params: C, id: String) where C: Codable {
@@ -61,7 +65,7 @@ public struct RPCRequest: Equatable {
         self.init(method: method, params: nil, id: idGenerator.next())
     }
 
-    public init(method: String, id: Int) {
+    public init(method: String, id: Int64) {
         self.init(method: method, params: nil, id: .right(id))
     }
 
@@ -72,11 +76,11 @@ public struct RPCRequest: Equatable {
 
 extension RPCRequest {
 
-    static func notification<C>(method: String, params: C) -> RPCRequest where C: Codable {
+    public static func notification<C>(method: String, params: C) -> RPCRequest where C: Codable {
         return RPCRequest(method: method, params: AnyCodable(params), id: nil)
     }
 
-    static func notification(method: String) -> RPCRequest {
+    public static func notification(method: String) -> RPCRequest {
         return RPCRequest(method: method, params: nil, id: nil)
     }
 
