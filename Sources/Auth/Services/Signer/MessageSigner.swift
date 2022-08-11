@@ -4,11 +4,11 @@ protocol MessageSignatureVerifying {
     func verify(signature: String, message: String, address: String) throws
 }
 
-protocol MessageSignatureSigning {
+protocol MessageSigning {
     func sign(message: String, privateKey: Data) throws -> String
 }
 
-struct MessageSigner: MessageSignatureVerifying & MessageSignatureSigning {
+struct MessageSigner: MessageSignatureVerifying & MessageSigning {
 
     enum Errors: Error {
         case signatureValidationFailed

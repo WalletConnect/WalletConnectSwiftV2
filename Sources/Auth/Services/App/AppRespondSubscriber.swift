@@ -30,7 +30,8 @@ class AppRespondSubscriber {
             guard
                 let requestId = subscriptionPayload.request.id,
                 let request = rpcHistory.get(recordId: requestId)?.request,
-                request.method == "wc_authRequest" else { return }
+                let requestParams = request.params, request.method == "wc_authRequest"
+            else { return }
 
             networkingInteractor.unsubscribe(topic: subscriptionPayload.topic)
 
@@ -39,14 +40,19 @@ class AppRespondSubscriber {
                     return logger.debug("Malformed auth response params")
                 }
 
+                let requestPayload = try requestParams.get(AuthRequestParams.self)
                 let address = try DIDPKH(iss: cacao.payload.iss).account.address
-                let payload = AuthPayload(payload: cacao.payload)
-                let message = messageFormatter.formatMessage(from: payload, address: address)
+                let message = try messageFormatter.formatMessage(from: cacao.payload)
+                let originalMessage = messageFormatter.formatMessage(from: requestPayload.payloadParams, address: address)
+
+                guard originalMessage == message else {
+                    return logger.debug("Original message compromised")
+                }
 
                 try signatureVerifier.verify(
                     signature: cacao.signature.s,
                     message: message,
-                    address: cacao.payload.iss
+                    address: address
                 )
                 onResponse?(requestId, cacao)
             } catch {
