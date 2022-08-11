@@ -3,22 +3,44 @@ import WalletConnectUtils
 
 protocol SIWEMessageFormatting {
     func formatMessage(from authPayload: AuthPayload, address: String) -> String
+    func formatMessage(from payload: CacaoPayload) throws -> String
 }
 
 struct SIWEMessageFormatter: SIWEMessageFormatting {
-    func formatMessage(from authPayload: AuthPayload, address: String) -> String {
-        SIWEMessage(domain: authPayload.domain,
-                    uri: authPayload.aud,
+    func formatMessage(from payload: AuthPayload, address: String) -> String {
+        let message = SIWEMessage(domain: payload.domain,
+                    uri: payload.aud,
                     address: address,
-                    version: authPayload.version,
-                    nonce: authPayload.nonce,
-                    chainId: authPayload.chainId,
-                    iat: authPayload.iat,
-                    nbf: authPayload.nbf,
-                    exp: authPayload.exp,
-                    statement: authPayload.statement,
-                    requestId: authPayload.requestId,
-                    resources: authPayload.resources).formatted
+                    version: payload.version,
+                    nonce: payload.nonce,
+                    chainId: payload.chainId,
+                    iat: payload.iat,
+                    nbf: payload.nbf,
+                    exp: payload.exp,
+                    statement: payload.statement,
+                    requestId: payload.requestId,
+                    resources: payload.resources
+        )
+        return message.formatted
+    }
+
+    func formatMessage(from payload: CacaoPayload) throws -> String {
+        let address = try DIDPKH(iss: payload.iss).account.address
+        let message = SIWEMessage(
+            domain: payload.domain,
+            uri: payload.aud,
+            address: address,
+            version: payload.version,
+            nonce: payload.nonce,
+            chainId: "1",
+            iat: payload.iat,
+            nbf: payload.nbf,
+            exp: payload.exp,
+            statement: payload.statement,
+            requestId: payload.requestId,
+            resources: payload.resources
+        )
+        return message.formatted
     }
 }
 

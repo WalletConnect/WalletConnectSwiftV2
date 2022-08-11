@@ -17,10 +17,12 @@ let package = Package(
             name: "WalletConnectChat",
             targets: ["Chat"]),
         .library(
-            name: "WalletConnectPairing",
-            targets: ["WalletConnectPairing"])
+            name: "WalletConnectAuth",
+            targets: ["Auth"])
     ],
-    dependencies: [],
+    dependencies: [
+        .package(url: "https://github.com/flypaper0/Web3.swift", .branch("master"))
+    ],
     targets: [
         .target(
             name: "WalletConnectSign",
@@ -32,7 +34,13 @@ let package = Package(
             path: "Sources/Chat"),
         .target(
             name: "Auth",
-            dependencies: ["WalletConnectRelay", "WalletConnectUtils", "WalletConnectKMS", "WalletConnectPairing"],
+            dependencies: [
+                "WalletConnectRelay",
+                "WalletConnectUtils",
+                "WalletConnectKMS",
+                "WalletConnectPairing",
+                .product(name: "Web3", package: "Web3.swift")
+            ],
             path: "Sources/Auth"),
         .target(
             name: "WalletConnectRelay",
