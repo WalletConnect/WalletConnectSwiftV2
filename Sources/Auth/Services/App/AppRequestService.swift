@@ -3,7 +3,7 @@ import WalletConnectUtils
 import WalletConnectKMS
 import JSONRPC
 
-actor AuthRequestService {
+actor AppRequestService {
     private let networkingInteractor: NetworkInteracting
     private let appMetadata: AppMetadata
     private let kms: KeyManagementService

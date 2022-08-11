@@ -3,7 +3,7 @@ import Foundation
 import WalletConnectUtils
 import JSONRPC
 
-class AuthRequestSubscriber {
+class WalletRequestSubscriber {
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging
     private let address: String
@@ -29,13 +29,9 @@ class AuthRequestSubscriber {
                 logger.debug("Malformed auth request params")
                 return
             }
-            do {
-                let message = try messageFormatter.formatMessage(from: authRequestParams.payloadParams, address: address)
-                guard let requestId = subscriptionPayload.request.id else { return }
-                onRequest?(requestId, message)
-            } catch {
-                logger.debug(error)
-            }
+            let message = messageFormatter.formatMessage(from: authRequestParams.payloadParams, address: address)
+            guard let requestId = subscriptionPayload.request.id else { return }
+            onRequest?(requestId, message)
         }.store(in: &publishers)
     }
 

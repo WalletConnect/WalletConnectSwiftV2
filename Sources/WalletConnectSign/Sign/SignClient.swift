@@ -3,9 +3,6 @@ import WalletConnectRelay
 import WalletConnectUtils
 import WalletConnectKMS
 import Combine
-#if os(iOS)
-import UIKit
-#endif
 
 /// An Object that expose public API to provide interactions with WalletConnect SDK
 ///
