@@ -1,6 +1,5 @@
 import Foundation
 import Combine
-import JSONRPC
 import WalletConnectUtils
 import WalletConnectPairing
 
@@ -19,7 +18,6 @@ class AuthClient {
     public var authResponsePublisher: AnyPublisher<(id: RPCID, cacao: Cacao), Never> {
         authResponsePublisherSubject.eraseToAnyPublisher()
     }
-    private let rpcHistory: RPCHistory
 
     private let appPairService: AppPairService
     private let appRequestService: AppRequestService
@@ -30,6 +28,7 @@ class AuthClient {
     private let walletRespondService: WalletRespondService
     private let cleanupService: CleanupService
     private let pairingStorage: WCPairingStorage
+    private let pendingRequestsProvider: PendingRequestsProvider
     public let logger: ConsoleLogging
 
     private var account: Account?
@@ -41,7 +40,7 @@ class AuthClient {
          walletRequestSubscriber: WalletRequestSubscriber,
          walletRespondService: WalletRespondService,
          account: Account?,
-         rpcHistory: RPCHistory,
+         pendingRequestsProvider: PendingRequestsProvider,
          cleanupService: CleanupService,
          logger: ConsoleLogging,
          pairingStorage: WCPairingStorage) {
@@ -52,7 +51,7 @@ class AuthClient {
         self.walletRespondService = walletRespondService
         self.appRespondSubscriber = appRespondSubscriber
         self.account = account
-        self.rpcHistory = rpcHistory
+        self.pendingRequestsProvider = pendingRequestsProvider
         self.cleanupService = cleanupService
         self.logger = logger
         self.pairingStorage = pairingStorage
@@ -67,20 +66,19 @@ class AuthClient {
         try await walletPairService.pair(pairingURI)
     }
 
-    public func request(_ params: RequestParams, topic: String?) async throws -> String? {
+    public func request(_ params: RequestParams) async throws -> String {
         logger.debug("Requesting Authentication")
-        if let topic = topic {
-            guard pairingStorage.hasPairing(forTopic: topic) else {
-                throw Errors.noPairingMatchingTopic
-            }
-            logger.debug("Requesting on existing pairing")
-            try await appRequestService.request(params: params, topic: topic)
-            return nil
-        } else {
-            let uri = try await appPairService.create()
-            try await appRequestService.request(params: params, topic: uri.topic)
-            return uri.absoluteString
+        let uri = try await appPairService.create()
+        try await appRequestService.request(params: params, topic: uri.topic)
+        return uri.absoluteString
+    }
+
+    public func request(_ params: RequestParams, topic: String) async throws {
+        logger.debug("Requesting Authentication on existing pairing")
+        guard pairingStorage.hasPairing(forTopic: topic) else {
+            throw Errors.noPairingMatchingTopic
         }
+        try await appRequestService.request(params: params, topic: topic)
     }
 
     public func respond(_ params: RespondParams) async throws {
@@ -90,14 +88,7 @@ class AuthClient {
 
     public func getPendingRequests() throws -> [AuthRequest] {
         guard let account = account else { throw Errors.unknownWalletAddress }
-        let pendingRequests: [AuthRequest] = rpcHistory.getPending()
-            .filter {$0.request.method == "wc_authRequest"}
-            .compactMap {
-                guard let params = try? $0.request.params?.get(AuthRequestParams.self) else {return nil}
-                let message = SIWEMessageFormatter().formatMessage(from: params.payloadParams, address: account.address)
-                return AuthRequest(id: $0.request.id!, message: message)
-            }
-        return pendingRequests
+        return try pendingRequestsProvider.getPendingRequests(account: account)
     }
 
 #if DEBUG
@@ -119,3 +110,4 @@ class AuthClient {
         }
     }
 }
+
