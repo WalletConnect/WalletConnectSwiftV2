@@ -1,5 +1,5 @@
 import XCTest
-import WalletConnectPairing
+@testable import WalletConnectPairing
 @testable import WalletConnectSign
 
 final class WCPairingTests: XCTestCase {
@@ -35,18 +35,61 @@ final class WCPairingTests: XCTestCase {
         XCTAssertEqual(pairing.expiryDate, inactiveExpiry)
     }
 
-    func testUpdateExpiry() {
+    func testUpdateExpiryForTopic() {
         var pairing = WCPairing(topic: "")
         let activeExpiry = referenceDate.advanced(by: WCPairing.timeToLiveActive)
         try? pairing.updateExpiry()
         XCTAssertEqual(pairing.expiryDate, activeExpiry)
     }
+    
+    func testUpdateExpiryForUri() {
+        var pairing = WCPairing(uri: WalletConnectURI.stub())
+        let activeExpiry = referenceDate.advanced(by: WCPairing.timeToLiveActive)
+        try? pairing.updateExpiry()
+        XCTAssertEqual(pairing.expiryDate, activeExpiry)
+    }
 
-    func testActivate() {
+    func testActivateTopic() {
         var pairing = WCPairing(topic: "")
         let activeExpiry = referenceDate.advanced(by: WCPairing.timeToLiveActive)
+        XCTAssertFalse(pairing.active)
         pairing.activate()
         XCTAssertTrue(pairing.active)
         XCTAssertEqual(pairing.expiryDate, activeExpiry)
+    }
+    
+    func testActivateURI() {
+        var pairing = WCPairing(uri: WalletConnectURI.stub())
+        let activeExpiry = referenceDate.advanced(by: WCPairing.timeToLiveActive)
+        XCTAssertFalse(pairing.active)
+        pairing.activate()
+        XCTAssertTrue(pairing.active)
+        XCTAssertEqual(pairing.expiryDate, activeExpiry)
+    }
+    
+    func testUpdateExpiry_WhenValueIsGreaterThanMax_ShouldThrowInvalidUpdateExpiryValue() {
+        var pairing = WCPairing(topic: "", relay: .stub(), peerMetadata: .stub(), expiryDate: referenceDate)
+        XCTAssertThrowsError(try pairing.updateExpiry(40 * .day)) { error in
+            XCTAssertEqual(error as! WCPairing.Errors, WCPairing.Errors.invalidUpdateExpiryValue)
+        }
+    }
+    
+    func testUpdateExpiry_WhenNewExpiryDateIsLessThanExpiryDate_ShouldThrowInvalidUpdateExpiryValue() {
+        let expiryDate = referenceDate.advanced(by: 10 * .minute)
+        var pairing = WCPairing(topic: "", relay: .stub(), peerMetadata: .stub(), expiryDate: expiryDate)
+        XCTAssertThrowsError(try pairing.updateExpiry(40 * .day)) { error in
+            XCTAssertEqual(error as! WCPairing.Errors, WCPairing.Errors.invalidUpdateExpiryValue)
+        }
+    }
+
+    func testActivate_WhenUpdateExpiryFails_ShouldActivateAndThrowError() {
+        let expiryDate = referenceDate.advanced(by: 10 * .minute)
+        var pairing = WCPairing(topic: "", relay: .stub(), peerMetadata: .stub(), expiryDate: expiryDate)
+        XCTAssertFalse(pairing.active)
+        pairing.activate()
+        XCTAssertThrowsError(try pairing.updateExpiry(10 * .minute)) { error in
+            XCTAssertEqual(error as! WCPairing.Errors, WCPairing.Errors.invalidUpdateExpiryValue)
+        }
+        XCTAssertTrue(pairing.active)
     }
 }
