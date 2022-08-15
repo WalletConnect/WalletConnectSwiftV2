@@ -28,7 +28,7 @@ class ClientDelegate {
             self.onSessionSettled?(session)
         }.store(in: &publishers)
 
-        client.socketConnectionStatusPublisher.sink { status in
+        client.socketConnectionStatusPublisher.sink { _ in
             self.onConnected?()
         }.store(in: &publishers)
 
