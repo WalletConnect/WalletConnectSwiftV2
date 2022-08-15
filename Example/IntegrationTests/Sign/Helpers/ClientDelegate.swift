@@ -1,10 +1,8 @@
 import Foundation
 @testable import WalletConnectSign
+import Combine
 
-class ClientDelegate: SignClientDelegate {
-    func didChangeSocketConnectionStatus(_ status: SocketConnectionStatus) {
-        onConnected?()
-    }
+class ClientDelegate {
 
     var client: SignClient
     var onSessionSettled: ((Session) -> Void)?
@@ -15,43 +13,55 @@ class ClientDelegate: SignClientDelegate {
     var onSessionRejected: ((Session.Proposal, Reason) -> Void)?
     var onSessionDelete: (() -> Void)?
     var onSessionUpdateNamespaces: ((String, [String: SessionNamespace]) -> Void)?
-    var onSessionUpdateEvents: ((String, Set<String>) -> Void)?
     var onSessionExtend: ((String, Date) -> Void)?
     var onEventReceived: ((Session.Event, String) -> Void)?
-    var onPairingUpdate: ((Pairing) -> Void)?
 
-    internal init(client: SignClient) {
+    private var publishers = Set<AnyCancellable>()
+
+    init(client: SignClient) {
         self.client = client
-        client.delegate = self
+        setupSubscriptions()
     }
 
-    func didReject(proposal: Session.Proposal, reason: Reason) {
-        onSessionRejected?(proposal, reason)
-    }
-    func didSettle(session: Session) {
-        onSessionSettled?(session)
-    }
-    func didReceive(sessionProposal: Session.Proposal) {
-        onSessionProposal?(sessionProposal)
-    }
-    func didReceive(sessionRequest: Request) {
-        onSessionRequest?(sessionRequest)
-    }
-    func didDelete(sessionTopic: String, reason: Reason) {
-        onSessionDelete?()
-    }
-    func didUpdate(sessionTopic: String, namespaces: [String: SessionNamespace]) {
-        onSessionUpdateNamespaces?(sessionTopic, namespaces)
-    }
-    func didExtend(sessionTopic: String, to date: Date) {
-        onSessionExtend?(sessionTopic, date)
-    }
-    func didReceive(event: Session.Event, sessionTopic: String, chainId: Blockchain?) {
-        onEventReceived?(event, sessionTopic)
-    }
-    func didReceive(sessionResponse: Response) {
-        onSessionResponse?(sessionResponse)
-    }
+    private func setupSubscriptions() {
+        client.sessionSettlePublisher.sink { session in
+            self.onSessionSettled?(session)
+        }.store(in: &publishers)
 
-    func didDisconnect() {}
+        client.socketConnectionStatusPublisher.sink { status in
+            self.onConnected?()
+        }.store(in: &publishers)
+
+        client.sessionProposalPublisher.sink { proposal in
+            self.onSessionProposal?(proposal)
+        }.store(in: &publishers)
+
+        client.sessionRequestPublisher.sink { request in
+            self.onSessionRequest?(request)
+        }.store(in: &publishers)
+
+        client.sessionResponsePublisher.sink { response in
+            self.onSessionResponse?(response)
+        }.store(in: &publishers)
+
+        client.sessionRejectionPublisher.sink { (proposal, reason) in
+            self.onSessionRejected?(proposal, reason)
+        }.store(in: &publishers)
+
+        client.sessionDeletePublisher.sink { _ in
+            self.onSessionDelete?()
+        }.store(in: &publishers)
+
+        client.sessionUpdatePublisher.sink { (topic, namespaces) in
+            self.onSessionUpdateNamespaces?(topic, namespaces)
+        }.store(in: &publishers)
+
+        client.sessionEventPublisher.sink { (event, topic, _) in
+            self.onEventReceived?(event, topic)
+        }.store(in: &publishers)
+
+        client.sessionExtendPublisher.sink { (topic, date) in
+            self.onSessionExtend?(topic, date)
+        }.store(in: &publishers)
+    }
 }
