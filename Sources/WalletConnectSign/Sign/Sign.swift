@@ -11,22 +11,18 @@ public class Sign {
 
     private static var config: Config?
     private let client: SignClient
-    private let relayClient: RelayClient
 
     private init() {
         guard let config = Sign.config else {
             fatalError("Error - you must call configure(_:) before accessing the shared instance.")
         }
-        relayClient = RelayClient(
+        Relay.configure(
             relayHost: "relay.walletconnect.com",
             projectId: config.projectId,
             socketFactory: config.socketFactory,
             socketConnectionType: config.socketConnectionType
         )
-        client = SignClientFactory.create(
-            metadata: config.metadata,
-            relayClient: relayClient
-        )
+        client = SignClientFactory.create(metadata: config.metadata, relayClient: Relay.instance)
         client.delegate = self
     }
 
@@ -260,11 +256,11 @@ extension Sign {
     }
 
     public func connect() throws {
-        try relayClient.connect()
+        try Relay.instance.connect()
     }
 
     public func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
-        try relayClient.disconnect(closeCode: closeCode)
+        try Relay.instance.disconnect(closeCode: closeCode)
     }
 
 #if DEBUG
