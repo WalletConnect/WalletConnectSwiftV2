@@ -17,14 +17,18 @@ public final class RelayClient {
 
     static let historyIdentifier = "com.walletconnect.sdk.relayer_client.subscription_json_rpc_record"
 
-    public var onMessage: ((String, String) -> Void)?
-
     let defaultTtl = 6*Time.hour
     var subscriptions: [String: String] = [:]
+
+    public var messagePublisher: AnyPublisher<(topic: String, message: String), Never> {
+        messagePublisherSubject.eraseToAnyPublisher()
+    }
 
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
     }
+
+    private let messagePublisherSubject = PassthroughSubject<(topic: String, message: String), Never>()
     private let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
 
     private let subscriptionResponsePublisherSubject = PassthroughSubject<(RPCID?, String), Never>()
@@ -41,6 +45,8 @@ public final class RelayClient {
     private let logger: ConsoleLogging
 
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.relay_client", attributes: .concurrent)
+
+    // MARK: - Initialization
 
     init(
         dispatcher: Dispatching,
@@ -227,7 +233,7 @@ public final class RelayClient {
                 do {
                     try rpcHistory.set(request, forTopic: params.data.topic, emmitedBy: .remote)
                     try acknowledgeRequest(request)
-                    onMessage?(params.data.topic, params.data.message)
+                    messagePublisherSubject.send((params.data.topic, params.data.message))
                 } catch {
                     logger.error("[RelayClient] RPC History 'set()' error: \(error)")
                 }

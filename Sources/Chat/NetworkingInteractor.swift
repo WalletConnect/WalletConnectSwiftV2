@@ -39,6 +39,8 @@ class NetworkingInteractor: NetworkInteracting {
     private let responsePublisherSubject = PassthroughSubject<ChatResponse, Never>()
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
+    private var publishers = Set<AnyCancellable>()
+
     init(relayClient: RelayClient,
          serializer: Serializing,
          logger: ConsoleLogging,
@@ -49,9 +51,10 @@ class NetworkingInteractor: NetworkInteracting {
         self.jsonRpcHistory = jsonRpcHistory
         self.logger = logger
         self.socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
-        relayClient.onMessage = { [unowned self] topic, message in
+
+        relayClient.messagePublisher.sink { [unowned self] (topic, message) in
             manageSubscription(topic, message)
-        }
+        }.store(in: &publishers)
     }
 
     func request(_ request: JSONRPCRequest<ChatRequestParams>, topic: String, envelopeType: Envelope.EnvelopeType) async throws {
