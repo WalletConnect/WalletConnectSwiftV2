@@ -6,7 +6,7 @@ import JSONRPC
 class WalletRequestSubscriber {
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging
-    private let address: String
+    private let address: String?
     private var publishers = [AnyCancellable]()
     private let messageFormatter: SIWEMessageFormatting
     var onRequest: ((_ id: RPCID, _ message: String)->Void)?
@@ -14,7 +14,7 @@ class WalletRequestSubscriber {
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
          messageFormatter: SIWEMessageFormatting,
-         address: String) {
+         address: String?) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.address = address
@@ -23,6 +23,10 @@ class WalletRequestSubscriber {
     }
     
     private func subscribeForRequest() {
+        guard let address = address else {
+            logger.warn("unexpected request")
+            return
+        }
         networkingInteractor.requestPublisher.sink { [unowned self] subscriptionPayload in
             guard
                 let requestId = subscriptionPayload.request.id,

@@ -13,7 +13,8 @@ final class AuthTests: XCTestCase {
 
     override func setUp() {
         app = makeClient(prefix: "👻 App")
-        wallet = makeClient(prefix: "🤑 Wallet")
+        let walletAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
+        wallet = makeClient(prefix: "🤑 Wallet", account: walletAccount)
 
         let expectation = expectation(description: "Wait Clients Connected")
         expectation.expectedFulfillmentCount = 2
@@ -31,28 +32,24 @@ final class AuthTests: XCTestCase {
         }.store(in: &publishers)
 
         wait(for: [expectation], timeout: 5)
-
     }
 
 
-    func makeClient(prefix: String) -> AuthClient {
+    func makeClient(prefix: String, account: Account? = nil) -> AuthClient {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let relayHost = "relay.walletconnect.com"
         let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
         let keychain = KeychainStorageMock()
         let relayClient = RelayClient(relayHost: relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
-        return AuthClientFactory()
+
+        return AuthClientFactory.create(
+            metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
+            account: account,
+            relayClient: relayClient,
+            logger: logger)
     }
 
     func testRequest() async {
-        let inviteExpectation = expectation(description: "invitation expectation")
-        let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
-        let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
-        let pubKey = try! await invitee.register(account: inviteeAccount)
-        try! await inviter.invite(publicKey: pubKey, peerAccount: inviteeAccount, openingMessage: "", account: inviterAccount)
-        invitee.invitePublisher.sink { _ in
-            inviteExpectation.fulfill()
-        }.store(in: &publishers)
-        wait(for: [inviteExpectation], timeout: 4)
+
     }
 }
