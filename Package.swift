@@ -21,7 +21,7 @@ let package = Package(
             targets: ["WalletConnectRouter"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/flypaper0/Web3.swift", .branch("master"))
+        .package(url: "https://github.com/flypaper0/Web3.swift", .branch("feature/eip-155"))
     ],
     targets: [
         .target(

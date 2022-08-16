@@ -59,8 +59,8 @@
         "package": "Web3",
         "repositoryURL": "https://github.com/flypaper0/Web3.swift",
         "state": {
-          "branch": "master",
-          "revision": "23b6940bbda0769d9147bec6696b33a9fee0b120",
+          "branch": "feature/eip-155",
+          "revision": "92a43a8c279b9df25fe23dd6f8311e6fb0ea06ed",
           "version": null
         }
       }

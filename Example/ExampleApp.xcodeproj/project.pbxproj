@@ -1744,7 +1744,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/flypaper0/Web3.swift";
 			requirement = {
-				branch = master;
+				branch = "feature/eip-155";
 				kind = branch;
 			};
 		};
