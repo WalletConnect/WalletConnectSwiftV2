@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 @testable import Auth
-import TestingUtils
+import Toolbox
 
 class CacaoSignerTest: XCTestCase {
 
