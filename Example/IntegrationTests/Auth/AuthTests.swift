@@ -1,52 +1,51 @@
 import Foundation
 import XCTest
-@testable import Auth
 import WalletConnectUtils
 @testable import WalletConnectKMS
 import WalletConnectRelay
 import Combine
+@testable import Auth
 
 final class AuthTests: XCTestCase {
-    var registry: KeyValueRegistry!
+    var app: AuthClient!
+    var wallet: AuthClient!
     private var publishers = [AnyCancellable]()
 
     override func setUp() {
         registry = KeyValueRegistry()
-        invitee = makeClient(prefix: "🦖 Registered")
-        inviter = makeClient(prefix: "🍄 Inviter")
+        app = makeClient(prefix: "👻 App")
+        wallet = makeClient(prefix: "🤑 Wallet")
 
-        waitClientsConnected()
-    }
-
-    private func waitClientsConnected() {
         let expectation = expectation(description: "Wait Clients Connected")
         expectation.expectedFulfillmentCount = 2
 
-        invitee.socketConnectionStatusPublisher.sink { status in
+        app.socketConnectionStatusPublisher.sink { status in
             if status == .connected {
                 expectation.fulfill()
             }
         }.store(in: &publishers)
 
-        inviter.socketConnectionStatusPublisher.sink { status in
+        wallet.socketConnectionStatusPublisher.sink { status in
             if status == .connected {
                 expectation.fulfill()
             }
         }.store(in: &publishers)
 
         wait(for: [expectation], timeout: 5)
+
     }
 
-    func makeClient(prefix: String) -> ChatClient {
+
+    func makeClient(prefix: String) -> AuthClient {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let relayHost = "relay.walletconnect.com"
         let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
         let keychain = KeychainStorageMock()
         let relayClient = RelayClient(relayHost: relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
-        return ChatClientFactory.create(registry: registry, relayClient: relayClient, kms: KeyManagementService(keychain: keychain), logger: logger, keyValueStorage: RuntimeKeyValueStorage())
+        return AuthClientFactory()
     }
 
-    func testInvite() async {
+    func testRequest() async {
         let inviteExpectation = expectation(description: "invitation expectation")
         let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
         let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!

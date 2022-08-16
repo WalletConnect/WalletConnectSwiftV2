@@ -279,7 +279,7 @@ public final class SignClient {
     }
 
 #if DEBUG
-    /// Delete all stored data sach as: pairings, sessions, keys
+    /// Delete all stored data such as: pairings, sessions, keys
     ///
     /// - Note: Doesn't unsubscribe from topics
     public func cleanup() throws {

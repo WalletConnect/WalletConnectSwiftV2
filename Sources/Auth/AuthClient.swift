@@ -92,7 +92,7 @@ public class AuthClient {
     }
 
 #if DEBUG
-    /// Delete all stored data sach as: pairings, sessions, keys
+    /// Delete all stored data such as: pairings, keys
     ///
     /// - Note: Doesn't unsubscribe from topics
     public func cleanup() throws {
