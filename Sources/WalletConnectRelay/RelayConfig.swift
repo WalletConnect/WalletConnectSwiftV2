@@ -1,7 +1,7 @@
 import Foundation
 
 extension Relay {
-    public struct Config {
+    struct Config {
         let relayHost: String
         let projectId: String
         let socketFactory: WebSocketFactory

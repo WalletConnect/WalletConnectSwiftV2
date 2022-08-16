@@ -19,10 +19,10 @@ public class Relay {
     private init() { }
 
     static public func configure(
-        relayHost: String,
+        relayHost: String = "relay.walletconnect.com",
         projectId: String,
         socketFactory: WebSocketFactory,
-        socketConnectionType: SocketConnectionType
+        socketConnectionType: SocketConnectionType = .automatic
     ) {
         Relay.config = Relay.Config(
             relayHost: relayHost,
