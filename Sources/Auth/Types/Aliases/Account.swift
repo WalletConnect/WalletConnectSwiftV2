@@ -1,4 +1,4 @@
 import WalletConnectUtils
 import Foundation
 
-typealias Account = WalletConnectUtils.Account
+public typealias Account = WalletConnectUtils.Account

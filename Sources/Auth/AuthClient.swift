@@ -3,7 +3,7 @@ import Combine
 import WalletConnectUtils
 import WalletConnectPairing
 
-class AuthClient {
+public class AuthClient {
     enum Errors: Error {
         case malformedPairingURI
         case unknownWalletAddress
