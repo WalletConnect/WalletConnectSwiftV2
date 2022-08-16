@@ -12,7 +12,6 @@ final class AuthTests: XCTestCase {
     private var publishers = [AnyCancellable]()
 
     override func setUp() {
-        registry = KeyValueRegistry()
         app = makeClient(prefix: "👻 App")
         wallet = makeClient(prefix: "🤑 Wallet")
 

@@ -19,7 +19,8 @@ public struct AuthClientFactory {
         let SIWEMessageFormatter = SIWEMessageFormatter()
         let appPairService = AppPairService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore)
         let appRequestService = AppRequestService(networkingInteractor: networkingInteractor, kms: kms, appMetadata: metadata)
-        let appRespondSubscriber = AppRespondSubscriber(networkingInteractor: networkingInteractor, logger: logger, rpcHistory: history)
+        let messageSigner = MessageSigner(signer: Signer())
+        let appRespondSubscriber = AppRespondSubscriber(networkingInteractor: networkingInteractor, logger: logger, rpcHistory: history, signatureVerifier: messageSigner, messageFormatter: SIWEMessageFormatter)
         let walletPairService = WalletPairService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore)
         let walletRequestSubscriber = WalletRequestSubscriber(networkingInteractor: networkingInteractor, logger: logger, messageFormatter: SIWEMessageFormatter, address: account.address)
         let walletRespondService = WalletRespondService(networkingInteractor: networkingInteractor, logger: logger, kms: kms, rpcHistory: history)
@@ -36,6 +37,6 @@ public struct AuthClientFactory {
                           pendingRequestsProvider: pendingRequestsProvider,
                           cleanupService: cleanupService,
                           logger: logger,
-                          pairingStorage: pairingStore)
+                          pairingStorage: pairingStore, socketConnectionStatusPublisher: relayClient.socketConnectionStatusPublisher)
     }
 }

@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import WalletConnectUtils
 import WalletConnectPairing
+import WalletConnectRelay
 
 public class AuthClient {
     enum Errors: Error {
@@ -18,6 +19,8 @@ public class AuthClient {
     public var authResponsePublisher: AnyPublisher<(id: RPCID, cacao: Cacao), Never> {
         authResponsePublisherSubject.eraseToAnyPublisher()
     }
+
+    public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
     private let appPairService: AppPairService
     private let appRequestService: AppRequestService
@@ -43,7 +46,9 @@ public class AuthClient {
          pendingRequestsProvider: PendingRequestsProvider,
          cleanupService: CleanupService,
          logger: ConsoleLogging,
-         pairingStorage: WCPairingStorage) {
+         pairingStorage: WCPairingStorage,
+         socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
+) {
         self.appPairService = appPairService
         self.appRequestService = appRequestService
         self.walletPairService = walletPairService
@@ -55,6 +60,7 @@ public class AuthClient {
         self.cleanupService = cleanupService
         self.logger = logger
         self.pairingStorage = pairingStorage
+        self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
 
         setUpPublishers()
     }
