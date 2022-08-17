@@ -19,7 +19,7 @@ class WalletRequestSubscriber {
         self.logger = logger
         self.address = address
         self.messageFormatter = messageFormatter
-        if let address = address {
+        if address != nil {
             subscribeForRequest()
         }
     }
@@ -36,7 +36,7 @@ class WalletRequestSubscriber {
                 
                 let message = messageFormatter.formatMessage(
                     from: authRequestParams.payloadParams,
-                    address: address
+                    address: address!
                 )
                 
                 onRequest?(requestId, message)
