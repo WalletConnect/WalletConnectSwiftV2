@@ -11,6 +11,7 @@ protocol NetworkInteracting {
     func subscribe(topic: String) async throws
     func unsubscribe(topic: String)
     func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws
+    func requestNetworkAck(_ request: RPCRequest, topic: String, tag: Int) async throws 
     func respond(topic: String, response: RPCResponse, tag: Int, envelopeType: Envelope.EnvelopeType) async throws
 }
 
@@ -24,6 +25,7 @@ class NetworkingInteractor: NetworkInteracting {
     private let relayClient: RelayClient
     private let serializer: Serializing
     private let rpcHistory: RPCHistory
+    private let logger: ConsoleLogging
     var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
@@ -32,13 +34,20 @@ class NetworkingInteractor: NetworkInteracting {
         responsePublisherSubject.eraseToAnyPublisher()
     }
     private let responsePublisherSubject = PassthroughSubject<ResponseSubscriptionPayload, Never>()
+    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
     init(relayClient: RelayClient,
          serializer: Serializing,
+         logger: ConsoleLogging,
          rpcHistory: RPCHistory) {
         self.relayClient = relayClient
         self.serializer = serializer
         self.rpcHistory = rpcHistory
+        self.logger = logger
+        self.socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
+        relayClient.onMessage = { [unowned self] topic, message in
+            manageSubscription(topic, message)
+        }
     }
 
     func subscribe(topic: String) async throws {
@@ -55,9 +64,60 @@ class NetworkingInteractor: NetworkInteracting {
         try await relayClient.publish(topic: topic, payload: message, tag: tag)
     }
 
+    /// Completes with an acknowledgement from the relay network.
+    /// completes with error if networking client was not able to send a message
+    /// TODO - relay client should provide async function - continualion should be removed from here
+    func requestNetworkAck(_ request: RPCRequest, topic: String, tag: Int) async throws {
+        do {
+            try rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
+            let message = try serializer.serialize(topic: topic, encodable: request)
+            return try await withCheckedThrowingContinuation { continuation in
+                relayClient.publish(topic: topic, payload: message, tag: tag) { error in
+                    if let error = error {
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume()
+                    }
+                }
+            }
+        } catch {
+            logger.error(error)
+        }
+    }
+
     func respond(topic: String, response: RPCResponse, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {
         try rpcHistory.resolve(response)
         let message = try! serializer.serialize(topic: topic, encodable: response, envelopeType: envelopeType)
         try await relayClient.publish(topic: topic, payload: message, tag: tag)
+    }
+
+    private func manageSubscription(_ topic: String, _ encodedEnvelope: String) {
+        if let deserializedJsonRpcRequest: RPCRequest = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
+            handleRequest(topic: topic, request: deserializedJsonRpcRequest)
+        } else if let deserializedJsonRpcResponse: RPCResponse = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
+            handleResponse(response: deserializedJsonRpcResponse)
+        } else {
+            logger.debug("Networking Interactor - Received unknown object type from networking relay")
+        }
+    }
+
+    private func handleRequest(topic: String, request: RPCRequest) {
+        do {
+            try rpcHistory.set(request, forTopic: topic, emmitedBy: .remote)
+            let payload = RequestSubscriptionPayload(topic: topic, request: request)
+            requestPublisherSubject.send(payload)
+        } catch {
+            logger.debug(error)
+        }
+    }
+
+    private func handleResponse(response: RPCResponse) {
+        do {
+            try rpcHistory.resolve(response)
+            let record = rpcHistory.get(recordId: response.id!)!
+            responsePublisherSubject.send(ResponseSubscriptionPayload(topic: record.topic, response: response))
+        } catch {
+            logger.debug("Handle json rpc response error: \(error)")
+        }
     }
 }
