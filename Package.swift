@@ -18,7 +18,7 @@ let package = Package(
             targets: ["Chat"]),
         .library(
             name: "WalletConnectRouter",
-            targets: ["WalletConnectRouter"]),
+            targets: ["WalletConnectRouter"])
     ],
     dependencies: [
         .package(url: "https://github.com/flypaper0/Web3.swift", .branch("feature/eip-155"))

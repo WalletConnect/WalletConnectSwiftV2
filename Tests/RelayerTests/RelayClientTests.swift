@@ -10,6 +10,8 @@ final class RelayClientTests: XCTestCase {
     var sut: RelayClient!
     var dispatcher: DispatcherMock!
 
+    var publishers = Set<AnyCancellable>()
+
     override func setUp() {
         dispatcher = DispatcherMock()
         let logger = ConsoleLogger()
@@ -29,11 +31,12 @@ final class RelayClientTests: XCTestCase {
         let subscription = Subscription(id: subscriptionId, topic: topic, message: message)
         let request = subscription.asRPCRequest()
 
-        sut.onMessage = { subscriptionTopic, subscriptionMessage in
+        sut.messagePublisher.sink { (subscriptionTopic, subscriptionMessage) in
             XCTAssertEqual(subscriptionMessage, message)
             XCTAssertEqual(subscriptionTopic, topic)
             expectation.fulfill()
-        }
+        }.store(in: &publishers)
+
         dispatcher.onMessage?(try! request.asJSONEncodedString())
         waitForExpectations(timeout: 0.001, handler: nil)
     }
@@ -79,9 +82,11 @@ final class RelayClientTests: XCTestCase {
     func testSubscriptionRequestDeliveredOnce() {
         let expectation = expectation(description: "Duplicate Subscription requests must notify only the first time")
         let request = Subscription.init(id: "sub_id", topic: "topic", message: "message").asRPCRequest()
-        sut.onMessage = { _, _ in
+
+        sut.messagePublisher.sink { (_, _) in
             expectation.fulfill()
-        }
+        }.store(in: &publishers)
+
         dispatcher.onMessage?(try! request.asJSONEncodedString())
         dispatcher.onMessage?(try! request.asJSONEncodedString())
         waitForExpectations(timeout: 0.1, handler: nil)
