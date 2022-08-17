@@ -6,10 +6,15 @@ import WalletConnectPairing
 
 public struct AuthClientFactory {
 
-    public static func create(metadata: AppMetadata, account: Account?, relayClient: RelayClient, logger: ConsoleLogging) -> AuthClient {
+    public static func create(metadata: AppMetadata, account: Account?, relayClient: RelayClient) -> AuthClient {
+        let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults.standard
-        let historyStorage = CodableStore<RPCHistory.Record>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue)
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
+        return AuthClientFactory.create(metadata: metadata, account: account, logger: logger, keyValueStorage: keyValueStorage, keychainStorage: keychainStorage, relayClient: relayClient)
+    }
+
+    static func create(metadata: AppMetadata, account: Account?, logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, relayClient: RelayClient) -> AuthClient {
+        let historyStorage = CodableStore<RPCHistory.Record>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue)
         let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue)))
         let kms = KeyManagementService(keychain: keychainStorage)
         let serializer = Serializer(kms: kms)
