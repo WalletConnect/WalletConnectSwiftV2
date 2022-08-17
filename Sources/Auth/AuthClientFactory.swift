@@ -19,7 +19,7 @@ public struct AuthClientFactory {
         let kms = KeyManagementService(keychain: keychainStorage)
         let serializer = Serializer(kms: kms)
         let history = RPCHistory(keyValueStore: historyStorage)
-        let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serializer, rpcHistory: history)
+        let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serializer, logger: logger, rpcHistory: history)
         let SIWEMessageFormatter = SIWEMessageFormatter()
         let appPairService = AppPairService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore)
         let appRequestService = AppRequestService(networkingInteractor: networkingInteractor, kms: kms, appMetadata: metadata)
