@@ -24,6 +24,8 @@
 		76629B3D28AD6B040024B3D1 /* TabViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76629B3C28AD6B040024B3D1 /* TabViewController.swift */; };
 		76629B4028AD6D540024B3D1 /* AuthViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76629B3F28AD6D540024B3D1 /* AuthViewController.swift */; };
 		76629B4328AD6D690024B3D1 /* SignViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76629B4228AD6D690024B3D1 /* SignViewController.swift */; };
+		76629B4528AD75B60024B3D1 /* WalletConnectAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 76629B4428AD75B60024B3D1 /* WalletConnectAuth */; };
+		76629B4728AD7A6F0024B3D1 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76629B4628AD7A6F0024B3D1 /* AuthView.swift */; };
 		76744CF726FE4D5400B77ED9 /* ActiveSessionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */; };
 		76744CF926FE4D7400B77ED9 /* ActiveSessionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */; };
 		767DC83528997F8E00080FA9 /* EthSendTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 767DC83428997F8E00080FA9 /* EthSendTransaction.swift */; };
@@ -187,8 +189,9 @@
 		764E1D5926F8DF1B00A1FB15 /* ScannerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerViewController.swift; sourceTree = "<group>"; };
 		765056262821989600F9AE79 /* Color+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extension.swift"; sourceTree = "<group>"; };
 		76629B3C28AD6B040024B3D1 /* TabViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabViewController.swift; sourceTree = "<group>"; };
-		76629B3F28AD6D540024B3D1 /* AuthViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewController.swift; sourceTree = "<group>"; };
+		76629B3F28AD6D540024B3D1 /* AuthViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewController.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		76629B4228AD6D690024B3D1 /* SignViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignViewController.swift; sourceTree = "<group>"; };
+		76629B4628AD7A6F0024B3D1 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionItem.swift; sourceTree = "<group>"; };
 		76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionCell.swift; sourceTree = "<group>"; };
 		767DC83428997F8E00080FA9 /* EthSendTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthSendTransaction.swift; sourceTree = "<group>"; };
@@ -325,6 +328,7 @@
 			files = (
 				8448F1D427E4726F0000B866 /* WalletConnect in Frameworks */,
 				A5D85228286333E300DAF5C3 /* Starscream in Frameworks */,
+				76629B4528AD75B60024B3D1 /* WalletConnectAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -452,6 +456,7 @@
 			isa = PBXGroup;
 			children = (
 				76629B3F28AD6D540024B3D1 /* AuthViewController.swift */,
+				76629B4628AD7A6F0024B3D1 /* AuthView.swift */,
 			);
 			path = Auth;
 			sourceTree = "<group>";
@@ -993,6 +998,7 @@
 			packageProductDependencies = (
 				8448F1D327E4726F0000B866 /* WalletConnect */,
 				A5D85227286333E300DAF5C3 /* Starscream */,
+				76629B4428AD75B60024B3D1 /* WalletConnectAuth */,
 			);
 			productName = DApp;
 			productReference = 84CE641C27981DED00142511 /* DApp.app */;
@@ -1204,6 +1210,7 @@
 				76629B4028AD6D540024B3D1 /* AuthViewController.swift in Sources */,
 				76629B4328AD6D690024B3D1 /* SignViewController.swift in Sources */,
 				84CE644B279EA1FA00142511 /* AccountRequestView.swift in Sources */,
+				76629B4728AD7A6F0024B3D1 /* AuthView.swift in Sources */,
 				84CE6431279820F600142511 /* AccountsView.swift in Sources */,
 				84CE643D2798322600142511 /* ConnectViewController.swift in Sources */,
 				84CE6444279AB5AD00142511 /* SelectChainViewController.swift in Sources */,
@@ -1806,6 +1813,10 @@
 		764E1D5726F8DBAB00A1FB15 /* WalletConnect */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnect;
+		};
+		76629B4428AD75B60024B3D1 /* WalletConnectAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = WalletConnectAuth;
 		};
 		8448F1D327E4726F0000B866 /* WalletConnect */ = {
 			isa = XCSwiftPackageProductDependency;

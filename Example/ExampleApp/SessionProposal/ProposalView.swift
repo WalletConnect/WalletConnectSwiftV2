@@ -135,10 +135,10 @@ struct ProposalView: View {
     }
 }
 
-struct ProposalView_Previews: PreviewProvider {
-
-    static var previews: some View {
-        ProposalView(proposal: Proposal.mock())
-        ProposalView(proposal: Proposal.mock()).preferredColorScheme(.dark)
-    }
-}
+//struct ProposalView_Previews: PreviewProvider {
+//
+//    static var previews: some View {
+//        ProposalView(proposal: Proposal.mock())
+//        ProposalView(proposal: Proposal.mock()).preferredColorScheme(.dark)
+//    }
+//}
