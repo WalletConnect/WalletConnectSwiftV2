@@ -3,5 +3,5 @@ import JSONRPC
 
 struct ResponseSubscriptionPayload: Codable, Equatable {
     let topic: String
-    let request: RPCResponse
+    let response: RPCResponse
 }

@@ -29,7 +29,7 @@ extension NetworkInteracting {
 
 class NetworkInteractor: NetworkInteracting {
 
-    private var publishers = [AnyCancellable]()
+    private var publishers = Set<AnyCancellable>()
 
     private var relayClient: NetworkRelaying
     private let serializer: Serializing
@@ -183,9 +183,10 @@ class NetworkInteractor: NetworkInteracting {
             }
         }.store(in: &publishers)
 
-        relayClient.onMessage = { [unowned self] topic, message in
-            manageSubscription(topic, message)
+        relayClient.messagePublisher.sink { [weak self] (topic, message) in
+            self?.manageSubscription(topic, message)
         }
+        .store(in: &publishers)
     }
 
     private func manageSubscription(_ topic: String, _ encodedEnvelope: String) {

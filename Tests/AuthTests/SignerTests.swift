@@ -11,14 +11,26 @@ class SignerTest: XCTestCase {
 
     private let message = "Message".data(using: .utf8)!
     private let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
-    private let signature = Data(hex: "f7d00a04559bff462f02194874b1ae7d4a8f0461acbe4be73386ebe982a9b9dc599abf31107e1ba708a3ec72499f1fd73dd390c5ca1a3084abe176de0529d00e00")
+    private let signature = Data(hex: "66121e60cccc01fbf7fcba694a1e08ac5db35fb4ec6c045bedba7860445b95c021cad2c595f0bf68ff896964c7c02bb2f3a3e9540e8e4595c98b737ce264cc541b")
     private var address = "0x15bca56b6e2728aec2532df9d436bd1600e86688"
 
     func testValidSignature() throws {
         let result = try signer.sign(message: message, with: privateKey)
 
-        XCTAssertEqual(signature, result)
+        XCTAssertEqual(signature.toHexString(), result.toHexString())
         XCTAssertTrue(try signer.isValid(signature: result, message: message, address: address))
+    }
+
+    func testEtherscanSignature() throws {
+        let addressFromEtherscan = "0x6721591d424c18b7173d55895efa1839aa57d9c2"
+        let message = "[Etherscan.io 12/08/2022 09:26:23] I, hereby verify that I am the owner/creator of the address [0x7e77dcb127f99ece88230a64db8d595f31f1b068]"
+        let signedMessageFromEtherscan = message.data(using: .utf8)!
+        let signatureHashFromEtherscan = Data(hex: "60eb9cfe362210f1b4855f4865eafc378bd442c406de22354cc9f643fb84cb265b7f6d9d10b13199e450558c328814a9038884d9993d9feb79b727366736853d1b")
+        XCTAssertTrue(try signer.isValid(
+            signature: signatureHashFromEtherscan,
+            message: signedMessageFromEtherscan,
+            address: addressFromEtherscan
+        ))
     }
 
     func testInvalidMessage() throws {
