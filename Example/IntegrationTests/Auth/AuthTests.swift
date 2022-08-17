@@ -45,8 +45,10 @@ final class AuthTests: XCTestCase {
         return AuthClientFactory.create(
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
             account: account,
-            relayClient: relayClient,
-            logger: logger)
+            logger: logger,
+            keyValueStorage: RuntimeKeyValueStorage(),
+            keychainStorage: keychain,
+            relayClient: relayClient)
     }
 
     func testRequest() async {
