@@ -46,11 +46,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             presentResponse(for: response)
         }.store(in: &publishers)
 
-        if let session = Sign.instance.getSessions().first {
-            showAccountsScreen(session)
-        } else {
-            showSelectChainScreen()
-        }
+        window?.rootViewController = TabViewController()
+        window?.makeKeyAndVisible()
+//        if let session = Sign.instance.getSessions().first {
+//            showAccountsScreen(session)
+//        } else {
+//            showSelectChainScreen()
+//        }
     }
 
     func showSelectChainScreen() {

@@ -21,6 +21,9 @@
 		764E1D5826F8DBAB00A1FB15 /* WalletConnect in Frameworks */ = {isa = PBXBuildFile; productRef = 764E1D5726F8DBAB00A1FB15 /* WalletConnect */; };
 		764E1D5A26F8DF1B00A1FB15 /* ScannerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764E1D5926F8DF1B00A1FB15 /* ScannerViewController.swift */; };
 		765056272821989600F9AE79 /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 765056262821989600F9AE79 /* Color+Extension.swift */; };
+		76629B3D28AD6B040024B3D1 /* TabViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76629B3C28AD6B040024B3D1 /* TabViewController.swift */; };
+		76629B4028AD6D540024B3D1 /* AuthViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76629B3F28AD6D540024B3D1 /* AuthViewController.swift */; };
+		76629B4328AD6D690024B3D1 /* SignViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76629B4228AD6D690024B3D1 /* SignViewController.swift */; };
 		76744CF726FE4D5400B77ED9 /* ActiveSessionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */; };
 		76744CF926FE4D7400B77ED9 /* ActiveSessionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */; };
 		767DC83528997F8E00080FA9 /* EthSendTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 767DC83428997F8E00080FA9 /* EthSendTransaction.swift */; };
@@ -183,6 +186,9 @@
 		764E1D5626F8DB6000A1FB15 /* WalletConnectSwiftV2 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WalletConnectSwiftV2; path = ..; sourceTree = "<group>"; };
 		764E1D5926F8DF1B00A1FB15 /* ScannerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerViewController.swift; sourceTree = "<group>"; };
 		765056262821989600F9AE79 /* Color+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extension.swift"; sourceTree = "<group>"; };
+		76629B3C28AD6B040024B3D1 /* TabViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabViewController.swift; sourceTree = "<group>"; };
+		76629B3F28AD6D540024B3D1 /* AuthViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewController.swift; sourceTree = "<group>"; };
+		76629B4228AD6D690024B3D1 /* SignViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignViewController.swift; sourceTree = "<group>"; };
 		76744CF626FE4D5400B77ED9 /* ActiveSessionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionItem.swift; sourceTree = "<group>"; };
 		76744CF826FE4D7400B77ED9 /* ActiveSessionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionCell.swift; sourceTree = "<group>"; };
 		767DC83428997F8E00080FA9 /* EthSendTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthSendTransaction.swift; sourceTree = "<group>"; };
@@ -442,6 +448,22 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		76629B3E28AD6D410024B3D1 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				76629B3F28AD6D540024B3D1 /* AuthViewController.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		76629B4128AD6D5A0024B3D1 /* Sign */ = {
+			isa = PBXGroup;
+			children = (
+				76629B4228AD6D690024B3D1 /* SignViewController.swift */,
+			);
+			path = Sign;
+			sourceTree = "<group>";
+		};
 		767DC83328997F7600080FA9 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
@@ -477,6 +499,9 @@
 				84CE641E27981DED00142511 /* AppDelegate.swift */,
 				84CE642027981DED00142511 /* SceneDelegate.swift */,
 				84CE645427A29D4C00142511 /* ResponseViewController.swift */,
+				76629B3C28AD6B040024B3D1 /* TabViewController.swift */,
+				76629B3E28AD6D410024B3D1 /* Auth */,
+				76629B4128AD6D5A0024B3D1 /* Sign */,
 				84CE6449279EA1E600142511 /* AccountRequest */,
 				84CE644C279ED2EC00142511 /* SelectChain */,
 				84CE6450279ED41D00142511 /* Connect */,
@@ -1168,6 +1193,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				76629B3D28AD6B040024B3D1 /* TabViewController.swift in Sources */,
 				84CE6430279820F600142511 /* AccountsViewController.swift in Sources */,
 				84CE645527A29D4D00142511 /* ResponseViewController.swift in Sources */,
 				84CE641F27981DED00142511 /* AppDelegate.swift in Sources */,
@@ -1175,6 +1201,8 @@
 				84CE6448279AE68600142511 /* AccountRequestViewController.swift in Sources */,
 				84CE642127981DED00142511 /* SceneDelegate.swift in Sources */,
 				84CE644E279ED2FF00142511 /* SelectChainView.swift in Sources */,
+				76629B4028AD6D540024B3D1 /* AuthViewController.swift in Sources */,
+				76629B4328AD6D690024B3D1 /* SignViewController.swift in Sources */,
 				84CE644B279EA1FA00142511 /* AccountRequestView.swift in Sources */,
 				84CE6431279820F600142511 /* AccountsView.swift in Sources */,
 				84CE643D2798322600142511 /* ConnectViewController.swift in Sources */,
