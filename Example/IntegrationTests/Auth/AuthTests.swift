@@ -53,13 +53,27 @@ final class AuthTests: XCTestCase {
 
     func testRequest() async {
         let requestExpectation = expectation(description: "request delivered to wallet")
-        Task(priority: .high) {
-            let uri = try await app.request(RequestParams.stub())
-            try await wallet.pair(uri: uri)
-        }
+        let uri = try! await app.request(RequestParams.stub())
+        try! await wallet.pair(uri: uri)
         wallet.authRequestPublisher.sink { _ in
             requestExpectation.fulfill()
         }.store(in: &publishers)
         wait(for: [requestExpectation], timeout: 2)
+    }
+
+    func testRespondSuccess() async {
+        let uri = try! await app.request(RequestParams.stub())
+        try! await wallet.pair(uri: uri)
+        wallet.authRequestPublisher.sink { _ in
+            Task(priority: .high) {
+                await wallet.respond(.success(<#T##RespondParams#>))
+            }
+        }.store(in: &publishers)
+    }
+}
+
+extension RespondParams {
+    static func stub() -> RespondParams {
+        
     }
 }
