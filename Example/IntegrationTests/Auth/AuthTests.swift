@@ -54,7 +54,8 @@ final class AuthTests: XCTestCase {
     func testRequest() async {
         let requestExpectation = expectation(description: "request")
         Task(priority: .high) {
-            try await app.request(RequestParams.stub())
+            let uri = try await app.request(RequestParams.stub())
+            try await wallet.pair(uri: uri)
         }
         wallet.authRequestPublisher.sink { _ in
             requestExpectation.fulfill()
