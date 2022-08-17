@@ -29,7 +29,7 @@ class AppRespondSubscriber {
         // TODO - handle error response
         networkingInteractor.responsePublisher.sink { [unowned self] subscriptionPayload in
             guard
-                let requestId = subscriptionPayload.request.id,
+                let requestId = subscriptionPayload.response.id,
                 let request = rpcHistory.get(recordId: requestId)?.request,
                 let requestParams = request.params, request.method == "wc_authRequest"
             else { return }
@@ -37,7 +37,7 @@ class AppRespondSubscriber {
             networkingInteractor.unsubscribe(topic: subscriptionPayload.topic)
 
             do {
-                guard let cacao = try subscriptionPayload.request.result?.get(Cacao.self) else {
+                guard let cacao = try subscriptionPayload.response.result?.get(Cacao.self) else {
                     return logger.debug("Malformed auth response params")
                 }
 

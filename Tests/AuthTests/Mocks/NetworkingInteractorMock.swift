@@ -32,4 +32,8 @@ struct NetworkingInteractorMock: NetworkInteracting {
 
     }
 
+    func requestNetworkAck(_ request: RPCRequest, topic: String, tag: Int) async throws {
+
+    }
+
 }
