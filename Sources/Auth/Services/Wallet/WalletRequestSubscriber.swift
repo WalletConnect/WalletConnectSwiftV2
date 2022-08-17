@@ -9,7 +9,7 @@ class WalletRequestSubscriber {
     private let address: String?
     private var publishers = [AnyCancellable]()
     private let messageFormatter: SIWEMessageFormatting
-    var onRequest: ((_ id: RPCID, _ message: String) -> Void)?
+    var onRequest: ((_ id: RPCID, _ result: Result<String, ErrorCode>) -> Void)?
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
@@ -25,24 +25,18 @@ class WalletRequestSubscriber {
     private func subscribeForRequest() {
         guard let address = address else {return}
         networkingInteractor.requestPublisher.sink { [unowned self] subscriptionPayload in
+
             logger.debug("WalletRequestSubscriber: Received request")
-            guard
-                let requestId = subscriptionPayload.request.id,
-                subscriptionPayload.request.method == "wc_authRequest" else { return }
 
-            do {
-                guard let authRequestParams = try subscriptionPayload.request.params?.get(AuthRequestParams.self) else { return logger.debug("Malformed auth request params")
-                }
+            guard let requestId = subscriptionPayload.request.id, subscriptionPayload.request.method == "wc_authRequest"
+            else { return }
 
-                let message = messageFormatter.formatMessage(
-                    from: authRequestParams.payloadParams,
-                    address: address
-                )
+            guard let authRequestParams = try? subscriptionPayload.request.params?.get(AuthRequestParams.self)
+            else { self.onRequest?(requestId, .failure(.malformedRequestParams)); return }
 
-                onRequest?(requestId, message)
-            } catch {
-                logger.debug(error)
-            }
+            let message = messageFormatter.formatMessage(from: authRequestParams.payloadParams, address: address)
+
+            onRequest?(requestId, .success(message))
         }.store(in: &publishers)
     }
 

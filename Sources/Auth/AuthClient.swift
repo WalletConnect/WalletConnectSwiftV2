@@ -10,8 +10,8 @@ public class AuthClient {
         case unknownWalletAddress
         case noPairingMatchingTopic
     }
-    private var authRequestPublisherSubject = PassthroughSubject<(id: RPCID, message: String), Never>()
-    public var authRequestPublisher: AnyPublisher<(id: RPCID, message: String), Never> {
+    private var authRequestPublisherSubject = PassthroughSubject<(id: RPCID, result: Result<String, ErrorCode>), Never>()
+    public var authRequestPublisher: AnyPublisher<(id: RPCID, result: Result<String, ErrorCode>), Never> {
         authRequestPublisherSubject.eraseToAnyPublisher()
     }
 

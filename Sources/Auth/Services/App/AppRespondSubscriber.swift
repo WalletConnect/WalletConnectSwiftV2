@@ -10,6 +10,7 @@ class AppRespondSubscriber {
     private let signatureVerifier: MessageSignatureVerifying
     private let messageFormatter: SIWEMessageFormatting
     private var publishers = [AnyCancellable]()
+
     var onResponse: ((_ id: RPCID, _ result: Result<Cacao, ErrorCode>) -> Void)?
 
     init(networkingInteractor: NetworkInteracting,
@@ -26,7 +27,6 @@ class AppRespondSubscriber {
     }
 
     private func subscribeForResponse() {
-        // TODO - handle error response
         networkingInteractor.responsePublisher.sink { [unowned self] subscriptionPayload in
             guard
                 let requestId = subscriptionPayload.response.id,
@@ -36,30 +36,23 @@ class AppRespondSubscriber {
 
             networkingInteractor.unsubscribe(topic: subscriptionPayload.topic)
 
-            do {
-                guard let cacao = try subscriptionPayload.response.result?.get(Cacao.self) else {
-                    return logger.debug("Malformed auth response params")
-                }
+            guard
+                let cacao = try? subscriptionPayload.response.result?.get(Cacao.self),
+                let address = try? DIDPKH(iss: cacao.payload.iss).account.address,
+                let message = try? messageFormatter.formatMessage(from: cacao.payload)
+            else { self.onResponse?(requestId, .failure(.malformedResponseParams)); return }
 
-                let requestPayload = try requestParams.get(AuthRequestParams.self)
-                let address = try DIDPKH(iss: cacao.payload.iss).account.address
-                let message = try messageFormatter.formatMessage(from: cacao.payload)
-                let originalMessage = messageFormatter.formatMessage(from: requestPayload.payloadParams, address: address)
+            guard let requestPayload = try? requestParams.get(AuthRequestParams.self)
+            else { self.onResponse?(requestId, .failure(.malformedRequestParams)); return }
 
-                guard originalMessage == message else {
-                    return logger.debug("Original message compromised")
-                }
+            guard messageFormatter.formatMessage(from: requestPayload.payloadParams, address: address) == message
+            else { self.onResponse?(requestId, .failure(.messageCompromised)); return }
 
-                try signatureVerifier.verify(
-                    signature: cacao.signature.s,
-                    message: message,
-                    address: address
-                )
-                logger.debug("Received response with valid signature")
-                onResponse?(requestId, .success(cacao))
-            } catch {
-                logger.debug("Received response with invalid signature")
-            }
+            guard let _ = try? signatureVerifier.verify(signature: cacao.signature.s, message: message, address: address)
+            else { self.onResponse?(requestId, .failure(.messageVerificationFailed)); return }
+
+            onResponse?(requestId, .success(cacao))
+
         }.store(in: &publishers)
     }
 }

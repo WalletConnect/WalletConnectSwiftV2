@@ -1,7 +1,9 @@
 
 import Foundation
 
-public struct ErrorCode: Codable, Equatable, Error {
-    let code: Int
-    let message: String
+public enum ErrorCode: Codable, Equatable, Error {
+    case malformedResponseParams
+    case malformedRequestParams
+    case messageCompromised
+    case messageVerificationFailed
 }

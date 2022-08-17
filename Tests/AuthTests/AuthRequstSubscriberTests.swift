@@ -27,7 +27,8 @@ class AuthRequstSubscriberTests: XCTestCase {
         messageFormatter.formattedMessage = expectedMessage
         var messageId: RPCID!
         var message: String!
-        sut.onRequest = { id, formattedMessage in
+        sut.onRequest = { id, result in
+            guard case .success(let formattedMessage) = result else { return XCTFail() }
             messageId = id
             message = formattedMessage
             messageExpectation.fulfill()
