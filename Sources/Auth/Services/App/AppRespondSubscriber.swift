@@ -10,7 +10,7 @@ class AppRespondSubscriber {
     private let signatureVerifier: MessageSignatureVerifying
     private let messageFormatter: SIWEMessageFormatting
     private var publishers = [AnyCancellable]()
-    var onResponse: ((_ id: RPCID, _ cacao: Cacao) -> Void)?
+    var onResponse: ((_ id: RPCID, _ result: Result<Cacao, ErrorCode>) -> Void)?
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
@@ -26,6 +26,7 @@ class AppRespondSubscriber {
     }
 
     private func subscribeForResponse() {
+        // TODO - handle error response
         networkingInteractor.responsePublisher.sink { [unowned self] subscriptionPayload in
             guard
                 let requestId = subscriptionPayload.request.id,
@@ -54,7 +55,7 @@ class AppRespondSubscriber {
                     message: message,
                     address: address
                 )
-                onResponse?(requestId, cacao)
+                onResponse?(requestId, .success(cacao))
             } catch {
                 logger.debug("Received response with invalid signature")
             }

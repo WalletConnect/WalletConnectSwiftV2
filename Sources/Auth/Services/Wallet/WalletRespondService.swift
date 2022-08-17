@@ -26,9 +26,9 @@ actor WalletRespondService {
     func respond(result: Result<RespondParams, ErrorCode>, account: Account) async throws {
         switch result {
         case .success(let params):
-            respond(respondParams: params, account: account)
+            try await respond(respondParams: params, account: account)
         case .failure(let error):
-            //TODO respond with error
+            fatalError("TODO respond with error")
         }
     }
 
