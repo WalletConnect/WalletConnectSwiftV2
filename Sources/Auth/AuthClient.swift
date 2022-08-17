@@ -2,8 +2,9 @@ import Foundation
 import Combine
 import WalletConnectUtils
 import WalletConnectPairing
+import WalletConnectRelay
 
-class AuthClient {
+public class AuthClient {
     enum Errors: Error {
         case malformedPairingURI
         case unknownWalletAddress
@@ -18,6 +19,8 @@ class AuthClient {
     public var authResponsePublisher: AnyPublisher<(id: RPCID, cacao: Cacao), Never> {
         authResponsePublisherSubject.eraseToAnyPublisher()
     }
+
+    public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
     private let appPairService: AppPairService
     private let appRequestService: AppRequestService
@@ -43,7 +46,9 @@ class AuthClient {
          pendingRequestsProvider: PendingRequestsProvider,
          cleanupService: CleanupService,
          logger: ConsoleLogging,
-         pairingStorage: WCPairingStorage) {
+         pairingStorage: WCPairingStorage,
+         socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
+) {
         self.appPairService = appPairService
         self.appRequestService = appRequestService
         self.walletPairService = walletPairService
@@ -55,6 +60,7 @@ class AuthClient {
         self.cleanupService = cleanupService
         self.logger = logger
         self.pairingStorage = pairingStorage
+        self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
 
         setUpPublishers()
     }
@@ -92,7 +98,7 @@ class AuthClient {
     }
 
 #if DEBUG
-    /// Delete all stored data sach as: pairings, sessions, keys
+    /// Delete all stored data such as: pairings, keys
     ///
     /// - Note: Doesn't unsubscribe from topics
     public func cleanup() throws {

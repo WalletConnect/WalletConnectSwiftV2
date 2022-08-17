@@ -1,6 +1,6 @@
 import Foundation
 
-struct RequestParams {
+public struct RequestParams {
     let domain: String
     let chainId: String
     let nonce: String

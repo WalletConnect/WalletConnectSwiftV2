@@ -8,7 +8,7 @@ final class CleanupService {
     private let pairingStore: WCPairingStorage
     private let kms: KeyManagementServiceProtocol
 
-    init(pairingStore: WCPairingStorage, kms: KeyManagementServiceProtocol, sessionToPairingTopic: CodableStore<String>) {
+    init(pairingStore: WCPairingStorage, kms: KeyManagementServiceProtocol) {
         self.pairingStore = pairingStore
         self.kms = kms
     }
