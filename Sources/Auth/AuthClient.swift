@@ -15,8 +15,8 @@ public class AuthClient {
         authRequestPublisherSubject.eraseToAnyPublisher()
     }
 
-    private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, cacao: Cacao), Never>()
-    public var authResponsePublisher: AnyPublisher<(id: RPCID, cacao: Cacao), Never> {
+    private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, ErrorCode>), Never>()
+    public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Cacao, ErrorCode>), Never> {
         authResponsePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -87,9 +87,9 @@ public class AuthClient {
         try await appRequestService.request(params: params, topic: topic)
     }
 
-    public func respond(_ params: RespondParams) async throws {
+    public func respond(_ result: Result<RespondParams, ErrorCode>) async throws {
         guard let account = account else { throw Errors.unknownWalletAddress }
-        try await walletRespondService.respond(respondParams: params, account: account)
+        try await walletRespondService.respond(result: result, account: account)
     }
 
     public func getPendingRequests() throws -> [AuthRequest] {
@@ -107,8 +107,8 @@ public class AuthClient {
 #endif
 
     private func setUpPublishers() {
-        appRespondSubscriber.onResponse = { [unowned self] (id, cacao) in
-            authResponsePublisherSubject.send((id, cacao))
+        appRespondSubscriber.onResponse = { [unowned self] (id, result) in
+            authResponsePublisherSubject.send((id, result))
         }
 
         walletRequestSubscriber.onRequest = { [unowned self] (id, message) in
