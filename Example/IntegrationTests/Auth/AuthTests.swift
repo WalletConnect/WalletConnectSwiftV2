@@ -52,7 +52,7 @@ final class AuthTests: XCTestCase {
     }
 
     func testRequest() async {
-        let requestExpectation = expectation(description: "request")
+        let requestExpectation = expectation(description: "request delivered to wallet")
         Task(priority: .high) {
             let uri = try await app.request(RequestParams.stub())
             try await wallet.pair(uri: uri)

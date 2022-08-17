@@ -25,6 +25,7 @@ class WalletRequestSubscriber {
     }
     
     private func subscribeForRequest() {
+        print("adasdadsadsadsadsadsdscaadsdasdasdsdsds")
         networkingInteractor.requestPublisher.sink { [unowned self] subscriptionPayload in
             guard
                 let requestId = subscriptionPayload.request.id,
