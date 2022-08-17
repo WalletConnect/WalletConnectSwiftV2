@@ -87,9 +87,9 @@ public class AuthClient {
         try await appRequestService.request(params: params, topic: topic)
     }
 
-    public func respond(_ params: RespondParams) async throws {
+    public func respond(_ result: Result<RespondParams, ErrorCode>) async throws {
         guard let account = account else { throw Errors.unknownWalletAddress }
-        try await walletRespondService.respond(respondParams: params, account: account)
+        try await walletRespondService.respond(result: result, account: account)
     }
 
     public func getPendingRequests() throws -> [AuthRequest] {

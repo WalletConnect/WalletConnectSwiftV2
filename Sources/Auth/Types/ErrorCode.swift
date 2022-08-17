@@ -1,7 +1,8 @@
 
 import Foundation
 
-struct ErrorCode: Codable, Equatable {
+public struct ErrorCode: Codable, Equatable, Error {
     let code: Int
     let message: String
 }
+x`

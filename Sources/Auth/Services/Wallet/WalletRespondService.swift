@@ -22,8 +22,17 @@ actor WalletRespondService {
         self.kms = kms
         self.rpcHistory = rpcHistory
     }
+    
+    func respond(result: Result<RespondParams, ErrorCode>, account: Account) async throws {
+        switch result {
+        case .success(let params):
+            respond(respondParams: params, account: account)
+        case .failure(let error):
+            //TODO respond with error
+        }
+    }
 
-    func respond(respondParams: RespondParams, account: Account) async throws {
+    private func respond(respondParams: RespondParams, account: Account) async throws {
         guard let request = rpcHistory.get(recordId: RPCID(respondParams.id))?.request else { throw Errors.recordForIdNotFound }
         guard let authRequestParams = try? request.params?.get(AuthRequestParams.self) else { throw Errors.malformedAuthRequestParams }
 
