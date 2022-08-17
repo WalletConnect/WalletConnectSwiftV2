@@ -7,11 +7,11 @@ public final class RPCHistory {
             case local
             case remote
         }
-        let id: RPCID
-        let topic: String
+        public let id: RPCID
+        public let topic: String
         let origin: Origin
         public let request: RPCRequest
-        var response: RPCResponse?
+        public var response: RPCResponse?
     }
 
     enum HistoryError: Error {
