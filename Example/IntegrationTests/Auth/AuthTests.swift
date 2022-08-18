@@ -78,7 +78,6 @@ final class AuthTests: XCTestCase {
         }
         .store(in: &publishers)
         wait(for: [responseExpectation], timeout: 2)
-
     }
 }
 

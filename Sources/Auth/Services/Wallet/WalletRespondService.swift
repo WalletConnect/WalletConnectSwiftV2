@@ -41,7 +41,6 @@ actor WalletRespondService {
         let selfPubKey = try kms.createX25519KeyPair()
         let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey)
         try kms.setAgreementSecret(agreementKeys, topic: responseTopic)
-
         let didpkh = DIDPKH(account: account)
         let cacao = CacaoFormatter().format(authRequestParams, respondParams.signature, didpkh)
         let response = RPCResponse(id: request.id!, result: cacao)
