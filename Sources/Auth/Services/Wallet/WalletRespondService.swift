@@ -33,7 +33,7 @@ actor WalletRespondService {
     }
 
     private func respond(respondParams: RespondParams, account: Account) async throws {
-        guard let request = rpcHistory.get(recordId: RPCID(respondParams.id))?.request else { throw Errors.recordForIdNotFound }
+        guard let request = rpcHistory.get(recordId: respondParams.id)?.request else { throw Errors.recordForIdNotFound }
         guard let authRequestParams = try? request.params?.get(AuthRequestParams.self) else { throw Errors.malformedAuthRequestParams }
 
         let peerPubKey = authRequestParams.requester.publicKey

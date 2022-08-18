@@ -25,8 +25,9 @@ class WalletRequestSubscriber {
     }
 
     private func subscribeForRequest() {
-        print("adasdadsadsadsadsadsdscaadsdasdasdsdsds")
+        guard let address = address else {return}
         networkingInteractor.requestPublisher.sink { [unowned self] subscriptionPayload in
+            logger.debug("WalletRequestSubscriber: Received request")
             guard
                 let requestId = subscriptionPayload.request.id,
                 subscriptionPayload.request.method == "wc_authRequest" else { return }
@@ -37,7 +38,7 @@ class WalletRequestSubscriber {
 
                 let message = messageFormatter.formatMessage(
                     from: authRequestParams.payloadParams,
-                    address: address!
+                    address: address
                 )
 
                 onRequest?(requestId, message)

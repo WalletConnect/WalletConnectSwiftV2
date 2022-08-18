@@ -67,6 +67,7 @@ final class AuthTests: XCTestCase {
         try! await wallet.pair(uri: uri)
         wallet.authRequestPublisher.sink { [unowned self] (id, message) in
             Task(priority: .high) {
+                print("responding")
                 try! await wallet.respond(.success(RespondParams.stub(id: id)))
             }
         }
@@ -76,11 +77,13 @@ final class AuthTests: XCTestCase {
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
+        wait(for: [responseExpectation], timeout: 2)
+
     }
 }
 
 extension RespondParams {
-    static func stub(id: Int64) -> RespondParams {
+    static func stub(id: RPCID) -> RespondParams {
         RespondParams(
             id: id,
             signature: CacaoSignature.stub())
@@ -89,6 +92,6 @@ extension RespondParams {
 
 extension CacaoSignature {
     static func stub() -> CacaoSignature {
-        return CacaoSignature(
+        return CacaoSignature(t: "eip191", s: "438effc459956b57fcd9f3dac6c675f9cee88abf21acab7305e8e32aa0303a883b06dcbd956279a7a2ca21ffa882ff55cc22e8ab8ec0f3fe90ab45f306938cfa1b")
     }
 }

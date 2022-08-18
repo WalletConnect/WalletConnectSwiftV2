@@ -1,6 +1,6 @@
 import Foundation
 
 public struct RespondParams {
-    let id: Int64
+    let id: RPCID
     let signature: CacaoSignature
 }
