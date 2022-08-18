@@ -67,14 +67,14 @@ final class WCPairingTests: XCTestCase {
         XCTAssertEqual(pairing.expiryDate, activeExpiry)
     }
     
-    func testUpdateExpiry_WhenValueIsGreaterThanMax_ShouldThrowInvalidUpdateExpiryValue() {
+    func testUpdateExpiryWhenValueIsGreaterThanMax() {
         var pairing = WCPairing(topic: "", relay: .stub(), peerMetadata: .stub(), expiryDate: referenceDate)
         XCTAssertThrowsError(try pairing.updateExpiry(40 * .day)) { error in
             XCTAssertEqual(error as! WCPairing.Errors, WCPairing.Errors.invalidUpdateExpiryValue)
         }
     }
     
-    func testUpdateExpiry_WhenNewExpiryDateIsLessThanExpiryDate_ShouldThrowInvalidUpdateExpiryValue() {
+    func testUpdateExpiryWhenNewExpiryDateIsLessThanExpiryDate() {
         let expiryDate = referenceDate.advanced(by: 40 * .day)
         var pairing = WCPairing(topic: "", relay: .stub(), peerMetadata: .stub(), expiryDate: expiryDate)
         XCTAssertThrowsError(try pairing.updateExpiry(10 * .minute)) { error in
@@ -82,7 +82,7 @@ final class WCPairingTests: XCTestCase {
         }
     }
 
-    func testActivate_WhenCanUpdateExpiry_ShouldActivateAndUpdateExpiryIn30Days() {
+    func testActivateWhenCanUpdateExpiry() {
         var pairing = WCPairing(topic: "", relay: .stub(), peerMetadata: .stub(), expiryDate: referenceDate)
         XCTAssertFalse(pairing.active)
         pairing.activate()
@@ -90,7 +90,7 @@ final class WCPairingTests: XCTestCase {
         XCTAssertEqual(referenceDate.advanced(by: 30 * .day), pairing.expiryDate)
     }
     
-    func testActivate_WhenUpdateExpiryIsInvalid_ShouldActivateAndNotUpdateExpiry() {
+    func testActivateWhenUpdateExpiryIsInvalid() {
         let expiryDate = referenceDate.advanced(by: 40 * .day)
         var pairing = WCPairing(topic: "", relay: .stub(), peerMetadata: .stub(), expiryDate: expiryDate)
         XCTAssertFalse(pairing.active)
