@@ -21,7 +21,7 @@ actor AppRequestService {
 
     func request(params: RequestParams, topic: String) async throws {
         let pubKey = try kms.createX25519KeyPair()
-        let responseTopic = pubKey.hexRepresentation
+        let responseTopic = pubKey.rawRepresentation.sha256().toHexString()        
         let requester = AuthRequestParams.Requester(publicKey: pubKey.hexRepresentation, metadata: appMetadata)
         let issueAt = ISO8601DateFormatter().string(from: Date())
         let payload = AuthPayload(requestParams: params, iat: issueAt)
