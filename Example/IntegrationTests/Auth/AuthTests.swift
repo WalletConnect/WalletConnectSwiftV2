@@ -13,7 +13,7 @@ final class AuthTests: XCTestCase {
 
     override func setUp() {
         app = makeClient(prefix: "👻 App")
-        let walletAccount = Account(chainIdentifier: "eip155:1", address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2")!
+        let walletAccount = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
         wallet = makeClient(prefix: "🤑 Wallet", account: walletAccount)
 
         let expectation = expectation(description: "Wait Clients Connected")
@@ -68,7 +68,10 @@ final class AuthTests: XCTestCase {
         wallet.authRequestPublisher.sink { [unowned self] (id, message) in
             Task(priority: .high) {
                 print("responding")
-                try! await wallet.respond(.success(RespondParams.stub(id: id)))
+                let prvKey = Data(hex: "462c1dad6832d7d96ccf87bd6a686a4110e114aaaebd5512e552c0e3a87b480f")
+                let sig = try! MessageSigner(signer: Signer()).sign(message: message, privateKey: prvKey)
+                let cacaoSig = CacaoSignature(t: "eip191", s: sig)
+                try! await wallet.respond(.success(RespondParams(id: id, signature: cacaoSig)))
             }
         }
         .store(in: &publishers)

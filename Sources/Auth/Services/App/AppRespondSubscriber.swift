@@ -55,6 +55,7 @@ class AppRespondSubscriber {
                     message: message,
                     address: address
                 )
+                logger.debug("Received response with valid signature")
                 onResponse?(requestId, .success(cacao))
             } catch {
                 logger.debug("Received response with invalid signature")
