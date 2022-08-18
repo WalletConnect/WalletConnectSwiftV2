@@ -22,19 +22,13 @@ actor WalletRespondService {
         self.kms = kms
         self.rpcHistory = rpcHistory
     }
-    
-    func respond(result: Result<RespondParams, ErrorCode>, account: Account) async throws {
-        switch result {
-        case .success(let params):
-            try await respond(respondParams: params, account: account)
-        case .failure(let error):
-            fatalError("TODO respond with error")
-        }
-    }
 
-    private func respond(respondParams: RespondParams, account: Account) async throws {
-        guard let request = rpcHistory.get(recordId: respondParams.id)?.request else { throw Errors.recordForIdNotFound }
-        guard let authRequestParams = try? request.params?.get(AuthRequestParams.self) else { throw Errors.malformedAuthRequestParams }
+    func respond(params: RespondParams, account: Account) async throws {
+        guard let request = rpcHistory.get(recordId: RPCID(params.id))?.request
+        else { throw ErrorCode.malformedRequestParams }
+
+        guard let authRequestParams = try request.params?.get(AuthRequestParams.self)
+        else { throw ErrorCode.malformedRequestParams }
 
         let peerPubKey = try AgreementPublicKey(hex: authRequestParams.requester.publicKey)
         let responseTopic = peerPubKey.rawRepresentation.sha256().toHexString()
@@ -43,9 +37,9 @@ actor WalletRespondService {
         try kms.setAgreementSecret(agreementKeys, topic: responseTopic)
 
         let didpkh = DIDPKH(account: account)
-        let cacao = CacaoFormatter().format(authRequestParams, respondParams.signature, didpkh)
+        let cacao = CacaoFormatter().format(authRequestParams, params.signature, didpkh)
         let response = RPCResponse(id: request.id!, result: cacao)
 
-        try await networkingInteractor.respond(topic: responseTopic, response: response, tag: AuthResponseParams.tag, envelopeType: .type1(pubKey: selfPubKey.rawRepresentation))
+        try await networkingInteractor.respond(topic: params.topic, response: response, tag: AuthResponseParams.tag, envelopeType: .type1(pubKey: selfPubKey.rawRepresentation))
     }
 }
