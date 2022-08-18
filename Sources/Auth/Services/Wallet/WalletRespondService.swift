@@ -45,6 +45,6 @@ actor WalletRespondService {
         let cacao = CacaoFormatter().format(authRequestParams, respondParams.signature, account)
         let response = RPCResponse(id: request.id!, result: cacao)
 
-        try await networkingInteractor.respond(topic: respondParams.topic, response: response, tag: AuthResponseParams.tag, envelopeType: .type1(pubKey: selfPubKey.rawRepresentation))
+        try await networkingInteractor.respond(topic: responseTopic, response: response, tag: AuthResponseParams.tag, envelopeType: .type1(pubKey: selfPubKey.rawRepresentation))
     }
 }
