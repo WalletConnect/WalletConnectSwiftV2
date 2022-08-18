@@ -57,7 +57,7 @@ class NetworkingInteractor: NetworkInteracting {
     }
 
     func unsubscribe(topic: String) {
-        fatalError("not implemented")
+//        fatalError("not implemented")
     }
 
     func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {

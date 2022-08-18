@@ -21,12 +21,13 @@ actor AppRequestService {
 
     func request(params: RequestParams, topic: String) async throws {
         let pubKey = try kms.createX25519KeyPair()
-        let responseTopic = pubKey.rawRepresentation.sha256().toHexString()        
+        let responseTopic = pubKey.rawRepresentation.sha256().toHexString()
         let requester = AuthRequestParams.Requester(publicKey: pubKey.hexRepresentation, metadata: appMetadata)
         let issueAt = ISO8601DateFormatter().string(from: Date())
         let payload = AuthPayload(requestParams: params, iat: issueAt)
         let params = AuthRequestParams(requester: requester, payloadParams: payload)
         let request = RPCRequest(method: "wc_authRequest", params: params)
+        try kms.setPublicKey(publicKey: pubKey, for: responseTopic)
         logger.debug("Subscribibg for response topic: \(responseTopic)")
         try await networkingInteractor.requestNetworkAck(request, topic: topic, tag: AuthRequestParams.tag)
         try await networkingInteractor.subscribe(topic: responseTopic)
