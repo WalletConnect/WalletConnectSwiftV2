@@ -8,7 +8,7 @@ protocol MessageSigning {
     func sign(message: String, privateKey: Data) throws -> String
 }
 
-struct MessageSigner: MessageSignatureVerifying & MessageSigning {
+struct MessageSigner: MessageSignatureVerifying, MessageSigning {
 
     enum Errors: Error {
         case signatureValidationFailed

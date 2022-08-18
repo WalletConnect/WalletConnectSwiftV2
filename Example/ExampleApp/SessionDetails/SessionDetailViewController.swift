@@ -7,7 +7,7 @@ final class SessionDetailViewController: UIHostingController<SessionDetailView> 
 
     private let viewModel: SessionDetailViewModel
 
-    init(session: Session, client: Sign) {
+    init(session: Session, client: SignClient) {
         self.viewModel = SessionDetailViewModel(session: session, client: client)
         super.init(rootView: SessionDetailView(viewModel: viewModel))
 

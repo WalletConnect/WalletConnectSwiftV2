@@ -33,7 +33,7 @@ class NetworkingInteractorTests: XCTestCase {
             requestExpectation.fulfill()
         }.store(in: &publishers)
         serializer.deserialized = request
-        relayClient.onMessage?(topic, testPayload)
+        relayClient.messagePublisherSubject.send((topic, testPayload))
         waitForExpectations(timeout: 1.001, handler: nil)
     }
 

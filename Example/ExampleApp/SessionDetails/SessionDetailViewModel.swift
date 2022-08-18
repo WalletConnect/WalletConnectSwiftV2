@@ -5,7 +5,7 @@ import WalletConnectSign
 @MainActor
 final class SessionDetailViewModel: ObservableObject {
     private let session: Session
-    private let client: Sign
+    private let client: SignClient
 
     enum Fields {
         case accounts
@@ -18,7 +18,7 @@ final class SessionDetailViewModel: ObservableObject {
     @Published var pingSuccess: Bool = false
     @Published var pingFailed: Bool = false
 
-    init(session: Session, client: Sign) {
+    init(session: Session, client: SignClient) {
         self.session = session
         self.client = client
         self.namespaces = session.namespaces

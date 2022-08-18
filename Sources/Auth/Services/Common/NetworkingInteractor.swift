@@ -22,6 +22,7 @@ extension NetworkInteracting {
 }
 
 class NetworkingInteractor: NetworkInteracting {
+    private var publishers = Set<AnyCancellable>()
     private let relayClient: RelayClient
     private let serializer: Serializing
     private let rpcHistory: RPCHistory
@@ -45,9 +46,10 @@ class NetworkingInteractor: NetworkInteracting {
         self.rpcHistory = rpcHistory
         self.logger = logger
         self.socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
-        relayClient.onMessage = { [unowned self] topic, message in
+        relayClient.messagePublisher.sink { [unowned self] (topic, message) in
             manageSubscription(topic, message)
         }
+        .store(in: &publishers)
     }
 
     func subscribe(topic: String) async throws {
