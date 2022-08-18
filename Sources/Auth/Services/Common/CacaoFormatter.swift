@@ -2,11 +2,13 @@ import Foundation
 import WalletConnectUtils
 
 protocol CacaoFormatting {
-    func format(_ request: AuthRequestParams, _ signature: CacaoSignature, _ account: Account) -> Cacao
+    func format(_ request: AuthRequestParams, _ signature: CacaoSignature, _ didpkh: DIDPKH) -> Cacao
 }
 
 class CacaoFormatter: CacaoFormatting {
-    func format(_ request: AuthRequestParams, _ signature: CacaoSignature, _ account: Account) -> Cacao {
-        fatalError("not implemented")
+    func format(_ request: AuthRequestParams, _ signature: CacaoSignature, _ didpkh: DIDPKH) -> Cacao {
+        let header = CacaoHeader(t: "eip191")
+        let payload = CacaoPayload(params: request.payloadParams, didpkh: didpkh)
+        return Cacao(header: header, payload: payload, signature: signature)
     }
 }
