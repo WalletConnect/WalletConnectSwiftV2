@@ -5,22 +5,22 @@ import Combine
 public class Auth {
 
     public static var instance: AuthClient = {
-        guard let metadata = Auth.metadata else {
+        guard let config = Auth.config else {
             fatalError("Error - you must call Auth.configure(_:) before accessing the shared instance.")
         }
         return AuthClientFactory.create(
-            metadata: metadata,
-            account: account,
+            metadata: config.metadata,
+            account: config.account,
             relayClient: Relay.instance)
     }()
-
-    private static var metadata: AppMetadata?
-    private static var account: Account?
+    
+    private static var config: Config?
 
     private init() { }
 
     static public func configure(metadata: AppMetadata, account: Account?) {
-        Auth.metadata = metadata
-        Auth.account = account
+        Auth.config = Auth.Config(
+            metadata: metadata,
+            account: account)
     }
 }
