@@ -15,9 +15,10 @@ class AuthRequstSubscriberTests: XCTestCase {
     override func setUp() {
         networkingInteractor = NetworkingInteractorMock()
         messageFormatter = SIWEMessageFormatterMock()
-//        sut = WalletRequestSubscriber(networkingInteractor: networkingInteractor,
-//                                      logger: ConsoleLoggerMock(),
-//                                      messageFormatter: messageFormatter, address: "")
+        sut = WalletRequestSubscriber(networkingInteractor: networkingInteractor,
+                                      logger: ConsoleLoggerMock(),
+                                      kms: KeyManagementServiceMock(),
+                                      messageFormatter: messageFormatter, address: "")
     }
 
     func testSubscribeRequest() {

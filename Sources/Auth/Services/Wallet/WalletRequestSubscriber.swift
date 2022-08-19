@@ -7,7 +7,7 @@ import WalletConnectKMS
 class WalletRequestSubscriber {
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging
-    private let kms: KeyManagementService
+    private let kms: KeyManagementServiceProtocol
     private let address: String?
     private var publishers = [AnyCancellable]()
     private let messageFormatter: SIWEMessageFormatting
@@ -15,7 +15,7 @@ class WalletRequestSubscriber {
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
-         kms: KeyManagementService,
+         kms: KeyManagementServiceProtocol,
          messageFormatter: SIWEMessageFormatting,
          address: String?) {
         self.networkingInteractor = networkingInteractor
@@ -27,11 +27,11 @@ class WalletRequestSubscriber {
     }
 
     private func subscribeForRequest() {
+        guard let address = address else { return }
+
         networkingInteractor.requestPublisher.sink { [unowned self] payload in
 
             logger.debug("WalletRequestSubscriber: Received request")
-
-            guard let address = address else { return }
 
             guard let requestId = payload.request.id, payload.request.method == "wc_authRequest"
             else { return }

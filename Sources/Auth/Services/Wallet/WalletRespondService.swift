@@ -66,10 +66,10 @@ actor WalletRespondService {
     }
 
     private func generateAgreementKeys(requestParams: AuthRequestParams) throws -> (topic: String, keys: AgreementKeys) {
-        let peerPubKey = requestParams.requester.publicKey
+        let peerPubKey = try AgreementPublicKey(hex: requestParams.requester.publicKey)
         let topic = peerPubKey.rawRepresentation.sha256().toHexString()
         let selfPubKey = try kms.createX25519KeyPair()
-        let keys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey)
+        let keys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey.hexRepresentation)
         return (topic, keys)
     }
 }
