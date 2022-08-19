@@ -57,7 +57,13 @@ class NetworkingInteractor: NetworkInteracting {
     }
 
     func unsubscribe(topic: String) {
-        fatalError("not implemented")
+        relayClient.unsubscribe(topic: topic) { [unowned self] error in
+            if let error = error {
+                logger.error(error)
+            } else {
+                rpcHistory.deleteAll(forTopic: topic)
+            }
+        }
     }
 
     func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {

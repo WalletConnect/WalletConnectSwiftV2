@@ -19,15 +19,15 @@ class WalletRequestSubscriber {
         self.logger = logger
         self.address = address
         self.messageFormatter = messageFormatter
-        subscribeForRequest()
+        if address != nil {
+            subscribeForRequest()
+        }
     }
 
     private func subscribeForRequest() {
-        guard let address = address else {
-            logger.warn("unexpected request")
-            return
-        }
+        guard let address = address else {return}
         networkingInteractor.requestPublisher.sink { [unowned self] subscriptionPayload in
+            logger.debug("WalletRequestSubscriber: Received request")
             guard
                 let requestId = subscriptionPayload.request.id,
                 subscriptionPayload.request.method == "wc_authRequest" else { return }
