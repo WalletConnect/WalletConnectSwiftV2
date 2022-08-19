@@ -28,7 +28,7 @@ actor AppRequestService {
         let params = AuthRequestParams(requester: requester, payloadParams: payload)
         let request = RPCRequest(method: "wc_authRequest", params: params)
         try kms.setPublicKey(publicKey: pubKey, for: responseTopic)
-        logger.debug("Subscribibg for response topic: \(responseTopic)")
+        logger.debug("AppRequestService: Subscribibg for response topic: \(responseTopic)")
         try await networkingInteractor.requestNetworkAck(request, topic: topic, tag: AuthRequestParams.tag)
         try await networkingInteractor.subscribe(topic: responseTopic)
     }
