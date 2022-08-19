@@ -6,7 +6,7 @@ public class Auth {
 
     public static var instance: AuthClient = {
         guard let metadata = Auth.metadata else {
-            fatalError("Error - you must call Sign.configure(_:) before accessing the shared instance.")
+            fatalError("Error - you must call Auth.configure(_:) before accessing the shared instance.")
         }
         return AuthClientFactory.create(
             metadata: metadata,
