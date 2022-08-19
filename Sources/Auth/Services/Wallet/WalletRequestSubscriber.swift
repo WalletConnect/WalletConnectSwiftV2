@@ -19,9 +19,7 @@ class WalletRequestSubscriber {
         self.logger = logger
         self.address = address
         self.messageFormatter = messageFormatter
-        if address != nil {
-            subscribeForRequest()
-        }
+        subscribeForRequest()
     }
 
     private func subscribeForRequest() {
