@@ -1,18 +1,13 @@
 import Foundation
 
-public protocol Reason {
-    var code: Int { get }
-    var message: String { get }
-}
-
-public enum ErrorCode: Codable, Equatable, Error {
+public enum InternalError: Codable, Equatable, Error {
     case malformedResponseParams
     case malformedRequestParams
     case messageCompromised
     case messageVerificationFailed
 }
 
-extension ErrorCode: Reason {
+extension InternalError: Reason {
 
     public var code: Int {
         switch self {

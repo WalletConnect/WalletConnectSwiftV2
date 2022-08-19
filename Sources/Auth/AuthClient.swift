@@ -10,13 +10,13 @@ public class AuthClient {
         case unknownWalletAddress
         case noPairingMatchingTopic
     }
-    private var authRequestPublisherSubject = PassthroughSubject<(id: RPCID, result: Result<String, ErrorCode>), Never>()
-    public var authRequestPublisher: AnyPublisher<(id: RPCID, result: Result<String, ErrorCode>), Never> {
+    private var authRequestPublisherSubject = PassthroughSubject<(id: RPCID, message: String), Never>()
+    public var authRequestPublisher: AnyPublisher<(id: RPCID, message: String), Never> {
         authRequestPublisherSubject.eraseToAnyPublisher()
     }
 
-    private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, ErrorCode>), Never>()
-    public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Cacao, ErrorCode>), Never> {
+    private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, InternalError>), Never>()
+    public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Cacao, InternalError>), Never> {
         authResponsePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -87,9 +87,9 @@ public class AuthClient {
         try await appRequestService.request(params: params, topic: topic)
     }
 
-    public func respond(_ params: RespondParams) async throws {
+    public func respond(requestId: RPCID, result: Result<RespondParams, ExternalError>) async throws {
         guard let account = account else { throw Errors.unknownWalletAddress }
-        try await walletRespondService.respond(params: params, account: account)
+        try await walletRespondService.respond(requestId: requestId, result: result, account: account)
     }
 
     public func getPendingRequests() throws -> [AuthRequest] {

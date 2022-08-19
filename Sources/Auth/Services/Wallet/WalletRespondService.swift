@@ -23,23 +23,53 @@ actor WalletRespondService {
         self.rpcHistory = rpcHistory
     }
 
-    func respond(params: RespondParams, account: Account) async throws {
-        guard let request = rpcHistory.get(recordId: RPCID(params.id))?.request
-        else { throw ErrorCode.malformedRequestParams }
+    func respond(requestId: RPCID, result: Result<RespondParams, ExternalError>, account: Account) async throws {
+        switch result {
+        case .success(let params):
+            try await respond(requestId: requestId, params: params, account: account)
+        case .failure(let error):
+            try await respond(error: error, requestId: requestId)
+        }
+    }
 
-        guard let authRequestParams = try request.params?.get(AuthRequestParams.self)
-        else { throw ErrorCode.malformedRequestParams }
+    private func respond(requestId: RPCID, params: RespondParams, account: Account) async throws {
+        let authRequestParams = try getAuthRequestParams(requestId: requestId)
+        let (topic, keys) = try generateAgreementKeys(requestParams: authRequestParams)
 
-        let peerPubKey = try AgreementPublicKey(hex: authRequestParams.requester.publicKey)
-        let responseTopic = peerPubKey.rawRepresentation.sha256().toHexString()
-        let selfPubKey = try kms.createX25519KeyPair()
-        let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey.hexRepresentation)
-        try kms.setAgreementSecret(agreementKeys, topic: responseTopic)
+        try kms.setAgreementSecret(keys, topic: topic)
 
         let didpkh = DIDPKH(account: account)
         let cacao = CacaoFormatter().format(authRequestParams, params.signature, didpkh)
-        let response = RPCResponse(id: request.id!, result: cacao)
+        let response = RPCResponse(id: requestId, result: cacao)
+        try await networkingInteractor.respond(topic: params.topic, response: response, tag: AuthResponseParams.tag, envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
+    }
 
-        try await networkingInteractor.respond(topic: params.topic, response: response, tag: AuthResponseParams.tag, envelopeType: .type1(pubKey: selfPubKey.rawRepresentation))
+    private func respond(error: ExternalError, requestId: RPCID) async throws {
+        let authRequestParams = try getAuthRequestParams(requestId: requestId)
+        let (topic, keys) = try generateAgreementKeys(requestParams: authRequestParams)
+
+        try kms.setAgreementSecret(keys, topic: topic)
+
+        let tag = AuthResponseParams.tag
+        let envelopeType = Envelope.EnvelopeType.type1(pubKey: keys.publicKey.rawRepresentation)
+        try await networkingInteractor.respondError(topic: topic, requestId: requestId, tag: tag, reason: error, envelopeType: envelopeType)
+    }
+
+    private func getAuthRequestParams(requestId: RPCID) throws -> AuthRequestParams {
+        guard let request = rpcHistory.get(recordId: requestId)?.request
+        else { throw Errors.recordForIdNotFound }
+
+        guard let authRequestParams = try request.params?.get(AuthRequestParams.self)
+        else { throw Errors.malformedAuthRequestParams }
+
+        return authRequestParams
+    }
+
+    private func generateAgreementKeys(requestParams: AuthRequestParams) throws -> (topic: String, keys: AgreementKeys) {
+        let peerPubKey = requestParams.requester.publicKey
+        let topic = peerPubKey.rawRepresentation.sha256().toHexString()
+        let selfPubKey = try kms.createX25519KeyPair()
+        let keys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey)
+        return (topic, keys)
     }
 }

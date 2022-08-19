@@ -11,7 +11,7 @@ class AppRespondSubscriber {
     private let messageFormatter: SIWEMessageFormatting
     private var publishers = [AnyCancellable]()
 
-    var onResponse: ((_ id: RPCID, _ result: Result<Cacao, ErrorCode>) -> Void)?
+    var onResponse: ((_ id: RPCID, _ result: Result<Cacao, InternalError>) -> Void)?
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
