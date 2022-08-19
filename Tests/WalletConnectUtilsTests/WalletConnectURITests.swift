@@ -1,11 +1,11 @@
 import XCTest
-@testable import WalletConnectSign
+@testable import WalletConnectUtils
 
 private let stubTopic = "8097df5f14871126866252c1b7479a14aefb980188fc35ec97d130d24bd887c8"
 private let stubSymKey = "587d5484ce2a2a6ee3ba1962fdd7e8588e06200c46823bd18fbd67def96ad303"
 private let stubProtocol = "irn"
 
-private let stubURI = "wc:7f6e504bfad60b485450578e05678ed3e8e8c4751d3c6160be17160d63ec90f9@2?symKey=587d5484ce2a2a6ee3ba1962fdd7e8588e06200c46823bd18fbd67def96ad303&relay-protocol=irn"
+private let stubURI = "wc:auth-\(stubTopic)@2?symKey=\(stubSymKey)&relay-protocol=\(stubProtocol)"
 
 final class WalletConnectURITests: XCTestCase {
 
@@ -33,6 +33,8 @@ final class WalletConnectURITests: XCTestCase {
         let outputURIString = uri?.absoluteString
         XCTAssertEqual(expectedString, outputURIString)
     }
+
+    // MARK: - Init failure cases
 
     func testInitFailsBadScheme() {
         let inputURIString = stubURI.replacingOccurrences(of: "wc:", with: "")
