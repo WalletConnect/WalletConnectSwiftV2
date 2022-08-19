@@ -1,33 +1,48 @@
 import XCTest
 @testable import WalletConnectUtils
 
-private let stubTopic = "8097df5f14871126866252c1b7479a14aefb980188fc35ec97d130d24bd887c8"
-private let stubSymKey = "587d5484ce2a2a6ee3ba1962fdd7e8588e06200c46823bd18fbd67def96ad303"
-private let stubProtocol = "irn"
-
-private let stubURI = "wc:auth-\(stubTopic)@2?symKey=\(stubSymKey)&relay-protocol=\(stubProtocol)"
-
 final class WalletConnectURITests: XCTestCase {
+
+    var stubURI: String!
+
+    var stubTopic: String!
+    var stubSymKey: String!
+    let stubProtocol = "irn"
+
+    override func setUp() {
+        let topic = Data.randomBytes(count: 32).toHexString()
+        let symKey = Data.randomBytes(count: 32).toHexString()
+        stubTopic = topic
+        stubSymKey = symKey
+        stubURI = "wc:\(topic)@2?symKey=\(symKey)&relay-protocol=\(stubProtocol)"
+    }
+
+    override func tearDown() {
+        stubURI = nil
+        stubTopic = nil
+        stubSymKey = nil
+    }
 
     func testInitURIToString() {
         let inputURI = WalletConnectURI(
-            topic: "8097df5f14871126866252c1b7479a14aefb980188fc35ec97d130d24bd887c8",
-            symKey: "19c5ecc857963976fabb98ed6a3e0a6ab6b0d65c018b6e25fbdcd3a164def868",
-            relay: RelayProtocolOptions(protocol: "irn", data: nil))
+            topic: stubTopic,
+            symKey: stubSymKey,
+            relay: RelayProtocolOptions(protocol: stubProtocol, data: nil))
         let uriString = inputURI.absoluteString
         let outputURI = WalletConnectURI(string: uriString)
         XCTAssertEqual(inputURI, outputURI)
+        XCTAssertEqual(stubURI, outputURI?.absoluteString)
     }
 
     func testInitStringToURI() {
-        let inputURIString = stubURI
+        let inputURIString = stubURI!
         let uri = WalletConnectURI(string: inputURIString)
         let outputURIString = uri?.absoluteString
         XCTAssertEqual(inputURIString, outputURIString)
     }
 
     func testInitStringToURIAlternate() {
-        let expectedString = stubURI
+        let expectedString = stubURI!
         let inputURIString = expectedString.replacingOccurrences(of: "wc:", with: "wc://")
         let uri = WalletConnectURI(string: inputURIString)
         let outputURIString = uri?.absoluteString
@@ -49,7 +64,8 @@ final class WalletConnectURITests: XCTestCase {
     }
 
     func testInitFailsNoSymKeyParam() {
-        let inputURIString = stubURI.replacingOccurrences(of: "symKey=\(stubSymKey)", with: "")
+        let symKey = stubSymKey!
+        let inputURIString = stubURI.replacingOccurrences(of: "symKey=\(symKey)", with: "")
         let uri = WalletConnectURI(string: inputURIString)
         XCTAssertNil(uri)
     }
