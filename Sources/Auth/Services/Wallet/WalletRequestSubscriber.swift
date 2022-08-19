@@ -7,7 +7,6 @@ import WalletConnectKMS
 class WalletRequestSubscriber {
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging
-    private let rpcHistory: RPCHistory
     private let kms: KeyManagementService
     private let address: String?
     private var publishers = [AnyCancellable]()
@@ -16,13 +15,11 @@ class WalletRequestSubscriber {
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
-         rpcHistory: RPCHistory,
          kms: KeyManagementService,
          messageFormatter: SIWEMessageFormatting,
          address: String?) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
-        self.rpcHistory = rpcHistory
         self.kms = kms
         self.address = address
         self.messageFormatter = messageFormatter

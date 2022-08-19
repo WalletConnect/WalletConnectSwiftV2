@@ -15,9 +15,9 @@ class AuthRequstSubscriberTests: XCTestCase {
     override func setUp() {
         networkingInteractor = NetworkingInteractorMock()
         messageFormatter = SIWEMessageFormatterMock()
-        sut = WalletRequestSubscriber(networkingInteractor: networkingInteractor,
-                                   logger: ConsoleLoggerMock(),
-                                    messageFormatter: messageFormatter, address: "")
+//        sut = WalletRequestSubscriber(networkingInteractor: networkingInteractor,
+//                                      logger: ConsoleLoggerMock(),
+//                                      messageFormatter: messageFormatter, address: "")
     }
 
     func testSubscribeRequest() {
@@ -27,8 +27,7 @@ class AuthRequstSubscriberTests: XCTestCase {
         messageFormatter.formattedMessage = expectedMessage
         var messageId: RPCID!
         var message: String!
-        sut.onRequest = { id, result in
-            guard case .success(let formattedMessage) = result else { return XCTFail() }
+        sut.onRequest = { id, formattedMessage in
             messageId = id
             message = formattedMessage
             messageExpectation.fulfill()

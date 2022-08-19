@@ -23,25 +23,25 @@ actor WalletRespondService {
         self.rpcHistory = rpcHistory
     }
 
-    func respond(requestId: RPCID, result: Result<RespondParams, ExternalError>, account: Account) async throws {
+    func respond(requestId: RPCID, result: Result<CacaoSignature, ExternalError>, account: Account) async throws {
         switch result {
-        case .success(let params):
-            try await respond(requestId: requestId, params: params, account: account)
+        case .success(let signature):
+            try await respond(requestId: requestId, signature: signature, account: account)
         case .failure(let error):
             try await respond(error: error, requestId: requestId)
         }
     }
 
-    private func respond(requestId: RPCID, params: RespondParams, account: Account) async throws {
+    private func respond(requestId: RPCID, signature: CacaoSignature, account: Account) async throws {
         let authRequestParams = try getAuthRequestParams(requestId: requestId)
         let (topic, keys) = try generateAgreementKeys(requestParams: authRequestParams)
 
         try kms.setAgreementSecret(keys, topic: topic)
 
         let didpkh = DIDPKH(account: account)
-        let cacao = CacaoFormatter().format(authRequestParams, params.signature, didpkh)
+        let cacao = CacaoFormatter().format(authRequestParams, signature, didpkh)
         let response = RPCResponse(id: requestId, result: cacao)
-        try await networkingInteractor.respond(topic: params.topic, response: response, tag: AuthResponseParams.tag, envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
+        try await networkingInteractor.respond(topic: topic, response: response, tag: AuthResponseParams.tag, envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
     }
 
     private func respond(error: ExternalError, requestId: RPCID) async throws {
