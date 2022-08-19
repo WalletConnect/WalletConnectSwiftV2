@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectUtils
 import WalletConnectRelay
 import Combine
 
