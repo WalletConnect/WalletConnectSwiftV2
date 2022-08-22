@@ -1,29 +1,34 @@
 import Foundation
 
-public enum InternalError: Codable, Equatable, Error {
+public enum AuthError: Codable, Equatable, Error {
+    case userRejeted
     case malformedResponseParams
     case malformedRequestParams
     case messageCompromised
     case messageVerificationFailed
 }
 
-extension InternalError: Reason {
+extension AuthError: Reason {
 
     public var code: Int {
         switch self {
+        case .userRejeted:
+            return 14001
         case .malformedResponseParams:
-            return 1001
+            return 12001
         case .malformedRequestParams:
-            return 1002
+            return 12002
         case .messageCompromised:
-            return 1003
+            return 12003
         case .messageVerificationFailed:
-            return 1004
+            return 12004
         }
     }
 
     public var message: String {
         switch self {
+        case .userRejeted:
+            return "Auth request rejected by user"
         case .malformedResponseParams:
             return "Response params malformed"
         case .malformedRequestParams:

@@ -45,7 +45,7 @@ class WalletRequestSubscriber {
         }.store(in: &publishers)
     }
 
-    private func respondError(_ error: InternalError, topic: String, requestId: RPCID) {
+    private func respondError(_ error: AuthError, topic: String, requestId: RPCID) {
         guard let pubKey = kms.getAgreementSecret(for: topic)?.publicKey
         else { return logger.error("Agreement key for topic \(topic) not found") }
 

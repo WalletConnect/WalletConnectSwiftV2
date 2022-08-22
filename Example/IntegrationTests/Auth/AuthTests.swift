@@ -35,7 +35,6 @@ final class AuthTests: XCTestCase {
         wait(for: [expectation], timeout: 5)
     }
 
-
     func makeClient(prefix: String, account: Account? = nil) -> AuthClient {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let relayHost = "relay.walletconnect.com"
@@ -79,6 +78,6 @@ final class AuthTests: XCTestCase {
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
-        wait(for: [responseExpectation], timeout: .infinity)
+        wait(for: [responseExpectation], timeout: 5)
     }
 }

@@ -15,8 +15,8 @@ public class AuthClient {
         authRequestPublisherSubject.eraseToAnyPublisher()
     }
 
-    private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, InternalError>), Never>()
-    public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Cacao, InternalError>), Never> {
+    private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, AuthError>), Never>()
+    public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Cacao, AuthError>), Never> {
         authResponsePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -87,7 +87,7 @@ public class AuthClient {
         try await appRequestService.request(params: params, topic: topic)
     }
 
-    public func respond(requestId: RPCID, result: Result<CacaoSignature, ExternalError>) async throws {
+    public func respond(requestId: RPCID, result: Result<CacaoSignature, Never>) async throws {
         guard let account = account else { throw Errors.unknownWalletAddress }
         try await walletRespondService.respond(requestId: requestId, result: result, account: account)
     }
