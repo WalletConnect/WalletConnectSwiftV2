@@ -4,7 +4,7 @@ import WalletConnectUtils
 @testable import WalletConnectKMS
 import WalletConnectRelay
 import Combine
-@testable import Auth
+import Auth
 
 final class AuthTests: XCTestCase {
     var app: AuthClient!
@@ -70,6 +70,26 @@ final class AuthTests: XCTestCase {
             Task(priority: .high) {
                 let signature = try! MessageSigner(signer: Signer()).sign(message: message, privateKey: prvKey)
                 let cacaoSignature = CacaoSignature(t: "eip191", s: signature)
+                try! await wallet.respond(.success(RespondParams(id: id, signature: cacaoSignature)))
+            }
+        }
+        .store(in: &publishers)
+        app.authResponsePublisher.sink { (id, result) in
+            guard case .success = result else { XCTFail(); return }
+            responseExpectation.fulfill()
+        }
+        .store(in: &publishers)
+        wait(for: [responseExpectation], timeout: 2)
+    }
+
+    func testRespondInvalidSignature() async {
+        let responseExpectation = expectation(description: "invalid signature response delivered")
+        let uri = try! await app.request(RequestParams.stub())
+        try! await wallet.pair(uri: uri)
+        wallet.authRequestPublisher.sink { [unowned self] (id, message) in
+            Task(priority: .high) {
+                let invalidSignature = "43effc459956b57fcd9f3dac6c675f9cee88abf21acab7305e8e32aa0303a883b06dcbd956279a7a2ca21ffa882ff55cc22e8ab8ec0f3fe90ab45f306938cfa1b"
+                let cacaoSignature = CacaoSignature(t: "eip191", s: invalidSignature)
                 try! await wallet.respond(.success(RespondParams(id: id, signature: cacaoSignature)))
             }
         }

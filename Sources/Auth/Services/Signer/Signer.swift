@@ -1,7 +1,7 @@
 import Foundation
 import Web3
 
-struct Signer {
+public struct Signer {
 
     typealias Signature = (v: UInt, r: [UInt8], s: [UInt8])
 
