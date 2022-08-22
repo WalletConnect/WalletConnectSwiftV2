@@ -35,7 +35,6 @@ final class AuthTests: XCTestCase {
         wait(for: [expectation], timeout: 5)
     }
 
-
     func makeClient(prefix: String, account: Account? = nil) -> AuthClient {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let relayHost = "relay.walletconnect.com"
@@ -70,7 +69,7 @@ final class AuthTests: XCTestCase {
             Task(priority: .high) {
                 let signature = try! MessageSigner(signer: Signer()).sign(message: message, privateKey: prvKey)
                 let cacaoSignature = CacaoSignature(t: "eip191", s: signature)
-                try! await wallet.respond(.success(RespondParams(id: id, signature: cacaoSignature)))
+                try! await wallet.respond(requestId: id, result: .success(cacaoSignature))
             }
         }
         .store(in: &publishers)
@@ -79,6 +78,6 @@ final class AuthTests: XCTestCase {
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
-        wait(for: [responseExpectation], timeout: 2)
+        wait(for: [responseExpectation], timeout: 5)
     }
 }

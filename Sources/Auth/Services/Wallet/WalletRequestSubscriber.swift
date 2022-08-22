@@ -2,10 +2,12 @@ import Combine
 import Foundation
 import WalletConnectUtils
 import JSONRPC
+import WalletConnectKMS
 
 class WalletRequestSubscriber {
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging
+    private let kms: KeyManagementServiceProtocol
     private let address: String?
     private var publishers = [AnyCancellable]()
     private let messageFormatter: SIWEMessageFormatting
@@ -13,37 +15,45 @@ class WalletRequestSubscriber {
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
+         kms: KeyManagementServiceProtocol,
          messageFormatter: SIWEMessageFormatting,
          address: String?) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
+        self.kms = kms
         self.address = address
         self.messageFormatter = messageFormatter
         subscribeForRequest()
     }
 
     private func subscribeForRequest() {
-        guard let address = address else {return}
-        networkingInteractor.requestPublisher.sink { [unowned self] subscriptionPayload in
+        guard let address = address else { return }
+
+        networkingInteractor.requestPublisher.sink { [unowned self] payload in
+
             logger.debug("WalletRequestSubscriber: Received request")
-            guard
-                let requestId = subscriptionPayload.request.id,
-                subscriptionPayload.request.method == "wc_authRequest" else { return }
 
-            do {
-                guard let authRequestParams = try subscriptionPayload.request.params?.get(AuthRequestParams.self) else { return logger.debug("Malformed auth request params")
-                }
+            guard let requestId = payload.request.id, payload.request.method == "wc_authRequest"
+            else { return }
 
-                let message = messageFormatter.formatMessage(
-                    from: authRequestParams.payloadParams,
-                    address: address
-                )
+            guard let authRequestParams = try? payload.request.params?.get(AuthRequestParams.self)
+            else { return respondError(.malformedRequestParams, topic: payload.topic, requestId: requestId) }
 
-                onRequest?(requestId, message)
-            } catch {
-                logger.debug(error)
-            }
+            let message = messageFormatter.formatMessage(from: authRequestParams.payloadParams, address: address)
+
+            onRequest?(requestId, message)
         }.store(in: &publishers)
     }
 
+    private func respondError(_ error: AuthError, topic: String, requestId: RPCID) {
+        guard let pubKey = kms.getAgreementSecret(for: topic)?.publicKey
+        else { return logger.error("Agreement key for topic \(topic) not found") }
+
+        let tag = AuthResponseParams.tag
+        let envelopeType = Envelope.EnvelopeType.type1(pubKey: pubKey.rawRepresentation)
+
+        Task(priority: .high) {
+            try await networkingInteractor.respondError(topic: topic, requestId: requestId, tag: tag, reason: error, envelopeType: envelopeType)
+        }
+    }
 }

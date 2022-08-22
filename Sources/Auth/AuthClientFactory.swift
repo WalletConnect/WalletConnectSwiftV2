@@ -26,7 +26,7 @@ public struct AuthClientFactory {
         let messageSigner = MessageSigner(signer: Signer())
         let appRespondSubscriber = AppRespondSubscriber(networkingInteractor: networkingInteractor, logger: logger, rpcHistory: history, signatureVerifier: messageSigner, messageFormatter: messageFormatter)
         let walletPairService = WalletPairService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore)
-        let walletRequestSubscriber = WalletRequestSubscriber(networkingInteractor: networkingInteractor, logger: logger, messageFormatter: messageFormatter, address: account?.address)
+        let walletRequestSubscriber = WalletRequestSubscriber(networkingInteractor: networkingInteractor, logger: logger, kms: kms, messageFormatter: messageFormatter, address: account?.address)
         let walletRespondService = WalletRespondService(networkingInteractor: networkingInteractor, logger: logger, kms: kms, rpcHistory: history)
         let pendingRequestsProvider = PendingRequestsProvider(rpcHistory: history)
         let cleanupService = CleanupService(pairingStore: pairingStore, kms: kms)
