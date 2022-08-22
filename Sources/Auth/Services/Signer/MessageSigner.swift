@@ -17,7 +17,7 @@ public struct MessageSigner: MessageSignatureVerifying, MessageSigning {
 
     private let signer: Signer
 
-    public init(signer: Signer) {
+    public init(signer: Signer = Signer()) {
         self.signer = signer
     }
 

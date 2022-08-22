@@ -4,7 +4,7 @@ import WalletConnectUtils
 @testable import WalletConnectKMS
 import WalletConnectRelay
 import Combine
-import Auth
+@testable import Auth
 
 final class AuthTests: XCTestCase {
     var app: AuthClient!
@@ -68,7 +68,7 @@ final class AuthTests: XCTestCase {
         try! await wallet.pair(uri: uri)
         wallet.authRequestPublisher.sink { [unowned self] (id, message) in
             Task(priority: .high) {
-                let signature = try! MessageSigner(signer: Signer()).sign(message: message, privateKey: prvKey)
+                let signature = try! MessageSigner().sign(message: message, privateKey: prvKey)
                 let cacaoSignature = CacaoSignature(t: "eip191", s: signature)
                 try! await wallet.respond(.success(RespondParams(id: id, signature: cacaoSignature)))
             }
@@ -88,14 +88,15 @@ final class AuthTests: XCTestCase {
         try! await wallet.pair(uri: uri)
         wallet.authRequestPublisher.sink { [unowned self] (id, message) in
             Task(priority: .high) {
-                let invalidSignature = "43effc459956b57fcd9f3dac6c675f9cee88abf21acab7305e8e32aa0303a883b06dcbd956279a7a2ca21ffa882ff55cc22e8ab8ec0f3fe90ab45f306938cfa1b"
+                let invalidSignature = "438effc459956b57fcd9f3dac6c675f9cee88abf21acab7305e8e32aa0303a883b06dcbd956279a7a2ca21ffa882ff55cc22e8ab8ec0f3fe90ab45f306938cfa1b"
                 let cacaoSignature = CacaoSignature(t: "eip191", s: invalidSignature)
                 try! await wallet.respond(.success(RespondParams(id: id, signature: cacaoSignature)))
             }
         }
         .store(in: &publishers)
         app.authResponsePublisher.sink { (id, result) in
-            guard case .success = result else { XCTFail(); return }
+            guard case .failure(let error) = result else { XCTFail(); return }
+            // TODO - complete after reason codes are merged
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
