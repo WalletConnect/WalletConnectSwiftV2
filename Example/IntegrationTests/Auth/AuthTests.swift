@@ -81,6 +81,24 @@ final class AuthTests: XCTestCase {
         wait(for: [responseExpectation], timeout: 5)
     }
 
+    func testUserRespondError() {
+        let responseExpectation = expectation(description: "error response delivered")
+        let uri = try! await app.request(RequestParams.stub())
+        try! await wallet.pair(uri: uri)
+        wallet.authRequestPublisher.sink { [unowned self] (id, message) in
+            Task(priority: .high) {
+                try! await wallet.respond(requestId: id, result: .failure(Never())
+            }
+        }
+        .store(in: &publishers)
+        app.authResponsePublisher.sink { (id, result) in
+            guard case .success = result else { XCTFail(); return }
+            responseExpectation.fulfill()
+        }
+        .store(in: &publishers)
+        wait(for: [responseExpectation], timeout: 5)
+    }
+
     func testRespondSignatureVerificationFailed() async {
         let responseExpectation = expectation(description: "invalid signature response delivered")
         let uri = try! await app.request(RequestParams.stub())
