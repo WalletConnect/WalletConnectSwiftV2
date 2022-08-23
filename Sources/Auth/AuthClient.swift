@@ -4,6 +4,7 @@ import WalletConnectUtils
 import WalletConnectPairing
 import WalletConnectRelay
 
+
 public class AuthClient {
     enum Errors: Error {
         case malformedPairingURI
@@ -87,9 +88,13 @@ public class AuthClient {
         try await appRequestService.request(params: params, topic: topic)
     }
 
-    public func respond(requestId: RPCID, result: Result<CacaoSignature, Never>) async throws {
+    public func respond(requestId: RPCID, signature: CacaoSignature) async throws {
         guard let account = account else { throw Errors.unknownWalletAddress }
-        try await walletRespondService.respond(requestId: requestId, result: result, account: account)
+        try await walletRespondService.respond(requestId: requestId, signature: signature, account: account)
+    }
+
+    public func reject(requestId: RPCID) async throws {
+        try await walletRespondService.respondError(requestId: requestId)
     }
 
     public func getPendingRequests() throws -> [AuthRequest] {

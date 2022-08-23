@@ -69,7 +69,7 @@ final class AuthTests: XCTestCase {
             Task(priority: .high) {
                 let signature = try! MessageSigner().sign(message: message, privateKey: prvKey)
                 let cacaoSignature = CacaoSignature(t: "eip191", s: signature)
-                try! await wallet.respond(requestId: id, result: .success(cacaoSignature))
+                try! await wallet.respond(requestId: id, signature: cacaoSignature)
             }
         }
         .store(in: &publishers)
@@ -81,18 +81,19 @@ final class AuthTests: XCTestCase {
         wait(for: [responseExpectation], timeout: 5)
     }
 
-    func testUserRespondError() {
+    func testUserRespondError() async {
         let responseExpectation = expectation(description: "error response delivered")
         let uri = try! await app.request(RequestParams.stub())
         try! await wallet.pair(uri: uri)
         wallet.authRequestPublisher.sink { [unowned self] (id, message) in
             Task(priority: .high) {
-                try! await wallet.respond(requestId: id, result: .failure(Never())
+                try! await wallet.reject(requestId: id)
             }
         }
         .store(in: &publishers)
         app.authResponsePublisher.sink { (id, result) in
-            guard case .success = result else { XCTFail(); return }
+            guard case .failure(let error) = result else { XCTFail(); return }
+            XCTAssertEqual(error, .userRejeted)
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
@@ -107,7 +108,7 @@ final class AuthTests: XCTestCase {
             Task(priority: .high) {
                 let invalidSignature = "438effc459956b57fcd9f3dac6c675f9cee88abf21acab7305e8e32aa0303a883b06dcbd956279a7a2ca21ffa882ff55cc22e8ab8ec0f3fe90ab45f306938cfa1b"
                 let cacaoSignature = CacaoSignature(t: "eip191", s: invalidSignature)
-                try! await wallet.respond(requestId: id, result: .success(cacaoSignature))
+                try! await wallet.respond(requestId: id, signature: cacaoSignature)
             }
         }
         .store(in: &publishers)

@@ -23,16 +23,7 @@ actor WalletRespondService {
         self.rpcHistory = rpcHistory
     }
 
-    func respond(requestId: RPCID, result: Result<CacaoSignature, Never>, account: Account) async throws {
-        switch result {
-        case .success(let signature):
-            try await respond(requestId: requestId, signature: signature, account: account)
-        case .failure:
-            try await respondError(requestId: requestId)
-        }
-    }
-
-    private func respond(requestId: RPCID, signature: CacaoSignature, account: Account) async throws {
+    func respond(requestId: RPCID, signature: CacaoSignature, account: Account) async throws {
         let authRequestParams = try getAuthRequestParams(requestId: requestId)
         let (topic, keys) = try generateAgreementKeys(requestParams: authRequestParams)
 
@@ -44,7 +35,7 @@ actor WalletRespondService {
         try await networkingInteractor.respond(topic: topic, response: response, tag: AuthResponseParams.tag, envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
     }
 
-    private func respondError(requestId: RPCID) async throws {
+    func respondError(requestId: RPCID) async throws {
         let authRequestParams = try getAuthRequestParams(requestId: requestId)
         let (topic, keys) = try generateAgreementKeys(requestParams: authRequestParams)
 
