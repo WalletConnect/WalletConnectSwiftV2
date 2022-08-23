@@ -3,7 +3,7 @@ import Chat
 
 final class Application {
 
-    let chatService: ChatService = {
+    lazy var chatService: ChatService = {
         return ChatService(client: ChatFactory.create())
     }()
 

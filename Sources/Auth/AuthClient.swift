@@ -11,8 +11,8 @@ public class AuthClient {
         case unknownWalletAddress
         case noPairingMatchingTopic
     }
-    private var authRequestPublisherSubject = PassthroughSubject<(id: RPCID, message: String), Never>()
-    public var authRequestPublisher: AnyPublisher<(id: RPCID, message: String), Never> {
+    private var authRequestPublisherSubject = PassthroughSubject<AuthRequest, Never>()
+    public var authRequestPublisher: AnyPublisher<AuthRequest, Never> {
         authRequestPublisherSubject.eraseToAnyPublisher()
     }
 
@@ -116,8 +116,8 @@ public class AuthClient {
             authResponsePublisherSubject.send((id, result))
         }
 
-        walletRequestSubscriber.onRequest = { [unowned self] (id, message) in
-            authRequestPublisherSubject.send((id, message))
+        walletRequestSubscriber.onRequest = { [unowned self] request in
+            authRequestPublisherSubject.send(request)
         }
     }
 }

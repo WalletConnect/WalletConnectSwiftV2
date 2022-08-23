@@ -9,9 +9,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private var configurators: [Configurator] {
         return [
             MigrationConfigurator(app: app),
+            ThirdPartyConfigurator(),
             ApplicationConfigurator(app: app),
             AppearanceConfigurator(),
-            ThirdPartyConfigurator()
         ]
     }
 

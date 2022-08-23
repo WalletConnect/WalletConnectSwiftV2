@@ -11,7 +11,7 @@ class WalletRequestSubscriber {
     private let address: String?
     private var publishers = [AnyCancellable]()
     private let messageFormatter: SIWEMessageFormatting
-    var onRequest: ((_ id: RPCID, _ message: String) -> Void)?
+    var onRequest: ((AuthRequest) -> Void)?
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
@@ -41,7 +41,7 @@ class WalletRequestSubscriber {
 
             let message = messageFormatter.formatMessage(from: authRequestParams.payloadParams, address: address)
 
-            onRequest?(requestId, message)
+            onRequest?(.init(id: requestId, message: message))
         }.store(in: &publishers)
     }
 
