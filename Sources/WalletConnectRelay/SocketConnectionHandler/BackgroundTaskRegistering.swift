@@ -25,9 +25,11 @@ class BackgroundTaskRegistrar: BackgroundTaskRegistering {
     }
 
     func invalidate() {
+#if os(iOS)
         if backgroundTaskID != .invalid {
             UIApplication.shared.endBackgroundTask(backgroundTaskID)
             backgroundTaskID = .invalid
         }
+#endif
     }
 }
