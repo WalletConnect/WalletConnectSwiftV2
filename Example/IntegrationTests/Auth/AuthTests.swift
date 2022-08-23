@@ -35,7 +35,6 @@ final class AuthTests: XCTestCase {
         wait(for: [expectation], timeout: 5)
     }
 
-
     func makeClient(prefix: String, account: Account? = nil) -> AuthClient {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let relayHost = "relay.walletconnect.com"
@@ -70,7 +69,7 @@ final class AuthTests: XCTestCase {
             Task(priority: .high) {
                 let signature = try! MessageSigner().sign(message: message, privateKey: prvKey)
                 let cacaoSignature = CacaoSignature(t: "eip191", s: signature)
-                try! await wallet.respond(.success(RespondParams(id: id, signature: cacaoSignature)))
+                try! await wallet.respond(requestId: id, result: .success(cacaoSignature))
             }
         }
         .store(in: &publishers)
@@ -79,10 +78,10 @@ final class AuthTests: XCTestCase {
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
-        wait(for: [responseExpectation], timeout: 2)
+        wait(for: [responseExpectation], timeout: 5)
     }
 
-    func testRespondInvalidSignature() async {
+    func testRespondSignatureVerificationFailed() async {
         let responseExpectation = expectation(description: "invalid signature response delivered")
         let uri = try! await app.request(RequestParams.stub())
         try! await wallet.pair(uri: uri)
@@ -90,13 +89,13 @@ final class AuthTests: XCTestCase {
             Task(priority: .high) {
                 let invalidSignature = "438effc459956b57fcd9f3dac6c675f9cee88abf21acab7305e8e32aa0303a883b06dcbd956279a7a2ca21ffa882ff55cc22e8ab8ec0f3fe90ab45f306938cfa1b"
                 let cacaoSignature = CacaoSignature(t: "eip191", s: invalidSignature)
-                try! await wallet.respond(.success(RespondParams(id: id, signature: cacaoSignature)))
+                try! await wallet.respond(requestId: id, result: .success(cacaoSignature))
             }
         }
         .store(in: &publishers)
         app.authResponsePublisher.sink { (id, result) in
             guard case .failure(let error) = result else { XCTFail(); return }
-            // TODO - complete after reason codes are merged
+            XCTAssertEqual(error, .signatureVerificationFailed)
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
