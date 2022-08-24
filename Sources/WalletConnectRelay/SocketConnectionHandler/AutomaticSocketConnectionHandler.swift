@@ -36,7 +36,6 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
         }
 
         appStateObserver.onWillEnterForeground = { [unowned self] in
-            backgroundTaskRegistrar.invalidate()
             socket.connect()
         }
     }
