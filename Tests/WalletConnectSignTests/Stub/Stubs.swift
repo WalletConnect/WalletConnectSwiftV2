@@ -5,16 +5,6 @@ import WalletConnectUtils
 import TestingUtils
 import WalletConnectPairing
 
-extension AppMetadata {
-    static func stub() -> AppMetadata {
-        AppMetadata(
-            name: "Wallet Connect",
-            description: "A protocol to connect blockchain wallets to dapps.",
-            url: "https://walletconnect.com/",
-            icons: []
-        )
-    }
-}
 
 extension Pairing {
     static func stub(expiryDate: Date = Date(timeIntervalSinceNow: 10000), topic: String = String.generateTopic()) -> Pairing {
