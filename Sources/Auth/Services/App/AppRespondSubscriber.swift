@@ -49,7 +49,7 @@ class AppRespondSubscriber {
             else { self.onResponse?(requestId, .failure(.messageCompromised)); return }
 
             guard let _ = try? signatureVerifier.verify(signature: cacao.signature.s, message: message, address: address)
-            else { self.onResponse?(requestId, .failure(.messageVerificationFailed)); return }
+            else { self.onResponse?(requestId, .failure(.signatureVerificationFailed)); return }
 
             onResponse?(requestId, .success(cacao))
 

@@ -1,9 +1,11 @@
 import Foundation
 import Web3
 
-struct Signer {
+public struct Signer {
 
     typealias Signature = (v: UInt, r: [UInt8], s: [UInt8])
+
+    public init() {}
 
     func sign(message: Data, with key: Data) throws -> Data {
         let prefixed = prefixed(message: message)

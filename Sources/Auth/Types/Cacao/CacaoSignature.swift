@@ -1,7 +1,13 @@
 import Foundation
 
 public struct CacaoSignature: Codable, Equatable {
-    public let t: String
-    public let s: String
-    public let m: String? = nil
+    let t: String
+    let s: String
+    let m: String?
+
+    public init(t: String, s: String, m: String? = nil) {
+        self.t = t
+        self.s = s
+        self.m = m
+    }
 }

@@ -5,7 +5,7 @@ public enum AuthError: Codable, Equatable, Error {
     case malformedResponseParams
     case malformedRequestParams
     case messageCompromised
-    case messageVerificationFailed
+    case signatureVerificationFailed
 }
 
 extension AuthError: Reason {
@@ -20,7 +20,7 @@ extension AuthError: Reason {
             return 12002
         case .messageCompromised:
             return 12003
-        case .messageVerificationFailed:
+        case .signatureVerificationFailed:
             return 12004
         }
     }
@@ -35,7 +35,7 @@ extension AuthError: Reason {
             return "Request params malformed"
         case .messageCompromised:
             return "Original message compromised"
-        case .messageVerificationFailed:
+        case .signatureVerificationFailed:
             return "Message verification failed"
         }
     }
