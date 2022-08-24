@@ -47,6 +47,10 @@ public struct RPCResponse: Equatable {
         self.init(id: id, outcome: .success(AnyCodable(result)))
     }
 
+    public init(id: RPCID?, error: JSONRPCError) {
+        self.init(id: id, outcome: .failure(error))
+    }
+
     public init(id: Int64, error: JSONRPCError) {
         self.init(id: RPCID(id), outcome: .failure(error))
     }

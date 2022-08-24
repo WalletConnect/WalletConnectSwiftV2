@@ -15,7 +15,7 @@ runs:
       run: "xcodebuild \
         -project Example/ExampleApp.xcodeproj \ 
         -scheme WalletConnect \
-        -clonedSourcePackagesDirPath SourcePackages \
+        -clonedSourcePackagesDirPath SourcePackagesCache \
         -destination 'platform=iOS Simulator,name=iPhone 13' \
         test"
 
@@ -26,7 +26,7 @@ runs:
       run: "xcodebuild \
         -project Example/ExampleApp.xcodeproj \ 
         -scheme IntegrationTests \
-        -clonedSourcePackagesDirPath SourcePackages \
+        -clonedSourcePackagesDirPath SourcePackagesCache \
         -destination 'platform=iOS Simulator,name=iPhone 13' test"
 
     # Wallet build
@@ -36,7 +36,7 @@ runs:
       run: "xcodebuild \
        -project Example/ExampleApp.xcodeproj \
        -scheme Wallet \
-       -clonedSourcePackagesDirPath SourcePackages \
+       -clonedSourcePackagesDirPath SourcePackagesCache \
        -sdk iphonesimulator"
 
     # DApp build
@@ -46,7 +46,7 @@ runs:
       run: "xcodebuild \
         -project Example/ExampleApp.xcodeproj \
         -scheme DApp \
-        -clonedSourcePackagesDirPath SourcePackages \
+        -clonedSourcePackagesDirPath SourcePackagesCache \
         -sdk iphonesimulator"
 
     # UI tests
@@ -56,6 +56,6 @@ runs:
       run: "xcodebuild \
         -project Example/ExampleApp.xcodeproj \
         -scheme UITests \
-        -clonedSourcePackagesDirPath SourcePackages \
+        -clonedSourcePackagesDirPath SourcePackagesCache \
         -destination 'platform=iOS Simulator,name=iPhone 13' test"
       continue-on-error: true

@@ -280,7 +280,7 @@ private extension ApproveEngine {
 
     func handleSessionProposeRequest(payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) throws {
         logger.debug("Received Session Proposal")
-        do { try Namespace.validate(proposal.requiredNamespaces) } catch { throw Errors.respondError(payload: payload, reason: .invalidUpdateNamespaceRequest) }
+        do { try Namespace.validate(proposal.requiredNamespaces) } catch { throw Errors.respondError(payload: payload, reason: .invalidUpdateRequest) }
         proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
         onSessionProposal?(proposal.publicRepresentation())
     }
@@ -290,7 +290,7 @@ private extension ApproveEngine {
         logger.debug("Did receive session settle request")
 
         guard let proposedNamespaces = settlingProposal?.requiredNamespaces
-        else { throw Errors.respondError(payload: payload, reason: .invalidUpdateNamespaceRequest) }
+        else { throw Errors.respondError(payload: payload, reason: .invalidUpdateRequest) }
 
         settlingProposal = nil
 

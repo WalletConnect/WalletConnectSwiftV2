@@ -13,6 +13,7 @@ protocol NetworkInteracting {
     func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws
     func requestNetworkAck(_ request: RPCRequest, topic: String, tag: Int) async throws 
     func respond(topic: String, response: RPCResponse, tag: Int, envelopeType: Envelope.EnvelopeType) async throws
+    func respondError(topic: String, requestId: RPCID, tag: Int, reason: Reason, envelopeType: Envelope.EnvelopeType) async throws
 }
 
 extension NetworkInteracting {
@@ -22,18 +23,22 @@ extension NetworkInteracting {
 }
 
 class NetworkingInteractor: NetworkInteracting {
+    private var publishers = Set<AnyCancellable>()
     private let relayClient: RelayClient
     private let serializer: Serializing
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
+
+    private let requestPublisherSubject = PassthroughSubject<RequestSubscriptionPayload, Never>()
     var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
-    private let requestPublisherSubject = PassthroughSubject<RequestSubscriptionPayload, Never>()
+
+    private let responsePublisherSubject = PassthroughSubject<ResponseSubscriptionPayload, Never>()
     var responsePublisher: AnyPublisher<ResponseSubscriptionPayload, Never> {
         responsePublisherSubject.eraseToAnyPublisher()
     }
-    private let responsePublisherSubject = PassthroughSubject<ResponseSubscriptionPayload, Never>()
+
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
     init(relayClient: RelayClient,
@@ -45,9 +50,10 @@ class NetworkingInteractor: NetworkInteracting {
         self.rpcHistory = rpcHistory
         self.logger = logger
         self.socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
-        relayClient.onMessage = { [unowned self] topic, message in
+        relayClient.messagePublisher.sink { [unowned self] (topic, message) in
             manageSubscription(topic, message)
         }
+        .store(in: &publishers)
     }
 
     func subscribe(topic: String) async throws {
@@ -55,7 +61,13 @@ class NetworkingInteractor: NetworkInteracting {
     }
 
     func unsubscribe(topic: String) {
-        fatalError("not implemented")
+        relayClient.unsubscribe(topic: topic) { [unowned self] error in
+            if let error = error {
+                logger.error(error)
+            } else {
+                rpcHistory.deleteAll(forTopic: topic)
+            }
+        }
     }
 
     func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {
@@ -91,11 +103,18 @@ class NetworkingInteractor: NetworkInteracting {
         try await relayClient.publish(topic: topic, payload: message, tag: tag)
     }
 
+    func respondError(topic: String, requestId: RPCID, tag: Int, reason: Reason, envelopeType: Envelope.EnvelopeType) async throws {
+        let error = JSONRPCError(code: reason.code, message: reason.message)
+        let response = RPCResponse(id: requestId, error: error)
+        let message = try! serializer.serialize(topic: topic, encodable: response, envelopeType: envelopeType)
+        try await relayClient.publish(topic: topic, payload: message, tag: tag)
+    }
+
     private func manageSubscription(_ topic: String, _ encodedEnvelope: String) {
         if let deserializedJsonRpcRequest: RPCRequest = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleRequest(topic: topic, request: deserializedJsonRpcRequest)
-        } else if let deserializedJsonRpcResponse: RPCResponse = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
-            handleResponse(response: deserializedJsonRpcResponse)
+        } else if let response: RPCResponse = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
+            handleResponse(response: response)
         } else {
             logger.debug("Networking Interactor - Received unknown object type from networking relay")
         }

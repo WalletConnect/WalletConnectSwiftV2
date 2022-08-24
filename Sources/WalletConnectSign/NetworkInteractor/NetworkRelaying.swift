@@ -5,7 +5,7 @@ import Combine
 extension RelayClient: NetworkRelaying {}
 
 protocol NetworkRelaying {
-    var onMessage: ((_ topic: String, _ message: String) -> Void)? {get set}
+    var messagePublisher: AnyPublisher<(topic: String, message: String), Never> { get }
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> { get }
     func connect() throws
     func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws

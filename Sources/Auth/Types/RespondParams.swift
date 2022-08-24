@@ -1,7 +1,11 @@
 import Foundation
 
-struct RespondParams {
-    let id: Int64
-    let topic: String
+public struct RespondParams: Equatable {
+    let id: RPCID
     let signature: CacaoSignature
+
+    public init(id: RPCID, signature: CacaoSignature) {
+        self.id = id
+        self.signature = signature
+    }
 }

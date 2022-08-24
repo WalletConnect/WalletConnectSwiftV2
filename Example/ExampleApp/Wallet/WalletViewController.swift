@@ -1,6 +1,7 @@
 import UIKit
 import WalletConnectSign
 import WalletConnectUtils
+import WalletConnectRouter
 import Web3
 import CryptoSwift
 import Combine
@@ -23,6 +24,7 @@ final class WalletViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Wallet"
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Back", style: .plain, target: self, action: #selector(goBack))
         walletView.scanButton.addTarget(self, action: #selector(showScanner), for: .touchUpInside)
         walletView.pasteButton.addTarget(self, action: #selector(showTextInput), for: .touchUpInside)
 
@@ -46,6 +48,11 @@ final class WalletViewController: UIViewController {
             self?.pairClient(uri: inputText)
         }
         present(alert, animated: true)
+    }
+
+    @objc
+    private func goBack() {
+        Router.goBack()
     }
 
     private func showSessionProposal(_ proposal: Proposal) {
@@ -222,7 +229,7 @@ extension WalletViewController: ProposalViewControllerDelegate {
     func didRejectSession() {
         let proposal = currentProposal!
         currentProposal = nil
-        reject(proposalId: proposal.id, reason: .disapprovedChains)
+        reject(proposalId: proposal.id, reason: .userRejectedChains)
     }
 }
 

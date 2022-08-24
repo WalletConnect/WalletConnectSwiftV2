@@ -2,16 +2,27 @@ import Foundation
 import UIKit
 
 class SelectChainView: UIView {
+
     let tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .insetGrouped)
         tableView.backgroundColor = .tertiarySystemBackground
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "chain")
         return tableView
     }()
+
     let connectButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Connect", for: .normal)
         button.backgroundColor = .systemBlue
+        button.tintColor = .white
+        button.layer.cornerRadius = 8
+        return button
+    }()
+
+    let openWallet: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Open Wallet", for: .normal)
+        button.backgroundColor = .systemFill
         button.tintColor = .white
         button.layer.cornerRadius = 8
         return button
@@ -23,6 +34,7 @@ class SelectChainView: UIView {
         backgroundColor = .systemBackground
         addSubview(tableView)
         addSubview(connectButton)
+        addSubview(openWallet)
 
         subviews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
 
@@ -35,7 +47,12 @@ class SelectChainView: UIView {
             connectButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -16),
             connectButton.centerXAnchor.constraint(equalTo: safeAreaLayoutGuide.centerXAnchor),
             connectButton.heightAnchor.constraint(equalToConstant: 44),
-            connectButton.widthAnchor.constraint(equalToConstant: 120)
+            connectButton.widthAnchor.constraint(equalToConstant: 120),
+
+            openWallet.bottomAnchor.constraint(equalTo: connectButton.topAnchor, constant: -16),
+            openWallet.centerXAnchor.constraint(equalTo: safeAreaLayoutGuide.centerXAnchor),
+            openWallet.heightAnchor.constraint(equalToConstant: 44),
+            openWallet.widthAnchor.constraint(equalToConstant: 120)
         ])
     }
 

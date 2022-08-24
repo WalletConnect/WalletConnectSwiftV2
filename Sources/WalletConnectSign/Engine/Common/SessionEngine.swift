@@ -153,7 +153,7 @@ private extension SessionEngine {
     func onSessionDelete(_ payload: WCRequestSubscriptionPayload, deleteParams: SessionType.DeleteParams) throws {
         let topic = payload.topic
         guard sessionStore.hasSession(forTopic: topic) else {
-            throw Errors.respondError(payload: payload, reason: .noContextWithTopic(context: .session, topic: topic))
+            throw Errors.respondError(payload: payload, reason: .noSessionForTopic)
         }
         sessionStore.delete(topic: topic)
         networkingInteractor.unsubscribe(topic: topic)
@@ -172,11 +172,11 @@ private extension SessionEngine {
             chainId: payloadParams.chainId)
 
         guard let session = sessionStore.getSession(forTopic: topic) else {
-            throw Errors.respondError(payload: payload, reason: .noContextWithTopic(context: .session, topic: topic))
+            throw Errors.respondError(payload: payload, reason: .noSessionForTopic)
         }
         let chain = request.chainId
         guard session.hasNamespace(for: chain) else {
-            throw Errors.respondError(payload: payload, reason: .unauthorizedTargetChain(chain.absoluteString))
+            throw Errors.respondError(payload: payload, reason: .unauthorizedChain)
         }
         guard session.hasPermission(forMethod: request.method, onChain: chain) else {
             throw Errors.respondError(payload: payload, reason: .unauthorizedMethod(request.method))
@@ -192,7 +192,7 @@ private extension SessionEngine {
         let event = eventParams.event
         let topic = payload.topic
         guard let session = sessionStore.getSession(forTopic: topic) else {
-            throw Errors.respondError(payload: payload, reason: .noContextWithTopic(context: .session, topic: payload.topic))
+            throw Errors.respondError(payload: payload, reason: .noSessionForTopic)
         }
         guard
             session.peerIsController,

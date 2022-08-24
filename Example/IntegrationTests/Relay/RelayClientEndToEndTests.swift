@@ -67,14 +67,16 @@ final class RelayClientEndToEndTests: XCTestCase {
         expectationA.assertForOverFulfill = false
         expectationB.assertForOverFulfill = false
 
-        relayA.onMessage = { topic, payload in
+        relayA.messagePublisher.sink { topic, payload in
             (subscriptionATopic, subscriptionAPayload) = (topic, payload)
             expectationA.fulfill()
-        }
-        relayB.onMessage = { topic, payload in
+        }.store(in: &publishers)
+
+        relayB.messagePublisher.sink { topic, payload in
             (subscriptionBTopic, subscriptionBPayload) = (topic, payload)
             expectationB.fulfill()
-        }
+        }.store(in: &publishers)
+
         relayA.socketConnectionStatusPublisher.sink {  _ in
             relayA.publish(topic: randomTopic, payload: payloadA, tag: 0, onNetworkAcknowledge: { error in
                 XCTAssertNil(error)

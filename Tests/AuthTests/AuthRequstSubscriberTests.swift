@@ -8,16 +8,17 @@ import JSONRPC
 
 class AuthRequstSubscriberTests: XCTestCase {
     var networkingInteractor: NetworkingInteractorMock!
-    var sut: AuthRequestSubscriber!
+    var sut: WalletRequestSubscriber!
     var messageFormatter: SIWEMessageFormatterMock!
     let defaultTimeout: TimeInterval = 0.01
 
     override func setUp() {
         networkingInteractor = NetworkingInteractorMock()
         messageFormatter = SIWEMessageFormatterMock()
-        sut = AuthRequestSubscriber(networkingInteractor: networkingInteractor,
-                                   logger: ConsoleLoggerMock(),
-                                    messageFormatter: messageFormatter, address: "")
+        sut = WalletRequestSubscriber(networkingInteractor: networkingInteractor,
+                                      logger: ConsoleLoggerMock(),
+                                      kms: KeyManagementServiceMock(),
+                                      messageFormatter: messageFormatter, address: "")
     }
 
     func testSubscribeRequest() {
