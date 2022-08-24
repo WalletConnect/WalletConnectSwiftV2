@@ -9,7 +9,7 @@ struct NetworkingInteractorMock: NetworkInteracting {
     var responsePublisher: AnyPublisher<ResponseSubscriptionPayload, Never> {
         responsePublisherSubject.eraseToAnyPublisher()
     }
-    private let responsePublisherSubject = PassthroughSubject<ResponseSubscriptionPayload, Never>()
+    let responsePublisherSubject = PassthroughSubject<ResponseSubscriptionPayload, Never>()
 
     let requestPublisherSubject = PassthroughSubject<RequestSubscriptionPayload, Never>()
     var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {
