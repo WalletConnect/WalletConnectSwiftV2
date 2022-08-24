@@ -28,16 +28,23 @@ class AppRespondSubscriber {
 
     private func subscribeForResponse() {
         networkingInteractor.responsePublisher.sink { [unowned self] subscriptionPayload in
+            let response = subscriptionPayload.response
             guard
-                let requestId = subscriptionPayload.response.id,
+                let requestId = response.id,
                 let request = rpcHistory.get(recordId: requestId)?.request,
                 let requestParams = request.params, request.method == "wc_authRequest"
             else { return }
 
             networkingInteractor.unsubscribe(topic: subscriptionPayload.topic)
 
+            if let errorResponse = response.error,
+               let error = AuthError(code: errorResponse.code) {
+                onResponse?(requestId, .failure(error))
+                return
+            }
+
             guard
-                let cacao = try? subscriptionPayload.response.result?.get(Cacao.self),
+                let cacao = try? response.result?.get(Cacao.self),
                 let address = try? DIDPKH(iss: cacao.payload.iss).account.address,
                 let message = try? messageFormatter.formatMessage(from: cacao.payload)
             else { self.onResponse?(requestId, .failure(.malformedResponseParams)); return }

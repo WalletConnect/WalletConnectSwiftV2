@@ -10,6 +10,23 @@ public enum AuthError: Codable, Equatable, Error {
 
 extension AuthError: Reason {
 
+    init?(code: Int) {
+        switch code {
+        case Self.userRejeted.code:
+            self = .userRejeted
+        case Self.malformedResponseParams.code:
+            self = .malformedResponseParams
+        case Self.malformedRequestParams.code:
+            self = .malformedRequestParams
+        case Self.messageCompromised.code:
+            self = .messageCompromised
+        case Self.signatureVerificationFailed.code:
+            self = .signatureVerificationFailed
+        default:
+            return nil
+        }
+    }
+
     public var code: Int {
         switch self {
         case .userRejeted:
