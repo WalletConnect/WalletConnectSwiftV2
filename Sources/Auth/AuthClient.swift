@@ -66,6 +66,13 @@ public class AuthClient {
         setUpPublishers()
     }
 
+    /// For wallet to establish a pairing and receive an authentication request
+    /// Wallet should call this function in order to accept peer's pairing proposal and be able to subscribe for future authentication request.
+    /// - Parameter uri: Pairing URI that is commonly presented as a QR code by a dapp or delivered with universal linking.
+    ///
+    /// Throws Error:
+    /// - When URI is invalid format or missing params
+    /// - When topic is already in use
     public func pair(uri: String) async throws {
         guard let pairingURI = WalletConnectURI(string: uri) else {
             throw Errors.malformedPairingURI
@@ -73,6 +80,10 @@ public class AuthClient {
         try await walletPairService.pair(pairingURI)
     }
 
+    /// For a dapp to send an authentication request to a wallet
+    /// - Parameter params: Set of parameters required to request authentication
+    ///
+    /// - Returns: Pairing URI that should be shared with wallet out of bound. Common way is to present it as a QR code.
     public func request(_ params: RequestParams) async throws -> String {
         logger.debug("Requesting Authentication")
         let uri = try await appPairService.create()
@@ -80,6 +91,9 @@ public class AuthClient {
         return uri.absoluteString
     }
 
+    /// For a dapp to send an authentication request to a wallet
+    /// - Parameter params: Set of parameters required to request authentication
+    /// - Parameter topic: Pairing topic that wallet already subscribes for
     public func request(_ params: RequestParams, topic: String) async throws {
         logger.debug("Requesting Authentication on existing pairing")
         guard pairingStorage.hasPairing(forTopic: topic) else {
