@@ -5,6 +5,7 @@ import UIKit
 
 protocol BackgroundTaskRegistering {
     func register(name: String, completion: @escaping () -> Void)
+    func invalidate()
 }
 
 class BackgroundTaskRegistrar: BackgroundTaskRegistering {
@@ -19,6 +20,15 @@ class BackgroundTaskRegistrar: BackgroundTaskRegistering {
             UIApplication.shared.endBackgroundTask(backgroundTaskID)
             backgroundTaskID = .invalid
             completion()
+        }
+#endif
+    }
+
+    func invalidate() {
+#if os(iOS)
+        if backgroundTaskID != .invalid {
+            UIApplication.shared.endBackgroundTask(backgroundTaskID)
+            backgroundTaskID = .invalid
         }
 #endif
     }
