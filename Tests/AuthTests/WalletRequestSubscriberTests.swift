@@ -6,7 +6,7 @@ import WalletConnectUtils
 @testable import TestingUtils
 import JSONRPC
 
-class AuthRequstSubscriberTests: XCTestCase {
+class WalletRequestSubscriberTests: XCTestCase {
     var networkingInteractor: NetworkingInteractorMock!
     var sut: WalletRequestSubscriber!
     var messageFormatter: SIWEMessageFormatterMock!
