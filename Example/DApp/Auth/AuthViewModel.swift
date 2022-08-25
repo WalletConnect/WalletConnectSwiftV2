@@ -4,14 +4,29 @@ import Auth
 
 final class AuthViewModel: ObservableObject {
 
+    enum SigningState {
+        case none
+        case signed(Cacao)
+        case error(Error)
+    }
+
+    private var disposeBag = Set<AnyCancellable>()
+
+    @Published var state: SigningState = .none
     @Published var uri: String?
 
     var qrImage: UIImage? {
         return uri.map { QRCodeGenerator.generateQRCode(from: $0) }
     }
 
+    init() {
+        setupSubscriptions()
+    }
+
     @MainActor
     func setupInitialState() async throws {
+        state = .none
+        uri = nil
         uri = try await Auth.instance.request(.stub())
     }
 
@@ -21,6 +36,20 @@ final class AuthViewModel: ObservableObject {
 
     func walletDidPressed() {
         
+    }
+}
+
+private extension AuthViewModel {
+
+    func setupSubscriptions() {
+        Auth.instance.authResponsePublisher.sink { [weak self] (id, result) in
+            switch result {
+            case .success(let cacao):
+                self?.state = .signed(cacao)
+            case .failure(let error):
+                self?.state = .error(error)
+            }
+        }.store(in: &disposeBag)
     }
 }
 

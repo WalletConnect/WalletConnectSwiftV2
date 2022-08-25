@@ -21,6 +21,10 @@ final class WalletPresenter: ObservableObject {
             try await self.interactor.pair(uri: uri)
         }
     }
+
+    func didScanPairingURI() {
+        
+    }
 }
 
 // MARK: SceneViewModel

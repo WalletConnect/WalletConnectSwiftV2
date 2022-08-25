@@ -19,6 +19,18 @@ final class AuthRequestPresenter: ObservableObject {
     var message: String {
         return request.message
     }
+
+    @MainActor
+    func approvePressed() async throws {
+        try await interactor.approve(request: request)
+        router.dismiss()
+    }
+
+    @MainActor
+    func rejectPressed() async throws {
+        try await interactor.reject(request: request)
+        router.dismiss()
+    }
 }
 
 // MARK: SceneViewModel

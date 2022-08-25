@@ -9,4 +9,8 @@ final class AuthRequestRouter {
     init(app: Application) {
         self.app = app
     }
+
+    func dismiss() {
+        viewController.navigationController?.dismiss()
+    }
 }

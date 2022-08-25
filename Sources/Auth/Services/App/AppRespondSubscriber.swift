@@ -55,7 +55,7 @@ class AppRespondSubscriber {
             guard messageFormatter.formatMessage(from: requestPayload.payloadParams, address: address) == message
             else { self.onResponse?(requestId, .failure(.messageCompromised)); return }
 
-            guard let _ = try? signatureVerifier.verify(signature: cacao.signature.s, message: message, address: address)
+            guard let _ = try? signatureVerifier.verify(signature: cacao.signature, message: message, address: address)
             else { self.onResponse?(requestId, .failure(.signatureVerificationFailed)); return }
 
             onResponse?(requestId, .success(cacao))

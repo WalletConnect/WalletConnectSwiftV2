@@ -20,7 +20,7 @@ struct AuthRequestView: View {
             .cornerRadius(10)
 
             HStack(spacing: 16.0) {
-                Button(action: {  }, label: {
+                Button(action: { Task(priority: .userInitiated) { try await presenter.rejectPressed() }}, label: {
                     HStack(spacing: 8.0) {
                         Text("Reject")
                             .foregroundColor(.w_foreground)
@@ -33,7 +33,7 @@ struct AuthRequestView: View {
                         .foregroundColor(.w_purpleForeground)
                 )
 
-                Button(action: {  }, label: {
+                Button(action: { Task(priority: .userInitiated) { try await presenter.approvePressed() }}, label: {
                     HStack(spacing: 8.0) {
                         Text("Approve")
                             .foregroundColor(.w_foreground)

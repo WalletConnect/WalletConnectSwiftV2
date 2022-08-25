@@ -12,8 +12,10 @@ struct AuthView: View {
             Image(uiImage: viewModel.qrImage ?? UIImage())
                 .interpolation(.none)
                 .resizable()
-                .aspectRatio(contentMode: .fill)
                 .frame(width: 300, height: 300)
+
+            signingLabel()
+                .frame(maxWidth: .infinity)
 
             Spacer()
 
@@ -27,6 +29,58 @@ struct AuthView: View {
         .onAppear { Task(priority: .userInitiated) {
             try await viewModel.setupInitialState()
         }}
+    }
+
+    @ViewBuilder
+    private func signingLabel() -> some View {
+        switch viewModel.state {
+        case .error(let error):
+            SigningLabel(state: .error(error.localizedDescription))
+                .frame(height: 50)
+        case .signed:
+            SigningLabel(state: .signed)
+                .frame(height: 50)
+        case .none:
+            Spacer().frame(height: 50)
+        }
+    }
+}
+
+struct SigningLabel: View {
+    enum State {
+        case signed
+        case error(String)
+
+        var color: Color {
+            switch self {
+            case .signed: return .green.opacity(0.6)
+            case .error: return .red.opacity(0.6)
+            }
+        }
+
+        var text: String {
+            switch self {
+            case .signed:
+                return "Authenticated"
+            case .error:
+                return "Authenticion error"
+            }
+        }
+    }
+
+    let state: State
+
+    var body: some View {
+        VStack {
+            Text(state.text)
+                .multilineTextAlignment(.center)
+                .foregroundColor(.white)
+                .font(.system(size: 14, weight: .semibold))
+                .padding(16.0)
+        }
+        .fixedSize(horizontal: true, vertical: false)
+        .background(state.color)
+        .cornerRadius(4.0)
     }
 }
 
