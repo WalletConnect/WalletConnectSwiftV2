@@ -12,6 +12,8 @@ final class WalletRouter {
     }
 
     func present(request: AuthRequest) {
-        AuthRequestModule.create(app: app, request: request).present(from: viewController)
+        AuthRequestModule.create(app: app, request: request)
+            .wrapToNavigationController()
+            .present(from: viewController)
     }
 }

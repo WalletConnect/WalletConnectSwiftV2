@@ -121,6 +121,12 @@
 		A5A4FC5E283D23CA00BBEC1E /* Array.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC5D283D23CA00BBEC1E /* Array.swift */; };
 		A5A4FC772840C12C00BBEC1E /* RegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC762840C12C00BBEC1E /* RegressionTests.swift */; };
 		A5AE354728A1A2AC0059AE8A /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = A5AE354628A1A2AC0059AE8A /* Web3 */; };
+		A5BB7F9F28B69B7100707FC6 /* SignCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BB7F9E28B69B7100707FC6 /* SignCoordinator.swift */; };
+		A5BB7FA128B69F3400707FC6 /* AuthCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BB7FA028B69F3400707FC6 /* AuthCoordinator.swift */; };
+		A5BB7FA328B6A50400707FC6 /* WalletConnectAuth in Frameworks */ = {isa = PBXBuildFile; productRef = A5BB7FA228B6A50400707FC6 /* WalletConnectAuth */; };
+		A5BB7FA728B6A5F600707FC6 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BB7FA628B6A5F600707FC6 /* AuthView.swift */; };
+		A5BB7FA928B6A5FD00707FC6 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BB7FA828B6A5FD00707FC6 /* AuthViewModel.swift */; };
+		A5BB7FAD28B6AA7D00707FC6 /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BB7FAC28B6AA7D00707FC6 /* QRCodeGenerator.swift */; };
 		A5C2020B287D9DEE007E3188 /* WelcomeModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20206287D9DEE007E3188 /* WelcomeModule.swift */; };
 		A5C2020C287D9DEE007E3188 /* WelcomePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20207287D9DEE007E3188 /* WelcomePresenter.swift */; };
 		A5C2020D287D9DEE007E3188 /* WelcomeRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20208287D9DEE007E3188 /* WelcomeRouter.swift */; };
@@ -293,6 +299,11 @@
 		A5A4FC5D283D23CA00BBEC1E /* Array.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Array.swift; sourceTree = "<group>"; };
 		A5A4FC722840C12C00BBEC1E /* UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5A4FC762840C12C00BBEC1E /* RegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegressionTests.swift; sourceTree = "<group>"; };
+		A5BB7F9E28B69B7100707FC6 /* SignCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignCoordinator.swift; sourceTree = "<group>"; };
+		A5BB7FA028B69F3400707FC6 /* AuthCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthCoordinator.swift; sourceTree = "<group>"; };
+		A5BB7FA628B6A5F600707FC6 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
+		A5BB7FA828B6A5FD00707FC6 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
+		A5BB7FAC28B6AA7D00707FC6 /* QRCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
 		A5C20206287D9DEE007E3188 /* WelcomeModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeModule.swift; sourceTree = "<group>"; };
 		A5C20207287D9DEE007E3188 /* WelcomePresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomePresenter.swift; sourceTree = "<group>"; };
 		A5C20208287D9DEE007E3188 /* WelcomeRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeRouter.swift; sourceTree = "<group>"; };
@@ -342,6 +353,7 @@
 			files = (
 				8448F1D427E4726F0000B866 /* WalletConnect in Frameworks */,
 				A5D85228286333E300DAF5C3 /* Starscream in Frameworks */,
+				A5BB7FA328B6A50400707FC6 /* WalletConnectAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -498,13 +510,11 @@
 		84CE641D27981DED00142511 /* DApp */ = {
 			isa = PBXGroup;
 			children = (
+				A5BB7FAB28B6AA7100707FC6 /* Common */,
 				84CE641E27981DED00142511 /* AppDelegate.swift */,
 				84CE642027981DED00142511 /* SceneDelegate.swift */,
-				84CE645427A29D4C00142511 /* ResponseViewController.swift */,
-				84CE6449279EA1E600142511 /* AccountRequest */,
-				84CE644C279ED2EC00142511 /* SelectChain */,
-				84CE6450279ED41D00142511 /* Connect */,
-				84CE644F279ED3FB00142511 /*  Accounts */,
+				A5BB7FAA28B6A64A00707FC6 /* Sign */,
+				A5BB7FA528B6A5DC00707FC6 /* Auth */,
 				84CE642727981DF000142511 /* Assets.xcassets */,
 				84CE642927981DF000142511 /* LaunchScreen.storyboard */,
 				84CE642C27981DF000142511 /* Info.plist */,
@@ -530,13 +540,13 @@
 			path = SelectChain;
 			sourceTree = "<group>";
 		};
-		84CE644F279ED3FB00142511 /*  Accounts */ = {
+		84CE644F279ED3FB00142511 /* Accounts */ = {
 			isa = PBXGroup;
 			children = (
 				761C649926FB7ABB004239D1 /* AccountsViewController.swift */,
 				7603D74C2703429A00DD27A2 /* AccountsView.swift */,
 			);
-			path = " Accounts";
+			path = Accounts;
 			sourceTree = "<group>";
 		};
 		84CE6450279ED41D00142511 /* Connect */ = {
@@ -886,6 +896,37 @@
 			path = Engine;
 			sourceTree = "<group>";
 		};
+		A5BB7FA528B6A5DC00707FC6 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				A5BB7FA028B69F3400707FC6 /* AuthCoordinator.swift */,
+				A5BB7FA628B6A5F600707FC6 /* AuthView.swift */,
+				A5BB7FA828B6A5FD00707FC6 /* AuthViewModel.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		A5BB7FAA28B6A64A00707FC6 /* Sign */ = {
+			isa = PBXGroup;
+			children = (
+				84CE645427A29D4C00142511 /* ResponseViewController.swift */,
+				84CE6449279EA1E600142511 /* AccountRequest */,
+				84CE644C279ED2EC00142511 /* SelectChain */,
+				84CE6450279ED41D00142511 /* Connect */,
+				84CE644F279ED3FB00142511 /* Accounts */,
+				A5BB7F9E28B69B7100707FC6 /* SignCoordinator.swift */,
+			);
+			path = Sign;
+			sourceTree = "<group>";
+		};
+		A5BB7FAB28B6AA7100707FC6 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				A5BB7FAC28B6AA7D00707FC6 /* QRCodeGenerator.swift */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
 		A5C20205287D9DB9007E3188 /* Welcome */ = {
 			isa = PBXGroup;
 			children = (
@@ -1035,6 +1076,7 @@
 			packageProductDependencies = (
 				8448F1D327E4726F0000B866 /* WalletConnect */,
 				A5D85227286333E300DAF5C3 /* Starscream */,
+				A5BB7FA228B6A50400707FC6 /* WalletConnectAuth */,
 			);
 			productName = DApp;
 			productReference = 84CE641C27981DED00142511 /* DApp.app */;
@@ -1236,11 +1278,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A5BB7FA728B6A5F600707FC6 /* AuthView.swift in Sources */,
 				84CE6430279820F600142511 /* AccountsViewController.swift in Sources */,
+				A5BB7FA128B69F3400707FC6 /* AuthCoordinator.swift in Sources */,
 				84CE645527A29D4D00142511 /* ResponseViewController.swift in Sources */,
 				84CE641F27981DED00142511 /* AppDelegate.swift in Sources */,
+				A5BB7FAD28B6AA7D00707FC6 /* QRCodeGenerator.swift in Sources */,
+				A5BB7FA928B6A5FD00707FC6 /* AuthViewModel.swift in Sources */,
 				84CE6452279ED42B00142511 /* ConnectView.swift in Sources */,
 				84CE6448279AE68600142511 /* AccountRequestViewController.swift in Sources */,
+				A5BB7F9F28B69B7100707FC6 /* SignCoordinator.swift in Sources */,
 				84CE642127981DED00142511 /* SceneDelegate.swift in Sources */,
 				84CE644E279ED2FF00142511 /* SelectChainView.swift in Sources */,
 				84CE644B279EA1FA00142511 /* AccountRequestView.swift in Sources */,
@@ -1883,6 +1930,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A5AE354528A1A2AC0059AE8A /* XCRemoteSwiftPackageReference "Web3" */;
 			productName = Web3;
+		};
+		A5BB7FA228B6A50400707FC6 /* WalletConnectAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = WalletConnectAuth;
 		};
 		A5C4DD8628A2DE88006A626D /* WalletConnectRouter */ = {
 			isa = XCSwiftPackageProductDependency;

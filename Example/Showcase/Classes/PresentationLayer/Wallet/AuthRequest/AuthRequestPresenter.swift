@@ -25,6 +25,13 @@ final class AuthRequestPresenter: ObservableObject {
 
 extension AuthRequestPresenter: SceneViewModel {
 
+    var sceneTitle: String? {
+        return "Auth Request"
+    }
+
+    var largeTitleDisplayMode: UINavigationItem.LargeTitleDisplayMode {
+        return .always
+    }
 }
 
 // MARK: Privates
