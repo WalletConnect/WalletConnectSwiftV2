@@ -6,6 +6,7 @@ struct ScanView: View {
 
     var body: some View {
         ScanQR(onValue: presenter.onValue, onError: presenter.onError)
+            .ignoresSafeArea()
     }
 }
 
