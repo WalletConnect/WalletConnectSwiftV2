@@ -11,6 +11,6 @@ struct ApplicationConfigurator: Configurator {
     }
 
     func configure() {
-        WelcomeModule.create(app: app).present()
+        MainModule.create(app: app).present()
     }
 }

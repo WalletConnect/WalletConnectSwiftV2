@@ -28,9 +28,9 @@ class WalletRequestSubscriberTests: XCTestCase {
         messageFormatter.formattedMessage = expectedMessage
         var messageId: RPCID!
         var message: String!
-        sut.onRequest = { id, formattedMessage in
-            messageId = id
-            message = formattedMessage
+        sut.onRequest = { request in
+            messageId = request.id
+            message = request.message
             messageExpectation.fulfill()
         }
 

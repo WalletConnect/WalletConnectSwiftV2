@@ -27,11 +27,10 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
     override func viewDidLoad() {
         super.viewDidLoad()
         DispatchQueue.global().async { [unowned self] in
-            if let qrImage = generateQRCode(from: uriString) {
-                DispatchQueue.main.async { [self] in
-                    self.connectView.qrCodeView.image = qrImage
-                    self.connectView.copyButton.isHidden = false
-                }
+            let qrImage = QRCodeGenerator.generateQRCode(from: uriString)
+            DispatchQueue.main.async { [self] in
+                self.connectView.qrCodeView.image = qrImage
+                self.connectView.copyButton.isHidden = false
             }
         }
         connectView.copyButton.addTarget(self, action: #selector(copyURI), for: .touchUpInside)
@@ -58,18 +57,6 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
 
     @objc func copyURI() {
         UIPasteboard.general.string = uriString
-    }
-
-    private func generateQRCode(from string: String) -> UIImage? {
-        let data = string.data(using: .ascii)
-        if let filter = CIFilter(name: "CIQRCodeGenerator") {
-            filter.setValue(data, forKey: "inputMessage")
-            let transform = CGAffineTransform(scaleX: 4, y: 4)
-            if let output = filter.outputImage?.transformed(by: transform) {
-                return UIImage(ciImage: output)
-            }
-        }
-        return nil
     }
 
     @objc func connectWithExampleWallet() {
