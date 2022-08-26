@@ -50,6 +50,14 @@
 		84FE684628ACDB4700C893FF /* RequestParams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FE684528ACDB4700C893FF /* RequestParams.swift */; };
 		A50C036528AAD32200FE72D3 /* ClientDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50C036428AAD32200FE72D3 /* ClientDelegate.swift */; };
 		A50F3946288005B200064555 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50F3945288005B200064555 /* Types.swift */; };
+		A55CAAB028B92AFF00844382 /* ScanModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55CAAAB28B92AFF00844382 /* ScanModule.swift */; };
+		A55CAAB128B92AFF00844382 /* ScanPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55CAAAC28B92AFF00844382 /* ScanPresenter.swift */; };
+		A55CAAB228B92AFF00844382 /* ScanRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55CAAAD28B92AFF00844382 /* ScanRouter.swift */; };
+		A55CAAB328B92AFF00844382 /* ScanInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55CAAAE28B92AFF00844382 /* ScanInteractor.swift */; };
+		A55CAAB428B92AFF00844382 /* ScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55CAAAF28B92AFF00844382 /* ScanView.swift */; };
+		A55CAAB928B92B4600844382 /* ScanQRView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55CAAB628B92B4600844382 /* ScanQRView.swift */; };
+		A55CAABA28B92B4600844382 /* ScanTargetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55CAAB728B92B4600844382 /* ScanTargetView.swift */; };
+		A55CAABB28B92B4600844382 /* ScanQR.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55CAAB828B92B4600844382 /* ScanQR.swift */; };
 		A5629AA92876A23100094373 /* ChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AA82876A23100094373 /* ChatService.swift */; };
 		A5629ABD2876CBC000094373 /* ChatListModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AB82876CBC000094373 /* ChatListModule.swift */; };
 		A5629ABE2876CBC000094373 /* ChatListPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AB92876CBC000094373 /* ChatListPresenter.swift */; };
@@ -230,6 +238,14 @@
 		84FE684528ACDB4700C893FF /* RequestParams.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestParams.swift; sourceTree = "<group>"; };
 		A50C036428AAD32200FE72D3 /* ClientDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientDelegate.swift; sourceTree = "<group>"; };
 		A50F3945288005B200064555 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
+		A55CAAAB28B92AFF00844382 /* ScanModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanModule.swift; sourceTree = "<group>"; };
+		A55CAAAC28B92AFF00844382 /* ScanPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanPresenter.swift; sourceTree = "<group>"; };
+		A55CAAAD28B92AFF00844382 /* ScanRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanRouter.swift; sourceTree = "<group>"; };
+		A55CAAAE28B92AFF00844382 /* ScanInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanInteractor.swift; sourceTree = "<group>"; };
+		A55CAAAF28B92AFF00844382 /* ScanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanView.swift; sourceTree = "<group>"; };
+		A55CAAB628B92B4600844382 /* ScanQRView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScanQRView.swift; sourceTree = "<group>"; };
+		A55CAAB728B92B4600844382 /* ScanTargetView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScanTargetView.swift; sourceTree = "<group>"; };
+		A55CAAB828B92B4600844382 /* ScanQR.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScanQR.swift; sourceTree = "<group>"; };
 		A5629AA82876A23100094373 /* ChatService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatService.swift; sourceTree = "<group>"; };
 		A5629AB82876CBC000094373 /* ChatListModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListModule.swift; sourceTree = "<group>"; };
 		A5629AB92876CBC000094373 /* ChatListPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListPresenter.swift; sourceTree = "<group>"; };
@@ -576,6 +592,29 @@
 			path = Types;
 			sourceTree = "<group>";
 		};
+		A55CAAAA28B92AF200844382 /* Scan */ = {
+			isa = PBXGroup;
+			children = (
+				A55CAAB528B92B3200844382 /* Views */,
+				A55CAAAB28B92AFF00844382 /* ScanModule.swift */,
+				A55CAAAC28B92AFF00844382 /* ScanPresenter.swift */,
+				A55CAAAD28B92AFF00844382 /* ScanRouter.swift */,
+				A55CAAAE28B92AFF00844382 /* ScanInteractor.swift */,
+				A55CAAAF28B92AFF00844382 /* ScanView.swift */,
+			);
+			path = Scan;
+			sourceTree = "<group>";
+		};
+		A55CAAB528B92B3200844382 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A55CAAB828B92B4600844382 /* ScanQR.swift */,
+				A55CAAB628B92B4600844382 /* ScanQRView.swift */,
+				A55CAAB728B92B4600844382 /* ScanTargetView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		A5629AA42876A19D00094373 /* DomainLayer */ = {
 			isa = PBXGroup;
 			children = (
@@ -857,6 +896,7 @@
 		A59F876928B53E7800A9CD80 /* Wallet */ = {
 			isa = PBXGroup;
 			children = (
+				A55CAAAA28B92AF200844382 /* Scan */,
 				A59EBEFD28B54A2E003EDAAF /* AuthRequest */,
 				A59F877428B53EA500A9CD80 /* Wallet */,
 			);
@@ -1349,21 +1389,27 @@
 				A5629AE12876CC6E00094373 /* InviteListInteractor.swift in Sources */,
 				A58E7CED28729F550082D443 /* SceneDelegate.swift in Sources */,
 				A5C2020F287D9DEE007E3188 /* WelcomeView.swift in Sources */,
+				A55CAAB128B92AFF00844382 /* ScanPresenter.swift in Sources */,
 				A59F877128B53EA000A9CD80 /* WalletRouter.swift in Sources */,
 				A5C20226287EB099007E3188 /* AccountNameResolver.swift in Sources */,
 				A5C2020D287D9DEE007E3188 /* WelcomeRouter.swift in Sources */,
+				A55CAAB328B92AFF00844382 /* ScanInteractor.swift in Sources */,
+				A55CAABA28B92B4600844382 /* ScanTargetView.swift in Sources */,
 				A578FA372873D8EE00AA7720 /* UIColor.swift in Sources */,
 				A5C2021D287E1FD8007E3188 /* ImportView.swift in Sources */,
 				A5C2021A287E1FD8007E3188 /* ImportPresenter.swift in Sources */,
 				A5629AE828772A0100094373 /* InviteViewModel.swift in Sources */,
+				A55CAAB928B92B4600844382 /* ScanQRView.swift in Sources */,
 				A5629AA92876A23100094373 /* ChatService.swift in Sources */,
 				A5C20229287EB34C007E3188 /* AccountStorage.swift in Sources */,
 				A5629AC02876CBC000094373 /* ChatListInteractor.swift in Sources */,
+				A55CAAB428B92AFF00844382 /* ScanView.swift in Sources */,
 				A5629AE22876CC6E00094373 /* InviteListView.swift in Sources */,
 				A578FA3D2874002400AA7720 /* View.swift in Sources */,
 				A5629AD72876CC5700094373 /* InviteView.swift in Sources */,
 				A59EBEFA28B54A2A003EDAAF /* AuthRequestRouter.swift in Sources */,
 				A5629AF02877F73000094373 /* SocketFactory.swift in Sources */,
+				A55CAAB228B92AFF00844382 /* ScanRouter.swift in Sources */,
 				A5629AED2877F6A600094373 /* ChatFactory.swift in Sources */,
 				A5C20221287EA5B8007E3188 /* TextFieldView.swift in Sources */,
 				A5C2022B287EB89A007E3188 /* WelcomeInteractor.swift in Sources */,
@@ -1373,7 +1419,9 @@
 				A59F877028B53EA000A9CD80 /* WalletPresenter.swift in Sources */,
 				A5629AD32876CC5700094373 /* InviteModule.swift in Sources */,
 				A5629AD52876CC5700094373 /* InviteRouter.swift in Sources */,
+				A55CAABB28B92B4600844382 /* ScanQR.swift in Sources */,
 				A5629ABF2876CBC000094373 /* ChatListRouter.swift in Sources */,
+				A55CAAB028B92AFF00844382 /* ScanModule.swift in Sources */,
 				A5629AC12876CBC000094373 /* ChatListView.swift in Sources */,
 				A578FA392873FCE000AA7720 /* ChatScrollView.swift in Sources */,
 				A58E7D1E2872A57B0082D443 /* ThirdPartyConfigurator.swift in Sources */,
