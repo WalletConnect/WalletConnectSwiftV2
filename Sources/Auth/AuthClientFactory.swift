@@ -7,7 +7,7 @@ import WalletConnectPairing
 public struct AuthClientFactory {
 
     public static func create(metadata: AppMetadata, account: Account?, relayClient: RelayClient) -> AuthClient {
-        let logger = ConsoleLogger(loggingLevel: .off)
+        let logger = ConsoleLogger(loggingLevel: .debug)
         let keyValueStorage = UserDefaults.standard
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
         return AuthClientFactory.create(metadata: metadata, account: account, logger: logger, keyValueStorage: keyValueStorage, keychainStorage: keychainStorage, relayClient: relayClient)
