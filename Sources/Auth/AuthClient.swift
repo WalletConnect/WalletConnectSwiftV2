@@ -49,7 +49,7 @@ public class AuthClient {
          logger: ConsoleLogging,
          pairingStorage: WCPairingStorage,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
-) {
+    ) {
         self.appPairService = appPairService
         self.appRequestService = appRequestService
         self.walletPairService = walletPairService

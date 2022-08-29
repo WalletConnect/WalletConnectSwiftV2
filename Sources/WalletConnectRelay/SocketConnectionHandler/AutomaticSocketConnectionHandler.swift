@@ -36,7 +36,9 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
         }
 
         appStateObserver.onWillEnterForeground = { [unowned self] in
-            socket.connect()
+            if !socket.isConnected {
+                socket.connect()
+            }
         }
     }
 
