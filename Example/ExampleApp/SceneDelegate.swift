@@ -46,7 +46,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         vc.onClientConnected = {
             Task {
                 do {
-                    try await Sign.instance.pair(uri: wcUri)
+                    try await Sign.instance.pair(uri: WalletConnectURI(string: wcUri)!)
                 } catch {
                     print(error)
                 }

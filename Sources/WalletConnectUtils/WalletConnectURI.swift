@@ -14,7 +14,7 @@ public struct WalletConnectURI: Equatable {
     public let relay: RelayProtocolOptions
 
     public var api: TargetAPI {
-        apiType ?? .sign
+        return apiType ?? .sign
     }
 
     public var absoluteString: String {

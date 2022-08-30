@@ -27,7 +27,7 @@ final class AuthViewModel: ObservableObject {
     func setupInitialState() async throws {
         state = .none
         uri = nil
-        uri = try await Auth.instance.request(.stub())
+        uri = try await Auth.instance.request(.stub()).absoluteString
     }
 
     func copyDidPressed() {
