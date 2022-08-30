@@ -16,4 +16,14 @@ final class WalletRouter {
             .wrapToNavigationController()
             .present(from: viewController)
     }
+
+    func presentScan(onValue: @escaping (String) -> Void, onError: @escaping (Error) -> Void) {
+        ScanModule.create(app: app, onValue: onValue, onError: onError)
+            .wrapToNavigationController()
+            .present(from: viewController)
+    }
+
+    func dismiss() {
+        viewController.navigationController?.dismiss()
+    }
 }

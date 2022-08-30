@@ -41,5 +41,4 @@ class AppStateObserver: AppStateObserving {
     private func appWillEnterForeground() {
         onWillEnterForeground?()
     }
-
 }

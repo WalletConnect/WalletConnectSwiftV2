@@ -24,6 +24,9 @@ struct AuthView: View {
 
             Button("Copy URI", action: { viewModel.copyDidPressed() })
                 .buttonStyle(CircleButtonStyle())
+
+            Button("Deeplink", action: { viewModel.deeplinkPressed() })
+                .buttonStyle(CircleButtonStyle())
         }
         .padding(16.0)
         .onAppear { Task(priority: .userInitiated) {

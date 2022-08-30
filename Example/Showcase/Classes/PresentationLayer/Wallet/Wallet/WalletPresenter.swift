@@ -16,14 +16,17 @@ final class WalletPresenter: ObservableObject {
 
     func didPastePairingURI() {
         guard let uri = UIPasteboard.general.string else { return }
-
-        Task(priority: .userInitiated) { [unowned self] in
-            try await self.interactor.pair(uri: uri)
-        }
+        pair(uri: uri)
     }
 
     func didScanPairingURI() {
-        
+        router.presentScan { [unowned self] value in
+            self.pair(uri: value)
+            self.router.dismiss()
+        } onError: { error in
+            print(error.localizedDescription)
+            self.router.dismiss()
+        }
     }
 }
 
@@ -48,5 +51,11 @@ private extension WalletPresenter {
         interactor.requestPublisher.sink { [unowned self] request in
             self.router.present(request: request)
         }.store(in: &disposeBag)
+    }
+
+    func pair(uri: String) {
+        Task(priority: .high) { [unowned self] in
+            try await self.interactor.pair(uri: uri)
+        }
     }
 }

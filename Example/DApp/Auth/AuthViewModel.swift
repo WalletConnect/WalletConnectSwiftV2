@@ -37,6 +37,11 @@ final class AuthViewModel: ObservableObject {
     func walletDidPressed() {
         
     }
+
+    func deeplinkPressed() {
+        guard let uri = uri else { return }
+        UIApplication.shared.open(URL(string: "showcase://wc?uri=\(uri)")!)
+    }
 }
 
 private extension AuthViewModel {
