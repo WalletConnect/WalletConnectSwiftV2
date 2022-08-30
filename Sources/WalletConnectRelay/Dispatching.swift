@@ -82,9 +82,9 @@ final class Dispatcher: NSObject, Dispatching {
 
     private func dequeuePendingTextFrames() {
         while let frame = textFramesQueue.dequeue() {
-            send(frame) { error in
+            send(frame) { [weak self] error in
                 if let error = error {
-                    print(error)
+                    self?.logger.error(error.localizedDescription)
                 }
             }
         }
