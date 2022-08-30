@@ -143,7 +143,7 @@ final class SignClientTests: XCTestCase {
         let uri = try await dapp.client.connect(requiredNamespaces: ProposalNamespace.stubRequired())!
         try await wallet.client.pair(uri: uri)
 
-        let pairing = wallet.client.getSettledPairings().first!
+        let pairing = wallet.client.getPairings().first!
         wallet.client.ping(topic: pairing.topic) { result in
             if case .failure = result { XCTFail() }
             pongResponseExpectation.fulfill()

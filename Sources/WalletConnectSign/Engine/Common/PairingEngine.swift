@@ -43,7 +43,7 @@ final class PairingEngine {
         return pairing
     }
 
-    func getSettledPairings() -> [Pairing] {
+    func getPairings() -> [Pairing] {
         pairingStore.getAll()
             .map {Pairing(topic: $0.topic, peer: $0.peerMetadata, expiryDate: $0.expiryDate)}
     }

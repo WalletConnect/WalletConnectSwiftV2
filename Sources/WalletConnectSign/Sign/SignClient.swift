@@ -139,10 +139,11 @@ public final class SignClient {
 
     // MARK: - Public interface
 
-    /// For the Proposer to propose a session to a responder.
-    /// Function will create pending pairing sequence or propose a session on existing pairing. When responder client approves pairing, session is be proposed automatically by your client.
-    /// - Parameter sessionPermissions: The session permissions the responder will be requested for.
-    /// - Parameter topic: Optional parameter - use it if you already have an established pairing with peer client.
+    /// For a dApp to propose a session to a wallet.
+    /// Function will create pairing and propose session or propose a session on existing pairing.
+    /// - Parameters:
+    ///   - requiredNamespaces: required namespaces for a session
+    ///   - topic: Optional parameter - use it if you already have an established pairing with peer client.
     /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
     public func connect(requiredNamespaces: [String: ProposalNamespace], topic: String? = nil) async throws -> String? {
         logger.debug("Connecting Application")
@@ -160,12 +161,12 @@ public final class SignClient {
         }
     }
 
-    /// For responder to receive a session proposal from a proposer
-    /// Responder should call this function in order to accept peer's pairing proposal and be able to subscribe for future session proposals.
+    /// For wallet to receive a session proposal from a dApp
+    /// Responder should call this function in order to accept peer's pairing and be able to subscribe for future session proposals.
     /// - Parameter uri: Pairing URI that is commonly presented as a QR code by a dapp.
     ///
     /// Should Error:
-    /// - When URI is invalid format or missing params
+    /// - When URI has invalid format or missing params
     /// - When topic is already in use
     public func pair(uri: String) async throws {
         guard let pairingURI = WalletConnectURI(string: uri) else {
@@ -174,26 +175,23 @@ public final class SignClient {
         try await pairEngine.pair(pairingURI)
     }
 
-    /// For the responder to approve a session proposal.
+    /// For a wallet to approve a session proposal.
     /// - Parameters:
-    ///   - proposalId: Session Proposal Public key received from peer client in a WalletConnect delegate function: `didReceive(sessionProposal: Session.Proposal)`
-    ///   - accounts: A Set of accounts that the dapp will be allowed to request methods executions on.
-    ///   - methods: A Set of methods that the dapp will be allowed to request.
-    ///   - events: A Set of events
+    ///   - proposalId: Session Proposal id
+    ///   - namespaces: namespaces for given session, needs to contain at least required namespaces proposed by dApp.
     public func approve(proposalId: String, namespaces: [String: SessionNamespace]) async throws {
-        // TODO - accounts should be validated for matching namespaces BEFORE responding proposal
         try await approveEngine.approveProposal(proposerPubKey: proposalId, validating: namespaces)
     }
 
-    /// For the responder to reject a session proposal.
+    /// For the wallet to reject a session proposal.
     /// - Parameters:
-    ///   - proposalId: Session Proposal Public key received from peer client in a WalletConnect delegate.
-    ///   - reason: Reason why the session proposal was rejected. Conforms to CAIP25.
+    ///   - proposalId: Session Proposal id
+    ///   - reason: Reason why the session proposal has been rejected. Conforms to CAIP25.
     public func reject(proposalId: String, reason: RejectionReason) async throws {
         try await approveEngine.reject(proposerPubKey: proposalId, reason: reason.internalRepresentation())
     }
 
-    /// For the responder to update session namespaces
+    /// For the wallet to update session namespaces
     /// - Parameters:
     ///   - topic: Topic of the session that is intended to be updated.
     ///   - namespaces: Dictionary of namespaces that will replace existing ones.
@@ -201,10 +199,9 @@ public final class SignClient {
         try await controllerSessionStateMachine.update(topic: topic, namespaces: namespaces)
     }
 
-    /// For controller to update expiry of a session
+    /// For wallet to extend a session to 7 days
     /// - Parameters:
-    ///   - topic: Topic of the Session, it can be a pairing or a session topic.
-    ///   - ttl: Time in seconds that a target session is expected to be extended for. Must be greater than current time to expire and than 7 days
+    ///   - topic: Topic of the session that is intended to be extended.
     public func extend(topic: String) async throws {
         let ttl: Int64 = Session.defaultTimeToLive
         if sessionEngine.hasSession(for: topic) {
@@ -212,14 +209,14 @@ public final class SignClient {
         }
     }
 
-    /// For the proposer to send JSON-RPC requests to responding peer.
+    /// For a dApp to send JSON-RPC requests to wallet.
     /// - Parameters:
     ///   - params: Parameters defining request and related session
     public func request(params: Request) async throws {
         try await sessionEngine.request(params)
     }
 
-    /// For the responder to respond on pending peer's session JSON-RPC Request
+    /// For the wallet to respond on pending dApp's JSON-RPC request
     /// - Parameters:
     ///   - topic: Topic of the session for which the request was received.
     ///   - response: Your JSON RPC response or an error.
@@ -227,16 +224,15 @@ public final class SignClient {
         try await sessionEngine.respondSessionRequest(topic: topic, response: response)
     }
 
-    /// Ping method allows to check if client's peer is online and is subscribing for your sequence topic
+    /// Ping method allows to check if peer client is online and is subscribing for given topic
     ///
     ///  Should Error:
     ///  - When the session topic is not found
     ///  - When the response is neither result or error
-    ///  - When the peer fails to respond within timeout
     ///
     /// - Parameters:
-    ///   - topic: Topic of the sequence, it can be a pairing or a session topic.
-    ///   - completion: Result will be success on response or error on timeout. -- TODO: timeout
+    ///   - topic: Topic of a session or a pairing
+    ///   - completion: Result will be success on response or an error
     public func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> Void)) {
         if pairingEngine.hasPairing(for: topic) {
             pairingEngine.ping(topic: topic) { result in
@@ -249,45 +245,45 @@ public final class SignClient {
         }
     }
 
-    /// For the proposer and responder to emits an event on the peer for an existing session
+    /// For the wallet to emit an event to a dApp
     ///
-    /// When:  a client wants to emit an event to its peer client (eg. chain changed or tx replaced)
+    /// When a client wants to emit an event to its peer client (eg. chain changed or tx replaced)
     ///
     /// Should Error:
     /// - When the session topic is not found
     /// - When the event params are invalid
-
     /// - Parameters:
     ///   - topic: Session topic
-    ///   - params: Event Parameters
-    ///   - completion: calls a handler upon completion
+    ///   - event: session event
+    ///   - chainId: CAIP-2 chain
     public func emit(topic: String, event: Session.Event, chainId: Blockchain) async throws {
         try await sessionEngine.emit(topic: topic, event: event.internalRepresentation(), chainId: chainId)
     }
 
-    /// For the proposer and responder to terminate a session
+    /// For a wallet and a dApp to terminate a session
     ///
     /// Should Error:
     /// - When the session topic is not found
-
     /// - Parameters:
     ///   - topic: Session topic that you want to delete
-    ///   - reason: Reason of session deletion
     public func disconnect(topic: String) async throws {
         try await sessionEngine.delete(topic: topic)
     }
 
+    /// Query sessions
     /// - Returns: All sessions
     public func getSessions() -> [Session] {
         sessionEngine.getSessions()
     }
 
-    /// - Returns: All settled pairings that are active
-    public func getSettledPairings() -> [Pairing] {
-        pairingEngine.getSettledPairings()
+    /// Query pairings
+    /// - Returns: All pairings
+    public func getPairings() -> [Pairing] {
+        pairingEngine.getPairings()
     }
 
-    /// - Returns: Pending requests received with wc_sessionRequest
+    /// Query pending requests
+    /// - Returns: Pending requests received from peer with `wc_sessionRequest` protocol method
     /// - Parameter topic: topic representing session for which you want to get pending requests. If nil, you will receive pending requests for all active sessions.
     public func getPendingRequests(topic: String? = nil) -> [Request] {
         let pendingRequests: [Request] = history.getPending()
@@ -311,6 +307,16 @@ public final class SignClient {
         let request = WalletConnectUtils.JsonRpcRecord.Request(method: payload.request.method, params: payload.request.params)
         return WalletConnectUtils.JsonRpcRecord(id: record.id, topic: record.topic, request: request, response: record.response, chainId: record.chainId)
     }
+
+
+#if DEBUG
+    /// Delete all stored data such as: pairings, sessions, keys
+    ///
+    /// - Note: Doesn't unsubscribe from topics
+    public func cleanup() throws {
+        try cleanupService.cleanup()
+    }
+#endif
 
     // MARK: - Private
 
@@ -355,13 +361,4 @@ public final class SignClient {
             self?.socketConnectionStatusPublisherSubject.send(status)
         }.store(in: &publishers)
     }
-
-#if DEBUG
-    /// Delete all stored data such as: pairings, sessions, keys
-    ///
-    /// - Note: Doesn't unsubscribe from topics
-    public func cleanup() throws {
-        try cleanupService.cleanup()
-    }
-#endif
 }

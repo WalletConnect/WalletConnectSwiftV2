@@ -4,7 +4,7 @@ import WalletConnectSign
 
 class ConnectViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     let uriString: String
-    let activePairings: [Pairing] = Sign.instance.getSettledPairings()
+    let activePairings: [Pairing] = Sign.instance.getPairings()
     let segmentedControl = UISegmentedControl(items: ["Pairings", "New Pairing"])
 
     init(uri: String) {
