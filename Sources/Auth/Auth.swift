@@ -4,7 +4,7 @@ import Combine
 
 /// Auth instatnce wrapper
 ///
-/// ```swift
+/// ```Swift
 /// let metadata = AppMetadata(
 ///         name: "Swift wallet",
 ///         description: "wallet",
