@@ -1,7 +1,13 @@
 import Foundation
 
+/// Relay instatnce wrapper
+///
+/// ```swift
+/// Relay.configure(projectId: projectId,socketFactory: SocketFactory())
+/// ```
 public class Relay {
 
+    /// Relay client instance
     public static var instance: RelayClient = {
         guard let config = Relay.config else {
             fatalError("Error - you must call Relay.configure(_:) before accessing the shared instance.")
@@ -18,6 +24,12 @@ public class Relay {
 
     private init() { }
 
+    /// Relay instance config method
+    /// - Parameters:
+    ///   - relayHost: relay host
+    ///   - projectId: project id
+    ///   - socketFactory: web socket factory
+    ///   - socketConnectionType: socket connection type
     static public func configure(
         relayHost: String = "relay.walletconnect.com",
         projectId: String,

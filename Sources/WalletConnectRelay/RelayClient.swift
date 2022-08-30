@@ -9,6 +9,11 @@ public enum SocketConnectionStatus {
     case disconnected
 }
 
+/// WalletConnect Relay Client
+///
+/// Should not be instantiated outside of the SDK
+///
+/// Access via `Relay.instance`
 public final class RelayClient {
 
     enum Errors: Error {
@@ -106,10 +111,16 @@ public final class RelayClient {
         self.init(dispatcher: dispatcher, logger: logger, keyValueStorage: keyValueStorage)
     }
 
+    /// Connects web socket
+    ///
+    /// Use this method for manual socket connection only
     public func connect() throws {
         try dispatcher.connect()
     }
 
+    /// Disconnects web socket
+    ///
+    /// Use this method for manual socket connection only
     public func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
         try dispatcher.disconnect(closeCode: closeCode)
     }

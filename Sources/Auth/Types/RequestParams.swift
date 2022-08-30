@@ -1,5 +1,9 @@
 import Foundation
 
+/// Parameters required to construct authentication request
+/// for details read CAIP-74 and EIP-4361 specs
+/// https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-74.md
+/// https://eips.ethereum.org/EIPS/eip-4361
 public struct RequestParams {
     public let domain: String
     public let chainId: String

@@ -1,5 +1,6 @@
 import Foundation
 
+/// Authentication error
 public enum AuthError: Codable, Equatable, Error {
     case userRejeted
     case malformedResponseParams
