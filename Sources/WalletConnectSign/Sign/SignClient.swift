@@ -4,14 +4,11 @@ import WalletConnectUtils
 import WalletConnectKMS
 import Combine
 
-/// An Object that expose public API to provide interactions with WalletConnect SDK
+/// WalletConnect Sign Client
 ///
-/// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
+/// Cannot be instantiated outside of the SDK
 ///
-/// ```swift
-/// let metadata = AppMetadata(name: String?, description: String?, url: String?, icons: [String]?)
-/// let client = SignClient(metadata: AppMetadata, projectId: String, relayHost: String)
-/// ```
+/// Access via `Sign.instance`
 public final class SignClient {
 
     /// Tells the delegate that session proposal has been received.

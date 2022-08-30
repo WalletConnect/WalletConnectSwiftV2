@@ -5,6 +5,11 @@ import WalletConnectPairing
 import WalletConnectRelay
 
 
+/// WalletConnect Auth Client
+///
+/// Cannot be instantiated outside of the SDK
+///
+/// Access via `Auth.instance`
 public class AuthClient {
     enum Errors: Error {
         case malformedPairingURI
@@ -12,11 +17,21 @@ public class AuthClient {
         case noPairingMatchingTopic
     }
     private var authRequestPublisherSubject = PassthroughSubject<AuthRequest, Never>()
+
+    /// Publisher that sends authentication requests
+    ///
+    /// Wallet should subscribe on events in order to receive auth requests.
     public var authRequestPublisher: AnyPublisher<AuthRequest, Never> {
         authRequestPublisherSubject.eraseToAnyPublisher()
     }
 
     private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, AuthError>), Never>()
+
+    /// Publisher that sends authentication responses
+    ///
+    /// App should subscribe for events in order to receive CACAO object with a signature matching authentication request.
+    ///
+    /// Emited result may be an error.
     public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Cacao, AuthError>), Never> {
         authResponsePublisherSubject.eraseToAnyPublisher()
     }
@@ -102,15 +117,23 @@ public class AuthClient {
         try await appRequestService.request(params: params, topic: topic)
     }
 
+    /// For a wallet to respond on authentication request
+    /// - Parameters:
+    ///   - requestId: authentication request id
+    ///   - signature: CACAO signature of requested message
     public func respond(requestId: RPCID, signature: CacaoSignature) async throws {
         guard let account = account else { throw Errors.unknownWalletAddress }
         try await walletRespondService.respond(requestId: requestId, signature: signature, account: account)
     }
 
+    /// For wallet to reject authentication request
+    /// - Parameter requestId: authentication request id
     public func reject(requestId: RPCID) async throws {
         try await walletRespondService.respondError(requestId: requestId)
     }
 
+    /// Query pending authentication requests
+    /// - Returns: Pending authentication requests
     public func getPendingRequests() throws -> [AuthRequest] {
         guard let account = account else { throw Errors.unknownWalletAddress }
         return try pendingRequestsProvider.getPendingRequests(account: account)
