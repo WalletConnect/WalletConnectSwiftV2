@@ -4,7 +4,6 @@ import WalletConnectUtils
 import WalletConnectPairing
 import WalletConnectRelay
 
-
 /// WalletConnect Auth Client
 ///
 /// Cannot be instantiated outside of the SDK
@@ -40,7 +39,6 @@ public class AuthClient {
 
     /// An object that loggs SDK's errors and info messages
     public let logger: ConsoleLogging
-
 
     // MARK: - Private Properties
 

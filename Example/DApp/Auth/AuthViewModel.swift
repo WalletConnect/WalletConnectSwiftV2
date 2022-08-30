@@ -35,7 +35,7 @@ final class AuthViewModel: ObservableObject {
     }
 
     func walletDidPressed() {
-        
+
     }
 
     func deeplinkPressed() {
@@ -47,7 +47,7 @@ final class AuthViewModel: ObservableObject {
 private extension AuthViewModel {
 
     func setupSubscriptions() {
-        Auth.instance.authResponsePublisher.sink { [weak self] (id, result) in
+        Auth.instance.authResponsePublisher.sink { [weak self] (_, result) in
             switch result {
             case .success(let cacao):
                 self?.state = .signed(cacao)

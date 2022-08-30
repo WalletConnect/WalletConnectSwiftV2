@@ -12,7 +12,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             MigrationConfigurator(app: app),
             ThirdPartyConfigurator(),
             ApplicationConfigurator(app: app),
-            AppearanceConfigurator(),
+            AppearanceConfigurator()
         ]
     }
 
