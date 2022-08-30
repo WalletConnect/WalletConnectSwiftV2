@@ -16,7 +16,8 @@ public class AuthClient {
         case unknownWalletAddress
         case noPairingMatchingTopic
     }
-    private var authRequestPublisherSubject = PassthroughSubject<AuthRequest, Never>()
+
+    // MARK: - Public Properties
 
     /// Publisher that sends authentication requests
     ///
@@ -24,8 +25,6 @@ public class AuthClient {
     public var authRequestPublisher: AnyPublisher<AuthRequest, Never> {
         authRequestPublisherSubject.eraseToAnyPublisher()
     }
-
-    private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, AuthError>), Never>()
 
     /// Publisher that sends authentication responses
     ///
@@ -36,20 +35,26 @@ public class AuthClient {
         authResponsePublisherSubject.eraseToAnyPublisher()
     }
 
+    /// Publisher that sends web socket connection status
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
+    /// An object that loggs SDK's errors and info messages
+    public let logger: ConsoleLogging
+
+
+    // MARK: - Private Properties
+
+    private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, AuthError>), Never>()
+    private var authRequestPublisherSubject = PassthroughSubject<AuthRequest, Never>()
     private let appPairService: AppPairService
     private let appRequestService: AppRequestService
     private let appRespondSubscriber: AppRespondSubscriber
-
     private let walletPairService: WalletPairService
     private let walletRequestSubscriber: WalletRequestSubscriber
     private let walletRespondService: WalletRespondService
     private let cleanupService: CleanupService
     private let pairingStorage: WCPairingStorage
     private let pendingRequestsProvider: PendingRequestsProvider
-    public let logger: ConsoleLogging
-
     private var account: Account?
 
     init(appPairService: AppPairService,

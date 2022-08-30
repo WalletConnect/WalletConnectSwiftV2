@@ -11,77 +11,77 @@ import Combine
 /// Access via `Sign.instance`
 public final class SignClient {
 
-    /// Tells the delegate that session proposal has been received.
+    // MARK: - Public Properties
+
+    /// Publisher that sends session proposal
     ///
-    /// Function is executed on responder client only
+    /// event is emited on responder client only
     public var sessionProposalPublisher: AnyPublisher<Session.Proposal, Never> {
         sessionProposalPublisherSubject.eraseToAnyPublisher()
     }
 
-    /// Tells the delegate that session payload request has been received
+    /// Publisher that sends session request
     ///
-    /// In most cases that function is supposed to be called on wallet client.
-    /// - Parameters:
-    ///     - sessionRequest: Object containing request received from peer client.
+    /// In most cases event will be emited on wallet
     public var sessionRequestPublisher: AnyPublisher<Request, Never> {
         sessionRequestPublisherSubject.eraseToAnyPublisher()
     }
 
-    /// Tells the delegate that client has connected WebSocket
+    /// Publisher that sends web socket connection status
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
     }
 
-    /// Tells the delegate that the client has settled a session.
+    /// Publisher that sends session when one is settled
     ///
-    /// Function is executed on proposer and responder client when both communicating peers have successfully established a session.
+    /// Event is emited on proposer and responder client when both communicating peers have successfully established a session.
     public var sessionSettlePublisher: AnyPublisher<Session, Never> {
         sessionSettlePublisherSubject.eraseToAnyPublisher()
     }
 
-    /// Tells the delegate that the peer client has terminated the session.
+    /// Publisher that sends deleted session topic
     ///
-    /// Function can be executed on any type of the client.
+    /// Event can be emited on any type of the client.
     public var sessionDeletePublisher: AnyPublisher<(String, Reason), Never> {
         sessionDeletePublisherSubject.eraseToAnyPublisher()
     }
 
-    /// Tells the delegate that session payload response has been received
+    /// Publisher that sends response for session request
     ///
-    /// In most cases that function is supposed to be called on dApp client.
-    /// - Parameters:
-    ///     - sessionResponse: Object containing response received from peer client.
+    /// In most cases that event will be emited on dApp client.
     public var sessionResponsePublisher: AnyPublisher<Response, Never> {
         sessionResponsePublisherSubject.eraseToAnyPublisher()
     }
 
-    /// Tells the delegate that peer client has rejected a session proposal.
+    /// Publisher that sends session proposal that has been rejected
     ///
-    /// Function will be executed on proposer client only.
+    /// Event will be emited on dApp client only.
     public var sessionRejectionPublisher: AnyPublisher<(Session.Proposal, Reason), Never> {
         sessionRejectionPublisherSubject.eraseToAnyPublisher()
     }
 
-    /// Tells the delegate that methods has been updated in session
+    /// Publisher that sends session topic and namespaces on session update
     ///
-    /// Function is executed on controller and non-controller client when both communicating peers have successfully updated methods requested by the controller client.
+    /// Event will be emited controller and non-controller client when both communicating peers have successfully updated methods requested by the controller client.
     public var sessionUpdatePublisher: AnyPublisher<(sessionTopic: String, namespaces: [String: SessionNamespace]), Never> {
         sessionUpdatePublisherSubject.eraseToAnyPublisher()
     }
 
-    /// Tells the delegate that event has been received.
+    /// Publisher that sends session event
+    ///
+    /// Event will be emited on dApp client only
     public var sessionEventPublisher: AnyPublisher<(event: Session.Event, sessionTopic: String, chainId: Blockchain?), Never> {
         sessionEventPublisherSubject.eraseToAnyPublisher()
     }
 
-    /// Tells the delegate that session expiry has been updated
+    /// Publisher that sends session topic when session is extended
     ///
-    /// Function will be executed on controller and non-controller clients.
+    /// Event will be emited on controller and non-controller clients.
     public var sessionExtendPublisher: AnyPublisher<(sessionTopic: String, date: Date), Never> {
         sessionExtendPublisherSubject.eraseToAnyPublisher()
     }
 
-    /// An object for logging messages
+    /// An object that loggs SDK's errors and info messages
     public let logger: ConsoleLogging
 
     // MARK: - Private properties
