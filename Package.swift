@@ -11,7 +11,7 @@ let package = Package(
     ],
     products: [
         .library(
-            name: "WalletConnect",
+            name: "WalletConnectSign",
             targets: ["WalletConnectSign"]),
         .library(
             name: "WalletConnectChat",
