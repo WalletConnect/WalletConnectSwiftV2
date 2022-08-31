@@ -15,6 +15,7 @@ class AppRespondSubscriberTests: XCTestCase {
     let walletAccount = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
     let prvKey = Data(hex: "462c1dad6832d7d96ccf87bd6a686a4110e114aaaebd5512e552c0e3a87b480f")
     var messageSigner: MessageSigner!
+    var pairingStorage: WCPairingStorageMock!
 
     override func setUp() {
         networkingInteractor = NetworkingInteractorMock()
@@ -22,12 +23,14 @@ class AppRespondSubscriberTests: XCTestCase {
         messageSigner = MessageSigner()
         let historyStorage = CodableStore<RPCHistory.Record>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue)
         rpcHistory = RPCHistory(keyValueStore: historyStorage)
+        pairingStorage = WCPairingStorageMock()
         sut = AppRespondSubscriber(
             networkingInteractor: networkingInteractor,
             logger: ConsoleLoggerMock(),
             rpcHistory: rpcHistory,
             signatureVerifier: messageSigner,
-            messageFormatter: messageFormatter)
+            messageFormatter: messageFormatter,
+            pairingStorage: pairingStorage)
     }
 
     func testMessageCompromisedFailure() {
