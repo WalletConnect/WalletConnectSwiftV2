@@ -42,7 +42,11 @@ class AppRespondSubscriber {
             activatePairingIfNeeded(id: requestId)
             networkingInteractor.unsubscribe(topic: subscriptionPayload.topic)
 
-            handleIfError(response: response)
+            if let errorResponse = response.error,
+               let error = AuthError(code: errorResponse.code) {
+                onResponse?(requestId, .failure(error))
+                return
+            }
 
             guard
                 let cacao = try? response.result?.get(Cacao.self),
@@ -72,15 +76,6 @@ class AppRespondSubscriber {
             pairing.activate()
         } else {
             try? pairing.updateExpiry()
-        }
-    }
-
-    private func handleIfError(response: RPCResponse) {
-        if let errorResponse = response.error,
-           let id = response.id,
-           let error = AuthError(code: errorResponse.code) {
-            onResponse?(id, .failure(error))
-            return
         }
     }
 }
