@@ -85,7 +85,7 @@ let package = Package(
             dependencies: ["WalletConnectKMS", "WalletConnectUtils", "TestingUtils"]),
         .target(
             name: "TestingUtils",
-            dependencies: ["WalletConnectUtils", "WalletConnectKMS", "JSONRPC"],
+            dependencies: ["WalletConnectUtils", "WalletConnectKMS", "JSONRPC", "WalletConnectPairing"],
             path: "Tests/TestingUtils"),
         .testTarget(
             name: "WalletConnectUtilsTests",

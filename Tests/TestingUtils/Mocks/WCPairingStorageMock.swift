@@ -1,32 +1,32 @@
 import WalletConnectPairing
 
-final class WCPairingStorageMock: WCPairingStorage {
+public final class WCPairingStorageMock: WCPairingStorage {
 
-    var onPairingExpiration: ((WCPairing) -> Void)?
+    public var onPairingExpiration: ((WCPairing) -> Void)?
 
     private(set) var pairings: [String: WCPairing] = [:]
 
-    func hasPairing(forTopic topic: String) -> Bool {
+    public func hasPairing(forTopic topic: String) -> Bool {
         pairings[topic] != nil
     }
 
-    func setPairing(_ pairing: WCPairing) {
+    public func setPairing(_ pairing: WCPairing) {
         pairings[pairing.topic] = pairing
     }
 
-    func getPairing(forTopic topic: String) -> WCPairing? {
+    public func getPairing(forTopic topic: String) -> WCPairing? {
         pairings[topic]
     }
 
-    func getAll() -> [WCPairing] {
+    public func getAll() -> [WCPairing] {
         Array(pairings.values)
     }
 
-    func delete(topic: String) {
+    public func delete(topic: String) {
         pairings[topic] = nil
     }
 
-    func deleteAll() {
+    public func deleteAll() {
         pairings = [:]
     }
 }
