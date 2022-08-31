@@ -33,7 +33,7 @@ struct NetworkingInteractorMock: NetworkInteracting {
     }
 
     func respondError(topic: String, requestId: RPCID, tag: Int, reason: Reason, envelopeType: Envelope.EnvelopeType) async throws {
-        
+
     }
 
     func requestNetworkAck(_ request: RPCRequest, topic: String, tag: Int) async throws {

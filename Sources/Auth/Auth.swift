@@ -25,7 +25,7 @@ public class Auth {
             account: config.account,
             relayClient: Relay.instance)
     }()
-    
+
     private static var config: Config?
 
     private init() { }

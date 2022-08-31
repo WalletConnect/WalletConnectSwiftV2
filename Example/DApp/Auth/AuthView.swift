@@ -98,4 +98,3 @@ struct CircleButtonStyle: ButtonStyle {
             .cornerRadius(8.0)
     }
 }
-

@@ -72,7 +72,7 @@ final class AuthTests: XCTestCase {
             }
         }
         .store(in: &publishers)
-        app.authResponsePublisher.sink { (id, result) in
+        app.authResponsePublisher.sink { (_, result) in
             guard case .success = result else { XCTFail(); return }
             responseExpectation.fulfill()
         }
@@ -90,7 +90,7 @@ final class AuthTests: XCTestCase {
             }
         }
         .store(in: &publishers)
-        app.authResponsePublisher.sink { (id, result) in
+        app.authResponsePublisher.sink { (_, result) in
             guard case .failure(let error) = result else { XCTFail(); return }
             XCTAssertEqual(error, .userRejeted)
             responseExpectation.fulfill()
@@ -111,7 +111,7 @@ final class AuthTests: XCTestCase {
             }
         }
         .store(in: &publishers)
-        app.authResponsePublisher.sink { (id, result) in
+        app.authResponsePublisher.sink { (_, result) in
             guard case .failure(let error) = result else { XCTFail(); return }
             XCTAssertEqual(error, .signatureVerificationFailed)
             responseExpectation.fulfill()

@@ -64,11 +64,9 @@ class AppRespondSubscriber {
         }.store(in: &publishers)
     }
 
-
     private func activatePairingIfNeeded(id: RPCID) {
         guard let record = rpcHistory.get(recordId: id) else { return }
         let pairingTopic = record.topic
-        print(pairingTopic)
         guard var pairing = pairingStorage.getPairing(forTopic: pairingTopic) else { return }
         if !pairing.active {
             pairing.activate()
