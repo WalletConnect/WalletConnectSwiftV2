@@ -3,7 +3,7 @@ import Auth
 
 final class WalletInteractor {
 
-    func pair(uri: String) async throws {
+    func pair(uri: WalletConnectURI) async throws {
         try await Auth.instance.pair(uri: uri)
     }
 

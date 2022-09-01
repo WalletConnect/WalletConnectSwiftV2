@@ -15,13 +15,14 @@ final class WalletPresenter: ObservableObject {
     }
 
     func didPastePairingURI() {
-        guard let uri = UIPasteboard.general.string else { return }
+        guard let string = UIPasteboard.general.string, let uri = WalletConnectURI(string: string) else { return }
         pair(uri: uri)
     }
 
     func didScanPairingURI() {
         router.presentScan { [unowned self] value in
-            self.pair(uri: value)
+            guard let uri = WalletConnectURI(string: value) else { return }
+            self.pair(uri: uri)
             self.router.dismiss()
         } onError: { error in
             print(error.localizedDescription)
@@ -53,7 +54,7 @@ private extension WalletPresenter {
         }.store(in: &disposeBag)
     }
 
-    func pair(uri: String) {
+    func pair(uri: WalletConnectURI) {
         Task(priority: .high) { [unowned self] in
             try await self.interactor.pair(uri: uri)
         }
