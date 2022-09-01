@@ -86,7 +86,7 @@ class NetworkingInteractor: NetworkInteracting {
         } else if let deserializedJsonRpcError: JSONRPCErrorResponse = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleJsonRpcErrorResponse(response: deserializedJsonRpcError)
         } else {
-            logger.error("Warning: Networking Interactor - Received unknown object type from networking relay")
+            logger.warn("Networking Interactor - Received unknown object type from networking relay")
         }
     }
 
