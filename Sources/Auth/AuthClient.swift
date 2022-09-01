@@ -11,7 +11,7 @@ import WalletConnectRelay
 /// Access via `Auth.instance`
 public class AuthClient {
     enum Errors: Error {
-        case malformedPairingURI
+        case pairingUriWrongApiParam
         case unknownWalletAddress
         case noPairingMatchingTopic
     }
@@ -91,22 +91,22 @@ public class AuthClient {
     /// Throws Error:
     /// - When URI is invalid format or missing params
     /// - When topic is already in use
-    public func pair(uri: String) async throws {
-        guard let pairingURI = WalletConnectURI(string: uri) else {
-            throw Errors.malformedPairingURI
+    public func pair(uri: WalletConnectURI) async throws {
+        guard uri.api == .auth else {
+            throw Errors.pairingUriWrongApiParam
         }
-        try await walletPairService.pair(pairingURI)
+        try await walletPairService.pair(uri)
     }
 
     /// For a dapp to send an authentication request to a wallet
     /// - Parameter params: Set of parameters required to request authentication
     ///
     /// - Returns: Pairing URI that should be shared with wallet out of bound. Common way is to present it as a QR code.
-    public func request(_ params: RequestParams) async throws -> String {
+    public func request(_ params: RequestParams) async throws -> WalletConnectURI {
         logger.debug("Requesting Authentication")
         let uri = try await appPairService.create()
         try await appRequestService.request(params: params, topic: uri.topic)
-        return uri.absoluteString
+        return uri
     }
 
     /// For a dapp to send an authentication request to a wallet

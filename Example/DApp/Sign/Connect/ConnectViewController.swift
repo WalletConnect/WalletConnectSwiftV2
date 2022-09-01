@@ -3,12 +3,12 @@ import UIKit
 import WalletConnectSign
 
 class ConnectViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
-    let uriString: String
+    let uri: WalletConnectURI
     let activePairings: [Pairing] = Sign.instance.getPairings()
     let segmentedControl = UISegmentedControl(items: ["Pairings", "New Pairing"])
 
-    init(uri: String) {
-        self.uriString = uri
+    init(uri: WalletConnectURI) {
+        self.uri = uri
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -27,7 +27,7 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
     override func viewDidLoad() {
         super.viewDidLoad()
         DispatchQueue.global().async { [unowned self] in
-            let qrImage = QRCodeGenerator.generateQRCode(from: uriString)
+            let qrImage = QRCodeGenerator.generateQRCode(from: uri.absoluteString)
             DispatchQueue.main.async { [self] in
                 self.connectView.qrCodeView.image = qrImage
                 self.connectView.copyButton.isHidden = false
@@ -56,11 +56,11 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
     }
 
     @objc func copyURI() {
-        UIPasteboard.general.string = uriString
+        UIPasteboard.general.string = uri.absoluteString
     }
 
     @objc func connectWithExampleWallet() {
-        let url = URL(string: "https://walletconnect.com/wc?uri=\(uriString)")!
+        let url = URL(string: "https://walletconnect.com/wc?uri=\(uri.absoluteString)")!
         DispatchQueue.main.async {
             UIApplication.shared.open(url, options: [:]) { [weak self] _ in
                 self?.dismiss(animated: true, completion: nil)

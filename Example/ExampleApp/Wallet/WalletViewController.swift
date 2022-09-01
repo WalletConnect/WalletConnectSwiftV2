@@ -45,7 +45,8 @@ final class WalletViewController: UIViewController {
     @objc
     private func showTextInput() {
         let alert = UIAlertController.createInputAlert { [weak self] inputText in
-            self?.pairClient(uri: inputText)
+            guard let self = self, let uri = WalletConnectURI(string: inputText) else { return }
+            self.pairClient(uri: uri)
         }
         present(alert, animated: true)
     }
@@ -119,7 +120,7 @@ final class WalletViewController: UIViewController {
     }
 
     @MainActor
-    private func pairClient(uri: String) {
+    private func pairClient(uri: WalletConnectURI) {
         print("[WALLET] Pairing to: \(uri)")
         Task {
             do {
@@ -201,7 +202,8 @@ extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
 extension WalletViewController: ScannerViewControllerDelegate {
 
     func didScan(_ code: String) {
-        pairClient(uri: code)
+        guard let uri = WalletConnectURI(string: code) else { return }
+        pairClient(uri: uri)
     }
 }
 

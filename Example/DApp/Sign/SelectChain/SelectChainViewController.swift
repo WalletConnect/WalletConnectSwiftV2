@@ -39,7 +39,7 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
         let namespaces: [String: ProposalNamespace] = ["eip155": ProposalNamespace(chains: blockchains, methods: methods, events: [], extensions: nil)]
         Task {
             let uri = try await Sign.instance.connect(requiredNamespaces: namespaces)
-            showConnectScreen(uriString: uri!)
+            showConnectScreen(uri: uri!)
         }
     }
 
@@ -48,9 +48,9 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
         UIApplication.shared.open(URL(string: "walletconnectwallet://")!)
     }
 
-    private func showConnectScreen(uriString: String) {
+    private func showConnectScreen(uri: WalletConnectURI) {
         DispatchQueue.main.async { [unowned self] in
-            let vc = UINavigationController(rootViewController: ConnectViewController(uri: uriString))
+            let vc = UINavigationController(rootViewController: ConnectViewController(uri: uri))
             present(vc, animated: true, completion: nil)
         }
     }

@@ -145,7 +145,7 @@ public final class SignClient {
     ///   - requiredNamespaces: required namespaces for a session
     ///   - topic: Optional parameter - use it if you already have an established pairing with peer client.
     /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
-    public func connect(requiredNamespaces: [String: ProposalNamespace], topic: String? = nil) async throws -> String? {
+    public func connect(requiredNamespaces: [String: ProposalNamespace], topic: String? = nil) async throws -> WalletConnectURI? {
         logger.debug("Connecting Application")
         if let topic = topic {
             guard let pairing = pairingEngine.getSettledPairing(for: topic) else {
@@ -157,7 +157,7 @@ public final class SignClient {
         } else {
             let pairingURI = try await pairingEngine.create()
             try await pairingEngine.propose(pairingTopic: pairingURI.topic, namespaces: requiredNamespaces, relay: pairingURI.relay)
-            return pairingURI.absoluteString
+            return pairingURI
         }
     }
 
@@ -168,11 +168,11 @@ public final class SignClient {
     /// Should Error:
     /// - When URI has invalid format or missing params
     /// - When topic is already in use
-    public func pair(uri: String) async throws {
-        guard let pairingURI = WalletConnectURI(string: uri) else {
-            throw WalletConnectError.malformedPairingURI
+    public func pair(uri: WalletConnectURI) async throws {
+        guard uri.api == .sign else {
+            throw WalletConnectError.pairingUriWrongApiParam
         }
-        try await pairEngine.pair(pairingURI)
+        try await pairEngine.pair(uri)
     }
 
     /// For a wallet to approve a session proposal.

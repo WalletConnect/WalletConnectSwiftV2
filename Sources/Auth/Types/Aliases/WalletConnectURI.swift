@@ -1,4 +1,4 @@
 import Foundation
 import WalletConnectUtils
 
-typealias WalletConnectURI = WalletConnectUtils.WalletConnectURI
+public typealias WalletConnectURI = WalletConnectUtils.WalletConnectURI
