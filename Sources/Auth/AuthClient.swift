@@ -11,7 +11,7 @@ import WalletConnectRelay
 /// Access via `Auth.instance`
 public class AuthClient {
     enum Errors: Error {
-        case malformedPairingURI
+        case pairingUriWrongApiParam
         case unknownWalletAddress
         case noPairingMatchingTopic
     }
@@ -92,6 +92,9 @@ public class AuthClient {
     /// - When URI is invalid format or missing params
     /// - When topic is already in use
     public func pair(uri: WalletConnectURI) async throws {
+        guard uri.api == .auth else {
+            throw Errors.pairingUriWrongApiParam
+        }
         try await walletPairService.pair(uri)
     }
 

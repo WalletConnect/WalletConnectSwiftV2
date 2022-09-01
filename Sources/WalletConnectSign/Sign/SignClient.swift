@@ -169,6 +169,9 @@ public final class SignClient {
     /// - When URI has invalid format or missing params
     /// - When topic is already in use
     public func pair(uri: WalletConnectURI) async throws {
+        guard uri.api == .sign else {
+            throw WalletConnectError.pairingUriWrongApiParam
+        }
         try await pairEngine.pair(uri)
     }
 
