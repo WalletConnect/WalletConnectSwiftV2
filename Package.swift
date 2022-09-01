@@ -21,7 +21,10 @@ let package = Package(
             targets: ["Auth"]),
         .library(
             name: "WalletConnectRouter",
-            targets: ["WalletConnectRouter"])
+            targets: ["WalletConnectRouter"]),
+        .library(
+            name: "WalletConnectNetworking",
+            targets: ["WalletConnectNetworking"]),
     ],
     dependencies: [
         .package(url: "https://github.com/flypaper0/Web3.swift", .branch("feature/eip-155"))
@@ -42,6 +45,7 @@ let package = Package(
                 "WalletConnectUtils",
                 "WalletConnectKMS",
                 "WalletConnectPairing",
+                "WalletConnectNetworking",
                 .product(name: "Web3", package: "Web3.swift")
             ],
             path: "Sources/Auth"),
@@ -65,6 +69,9 @@ let package = Package(
         .target(
             name: "Commons",
             dependencies: []),
+        .target(
+            name: "WalletConnectNetworking",
+            dependencies: ["JSONRPC", "WalletConnectKMS"]),
         .target(
             name: "WalletConnectRouter",
             dependencies: []),

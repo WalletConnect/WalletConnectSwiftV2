@@ -1,7 +1,8 @@
-import Combine
 import Foundation
-import WalletConnectUtils
+import Combine
 import JSONRPC
+import WalletConnectNetworking
+import WalletConnectUtils
 import WalletConnectKMS
 
 class WalletRequestSubscriber {

@@ -1,6 +1,7 @@
 import Foundation
-@testable import Auth
 import JSONRPC
+import WalletConnectNetworking
+@testable import Auth
 
 extension RequestSubscriptionPayload {
     static func stub(id: RPCID) -> RequestSubscriptionPayload {

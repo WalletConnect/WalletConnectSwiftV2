@@ -1,7 +1,8 @@
 import Foundation
+import JSONRPC
+import WalletConnectNetworking
 import WalletConnectUtils
 import WalletConnectKMS
-import JSONRPC
 
 actor AppRequestService {
     private let networkingInteractor: NetworkInteracting

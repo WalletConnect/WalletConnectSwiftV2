@@ -1,10 +1,11 @@
 import Foundation
 import XCTest
-@testable import Auth
+import JSONRPC
 import WalletConnectUtils
+import WalletConnectNetworking
+@testable import Auth
 @testable import WalletConnectKMS
 @testable import TestingUtils
-import JSONRPC
 
 class WalletRequestSubscriberTests: XCTestCase {
     var networkingInteractor: NetworkingInteractorMock!
