@@ -27,9 +27,9 @@ public class NetworkingInteractor: NetworkInteracting {
 
     public init(
         relayClient: RelayClient,
-         serializer: Serializing,
-         logger: ConsoleLogging,
-         rpcHistory: RPCHistory
+        serializer: Serializing,
+        logger: ConsoleLogging,
+        rpcHistory: RPCHistory
     ) {
         self.relayClient = relayClient
         self.serializer = serializer
@@ -89,11 +89,15 @@ public class NetworkingInteractor: NetworkInteracting {
         try await relayClient.publish(topic: topic, payload: message, tag: tag)
     }
 
+    public func respondSuccess(topic: String, requestId: RPCID, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {
+        let response = RPCResponse(id: requestId, result: true)
+        try await respond(topic: topic, response: response, tag: tag, envelopeType: envelopeType)
+    }
+
     public func respondError(topic: String, requestId: RPCID, tag: Int, reason: Reason, envelopeType: Envelope.EnvelopeType) async throws {
         let error = JSONRPCError(code: reason.code, message: reason.message)
         let response = RPCResponse(id: requestId, error: error)
-        let message = try! serializer.serialize(topic: topic, encodable: response, envelopeType: envelopeType)
-        try await relayClient.publish(topic: topic, payload: message, tag: tag)
+        try await respond(topic: topic, response: response, tag: tag, envelopeType: envelopeType)
     }
 
     private func manageSubscription(_ topic: String, _ encodedEnvelope: String) {

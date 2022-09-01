@@ -42,6 +42,7 @@ public struct AuthClientFactory {
                           pendingRequestsProvider: pendingRequestsProvider,
                           cleanupService: cleanupService,
                           logger: logger,
-                          pairingStorage: pairingStore, socketConnectionStatusPublisher: relayClient.socketConnectionStatusPublisher)
+                          pairingStorage: pairingStore,
+                          socketConnectionStatusPublisher: relayClient.socketConnectionStatusPublisher)
     }
 }

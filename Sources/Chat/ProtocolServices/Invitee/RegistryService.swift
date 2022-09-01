@@ -1,6 +1,7 @@
 import Foundation
 import WalletConnectUtils
 import WalletConnectKMS
+import WalletConnectNetworking
 
 actor RegistryService {
     let networkingInteractor: NetworkInteracting
