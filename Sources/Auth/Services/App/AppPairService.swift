@@ -18,7 +18,7 @@ actor AppPairService {
         try await networkingInteractor.subscribe(topic: topic)
         let symKey = try! kms.createSymmetricKey(topic)
         let pairing = WCPairing(topic: topic)
-        let uri = WalletConnectURI(topic: topic, symKey: symKey.hexRepresentation, relay: pairing.relay)
+        let uri = WalletConnectURI(topic: topic, symKey: symKey.hexRepresentation, relay: pairing.relay, api: .auth)
         pairingStorage.setPairing(pairing)
         return uri
     }
