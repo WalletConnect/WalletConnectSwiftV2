@@ -1,6 +1,8 @@
 import Foundation
-import WalletConnectUtils
 import Combine
+import JSONRPC
+import WalletConnectUtils
+import WalletConnectNetworking
 
 class MessagingService {
     enum Errors: Error {
@@ -31,8 +33,8 @@ class MessagingService {
         guard let authorAccount = thread?.selfAccount else { throw Errors.threadDoNotExist}
         let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
         let message = Message(topic: topic, message: messageString, authorAccount: authorAccount, timestamp: timestamp)
-        let request = JSONRPCRequest<ChatRequestParams>(params: .message(message))
-        try await networkingInteractor.request(request, topic: topic, envelopeType: .type0)
+        let request = RPCRequest(method: Message.method, params: message)
+        try await networkingInteractor.request(request, topic: topic, tag: Message.tag)
         Task(priority: .background) {
             await messagesStore.add(message)
             onMessage?(message)
@@ -41,38 +43,34 @@ class MessagingService {
 
     private func setUpResponseHandling() {
         networkingInteractor.responsePublisher
-            .sink { [unowned self] response in
-                switch response.requestParams {
-                case .message:
-                    handleMessageResponse(response)
-                default:
-                    return
-                }
+            .sink { [unowned self] payload in
+                logger.debug("Received Message response")
             }.store(in: &publishers)
     }
 
     private func setUpRequestHandling() {
-        networkingInteractor.requestPublisher.sink { [unowned self] subscriptionPayload in
-            switch subscriptionPayload.request.params {
-            case .message(var message):
-                message.topic = subscriptionPayload.topic
-                handleMessage(message, subscriptionPayload)
-            default:
-                return
+        networkingInteractor.requestPublisher.sink { [unowned self] payload in
+            do {
+                guard
+                    let requestId = payload.request.id, payload.request.method == Message.method,
+                    var message = try payload.request.params?.get(Message.self)
+                else { return }
+
+                message.topic = payload.topic
+
+                handleMessage(message, topic: payload.topic, requestId: requestId)
+            } catch {
+                logger.debug("Handling message response has failed")
             }
         }.store(in: &publishers)
     }
 
-    private func handleMessage(_ message: Message, _ payload: RequestSubscriptionPayload) {
+    private func handleMessage(_ message: Message, topic: String, requestId: RPCID) {
         Task(priority: .background) {
-            try await networkingInteractor.respondSuccess(payload: payload)
+            try await networkingInteractor.respondSuccess(topic: topic, requestId: requestId, tag: Message.tag)
             await messagesStore.add(message)
             logger.debug("Received message")
             onMessage?(message)
         }
-    }
-
-    private func handleMessageResponse(_ response: ChatResponse) {
-        logger.debug("Received Message response")
     }
 }

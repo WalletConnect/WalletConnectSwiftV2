@@ -36,15 +36,11 @@ let package = Package(
             path: "Sources/WalletConnectSign"),
         .target(
             name: "Chat",
-            dependencies: ["WalletConnectRelay", "WalletConnectUtils", "WalletConnectKMS"],
+            dependencies: ["WalletConnectNetworking"],
             path: "Sources/Chat"),
         .target(
             name: "Auth",
-            dependencies: [
-                "WalletConnectPairing",
-                "WalletConnectNetworking",
-                .product(name: "Web3", package: "Web3.swift")
-            ],
+            dependencies: ["WalletConnectPairing", "WalletConnectNetworking", .product(name: "Web3", package: "Web3.swift")],
             path: "Sources/Auth"),
         .target(
             name: "WalletConnectRelay",
@@ -68,12 +64,7 @@ let package = Package(
             dependencies: []),
         .target(
             name: "WalletConnectNetworking",
-            dependencies: [
-                "JSONRPC",
-                "WalletConnectKMS",
-                "WalletConnectRelay",
-                "WalletConnectUtils",
-            ]),
+            dependencies: ["JSONRPC", "WalletConnectKMS", "WalletConnectRelay", "WalletConnectUtils"]),
         .target(
             name: "WalletConnectRouter",
             dependencies: []),
@@ -94,7 +85,7 @@ let package = Package(
             dependencies: ["WalletConnectKMS", "WalletConnectUtils", "TestingUtils"]),
         .target(
             name: "TestingUtils",
-            dependencies: ["WalletConnectUtils", "WalletConnectKMS", "JSONRPC", "WalletConnectPairing"],
+            dependencies: ["WalletConnectPairing", "WalletConnectNetworking"],
             path: "Tests/TestingUtils"),
         .testTarget(
             name: "WalletConnectUtilsTests",
