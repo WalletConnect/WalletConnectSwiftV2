@@ -18,7 +18,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private let authCoordinator = AuthCoordinator()
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        Relay.configure(projectId: "8ba9ee138960775e5231b70cc5ef1c3a",socketFactory: SocketFactory())
+        Relay.configure(projectId: "8ba9ee138960775e5231b70cc5ef1c3a", socketFactory: SocketFactory())
 
         setupWindow(scene: scene)
     }

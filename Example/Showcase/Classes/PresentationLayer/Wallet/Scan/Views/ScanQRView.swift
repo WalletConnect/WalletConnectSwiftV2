@@ -10,17 +10,17 @@ final class ScanQRView: UIView {
     enum Errors: Error {
         case deviceNotFound
     }
-    
+
     weak var delegate: ScanQRViewDelegate?
-    
+
     private let targetSize = CGSize(
         width: UIScreen.main.bounds.width - 32.0,
         height: UIScreen.main.bounds.width - 32.0
     )
-    
+
     private var videoPreviewLayer: AVCaptureVideoPreviewLayer?
     private var captureSession: AVCaptureSession?
-    
+
     private lazy var borderView: UIView = {
         let borderView = ScanTargetView(radius: 24.0, color: .white, strokeWidth: 2.0, length: 36.0)
         borderView.alpha = 0.85
@@ -34,21 +34,21 @@ final class ScanQRView: UIView {
         bluredView.layer.mask = createMaskLayer()
         return bluredView
     }()
-    
+
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
+
         setupView()
         startCaptureSession()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     override func layoutSubviews() {
         super.layoutSubviews()
-        
+
         updateFrames()
         updateOrientation()
     }
@@ -61,7 +61,7 @@ final class ScanQRView: UIView {
 // MARK: AVCaptureMetadataOutputObjectsDelegate
 
 extension ScanQRView: AVCaptureMetadataOutputObjectsDelegate {
-    
+
     func metadataOutput(_ metadataOutput: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
         guard
             let metadataObject = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
@@ -76,14 +76,14 @@ extension ScanQRView: AVCaptureMetadataOutputObjectsDelegate {
 // MARK: Privates
 
 private extension ScanQRView {
-    
+
     private func setupView() {
         backgroundColor = .black
 
         addSubview(bluredView)
         addSubview(borderView)
     }
-    
+
     private func createMaskLayer() -> CAShapeLayer {
         let maskPath = UIBezierPath(rect: bounds)
         let rect = UIBezierPath(
@@ -98,62 +98,62 @@ private extension ScanQRView {
         )
         maskPath.append(rect)
         maskPath.usesEvenOddFillRule = true
-        
+
         let maskLayer = CAShapeLayer()
         maskLayer.path = maskPath.cgPath
         maskLayer.fillRule = .evenOdd
         return maskLayer
     }
-    
+
     private func startCaptureSession() {
         DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }
-            
+
             do {
                 let session = try self.createCaptureSession()
                 session.startRunning()
                 self.captureSession = session
-                
+
                 DispatchQueue.main.async { self.setupVideoPreviewLayer(with: session) }
             } catch {
                 DispatchQueue.main.async { self.delegate?.scanDidFail(with: error) }
             }
         }
     }
-    
+
     private func createCaptureSession() throws -> AVCaptureSession {
         guard let captureDevice = AVCaptureDevice.default(for: .video) else {
             throw Errors.deviceNotFound
         }
-        
+
         let input = try AVCaptureDeviceInput(device: captureDevice)
-        
+
         let session = AVCaptureSession()
         session.addInput(input)
-        
+
         let captureMetadataOutput = AVCaptureMetadataOutput()
         captureMetadataOutput.setMetadataObjectsDelegate(self, queue: .main)
         session.addOutput(captureMetadataOutput)
-        
+
         captureMetadataOutput.metadataObjectTypes = [.qr]
-        
+
         return session
     }
-    
+
     private func stopCaptureSession() {
         captureSession?.stopRunning()
         captureSession = nil
     }
-    
+
     private func setupVideoPreviewLayer(with session: AVCaptureSession) {
         let previewLayer = AVCaptureVideoPreviewLayer(session: session)
         previewLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
         previewLayer.frame = layer.bounds
         videoPreviewLayer = previewLayer
-        
+
         layer.insertSublayer(previewLayer, at: 0)
     }
-    
+
     private func updateFrames() {
         borderView.frame.size = targetSize
         borderView.center = center
@@ -161,13 +161,13 @@ private extension ScanQRView {
         bluredView.layer.mask = createMaskLayer()
         videoPreviewLayer?.frame = layer.bounds
     }
-    
+
     private func updateOrientation() {
         guard let connection = videoPreviewLayer?.connection else {
             return
         }
         let previewLayerConnection: AVCaptureConnection = connection
-        
+
         guard previewLayerConnection.isVideoOrientationSupported else {
             return
         }

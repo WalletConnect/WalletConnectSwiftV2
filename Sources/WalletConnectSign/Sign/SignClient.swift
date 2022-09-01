@@ -308,7 +308,6 @@ public final class SignClient {
         return WalletConnectUtils.JsonRpcRecord(id: record.id, topic: record.topic, request: request, response: record.response, chainId: record.chainId)
     }
 
-
 #if DEBUG
     /// Delete all stored data such as: pairings, sessions, keys
     ///

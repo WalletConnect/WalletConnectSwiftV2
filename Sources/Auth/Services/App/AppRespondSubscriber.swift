@@ -2,9 +2,11 @@ import Combine
 import Foundation
 import WalletConnectUtils
 import JSONRPC
+import WalletConnectPairing
 
 class AppRespondSubscriber {
     private let networkingInteractor: NetworkInteracting
+    private let pairingStorage: WCPairingStorage
     private let logger: ConsoleLogging
     private let rpcHistory: RPCHistory
     private let signatureVerifier: MessageSignatureVerifying
@@ -17,12 +19,14 @@ class AppRespondSubscriber {
          logger: ConsoleLogging,
          rpcHistory: RPCHistory,
          signatureVerifier: MessageSignatureVerifying,
-         messageFormatter: SIWEMessageFormatting) {
+         messageFormatter: SIWEMessageFormatting,
+         pairingStorage: WCPairingStorage) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.rpcHistory = rpcHistory
         self.signatureVerifier = signatureVerifier
         self.messageFormatter = messageFormatter
+        self.pairingStorage = pairingStorage
         subscribeForResponse()
     }
 
@@ -35,6 +39,7 @@ class AppRespondSubscriber {
                 let requestParams = request.params, request.method == "wc_authRequest"
             else { return }
 
+            activatePairingIfNeeded(id: requestId)
             networkingInteractor.unsubscribe(topic: subscriptionPayload.topic)
 
             if let errorResponse = response.error,
@@ -61,5 +66,16 @@ class AppRespondSubscriber {
             onResponse?(requestId, .success(cacao))
 
         }.store(in: &publishers)
+    }
+
+    private func activatePairingIfNeeded(id: RPCID) {
+        guard let record = rpcHistory.get(recordId: id) else { return }
+        let pairingTopic = record.topic
+        guard var pairing = pairingStorage.getPairing(forTopic: pairingTopic) else { return }
+        if !pairing.active {
+            pairing.activate()
+        } else {
+            try? pairing.updateExpiry()
+        }
     }
 }
