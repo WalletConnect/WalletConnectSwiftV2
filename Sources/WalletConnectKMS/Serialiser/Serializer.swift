@@ -2,8 +2,10 @@ import Foundation
 import WalletConnectUtils
 
 public class Serializer: Serializing {
+
     enum Errors: String, Error {
         case symmetricKeyForTopicNotFound
+        case publicKeyForTopicNotFound
     }
 
     private let kms: KeyManagementServiceProtocol
@@ -39,24 +41,17 @@ public class Serializer: Serializing {
     ///   - topic: Topic that is associated with a symetric key for decrypting particular codable object
     ///   - encodedEnvelope: Envelope to deserialize and decrypt
     /// - Returns: Deserialized object
-    public func tryDeserialize<T: Codable>(topic: String, encodedEnvelope: String) -> T? {
-        do {
-            let envelope = try Envelope(encodedEnvelope)
-            switch envelope.type {
-            case .type0:
-                let decodedType: T? = try handleType0Envelope(topic, envelope)
-                return decodedType
-            case .type1:
-                let decodedType: T? = try handleType1Envelope(topic, envelope)
-                return decodedType
-            }
-        } catch {
-            print(error)
-            return nil
+    public func deserialize<T: Codable>(topic: String, encodedEnvelope: String) throws -> T {
+        let envelope = try Envelope(encodedEnvelope)
+        switch envelope.type {
+        case .type0:
+            return try handleType0Envelope(topic, envelope)
+        case .type1(let peerPubKey):
+            return try handleType1Envelope(topic, peerPubKey: peerPubKey, sealbox: envelope.sealbox)
         }
     }
 
-    private func handleType0Envelope<T: Codable>(_ topic: String, _ envelope: Envelope) throws -> T? {
+    private func handleType0Envelope<T: Codable>(_ topic: String, _ envelope: Envelope) throws -> T {
         if let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) {
             return try decode(sealbox: envelope.sealbox, symmetricKey: symmetricKey)
         } else {
@@ -64,20 +59,15 @@ public class Serializer: Serializing {
         }
     }
 
-    private func handleType1Envelope<T: Codable>(_ topic: String, _ envelope: Envelope) throws -> T? {
-        guard let selfPubKey = kms.getPublicKey(for: topic),
-              case let .type1(peerPubKey) = envelope.type else { return nil }
-        do {
-            // self pub key is good
-            let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey.toHexString())
-            let decodedType: T? = try decode(sealbox: envelope.sealbox, symmetricKey: agreementKeys.sharedKey.rawRepresentation)
-            let newTopic = agreementKeys.derivedTopic()
-            try kms.setAgreementSecret(agreementKeys, topic: newTopic)
-            return decodedType
-        } catch {
-            print(error)
-        }
-        return nil
+    private func handleType1Envelope<T: Codable>(_ topic: String, peerPubKey: Data, sealbox: Data) throws -> T {
+        guard let selfPubKey = kms.getPublicKey(for: topic)
+        else { throw Errors.publicKeyForTopicNotFound }
+        
+        let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey.toHexString())
+        let decodedType: T = try decode(sealbox: sealbox, symmetricKey: agreementKeys.sharedKey.rawRepresentation)
+        let newTopic = agreementKeys.derivedTopic()
+        try kms.setAgreementSecret(agreementKeys, topic: newTopic)
+        return decodedType
     }
 
     private func decode<T: Codable>(sealbox: Data, symmetricKey: Data) throws -> T {

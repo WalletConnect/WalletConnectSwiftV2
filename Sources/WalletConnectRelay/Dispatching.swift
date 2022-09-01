@@ -65,26 +65,26 @@ final class Dispatcher: NSObject, Dispatching {
     }
 
     private func setUpWebSocketSession() {
-        socket.onText = { [weak self] in
-            self?.onMessage?($0)
+        socket.onText = { [unowned self] in
+            self.onMessage?($0)
         }
     }
 
     private func setUpSocketConnectionObserving() {
-        socket.onConnect = { [weak self] in
-            self?.dequeuePendingTextFrames()
-            self?.onConnect?()
+        socket.onConnect = { [unowned self] in
+            self.dequeuePendingTextFrames()
+            self.onConnect?()
         }
-        socket.onDisconnect = { [weak self] _ in
-            self?.onDisconnect?()
+        socket.onDisconnect = { [unowned self] _ in
+            self.onDisconnect?()
         }
     }
 
     private func dequeuePendingTextFrames() {
         while let frame = textFramesQueue.dequeue() {
-            send(frame) { error in
+            send(frame) { [unowned self] error in
                 if let error = error {
-                    print(error)
+                    self.logger.error(error.localizedDescription)
                 }
             }
         }

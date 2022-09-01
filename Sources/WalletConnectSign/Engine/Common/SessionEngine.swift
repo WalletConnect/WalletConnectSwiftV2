@@ -70,7 +70,7 @@ final class SessionEngine {
     }
 
     func request(_ request: Request) async throws {
-        print("will request on session topic: \(request.topic)")
+        logger.debug("will request on session topic: \(request.topic)")
         guard let session = sessionStore.getSession(forTopic: request.topic), session.acknowledged else {
             logger.debug("Could not find session for topic \(request.topic)")
             return // TODO: Marked to review on developer facing error cases
