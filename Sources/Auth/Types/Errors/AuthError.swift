@@ -1,4 +1,5 @@
 import Foundation
+import WalletConnectNetworking
 
 /// Authentication error
 public enum AuthError: Codable, Equatable, Error {

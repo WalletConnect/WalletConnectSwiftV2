@@ -1,7 +1,8 @@
 import Foundation
-import WalletConnectKMS
 import JSONRPC
+import WalletConnectKMS
 import WalletConnectUtils
+import WalletConnectNetworking
 
 actor WalletRespondService {
     enum Errors: Error {

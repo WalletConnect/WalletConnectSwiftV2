@@ -3,6 +3,7 @@ import Combine
 @testable import Auth
 import JSONRPC
 import WalletConnectKMS
+import WalletConnectNetworking
 
 struct NetworkingInteractorMock: NetworkInteracting {
 
