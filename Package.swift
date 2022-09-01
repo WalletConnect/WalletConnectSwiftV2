@@ -41,9 +41,6 @@ let package = Package(
         .target(
             name: "Auth",
             dependencies: [
-                "WalletConnectRelay",
-                "WalletConnectUtils",
-                "WalletConnectKMS",
                 "WalletConnectPairing",
                 "WalletConnectNetworking",
                 .product(name: "Web3", package: "Web3.swift")
@@ -71,7 +68,12 @@ let package = Package(
             dependencies: []),
         .target(
             name: "WalletConnectNetworking",
-            dependencies: ["JSONRPC", "WalletConnectKMS"]),
+            dependencies: [
+                "JSONRPC",
+                "WalletConnectKMS",
+                "WalletConnectRelay",
+                "WalletConnectUtils",
+            ]),
         .target(
             name: "WalletConnectRouter",
             dependencies: []),

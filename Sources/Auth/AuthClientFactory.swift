@@ -3,6 +3,7 @@ import WalletConnectRelay
 import WalletConnectUtils
 import WalletConnectKMS
 import WalletConnectPairing
+import WalletConnectNetworking
 
 public struct AuthClientFactory {
 
