@@ -30,7 +30,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         let uri = context.url.absoluteString.replacingOccurrences(of: "showcase://wc?uri=", with: "")
         Task {
-            try await Auth.instance.pair(uri: uri)
+            try await Auth.instance.pair(uri: WalletConnectURI(string: uri)!)
         }
     }
 }
