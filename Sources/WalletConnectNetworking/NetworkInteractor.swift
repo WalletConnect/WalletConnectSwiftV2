@@ -79,6 +79,16 @@ public class NetworkingInteractor: NetworkInteracting {
             .eraseToAnyPublisher()
     }
 
+    public func responceErrorSubscription(on request: NetworkRequest) -> AnyPublisher<ResponseSubscriptionErrorPayload, Never> {
+        return responsePublisher
+            .filter { $0.request.method == request.method }
+            .compactMap { (_, _, rpcResponce) in
+                guard let id = rpcResponce.id, let error = rpcResponce.error else { return nil }
+                return ResponseSubscriptionErrorPayload(id: id, error: error)
+            }
+            .eraseToAnyPublisher()
+    }
+
     public func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {
         try rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
         let message = try! serializer.serialize(topic: topic, encodable: request, envelopeType: envelopeType)

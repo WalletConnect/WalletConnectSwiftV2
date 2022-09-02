@@ -35,7 +35,8 @@ class WalletRequestSubscriberTests: XCTestCase {
             messageExpectation.fulfill()
         }
 
-        networkingInteractor.requestPublisherSubject.send(RequestSubscriptionPayload.stub(id: expectedRequestId))
+        let request = RPCRequest(method: AuthNetworkRequest.request.method, params: AuthRequestParams.stub(id: expectedRequestId), id: expectedRequestId.right!)
+        networkingInteractor.requestPublisherSubject.send(("123", request))
 
         wait(for: [messageExpectation], timeout: defaultTimeout)
         XCTAssertEqual(message, expectedMessage)

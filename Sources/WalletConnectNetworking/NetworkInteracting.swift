@@ -21,6 +21,8 @@ public protocol NetworkInteracting {
     func responseSubscription<Request: Codable, Response: Codable>(
         on request: NetworkRequest
     ) -> AnyPublisher<ResponseSubscriptionPayload<Request, Response>, Never>
+
+    func responceErrorSubscription(on request: NetworkRequest) -> AnyPublisher<ResponseSubscriptionErrorPayload, Never>
 }
 
 extension NetworkInteracting {

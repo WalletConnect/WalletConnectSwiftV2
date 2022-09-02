@@ -14,8 +14,8 @@ public class NetworkingInteractorMock: NetworkInteracting {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
     }
 
-    private let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest), Never>()
-    private let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse), Never>()
+    public let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest), Never>()
+    public let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse), Never>()
 
     private var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest), Never> {
         requestPublisherSubject.eraseToAnyPublisher()
@@ -44,6 +44,16 @@ public class NetworkingInteractorMock: NetworkInteracting {
                     let request = try? rpcRequest.params?.get(Request.self),
                     let response = try? rpcResponce.result?.get(Response.self) else { return nil }
                 return ResponseSubscriptionPayload(id: id, topic: topic, request: request, response: response)
+            }
+            .eraseToAnyPublisher()
+    }
+
+    public func responceErrorSubscription(on request: NetworkRequest) -> AnyPublisher<ResponseSubscriptionErrorPayload, Never> {
+        return responsePublisher
+            .filter { $0.request.method == request.method }
+            .compactMap { (_, _, rpcResponce) in
+                guard let id = rpcResponce.id, let error = rpcResponce.error else { return nil }
+                return ResponseSubscriptionErrorPayload(id: id, error: error)
             }
             .eraseToAnyPublisher()
     }
