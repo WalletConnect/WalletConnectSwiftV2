@@ -3,6 +3,7 @@ import WalletConnectRelay
 import WalletConnectUtils
 import WalletConnectKMS
 import WalletConnectPairing
+import WalletConnectNetworking
 
 public struct AuthClientFactory {
 
@@ -41,6 +42,7 @@ public struct AuthClientFactory {
                           pendingRequestsProvider: pendingRequestsProvider,
                           cleanupService: cleanupService,
                           logger: logger,
-                          pairingStorage: pairingStore, socketConnectionStatusPublisher: relayClient.socketConnectionStatusPublisher)
+                          pairingStorage: pairingStore,
+                          socketConnectionStatusPublisher: relayClient.socketConnectionStatusPublisher)
     }
 }

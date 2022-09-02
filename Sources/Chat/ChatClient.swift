@@ -2,6 +2,7 @@ import Foundation
 import WalletConnectUtils
 import WalletConnectKMS
 import WalletConnectRelay
+import WalletConnectNetworking
 import Combine
 
 public class ChatClient {
@@ -16,7 +17,7 @@ public class ChatClient {
     private let kms: KeyManagementService
     private let threadStore: Database<Thread>
     private let messagesStore: Database<Message>
-    private let invitePayloadStore: CodableStore<(RequestSubscriptionPayload)>
+    private let invitePayloadStore: CodableStore<RequestSubscriptionPayload>
 
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
@@ -47,7 +48,7 @@ public class ChatClient {
          kms: KeyManagementService,
          threadStore: Database<Thread>,
          messagesStore: Database<Message>,
-         invitePayloadStore: CodableStore<(RequestSubscriptionPayload)>,
+         invitePayloadStore: CodableStore<RequestSubscriptionPayload>,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
     ) {
         self.registry = registry
@@ -121,7 +122,7 @@ public class ChatClient {
     public func getInvites(account: Account) -> [Invite] {
         var invites = [Invite]()
         invitePayloadStore.getAll().forEach {
-            guard case .invite(let invite) = $0.request.params else {return}
+            guard let invite = try? $0.request.params?.get(Invite.self) else {return}
             invites.append(invite)
         }
         return invites

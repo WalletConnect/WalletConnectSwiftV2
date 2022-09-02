@@ -1,6 +1,6 @@
 import Foundation
 
-protocol Reason {
+public protocol Reason {
     var code: Int { get }
     var message: String { get }
 }

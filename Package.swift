@@ -21,7 +21,10 @@ let package = Package(
             targets: ["Auth"]),
         .library(
             name: "WalletConnectRouter",
-            targets: ["WalletConnectRouter"])
+            targets: ["WalletConnectRouter"]),
+        .library(
+            name: "WalletConnectNetworking",
+            targets: ["WalletConnectNetworking"]),
     ],
     dependencies: [
         .package(url: "https://github.com/flypaper0/Web3.swift", .branch("feature/eip-155"))
@@ -33,17 +36,11 @@ let package = Package(
             path: "Sources/WalletConnectSign"),
         .target(
             name: "Chat",
-            dependencies: ["WalletConnectRelay", "WalletConnectUtils", "WalletConnectKMS"],
+            dependencies: ["WalletConnectNetworking"],
             path: "Sources/Chat"),
         .target(
             name: "Auth",
-            dependencies: [
-                "WalletConnectRelay",
-                "WalletConnectUtils",
-                "WalletConnectKMS",
-                "WalletConnectPairing",
-                .product(name: "Web3", package: "Web3.swift")
-            ],
+            dependencies: ["WalletConnectPairing", "WalletConnectNetworking", .product(name: "Web3", package: "Web3.swift")],
             path: "Sources/Auth"),
         .target(
             name: "WalletConnectRelay",
@@ -66,6 +63,9 @@ let package = Package(
             name: "Commons",
             dependencies: []),
         .target(
+            name: "WalletConnectNetworking",
+            dependencies: ["JSONRPC", "WalletConnectKMS", "WalletConnectRelay", "WalletConnectUtils"]),
+        .target(
             name: "WalletConnectRouter",
             dependencies: []),
         .testTarget(
@@ -85,7 +85,7 @@ let package = Package(
             dependencies: ["WalletConnectKMS", "WalletConnectUtils", "TestingUtils"]),
         .target(
             name: "TestingUtils",
-            dependencies: ["WalletConnectUtils", "WalletConnectKMS", "JSONRPC", "WalletConnectPairing"],
+            dependencies: ["WalletConnectPairing", "WalletConnectNetworking"],
             path: "Tests/TestingUtils"),
         .testTarget(
             name: "WalletConnectUtilsTests",
