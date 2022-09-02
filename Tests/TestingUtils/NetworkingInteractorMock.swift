@@ -14,14 +14,38 @@ public class NetworkingInteractorMock: NetworkInteracting {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
     }
 
-    public var responsePublisher: AnyPublisher<ResponseSubscriptionPayload, Never> {
+    private let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest), Never>()
+    private let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse), Never>()
+
+    private var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest), Never> {
+        requestPublisherSubject.eraseToAnyPublisher()
+    }
+
+    private var responsePublisher: AnyPublisher<(topic: String, request: RPCRequest, response: RPCResponse), Never> {
         responsePublisherSubject.eraseToAnyPublisher()
     }
-    public let responsePublisherSubject = PassthroughSubject<ResponseSubscriptionPayload, Never>()
 
-    public let requestPublisherSubject = PassthroughSubject<RequestSubscriptionPayload, Never>()
-    public var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {
-        requestPublisherSubject.eraseToAnyPublisher()
+    public func requestSubscription<Request: Codable>(on request: NetworkRequest) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never> {
+        return requestPublisher
+            .filter { $0.request.method == request.method }
+            .compactMap { topic, rpcRequest in
+                guard let id = rpcRequest.id, let request = try? rpcRequest.params?.get(Request.self) else { return nil }
+                return RequestSubscriptionPayload(id: id, topic: topic, request: request)
+            }
+            .eraseToAnyPublisher()
+    }
+
+    public func responseSubscription<Request: Codable, Response: Codable>(on request: NetworkRequest) -> AnyPublisher<ResponseSubscriptionPayload<Request, Response>, Never> {
+        return responsePublisher
+            .filter { $0.request.method == request.method }
+            .compactMap { topic, rpcRequest, rpcResponce in
+                guard
+                    let id = rpcRequest.id,
+                    let request = try? rpcRequest.params?.get(Request.self),
+                    let response = try? rpcResponce.result?.get(Response.self) else { return nil }
+                return ResponseSubscriptionPayload(id: id, topic: topic, request: request, response: response)
+            }
+            .eraseToAnyPublisher()
     }
 
     public func subscribe(topic: String) async throws {

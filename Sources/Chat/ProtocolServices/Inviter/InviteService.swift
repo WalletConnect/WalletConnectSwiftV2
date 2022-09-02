@@ -42,7 +42,7 @@ class InviteService {
         // overrides on invite toipic
         try kms.setSymmetricKey(symKeyI.sharedKey, for: inviteTopic)
 
-        let request = RPCRequest(method: Invite.method, params: invite)
+        let request = RPCRequest(method: ChatRequest.invite.method, params: invite)
 
         // 2. Proposer subscribes to topic R which is the hash of the derived symKey
         let responseTopic = symKeyI.derivedTopic()
@@ -50,33 +50,23 @@ class InviteService {
         try kms.setSymmetricKey(symKeyI.sharedKey, for: responseTopic)
 
         try await networkingInteractor.subscribe(topic: responseTopic)
-        try await networkingInteractor.request(request, topic: inviteTopic, tag: Invite.tag, envelopeType: .type1(pubKey: selfPubKeyY.rawRepresentation))
+        try await networkingInteractor.request(request, topic: inviteTopic, tag: ChatRequest.invite.tag, envelopeType: .type1(pubKey: selfPubKeyY.rawRepresentation))
 
         logger.debug("invite sent on topic: \(inviteTopic)")
     }
 
     private func setUpResponseHandling() {
-        networkingInteractor.responsePublisher
-            .sink { [unowned self] payload in
-                do {
-                    guard
-                        let requestId = payload.response.id,
-                        let request = rpcHistory.get(recordId: requestId)?.request,
-                        let requestParams = request.params, request.method == Invite.method
-                    else { return }
+        networkingInteractor.responseSubscription(on: ChatRequest.invite)
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<Invite, InviteResponse>) in
+                logger.debug("Invite has been accepted")
 
-                    guard let inviteResponse = try payload.response.result?.get(InviteResponse.self)
-                    else { return }
-
-                    let inviteParams = try requestParams.get(Invite.self)
-
-                    logger.debug("Invite has been accepted")
-
-                    Task(priority: .background) {
-                        try await createThread(selfPubKeyHex: inviteParams.publicKey, peerPubKey: inviteResponse.publicKey, account: inviteParams.account, peerAccount: peerAccount)
-                    }
-                } catch {
-                    logger.debug("Handling invite response has failed")
+                Task(priority: .background) {
+                    try await createThread(
+                        selfPubKeyHex: payload.request.publicKey,
+                        peerPubKey: payload.response.publicKey,
+                        account: payload.request.account,
+                        peerAccount: peerAccount
+                    )
                 }
             }.store(in: &publishers)
     }

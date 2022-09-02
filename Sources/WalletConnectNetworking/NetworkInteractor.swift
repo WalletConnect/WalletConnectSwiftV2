@@ -60,9 +60,8 @@ public class NetworkingInteractor: NetworkInteracting {
         return requestPublisher
             .filter { $0.request.method == request.method }
             .compactMap { topic, rpcRequest in
-                guard let request = try? rpcRequest.params?.get(Request.self) else { return nil }
-
-                return RequestSubscriptionPayload(topic: topic, request: request)
+                guard let id = rpcRequest.id, let request = try? rpcRequest.params?.get(Request.self) else { return nil }
+                return RequestSubscriptionPayload(id: id, topic: topic, request: request)
             }
             .eraseToAnyPublisher()
     }
@@ -72,10 +71,10 @@ public class NetworkingInteractor: NetworkInteracting {
             .filter { $0.request.method == request.method }
             .compactMap { topic, rpcRequest, rpcResponce in
                 guard
+                    let id = rpcRequest.id,
                     let request = try? rpcRequest.params?.get(Request.self),
                     let response = try? rpcResponce.result?.get(Response.self) else { return nil }
-
-                return ResponseSubscriptionPayload(topic: topic, request: request, response: response)
+                return ResponseSubscriptionPayload(id: id, topic: topic, request: request, response: response)
             }
             .eraseToAnyPublisher()
     }
