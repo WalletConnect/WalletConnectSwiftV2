@@ -22,7 +22,7 @@ public protocol NetworkInteracting {
         on request: ProtocolMethod
     ) -> AnyPublisher<ResponseSubscriptionPayload<Request, Response>, Never>
 
-    func responceErrorSubscription(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionErrorPayload, Never>
+    func responseErrorSubscription(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionErrorPayload, Never>
 }
 
 extension NetworkInteracting {
