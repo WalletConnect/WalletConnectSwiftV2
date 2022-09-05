@@ -17,7 +17,7 @@ public class ChatClient {
     private let kms: KeyManagementService
     private let threadStore: Database<Thread>
     private let messagesStore: Database<Message>
-    private let invitePayloadStore: CodableStore<RequestSubscriptionPayload>
+    private let invitePayloadStore: CodableStore<RequestSubscriptionPayload<Invite>>
 
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
@@ -48,7 +48,7 @@ public class ChatClient {
          kms: KeyManagementService,
          threadStore: Database<Thread>,
          messagesStore: Database<Message>,
-         invitePayloadStore: CodableStore<RequestSubscriptionPayload>,
+         invitePayloadStore: CodableStore<RequestSubscriptionPayload<Invite>>,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
     ) {
         self.registry = registry
@@ -120,12 +120,7 @@ public class ChatClient {
     }
 
     public func getInvites(account: Account) -> [Invite] {
-        var invites = [Invite]()
-        invitePayloadStore.getAll().forEach {
-            guard let invite = try? $0.request.params?.get(Invite.self) else {return}
-            invites.append(invite)
-        }
-        return invites
+        return invitePayloadStore.getAll().map { $0.request }
     }
 
     public func getThreads() async -> [Thread] {

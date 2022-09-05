@@ -17,7 +17,7 @@ public struct ChatClientFactory {
         let serialiser = Serializer(kms: kms)
         let rpcHistory = RPCHistory(keyValueStore: CodableStore<RPCHistory.Record>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
         let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serialiser, logger: logger, rpcHistory: rpcHistory)
-        let invitePayloadStore = CodableStore<RequestSubscriptionPayload>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
+        let invitePayloadStore = CodableStore<RequestSubscriptionPayload<Invite>>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.invite.rawValue)
         let registryService = RegistryService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToRegistryRecordStore: topicToRegistryRecordStore)
         let threadStore = Database<Thread>(keyValueStorage: keyValueStorage, identifier: StorageDomainIdentifiers.threads.rawValue)
         let resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, threadStore: threadStore, logger: logger)

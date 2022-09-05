@@ -61,7 +61,7 @@ class AppRespondSubscriberTests: XCTestCase {
         let cacao = Cacao(header: header, payload: payload, signature: cacaoSignature)
 
         let response = RPCResponse(id: requestId, result: cacao)
-        networkingInteractor.responsePublisherSubject.send(ResponseSubscriptionPayload(topic: topic, response: response))
+        networkingInteractor.responsePublisherSubject.send((topic, request, response))
 
         wait(for: [messageExpectation], timeout: defaultTimeout)
         XCTAssertEqual(result, .failure(AuthError.messageCompromised))

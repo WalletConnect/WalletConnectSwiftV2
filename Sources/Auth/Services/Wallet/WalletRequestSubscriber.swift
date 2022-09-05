@@ -30,27 +30,19 @@ class WalletRequestSubscriber {
     private func subscribeForRequest() {
         guard let address = address else { return }
 
-        networkingInteractor.requestPublisher.sink { [unowned self] payload in
-
-            logger.debug("WalletRequestSubscriber: Received request")
-
-            guard let requestId = payload.request.id, payload.request.method == "wc_authRequest"
-            else { return }
-
-            guard let authRequestParams = try? payload.request.params?.get(AuthRequestParams.self)
-            else { return respondError(.malformedRequestParams, topic: payload.topic, requestId: requestId) }
-
-            let message = messageFormatter.formatMessage(from: authRequestParams.payloadParams, address: address)
-
-            onRequest?(.init(id: requestId, message: message))
-        }.store(in: &publishers)
+        networkingInteractor.requestSubscription(on: AuthProtocolMethod.request)
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<AuthRequestParams>) in
+                logger.debug("WalletRequestSubscriber: Received request")
+                let message = messageFormatter.formatMessage(from: payload.request.payloadParams, address: address)
+                onRequest?(.init(id: payload.id, message: message))
+            }.store(in: &publishers)
     }
 
     private func respondError(_ error: AuthError, topic: String, requestId: RPCID) {
         guard let pubKey = kms.getAgreementSecret(for: topic)?.publicKey
         else { return logger.error("Agreement key for topic \(topic) not found") }
 
-        let tag = AuthResponseParams.tag
+        let tag = AuthProtocolMethod.request.tag
         let envelopeType = Envelope.EnvelopeType.type1(pubKey: pubKey.rawRepresentation)
 
         Task(priority: .high) {
