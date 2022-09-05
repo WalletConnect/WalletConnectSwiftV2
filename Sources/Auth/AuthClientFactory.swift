@@ -31,13 +31,14 @@ public struct AuthClientFactory {
         let walletRespondService = WalletRespondService(networkingInteractor: networkingInteractor, logger: logger, kms: kms, rpcHistory: history)
         let pendingRequestsProvider = PendingRequestsProvider(rpcHistory: history)
         let cleanupService = CleanupService(pairingStore: pairingStore, kms: kms)
+        let deletePairingService = DeletePairingService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore, logger: logger)
 
         return AuthClient(appPairService: appPairService,
                           appRequestService: appRequestService,
                           appRespondSubscriber: appRespondSubscriber,
                           walletPairService: walletPairService,
                           walletRequestSubscriber: walletRequestSubscriber,
-                          walletRespondService: walletRespondService,
+                          walletRespondService: walletRespondService, deletePairingService: deletePairingService,
                           account: account,
                           pendingRequestsProvider: pendingRequestsProvider,
                           cleanupService: cleanupService,

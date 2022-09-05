@@ -6,7 +6,7 @@ import WalletConnectKMS
 import WalletConnectUtils
 import WalletConnectPairing
 
-class DisconnectPairService {
+class DeletePairingService {
     enum Errors: Error {
         case pairingNotFound
     }
@@ -34,34 +34,5 @@ class DisconnectPairService {
         pairingStorage.delete(topic: topic)
         kms.deleteSymmetricKey(for: topic)
         networkingInteractor.unsubscribe(topic: topic)
-    }
-}
-
-
-enum AuthProtocolMethods: String {
-    case authRequest = "wc_authRequest"
-    case pairingDelete = "wc_pairingDelete"
-    case pairingPing = "wc_pairingPing"
-
-    var requestTag: Int {
-        switch self {
-        case .authRequest:
-            return 3000
-        case .pairingDelete:
-            return 1000
-        case .pairingPing:
-            return 1002
-        }
-    }
-
-    var responseTag: Int {
-        switch self {
-        case .authRequest:
-            return 3001
-        case .pairingDelete:
-            return 1001
-        case .pairingPing:
-            return 1003
-        }
     }
 }

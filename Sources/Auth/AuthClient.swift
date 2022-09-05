@@ -46,6 +46,7 @@ public class AuthClient {
     private var authRequestPublisherSubject = PassthroughSubject<AuthRequest, Never>()
     private let appPairService: AppPairService
     private let appRequestService: AppRequestService
+    private let deletePairingService: DeletePairingService
     private let appRespondSubscriber: AppRespondSubscriber
     private let walletPairService: WalletPairService
     private let walletRequestSubscriber: WalletRequestSubscriber
@@ -61,6 +62,7 @@ public class AuthClient {
          walletPairService: WalletPairService,
          walletRequestSubscriber: WalletRequestSubscriber,
          walletRespondService: WalletRespondService,
+         deletePairingService: DeletePairingService,
          account: Account?,
          pendingRequestsProvider: PendingRequestsProvider,
          cleanupService: CleanupService,
@@ -80,7 +82,7 @@ public class AuthClient {
         self.logger = logger
         self.pairingStorage = pairingStorage
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
-
+        self.deletePairingService = deletePairingService
         setUpPublishers()
     }
 
@@ -133,6 +135,10 @@ public class AuthClient {
     /// - Parameter requestId: authentication request id
     public func reject(requestId: RPCID) async throws {
         try await walletRespondService.respondError(requestId: requestId)
+    }
+
+    public func disconnect(topic: String) async throws {
+        try await deletePairingService.delete(topic: topic)
     }
 
     /// Query pending authentication requests
