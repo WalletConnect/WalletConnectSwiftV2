@@ -14,14 +14,6 @@ public struct Message: Codable, Equatable {
         case timestamp
     }
 
-    static var tag: Int {
-        return 2002
-    }
-
-    static var method: String {
-        return "wc_chatMessage"
-    }
-
     init(topic: String? = nil, message: String, authorAccount: Account, timestamp: Int64) {
         self.topic = topic
         self.message = message

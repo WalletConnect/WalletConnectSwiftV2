@@ -26,10 +26,11 @@ final class SignCoordinator {
             icons: ["https://avatars.githubusercontent.com/u/37784886"])
 
         Sign.configure(metadata: metadata)
-
+#if DEBUG
         if CommandLine.arguments.contains("-cleanInstall") {
             try? Sign.instance.cleanup()
         }
+#endif
 
         Sign.instance.sessionDeletePublisher
             .receive(on: DispatchQueue.main)

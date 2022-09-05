@@ -32,41 +32,36 @@ class AppRespondSubscriber {
     }
 
     private func subscribeForResponse() {
-        networkingInteractor.responsePublisher.sink { [unowned self] subscriptionPayload in
-            let response = subscriptionPayload.response
-            guard
-                let requestId = response.id,
-                let request = rpcHistory.get(recordId: requestId)?.request,
-                let requestParams = request.params, request.method == "wc_authRequest"
-            else { return }
+        networkingInteractor.responseErrorSubscription(on: AuthProtocolMethod.request)
+            .sink { [unowned self] payload in
+                guard let error = AuthError(code: payload.error.code) else { return }
+                onResponse?(payload.id, .failure(error))
+            }.store(in: &publishers)
 
-            activatePairingIfNeeded(id: requestId)
-            networkingInteractor.unsubscribe(topic: subscriptionPayload.topic)
+        networkingInteractor.responseSubscription(on: AuthProtocolMethod.request)
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<AuthRequestParams, Cacao>)  in
 
-            if let errorResponse = response.error,
-               let error = AuthError(code: errorResponse.code) {
-                onResponse?(requestId, .failure(error))
-                return
-            }
+                activatePairingIfNeeded(id: payload.id)
+                networkingInteractor.unsubscribe(topic: payload.topic)
 
-            guard
-                let cacao = try? response.result?.get(Cacao.self),
-                let address = try? DIDPKH(iss: cacao.payload.iss).account.address,
-                let message = try? messageFormatter.formatMessage(from: cacao.payload)
-            else { self.onResponse?(requestId, .failure(.malformedResponseParams)); return }
+                let requestId = payload.id
+                let cacao = payload.response
+                let requestPayload = payload.request
 
-            guard let requestPayload = try? requestParams.get(AuthRequestParams.self)
-            else { self.onResponse?(requestId, .failure(.malformedRequestParams)); return }
+                guard
+                    let address = try? DIDPKH(iss: cacao.payload.iss).account.address,
+                    let message = try? messageFormatter.formatMessage(from: cacao.payload)
+                else { self.onResponse?(requestId, .failure(.malformedResponseParams)); return }
 
-            guard messageFormatter.formatMessage(from: requestPayload.payloadParams, address: address) == message
-            else { self.onResponse?(requestId, .failure(.messageCompromised)); return }
+                guard messageFormatter.formatMessage(from: requestPayload.payloadParams, address: address) == message
+                else { self.onResponse?(requestId, .failure(.messageCompromised)); return }
 
-            guard let _ = try? signatureVerifier.verify(signature: cacao.signature, message: message, address: address)
-            else { self.onResponse?(requestId, .failure(.signatureVerificationFailed)); return }
+                guard let _ = try? signatureVerifier.verify(signature: cacao.signature, message: message, address: address)
+                else { self.onResponse?(requestId, .failure(.signatureVerificationFailed)); return }
 
-            onResponse?(requestId, .success(cacao))
+                onResponse?(requestId, .success(cacao))
 
-        }.store(in: &publishers)
+            }.store(in: &publishers)
     }
 
     private func activatePairingIfNeeded(id: RPCID) {

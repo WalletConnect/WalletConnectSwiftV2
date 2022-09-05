@@ -43,7 +43,8 @@ public final class RPCHistory {
         storage.set(record, forKey: "\(record.id)")
     }
 
-    public func resolve(_ response: RPCResponse) throws {
+    @discardableResult
+    public func resolve(_ response: RPCResponse) throws -> Record {
         guard let id = response.id else {
             throw HistoryError.unidentifiedResponse
         }
@@ -55,6 +56,7 @@ public final class RPCHistory {
         }
         record.response = response
         storage.set(record, forKey: "\(record.id)")
+        return record
     }
 
     public func deleteAll(forTopic topic: String) {

@@ -12,6 +12,7 @@ public class NetworkingInteractor: NetworkInteracting {
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
 
+<<<<<<< HEAD:Sources/WalletConnectNetworking/NetworkingInteractor.swift
     private let requestPublisherSubject = PassthroughSubject<RequestSubscriptionPayload, Never>()
     private let responsePublisherSubject = PassthroughSubject<ResponseSubscriptionPayload, Never>()
 
@@ -20,6 +21,16 @@ public class NetworkingInteractor: NetworkInteracting {
     }
 
     public var responsePublisher: AnyPublisher<ResponseSubscriptionPayload, Never> {
+=======
+    private let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest), Never>()
+    private let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse), Never>()
+
+    private var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest), Never> {
+        requestPublisherSubject.eraseToAnyPublisher()
+    }
+
+    private var responsePublisher: AnyPublisher<(topic: String, request: RPCRequest, response: RPCResponse), Never> {
+>>>>>>> 7cb497caa4e4587bb940bd35ece55b709f14aac5:Sources/WalletConnectNetworking/NetworkInteractor.swift
         responsePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -56,6 +67,42 @@ public class NetworkingInteractor: NetworkInteracting {
         }
     }
 
+<<<<<<< HEAD:Sources/WalletConnectNetworking/NetworkingInteractor.swift
+=======
+    public func requestSubscription<Request: Codable>(on request: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never> {
+        return requestPublisher
+            .filter { $0.request.method == request.method }
+            .compactMap { topic, rpcRequest in
+                guard let id = rpcRequest.id, let request = try? rpcRequest.params?.get(Request.self) else { return nil }
+                return RequestSubscriptionPayload(id: id, topic: topic, request: request)
+            }
+            .eraseToAnyPublisher()
+    }
+
+    public func responseSubscription<Request: Codable, Response: Codable>(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionPayload<Request, Response>, Never> {
+        return responsePublisher
+            .filter { $0.request.method == request.method }
+            .compactMap { topic, rpcRequest, rpcResponse in
+                guard
+                    let id = rpcRequest.id,
+                    let request = try? rpcRequest.params?.get(Request.self),
+                    let response = try? rpcResponse.result?.get(Response.self) else { return nil }
+                return ResponseSubscriptionPayload(id: id, topic: topic, request: request, response: response)
+            }
+            .eraseToAnyPublisher()
+    }
+
+    public func responseErrorSubscription(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionErrorPayload, Never> {
+        return responsePublisher
+            .filter { $0.request.method == request.method }
+            .compactMap { (_, _, rpcResponse) in
+                guard let id = rpcResponse.id, let error = rpcResponse.error else { return nil }
+                return ResponseSubscriptionErrorPayload(id: id, error: error)
+            }
+            .eraseToAnyPublisher()
+    }
+
+>>>>>>> 7cb497caa4e4587bb940bd35ece55b709f14aac5:Sources/WalletConnectNetworking/NetworkInteractor.swift
     public func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {
         try rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
         let message = try! serializer.serialize(topic: topic, encodable: request, envelopeType: envelopeType)
@@ -113,8 +160,7 @@ public class NetworkingInteractor: NetworkInteracting {
     private func handleRequest(topic: String, request: RPCRequest) {
         do {
             try rpcHistory.set(request, forTopic: topic, emmitedBy: .remote)
-            let payload = RequestSubscriptionPayload(topic: topic, request: request)
-            requestPublisherSubject.send(payload)
+            requestPublisherSubject.send((topic, request))
         } catch {
             logger.debug(error)
         }
@@ -124,7 +170,7 @@ public class NetworkingInteractor: NetworkInteracting {
         do {
             try rpcHistory.resolve(response)
             let record = rpcHistory.get(recordId: response.id!)!
-            responsePublisherSubject.send(ResponseSubscriptionPayload(topic: record.topic, response: response))
+            responsePublisherSubject.send((record.topic, record.request, response))
         } catch {
             logger.debug("Handle json rpc response error: \(error)")
         }
