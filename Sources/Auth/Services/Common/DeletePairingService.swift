@@ -28,8 +28,8 @@ class DeletePairingService {
         guard pairingStorage.hasPairing(forTopic: topic) else { throw Errors.pairingNotFound}
         let reason = AuthError.userDisconnected
         logger.debug("Will delete pairing for reason: message: \(reason.message) code: \(reason.code)")
-        let request = RPCRequest(method: AuthProtocolMethods.pairingDelete.rawValue, params: reason)
-        try await networkingInteractor.request(request, topic: topic, tag: AuthProtocolMethods.pairingDelete.requestTag)
+        let request = RPCRequest(method: AuthProtocolMethod.pairingDelete.rawValue, params: reason)
+        try await networkingInteractor.request(request, topic: topic, tag: AuthProtocolMethod.pairingDelete.requestTag)
         pairingStorage.delete(topic: topic)
         kms.deleteSymmetricKey(for: topic)
         networkingInteractor.unsubscribe(topic: topic)
