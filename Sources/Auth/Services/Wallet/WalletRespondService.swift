@@ -33,7 +33,7 @@ actor WalletRespondService {
         let didpkh = DIDPKH(account: account)
         let cacao = CacaoFormatter().format(authRequestParams, signature, didpkh)
         let response = RPCResponse(id: requestId, result: cacao)
-        try await networkingInteractor.respond(topic: topic, response: response, tag: AuthProtocolMethod.request.tag, envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
+        try await networkingInteractor.respond(topic: topic, response: response, tag: AuthProtocolMethod.authRequest.responseTag, envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
     }
 
     func respondError(requestId: RPCID) async throws {
@@ -42,7 +42,7 @@ actor WalletRespondService {
 
         try kms.setAgreementSecret(keys, topic: topic)
 
-        let tag = AuthProtocolMethod.request.tag
+        let tag = AuthProtocolMethod.authRequest.responseTag
         let error = AuthError.userRejeted
         let envelopeType = Envelope.EnvelopeType.type1(pubKey: keys.publicKey.rawRepresentation)
         try await networkingInteractor.respondError(topic: topic, requestId: requestId, tag: tag, reason: error, envelopeType: envelopeType)

@@ -34,7 +34,7 @@ class MessagingService {
         let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
         let message = Message(topic: topic, message: messageString, authorAccount: authorAccount, timestamp: timestamp)
         let request = RPCRequest(method: ChatProtocolMethod.message.method, params: message)
-        try await networkingInteractor.request(request, topic: topic, tag: ChatProtocolMethod.message.tag)
+        try await networkingInteractor.request(request, topic: topic, tag: ChatProtocolMethod.message.requestTag)
         Task(priority: .background) {
             await messagesStore.add(message)
             onMessage?(message)
@@ -59,7 +59,7 @@ class MessagingService {
 
     private func handleMessage(_ message: Message, topic: String, requestId: RPCID) {
         Task(priority: .background) {
-            try await networkingInteractor.respondSuccess(topic: topic, requestId: requestId, tag: ChatProtocolMethod.message.tag)
+            try await networkingInteractor.respondSuccess(topic: topic, requestId: requestId, tag: ChatProtocolMethod.message.responseTag)
             await messagesStore.add(message)
             logger.debug("Received message")
             onMessage?(message)

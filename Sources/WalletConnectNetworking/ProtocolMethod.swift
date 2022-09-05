@@ -2,5 +2,6 @@ import Foundation
 
 public protocol ProtocolMethod {
     var method: String { get }
-    var tag: Int { get }
+    var requestTag: Int { get }
+    var responseTag: Int { get }
 }

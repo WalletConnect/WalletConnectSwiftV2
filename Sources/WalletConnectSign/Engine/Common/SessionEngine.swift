@@ -44,15 +44,6 @@ final class SessionEngine {
         sessionStore.getAll().map {$0.publicRepresentation()}
     }
 
-    func delete(topic: String) async throws {
-        let reasonCode = ReasonCode.userDisconnected
-        let reason = SessionType.Reason(code: reasonCode.code, message: reasonCode.message)
-        logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
-        try await networkingInteractor.request(.wcSessionDelete(reason), onTopic: topic)
-        sessionStore.delete(topic: topic)
-        networkingInteractor.unsubscribe(topic: topic)
-    }
-
     func ping(topic: String, completion: @escaping (Result<Void, Error>) -> Void) {
         guard sessionStore.hasSession(forTopic: topic) else {
             logger.debug("Could not find session to ping for topic \(topic)")
