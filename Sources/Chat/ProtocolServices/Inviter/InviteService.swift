@@ -42,7 +42,7 @@ class InviteService {
         // overrides on invite toipic
         try kms.setSymmetricKey(symKeyI.sharedKey, for: inviteTopic)
 
-        let request = RPCRequest(method: ChatRequest.invite.method, params: invite)
+        let request = RPCRequest(method: ChatProtocolMethod.invite.method, params: invite)
 
         // 2. Proposer subscribes to topic R which is the hash of the derived symKey
         let responseTopic = symKeyI.derivedTopic()
@@ -50,13 +50,13 @@ class InviteService {
         try kms.setSymmetricKey(symKeyI.sharedKey, for: responseTopic)
 
         try await networkingInteractor.subscribe(topic: responseTopic)
-        try await networkingInteractor.request(request, topic: inviteTopic, tag: ChatRequest.invite.tag, envelopeType: .type1(pubKey: selfPubKeyY.rawRepresentation))
+        try await networkingInteractor.request(request, topic: inviteTopic, tag: ChatProtocolMethod.invite.tag, envelopeType: .type1(pubKey: selfPubKeyY.rawRepresentation))
 
         logger.debug("invite sent on topic: \(inviteTopic)")
     }
 
     private func setUpResponseHandling() {
-        networkingInteractor.responseSubscription(on: ChatRequest.invite)
+        networkingInteractor.responseSubscription(on: ChatProtocolMethod.invite)
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<Invite, InviteResponse>) in
                 logger.debug("Invite has been accepted")
 

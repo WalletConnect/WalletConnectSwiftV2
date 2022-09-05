@@ -25,7 +25,7 @@ public class NetworkingInteractorMock: NetworkInteracting {
         responsePublisherSubject.eraseToAnyPublisher()
     }
 
-    public func requestSubscription<Request: Codable>(on request: NetworkRequest) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never> {
+    public func requestSubscription<Request: Codable>(on request: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never> {
         return requestPublisher
             .filter { $0.request.method == request.method }
             .compactMap { topic, rpcRequest in
@@ -35,7 +35,7 @@ public class NetworkingInteractorMock: NetworkInteracting {
             .eraseToAnyPublisher()
     }
 
-    public func responseSubscription<Request: Codable, Response: Codable>(on request: NetworkRequest) -> AnyPublisher<ResponseSubscriptionPayload<Request, Response>, Never> {
+    public func responseSubscription<Request: Codable, Response: Codable>(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionPayload<Request, Response>, Never> {
         return responsePublisher
             .filter { $0.request.method == request.method }
             .compactMap { topic, rpcRequest, rpcResponce in
@@ -48,7 +48,7 @@ public class NetworkingInteractorMock: NetworkInteracting {
             .eraseToAnyPublisher()
     }
 
-    public func responceErrorSubscription(on request: NetworkRequest) -> AnyPublisher<ResponseSubscriptionErrorPayload, Never> {
+    public func responceErrorSubscription(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionErrorPayload, Never> {
         return responsePublisher
             .filter { $0.request.method == request.method }
             .compactMap { (_, _, rpcResponce) in

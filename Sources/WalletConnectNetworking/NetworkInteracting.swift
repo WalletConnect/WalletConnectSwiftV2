@@ -15,14 +15,14 @@ public protocol NetworkInteracting {
     func respondError(topic: String, requestId: RPCID, tag: Int, reason: Reason, envelopeType: Envelope.EnvelopeType) async throws
 
     func requestSubscription<Request: Codable>(
-        on request: NetworkRequest
+        on request: ProtocolMethod
     ) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never>
 
     func responseSubscription<Request: Codable, Response: Codable>(
-        on request: NetworkRequest
+        on request: ProtocolMethod
     ) -> AnyPublisher<ResponseSubscriptionPayload<Request, Response>, Never>
 
-    func responceErrorSubscription(on request: NetworkRequest) -> AnyPublisher<ResponseSubscriptionErrorPayload, Never>
+    func responceErrorSubscription(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionErrorPayload, Never>
 }
 
 extension NetworkInteracting {

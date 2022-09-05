@@ -1,7 +1,7 @@
 import Foundation
 import WalletConnectNetworking
 
-enum ChatRequest: NetworkRequest {
+enum ChatProtocolMethod: ProtocolMethod {
     case invite
     case message
 

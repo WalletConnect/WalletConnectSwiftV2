@@ -1,7 +1,7 @@
 import Foundation
 import WalletConnectNetworking
 
-enum AuthNetworkRequest: NetworkRequest {
+enum AuthProtocolMethod: ProtocolMethod {
     case request
 
     var method: String {
