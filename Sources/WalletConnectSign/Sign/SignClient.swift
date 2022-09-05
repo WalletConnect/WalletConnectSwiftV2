@@ -91,6 +91,7 @@ public final class SignClient {
     private let pairEngine: PairEngine
     private let sessionEngine: SessionEngine
     private let approveEngine: ApproveEngine
+    private let disconnectService: DisconnectService
     private let nonControllerSessionStateMachine: NonControllerSessionStateMachine
     private let controllerSessionStateMachine: ControllerSessionStateMachine
     private let history: JsonRpcHistory
@@ -119,6 +120,7 @@ public final class SignClient {
          approveEngine: ApproveEngine,
          nonControllerSessionStateMachine: NonControllerSessionStateMachine,
          controllerSessionStateMachine: ControllerSessionStateMachine,
+         disconnectService: DisconnectService,
          history: JsonRpcHistory,
          cleanupService: CleanupService
     ) {
@@ -132,7 +134,7 @@ public final class SignClient {
         self.controllerSessionStateMachine = controllerSessionStateMachine
         self.history = history
         self.cleanupService = cleanupService
-
+        self.disconnectService = disconnectService
         setUpConnectionObserving()
         setUpEnginesCallbacks()
     }
@@ -267,7 +269,7 @@ public final class SignClient {
     /// - Parameters:
     ///   - topic: Session topic that you want to delete
     public func disconnect(topic: String) async throws {
-        try await sessionEngine.delete(topic: topic)
+        try await disconnectService.disconnect(topic: topic)
     }
 
     /// Query sessions
