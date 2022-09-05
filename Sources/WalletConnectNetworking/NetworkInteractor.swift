@@ -12,16 +12,6 @@ public class NetworkingInteractor: NetworkInteracting {
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
 
-<<<<<<< HEAD:Sources/WalletConnectNetworking/NetworkingInteractor.swift
-    private let requestPublisherSubject = PassthroughSubject<RequestSubscriptionPayload, Never>()
-    private let responsePublisherSubject = PassthroughSubject<ResponseSubscriptionPayload, Never>()
-
-    public var requestPublisher: AnyPublisher<RequestSubscriptionPayload, Never> {
-        requestPublisherSubject.eraseToAnyPublisher()
-    }
-
-    public var responsePublisher: AnyPublisher<ResponseSubscriptionPayload, Never> {
-=======
     private let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest), Never>()
     private let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse), Never>()
 
@@ -30,7 +20,6 @@ public class NetworkingInteractor: NetworkInteracting {
     }
 
     private var responsePublisher: AnyPublisher<(topic: String, request: RPCRequest, response: RPCResponse), Never> {
->>>>>>> 7cb497caa4e4587bb940bd35ece55b709f14aac5:Sources/WalletConnectNetworking/NetworkInteractor.swift
         responsePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -67,8 +56,6 @@ public class NetworkingInteractor: NetworkInteracting {
         }
     }
 
-<<<<<<< HEAD:Sources/WalletConnectNetworking/NetworkingInteractor.swift
-=======
     public func requestSubscription<Request: Codable>(on request: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never> {
         return requestPublisher
             .filter { $0.request.method == request.method }
@@ -102,7 +89,6 @@ public class NetworkingInteractor: NetworkInteracting {
             .eraseToAnyPublisher()
     }
 
->>>>>>> 7cb497caa4e4587bb940bd35ece55b709f14aac5:Sources/WalletConnectNetworking/NetworkInteractor.swift
     public func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {
         try rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
         let message = try! serializer.serialize(topic: topic, encodable: request, envelopeType: envelopeType)
