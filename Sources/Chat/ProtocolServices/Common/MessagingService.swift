@@ -43,7 +43,7 @@ class MessagingService {
 
     private func setUpResponseHandling() {
         networkingInteractor.responsePublisher
-            .sink { [unowned self] payload in
+            .sink { [unowned self] _ in
                 logger.debug("Received Message response")
             }.store(in: &publishers)
     }
