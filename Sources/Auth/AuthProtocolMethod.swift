@@ -1,9 +1,14 @@
 import Foundation
+import WalletConnectNetworking
 
-enum AuthProtocolMethods: String {
+enum AuthProtocolMethod: String, ProtocolMethod {
     case authRequest = "wc_authRequest"
     case pairingDelete = "wc_pairingDelete"
     case pairingPing = "wc_pairingPing"
+
+    var method: String {
+        return self.rawValue
+    }
 
     var requestTag: Int {
         switch self {

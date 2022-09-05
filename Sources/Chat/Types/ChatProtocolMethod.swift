@@ -5,12 +5,21 @@ enum ChatProtocolMethod: ProtocolMethod {
     case invite
     case message
 
-    var tag: Int {
+    var requestTag: Int {
         switch self {
         case .invite:
-            return 2002
+            return 2000
         case .message:
             return 2002
+        }
+    }
+    
+    var responseTag: Int {
+        switch self {
+        case .invite:
+            return 2001
+        case .message:
+            return 2003
         }
     }
 
