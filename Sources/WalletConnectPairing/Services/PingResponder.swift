@@ -18,7 +18,7 @@ class PingResponder {
         networkingInteractor.requestSubscription(on: PairingProtocolMethod.ping)
             .sink { [unowned self]  (payload: RequestSubscriptionPayload<PairingPingParams>) in
                 logger.debug("Responding for pairing ping")
-                Task {
+                Task(priority: .high) {
                     try? await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, tag: PairingProtocolMethod.ping.responseTag)
                 }
             }
