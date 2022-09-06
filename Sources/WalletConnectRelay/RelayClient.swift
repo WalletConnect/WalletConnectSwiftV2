@@ -87,7 +87,7 @@ public final class RelayClient {
         keychainStorage: KeychainStorageProtocol = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk"),
         socketFactory: WebSocketFactory,
         socketConnectionType: SocketConnectionType = .automatic,
-        logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off)
+        logger: ConsoleLogging = ConsoleLogger(loggingLevel: .debug)
     ) {
         let socketAuthenticator = SocketAuthenticator(
             clientIdStorage: ClientIdStorage(keychain: keychainStorage),

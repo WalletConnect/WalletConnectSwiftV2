@@ -48,7 +48,7 @@ private struct SIWEMessage: Equatable {
     let domain: String
     let uri: String // aud
     let address: String
-    let version: Int
+    let version: String
     let nonce: String
     let chainId: String
     let iat: String
