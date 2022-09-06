@@ -32,6 +32,7 @@ public struct AuthClientFactory {
         let pendingRequestsProvider = PendingRequestsProvider(rpcHistory: history)
         let cleanupService = CleanupService(pairingStore: pairingStore, kms: kms)
         let deletePairingService = DeletePairingService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore, logger: logger)
+        let pingService = PairingPingService(pairingStorage: pairingStore, networkingInteractor: networkingInteractor, logger: logger)
 
         return AuthClient(appPairService: appPairService,
                           appRequestService: appRequestService,
@@ -44,6 +45,7 @@ public struct AuthClientFactory {
                           cleanupService: cleanupService,
                           logger: logger,
                           pairingStorage: pairingStore,
-                          socketConnectionStatusPublisher: relayClient.socketConnectionStatusPublisher)
+                          socketConnectionStatusPublisher: relayClient.socketConnectionStatusPublisher,
+                          pingService: pingService)
     }
 }
