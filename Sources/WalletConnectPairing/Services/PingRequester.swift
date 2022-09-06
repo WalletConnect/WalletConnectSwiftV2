@@ -2,7 +2,7 @@ import Foundation
 import WalletConnectNetworking
 import JSONRPC
 
-class PingService {
+class PingRequester {
     private let pairingStorage: WCPairingStorage
     private let networkingInteractor: NetworkInteracting
 
