@@ -3,6 +3,7 @@ import Combine
 import WalletConnectPairing
 import WalletConnectUtils
 import WalletConnectKMS
+import WalletConnectNetworking
 
 final class PairingEngine {
 

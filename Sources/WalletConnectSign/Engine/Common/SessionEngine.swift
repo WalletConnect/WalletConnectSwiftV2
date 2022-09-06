@@ -7,7 +7,6 @@ import WalletConnectNetworking
 
 final class SessionEngine {
     enum Errors: Error {
-        case respondError(payload: SubscriptionPayload, reason: ReasonCode)
         case sessionNotFound(topic: String)
     }
 

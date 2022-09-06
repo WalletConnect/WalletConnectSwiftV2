@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import JSONRPC
 import WalletConnectUtils
 import WalletConnectKMS
 import WalletConnectPairing
@@ -12,7 +13,6 @@ final class ApproveEngine {
         case proposalPayloadsNotFound
         case pairingNotFound
         case agreementMissingOrInvalid
-        case respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode)
     }
 
     var onSessionProposal: ((Session.Proposal) -> Void)?
@@ -24,7 +24,7 @@ final class ApproveEngine {
     private let networkingInteractor: NetworkInteracting
     private let pairingStore: WCPairingStorage
     private let sessionStore: WCSessionStorage
-    private let proposalPayloadsStore: CodableStore<WCRequestSubscriptionPayload>
+    private let proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<WCRequest>>
     private let sessionToPairingTopic: CodableStore<String>
     private let metadata: AppMetadata
     private let kms: KeyManagementServiceProtocol
@@ -34,7 +34,7 @@ final class ApproveEngine {
 
     init(
         networkingInteractor: NetworkInteracting,
-        proposalPayloadsStore: CodableStore<WCRequestSubscriptionPayload>,
+        proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<WCRequest>>,
         sessionToPairingTopic: CodableStore<String>,
         metadata: AppMetadata,
         kms: KeyManagementServiceProtocol,
@@ -57,7 +57,7 @@ final class ApproveEngine {
     func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace]) async throws {
         let payload = try proposalPayloadsStore.get(key: proposerPubKey)
 
-        guard let payload = payload, case .sessionPropose(let proposal) = payload.wcRequest.params else {
+        guard let payload = payload, case .sessionPropose(let proposal) = payload.request else {
             throw Errors.wrongRequestParams
         }
 
@@ -80,14 +80,13 @@ final class ApproveEngine {
             throw Errors.relayNotFound
         }
 
-        let proposeResponse = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
-        let response = JSONRPCResponse<AnyCodable>(id: payload.wcRequest.id, result: AnyCodable(proposeResponse))
-
         guard var pairing = pairingStore.getPairing(forTopic: payload.topic) else {
             throw Errors.pairingNotFound
         }
 
-        try await networkingInteractor.respond(topic: payload.topic, response: .response(response), tag: payload.wcRequest.responseTag)
+        let result = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
+        let response = RPCResponse(id: payload.id, result: result)
+        try await networkingInteractor.respond(topic: payload.topic, response: response, tag: WCRequest.Method.sessionPropose.responseTag)
 
         try pairing.updateExpiry()
         pairingStore.setPairing(pairing)
@@ -100,7 +99,7 @@ final class ApproveEngine {
             throw Errors.proposalPayloadsNotFound
         }
         proposalPayloadsStore.delete(forKey: proposerPubKey)
-        try await networkingInteractor.respondError(payload: payload, reason: reason)
+        try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, tag: WCRequest.Method.sessionPropose.responseTag, reason: reason)
         // TODO: Delete pairing if inactive 
     }
 
@@ -141,7 +140,8 @@ final class ApproveEngine {
         try await networkingInteractor.subscribe(topic: topic)
         sessionStore.setSession(session)
 
-        try await networkingInteractor.request(.wcSessionSettle(settleParams), onTopic: topic)
+        let request = RPCRequest(method: WCRequest.Method.sessionSettle.method, params: WCRequest.sessionSettle(settleParams))
+        try await networkingInteractor.request(request, topic: topic, tag: WCRequest.Method.sessionSettle.requestTag)
         onSessionSettle?(session.publicRepresentation())
     }
 }
@@ -151,40 +151,34 @@ final class ApproveEngine {
 private extension ApproveEngine {
 
     func setupNetworkingSubscriptions() {
-        networkingInteractor.responsePublisher
-            .sink { [unowned self] response in
-                switch response.requestParams {
+        networkingInteractor.responseSubscription(on: nil)
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<WCRequest, JsonRpcResult>) in
+                switch payload.request {
                 case .sessionPropose(let proposal):
-                    handleSessionProposeResponse(response: response, proposal: proposal)
+                    handleSessionProposeResponse(payload: payload, proposal: proposal)
                 case .sessionSettle:
-                    handleSessionSettleResponse(response: response)
+                    handleSessionSettleResponse(payload: payload)
                 default:
                     break
                 }
             }.store(in: &publishers)
 
-        networkingInteractor.wcRequestPublisher
-            .sink { [unowned self] subscriptionPayload in
-                do {
-                    switch subscriptionPayload.wcRequest.params {
-                    case .sessionPropose(let proposal):
-                        try handleSessionProposeRequest(payload: subscriptionPayload, proposal: proposal)
-                    case .sessionSettle(let settleParams):
-                        try handleSessionSettleRequest(payload: subscriptionPayload, settleParams: settleParams)
-                    default: return
-                    }
-                } catch Errors.respondError(let payload, let reason) {
-                    respondError(payload: payload, reason: reason)
-                } catch {
-                    logger.error("Unexpected Error: \(error.localizedDescription)")
+        networkingInteractor.requestSubscription(on: nil)
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<WCRequest>) in
+                switch payload.request {
+                case .sessionPropose(let proposal):
+                    handleSessionProposeRequest(payload: payload, proposal: proposal)
+                case .sessionSettle(let params):
+                    handleSessionSettleRequest(payload: payload, params: params)
+                default: return
                 }
             }.store(in: &publishers)
     }
 
-    func respondError(payload: SubscriptionPayload, reason: ReasonCode) {
+    func respondError(payload: SubscriptionPayload, reason: ReasonCode, tag: Int) {
         Task {
             do {
-                try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, tag: <#T##Int#>, reason: reason)
+                try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, tag: tag, reason: reason)
             } catch {
                 logger.error("Respond Error failed with: \(error.localizedDescription)")
             }
@@ -199,12 +193,12 @@ private extension ApproveEngine {
 
     // MARK: SessionProposeResponse
     // TODO: Move to Non-Controller SettleEngine
-    func handleSessionProposeResponse(response: WCResponse, proposal: SessionType.ProposeParams) {
+    func handleSessionProposeResponse(payload: ResponseSubscriptionPayload<WCRequest, JsonRpcResult>, proposal: SessionType.ProposeParams) {
         do {
             let sessionTopic = try handleProposeResponse(
-                pairingTopic: response.topic,
+                pairingTopic: payload.topic,
                 proposal: proposal,
-                result: response.result
+                result: payload.response
             )
             settlingProposal = proposal
 
@@ -260,48 +254,55 @@ private extension ApproveEngine {
 
     // MARK: SessionSettleResponse
 
-    func handleSessionSettleResponse(response: WCResponse) {
-        guard let session = sessionStore.getSession(forTopic: response.topic) else { return }
-        switch response.result {
+    func handleSessionSettleResponse(payload: ResponseSubscriptionPayload<WCRequest, JsonRpcResult>) {
+        guard let session = sessionStore.getSession(forTopic: payload.topic) else { return }
+        switch payload.response {
         case .response:
             logger.debug("Received session settle response")
-            guard var session = sessionStore.getSession(forTopic: response.topic) else { return }
+            guard var session = sessionStore.getSession(forTopic: payload.topic) else { return }
             session.acknowledge()
             sessionStore.setSession(session)
         case .error(let error):
             logger.error("Error - session rejected, Reason: \(error)")
-            networkingInteractor.unsubscribe(topic: response.topic)
-            sessionStore.delete(topic: response.topic)
-            kms.deleteAgreementSecret(for: response.topic)
+            networkingInteractor.unsubscribe(topic: payload.topic)
+            sessionStore.delete(topic: payload.topic)
+            kms.deleteAgreementSecret(for: payload.topic)
             kms.deletePrivateKey(for: session.publicKey!)
         }
     }
 
     // MARK: SessionProposeRequest
 
-    func handleSessionProposeRequest(payload: WCRequestSubscriptionPayload, proposal: SessionType.ProposeParams) throws {
+    func handleSessionProposeRequest(payload: RequestSubscriptionPayload<WCRequest>, proposal: SessionType.ProposeParams) {
         logger.debug("Received Session Proposal")
-        do { try Namespace.validate(proposal.requiredNamespaces) } catch { throw Errors.respondError(payload: payload, reason: .invalidUpdateRequest) }
+        do { try Namespace.validate(proposal.requiredNamespaces) } catch {
+            return respondError(payload: payload, reason: .invalidUpdateRequest, tag: WCRequest.Method.sessionPropose.responseTag)
+        }
         proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
         onSessionProposal?(proposal.publicRepresentation())
     }
 
     // MARK: SessionSettleRequest
-    func handleSessionSettleRequest(payload: WCRequestSubscriptionPayload, settleParams: SessionType.SettleParams) throws {
+    func handleSessionSettleRequest(payload: RequestSubscriptionPayload<WCRequest>, params: SessionType.SettleParams) {
         logger.debug("Did receive session settle request")
 
-        guard let proposedNamespaces = settlingProposal?.requiredNamespaces
-        else { throw Errors.respondError(payload: payload, reason: .invalidUpdateRequest) }
+        let tag = WCRequest.Method.sessionSettle.responseTag
+
+        guard let proposedNamespaces = settlingProposal?.requiredNamespaces else {
+            return respondError(payload: payload, reason: .invalidUpdateRequest, tag: tag)
+        }
 
         settlingProposal = nil
 
-        let sessionNamespaces = settleParams.namespaces
+        let sessionNamespaces = params.namespaces
 
         do {
             try Namespace.validate(sessionNamespaces)
             try Namespace.validateApproved(sessionNamespaces, against: proposedNamespaces)
         } catch WalletConnectError.unsupportedNamespace(let reason) {
-            throw Errors.respondError(payload: payload, reason: reason)
+            return respondError(payload: payload, reason: reason, tag: tag)
+        } catch {
+            return respondError(payload: payload, reason: .invalidUpdateRequest, tag: tag)
         }
 
         let topic = payload.topic
@@ -311,20 +312,22 @@ private extension ApproveEngine {
             metadata: metadata
         )
         if let pairingTopic = try? sessionToPairingTopic.get(key: topic) {
-            updatePairingMetadata(topic: pairingTopic, metadata: settleParams.controller.metadata)
+            updatePairingMetadata(topic: pairingTopic, metadata: params.controller.metadata)
         }
 
         let session = WCSession(
             topic: topic,
             timestamp: Date(),
             selfParticipant: selfParticipant,
-            peerParticipant: settleParams.controller,
-            settleParams: settleParams,
+            peerParticipant: params.controller,
+            settleParams: params,
             requiredNamespaces: proposedNamespaces,
             acknowledged: true
         )
         sessionStore.setSession(session)
-        networkingInteractor.respondSuccess(for: payload)
+        Task(priority: .high) {
+            try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, tag: tag)
+        }
         onSessionSettle?(session.publicRepresentation())
     }
 }
