@@ -131,6 +131,6 @@ final class AuthTests: XCTestCase {
                 pingExpectation.fulfill()
             }
             .store(in: &publishers)
-        wait(for: [pingExpectation], timeout: 3)
+        wait(for: [pingExpectation], timeout: 5)
     }
 }
