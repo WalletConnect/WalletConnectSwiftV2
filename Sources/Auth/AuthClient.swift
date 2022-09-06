@@ -177,5 +177,9 @@ public class AuthClient {
         walletRequestSubscriber.onRequest = { [unowned self] request in
             authRequestPublisherSubject.send(request)
         }
+
+        pingService.onResponse = { [unowned self] topic in
+            pingResponsePublisherSubject.send(topic)
+        }
     }
 }

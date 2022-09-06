@@ -119,4 +119,18 @@ final class AuthTests: XCTestCase {
         .store(in: &publishers)
         wait(for: [responseExpectation], timeout: 2)
     }
+
+    func testPing() async {
+        let pingExpectation = expectation(description: "expects ping response")
+        let uri = try! await app.request(RequestParams.stub())
+        try! await wallet.pair(uri: uri)
+        try! await wallet.ping(topic: uri.topic)
+        wallet.pingResponsePublisher
+            .sink { topic in
+                XCTAssertEqual(topic, uri.topic)
+                pingExpectation.fulfill()
+            }
+            .store(in: &publishers)
+        wait(for: [pingExpectation], timeout: 3)
+    }
 }
