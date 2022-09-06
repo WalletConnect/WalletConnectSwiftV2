@@ -60,7 +60,7 @@ public class NetworkingInteractor: NetworkInteracting {
         return requestPublisher
             .filter { $0.request.method == request.method }
             .compactMap { topic, rpcRequest in
-                guard let id = rpcRequest.id, let request = try? rpcRequest.params?.get(Request.self) else { return nil }
+                guard let id = rpcRequest.id, let request = try! rpcRequest.params?.get(Request.self) else { return nil }
                 return RequestSubscriptionPayload(id: id, topic: topic, request: request)
             }
             .eraseToAnyPublisher()

@@ -34,6 +34,7 @@ class WalletRequestSubscriber {
             .sink { [unowned self] (payload: RequestSubscriptionPayload<AuthRequestParams>) in
                 logger.debug("WalletRequestSubscriber: Received request")
                 let message = messageFormatter.formatMessage(from: payload.request.payloadParams, address: address)
+                print(message)
                 onRequest?(.init(id: payload.id, message: message))
             }.store(in: &publishers)
     }

@@ -24,7 +24,7 @@ public struct MessageSigner: MessageSignatureVerifying, MessageSigning {
     public func sign(message: String, privateKey: Data) throws -> CacaoSignature {
         guard let messageData = message.data(using: .utf8) else { throw Errors.utf8EncodingFailed }
         let signature = try signer.sign(message: messageData, with: privateKey)
-        return CacaoSignature(t: "eip191", s: signature.toHexString())
+        return CacaoSignature(t: "eip191", s: "0x"+signature.toHexString())
     }
 
     public func verify(signature: CacaoSignature, message: String, address: String) throws {
