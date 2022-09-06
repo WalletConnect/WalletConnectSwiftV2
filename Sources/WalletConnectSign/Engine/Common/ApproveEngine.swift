@@ -3,6 +3,7 @@ import Combine
 import WalletConnectUtils
 import WalletConnectKMS
 import WalletConnectPairing
+import WalletConnectNetworking
 
 final class ApproveEngine {
     enum Errors: Error {
@@ -180,10 +181,10 @@ private extension ApproveEngine {
             }.store(in: &publishers)
     }
 
-    func respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode) {
+    func respondError(payload: SubscriptionPayload, reason: ReasonCode) {
         Task {
             do {
-                try await networkingInteractor.respondError(payload: payload, reason: reason)
+                try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, tag: <#T##Int#>, reason: reason)
             } catch {
                 logger.error("Respond Error failed with: \(error.localizedDescription)")
             }

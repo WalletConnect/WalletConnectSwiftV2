@@ -1,11 +1,13 @@
 import Foundation
 import Combine
+import JSONRPC
 import WalletConnectUtils
 import WalletConnectKMS
+import WalletConnectNetworking
 
 final class SessionEngine {
     enum Errors: Error {
-        case respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode)
+        case respondError(payload: SubscriptionPayload, reason: ReasonCode)
         case sessionNotFound(topic: String)
     }
 
@@ -49,15 +51,16 @@ final class SessionEngine {
             logger.debug("Could not find session to ping for topic \(topic)")
             return
         }
-        networkingInteractor.requestPeerResponse(.wcSessionPing, onTopic: topic) { [unowned self] result in
-            switch result {
-            case .success:
-                logger.debug("Did receive ping response")
-                completion(.success(()))
-            case .failure(let error):
-                logger.debug("error: \(error)")
-            }
-        }
+// TODO: Ping disabled
+//        networkingInteractor.requestPeerResponse(.wcSessionPing, onTopic: topic) { [unowned self] result in
+//            switch result {
+//            case .success:
+//                logger.debug("Did receive ping response")
+//                completion(.success(()))
+//            case .failure(let error):
+//                logger.debug("error: \(error)")
+//            }
+//        }
     }
 
     func request(_ request: Request) async throws {
@@ -71,14 +74,18 @@ final class SessionEngine {
         }
         let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params)
         let sessionRequestParams = SessionType.RequestParams(request: chainRequest, chainId: request.chainId)
-        try await networkingInteractor.request(.wcSessionRequest(sessionRequestParams), onTopic: request.topic)
+
+        let payload = WCRequest.sessionRequest(sessionRequestParams)
+        let rpcRequest = RPCRequest(method: WCRequest.Method.sessionRequest.method, params: payload)
+        try await networkingInteractor.request(rpcRequest, topic: request.topic, tag: WCRequest.Method.sessionRequest.requestTag)
     }
 
     func respondSessionRequest(topic: String, response: JsonRpcResult) async throws {
         guard sessionStore.hasSession(forTopic: topic) else {
             throw Errors.sessionNotFound(topic: topic)
         }
-        try await networkingInteractor.respond(topic: topic, response: response, tag: 1109) // FIXME: Hardcoded tag
+        // TODO: ???
+//        try await networkingInteractor.respond(topic: topic, response: response, tag: 1109) // FIXME: Hardcoded tag
     }
 
     func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain) async throws {
@@ -90,7 +97,8 @@ final class SessionEngine {
             throw WalletConnectError.invalidEvent
         }
         let params = SessionType.EventParams(event: event, chainId: chainId)
-        try await networkingInteractor.request(.wcSessionEvent(params), onTopic: topic)
+        let rpcRequest = RPCRequest(method: WCRequest.Method.sessionEvent.method, params: params)
+        try await networkingInteractor.request(rpcRequest, topic: topic, tag: WCRequest.Method.sessionEvent.requestTag)
     }
 }
 
@@ -99,116 +107,119 @@ final class SessionEngine {
 private extension SessionEngine {
 
     func setupNetworkingSubscriptions() {
-        networkingInteractor.wcRequestPublisher.sink { [unowned self] subscriptionPayload in
-            do {
-                switch subscriptionPayload.wcRequest.params {
-                case .sessionDelete(let deleteParams):
-                    try onSessionDelete(subscriptionPayload, deleteParams: deleteParams)
-                case .sessionRequest(let sessionRequestParams):
-                    try onSessionRequest(subscriptionPayload, payloadParams: sessionRequestParams)
+        networkingInteractor.socketConnectionStatusPublisher
+            .sink { [unowned self] status in
+                guard status == .connected else { return }
+                sessionStore.getAll()
+                    .forEach { session in
+                        Task { try await networkingInteractor.subscribe(topic: session.topic) }
+                    }
+            }
+            .store(in: &publishers)
+
+        networkingInteractor.requestSubscription(on: nil)
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<WCRequest>) in
+                switch payload.request {
+                case .sessionDelete(let params):
+                    onSessionDelete(payload, params: params)
+                case .sessionRequest(let params):
+                    onSessionRequest(payload, params: params)
                 case .sessionPing:
-                    onSessionPing(subscriptionPayload)
-                case .sessionEvent(let eventParams):
-                    try onSessionEvent(subscriptionPayload, eventParams: eventParams)
+                    onSessionPing(payload)
+                case .sessionEvent(let params):
+                    onSessionEvent(payload, params: params)
                 default: return
                 }
-            } catch Errors.respondError(let payload, let reason) {
-                respondError(payload: payload, reason: reason)
-            } catch {
-                logger.error("Unexpected Error: \(error.localizedDescription)")
             }
-        }.store(in: &publishers)
+            .store(in: &publishers)
 
-        networkingInteractor.transportConnectionPublisher
-            .sink { [unowned self] (_) in
-                let topics = sessionStore.getAll().map {$0.topic}
-                topics.forEach { topic in Task { try? await networkingInteractor.subscribe(topic: topic) } }
-            }.store(in: &publishers)
-
-        networkingInteractor.responsePublisher
-            .sink { [unowned self] response in
-                self.handleResponse(response)
-            }.store(in: &publishers)
+        networkingInteractor.responseSubscription(on: nil)
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<WCRequest, JsonRpcResult>) in
+                switch payload.request {
+                case .sessionRequest(let params):
+                    // TODO: ??? Chain ID from request is ok?
+                    // Need to check absolute string
+                    let response = Response(topic: payload.topic, chainId: params.chainId.absoluteString, result: payload.response)
+                    onSessionResponse?(response)
+                default:
+                    break
+                }
+            }
+            .store(in: &publishers)
     }
 
-    func respondError(payload: WCRequestSubscriptionPayload, reason: ReasonCode) {
+    func respondError(payload: SubscriptionPayload, reason: ReasonCode, tag: Int) {
         Task {
             do {
-                try await networkingInteractor.respondError(payload: payload, reason: reason)
+                try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, tag: tag, reason: reason)
             } catch {
                 logger.error("Respond Error failed with: \(error.localizedDescription)")
             }
         }
     }
 
-    func onSessionDelete(_ payload: WCRequestSubscriptionPayload, deleteParams: SessionType.DeleteParams) throws {
+    func onSessionDelete(_ payload: SubscriptionPayload, params: SessionType.DeleteParams) {
+        let tag = WCRequest.Method.sessionDelete.responseTag
         let topic = payload.topic
         guard sessionStore.hasSession(forTopic: topic) else {
-            throw Errors.respondError(payload: payload, reason: .noSessionForTopic)
+            return respondError(payload: payload, reason: .noSessionForTopic, tag: tag)
         }
         sessionStore.delete(topic: topic)
         networkingInteractor.unsubscribe(topic: topic)
-        networkingInteractor.respondSuccess(for: payload)
-        onSessionDelete?(topic, deleteParams)
+        Task(priority: .high) {
+            try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, tag: tag)
+        }
+        onSessionDelete?(topic, params)
     }
 
-    func onSessionRequest(_ payload: WCRequestSubscriptionPayload, payloadParams: SessionType.RequestParams) throws {
+    func onSessionRequest(_ payload: SubscriptionPayload, params: SessionType.RequestParams) {
+        let tag = WCRequest.Method.sessionRequest.responseTag
         let topic = payload.topic
-        let jsonRpcRequest = JSONRPCRequest<AnyCodable>(id: payload.wcRequest.id, method: payloadParams.request.method, params: payloadParams.request.params)
         let request = Request(
-            id: jsonRpcRequest.id,
-            topic: topic,
-            method: jsonRpcRequest.method,
-            params: jsonRpcRequest.params,
-            chainId: payloadParams.chainId)
+            id: payload.id,
+            topic: payload.topic,
+            method: WCRequest.Method.sessionRequest.method,
+            params: params,
+            chainId: params.chainId)
 
         guard let session = sessionStore.getSession(forTopic: topic) else {
-            throw Errors.respondError(payload: payload, reason: .noSessionForTopic)
+            return respondError(payload: payload, reason: .noSessionForTopic, tag: tag)
         }
-        let chain = request.chainId
-        guard session.hasNamespace(for: chain) else {
-            throw Errors.respondError(payload: payload, reason: .unauthorizedChain)
+        guard session.hasNamespace(for: request.chainId) else {
+            return respondError(payload: payload, reason: .unauthorizedChain, tag: tag)
         }
-        guard session.hasPermission(forMethod: request.method, onChain: chain) else {
-            throw Errors.respondError(payload: payload, reason: .unauthorizedMethod(request.method))
+        guard session.hasPermission(forMethod: request.method, onChain: request.chainId) else {
+            return respondError(payload: payload, reason: .unauthorizedMethod(request.method), tag: tag)
         }
         onSessionRequest?(request)
     }
 
-    func onSessionPing(_ payload: WCRequestSubscriptionPayload) {
-        networkingInteractor.respondSuccess(for: payload)
+    func onSessionPing(_ payload: SubscriptionPayload) {
+        Task(priority: .high) {
+            try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, tag: WCRequest.Method.sessionPing.responseTag)
+        }
     }
 
-    func onSessionEvent(_ payload: WCRequestSubscriptionPayload, eventParams: SessionType.EventParams) throws {
-        let event = eventParams.event
+    func onSessionEvent(_ payload: SubscriptionPayload, params: SessionType.EventParams) {
+        let tag = WCRequest.Method.sessionEvent.responseTag
+        let event = params.event
         let topic = payload.topic
         guard let session = sessionStore.getSession(forTopic: topic) else {
-            throw Errors.respondError(payload: payload, reason: .noSessionForTopic)
+            return respondError(payload: payload, reason: .noSessionForTopic, tag: tag)
         }
-        guard
-            session.peerIsController,
-            session.hasPermission(forEvent: event.name, onChain: eventParams.chainId)
-        else {
-            throw Errors.respondError(payload: payload, reason: .unauthorizedEvent(event.name))
+        guard session.peerIsController, session.hasPermission(forEvent: event.name, onChain: params.chainId) else {
+            return respondError(payload: payload, reason: .unauthorizedEvent(event.name), tag: tag)
         }
-        networkingInteractor.respondSuccess(for: payload)
-        onEventReceived?(topic, event.publicRepresentation(), eventParams.chainId)
+        Task(priority: .high) {
+            try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, tag: tag)
+        }
+        onEventReceived?(topic, event.publicRepresentation(), params.chainId)
     }
 
     func setupExpirationSubscriptions() {
         sessionStore.onSessionExpiration = { [weak self] session in
             self?.kms.deletePrivateKey(for: session.selfParticipant.publicKey)
             self?.kms.deleteAgreementSecret(for: session.topic)
-        }
-    }
-
-    func handleResponse(_ response: WCResponse) {
-        switch response.requestParams {
-        case .sessionRequest:
-            let response = Response(topic: response.topic, chainId: response.chainId, result: response.result)
-            onSessionResponse?(response)
-        default:
-            break
         }
     }
 }
