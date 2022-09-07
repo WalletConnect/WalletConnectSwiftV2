@@ -16,10 +16,12 @@ class WalletRequestSubscriberTests: XCTestCase {
     override func setUp() {
         networkingInteractor = NetworkingInteractorMock()
         messageFormatter = SIWEMessageFormatterMock()
+
+        let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingInteractor, logger: ConsoleLoggerMock(), kms: KeyManagementServiceMock(), rpcHistory: RPCHistory(keyValueStore: CodableStore(defaults: RuntimeKeyValueStorage(), identifier: "")))
         sut = WalletRequestSubscriber(networkingInteractor: networkingInteractor,
                                       logger: ConsoleLoggerMock(),
                                       kms: KeyManagementServiceMock(),
-                                      messageFormatter: messageFormatter, address: "")
+                                      messageFormatter: messageFormatter, address: "", walletErrorResponder: walletErrorResponder)
     }
 
     func testSubscribeRequest() {

@@ -55,13 +55,13 @@ actor WalletErrorResponder {
     }
 
     private let networkingInteractor: NetworkInteracting
-    private let kms: KeyManagementService
+    private let kms: KeyManagementServiceProtocol
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
-         kms: KeyManagementService,
+         kms: KeyManagementServiceProtocol,
          rpcHistory: RPCHistory) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
