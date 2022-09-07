@@ -1,49 +1,40 @@
 import Foundation
 import JSONRPC
-import WalletConnectKMS
-import WalletConnectUtils
 import WalletConnectNetworking
+import WalletConnectUtils
+import WalletConnectKMS
 
-actor WalletRespondService {
+actor WalletErrorResponder {
     enum Errors: Error {
         case recordForIdNotFound
         case malformedAuthRequestParams
     }
+
     private let networkingInteractor: NetworkInteracting
-    private let kms: KeyManagementService
+    private let kms: KeyManagementServiceProtocol
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
-    private let walletErrorResponder: WalletErrorResponder
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
-         kms: KeyManagementService,
-         rpcHistory: RPCHistory,
-         walletErrorResponder: WalletErrorResponder) {
+         kms: KeyManagementServiceProtocol,
+         rpcHistory: RPCHistory) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.kms = kms
         self.rpcHistory = rpcHistory
-        self.walletErrorResponder = walletErrorResponder
     }
 
-    func respond(requestId: RPCID, signature: CacaoSignature, account: Account) async throws {
+
+    func respondError(_ error: AuthError, requestId: RPCID) async throws {
         let authRequestParams = try getAuthRequestParams(requestId: requestId)
         let (topic, keys) = try generateAgreementKeys(requestParams: authRequestParams)
 
         try kms.setAgreementSecret(keys, topic: topic)
 
-        let didpkh = DIDPKH(account: account)
-        let header = CacaoHeader(t: "eip4361")
-        let payload = CacaoPayload(params: authRequestParams.payloadParams, didpkh: didpkh)
-        let responseParams =  AuthResponseParams(header: header, payload: payload, signature: signature)
-
-        let response = RPCResponse(id: requestId, result: responseParams)
-        try await networkingInteractor.respond(topic: topic, response: response, tag: AuthProtocolMethod.authRequest.responseTag, envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
-    }
-
-    func respondError(requestId: RPCID) async throws {
-        try await walletErrorResponder.respondError(AuthError.userRejeted, requestId: requestId)
+        let tag = AuthProtocolMethod.authRequest.responseTag
+        let envelopeType = Envelope.EnvelopeType.type1(pubKey: keys.publicKey.rawRepresentation)
+        try await networkingInteractor.respondError(topic: topic, requestId: requestId, tag: tag, reason: error, envelopeType: envelopeType)
     }
 
     private func getAuthRequestParams(requestId: RPCID) throws -> AuthRequestParams {
@@ -61,6 +52,7 @@ actor WalletRespondService {
         let topic = peerPubKey.rawRepresentation.sha256().toHexString()
         let selfPubKey = try kms.createX25519KeyPair()
         let keys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey.hexRepresentation)
+        //TODO -  remove keys
         return (topic, keys)
     }
 }

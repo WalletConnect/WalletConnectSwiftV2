@@ -3,7 +3,7 @@ import Foundation
 struct AuthPayload: Codable, Equatable {
     let domain: String
     let aud: String
-    let version: Int
+    let version: String
     let nonce: String
     let chainId: String
     let type: String
@@ -19,7 +19,7 @@ struct AuthPayload: Codable, Equatable {
         self.chainId = requestParams.chainId
         self.domain = requestParams.domain
         self.aud = requestParams.aud
-        self.version = 1
+        self.version = "1"
         self.nonce = requestParams.nonce
         self.iat = iat
         self.nbf = requestParams.nbf

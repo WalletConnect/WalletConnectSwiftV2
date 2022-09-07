@@ -4,7 +4,7 @@ struct CacaoPayload: Codable, Equatable {
     let iss: String
     let domain: String
     let aud: String
-    let version: Int
+    let version: String
     let nonce: String
     let iat: String
     let nbf: String?
@@ -17,7 +17,7 @@ struct CacaoPayload: Codable, Equatable {
         self.iss = didpkh.iss
         self.domain = params.domain
         self.aud = params.aud
-        self.version = 1
+        self.version = "1"
         self.nonce = params.nonce
         self.iat = params.iat
         self.nbf = params.nbf

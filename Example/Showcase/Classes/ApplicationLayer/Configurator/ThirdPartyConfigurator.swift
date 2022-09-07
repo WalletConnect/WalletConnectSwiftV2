@@ -14,7 +14,7 @@ struct ThirdPartyConfigurator: Configurator {
                 url: "example.wallet",
                 icons: ["https://avatars.githubusercontent.com/u/37784886"]
             ),
-            account: Account("eip155:56:0xe5EeF1368781911d265fDB6946613dA61915a501")!
+            account: Account("eip155:1:0xe5EeF1368781911d265fDB6946613dA61915a501")!
         )
     }
 }

@@ -4,7 +4,8 @@ import WalletConnectUtils
 /// wc_authRequest RPC method request param
 struct AuthRequestParams: Codable, Equatable {
     let requester: Requester
-    let payloadParams: AuthPayload}
+    let payloadParams: AuthPayload
+}
 
 extension AuthRequestParams {
     struct Requester: Codable, Equatable {

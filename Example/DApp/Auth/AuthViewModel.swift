@@ -61,7 +61,7 @@ private extension AuthViewModel {
 private extension RequestParams {
     static func stub(
         domain: String = "service.invalid",
-        chainId: String = "1",
+        chainId: String = "eip155:1",
         nonce: String = "32891756",
         aud: String = "https://service.invalid/login",
         nbf: String? = nil,
