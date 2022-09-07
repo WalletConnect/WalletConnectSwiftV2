@@ -2,18 +2,19 @@ import Foundation
 import WalletConnectUtils
 
 protocol SIWEMessageFormatting {
-    func formatMessage(from authPayload: AuthPayload, address: String) -> String
+    func formatMessage(from authPayload: AuthPayload, address: String) -> String?
     func formatMessage(from payload: CacaoPayload) throws -> String
 }
 
 struct SIWEMessageFormatter: SIWEMessageFormatting {
-    func formatMessage(from payload: AuthPayload, address: String) -> String {
+    func formatMessage(from payload: AuthPayload, address: String) -> String? {
+        guard let chain = Blockchain(payload.chainId) else {return nil}
         let message = SIWEMessage(domain: payload.domain,
                     uri: payload.aud,
                     address: address,
                     version: payload.version,
                     nonce: payload.nonce,
-                    chainId: payload.chainId,
+                                  chainId: chain.reference,
                     iat: payload.iat,
                     nbf: payload.nbf,
                     exp: payload.exp,
@@ -26,6 +27,7 @@ struct SIWEMessageFormatter: SIWEMessageFormatting {
 
     func formatMessage(from payload: CacaoPayload) throws -> String {
         let address = try DIDPKH(iss: payload.iss).account.address
+
         let message = SIWEMessage(
             domain: payload.domain,
             uri: payload.aud,

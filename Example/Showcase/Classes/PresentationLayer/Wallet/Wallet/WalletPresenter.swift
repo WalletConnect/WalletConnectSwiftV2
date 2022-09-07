@@ -16,6 +16,7 @@ final class WalletPresenter: ObservableObject {
 
     func didPastePairingURI() {
         guard let string = UIPasteboard.general.string, let uri = WalletConnectURI(string: string) else { return }
+        print(uri)
         pair(uri: uri)
     }
 

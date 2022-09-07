@@ -29,6 +29,7 @@ actor WalletPairService {
         let symKey = try SymmetricKey(hex: uri.symKey)
         try kms.setSymmetricKey(symKey, for: pairing.topic)
         pairing.activate()
+        print("pairing")
         pairingStorage.setPairing(pairing)
     }
 
