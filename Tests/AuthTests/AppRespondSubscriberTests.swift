@@ -58,7 +58,7 @@ class AppRespondSubscriberTests: XCTestCase {
         let message = try! messageFormatter.formatMessage(from: payload)
         let cacaoSignature = try! messageSigner.sign(message: message, privateKey: prvKey)
 
-        let cacao = Cacao(h: header, p: payload, s: cacaoSignature)
+        let cacao = Cacao(header: header, payload: payload, signature: cacaoSignature)
 
         let response = RPCResponse(id: requestId, result: cacao)
         networkingInteractor.responsePublisherSubject.send((topic, request, response))
