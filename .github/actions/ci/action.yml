@@ -28,7 +28,7 @@ runs:
         -scheme IntegrationTests \
         -clonedSourcePackagesDirPath SourcePackagesCache \
         -destination 'platform=iOS Simulator,name=iPhone 13' \ 
-        RELAY_HOST=host.host \
+        RELAY_HOST='host.host' \
         test"
 
     # Wallet build
