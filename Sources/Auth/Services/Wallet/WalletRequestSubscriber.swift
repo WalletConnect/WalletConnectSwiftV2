@@ -37,7 +37,7 @@ class WalletRequestSubscriber {
             .sink { [unowned self] (payload: RequestSubscriptionPayload<AuthRequestParams>) in
                 logger.debug("WalletRequestSubscriber: Received request")
                 guard let message = messageFormatter.formatMessage(from: payload.request.payloadParams, address: address) else {
-                    Task(prority: .high) {
+                    Task(priority: .high) {
                         try? await walletErrorResponder.respondError(AuthError.malformedRequestParams, requestId: payload.id)
                     }
                     return
