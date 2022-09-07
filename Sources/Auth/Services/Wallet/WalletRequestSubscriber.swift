@@ -81,7 +81,6 @@ actor WalletErrorResponder {
         try await networkingInteractor.respondError(topic: topic, requestId: requestId, tag: tag, reason: error, envelopeType: envelopeType)
     }
 
-
     private func getAuthRequestParams(requestId: RPCID) throws -> AuthRequestParams {
         guard let request = rpcHistory.get(recordId: requestId)?.request
         else { throw Errors.recordForIdNotFound }
@@ -97,6 +96,7 @@ actor WalletErrorResponder {
         let topic = peerPubKey.rawRepresentation.sha256().toHexString()
         let selfPubKey = try kms.createX25519KeyPair()
         let keys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey.hexRepresentation)
+        //TODO -  remove keys
         return (topic, keys)
     }
 }
