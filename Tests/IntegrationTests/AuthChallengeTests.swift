@@ -4,13 +4,11 @@ import WalletConnectKMS
 
 final class AuthChallengeTests: XCTestCase {
 
-    let relayHost: String = "dev.relay.walletconnect.com"
-
     var httpClient: HTTPClient!
     var provider: AuthChallengeProvider!
 
     override func setUp() {
-        httpClient = HTTPClient(host: relayHost)
+        httpClient = HTTPClient(host: URLConfig.relayHost)
         provider = AuthChallengeProvider(client: httpClient)
     }
 
