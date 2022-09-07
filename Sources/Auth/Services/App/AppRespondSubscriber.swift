@@ -44,19 +44,21 @@ class AppRespondSubscriber {
                 activatePairingIfNeeded(id: payload.id)
                 networkingInteractor.unsubscribe(topic: payload.topic)
 
+                print(payload)
                 let requestId = payload.id
                 let cacao = payload.response
                 let requestPayload = payload.request
 
                 guard
-                    let address = try? DIDPKH(iss: cacao.p.iss).account.address,
-                    let message = try? messageFormatter.formatMessage(from: cacao.p)
+                    let address = try? DIDPKH(iss: cacao.payload.iss).account.address,
+                    let message = try? messageFormatter.formatMessage(from: cacao.payload)
                 else { self.onResponse?(requestId, .failure(.malformedResponseParams)); return }
 
+                print(message)
                 guard messageFormatter.formatMessage(from: requestPayload.payloadParams, address: address) == message
                 else { self.onResponse?(requestId, .failure(.messageCompromised)); return }
 
-                guard let _ = try? signatureVerifier.verify(signature: cacao.s, message: message, address: address)
+                guard let _ = try? signatureVerifier.verify(signature: cacao.signature, message: message, address: address)
                 else { self.onResponse?(requestId, .failure(.signatureVerificationFailed)); return }
 
                 onResponse?(requestId, .success(cacao))
