@@ -27,14 +27,14 @@ struct SIWEMessageFormatter: SIWEMessageFormatting {
 
     func formatMessage(from payload: CacaoPayload) throws -> String {
         let address = try DIDPKH(iss: payload.iss).account.address
-
+        let iss = try DIDPKH(iss: payload.iss)
         let message = SIWEMessage(
             domain: payload.domain,
             uri: payload.aud,
             address: address,
             version: payload.version,
             nonce: payload.nonce,
-            chainId: "1",
+            chainId: iss.account.reference,
             iat: payload.iat,
             nbf: payload.nbf,
             exp: payload.exp,
