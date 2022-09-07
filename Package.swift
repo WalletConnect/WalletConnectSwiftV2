@@ -52,7 +52,7 @@ let package = Package(
             path: "Sources/WalletConnectKMS"),
         .target(
             name: "WalletConnectPairing",
-            dependencies: ["WalletConnectUtils"]),
+            dependencies: ["WalletConnectUtils", "WalletConnectNetworking", "JSONRPC"]),
         .target(
             name: "WalletConnectUtils",
             dependencies: ["Commons", "JSONRPC"]),

@@ -34,6 +34,10 @@ public class AuthClient {
         authResponsePublisherSubject.eraseToAnyPublisher()
     }
 
+    public var pingResponsePublisher: AnyPublisher<(String), Never> {
+        pingResponsePublisherSubject.eraseToAnyPublisher()
+    }
+
     /// Publisher that sends web socket connection status
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
@@ -44,6 +48,7 @@ public class AuthClient {
 
     private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, AuthError>), Never>()
     private var authRequestPublisherSubject = PassthroughSubject<AuthRequest, Never>()
+    private var pingResponsePublisherSubject = PassthroughSubject<String, Never>()
     private let appPairService: AppPairService
     private let appRequestService: AppRequestService
     private let deletePairingService: DeletePairingService
@@ -54,6 +59,7 @@ public class AuthClient {
     private let cleanupService: CleanupService
     private let pairingStorage: WCPairingStorage
     private let pendingRequestsProvider: PendingRequestsProvider
+    private let pingService: PairingPingService
     private var account: Account?
 
     init(appPairService: AppPairService,
@@ -68,7 +74,8 @@ public class AuthClient {
          cleanupService: CleanupService,
          logger: ConsoleLogging,
          pairingStorage: WCPairingStorage,
-         socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
+         socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
+         pingService: PairingPingService
     ) {
         self.appPairService = appPairService
         self.appRequestService = appRequestService
@@ -83,6 +90,7 @@ public class AuthClient {
         self.pairingStorage = pairingStorage
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
         self.deletePairingService = deletePairingService
+        self.pingService = pingService
         setUpPublishers()
     }
 
@@ -141,6 +149,10 @@ public class AuthClient {
         try await deletePairingService.delete(topic: topic)
     }
 
+    public func ping(topic: String) async throws {
+        try await pingService.ping(topic: topic)
+    }
+
     /// Query pending authentication requests
     /// - Returns: Pending authentication requests
     public func getPendingRequests() throws -> [AuthRequest] {
@@ -164,6 +176,10 @@ public class AuthClient {
 
         walletRequestSubscriber.onRequest = { [unowned self] request in
             authRequestPublisherSubject.send(request)
+        }
+
+        pingService.onResponse = { [unowned self] topic in
+            pingResponsePublisherSubject.send(topic)
         }
     }
 }
