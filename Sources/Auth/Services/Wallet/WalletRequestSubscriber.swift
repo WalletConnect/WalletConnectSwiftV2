@@ -33,9 +33,7 @@ class WalletRequestSubscriber {
         networkingInteractor.requestSubscription(on: AuthProtocolMethod.authRequest)
             .sink { [unowned self] (payload: RequestSubscriptionPayload<AuthRequestParams>) in
                 logger.debug("WalletRequestSubscriber: Received request")
-                print(payload)
                 let message = messageFormatter.formatMessage(from: payload.request.payloadParams, address: address)!
-                print(message)
                 onRequest?(.init(id: payload.id, message: message))
             }.store(in: &publishers)
     }

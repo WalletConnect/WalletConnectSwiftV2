@@ -44,7 +44,6 @@ class AppRespondSubscriber {
                 activatePairingIfNeeded(id: payload.id)
                 networkingInteractor.unsubscribe(topic: payload.topic)
 
-                print(payload)
                 let requestId = payload.id
                 let cacao = payload.response
                 let requestPayload = payload.request
@@ -54,7 +53,6 @@ class AppRespondSubscriber {
                     let message = try? messageFormatter.formatMessage(from: cacao.payload)
                 else { self.onResponse?(requestId, .failure(.malformedResponseParams)); return }
 
-                print(message)
                 guard messageFormatter.formatMessage(from: requestPayload.payloadParams, address: address) == message
                 else { self.onResponse?(requestId, .failure(.messageCompromised)); return }
 
