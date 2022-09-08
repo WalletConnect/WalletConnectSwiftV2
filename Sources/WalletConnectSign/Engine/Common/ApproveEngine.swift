@@ -16,7 +16,7 @@ final class ApproveEngine {
     }
 
     var onSessionProposal: ((Session.Proposal) -> Void)?
-    var onSessionRejected: ((Session.Proposal, SessionType.Reason) -> Void)?
+    var onSessionRejected: ((Session.Proposal, Reason) -> Void)?
     var onSessionSettle: ((Session) -> Void)?
 
     var settlingProposal: SessionProposal?
@@ -24,7 +24,7 @@ final class ApproveEngine {
     private let networkingInteractor: NetworkInteracting
     private let pairingStore: WCPairingStorage
     private let sessionStore: WCSessionStorage
-    private let proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<WCRequest>>
+    private let proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>
     private let sessionToPairingTopic: CodableStore<String>
     private let metadata: AppMetadata
     private let kms: KeyManagementServiceProtocol
@@ -34,7 +34,7 @@ final class ApproveEngine {
 
     init(
         networkingInteractor: NetworkInteracting,
-        proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<WCRequest>>,
+        proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>,
         sessionToPairingTopic: CodableStore<String>,
         metadata: AppMetadata,
         kms: KeyManagementServiceProtocol,
@@ -51,15 +51,16 @@ final class ApproveEngine {
         self.pairingStore = pairingStore
         self.sessionStore = sessionStore
 
-        setupNetworkingSubscriptions()
+        setupRequestSubscriptions()
+        setupResponseSubscriptions()
     }
 
     func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace]) async throws {
-        let payload = try proposalPayloadsStore.get(key: proposerPubKey)
-
-        guard let payload = payload, case .sessionPropose(let proposal) = payload.request else {
+        guard let payload = try proposalPayloadsStore.get(key: proposerPubKey) else {
             throw Errors.wrongRequestParams
         }
+
+        let proposal = payload.request
 
         proposalPayloadsStore.delete(forKey: proposerPubKey)
 
@@ -86,7 +87,7 @@ final class ApproveEngine {
 
         let result = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
         let response = RPCResponse(id: payload.id, result: result)
-        try await networkingInteractor.respond(topic: payload.topic, response: response, tag: WCRequest.Method.sessionPropose.responseTag)
+        try await networkingInteractor.respond(topic: payload.topic, response: response, tag: SignProtocolMethod.sessionPropose.responseTag)
 
         try pairing.updateExpiry()
         pairingStore.setPairing(pairing)
@@ -99,7 +100,7 @@ final class ApproveEngine {
             throw Errors.proposalPayloadsNotFound
         }
         proposalPayloadsStore.delete(forKey: proposerPubKey)
-        try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, tag: WCRequest.Method.sessionPropose.responseTag, reason: reason)
+        try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, tag: SignProtocolMethod.sessionPropose.responseTag, reason: reason)
         // TODO: Delete pairing if inactive 
     }
 
@@ -140,8 +141,8 @@ final class ApproveEngine {
         try await networkingInteractor.subscribe(topic: topic)
         sessionStore.setSession(session)
 
-        let request = RPCRequest(method: WCRequest.Method.sessionSettle.method, params: WCRequest.sessionSettle(settleParams))
-        try await networkingInteractor.request(request, topic: topic, tag: WCRequest.Method.sessionSettle.requestTag)
+        let request = RPCRequest(method: SignProtocolMethod.sessionSettle.method, params: settleParams)
+        try await networkingInteractor.request(request, topic: topic, tag: SignProtocolMethod.sessionSettle.requestTag)
         onSessionSettle?(session.publicRepresentation())
     }
 }
@@ -150,28 +151,35 @@ final class ApproveEngine {
 
 private extension ApproveEngine {
 
-    func setupNetworkingSubscriptions() {
-        networkingInteractor.responseSubscription(on: nil)
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<WCRequest, JsonRpcResult>) in
-                switch payload.request {
-                case .sessionPropose(let proposal):
-                    handleSessionProposeResponse(payload: payload, proposal: proposal)
-                case .sessionSettle:
-                    handleSessionSettleResponse(payload: payload)
-                default:
-                    break
-                }
+    func setupRequestSubscriptions() {
+        networkingInteractor.requestSubscription(on: SignProtocolMethod.sessionPropose)
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionType.ProposeParams>) in
+                handleSessionProposeRequest(payload: payload)
             }.store(in: &publishers)
 
-        networkingInteractor.requestSubscription(on: nil)
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<WCRequest>) in
-                switch payload.request {
-                case .sessionPropose(let proposal):
-                    handleSessionProposeRequest(payload: payload, proposal: proposal)
-                case .sessionSettle(let params):
-                    handleSessionSettleRequest(payload: payload, params: params)
-                default: return
-                }
+        networkingInteractor.requestSubscription(on: SignProtocolMethod.sessionSettle)
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionType.SettleParams>) in
+                handleSessionSettleRequest(payload: payload)
+            }.store(in: &publishers)
+    }
+
+    func setupResponseSubscriptions() {
+        networkingInteractor.responseSubscription(on: SignProtocolMethod.sessionPropose)
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionType.ProposeParams, RPCResult>) in
+                handleSessionProposeResponse(payload: payload)
+            }.store(in: &publishers)
+
+        networkingInteractor.responseSubscription(on: SignProtocolMethod.sessionSettle)
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionType.SettleParams, RPCResult>) in
+                handleSessionSettleResponse(payload: payload)
+            }.store(in: &publishers)
+
+        networkingInteractor.responseErrorSubscription(on: SignProtocolMethod.sessionPropose)
+            .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<SessionType.ProposeParams>) in
+                onSessionRejected?(
+                    payload.request.publicRepresentation(),
+                    SessionType.Reason(code: payload.error.code, message: payload.error.message)
+                )
             }.store(in: &publishers)
     }
 
@@ -193,27 +201,27 @@ private extension ApproveEngine {
 
     // MARK: SessionProposeResponse
     // TODO: Move to Non-Controller SettleEngine
-    func handleSessionProposeResponse(payload: ResponseSubscriptionPayload<WCRequest, JsonRpcResult>, proposal: SessionType.ProposeParams) {
+    func handleSessionProposeResponse(payload: ResponseSubscriptionPayload<SessionType.ProposeParams, RPCResult>) {
         do {
             let sessionTopic = try handleProposeResponse(
                 pairingTopic: payload.topic,
-                proposal: proposal,
+                proposal: payload.request,
                 result: payload.response
             )
-            settlingProposal = proposal
+            settlingProposal = payload.request
 
             Task(priority: .high) {
-                try? await networkingInteractor.subscribe(topic: sessionTopic)
+                try await networkingInteractor.subscribe(topic: sessionTopic)
             }
         } catch {
-            guard let error = error as? JSONRPCErrorResponse else {
+            guard let error = error as? Reason else {
                 return logger.debug(error.localizedDescription)
             }
-            onSessionRejected?(proposal.publicRepresentation(), SessionType.Reason(code: error.error.code, message: error.error.message))
+            onSessionRejected?(payload.request.publicRepresentation(), SessionType.Reason(code: error.code, message: error.message))
         }
     }
 
-    func handleProposeResponse(pairingTopic: String, proposal: SessionProposal, result: JsonRpcResult) throws -> String {
+    func handleProposeResponse(pairingTopic: String, proposal: SessionProposal, result: RPCResult) throws -> String {
         guard var pairing = pairingStore.getPairing(forTopic: pairingTopic)
         else { throw Errors.pairingNotFound }
 
@@ -229,7 +237,7 @@ private extension ApproveEngine {
             pairingStore.setPairing(pairing)
 
             let selfPublicKey = try AgreementPublicKey(hex: proposal.proposer.publicKey)
-            let proposeResponse = try response.result.get(SessionType.ProposeResponse.self)
+            let proposeResponse = try response.get(SessionType.ProposeResponse.self)
             let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposeResponse.responderPublicKey)
 
             let sessionTopic = agreementKeys.derivedTopic()
@@ -254,7 +262,7 @@ private extension ApproveEngine {
 
     // MARK: SessionSettleResponse
 
-    func handleSessionSettleResponse(payload: ResponseSubscriptionPayload<WCRequest, JsonRpcResult>) {
+    func handleSessionSettleResponse(payload: ResponseSubscriptionPayload<SessionType.SettleParams, RPCResult>) {
         guard let session = sessionStore.getSession(forTopic: payload.topic) else { return }
         switch payload.response {
         case .response:
@@ -273,20 +281,21 @@ private extension ApproveEngine {
 
     // MARK: SessionProposeRequest
 
-    func handleSessionProposeRequest(payload: RequestSubscriptionPayload<WCRequest>, proposal: SessionType.ProposeParams) {
+    func handleSessionProposeRequest(payload: RequestSubscriptionPayload<SessionType.ProposeParams>) {
         logger.debug("Received Session Proposal")
+        let proposal = payload.request
         do { try Namespace.validate(proposal.requiredNamespaces) } catch {
-            return respondError(payload: payload, reason: .invalidUpdateRequest, tag: WCRequest.Method.sessionPropose.responseTag)
+            return respondError(payload: payload, reason: .invalidUpdateRequest, tag: SignProtocolMethod.sessionPropose.responseTag)
         }
         proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
         onSessionProposal?(proposal.publicRepresentation())
     }
 
     // MARK: SessionSettleRequest
-    func handleSessionSettleRequest(payload: RequestSubscriptionPayload<WCRequest>, params: SessionType.SettleParams) {
+    func handleSessionSettleRequest(payload: RequestSubscriptionPayload<SessionType.SettleParams>) {
         logger.debug("Did receive session settle request")
 
-        let tag = WCRequest.Method.sessionSettle.responseTag
+        let tag = SignProtocolMethod.sessionSettle.responseTag
 
         guard let proposedNamespaces = settlingProposal?.requiredNamespaces else {
             return respondError(payload: payload, reason: .invalidUpdateRequest, tag: tag)
@@ -294,6 +303,7 @@ private extension ApproveEngine {
 
         settlingProposal = nil
 
+        let params = payload.request
         let sessionNamespaces = params.namespaces
 
         do {

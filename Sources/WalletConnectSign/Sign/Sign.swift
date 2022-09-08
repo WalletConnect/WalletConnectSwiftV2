@@ -1,10 +1,14 @@
 import Foundation
+import Combine
+import JSONRPC
 import WalletConnectUtils
 import WalletConnectRelay
-import Combine
+import WalletConnectNetworking
 
 public typealias Account = WalletConnectUtils.Account
 public typealias Blockchain = WalletConnectUtils.Blockchain
+public typealias Reason = WalletConnectNetworking.Reason
+public typealias RPCID = JSONRPC.RPCID
 
 /// Sign instatnce wrapper
 ///

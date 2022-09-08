@@ -33,7 +33,7 @@ class AppRespondSubscriber {
 
     private func subscribeForResponse() {
         networkingInteractor.responseErrorSubscription(on: AuthProtocolMethod.authRequest)
-            .sink { [unowned self] payload in
+            .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<AuthRequestParams>) in
                 guard let error = AuthError(code: payload.error.code) else { return }
                 onResponse?(payload.id, .failure(error))
             }.store(in: &publishers)

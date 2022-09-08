@@ -56,10 +56,9 @@ public class NetworkingInteractor: NetworkInteracting {
         }
     }
 
-    public func requestSubscription<Request: Codable>(on request: ProtocolMethod?) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never> {
+    public func requestSubscription<Request: Codable>(on request: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never> {
         return requestPublisher
             .filter { rpcRequest in
-                guard let request = request else { return true }
                 return rpcRequest.request.method == request.method
             }
             .compactMap { topic, rpcRequest in
@@ -69,10 +68,9 @@ public class NetworkingInteractor: NetworkInteracting {
             .eraseToAnyPublisher()
     }
 
-    public func responseSubscription<Request: Codable, Response: Codable>(on request: ProtocolMethod?) -> AnyPublisher<ResponseSubscriptionPayload<Request, Response>, Never> {
+    public func responseSubscription<Request: Codable, Response: Codable>(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionPayload<Request, Response>, Never> {
         return responsePublisher
             .filter { rpcRequest in
-                guard let request = request else { return true }
                 return rpcRequest.request.method == request.method
             }
             .compactMap { topic, rpcRequest, rpcResponse in
@@ -85,12 +83,12 @@ public class NetworkingInteractor: NetworkInteracting {
             .eraseToAnyPublisher()
     }
 
-    public func responseErrorSubscription(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionErrorPayload, Never> {
+    public func responseErrorSubscription<Request: Codable>(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionErrorPayload<Request>, Never> {
         return responsePublisher
             .filter { $0.request.method == request.method }
-            .compactMap { (_, _, rpcResponse) in
-                guard let id = rpcResponse.id, let error = rpcResponse.error else { return nil }
-                return ResponseSubscriptionErrorPayload(id: id, error: error)
+            .compactMap { (topic, rpcRequest, rpcResponse) in
+                guard let id = rpcResponse.id, let request = try? rpcRequest.params?.get(Request.self), let error = rpcResponse.error else { return nil }
+                return ResponseSubscriptionErrorPayload(id: id, topic: topic, request: request, error: error)
             }
             .eraseToAnyPublisher()
     }

@@ -247,13 +247,13 @@ public final class RelayClient {
             }
         } else if let response = tryDecode(RPCResponse.self, from: payload) {
             switch response.outcome {
-            case .success(let anyCodable):
+            case .response(let anyCodable):
                 if let _ = try? anyCodable.get(Bool.self) { // TODO: Handle success vs. error
                     requestAcknowledgePublisherSubject.send(response.id)
                 } else if let subscriptionId = try? anyCodable.get(String.self) {
                     subscriptionResponsePublisherSubject.send((response.id, subscriptionId))
                 }
-            case .failure(let rpcError):
+            case .error(let rpcError):
                 logger.error("Received RPC error from relay network: \(rpcError)")
             }
         } else {
