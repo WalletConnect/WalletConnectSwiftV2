@@ -94,7 +94,7 @@ private extension SessionEngine {
                 guard status == .connected else { return }
                 sessionStore.getAll()
                     .forEach { session in
-                        Task { try await networkingInteractor.subscribe(topic: session.topic) }
+                        Task(priority: .high) { try await networkingInteractor.subscribe(topic: session.topic) }
                     }
             }
             .store(in: &publishers)
@@ -142,7 +142,7 @@ private extension SessionEngine {
     }
 
     func respondError(payload: SubscriptionPayload, reason: ReasonCode, tag: Int) {
-        Task {
+        Task(priority: .high) {
             do {
                 try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, tag: tag, reason: reason)
             } catch {

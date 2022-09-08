@@ -1,7 +1,9 @@
 import XCTest
 import Combine
+import JSONRPC
 import WalletConnectUtils
 import WalletConnectPairing
+import WalletConnectNetworking
 @testable import WalletConnectSign
 @testable import TestingUtils
 @testable import WalletConnectKMS
@@ -14,7 +16,7 @@ final class ApproveEngineTests: XCTestCase {
     var cryptoMock: KeyManagementServiceMock!
     var pairingStorageMock: WCPairingStorageMock!
     var sessionStorageMock: WCSessionStorageMock!
-    var proposalPayloadsStore: CodableStore<WCRequestSubscriptionPayload>!
+    var proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>!
 
     var publishers = Set<AnyCancellable>()
 
@@ -24,7 +26,7 @@ final class ApproveEngineTests: XCTestCase {
         cryptoMock = KeyManagementServiceMock()
         pairingStorageMock = WCPairingStorageMock()
         sessionStorageMock = WCSessionStorageMock()
-        proposalPayloadsStore = CodableStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: "")
+        proposalPayloadsStore = CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>(defaults: RuntimeKeyValueStorage(), identifier: "")
         engine = ApproveEngine(
             networkingInteractor: networkingInteractor,
             proposalPayloadsStore: proposalPayloadsStore,
@@ -52,9 +54,8 @@ final class ApproveEngineTests: XCTestCase {
         pairingStorageMock.setPairing(pairing)
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
-        let request = WCRequest(method: .sessionPropose, params: .sessionPropose(proposal))
-        let payload = WCRequestSubscriptionPayload(topic: topicA, wcRequest: request)
-        networkingInteractor.wcRequestPublisherSubject.send(payload)
+        let request = RPCRequest(method: SignProtocolMethod.sessionPropose.method, params: proposal)
+        networkingInteractor.requestPublisherSubject.send((topicA, request))
 
         try await engine.approveProposal(proposerPubKey: proposal.proposer.publicKey, validating: SessionNamespace.stubDictionary())
 
@@ -74,14 +75,13 @@ final class ApproveEngineTests: XCTestCase {
         var sessionProposed = false
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
-        let request = WCRequest(method: .sessionPropose, params: .sessionPropose(proposal))
-        let payload = WCRequestSubscriptionPayload(topic: topicA, wcRequest: request)
+        let request = RPCRequest(method: SignProtocolMethod.sessionPropose.method, params: proposal)
 
         engine.onSessionProposal = { _ in
             sessionProposed = true
         }
 
-        networkingInteractor.wcRequestPublisherSubject.send(payload)
+        networkingInteractor.requestPublisherSubject.send((topicA, request))
         XCTAssertNotNil(try! proposalPayloadsStore.get(key: proposal.proposer.publicKey), "Proposer must store proposal payload")
         XCTAssertTrue(sessionProposed)
     }
@@ -106,7 +106,9 @@ final class ApproveEngineTests: XCTestCase {
         }
 
         engine.settlingProposal = SessionProposal.stub()
-        networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubSettle(topic: sessionTopic))
+        networkingInteractor.requestPublisherSubject.send((sessionTopic, RPCRequest.stubSettle()))
+
+        usleep(100)
 
         XCTAssertTrue(sessionStorageMock.getSession(forTopic: sessionTopic)!.acknowledged, "Proposer must store acknowledged session on topic B")
         XCTAssertTrue(networkingInteractor.didRespondSuccess, "Proposer must send acknowledge on settle request")
@@ -117,14 +119,10 @@ final class ApproveEngineTests: XCTestCase {
         let session = WCSession.stub(isSelfController: true, acknowledged: false)
         sessionStorageMock.setSession(session)
 
-        let settleResponse = JSONRPCResponse(id: 1, result: AnyCodable(true))
-        let response = WCResponse(
-            topic: session.topic,
-            chainId: nil,
-            requestMethod: .sessionSettle,
-            requestParams: .sessionSettle(SessionType.SettleParams.stub()),
-            result: .response(settleResponse))
-        networkingInteractor.responsePublisherSubject.send(response)
+        let request = RPCRequest(method: SignProtocolMethod.sessionSettle.method, params: SessionType.SettleParams.stub())
+        let response = RPCResponse(matchingRequest: request, result: RPCResult.response(AnyCodable(true)))
+
+        networkingInteractor.responsePublisherSubject.send((session.topic, request, response))
 
         XCTAssertTrue(sessionStorageMock.getSession(forTopic: session.topic)!.acknowledged, "Responder must acknowledged session")
     }
@@ -136,13 +134,10 @@ final class ApproveEngineTests: XCTestCase {
         cryptoMock.setAgreementSecret(AgreementKeys.stub(), topic: session.topic)
         try! cryptoMock.setPrivateKey(privateKey)
 
-        let response = WCResponse(
-            topic: session.topic,
-            chainId: nil,
-            requestMethod: .sessionSettle,
-            requestParams: .sessionSettle(SessionType.SettleParams.stub()),
-            result: .error(JSONRPCErrorResponse(id: 1, error: JSONRPCErrorResponse.Error(code: 0, message: ""))))
-        networkingInteractor.responsePublisherSubject.send(response)
+        let request = RPCRequest(method: SignProtocolMethod.sessionSettle.method, params: SessionType.SettleParams.stub())
+        let response = RPCResponse(matchingRequest: request, result: RPCResult.error(JSONRPCError(code: 0, message: "")))
+
+        networkingInteractor.responsePublisherSubject.send((session.topic, request, response))
 
         XCTAssertNil(sessionStorageMock.getSession(forTopic: session.topic), "Responder must remove session")
         XCTAssertTrue(networkingInteractor.didUnsubscribe(to: session.topic), "Responder must unsubscribe topic B")
