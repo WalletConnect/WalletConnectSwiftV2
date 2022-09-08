@@ -42,6 +42,8 @@ public struct SignClientFactory {
         let deletePairingService = DeletePairingService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore, logger: logger)
         let deleteSessionService = DeleteSessionService(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         let disconnectService = DisconnectService(deletePairingService: deletePairingService, deleteSessionService: deleteSessionService, pairingStorage: pairingStore, sessionStorage: sessionStore)
+        let sessionPingService = SessionPingService(sessionStorage: sessionStore, networkingInteractor: networkingInteractor, logger: logger)
+        let pairingPingService = PairingPingService(pairingStorage: pairingStore, networkingInteractor: networkingInteractor, logger: logger)
 
         let client = SignClient(
             logger: logger,
@@ -50,6 +52,8 @@ public struct SignClientFactory {
             pairEngine: pairEngine,
             sessionEngine: sessionEngine,
             approveEngine: approveEngine,
+            pairingPingService: pairingPingService,
+            sessionPingService: sessionPingService,
             nonControllerSessionStateMachine: nonControllerSessionStateMachine,
             controllerSessionStateMachine: controllerSessionStateMachine, disconnectService: disconnectService,
             history: rpcHistory,

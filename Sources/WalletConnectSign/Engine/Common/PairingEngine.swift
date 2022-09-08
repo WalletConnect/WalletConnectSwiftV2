@@ -75,23 +75,6 @@ final class PairingEngine {
         let request = RPCRequest(method: SignProtocolMethod.sessionPropose.method, params: proposal)
         try await networkingInteractor.request(request, topic: pairingTopic, tag: SignProtocolMethod.sessionPropose.requestTag)
     }
-
-    func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> Void)) {
-        guard pairingStore.hasPairing(forTopic: topic) else {
-            logger.debug("Could not find pairing to ping for topic \(topic)")
-            return
-        }
-// TODO: Ping disabled
-//        networkingInteractor.requestPeerResponse(.wcPairingPing, onTopic: topic) { [unowned self] result in
-//            switch result {
-//            case .success:
-//                logger.debug("Did receive ping response")
-//                completion(.success(()))
-//            case .failure(let error):
-//                logger.debug("error: \(error)")
-//            }
-//        }
-    }
 }
 
 // MARK: Private

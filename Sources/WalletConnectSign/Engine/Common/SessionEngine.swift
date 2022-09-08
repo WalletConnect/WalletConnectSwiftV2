@@ -47,23 +47,6 @@ final class SessionEngine {
         sessionStore.getAll().map {$0.publicRepresentation()}
     }
 
-    func ping(topic: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        guard sessionStore.hasSession(forTopic: topic) else {
-            logger.debug("Could not find session to ping for topic \(topic)")
-            return
-        }
-// TODO: Ping disabled
-//        networkingInteractor.requestPeerResponse(.wcSessionPing, onTopic: topic) { [unowned self] result in
-//            switch result {
-//            case .success:
-//                logger.debug("Did receive ping response")
-//                completion(.success(()))
-//            case .failure(let error):
-//                logger.debug("error: \(error)")
-//            }
-//        }
-    }
-
     func request(_ request: Request) async throws {
         logger.debug("will request on session topic: \(request.topic)")
         guard let session = sessionStore.getSession(forTopic: request.topic), session.acknowledged else {

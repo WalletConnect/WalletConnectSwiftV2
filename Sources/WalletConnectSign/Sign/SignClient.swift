@@ -5,6 +5,7 @@ import WalletConnectRelay
 import WalletConnectUtils
 import WalletConnectKMS
 import WalletConnectNetworking
+import WalletConnectPairing
 
 /// WalletConnect Sign Client
 ///
@@ -83,6 +84,20 @@ public final class SignClient {
         sessionExtendPublisherSubject.eraseToAnyPublisher()
     }
 
+    /// Publisher that sends session topic when session ping received
+    ///
+    /// Event will be emited on controller and non-controller clients.
+    public var sessionPingResponsePublisher: AnyPublisher<String, Never> {
+        sessionPingResponsePublisherSubject.eraseToAnyPublisher()
+    }
+
+    /// Publisher that sends pairing topic when pairing ping received
+    ///
+    /// Event will be emited on controller and non-controller clients.
+    public var pairingPingResponsePublisher: AnyPublisher<String, Never> {
+        pairingPingResponsePublisherSubject.eraseToAnyPublisher()
+    }
+
     /// An object that loggs SDK's errors and info messages
     public let logger: ConsoleLogging
 
@@ -94,6 +109,8 @@ public final class SignClient {
     private let sessionEngine: SessionEngine
     private let approveEngine: ApproveEngine
     private let disconnectService: DisconnectService
+    private let pairingPingService: PairingPingService
+    private let sessionPingService: SessionPingService
     private let nonControllerSessionStateMachine: NonControllerSessionStateMachine
     private let controllerSessionStateMachine: ControllerSessionStateMachine
     private let history: RPCHistory
@@ -109,6 +126,8 @@ public final class SignClient {
     private let sessionUpdatePublisherSubject = PassthroughSubject<(sessionTopic: String, namespaces: [String: SessionNamespace]), Never>()
     private let sessionEventPublisherSubject = PassthroughSubject<(event: Session.Event, sessionTopic: String, chainId: Blockchain?), Never>()
     private let sessionExtendPublisherSubject = PassthroughSubject<(sessionTopic: String, date: Date), Never>()
+    private let sessionPingResponsePublisherSubject = PassthroughSubject<String, Never>()
+    private let pairingPingResponsePublisherSubject = PassthroughSubject<String, Never>()
 
     private var publishers = Set<AnyCancellable>()
 
@@ -120,6 +139,8 @@ public final class SignClient {
          pairEngine: PairEngine,
          sessionEngine: SessionEngine,
          approveEngine: ApproveEngine,
+         pairingPingService: PairingPingService,
+         sessionPingService: SessionPingService,
          nonControllerSessionStateMachine: NonControllerSessionStateMachine,
          controllerSessionStateMachine: ControllerSessionStateMachine,
          disconnectService: DisconnectService,
@@ -132,6 +153,8 @@ public final class SignClient {
         self.pairEngine = pairEngine
         self.sessionEngine = sessionEngine
         self.approveEngine = approveEngine
+        self.pairingPingService = pairingPingService
+        self.sessionPingService = sessionPingService
         self.nonControllerSessionStateMachine = nonControllerSessionStateMachine
         self.controllerSessionStateMachine = controllerSessionStateMachine
         self.history = history
@@ -238,15 +261,11 @@ public final class SignClient {
     /// - Parameters:
     ///   - topic: Topic of a session or a pairing
     ///   - completion: Result will be success on response or an error
-    public func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> Void)) {
+    public func ping(topic: String) async throws {
         if pairingEngine.hasPairing(for: topic) {
-            pairingEngine.ping(topic: topic) { result in
-                completion(result)
-            }
+            try await pairingPingService.ping(topic: topic)
         } else if sessionEngine.hasSession(for: topic) {
-            sessionEngine.ping(topic: topic) { result in
-                completion(result)
-            }
+            try await sessionPingService.ping(topic: topic)
         }
     }
 
@@ -358,6 +377,12 @@ public final class SignClient {
         }
         sessionEngine.onSessionResponse = { [unowned self] response in
             sessionResponsePublisherSubject.send(response)
+        }
+        pairingPingService.onResponse = { [unowned self] topic in
+            pairingPingResponsePublisherSubject.send(topic)
+        }
+        sessionPingService.onResponse = { [unowned self] topic in
+            sessionPingResponsePublisherSubject.send(topic)
         }
     }
 
