@@ -184,7 +184,7 @@ private extension ApproveEngine {
     }
 
     func respondError(payload: SubscriptionPayload, reason: ReasonCode, tag: Int) {
-        Task {
+        Task(priority: .high) {
             do {
                 try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, tag: tag, reason: reason)
             } catch {

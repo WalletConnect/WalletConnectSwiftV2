@@ -8,6 +8,19 @@ import WalletConnectNetworking
 public class NetworkingInteractorMock: NetworkInteracting {
 
     private(set) var subscriptions: [String] = []
+    private(set) var unsubscriptions: [String] = []
+
+    private(set) var requests: [(topic: String, request: RPCRequest)] = []
+
+    private(set) var didRespondSuccess = false
+    private(set) var didRespondError = false
+    private(set) var didCallSubscribe = false
+    private(set) var didCallUnsubscribe = false
+    private(set) var didRespondOnTopic: String?
+    private(set) var lastErrorCode = -1
+
+    private(set) var requestCallCount = 0
+    var didCallRequest: Bool { requestCallCount > 0 }
 
     public let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
@@ -67,33 +80,42 @@ public class NetworkingInteractorMock: NetworkInteracting {
 
     public func subscribe(topic: String) async throws {
         subscriptions.append(topic)
+        didCallSubscribe = true
     }
 
     func didSubscribe(to topic: String) -> Bool {
-         subscriptions.contains { $0 == topic }
+        subscriptions.contains { $0 == topic }
+    }
+
+    func didUnsubscribe(to topic: String) -> Bool {
+        unsubscriptions.contains { $0 == topic }
     }
 
     public func unsubscribe(topic: String) {
-
+        unsubscriptions.append(topic)
+        didCallUnsubscribe = true
     }
 
     public func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {
-
+        requestCallCount += 1
+        requests.append((topic, request))
     }
 
     public func respond(topic: String, response: RPCResponse, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {
-
+        didRespondOnTopic = topic
     }
 
     public func respondSuccess(topic: String, requestId: RPCID, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {
-
+        didRespondSuccess = true
     }
 
     public func respondError(topic: String, requestId: RPCID, tag: Int, reason: Reason, envelopeType: Envelope.EnvelopeType) async throws {
-
+        lastErrorCode = reason.code
+        didRespondError = true
     }
 
     public func requestNetworkAck(_ request: RPCRequest, topic: String, tag: Int) async throws {
-
+        requestCallCount += 1
+        requests.append((topic, request))
     }
 }
