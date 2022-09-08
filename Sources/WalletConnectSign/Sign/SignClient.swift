@@ -1,8 +1,10 @@
 import Foundation
+import Combine
+import JSONRPC
 import WalletConnectRelay
 import WalletConnectUtils
 import WalletConnectKMS
-import Combine
+import WalletConnectNetworking
 
 /// WalletConnect Sign Client
 ///
@@ -94,7 +96,7 @@ public final class SignClient {
     private let disconnectService: DisconnectService
     private let nonControllerSessionStateMachine: NonControllerSessionStateMachine
     private let controllerSessionStateMachine: ControllerSessionStateMachine
-    private let history: JsonRpcHistory
+    private let history: RPCHistory
     private let cleanupService: CleanupService
 
     private let sessionProposalPublisherSubject = PassthroughSubject<Session.Proposal, Never>()
@@ -121,7 +123,7 @@ public final class SignClient {
          nonControllerSessionStateMachine: NonControllerSessionStateMachine,
          controllerSessionStateMachine: ControllerSessionStateMachine,
          disconnectService: DisconnectService,
-         history: JsonRpcHistory,
+         history: RPCHistory,
          cleanupService: CleanupService
     ) {
         self.logger = logger
@@ -221,9 +223,10 @@ public final class SignClient {
     /// For the wallet to respond on pending dApp's JSON-RPC request
     /// - Parameters:
     ///   - topic: Topic of the session for which the request was received.
+    ///   - requestId: RPC request ID
     ///   - response: Your JSON RPC response or an error.
-    public func respond(topic: String, response: JsonRpcResult) async throws {
-        try await sessionEngine.respondSessionRequest(topic: topic, response: response)
+    public func respond(topic: String, requestId: RPCID, response: RPCResult) async throws {
+        try await sessionEngine.respondSessionRequest(topic: topic, requestId: requestId, response: response)
     }
 
     /// Ping method allows to check if peer client is online and is subscribing for given topic
@@ -289,10 +292,9 @@ public final class SignClient {
     /// - Parameter topic: topic representing session for which you want to get pending requests. If nil, you will receive pending requests for all active sessions.
     public func getPendingRequests(topic: String? = nil) -> [Request] {
         let pendingRequests: [Request] = history.getPending()
-            .filter {$0.request.method == .sessionRequest}
             .compactMap {
-                guard case let .sessionRequest(payloadRequest) = $0.request.params else {return nil}
-                return Request(id: $0.id, topic: $0.topic, method: payloadRequest.request.method, params: payloadRequest.request.params, chainId: payloadRequest.chainId)
+                guard let request = try? $0.request.params?.get(SessionType.RequestParams.self) else { return nil }
+                return Request(id: $0.id, topic: $0.topic, method: request.request.method, params: request.request.params, chainId: request.chainId)
             }
         if let topic = topic {
             return pendingRequests.filter {$0.topic == topic}
@@ -303,11 +305,13 @@ public final class SignClient {
 
     /// - Parameter id: id of a wc_sessionRequest jsonrpc request
     /// - Returns: json rpc record object for given id or nil if record for give id does not exits
-    public func getSessionRequestRecord(id: Int64) -> WalletConnectUtils.JsonRpcRecord? {
-        guard let record = history.get(id: id),
-              case .sessionRequest(let payload) = record.request.params else {return nil}
-        let request = WalletConnectUtils.JsonRpcRecord.Request(method: payload.request.method, params: payload.request.params)
-        return WalletConnectUtils.JsonRpcRecord(id: record.id, topic: record.topic, request: request, response: record.response, chainId: record.chainId)
+    public func getSessionRequestRecord(id: Int64) -> Request? {
+        guard
+            let record = history.get(recordId: RPCID(id)),
+            let request = try? record.request.params?.get(SessionType.RequestParams.self)
+        else { return nil }
+
+        return Request(id: record.id, topic: record.topic, method: record.request.method, params: request, chainId: request.chainId)
     }
 
 #if DEBUG
@@ -326,7 +330,7 @@ public final class SignClient {
             sessionProposalPublisherSubject.send(proposal)
         }
         approveEngine.onSessionRejected = { [unowned self] proposal, reason in
-            sessionRejectionPublisherSubject.send((proposal, reason.publicRepresentation()))
+            sessionRejectionPublisherSubject.send((proposal, reason))
         }
         approveEngine.onSessionSettle = { [unowned self] settledSession in
             sessionSettlePublisherSubject.send(settledSession)
@@ -335,7 +339,7 @@ public final class SignClient {
             sessionRequestPublisherSubject.send(sessionRequest)
         }
         sessionEngine.onSessionDelete = { [unowned self] topic, reason in
-            sessionDeletePublisherSubject.send((topic, reason.publicRepresentation()))
+            sessionDeletePublisherSubject.send((topic, reason))
         }
         controllerSessionStateMachine.onNamespacesUpdate = { [unowned self] topic, namespaces in
             sessionUpdatePublisherSubject.send((topic, namespaces))

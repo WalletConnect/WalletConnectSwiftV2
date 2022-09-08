@@ -1,5 +1,6 @@
 import Foundation
 import WalletConnectUtils
+import WalletConnectNetworking
 
 // Internal namespace for session payloads.
 internal enum SessionType {
@@ -24,7 +25,7 @@ internal enum SessionType {
 
     typealias DeleteParams = SessionType.Reason
 
-    struct Reason: Codable, Equatable {
+    struct Reason: Codable, Equatable, WalletConnectNetworking.Reason {
         let code: Int
         let message: String
 
@@ -62,17 +63,5 @@ internal enum SessionType {
 
     struct UpdateExpiryParams: Codable, Equatable {
         let expiry: Int64
-    }
-}
-
-internal extension Reason {
-    func internalRepresentation() -> SessionType.Reason {
-        SessionType.Reason(code: self.code, message: self.message)
-    }
-}
-
-extension SessionType.Reason {
-    func publicRepresentation() -> Reason {
-        Reason(code: self.code, message: self.message)
     }
 }

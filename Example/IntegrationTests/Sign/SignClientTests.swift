@@ -1,5 +1,6 @@
 import XCTest
 import WalletConnectUtils
+import JSONRPC
 @testable import WalletConnectKMS
 @testable import WalletConnectSign
 @testable import WalletConnectRelay
@@ -171,7 +172,7 @@ final class SignClientTests: XCTestCase {
         }
         dapp.onSessionSettled = { [unowned self] settledSession in
             Task(priority: .high) {
-                let request = Request(id: 0, topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain)
+                let request = Request(id: RPCID(0), topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain)
                 try await dapp.client.request(params: request)
             }
         }
@@ -181,14 +182,13 @@ final class SignClientTests: XCTestCase {
             XCTAssertEqual(sessionRequest.method, requestMethod)
             requestExpectation.fulfill()
             Task(priority: .high) {
-                let jsonrpcResponse = JSONRPCResponse<AnyCodable>(id: sessionRequest.id, result: AnyCodable(responseParams))
-                try await wallet.client.respond(topic: sessionRequest.topic, response: .response(jsonrpcResponse))
+                try await wallet.client.respond(topic: sessionRequest.topic, requestId: sessionRequest.id, response: .response(AnyCodable(responseParams)))
             }
         }
         dapp.onSessionResponse = { response in
             switch response.result {
             case .response(let response):
-                XCTAssertEqual(try! response.result.get(String.self), responseParams)
+                XCTAssertEqual(try! response.get(String.self), responseParams)
             case .error:
                 XCTFail()
             }
@@ -207,7 +207,8 @@ final class SignClientTests: XCTestCase {
 
         let requestMethod = "eth_sendTransaction"
         let requestParams = [EthSendTransaction.stub()]
-        let error = JSONRPCErrorResponse.Error(code: 0, message: "error")
+        let error = JSONRPCError(code: 0, message: "error")
+
         let chain = Blockchain("eip155:1")!
 
         wallet.onSessionProposal = { [unowned self] proposal in
@@ -217,22 +218,21 @@ final class SignClientTests: XCTestCase {
         }
         dapp.onSessionSettled = { [unowned self] settledSession in
             Task(priority: .high) {
-                let request = Request(id: 0, topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain)
+                let request = Request(id: RPCID(0), topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain)
                 try await dapp.client.request(params: request)
             }
         }
         wallet.onSessionRequest = { [unowned self] sessionRequest in
             Task(priority: .high) {
-                let response = JSONRPCErrorResponse(id: sessionRequest.id, error: error)
-                try await wallet.client.respond(topic: sessionRequest.topic, response: .error(response))
+                try await wallet.client.respond(topic: sessionRequest.topic, requestId: sessionRequest.id, response: .error(error))
             }
         }
         dapp.onSessionResponse = { response in
             switch response.result {
             case .response:
                 XCTFail()
-            case .error(let errorResponse):
-                XCTAssertEqual(error, errorResponse.error)
+            case .error(let receivedError):
+                XCTAssertEqual(error, receivedError)
             }
             expectation.fulfill()
         }
