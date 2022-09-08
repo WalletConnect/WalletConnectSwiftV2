@@ -36,7 +36,7 @@ actor WalletRespondService {
         let didpkh = DIDPKH(account: account)
         let header = CacaoHeader(t: "eip4361")
         let payload = CacaoPayload(params: authRequestParams.payloadParams, didpkh: didpkh)
-        let responseParams =  AuthResponseParams(header: header, payload: payload, signature: signature)
+        let responseParams =  AuthResponseParams(h: header, p: payload, s: signature)
 
         let response = RPCResponse(id: requestId, result: responseParams)
         try await networkingInteractor.respond(topic: topic, response: response, tag: AuthProtocolMethod.authRequest.responseTag, envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
