@@ -41,10 +41,9 @@ final class ChatTests: XCTestCase {
 
     func makeClient(prefix: String) -> ChatClient {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
-        let relayHost = "relay.walletconnect.com"
         let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
         let keychain = KeychainStorageMock()
-        let relayClient = RelayClient(relayHost: relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
+        let relayClient = RelayClient(relayHost: URLConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
         return ChatClientFactory.create(registry: registry, relayClient: relayClient, kms: KeyManagementService(keychain: keychain), logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
 

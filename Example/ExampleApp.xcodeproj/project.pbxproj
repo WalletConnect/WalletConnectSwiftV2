@@ -48,6 +48,7 @@
 		84F568C2279582D200D0A289 /* Signer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C1279582D200D0A289 /* Signer.swift */; };
 		84F568C42795832A00D0A289 /* EthereumTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C32795832A00D0A289 /* EthereumTransaction.swift */; };
 		84FE684628ACDB4700C893FF /* RequestParams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FE684528ACDB4700C893FF /* RequestParams.swift */; };
+		A501AC2728C8E59800CEAA42 /* URLConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A501AC2628C8E59800CEAA42 /* URLConfig.swift */; };
 		A50C036528AAD32200FE72D3 /* ClientDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50C036428AAD32200FE72D3 /* ClientDelegate.swift */; };
 		A50F3946288005B200064555 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50F3945288005B200064555 /* Types.swift */; };
 		A55CAAB028B92AFF00844382 /* ScanModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55CAAAB28B92AFF00844382 /* ScanModule.swift */; };
@@ -236,6 +237,7 @@
 		84F568C1279582D200D0A289 /* Signer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Signer.swift; sourceTree = "<group>"; };
 		84F568C32795832A00D0A289 /* EthereumTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthereumTransaction.swift; sourceTree = "<group>"; };
 		84FE684528ACDB4700C893FF /* RequestParams.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestParams.swift; sourceTree = "<group>"; };
+		A501AC2628C8E59800CEAA42 /* URLConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLConfig.swift; sourceTree = "<group>"; };
 		A50C036428AAD32200FE72D3 /* ClientDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientDelegate.swift; sourceTree = "<group>"; };
 		A50F3945288005B200064555 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		A55CAAAB28B92AFF00844382 /* ScanModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanModule.swift; sourceTree = "<group>"; };
@@ -1048,6 +1050,7 @@
 				A5E03E0E28646D8A00888481 /* WebSocketFactory.swift */,
 				A5E03DFC286465D100888481 /* Stubs.swift */,
 				84FE684528ACDB4700C893FF /* RequestParams.swift */,
+				A501AC2628C8E59800CEAA42 /* URLConfig.swift */,
 			);
 			path = Stubs;
 			sourceTree = "<group>";
@@ -1456,6 +1459,7 @@
 				7694A5262874296A0001257E /* RegistryTests.swift in Sources */,
 				A50C036528AAD32200FE72D3 /* ClientDelegate.swift in Sources */,
 				A5E03E0D28646AD200888481 /* RelayClientEndToEndTests.swift in Sources */,
+				A501AC2728C8E59800CEAA42 /* URLConfig.swift in Sources */,
 				A5E03DFA286465C700888481 /* SignClientTests.swift in Sources */,
 				A5E03E0F28646D8A00888481 /* WebSocketFactory.swift in Sources */,
 				A5E03E1128646F8000888481 /* KeychainStorageMock.swift in Sources */,
@@ -1846,11 +1850,17 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = W5R8AG9K22;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+					"RELAY_HOST=$(RELAY_HOST)",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.IntegrationTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				RELAY_HOST = relay.walletconnect.com;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1869,6 +1879,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.IntegrationTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				RELAY_HOST = relay.walletconnect.com;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
