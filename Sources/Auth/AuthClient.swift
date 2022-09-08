@@ -60,6 +60,7 @@ public class AuthClient {
     private let pairingStorage: WCPairingStorage
     private let pendingRequestsProvider: PendingRequestsProvider
     private let pingService: PairingPingService
+    private let pairingsProvider: PairingsProvider
     private var account: Account?
 
     init(appPairService: AppPairService,
@@ -75,7 +76,8 @@ public class AuthClient {
          logger: ConsoleLogging,
          pairingStorage: WCPairingStorage,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
-         pingService: PairingPingService
+         pingService: PairingPingService,
+         pairingsProvider: PairingsProvider
     ) {
         self.appPairService = appPairService
         self.appRequestService = appRequestService
@@ -91,6 +93,7 @@ public class AuthClient {
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
         self.deletePairingService = deletePairingService
         self.pingService = pingService
+        self.pairingsProvider = pairingsProvider
         setUpPublishers()
     }
 
@@ -154,7 +157,7 @@ public class AuthClient {
     }
 
     public func getPairings() -> [Pairing] {
-        
+        pairingsProvider.getPairings()
     }
 
     /// Query pending authentication requests

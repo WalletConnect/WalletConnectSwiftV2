@@ -1,9 +1,15 @@
 import Foundation
-import WalletConnectSign
+import WalletConnectPairing
 
-class PairingsProvider {
+public class PairingsProvider {
+    private let pairingStorage: WCPairingStorage
+
+    public init(pairingStorage: WCPairingStorage) {
+        self.pairingStorage = pairingStorage
+    }
 
     func getPairings() -> [Pairing] {
-        fatalError()
+        pairingStorage.getAll()
+            .map {Pairing(topic: $0.topic, peer: $0.peerMetadata, expiryDate: $0.expiryDate)}
     }
 }
