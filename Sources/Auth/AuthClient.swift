@@ -153,6 +153,10 @@ public class AuthClient {
         try await pingService.ping(topic: topic)
     }
 
+    public func getPairings() -> [Pairing] {
+        
+    }
+
     /// Query pending authentication requests
     /// - Returns: Pending authentication requests
     public func getPendingRequests() throws -> [AuthRequest] {
