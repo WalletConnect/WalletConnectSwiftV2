@@ -137,18 +137,52 @@ final class SignClientTests: XCTestCase {
         wait(for: [sessionDeleteExpectation], timeout: defaultTimeout)
     }
 
-    func testNewPairingPing() async throws {
+    func testPairingPing() async throws {
         let pongResponseExpectation = expectation(description: "Ping sender receives a pong response")
 
         let uri = try await dapp.client.connect(requiredNamespaces: ProposalNamespace.stubRequired())!
         try await wallet.client.pair(uri: uri)
 
         let pairing = wallet.client.getPairings().first!
-        wallet.client.ping(topic: pairing.topic) { result in
-            if case .failure = result { XCTFail() }
+
+        wallet.onPairingPing = { topic in
+            XCTAssertEqual(topic, pairing.topic)
             pongResponseExpectation.fulfill()
         }
+
+        try await wallet.client.ping(topic: pairing.topic)
+        
         wait(for: [pongResponseExpectation], timeout: defaultTimeout)
+    }
+
+    func testSessionPing() async throws {
+        let expectation = expectation(description: "Proposer receives ping response")
+
+        let requiredNamespaces = ProposalNamespace.stubRequired()
+        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
+
+        wallet.onSessionProposal = { proposal in
+            Task(priority: .high) {
+                try! await self.wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+            }
+        }
+
+        dapp.onSessionSettled = { sessionSettled in
+            Task(priority: .high) {
+                try! await self.dapp.client.ping(topic: sessionSettled.topic)
+            }
+        }
+
+        dapp.onSessionPing = { topic in
+            let session = self.wallet.client.getSessions().first!
+            XCTAssertEqual(topic, session.topic)
+            expectation.fulfill()
+        }
+
+        let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces)!
+        try await wallet.client.pair(uri: uri)
+
+        wait(for: [expectation], timeout: .infinity)
     }
 
     func testSessionRequest() async throws {
@@ -241,7 +275,6 @@ final class SignClientTests: XCTestCase {
         try await wallet.client.pair(uri: uri!)
         wait(for: [expectation], timeout: defaultTimeout)
     }
-
 
     func testNewSessionOnExistingPairing() async {
         let dappSettlementExpectation = expectation(description: "Dapp settles session")
