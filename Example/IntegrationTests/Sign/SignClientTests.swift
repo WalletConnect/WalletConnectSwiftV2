@@ -13,7 +13,7 @@ final class SignClientTests: XCTestCase {
 
     static private func makeClientDelegate(
         name: String,
-        projectId: String = "8ba9ee138960775e5231b70cc5ef1c3a"
+        projectId: String = "3ca2919724fbfa5456a25194e369a8b4"
     ) -> ClientDelegate {
         let logger = ConsoleLogger(suffix: name, loggingLevel: .debug)
         let keychain = KeychainStorageMock()

@@ -37,7 +37,7 @@ final class AuthTests: XCTestCase {
 
     func makeClient(prefix: String, account: Account? = nil) -> AuthClient {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
-        let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
+        let projectId = "3ca2919724fbfa5456a25194e369a8b4"
         let keychain = KeychainStorageMock()
         let relayClient = RelayClient(relayHost: URLConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
 
