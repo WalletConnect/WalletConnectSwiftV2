@@ -87,15 +87,8 @@ public final class SignClient {
     /// Publisher that sends session topic when session ping received
     ///
     /// Event will be emited on controller and non-controller clients.
-    public var sessionPingResponsePublisher: AnyPublisher<String, Never> {
-        sessionPingResponsePublisherSubject.eraseToAnyPublisher()
-    }
-
-    /// Publisher that sends pairing topic when pairing ping received
-    ///
-    /// Event will be emited on controller and non-controller clients.
-    public var pairingPingResponsePublisher: AnyPublisher<String, Never> {
-        pairingPingResponsePublisherSubject.eraseToAnyPublisher()
+    public var pingResponsePublisher: AnyPublisher<String, Never> {
+        pingResponsePublisherSubject.eraseToAnyPublisher()
     }
 
     /// An object that loggs SDK's errors and info messages
@@ -126,8 +119,7 @@ public final class SignClient {
     private let sessionUpdatePublisherSubject = PassthroughSubject<(sessionTopic: String, namespaces: [String: SessionNamespace]), Never>()
     private let sessionEventPublisherSubject = PassthroughSubject<(event: Session.Event, sessionTopic: String, chainId: Blockchain?), Never>()
     private let sessionExtendPublisherSubject = PassthroughSubject<(sessionTopic: String, date: Date), Never>()
-    private let sessionPingResponsePublisherSubject = PassthroughSubject<String, Never>()
-    private let pairingPingResponsePublisherSubject = PassthroughSubject<String, Never>()
+    private let pingResponsePublisherSubject = PassthroughSubject<String, Never>()
 
     private var publishers = Set<AnyCancellable>()
 
@@ -324,9 +316,9 @@ public final class SignClient {
 
     /// - Parameter id: id of a wc_sessionRequest jsonrpc request
     /// - Returns: json rpc record object for given id or nil if record for give id does not exits
-    public func getSessionRequestRecord(id: Int64) -> Request? {
+    public func getSessionRequestRecord(id: RPCID) -> Request? {
         guard
-            let record = history.get(recordId: RPCID(id)),
+            let record = history.get(recordId: id),
             let request = try? record.request.params?.get(SessionType.RequestParams.self)
         else { return nil }
 
@@ -379,10 +371,10 @@ public final class SignClient {
             sessionResponsePublisherSubject.send(response)
         }
         pairingPingService.onResponse = { [unowned self] topic in
-            pairingPingResponsePublisherSubject.send(topic)
+            pingResponsePublisherSubject.send(topic)
         }
         sessionPingService.onResponse = { [unowned self] topic in
-            sessionPingResponsePublisherSubject.send(topic)
+            pingResponsePublisherSubject.send(topic)
         }
     }
 

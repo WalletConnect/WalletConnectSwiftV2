@@ -145,7 +145,7 @@ final class SignClientTests: XCTestCase {
 
         let pairing = wallet.client.getPairings().first!
 
-        wallet.onPairingPing = { topic in
+        wallet.onPing = { topic in
             XCTAssertEqual(topic, pairing.topic)
             pongResponseExpectation.fulfill()
         }
@@ -173,7 +173,7 @@ final class SignClientTests: XCTestCase {
             }
         }
 
-        dapp.onSessionPing = { topic in
+        dapp.onPing = { topic in
             let session = self.wallet.client.getSessions().first!
             XCTAssertEqual(topic, session.topic)
             expectation.fulfill()
