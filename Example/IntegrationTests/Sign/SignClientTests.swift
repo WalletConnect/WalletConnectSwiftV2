@@ -302,31 +302,34 @@ final class SignClientTests: XCTestCase {
     }
 
 
-//
-//    func testSuccessfulSessionUpdateNamespaces() async {
-//        await waitClientsConnected()
-//        let proposerSessionUpdateExpectation = expectation(description: "Proposer updates session methods on responder request")
-//        let responderSessionUpdateExpectation = expectation(description: "Responder updates session methods on proposer response")
-//        let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
-//        let namespacesToUpdateWith: Set<Namespace> = [Namespace(chains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], methods: ["xyz"], events: ["abc"])]
-//        try! await responder.client.pair(uri: uri)
-//        responder.onSessionProposal = { [unowned self] proposal in
-//            try? self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [])
-//        }
-//        responder.onSessionSettled = { [unowned self] session in
-//            try? responder.client.updateNamespaces(topic: session.topic, namespaces: namespacesToUpdateWith)
-//        }
-//        proposer.onSessionUpdateNamespaces = { topic, namespaces in
-//            XCTAssertEqual(namespaces, namespacesToUpdateWith)
-//            proposerSessionUpdateExpectation.fulfill()
-//        }
-//        responder.onSessionUpdateNamespaces = { topic, namespaces in
-//            XCTAssertEqual(namespaces, namespacesToUpdateWith)
-//            responderSessionUpdateExpectation.fulfill()
-//        }
-//        wait(for: [proposerSessionUpdateExpectation, responderSessionUpdateExpectation], timeout: defaultTimeout)
-//    }
-//
+    func testSuccessfulSessionUpdateNamespaces() async {
+        let expectation = expectation(description: "Dapp updates namespaces")
+        let requiredNamespaces = ProposalNamespace.stubRequired()
+        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
+
+        wallet.onSessionProposal = { [unowned self] proposal in
+            Task(priority: .high) {
+                try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+            }
+        }
+        dapp.onSessionSettled = { [unowned self] settledSession in
+            Task(priority: .high) {
+                try! await wallet.client.update(topic: settledSession.topic, namespaces: sessionNamespaces)
+            }
+        }
+        dapp.onSessionUpdateNamespaces = { _, _ in
+            expectation.fulfill()
+        }
+        let uri = try! await dapp.client.connect(requiredNamespaces: requiredNamespaces)
+        try! await wallet.client.pair(uri: uri!)
+        wait(for: [expectation], timeout: defaultTimeout)
+    }
+
+
+
+
+
+
 //    func testSuccessfulSessionUpdateExpiry() async {
 //        await waitClientsConnected()
 //        let proposerSessionUpdateExpectation = expectation(description: "Proposer updates session expiry on responder request")
