@@ -242,36 +242,49 @@ final class SignClientTests: XCTestCase {
         wait(for: [expectation], timeout: defaultTimeout)
     }
 
-//
-//    func testNewSessionOnExistingPairing() async {
-//        await waitClientsConnected()
-//        let proposerSettlesSessionExpectation = expectation(description: "Proposer settles session")
-//        proposerSettlesSessionExpectation.expectedFulfillmentCount = 2
-//        let responderSettlesSessionExpectation = expectation(description: "Responder settles session")
-//        responderSettlesSessionExpectation.expectedFulfillmentCount = 2
-//        var initiatedSecondSession = false
-//        let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
-//
-//        try! await responder.client.pair(uri: uri)
-//
-//        responder.onSessionProposal = { [unowned self] proposal in
-//            try? responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [])
-//        }
-//        responder.onSessionSettled = { sessionSettled in
-//            responderSettlesSessionExpectation.fulfill()
-//        }
-//        proposer.onSessionSettled = { [unowned self] sessionSettled in
-//            proposerSettlesSessionExpectation.fulfill()
-//            let pairingTopic = proposer.client.getSettledPairings().first!.topic
-//            if !initiatedSecondSession {
-//                Task {
-//                    let _ = try! await proposer.client.connect(namespaces: [Namespace.stub()], topic: pairingTopic)
-//                }
-//                initiatedSecondSession = true
-//            }
-//        }
-//        wait(for: [proposerSettlesSessionExpectation, responderSettlesSessionExpectation], timeout: defaultTimeout)
-//    }
+
+    func testNewSessionOnExistingPairing() async {
+        let dappSettlementExpectation = expectation(description: "Dapp settles session")
+        dappSettlementExpectation.expectedFulfillmentCount = 2
+        let walletSettlementExpectation = expectation(description: "Wallet settles session")
+        walletSettlementExpectation.expectedFulfillmentCount = 2
+        let requiredNamespaces = ProposalNamespace.stubRequired()
+        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
+        var initiatedSecondSession = false
+
+        wallet.onSessionProposal = { [unowned self] proposal in
+            Task(priority: .high) {
+                do {
+                    try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                } catch {
+                    XCTFail("\(error)")
+                }
+            }
+        }
+        dapp.onSessionSettled = { [unowned self] _ in
+            dappSettlementExpectation.fulfill()
+            let pairingTopic = dapp.client.getPairings().first!.topic
+            if !initiatedSecondSession {
+                Task {
+                    let _ = try! await dapp.client.connect(requiredNamespaces: requiredNamespaces, topic: pairingTopic)
+                }
+                initiatedSecondSession = true
+            }
+        }
+        wallet.onSessionSettled = { _ in
+            walletSettlementExpectation.fulfill()
+        }
+
+        let uri = try! await dapp.client.connect(requiredNamespaces: requiredNamespaces)
+        try! await wallet.client.pair(uri: uri!)
+        wait(for: [dappSettlementExpectation, walletSettlementExpectation], timeout: defaultTimeout)
+
+    }
+
+
+
+
+
 //
 //    func testSessionPing() async {
 //        await waitClientsConnected()
