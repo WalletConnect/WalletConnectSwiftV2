@@ -326,31 +326,36 @@ final class SignClientTests: XCTestCase {
     }
 
 
+    func testSuccessfulSessionExtend() async {
+        let expectation = expectation(description: "Dapp extends session")
+
+        let requiredNamespaces = ProposalNamespace.stubRequired()
+        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
+
+        wallet.onSessionProposal = { [unowned self] proposal in
+            Task(priority: .high) {
+                try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+            }
+        }
+
+        dapp.onSessionExtend = { _, _ in
+            expectation.fulfill()
+        }
+
+        dapp.onSessionSettled = { [unowned self] settledSession in
+            Task(priority: .high) {
+                try! await wallet.client.extend(topic: settledSession.topic)
+            }
+        }
+
+        let uri = try! await dapp.client.connect(requiredNamespaces: requiredNamespaces)
+        try! await wallet.client.pair(uri: uri!)
+
+        wait(for: [expectation], timeout: defaultTimeout)
+    }
 
 
 
-
-//    func testSuccessfulSessionUpdateExpiry() async {
-//        await waitClientsConnected()
-//        let proposerSessionUpdateExpectation = expectation(description: "Proposer updates session expiry on responder request")
-//        let responderSessionUpdateExpectation = expectation(description: "Responder updates session expiry on proposer response")
-//        let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
-//        try! await responder.client.pair(uri: uri)
-//        responder.onSessionProposal = { [unowned self] proposal in
-//            try? self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [])
-//        }
-//        responder.onSessionSettled = { [unowned self] session in
-//            Thread.sleep(forTimeInterval: 1) //sleep because new expiry must be greater than current
-//            try? responder.client.updateExpiry(topic: session.topic)
-//        }
-//        proposer.onSessionUpdateExpiry = { _, _ in
-//            proposerSessionUpdateExpectation.fulfill()
-//        }
-//        responder.onSessionUpdateExpiry = { _, _ in
-//            responderSessionUpdateExpectation.fulfill()
-//        }
-//        wait(for: [proposerSessionUpdateExpectation, responderSessionUpdateExpectation], timeout: defaultTimeout)
-//    }
 //
 //    func testSessionEventSucceeds() async {
 //        await waitClientsConnected()
