@@ -1,6 +1,9 @@
 import Foundation
+import WalletConnectNetworking
 
+/// Authentication error
 public enum AuthError: Codable, Equatable, Error {
+    case userDisconnected
     case userRejeted
     case malformedResponseParams
     case malformedRequestParams
@@ -29,6 +32,8 @@ extension AuthError: Reason {
 
     public var code: Int {
         switch self {
+        case .userDisconnected:
+            return 6000
         case .userRejeted:
             return 14001
         case .malformedResponseParams:
@@ -54,6 +59,8 @@ extension AuthError: Reason {
             return "Original message compromised"
         case .signatureVerificationFailed:
             return "Message verification failed"
+        case .userDisconnected:
+            return "User Disconnected"
         }
     }
 }

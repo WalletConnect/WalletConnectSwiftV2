@@ -1,4 +1,5 @@
 import UIKit
+import Auth
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -9,9 +10,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private var configurators: [Configurator] {
         return [
             MigrationConfigurator(app: app),
+            ThirdPartyConfigurator(),
             ApplicationConfigurator(app: app),
-            AppearanceConfigurator(),
-            ThirdPartyConfigurator()
+            AppearanceConfigurator()
         ]
     }
 
@@ -22,5 +23,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.makeKeyAndVisible()
 
         configurators.configure()
+    }
+
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        guard let context = URLContexts.first else { return }
+
+        let uri = context.url.absoluteString.replacingOccurrences(of: "showcase://wc?uri=", with: "")
+        Task {
+            try await Auth.instance.pair(uri: WalletConnectURI(string: uri)!)
+        }
     }
 }

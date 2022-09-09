@@ -1,10 +1,13 @@
-import Combine
 import Foundation
-import WalletConnectUtils
+import Combine
 import JSONRPC
+import WalletConnectNetworking
+import WalletConnectUtils
+import WalletConnectPairing
 
 class AppRespondSubscriber {
     private let networkingInteractor: NetworkInteracting
+    private let pairingStorage: WCPairingStorage
     private let logger: ConsoleLogging
     private let rpcHistory: RPCHistory
     private let signatureVerifier: MessageSignatureVerifying
@@ -17,49 +20,58 @@ class AppRespondSubscriber {
          logger: ConsoleLogging,
          rpcHistory: RPCHistory,
          signatureVerifier: MessageSignatureVerifying,
-         messageFormatter: SIWEMessageFormatting) {
+         messageFormatter: SIWEMessageFormatting,
+         pairingStorage: WCPairingStorage) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.rpcHistory = rpcHistory
         self.signatureVerifier = signatureVerifier
         self.messageFormatter = messageFormatter
+        self.pairingStorage = pairingStorage
         subscribeForResponse()
     }
 
     private func subscribeForResponse() {
-        networkingInteractor.responsePublisher.sink { [unowned self] subscriptionPayload in
-            let response = subscriptionPayload.response
-            guard
-                let requestId = response.id,
-                let request = rpcHistory.get(recordId: requestId)?.request,
-                let requestParams = request.params, request.method == "wc_authRequest"
-            else { return }
+        networkingInteractor.responseErrorSubscription(on: AuthProtocolMethod.authRequest)
+            .sink { [unowned self] payload in
+                guard let error = AuthError(code: payload.error.code) else { return }
+                onResponse?(payload.id, .failure(error))
+            }.store(in: &publishers)
 
-            networkingInteractor.unsubscribe(topic: subscriptionPayload.topic)
+        networkingInteractor.responseSubscription(on: AuthProtocolMethod.authRequest)
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<AuthRequestParams, Cacao>)  in
 
-            if let errorResponse = response.error,
-               let error = AuthError(code: errorResponse.code) {
-                onResponse?(requestId, .failure(error))
-                return
-            }
+                activatePairingIfNeeded(id: payload.id)
+                networkingInteractor.unsubscribe(topic: payload.topic)
 
-            guard
-                let cacao = try? response.result?.get(Cacao.self),
-                let address = try? DIDPKH(iss: cacao.payload.iss).account.address,
-                let message = try? messageFormatter.formatMessage(from: cacao.payload)
-            else { self.onResponse?(requestId, .failure(.malformedResponseParams)); return }
+                let requestId = payload.id
+                let cacao = payload.response
+                let requestPayload = payload.request
 
-            guard let requestPayload = try? requestParams.get(AuthRequestParams.self)
-            else { self.onResponse?(requestId, .failure(.malformedRequestParams)); return }
+                guard
+                    let address = try? DIDPKH(iss: cacao.p.iss).account.address,
+                    let message = try? messageFormatter.formatMessage(from: cacao.p)
+                else { self.onResponse?(requestId, .failure(.malformedResponseParams)); return }
 
-            guard messageFormatter.formatMessage(from: requestPayload.payloadParams, address: address) == message
-            else { self.onResponse?(requestId, .failure(.messageCompromised)); return }
+                guard messageFormatter.formatMessage(from: requestPayload.payloadParams, address: address) == message
+                else { self.onResponse?(requestId, .failure(.messageCompromised)); return }
 
-            guard let _ = try? signatureVerifier.verify(signature: cacao.signature.s, message: message, address: address)
-            else { self.onResponse?(requestId, .failure(.signatureVerificationFailed)); return }
+                guard let _ = try? signatureVerifier.verify(signature: cacao.s, message: message, address: address)
+                else { self.onResponse?(requestId, .failure(.signatureVerificationFailed)); return }
 
-            onResponse?(requestId, .success(cacao))
+                onResponse?(requestId, .success(cacao))
 
-        }.store(in: &publishers)
+            }.store(in: &publishers)
+    }
+
+    private func activatePairingIfNeeded(id: RPCID) {
+        guard let record = rpcHistory.get(recordId: id) else { return }
+        let pairingTopic = record.topic
+        guard var pairing = pairingStorage.getPairing(forTopic: pairingTopic) else { return }
+        if !pairing.active {
+            pairing.activate()
+        } else {
+            try? pairing.updateExpiry()
+        }
     }
 }

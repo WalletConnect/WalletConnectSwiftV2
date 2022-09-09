@@ -5,7 +5,6 @@ import WalletConnectUtils
 import TestingUtils
 import WalletConnectPairing
 
-
 extension Pairing {
     static func stub(expiryDate: Date = Date(timeIntervalSinceNow: 10000), topic: String = String.generateTopic()) -> Pairing {
         Pairing(topic: topic, peer: nil, expiryDate: expiryDate)

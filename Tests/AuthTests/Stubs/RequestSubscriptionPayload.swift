@@ -1,15 +1,14 @@
 import Foundation
-@testable import Auth
 import JSONRPC
+import WalletConnectNetworking
+@testable import Auth
 
-extension RequestSubscriptionPayload {
-    static func stub(id: RPCID) -> RequestSubscriptionPayload {
+extension AuthRequestParams {
+    static func stub(id: RPCID) -> AuthRequestParams {
         let appMetadata = AppMetadata(name: "", description: "", url: "", icons: [])
         let requester = AuthRequestParams.Requester(publicKey: "", metadata: appMetadata)
         let issueAt = ISO8601DateFormatter().string(from: Date())
         let payload = AuthPayload(requestParams: RequestParams.stub(), iat: issueAt)
-        let params = AuthRequestParams(requester: requester, payloadParams: payload)
-        let request = RPCRequest(method: "wc_authRequest", params: params, rpcid: id)
-        return RequestSubscriptionPayload(topic: "123", request: request)
+        return AuthRequestParams(requester: requester, payloadParams: payload)
     }
 }

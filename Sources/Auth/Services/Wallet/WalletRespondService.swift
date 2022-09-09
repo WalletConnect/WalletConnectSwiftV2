@@ -1,7 +1,8 @@
 import Foundation
-import WalletConnectKMS
 import JSONRPC
+import WalletConnectKMS
 import WalletConnectUtils
+import WalletConnectNetworking
 
 actor WalletRespondService {
     enum Errors: Error {
@@ -12,15 +13,18 @@ actor WalletRespondService {
     private let kms: KeyManagementService
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
+    private let walletErrorResponder: WalletErrorResponder
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
          kms: KeyManagementService,
-         rpcHistory: RPCHistory) {
+         rpcHistory: RPCHistory,
+         walletErrorResponder: WalletErrorResponder) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.kms = kms
         self.rpcHistory = rpcHistory
+        self.walletErrorResponder = walletErrorResponder
     }
 
     func respond(requestId: RPCID, signature: CacaoSignature, account: Account) async throws {
@@ -30,21 +34,16 @@ actor WalletRespondService {
         try kms.setAgreementSecret(keys, topic: topic)
 
         let didpkh = DIDPKH(account: account)
-        let cacao = CacaoFormatter().format(authRequestParams, signature, didpkh)
-        let response = RPCResponse(id: requestId, result: cacao)
-        try await networkingInteractor.respond(topic: topic, response: response, tag: AuthResponseParams.tag, envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
+        let header = CacaoHeader(t: "eip4361")
+        let payload = CacaoPayload(params: authRequestParams.payloadParams, didpkh: didpkh)
+        let responseParams =  AuthResponseParams(h: header, p: payload, s: signature)
+
+        let response = RPCResponse(id: requestId, result: responseParams)
+        try await networkingInteractor.respond(topic: topic, response: response, tag: AuthProtocolMethod.authRequest.responseTag, envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
     }
 
     func respondError(requestId: RPCID) async throws {
-        let authRequestParams = try getAuthRequestParams(requestId: requestId)
-        let (topic, keys) = try generateAgreementKeys(requestParams: authRequestParams)
-
-        try kms.setAgreementSecret(keys, topic: topic)
-
-        let tag = AuthResponseParams.tag
-        let error = AuthError.userRejeted
-        let envelopeType = Envelope.EnvelopeType.type1(pubKey: keys.publicKey.rawRepresentation)
-        try await networkingInteractor.respondError(topic: topic, requestId: requestId, tag: tag, reason: error, envelopeType: envelopeType)
+        try await walletErrorResponder.respondError(AuthError.userRejeted, requestId: requestId)
     }
 
     private func getAuthRequestParams(requestId: RPCID) throws -> AuthRequestParams {

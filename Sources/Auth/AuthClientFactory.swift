@@ -3,6 +3,7 @@ import WalletConnectRelay
 import WalletConnectUtils
 import WalletConnectKMS
 import WalletConnectPairing
+import WalletConnectNetworking
 
 public struct AuthClientFactory {
 
@@ -24,23 +25,30 @@ public struct AuthClientFactory {
         let appPairService = AppPairService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore)
         let appRequestService = AppRequestService(networkingInteractor: networkingInteractor, kms: kms, appMetadata: metadata, logger: logger)
         let messageSigner = MessageSigner(signer: Signer())
-        let appRespondSubscriber = AppRespondSubscriber(networkingInteractor: networkingInteractor, logger: logger, rpcHistory: history, signatureVerifier: messageSigner, messageFormatter: messageFormatter)
+        let appRespondSubscriber = AppRespondSubscriber(networkingInteractor: networkingInteractor, logger: logger, rpcHistory: history, signatureVerifier: messageSigner, messageFormatter: messageFormatter, pairingStorage: pairingStore)
         let walletPairService = WalletPairService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore)
-        let walletRequestSubscriber = WalletRequestSubscriber(networkingInteractor: networkingInteractor, logger: logger, kms: kms, messageFormatter: messageFormatter, address: account?.address)
-        let walletRespondService = WalletRespondService(networkingInteractor: networkingInteractor, logger: logger, kms: kms, rpcHistory: history)
+        let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingInteractor, logger: logger, kms: kms, rpcHistory: history)
+        let walletRequestSubscriber = WalletRequestSubscriber(networkingInteractor: networkingInteractor, logger: logger, kms: kms, messageFormatter: messageFormatter, address: account?.address, walletErrorResponder: walletErrorResponder)
+        let walletRespondService = WalletRespondService(networkingInteractor: networkingInteractor, logger: logger, kms: kms, rpcHistory: history, walletErrorResponder: walletErrorResponder)
         let pendingRequestsProvider = PendingRequestsProvider(rpcHistory: history)
         let cleanupService = CleanupService(pairingStore: pairingStore, kms: kms)
+        let deletePairingService = DeletePairingService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore, logger: logger)
+        let pingService = PairingPingService(pairingStorage: pairingStore, networkingInteractor: networkingInteractor, logger: logger)
+        let pairingsProvider = PairingsProvider(pairingStorage: pairingStore)
 
         return AuthClient(appPairService: appPairService,
                           appRequestService: appRequestService,
                           appRespondSubscriber: appRespondSubscriber,
                           walletPairService: walletPairService,
                           walletRequestSubscriber: walletRequestSubscriber,
-                          walletRespondService: walletRespondService,
+                          walletRespondService: walletRespondService, deletePairingService: deletePairingService,
                           account: account,
                           pendingRequestsProvider: pendingRequestsProvider,
                           cleanupService: cleanupService,
                           logger: logger,
-                          pairingStorage: pairingStore, socketConnectionStatusPublisher: relayClient.socketConnectionStatusPublisher)
+                          pairingStorage: pairingStore,
+                          socketConnectionStatusPublisher: relayClient.socketConnectionStatusPublisher,
+                          pingService: pingService,
+                          pairingsProvider: pairingsProvider)
     }
 }

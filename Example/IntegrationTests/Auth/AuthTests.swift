@@ -37,10 +37,9 @@ final class AuthTests: XCTestCase {
 
     func makeClient(prefix: String, account: Account? = nil) -> AuthClient {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
-        let relayHost = "relay.walletconnect.com"
-        let projectId = "8ba9ee138960775e5231b70cc5ef1c3a"
+        let projectId = "3ca2919724fbfa5456a25194e369a8b4"
         let keychain = KeychainStorageMock()
-        let relayClient = RelayClient(relayHost: relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
+        let relayClient = RelayClient(relayHost: URLConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
 
         return AuthClientFactory.create(
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
@@ -65,15 +64,14 @@ final class AuthTests: XCTestCase {
         let responseExpectation = expectation(description: "successful response delivered")
         let uri = try! await app.request(RequestParams.stub())
         try! await wallet.pair(uri: uri)
-        wallet.authRequestPublisher.sink { [unowned self] (id, message) in
+        wallet.authRequestPublisher.sink { [unowned self] request in
             Task(priority: .high) {
-                let signature = try! MessageSigner().sign(message: message, privateKey: prvKey)
-                let cacaoSignature = CacaoSignature(t: "eip191", s: signature)
-                try! await wallet.respond(requestId: id, signature: cacaoSignature)
+                let signature = try! MessageSigner().sign(message: request.message, privateKey: prvKey)
+                try! await wallet.respond(requestId: request.id, signature: signature)
             }
         }
         .store(in: &publishers)
-        app.authResponsePublisher.sink { (id, result) in
+        app.authResponsePublisher.sink { (_, result) in
             guard case .success = result else { XCTFail(); return }
             responseExpectation.fulfill()
         }
@@ -85,13 +83,13 @@ final class AuthTests: XCTestCase {
         let responseExpectation = expectation(description: "error response delivered")
         let uri = try! await app.request(RequestParams.stub())
         try! await wallet.pair(uri: uri)
-        wallet.authRequestPublisher.sink { [unowned self] (id, message) in
+        wallet.authRequestPublisher.sink { [unowned self] request in
             Task(priority: .high) {
-                try! await wallet.reject(requestId: id)
+                try! await wallet.reject(requestId: request.id)
             }
         }
         .store(in: &publishers)
-        app.authResponsePublisher.sink { (id, result) in
+        app.authResponsePublisher.sink { (_, result) in
             guard case .failure(let error) = result else { XCTFail(); return }
             XCTAssertEqual(error, .userRejeted)
             responseExpectation.fulfill()
@@ -104,20 +102,34 @@ final class AuthTests: XCTestCase {
         let responseExpectation = expectation(description: "invalid signature response delivered")
         let uri = try! await app.request(RequestParams.stub())
         try! await wallet.pair(uri: uri)
-        wallet.authRequestPublisher.sink { [unowned self] (id, message) in
+        wallet.authRequestPublisher.sink { [unowned self] request in
             Task(priority: .high) {
                 let invalidSignature = "438effc459956b57fcd9f3dac6c675f9cee88abf21acab7305e8e32aa0303a883b06dcbd956279a7a2ca21ffa882ff55cc22e8ab8ec0f3fe90ab45f306938cfa1b"
                 let cacaoSignature = CacaoSignature(t: "eip191", s: invalidSignature)
-                try! await wallet.respond(requestId: id, signature: cacaoSignature)
+                try! await wallet.respond(requestId: request.id, signature: cacaoSignature)
             }
         }
         .store(in: &publishers)
-        app.authResponsePublisher.sink { (id, result) in
+        app.authResponsePublisher.sink { (_, result) in
             guard case .failure(let error) = result else { XCTFail(); return }
             XCTAssertEqual(error, .signatureVerificationFailed)
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
         wait(for: [responseExpectation], timeout: 2)
+    }
+
+    func testPing() async {
+        let pingExpectation = expectation(description: "expects ping response")
+        let uri = try! await app.request(RequestParams.stub())
+        try! await wallet.pair(uri: uri)
+        try! await wallet.ping(topic: uri.topic)
+        wallet.pingResponsePublisher
+            .sink { topic in
+                XCTAssertEqual(topic, uri.topic)
+                pingExpectation.fulfill()
+            }
+            .store(in: &publishers)
+        wait(for: [pingExpectation], timeout: 5)
     }
 }

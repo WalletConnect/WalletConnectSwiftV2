@@ -24,7 +24,7 @@ class CacaoSignerTest: XCTestCase {
         - https://example.com/my-web2-claim.json
         """
 
-    let signature = "438effc459956b57fcd9f3dac6c675f9cee88abf21acab7305e8e32aa0303a883b06dcbd956279a7a2ca21ffa882ff55cc22e8ab8ec0f3fe90ab45f306938cfa1b"
+    let signature = CacaoSignature(t: "eip191", s: "0x438effc459956b57fcd9f3dac6c675f9cee88abf21acab7305e8e32aa0303a883b06dcbd956279a7a2ca21ffa882ff55cc22e8ab8ec0f3fe90ab45f306938cfa1b")
 
     func testCacaoSign() throws {
         let signer = MessageSigner(signer: Signer())

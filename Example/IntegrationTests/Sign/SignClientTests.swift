@@ -13,13 +13,12 @@ final class SignClientTests: XCTestCase {
 
     static private func makeClientDelegate(
         name: String,
-        relayHost: String = "relay.walletconnect.com",
-        projectId: String = "8ba9ee138960775e5231b70cc5ef1c3a"
+        projectId: String = "3ca2919724fbfa5456a25194e369a8b4"
     ) -> ClientDelegate {
         let logger = ConsoleLogger(suffix: name, loggingLevel: .debug)
         let keychain = KeychainStorageMock()
         let relayClient = RelayClient(
-            relayHost: relayHost,
+            relayHost: URLConfig.relayHost,
             projectId: projectId,
             keyValueStorage: RuntimeKeyValueStorage(),
             keychainStorage: keychain,
@@ -143,7 +142,7 @@ final class SignClientTests: XCTestCase {
         let uri = try await dapp.client.connect(requiredNamespaces: ProposalNamespace.stubRequired())!
         try await wallet.client.pair(uri: uri)
 
-        let pairing = wallet.client.getSettledPairings().first!
+        let pairing = wallet.client.getPairings().first!
         wallet.client.ping(topic: pairing.topic) { result in
             if case .failure = result { XCTFail() }
             pongResponseExpectation.fulfill()

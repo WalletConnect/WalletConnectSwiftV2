@@ -12,8 +12,8 @@ class SerializerMock: Serializing {
     func serialize(topic: String, encodable: Encodable, envelopeType: Envelope.EnvelopeType) throws -> String {
         try serialize(json: try encodable.json(), agreementKeys: AgreementKeys.stub())
     }
-    func tryDeserialize<T: Codable>(topic: String, encodedEnvelope: String) -> T? {
-        try? deserialize(message: encodedEnvelope, symmetricKey: Data())
+    func deserialize<T: Codable>(topic: String, encodedEnvelope: String) throws -> T {
+        return try deserialize(message: encodedEnvelope, symmetricKey: Data())
     }
     func deserializeJsonRpc(topic: String, message: String) throws -> Result<JSONRPCResponse<AnyCodable>, JSONRPCErrorResponse> {
         .success(try deserialize(message: message, symmetricKey: Data()))

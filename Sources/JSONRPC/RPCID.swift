@@ -1,4 +1,5 @@
 import Commons
+import Foundation
 
 public typealias RPCID = Either<String, Int64>
 
@@ -9,6 +10,8 @@ public protocol IdentifierGenerator {
 struct IntIdentifierGenerator: IdentifierGenerator {
 
     func next() -> RPCID {
-        return RPCID(Int64.random(in: Int64.min...Int64.max))
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000) * 1000
+        let random = Int64.random(in: 0..<1000)
+        return RPCID(timestamp + random)
     }
 }

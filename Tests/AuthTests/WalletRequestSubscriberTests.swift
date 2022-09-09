@@ -1,10 +1,11 @@
 import Foundation
 import XCTest
-@testable import Auth
+import JSONRPC
 import WalletConnectUtils
+import WalletConnectNetworking
+@testable import Auth
 @testable import WalletConnectKMS
 @testable import TestingUtils
-import JSONRPC
 
 class WalletRequestSubscriberTests: XCTestCase {
     var networkingInteractor: NetworkingInteractorMock!
@@ -15,10 +16,12 @@ class WalletRequestSubscriberTests: XCTestCase {
     override func setUp() {
         networkingInteractor = NetworkingInteractorMock()
         messageFormatter = SIWEMessageFormatterMock()
+
+        let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingInteractor, logger: ConsoleLoggerMock(), kms: KeyManagementServiceMock(), rpcHistory: RPCHistory(keyValueStore: CodableStore(defaults: RuntimeKeyValueStorage(), identifier: "")))
         sut = WalletRequestSubscriber(networkingInteractor: networkingInteractor,
                                       logger: ConsoleLoggerMock(),
                                       kms: KeyManagementServiceMock(),
-                                      messageFormatter: messageFormatter, address: "")
+                                      messageFormatter: messageFormatter, address: "", walletErrorResponder: walletErrorResponder)
     }
 
     func testSubscribeRequest() {
@@ -28,13 +31,14 @@ class WalletRequestSubscriberTests: XCTestCase {
         messageFormatter.formattedMessage = expectedMessage
         var messageId: RPCID!
         var message: String!
-        sut.onRequest = { id, formattedMessage in
-            messageId = id
-            message = formattedMessage
+        sut.onRequest = { request in
+            messageId = request.id
+            message = request.message
             messageExpectation.fulfill()
         }
 
-        networkingInteractor.requestPublisherSubject.send(RequestSubscriptionPayload.stub(id: expectedRequestId))
+        let request = RPCRequest(method: AuthProtocolMethod.authRequest.method, params: AuthRequestParams.stub(id: expectedRequestId), id: expectedRequestId.right!)
+        networkingInteractor.requestPublisherSubject.send(("123", request))
 
         wait(for: [messageExpectation], timeout: defaultTimeout)
         XCTAssertEqual(message, expectedMessage)

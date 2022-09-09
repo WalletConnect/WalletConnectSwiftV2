@@ -4,6 +4,10 @@ inputs:
   type:
     description: 'The type of CI step to run'
     required: true
+  relay-endpoint:
+    description: 'The endpoint of the relay e.g. relay.walletconnect.com'
+    required: false
+    default: 'relay.walletconnect.com'
 
 runs:
   using: "composite"
@@ -23,11 +27,15 @@ runs:
     - name: Run integration tests
       if: inputs.type == 'integration-tests'
       shell: bash
+      env:
+        RELAY_ENDPOINT: ${{ inputs.relay-endpoint }}
       run: "xcodebuild \
         -project Example/ExampleApp.xcodeproj \ 
         -scheme IntegrationTests \
         -clonedSourcePackagesDirPath SourcePackagesCache \
-        -destination 'platform=iOS Simulator,name=iPhone 13' test"
+        -destination 'platform=iOS Simulator,name=iPhone 13' \ 
+        RELAY_HOST='$RELAY_ENDPOINT' \
+        test"
 
     # Wallet build
     - name: Build Example Wallet

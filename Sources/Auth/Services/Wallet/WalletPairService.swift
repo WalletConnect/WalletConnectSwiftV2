@@ -1,6 +1,7 @@
 import Foundation
 import WalletConnectKMS
 import WalletConnectPairing
+import WalletConnectNetworking
 
 actor WalletPairService {
     enum Errors: Error {

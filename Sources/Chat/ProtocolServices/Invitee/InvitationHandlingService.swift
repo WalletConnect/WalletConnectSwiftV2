@@ -1,8 +1,10 @@
 import Foundation
+import Combine
+import JSONRPC
 import WalletConnectKMS
 import WalletConnectUtils
 import WalletConnectRelay
-import Combine
+import WalletConnectNetworking
 
 class InvitationHandlingService {
     enum Error: Swift.Error {
@@ -11,7 +13,7 @@ class InvitationHandlingService {
     var onInvite: ((Invite) -> Void)?
     var onNewThread: ((Thread) -> Void)?
     private let networkingInteractor: NetworkInteracting
-    private let invitePayloadStore: CodableStore<(RequestSubscriptionPayload)>
+    private let invitePayloadStore: CodableStore<RequestSubscriptionPayload<Invite>>
     private let topicToRegistryRecordStore: CodableStore<RegistryRecord>
     private let registry: Registry
     private let logger: ConsoleLogging
@@ -24,7 +26,7 @@ class InvitationHandlingService {
          kms: KeyManagementService,
          logger: ConsoleLogging,
          topicToRegistryRecordStore: CodableStore<RegistryRecord>,
-         invitePayloadStore: CodableStore<RequestSubscriptionPayload>,
+         invitePayloadStore: CodableStore<RequestSubscriptionPayload<Invite>>,
          threadsStore: Database<Thread>) {
         self.registry = registry
         self.kms = kms
@@ -37,34 +39,26 @@ class InvitationHandlingService {
     }
 
     func accept(inviteId: String) async throws {
-
         guard let payload = try invitePayloadStore.get(key: inviteId) else { throw Error.inviteForIdNotFound }
 
         let selfThreadPubKey = try kms.createX25519KeyPair()
 
         let inviteResponse = InviteResponse(publicKey: selfThreadPubKey.hexRepresentation)
 
-        let response = JsonRpcResult.response(JSONRPCResponse<AnyCodable>(id: payload.request.id, result: AnyCodable(inviteResponse)))
+        let response = RPCResponse(id: payload.id, result: inviteResponse)
+        let responseTopic = try getInviteResponseTopic(requestTopic: payload.topic, invite: payload.request)
+        try await networkingInteractor.respond(topic: responseTopic, response: response, tag: ChatProtocolMethod.invite.responseTag)
 
-        guard case .invite(let invite) = payload.request.params else {return}
-
-        let responseTopic = try getInviteResponseTopic(payload, invite)
-
-        try await networkingInteractor.respond(topic: responseTopic, response: response, tag: payload.request.params.responseTag)
-
-        let threadAgreementKeys = try kms.performKeyAgreement(selfPublicKey: selfThreadPubKey, peerPublicKey: invite.publicKey)
-
+        let threadAgreementKeys = try kms.performKeyAgreement(selfPublicKey: selfThreadPubKey, peerPublicKey: payload.request.publicKey)
         let threadTopic = threadAgreementKeys.derivedTopic()
-
         try kms.setSymmetricKey(threadAgreementKeys.sharedKey, for: threadTopic)
-
         try await networkingInteractor.subscribe(topic: threadTopic)
 
         logger.debug("Accepting an invite on topic: \(threadTopic)")
 
         // TODO - derive account
         let selfAccount = try! topicToRegistryRecordStore.get(key: payload.topic)!.account
-        let thread = Thread(topic: threadTopic, selfAccount: selfAccount, peerAccount: invite.account)
+        let thread = Thread(topic: threadTopic, selfAccount: selfAccount, peerAccount: payload.request.account)
         await threadsStore.add(thread)
 
         invitePayloadStore.delete(forKey: inviteId)
@@ -73,47 +67,28 @@ class InvitationHandlingService {
     }
 
     func reject(inviteId: String) async throws {
-
         guard let payload = try invitePayloadStore.get(key: inviteId) else { throw Error.inviteForIdNotFound }
 
-        guard case .invite(let invite) = payload.request.params else {return}
+        let responseTopic = try getInviteResponseTopic(requestTopic: payload.topic, invite: payload.request)
 
-        let responseTopic = try getInviteResponseTopic(payload, invite)
-
-        // TODO - error not in specs yet
-        let error = JSONRPCErrorResponse.Error(code: 0, message: "user rejected")
-        let response = JsonRpcResult.error(JSONRPCErrorResponse(id: payload.request.id, error: error))
-
-        try await networkingInteractor.respond(topic: responseTopic, response: response, tag: payload.request.params.responseTag)
+        try await networkingInteractor.respondError(topic: responseTopic, requestId: payload.id, tag: ChatProtocolMethod.invite.responseTag, reason: ChatError.userRejected)
 
         invitePayloadStore.delete(forKey: inviteId)
     }
 
     private func setUpRequestHandling() {
-        networkingInteractor.requestPublisher.sink { [unowned self] subscriptionPayload in
-            switch subscriptionPayload.request.params {
-            case .invite(let invite):
-                do {
-                    try handleInvite(invite, subscriptionPayload)
-                } catch {
-                    logger.debug("Did not handle invite, error: \(error)")
-                }
-            default:
-                return
-            }
-        }.store(in: &publishers)
+        networkingInteractor.requestSubscription(on: ChatProtocolMethod.invite)
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<Invite>) in
+                logger.debug("did receive an invite")
+                invitePayloadStore.set(payload, forKey: payload.request.publicKey)
+                onInvite?(payload.request)
+            }.store(in: &publishers)
     }
 
-    private func handleInvite(_ invite: Invite, _ payload: RequestSubscriptionPayload) throws {
-        logger.debug("did receive an invite")
-        invitePayloadStore.set(payload, forKey: invite.publicKey)
-        onInvite?(invite)
-    }
-
-    private func getInviteResponseTopic(_ payload: RequestSubscriptionPayload, _ invite: Invite) throws -> String {
+    private func getInviteResponseTopic(requestTopic: String, invite: Invite) throws -> String {
         // todo - remove topicToInvitationPubKeyStore ?
 
-        guard let record = try? topicToRegistryRecordStore.get(key: payload.topic) else {
+        guard let record = try? topicToRegistryRecordStore.get(key: requestTopic) else {
             logger.debug("PubKey for invitation topic not found")
             fatalError("todo")
         }

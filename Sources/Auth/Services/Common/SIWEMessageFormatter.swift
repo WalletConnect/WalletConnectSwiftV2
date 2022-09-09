@@ -2,18 +2,19 @@ import Foundation
 import WalletConnectUtils
 
 protocol SIWEMessageFormatting {
-    func formatMessage(from authPayload: AuthPayload, address: String) -> String
+    func formatMessage(from authPayload: AuthPayload, address: String) -> String?
     func formatMessage(from payload: CacaoPayload) throws -> String
 }
 
 struct SIWEMessageFormatter: SIWEMessageFormatting {
-    func formatMessage(from payload: AuthPayload, address: String) -> String {
+    func formatMessage(from payload: AuthPayload, address: String) -> String? {
+        guard let chain = Blockchain(payload.chainId) else {return nil}
         let message = SIWEMessage(domain: payload.domain,
                     uri: payload.aud,
                     address: address,
                     version: payload.version,
                     nonce: payload.nonce,
-                    chainId: payload.chainId,
+                                  chainId: chain.reference,
                     iat: payload.iat,
                     nbf: payload.nbf,
                     exp: payload.exp,
@@ -26,13 +27,14 @@ struct SIWEMessageFormatter: SIWEMessageFormatting {
 
     func formatMessage(from payload: CacaoPayload) throws -> String {
         let address = try DIDPKH(iss: payload.iss).account.address
+        let iss = try DIDPKH(iss: payload.iss)
         let message = SIWEMessage(
             domain: payload.domain,
             uri: payload.aud,
             address: address,
             version: payload.version,
             nonce: payload.nonce,
-            chainId: "1",
+            chainId: iss.account.reference,
             iat: payload.iat,
             nbf: payload.nbf,
             exp: payload.exp,
@@ -48,7 +50,7 @@ private struct SIWEMessage: Equatable {
     let domain: String
     let uri: String // aud
     let address: String
-    let version: Int
+    let version: String
     let nonce: String
     let chainId: String
     let iat: String

@@ -2,6 +2,7 @@ import Foundation
 import XCTest
 @testable import Auth
 import WalletConnectUtils
+import WalletConnectNetworking
 @testable import WalletConnectKMS
 @testable import TestingUtils
 import JSONRPC
@@ -15,6 +16,7 @@ class AppRespondSubscriberTests: XCTestCase {
     let walletAccount = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
     let prvKey = Data(hex: "462c1dad6832d7d96ccf87bd6a686a4110e114aaaebd5512e552c0e3a87b480f")
     var messageSigner: MessageSigner!
+    var pairingStorage: WCPairingStorageMock!
 
     override func setUp() {
         networkingInteractor = NetworkingInteractorMock()
@@ -22,12 +24,14 @@ class AppRespondSubscriberTests: XCTestCase {
         messageSigner = MessageSigner()
         let historyStorage = CodableStore<RPCHistory.Record>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue)
         rpcHistory = RPCHistory(keyValueStore: historyStorage)
+        pairingStorage = WCPairingStorageMock()
         sut = AppRespondSubscriber(
             networkingInteractor: networkingInteractor,
             logger: ConsoleLoggerMock(),
             rpcHistory: rpcHistory,
             signatureVerifier: messageSigner,
-            messageFormatter: messageFormatter)
+            messageFormatter: messageFormatter,
+            pairingStorage: pairingStorage)
     }
 
     func testMessageCompromisedFailure() {
@@ -52,13 +56,12 @@ class AppRespondSubscriberTests: XCTestCase {
         let payload = CacaoPayload(params: AuthPayload.stub(nonce: "compromised nonce"), didpkh: DIDPKH(account: walletAccount))
 
         let message = try! messageFormatter.formatMessage(from: payload)
-        let signature = try! messageSigner.sign(message: message, privateKey: prvKey)
-        let cacaoSignature = CacaoSignature(t: "eip191", s: signature)
+        let cacaoSignature = try! messageSigner.sign(message: message, privateKey: prvKey)
 
-        let cacao = Cacao(header: header, payload: payload, signature: cacaoSignature)
+        let cacao = Cacao(h: header, p: payload, s: cacaoSignature)
 
         let response = RPCResponse(id: requestId, result: cacao)
-        networkingInteractor.responsePublisherSubject.send(ResponseSubscriptionPayload(topic: topic, response: response))
+        networkingInteractor.responsePublisherSubject.send((topic, request, response))
 
         wait(for: [messageExpectation], timeout: defaultTimeout)
         XCTAssertEqual(result, .failure(AuthError.messageCompromised))

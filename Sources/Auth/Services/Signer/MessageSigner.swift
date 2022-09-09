@@ -1,11 +1,11 @@
 import Foundation
 
 protocol MessageSignatureVerifying {
-    func verify(signature: String, message: String, address: String) throws
+    func verify(signature: CacaoSignature, message: String, address: String) throws
 }
 
 protocol MessageSigning {
-    func sign(message: String, privateKey: Data) throws -> String
+    func sign(message: String, privateKey: Data) throws -> CacaoSignature
 }
 
 public struct MessageSigner: MessageSignatureVerifying, MessageSigning {
@@ -21,15 +21,16 @@ public struct MessageSigner: MessageSignatureVerifying, MessageSigning {
         self.signer = signer
     }
 
-    public func sign(message: String, privateKey: Data) throws -> String {
+    public func sign(message: String, privateKey: Data) throws -> CacaoSignature {
         guard let messageData = message.data(using: .utf8) else { throw Errors.utf8EncodingFailed }
         let signature = try signer.sign(message: messageData, with: privateKey)
-        return signature.toHexString()
+        let prefixedHexSignature = "0x" + signature.toHexString()
+        return CacaoSignature(t: "eip191", s: prefixedHexSignature)
     }
 
-    public func verify(signature: String, message: String, address: String) throws {
+    public func verify(signature: CacaoSignature, message: String, address: String) throws {
         guard let messageData = message.data(using: .utf8) else { throw Errors.utf8EncodingFailed }
-        let signatureData = Data(hex: signature)
+        let signatureData = Data(hex: signature.s)
         guard try signer.isValid(signature: signatureData, message: messageData, address: address)
         else { throw Errors.signatureValidationFailed }
     }
