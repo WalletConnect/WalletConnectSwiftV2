@@ -281,28 +281,30 @@ final class SignClientTests: XCTestCase {
 
     }
 
+    //TODO - fix test after onPingResponse publisher implemented
+    func testSessionPing() async {
+//        let expectation = expectation(description: "Dapp receives ping response")
+        let requiredNamespaces = ProposalNamespace.stubRequired()
+        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
+
+        dapp.onPingResponse = { [unowned self] _ in
+//            expectation.fulfill()
+        }
+        wallet.onSessionProposal = { [unowned self] proposal in
+            Task(priority: .high) {
+                try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+            }
+        }
+        dapp.onSessionSettled = { [unowned self] settledSession in
+            Task(priority: .high) {
+//                try await dapp.client.ping(topic: settledSession.topic)
+            }
+        }
+
+//        wait(for: [expectation], timeout: defaultTimeout)
+    }
 
 
-
-
-//
-//    func testSessionPing() async {
-//        await waitClientsConnected()
-//        let proposerReceivesPingResponseExpectation = expectation(description: "Proposer receives ping response")
-//        let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
-//
-//        try! await responder.client.pair(uri: uri)
-//        responder.onSessionProposal = { [unowned self] proposal in
-//            try? self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [])
-//        }
-//        proposer.onSessionSettled = { [unowned self] sessionSettled in
-//            self.proposer.client.ping(topic: sessionSettled.topic) { response in
-//                XCTAssertTrue(response.isSuccess)
-//                proposerReceivesPingResponseExpectation.fulfill()
-//            }
-//        }
-//        wait(for: [proposerReceivesPingResponseExpectation], timeout: defaultTimeout)
-//    }
 //
 //    func testSuccessfulSessionUpdateNamespaces() async {
 //        await waitClientsConnected()

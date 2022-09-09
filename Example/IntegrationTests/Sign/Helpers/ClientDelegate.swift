@@ -15,6 +15,7 @@ class ClientDelegate {
     var onSessionUpdateNamespaces: ((String, [String: SessionNamespace]) -> Void)?
     var onSessionExtend: ((String, Date) -> Void)?
     var onEventReceived: ((Session.Event, String) -> Void)?
+    var onPingResponse: ((String) -> ())?
 
     private var publishers = Set<AnyCancellable>()
 
