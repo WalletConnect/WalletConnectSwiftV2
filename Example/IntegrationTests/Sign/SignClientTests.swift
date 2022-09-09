@@ -281,27 +281,24 @@ final class SignClientTests: XCTestCase {
 
     }
 
-    //TODO - fix test after onPingResponse publisher implemented
     func testSessionPing() async {
-//        let expectation = expectation(description: "Dapp receives ping response")
+        let expectation = expectation(description: "Dapp receives ping response")
         let requiredNamespaces = ProposalNamespace.stubRequired()
         let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
 
-        dapp.onPingResponse = { [unowned self] _ in
-//            expectation.fulfill()
-        }
         wallet.onSessionProposal = { [unowned self] proposal in
             Task(priority: .high) {
                 try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
             }
         }
         dapp.onSessionSettled = { [unowned self] settledSession in
-            Task(priority: .high) {
-//                try await dapp.client.ping(topic: settledSession.topic)
+            dapp.client.ping(topic: settledSession.topic) {_ in
+                expectation.fulfill()
             }
         }
-
-//        wait(for: [expectation], timeout: defaultTimeout)
+        let uri = try! await dapp.client.connect(requiredNamespaces: requiredNamespaces)
+        try! await wallet.client.pair(uri: uri!)
+        wait(for: [expectation], timeout: defaultTimeout)
     }
 
 
