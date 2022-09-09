@@ -126,6 +126,7 @@ private extension SessionEngine {
         networkingInteractor.responseSubscription(on: SignProtocolMethod.sessionRequest)
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionType.RequestParams, RPCResult>) in
                 onSessionResponse?(Response(
+                    id: payload.id,
                     topic: payload.topic,
                     chainId: payload.request.chainId.absoluteString,
                     result: payload.response
