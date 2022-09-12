@@ -98,10 +98,12 @@ final class SessionDetailViewModel: ObservableObject {
 private extension SessionDetailViewModel {
 
     func setupSubscriptions() {
-        client.pingResponsePublisher.sink { _ in
-            self.pingSuccess = true
-        }
-        .store(in: &publishers)
+        client.pingResponsePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { _ in
+                self.pingSuccess = true
+            }
+            .store(in: &publishers)
     }
 
     func addTestAccount(for chain: String) {
