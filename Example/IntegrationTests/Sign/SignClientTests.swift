@@ -6,7 +6,7 @@ import WalletConnectUtils
 
 final class SignClientTests: XCTestCase {
 
-    let defaultTimeout: TimeInterval = 5
+    let defaultTimeout: TimeInterval = 8
 
     var dapp: ClientDelegate!
     var wallet: ClientDelegate!
