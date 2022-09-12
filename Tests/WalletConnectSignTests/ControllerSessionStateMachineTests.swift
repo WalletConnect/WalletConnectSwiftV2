@@ -43,14 +43,6 @@ class ControllerSessionStateMachineTests: XCTestCase {
         }
     }
 
-    func testUpdateNamespacesErrorSessionNotAcknowledged() async {
-        let session = WCSession.stub(acknowledged: false)
-        storageMock.setSession(session)
-        await XCTAssertThrowsErrorAsync( try await sut.update(topic: session.topic, namespaces: SessionNamespace.stubDictionary())) { error in
-            XCTAssertTrue(error.isSessionNotAcknowledgedError)
-        }
-    }
-
 //    func testUpdateNamespacesErrorInvalidMethod() {
 //        let session = WCSession.stub(isSelfController: true)
 //        storageMock.setSession(session)
