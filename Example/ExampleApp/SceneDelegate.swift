@@ -1,4 +1,5 @@
 import UIKit
+import Combine
 import WalletConnectSign
 import WalletConnectRelay
 import Starscream
@@ -14,6 +15,10 @@ struct SocketFactory: WebSocketFactory {
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+
+    private var publishers: Set<AnyCancellable> = []
+    private var onConnected: (() -> Void)?
+    private var connectionStatus: SocketConnectionStatus = .disconnected
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
 
@@ -35,6 +40,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = UITabBarController.createExampleApp()
         window?.makeKeyAndVisible()
+
+        Sign.instance.socketConnectionStatusPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] status in
+                self.connectionStatus = status
+                if status == .connected {
+                    self.onConnected?()
+                    self.onConnected = nil
+                }
+            }.store(in: &publishers)
     }
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
@@ -44,7 +59,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
               }
         let wcUri = incomingURL.absoluteString.deletingPrefix("https://walletconnect.com/wc?uri=")
         let vc = ((window!.rootViewController as! UINavigationController).viewControllers[0] as! WalletViewController)
-        Task(priority: .high) {try? await Sign.instance.pair(uri: WalletConnectURI(string: wcUri)!)}
+        Task(priority: .high) { try? await Sign.instance.pair(uri: WalletConnectURI(string: wcUri)!) }
         vc.onClientConnected = {
             Task(priority: .high) {
                 do {

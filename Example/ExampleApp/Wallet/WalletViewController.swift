@@ -10,7 +10,6 @@ final class WalletViewController: UIViewController {
     lazy  var account = Signer.privateKey.address.hex(eip55: true)
     var sessionItems: [ActiveSessionItem] = []
     var currentProposal: Session.Proposal?
-    var onClientConnected: (() -> Void)?
     private var publishers = [AnyCancellable]()
 
     private let walletView: WalletView = {
@@ -236,9 +235,8 @@ extension WalletViewController {
     func setUpAuthSubscribing() {
         Sign.instance.socketConnectionStatusPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] status in
+            .sink { status in
                 if status == .connected {
-                    self?.onClientConnected?()
                     print("Client connected")
                 }
             }.store(in: &publishers)
