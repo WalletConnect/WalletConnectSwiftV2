@@ -265,7 +265,7 @@ final class SignClientTests: XCTestCase {
             dappSettlementExpectation.fulfill()
             let pairingTopic = dapp.client.getPairings().first!.topic
             if !initiatedSecondSession {
-                Task {
+                Task(priority: .high) {
                     let _ = try! await dapp.client.connect(requiredNamespaces: requiredNamespaces, topic: pairingTopic)
                 }
                 initiatedSecondSession = true
