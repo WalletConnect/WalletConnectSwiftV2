@@ -354,48 +354,60 @@ final class SignClientTests: XCTestCase {
         wait(for: [expectation], timeout: defaultTimeout)
     }
 
+    func testSessionEventSucceeds() async {
+        let expectation = expectation(description: "Dapp receives session event")
 
+        let requiredNamespaces = ProposalNamespace.stubRequired()
+        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
+        let event = Session.Event(name: "any", data: AnyCodable("event_data"))
+        let chain = Blockchain("eip155:1")!
 
-//
-//    func testSessionEventSucceeds() async {
-//        await waitClientsConnected()
-//        let proposerReceivesEventExpectation = expectation(description: "Proposer receives event")
-//        let namespace = Namespace(chains: [Blockchain("eip155:1")!], methods: [], events: ["type1"]) // TODO: Fix namespace with empty chain array / protocol change
-//        let uri = try! await proposer.client.connect(namespaces: [namespace])!
-//
-//        try! await responder.client.pair(uri: uri)
-//        let event = Session.Event(name: "type1", data: AnyCodable("event_data"))
-//        responder.onSessionProposal = { [unowned self] proposal in
-//            try? self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [namespace])
-//        }
-//        responder.onSessionSettled = { [unowned self] session in
-//            Task{try? await responder.client.emit(topic: session.topic, event: event, chainId: Blockchain("eip155:1")!)}
-//        }
-//        proposer.onEventReceived = { event, _ in
-//            XCTAssertEqual(event, event)
-//            proposerReceivesEventExpectation.fulfill()
-//        }
-//        wait(for: [proposerReceivesEventExpectation], timeout: defaultTimeout)
-//    }
-//
-//    func testSessionEventFails() async {
-//        await waitClientsConnected()
-//        let proposerReceivesEventExpectation = expectation(description: "Proposer receives event")
-//        proposerReceivesEventExpectation.isInverted = true
-//        let uri = try! await proposer.client.connect(namespaces: [Namespace.stub()])!
-//
-//        try! await responder.client.pair(uri: uri)
-//        let event = Session.Event(name: "type2", data: AnyCodable("event_data"))
-//        responder.onSessionProposal = { [unowned self] proposal in
-//            try? self.responder.client.approve(proposalId: proposal.id, accounts: [], namespaces: [])
-//        }
-//        proposer.onSessionSettled = { [unowned self] session in
-//            Task {await XCTAssertThrowsErrorAsync(try await proposer.client.emit(topic: session.topic, event: event, chainId: Blockchain("eip155:1")!))}
-//        }
-//        responder.onEventReceived = { _, _ in
-//            XCTFail()
-//            proposerReceivesEventExpectation.fulfill()
-//        }
-//        wait(for: [proposerReceivesEventExpectation], timeout: defaultTimeout)
-//    }
+        wallet.onSessionProposal = { [unowned self] proposal in
+            Task(priority: .high) {
+                try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+            }
+        }
+
+        dapp.onEventReceived = { _, _ in
+            expectation.fulfill()
+        }
+
+        dapp.onSessionSettled = { [unowned self] settledSession in
+            Task(priority: .high) {
+                try! await wallet.client.emit(topic: settledSession.topic, event: event, chainId: chain)
+            }
+        }
+
+        let uri = try! await dapp.client.connect(requiredNamespaces: requiredNamespaces)
+        try! await wallet.client.pair(uri: uri!)
+
+        wait(for: [expectation], timeout: defaultTimeout)
+    }
+
+    func testSessionEventFails() async {
+        let expectation = expectation(description: "Dapp receives session event")
+
+        let requiredNamespaces = ProposalNamespace.stubRequired()
+        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
+        let event = Session.Event(name: "unknown", data: AnyCodable("event_data"))
+        let chain = Blockchain("eip155:1")!
+
+        wallet.onSessionProposal = { [unowned self] proposal in
+            Task(priority: .high) {
+                try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+            }
+        }
+
+        dapp.onSessionSettled = { [unowned self] settledSession in
+            Task(priority: .high) {
+                await XCTAssertThrowsErrorAsync(try await wallet.client.emit(topic: settledSession.topic, event: event, chainId: chain))
+                expectation.fulfill()
+            }
+        }
+
+        let uri = try! await dapp.client.connect(requiredNamespaces: requiredNamespaces)
+        try! await wallet.client.pair(uri: uri!)
+
+        wait(for: [expectation], timeout: defaultTimeout)
+    }
 }
