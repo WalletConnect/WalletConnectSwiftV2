@@ -8,8 +8,8 @@ actor WalletPairService {
         case pairingAlreadyExist
     }
 
-    private let networkingInteractor: NetworkInteracting
-    private let kms: KeyManagementServiceProtocol
+    let networkingInteractor: NetworkInteracting
+    let kms: KeyManagementServiceProtocol
     private let pairingStorage: WCPairingStorage
 
     init(networkingInteractor: NetworkInteracting,
