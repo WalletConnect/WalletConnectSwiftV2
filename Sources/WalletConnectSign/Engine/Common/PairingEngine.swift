@@ -84,7 +84,6 @@ private extension PairingEngine {
     func setupNetworkingSubscriptions() {
         networkingInteractor.socketConnectionStatusPublisher
             .sink { [unowned self] status in
-                guard status == .connected else { return }
                 pairingStore.getAll()
                     .forEach { pairing in
                         Task(priority: .high) { try await networkingInteractor.subscribe(topic: pairing.topic) }
