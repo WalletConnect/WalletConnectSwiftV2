@@ -67,7 +67,7 @@ final class SignCoordinator {
         controller.onDisconnect = { [unowned self]  in
             showSelectChainScreen()
         }
-        navigationController.presentedViewController?.dismiss(animated: true)
+        navigationController.presentedViewController?.dismiss(animated: false)
         navigationController.viewControllers = [controller]
     }
 

@@ -1,4 +1,5 @@
 import UIKit
+import Foundation
 import Combine
 import WalletConnectSign
 import WalletConnectRelay
@@ -15,10 +16,6 @@ struct SocketFactory: WebSocketFactory {
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-
-    private var publishers: Set<AnyCancellable> = []
-    private var onConnected: (() -> Void)?
-    private var connectionStatus: SocketConnectionStatus = .disconnected
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
 
@@ -40,16 +37,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = UITabBarController.createExampleApp()
         window?.makeKeyAndVisible()
-
-        Sign.instance.socketConnectionStatusPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [unowned self] status in
-                self.connectionStatus = status
-                if status == .connected {
-                    self.onConnected?()
-                    self.onConnected = nil
-                }
-            }.store(in: &publishers)
     }
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
