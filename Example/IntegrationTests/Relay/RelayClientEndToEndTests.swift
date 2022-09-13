@@ -98,7 +98,6 @@ final class RelayClientEndToEndTests: XCTestCase {
         XCTAssertEqual(subscriptionATopic, randomTopic)
         XCTAssertEqual(subscriptionBTopic, randomTopic)
 
-        // TODO - uncomment lines when request rebound is resolved
         XCTAssertEqual(subscriptionBPayload, payloadA)
         XCTAssertEqual(subscriptionAPayload, payloadB)
     }
