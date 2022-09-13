@@ -16,7 +16,7 @@ public struct SignClientFactory {
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
     public static func create(metadata: AppMetadata, relayClient: RelayClient) -> SignClient {
-        let logger = ConsoleLogger(loggingLevel: .debug)
+        let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults.standard
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
         return SignClientFactory.create(metadata: metadata, logger: logger, keyValueStorage: keyValueStorage, keychainStorage: keychainStorage, relayClient: relayClient)
