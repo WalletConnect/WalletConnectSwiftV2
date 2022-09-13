@@ -12,6 +12,8 @@ final class WalletViewController: UIViewController {
     var currentProposal: Session.Proposal?
     private var publishers = [AnyCancellable]()
 
+    var onClientConnected: (() -> Void)?
+
     private let walletView: WalletView = {
         WalletView()
     }()
@@ -235,9 +237,10 @@ extension WalletViewController {
     func setUpAuthSubscribing() {
         Sign.instance.socketConnectionStatusPublisher
             .receive(on: DispatchQueue.main)
-            .sink { status in
+            .sink { [weak self] status in
                 if status == .connected {
                     print("Client connected")
+                    self?.onClientConnected?()
                 }
             }.store(in: &publishers)
 
