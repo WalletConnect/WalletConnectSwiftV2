@@ -87,7 +87,7 @@ public final class RelayClient {
         keychainStorage: KeychainStorageProtocol = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk"),
         socketFactory: WebSocketFactory,
         socketConnectionType: SocketConnectionType = .automatic,
-        logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off)
+        logger: ConsoleLogging = ConsoleLogger(loggingLevel: .debug)
     ) {
         let socketAuthenticator = SocketAuthenticator(
             clientIdStorage: ClientIdStorage(keychain: keychainStorage),
@@ -247,6 +247,7 @@ public final class RelayClient {
                     messagePublisherSubject.send((params.data.topic, params.data.message))
                 } catch {
                     logger.error("[RelayClient] RPC History 'set()' error: \(error)")
+                    logger.error(request.id)
                 }
             } else {
                 logger.error("Unexpected request from network")
@@ -278,11 +279,16 @@ public final class RelayClient {
 
     private func acknowledgeRequest(_ request: RPCRequest) throws {
         let response = RPCResponse(matchingRequest: request, result: true)
-        try rpcHistory.resolve(response)
         let message = try response.asJSONEncodedString()
-        dispatcher.send(message) { [weak self] in
+        dispatcher.send(message) { [unowned self] in
             if let error = $0 {
-                self?.logger.debug("Failed to dispatch response: \(response), error: \(error)")
+                logger.debug("Failed to dispatch response: \(response), error: \(error)")
+            } else {
+                do {
+                    try rpcHistory.resolve(response)
+                } catch {
+                    logger.debug(error)
+                }
             }
         }
     }
