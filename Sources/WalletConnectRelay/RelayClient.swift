@@ -242,8 +242,8 @@ public final class RelayClient {
         if let request = tryDecode(RPCRequest.self, from: payload) {
             if let params = try? request.params?.get(Subscription.Params.self) {
                 do {
-                    try rpcHistory.set(request, forTopic: params.data.topic, emmitedBy: .remote)
                     try acknowledgeRequest(request)
+                    try rpcHistory.set(request, forTopic: params.data.topic, emmitedBy: .remote)
                     messagePublisherSubject.send((params.data.topic, params.data.message))
                 } catch {
                     logger.error("[RelayClient] RPC History 'set()' error: \(error)")
