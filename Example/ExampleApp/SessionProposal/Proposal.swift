@@ -17,7 +17,7 @@ struct Proposal {
         self.proposerName = proposal.proposer.name
         self.proposerDescription = proposal.proposer.description
         self.proposerURL = proposal.proposer.url
-        self.iconURL = proposal.proposer.icons.first!
+        self.iconURL = proposal.proposer.icons.first ?? "https://avatars.githubusercontent.com/u/37784886"
         self.permissions = [
             Namespace(
                 chains: ["eip155:1"],

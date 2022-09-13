@@ -25,10 +25,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         Relay.configure(projectId: "3ca2919724fbfa5456a25194e369a8b4", socketFactory: SocketFactory())
         Sign.configure(metadata: metadata)
-
+#if DEBUG
         if CommandLine.arguments.contains("-cleanInstall") {
             try? Sign.instance.cleanup()
         }
+#endif
 
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
