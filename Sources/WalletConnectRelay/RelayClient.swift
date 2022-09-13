@@ -247,7 +247,6 @@ public final class RelayClient {
                     messagePublisherSubject.send((params.data.topic, params.data.message))
                 } catch {
                     logger.error("[RelayClient] RPC History 'set()' error: \(error)")
-                    logger.error(request.id)
                 }
             } else {
                 logger.error("Unexpected request from network")
