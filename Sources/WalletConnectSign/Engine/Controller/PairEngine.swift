@@ -22,9 +22,9 @@ actor PairEngine {
         var pairing = WCPairing(uri: uri)
         let symKey = try SymmetricKey(hex: uri.symKey)
         try kms.setSymmetricKey(symKey, for: pairing.topic)
-        try await networkingInteractor.subscribe(topic: pairing.topic)
         pairing.activate()
         pairingStore.setPairing(pairing)
+        try await networkingInteractor.subscribe(topic: pairing.topic)
     }
 
     func hasPairing(for topic: String) -> Bool {
