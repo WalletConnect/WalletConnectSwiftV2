@@ -12,6 +12,7 @@ final class ApproveEngine {
         case relayNotFound
         case proposalPayloadsNotFound
         case pairingNotFound
+        case sessionNotFound
         case agreementMissingOrInvalid
     }
 
@@ -53,6 +54,7 @@ final class ApproveEngine {
 
         setupRequestSubscriptions()
         setupResponseSubscriptions()
+        setupResponseErrorSubscriptions()
     }
 
     func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace]) async throws {
@@ -165,21 +167,25 @@ private extension ApproveEngine {
 
     func setupResponseSubscriptions() {
         networkingInteractor.responseSubscription(on: SignProtocolMethod.sessionPropose)
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionType.ProposeParams, RPCResult>) in
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionType.ProposeParams, SessionType.ProposeResponse>) in
                 handleSessionProposeResponse(payload: payload)
             }.store(in: &publishers)
 
         networkingInteractor.responseSubscription(on: SignProtocolMethod.sessionSettle)
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionType.SettleParams, RPCResult>) in
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionType.SettleParams, Bool>) in
                 handleSessionSettleResponse(payload: payload)
             }.store(in: &publishers)
+    }
 
+    func setupResponseErrorSubscriptions() {
         networkingInteractor.responseErrorSubscription(on: SignProtocolMethod.sessionPropose)
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<SessionType.ProposeParams>) in
-                onSessionRejected?(
-                    payload.request.publicRepresentation(),
-                    SessionType.Reason(code: payload.error.code, message: payload.error.message)
-                )
+                handleSessionProposeResponseError(payload: payload)
+            }.store(in: &publishers)
+
+        networkingInteractor.responseErrorSubscription(on: SignProtocolMethod.sessionSettle)
+            .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<SessionType.SettleParams>) in
+                handleSessionSettleResponseError(payload: payload)
             }.store(in: &publishers)
     }
 
@@ -201,32 +207,14 @@ private extension ApproveEngine {
 
     // MARK: SessionProposeResponse
     // TODO: Move to Non-Controller SettleEngine
-    func handleSessionProposeResponse(payload: ResponseSubscriptionPayload<SessionType.ProposeParams, RPCResult>) {
+    func handleSessionProposeResponse(payload: ResponseSubscriptionPayload<SessionType.ProposeParams, SessionType.ProposeResponse>) {
         do {
-            let sessionTopic = try handleProposeResponse(
-                pairingTopic: payload.topic,
-                proposal: payload.request,
-                result: payload.response
-            )
-            settlingProposal = payload.request
+            let pairingTopic = payload.topic
 
-            Task(priority: .high) {
-                try await networkingInteractor.subscribe(topic: sessionTopic)
+            guard var pairing = pairingStore.getPairing(forTopic: pairingTopic) else {
+                throw Errors.pairingNotFound
             }
-        } catch {
-            guard let error = error as? Reason else {
-                return logger.debug(error.localizedDescription)
-            }
-            onSessionRejected?(payload.request.publicRepresentation(), SessionType.Reason(code: error.code, message: error.message))
-        }
-    }
 
-    func handleProposeResponse(pairingTopic: String, proposal: SessionProposal, result: RPCResult) throws -> String {
-        guard var pairing = pairingStore.getPairing(forTopic: pairingTopic)
-        else { throw Errors.pairingNotFound }
-
-        switch result {
-        case .response(let response):
             // Activate the pairing
             if !pairing.active {
                 pairing.activate()
@@ -236,9 +224,8 @@ private extension ApproveEngine {
 
             pairingStore.setPairing(pairing)
 
-            let selfPublicKey = try AgreementPublicKey(hex: proposal.proposer.publicKey)
-            let proposeResponse = try response.get(SessionType.ProposeResponse.self)
-            let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: proposeResponse.responderPublicKey)
+            let selfPublicKey = try AgreementPublicKey(hex: payload.request.proposer.publicKey)
+            let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: payload.response.responderPublicKey)
 
             let sessionTopic = agreementKeys.derivedTopic()
             logger.debug("Received Session Proposal response")
@@ -246,37 +233,57 @@ private extension ApproveEngine {
             try kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
             sessionToPairingTopic.set(pairingTopic, forKey: sessionTopic)
 
-            return sessionTopic
+            settlingProposal = payload.request
 
-        case .error(let error):
-            if !pairing.active {
-                kms.deleteSymmetricKey(for: pairing.topic)
-                networkingInteractor.unsubscribe(topic: pairing.topic)
-                pairingStore.delete(topic: pairingTopic)
+            Task(priority: .high) {
+                try await networkingInteractor.subscribe(topic: sessionTopic)
             }
-            logger.debug("Session Proposal has been rejected")
-            kms.deletePrivateKey(for: proposal.proposer.publicKey)
-            throw error
+        } catch {
+            return logger.debug(error.localizedDescription)
         }
+    }
+
+    func handleSessionProposeResponseError(payload: ResponseSubscriptionErrorPayload<SessionType.ProposeParams>) {
+        guard let pairing = pairingStore.getPairing(forTopic: payload.topic) else {
+            return logger.debug(Errors.pairingNotFound.localizedDescription)
+        }
+
+        if !pairing.active {
+            kms.deleteSymmetricKey(for: pairing.topic)
+            networkingInteractor.unsubscribe(topic: pairing.topic)
+            pairingStore.delete(topic: payload.topic)
+        }
+        logger.debug("Session Proposal has been rejected")
+        kms.deletePrivateKey(for: payload.request.proposer.publicKey)
+
+        onSessionRejected?(
+            payload.request.publicRepresentation(),
+            SessionType.Reason(code: payload.error.code, message: payload.error.message)
+        )
     }
 
     // MARK: SessionSettleResponse
 
-    func handleSessionSettleResponse(payload: ResponseSubscriptionPayload<SessionType.SettleParams, RPCResult>) {
-        guard let session = sessionStore.getSession(forTopic: payload.topic) else { return }
-        switch payload.response {
-        case .response:
-            logger.debug("Received session settle response")
-            guard var session = sessionStore.getSession(forTopic: payload.topic) else { return }
-            session.acknowledge()
-            sessionStore.setSession(session)
-        case .error(let error):
-            logger.error("Error - session rejected, Reason: \(error)")
-            networkingInteractor.unsubscribe(topic: payload.topic)
-            sessionStore.delete(topic: payload.topic)
-            kms.deleteAgreementSecret(for: payload.topic)
-            kms.deletePrivateKey(for: session.publicKey!)
+    func handleSessionSettleResponse(payload: ResponseSubscriptionPayload<SessionType.SettleParams, Bool>) {
+        guard var session = sessionStore.getSession(forTopic: payload.topic) else {
+            return logger.debug(Errors.sessionNotFound.localizedDescription)
         }
+
+        logger.debug("Received session settle response")
+        session.acknowledge()
+        sessionStore.setSession(session)
+    }
+
+    func handleSessionSettleResponseError(payload: ResponseSubscriptionErrorPayload<SessionType.SettleParams>) {
+        guard let session = sessionStore.getSession(forTopic: payload.topic) else {
+            return logger.debug(Errors.sessionNotFound.localizedDescription)
+        }
+
+        logger.error("Error - session rejected, Reason: \(payload.error)")
+        networkingInteractor.unsubscribe(topic: payload.topic)
+        sessionStore.delete(topic: payload.topic)
+        kms.deleteAgreementSecret(for: payload.topic)
+        kms.deletePrivateKey(for: session.publicKey!)
     }
 
     // MARK: SessionProposeRequest
@@ -292,6 +299,7 @@ private extension ApproveEngine {
     }
 
     // MARK: SessionSettleRequest
+
     func handleSessionSettleRequest(payload: RequestSubscriptionPayload<SessionType.SettleParams>) {
         logger.debug("Did receive session settle request")
 
