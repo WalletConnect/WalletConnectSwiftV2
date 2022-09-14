@@ -135,7 +135,7 @@ final class ApproveEngineTests: XCTestCase {
         try! cryptoMock.setPrivateKey(privateKey)
 
         let request = RPCRequest(method: SignProtocolMethod.sessionSettle.method, params: SessionType.SettleParams.stub())
-        let response = RPCResponse(matchingRequest: request, result: RPCResult.error(JSONRPCError(code: 0, message: "")))
+        let response = RPCResponse.stubError(forRequest: request)
 
         networkingInteractor.responsePublisherSubject.send((session.topic, request, response))
 
