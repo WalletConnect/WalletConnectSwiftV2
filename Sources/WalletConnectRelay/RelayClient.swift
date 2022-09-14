@@ -34,7 +34,7 @@ public final class RelayClient {
     }
 
     private let messagePublisherSubject = PassthroughSubject<(topic: String, message: String), Never>()
-    private let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
+    private let socketConnectionStatusPublisherSubject = CurrentValueSubject<SocketConnectionStatus, Never>(.disconnected)
 
     private let subscriptionResponsePublisherSubject = PassthroughSubject<(RPCID?, String), Never>()
     private var subscriptionResponsePublisher: AnyPublisher<(RPCID?, String), Never> {
@@ -70,6 +70,9 @@ public final class RelayClient {
         }
         dispatcher.onConnect = { [unowned self] in
             self.socketConnectionStatusPublisherSubject.send(.connected)
+        }
+        dispatcher.onDisconnect = {
+            self.socketConnectionStatusPublisherSubject.send(.disconnected)
         }
     }
 
@@ -132,7 +135,7 @@ public final class RelayClient {
             .asRPCRequest()
         let message = try request.asJSONEncodedString()
         logger.debug("Publishing payload on topic: \(topic)")
-        try await dispatcher.send(message)
+        try await protectedSend(message)
     }
 
     /// Completes with an acknowledgement from the relay network.
@@ -156,7 +159,7 @@ public final class RelayClient {
             cancellable?.cancel()
                 onNetworkAcknowledge(nil)
         }
-        dispatcher.send(message) { [weak self] error in
+        protectedSend(message) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to Publish Payload, error: \(error)")
                 cancellable?.cancel()
@@ -183,7 +186,7 @@ public final class RelayClient {
                 }
                 completion(nil)
         }
-        dispatcher.send(message) { [weak self] error in
+        protectedSend(message) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to subscribe to topic \(error)")
                 cancellable?.cancel()
@@ -223,7 +226,7 @@ public final class RelayClient {
                 cancellable?.cancel()
                 completion(nil)
             }
-        dispatcher.send(message) { [weak self] error in
+        protectedSend(message) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to unsubscribe from topic")
                 cancellable?.cancel()
@@ -279,7 +282,7 @@ public final class RelayClient {
     private func acknowledgeRequest(_ request: RPCRequest) throws {
         let response = RPCResponse(matchingRequest: request, result: true)
         let message = try response.asJSONEncodedString()
-        dispatcher.send(message) { [unowned self] in
+        protectedSend(message) { [unowned self] in
             if let error = $0 {
                 logger.debug("Failed to dispatch response: \(response), error: \(error)")
             } else {
@@ -289,6 +292,36 @@ public final class RelayClient {
                     logger.debug(error)
                 }
             }
+        }
+    }
+
+    private func protectedSend(_ string: String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            protectedSend(string) { error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: ())
+                }
+            }
+        }
+    }
+
+    private func protectedSend(_ string: String, timeout: Int = 5, completion: @escaping (Error?) -> Void) {
+        guard socketConnectionStatusPublisherSubject.value == .disconnected else {
+            return dispatcher.send(string, completion: completion)
+        }
+
+        var cancellable: AnyCancellable?
+        cancellable = socketConnectionStatusPublisher.sink { [unowned self] status in
+            guard status == .connected else { return }
+            defer { cancellable?.cancel() }
+            dispatcher.send(string, completion: completion)
+        }
+
+        concurrentQueue.asyncAfter(deadline: .now() + .seconds(timeout)) {
+            completion(NetworkError.webSocketNotConnected)
+            cancellable?.cancel()
         }
     }
 }
