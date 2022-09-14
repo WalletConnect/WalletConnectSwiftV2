@@ -94,6 +94,6 @@ extension SessionProposal {
 
 extension RPCResponse {
     static func stubError(forRequest request: RPCRequest) -> RPCResponse {
-        return RPCResponse(matchingRequest: request, result: RPCResult.error(JSONRPCError(code: 0, message: "")))
+        return RPCResponse(matchingRequest: request, error: JSONRPCError(code: 0, message: ""))
     }
 }
