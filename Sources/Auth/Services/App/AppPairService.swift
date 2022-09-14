@@ -16,10 +16,10 @@ actor AppPairService {
 
     func create() async throws -> WalletConnectURI {
         let topic = String.generateTopic()
-        try await networkingInteractor.subscribe(topic: topic)
         let symKey = try! kms.createSymmetricKey(topic)
         let pairing = WCPairing(topic: topic)
         let uri = WalletConnectURI(topic: topic, symKey: symKey.hexRepresentation, relay: pairing.relay, api: .auth)
+        try await networkingInteractor.subscribe(topic: topic)
         pairingStorage.setPairing(pairing)
         return uri
     }
