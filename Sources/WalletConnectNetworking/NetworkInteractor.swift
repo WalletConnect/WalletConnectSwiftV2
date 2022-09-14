@@ -96,7 +96,7 @@ public class NetworkingInteractor: NetworkInteracting {
     public func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {
         try rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
         let message = try! serializer.serialize(topic: topic, encodable: request, envelopeType: envelopeType)
-        try await relayClient.publish(topic: topic, payload: message, tag: tag)
+        try await relayClient.publish(topic: topic, payload: message, tag: tag, prompt: shouldPrompt(method: request.method))
     }
 
     /// Completes with an acknowledgement from the relay network.
@@ -107,7 +107,7 @@ public class NetworkingInteractor: NetworkInteracting {
             try rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
             let message = try serializer.serialize(topic: topic, encodable: request)
             return try await withCheckedThrowingContinuation { continuation in
-                relayClient.publish(topic: topic, payload: message, tag: tag) { error in
+                relayClient.publish(topic: topic, payload: message, tag: tag, prompt: shouldPrompt(method: request.method)) { error in
                     if let error = error {
                         continuation.resume(throwing: error)
                     } else {
@@ -163,6 +163,15 @@ public class NetworkingInteractor: NetworkInteracting {
             responsePublisherSubject.send((record.topic, record.request, response))
         } catch {
             logger.debug("Handle json rpc response error: \(error)")
+        }
+    }
+
+    private func shouldPrompt(method: String) -> Bool {
+        switch method {
+        case "wc_sessionRequest": // TODO: Include promt in ProtocolMethod
+            return true
+        default:
+            return false
         }
     }
 }
