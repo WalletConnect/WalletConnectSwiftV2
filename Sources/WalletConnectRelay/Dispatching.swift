@@ -1,23 +1,30 @@
 import Foundation
+import Combine
 import WalletConnectUtils
 
 protocol Dispatching {
-    var onConnect: (() -> Void)? {get set}
-    var onDisconnect: (() -> Void)? {get set}
-    var onMessage: ((String) -> Void)? {get set}
+    var onMessage: ((String) -> Void)? { get set }
+    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> { get }
     func send(_ string: String, completion: @escaping (Error?) -> Void)
+    func protectedSend(_ string: String, completion: @escaping (Error?) -> Void)
+    func protectedSend(_ string: String) async throws
     func connect() throws
     func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws
 }
 
 final class Dispatcher: NSObject, Dispatching {
-    var onConnect: (() -> Void)?
-    var onDisconnect: (() -> Void)?
     var onMessage: ((String) -> Void)?
-    private var textFramesQueue = Queue<String>()
-    private let logger: ConsoleLogging
     var socket: WebSocketConnecting
     var socketConnectionHandler: SocketConnectionHandler
+
+    private let logger: ConsoleLogging
+    private let defaultTimeout: Int = 5
+
+    private let socketConnectionStatusPublisherSubject = CurrentValueSubject<SocketConnectionStatus, Never>(.disconnected)
+
+    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
+        socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
+    }
 
     init(socket: WebSocketConnecting,
          socketConnectionHandler: SocketConnectionHandler,
@@ -40,6 +47,36 @@ final class Dispatcher: NSObject, Dispatching {
         }
     }
 
+    func protectedSend(_ string: String, completion: @escaping (Error?) -> Void) {
+        guard socketConnectionStatusPublisherSubject.value == .disconnected else {
+            return send(string, completion: completion)
+        }
+
+        var cancellable: AnyCancellable?
+        cancellable = socketConnectionStatusPublisher.sink { [unowned self] status in
+            guard status == .connected else { return }
+            defer { cancellable?.cancel() }
+            send(string, completion: completion)
+        }
+
+        DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(defaultTimeout)) {
+            completion(NetworkError.webSocketNotConnected)
+            cancellable?.cancel()
+        }
+    }
+
+    func protectedSend(_ string: String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            protectedSend(string) { error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: ())
+                }
+            }
+        }
+    }
+
     func connect() throws {
         try socketConnectionHandler.handleConnect()
     }
@@ -56,10 +93,10 @@ final class Dispatcher: NSObject, Dispatching {
 
     private func setUpSocketConnectionObserving() {
         socket.onConnect = { [unowned self] in
-            self.onConnect?()
+            self.socketConnectionStatusPublisherSubject.send(.connected)
         }
         socket.onDisconnect = { [unowned self] _ in
-            self.onDisconnect?()
+            self.socketConnectionStatusPublisherSubject.send(.disconnected)
         }
     }
 }
