@@ -53,8 +53,8 @@ public class PairingRequester {
         self.protocolMethod = protocolMethod
     }
 
-    func request(topic: String) async throws {
-        let request = RPCRequest(method: protocolMethod.method, params: AnyCodable(""))
+    func request(topic: String, params: AnyCodable) async throws {
+        let request = RPCRequest(method: protocolMethod.method, params: params)
 
         try await networkingInteractor.requestNetworkAck(request, topic: topic, tag: PushProtocolMethod.propose.requestTag)
     }

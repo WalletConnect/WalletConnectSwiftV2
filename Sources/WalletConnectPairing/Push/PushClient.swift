@@ -4,6 +4,8 @@ import WalletConnectUtils
 import WalletConnectNetworking
 import Combine
 
+struct ProposalParams: Codable {}
+
 public class PushClient: Paringable {
 
     public var protocolMethod: ProtocolMethod
@@ -33,10 +35,11 @@ public class PushClient: Paringable {
     func handleProposal() {
         pairingRequestSubscriber.onRequest = { [unowned self] _ in
             logger.debug("Push: received proposal")
+            proposalPublisherSubject.send("done")
         }
     }
 
     public func propose(topic: String) async throws {
-        try await pairingRequester.request(topic: topic)
+        try await pairingRequester.request(topic: topic, params: AnyCodable(PushRequestParams()))
     }
 }
