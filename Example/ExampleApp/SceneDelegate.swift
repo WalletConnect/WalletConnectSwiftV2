@@ -25,10 +25,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         Relay.configure(projectId: "3ca2919724fbfa5456a25194e369a8b4", socketFactory: SocketFactory())
         Sign.configure(metadata: metadata)
-
+#if DEBUG
         if CommandLine.arguments.contains("-cleanInstall") {
             try? Sign.instance.cleanup()
         }
+#endif
 
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
@@ -43,8 +44,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
               }
         let wcUri = incomingURL.absoluteString.deletingPrefix("https://walletconnect.com/wc?uri=")
         let vc = ((window!.rootViewController as! UINavigationController).viewControllers[0] as! WalletViewController)
+        Task(priority: .high) {try? await Sign.instance.pair(uri: WalletConnectURI(string: wcUri)!)}
         vc.onClientConnected = {
-            Task {
+            Task(priority: .high) {
                 do {
                     try await Sign.instance.pair(uri: WalletConnectURI(string: wcUri)!)
                 } catch {

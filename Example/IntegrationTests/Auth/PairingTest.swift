@@ -62,7 +62,7 @@ final class Pairingtests: XCTestCase {
 
         appPairingClient.configure(with: [appPushClient])
 
-        walletPairingClient.configure(with: [walletPushClient, KYC])
+        walletPairingClient.configure(with: [walletPushClient, ])
 
         let uri = try! await appPairingClient.create()
 

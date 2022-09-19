@@ -19,11 +19,6 @@ extension Error {
         return true
     }
 
-    var isSessionNotAcknowledgedError: Bool {
-        guard case .sessionNotAcknowledged = wcError else { return false }
-        return true
-    }
-
     var isInvalidMethodError: Bool {
         guard case .invalidMethod = wcError else { return false }
         return true

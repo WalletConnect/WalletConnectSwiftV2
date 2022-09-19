@@ -242,8 +242,8 @@ public final class RelayClient {
         if let request = tryDecode(RPCRequest.self, from: payload) {
             if let params = try? request.params?.get(Subscription.Params.self) {
                 do {
-                    try rpcHistory.set(request, forTopic: params.data.topic, emmitedBy: .remote)
                     try acknowledgeRequest(request)
+                    try rpcHistory.set(request, forTopic: params.data.topic, emmitedBy: .remote)
                     messagePublisherSubject.send((params.data.topic, params.data.message))
                 } catch {
                     logger.error("[RelayClient] RPC History 'set()' error: \(error)")
@@ -278,11 +278,16 @@ public final class RelayClient {
 
     private func acknowledgeRequest(_ request: RPCRequest) throws {
         let response = RPCResponse(matchingRequest: request, result: true)
-        try rpcHistory.resolve(response)
         let message = try response.asJSONEncodedString()
-        dispatcher.send(message) { [weak self] in
+        dispatcher.send(message) { [unowned self] in
             if let error = $0 {
-                self?.logger.debug("Failed to dispatch response: \(response), error: \(error)")
+                logger.debug("Failed to dispatch response: \(response), error: \(error)")
+            } else {
+                do {
+                    try rpcHistory.resolve(response)
+                } catch {
+                    logger.debug(error)
+                }
             }
         }
     }

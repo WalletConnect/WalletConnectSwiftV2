@@ -29,7 +29,7 @@ final class ControllerSessionStateMachine {
 
     func update(topic: String, namespaces: [String: SessionNamespace]) async throws {
         let session = try getSession(for: topic)
-        try validateControlledAcknowledged(session)
+        try validateController(session)
         try Namespace.validate(namespaces)
         logger.debug("Controller will update methods")
         sessionStore.setSession(session)
@@ -38,7 +38,7 @@ final class ControllerSessionStateMachine {
 
    func extend(topic: String, by ttl: Int64) async throws {
        var session = try getSession(for: topic)
-       try validateControlledAcknowledged(session)
+       try validateController(session)
        try session.updateExpiry(by: ttl)
        let newExpiry = Int64(session.expiryDate.timeIntervalSince1970 )
        sessionStore.setSession(session)
@@ -101,10 +101,7 @@ final class ControllerSessionStateMachine {
         }
     }
 
-    private func validateControlledAcknowledged(_ session: WCSession) throws {
-        guard session.acknowledged else {
-            throw WalletConnectError.sessionNotAcknowledged(session.topic)
-        }
+    private func validateController(_ session: WCSession) throws {
         guard session.selfIsController else {
             throw WalletConnectError.unauthorizedNonControllerCall
         }
