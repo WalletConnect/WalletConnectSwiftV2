@@ -1,24 +1,30 @@
 import Foundation
+import Combine
 import WalletConnectUtils
 
 protocol Dispatching {
-    var onConnect: (() -> Void)? {get set}
-    var onDisconnect: (() -> Void)? {get set}
-    var onMessage: ((String) -> Void)? {get set}
-    func send(_ string: String) async throws
+    var onMessage: ((String) -> Void)? { get set }
+    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> { get }
     func send(_ string: String, completion: @escaping (Error?) -> Void)
+    func protectedSend(_ string: String, completion: @escaping (Error?) -> Void)
+    func protectedSend(_ string: String) async throws
     func connect() throws
     func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws
 }
 
 final class Dispatcher: NSObject, Dispatching {
-    var onConnect: (() -> Void)?
-    var onDisconnect: (() -> Void)?
     var onMessage: ((String) -> Void)?
-    private var textFramesQueue = Queue<String>()
-    private let logger: ConsoleLogging
     var socket: WebSocketConnecting
     var socketConnectionHandler: SocketConnectionHandler
+
+    private let logger: ConsoleLogging
+    private let defaultTimeout: Int = 5
+
+    private let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
+
+    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
+        socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
+    }
 
     init(socket: WebSocketConnecting,
          socketConnectionHandler: SocketConnectionHandler,
@@ -31,28 +37,43 @@ final class Dispatcher: NSObject, Dispatching {
         setUpSocketConnectionObserving()
     }
 
-    func send(_ string: String) async throws {
-        return try await withCheckedThrowingContinuation { continuation in
-            if socket.isConnected {
-                socket.write(string: string) {
-                    continuation.resume(returning: ())
-                }
-            } else {
-                continuation.resume(throwing: NetworkError.webSocketNotConnected)
-            }
-        }
-    }
-
     func send(_ string: String, completion: @escaping (Error?) -> Void) {
-        // TODO - add policy for retry and "single try"
         if socket.isConnected {
             self.socket.write(string: string) {
                 completion(nil)
             }
-            // TODO - enqueue     if fails
         } else {
             completion(NetworkError.webSocketNotConnected)
-//            textFramesQueue.enqueue(string)
+        }
+    }
+
+    func protectedSend(_ string: String, completion: @escaping (Error?) -> Void) {
+        guard !socket.isConnected else {
+            return send(string, completion: completion)
+        }
+
+        var cancellable: AnyCancellable?
+        cancellable = socketConnectionStatusPublisher.sink { [unowned self] status in
+            guard status == .connected else { return }
+            cancellable?.cancel()
+            send(string, completion: completion)
+        }
+
+        DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(defaultTimeout)) {
+            completion(NetworkError.webSocketNotConnected)
+            cancellable?.cancel()
+        }
+    }
+
+    func protectedSend(_ string: String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            protectedSend(string) { error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: ())
+                }
+            }
         }
     }
 
@@ -72,21 +93,10 @@ final class Dispatcher: NSObject, Dispatching {
 
     private func setUpSocketConnectionObserving() {
         socket.onConnect = { [unowned self] in
-            self.dequeuePendingTextFrames()
-            self.onConnect?()
+            self.socketConnectionStatusPublisherSubject.send(.connected)
         }
         socket.onDisconnect = { [unowned self] _ in
-            self.onDisconnect?()
-        }
-    }
-
-    private func dequeuePendingTextFrames() {
-        while let frame = textFramesQueue.dequeue() {
-            send(frame) { [unowned self] error in
-                if let error = error {
-                    self.logger.error(error.localizedDescription)
-                }
-            }
+            self.socketConnectionStatusPublisherSubject.send(.disconnected)
         }
     }
 }
