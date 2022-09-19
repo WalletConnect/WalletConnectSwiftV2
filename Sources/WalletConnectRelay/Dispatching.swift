@@ -20,7 +20,7 @@ final class Dispatcher: NSObject, Dispatching {
     private let logger: ConsoleLogging
     private let defaultTimeout: Int = 5
 
-    private let socketConnectionStatusPublisherSubject = CurrentValueSubject<SocketConnectionStatus, Never>(.disconnected)
+    private let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
 
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
@@ -48,14 +48,14 @@ final class Dispatcher: NSObject, Dispatching {
     }
 
     func protectedSend(_ string: String, completion: @escaping (Error?) -> Void) {
-        guard socketConnectionStatusPublisherSubject.value == .disconnected else {
+        guard !socket.isConnected else {
             return send(string, completion: completion)
         }
 
         var cancellable: AnyCancellable?
         cancellable = socketConnectionStatusPublisher.sink { [unowned self] status in
             guard status == .connected else { return }
-            defer { cancellable?.cancel() }
+            cancellable?.cancel()
             send(string, completion: completion)
         }
 
