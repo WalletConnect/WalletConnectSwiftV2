@@ -1,8 +1,8 @@
 import Foundation
 import XCTest
 import JSONRPC
-import WalletConnectUtils
-import WalletConnectNetworking
+@testable import WalletConnectUtils
+@testable import WalletConnectNetworking
 @testable import Auth
 @testable import WalletConnectKMS
 @testable import TestingUtils
