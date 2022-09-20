@@ -20,8 +20,6 @@ public final class RelayClient {
         case subscriptionIdNotFound
     }
 
-    static let historyIdentifier = "com.walletconnect.sdk.relayer_client.subscription_json_rpc_record"
-
     let defaultTtl = 6*Time.hour
     var subscriptions: [String: String] = [:]
 
@@ -59,7 +57,7 @@ public final class RelayClient {
     ) {
         self.logger = logger
         self.dispatcher = dispatcher
-        self.rpcHistory = RPCHistory(keyValueStore: CodableStore<RPCHistory.Record>(defaults: keyValueStorage, identifier: Self.historyIdentifier))
+        self.rpcHistory = RPCHistoryFactory.createForRelay(keyValueStorage: keyValueStorage)
         setUpBindings()
     }
 
