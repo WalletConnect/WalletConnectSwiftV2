@@ -1,6 +1,7 @@
 import Foundation
 import WalletConnectUtils
 import WalletConnectRelay
+import WalletConnectNetworking
 import Combine
 
 public class PairingClient {
@@ -8,13 +9,17 @@ public class PairingClient {
     private let appPairService: AppPairService
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
     let logger: ConsoleLogging
+    private let networkingInteractor: NetworkInteracting
+
     init(appPairService: AppPairService,
+         networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
          walletPairService: WalletPairService,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
     ) {
         self.appPairService = appPairService
         self.walletPairService = walletPairService
+        self.networkingInteractor = networkingInteractor
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
         self.logger = logger
     }
@@ -33,13 +38,13 @@ public class PairingClient {
         return try await appPairService.create()
     }
 
-    public func configure(with paringables: [Paringable]) {
-        var p = paringables.first!
+    public func configureProtocols(with paringables: [Paringable]) {
+        paringables.forEach {
+            $0.pairingRequestSubscriber = PairingRequestSubscriber(networkingInteractor: walletPairService.networkingInteractor, logger: logger, kms: walletPairService.kms, protocolMethod: $0.protocolMethod)
 
-        p.pairingRequestSubscriber = PairingRequestSubscriber(networkingInteractor: walletPairService.networkingInteractor, logger: logger, kms: walletPairService.kms, protocolMethod: p.protocolMethod)
+            $0.pairingRequester = PairingRequester(networkingInteractor: walletPairService.networkingInteractor, kms: walletPairService.kms, logger: logger, protocolMethod: $0.protocolMethod)
+        }
 
-
-        p.pairingRequester = PairingRequester(networkingInteractor: walletPairService.networkingInteractor, kms: walletPairService.kms, logger: logger, protocolMethod: p.protocolMethod)
     }
 
     

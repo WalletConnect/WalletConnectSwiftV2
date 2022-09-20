@@ -4,8 +4,6 @@ import WalletConnectUtils
 import WalletConnectNetworking
 import Combine
 
-struct ProposalParams: Codable {}
-
 public class PushClient: Paringable {
 
     public var protocolMethod: ProtocolMethod

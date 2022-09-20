@@ -5,11 +5,6 @@ import WalletConnectUtils
 import WalletConnectKMS
 import WalletConnectNetworking
 
-public protocol Paringable {
-    var protocolMethod: ProtocolMethod { get set }
-    var pairingRequestSubscriber: PairingRequestSubscriber! {get set}
-    var pairingRequester: PairingRequester! {get set}
-}
 
 public class PairingRequestSubscriber {
     private let networkingInteractor: NetworkInteracting
@@ -34,28 +29,5 @@ public class PairingRequestSubscriber {
             .sink { [unowned self] (payload: RequestSubscriptionPayload<AnyCodable>) in
                 onRequest?(payload)
             }.store(in: &publishers)
-    }
-}
-
-public class PairingRequester {
-    private let networkingInteractor: NetworkInteracting
-    private let kms: KeyManagementServiceProtocol
-    private let logger: ConsoleLogging
-    let protocolMethod: ProtocolMethod
-
-    init(networkingInteractor: NetworkInteracting,
-         kms: KeyManagementServiceProtocol,
-         logger: ConsoleLogging,
-         protocolMethod: ProtocolMethod) {
-        self.networkingInteractor = networkingInteractor
-        self.kms = kms
-        self.logger = logger
-        self.protocolMethod = protocolMethod
-    }
-
-    func request(topic: String, params: AnyCodable) async throws {
-        let request = RPCRequest(method: protocolMethod.method, params: params)
-
-        try await networkingInteractor.requestNetworkAck(request, topic: topic, tag: PushProtocolMethod.propose.requestTag)
     }
 }
