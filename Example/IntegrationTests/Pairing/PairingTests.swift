@@ -15,8 +15,8 @@ final class PairingTests: XCTestCase {
     private var publishers = [AnyCancellable]()
 
     override func setUp() {
-        appPairingClient = makeClient(prefix: "👻 App")
-        walletPairingClient = makeClient(prefix: "🤑 Wallet")
+        appPairingClient = makeClient(prefix: "👻 App", keychain: appKeychain)
+        walletPairingClient = makeClient(prefix: "🤑 Wallet", keychain: walletKeychain)
 
         let expectation = expectation(description: "Wait Clients Connected")
         expectation.expectedFulfillmentCount = 2
@@ -36,21 +36,21 @@ final class PairingTests: XCTestCase {
         wait(for: [expectation], timeout: 5)
     }
 
-
-    func makeClient(prefix: String) -> PairingClient {
+    func makeClient(prefix: String, keychain: KeychainStorageMock) -> PairingClient {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let projectId = "3ca2919724fbfa5456a25194e369a8b4"
-        let keychain = KeychainStorageMock()
         let relayClient = RelayClient(relayHost: URLConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
 
         let pairingClient = PairingClientFactory.create(logger: logger, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, relayClient: relayClient)
         return pairingClient
     }
 
-    func makePushClient(suffix: String) -> PushClient {
+    let appKeychain = KeychainStorageMock()
+    let walletKeychain = KeychainStorageMock()
+
+    func makePushClient(suffix: String, keychain: KeychainStorageMock) -> PushClient {
         let logger = ConsoleLogger(suffix: suffix, loggingLevel: .debug)
         let projectId = "3ca2919724fbfa5456a25194e369a8b4"
-        let keychain = KeychainStorageMock()
         let relayClient = RelayClient(relayHost: URLConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
         return PushClientFactory.create(logger: logger, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, relayClient: relayClient)
     }
@@ -58,8 +58,8 @@ final class PairingTests: XCTestCase {
     func testProposePushOnPairing() async {
         let exp = expectation(description: "")
         
-        let appPushClient = makePushClient(suffix: "👻 App")
-        let walletPushClient = makePushClient(suffix: "🤑 Wallet")
+        let appPushClient = makePushClient(suffix: "👻 App", keychain: appKeychain)
+        let walletPushClient = makePushClient(suffix: "🤑 Wallet", keychain: walletKeychain)
 
         walletPushClient.proposalPublisher.sink { _ in
             exp.fulfill()
@@ -74,8 +74,6 @@ final class PairingTests: XCTestCase {
         try! await walletPairingClient.pair(uri: uri)
 
         try! await appPushClient.propose(topic: uri.topic)
-
-
 
         wait(for: [exp], timeout: 2)
 
