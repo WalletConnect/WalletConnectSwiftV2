@@ -15,16 +15,12 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
     private var publishers = [AnyCancellable]()
 
     let chains = [Chain(name: "Ethereum", id: "eip155:1"), Chain(name: "Polygon", id: "eip155:137")]
-    var onSessionSettled: ((Session) -> Void)?
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Available Chains"
         selectChainView.tableView.dataSource = self
         selectChainView.connectButton.addTarget(self, action: #selector(connect), for: .touchUpInside)
         selectChainView.openWallet.addTarget(self, action: #selector(openWallet), for: .touchUpInside)
-        Sign.instance.sessionSettlePublisher.sink {[unowned self] session in
-            onSessionSettled?(session)
-        }.store(in: &publishers)
     }
 
     override func loadView() {

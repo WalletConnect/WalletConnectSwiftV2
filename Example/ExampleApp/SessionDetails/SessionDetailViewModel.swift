@@ -7,6 +7,8 @@ final class SessionDetailViewModel: ObservableObject {
     private let session: Session
     private let client: SignClient
 
+    private var publishers = Set<AnyCancellable>()
+
     enum Fields {
         case accounts
         case methods
@@ -22,6 +24,8 @@ final class SessionDetailViewModel: ObservableObject {
         self.session = session
         self.client = client
         self.namespaces = session.namespaces
+
+        setupSubscriptions()
     }
 
     var peerName: String {
@@ -81,13 +85,8 @@ final class SessionDetailViewModel: ObservableObject {
     }
 
     func ping() {
-        client.ping(topic: session.topic) {  result in
-            switch result {
-            case .success:
-                self.pingSuccess = true
-            case .failure:
-                self.pingFailed = true
-            }
+        Task(priority: .userInitiated) {
+            try await client.ping(topic: session.topic)
         }
     }
 
@@ -97,6 +96,15 @@ final class SessionDetailViewModel: ObservableObject {
 }
 
 private extension SessionDetailViewModel {
+
+    func setupSubscriptions() {
+        client.pingResponsePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { _ in
+                self.pingSuccess = true
+            }
+            .store(in: &publishers)
+    }
 
     func addTestAccount(for chain: String) {
         guard let viewModel = namespace(for: chain) else { return }

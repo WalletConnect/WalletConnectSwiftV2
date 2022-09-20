@@ -4,14 +4,12 @@ class PairingTests: XCTestCase {
 
     private let engine: Engine = Engine()
 
-    private static var cleanLaunch: Bool = true
-
-    override func setUp() {
-        engine.routing.launch(app: .dapp, clean: PairingTests.cleanLaunch)
-        engine.routing.launch(app: .wallet, clean: PairingTests.cleanLaunch)
-
-        PairingTests.cleanLaunch = false
+    override class func setUp() {
+        let engine: Engine = Engine()
+        engine.routing.launch(app: .dapp, clean: true)
+        engine.routing.launch(app: .wallet, clean: true)
     }
+
 
     /// Check pairing proposal approval via QR code or uri
     /// - TU001
@@ -45,6 +43,9 @@ class PairingTests: XCTestCase {
         engine.wallet.pingButton.waitTap()
 
         XCTAssertTrue(engine.wallet.pingAlert.waitExists())
+
+        engine.wallet.okButton.waitTap()
+        engine.wallet.swipeDismiss()
     }
 
     /// Approve session on existing pairing

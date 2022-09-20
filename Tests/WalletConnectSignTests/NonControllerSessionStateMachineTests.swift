@@ -2,6 +2,7 @@ import XCTest
 import WalletConnectUtils
 @testable import TestingUtils
 import WalletConnectKMS
+import JSONRPC
 @testable import WalletConnectSign
 
 class NonControllerSessionStateMachineTests: XCTestCase {
@@ -34,8 +35,9 @@ class NonControllerSessionStateMachineTests: XCTestCase {
             didCallbackUpdatMethods = true
             XCTAssertEqual(topic, session.topic)
         }
-        networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateNamespaces(topic: session.topic))
+        networkingInteractor.requestPublisherSubject.send((session.topic, RPCRequest.stubUpdateNamespaces()))
         XCTAssertTrue(didCallbackUpdatMethods)
+        usleep(100)
         XCTAssertTrue(networkingInteractor.didRespondSuccess)
     }
 
@@ -49,7 +51,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
 //    }
 
     func testUpdateMethodPeerErrorSessionNotFound() {
-        networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateNamespaces(topic: ""))
+        networkingInteractor.requestPublisherSubject.send(("", RPCRequest.stubUpdateNamespaces()))
         usleep(100)
         XCTAssertFalse(networkingInteractor.didRespondSuccess)
         XCTAssertEqual(networkingInteractor.lastErrorCode, 7001)
@@ -58,7 +60,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
     func testUpdateMethodPeerErrorUnauthorized() {
         let session = WCSession.stub(isSelfController: true) // Peer is not a controller
         storageMock.setSession(session)
-        networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateNamespaces(topic: session.topic))
+        networkingInteractor.requestPublisherSubject.send((session.topic, RPCRequest.stubUpdateNamespaces()))
         usleep(100)
         XCTAssertFalse(networkingInteractor.didRespondSuccess)
         XCTAssertEqual(networkingInteractor.lastErrorCode, 3003)
@@ -72,7 +74,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         storageMock.setSession(session)
         let twoDaysFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 2).timeIntervalSince1970)
 
-        networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateExpiry(topic: session.topic, expiry: twoDaysFromNowTimestamp))
+        networkingInteractor.requestPublisherSubject.send((session.topic, RPCRequest.stubUpdateExpiry(expiry: twoDaysFromNowTimestamp)))
         let extendedSession = storageMock.getAll().first {$0.topic == session.topic}!
         print(extendedSession.expiryDate)
 
@@ -85,7 +87,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         storageMock.setSession(session)
         let twoDaysFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 2).timeIntervalSince1970)
 
-        networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateExpiry(topic: session.topic, expiry: twoDaysFromNowTimestamp))
+        networkingInteractor.requestPublisherSubject.send((session.topic, RPCRequest.stubUpdateExpiry(expiry: twoDaysFromNowTimestamp)))
 
         let potentiallyExtendedSession = storageMock.getAll().first {$0.topic == session.topic}!
         XCTAssertEqual(potentiallyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, accuracy: 1, "expiry date has been extended for peer non controller request ")
@@ -96,7 +98,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         let session = WCSession.stub(isSelfController: false, expiryDate: tomorrow)
         storageMock.setSession(session)
         let tenDaysFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 10).timeIntervalSince1970)
-        networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateExpiry(topic: session.topic, expiry: tenDaysFromNowTimestamp))
+        networkingInteractor.requestPublisherSubject.send((session.topic, RPCRequest.stubUpdateExpiry(expiry: tenDaysFromNowTimestamp)))
 
         let potentaillyExtendedSession = storageMock.getAll().first {$0.topic == session.topic}!
         XCTAssertEqual(potentaillyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, accuracy: 1, "expiry date has been extended despite ttl to high")
@@ -108,7 +110,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         storageMock.setSession(session)
         let oneDayFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 10).timeIntervalSince1970)
 
-        networkingInteractor.wcRequestPublisherSubject.send(WCRequestSubscriptionPayload.stubUpdateExpiry(topic: session.topic, expiry: oneDayFromNowTimestamp))
+        networkingInteractor.requestPublisherSubject.send((session.topic, RPCRequest.stubUpdateExpiry(expiry: oneDayFromNowTimestamp)))
         let potentaillyExtendedSession = storageMock.getAll().first {$0.topic == session.topic}!
         XCTAssertEqual(potentaillyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, accuracy: 1, "expiry date has been extended despite ttl to low")
     }

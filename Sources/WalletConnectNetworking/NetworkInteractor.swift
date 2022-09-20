@@ -58,7 +58,9 @@ public class NetworkingInteractor: NetworkInteracting {
 
     public func requestSubscription<Request: Codable>(on request: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never> {
         return requestPublisher
-            .filter { $0.request.method == request.method }
+            .filter { rpcRequest in
+                return rpcRequest.request.method == request.method
+            }
             .compactMap { topic, rpcRequest in
                 guard let id = rpcRequest.id, let request = try? rpcRequest.params?.get(Request.self) else { return nil }
                 return RequestSubscriptionPayload(id: id, topic: topic, request: request)
@@ -68,7 +70,9 @@ public class NetworkingInteractor: NetworkInteracting {
 
     public func responseSubscription<Request: Codable, Response: Codable>(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionPayload<Request, Response>, Never> {
         return responsePublisher
-            .filter { $0.request.method == request.method }
+            .filter { rpcRequest in
+                return rpcRequest.request.method == request.method
+            }
             .compactMap { topic, rpcRequest, rpcResponse in
                 guard
                     let id = rpcRequest.id,
@@ -79,12 +83,12 @@ public class NetworkingInteractor: NetworkInteracting {
             .eraseToAnyPublisher()
     }
 
-    public func responseErrorSubscription(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionErrorPayload, Never> {
+    public func responseErrorSubscription<Request: Codable>(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionErrorPayload<Request>, Never> {
         return responsePublisher
             .filter { $0.request.method == request.method }
-            .compactMap { (_, _, rpcResponse) in
-                guard let id = rpcResponse.id, let error = rpcResponse.error else { return nil }
-                return ResponseSubscriptionErrorPayload(id: id, error: error)
+            .compactMap { (topic, rpcRequest, rpcResponse) in
+                guard let id = rpcResponse.id, let request = try? rpcRequest.params?.get(Request.self), let error = rpcResponse.error else { return nil }
+                return ResponseSubscriptionErrorPayload(id: id, topic: topic, request: request, error: error)
             }
             .eraseToAnyPublisher()
     }
@@ -92,7 +96,7 @@ public class NetworkingInteractor: NetworkInteracting {
     public func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {
         try rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
         let message = try! serializer.serialize(topic: topic, encodable: request, envelopeType: envelopeType)
-        try await relayClient.publish(topic: topic, payload: message, tag: tag)
+        try await relayClient.publish(topic: topic, payload: message, tag: tag, prompt: shouldPrompt(method: request.method))
     }
 
     /// Completes with an acknowledgement from the relay network.
@@ -103,7 +107,7 @@ public class NetworkingInteractor: NetworkInteracting {
             try rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
             let message = try serializer.serialize(topic: topic, encodable: request)
             return try await withCheckedThrowingContinuation { continuation in
-                relayClient.publish(topic: topic, payload: message, tag: tag) { error in
+                relayClient.publish(topic: topic, payload: message, tag: tag, prompt: shouldPrompt(method: request.method)) { error in
                     if let error = error {
                         continuation.resume(throwing: error)
                     } else {
@@ -159,6 +163,15 @@ public class NetworkingInteractor: NetworkInteracting {
             responsePublisherSubject.send((record.topic, record.request, response))
         } catch {
             logger.debug("Handle json rpc response error: \(error)")
+        }
+    }
+
+    private func shouldPrompt(method: String) -> Bool {
+        switch method {
+        case "wc_sessionRequest": // TODO: Include promt in ProtocolMethod
+            return true
+        default:
+            return false
         }
     }
 }

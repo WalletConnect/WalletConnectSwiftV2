@@ -10,65 +10,65 @@ public struct RPCResponse: Equatable {
     public let id: RPCID?
 
     public var result: AnyCodable? {
-        if case .success(let value) = outcome { return value }
+        if case .response(let value) = outcome { return value }
         return nil
     }
 
     public var error: JSONRPCError? {
-        if case .failure(let error) = outcome { return error }
+        if case .error(let error) = outcome { return error }
         return nil
     }
 
-    public let outcome: Result<AnyCodable, JSONRPCError>
+    public let outcome: RPCResult
 
-    internal init(id: RPCID?, outcome: Result<AnyCodable, JSONRPCError>) {
+    internal init(id: RPCID?, outcome: RPCResult) {
         self.jsonrpc = "2.0"
         self.id = id
         self.outcome = outcome
     }
 
     public init<C>(matchingRequest: RPCRequest, result: C) where C: Codable {
-        self.init(id: matchingRequest.id, outcome: .success(AnyCodable(result)))
+        self.init(id: matchingRequest.id, outcome: .response(AnyCodable(result)))
     }
 
     public init(matchingRequest: RPCRequest, error: JSONRPCError) {
-        self.init(id: matchingRequest.id, outcome: .failure(error))
+        self.init(id: matchingRequest.id, outcome: .error(error))
     }
 
     public init<C>(id: Int64, result: C) where C: Codable {
-        self.init(id: RPCID(id), outcome: .success(AnyCodable(result)))
+        self.init(id: RPCID(id), outcome: .response(AnyCodable(result)))
     }
 
     public init<C>(id: String, result: C) where C: Codable {
-        self.init(id: RPCID(id), outcome: .success(AnyCodable(result)))
+        self.init(id: RPCID(id), outcome: .response(AnyCodable(result)))
     }
 
     public init<C>(id: RPCID, result: C) where C: Codable {
-        self.init(id: id, outcome: .success(AnyCodable(result)))
+        self.init(id: id, outcome: .response(AnyCodable(result)))
     }
 
     public init(id: RPCID?, error: JSONRPCError) {
-        self.init(id: id, outcome: .failure(error))
+        self.init(id: id, outcome: .error(error))
     }
 
     public init(id: Int64, error: JSONRPCError) {
-        self.init(id: RPCID(id), outcome: .failure(error))
+        self.init(id: RPCID(id), outcome: .error(error))
     }
 
     public init(id: String, error: JSONRPCError) {
-        self.init(id: RPCID(id), outcome: .failure(error))
+        self.init(id: RPCID(id), outcome: .error(error))
     }
 
     public init(id: Int64, errorCode: Int, message: String, associatedData: AnyCodable? = nil) {
-        self.init(id: RPCID(id), outcome: .failure(JSONRPCError(code: errorCode, message: message, data: associatedData)))
+        self.init(id: RPCID(id), outcome: .error(JSONRPCError(code: errorCode, message: message, data: associatedData)))
     }
 
     public init(id: String, errorCode: Int, message: String, associatedData: AnyCodable? = nil) {
-        self.init(id: RPCID(id), outcome: .failure(JSONRPCError(code: errorCode, message: message, data: associatedData)))
+        self.init(id: RPCID(id), outcome: .error(JSONRPCError(code: errorCode, message: message, data: associatedData)))
     }
 
     public init(errorWithoutID: JSONRPCError) {
-        self.init(id: nil, outcome: .failure(errorWithoutID))
+        self.init(id: nil, outcome: .error(errorWithoutID))
     }
 }
 
@@ -104,9 +104,9 @@ extension RPCResponse: Codable {
                     codingPath: [CodingKeys.result, CodingKeys.id],
                     debugDescription: "A success response must have a valid `id`."))
             }
-            outcome = .success(result)
+            outcome = .response(result)
         } else if let error = error {
-            outcome = .failure(error)
+            outcome = .error(error)
         } else {
             throw DecodingError.dataCorrupted(.init(
                 codingPath: [CodingKeys.result, CodingKeys.error],
@@ -119,9 +119,9 @@ extension RPCResponse: Codable {
         try container.encode(jsonrpc, forKey: .jsonrpc)
         try container.encode(id, forKey: .id)
         switch outcome {
-        case .success(let anyCodable):
+        case .response(let anyCodable):
             try container.encode(anyCodable, forKey: .result)
-        case .failure(let rpcError):
+        case .error(let rpcError):
             try container.encode(rpcError, forKey: .error)
         }
     }

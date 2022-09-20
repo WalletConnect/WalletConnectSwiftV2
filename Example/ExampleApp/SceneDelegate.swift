@@ -1,4 +1,6 @@
 import UIKit
+import Foundation
+import Combine
 import WalletConnectSign
 import WalletConnectRelay
 import Starscream
@@ -44,7 +46,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
               }
         let wcUri = incomingURL.absoluteString.deletingPrefix("https://walletconnect.com/wc?uri=")
         let vc = ((window!.rootViewController as! UINavigationController).viewControllers[0] as! WalletViewController)
-        Task(priority: .high) {try? await Sign.instance.pair(uri: WalletConnectURI(string: wcUri)!)}
+        Task(priority: .high) { try? await Sign.instance.pair(uri: WalletConnectURI(string: wcUri)!) }
         vc.onClientConnected = {
             Task(priority: .high) {
                 do {
