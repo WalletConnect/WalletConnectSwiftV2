@@ -6,7 +6,7 @@ import WalletConnectKMS
 import WalletConnectNetworking
 
 
-public class PushRequester {
+public class PushProposer {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging

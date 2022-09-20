@@ -13,10 +13,10 @@ public struct PushClientFactory {
         let history = RPCHistory(keyValueStore: historyStorage)
 
 
-        let networkingInt = NetworkingInteractor(relayClient: relayClient, serializer: serializer, logger: logger, rpcHistory: history)
+        let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serializer, logger: logger, rpcHistory: history)
 
-
-
-        return PushClient(networkingInteractor: networkingInt, logger: logger, kms: kms)
+        let protocolMethod = PushProtocolMethod.propose
+        let pushProposer = PushProposer(networkingInteractor: networkingInteractor, kms: kms, logger: logger, protocolMethod: protocolMethod)
+        return PushClient(networkingInteractor: networkingInteractor, logger: logger, kms: kms, protocolMethod: protocolMethod, pushProposer: pushProposer)
     }
 }

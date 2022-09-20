@@ -2,42 +2,33 @@ import Foundation
 import WalletConnectKMS
 import WalletConnectUtils
 import WalletConnectNetworking
+import JSONRPC
 import Combine
 
 public class PushClient: Pairingable {
+    public var requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest), Never>()
 
     public var protocolMethod: ProtocolMethod
-    public var proposalPublisher: AnyPublisher<String, Never> {
-        proposalPublisherSubject.eraseToAnyPublisher()
-    }
-    private let proposalPublisherSubject = PassthroughSubject<String, Never>()
 
-    public var pairingRequestSubscriber: PairingRequestSubscriber! {
-        didSet {
-            handleProposal()
-        }
+    public var proposalPublisher: AnyPublisher<(topic: String, request: RPCRequest), Never> {
+        requestPublisherSubject.eraseToAnyPublisher()
     }
 
-    public var pairingRequester: PairingRequester!
+    private let pushProposer: PushProposer
 
     public let logger: ConsoleLogging
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
-         kms: KeyManagementServiceProtocol) {
+         kms: KeyManagementServiceProtocol,
+         protocolMethod: ProtocolMethod,
+         pushProposer: PushProposer) {
         self.logger = logger
-
-        protocolMethod = PushProtocolMethod.propose
-    }
-
-    func handleProposal() {
-        pairingRequestSubscriber.onRequest = { [unowned self] _ in
-            logger.debug("Push: received proposal")
-            proposalPublisherSubject.send("done")
-        }
+        self.protocolMethod = protocolMethod
+        self.pushProposer = pushProposer
     }
 
     public func propose(topic: String) async throws {
-        try await pairingRequester.request(topic: topic, params: AnyCodable(PushRequestParams()))
+        try await pushProposer.request(topic: topic, params: AnyCodable(PushRequestParams()))
     }
 }
