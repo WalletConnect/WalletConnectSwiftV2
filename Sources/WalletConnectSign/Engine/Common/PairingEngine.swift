@@ -73,7 +73,7 @@ final class PairingEngine {
             requiredNamespaces: namespaces)
 
         let request = RPCRequest(method: SignProtocolMethod.sessionPropose.method, params: proposal)
-        try await networkingInteractor.requestNetworkAck(request, topic: pairingTopic, tag: SignProtocolMethod.sessionPropose.requestTag)
+        try await networkingInteractor.request(request, topic: pairingTopic, tag: SignProtocolMethod.sessionPropose.requestTag)
     }
 }
 
