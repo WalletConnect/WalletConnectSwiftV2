@@ -68,6 +68,10 @@ public class NetworkingInteractor: NetworkInteracting {
             .eraseToAnyPublisher()
     }
 
+    public func requestSubscription<Request>(on requests: [ProtocolMethod]) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never> where Request : Decodable, Request : Encodable {
+        <#code#>
+    }
+
     public func responseSubscription<Request: Codable, Response: Codable>(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionPayload<Request, Response>, Never> {
         return responsePublisher
             .filter { rpcRequest in

@@ -18,6 +18,10 @@ public protocol NetworkInteracting {
         on request: ProtocolMethod
     ) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never>
 
+    func requestSubscription<Request: Codable>(
+        on requests: [ProtocolMethod]
+    ) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never>
+
     func responseSubscription<Request: Codable, Response: Codable>(
         on request: ProtocolMethod
     ) -> AnyPublisher<ResponseSubscriptionPayload<Request, Response>, Never>

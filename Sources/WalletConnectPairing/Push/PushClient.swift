@@ -4,7 +4,7 @@ import WalletConnectUtils
 import WalletConnectNetworking
 import Combine
 
-public class PushClient: Paringable {
+public class PushClient: Pairingable {
 
     public var protocolMethod: ProtocolMethod
     public var proposalPublisher: AnyPublisher<String, Never> {

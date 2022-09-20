@@ -38,15 +38,72 @@ public class PairingClient {
         return try await appPairService.create()
     }
 
-    public func configureProtocols(with paringables: [Paringable]) {
-        paringables.forEach {
-            $0.pairingRequestSubscriber = PairingRequestSubscriber(networkingInteractor: walletPairService.networkingInteractor, logger: logger, kms: walletPairService.kms, protocolMethod: $0.protocolMethod)
+    public func configureProtocols(with paringables: [Pairingable]) {
 
-            $0.pairingRequester = PairingRequester(networkingInteractor: walletPairService.networkingInteractor, kms: walletPairService.kms, logger: logger, protocolMethod: $0.protocolMethod)
-        }
+    }
+}
+
+import Foundation
+import Combine
+import JSONRPC
+import WalletConnectUtils
+import WalletConnectKMS
+import WalletConnectNetworking
+
+
+public class PairingRequestsSubscriber {
+    private let networkingInteractor: NetworkInteracting
+    private let kms: KeyManagementServiceProtocol
+    private var publishers = [AnyCancellable]()
+    var onRequest: ((RequestSubscriptionPayload<AnyCodable>) -> Void)?
+    let protocolMethod: ProtocolMethod
+    var pairingables = [Pairingable]()
+
+    init(networkingInteractor: NetworkInteracting,
+         logger: ConsoleLogging,
+         kms: KeyManagementServiceProtocol,
+         protocolMethod: ProtocolMethod) {
+        self.networkingInteractor = networkingInteractor
+        self.kms = kms
+        self.protocolMethod = protocolMethod
+    }
+
+    func setPairingables(_ pairingables: [Pairingable]) {
+        self.pairingables = pairingables
+        let methods = pairingables.map{$0.protocolMethod}
+        subscribeForRequests(methods: methods)
 
     }
 
-    
+    private func subscribeForRequests(methods: [ProtocolMethod]) {
+        // TODO - spec tag
+        let tag = 123456
+        networkingInteractor.requestSubscription(on: methods)
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<RPCRequest>) in
+                guard let pairingable = pairingables
+                    .first(where: { p in
+                        p.protocolMethod.method == payload.request.method
+                    }) else {
+                    Task { try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, tag: tag, reason: PairError.methodUnsupported) }
+                    return
+                }
+                pairingable.requestPublisherSubject.send((topic: payload.topic, request: payload.request))
+
+            }.store(in: &publishers)
+    }
+
+}
+public enum PairError: Codable, Equatable, Error, Reason {
+    case methodUnsupported
+
+    public var code: Int {
+        //TODO - spec code
+        return 44444
+    }
+
+    //TODO - spec message
+    public var message: String {
+        return "Method Unsupported"
+    }
 
 }
