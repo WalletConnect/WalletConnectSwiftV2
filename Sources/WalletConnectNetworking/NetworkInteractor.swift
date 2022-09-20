@@ -56,20 +56,26 @@ public class NetworkingInteractor: NetworkInteracting {
         }
     }
 
-    public func requestSubscription<Request: Codable>(on request: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never> {
+    public func requestSubscription<RequestParams: Codable>(on request: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {
         return requestPublisher
             .filter { rpcRequest in
                 return rpcRequest.request.method == request.method
             }
             .compactMap { topic, rpcRequest in
-                guard let id = rpcRequest.id, let request = try? rpcRequest.params?.get(Request.self) else { return nil }
+                guard let id = rpcRequest.id, let request = try? rpcRequest.params?.get(RequestParams.self) else { return nil }
                 return RequestSubscriptionPayload(id: id, topic: topic, request: request)
             }
             .eraseToAnyPublisher()
     }
 
-    public func requestSubscription<Request>(on requests: [ProtocolMethod]) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never> where Request : Decodable, Request : Encodable {
-        <#code#>
+    public func requestSubscription(on requests: [ProtocolMethod]) -> AnyPublisher<(topic: String, request: RPCRequest), Never> {
+        return requestPublisher
+            .filter { rpcRequest in
+                return requests.contains { protocolMethod in
+                    protocolMethod.method == rpcRequest.request.method
+                }
+            }
+            .eraseToAnyPublisher()
     }
 
     public func responseSubscription<Request: Codable, Response: Codable>(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionPayload<Request, Response>, Never> {

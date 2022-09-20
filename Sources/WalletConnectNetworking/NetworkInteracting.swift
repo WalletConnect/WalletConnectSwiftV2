@@ -18,9 +18,7 @@ public protocol NetworkInteracting {
         on request: ProtocolMethod
     ) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never>
 
-    func requestSubscription<Request: Codable>(
-        on requests: [ProtocolMethod]
-    ) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never>
+    func requestSubscription(on requests: [ProtocolMethod]) -> AnyPublisher<(topic: String, request: RPCRequest), Never> 
 
     func responseSubscription<Request: Codable, Response: Codable>(
         on request: ProtocolMethod
