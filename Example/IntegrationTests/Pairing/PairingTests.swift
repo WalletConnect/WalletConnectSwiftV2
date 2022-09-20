@@ -55,6 +55,13 @@ final class PairingTests: XCTestCase {
         return PushClientFactory.create(logger: logger, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, relayClient: relayClient)
     }
 
+    func makeAppClients() -> (PairingClient, PushClient) {
+
+    }
+
+    func makeWalletClient() -> (PairingClient, PushClient) {
+    }
+
     func testProposePushOnPairing() async {
         let exp = expectation(description: "")
         
