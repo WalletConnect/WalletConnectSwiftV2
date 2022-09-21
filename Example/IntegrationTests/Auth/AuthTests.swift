@@ -16,6 +16,23 @@ final class AuthTests: XCTestCase {
         app = makeClient(prefix: "👻 App")
         let walletAccount = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
         wallet = makeClient(prefix: "🤑 Wallet", account: walletAccount)
+
+        let expectation = expectation(description: "Wait Clients Connected")
+        expectation.expectedFulfillmentCount = 2
+
+        app.socketConnectionStatusPublisher.sink { status in
+            if status == .connected {
+                expectation.fulfill()
+            }
+        }.store(in: &publishers)
+
+        wallet.socketConnectionStatusPublisher.sink { status in
+            if status == .connected {
+                expectation.fulfill()
+            }
+        }.store(in: &publishers)
+
+        wait(for: [expectation], timeout: 5)
     }
 
     func makeClient(prefix: String, account: Account? = nil) -> AuthClient {

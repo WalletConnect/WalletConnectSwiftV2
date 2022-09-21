@@ -6,6 +6,7 @@ import WalletConnectRelay
 
 public protocol NetworkInteracting {
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> { get }
+    var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest), Never> { get }
     func subscribe(topic: String) async throws
     func unsubscribe(topic: String)
     func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws
@@ -17,8 +18,6 @@ public protocol NetworkInteracting {
     func requestSubscription<Request: Codable>(
         on request: ProtocolMethod
     ) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never>
-
-    func requestSubscription(on requests: [ProtocolMethod]) -> AnyPublisher<(topic: String, request: RPCRequest), Never> 
 
     func responseSubscription<Request: Codable, Response: Codable>(
         on request: ProtocolMethod

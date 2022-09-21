@@ -31,7 +31,7 @@ public class PairingRequestsSubscriber {
     private func subscribeForRequests(methods: [ProtocolMethod]) {
         // TODO - spec tag
         let tag = 123456
-        networkingInteractor.requestSubscription(on: methods)
+        networkingInteractor.requestPublisher
             .sink { [unowned self] topic, request in
                 guard let pairingable = pairingables
                     .first(where: { p in
