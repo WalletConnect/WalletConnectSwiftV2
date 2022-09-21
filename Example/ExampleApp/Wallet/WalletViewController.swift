@@ -10,8 +10,9 @@ final class WalletViewController: UIViewController {
     lazy  var account = Signer.privateKey.address.hex(eip55: true)
     var sessionItems: [ActiveSessionItem] = []
     var currentProposal: Session.Proposal?
-    var onClientConnected: (() -> Void)?
     private var publishers = [AnyCancellable]()
+
+    var onClientConnected: (() -> Void)?
 
     private let walletView: WalletView = {
         WalletView()
@@ -71,8 +72,7 @@ final class WalletViewController: UIViewController {
         let requestVC = RequestViewController(request)
         requestVC.onSign = { [unowned self] in
             let result = Signer.signEth(request: request)
-            let response = JSONRPCResponse<AnyCodable>(id: request.id, result: result)
-            respondOnSign(request: request, response: response)
+            respondOnSign(request: request, response: result)
             reloadSessionDetailsIfNeeded()
         }
         requestVC.onReject = { [unowned self] in
@@ -90,11 +90,11 @@ final class WalletViewController: UIViewController {
     }
 
     @MainActor
-    private func respondOnSign(request: Request, response: JSONRPCResponse<AnyCodable>) {
+    private func respondOnSign(request: Request, response: AnyCodable) {
         print("[WALLET] Respond on Sign")
         Task {
             do {
-                try await Sign.instance.respond(topic: request.topic, response: .response(response))
+                try await Sign.instance.respond(topic: request.topic, requestId: request.id, response: .response(response))
             } catch {
                 print("[DAPP] Respond Error: \(error.localizedDescription)")
             }
@@ -108,10 +108,8 @@ final class WalletViewController: UIViewController {
             do {
                 try await Sign.instance.respond(
                     topic: request.topic,
-                    response: .error(JSONRPCErrorResponse(
-                        id: request.id,
-                        error: JSONRPCErrorResponse.Error(code: 0, message: ""))
-                    )
+                    requestId: request.id,
+                    response: .error(.init(code: 0, message: ""))
                 )
             } catch {
                 print("[DAPP] Respond Error: \(error.localizedDescription)")
@@ -241,8 +239,8 @@ extension WalletViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] status in
                 if status == .connected {
-                    self?.onClientConnected?()
                     print("Client connected")
+                    self?.onClientConnected?()
                 }
             }.store(in: &publishers)
 

@@ -45,7 +45,15 @@ struct WalletEngine {
         instance.buttons["Ping"]
     }
 
+    var okButton: XCUIElement {
+        instance.buttons["OK"]
+    }
+
     var pingAlert: XCUIElement {
         instance.alerts.element.staticTexts["Received ping response"]
+    }
+
+    func swipeDismiss() {
+        instance.swipeDown(velocity: .fast)
     }
 }
