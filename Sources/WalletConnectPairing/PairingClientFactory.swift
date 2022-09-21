@@ -8,13 +8,10 @@ public struct PairingClientFactory {
     public static func create(logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, relayClient: RelayClient) -> PairingClient {
         let kms = KeyManagementService(keychain: keychainStorage)
         let serializer = Serializer(kms: kms)
-        let kv = RuntimeKeyValueStorage()
-        let history = RPCHistoryFactory.createForNetwork(keyValueStorage: kv)
-
+        let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
 
         let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serializer, logger: logger, rpcHistory: history)
-        let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: kv, identifier: "")))
-
+        let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: keyValueStorage, identifier: "")))
 
         let appPairService = AppPairService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore)
 

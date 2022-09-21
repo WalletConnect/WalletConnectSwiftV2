@@ -26,8 +26,8 @@ public class PairingClient {
         self.logger = logger
         self.pairingRequestsSubscriber = pairingRequestsSubscriber
     }
-    /// For wallet to establish a pairing and receive an authentication request
-    /// Wallet should call this function in order to accept peer's pairing proposal and be able to subscribe for future authentication request.
+    /// For wallet to establish a pairing
+    /// Wallet should call this function in order to accept peer's pairing proposal and be able to subscribe for future requests.
     /// - Parameter uri: Pairing URI that is commonly presented as a QR code by a dapp or delivered with universal linking.
     ///
     /// Throws Error:
