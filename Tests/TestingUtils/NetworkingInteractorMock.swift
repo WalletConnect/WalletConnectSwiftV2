@@ -113,4 +113,9 @@ public class NetworkingInteractorMock: NetworkInteracting {
         lastErrorCode = reason.code
         didRespondError = true
     }
+
+    public func requestNetworkAck(_ request: RPCRequest, topic: String, tag: Int) async throws {
+        requestCallCount += 1
+        requests.append((topic, request))
+    }
 }
