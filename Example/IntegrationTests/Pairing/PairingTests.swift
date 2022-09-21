@@ -12,11 +12,14 @@ final class PairingTests: XCTestCase {
     var appPairingClient: PairingClient!
     var walletPairingClient: PairingClient!
 
+    var appPushClient: PushClient!
+    var walletPushClient: PushClient!
+
     private var publishers = [AnyCancellable]()
 
     override func setUp() {
-        appPairingClient = makeClient(prefix: "👻 App", keychain: appKeychain)
-        walletPairingClient = makeClient(prefix: "🤑 Wallet", keychain: walletKeychain)
+        (appPairingClient, appPushClient) = makeClients(prefix: "👻 App")
+        (walletPairingClient, walletPushClient) = makeClients(prefix: "🤑 Wallet")
 
         let expectation = expectation(description: "Wait Clients Connected")
         expectation.expectedFulfillmentCount = 2
@@ -36,38 +39,22 @@ final class PairingTests: XCTestCase {
         wait(for: [expectation], timeout: 5)
     }
 
-    func makeClient(prefix: String, keychain: KeychainStorageMock) -> PairingClient {
+    func makeClients(prefix: String) -> (PairingClient, PushClient) {
+        let keychain = KeychainStorageMock()
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let projectId = "3ca2919724fbfa5456a25194e369a8b4"
         let relayClient = RelayClient(relayHost: URLConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
 
         let pairingClient = PairingClientFactory.create(logger: logger, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, relayClient: relayClient)
-        return pairingClient
-    }
 
-    let appKeychain = KeychainStorageMock()
-    let walletKeychain = KeychainStorageMock()
+        let pushClient = PushClientFactory.create(logger: logger, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, relayClient: relayClient)
+        return (pairingClient, pushClient)
 
-    func makePushClient(suffix: String, keychain: KeychainStorageMock) -> PushClient {
-        let logger = ConsoleLogger(suffix: suffix, loggingLevel: .debug)
-        let projectId = "3ca2919724fbfa5456a25194e369a8b4"
-        let relayClient = RelayClient(relayHost: URLConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
-        return PushClientFactory.create(logger: logger, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, relayClient: relayClient)
-    }
-
-    func makeAppClients() -> (PairingClient, PushClient) {
-
-    }
-
-    func makeWalletClient() -> (PairingClient, PushClient) {
     }
 
     func testProposePushOnPairing() async {
         let exp = expectation(description: "")
         
-        let appPushClient = makePushClient(suffix: "👻 App", keychain: appKeychain)
-        let walletPushClient = makePushClient(suffix: "🤑 Wallet", keychain: walletKeychain)
-
         walletPushClient.proposalPublisher.sink { _ in
             exp.fulfill()
         }.store(in: &publishers)

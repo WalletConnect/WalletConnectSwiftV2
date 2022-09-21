@@ -9,8 +9,7 @@ public struct PairingClientFactory {
         let kms = KeyManagementService(keychain: keychainStorage)
         let serializer = Serializer(kms: kms)
         let kv = RuntimeKeyValueStorage()
-        let historyStorage = CodableStore<RPCHistory.Record>(defaults: kv, identifier: "")
-        let history = RPCHistory(keyValueStore: historyStorage)
+        let history = RPCHistoryFactory.createForNetwork(keyValueStorage: kv)
 
 
         let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serializer, logger: logger, rpcHistory: history)
