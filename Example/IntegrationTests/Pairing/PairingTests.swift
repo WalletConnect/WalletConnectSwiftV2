@@ -20,23 +20,6 @@ final class PairingTests: XCTestCase {
     override func setUp() {
         (appPairingClient, appPushClient) = makeClients(prefix: "👻 App")
         (walletPairingClient, walletPushClient) = makeClients(prefix: "🤑 Wallet")
-
-        let expectation = expectation(description: "Wait Clients Connected")
-        expectation.expectedFulfillmentCount = 2
-
-        appPairingClient.socketConnectionStatusPublisher.sink { status in
-            if status == .connected {
-                expectation.fulfill()
-            }
-        }.store(in: &publishers)
-
-        walletPairingClient.socketConnectionStatusPublisher.sink { status in
-            if status == .connected {
-                expectation.fulfill()
-            }
-        }.store(in: &publishers)
-
-        wait(for: [expectation], timeout: 5)
     }
 
     func makeClients(prefix: String) -> (PairingClient, PushClient) {
@@ -54,7 +37,7 @@ final class PairingTests: XCTestCase {
 
     func testProposePushOnPairing() async {
         let exp = expectation(description: "")
-        
+
         walletPushClient.proposalPublisher.sink { _ in
             exp.fulfill()
         }.store(in: &publishers)
