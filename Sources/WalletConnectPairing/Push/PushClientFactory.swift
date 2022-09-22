@@ -12,8 +12,7 @@ public struct PushClientFactory {
 
         let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serializer, logger: logger, rpcHistory: history)
 
-        let protocolMethod = PushProtocolMethod.propose
-        let pushProposer = PushProposer(networkingInteractor: networkingInteractor, kms: kms, logger: logger, protocolMethod: protocolMethod)
-        return PushClient(networkingInteractor: networkingInteractor, logger: logger, kms: kms, protocolMethod: protocolMethod, pushProposer: pushProposer)
+        let pushProposer = PushProposer(networkingInteractor: networkingInteractor, kms: kms, logger: logger)
+        return PushClient(networkInteractor: networkingInteractor, logger: logger, kms: kms, pushProposer: pushProposer)
     }
 }

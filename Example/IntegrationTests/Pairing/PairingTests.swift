@@ -5,7 +5,7 @@ import WalletConnectUtils
 import WalletConnectRelay
 import Combine
 import WalletConnectNetworking
-import WalletConnectPairing
+@testable import WalletConnectPairing
 
 
 final class PairingTests: XCTestCase {
@@ -59,10 +59,6 @@ final class PairingTests: XCTestCase {
             exp.fulfill()
         }.store(in: &publishers)
 
-        appPairingClient.configureProtocols(with: [appPushClient])
-
-        walletPairingClient.configureProtocols(with: [walletPushClient])
-
         let uri = try! await appPairingClient.create()
 
         try! await walletPairingClient.pair(uri: uri)
@@ -70,8 +66,6 @@ final class PairingTests: XCTestCase {
         try! await appPushClient.propose(topic: uri.topic)
 
         wait(for: [exp], timeout: 2)
-
     }
-
 }
 

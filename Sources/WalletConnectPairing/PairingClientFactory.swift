@@ -17,9 +17,7 @@ public struct PairingClientFactory {
 
         let walletPaS = WalletPairService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore)
 
-        let pairingRequestsSubscriber = PairingRequestsSubscriber(networkingInteractor: networkingInteractor, logger: logger, kms: kms)
-
-        return PairingClient(appPairService: appPairService, networkingInteractor: networkingInteractor, logger: logger, walletPairService: walletPaS, pairingRequestsSubscriber: pairingRequestsSubscriber, socketConnectionStatusPublisher: relayClient.socketConnectionStatusPublisher)
+        return PairingClient(appPairService: appPairService, networkingInteractor: networkingInteractor, logger: logger, walletPairService: walletPaS, socketConnectionStatusPublisher: relayClient.socketConnectionStatusPublisher)
     }
 }
 
