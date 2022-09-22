@@ -8,7 +8,7 @@ public class PairingClient {
     private let walletPairService: WalletPairService
     private let appPairService: AppPairService
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
-    let logger: ConsoleLogging
+    private let logger: ConsoleLogging
     private let networkingInteractor: NetworkInteracting
     private let pairingRequestsSubscriber: PairingRequestsSubscriber
 
