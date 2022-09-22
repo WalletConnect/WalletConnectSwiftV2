@@ -19,14 +19,17 @@ public class PushClient {
 
     private let pushProposer: PushProposer
     private let networkInteractor: NetworkInteracting
+    private let pairingRegisterer: PairingRegisterer
 
     init(networkInteractor: NetworkInteracting,
          logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
-         pushProposer: PushProposer) {
+         pushProposer: PushProposer,
+         pairingRegisterer: PairingRegisterer) {
         self.networkInteractor = networkInteractor
         self.logger = logger
         self.pushProposer = pushProposer
+        self.pairingRegisterer = pairingRegisterer
 
         setupPairingSubscriptions()
     }
@@ -39,6 +42,8 @@ public class PushClient {
 private extension PushClient {
 
     func setupPairingSubscriptions() {
+        pairingRegisterer.register(method: PushProtocolMethod.propose)
+
         networkInteractor.requestSubscription(on: PushProtocolMethod.propose)
             .sink { [unowned self] (payload: RequestSubscriptionPayload<PushRequestParams>) in
                 requestPublisherSubject.send((payload.topic, payload.request))

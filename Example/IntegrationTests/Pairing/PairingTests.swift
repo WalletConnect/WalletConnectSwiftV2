@@ -15,6 +15,8 @@ final class PairingTests: XCTestCase {
     var appPushClient: PushClient!
     var walletPushClient: PushClient!
 
+    var pairingStorage: PairingStorage!
+
     private var publishers = [AnyCancellable]()
 
     override func setUp() {
@@ -47,23 +49,23 @@ final class PairingTests: XCTestCase {
 
         let pairingClient = PairingClientFactory.create(logger: logger, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, relayClient: relayClient)
 
-        let pushClient = PushClientFactory.create(logger: logger, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, relayClient: relayClient)
+        let pushClient = PushClientFactory.create(logger: logger, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, relayClient: relayClient, pairingClient: pairingClient)
         return (pairingClient, pushClient)
 
     }
 
-    func testProposePushOnPairing() async {
-        let exp = expectation(description: "")
+    func testProposePushOnPairing() async throws {
+        let exp = expectation(description: "testProposePushOnPairing")
 
         walletPushClient.proposalPublisher.sink { _ in
             exp.fulfill()
         }.store(in: &publishers)
 
-        let uri = try! await appPairingClient.create()
+        let uri = try await appPairingClient.create()
 
-        try! await walletPairingClient.pair(uri: uri)
+        try await walletPairingClient.pair(uri: uri)
 
-        try! await appPushClient.propose(topic: uri.topic)
+        try await appPushClient.propose(topic: uri.topic)
 
         wait(for: [exp], timeout: 2)
     }
