@@ -46,7 +46,7 @@ private extension PushClient {
 
         networkInteractor.responseErrorSubscription(on: PushProtocolMethod.propose)
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<PushRequestParams>) in
-                print("error")
+                logger.error(payload.error.localizedDescription)
             }.store(in: &publishers)
 
         networkInteractor.requestSubscription(on: PushProtocolMethod.propose)

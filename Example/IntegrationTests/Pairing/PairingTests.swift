@@ -55,7 +55,7 @@ final class PairingTests: XCTestCase {
     }
 
     func testProposePushOnPairing() async throws {
-        let exp = expectation(description: "testProposePushOnPairing")
+        let exp = expectation(description: "testProposePushOnPairing") 
 
         walletPushClient.proposalPublisher.sink { _ in
             exp.fulfill()
