@@ -1,6 +1,4 @@
 import UIKit
-import Foundation
-import Combine
 import WalletConnectSign
 import WalletConnectRelay
 import Starscream

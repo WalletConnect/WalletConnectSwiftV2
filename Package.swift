@@ -32,7 +32,7 @@ let package = Package(
     targets: [
         .target(
             name: "WalletConnectSign",
-            dependencies: ["WalletConnectNetworking", "WalletConnectPairing"],
+            dependencies: ["WalletConnectRelay", "WalletConnectUtils", "WalletConnectKMS", "WalletConnectPairing"],
             path: "Sources/WalletConnectSign"),
         .target(
             name: "Chat",
@@ -52,7 +52,7 @@ let package = Package(
             path: "Sources/WalletConnectKMS"),
         .target(
             name: "WalletConnectPairing",
-            dependencies: ["WalletConnectNetworking"]),
+            dependencies: ["WalletConnectUtils", "WalletConnectNetworking", "JSONRPC"]),
         .target(
             name: "WalletConnectUtils",
             dependencies: ["Commons", "JSONRPC"]),

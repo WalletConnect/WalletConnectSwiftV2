@@ -2,27 +2,24 @@ import Combine
 import WalletConnectUtils
 import WalletConnectNetworking
 
-public class PingResponder {
+class PingResponder {
     private let networkingInteractor: NetworkInteracting
-    private let method: ProtocolMethod
     private let logger: ConsoleLogging
     private var publishers = [AnyCancellable]()
 
-    public init(networkingInteractor: NetworkInteracting,
-         method: ProtocolMethod,
+    init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging) {
         self.networkingInteractor = networkingInteractor
-        self.method = method
         self.logger = logger
         subscribePingRequests()
     }
 
     private func subscribePingRequests() {
-        networkingInteractor.requestSubscription(on: method)
+        networkingInteractor.requestSubscription(on: PairingProtocolMethod.ping)
             .sink { [unowned self]  (payload: RequestSubscriptionPayload<PairingPingParams>) in
                 logger.debug("Responding for pairing ping")
                 Task(priority: .high) {
-                    try? await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, tag: method.responseTag)
+                    try? await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, tag: PairingProtocolMethod.ping.responseTag)
                 }
             }
             .store(in: &publishers)

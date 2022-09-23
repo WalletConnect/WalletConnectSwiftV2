@@ -1,9 +1,7 @@
 import Foundation
-import Combine
-import JSONRPC
 import WalletConnectUtils
 import WalletConnectKMS
-import WalletConnectNetworking
+import Combine
 
 final class ControllerSessionStateMachine {
 
@@ -24,8 +22,9 @@ final class ControllerSessionStateMachine {
         self.kms = kms
         self.sessionStore = sessionStore
         self.logger = logger
-
-        setupSubscriptions()
+        networkingInteractor.responsePublisher.sink { [unowned self] response in
+            handleResponse(response)
+        }.store(in: &publishers)
     }
 
     func update(topic: String, namespaces: [String: SessionNamespace]) async throws {
@@ -34,8 +33,7 @@ final class ControllerSessionStateMachine {
         try Namespace.validate(namespaces)
         logger.debug("Controller will update methods")
         sessionStore.setSession(session)
-        let request = RPCRequest(method: SignProtocolMethod.sessionUpdate.method, params: SessionType.UpdateParams(namespaces: namespaces))
-        try await networkingInteractor.request(request, topic: topic, tag: SignProtocolMethod.sessionUpdate.requestTag)
+        try await networkingInteractor.request(.wcSessionUpdate(SessionType.UpdateParams(namespaces: namespaces)), onTopic: topic)
     }
 
    func extend(topic: String, by ttl: Int64) async throws {
@@ -44,32 +42,28 @@ final class ControllerSessionStateMachine {
        try session.updateExpiry(by: ttl)
        let newExpiry = Int64(session.expiryDate.timeIntervalSince1970 )
        sessionStore.setSession(session)
-       let request = RPCRequest(method: SignProtocolMethod.sessionExtend.method, params: SessionType.UpdateExpiryParams(expiry: newExpiry))
-       try await networkingInteractor.request(request, topic: topic, tag: SignProtocolMethod.sessionExtend.requestTag)
+       try await networkingInteractor.request(.wcSessionExtend(SessionType.UpdateExpiryParams(expiry: newExpiry)), onTopic: topic)
    }
 
     // MARK: - Handle Response
 
-    private func setupSubscriptions() {
-        networkingInteractor.responseSubscription(on: SignProtocolMethod.sessionUpdate)
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionType.UpdateParams, RPCResult>) in
-                handleUpdateResponse(payload: payload)
-            }
-            .store(in: &publishers)
-
-        networkingInteractor.responseSubscription(on: SignProtocolMethod.sessionExtend)
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionType.UpdateExpiryParams, RPCResult>) in
-                handleUpdateExpiryResponse(payload: payload)
-            }
-            .store(in: &publishers)
+    private func handleResponse(_ response: WCResponse) {
+        switch response.requestParams {
+        case .sessionUpdate(let payload):
+            handleUpdateResponse(response: response, payload: payload)
+        case .sessionExtend(let payload):
+            handleUpdateExpiryResponse(response: response, payload: payload)
+        default:
+            break
+        }
     }
 
-    private func handleUpdateResponse(payload: ResponseSubscriptionPayload<SessionType.UpdateParams, RPCResult>) {
-        guard var session = sessionStore.getSession(forTopic: payload.topic) else { return }
-        switch payload.response {
+    private func handleUpdateResponse(response: WCResponse, payload: SessionType.UpdateParams) {
+        guard var session = sessionStore.getSession(forTopic: response.topic) else { return }
+        switch response.result {
         case .response:
             do {
-                try session.updateNamespaces(payload.request.namespaces, timestamp: payload.id.timestamp)
+                try session.updateNamespaces(payload.namespaces, timestamp: response.timestamp)
 
                 if sessionStore.setSessionIfNewer(session) {
                     onNamespacesUpdate?(session.topic, session.namespaces)
@@ -82,12 +76,12 @@ final class ControllerSessionStateMachine {
         }
     }
 
-    private func handleUpdateExpiryResponse(payload: ResponseSubscriptionPayload<SessionType.UpdateExpiryParams, RPCResult>) {
-        guard var session = sessionStore.getSession(forTopic: payload.topic) else { return }
-        switch payload.response {
+    private func handleUpdateExpiryResponse(response: WCResponse, payload: SessionType.UpdateExpiryParams) {
+        guard var session = sessionStore.getSession(forTopic: response.topic) else { return }
+        switch response.result {
         case .response:
             do {
-                try session.updateExpiry(to: payload.request.expiry)
+                try session.updateExpiry(to: payload.expiry)
                 sessionStore.setSession(session)
                 onExtend?(session.topic, session.expiryDate)
             } catch {

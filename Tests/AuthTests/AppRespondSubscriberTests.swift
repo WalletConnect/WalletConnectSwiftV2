@@ -22,7 +22,8 @@ class AppRespondSubscriberTests: XCTestCase {
         networkingInteractor = NetworkingInteractorMock()
         messageFormatter = SIWEMessageFormatter()
         messageSigner = MessageSigner()
-        rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: RuntimeKeyValueStorage())
+        let historyStorage = CodableStore<RPCHistory.Record>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue)
+        rpcHistory = RPCHistory(keyValueStore: historyStorage)
         pairingStorage = WCPairingStorageMock()
         sut = AppRespondSubscriber(
             networkingInteractor: networkingInteractor,

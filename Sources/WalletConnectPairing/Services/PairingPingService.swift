@@ -1,9 +1,8 @@
-import Foundation
 import WalletConnectUtils
+import Foundation
 import WalletConnectNetworking
 
 public class PairingPingService {
-    private let pairingStorage: WCPairingStorage
     private let pingRequester: PingRequester
     private let pingResponder: PingResponder
     private let pingResponseSubscriber: PingResponseSubscriber
@@ -21,14 +20,13 @@ public class PairingPingService {
         pairingStorage: WCPairingStorage,
         networkingInteractor: NetworkInteracting,
         logger: ConsoleLogging) {
-            self.pairingStorage = pairingStorage
-            self.pingRequester = PingRequester(networkingInteractor: networkingInteractor, method: PairingProtocolMethod.ping)
-            self.pingResponder = PingResponder(networkingInteractor: networkingInteractor, method: PairingProtocolMethod.ping, logger: logger)
-            self.pingResponseSubscriber = PingResponseSubscriber(networkingInteractor: networkingInteractor, method: PairingProtocolMethod.ping, logger: logger)
+            pingRequester = PingRequester(pairingStorage: pairingStorage, networkingInteractor: networkingInteractor)
+            pingResponder = PingResponder(networkingInteractor: networkingInteractor, logger: logger)
+            pingResponseSubscriber = PingResponseSubscriber(networkingInteractor: networkingInteractor, logger: logger)
         }
 
     public func ping(topic: String) async throws {
-        guard pairingStorage.hasPairing(forTopic: topic) else { return }
         try await pingRequester.ping(topic: topic)
     }
+
 }

@@ -1,6 +1,5 @@
 import XCTest
 import WalletConnectUtils
-import JSONRPC
 @testable import WalletConnectKMS
 @testable import WalletConnectSign
 @testable import WalletConnectRelay
@@ -137,52 +136,18 @@ final class SignClientTests: XCTestCase {
         wait(for: [sessionDeleteExpectation], timeout: defaultTimeout)
     }
 
-    func testPairingPing() async throws {
+    func testNewPairingPing() async throws {
         let pongResponseExpectation = expectation(description: "Ping sender receives a pong response")
 
         let uri = try await dapp.client.connect(requiredNamespaces: ProposalNamespace.stubRequired())!
         try await wallet.client.pair(uri: uri)
 
         let pairing = wallet.client.getPairings().first!
-
-        wallet.onPing = { topic in
-            XCTAssertEqual(topic, pairing.topic)
+        wallet.client.ping(topic: pairing.topic) { result in
+            if case .failure = result { XCTFail() }
             pongResponseExpectation.fulfill()
         }
-
-        try await wallet.client.ping(topic: pairing.topic)
-        
         wait(for: [pongResponseExpectation], timeout: defaultTimeout)
-    }
-
-    func testSessionPing() async throws {
-        let expectation = expectation(description: "Proposer receives ping response")
-
-        let requiredNamespaces = ProposalNamespace.stubRequired()
-        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
-
-        wallet.onSessionProposal = { proposal in
-            Task(priority: .high) {
-                try! await self.wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
-            }
-        }
-
-        dapp.onSessionSettled = { sessionSettled in
-            Task(priority: .high) {
-                try! await self.dapp.client.ping(topic: sessionSettled.topic)
-            }
-        }
-
-        dapp.onPing = { topic in
-            let session = self.wallet.client.getSessions().first!
-            XCTAssertEqual(topic, session.topic)
-            expectation.fulfill()
-        }
-
-        let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces)!
-        try await wallet.client.pair(uri: uri)
-
-        wait(for: [expectation], timeout: .infinity)
     }
 
     func testSessionRequest() async throws {
@@ -206,7 +171,7 @@ final class SignClientTests: XCTestCase {
         }
         dapp.onSessionSettled = { [unowned self] settledSession in
             Task(priority: .high) {
-                let request = Request(id: RPCID(0), topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain)
+                let request = Request(id: 0, topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain)
                 try await dapp.client.request(params: request)
             }
         }
@@ -216,13 +181,14 @@ final class SignClientTests: XCTestCase {
             XCTAssertEqual(sessionRequest.method, requestMethod)
             requestExpectation.fulfill()
             Task(priority: .high) {
-                try await wallet.client.respond(topic: sessionRequest.topic, requestId: sessionRequest.id, response: .response(AnyCodable(responseParams)))
+                let jsonrpcResponse = JSONRPCResponse<AnyCodable>(id: sessionRequest.id, result: AnyCodable(responseParams))
+                try await wallet.client.respond(topic: sessionRequest.topic, response: .response(jsonrpcResponse))
             }
         }
         dapp.onSessionResponse = { response in
             switch response.result {
             case .response(let response):
-                XCTAssertEqual(try! response.get(String.self), responseParams)
+                XCTAssertEqual(try! response.result.get(String.self), responseParams)
             case .error:
                 XCTFail()
             }
@@ -241,8 +207,7 @@ final class SignClientTests: XCTestCase {
 
         let requestMethod = "eth_sendTransaction"
         let requestParams = [EthSendTransaction.stub()]
-        let error = JSONRPCError(code: 0, message: "error")
-
+        let error = JSONRPCErrorResponse.Error(code: 0, message: "error")
         let chain = Blockchain("eip155:1")!
 
         wallet.onSessionProposal = { [unowned self] proposal in
@@ -252,21 +217,22 @@ final class SignClientTests: XCTestCase {
         }
         dapp.onSessionSettled = { [unowned self] settledSession in
             Task(priority: .high) {
-                let request = Request(id: RPCID(0), topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain)
+                let request = Request(id: 0, topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain)
                 try await dapp.client.request(params: request)
             }
         }
         wallet.onSessionRequest = { [unowned self] sessionRequest in
             Task(priority: .high) {
-                try await wallet.client.respond(topic: sessionRequest.topic, requestId: sessionRequest.id, response: .error(error))
+                let response = JSONRPCErrorResponse(id: sessionRequest.id, error: error)
+                try await wallet.client.respond(topic: sessionRequest.topic, response: .error(response))
             }
         }
         dapp.onSessionResponse = { response in
             switch response.result {
             case .response:
                 XCTFail()
-            case .error(let receivedError):
-                XCTAssertEqual(error, receivedError)
+            case .error(let errorResponse):
+                XCTAssertEqual(error, errorResponse.error)
             }
             expectation.fulfill()
         }
@@ -275,6 +241,7 @@ final class SignClientTests: XCTestCase {
         try await wallet.client.pair(uri: uri!)
         wait(for: [expectation], timeout: defaultTimeout)
     }
+
 
     func testNewSessionOnExistingPairing() async {
         let dappSettlementExpectation = expectation(description: "Dapp settles session")
@@ -313,6 +280,27 @@ final class SignClientTests: XCTestCase {
         wait(for: [dappSettlementExpectation, walletSettlementExpectation], timeout: defaultTimeout)
 
     }
+
+    func testSessionPing() async {
+        let expectation = expectation(description: "Dapp receives ping response")
+        let requiredNamespaces = ProposalNamespace.stubRequired()
+        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
+
+        wallet.onSessionProposal = { [unowned self] proposal in
+            Task(priority: .high) {
+                try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+            }
+        }
+        dapp.onSessionSettled = { [unowned self] settledSession in
+            dapp.client.ping(topic: settledSession.topic) {_ in
+                expectation.fulfill()
+            }
+        }
+        let uri = try! await dapp.client.connect(requiredNamespaces: requiredNamespaces)
+        try! await wallet.client.pair(uri: uri!)
+        wait(for: [expectation], timeout: defaultTimeout)
+    }
+
 
     func testSuccessfulSessionUpdateNamespaces() async {
         let expectation = expectation(description: "Dapp updates namespaces")

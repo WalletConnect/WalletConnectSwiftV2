@@ -14,7 +14,6 @@ class ClientDelegate {
     var onSessionDelete: (() -> Void)?
     var onSessionUpdateNamespaces: ((String, [String: SessionNamespace]) -> Void)?
     var onSessionExtend: ((String, Date) -> Void)?
-    var onPing: ((String) -> Void)?
     var onEventReceived: ((Session.Event, String) -> Void)?
 
     private var publishers = Set<AnyCancellable>()
@@ -63,10 +62,6 @@ class ClientDelegate {
 
         client.sessionExtendPublisher.sink { (topic, date) in
             self.onSessionExtend?(topic, date)
-        }.store(in: &publishers)
-
-        client.pingResponsePublisher.sink { topic in
-            self.onPing?(topic)
         }.store(in: &publishers)
     }
 }

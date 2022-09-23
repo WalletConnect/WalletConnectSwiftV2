@@ -1,6 +1,5 @@
 import XCTest
 import Combine
-import JSONRPC
 @testable import WalletConnectSign
 @testable import TestingUtils
 @testable import WalletConnectKMS
@@ -79,7 +78,7 @@ final class PairingEngineTests: XCTestCase {
         try! await engine.propose(pairingTopic: pairing.topic, namespaces: ProposalNamespace.stubDictionary(), relay: relayOptions)
 
         guard let publishTopic = networkingInteractor.requests.first?.topic,
-              let proposal = try? networkingInteractor.requests.first?.request.params?.get(SessionType.ProposeParams.self) else {
+              let proposal = networkingInteractor.requests.first?.request.sessionProposal else {
                   XCTFail("Proposer must publish a proposal request."); return
               }
         XCTAssert(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must store the private key matching the public key sent through the proposal.")
@@ -97,7 +96,7 @@ final class PairingEngineTests: XCTestCase {
         try! await engine.propose(pairingTopic: pairing.topic, namespaces: ProposalNamespace.stubDictionary(), relay: relayOptions)
 
         guard let request = networkingInteractor.requests.first?.request,
-              let proposal = try? networkingInteractor.requests.first?.request.params?.get(SessionType.ProposeParams.self) else {
+              let proposal = networkingInteractor.requests.first?.request.sessionProposal else {
                   XCTFail("Proposer must publish session proposal request"); return
               }
 
@@ -105,9 +104,14 @@ final class PairingEngineTests: XCTestCase {
         let responder = Participant.stub()
         let proposalResponse = SessionType.ProposeResponse(relay: relayOptions, responderPublicKey: responder.publicKey)
 
-        let response = RPCResponse(id: request.id!, result: RPCResult.response(AnyCodable(proposalResponse)))
+        let jsonRpcResponse = JSONRPCResponse<AnyCodable>(id: request.id, result: AnyCodable.decoded(proposalResponse))
+        let response = WCResponse(topic: topicA,
+                                  chainId: nil,
+                                  requestMethod: request.method,
+                                  requestParams: request.params,
+                                  result: .response(jsonRpcResponse))
 
-        networkingInteractor.responsePublisherSubject.send((topicA, request, response))
+        networkingInteractor.responsePublisherSubject.send(response)
         let privateKey = try! cryptoMock.getPrivateKey(for: proposal.proposer.publicKey)!
         let topicB = deriveTopic(publicKey: responder.publicKey, privateKey: privateKey)
         let storedPairing = storageMock.getPairing(forTopic: topicA)!
@@ -129,12 +133,12 @@ final class PairingEngineTests: XCTestCase {
         try! await engine.propose(pairingTopic: pairing.topic, namespaces: ProposalNamespace.stubDictionary(), relay: relayOptions)
 
         guard let request = networkingInteractor.requests.first?.request,
-              let proposal = try? networkingInteractor.requests.first?.request.params?.get(SessionType.ProposeParams.self) else {
+              let proposal = networkingInteractor.requests.first?.request.sessionProposal else {
                   XCTFail("Proposer must publish session proposal request"); return
               }
 
-        let response = RPCResponse.stubError(forRequest: request)
-        networkingInteractor.responsePublisherSubject.send((topicA, request, response))
+        let response = WCResponse.stubError(forRequest: request, topic: topicA)
+        networkingInteractor.responsePublisherSubject.send(response)
 
         XCTAssert(networkingInteractor.didUnsubscribe(to: pairing.topic), "Proposer must unsubscribe if pairing is inactive.")
         XCTAssertFalse(storageMock.hasPairing(forTopic: pairing.topic), "Proposer must delete an inactive pairing.")
@@ -153,7 +157,7 @@ final class PairingEngineTests: XCTestCase {
         try? await engine.propose(pairingTopic: pairing.topic, namespaces: ProposalNamespace.stubDictionary(), relay: relayOptions)
 
         guard let request = networkingInteractor.requests.first?.request,
-              let proposal = try? networkingInteractor.requests.first?.request.params?.get(SessionType.ProposeParams.self) else {
+              let proposal = networkingInteractor.requests.first?.request.sessionProposal else {
                   XCTFail("Proposer must publish session proposal request"); return
               }
 
@@ -161,8 +165,8 @@ final class PairingEngineTests: XCTestCase {
         storedPairing.activate()
         storageMock.setPairing(storedPairing)
 
-        let response = RPCResponse.stubError(forRequest: request)
-        networkingInteractor.responsePublisherSubject.send((topicA, request, response))
+        let response = WCResponse.stubError(forRequest: request, topic: topicA)
+        networkingInteractor.responsePublisherSubject.send(response)
 
         XCTAssertFalse(networkingInteractor.didUnsubscribe(to: pairing.topic), "Proposer must not unsubscribe if pairing is active.")
         XCTAssert(storageMock.hasPairing(forTopic: pairing.topic), "Proposer must not delete an active pairing.")

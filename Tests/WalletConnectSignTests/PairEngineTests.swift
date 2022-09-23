@@ -3,7 +3,6 @@ import XCTest
 @testable import TestingUtils
 @testable import WalletConnectKMS
 import WalletConnectUtils
-import WalletConnectNetworking
 
 final class PairEngineTests: XCTestCase {
 
@@ -12,11 +11,16 @@ final class PairEngineTests: XCTestCase {
     var networkingInteractor: NetworkingInteractorMock!
     var storageMock: WCPairingStorageMock!
     var cryptoMock: KeyManagementServiceMock!
+    var proposalPayloadsStore: CodableStore<WCRequestSubscriptionPayload>!
+
+    var topicGenerator: TopicGenerator!
 
     override func setUp() {
         networkingInteractor = NetworkingInteractorMock()
         storageMock = WCPairingStorageMock()
         cryptoMock = KeyManagementServiceMock()
+        topicGenerator = TopicGenerator()
+        proposalPayloadsStore = CodableStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: "")
         setupEngine()
     }
 

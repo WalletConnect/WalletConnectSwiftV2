@@ -1,8 +1,6 @@
 import Foundation
-import JSONRPC
 import WalletConnectKMS
 import WalletConnectUtils
-import WalletConnectNetworking
 
 class DeleteSessionService {
     private let networkingInteractor: NetworkInteracting
@@ -24,8 +22,7 @@ class DeleteSessionService {
         let reasonCode = ReasonCode.userDisconnected
         let reason = SessionType.Reason(code: reasonCode.code, message: reasonCode.message)
         logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
-        let request = RPCRequest(method: SignProtocolMethod.sessionDelete.method, params: reason)
-        try await networkingInteractor.request(request, topic: topic, tag: SignProtocolMethod.sessionDelete.requestTag)
+        try await networkingInteractor.request(.wcSessionDelete(reason), onTopic: topic)
         sessionStore.delete(topic: topic)
         kms.deleteSymmetricKey(for: topic)
         networkingInteractor.unsubscribe(topic: topic)

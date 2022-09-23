@@ -1,10 +1,8 @@
 import Foundation
 import Combine
-import JSONRPC
 import WalletConnectPairing
 import WalletConnectUtils
 import WalletConnectKMS
-import WalletConnectNetworking
 
 final class PairingEngine {
 
@@ -71,9 +69,31 @@ final class PairingEngine {
             relays: [relay],
             proposer: proposer,
             requiredNamespaces: namespaces)
+        return try await withCheckedThrowingContinuation { continuation in
+            networkingInteractor.requestNetworkAck(.wcSessionPropose(proposal), onTopic: pairingTopic) { error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
+    }
 
-        let request = RPCRequest(method: SignProtocolMethod.sessionPropose.method, params: proposal)
-        try await networkingInteractor.requestNetworkAck(request, topic: pairingTopic, tag: SignProtocolMethod.sessionPropose.requestTag)
+    func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> Void)) {
+        guard pairingStore.hasPairing(forTopic: topic) else {
+            logger.debug("Could not find pairing to ping for topic \(topic)")
+            return
+        }
+        networkingInteractor.requestPeerResponse(.wcPairingPing, onTopic: topic) { [unowned self] result in
+            switch result {
+            case .success:
+                logger.debug("Did receive ping response")
+                completion(.success(()))
+            case .failure(let error):
+                logger.debug("error: \(error)")
+            }
+        }
     }
 }
 
@@ -82,22 +102,26 @@ final class PairingEngine {
 private extension PairingEngine {
 
     func setupNetworkingSubscriptions() {
-        networkingInteractor.socketConnectionStatusPublisher
-            .sink { [unowned self] status in
-                pairingStore.getAll()
-                    .forEach { pairing in
-                        Task(priority: .high) { try await networkingInteractor.subscribe(topic: pairing.topic) }
-                    }
-            }
-            .store(in: &publishers)
+        networkingInteractor.transportConnectionPublisher
+            .sink { [unowned self] (_) in
+                let topics = pairingStore.getAll()
+                    .map {$0.topic}
+                topics.forEach { topic in Task {try? await networkingInteractor.subscribe(topic: topic)}}
+            }.store(in: &publishers)
 
-        networkingInteractor.requestSubscription(on: SignProtocolMethod.pairingPing)
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<PairingType.PingParams>) in
-                Task(priority: .high) {
-                    try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, tag: SignProtocolMethod.pairingPing.responseTag)
+        networkingInteractor.wcRequestPublisher
+            .sink { [unowned self] subscriptionPayload in
+                switch subscriptionPayload.wcRequest.params {
+                case .pairingPing:
+                    wcPairingPing(subscriptionPayload)
+                default:
+                    return
                 }
-            }
-            .store(in: &publishers)
+            }.store(in: &publishers)
+    }
+
+    func wcPairingPing(_ payload: WCRequestSubscriptionPayload) {
+        networkingInteractor.respondSuccess(for: payload)
     }
 
     func setupExpirationHandling() {

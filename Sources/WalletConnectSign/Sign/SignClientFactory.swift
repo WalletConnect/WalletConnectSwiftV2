@@ -3,7 +3,6 @@ import WalletConnectRelay
 import WalletConnectUtils
 import WalletConnectKMS
 import WalletConnectPairing
-import WalletConnectNetworking
 
 public struct SignClientFactory {
 
@@ -26,12 +25,12 @@ public struct SignClientFactory {
     static func create(metadata: AppMetadata, logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, relayClient: RelayClient) -> SignClient {
         let kms = KeyManagementService(keychain: keychainStorage)
         let serializer = Serializer(kms: kms)
-        let rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
-        let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serializer, logger: logger, rpcHistory: rpcHistory)
+        let history = JsonRpcHistory(logger: logger, keyValueStore: CodableStore<JsonRpcRecord>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue))
+        let networkingInteractor = NetworkInteractor(relayClient: relayClient, serializer: serializer, logger: logger, jsonRpcHistory: history)
         let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue)))
         let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue)))
         let sessionToPairingTopic = CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
-        let proposalPayloadsStore = CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.proposals.rawValue)
+        let proposalPayloadsStore = CodableStore<WCRequestSubscriptionPayload>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.proposals.rawValue)
         let pairingEngine = PairingEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, metadata: metadata, logger: logger)
         let sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         let nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
@@ -42,8 +41,6 @@ public struct SignClientFactory {
         let deletePairingService = DeletePairingService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore, logger: logger)
         let deleteSessionService = DeleteSessionService(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         let disconnectService = DisconnectService(deletePairingService: deletePairingService, deleteSessionService: deleteSessionService, pairingStorage: pairingStore, sessionStorage: sessionStore)
-        let sessionPingService = SessionPingService(sessionStorage: sessionStore, networkingInteractor: networkingInteractor, logger: logger)
-        let pairingPingService = PairingPingService(pairingStorage: pairingStore, networkingInteractor: networkingInteractor, logger: logger)
 
         let client = SignClient(
             logger: logger,
@@ -52,11 +49,9 @@ public struct SignClientFactory {
             pairEngine: pairEngine,
             sessionEngine: sessionEngine,
             approveEngine: approveEngine,
-            pairingPingService: pairingPingService,
-            sessionPingService: sessionPingService,
             nonControllerSessionStateMachine: nonControllerSessionStateMachine,
             controllerSessionStateMachine: controllerSessionStateMachine, disconnectService: disconnectService,
-            history: rpcHistory,
+            history: history,
             cleanupService: cleanupService
         )
         return client

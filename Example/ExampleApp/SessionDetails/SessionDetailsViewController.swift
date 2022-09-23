@@ -49,11 +49,11 @@ final class SessionDetailsViewController: UIViewController, UITableViewDelegate,
 
     @objc
     private func ping() {
-        Task(priority: .userInitiated) { @MainActor in
-            do {
-                try await Sign.instance.ping(topic: session.topic)
+        Sign.instance.ping(topic: session.topic) { result in
+            switch result {
+            case .success:
                 print("received ping response")
-            } catch {
+            case .failure(let error):
                 print(error)
             }
         }
