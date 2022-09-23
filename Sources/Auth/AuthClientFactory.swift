@@ -15,10 +15,11 @@ public struct AuthClientFactory {
     }
 
     static func create(metadata: AppMetadata, account: Account?, logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, relayClient: RelayClient) -> AuthClient {
+        let historyStorage = CodableStore<RPCHistory.Record>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue)
         let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue)))
         let kms = KeyManagementService(keychain: keychainStorage)
         let serializer = Serializer(kms: kms)
-        let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
+        let history = RPCHistory(keyValueStore: historyStorage)
         let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serializer, logger: logger, rpcHistory: history)
         let messageFormatter = SIWEMessageFormatter()
         let appPairService = AppPairService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore)

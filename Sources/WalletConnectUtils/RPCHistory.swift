@@ -24,7 +24,7 @@ public final class RPCHistory {
 
     private let storage: CodableStore<Record>
 
-    init(keyValueStore: CodableStore<Record>) {
+    public init(keyValueStore: CodableStore<Record>) {
         self.storage = keyValueStore
     }
 
