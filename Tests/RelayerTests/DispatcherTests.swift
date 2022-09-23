@@ -1,6 +1,5 @@
 import Foundation
 import XCTest
-import Combine
 @testable import WalletConnectRelay
 import TestingUtils
 import Combine
@@ -30,7 +29,6 @@ class WebSocketMock: WebSocketConnecting {
 }
 
 final class DispatcherTests: XCTestCase {
-    var publishers = Set<AnyCancellable>()
     var sut: Dispatcher!
     var webSocket: WebSocketMock!
     var networkMonitor: NetworkMonitoringMock!
@@ -68,21 +66,18 @@ final class DispatcherTests: XCTestCase {
 
     func testOnConnect() {
         let expectation = expectation(description: "on connect")
-        sut.socketConnectionStatusPublisher.sink { status in
-            guard status == .connected else { return }
+        sut.onConnect = {
             expectation.fulfill()
-        }.store(in: &publishers)
+        }
         webSocket.onConnect?()
         waitForExpectations(timeout: 0.001)
     }
 
-    func testOnDisconnect() throws {
+    func testOnDisconnect() {
         let expectation = expectation(description: "on disconnect")
-        try sut.connect()
-        sut.socketConnectionStatusPublisher.sink { status in
-            guard status == .disconnected else { return }
+        sut.onDisconnect = {
             expectation.fulfill()
-        }.store(in: &publishers)
+        }
         webSocket.onDisconnect?(nil)
         waitForExpectations(timeout: 0.001)
     }
