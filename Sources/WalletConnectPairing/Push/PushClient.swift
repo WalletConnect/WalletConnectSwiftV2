@@ -44,6 +44,11 @@ private extension PushClient {
     func setupPairingSubscriptions() {
         pairingRegisterer.register(method: PushProtocolMethod.propose)
 
+        networkInteractor.responseErrorSubscription(on: PushProtocolMethod.propose)
+            .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<PushRequestParams>) in
+                print("error")
+            }.store(in: &publishers)
+
         networkInteractor.requestSubscription(on: PushProtocolMethod.propose)
             .sink { [unowned self] (payload: RequestSubscriptionPayload<PushRequestParams>) in
                 requestPublisherSubject.send((payload.topic, payload.request))
