@@ -30,34 +30,36 @@ final class ControllerSessionStateMachine {
 
     func update(topic: String, namespaces: [String: SessionNamespace]) async throws {
         let session = try getSession(for: topic)
+        let protocolMethod = SessionUpdateProtocolMethod()
         try validateController(session)
         try Namespace.validate(namespaces)
         logger.debug("Controller will update methods")
         sessionStore.setSession(session)
-        let request = RPCRequest(method: SignProtocolMethod.sessionUpdate.method, params: SessionType.UpdateParams(namespaces: namespaces))
-        try await networkingInteractor.request(request, topic: topic, protocolMethod: SignProtocolMethod.sessionUpdate)
+        let request = RPCRequest(method: protocolMethod.method, params: SessionType.UpdateParams(namespaces: namespaces))
+        try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
     }
 
    func extend(topic: String, by ttl: Int64) async throws {
        var session = try getSession(for: topic)
+       let protocolMethod = SessionExtendProtocolMethod()
        try validateController(session)
        try session.updateExpiry(by: ttl)
        let newExpiry = Int64(session.expiryDate.timeIntervalSince1970 )
        sessionStore.setSession(session)
-       let request = RPCRequest(method: SignProtocolMethod.sessionExtend.method, params: SessionType.UpdateExpiryParams(expiry: newExpiry))
-       try await networkingInteractor.request(request, topic: topic, protocolMethod: SignProtocolMethod.sessionExtend)
+       let request = RPCRequest(method: protocolMethod.method, params: SessionType.UpdateExpiryParams(expiry: newExpiry))
+       try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
    }
 
     // MARK: - Handle Response
 
     private func setupSubscriptions() {
-        networkingInteractor.responseSubscription(on: SignProtocolMethod.sessionUpdate)
+        networkingInteractor.responseSubscription(on: SessionUpdateProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionType.UpdateParams, RPCResult>) in
                 handleUpdateResponse(payload: payload)
             }
             .store(in: &publishers)
 
-        networkingInteractor.responseSubscription(on: SignProtocolMethod.sessionExtend)
+        networkingInteractor.responseSubscription(on: SessionExtendProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionType.UpdateExpiryParams, RPCResult>) in
                 handleUpdateExpiryResponse(payload: payload)
             }

@@ -27,12 +27,12 @@ final class NonControllerSessionStateMachine {
     }
 
     private func setupSubscriptions() {
-        networkingInteractor.requestSubscription(on: SignProtocolMethod.sessionUpdate)
+        networkingInteractor.requestSubscription(on: SessionUpdateProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionType.UpdateParams>) in
                 onSessionUpdateNamespacesRequest(payload: payload, updateParams: payload.request)
             }.store(in: &publishers)
 
-        networkingInteractor.requestSubscription(on: SignProtocolMethod.sessionExtend)
+        networkingInteractor.requestSubscription(on: SessionExtendProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionType.UpdateExpiryParams>) in
                 onSessionUpdateExpiry(payload: payload, updateExpiryParams: payload.request)
             }.store(in: &publishers)
@@ -50,7 +50,7 @@ final class NonControllerSessionStateMachine {
 
     // TODO: Update stored session namespaces
     private func onSessionUpdateNamespacesRequest(payload: SubscriptionPayload, updateParams: SessionType.UpdateParams) {
-        let protocolMethod = SignProtocolMethod.sessionUpdate
+        let protocolMethod = SessionUpdateProtocolMethod()
         do {
             try Namespace.validate(updateParams.namespaces)
         } catch {
@@ -77,7 +77,7 @@ final class NonControllerSessionStateMachine {
     }
 
     private func onSessionUpdateExpiry(payload: SubscriptionPayload, updateExpiryParams: SessionType.UpdateExpiryParams) {
-        let protocolMethod = SignProtocolMethod.sessionExtend
+        let protocolMethod = SessionExtendProtocolMethod()
         let topic = payload.topic
         guard var session = sessionStore.getSession(forTopic: topic) else {
             return respondError(payload: payload, reason: .noSessionForTopic, protocolMethod: protocolMethod)
@@ -93,7 +93,7 @@ final class NonControllerSessionStateMachine {
         sessionStore.setSession(session)
 
         Task(priority: .high) {
-            try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, protocolMethod: SignProtocolMethod.sessionExtend)
+            try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod)
         }
 
         onExtend?(session.topic, session.expiryDate)

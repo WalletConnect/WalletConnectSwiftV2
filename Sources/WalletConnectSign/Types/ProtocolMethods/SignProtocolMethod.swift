@@ -1,7 +1,4 @@
 import Foundation
-import JSONRPC
-import WalletConnectPairing
-import WalletConnectUtils
 import WalletConnectNetworking
 
 struct PairingPingProtocolMethod: ProtocolMethod {
@@ -19,9 +16,6 @@ struct PairingDeleteProtocolMethod: ProtocolMethod {
 
     var response = RelayConfig(tag: 1001, prompt: false)
 }
-
-
-
 
 struct SessionProposeProtocolMethod: ProtocolMethod {
     var method: String = "wc_sessionPropose"
@@ -71,6 +65,7 @@ struct SessionRequestProtocolMethod: ProtocolMethod {
 
     var response = RelayConfig(tag: 1109, prompt: false)
 }
+
 struct SessionPingProtocolMethod: ProtocolMethod {
     var method: String = "wc_sessionPing"
 
@@ -78,6 +73,7 @@ struct SessionPingProtocolMethod: ProtocolMethod {
 
     var response = RelayConfig(tag: 1115, prompt: false)
 }
+
 struct SessionEventProtocolMethod: ProtocolMethod {
     var method: String = "wc_sessionEvent"
 
