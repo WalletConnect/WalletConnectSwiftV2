@@ -54,7 +54,7 @@ final class ApproveEngineTests: XCTestCase {
         pairingStorageMock.setPairing(pairing)
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
-        let request = RPCRequest(method: SignProtocolMethod.sessionPropose.method, params: proposal)
+        let request = RPCRequest(method: SessionProposeProtocolMethod().method, params: proposal)
         networkingInteractor.requestPublisherSubject.send((topicA, request))
 
         try await engine.approveProposal(proposerPubKey: proposal.proposer.publicKey, validating: SessionNamespace.stubDictionary())
@@ -75,7 +75,7 @@ final class ApproveEngineTests: XCTestCase {
         var sessionProposed = false
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
-        let request = RPCRequest(method: SignProtocolMethod.sessionPropose.method, params: proposal)
+        let request = RPCRequest(method: SessionProposeProtocolMethod().method, params: proposal)
 
         engine.onSessionProposal = { _ in
             sessionProposed = true
@@ -119,7 +119,7 @@ final class ApproveEngineTests: XCTestCase {
         let session = WCSession.stub(isSelfController: true, acknowledged: false)
         sessionStorageMock.setSession(session)
 
-        let request = RPCRequest(method: SignProtocolMethod.sessionSettle.method, params: SessionType.SettleParams.stub())
+        let request = RPCRequest(method: SessionSettleProtocolMethod().method, params: SessionType.SettleParams.stub())
         let response = RPCResponse(matchingRequest: request, result: RPCResult.response(AnyCodable(true)))
 
         networkingInteractor.responsePublisherSubject.send((session.topic, request, response))
@@ -134,7 +134,7 @@ final class ApproveEngineTests: XCTestCase {
         cryptoMock.setAgreementSecret(AgreementKeys.stub(), topic: session.topic)
         try! cryptoMock.setPrivateKey(privateKey)
 
-        let request = RPCRequest(method: SignProtocolMethod.sessionSettle.method, params: SessionType.SettleParams.stub())
+        let request = RPCRequest(method: SessionSettleProtocolMethod().method, params: SessionType.SettleParams.stub())
         let response = RPCResponse.stubError(forRequest: request)
 
         networkingInteractor.responsePublisherSubject.send((session.topic, request, response))

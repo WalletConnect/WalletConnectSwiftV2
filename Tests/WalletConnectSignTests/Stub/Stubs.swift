@@ -63,22 +63,22 @@ extension AgreementPeer {
 extension RPCRequest {
 
     static func stubUpdateNamespaces(namespaces: [String: SessionNamespace] = SessionNamespace.stubDictionary()) -> RPCRequest {
-        return RPCRequest(method: SignProtocolMethod.sessionUpdate.method, params: SessionType.UpdateParams(namespaces: namespaces))
+        return RPCRequest(method: SessionUpdateProtocolMethod().method, params: SessionType.UpdateParams(namespaces: namespaces))
     }
 
     static func stubUpdateExpiry(expiry: Int64) -> RPCRequest {
-        return RPCRequest(method: SignProtocolMethod.sessionExtend.method, params: SessionType.UpdateExpiryParams(expiry: expiry))
+        return RPCRequest(method: SessionExtendProtocolMethod().method, params: SessionType.UpdateExpiryParams(expiry: expiry))
     }
 
     static func stubSettle() -> RPCRequest {
-        return RPCRequest(method: SignProtocolMethod.sessionSettle.method, params: SessionType.SettleParams.stub())
+        return RPCRequest(method: SessionSettleProtocolMethod().method, params: SessionType.SettleParams.stub())
     }
 
     static func stubRequest(method: String, chainId: Blockchain) -> RPCRequest {
         let params = SessionType.RequestParams(
             request: SessionType.RequestParams.Request(method: method, params: AnyCodable(EmptyCodable())),
             chainId: chainId)
-        return RPCRequest(method: SignProtocolMethod.sessionRequest.method, params: params)
+        return RPCRequest(method: SessionRequestProtocolMethod().method, params: params)
     }
 }
 
