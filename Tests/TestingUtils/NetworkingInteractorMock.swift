@@ -96,7 +96,7 @@ public class NetworkingInteractorMock: NetworkInteracting {
         didCallUnsubscribe = true
     }
 
-    public func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {
+    public func request(_ request: RPCRequest, topic: String, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
         requestCallCount += 1
         requests.append((topic, request))
     }

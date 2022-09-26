@@ -93,10 +93,10 @@ public class NetworkingInteractor: NetworkInteracting {
             .eraseToAnyPublisher()
     }
 
-    public func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {
+    public func request(_ request: RPCRequest, topic: String, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
         try rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
         let message = try! serializer.serialize(topic: topic, encodable: request, envelopeType: envelopeType)
-        try await relayClient.publish(topic: topic, payload: message, tag: tag, prompt: shouldPrompt(method: request.method))
+        try await relayClient.publish(topic: topic, payload: message, tag: protocolMethod.requestTag, prompt: shouldPrompt(method: request.method))
     }
 
     /// Completes with an acknowledgement from the relay network.

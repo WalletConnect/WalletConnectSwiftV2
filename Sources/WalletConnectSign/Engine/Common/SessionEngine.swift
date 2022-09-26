@@ -60,7 +60,7 @@ final class SessionEngine {
         let sessionRequestParams = SessionType.RequestParams(request: chainRequest, chainId: request.chainId)
 
         let rpcRequest = RPCRequest(method: SignProtocolMethod.sessionRequest.method, params: sessionRequestParams)
-        try await networkingInteractor.request(rpcRequest, topic: request.topic, tag: SignProtocolMethod.sessionRequest.requestTag)
+        try await networkingInteractor.request(rpcRequest, topic: request.topic, protocolMethod: SignProtocolMethod.sessionRequest)
     }
 
     func respondSessionRequest(topic: String, requestId: RPCID, response: RPCResult) async throws {
@@ -80,7 +80,7 @@ final class SessionEngine {
             throw WalletConnectError.invalidEvent
         }
         let rpcRequest = RPCRequest(method: SignProtocolMethod.sessionEvent.method, params: SessionType.EventParams(event: event, chainId: chainId))
-        try await networkingInteractor.request(rpcRequest, topic: topic, tag: SignProtocolMethod.sessionEvent.requestTag)
+        try await networkingInteractor.request(rpcRequest, topic: topic, protocolMethod: SignProtocolMethod.sessionEvent)
     }
 }
 

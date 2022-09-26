@@ -50,7 +50,7 @@ class InviteService {
         try kms.setSymmetricKey(symKeyI.sharedKey, for: responseTopic)
 
         try await networkingInteractor.subscribe(topic: responseTopic)
-        try await networkingInteractor.request(request, topic: inviteTopic, tag: ChatProtocolMethod.invite.requestTag, envelopeType: .type1(pubKey: selfPubKeyY.rawRepresentation))
+        try await networkingInteractor.request(request, topic: inviteTopic, protocolMethod: ChatProtocolMethod.invite, envelopeType: .type1(pubKey: selfPubKeyY.rawRepresentation))
 
         logger.debug("invite sent on topic: \(inviteTopic)")
     }

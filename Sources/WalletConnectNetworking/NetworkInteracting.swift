@@ -8,7 +8,7 @@ public protocol NetworkInteracting {
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> { get }
     func subscribe(topic: String) async throws
     func unsubscribe(topic: String)
-    func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws
+    func request(_ request: RPCRequest, topic: String, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws
     func requestNetworkAck(_ request: RPCRequest, topic: String, tag: Int) async throws
     func respond(topic: String, response: RPCResponse, tag: Int, envelopeType: Envelope.EnvelopeType) async throws
     func respondSuccess(topic: String, requestId: RPCID, tag: Int, envelopeType: Envelope.EnvelopeType) async throws
@@ -28,8 +28,8 @@ public protocol NetworkInteracting {
 }
 
 extension NetworkInteracting {
-    public func request(_ request: RPCRequest, topic: String, tag: Int) async throws {
-        try await self.request(request, topic: topic, tag: tag, envelopeType: .type0)
+    public func request(_ request: RPCRequest, topic: String, protocolMethod: ProtocolMethod) async throws {
+        try await self.request(request, topic: topic, protocolMethod: protocolMethod, envelopeType: .type0)
     }
 
     public func respond(topic: String, response: RPCResponse, tag: Int) async throws {

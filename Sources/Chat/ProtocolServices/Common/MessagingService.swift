@@ -34,7 +34,7 @@ class MessagingService {
         let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
         let message = Message(topic: topic, message: messageString, authorAccount: authorAccount, timestamp: timestamp)
         let request = RPCRequest(method: ChatProtocolMethod.message.method, params: message)
-        try await networkingInteractor.request(request, topic: topic, tag: ChatProtocolMethod.message.requestTag)
+        try await networkingInteractor.request(request, topic: topic, protocolMethod: ChatProtocolMethod.message)
         Task(priority: .background) {
             await messagesStore.add(message)
             onMessage?(message)

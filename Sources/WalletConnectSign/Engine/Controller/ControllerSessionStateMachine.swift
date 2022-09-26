@@ -35,7 +35,7 @@ final class ControllerSessionStateMachine {
         logger.debug("Controller will update methods")
         sessionStore.setSession(session)
         let request = RPCRequest(method: SignProtocolMethod.sessionUpdate.method, params: SessionType.UpdateParams(namespaces: namespaces))
-        try await networkingInteractor.request(request, topic: topic, tag: SignProtocolMethod.sessionUpdate.requestTag)
+        try await networkingInteractor.request(request, topic: topic, protocolMethod: SignProtocolMethod.sessionUpdate)
     }
 
    func extend(topic: String, by ttl: Int64) async throws {
@@ -45,7 +45,7 @@ final class ControllerSessionStateMachine {
        let newExpiry = Int64(session.expiryDate.timeIntervalSince1970 )
        sessionStore.setSession(session)
        let request = RPCRequest(method: SignProtocolMethod.sessionExtend.method, params: SessionType.UpdateExpiryParams(expiry: newExpiry))
-       try await networkingInteractor.request(request, topic: topic, tag: SignProtocolMethod.sessionExtend.requestTag)
+       try await networkingInteractor.request(request, topic: topic, protocolMethod: SignProtocolMethod.sessionExtend)
    }
 
     // MARK: - Handle Response

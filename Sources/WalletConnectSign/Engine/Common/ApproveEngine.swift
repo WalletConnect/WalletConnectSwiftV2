@@ -144,7 +144,7 @@ final class ApproveEngine {
         sessionStore.setSession(session)
 
         let request = RPCRequest(method: SignProtocolMethod.sessionSettle.method, params: settleParams)
-        try await networkingInteractor.request(request, topic: topic, tag: SignProtocolMethod.sessionSettle.requestTag)
+        try await networkingInteractor.request(request, topic: topic, protocolMethod: SignProtocolMethod.sessionSettle)
         onSessionSettle?(session.publicRepresentation())
     }
 }

@@ -25,7 +25,7 @@ class DeleteSessionService {
         let reason = SessionType.Reason(code: reasonCode.code, message: reasonCode.message)
         logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
         let request = RPCRequest(method: SignProtocolMethod.sessionDelete.method, params: reason)
-        try await networkingInteractor.request(request, topic: topic, tag: SignProtocolMethod.sessionDelete.requestTag)
+        try await networkingInteractor.request(request, topic: topic, protocolMethod: SignProtocolMethod.sessionDelete)
         sessionStore.delete(topic: topic)
         kms.deleteSymmetricKey(for: topic)
         networkingInteractor.unsubscribe(topic: topic)
