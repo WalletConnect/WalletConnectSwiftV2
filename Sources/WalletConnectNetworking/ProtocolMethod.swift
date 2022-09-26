@@ -2,11 +2,11 @@ import Foundation
 
 public protocol ProtocolMethod {
     var method: String { get }
-    var request: RelayConfigrable { get }
-    var response: RelayConfigrable { get }
+    var request: RelayConfig { get }
+    var response: RelayConfig { get }
 }
 
-public struct RelayConfigrable {
+public struct RelayConfig {
     var tag: Int
     var prompt: Bool
     
