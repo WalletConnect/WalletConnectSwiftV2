@@ -94,7 +94,7 @@ private extension PairingEngine {
         networkingInteractor.requestSubscription(on: SignProtocolMethod.pairingPing)
             .sink { [unowned self] (payload: RequestSubscriptionPayload<PairingType.PingParams>) in
                 Task(priority: .high) {
-                    try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, tag: SignProtocolMethod.pairingPing.responseTag)
+                    try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, protocolMethod: SignProtocolMethod.pairingPing)
                 }
             }
             .store(in: &publishers)

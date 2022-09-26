@@ -89,7 +89,7 @@ final class ApproveEngine {
 
         let result = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
         let response = RPCResponse(id: payload.id, result: result)
-        try await networkingInteractor.respond(topic: payload.topic, response: response, tag: SignProtocolMethod.sessionPropose.responseTag)
+        try await networkingInteractor.respond(topic: payload.topic, response: response, protocolMethod: SignProtocolMethod.sessionPropose)
 
         try pairing.updateExpiry()
         pairingStore.setPairing(pairing)
@@ -102,7 +102,7 @@ final class ApproveEngine {
             throw Errors.proposalPayloadsNotFound
         }
         proposalPayloadsStore.delete(forKey: proposerPubKey)
-        try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, tag: SignProtocolMethod.sessionPropose.responseTag, reason: reason)
+        try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, protocolMethod: SignProtocolMethod.sessionPropose, reason: reason)
         // TODO: Delete pairing if inactive 
     }
 
@@ -189,10 +189,10 @@ private extension ApproveEngine {
             }.store(in: &publishers)
     }
 
-    func respondError(payload: SubscriptionPayload, reason: ReasonCode, tag: Int) {
+    func respondError(payload: SubscriptionPayload, reason: ReasonCode, protocolMethod: ProtocolMethod) {
         Task(priority: .high) {
             do {
-                try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, tag: tag, reason: reason)
+                try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod, reason: reason)
             } catch {
                 logger.error("Respond Error failed with: \(error.localizedDescription)")
             }
@@ -292,7 +292,7 @@ private extension ApproveEngine {
         logger.debug("Received Session Proposal")
         let proposal = payload.request
         do { try Namespace.validate(proposal.requiredNamespaces) } catch {
-            return respondError(payload: payload, reason: .invalidUpdateRequest, tag: SignProtocolMethod.sessionPropose.responseTag)
+            return respondError(payload: payload, reason: .invalidUpdateRequest, protocolMethod: SignProtocolMethod.sessionPropose)
         }
         proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
         onSessionProposal?(proposal.publicRepresentation())
@@ -303,10 +303,10 @@ private extension ApproveEngine {
     func handleSessionSettleRequest(payload: RequestSubscriptionPayload<SessionType.SettleParams>) {
         logger.debug("Did receive session settle request")
 
-        let tag = SignProtocolMethod.sessionSettle.responseTag
+        let protocolMethod = SignProtocolMethod.sessionSettle
 
         guard let proposedNamespaces = settlingProposal?.requiredNamespaces else {
-            return respondError(payload: payload, reason: .invalidUpdateRequest, tag: tag)
+            return respondError(payload: payload, reason: .invalidUpdateRequest, protocolMethod: protocolMethod)
         }
 
         settlingProposal = nil
@@ -318,9 +318,9 @@ private extension ApproveEngine {
             try Namespace.validate(sessionNamespaces)
             try Namespace.validateApproved(sessionNamespaces, against: proposedNamespaces)
         } catch WalletConnectError.unsupportedNamespace(let reason) {
-            return respondError(payload: payload, reason: reason, tag: tag)
+            return respondError(payload: payload, reason: reason, protocolMethod: protocolMethod)
         } catch {
-            return respondError(payload: payload, reason: .invalidUpdateRequest, tag: tag)
+            return respondError(payload: payload, reason: .invalidUpdateRequest, protocolMethod: protocolMethod)
         }
 
         let topic = payload.topic
@@ -344,7 +344,7 @@ private extension ApproveEngine {
         )
         sessionStore.setSession(session)
         Task(priority: .high) {
-            try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, tag: tag)
+            try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod)
         }
         onSessionSettle?(session.publicRepresentation())
     }

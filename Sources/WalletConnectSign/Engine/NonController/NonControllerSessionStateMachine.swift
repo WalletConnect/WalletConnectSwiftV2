@@ -38,10 +38,10 @@ final class NonControllerSessionStateMachine {
             }.store(in: &publishers)
     }
 
-    private func respondError(payload: SubscriptionPayload, reason: ReasonCode, tag: Int) {
+    private func respondError(payload: SubscriptionPayload, reason: ReasonCode, protocolMethod: ProtocolMethod) {
         Task(priority: .high) {
             do {
-                try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, tag: tag, reason: reason)
+                try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod, reason: reason)
             } catch {
                 logger.error("Respond Error failed with: \(error.localizedDescription)")
             }
@@ -50,48 +50,50 @@ final class NonControllerSessionStateMachine {
 
     // TODO: Update stored session namespaces
     private func onSessionUpdateNamespacesRequest(payload: SubscriptionPayload, updateParams: SessionType.UpdateParams) {
+        let protocolMethod = SignProtocolMethod.sessionUpdate
         do {
             try Namespace.validate(updateParams.namespaces)
         } catch {
-            return respondError(payload: payload, reason: .invalidUpdateRequest, tag: SignProtocolMethod.sessionUpdate.responseTag)
+            return respondError(payload: payload, reason: .invalidUpdateRequest, protocolMethod: protocolMethod)
         }
         guard var session = sessionStore.getSession(forTopic: payload.topic) else {
-            return respondError(payload: payload, reason: .noSessionForTopic, tag: SignProtocolMethod.sessionUpdate.responseTag)
+            return respondError(payload: payload, reason: .noSessionForTopic, protocolMethod: protocolMethod)
         }
         guard session.peerIsController else {
-            return respondError(payload: payload, reason: .unauthorizedUpdateRequest, tag: SignProtocolMethod.sessionUpdate.responseTag)
+            return respondError(payload: payload, reason: .unauthorizedUpdateRequest, protocolMethod: protocolMethod)
         }
         do {
             try session.updateNamespaces(updateParams.namespaces, timestamp: payload.id.timestamp)
         } catch {
-            return respondError(payload: payload, reason: .invalidUpdateRequest, tag: SignProtocolMethod.sessionUpdate.responseTag)
+            return respondError(payload: payload, reason: .invalidUpdateRequest, protocolMethod: protocolMethod)
         }
         sessionStore.setSession(session)
 
         Task(priority: .high) {
-            try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, tag: SignProtocolMethod.sessionUpdate.responseTag)
+            try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod)
         }
 
         onNamespacesUpdate?(session.topic, updateParams.namespaces)
     }
 
     private func onSessionUpdateExpiry(payload: SubscriptionPayload, updateExpiryParams: SessionType.UpdateExpiryParams) {
+        let protocolMethod = SignProtocolMethod.sessionExtend
         let topic = payload.topic
         guard var session = sessionStore.getSession(forTopic: topic) else {
-            return respondError(payload: payload, reason: .noSessionForTopic, tag: SignProtocolMethod.sessionExtend.responseTag)
+            return respondError(payload: payload, reason: .noSessionForTopic, protocolMethod: protocolMethod)
         }
         guard session.peerIsController else {
-            return respondError(payload: payload, reason: .unauthorizedExtendRequest, tag: SignProtocolMethod.sessionExtend.responseTag)
+            return respondError(payload: payload, reason: .unauthorizedExtendRequest, protocolMethod: protocolMethod)
         }
         do {
             try session.updateExpiry(to: updateExpiryParams.expiry)
         } catch {
-            return respondError(payload: payload, reason: .invalidExtendRequest, tag: SignProtocolMethod.sessionExtend.responseTag)
+            return respondError(payload: payload, reason: .invalidExtendRequest, protocolMethod: protocolMethod)
         }
         sessionStore.setSession(session)
 
         Task(priority: .high) {
-            try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, tag: SignProtocolMethod.sessionExtend.responseTag)
+            try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, protocolMethod: SignProtocolMethod.sessionExtend)
         }
 
         onExtend?(session.topic, session.expiryDate)

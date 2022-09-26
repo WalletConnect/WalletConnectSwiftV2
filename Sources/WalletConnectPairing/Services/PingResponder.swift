@@ -22,7 +22,7 @@ public class PingResponder {
             .sink { [unowned self]  (payload: RequestSubscriptionPayload<PairingPingParams>) in
                 logger.debug("Responding for pairing ping")
                 Task(priority: .high) {
-                    try? await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, tag: method.responseTag)
+                    try? await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, protocolMethod: method)
                 }
             }
             .store(in: &publishers)

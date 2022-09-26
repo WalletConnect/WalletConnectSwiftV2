@@ -68,7 +68,7 @@ final class SessionEngine {
             throw Errors.sessionNotFound(topic: topic)
         }
         let response = RPCResponse(id: requestId, result: response)
-        try await networkingInteractor.respond(topic: topic, response: response, tag: 1109) // FIXME: Hardcoded tag
+        try await networkingInteractor.respond(topic: topic, response: response, protocolMethod: SignProtocolMethod.sessionRequest) 
     }
 
     func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain) async throws {
@@ -141,10 +141,10 @@ private extension SessionEngine {
         }
     }
 
-    func respondError(payload: SubscriptionPayload, reason: ReasonCode, tag: Int) {
+    func respondError(payload: SubscriptionPayload, reason: ReasonCode, protocolMethod: ProtocolMethod) {
         Task(priority: .high) {
             do {
-                try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, tag: tag, reason: reason)
+                try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod, reason: reason)
             } catch {
                 logger.error("Respond Error failed with: \(error.localizedDescription)")
             }
@@ -152,21 +152,21 @@ private extension SessionEngine {
     }
 
     func onSessionDelete(payload: RequestSubscriptionPayload<SessionType.DeleteParams>) {
-        let tag = SignProtocolMethod.sessionDelete.responseTag
+        let protocolMethod = SignProtocolMethod.sessionDelete
         let topic = payload.topic
         guard sessionStore.hasSession(forTopic: topic) else {
-            return respondError(payload: payload, reason: .noSessionForTopic, tag: tag)
+            return respondError(payload: payload, reason: .noSessionForTopic, protocolMethod: protocolMethod)
         }
         sessionStore.delete(topic: topic)
         networkingInteractor.unsubscribe(topic: topic)
         Task(priority: .high) {
-            try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, tag: tag)
+            try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod)
         }
         onSessionDelete?(topic, payload.request)
     }
 
     func onSessionRequest(payload: RequestSubscriptionPayload<SessionType.RequestParams>) {
-        let tag = SignProtocolMethod.sessionRequest.responseTag
+        let protocolMethod = SignProtocolMethod.sessionRequest
         let topic = payload.topic
         let request = Request(
             id: payload.id,
@@ -176,35 +176,35 @@ private extension SessionEngine {
             chainId: payload.request.chainId)
 
         guard let session = sessionStore.getSession(forTopic: topic) else {
-            return respondError(payload: payload, reason: .noSessionForTopic, tag: tag)
+            return respondError(payload: payload, reason: .noSessionForTopic, protocolMethod: protocolMethod)
         }
         guard session.hasNamespace(for: request.chainId) else {
-            return respondError(payload: payload, reason: .unauthorizedChain, tag: tag)
+            return respondError(payload: payload, reason: .unauthorizedChain, protocolMethod: protocolMethod)
         }
         guard session.hasPermission(forMethod: request.method, onChain: request.chainId) else {
-            return respondError(payload: payload, reason: .unauthorizedMethod(request.method), tag: tag)
+            return respondError(payload: payload, reason: .unauthorizedMethod(request.method), protocolMethod: protocolMethod)
         }
         onSessionRequest?(request)
     }
 
     func onSessionPing(payload: SubscriptionPayload) {
         Task(priority: .high) {
-            try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, tag: SignProtocolMethod.sessionPing.responseTag)
+            try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, protocolMethod: SignProtocolMethod.sessionPing)
         }
     }
 
     func onSessionEvent(payload: RequestSubscriptionPayload<SessionType.EventParams>) {
-        let tag = SignProtocolMethod.sessionEvent.responseTag
+        let protocolMethod = SignProtocolMethod.sessionEvent
         let event = payload.request.event
         let topic = payload.topic
         guard let session = sessionStore.getSession(forTopic: topic) else {
-            return respondError(payload: payload, reason: .noSessionForTopic, tag: tag)
+            return respondError(payload: payload, reason: .noSessionForTopic, protocolMethod: protocolMethod)
         }
         guard session.peerIsController, session.hasPermission(forEvent: event.name, onChain: payload.request.chainId) else {
-            return respondError(payload: payload, reason: .unauthorizedEvent(event.name), tag: tag)
+            return respondError(payload: payload, reason: .unauthorizedEvent(event.name), protocolMethod: protocolMethod)
         }
         Task(priority: .high) {
-            try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, tag: tag)
+            try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod)
         }
         onEventReceived?(topic, event.publicRepresentation(), payload.request.chainId)
     }

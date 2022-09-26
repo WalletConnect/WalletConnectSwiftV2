@@ -59,7 +59,7 @@ class MessagingService {
 
     private func handleMessage(_ message: Message, topic: String, requestId: RPCID) {
         Task(priority: .background) {
-            try await networkingInteractor.respondSuccess(topic: topic, requestId: requestId, tag: ChatProtocolMethod.message.responseTag)
+            try await networkingInteractor.respondSuccess(topic: topic, requestId: requestId, protocolMethod: ChatProtocolMethod.message)
             await messagesStore.add(message)
             logger.debug("Received message")
             onMessage?(message)

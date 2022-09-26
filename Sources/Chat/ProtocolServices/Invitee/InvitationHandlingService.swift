@@ -47,7 +47,7 @@ class InvitationHandlingService {
 
         let response = RPCResponse(id: payload.id, result: inviteResponse)
         let responseTopic = try getInviteResponseTopic(requestTopic: payload.topic, invite: payload.request)
-        try await networkingInteractor.respond(topic: responseTopic, response: response, tag: ChatProtocolMethod.invite.responseTag)
+        try await networkingInteractor.respond(topic: responseTopic, response: response, protocolMethod: ChatProtocolMethod.invite)
 
         let threadAgreementKeys = try kms.performKeyAgreement(selfPublicKey: selfThreadPubKey, peerPublicKey: payload.request.publicKey)
         let threadTopic = threadAgreementKeys.derivedTopic()
@@ -71,7 +71,7 @@ class InvitationHandlingService {
 
         let responseTopic = try getInviteResponseTopic(requestTopic: payload.topic, invite: payload.request)
 
-        try await networkingInteractor.respondError(topic: responseTopic, requestId: payload.id, tag: ChatProtocolMethod.invite.responseTag, reason: ChatError.userRejected)
+        try await networkingInteractor.respondError(topic: responseTopic, requestId: payload.id, protocolMethod: ChatProtocolMethod.invite, reason: ChatError.userRejected)
 
         invitePayloadStore.delete(forKey: inviteId)
     }

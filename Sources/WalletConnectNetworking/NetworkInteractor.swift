@@ -120,21 +120,21 @@ public class NetworkingInteractor: NetworkInteracting {
         }
     }
 
-    public func respond(topic: String, response: RPCResponse, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {
+    public func respond(topic: String, response: RPCResponse, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
         try rpcHistory.resolve(response)
         let message = try! serializer.serialize(topic: topic, encodable: response, envelopeType: envelopeType)
-        try await relayClient.publish(topic: topic, payload: message, tag: tag)
+        try await relayClient.publish(topic: topic, payload: message, tag: protocolMethod.responseTag)
     }
 
-    public func respondSuccess(topic: String, requestId: RPCID, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {
+    public func respondSuccess(topic: String, requestId: RPCID, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
         let response = RPCResponse(id: requestId, result: true)
-        try await respond(topic: topic, response: response, tag: tag, envelopeType: envelopeType)
+        try await respond(topic: topic, response: response, protocolMethod: protocolMethod, envelopeType: envelopeType)
     }
 
-    public func respondError(topic: String, requestId: RPCID, tag: Int, reason: Reason, envelopeType: Envelope.EnvelopeType) async throws {
+    public func respondError(topic: String, requestId: RPCID, protocolMethod: ProtocolMethod, reason: Reason, envelopeType: Envelope.EnvelopeType) async throws {
         let error = JSONRPCError(code: reason.code, message: reason.message)
         let response = RPCResponse(id: requestId, error: error)
-        try await respond(topic: topic, response: response, tag: tag, envelopeType: envelopeType)
+        try await respond(topic: topic, response: response, protocolMethod: protocolMethod, envelopeType: envelopeType)
     }
 
     private func manageSubscription(_ topic: String, _ encodedEnvelope: String) {
