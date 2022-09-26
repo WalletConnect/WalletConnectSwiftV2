@@ -7,11 +7,13 @@ public protocol ProtocolMethod {
 }
 
 public struct RelayConfig {
-    var tag: Int
-    var prompt: Bool
+    let tag: Int
+    let prompt: Bool
+    let ttl: Int
     
-    public init(tag: Int, prompt: Bool) {
+    public init(tag: Int, prompt: Bool, ttl: Int) {
         self.tag = tag
         self.prompt = prompt
+        self.ttl = ttl
     }
 }
