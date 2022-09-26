@@ -96,7 +96,7 @@ public class NetworkingInteractor: NetworkInteracting {
     public func request(_ request: RPCRequest, topic: String, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
         try rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
         let message = try! serializer.serialize(topic: topic, encodable: request, envelopeType: envelopeType)
-        try await relayClient.publish(topic: topic, payload: message, tag: protocolMethod.request.tag, prompt: protocolMethod.request.prompt)
+        try await relayClient.publish(topic: topic, payload: message, tag: protocolMethod.requestConfig.tag, prompt: protocolMethod.requestConfig.prompt)
     }
 
     /// Completes with an acknowledgement from the relay network.
@@ -107,7 +107,7 @@ public class NetworkingInteractor: NetworkInteracting {
             try rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
             let message = try serializer.serialize(topic: topic, encodable: request)
             return try await withCheckedThrowingContinuation { continuation in
-                relayClient.publish(topic: topic, payload: message, tag: protocolMethod.request.tag, prompt: protocolMethod.request.prompt) { error in
+                relayClient.publish(topic: topic, payload: message, tag: protocolMethod.requestConfig.tag, prompt: protocolMethod.requestConfig.prompt) { error in
                     if let error = error {
                         continuation.resume(throwing: error)
                     } else {
@@ -123,7 +123,7 @@ public class NetworkingInteractor: NetworkInteracting {
     public func respond(topic: String, response: RPCResponse, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
         try rpcHistory.resolve(response)
         let message = try! serializer.serialize(topic: topic, encodable: response, envelopeType: envelopeType)
-        try await relayClient.publish(topic: topic, payload: message, tag: protocolMethod.response.tag)
+        try await relayClient.publish(topic: topic, payload: message, tag: protocolMethod.responseConfig.tag)
     }
 
     public func respondSuccess(topic: String, requestId: RPCID, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {

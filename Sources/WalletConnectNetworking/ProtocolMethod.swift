@@ -2,8 +2,8 @@ import Foundation
 
 public protocol ProtocolMethod {
     var method: String { get }
-    var request: RelayConfig { get }
-    var response: RelayConfig { get }
+    var requestConfig: RelayConfig { get }
+    var responseConfig: RelayConfig { get }
 }
 
 public struct RelayConfig {
