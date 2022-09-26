@@ -33,6 +33,7 @@ class InviteService {
 
     func invite(peerPubKey: String, peerAccount: Account, openingMessage: String, account: Account) async throws {
         // TODO ad storage
+        let protocolMethod = ChatInviteProtocolMethod()
         self.peerAccount = peerAccount
         let selfPubKeyY = try kms.createX25519KeyPair()
         let invite = Invite(message: openingMessage, account: account, publicKey: selfPubKeyY.hexRepresentation)
@@ -42,7 +43,7 @@ class InviteService {
         // overrides on invite toipic
         try kms.setSymmetricKey(symKeyI.sharedKey, for: inviteTopic)
 
-        let request = RPCRequest(method: ChatProtocolMethod.invite.method, params: invite)
+        let request = RPCRequest(method: protocolMethod.method, params: invite)
 
         // 2. Proposer subscribes to topic R which is the hash of the derived symKey
         let responseTopic = symKeyI.derivedTopic()
@@ -50,13 +51,13 @@ class InviteService {
         try kms.setSymmetricKey(symKeyI.sharedKey, for: responseTopic)
 
         try await networkingInteractor.subscribe(topic: responseTopic)
-        try await networkingInteractor.request(request, topic: inviteTopic, protocolMethod: ChatProtocolMethod.invite, envelopeType: .type1(pubKey: selfPubKeyY.rawRepresentation))
+        try await networkingInteractor.request(request, topic: inviteTopic, protocolMethod: protocolMethod, envelopeType: .type1(pubKey: selfPubKeyY.rawRepresentation))
 
         logger.debug("invite sent on topic: \(inviteTopic)")
     }
 
     private func setUpResponseHandling() {
-        networkingInteractor.responseSubscription(on: ChatProtocolMethod.invite)
+        networkingInteractor.responseSubscription(on: ChatInviteProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<Invite, InviteResponse>) in
                 logger.debug("Invite has been accepted")
 

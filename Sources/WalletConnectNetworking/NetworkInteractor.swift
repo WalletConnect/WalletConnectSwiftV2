@@ -96,18 +96,18 @@ public class NetworkingInteractor: NetworkInteracting {
     public func request(_ request: RPCRequest, topic: String, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
         try rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
         let message = try! serializer.serialize(topic: topic, encodable: request, envelopeType: envelopeType)
-        try await relayClient.publish(topic: topic, payload: message, tag: protocolMethod.requestTag, prompt: shouldPrompt(method: request.method))
+        try await relayClient.publish(topic: topic, payload: message, tag: protocolMethod.request.tag, prompt: protocolMethod.request.prompt)
     }
 
     /// Completes with an acknowledgement from the relay network.
     /// completes with error if networking client was not able to send a message
     /// TODO - relay client should provide async function - continualion should be removed from here
-    public func requestNetworkAck(_ request: RPCRequest, topic: String, tag: Int) async throws {
+    public func requestNetworkAck(_ request: RPCRequest, topic: String, protocolMethod: ProtocolMethod) async throws {
         do {
             try rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
             let message = try serializer.serialize(topic: topic, encodable: request)
             return try await withCheckedThrowingContinuation { continuation in
-                relayClient.publish(topic: topic, payload: message, tag: tag, prompt: shouldPrompt(method: request.method)) { error in
+                relayClient.publish(topic: topic, payload: message, tag: protocolMethod.request.tag, prompt: protocolMethod.request.prompt) { error in
                     if let error = error {
                         continuation.resume(throwing: error)
                     } else {
@@ -123,7 +123,7 @@ public class NetworkingInteractor: NetworkInteracting {
     public func respond(topic: String, response: RPCResponse, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
         try rpcHistory.resolve(response)
         let message = try! serializer.serialize(topic: topic, encodable: response, envelopeType: envelopeType)
-        try await relayClient.publish(topic: topic, payload: message, tag: protocolMethod.responseTag)
+        try await relayClient.publish(topic: topic, payload: message, tag: protocolMethod.response.tag)
     }
 
     public func respondSuccess(topic: String, requestId: RPCID, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
@@ -163,15 +163,6 @@ public class NetworkingInteractor: NetworkInteracting {
             responsePublisherSubject.send((record.topic, record.request, response))
         } catch {
             logger.debug("Handle json rpc response error: \(error)")
-        }
-    }
-
-    private func shouldPrompt(method: String) -> Bool {
-        switch method {
-        case "wc_sessionRequest": // TODO: Include promt in ProtocolMethod
-            return true
-        default:
-            return false
         }
     }
 }

@@ -39,7 +39,7 @@ actor WalletRespondService {
         let responseParams =  AuthResponseParams(h: header, p: payload, s: signature)
 
         let response = RPCResponse(id: requestId, result: responseParams)
-        try await networkingInteractor.respond(topic: topic, response: response, protocolMethod: AuthProtocolMethod.authRequest, envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
+        try await networkingInteractor.respond(topic: topic, response: response, protocolMethod: AuthRequestProtocolMethod(), envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
     }
 
     func respondError(requestId: RPCID) async throws {

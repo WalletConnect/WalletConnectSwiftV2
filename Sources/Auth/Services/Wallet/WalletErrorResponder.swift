@@ -33,7 +33,7 @@ actor WalletErrorResponder {
         try kms.setAgreementSecret(keys, topic: topic)
 
         let envelopeType = Envelope.EnvelopeType.type1(pubKey: keys.publicKey.rawRepresentation)
-        try await networkingInteractor.respondError(topic: topic, requestId: requestId, protocolMethod: AuthProtocolMethod.authRequest, reason: error, envelopeType: envelopeType)
+        try await networkingInteractor.respondError(topic: topic, requestId: requestId, protocolMethod: AuthRequestProtocolMethod(), reason: error, envelopeType: envelopeType)
     }
 
     private func getAuthRequestParams(requestId: RPCID) throws -> AuthRequestParams {

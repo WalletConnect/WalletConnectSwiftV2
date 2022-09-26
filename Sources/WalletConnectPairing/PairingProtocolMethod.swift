@@ -1,18 +1,10 @@
 import Foundation
 import WalletConnectNetworking
 
-enum PairingProtocolMethod: String, ProtocolMethod {
-    case ping = "wc_pairingPing"
+struct PairingPingProtocolMethod: ProtocolMethod {
+    var method: String = "wc_pairingPing"
 
-    var method: String {
-        return self.rawValue
-    }
+    var request = RelayConfigrable(tag: 1002, prompt: false)
 
-    var requestTag: Int {
-        return 1002
-    }
-
-    var responseTag: Int {
-        return 1003
-    }
+    var response = RelayConfigrable(tag: 1003, prompt: false)
 }

@@ -1,34 +1,28 @@
 import Foundation
 import WalletConnectNetworking
 
-enum AuthProtocolMethod: String, ProtocolMethod {
-    case authRequest = "wc_authRequest"
-    case pairingDelete = "wc_pairingDelete"
-    case pairingPing = "wc_pairingPing"
+struct AuthRequestProtocolMethod: ProtocolMethod {
+    var method: String = "wc_authRequest"
 
-    var method: String {
-        return self.rawValue
-    }
+    var request = RelayConfigrable(tag: 3000, prompt: true)
 
-    var requestTag: Int {
-        switch self {
-        case .authRequest:
-            return 3000
-        case .pairingDelete:
-            return 1000
-        case .pairingPing:
-            return 1002
-        }
-    }
+    var response = RelayConfigrable(tag: 3001, prompt: false)
+}
 
-    var responseTag: Int {
-        switch self {
-        case .authRequest:
-            return 3001
-        case .pairingDelete:
-            return 1001
-        case .pairingPing:
-            return 1003
-        }
-    }
+
+struct PairingPingProtocolMethod: ProtocolMethod {
+    var method: String = "wc_pairingPing"
+
+    var request = RelayConfigrable(tag: 1002, prompt: false)
+
+    var response = RelayConfigrable(tag: 1003, prompt: false)
+}
+
+
+struct PairingDeleteProtocolMethod: ProtocolMethod {
+    var method: String = "wc_pairingDelete"
+
+    var request = RelayConfigrable(tag: 1000, prompt: false)
+
+    var response = RelayConfigrable(tag: 1001, prompt: false)
 }
