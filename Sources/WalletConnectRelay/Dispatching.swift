@@ -26,6 +26,8 @@ final class Dispatcher: NSObject, Dispatching {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
     }
 
+    private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.dispatcher", attributes: .concurrent)
+
     init(socket: WebSocketConnecting,
          socketConnectionHandler: SocketConnectionHandler,
          logger: ConsoleLogging) {
@@ -53,16 +55,21 @@ final class Dispatcher: NSObject, Dispatching {
         }
 
         var cancellable: AnyCancellable?
-        cancellable = socketConnectionStatusPublisher.sink { [unowned self] status in
-            guard status == .connected else { return }
-            cancellable?.cancel()
-            send(string, completion: completion)
-        }
-
-        DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(defaultTimeout)) {
-            completion(NetworkError.webSocketNotConnected)
-            cancellable?.cancel()
-        }
+        cancellable = socketConnectionStatusPublisher
+            .filter { $0 == .connected }
+            .setFailureType(to: NetworkError.self)
+            .timeout(.seconds(defaultTimeout), scheduler: concurrentQueue, customError: { .webSocketNotConnected })
+            .sink(receiveCompletion: { result in
+                switch result {
+                case .failure(let error):
+                    cancellable?.cancel()
+                    completion(error)
+                case .finished: break
+                }
+            }, receiveValue: { [unowned self] status in
+                cancellable?.cancel()
+                send(string, completion: completion)
+            })
     }
 
     func protectedSend(_ string: String) async throws {

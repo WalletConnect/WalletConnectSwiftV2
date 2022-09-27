@@ -37,24 +37,9 @@ final class SignClientTests: XCTestCase {
         return ClientDelegate(client: client)
     }
 
-    private func listenForConnection() async {
-        let group = DispatchGroup()
-        group.enter()
-        dapp.onConnected = {
-            group.leave()
-        }
-        group.enter()
-        wallet.onConnected = {
-            group.leave()
-        }
-        group.wait()
-        return
-    }
-
     override func setUp() async throws {
         dapp = Self.makeClientDelegate(name: "🍏P")
         wallet = Self.makeClientDelegate(name: "🍎R")
-        await listenForConnection()
     }
 
     override func tearDown() {

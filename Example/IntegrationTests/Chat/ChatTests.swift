@@ -16,27 +16,6 @@ final class ChatTests: XCTestCase {
         registry = KeyValueRegistry()
         invitee = makeClient(prefix: "🦖 Registered")
         inviter = makeClient(prefix: "🍄 Inviter")
-
-        waitClientsConnected()
-    }
-
-    private func waitClientsConnected() {
-        let expectation = expectation(description: "Wait Clients Connected")
-        expectation.expectedFulfillmentCount = 2
-
-        invitee.socketConnectionStatusPublisher.sink { status in
-            if status == .connected {
-                expectation.fulfill()
-            }
-        }.store(in: &publishers)
-
-        inviter.socketConnectionStatusPublisher.sink { status in
-            if status == .connected {
-                expectation.fulfill()
-            }
-        }.store(in: &publishers)
-
-        wait(for: [expectation], timeout: 5)
     }
 
     func makeClient(prefix: String) -> ChatClient {
