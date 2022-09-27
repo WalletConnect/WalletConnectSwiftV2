@@ -33,7 +33,7 @@ class WalletRequestSubscriber {
     private func subscribeForRequest() {
         guard let address = address else { return }
 
-        networkingInteractor.requestSubscription(on: AuthProtocolMethod.authRequest)
+        networkingInteractor.requestSubscription(on: AuthRequestProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<AuthRequestParams>) in
                 logger.debug("WalletRequestSubscriber: Received request")
                 guard let message = messageFormatter.formatMessage(from: payload.request.payloadParams, address: address) else {

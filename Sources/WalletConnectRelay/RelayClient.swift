@@ -20,7 +20,6 @@ public final class RelayClient {
         case subscriptionIdNotFound
     }
 
-    let defaultTtl = 6*Time.hour
     var subscriptions: [String: String] = [:]
 
     public var messagePublisher: AnyPublisher<(topic: String, message: String), Never> {
@@ -120,8 +119,8 @@ public final class RelayClient {
     }
 
     /// Completes when networking client sends a request, error if it fails on client side
-    public func publish(topic: String, payload: String, tag: Int, prompt: Bool = false) async throws {
-        let request = Publish(params: .init(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag))
+    public func publish(topic: String, payload: String, tag: Int, prompt: Bool, ttl: Int) async throws {
+        let request = Publish(params: .init(topic: topic, message: payload, ttl: ttl, prompt: prompt, tag: tag))
             .wrapToIRN()
             .asRPCRequest()
         let message = try request.asJSONEncodedString()
@@ -134,10 +133,11 @@ public final class RelayClient {
         topic: String,
         payload: String,
         tag: Int,
-        prompt: Bool = false,
+        prompt: Bool,
+        ttl: Int,
         onNetworkAcknowledge: @escaping ((Error?) -> Void)
     ) {
-        let rpc = Publish(params: .init(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag))
+        let rpc = Publish(params: .init(topic: topic, message: payload, ttl: ttl, prompt: prompt, tag: tag))
         let request = rpc
             .wrapToIRN()
             .asRPCRequest()

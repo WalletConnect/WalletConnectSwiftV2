@@ -63,6 +63,7 @@ final class PairingEngine {
     func propose(pairingTopic: String, namespaces: [String: ProposalNamespace], relay: RelayProtocolOptions) async throws {
         logger.debug("Propose Session on topic: \(pairingTopic)")
         try Namespace.validate(namespaces)
+        let protocolMethod = SessionProposeProtocolMethod()
         let publicKey = try! kms.createX25519KeyPair()
         let proposer = Participant(
             publicKey: publicKey.hexRepresentation,
@@ -72,8 +73,8 @@ final class PairingEngine {
             proposer: proposer,
             requiredNamespaces: namespaces)
 
-        let request = RPCRequest(method: SignProtocolMethod.sessionPropose.method, params: proposal)
-        try await networkingInteractor.requestNetworkAck(request, topic: pairingTopic, tag: SignProtocolMethod.sessionPropose.requestTag)
+        let request = RPCRequest(method: protocolMethod.method, params: proposal)
+        try await networkingInteractor.requestNetworkAck(request, topic: pairingTopic, protocolMethod: protocolMethod)
     }
 }
 
@@ -90,11 +91,12 @@ private extension PairingEngine {
                     }
             }
             .store(in: &publishers)
+        let protocolMethod = PairingPingProtocolMethod()
 
-        networkingInteractor.requestSubscription(on: SignProtocolMethod.pairingPing)
+        networkingInteractor.requestSubscription(on: protocolMethod)
             .sink { [unowned self] (payload: RequestSubscriptionPayload<PairingType.PingParams>) in
                 Task(priority: .high) {
-                    try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, tag: SignProtocolMethod.pairingPing.responseTag)
+                    try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod)
                 }
             }
             .store(in: &publishers)
