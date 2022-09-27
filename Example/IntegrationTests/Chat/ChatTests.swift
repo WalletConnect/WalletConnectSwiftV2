@@ -12,6 +12,8 @@ final class ChatTests: XCTestCase {
     var registry: KeyValueRegistry!
     private var publishers = [AnyCancellable]()
 
+    private let defaultTimeout: TimeInterval = 30
+
     override func setUp() {
         registry = KeyValueRegistry()
         invitee = makeClient(prefix: "🦖 Registered")
@@ -56,7 +58,7 @@ final class ChatTests: XCTestCase {
         invitee.invitePublisher.sink { _ in
             inviteExpectation.fulfill()
         }.store(in: &publishers)
-        wait(for: [inviteExpectation], timeout: 4)
+        wait(for: [inviteExpectation], timeout: defaultTimeout)
     }
 
     func testAcceptAndCreateNewThread() {
@@ -83,7 +85,7 @@ final class ChatTests: XCTestCase {
             newThreadInviterExpectation.fulfill()
         }.store(in: &publishers)
 
-        wait(for: [newThreadinviteeExpectation, newThreadInviterExpectation], timeout: 10)
+        wait(for: [newThreadinviteeExpectation, newThreadInviterExpectation], timeout: defaultTimeout)
     }
 
     func testMessage() {
@@ -118,6 +120,6 @@ final class ChatTests: XCTestCase {
             messageExpectation.fulfill()
         }.store(in: &publishers)
 
-        wait(for: [messageExpectation], timeout: 10)
+        wait(for: [messageExpectation], timeout: defaultTimeout)
     }
 }

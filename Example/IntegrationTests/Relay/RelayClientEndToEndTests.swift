@@ -7,10 +7,10 @@ import Starscream
 
 final class RelayClientEndToEndTests: XCTestCase {
 
-    let defaultTimeout: TimeInterval = 10
-
     let projectId = "3ca2919724fbfa5456a25194e369a8b4"
     private var publishers = Set<AnyCancellable>()
+
+    private let defaultTimeout: TimeInterval = 30
 
     func makeRelayClient() -> RelayClient {
         let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock())

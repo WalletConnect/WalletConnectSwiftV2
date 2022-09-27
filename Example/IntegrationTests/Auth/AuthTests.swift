@@ -12,6 +12,8 @@ final class AuthTests: XCTestCase {
     let prvKey = Data(hex: "462c1dad6832d7d96ccf87bd6a686a4110e114aaaebd5512e552c0e3a87b480f")
     private var publishers = [AnyCancellable]()
 
+    private let defaultTimeout: TimeInterval = 30
+
     override func setUp() {
         app = makeClient(prefix: "👻 App")
         let walletAccount = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
@@ -57,7 +59,7 @@ final class AuthTests: XCTestCase {
         wallet.authRequestPublisher.sink { _ in
             requestExpectation.fulfill()
         }.store(in: &publishers)
-        wait(for: [requestExpectation], timeout: 2)
+        wait(for: [requestExpectation], timeout: defaultTimeout)
     }
 
     func testRespondSuccess() async {
@@ -76,7 +78,7 @@ final class AuthTests: XCTestCase {
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
-        wait(for: [responseExpectation], timeout: 5)
+        wait(for: [responseExpectation], timeout: defaultTimeout)
     }
 
     func testUserRespondError() async {
@@ -95,7 +97,7 @@ final class AuthTests: XCTestCase {
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
-        wait(for: [responseExpectation], timeout: 5)
+        wait(for: [responseExpectation], timeout: defaultTimeout)
     }
 
     func testRespondSignatureVerificationFailed() async {
@@ -116,7 +118,7 @@ final class AuthTests: XCTestCase {
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
-        wait(for: [responseExpectation], timeout: 2)
+        wait(for: [responseExpectation], timeout: defaultTimeout)
     }
 
     func testPing() async {
@@ -130,6 +132,6 @@ final class AuthTests: XCTestCase {
                 pingExpectation.fulfill()
             }
             .store(in: &publishers)
-        wait(for: [pingExpectation], timeout: 5)
+        wait(for: [pingExpectation], timeout: defaultTimeout)
     }
 }
