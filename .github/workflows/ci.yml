@@ -33,9 +33,9 @@ jobs:
         path: |
           .build
           SourcePackagesCache
-        key: ${{ runner.os }}-spm3-${{ hashFiles('**/Package.resolved') }}
+        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
         restore-keys: |
-          ${{ runner.os }}-spm3-
+          ${{ runner.os }}-spm-
 
     - name: Resolve Dependencies
       shell: bash
@@ -65,9 +65,9 @@ jobs:
         path: |
           .build
           SourcePackagesCache
-        key: ${{ runner.os }}-spm3-${{ hashFiles('**/Package.resolved') }}
+        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
         restore-keys: |
-          ${{ runner.os }}-spm3-
+          ${{ runner.os }}-spm-
 
     - uses: ./.github/actions/ci
       with:
