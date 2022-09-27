@@ -12,14 +12,11 @@ final class SignClientTests: XCTestCase {
     var dapp: ClientDelegate!
     var wallet: ClientDelegate!
 
-    static private func makeClientDelegate(
-        name: String,
-        projectId: String = "3ca2919724fbfa5456a25194e369a8b4"
-    ) -> ClientDelegate {
+    static private func makeClientDelegate(name: String, projectId: String) -> ClientDelegate {
         let logger = ConsoleLogger(suffix: name, loggingLevel: .debug)
         let keychain = KeychainStorageMock()
         let relayClient = RelayClient(
-            relayHost: URLConfig.relayHost,
+            relayHost: InputConfig.relayHost,
             projectId: projectId,
             keyValueStorage: RuntimeKeyValueStorage(),
             keychainStorage: keychain,
@@ -38,8 +35,8 @@ final class SignClientTests: XCTestCase {
     }
 
     override func setUp() async throws {
-        dapp = Self.makeClientDelegate(name: "🍏P")
-        wallet = Self.makeClientDelegate(name: "🍎R")
+        dapp = Self.makeClientDelegate(name: "🍏P", projectId: InputConfig.appID)
+        wallet = Self.makeClientDelegate(name: "🍎R", projectId: InputConfig.walletID)
     }
 
     override func tearDown() {

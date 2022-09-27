@@ -14,15 +14,14 @@ final class ChatTests: XCTestCase {
 
     override func setUp() {
         registry = KeyValueRegistry()
-        invitee = makeClient(prefix: "🦖 Registered")
-        inviter = makeClient(prefix: "🍄 Inviter")
+        invitee = makeClient(prefix: "🦖 Registered", projectId: InputConfig.walletID)
+        inviter = makeClient(prefix: "🍄 Inviter", projectId: InputConfig.appID)
     }
 
-    func makeClient(prefix: String) -> ChatClient {
+    func makeClient(prefix: String, projectId: String) -> ChatClient {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
-        let projectId = "3ca2919724fbfa5456a25194e369a8b4"
         let keychain = KeychainStorageMock()
-        let relayClient = RelayClient(relayHost: URLConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
+        let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
         return ChatClientFactory.create(registry: registry, relayClient: relayClient, kms: KeyManagementService(keychain: keychain), logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
 

@@ -13,16 +13,15 @@ final class AuthTests: XCTestCase {
     private var publishers = [AnyCancellable]()
 
     override func setUp() {
-        app = makeClient(prefix: "👻 App")
+        app = makeClient(prefix: "👻 App", projectId: InputConfig.appID)
         let walletAccount = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
-        wallet = makeClient(prefix: "🤑 Wallet", account: walletAccount)
+        wallet = makeClient(prefix: "🤑 Wallet", projectId: InputConfig.walletID, account: walletAccount)
     }
 
-    func makeClient(prefix: String, account: Account? = nil) -> AuthClient {
+    func makeClient(prefix: String, projectId: String, account: Account? = nil) -> AuthClient {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
-        let projectId = "3ca2919724fbfa5456a25194e369a8b4"
         let keychain = KeychainStorageMock()
-        let relayClient = RelayClient(relayHost: URLConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
+        let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
 
         return AuthClientFactory.create(
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),

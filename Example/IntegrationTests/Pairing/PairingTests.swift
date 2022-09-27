@@ -20,15 +20,14 @@ final class PairingTests: XCTestCase {
     private var publishers = [AnyCancellable]()
 
     override func setUp() {
-        (appPairingClient, appPushClient) = makeClients(prefix: "🤖 App")
-        (walletPairingClient, walletPushClient) = makeClients(prefix: "🐶 Wallet")
+        (appPairingClient, appPushClient) = makeClients(prefix: "🤖 App", projectId: InputConfig.appID)
+        (walletPairingClient, walletPushClient) = makeClients(prefix: "🐶 Wallet", projectId: InputConfig.walletID)
     }
 
-    func makeClients(prefix: String) -> (PairingClient, PushClient) {
+    func makeClients(prefix: String, projectId: String) -> (PairingClient, PushClient) {
         let keychain = KeychainStorageMock()
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
-        let projectId = "3ca2919724fbfa5456a25194e369a8b4"
-        let relayClient = RelayClient(relayHost: URLConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
+        let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
 
         let pairingClient = PairingClientFactory.create(logger: logger, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, relayClient: relayClient)
 

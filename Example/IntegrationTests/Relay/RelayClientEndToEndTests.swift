@@ -9,7 +9,6 @@ final class RelayClientEndToEndTests: XCTestCase {
 
     let defaultTimeout: TimeInterval = 10
 
-    let projectId = "3ca2919724fbfa5456a25194e369a8b4"
     private var publishers = Set<AnyCancellable>()
 
     func makeRelayClient() -> RelayClient {
@@ -17,10 +16,10 @@ final class RelayClientEndToEndTests: XCTestCase {
         let socketAuthenticator = SocketAuthenticator(
             clientIdStorage: clientIdStorage,
             didKeyFactory: ED25519DIDKeyFactory(),
-            relayHost: URLConfig.relayHost
+            relayHost: InputConfig.relayHost
         )
         let urlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)
-        let socket = WebSocket(url: urlFactory.create(host: URLConfig.relayHost, projectId: projectId))
+        let socket = WebSocket(url: urlFactory.create(host: InputConfig.relayHost, projectId: InputConfig.walletID))
 
         let logger = ConsoleLogger()
         let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket), logger: logger)

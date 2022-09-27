@@ -8,7 +8,7 @@ final class AuthChallengeTests: XCTestCase {
     var provider: AuthChallengeProvider!
 
     override func setUp() {
-        httpClient = HTTPClient(host: URLConfig.relayHost)
+        httpClient = HTTPClient(host: InputConfig.relayHost)
         provider = AuthChallengeProvider(client: httpClient)
     }
 
