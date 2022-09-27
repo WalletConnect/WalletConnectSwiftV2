@@ -15,7 +15,7 @@ public class NetworkingInteractor: NetworkInteracting {
     private let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest), Never>()
     private let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse), Never>()
 
-    private var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest), Never> {
+    public var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest), Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
@@ -56,13 +56,13 @@ public class NetworkingInteractor: NetworkInteracting {
         }
     }
 
-    public func requestSubscription<Request: Codable>(on request: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never> {
+    public func requestSubscription<RequestParams: Codable>(on request: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {
         return requestPublisher
             .filter { rpcRequest in
                 return rpcRequest.request.method == request.method
             }
             .compactMap { topic, rpcRequest in
-                guard let id = rpcRequest.id, let request = try? rpcRequest.params?.get(Request.self) else { return nil }
+                guard let id = rpcRequest.id, let request = try? rpcRequest.params?.get(RequestParams.self) else { return nil }
                 return RequestSubscriptionPayload(id: id, topic: topic, request: request)
             }
             .eraseToAnyPublisher()

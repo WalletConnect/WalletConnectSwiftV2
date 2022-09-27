@@ -6,6 +6,7 @@ import WalletConnectRelay
 
 public protocol NetworkInteracting {
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> { get }
+    var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest), Never> { get }
     func subscribe(topic: String) async throws
     func unsubscribe(topic: String)
     func request(_ request: RPCRequest, topic: String, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws

@@ -87,6 +87,7 @@ final class PairingEngineTests: XCTestCase {
     }
 
     func testHandleSessionProposeResponse() async {
+        let exp = expectation(description: "testHandleSessionProposeResponse")
         let uri = try! await engine.create()
         let pairing = storageMock.getPairing(forTopic: uri.topic)!
         let topicA = pairing.topic
@@ -107,10 +108,17 @@ final class PairingEngineTests: XCTestCase {
 
         let response = RPCResponse(id: request.id!, result: RPCResult.response(AnyCodable(proposalResponse)))
 
+        networkingInteractor.onSubscribeCalled = {
+            exp.fulfill()
+        }
+
         networkingInteractor.responsePublisherSubject.send((topicA, request, response))
         let privateKey = try! cryptoMock.getPrivateKey(for: proposal.proposer.publicKey)!
         let topicB = deriveTopic(publicKey: responder.publicKey, privateKey: privateKey)
         let storedPairing = storageMock.getPairing(forTopic: topicA)!
+
+        wait(for: [exp], timeout: 5)
+
         let sessionTopic = networkingInteractor.subscriptions.last!
 
         XCTAssertTrue(networkingInteractor.didCallSubscribe)

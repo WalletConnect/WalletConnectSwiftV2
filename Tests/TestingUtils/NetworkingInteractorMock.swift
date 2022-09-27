@@ -22,6 +22,8 @@ public class NetworkingInteractorMock: NetworkInteracting {
     private(set) var requestCallCount = 0
     var didCallRequest: Bool { requestCallCount > 0 }
 
+    var onSubscribeCalled: (() -> Void)?
+
     public let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
@@ -30,7 +32,7 @@ public class NetworkingInteractorMock: NetworkInteracting {
     public let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest), Never>()
     public let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse), Never>()
 
-    private var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest), Never> {
+    public var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest), Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
@@ -79,6 +81,7 @@ public class NetworkingInteractorMock: NetworkInteracting {
     }
 
     public func subscribe(topic: String) async throws {
+        defer { onSubscribeCalled?() }
         subscriptions.append(topic)
         didCallSubscribe = true
     }
