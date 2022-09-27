@@ -5,12 +5,14 @@ import WalletConnectRelay
 import WalletConnectUtils
 import WalletConnectKMS
 
+
 public class NetworkingInteractor: NetworkInteracting {
     private var publishers = Set<AnyCancellable>()
     private let relayClient: RelayClient
     private let serializer: Serializing
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
+    private let topics = SetStore<String>()
 
     private let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest), Never>()
     private let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse), Never>()
@@ -43,10 +45,12 @@ public class NetworkingInteractor: NetworkInteracting {
     }
 
     public func subscribe(topic: String) async throws {
+        await topics.insert(topic)
         try await relayClient.subscribe(topic: topic)
     }
 
     public func unsubscribe(topic: String) {
+        Task { await topics.remove(topic) }
         relayClient.unsubscribe(topic: topic) { [unowned self] error in
             if let error = error {
                 logger.error(error)
