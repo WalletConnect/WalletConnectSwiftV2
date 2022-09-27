@@ -39,9 +39,9 @@ jobs:
         path: |
           .build
           SourcePackagesCache
-        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+        key: ${{ runner.os }}-spm1-${{ hashFiles('**/Package.resolved') }}
         restore-keys: |
-          ${{ runner.os }}-spm-
+          ${{ runner.os }}-spm1-
 
     - uses: ./.github/actions/ci
       with:
@@ -65,9 +65,9 @@ jobs:
         path: |
           .build
           SourcePackagesCache
-        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+        key: ${{ runner.os }}-spm1-${{ hashFiles('**/Package.resolved') }}
         restore-keys: |
-          ${{ runner.os }}-spm-
+          ${{ runner.os }}-spm1-
 
     - uses: ./.github/actions/ci
       with:
