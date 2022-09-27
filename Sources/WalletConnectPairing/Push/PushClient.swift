@@ -42,14 +42,16 @@ public class PushClient {
 private extension PushClient {
 
     func setupPairingSubscriptions() {
-        pairingRegisterer.register(method: PushProtocolMethod.propose)
+        let protocolMethod = PushProposeProtocolMethod()
 
-        networkInteractor.responseErrorSubscription(on: PushProtocolMethod.propose)
+        pairingRegisterer.register(method: protocolMethod)
+
+        networkInteractor.responseErrorSubscription(on: protocolMethod)
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<PushRequestParams>) in
                 logger.error(payload.error.localizedDescription)
             }.store(in: &publishers)
 
-        networkInteractor.requestSubscription(on: PushProtocolMethod.propose)
+        networkInteractor.requestSubscription(on: protocolMethod)
             .sink { [unowned self] (payload: RequestSubscriptionPayload<PushRequestParams>) in
                 requestPublisherSubject.send((payload.topic, payload.request))
             }.store(in: &publishers)

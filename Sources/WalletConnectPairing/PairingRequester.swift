@@ -20,7 +20,8 @@ public class PushProposer {
     }
 
     func request(topic: String, params: AnyCodable) async throws {
-        let request = RPCRequest(method: PushProtocolMethod.propose.method, params: params)
-        try await networkingInteractor.requestNetworkAck(request, topic: topic, tag: PushProtocolMethod.propose.requestTag)
+        let protocolMethod = PushProposeProtocolMethod()
+        let request = RPCRequest(method: protocolMethod.method, params: params)
+        try await networkingInteractor.requestNetworkAck(request, topic: topic, protocolMethod: protocolMethod)
     }
 }

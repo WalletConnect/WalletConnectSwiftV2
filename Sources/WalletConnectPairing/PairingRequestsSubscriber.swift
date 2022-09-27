@@ -27,7 +27,7 @@ public class PairingRequestsSubscriber {
             .sink { [unowned self] topic, request in
                 Task(priority: .high) {
                     // TODO - spec tag
-                    try await networkingInteractor.respondError(topic: topic, requestId: request.id!, tag: 123456, reason: PairError.methodUnsupported)
+                    try await networkingInteractor.respondError(topic: topic, requestId: request.id!, protocolMethod: protocolMethod, reason: PairError.methodUnsupported)
                 }
 
             }.store(in: &publishers)
