@@ -5,6 +5,7 @@ import WalletConnectUtils
 import WalletConnectRelay
 import Combine
 import WalletConnectNetworking
+import WalletConnectPush
 @testable import WalletConnectPairing
 
 

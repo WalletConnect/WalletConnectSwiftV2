@@ -9,4 +9,4 @@ struct PushProposeProtocolMethod: ProtocolMethod {
     let responseConfig: RelayConfig = RelayConfig(tag: 112, prompt: true, ttl: 300)
 }
 
-struct PushRequestParams: Codable {}
+public struct PushRequestParams: Codable {}

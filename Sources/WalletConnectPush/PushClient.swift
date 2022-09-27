@@ -4,6 +4,7 @@ import Combine
 import WalletConnectKMS
 import WalletConnectUtils
 import WalletConnectNetworking
+import WalletConnectPairing
 
 public class PushClient {
 
@@ -11,7 +12,7 @@ public class PushClient {
 
     let requestPublisherSubject = PassthroughSubject<(topic: String, params: PushRequestParams), Never>()
 
-    var proposalPublisher: AnyPublisher<(topic: String, params: PushRequestParams), Never> {
+    public var proposalPublisher: AnyPublisher<(topic: String, params: PushRequestParams), Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
