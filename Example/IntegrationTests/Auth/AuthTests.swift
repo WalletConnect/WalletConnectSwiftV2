@@ -12,8 +12,6 @@ final class AuthTests: XCTestCase {
     let prvKey = Data(hex: "462c1dad6832d7d96ccf87bd6a686a4110e114aaaebd5512e552c0e3a87b480f")
     private var publishers = [AnyCancellable]()
 
-    private let defaultTimeout: TimeInterval = 30
-
     override func setUp() {
         app = makeClient(prefix: "👻 App")
         let walletAccount = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
@@ -24,7 +22,7 @@ final class AuthTests: XCTestCase {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let projectId = "3ca2919724fbfa5456a25194e369a8b4"
         let keychain = KeychainStorageMock()
-        let relayClient = RelayClient(relayHost: URLConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
+        let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
 
         return AuthClientFactory.create(
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
@@ -42,7 +40,7 @@ final class AuthTests: XCTestCase {
         wallet.authRequestPublisher.sink { _ in
             requestExpectation.fulfill()
         }.store(in: &publishers)
-        wait(for: [requestExpectation], timeout: defaultTimeout)
+        wait(for: [requestExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testRespondSuccess() async {
@@ -61,7 +59,7 @@ final class AuthTests: XCTestCase {
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
-        wait(for: [responseExpectation], timeout: defaultTimeout)
+        wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testUserRespondError() async {
@@ -80,7 +78,7 @@ final class AuthTests: XCTestCase {
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
-        wait(for: [responseExpectation], timeout: defaultTimeout)
+        wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testRespondSignatureVerificationFailed() async {
@@ -101,7 +99,7 @@ final class AuthTests: XCTestCase {
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
-        wait(for: [responseExpectation], timeout: defaultTimeout)
+        wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testPing() async {
@@ -115,6 +113,6 @@ final class AuthTests: XCTestCase {
                 pingExpectation.fulfill()
             }
             .store(in: &publishers)
-        wait(for: [pingExpectation], timeout: defaultTimeout)
+        wait(for: [pingExpectation], timeout: InputConfig.defaultTimeout)
     }
 }

@@ -20,8 +20,6 @@ final class PairingTests: XCTestCase {
 
     private var publishers = [AnyCancellable]()
 
-    private let defaultTimeout: TimeInterval = 30
-
     override func setUp() {
         (appPairingClient, appPushClient) = makeClients(prefix: "🤖 App")
         (walletPairingClient, walletPushClient) = makeClients(prefix: "🐶 Wallet")
@@ -31,7 +29,7 @@ final class PairingTests: XCTestCase {
         let keychain = KeychainStorageMock()
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let projectId = "3ca2919724fbfa5456a25194e369a8b4"
-        let relayClient = RelayClient(relayHost: URLConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
+        let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
 
         let pairingClient = PairingClientFactory.create(logger: logger, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, relayClient: relayClient)
 
@@ -53,7 +51,7 @@ final class PairingTests: XCTestCase {
 
         try await appPushClient.propose(topic: uri.topic)
 
-        wait(for: [exp], timeout: defaultTimeout)
+        wait(for: [exp], timeout: InputConfig.defaultTimeout)
     }
 }
 

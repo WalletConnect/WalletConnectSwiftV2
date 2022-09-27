@@ -10,17 +10,15 @@ final class RelayClientEndToEndTests: XCTestCase {
     let projectId = "3ca2919724fbfa5456a25194e369a8b4"
     private var publishers = Set<AnyCancellable>()
 
-    private let defaultTimeout: TimeInterval = 30
-
     func makeRelayClient() -> RelayClient {
         let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock())
         let socketAuthenticator = SocketAuthenticator(
             clientIdStorage: clientIdStorage,
             didKeyFactory: ED25519DIDKeyFactory(),
-            relayHost: URLConfig.relayHost
+            relayHost: InputConfig.relayHost
         )
         let urlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)
-        let socket = WebSocket(url: urlFactory.create(host: URLConfig.relayHost, projectId: projectId))
+        let socket = WebSocket(url: urlFactory.create(host: InputConfig.relayHost, projectId: projectId))
 
         let logger = ConsoleLogger()
         let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket), logger: logger)
@@ -42,7 +40,7 @@ final class RelayClientEndToEndTests: XCTestCase {
             }
         }.store(in: &publishers)
 
-        wait(for: [subscribeExpectation], timeout: defaultTimeout)
+        wait(for: [subscribeExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testEndToEndPayload() {
@@ -93,7 +91,7 @@ final class RelayClientEndToEndTests: XCTestCase {
             }
         }.store(in: &publishers)
 
-        wait(for: [expectationA, expectationB], timeout: defaultTimeout)
+        wait(for: [expectationA, expectationB], timeout: InputConfig.defaultTimeout)
 
         XCTAssertEqual(subscriptionATopic, randomTopic)
         XCTAssertEqual(subscriptionBTopic, randomTopic)
