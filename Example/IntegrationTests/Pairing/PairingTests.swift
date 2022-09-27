@@ -9,6 +9,7 @@ import WalletConnectNetworking
 
 
 final class PairingTests: XCTestCase {
+
     var appPairingClient: PairingClient!
     var walletPairingClient: PairingClient!
 
@@ -18,6 +19,8 @@ final class PairingTests: XCTestCase {
     var pairingStorage: PairingStorage!
 
     private var publishers = [AnyCancellable]()
+
+    private let defaultTimeout: TimeInterval = 30
 
     override func setUp() {
         (appPairingClient, appPushClient) = makeClients(prefix: "🤖 App")
@@ -50,7 +53,7 @@ final class PairingTests: XCTestCase {
 
         try await appPushClient.propose(topic: uri.topic)
 
-        wait(for: [exp], timeout: 2)
+        wait(for: [exp], timeout: defaultTimeout)
     }
 }
 

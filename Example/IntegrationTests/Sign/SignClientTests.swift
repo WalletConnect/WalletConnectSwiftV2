@@ -7,7 +7,7 @@ import JSONRPC
 
 final class SignClientTests: XCTestCase {
 
-    let defaultTimeout: TimeInterval = 8
+    private let defaultTimeout: TimeInterval = 30
 
     var dapp: ClientDelegate!
     var wallet: ClientDelegate!
