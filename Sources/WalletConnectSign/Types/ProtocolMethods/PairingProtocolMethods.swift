@@ -1,15 +1,6 @@
 import Foundation
 import WalletConnectNetworking
 
-struct AuthRequestProtocolMethod: ProtocolMethod {
-    let method: String = "wc_authRequest"
-
-    let requestConfig = RelayConfig(tag: 3000, prompt: true, ttl: 86400)
-
-    let responseConfig = RelayConfig(tag: 3001, prompt: false, ttl: 86400)
-}
-
-
 struct PairingPingProtocolMethod: ProtocolMethod {
     let method: String = "wc_pairingPing"
 
@@ -17,7 +8,6 @@ struct PairingPingProtocolMethod: ProtocolMethod {
 
     let responseConfig = RelayConfig(tag: 1003, prompt: false, ttl: 30)
 }
-
 
 struct PairingDeleteProtocolMethod: ProtocolMethod {
     let method: String = "wc_pairingDelete"

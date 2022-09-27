@@ -21,10 +21,11 @@ public class PairingPingService {
         pairingStorage: WCPairingStorage,
         networkingInteractor: NetworkInteracting,
         logger: ConsoleLogging) {
+            let protocolMethod = PairingPingProtocolMethod()
             self.pairingStorage = pairingStorage
-            self.pingRequester = PingRequester(networkingInteractor: networkingInteractor, method: PairingProtocolMethod.ping)
-            self.pingResponder = PingResponder(networkingInteractor: networkingInteractor, method: PairingProtocolMethod.ping, logger: logger)
-            self.pingResponseSubscriber = PingResponseSubscriber(networkingInteractor: networkingInteractor, method: PairingProtocolMethod.ping, logger: logger)
+            self.pingRequester = PingRequester(networkingInteractor: networkingInteractor, method: protocolMethod)
+            self.pingResponder = PingResponder(networkingInteractor: networkingInteractor, method: protocolMethod, logger: logger)
+            self.pingResponseSubscriber = PingResponseSubscriber(networkingInteractor: networkingInteractor, method: protocolMethod, logger: logger)
         }
 
     public func ping(topic: String) async throws {

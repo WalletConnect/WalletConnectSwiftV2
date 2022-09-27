@@ -77,7 +77,7 @@ final class RelayClientEndToEndTests: XCTestCase {
         }.store(in: &publishers)
 
         relayA.socketConnectionStatusPublisher.sink {  _ in
-            relayA.publish(topic: randomTopic, payload: payloadA, tag: 0, onNetworkAcknowledge: { error in
+            relayA.publish(topic: randomTopic, payload: payloadA, tag: 0, prompt: false, ttl: 60, onNetworkAcknowledge: { error in
                 XCTAssertNil(error)
             })
             relayA.subscribe(topic: randomTopic) { error in
@@ -85,7 +85,7 @@ final class RelayClientEndToEndTests: XCTestCase {
             }
         }.store(in: &publishers)
         relayB.socketConnectionStatusPublisher.sink {  _ in
-            relayB.publish(topic: randomTopic, payload: payloadB, tag: 0, onNetworkAcknowledge: { error in
+            relayB.publish(topic: randomTopic, payload: payloadB, tag: 0, prompt: false, ttl: 60, onNetworkAcknowledge: { error in
                 XCTAssertNil(error)
             })
             relayB.subscribe(topic: randomTopic) { error in

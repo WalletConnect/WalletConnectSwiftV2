@@ -23,10 +23,11 @@ class DeletePairingService {
 
     func delete(topic: String) async throws {
         let reasonCode = ReasonCode.userDisconnected
+        let protocolMethod = PairingDeleteProtocolMethod()
         let reason = SessionType.Reason(code: reasonCode.code, message: reasonCode.message)
         logger.debug("Will delete pairing for reason: message: \(reason.message) code: \(reason.code)")
-        let request = RPCRequest(method: SignProtocolMethod.sessionDelete.method, params: reason)
-        try await networkingInteractor.request(request, topic: topic, tag: SignProtocolMethod.sessionDelete.requestTag)
+        let request = RPCRequest(method: protocolMethod.method, params: reason)
+        try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
         pairingStorage.delete(topic: topic)
         kms.deleteSymmetricKey(for: topic)
         networkingInteractor.unsubscribe(topic: topic)

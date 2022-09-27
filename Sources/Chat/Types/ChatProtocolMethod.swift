@@ -1,34 +1,20 @@
 import Foundation
 import WalletConnectNetworking
 
-enum ChatProtocolMethod: ProtocolMethod {
-    case invite
-    case message
+struct ChatInviteProtocolMethod: ProtocolMethod {
+    let method: String = "wc_chatInvite"
 
-    var requestTag: Int {
-        switch self {
-        case .invite:
-            return 2000
-        case .message:
-            return 2002
-        }
-    }
-    
-    var responseTag: Int {
-        switch self {
-        case .invite:
-            return 2001
-        case .message:
-            return 2003
-        }
-    }
+    let requestConfig = RelayConfig(tag: 2000, prompt: true, ttl: 86400)
 
-    var method: String {
-        switch self {
-        case .invite:
-            return "wc_chatInvite"
-        case .message:
-            return "wc_chatMessage"
-        }
-    }
+    let responseConfig = RelayConfig(tag: 2001, prompt: false, ttl: 86400)
+
+}
+
+struct ChatMessageProtocolMethod: ProtocolMethod {
+    let method: String = "wc_chatMessage"
+
+    let requestConfig = RelayConfig(tag: 2002, prompt: true, ttl: 86400)
+
+    let responseConfig = RelayConfig(tag: 2003, prompt: false, ttl: 86400)
+
 }

@@ -22,10 +22,11 @@ class SessionPingService {
         sessionStorage: WCSessionStorage,
         networkingInteractor: NetworkInteracting,
         logger: ConsoleLogging) {
+            let protocolMethod = SessionPingProtocolMethod()
             self.sessionStorage = sessionStorage
-            self.pingRequester = PingRequester(networkingInteractor: networkingInteractor, method: SignProtocolMethod.sessionPing)
-            self.pingResponder = PingResponder(networkingInteractor: networkingInteractor, method: SignProtocolMethod.sessionPing, logger: logger)
-            self.pingResponseSubscriber = PingResponseSubscriber(networkingInteractor: networkingInteractor, method: SignProtocolMethod.sessionPing, logger: logger)
+            self.pingRequester = PingRequester(networkingInteractor: networkingInteractor, method: protocolMethod)
+            self.pingResponder = PingResponder(networkingInteractor: networkingInteractor, method: protocolMethod, logger: logger)
+            self.pingResponseSubscriber = PingResponseSubscriber(networkingInteractor: networkingInteractor, method: protocolMethod, logger: logger)
         }
 
     func ping(topic: String) async throws {
