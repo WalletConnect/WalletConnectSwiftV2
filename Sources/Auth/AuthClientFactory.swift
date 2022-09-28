@@ -22,12 +22,11 @@ public struct AuthClientFactory {
         let messageFormatter = SIWEMessageFormatter()
         let appRequestService = AppRequestService(networkingInteractor: networkingInteractor, kms: kms, appMetadata: metadata, logger: logger)
         let messageSigner = MessageSigner(signer: Signer())
-        let appRespondSubscriber = AppRespondSubscriber(networkingInteractor: networkingInteractor, logger: logger, rpcHistory: history, signatureVerifier: messageSigner, messageFormatter: messageFormatter, pairingStorage: pairingStore)
+        let appRespondSubscriber = AppRespondSubscriber(networkingInteractor: networkingInteractor, logger: logger, rpcHistory: history, signatureVerifier: messageSigner, messageFormatter: messageFormatter)
         let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingInteractor, logger: logger, kms: kms, rpcHistory: history)
         let walletRequestSubscriber = WalletRequestSubscriber(networkingInteractor: networkingInteractor, logger: logger, kms: kms, messageFormatter: messageFormatter, address: account?.address, walletErrorResponder: walletErrorResponder)
         let walletRespondService = WalletRespondService(networkingInteractor: networkingInteractor, logger: logger, kms: kms, rpcHistory: history, walletErrorResponder: walletErrorResponder)
         let pendingRequestsProvider = PendingRequestsProvider(rpcHistory: history)
-        let pingService = PairingPingService(pairingStorage: pairingStore, networkingInteractor: networkingInteractor, logger: logger)
 
         //TODO - fix this - singleton?
         let pairingClient = PairingClientFactory.create(relayClient: relayClient)
@@ -39,9 +38,7 @@ public struct AuthClientFactory {
                           account: account,
                           pendingRequestsProvider: pendingRequestsProvider,
                           logger: logger,
-                          pairingStorage: pairingStore,
                           socketConnectionStatusPublisher: relayClient.socketConnectionStatusPublisher,
-                          pingService: pingService,
                           pairingClient: pairingClient)
     }
 }

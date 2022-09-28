@@ -7,7 +7,6 @@ import WalletConnectPairing
 
 class AppRespondSubscriber {
     private let networkingInteractor: NetworkInteracting
-    private let pairingStorage: WCPairingStorage
     private let logger: ConsoleLogging
     private let rpcHistory: RPCHistory
     private let signatureVerifier: MessageSignatureVerifying
@@ -20,14 +19,12 @@ class AppRespondSubscriber {
          logger: ConsoleLogging,
          rpcHistory: RPCHistory,
          signatureVerifier: MessageSignatureVerifying,
-         messageFormatter: SIWEMessageFormatting,
-         pairingStorage: WCPairingStorage) {
+         messageFormatter: SIWEMessageFormatting) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.rpcHistory = rpcHistory
         self.signatureVerifier = signatureVerifier
         self.messageFormatter = messageFormatter
-        self.pairingStorage = pairingStorage
         subscribeForResponse()
     }
 
@@ -41,7 +38,8 @@ class AppRespondSubscriber {
         networkingInteractor.responseSubscription(on: AuthRequestProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<AuthRequestParams, Cacao>)  in
 
-                activatePairingIfNeeded(id: payload.id)
+                //TODO - call pairing client to activate
+//                activatePairingIfNeeded(id: payload.id)
                 networkingInteractor.unsubscribe(topic: payload.topic)
 
                 let requestId = payload.id
@@ -62,16 +60,5 @@ class AppRespondSubscriber {
                 onResponse?(requestId, .success(cacao))
 
             }.store(in: &publishers)
-    }
-
-    private func activatePairingIfNeeded(id: RPCID) {
-        guard let record = rpcHistory.get(recordId: id) else { return }
-        let pairingTopic = record.topic
-        guard var pairing = pairingStorage.getPairing(forTopic: pairingTopic) else { return }
-        if !pairing.active {
-            pairing.activate()
-        } else {
-            try? pairing.updateExpiry()
-        }
     }
 }

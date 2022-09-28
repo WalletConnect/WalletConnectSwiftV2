@@ -6,21 +6,34 @@ import Combine
 import JSONRPC
 
 public class PairingClient: PairingRegisterer {
+
+    public var pingResponsePublisher: AnyPublisher<(String), Never> {
+        pingResponsePublisherSubject.eraseToAnyPublisher()
+    }
+    public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
+
     private let walletPairService: WalletPairService
     private let appPairService: AppPairService
-    public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
+    private var pingResponsePublisherSubject = PassthroughSubject<String, Never>()
     private let logger: ConsoleLogging
+    private let pingService: PairingPingService
     private let networkingInteractor: NetworkInteracting
     private let pairingRequestsSubscriber: PairingRequestsSubscriber
     private let pairingsProvider: PairingsProvider
+    private let deletePairingService: DeletePairingService
+    private let pairingStorage: WCPairingStorage
+
     private let cleanupService: CleanupService
 
     init(appPairService: AppPairService,
          networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
          walletPairService: WalletPairService,
+         deletePairingService: DeletePairingService,
          pairingRequestsSubscriber: PairingRequestsSubscriber,
+         pairingStorage: WCPairingStorage,
          cleanupService: CleanupService,
+         pingService: PairingPingService,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
          pairingsProvider: PairingsProvider
     ) {
@@ -29,10 +42,20 @@ public class PairingClient: PairingRegisterer {
         self.networkingInteractor = networkingInteractor
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
         self.logger = logger
+        self.pairingStorage = pairingStorage
+        self.deletePairingService = deletePairingService
         self.cleanupService = cleanupService
+        self.pingService = pingService
         self.pairingRequestsSubscriber = pairingRequestsSubscriber
         self.pairingsProvider = pairingsProvider
     }
+
+    private func setUpPublishers() {
+        pingService.onResponse = { [unowned self] topic in
+            pingResponsePublisherSubject.send(topic)
+        }
+    }
+
     /// For wallet to establish a pairing
     /// Wallet should call this function in order to accept peer's pairing proposal and be able to subscribe for future requests.
     /// - Parameter uri: Pairing URI that is commonly presented as a QR code by a dapp or delivered with universal linking.
@@ -64,11 +87,16 @@ public class PairingClient: PairingRegisterer {
         pairingsProvider.getPairings()
     }
 
-    public func ping(_ topic: String) {
+    public func getPairing(for topic: String) throws -> Pairing {
+        try pairingsProvider.getPairing(for: topic)
+    }
 
+    public func ping(topic: String) async throws {
+        try await pingService.ping(topic: topic)
     }
 
     public func disconnect(topic: String) async throws {
+        try await deletePairingService.delete(topic: topic)
 
     }
 

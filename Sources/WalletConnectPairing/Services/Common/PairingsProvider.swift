@@ -1,6 +1,9 @@
 import Foundation
 
 public class PairingsProvider {
+    enum Errors: Error {
+        case noPairingMatchingTopic
+    }
     private let pairingStorage: WCPairingStorage
 
     public init(pairingStorage: WCPairingStorage) {
@@ -9,6 +12,14 @@ public class PairingsProvider {
 
     func getPairings() -> [Pairing] {
         pairingStorage.getAll()
-            .map {Pairing(topic: $0.topic, peer: $0.peerMetadata, expiryDate: $0.expiryDate)}
+            .map {Pairing($0)}
+    }
+
+
+    public func getPairing(for topic: String) throws -> Pairing {
+        guard let pairing = pairingStorage.getPairing(forTopic: topic) else {
+            throw Errors.noPairingMatchingTopic
+        }
+        return Pairing(pairing)
     }
 }

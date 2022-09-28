@@ -24,14 +24,19 @@ public struct PairingClientFactory {
         let pairingRequestsSubscriber = PairingRequestsSubscriber(networkingInteractor: networkingInteractor, pairingStorage: pairingStore, logger: logger)
         let pairingsProvider = PairingsProvider(pairingStorage: pairingStore)
         let cleanupService = CleanupService(pairingStore: pairingStore, kms: kms)
+        let deletePairingService = DeletePairingService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore, logger: logger)
+        let pingService = PairingPingService(pairingStorage: pairingStore, networkingInteractor: networkingInteractor, logger: logger)
 
         return PairingClient(
             appPairService: appPairService,
             networkingInteractor: networkingInteractor,
             logger: logger,
             walletPairService: walletPairService,
+            deletePairingService: deletePairingService,
             pairingRequestsSubscriber: pairingRequestsSubscriber,
+            pairingStorage: pairingStore,
             cleanupService: cleanupService,
+            pingService: pingService,
             socketConnectionStatusPublisher: relayClient.socketConnectionStatusPublisher,
             pairingsProvider: pairingsProvider
         )

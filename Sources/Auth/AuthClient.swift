@@ -11,9 +11,7 @@ import WalletConnectRelay
 /// Access via `Auth.instance`
 public class AuthClient {
     enum Errors: Error {
-        case pairingUriWrongApiParam
         case unknownWalletAddress
-        case noPairingMatchingTopic
     }
 
     // MARK: - Public Properties
@@ -34,9 +32,7 @@ public class AuthClient {
         authResponsePublisherSubject.eraseToAnyPublisher()
     }
 
-    public var pingResponsePublisher: AnyPublisher<(String), Never> {
-        pingResponsePublisherSubject.eraseToAnyPublisher()
-    }
+
 
     /// Publisher that sends web socket connection status
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
@@ -50,15 +46,11 @@ public class AuthClient {
 
     private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, AuthError>), Never>()
     private var authRequestPublisherSubject = PassthroughSubject<AuthRequest, Never>()
-    private var pingResponsePublisherSubject = PassthroughSubject<String, Never>()
     private let appRequestService: AppRequestService
     private let appRespondSubscriber: AppRespondSubscriber
     private let walletRequestSubscriber: WalletRequestSubscriber
     private let walletRespondService: WalletRespondService
-    private let pairingStorage: WCPairingStorage
     private let pendingRequestsProvider: PendingRequestsProvider
-    private let pingService: PairingPingService
-    private let pairingsProvider: PairingsProvider
     private var account: Account?
 
     init(appRequestService: AppRequestService,
@@ -68,10 +60,7 @@ public class AuthClient {
          account: Account?,
          pendingRequestsProvider: PendingRequestsProvider,
          logger: ConsoleLogging,
-         pairingStorage: WCPairingStorage,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
-         pingService: PairingPingService,
-         pairingsProvider: PairingsProvider,
          pairingClient: PairingClient
     ) {
         self.appRequestService = appRequestService
@@ -81,10 +70,7 @@ public class AuthClient {
         self.account = account
         self.pendingRequestsProvider = pendingRequestsProvider
         self.logger = logger
-        self.pairingStorage = pairingStorage
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
-        self.pingService = pingService
-        self.pairingsProvider = pairingsProvider
         self.pairingClient = pairingClient
         setUpPublishers()
     }
@@ -97,9 +83,6 @@ public class AuthClient {
     /// - When URI is invalid format or missing params
     /// - When topic is already in use
     public func pair(uri: WalletConnectURI) async throws {
-        guard uri.api == .auth else {
-            throw Errors.pairingUriWrongApiParam
-        }
         try await pairingClient.pair(uri: uri)
     }
 
@@ -119,9 +102,7 @@ public class AuthClient {
     /// - Parameter topic: Pairing topic that wallet already subscribes for
     public func request(_ params: RequestParams, topic: String) async throws {
         logger.debug("Requesting Authentication on existing pairing")
-        guard pairingStorage.hasPairing(forTopic: topic) else {
-            throw Errors.noPairingMatchingTopic
-        }
+        try pairingClient.getPairing(for: topic)
         try await appRequestService.request(params: params, topic: topic)
     }
 
@@ -145,7 +126,7 @@ public class AuthClient {
     }
 
     public func ping(topic: String) async throws {
-        try await pingService.ping(topic: topic)
+        try await pairingClient.ping(topic: topic)
     }
 
     public func getPairings() -> [Pairing] {
@@ -166,10 +147,6 @@ public class AuthClient {
 
         walletRequestSubscriber.onRequest = { [unowned self] request in
             authRequestPublisherSubject.send(request)
-        }
-
-        pingService.onResponse = { [unowned self] topic in
-            pingResponsePublisherSubject.send(topic)
         }
     }
 }
