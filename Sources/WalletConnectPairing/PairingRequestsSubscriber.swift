@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import WalletConnectUtils
 import WalletConnectNetworking
+import JSONRPC
 
 public class PairingRequestsSubscriber {
     private let networkingInteractor: NetworkInteracting
@@ -13,24 +14,22 @@ public class PairingRequestsSubscriber {
         self.pairingStorage = pairingStorage
     }
 
-    func subscribeForRequest(_ protocolMethod: ProtocolMethod) {
+    func subscribeForRequest(_ protocolMethod: ProtocolMethod) -> AnyPublisher<(topic: String, request: RPCRequest), Never> {
+        let publisherSubject = PassthroughSubject<(topic: String, request: RPCRequest), Never>()
         networkingInteractor.requestPublisher
-            // Pairing requests only
-            .filter { [unowned self] payload in
-                return pairingStorage.hasPairing(forTopic: payload.topic)
-            }
-            // Wrong method
-            .filter { payload in
-                return payload.request.method != protocolMethod.method
-            }
-            // Respond error
             .sink { [unowned self] topic, request in
-                Task(priority: .high) {
-                    // TODO - spec tag
-                    try await networkingInteractor.respondError(topic: topic, requestId: request.id!, protocolMethod: protocolMethod, reason: PairError.methodUnsupported)
+                if request.method != protocolMethod.method {
+                    Task(priority: .high) {
+                        // TODO - spec tag
+                        try await networkingInteractor.respondError(topic: topic, requestId: request.id!, protocolMethod: protocolMethod, reason: PairError.methodUnsupported)
+                    }
+                } else {
+                    publisherSubject.send((topic, request))
                 }
 
             }.store(in: &publishers)
+
+        return publisherSubject.eraseToAnyPublisher()
     }
 
 }

@@ -46,15 +46,15 @@ private extension PushClient {
         let protocolMethod = PushProposeProtocolMethod()
 
         pairingRegisterer.register(method: protocolMethod)
+            .sink { [unowned self] (topic, request) in
+                let params = try! request.params!.get(PushRequestParams.self)
+                requestPublisherSubject.send((topic: topic, params: params))
+        }.store(in: &publishers)
 
         networkInteractor.responseErrorSubscription(on: protocolMethod)
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<PushRequestParams>) in
                 logger.error(payload.error.localizedDescription)
             }.store(in: &publishers)
 
-        networkInteractor.requestSubscription(on: protocolMethod)
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<PushRequestParams>) in
-                requestPublisherSubject.send((payload.topic, payload.request))
-            }.store(in: &publishers)
     }
 }

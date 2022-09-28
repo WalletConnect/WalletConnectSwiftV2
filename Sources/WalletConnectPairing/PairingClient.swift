@@ -3,6 +3,7 @@ import WalletConnectUtils
 import WalletConnectRelay
 import WalletConnectNetworking
 import Combine
+import JSONRPC
 
 public class PairingClient: PairingRegisterer {
     private let walletPairService: WalletPairService
@@ -41,7 +42,7 @@ public class PairingClient: PairingRegisterer {
         return try await appPairService.create()
     }
 
-    public func register(method: ProtocolMethod) {
+    public func register(method: ProtocolMethod) -> AnyPublisher<(topic: String, request: RPCRequest), Never> {
         pairingRequestsSubscriber.subscribeForRequest(method)
     }
 }
