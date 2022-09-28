@@ -42,6 +42,30 @@ public class PairingClient: PairingRegisterer {
         return try await appPairService.create()
     }
 
+    public func activate(_ topic: String) {
+
+    }
+
+    public func updateExpiry(_ topic: String) {
+
+    }
+
+    public func updateMetadata(_ topic: String, metadata: AppMetadata) {
+
+    }
+
+    public func getPairings() -> [Pairing] {
+
+    }
+
+    public func ping(_ topic: String) {
+
+    }
+
+    public func disconnect(_ topic: String) {
+        
+    }
+
     public func register(method: ProtocolMethod) -> AnyPublisher<(topic: String, request: RPCRequest), Never> {
         pairingRequestsSubscriber.subscribeForRequest(method)
     }
