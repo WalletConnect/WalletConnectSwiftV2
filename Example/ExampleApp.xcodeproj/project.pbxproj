@@ -247,7 +247,6 @@
 		A50C036428AAD32200FE72D3 /* ClientDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientDelegate.swift; sourceTree = "<group>"; };
 		A50F3945288005B200064555 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		A518B31328E33A6500A2CE93 /* InputConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputConfig.swift; sourceTree = "<group>"; };
-		A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Configuration.xcconfig; sourceTree = "<group>"; };
 		A51AC0D828E436A3001BACF9 /* InputConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputConfig.swift; sourceTree = "<group>"; };
 		A51AC0DB28E436E6001BACF9 /* InputConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputConfig.swift; sourceTree = "<group>"; };
 		A51AC0DE28E4379F001BACF9 /* InputConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputConfig.swift; sourceTree = "<group>"; };
@@ -363,6 +362,7 @@
 		A5E22D212840C8D300E36487 /* WalletEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletEngine.swift; sourceTree = "<group>"; };
 		A5E22D232840C8DB00E36487 /* SafariEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariEngine.swift; sourceTree = "<group>"; };
 		A5E22D2B2840EAC300E36487 /* XCUIElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCUIElement.swift; sourceTree = "<group>"; };
+		A5F48A0528E43D3F0034CBFB /* Configuration.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Configuration.xcconfig; path = ../Configuration.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -459,7 +459,7 @@
 		764E1D3326F8D3FC00A1FB15 = {
 			isa = PBXGroup;
 			children = (
-				A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */,
+				A5F48A0528E43D3F0034CBFB /* Configuration.xcconfig */,
 				84CE6453279FFE1100142511 /* Wallet.entitlements */,
 				764E1D3E26F8D3FC00A1FB15 /* ExampleApp */,
 				84CE641D27981DED00142511 /* DApp */,
@@ -1550,7 +1550,7 @@
 /* Begin XCBuildConfiguration section */
 		764E1D4E26F8D3FE00A1FB15 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
+			baseConfigurationReference = A5F48A0528E43D3F0034CBFB /* Configuration.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -1612,7 +1612,7 @@
 		};
 		764E1D4F26F8D3FE00A1FB15 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
+			baseConfigurationReference = A5F48A0528E43D3F0034CBFB /* Configuration.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -1669,7 +1669,6 @@
 		};
 		764E1D5126F8D3FE00A1FB15 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1695,7 +1694,6 @@
 		};
 		764E1D5226F8D3FE00A1FB15 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1721,7 +1719,6 @@
 		};
 		84CE642D27981DF000142511 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1756,7 +1753,6 @@
 		};
 		84CE642E27981DF000142511 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1791,7 +1787,6 @@
 		};
 		A58E7CF928729F550082D443 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1822,7 +1817,6 @@
 		};
 		A58E7CFA28729F550082D443 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1853,7 +1847,6 @@
 		};
 		A5A4FC782840C12C00BBEC1E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
@@ -1873,7 +1866,6 @@
 		};
 		A5A4FC792840C12C00BBEC1E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
@@ -1893,7 +1885,6 @@
 		};
 		A5E03DF2286464DB00888481 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
@@ -1917,7 +1908,6 @@
 		};
 		A5E03DF3286464DB00888481 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
