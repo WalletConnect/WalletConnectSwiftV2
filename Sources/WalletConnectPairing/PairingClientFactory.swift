@@ -14,14 +14,16 @@ public struct PairingClientFactory {
     }
 
     static func create(logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, relayClient: RelayClient) -> PairingClient {
+        let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue)))
         let kms = KeyManagementService(keychain: keychainStorage)
         let serializer = Serializer(kms: kms)
         let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
         let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serializer, logger: logger, rpcHistory: history)
-        let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: keyValueStorage, identifier: "")))
         let appPairService = AppPairService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore)
         let walletPairService = WalletPairService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore)
         let pairingRequestsSubscriber = PairingRequestsSubscriber(networkingInteractor: networkingInteractor, pairingStorage: pairingStore, logger: logger)
+        let pairingsProvider = PairingsProvider(pairingStorage: pairingStore)
+        let cleanupService = CleanupService(pairingStore: pairingStore, kms: kms)
 
         return PairingClient(
             appPairService: appPairService,
@@ -29,7 +31,9 @@ public struct PairingClientFactory {
             logger: logger,
             walletPairService: walletPairService,
             pairingRequestsSubscriber: pairingRequestsSubscriber,
-            socketConnectionStatusPublisher: relayClient.socketConnectionStatusPublisher
+            cleanupService: cleanupService,
+            socketConnectionStatusPublisher: relayClient.socketConnectionStatusPublisher,
+            pairingsProvider: pairingsProvider
         )
     }
 }

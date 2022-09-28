@@ -46,54 +46,46 @@ public class AuthClient {
 
     // MARK: - Private Properties
 
+    private let pairingClient: PairingClient
+
     private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, AuthError>), Never>()
     private var authRequestPublisherSubject = PassthroughSubject<AuthRequest, Never>()
     private var pingResponsePublisherSubject = PassthroughSubject<String, Never>()
-    private let appPairService: AppPairService
     private let appRequestService: AppRequestService
-    private let deletePairingService: DeletePairingService
     private let appRespondSubscriber: AppRespondSubscriber
-    private let walletPairService: WalletPairService
     private let walletRequestSubscriber: WalletRequestSubscriber
     private let walletRespondService: WalletRespondService
-    private let cleanupService: CleanupService
     private let pairingStorage: WCPairingStorage
     private let pendingRequestsProvider: PendingRequestsProvider
     private let pingService: PairingPingService
     private let pairingsProvider: PairingsProvider
     private var account: Account?
 
-    init(appPairService: AppPairService,
-         appRequestService: AppRequestService,
+    init(appRequestService: AppRequestService,
          appRespondSubscriber: AppRespondSubscriber,
-         walletPairService: WalletPairService,
          walletRequestSubscriber: WalletRequestSubscriber,
          walletRespondService: WalletRespondService,
-         deletePairingService: DeletePairingService,
          account: Account?,
          pendingRequestsProvider: PendingRequestsProvider,
-         cleanupService: CleanupService,
          logger: ConsoleLogging,
          pairingStorage: WCPairingStorage,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
          pingService: PairingPingService,
-         pairingsProvider: PairingsProvider
+         pairingsProvider: PairingsProvider,
+         pairingClient: PairingClient
     ) {
-        self.appPairService = appPairService
         self.appRequestService = appRequestService
-        self.walletPairService = walletPairService
         self.walletRequestSubscriber = walletRequestSubscriber
         self.walletRespondService = walletRespondService
         self.appRespondSubscriber = appRespondSubscriber
         self.account = account
         self.pendingRequestsProvider = pendingRequestsProvider
-        self.cleanupService = cleanupService
         self.logger = logger
         self.pairingStorage = pairingStorage
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
-        self.deletePairingService = deletePairingService
         self.pingService = pingService
         self.pairingsProvider = pairingsProvider
+        self.pairingClient = pairingClient
         setUpPublishers()
     }
 
@@ -108,7 +100,7 @@ public class AuthClient {
         guard uri.api == .auth else {
             throw Errors.pairingUriWrongApiParam
         }
-        try await walletPairService.pair(uri)
+        try await pairingClient.pair(uri: uri)
     }
 
     /// For a dapp to send an authentication request to a wallet
@@ -117,7 +109,7 @@ public class AuthClient {
     /// - Returns: Pairing URI that should be shared with wallet out of bound. Common way is to present it as a QR code.
     public func request(_ params: RequestParams) async throws -> WalletConnectURI {
         logger.debug("Requesting Authentication")
-        let uri = try await appPairService.create()
+        let uri = try await pairingClient.create()
         try await appRequestService.request(params: params, topic: uri.topic)
         return uri
     }
@@ -149,7 +141,7 @@ public class AuthClient {
     }
 
     public func disconnect(topic: String) async throws {
-        try await deletePairingService.delete(topic: topic)
+        try await pairingClient.disconnect(topic: topic)
     }
 
     public func ping(topic: String) async throws {
@@ -157,7 +149,7 @@ public class AuthClient {
     }
 
     public func getPairings() -> [Pairing] {
-        pairingsProvider.getPairings()
+        pairingClient.getPairings()
     }
 
     /// Query pending authentication requests
@@ -166,15 +158,6 @@ public class AuthClient {
         guard let account = account else { throw Errors.unknownWalletAddress }
         return try pendingRequestsProvider.getPendingRequests(account: account)
     }
-
-#if DEBUG
-    /// Delete all stored data such as: pairings, keys
-    ///
-    /// - Note: Doesn't unsubscribe from topics
-    public func cleanup() throws {
-        try cleanupService.cleanup()
-    }
-#endif
 
     private func setUpPublishers() {
         appRespondSubscriber.onResponse = { [unowned self] (id, result) in

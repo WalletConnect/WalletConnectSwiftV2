@@ -13,12 +13,14 @@ public class PairingClient: PairingRegisterer {
     private let networkingInteractor: NetworkInteracting
     private let pairingRequestsSubscriber: PairingRequestsSubscriber
     private let pairingsProvider: PairingsProvider
+    private let cleanupService: CleanupService
 
     init(appPairService: AppPairService,
          networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
          walletPairService: WalletPairService,
          pairingRequestsSubscriber: PairingRequestsSubscriber,
+         cleanupService: CleanupService,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
          pairingsProvider: PairingsProvider
     ) {
@@ -27,6 +29,7 @@ public class PairingClient: PairingRegisterer {
         self.networkingInteractor = networkingInteractor
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
         self.logger = logger
+        self.cleanupService = cleanupService
         self.pairingRequestsSubscriber = pairingRequestsSubscriber
         self.pairingsProvider = pairingsProvider
     }
@@ -65,12 +68,21 @@ public class PairingClient: PairingRegisterer {
 
     }
 
-    public func disconnect(_ topic: String) {
-        
+    public func disconnect(topic: String) async throws {
+
     }
 
     public func register(method: ProtocolMethod) -> AnyPublisher<(topic: String, request: RPCRequest), Never> {
         pairingRequestsSubscriber.subscribeForRequest(method)
     }
+
+#if DEBUG
+    /// Delete all stored data such as: pairings, keys
+    ///
+    /// - Note: Doesn't unsubscribe from topics
+    public func cleanup() throws {
+        try cleanupService.cleanup()
+    }
+#endif
 }
 
