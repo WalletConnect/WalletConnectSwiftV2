@@ -42,8 +42,7 @@ public class NetworkingInteractor: NetworkInteracting {
 
     private func setupRelaySubscribtion() {
         relayClient.messagePublisher
-        //TODO - add async filter
-            .filter { [unowned self] in topics.contains($0.topic)}
+            .asyncFilter { [unowned self] in await topics.contains($0.topic)}
             .sink { [unowned self] (topic, message) in
             manageSubscription(topic, message)
         }
@@ -51,14 +50,12 @@ public class NetworkingInteractor: NetworkInteracting {
     }
 
     public func subscribe(topic: String) async throws {
-//        await topics.insert(topic)
-        topics.insert(topic)
+        await topics.insert(topic)
         try await relayClient.subscribe(topic: topic)
     }
 
     public func unsubscribe(topic: String) {
-//        Task { await topics.remove(topic) }
-        topics.remove(topic)
+        Task { await topics.remove(topic) }
         relayClient.unsubscribe(topic: topic) { [unowned self] error in
             if let error = error {
                 logger.error(error)
