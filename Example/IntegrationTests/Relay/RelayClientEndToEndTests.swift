@@ -7,7 +7,6 @@ import Starscream
 
 final class RelayClientEndToEndTests: XCTestCase {
 
-    let projectId = "3ca2919724fbfa5456a25194e369a8b4"
     private var publishers = Set<AnyCancellable>()
 
     func makeRelayClient() -> RelayClient {
@@ -18,7 +17,7 @@ final class RelayClientEndToEndTests: XCTestCase {
             relayHost: InputConfig.relayHost
         )
         let urlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)
-        let socket = WebSocket(url: urlFactory.create(host: InputConfig.relayHost, projectId: projectId))
+        let socket = WebSocket(url: urlFactory.create(host: InputConfig.relayHost, projectId: InputConfig.projectId))
 
         let logger = ConsoleLogger()
         let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket), logger: logger)

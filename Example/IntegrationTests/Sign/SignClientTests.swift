@@ -9,15 +9,12 @@ final class SignClientTests: XCTestCase {
     var dapp: ClientDelegate!
     var wallet: ClientDelegate!
 
-    static private func makeClientDelegate(
-        name: String,
-        projectId: String = "3ca2919724fbfa5456a25194e369a8b4"
-    ) -> ClientDelegate {
+    static private func makeClientDelegate(name: String) -> ClientDelegate {
         let logger = ConsoleLogger(suffix: name, loggingLevel: .debug)
         let keychain = KeychainStorageMock()
         let relayClient = RelayClient(
             relayHost: InputConfig.relayHost,
-            projectId: projectId,
+            projectId: InputConfig.projectId,
             keyValueStorage: RuntimeKeyValueStorage(),
             keychainStorage: keychain,
             socketFactory: SocketFactory(),

@@ -244,6 +244,7 @@
 		A50C036428AAD32200FE72D3 /* ClientDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientDelegate.swift; sourceTree = "<group>"; };
 		A50F3945288005B200064555 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		A518B31328E33A6500A2CE93 /* InputConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputConfig.swift; sourceTree = "<group>"; };
+		A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Configuration.xcconfig; sourceTree = "<group>"; };
 		A55CAAAB28B92AFF00844382 /* ScanModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanModule.swift; sourceTree = "<group>"; };
 		A55CAAAC28B92AFF00844382 /* ScanPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanPresenter.swift; sourceTree = "<group>"; };
 		A55CAAAD28B92AFF00844382 /* ScanRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanRouter.swift; sourceTree = "<group>"; };
@@ -452,6 +453,7 @@
 		764E1D3326F8D3FC00A1FB15 = {
 			isa = PBXGroup;
 			children = (
+				A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */,
 				84CE6453279FFE1100142511 /* Wallet.entitlements */,
 				764E1D3E26F8D3FC00A1FB15 /* ExampleApp */,
 				84CE641D27981DED00142511 /* DApp */,
@@ -1528,6 +1530,7 @@
 /* Begin XCBuildConfiguration section */
 		764E1D4E26F8D3FE00A1FB15 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -1589,6 +1592,7 @@
 		};
 		764E1D4F26F8D3FE00A1FB15 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -1645,6 +1649,7 @@
 		};
 		764E1D5126F8D3FE00A1FB15 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1670,6 +1675,7 @@
 		};
 		764E1D5226F8D3FE00A1FB15 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1695,6 +1701,7 @@
 		};
 		84CE642D27981DF000142511 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1729,6 +1736,7 @@
 		};
 		84CE642E27981DF000142511 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1763,6 +1771,7 @@
 		};
 		A58E7CF928729F550082D443 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1793,6 +1802,7 @@
 		};
 		A58E7CFA28729F550082D443 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1823,6 +1833,7 @@
 		};
 		A5A4FC782840C12C00BBEC1E /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
@@ -1842,6 +1853,7 @@
 		};
 		A5A4FC792840C12C00BBEC1E /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
@@ -1861,6 +1873,7 @@
 		};
 		A5E03DF2286464DB00888481 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
@@ -1876,7 +1889,6 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.IntegrationTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				RELAY_HOST = relay.walletconnect.com;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1885,6 +1897,7 @@
 		};
 		A5E03DF3286464DB00888481 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A51AC0D528E42DCF001BACF9 /* Configuration.xcconfig */;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
@@ -1895,7 +1908,6 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.IntegrationTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				RELAY_HOST = relay.walletconnect.com;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
