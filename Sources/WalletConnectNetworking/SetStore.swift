@@ -11,4 +11,8 @@ actor SetStore<T: Hashable> {
     @discardableResult func remove(_ element: T) -> T? {
         store.remove(element)
     }
+
+    func contains(_ element: T) -> Bool {
+        return store.contains(element)
+    }
 }

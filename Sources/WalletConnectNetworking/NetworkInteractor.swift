@@ -5,7 +5,6 @@ import WalletConnectRelay
 import WalletConnectUtils
 import WalletConnectKMS
 
-
 public class NetworkingInteractor: NetworkInteracting {
     private var publishers = Set<AnyCancellable>()
     private let relayClient: RelayClient
@@ -38,7 +37,14 @@ public class NetworkingInteractor: NetworkInteracting {
         self.rpcHistory = rpcHistory
         self.logger = logger
         self.socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
-        relayClient.messagePublisher.sink { [unowned self] (topic, message) in
+        setupRelaySubscribtion()
+    }
+
+    private func setupRelaySubscribtion() {
+        relayClient.messagePublisher
+        //TODO - add async filter
+            .asyncFilter { [unowned self] in await topics.contains($0.topic)}
+            .sink { [unowned self] (topic, message) in
             manageSubscription(topic, message)
         }
         .store(in: &publishers)
