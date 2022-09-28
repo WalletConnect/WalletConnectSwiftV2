@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectPairing
 
 public class PairingsProvider {
     private let pairingStorage: WCPairingStorage

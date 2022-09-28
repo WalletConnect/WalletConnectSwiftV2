@@ -12,13 +12,15 @@ public class PairingClient: PairingRegisterer {
     private let logger: ConsoleLogging
     private let networkingInteractor: NetworkInteracting
     private let pairingRequestsSubscriber: PairingRequestsSubscriber
+    private let pairingsProvider: PairingsProvider
 
     init(appPairService: AppPairService,
          networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
          walletPairService: WalletPairService,
          pairingRequestsSubscriber: PairingRequestsSubscriber,
-         socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
+         socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
+         pairingsProvider: PairingsProvider
     ) {
         self.appPairService = appPairService
         self.walletPairService = walletPairService
@@ -26,6 +28,7 @@ public class PairingClient: PairingRegisterer {
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
         self.logger = logger
         self.pairingRequestsSubscriber = pairingRequestsSubscriber
+        self.pairingsProvider = pairingsProvider
     }
     /// For wallet to establish a pairing
     /// Wallet should call this function in order to accept peer's pairing proposal and be able to subscribe for future requests.
@@ -55,7 +58,7 @@ public class PairingClient: PairingRegisterer {
     }
 
     public func getPairings() -> [Pairing] {
-
+        pairingsProvider.getPairings()
     }
 
     public func ping(_ topic: String) {
