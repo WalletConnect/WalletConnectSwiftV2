@@ -9,6 +9,7 @@ import WalletConnectNetworking
 
 
 final class PairingTests: XCTestCase {
+
     var appPairingClient: PairingClient!
     var walletPairingClient: PairingClient!
 
@@ -28,7 +29,7 @@ final class PairingTests: XCTestCase {
         let keychain = KeychainStorageMock()
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let projectId = "3ca2919724fbfa5456a25194e369a8b4"
-        let relayClient = RelayClient(relayHost: URLConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
+        let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
 
         let pairingClient = PairingClientFactory.create(logger: logger, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, relayClient: relayClient)
 
@@ -50,7 +51,7 @@ final class PairingTests: XCTestCase {
 
         try await appPushClient.propose(topic: uri.topic)
 
-        wait(for: [exp], timeout: 2)
+        wait(for: [exp], timeout: InputConfig.defaultTimeout)
     }
 }
 

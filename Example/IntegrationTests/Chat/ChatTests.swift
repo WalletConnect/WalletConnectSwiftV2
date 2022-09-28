@@ -22,7 +22,7 @@ final class ChatTests: XCTestCase {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let projectId = "3ca2919724fbfa5456a25194e369a8b4"
         let keychain = KeychainStorageMock()
-        let relayClient = RelayClient(relayHost: URLConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
+        let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
         return ChatClientFactory.create(registry: registry, relayClient: relayClient, kms: KeyManagementService(keychain: keychain), logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
 
@@ -35,7 +35,7 @@ final class ChatTests: XCTestCase {
         invitee.invitePublisher.sink { _ in
             inviteExpectation.fulfill()
         }.store(in: &publishers)
-        wait(for: [inviteExpectation], timeout: 4)
+        wait(for: [inviteExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testAcceptAndCreateNewThread() {
@@ -62,7 +62,7 @@ final class ChatTests: XCTestCase {
             newThreadInviterExpectation.fulfill()
         }.store(in: &publishers)
 
-        wait(for: [newThreadinviteeExpectation, newThreadInviterExpectation], timeout: 10)
+        wait(for: [newThreadinviteeExpectation, newThreadInviterExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testMessage() {
@@ -97,6 +97,6 @@ final class ChatTests: XCTestCase {
             messageExpectation.fulfill()
         }.store(in: &publishers)
 
-        wait(for: [messageExpectation], timeout: 10)
+        wait(for: [messageExpectation], timeout: InputConfig.defaultTimeout)
     }
 }

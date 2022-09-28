@@ -22,7 +22,7 @@ final class AuthTests: XCTestCase {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let projectId = "3ca2919724fbfa5456a25194e369a8b4"
         let keychain = KeychainStorageMock()
-        let relayClient = RelayClient(relayHost: URLConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
+        let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
 
         return AuthClientFactory.create(
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
@@ -40,7 +40,7 @@ final class AuthTests: XCTestCase {
         wallet.authRequestPublisher.sink { _ in
             requestExpectation.fulfill()
         }.store(in: &publishers)
-        wait(for: [requestExpectation], timeout: 2)
+        wait(for: [requestExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testRespondSuccess() async {
@@ -59,7 +59,7 @@ final class AuthTests: XCTestCase {
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
-        wait(for: [responseExpectation], timeout: 5)
+        wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testUserRespondError() async {
@@ -78,7 +78,7 @@ final class AuthTests: XCTestCase {
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
-        wait(for: [responseExpectation], timeout: 5)
+        wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testRespondSignatureVerificationFailed() async {
@@ -99,7 +99,7 @@ final class AuthTests: XCTestCase {
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
-        wait(for: [responseExpectation], timeout: 2)
+        wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testPing() async {
@@ -113,6 +113,6 @@ final class AuthTests: XCTestCase {
                 pingExpectation.fulfill()
             }
             .store(in: &publishers)
-        wait(for: [pingExpectation], timeout: 5)
+        wait(for: [pingExpectation], timeout: InputConfig.defaultTimeout)
     }
 }
