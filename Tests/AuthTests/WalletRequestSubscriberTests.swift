@@ -21,7 +21,9 @@ class WalletRequestSubscriberTests: XCTestCase {
         sut = WalletRequestSubscriber(networkingInteractor: networkingInteractor,
                                       logger: ConsoleLoggerMock(),
                                       kms: KeyManagementServiceMock(),
-                                      messageFormatter: messageFormatter, address: "", walletErrorResponder: walletErrorResponder)
+                                      messageFormatter: messageFormatter, address: "",
+                                      walletErrorResponder: walletErrorResponder,
+                                      pairingRegisterer: PairingRegistererMock())
     }
 
     func testSubscribeRequest() {
