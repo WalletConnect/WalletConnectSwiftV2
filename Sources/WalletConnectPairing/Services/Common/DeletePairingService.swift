@@ -4,7 +4,6 @@ import WalletConnectKMS
 import WalletConnectUtils
 import WalletConnectNetworking
 
-
 class DeletePairingService {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol

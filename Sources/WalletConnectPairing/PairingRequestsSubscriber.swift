@@ -8,7 +8,8 @@ public class PairingRequestsSubscriber {
     private let networkingInteractor: NetworkInteracting
     private let pairingStorage: PairingStorage
     private var publishers = Set<AnyCancellable>()
-    private var protocolMethods = SetStore<String>()
+    private var registeredProtocolMethods = SetStore<String>(label: "com.walletconnect.sdk.pairing.registered_protocol_methods")
+    private let pairingProtocolMethods = ["\(PairingPingProtocolMethod().method)", "\(PairingDeleteProtocolMethod().method)"]
     private let logger: ConsoleLogging
 
     init(networkingInteractor: NetworkInteracting,
@@ -22,7 +23,7 @@ public class PairingRequestsSubscriber {
 
     func subscribeForRequest<RequestParams: Codable>(_ protocolMethod: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {
 
-        Task(priority: .high) { await protocolMethods.insert(protocolMethod.method) }
+        registeredProtocolMethods.insert(protocolMethod.method)
 
         let publisherSubject = PassthroughSubject<RequestSubscriptionPayload<RequestParams>, Never>()
 
@@ -34,12 +35,9 @@ public class PairingRequestsSubscriber {
     }
 
     func handleUnregisteredRequests() {
-        Task(priority: .high) { [unowned self] in
-            await protocolMethods.insert(PairingDeleteProtocolMethod().method)
-            await protocolMethods.insert(PairingPingProtocolMethod().method)
-        }
         networkingInteractor.requestPublisher
-            .asyncFilter { [unowned self] in await !protocolMethods.contains($0.request.method)}
+            .filter { [unowned self] in !pairingProtocolMethods.contains($0.request.method)}
+            .filter { [unowned self] in !registeredProtocolMethods.contains($0.request.method)}
             .sink { [unowned self] topic, request in
                 Task(priority: .high) {
                     let protocolMethod = UnsupportedProtocolMethod(method: request.method)

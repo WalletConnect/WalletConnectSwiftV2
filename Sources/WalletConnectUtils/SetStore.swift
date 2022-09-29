@@ -1,17 +1,26 @@
 
 import Foundation
 
-public actor SetStore<T: Hashable> {
+public class SetStore<T: Hashable> {
+
+    private let concurrentQueue: DispatchQueue
+
     private var store: Set<T> = Set()
 
-    public init(){}
-
-    public func insert(_ element: T) {
-        store.insert(element)
+    public init(label: String){
+        self.concurrentQueue = DispatchQueue(label: label, attributes: .concurrent)
     }
 
-    @discardableResult public func remove(_ element: T) -> T? {
-        store.remove(element)
+    public func insert(_ element: T) {
+        concurrentQueue.async(flags: .barrier) { [weak self] in
+            self?.store.insert(element)
+        }
+    }
+
+    public func remove(_ element: T) {
+        concurrentQueue.async(flags: .barrier) { [weak self] in
+            self?.store.remove(element)
+        }
     }
 
     public func contains(_ element: T) -> Bool {
