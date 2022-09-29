@@ -55,7 +55,7 @@ public class NetworkingInteractor: NetworkInteracting {
     }
 
     public func unsubscribe(topic: String) {
-        Task { await topics.remove(topic) }
+        Task(priority: .high) { await topics.remove(topic) }
         relayClient.unsubscribe(topic: topic) { [unowned self] error in
             if let error = error {
                 logger.error(error)

@@ -25,11 +25,18 @@ final class SignClientTests: XCTestCase {
             socketConnectionType: .automatic,
             logger: logger
         )
-        let pairingClient = PairingClientFactory.create(relayClient: relayClient)
+        let keyValueStorage = RuntimeKeyValueStorage()
+
+        let pairingClient = PairingClientFactory.create(
+            logger: logger,
+            keyValueStorage: keyValueStorage,
+            keychainStorage: keychain,
+            relayClient: relayClient)
+
         let client = SignClientFactory.create(
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
             logger: logger,
-            keyValueStorage: RuntimeKeyValueStorage(),
+            keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             relayClient: relayClient,
             pairingClient: pairingClient
