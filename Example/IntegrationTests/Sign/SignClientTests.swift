@@ -7,9 +7,6 @@ import JSONRPC
 import WalletConnectPairing
 
 final class SignClientTests: XCTestCase {
-
-    let defaultTimeout: TimeInterval = 8
-
     var dapp: ClientDelegate!
     var wallet: ClientDelegate!
 
@@ -20,7 +17,7 @@ final class SignClientTests: XCTestCase {
         let logger = ConsoleLogger(suffix: name, loggingLevel: .debug)
         let keychain = KeychainStorageMock()
         let relayClient = RelayClient(
-            relayHost: URLConfig.relayHost,
+            relayHost: InputConfig.relayHost,
             projectId: projectId,
             keyValueStorage: RuntimeKeyValueStorage(),
             keychainStorage: keychain,
@@ -74,7 +71,7 @@ final class SignClientTests: XCTestCase {
 
         let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces)
         try await wallet.client.pair(uri: uri!)
-        wait(for: [dappSettlementExpectation, walletSettlementExpectation], timeout: defaultTimeout)
+        wait(for: [dappSettlementExpectation, walletSettlementExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testSessionReject() async throws {
@@ -98,7 +95,7 @@ final class SignClientTests: XCTestCase {
             XCTAssertEqual(store.rejectedProposal, proposal)
             sessionRejectExpectation.fulfill() // TODO: Assert reason code
         }
-        wait(for: [sessionRejectExpectation], timeout: defaultTimeout)
+        wait(for: [sessionRejectExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testSessionDelete() async throws {
@@ -122,7 +119,7 @@ final class SignClientTests: XCTestCase {
 
         let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces)
         try await wallet.client.pair(uri: uri!)
-        wait(for: [sessionDeleteExpectation], timeout: defaultTimeout)
+        wait(for: [sessionDeleteExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testPairingPing() async throws {
@@ -140,7 +137,7 @@ final class SignClientTests: XCTestCase {
 
         try await wallet.client.ping(topic: pairing.topic)
         
-        wait(for: [pongResponseExpectation], timeout: defaultTimeout)
+        wait(for: [pongResponseExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testSessionPing() async throws {
@@ -219,7 +216,7 @@ final class SignClientTests: XCTestCase {
 
         let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces)
         try await wallet.client.pair(uri: uri!)
-        wait(for: [requestExpectation, responseExpectation], timeout: defaultTimeout)
+        wait(for: [requestExpectation, responseExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testSessionRequestFailureResponse() async throws {
@@ -261,7 +258,7 @@ final class SignClientTests: XCTestCase {
 
         let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces)
         try await wallet.client.pair(uri: uri!)
-        wait(for: [expectation], timeout: defaultTimeout)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testNewSessionOnExistingPairing() async {
@@ -298,7 +295,7 @@ final class SignClientTests: XCTestCase {
 
         let uri = try! await dapp.client.connect(requiredNamespaces: requiredNamespaces)
         try! await wallet.client.pair(uri: uri!)
-        wait(for: [dappSettlementExpectation, walletSettlementExpectation], timeout: defaultTimeout)
+        wait(for: [dappSettlementExpectation, walletSettlementExpectation], timeout: InputConfig.defaultTimeout)
 
     }
 
@@ -322,7 +319,7 @@ final class SignClientTests: XCTestCase {
         }
         let uri = try! await dapp.client.connect(requiredNamespaces: requiredNamespaces)
         try! await wallet.client.pair(uri: uri!)
-        wait(for: [expectation], timeout: defaultTimeout)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
 
@@ -351,7 +348,7 @@ final class SignClientTests: XCTestCase {
         let uri = try! await dapp.client.connect(requiredNamespaces: requiredNamespaces)
         try! await wallet.client.pair(uri: uri!)
 
-        wait(for: [expectation], timeout: defaultTimeout)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testSessionEventSucceeds() async {
@@ -381,7 +378,7 @@ final class SignClientTests: XCTestCase {
         let uri = try! await dapp.client.connect(requiredNamespaces: requiredNamespaces)
         try! await wallet.client.pair(uri: uri!)
 
-        wait(for: [expectation], timeout: defaultTimeout)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testSessionEventFails() async {
@@ -408,6 +405,6 @@ final class SignClientTests: XCTestCase {
         let uri = try! await dapp.client.connect(requiredNamespaces: requiredNamespaces)
         try! await wallet.client.pair(uri: uri!)
 
-        wait(for: [expectation], timeout: defaultTimeout)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 }

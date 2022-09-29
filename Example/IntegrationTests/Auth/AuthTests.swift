@@ -23,7 +23,7 @@ final class AuthTests: XCTestCase {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let projectId = "3ca2919724fbfa5456a25194e369a8b4"
         let keychain = KeychainStorageMock()
-        let relayClient = RelayClient(relayHost: URLConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
+        let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
         let keyValueStorage = RuntimeKeyValueStorage()
 
         let pairingClient = PairingClientFactory.create(
@@ -49,7 +49,7 @@ final class AuthTests: XCTestCase {
         wallet.authRequestPublisher.sink { _ in
             requestExpectation.fulfill()
         }.store(in: &publishers)
-        wait(for: [requestExpectation], timeout: 2)
+        wait(for: [requestExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testRespondSuccess() async {
@@ -68,7 +68,7 @@ final class AuthTests: XCTestCase {
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
-        wait(for: [responseExpectation], timeout: 5)
+        wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testUserRespondError() async {
@@ -87,7 +87,7 @@ final class AuthTests: XCTestCase {
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
-        wait(for: [responseExpectation], timeout: 5)
+        wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testRespondSignatureVerificationFailed() async {
@@ -108,20 +108,20 @@ final class AuthTests: XCTestCase {
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
-        wait(for: [responseExpectation], timeout: 2)
+        wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
-// TODO - uncomment
-//    func testPing() async {
-//        let pingExpectation = expectation(description: "expects ping response")
-//        let uri = try! await app.request(RequestParams.stub())
-//        try! await wallet.pair(uri: uri)
-//        try! await wallet.ping(topic: uri.topic)
-//        wallet.pingResponsePublisher
-//            .sink { topic in
-//                XCTAssertEqual(topic, uri.topic)
-//                pingExpectation.fulfill()
-//            }
-//            .store(in: &publishers)
-//        wait(for: [pingExpectation], timeout: 5)
-//    }
+
+    func testPing() async {
+        let pingExpectation = expectation(description: "expects ping response")
+        let uri = try! await app.request(RequestParams.stub())
+        try! await wallet.pair(uri: uri)
+        try! await wallet.ping(topic: uri.topic)
+        wallet.pingResponsePublisher
+            .sink { topic in
+                XCTAssertEqual(topic, uri.topic)
+                pingExpectation.fulfill()
+            }
+            .store(in: &publishers)
+        wait(for: [pingExpectation], timeout: InputConfig.defaultTimeout)
+    }
 }
