@@ -11,6 +11,26 @@ import Foundation
  */
 public struct AppMetadata: Codable, Equatable {
 
+    public struct Redirect: Codable, Equatable {
+        /// Native deeplink URL string.
+        public let native: String?
+
+        /// Universal link URL string.
+        public let universal: String?
+
+        /**
+         Creates a new Redirect object with the specified information.
+
+         - parameters:
+            - native: Native deeplink URL string.
+            - universal: Universal link URL string.
+         */
+        public init(native: String?, universal: String?) {
+            self.native = native
+            self.universal = universal
+        }
+    }
+
     /// The name of the app.
     public let name: String
 
@@ -23,6 +43,9 @@ public struct AppMetadata: Codable, Equatable {
     /// An array of URL strings pointing to the icon assets on the web.
     public let icons: [String]
 
+    /// Redirect links which could be manually used on wallet side
+    public let redirect: Redirect?
+
     /**
      Creates a new metadata object with the specified information.
      
@@ -32,10 +55,11 @@ public struct AppMetadata: Codable, Equatable {
         - url: The URL string that identifies the official domain of the app.
         - icons: An array of URL strings pointing to the icon assets on the web.
      */
-    public init(name: String, description: String, url: String, icons: [String]) {
+    public init(name: String, description: String, url: String, icons: [String], redirect: Redirect? = nil) {
         self.name = name
         self.description = description
         self.url = url
         self.icons = icons
+        self.redirect = redirect
     }
 }
