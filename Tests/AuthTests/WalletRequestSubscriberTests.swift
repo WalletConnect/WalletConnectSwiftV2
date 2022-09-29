@@ -8,13 +8,15 @@ import JSONRPC
 @testable import TestingUtils
 
 class WalletRequestSubscriberTests: XCTestCase {
-    var networkingInteractor: NetworkingInteractorMock!
+    var pairingRegisterer: PairingRegistererMock<AuthRequestParams>!
     var sut: WalletRequestSubscriber!
     var messageFormatter: SIWEMessageFormatterMock!
+
     let defaultTimeout: TimeInterval = 0.01
 
     override func setUp() {
-        networkingInteractor = NetworkingInteractorMock()
+        let networkingInteractor = NetworkingInteractorMock()
+        pairingRegisterer = PairingRegistererMock()
         messageFormatter = SIWEMessageFormatterMock()
 
         let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingInteractor, logger: ConsoleLoggerMock(), kms: KeyManagementServiceMock(), rpcHistory: RPCHistory(keyValueStore: CodableStore(defaults: RuntimeKeyValueStorage(), identifier: "")))
@@ -23,7 +25,7 @@ class WalletRequestSubscriberTests: XCTestCase {
                                       kms: KeyManagementServiceMock(),
                                       messageFormatter: messageFormatter, address: "",
                                       walletErrorResponder: walletErrorResponder,
-                                      pairingRegisterer: PairingRegistererMock())
+                                      pairingRegisterer: pairingRegisterer)
     }
 
     func testSubscribeRequest() {
@@ -38,9 +40,12 @@ class WalletRequestSubscriberTests: XCTestCase {
             message = request.message
             messageExpectation.fulfill()
         }
+        
 
-        let request = RPCRequest(method: AuthRequestProtocolMethod().method, params: AuthRequestParams.stub(id: expectedRequestId), id: expectedRequestId.right!)
-        networkingInteractor.requestPublisherSubject.send(("123", request))
+
+        let payload = RequestSubscriptionPayload<AuthRequestParams>(id: expectedRequestId, topic: "123", request: AuthRequestParams.stub(id: expectedRequestId))
+
+        pairingRegisterer.subject.send(payload)
 
         wait(for: [messageExpectation], timeout: defaultTimeout)
         XCTAssertEqual(message, expectedMessage)

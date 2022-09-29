@@ -3,8 +3,10 @@ import WalletConnectPairing
 import Combine
 import WalletConnectNetworking
 
-struct PairingRegistererMock: PairingRegisterer {
+struct PairingRegistererMock<RequestParams>: PairingRegisterer where RequestParams : Codable {
+    let subject = PassthroughSubject<RequestSubscriptionPayload<RequestParams>, Never>()
+
     func register<RequestParams>(method: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> where RequestParams : Decodable, RequestParams : Encodable {
-        fatalError()
+        subject.eraseToAnyPublisher() as! AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never>
     }
 }
