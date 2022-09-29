@@ -102,7 +102,7 @@ public class PairingClient: PairingRegisterer {
     }
 
     public func register<RequestParams>(method: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {
-        logger.debug("Pairing Client - regitring for \(method.method)")
+        logger.debug("Pairing Client - registering for \(method.method)")
         return pairingRequestsSubscriber.subscribeForRequest(method)
     }
 
