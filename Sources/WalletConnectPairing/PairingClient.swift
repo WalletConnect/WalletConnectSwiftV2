@@ -48,6 +48,7 @@ public class PairingClient: PairingRegisterer {
         self.pingService = pingService
         self.pairingRequestsSubscriber = pairingRequestsSubscriber
         self.pairingsProvider = pairingsProvider
+        setUpPublishers()
     }
 
     private func setUpPublishers() {
