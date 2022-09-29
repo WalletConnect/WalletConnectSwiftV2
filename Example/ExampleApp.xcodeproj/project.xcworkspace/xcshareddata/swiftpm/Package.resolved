@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/krzyzanowskim/CryptoSwift.git",
         "state": {
           "branch": null,
-          "revision": "039f56c5d7960f277087a0be51f5eb04ed0ec073",
-          "version": "1.5.1"
+          "revision": "19b3c3ceed117c5cc883517c4e658548315ba70b",
+          "version": "1.6.0"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/mxcl/PromiseKit.git",
         "state": {
           "branch": null,
-          "revision": "ed3192004c0b00b4b3d7baa9578ee655c66faae3",
-          "version": "6.18.0"
+          "revision": "43772616c46a44a9977e41924ae01d0e55f2f9ca",
+          "version": "6.18.1"
         }
       },
       {
@@ -57,11 +57,11 @@
       },
       {
         "package": "Web3",
-        "repositoryURL": "https://github.com/flypaper0/Web3.swift",
+        "repositoryURL": "https://github.com/WalletConnect/Web3.swift",
         "state": {
-          "branch": "feature/eip-155",
-          "revision": "92a43a8c279b9df25fe23dd6f8311e6fb0ea06ed",
-          "version": null
+          "branch": null,
+          "revision": "bdaaed96eee3a9bf7f341165f89a94288961d14c",
+          "version": "1.0.0"
         }
       }
     ]
