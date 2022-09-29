@@ -4,6 +4,7 @@ import JSONRPC
 import WalletConnectNetworking
 import WalletConnectUtils
 import WalletConnectKMS
+import WalletConnectPairing
 
 class WalletRequestSubscriber {
     private let networkingInteractor: NetworkInteracting
@@ -13,6 +14,7 @@ class WalletRequestSubscriber {
     private var publishers = [AnyCancellable]()
     private let messageFormatter: SIWEMessageFormatting
     private let walletErrorResponder: WalletErrorResponder
+    private let pairingRegisterer: PairingRegisterer
     var onRequest: ((AuthRequest) -> Void)?
 
     init(networkingInteractor: NetworkInteracting,
@@ -20,29 +22,32 @@ class WalletRequestSubscriber {
          kms: KeyManagementServiceProtocol,
          messageFormatter: SIWEMessageFormatting,
          address: String?,
-         walletErrorResponder: WalletErrorResponder) {
+         walletErrorResponder: WalletErrorResponder,
+         pairingRegisterer: PairingRegisterer) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.kms = kms
         self.address = address
         self.messageFormatter = messageFormatter
         self.walletErrorResponder = walletErrorResponder
+        self.pairingRegisterer = pairingRegisterer
         subscribeForRequest()
     }
 
     private func subscribeForRequest() {
         guard let address = address else { return }
 
-        networkingInteractor.requestSubscription(on: AuthRequestProtocolMethod())
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<AuthRequestParams>) in
+        pairingRegisterer.register(method: AuthRequestProtocolMethod())
+            .sink { [unowned self] (topic, request) in
+                let params = try! request.params!.get(AuthRequestParams.self)
                 logger.debug("WalletRequestSubscriber: Received request")
-                guard let message = messageFormatter.formatMessage(from: payload.request.payloadParams, address: address) else {
+                guard let message = messageFormatter.formatMessage(from: params.payloadParams, address: address) else {
                     Task(priority: .high) {
-                        try? await walletErrorResponder.respondError(AuthError.malformedRequestParams, requestId: payload.id)
+                        try? await walletErrorResponder.respondError(AuthError.malformedRequestParams, requestId: request.id!)
                     }
                     return
                 }
-                onRequest?(.init(id: payload.id, message: message))
+                onRequest?(.init(id: request.id!, message: message))
             }.store(in: &publishers)
     }
 }

@@ -16,14 +16,14 @@ public struct SignClientFactory {
     ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
-    public static func create(metadata: AppMetadata, relayClient: RelayClient) -> SignClient {
+    public static func create(metadata: AppMetadata, relayClient: RelayClient, pairingClient: PairingClient) -> SignClient {
         let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults.standard
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
-        return SignClientFactory.create(metadata: metadata, logger: logger, keyValueStorage: keyValueStorage, keychainStorage: keychainStorage, relayClient: relayClient)
+        return SignClientFactory.create(metadata: metadata, logger: logger, keyValueStorage: keyValueStorage, keychainStorage: keychainStorage, relayClient: relayClient, pairingClient: pairingClient)
     }
 
-    static func create(metadata: AppMetadata, logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, relayClient: RelayClient) -> SignClient {
+    static func create(metadata: AppMetadata, logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, relayClient: RelayClient, pairingClient: PairingClient) -> SignClient {
         let kms = KeyManagementService(keychain: keychainStorage)
         let serializer = Serializer(kms: kms)
         let rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
@@ -39,9 +39,8 @@ public struct SignClientFactory {
         let pairEngine = PairEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore)
         let approveEngine = ApproveEngine(networkingInteractor: networkingInteractor, proposalPayloadsStore: proposalPayloadsStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, kms: kms, logger: logger, pairingStore: pairingStore, sessionStore: sessionStore)
         let cleanupService = CleanupService(pairingStore: pairingStore, sessionStore: sessionStore, kms: kms, sessionToPairingTopic: sessionToPairingTopic)
-        let deletePairingService = DeletePairingService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore, logger: logger)
         let deleteSessionService = DeleteSessionService(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
-        let disconnectService = DisconnectService(deletePairingService: deletePairingService, deleteSessionService: deleteSessionService, pairingStorage: pairingStore, sessionStorage: sessionStore)
+        let disconnectService = DisconnectService(deleteSessionService: deleteSessionService, sessionStorage: sessionStore, pairingClient: pairingClient)
         let sessionPingService = SessionPingService(sessionStorage: sessionStore, networkingInteractor: networkingInteractor, logger: logger)
         let pairingPingService = PairingPingService(pairingStorage: pairingStore, networkingInteractor: networkingInteractor, logger: logger)
 
@@ -57,7 +56,8 @@ public struct SignClientFactory {
             nonControllerSessionStateMachine: nonControllerSessionStateMachine,
             controllerSessionStateMachine: controllerSessionStateMachine, disconnectService: disconnectService,
             history: rpcHistory,
-            cleanupService: cleanupService
+            cleanupService: cleanupService,
+            pairingClient: pairingClient
         )
         return client
     }

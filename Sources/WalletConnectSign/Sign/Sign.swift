@@ -4,6 +4,7 @@ import JSONRPC
 import WalletConnectUtils
 import WalletConnectRelay
 import WalletConnectNetworking
+import WalletConnectPairing
 
 public typealias Account = WalletConnectUtils.Account
 public typealias Blockchain = WalletConnectUtils.Blockchain
@@ -30,7 +31,8 @@ public class Sign {
         }
         return SignClientFactory.create(
             metadata: metadata,
-            relayClient: Relay.instance
+            relayClient: Relay.instance,
+            pairingClient: Pair.instance
         )
     }()
 

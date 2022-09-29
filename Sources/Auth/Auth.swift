@@ -1,5 +1,6 @@
 import Foundation
 import WalletConnectRelay
+import WalletConnectPairing
 import Combine
 
 /// Auth instatnce wrapper
@@ -23,7 +24,8 @@ public class Auth {
         return AuthClientFactory.create(
             metadata: config.metadata,
             account: config.account,
-            relayClient: Relay.instance)
+            relayClient: Relay.instance,
+            pairingClient: Pair.instance)
     }()
 
     private static var config: Config?

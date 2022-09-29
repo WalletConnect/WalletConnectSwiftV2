@@ -6,24 +6,21 @@ class DisconnectService {
         case objectForTopicNotFound
     }
 
-    private let deletePairingService: DeletePairingService
     private let deleteSessionService: DeleteSessionService
-    private let pairingStorage: WCPairingStorage
     private let sessionStorage: WCSessionStorage
+    private let pairingClient: PairingClient
 
-    init(deletePairingService: DeletePairingService,
-         deleteSessionService: DeleteSessionService,
-         pairingStorage: WCPairingStorage,
-         sessionStorage: WCSessionStorage) {
-        self.deletePairingService = deletePairingService
+    init(deleteSessionService: DeleteSessionService,
+         sessionStorage: WCSessionStorage,
+         pairingClient: PairingClient) {
         self.deleteSessionService = deleteSessionService
-        self.pairingStorage = pairingStorage
         self.sessionStorage = sessionStorage
+        self.pairingClient = pairingClient
     }
 
     func disconnect(topic: String) async throws {
-        if pairingStorage.hasPairing(forTopic: topic) {
-            try await deletePairingService.delete(topic: topic)
+        if let _ = try? pairingClient.getPairing(for: topic) {
+            try await pairingClient.disconnect(topic: topic)
         } else if sessionStorage.hasSession(forTopic: topic) {
             try await deleteSessionService.delete(topic: topic)
         } else {

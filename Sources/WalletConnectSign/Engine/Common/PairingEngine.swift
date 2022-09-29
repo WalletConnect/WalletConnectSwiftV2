@@ -91,15 +91,15 @@ private extension PairingEngine {
                     }
             }
             .store(in: &publishers)
-        let protocolMethod = PairingPingProtocolMethod()
+//        let protocolMethod = PairingPingProtocolMethod()
 
-        networkingInteractor.requestSubscription(on: protocolMethod)
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<PairingType.PingParams>) in
-                Task(priority: .high) {
-                    try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod)
-                }
-            }
-            .store(in: &publishers)
+//        networkingInteractor.requestSubscription(on: protocolMethod)
+//            .sink { [unowned self] (payload: RequestSubscriptionPayload<PairingType.PingParams>) in
+//                Task(priority: .high) {
+//                    try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod)
+//                }
+//            }
+//            .store(in: &publishers)
     }
 
     func setupExpirationHandling() {

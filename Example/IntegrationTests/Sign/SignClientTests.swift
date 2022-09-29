@@ -4,6 +4,7 @@ import JSONRPC
 @testable import WalletConnectKMS
 @testable import WalletConnectSign
 @testable import WalletConnectRelay
+import WalletConnectPairing
 
 final class SignClientTests: XCTestCase {
 
@@ -27,12 +28,14 @@ final class SignClientTests: XCTestCase {
             socketConnectionType: .automatic,
             logger: logger
         )
+        let pairingClient = PairingClientFactory.create(relayClient: relayClient)
         let client = SignClientFactory.create(
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
             logger: logger,
             keyValueStorage: RuntimeKeyValueStorage(),
             keychainStorage: keychain,
-            relayClient: relayClient
+            relayClient: relayClient,
+            pairingClient: pairingClient
         )
         return ClientDelegate(client: client)
     }

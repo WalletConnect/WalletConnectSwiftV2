@@ -101,7 +101,8 @@ public class PairingClient: PairingRegisterer {
     }
 
     public func register(method: ProtocolMethod) -> AnyPublisher<(topic: String, request: RPCRequest), Never> {
-        pairingRequestsSubscriber.subscribeForRequest(method)
+        logger.debug("Pairing Client - regitring for \(method.method)")
+        return pairingRequestsSubscriber.subscribeForRequest(method)
     }
 
 #if DEBUG
