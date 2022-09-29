@@ -16,3 +16,12 @@ struct PairingDeleteProtocolMethod: ProtocolMethod {
 
     let responseConfig = RelayConfig(tag: 1001, prompt: false, ttl: 86400)
 }
+
+struct UnsupportedProtocolMethod: ProtocolMethod {
+    let method: String
+
+    // TODO - spec tag
+    let requestConfig = RelayConfig(tag: 0, prompt: false, ttl: 86400)
+
+    let responseConfig = RelayConfig(tag: 0, prompt: false, ttl: 86400)
+}

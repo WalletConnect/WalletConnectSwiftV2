@@ -1,7 +1,7 @@
 import Combine
 import Foundation
 
-extension Publisher {
+public extension Publisher {
 
     func asyncFilter(filter: @escaping (Output) async -> Bool) -> AnyPublisher<Output, Failure> {
         return flatMap { output in

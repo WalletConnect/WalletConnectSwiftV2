@@ -4,5 +4,5 @@ import Combine
 import JSONRPC
 
 public protocol PairingRegisterer {
-    func register(method: ProtocolMethod) -> AnyPublisher<(topic: String, request: RPCRequest), Never>
+    func register<RequestParams>(method: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never>
 }

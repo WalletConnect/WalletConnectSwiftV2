@@ -38,16 +38,15 @@ class WalletRequestSubscriber {
         guard let address = address else { return }
 
         pairingRegisterer.register(method: AuthRequestProtocolMethod())
-            .sink { [unowned self] (topic, request) in
-                let params = try! request.params!.get(AuthRequestParams.self)
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<AuthRequestParams>) in
                 logger.debug("WalletRequestSubscriber: Received request")
-                guard let message = messageFormatter.formatMessage(from: params.payloadParams, address: address) else {
+                guard let message = messageFormatter.formatMessage(from: payload.request.payloadParams, address: address) else {
                     Task(priority: .high) {
-                        try? await walletErrorResponder.respondError(AuthError.malformedRequestParams, requestId: request.id!)
+                        try? await walletErrorResponder.respondError(AuthError.malformedRequestParams, requestId: payload.id)
                     }
                     return
                 }
-                onRequest?(.init(id: request.id!, message: message))
+                onRequest?(.init(id: payload.id, message: message))
             }.store(in: &publishers)
     }
 }
