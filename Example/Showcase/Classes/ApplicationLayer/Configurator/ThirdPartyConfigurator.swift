@@ -5,7 +5,7 @@ import Auth
 struct ThirdPartyConfigurator: Configurator {
 
     func configure() {
-        Relay.configure(projectId: "relay.walletconnect.com", socketFactory: SocketFactory())
+        Relay.configure(projectId: InputConfig.projectId, socketFactory: SocketFactory())
 
         Auth.configure(
             metadata: AppMetadata(

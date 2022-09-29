@@ -20,3 +20,6 @@ Package.resolved
 */fastlane/test_output
 */fastlane/README.md
 
+# Configuration
+Configuration.xcconfig
+
