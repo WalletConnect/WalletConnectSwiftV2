@@ -9,7 +9,7 @@ public class PairingRequestsSubscriber {
     private let pairingStorage: PairingStorage
     private var publishers = Set<AnyCancellable>()
     private var registeredProtocolMethods = SetStore<String>(label: "com.walletconnect.sdk.pairing.registered_protocol_methods")
-    private let pairingProtocolMethods = ["\(PairingPingProtocolMethod().method)", "\(PairingDeleteProtocolMethod().method)"]
+    private let pairingProtocolMethods = PairingProtocolMethod.allCases.map { $0.method }
     private let logger: ConsoleLogging
 
     init(networkingInteractor: NetworkInteracting,

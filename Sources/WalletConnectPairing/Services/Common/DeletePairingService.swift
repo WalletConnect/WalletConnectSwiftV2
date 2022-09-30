@@ -22,7 +22,7 @@ class DeletePairingService {
 
     func delete(topic: String) async throws {
         let reason = ReasonCode.userDisconnected
-        let protocolMethod = PairingDeleteProtocolMethod()
+        let protocolMethod = PairingProtocolMethod.delete
         logger.debug("Will delete pairing for reason: message: \(reason.message) code: \(reason.code)")
         let request = RPCRequest(method: protocolMethod.method, params: reason)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
