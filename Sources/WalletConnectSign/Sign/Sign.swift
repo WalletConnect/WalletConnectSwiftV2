@@ -26,7 +26,7 @@ public class Sign {
 
     /// Sign client instance
     public static var instance: SignClient = {
-        guard let metadata = Sign.metadata else {
+        guard let metadata = Sign.metadata ?? Pair.metadata else {
             fatalError("Error - you must call Sign.configure(_:) before accessing the shared instance.")
         }
         return SignClientFactory.create(
@@ -36,6 +36,7 @@ public class Sign {
         )
     }()
 
+    @available(*, deprecated, message: "Remove after clients migration")
     private static var metadata: AppMetadata?
 
     private init() { }
@@ -43,6 +44,7 @@ public class Sign {
     /// Sign instance config method
     /// - Parameters:
     ///   - metadata: App metadata
+    @available(*, deprecated, message: "Use Pair.configure(metadata:) instead")
     static public func configure(metadata: AppMetadata) {
         Sign.metadata = metadata
     }

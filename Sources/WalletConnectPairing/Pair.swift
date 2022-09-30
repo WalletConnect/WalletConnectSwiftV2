@@ -2,12 +2,6 @@ import Foundation
 import WalletConnectRelay
 import Combine
 
-extension Pair {
-    struct Config {
-        let metadata: AppMetadata
-    }
-}
-
 public class Pair {
 
     /// Pairing client instance
@@ -17,6 +11,13 @@ public class Pair {
         }
         return PairingClientFactory.create(relayClient: Relay.instance)
     }()
+
+    public static var metadata: AppMetadata {
+        guard let metadata = config?.metadata else {
+            fatalError("Error - you configure metadata with Pair.configure(metadata:)")
+        }
+        return metadata
+    }
 
     private static var config: Config?
 
