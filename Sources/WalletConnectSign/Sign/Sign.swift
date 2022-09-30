@@ -26,11 +26,8 @@ public class Sign {
 
     /// Sign client instance
     public static var instance: SignClient = {
-        guard let metadata = Sign.metadata ?? Pair.metadata else {
-            fatalError("Error - you must call Sign.configure(_:) before accessing the shared instance.")
-        }
         return SignClientFactory.create(
-            metadata: metadata,
+            metadata: Sign.metadata ?? Pair.metadata,
             relayClient: Relay.instance,
             pairingClient: Pair.instance
         )
