@@ -25,6 +25,12 @@ dependencies: [
     .package(url: "https://github.com/WalletConnect/WalletConnectSwiftV2", .branch("main")),
 ],
 ```
+## Setting Project ID
+Follow instructions from *Configuration.xcconfig* and configure PROJECT_ID with your ID from WalletConnect Dashboard
+```
+// Uncomment next line and paste your project id. Get this on: https://cloud.walletconnect.com/sign-in
+// PROJECT_ID = YOUR_PROJECT_ID
+```
 ## Example App
 open `Example/ExampleApp.xcodeproj`
 

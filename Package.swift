@@ -33,7 +33,7 @@ let package = Package(
             targets: ["WalletConnectNetworking"])
     ],
     dependencies: [
-        .package(url: "https://github.com/flypaper0/Web3.swift", .branch("feature/eip-155"))
+        .package(url: "https://github.com/WalletConnect/Web3.swift", .exact("1.0.0"))
     ],
     targets: [
         .target(
