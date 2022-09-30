@@ -108,8 +108,11 @@ public class PairingClient: PairingRegisterer {
 
     public func register<RequestParams>(method: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {
         logger.debug("Pairing Client - registering for \(method.method)")
-        appPairActivateService.activate(on: method)
         return pairingRequestsSubscriber.subscribeForRequest(method)
+    }
+
+    public func activate(pairingTopic: String) {
+        appPairActivateService.activate(for: pairingTopic)
     }
 
 #if DEBUG
