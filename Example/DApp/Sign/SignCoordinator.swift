@@ -27,7 +27,6 @@ final class SignCoordinator {
             icons: ["https://avatars.githubusercontent.com/u/37784886"])
 
         Pair.configure(metadata: metadata)
-        Sign.configure()
 #if DEBUG
         if CommandLine.arguments.contains("-cleanInstall") {
             try? Sign.instance.cleanup()
