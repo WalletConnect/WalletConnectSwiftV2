@@ -25,7 +25,7 @@ public class Auth {
             metadata: config.metadata,
             account: config.account,
             relayClient: Relay.instance,
-            pairingClient: Pair.instance)
+            pairingRegisterer: Pair.instance)
     }()
 
     private static var config: Config?

@@ -43,6 +43,7 @@ public class Sign {
     ///   - metadata: App metadata
     @available(*, deprecated, message: "Use Pair.configure(metadata:) instead")
     static public func configure(metadata: AppMetadata) {
+        Pair.configure(metadata: metadata)
         Sign.metadata = metadata
     }
 }

@@ -6,7 +6,6 @@ import Combine
 import JSONRPC
 
 public class PairingClient: PairingRegisterer {
-
     public var pingResponsePublisher: AnyPublisher<(String), Never> {
         pingResponsePublisherSubject.eraseToAnyPublisher()
     }
@@ -99,6 +98,10 @@ public class PairingClient: PairingRegisterer {
     public func disconnect(topic: String) async throws {
         try await deletePairingService.delete(topic: topic)
 
+    }
+
+    public func validatePairingExistance(_ topic: String) throws {
+        _ = try pairingsProvider.getPairing(for: topic)
     }
 
     public func register<RequestParams>(method: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {

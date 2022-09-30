@@ -1,6 +1,7 @@
 import UIKit
 import Combine
 import Auth
+import WalletConnectPairing
 
 final class AuthViewModel: ObservableObject {
 
@@ -27,7 +28,8 @@ final class AuthViewModel: ObservableObject {
     func setupInitialState() async throws {
         state = .none
         uri = nil
-        uri = try await Auth.instance.request(.stub()).absoluteString
+        let uri = try! await Pair.instance.create()
+        try await Auth.instance.request(.stub(), topic: uri.topic)
     }
 
     func copyDidPressed() {
