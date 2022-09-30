@@ -29,6 +29,7 @@ class AppRespondSubscriberTests: XCTestCase {
             logger: ConsoleLoggerMock(),
             rpcHistory: rpcHistory,
             signatureVerifier: messageSigner,
+            pairingRegisterer: PairingRegistererMock<AuthRequestParams>(),
             messageFormatter: messageFormatter)
     }
 

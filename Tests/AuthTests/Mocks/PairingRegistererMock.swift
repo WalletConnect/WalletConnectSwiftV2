@@ -10,6 +10,10 @@ struct PairingRegistererMock<RequestParams>: PairingRegisterer where RequestPara
     func register<RequestParams>(method: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> where RequestParams : Decodable, RequestParams : Encodable {
         subject.eraseToAnyPublisher() as! AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never>
     }
+
+    func activate(pairingTopic: String) {
+        
+    }
     
     func validatePairingExistance(_ topic: String) throws {
     }
