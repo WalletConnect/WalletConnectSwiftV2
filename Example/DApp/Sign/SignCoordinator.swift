@@ -2,6 +2,7 @@ import UIKit
 import Combine
 import WalletConnectSign
 import WalletConnectRelay
+import WalletConnectPairing
 
 final class SignCoordinator {
 
@@ -25,7 +26,8 @@ final class SignCoordinator {
             url: "wallet.connect",
             icons: ["https://avatars.githubusercontent.com/u/37784886"])
 
-        Sign.configure(metadata: metadata)
+        Pair.configure(metadata: metadata)
+        Sign.configure()
 #if DEBUG
         if CommandLine.arguments.contains("-cleanInstall") {
             try? Sign.instance.cleanup()
