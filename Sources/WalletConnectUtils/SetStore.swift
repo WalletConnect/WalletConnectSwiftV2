@@ -24,7 +24,10 @@ public class SetStore<T: Hashable> {
     }
 
     public func contains(_ element: T) -> Bool {
-        return store.contains(element)
+        var contains = false
+        concurrentQueue.sync { [unowned self] in
+            contains = store.contains(element)
+        }
+        return contains
     }
-
 }
