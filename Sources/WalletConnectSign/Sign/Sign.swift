@@ -4,6 +4,7 @@ import JSONRPC
 import WalletConnectUtils
 import WalletConnectRelay
 import WalletConnectNetworking
+import WalletConnectPairing
 
 public typealias Account = WalletConnectUtils.Account
 public typealias Blockchain = WalletConnectUtils.Blockchain
@@ -25,15 +26,14 @@ public class Sign {
 
     /// Sign client instance
     public static var instance: SignClient = {
-        guard let metadata = Sign.metadata else {
-            fatalError("Error - you must call Sign.configure(_:) before accessing the shared instance.")
-        }
         return SignClientFactory.create(
-            metadata: metadata,
-            relayClient: Relay.instance
+            metadata: Sign.metadata ?? Pair.metadata,
+            relayClient: Relay.instance,
+            pairingClient: Pair.instance
         )
     }()
 
+    @available(*, deprecated, message: "Remove after clients migration")
     private static var metadata: AppMetadata?
 
     private init() { }
@@ -41,6 +41,7 @@ public class Sign {
     /// Sign instance config method
     /// - Parameters:
     ///   - metadata: App metadata
+    @available(*, deprecated, message: "Use Pair.configure(metadata:) instead")
     static public func configure(metadata: AppMetadata) {
         Sign.metadata = metadata
     }

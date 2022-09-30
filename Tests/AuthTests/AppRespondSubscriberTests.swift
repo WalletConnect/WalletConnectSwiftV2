@@ -29,8 +29,7 @@ class AppRespondSubscriberTests: XCTestCase {
             logger: ConsoleLoggerMock(),
             rpcHistory: rpcHistory,
             signatureVerifier: messageSigner,
-            messageFormatter: messageFormatter,
-            pairingStorage: pairingStorage)
+            messageFormatter: messageFormatter)
     }
 
     func testMessageCompromisedFailure() {

@@ -11,6 +11,7 @@ public class NetworkingInteractor: NetworkInteracting {
     private let serializer: Serializing
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
+    private let topics = SetStore<String>(label: "com.walletconnect.sdk.networking.topics")
 
     private let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest), Never>()
     private let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse), Never>()
@@ -36,17 +37,25 @@ public class NetworkingInteractor: NetworkInteracting {
         self.rpcHistory = rpcHistory
         self.logger = logger
         self.socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
-        relayClient.messagePublisher.sink { [unowned self] (topic, message) in
+        setupRelaySubscribtion()
+    }
+
+    private func setupRelaySubscribtion() {
+        relayClient.messagePublisher
+            .filter { [unowned self] in topics.contains($0.topic)}
+            .sink { [unowned self] (topic, message) in
             manageSubscription(topic, message)
         }
         .store(in: &publishers)
     }
 
     public func subscribe(topic: String) async throws {
+        topics.insert(topic)
         try await relayClient.subscribe(topic: topic)
     }
 
     public func unsubscribe(topic: String) {
+        topics.remove(topic)
         relayClient.unsubscribe(topic: topic) { [unowned self] error in
             if let error = error {
                 logger.error(error)

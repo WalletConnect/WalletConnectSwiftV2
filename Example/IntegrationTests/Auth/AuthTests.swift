@@ -5,6 +5,7 @@ import WalletConnectUtils
 import WalletConnectRelay
 import Combine
 @testable import Auth
+import WalletConnectPairing
 
 final class AuthTests: XCTestCase {
     var app: AuthClient!
@@ -22,14 +23,22 @@ final class AuthTests: XCTestCase {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let keychain = KeychainStorageMock()
         let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
+        let keyValueStorage = RuntimeKeyValueStorage()
+
+        let pairingClient = PairingClientFactory.create(
+            logger: logger,
+            keyValueStorage: keyValueStorage,
+            keychainStorage: keychain,
+            relayClient: relayClient)
 
         return AuthClientFactory.create(
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
             account: account,
             logger: logger,
-            keyValueStorage: RuntimeKeyValueStorage(),
+            keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
-            relayClient: relayClient)
+            relayClient: relayClient,
+            pairingClient: pairingClient)
     }
 
     func testRequest() async {
@@ -99,19 +108,5 @@ final class AuthTests: XCTestCase {
         }
         .store(in: &publishers)
         wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
-    }
-
-    func testPing() async {
-        let pingExpectation = expectation(description: "expects ping response")
-        let uri = try! await app.request(RequestParams.stub())
-        try! await wallet.pair(uri: uri)
-        try! await wallet.ping(topic: uri.topic)
-        wallet.pingResponsePublisher
-            .sink { topic in
-                XCTAssertEqual(topic, uri.topic)
-                pingExpectation.fulfill()
-            }
-            .store(in: &publishers)
-        wait(for: [pingExpectation], timeout: InputConfig.defaultTimeout)
     }
 }

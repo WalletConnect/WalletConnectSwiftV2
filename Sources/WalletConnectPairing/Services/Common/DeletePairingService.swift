@@ -1,14 +1,10 @@
 import Foundation
-import WalletConnectNetworking
 import JSONRPC
 import WalletConnectKMS
 import WalletConnectUtils
-import WalletConnectPairing
+import WalletConnectNetworking
 
 class DeletePairingService {
-    enum Errors: Error {
-        case pairingNotFound
-    }
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private let pairingStorage: WCPairingStorage
@@ -25,9 +21,8 @@ class DeletePairingService {
     }
 
     func delete(topic: String) async throws {
-        guard pairingStorage.hasPairing(forTopic: topic) else { throw Errors.pairingNotFound}
-        let protocolMethod = PairingDeleteProtocolMethod()
-        let reason = AuthError.userDisconnected
+        let reason = ReasonCode.userDisconnected
+        let protocolMethod = PairingProtocolMethod.delete
         logger.debug("Will delete pairing for reason: message: \(reason.message) code: \(reason.code)")
         let request = RPCRequest(method: protocolMethod.method, params: reason)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)

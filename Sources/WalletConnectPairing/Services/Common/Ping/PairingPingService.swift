@@ -21,7 +21,7 @@ public class PairingPingService {
         pairingStorage: WCPairingStorage,
         networkingInteractor: NetworkInteracting,
         logger: ConsoleLogging) {
-            let protocolMethod = PairingPingProtocolMethod()
+            let protocolMethod = PairingProtocolMethod.ping
             self.pairingStorage = pairingStorage
             self.pingRequester = PingRequester(networkingInteractor: networkingInteractor, method: protocolMethod)
             self.pingResponder = PingResponder(networkingInteractor: networkingInteractor, method: protocolMethod, logger: logger)

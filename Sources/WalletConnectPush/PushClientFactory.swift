@@ -3,10 +3,11 @@ import WalletConnectRelay
 import WalletConnectUtils
 import WalletConnectKMS
 import WalletConnectNetworking
+import WalletConnectPairing
 
 public struct PushClientFactory {
 
-    static func create(logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, relayClient: RelayClient, pairingClient: PairingClient) -> PushClient {
+    static public func create(logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, relayClient: RelayClient, pairingClient: PairingClient) -> PushClient {
         let kms = KeyManagementService(keychain: keychainStorage)
         let serializer = Serializer(kms: kms)
         let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)

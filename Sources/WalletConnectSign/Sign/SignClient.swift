@@ -95,7 +95,7 @@ public final class SignClient {
     public let logger: ConsoleLogging
 
     // MARK: - Private properties
-
+    private let pairingClient: PairingClient
     private let relayClient: RelayClient
     private let pairingEngine: PairingEngine
     private let pairEngine: PairEngine
@@ -137,7 +137,8 @@ public final class SignClient {
          controllerSessionStateMachine: ControllerSessionStateMachine,
          disconnectService: DisconnectService,
          history: RPCHistory,
-         cleanupService: CleanupService
+         cleanupService: CleanupService,
+         pairingClient: PairingClient
     ) {
         self.logger = logger
         self.relayClient = relayClient
@@ -152,6 +153,7 @@ public final class SignClient {
         self.history = history
         self.cleanupService = cleanupService
         self.disconnectService = disconnectService
+        self.pairingClient = pairingClient
         setUpConnectionObserving()
         setUpEnginesCallbacks()
     }

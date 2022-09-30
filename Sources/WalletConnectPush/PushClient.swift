@@ -4,6 +4,7 @@ import Combine
 import WalletConnectKMS
 import WalletConnectUtils
 import WalletConnectNetworking
+import WalletConnectPairing
 
 public class PushClient {
 
@@ -11,7 +12,7 @@ public class PushClient {
 
     let requestPublisherSubject = PassthroughSubject<(topic: String, params: PushRequestParams), Never>()
 
-    var proposalPublisher: AnyPublisher<(topic: String, params: PushRequestParams), Never> {
+    public var proposalPublisher: AnyPublisher<(topic: String, params: PushRequestParams), Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
@@ -45,15 +46,14 @@ private extension PushClient {
         let protocolMethod = PushProposeProtocolMethod()
 
         pairingRegisterer.register(method: protocolMethod)
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<PushRequestParams>) in
+                requestPublisherSubject.send((topic: payload.topic, params: payload.request))
+        }.store(in: &publishers)
 
         networkInteractor.responseErrorSubscription(on: protocolMethod)
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<PushRequestParams>) in
                 logger.error(payload.error.localizedDescription)
             }.store(in: &publishers)
 
-        networkInteractor.requestSubscription(on: protocolMethod)
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<PushRequestParams>) in
-                requestPublisherSubject.send((payload.topic, payload.request))
-            }.store(in: &publishers)
     }
 }
