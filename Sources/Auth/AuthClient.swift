@@ -82,6 +82,7 @@ public class AuthClient {
     /// Throws Error:
     /// - When URI is invalid format or missing params
     /// - When topic is already in use
+    @available(*, deprecated, message: "Use Pair.pair(uri:) instead")
     public func pair(uri: WalletConnectURI) async throws {
         try await pairingClient.pair(uri: uri)
     }
@@ -121,14 +122,17 @@ public class AuthClient {
         try await walletRespondService.respondError(requestId: requestId)
     }
 
+    @available(*, deprecated, message: "Use Pair.disconnect(topic:) instead")
     public func disconnect(topic: String) async throws {
         try await pairingClient.disconnect(topic: topic)
     }
 
+    @available(*, deprecated, message: "Use Pair.ping(topic:) instead")
     public func ping(topic: String) async throws {
         try await pairingClient.ping(topic: topic)
     }
 
+    @available(*, deprecated, message: "Use Pair.getPairings() instead")
     public func getPairings() -> [Pairing] {
         pairingClient.getPairings()
     }
