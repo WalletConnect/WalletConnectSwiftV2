@@ -1,5 +1,6 @@
 import UIKit
 import Auth
+import WalletConnectPairing
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -30,7 +31,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         let uri = context.url.absoluteString.replacingOccurrences(of: "showcase://wc?uri=", with: "")
         Task {
-            try await Auth.instance.pair(uri: WalletConnectURI(string: uri)!)
+            try await Pair.instance.pair(uri: WalletConnectURI(string: uri)!)
         }
     }
 }
