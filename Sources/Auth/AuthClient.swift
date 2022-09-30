@@ -32,8 +32,6 @@ public class AuthClient {
         authResponsePublisherSubject.eraseToAnyPublisher()
     }
 
-
-
     /// Publisher that sends web socket connection status
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
@@ -42,7 +40,7 @@ public class AuthClient {
 
     // MARK: - Private Properties
 
-    private let pairingClient: PairingClient
+    private let pairingRegisterer: PairingRegisterer
 
     private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, AuthError>), Never>()
     private var authRequestPublisherSubject = PassthroughSubject<AuthRequest, Never>()
@@ -71,31 +69,8 @@ public class AuthClient {
         self.pendingRequestsProvider = pendingRequestsProvider
         self.logger = logger
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
-        self.pairingClient = pairingClient
+        self.pairingRegisterer = pairingClient
         setUpPublishers()
-    }
-
-    /// For wallet to establish a pairing and receive an authentication request
-    /// Wallet should call this function in order to accept peer's pairing proposal and be able to subscribe for future authentication request.
-    /// - Parameter uri: Pairing URI that is commonly presented as a QR code by a dapp or delivered with universal linking.
-    ///
-    /// Throws Error:
-    /// - When URI is invalid format or missing params
-    /// - When topic is already in use
-    @available(*, deprecated, message: "Use Pair.pair(uri:) instead")
-    public func pair(uri: WalletConnectURI) async throws {
-        try await pairingClient.pair(uri: uri)
-    }
-
-    /// For a dapp to send an authentication request to a wallet
-    /// - Parameter params: Set of parameters required to request authentication
-    ///
-    /// - Returns: Pairing URI that should be shared with wallet out of bound. Common way is to present it as a QR code.
-    public func request(_ params: RequestParams) async throws -> WalletConnectURI {
-        logger.debug("Requesting Authentication")
-        let uri = try await pairingClient.create()
-        try await appRequestService.request(params: params, topic: uri.topic)
-        return uri
     }
 
     /// For a dapp to send an authentication request to a wallet
@@ -103,7 +78,7 @@ public class AuthClient {
     /// - Parameter topic: Pairing topic that wallet already subscribes for
     public func request(_ params: RequestParams, topic: String) async throws {
         logger.debug("Requesting Authentication on existing pairing")
-        try pairingClient.getPairing(for: topic)
+        try pairingRegisterer.validatePairingExistance(topic)
         try await appRequestService.request(params: params, topic: topic)
     }
 
@@ -120,21 +95,6 @@ public class AuthClient {
     /// - Parameter requestId: authentication request id
     public func reject(requestId: RPCID) async throws {
         try await walletRespondService.respondError(requestId: requestId)
-    }
-
-    @available(*, deprecated, message: "Use Pair.disconnect(topic:) instead")
-    public func disconnect(topic: String) async throws {
-        try await pairingClient.disconnect(topic: topic)
-    }
-
-    @available(*, deprecated, message: "Use Pair.ping(topic:) instead")
-    public func ping(topic: String) async throws {
-        try await pairingClient.ping(topic: topic)
-    }
-
-    @available(*, deprecated, message: "Use Pair.getPairings() instead")
-    public func getPairings() -> [Pairing] {
-        pairingClient.getPairings()
     }
 
     /// Query pending authentication requests
