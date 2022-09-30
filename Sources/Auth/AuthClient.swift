@@ -59,7 +59,7 @@ public class AuthClient {
          pendingRequestsProvider: PendingRequestsProvider,
          logger: ConsoleLogging,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
-         pairingClient: PairingClient
+         pairingRegisterer: PairingRegisterer
     ) {
         self.appRequestService = appRequestService
         self.walletRequestSubscriber = walletRequestSubscriber
@@ -69,7 +69,7 @@ public class AuthClient {
         self.pendingRequestsProvider = pendingRequestsProvider
         self.logger = logger
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
-        self.pairingRegisterer = pairingClient
+        self.pairingRegisterer = pairingRegisterer
         setUpPublishers()
     }
 

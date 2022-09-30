@@ -1,6 +1,6 @@
 import Foundation
 
-public class PairingsProvider {
+class PairingsProvider {
     enum Errors: Error {
         case noPairingMatchingTopic
     }
@@ -15,8 +15,7 @@ public class PairingsProvider {
             .map {Pairing($0)}
     }
 
-
-    public func getPairing(for topic: String) throws -> Pairing {
+    func getPairing(for topic: String) throws -> Pairing {
         guard let pairing = pairingStorage.getPairing(forTopic: topic) else {
             throw Errors.noPairingMatchingTopic
         }
