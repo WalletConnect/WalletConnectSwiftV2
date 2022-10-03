@@ -17,6 +17,7 @@ class AppRespondSubscriberTests: XCTestCase {
     let prvKey = Data(hex: "462c1dad6832d7d96ccf87bd6a686a4110e114aaaebd5512e552c0e3a87b480f")
     var messageSigner: MessageSigner!
     var pairingStorage: WCPairingStorageMock!
+    var pairingRegisterer: PairingRegistererMock<AuthRequestParams>!
 
     override func setUp() {
         networkingInteractor = NetworkingInteractorMock()
@@ -24,12 +25,13 @@ class AppRespondSubscriberTests: XCTestCase {
         messageSigner = MessageSigner()
         rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: RuntimeKeyValueStorage())
         pairingStorage = WCPairingStorageMock()
+        pairingRegisterer = PairingRegistererMock<AuthRequestParams>()
         sut = AppRespondSubscriber(
             networkingInteractor: networkingInteractor,
             logger: ConsoleLoggerMock(),
             rpcHistory: rpcHistory,
             signatureVerifier: messageSigner,
-            pairingRegisterer: PairingRegistererMock<AuthRequestParams>(),
+            pairingRegisterer: pairingRegisterer,
             messageFormatter: messageFormatter)
     }
 
@@ -63,6 +65,7 @@ class AppRespondSubscriberTests: XCTestCase {
         networkingInteractor.responsePublisherSubject.send((topic, request, response))
 
         wait(for: [messageExpectation], timeout: defaultTimeout)
+        XCTAssertTrue(pairingRegisterer.isActivateCalled)
         XCTAssertEqual(result, .failure(AuthError.messageCompromised))
         XCTAssertEqual(messageId, requestId)
     }

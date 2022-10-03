@@ -46,6 +46,7 @@ class WalletRequestSubscriber {
                     }
                     return
                 }
+                pairingRegisterer.activate(pairingTopic: payload.topic)
                 onRequest?(.init(id: payload.id, message: message))
             }.store(in: &publishers)
     }
