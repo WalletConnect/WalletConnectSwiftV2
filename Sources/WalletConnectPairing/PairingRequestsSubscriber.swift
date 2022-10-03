@@ -31,6 +31,7 @@ public class PairingRequestsSubscriber {
             publisherSubject.send(payload)
         }.store(in: &publishers)
 
+
         return publisherSubject.eraseToAnyPublisher()
     }
 

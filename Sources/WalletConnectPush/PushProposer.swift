@@ -6,7 +6,7 @@ import WalletConnectKMS
 import WalletConnectNetworking
 
 
-public class PushProposer {
+class PushProposer {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
@@ -19,7 +19,8 @@ public class PushProposer {
         self.logger = logger
     }
 
-    func request(topic: String, params: AnyCodable) async throws {
+    func request(topic: String, params: PushRequestParams) async throws {
+        logger.debug("Sending Push Proposal")
         let protocolMethod = PushProposeProtocolMethod()
         let request = RPCRequest(method: protocolMethod.method, params: params)
         try await networkingInteractor.requestNetworkAck(request, topic: topic, protocolMethod: protocolMethod)

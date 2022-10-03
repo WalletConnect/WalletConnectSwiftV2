@@ -10,3 +10,5 @@ struct PushProposeProtocolMethod: ProtocolMethod {
 }
 
 public struct PushRequestParams: Codable {}
+
+public struct PushResponseParams: Codable, Equatable {}

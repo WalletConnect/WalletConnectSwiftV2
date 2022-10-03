@@ -13,12 +13,13 @@ public struct PushClientFactory {
         let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
         let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serializer, logger: logger, rpcHistory: history)
         let pushProposer = PushProposer(networkingInteractor: networkingInteractor, kms: kms, logger: logger)
-
+        let proposalResponseSubscriber = ProposalResponseSubscriber(networkingInteractor: networkingInteractor, kms: kms, logger: logger)
+        
         return PushClient(
             networkInteractor: networkingInteractor,
             logger: logger,
             kms: kms,
-            pushProposer: pushProposer,
+            pushProposer: pushProposer, proposalResponseSubscriber: proposalResponseSubscriber,
             pairingRegisterer: pairingClient
         )
     }
