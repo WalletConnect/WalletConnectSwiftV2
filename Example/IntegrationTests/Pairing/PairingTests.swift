@@ -24,11 +24,13 @@ final class PairingTests: XCTestCase {
 
     func makeClients(prefix: String) -> (PairingClient, PushClient) {
         let keychain = KeychainStorageMock()
-        let keyValueStorage = RuntimeKeyValueStorage(prefix: prefix)
+        let keyValueStorage = RuntimeKeyValueStorage()
 
         let relayLogger = ConsoleLogger(suffix: prefix + " [Relay]", loggingLevel: .debug)
         let pairingLogger = ConsoleLogger(suffix: prefix + " [Pairing]", loggingLevel: .debug)
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
+        let networkingLogger = ConsoleLogger(suffix: prefix + " [Networking]", loggingLevel: .debug)
+
 
         let relayClient = RelayClient(
             relayHost: InputConfig.relayHost,
@@ -38,9 +40,15 @@ final class PairingTests: XCTestCase {
             socketFactory: SocketFactory(),
             logger: relayLogger)
 
-        let pairingClient = PairingClientFactory.create(logger: pairingLogger, keyValueStorage: keyValueStorage, keychainStorage: keychain, relayClient: relayClient)
+        let networkingClient = NetworkingClientFactory.create(
+            relayClient: relayClient,
+            logger: networkingLogger,
+            keychainStorage: keychain,
+            keyValueStorage: keyValueStorage)
 
-        let pushClient = PushClientFactory.create(logger: pushLogger, keyValueStorage: keyValueStorage, keychainStorage: keychain, relayClient: relayClient, pairingClient: pairingClient)
+        let pairingClient = PairingClientFactory.create(logger: pairingLogger, keyValueStorage: keyValueStorage, keychainStorage: keychain, networkingClient: networkingClient)
+
+        let pushClient = PushClientFactory.create(logger: pushLogger, keyValueStorage: keyValueStorage, keychainStorage: keychain, networkingClient: networkingClient, pairingClient: pairingClient)
         return (pairingClient, pushClient)
     }
 
@@ -48,8 +56,15 @@ final class PairingTests: XCTestCase {
         let keychain = KeychainStorageMock()
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
+        let keyValueStorage = RuntimeKeyValueStorage()
 
-        let pairingClient = PairingClientFactory.create(logger: logger, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, relayClient: relayClient)
+        let networkingClient = NetworkingClientFactory.create(
+            relayClient: relayClient,
+            logger: logger,
+            keychainStorage: keychain,
+            keyValueStorage: keyValueStorage)
+
+        let pairingClient = PairingClientFactory.create(logger: logger, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, networkingClient: networkingClient)
         return pairingClient
     }
 

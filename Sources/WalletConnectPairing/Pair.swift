@@ -1,5 +1,5 @@
 import Foundation
-import WalletConnectRelay
+import WalletConnectNetworking
 import Combine
 
 public class Pair {
@@ -9,7 +9,7 @@ public class Pair {
         guard let config = Pair.config else {
             fatalError("Error - you must call Pair.configure(_:) before accessing the shared instance.")
         }
-        return PairingClientFactory.create(relayClient: Relay.instance)
+        return PairingClientFactory.create(networkingClient: Networking.instance)
     }()
 
     public static var metadata: AppMetadata {
