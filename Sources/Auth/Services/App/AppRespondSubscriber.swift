@@ -11,6 +11,7 @@ class AppRespondSubscriber {
     private let rpcHistory: RPCHistory
     private let signatureVerifier: MessageSignatureVerifying
     private let messageFormatter: SIWEMessageFormatting
+    private let pairingRegisterer: PairingRegisterer
     private var publishers = [AnyCancellable]()
 
     var onResponse: ((_ id: RPCID, _ result: Result<Cacao, AuthError>) -> Void)?
@@ -19,12 +20,14 @@ class AppRespondSubscriber {
          logger: ConsoleLogging,
          rpcHistory: RPCHistory,
          signatureVerifier: MessageSignatureVerifying,
+         pairingRegisterer: PairingRegisterer,
          messageFormatter: SIWEMessageFormatting) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.rpcHistory = rpcHistory
         self.signatureVerifier = signatureVerifier
         self.messageFormatter = messageFormatter
+        self.pairingRegisterer = pairingRegisterer
         subscribeForResponse()
     }
 
@@ -38,8 +41,7 @@ class AppRespondSubscriber {
         networkingInteractor.responseSubscription(on: AuthRequestProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<AuthRequestParams, Cacao>)  in
 
-                //TODO - call pairing client to activate
-//                activatePairingIfNeeded(id: payload.id)
+                pairingRegisterer.activate(pairingTopic: payload.topic)
                 networkingInteractor.unsubscribe(topic: payload.topic)
 
                 let requestId = payload.id

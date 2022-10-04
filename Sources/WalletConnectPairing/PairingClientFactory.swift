@@ -23,6 +23,7 @@ public struct PairingClientFactory {
         let cleanupService = CleanupService(pairingStore: pairingStore, kms: kms)
         let deletePairingService = DeletePairingService(networkingInteractor: networkingClient, kms: kms, pairingStorage: pairingStore, logger: logger)
         let pingService = PairingPingService(pairingStorage: pairingStore, networkingInteractor: networkingClient, logger: logger)
+        let appPairActivateService = AppPairActivationService(pairingStorage: pairingStore, logger: logger)
 
         return PairingClient(
             appPairService: appPairService,
@@ -31,6 +32,7 @@ public struct PairingClientFactory {
             walletPairService: walletPairService,
             deletePairingService: deletePairingService,
             pairingRequestsSubscriber: pairingRequestsSubscriber,
+            appPairActivateService: appPairActivateService,
             pairingStorage: pairingStore,
             cleanupService: cleanupService,
             pingService: pingService,

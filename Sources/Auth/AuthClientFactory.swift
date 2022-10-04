@@ -20,7 +20,7 @@ public struct AuthClientFactory {
         let messageFormatter = SIWEMessageFormatter()
         let appRequestService = AppRequestService(networkingInteractor: networkingClient, kms: kms, appMetadata: metadata, logger: logger)
         let messageSigner = MessageSigner(signer: Signer())
-        let appRespondSubscriber = AppRespondSubscriber(networkingInteractor: networkingClient, logger: logger, rpcHistory: history, signatureVerifier: messageSigner, messageFormatter: messageFormatter)
+        let appRespondSubscriber = AppRespondSubscriber(networkingInteractor: networkingClient, logger: logger, rpcHistory: history, signatureVerifier: messageSigner, pairingRegisterer: pairingRegisterer, messageFormatter: messageFormatter)
         let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: history)
         let walletRequestSubscriber = WalletRequestSubscriber(networkingInteractor: networkingClient, logger: logger, kms: kms, messageFormatter: messageFormatter, address: account?.address, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingRegisterer)
         let walletRespondService = WalletRespondService(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: history, walletErrorResponder: walletErrorResponder)
