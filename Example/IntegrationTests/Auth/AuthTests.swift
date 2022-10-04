@@ -6,6 +6,7 @@ import WalletConnectRelay
 import Combine
 @testable import Auth
 import WalletConnectPairing
+import WalletConnectNetworking
 
 final class AuthTests: XCTestCase {
     var appPairingClient: PairingClient!
@@ -29,11 +30,17 @@ final class AuthTests: XCTestCase {
         let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
         let keyValueStorage = RuntimeKeyValueStorage()
 
+        let networkingClient = NetworkingClientFactory.create(
+            relayClient: relayClient,
+            logger: logger,
+            keychainStorage: keychain,
+            keyValueStorage: keyValueStorage)
+
         let pairingClient = PairingClientFactory.create(
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
-            relayClient: relayClient)
+            networkingClient: networkingClient)
 
         let authClient = AuthClientFactory.create(
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
@@ -41,7 +48,7 @@ final class AuthTests: XCTestCase {
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
-            relayClient: relayClient,
+            networkingClient: networkingClient,
             pairingRegisterer: pairingClient)
 
         return (pairingClient, authClient)

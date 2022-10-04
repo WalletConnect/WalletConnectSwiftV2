@@ -3,12 +3,22 @@ import WalletConnectNetworking
 public enum PairError: Codable, Equatable, Error, Reason {
     case methodUnsupported
 
-    public var code: Int {
-        //TODO - spec code
-        return 44444
+    public init?(code: Int) {
+        switch code {
+        case Self.methodUnsupported.code:
+            self = .methodUnsupported
+        default:
+            return nil
+        }
     }
 
-    //TODO - spec message
+    public var code: Int {
+        switch self {
+        case .methodUnsupported:
+            return 0
+        }
+    }
+
     public var message: String {
         return "Method Unsupported"
     }

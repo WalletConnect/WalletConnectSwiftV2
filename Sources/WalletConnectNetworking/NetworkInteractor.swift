@@ -5,7 +5,7 @@ import WalletConnectRelay
 import WalletConnectUtils
 import WalletConnectKMS
 
-public class NetworkingInteractor: NetworkInteracting {
+public class NetworkingClient: NetworkInteracting {
     private var publishers = Set<AnyCancellable>()
     private let relayClient: RelayClient
     private let serializer: Serializing

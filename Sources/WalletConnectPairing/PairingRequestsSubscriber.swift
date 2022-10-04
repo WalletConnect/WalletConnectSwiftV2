@@ -31,12 +31,14 @@ public class PairingRequestsSubscriber {
             publisherSubject.send(payload)
         }.store(in: &publishers)
 
+
         return publisherSubject.eraseToAnyPublisher()
     }
 
     func handleUnregisteredRequests() {
         networkingInteractor.requestPublisher
             .filter { [unowned self] in !pairingProtocolMethods.contains($0.request.method)}
+            .filter { [unowned self] in pairingStorage.hasPairing(forTopic: $0.topic)}
             .filter { [unowned self] in !registeredProtocolMethods.contains($0.request.method)}
             .sink { [unowned self] topic, request in
                 Task(priority: .high) {

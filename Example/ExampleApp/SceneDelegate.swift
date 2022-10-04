@@ -2,6 +2,7 @@ import UIKit
 import Foundation
 import Combine
 import WalletConnectSign
+import WalletConnectNetworking
 import WalletConnectRelay
 import Starscream
 
@@ -25,7 +26,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             url: "example.wallet",
             icons: ["https://avatars.githubusercontent.com/u/37784886"])
 
-        Relay.configure(projectId: InputConfig.projectId, socketFactory: SocketFactory())
+        Networking.configure(projectId: InputConfig.projectId, socketFactory: SocketFactory())
         Sign.configure(metadata: metadata)
 #if DEBUG
         if CommandLine.arguments.contains("-cleanInstall") {

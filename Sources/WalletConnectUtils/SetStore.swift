@@ -1,7 +1,7 @@
 
 import Foundation
 
-public class SetStore<T: Hashable> {
+public class SetStore<T: Hashable>: CustomStringConvertible {
 
     private let concurrentQueue: DispatchQueue
 
@@ -29,5 +29,9 @@ public class SetStore<T: Hashable> {
             contains = store.contains(element)
         }
         return contains
+    }
+
+    public var description: String {
+        return store.description
     }
 }
