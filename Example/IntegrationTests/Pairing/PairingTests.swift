@@ -7,8 +7,6 @@ import Combine
 import WalletConnectNetworking
 import WalletConnectPush
 @testable import WalletConnectPairing
-import Auth
-
 
 final class PairingTests: XCTestCase {
 
@@ -31,7 +29,6 @@ final class PairingTests: XCTestCase {
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
         let networkingLogger = ConsoleLogger(suffix: prefix + " [Networking]", loggingLevel: .debug)
 
-
         let relayClient = RelayClient(
             relayHost: InputConfig.relayHost,
             projectId: InputConfig.projectId,
@@ -46,17 +43,33 @@ final class PairingTests: XCTestCase {
             keychainStorage: keychain,
             keyValueStorage: keyValueStorage)
 
-        let pairingClient = PairingClientFactory.create(logger: pairingLogger, keyValueStorage: keyValueStorage, keychainStorage: keychain, networkingClient: networkingClient)
+        let pairingClient = PairingClientFactory.create(
+            logger: pairingLogger,
+            keyValueStorage: keyValueStorage,
+            keychainStorage: keychain,
+            networkingClient: networkingClient)
 
-        let pushClient = PushClientFactory.create(logger: pushLogger, keyValueStorage: keyValueStorage, keychainStorage: keychain, networkingClient: networkingClient, pairingClient: pairingClient)
+        let pushClient = PushClientFactory.create(
+            logger: pushLogger,
+            keyValueStorage: keyValueStorage,
+            keychainStorage: keychain,
+            networkingClient: networkingClient,
+            pairingClient: pairingClient)
+
         return (pairingClient, pushClient)
     }
 
     func makePairingClient(prefix: String) -> PairingClient {
         let keychain = KeychainStorageMock()
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
-        let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
         let keyValueStorage = RuntimeKeyValueStorage()
+
+        let relayClient = RelayClient(
+            relayHost: InputConfig.relayHost,
+            projectId: InputConfig.projectId,
+            keychainStorage: keychain,
+            socketFactory: SocketFactory(),
+            logger: logger)
 
         let networkingClient = NetworkingClientFactory.create(
             relayClient: relayClient,
@@ -64,18 +77,23 @@ final class PairingTests: XCTestCase {
             keychainStorage: keychain,
             keyValueStorage: keyValueStorage)
 
-        let pairingClient = PairingClientFactory.create(logger: logger, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, networkingClient: networkingClient)
+        let pairingClient = PairingClientFactory.create(
+            logger: logger,
+            keyValueStorage: keyValueStorage,
+            keychainStorage: keychain,
+            networkingClient: networkingClient)
+
         return pairingClient
     }
 
     func testProposePushOnPairing() async {
-        let exp = expectation(description: "testProposePushOnPairing")
+        let expectation = expectation(description: "propose push on pairing")
 
         (appPairingClient, appPushClient) = makeClients(prefix: "🤖 App")
         (walletPairingClient, walletPushClient) = makeClients(prefix: "🐶 Wallet")
 
         walletPushClient.proposalPublisher.sink { _ in
-            exp.fulfill()
+            expectation.fulfill()
         }.store(in: &publishers)
 
         let uri = try! await appPairingClient.create()
@@ -84,11 +102,11 @@ final class PairingTests: XCTestCase {
 
         try! await appPushClient.propose(topic: uri.topic)
 
-        wait(for: [exp], timeout: InputConfig.defaultTimeout)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testPing() async {
-        let pingExpectation = expectation(description: "expects ping response")
+        let expectation = expectation(description: "expects ping response")
 
         (appPairingClient, appPushClient) = makeClients(prefix: "🤖 App")
         (walletPairingClient, walletPushClient) = makeClients(prefix: "🐶 Wallet")
@@ -99,20 +117,20 @@ final class PairingTests: XCTestCase {
         walletPairingClient.pingResponsePublisher
             .sink { topic in
                 XCTAssertEqual(topic, uri.topic)
-                pingExpectation.fulfill()
+                expectation.fulfill()
             }.store(in: &publishers)
-        wait(for: [pingExpectation], timeout: InputConfig.defaultTimeout)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
     
     func testResponseErrorForMethodUnregistered() async {
         (appPairingClient, appPushClient) = makeClients(prefix: "🤖 App")
         walletPairingClient = makePairingClient(prefix: "🐶 Wallet")
 
-        let exp = expectation(description: "testProposePushOnPairing")
+        let expectation = expectation(description: "wallet responds unsupported method for unregistered method")
 
         appPushClient.responsePublisher.sink { (id, response) in
             XCTAssertEqual(response, .failure(WalletConnectPairing.PairError(code: 0)!))
-            exp.fulfill()
+            expectation.fulfill()
         }.store(in: &publishers)
 
         let uri = try! await appPairingClient.create()
@@ -121,12 +139,12 @@ final class PairingTests: XCTestCase {
 
         try! await appPushClient.propose(topic: uri.topic)
 
-        wait(for: [exp], timeout: InputConfig.defaultTimeout)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
 
     }
 
     func testDisconnect() {
-
+        //TODO
     }
 }
 
