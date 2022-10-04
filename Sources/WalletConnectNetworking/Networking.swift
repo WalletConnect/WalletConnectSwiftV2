@@ -6,7 +6,7 @@ import Foundation
 public class Networking {
 
     /// Networking client instance
-    public static var instance: NetworkingInteractor = {
+    public static var instance: NetworkingClient = {
         guard let config = Networking.config else {
             fatalError("Error - you must call Networking.configure(_:) before accessing the shared instance.")
         }
