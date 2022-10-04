@@ -22,17 +22,8 @@ public class PairingRequestsSubscriber {
     }
 
     func subscribeForRequest<RequestParams: Codable>(_ protocolMethod: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {
-
         registeredProtocolMethods.insert(protocolMethod.method)
-
-        let publisherSubject = PassthroughSubject<RequestSubscriptionPayload<RequestParams>, Never>()
-
-        networkingInteractor.requestSubscription(on: protocolMethod).sink { (payload: RequestSubscriptionPayload<RequestParams>) in
-            publisherSubject.send(payload)
-        }.store(in: &publishers)
-
-
-        return publisherSubject.eraseToAnyPublisher()
+        return networkingInteractor.requestSubscription(on: protocolMethod).eraseToAnyPublisher()
     }
 
     func handleUnregisteredRequests() {

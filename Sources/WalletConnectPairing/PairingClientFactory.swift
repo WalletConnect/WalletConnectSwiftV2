@@ -24,8 +24,8 @@ public struct PairingClientFactory {
         let deletePairingService = DeletePairingService(networkingInteractor: networkingClient, kms: kms, pairingStorage: pairingStore, logger: logger)
         let pingService = PairingPingService(pairingStorage: pairingStore, networkingInteractor: networkingClient, logger: logger)
         let appPairActivateService = AppPairActivationService(pairingStorage: pairingStore, logger: logger)
-        let expirationService = ExpirationService(pairingStorage: pairingStore, networkInteractor: networkingInteractor, kms: kms)
-        let resubscribeService = ResubscribeService(networkInteractor: networkingInteractor, pairingStorage: pairingStore)
+        let expirationService = ExpirationService(pairingStorage: pairingStore, networkInteractor: networkingClient, kms: kms)
+        let resubscribeService = ResubscribeService(networkInteractor: networkingClient, pairingStorage: pairingStore)
 
         return PairingClient(
             appPairService: appPairService,

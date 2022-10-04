@@ -29,7 +29,8 @@ public class Sign {
         return SignClientFactory.create(
             metadata: Sign.metadata ?? Pair.metadata,
             relayClient: Relay.instance,
-            pairingClient: Pair.instance
+            pairingClient: Pair.instance,
+            networkingClient: Networking.instance
         )
     }()
 

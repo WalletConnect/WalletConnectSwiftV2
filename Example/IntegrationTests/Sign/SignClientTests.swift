@@ -29,21 +29,22 @@ final class SignClientTests: XCTestCase {
             relayClient: relayClient,
             logger: logger,
             keychainStorage: keychain,
-            keyValueStorage: keyValueStorage)
-
+            keyValueStorage: keyValueStorage
+        )
         let pairingClient = PairingClientFactory.create(
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
-            networkingClient: networkingClient)
-
+            networkingClient: networkingClient
+        )
         let client = SignClientFactory.create(
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             relayClient: relayClient,
-            pairingClient: pairingClient
+            pairingClient: pairingClient,
+            networkingClient: networkingClient
         )
         return ClientDelegate(client: client)
     }
