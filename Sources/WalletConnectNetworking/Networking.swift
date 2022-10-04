@@ -5,7 +5,7 @@ import Foundation
 
 public class Networking {
 
-    /// Relay client instance
+    /// Networking client instance
     public static var instance: NetworkingInteractor = {
         guard let config = Networking.config else {
             fatalError("Error - you must call Networking.configure(_:) before accessing the shared instance.")
@@ -18,7 +18,7 @@ public class Networking {
 
     private init() { }
 
-    /// Relay instance config method
+    /// Networking instance config method
     /// - Parameters:
     ///   - relayHost: relay host
     ///   - projectId: project id
@@ -36,7 +36,7 @@ public class Networking {
             socketFactory: socketFactory,
             socketConnectionType: socketConnectionType
         )
-        Networking.configure(
+        Relay.configure(
             relayHost: relayHost,
             projectId: projectId,
             socketFactory: socketFactory,
@@ -44,35 +44,3 @@ public class Networking {
     }
 }
 
-extension Networking {
-    struct Config {
-        let relayHost: String
-        let projectId: String
-        let socketFactory: WebSocketFactory
-        let socketConnectionType: SocketConnectionType
-    }
-}
-
-public struct NetworkingClientFactory {
-
-    public static func create(relayClient: RelayClient) -> NetworkingInteractor {
-        let logger = ConsoleLogger(loggingLevel: .off)
-        let keyValueStorage = UserDefaults.standard
-        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
-        return NetworkingClientFactory.create(relayClient: relayClient, logger: logger, keychainStorage: keychainStorage, keyValueStorage: keyValueStorage)
-    }
-
-    public static func create(relayClient: RelayClient, logger: ConsoleLogging, keychainStorage: KeychainStorageProtocol, keyValueStorage: KeyValueStorage) -> NetworkingInteractor{
-        let kms = KeyManagementService(keychain: keychainStorage)
-
-        let serializer = Serializer(kms: kms)
-
-        let rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
-
-        return NetworkingInteractor(
-            relayClient: relayClient,
-            serializer: serializer,
-            logger: logger,
-            rpcHistory: rpcHistory)
-    }
-}
