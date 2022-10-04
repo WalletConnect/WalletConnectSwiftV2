@@ -48,7 +48,7 @@ final class AuthTests: XCTestCase {
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
-            relayClient: relayClient,
+            networkingClient: networkingClient,
             pairingRegisterer: pairingClient)
 
         return (pairingClient, authClient)
