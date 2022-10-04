@@ -37,7 +37,6 @@ public struct PairingClientFactory {
             expirationService: expirationService,
             pairingRequestsSubscriber: pairingRequestsSubscriber,
             appPairActivateService: appPairActivateService,
-            pairingStorage: pairingStore,
             cleanupService: cleanupService,
             pingService: pingService,
             socketConnectionStatusPublisher: networkingClient.socketConnectionStatusPublisher,
