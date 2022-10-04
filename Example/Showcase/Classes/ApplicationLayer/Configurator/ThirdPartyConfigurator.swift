@@ -1,11 +1,11 @@
-import WalletConnectRelay
+import WalletConnectNetworking
 import WalletConnectPairing
 import Auth
 
 struct ThirdPartyConfigurator: Configurator {
 
     func configure() {
-        Relay.configure(projectId: InputConfig.projectId, socketFactory: SocketFactory())
+        Networking.configure(projectId: InputConfig.projectId, socketFactory: SocketFactory())
         Pair.configure(
             metadata: AppMetadata(
                 name: "Showcase App",
