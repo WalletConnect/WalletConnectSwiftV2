@@ -111,7 +111,8 @@ final class PairingTests: XCTestCase {
         let exp = expectation(description: "testProposePushOnPairing")
 
         appPushClient.responsePublisher.sink { (id, response) in
-            XCTAssertEqual(response, .failure(PairError(code: 4444)!))
+            XCTAssertEqual(response, .failure(WalletConnectPairing.PairError(code: 0)!))
+            exp.fulfill()
         }.store(in: &publishers)
 
         let uri = try! await appPairingClient.create()

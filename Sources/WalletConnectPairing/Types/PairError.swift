@@ -13,11 +13,12 @@ public enum PairError: Codable, Equatable, Error, Reason {
     }
 
     public var code: Int {
-        //TODO - spec code
-        return 44444
+        switch self {
+        case .methodUnsupported:
+            return 0
+        }
     }
 
-    //TODO - spec message
     public var message: String {
         return "Method Unsupported"
     }
