@@ -95,9 +95,9 @@ public final class SignClient {
     public let logger: ConsoleLogging
 
     // MARK: - Private properties
+
     private let pairingClient: PairingClient
     private let relayClient: RelayClient
-    private let pairingEngine: PairingEngine
     private let pairEngine: PairEngine
     private let sessionEngine: SessionEngine
     private let approveEngine: ApproveEngine
@@ -106,6 +106,7 @@ public final class SignClient {
     private let sessionPingService: SessionPingService
     private let nonControllerSessionStateMachine: NonControllerSessionStateMachine
     private let controllerSessionStateMachine: ControllerSessionStateMachine
+    private let appProposeService: AppProposeService
     private let history: RPCHistory
     private let cleanupService: CleanupService
 
@@ -127,7 +128,6 @@ public final class SignClient {
 
     init(logger: ConsoleLogging,
          relayClient: RelayClient,
-         pairingEngine: PairingEngine,
          pairEngine: PairEngine,
          sessionEngine: SessionEngine,
          approveEngine: ApproveEngine,
@@ -135,6 +135,7 @@ public final class SignClient {
          sessionPingService: SessionPingService,
          nonControllerSessionStateMachine: NonControllerSessionStateMachine,
          controllerSessionStateMachine: ControllerSessionStateMachine,
+         appProposeService: AppProposeService,
          disconnectService: DisconnectService,
          history: RPCHistory,
          cleanupService: CleanupService,
@@ -142,7 +143,6 @@ public final class SignClient {
     ) {
         self.logger = logger
         self.relayClient = relayClient
-        self.pairingEngine = pairingEngine
         self.pairEngine = pairEngine
         self.sessionEngine = sessionEngine
         self.approveEngine = approveEngine
@@ -150,12 +150,15 @@ public final class SignClient {
         self.sessionPingService = sessionPingService
         self.nonControllerSessionStateMachine = nonControllerSessionStateMachine
         self.controllerSessionStateMachine = controllerSessionStateMachine
+        self.appProposeService = appProposeService
         self.history = history
         self.cleanupService = cleanupService
         self.disconnectService = disconnectService
         self.pairingClient = pairingClient
+
         setUpConnectionObserving()
         setUpEnginesCallbacks()
+        setUpPairingResubscription()
     }
 
     // MARK: - Public interface
@@ -169,15 +172,20 @@ public final class SignClient {
     public func connect(requiredNamespaces: [String: ProposalNamespace], topic: String? = nil) async throws -> WalletConnectURI? {
         logger.debug("Connecting Application")
         if let topic = topic {
-            guard let pairing = pairingEngine.getSettledPairing(for: topic) else {
-                throw WalletConnectError.noPairingMatchingTopic(topic)
-            }
-            logger.debug("Proposing session on existing pairing")
-            try await pairingEngine.propose(pairingTopic: topic, namespaces: requiredNamespaces, relay: pairing.relay)
+            try pairingClient.validatePairingExistance(topic)
+            try await appProposeService.propose(
+                pairingTopic: topic,
+                namespaces: requiredNamespaces,
+                relay: RelayProtocolOptions(protocol: "irn", data: nil)
+            )
             return nil
         } else {
-            let pairingURI = try await pairingEngine.create()
-            try await pairingEngine.propose(pairingTopic: pairingURI.topic, namespaces: requiredNamespaces, relay: pairingURI.relay)
+            let pairingURI = try await pairingClient.create()
+            try await appProposeService.propose(
+                pairingTopic: pairingURI.topic,
+                namespaces: requiredNamespaces,
+                relay: RelayProtocolOptions(protocol: "irn", data: nil)
+            )
             return pairingURI
         }
     }
@@ -190,9 +198,6 @@ public final class SignClient {
     /// - When URI has invalid format or missing params
     /// - When topic is already in use
     public func pair(uri: WalletConnectURI) async throws {
-        guard uri.api == .sign else {
-            throw WalletConnectError.pairingUriWrongApiParam
-        }
         try await pairEngine.pair(uri)
     }
 
@@ -256,7 +261,7 @@ public final class SignClient {
     ///   - topic: Topic of a session or a pairing
     ///   - completion: Result will be success on response or an error
     public func ping(topic: String) async throws {
-        if pairingEngine.hasPairing(for: topic) {
+        if let _ = try? pairingClient.validatePairingExistance(topic) {
             try await pairingPingService.ping(topic: topic)
         } else if sessionEngine.hasSession(for: topic) {
             try await sessionPingService.ping(topic: topic)
@@ -297,7 +302,7 @@ public final class SignClient {
     /// Query pairings
     /// - Returns: All pairings
     public func getPairings() -> [Pairing] {
-        pairingEngine.getPairings()
+        pairingClient.getPairings()
     }
 
     /// Query pending requests
@@ -384,5 +389,9 @@ public final class SignClient {
         relayClient.socketConnectionStatusPublisher.sink { [weak self] status in
             self?.socketConnectionStatusPublisherSubject.send(status)
         }.store(in: &publishers)
+    }
+
+    private func setUpPairingResubscription() {
+        pairingClient.resubscribe()
     }
 }

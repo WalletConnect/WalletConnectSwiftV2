@@ -32,29 +32,30 @@ public struct SignClientFactory {
         let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.sessions.rawValue)))
         let sessionToPairingTopic = CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.sessionToPairingTopic.rawValue)
         let proposalPayloadsStore = CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.proposals.rawValue)
-        let pairingEngine = PairingEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore, metadata: metadata, logger: logger)
         let sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         let nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         let controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         let pairEngine = PairEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore)
-        let approveEngine = ApproveEngine(networkingInteractor: networkingInteractor, proposalPayloadsStore: proposalPayloadsStore, sessionToPairingTopic: sessionToPairingTopic, metadata: metadata, kms: kms, logger: logger, pairingStore: pairingStore, sessionStore: sessionStore)
+        let approveEngine = ApproveEngine(networkingInteractor: networkingInteractor, proposalPayloadsStore: proposalPayloadsStore, sessionToPairingTopic: sessionToPairingTopic, pairingRegisterer: pairingClient, metadata: metadata, kms: kms, logger: logger, pairingStore: pairingStore, sessionStore: sessionStore)
         let cleanupService = CleanupService(pairingStore: pairingStore, sessionStore: sessionStore, kms: kms, sessionToPairingTopic: sessionToPairingTopic)
         let deleteSessionService = DeleteSessionService(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         let disconnectService = DisconnectService(deleteSessionService: deleteSessionService, sessionStorage: sessionStore, pairingClient: pairingClient)
         let sessionPingService = SessionPingService(sessionStorage: sessionStore, networkingInteractor: networkingInteractor, logger: logger)
         let pairingPingService = PairingPingService(pairingStorage: pairingStore, networkingInteractor: networkingInteractor, logger: logger)
+        let appProposerService = AppProposeService(metadata: metadata, networkingInteractor: networkingInteractor, kms: kms, logger: logger)
 
         let client = SignClient(
             logger: logger,
             relayClient: relayClient,
-            pairingEngine: pairingEngine,
             pairEngine: pairEngine,
             sessionEngine: sessionEngine,
             approveEngine: approveEngine,
             pairingPingService: pairingPingService,
             sessionPingService: sessionPingService,
             nonControllerSessionStateMachine: nonControllerSessionStateMachine,
-            controllerSessionStateMachine: controllerSessionStateMachine, disconnectService: disconnectService,
+            controllerSessionStateMachine: controllerSessionStateMachine,
+            appProposeService: appProposerService,
+            disconnectService: disconnectService,
             history: rpcHistory,
             cleanupService: cleanupService,
             pairingClient: pairingClient

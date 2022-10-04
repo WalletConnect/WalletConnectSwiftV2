@@ -21,7 +21,8 @@ public class PairingClient: PairingRegisterer {
     private let pairingRequestsSubscriber: PairingRequestsSubscriber
     private let pairingsProvider: PairingsProvider
     private let deletePairingService: DeletePairingService
-    private let pairingStorage: WCPairingStorage
+    private let resubscribeService: ResubscribeService
+    private let expirationService: ExpirationService
 
     private let cleanupService: CleanupService
 
@@ -30,9 +31,10 @@ public class PairingClient: PairingRegisterer {
          logger: ConsoleLogging,
          walletPairService: WalletPairService,
          deletePairingService: DeletePairingService,
+         resubscribeService: ResubscribeService,
+         expirationService: ExpirationService,
          pairingRequestsSubscriber: PairingRequestsSubscriber,
          appPairActivateService: AppPairActivationService,
-         pairingStorage: WCPairingStorage,
          cleanupService: CleanupService,
          pingService: PairingPingService,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
@@ -43,20 +45,26 @@ public class PairingClient: PairingRegisterer {
         self.networkingInteractor = networkingInteractor
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
         self.logger = logger
-        self.pairingStorage = pairingStorage
         self.deletePairingService = deletePairingService
         self.appPairActivateService = appPairActivateService
+        self.resubscribeService = resubscribeService
+        self.expirationService = expirationService
         self.cleanupService = cleanupService
         self.pingService = pingService
         self.pairingRequestsSubscriber = pairingRequestsSubscriber
         self.pairingsProvider = pairingsProvider
         setUpPublishers()
+        setUpExpiration()
     }
 
     private func setUpPublishers() {
         pingService.onResponse = { [unowned self] topic in
             pingResponsePublisherSubject.send(topic)
         }
+    }
+
+    private func setUpExpiration() {
+        expirationService.setupExpirationHandling()
     }
 
     /// For wallet to establish a pairing
@@ -104,6 +112,10 @@ public class PairingClient: PairingRegisterer {
 
     public func validatePairingExistance(_ topic: String) throws {
         _ = try pairingsProvider.getPairing(for: topic)
+    }
+
+    public func resubscribe() {
+        resubscribeService.resubscribe()
     }
 
     public func register<RequestParams>(method: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {

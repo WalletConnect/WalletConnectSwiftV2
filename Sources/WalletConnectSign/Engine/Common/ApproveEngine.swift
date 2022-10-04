@@ -27,6 +27,7 @@ final class ApproveEngine {
     private let sessionStore: WCSessionStorage
     private let proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>
     private let sessionToPairingTopic: CodableStore<String>
+    private let pairingRegisterer: PairingRegisterer
     private let metadata: AppMetadata
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
@@ -37,6 +38,7 @@ final class ApproveEngine {
         networkingInteractor: NetworkInteracting,
         proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>,
         sessionToPairingTopic: CodableStore<String>,
+        pairingRegisterer: PairingRegisterer,
         metadata: AppMetadata,
         kms: KeyManagementServiceProtocol,
         logger: ConsoleLogging,
@@ -46,6 +48,7 @@ final class ApproveEngine {
         self.networkingInteractor = networkingInteractor
         self.proposalPayloadsStore = proposalPayloadsStore
         self.sessionToPairingTopic = sessionToPairingTopic
+        self.pairingRegisterer = pairingRegisterer
         self.metadata = metadata
         self.kms = kms
         self.logger = logger
@@ -155,7 +158,7 @@ final class ApproveEngine {
 private extension ApproveEngine {
 
     func setupRequestSubscriptions() {
-        networkingInteractor.requestSubscription(on: SessionProposeProtocolMethod())
+        pairingRegisterer.register(method: SessionProposeProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionType.ProposeParams>) in
                 handleSessionProposeRequest(payload: payload)
             }.store(in: &publishers)
