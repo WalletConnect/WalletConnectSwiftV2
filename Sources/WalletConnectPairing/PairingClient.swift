@@ -13,6 +13,7 @@ public class PairingClient: PairingRegisterer {
 
     private let walletPairService: WalletPairService
     private let appPairService: AppPairService
+    private let appPairActivateService: AppPairActivationService
     private var pingResponsePublisherSubject = PassthroughSubject<String, Never>()
     private let logger: ConsoleLogging
     private let pingService: PairingPingService
@@ -30,6 +31,7 @@ public class PairingClient: PairingRegisterer {
          walletPairService: WalletPairService,
          deletePairingService: DeletePairingService,
          pairingRequestsSubscriber: PairingRequestsSubscriber,
+         appPairActivateService: AppPairActivationService,
          pairingStorage: WCPairingStorage,
          cleanupService: CleanupService,
          pingService: PairingPingService,
@@ -43,6 +45,7 @@ public class PairingClient: PairingRegisterer {
         self.logger = logger
         self.pairingStorage = pairingStorage
         self.deletePairingService = deletePairingService
+        self.appPairActivateService = appPairActivateService
         self.cleanupService = cleanupService
         self.pingService = pingService
         self.pairingRequestsSubscriber = pairingRequestsSubscriber
@@ -97,7 +100,6 @@ public class PairingClient: PairingRegisterer {
 
     public func disconnect(topic: String) async throws {
         try await deletePairingService.delete(topic: topic)
-
     }
 
     public func validatePairingExistance(_ topic: String) throws {
@@ -107,6 +109,10 @@ public class PairingClient: PairingRegisterer {
     public func register<RequestParams>(method: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {
         logger.debug("Pairing Client - registering for \(method.method)")
         return pairingRequestsSubscriber.subscribeForRequest(method)
+    }
+
+    public func activate(pairingTopic: String) {
+        appPairActivateService.activate(for: pairingTopic)
     }
 
 #if DEBUG

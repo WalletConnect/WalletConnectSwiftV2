@@ -41,13 +41,12 @@ class WalletRequestSubscriberTests: XCTestCase {
             messageExpectation.fulfill()
         }
         
-
-
         let payload = RequestSubscriptionPayload<AuthRequestParams>(id: expectedRequestId, topic: "123", request: AuthRequestParams.stub(id: expectedRequestId))
 
         pairingRegisterer.subject.send(payload)
 
         wait(for: [messageExpectation], timeout: defaultTimeout)
+        XCTAssertTrue(pairingRegisterer.isActivateCalled)
         XCTAssertEqual(message, expectedMessage)
         XCTAssertEqual(messageId, expectedRequestId)
     }
