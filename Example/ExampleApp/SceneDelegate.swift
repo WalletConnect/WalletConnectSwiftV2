@@ -2,6 +2,8 @@ import UIKit
 import Foundation
 import Combine
 import WalletConnectSign
+import WalletConnectNetworking
+import WalletConnectRelay
 import Starscream
 
 extension WebSocket: WebSocketConnecting { }
