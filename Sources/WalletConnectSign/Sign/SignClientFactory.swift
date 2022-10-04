@@ -35,7 +35,6 @@ public struct SignClientFactory {
         let sessionEngine = SessionEngine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         let nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
         let controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
-        let pairEngine = PairEngine(networkingInteractor: networkingInteractor, kms: kms, pairingStore: pairingStore)
         let approveEngine = ApproveEngine(networkingInteractor: networkingInteractor, proposalPayloadsStore: proposalPayloadsStore, sessionToPairingTopic: sessionToPairingTopic, pairingRegisterer: pairingClient, metadata: metadata, kms: kms, logger: logger, pairingStore: pairingStore, sessionStore: sessionStore)
         let cleanupService = CleanupService(pairingStore: pairingStore, sessionStore: sessionStore, kms: kms, sessionToPairingTopic: sessionToPairingTopic)
         let deleteSessionService = DeleteSessionService(networkingInteractor: networkingInteractor, kms: kms, sessionStore: sessionStore, logger: logger)
@@ -47,7 +46,6 @@ public struct SignClientFactory {
         let client = SignClient(
             logger: logger,
             relayClient: relayClient,
-            pairEngine: pairEngine,
             sessionEngine: sessionEngine,
             approveEngine: approveEngine,
             pairingPingService: pairingPingService,

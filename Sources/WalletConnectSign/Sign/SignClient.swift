@@ -98,7 +98,6 @@ public final class SignClient {
 
     private let pairingClient: PairingClient
     private let relayClient: RelayClient
-    private let pairEngine: PairEngine
     private let sessionEngine: SessionEngine
     private let approveEngine: ApproveEngine
     private let disconnectService: DisconnectService
@@ -128,7 +127,6 @@ public final class SignClient {
 
     init(logger: ConsoleLogging,
          relayClient: RelayClient,
-         pairEngine: PairEngine,
          sessionEngine: SessionEngine,
          approveEngine: ApproveEngine,
          pairingPingService: PairingPingService,
@@ -143,7 +141,6 @@ public final class SignClient {
     ) {
         self.logger = logger
         self.relayClient = relayClient
-        self.pairEngine = pairEngine
         self.sessionEngine = sessionEngine
         self.approveEngine = approveEngine
         self.pairingPingService = pairingPingService
@@ -198,7 +195,7 @@ public final class SignClient {
     /// - When URI has invalid format or missing params
     /// - When topic is already in use
     public func pair(uri: WalletConnectURI) async throws {
-        try await pairEngine.pair(uri)
+        try await pairingClient.pair(uri: uri)
     }
 
     /// For a wallet to approve a session proposal.
