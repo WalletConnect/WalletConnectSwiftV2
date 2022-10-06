@@ -12,11 +12,13 @@ final class ResubscribeService {
     init(networkInteractor: NetworkInteracting, pairingStorage: PairingStorage) {
         self.networkInteractor = networkInteractor
         self.pairingStorage = pairingStorage
+        setUpResubscription()
     }
 
-    func resubscribe() {
+    func setUpResubscription() {
         networkInteractor.socketConnectionStatusPublisher
             .sink { [unowned self] status in
+                guard status == .connected else { return }
                 pairingStorage.getAll()
                     .forEach { pairing in
                         Task(priority: .high) { try await networkInteractor.subscribe(topic: pairing.topic) }

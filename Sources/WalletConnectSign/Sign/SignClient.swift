@@ -155,7 +155,6 @@ public final class SignClient {
 
         setUpConnectionObserving()
         setUpEnginesCallbacks()
-        setUpPairingResubscription()
     }
 
     // MARK: - Public interface
@@ -386,9 +385,5 @@ public final class SignClient {
         relayClient.socketConnectionStatusPublisher.sink { [weak self] status in
             self?.socketConnectionStatusPublisherSubject.send(status)
         }.store(in: &publishers)
-    }
-
-    private func setUpPairingResubscription() {
-        pairingClient.resubscribe()
     }
 }

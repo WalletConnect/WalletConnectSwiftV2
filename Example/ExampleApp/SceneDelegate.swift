@@ -38,14 +38,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = UITabBarController.createExampleApp()
         window?.makeKeyAndVisible()
+
+        if let userActivity = connectionOptions.userActivities.first {
+            handle(userActivity: userActivity)
+        }
     }
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
-        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
-              let incomingURL = userActivity.webpageURL else {
-                  return
-              }
-        let wcUri = incomingURL.absoluteString.deletingPrefix("https://walletconnect.com/wc?uri=")
+        handle(userActivity: userActivity)
+    }
+
+    private func handle(userActivity: NSUserActivity) {
+        guard
+            let url = userActivity.webpageURL,
+            userActivity.activityType == NSUserActivityTypeBrowsingWeb
+        else { return }
+
+        let wcUri = url.absoluteString.deletingPrefix("https://walletconnect.com/wc?uri=")
         Task(priority: .high) {
             try! await Sign.instance.pair(uri: WalletConnectURI(string: wcUri)!)
         }

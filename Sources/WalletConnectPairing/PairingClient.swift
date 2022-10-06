@@ -114,10 +114,6 @@ public class PairingClient: PairingRegisterer {
         _ = try pairingsProvider.getPairing(for: topic)
     }
 
-    public func resubscribe() {
-        resubscribeService.resubscribe()
-    }
-
     public func register<RequestParams>(method: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {
         logger.debug("Pairing Client - registering for \(method.method)")
         return pairingRequestsSubscriber.subscribeForRequest(method)
