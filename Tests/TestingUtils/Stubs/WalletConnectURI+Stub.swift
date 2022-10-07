@@ -1,10 +1,9 @@
-@testable import WalletConnectSign
-@testable import WalletConnectKMS
-import CryptoKit
+import WalletConnectKMS
+import WalletConnectUtils
 
 extension WalletConnectURI {
 
-    static func stub(isController: Bool = false) -> WalletConnectURI {
+    public static func stub(isController: Bool = false) -> WalletConnectURI {
         WalletConnectURI(
             topic: String.generateTopic(),
             symKey: SymmetricKey().hexRepresentation,

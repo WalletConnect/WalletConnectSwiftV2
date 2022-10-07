@@ -31,6 +31,7 @@ final class ApproveEngineTests: XCTestCase {
             networkingInteractor: networkingInteractor,
             proposalPayloadsStore: proposalPayloadsStore,
             sessionToPairingTopic: CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: ""),
+            pairingRegisterer: PairingRegistererMock<SessionProposal>(),
             metadata: metadata,
             kms: cryptoMock,
             logger: ConsoleLoggerMock(),

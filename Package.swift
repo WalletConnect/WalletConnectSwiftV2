@@ -82,6 +82,9 @@ let package = Package(
             name: "WalletConnectSignTests",
             dependencies: ["WalletConnectSign", "TestingUtils"]),
         .testTarget(
+            name: "WalletConnectPairingTests",
+            dependencies: ["WalletConnectPairing", "TestingUtils"]),
+        .testTarget(
             name: "ChatTests",
             dependencies: ["Chat", "WalletConnectUtils", "TestingUtils"]),
         .testTarget(
