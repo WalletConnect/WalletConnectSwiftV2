@@ -3,11 +3,11 @@ import WalletConnectNetworking
 import WalletConnectKMS
 
 final class ExpirationService {
-    private let pairingStorage: PairingStorage
+    private let pairingStorage: WCPairingStorage
     private let networkInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
 
-    init(pairingStorage: PairingStorage, networkInteractor: NetworkInteracting, kms: KeyManagementServiceProtocol) {
+    init(pairingStorage: WCPairingStorage, networkInteractor: NetworkInteracting, kms: KeyManagementServiceProtocol) {
         self.pairingStorage = pairingStorage
         self.networkInteractor = networkInteractor
         self.kms = kms
