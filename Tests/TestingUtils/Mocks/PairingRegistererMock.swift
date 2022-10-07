@@ -20,4 +20,8 @@ public class PairingRegistererMock<RequestParams>: PairingRegisterer where Reque
     public func validatePairingExistance(_ topic: String) throws {
 
     }
+
+    public func updateMetadata(_ topic: String, metadata: AppMetadata) {
+
+    }
 }

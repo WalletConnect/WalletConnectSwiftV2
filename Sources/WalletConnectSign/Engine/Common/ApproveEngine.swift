@@ -203,12 +203,6 @@ private extension ApproveEngine {
         }
     }
 
-    func updatePairingMetadata(topic: String, metadata: AppMetadata) {
-        guard var pairing = pairingStore.getPairing(forTopic: topic) else { return }
-        pairing.peerMetadata = metadata
-        pairingStore.setPairing(pairing)
-    }
-
     // MARK: SessionProposeResponse
     // TODO: Move to Non-Controller SettleEngine
     func handleSessionProposeResponse(payload: ResponseSubscriptionPayload<SessionType.ProposeParams, SessionType.ProposeResponse>) {
@@ -334,7 +328,7 @@ private extension ApproveEngine {
             metadata: metadata
         )
         if let pairingTopic = try? sessionToPairingTopic.get(key: topic) {
-            updatePairingMetadata(topic: pairingTopic, metadata: params.controller.metadata)
+            pairingRegisterer.updateMetadata(pairingTopic, metadata: params.controller.metadata)
         }
 
         let session = WCSession(

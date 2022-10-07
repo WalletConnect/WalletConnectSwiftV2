@@ -14,6 +14,7 @@ public class PairingClient: PairingRegisterer {
     private let walletPairService: WalletPairService
     private let appPairService: AppPairService
     private let appPairActivateService: AppPairActivationService
+    private let appUpdateMetadataService: AppUpdateMetadataService
     private var pingResponsePublisherSubject = PassthroughSubject<String, Never>()
     private let logger: ConsoleLogging
     private let pingService: PairingPingService
@@ -35,6 +36,7 @@ public class PairingClient: PairingRegisterer {
          expirationService: ExpirationService,
          pairingRequestsSubscriber: PairingRequestsSubscriber,
          appPairActivateService: AppPairActivationService,
+         appUpdateMetadataService: AppUpdateMetadataService,
          cleanupService: CleanupService,
          pingService: PairingPingService,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
@@ -47,6 +49,7 @@ public class PairingClient: PairingRegisterer {
         self.logger = logger
         self.deletePairingService = deletePairingService
         self.appPairActivateService = appPairActivateService
+        self.appUpdateMetadataService = appUpdateMetadataService
         self.resubscribeService = resubscribeService
         self.expirationService = expirationService
         self.cleanupService = cleanupService
@@ -82,16 +85,12 @@ public class PairingClient: PairingRegisterer {
         return try await appPairService.create()
     }
 
-    public func activate(_ topic: String) {
-
-    }
-
-    public func updateExpiry(_ topic: String) {
-
+    public func activate(pairingTopic: String) {
+        appPairActivateService.activate(for: pairingTopic)
     }
 
     public func updateMetadata(_ topic: String, metadata: AppMetadata) {
-
+        appUpdateMetadataService.updatePairingMetadata(topic: topic, metadata: metadata)
     }
 
     public func getPairings() -> [Pairing] {
@@ -117,10 +116,6 @@ public class PairingClient: PairingRegisterer {
     public func register<RequestParams>(method: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {
         logger.debug("Pairing Client - registering for \(method.method)")
         return pairingRequestsSubscriber.subscribeForRequest(method)
-    }
-
-    public func activate(pairingTopic: String) {
-        appPairActivateService.activate(for: pairingTopic)
     }
 
 #if DEBUG
