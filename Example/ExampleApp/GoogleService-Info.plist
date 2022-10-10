@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>83929691786-2r8ksvrgbj5cv5rpnkjplc85blv2sf69.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.83929691786-2r8ksvrgbj5cv5rpnkjplc85blv2sf69</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDfO0_e51Czoec9SWU4dKUKTsk6YkGc3L8</string>
+	<key>GCM_SENDER_ID</key>
+	<string>83929691786</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.walletconnect.example</string>
+	<key>PROJECT_ID</key>
+	<string>echo-server-demo</string>
+	<key>STORAGE_BUCKET</key>
+	<string>echo-server-demo.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:83929691786:ios:b5b4d715cafc09f93edf73</string>
+</dict>
+</plist>
