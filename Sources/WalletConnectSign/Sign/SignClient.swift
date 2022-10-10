@@ -275,7 +275,7 @@ public final class SignClient {
     /// - Parameters:
     ///   - topic: Topic of a session
     public func ping(topic: String) async throws {
-        guard sessionEngine.hasSession(for: topic) else { Errors.sessionForTopicNotFound }
+        guard sessionEngine.hasSession(for: topic) else { throw Errors.sessionForTopicNotFound }
         try await sessionPingService.ping(topic: topic)
     }
 
