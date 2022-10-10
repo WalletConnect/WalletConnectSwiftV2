@@ -1,5 +1,6 @@
 import Foundation
 import WalletConnectSign
+import WalletConnectPairing
 import UIKit
 import Combine
 
@@ -34,8 +35,9 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
         let blockchains: Set<Blockchain> = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
         let namespaces: [String: ProposalNamespace] = ["eip155": ProposalNamespace(chains: blockchains, methods: methods, events: [], extensions: nil)]
         Task {
-            let uri = try await Sign.instance.connect(requiredNamespaces: namespaces)
-            showConnectScreen(uri: uri!)
+            let uri = try await Pair.instance.create()
+            try await Sign.instance.connect(requiredNamespaces: namespaces, topic: uri.topic)
+            showConnectScreen(uri: uri)
         }
     }
 

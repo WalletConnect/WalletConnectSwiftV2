@@ -1,5 +1,6 @@
 import SwiftUI
 import Auth
+import WalletConnectPairing
 
 final class AuthCoordinator {
 
@@ -30,7 +31,8 @@ final class AuthCoordinator {
             url: "wallet.connect",
             icons: ["https://avatars.githubusercontent.com/u/37784886"])
 
-        Auth.configure(metadata: metadata, account: nil)
+        Pair.configure(metadata: metadata)
+        Auth.configure(account: nil)
 
         navigationController.viewControllers = [authViewController]
     }

@@ -57,7 +57,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         let wcUri = url.absoluteString.deletingPrefix("https://walletconnect.com/wc?uri=")
         Task(priority: .high) {
-            try! await Sign.instance.pair(uri: WalletConnectURI(string: wcUri)!)
+            try! await Pair.instance.pair(uri: WalletConnectURI(string: wcUri)!)
         }
     }
 }
