@@ -10,4 +10,5 @@ public protocol PairingRegisterer {
 
     func activate(pairingTopic: String)
     func validatePairingExistance(_ topic: String) throws
+    func updateMetadata(_ topic: String, metadata: AppMetadata) 
 }

@@ -29,21 +29,22 @@ final class SignClientTests: XCTestCase {
             relayClient: relayClient,
             logger: logger,
             keychainStorage: keychain,
-            keyValueStorage: keyValueStorage)
-
+            keyValueStorage: keyValueStorage
+        )
         let pairingClient = PairingClientFactory.create(
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
-            networkingClient: networkingClient)
-
+            networkingClient: networkingClient
+        )
         let client = SignClientFactory.create(
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             relayClient: relayClient,
-            pairingClient: pairingClient
+            pairingClient: pairingClient,
+            networkingClient: networkingClient
         )
         return ClientDelegate(client: client)
     }
@@ -307,7 +308,6 @@ final class SignClientTests: XCTestCase {
         let uri = try! await dapp.client.connect(requiredNamespaces: requiredNamespaces)
         try! await wallet.client.pair(uri: uri!)
         wait(for: [dappSettlementExpectation, walletSettlementExpectation], timeout: InputConfig.defaultTimeout)
-
     }
 
     func testSuccessfulSessionUpdateNamespaces() async {

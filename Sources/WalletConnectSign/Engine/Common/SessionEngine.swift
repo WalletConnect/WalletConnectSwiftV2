@@ -92,6 +92,7 @@ private extension SessionEngine {
     func setupConnectionSubscriptions() {
         networkingInteractor.socketConnectionStatusPublisher
             .sink { [unowned self] status in
+                guard status == .connected else { return }
                 sessionStore.getAll()
                     .forEach { session in
                         Task(priority: .high) { try await networkingInteractor.subscribe(topic: session.topic) }

@@ -42,12 +42,6 @@ extension SessionNamespace {
     }
 }
 
-extension RelayProtocolOptions {
-    static func stub() -> RelayProtocolOptions {
-        RelayProtocolOptions(protocol: "", data: nil)
-    }
-}
-
 extension Participant {
     static func stub(publicKey: String = AgreementPrivateKey().publicKey.hexRepresentation) -> Participant {
         Participant(publicKey: publicKey, metadata: AppMetadata.stub())

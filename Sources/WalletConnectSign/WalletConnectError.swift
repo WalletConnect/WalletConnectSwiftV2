@@ -1,7 +1,6 @@
 enum WalletConnectError: Error {
 
     case pairingProposalFailed
-    case pairingUriWrongApiParam
     case noPairingMatchingTopic(String)
     case noSessionMatchingTopic(String)
     case sessionNotAcknowledged(String)
@@ -29,8 +28,6 @@ extension WalletConnectError {
         switch self {
         case .pairingProposalFailed:
             return "Pairing proposal failed."
-        case .pairingUriWrongApiParam:
-            return "Pairing URI containt wrong API param"
         case .noPairingMatchingTopic(let topic):
             return "There is no existing pairing matching the topic: \(topic)."
         case .noSessionMatchingTopic(let topic):

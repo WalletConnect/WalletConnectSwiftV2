@@ -4,15 +4,19 @@ import JSONRPC
 @testable import WalletConnectSign
 @testable import TestingUtils
 @testable import WalletConnectKMS
+@testable import WalletConnectPairing
 import WalletConnectUtils
 
 func deriveTopic(publicKey: String, privateKey: AgreementPrivateKey) -> String {
     try! KeyManagementService.generateAgreementKey(from: privateKey, peerPublicKey: publicKey).derivedTopic()
 }
 
-final class PairingEngineTests: XCTestCase {
+final class AppProposalServiceTests: XCTestCase {
 
-    var engine: PairingEngine!
+    var service: AppProposeService!
+
+    var appPairService: AppPairService!
+    var pairingRegisterer: PairingRegistererMock<SessionProposal>!
     var approveEngine: ApproveEngine!
 
     var networkingInteractor: NetworkingInteractorMock!
@@ -27,7 +31,8 @@ final class PairingEngineTests: XCTestCase {
         storageMock = WCPairingStorageMock()
         cryptoMock = KeyManagementServiceMock()
         topicGenerator = TopicGenerator()
-        setupEngines()
+        pairingRegisterer = PairingRegistererMock()
+        setupServices()
     }
 
     override func tearDown() {
@@ -35,25 +40,30 @@ final class PairingEngineTests: XCTestCase {
         storageMock = nil
         cryptoMock = nil
         topicGenerator = nil
-        engine = nil
+        pairingRegisterer = nil
         approveEngine = nil
     }
 
-    func setupEngines() {
+    func setupServices() {
         let meta = AppMetadata.stub()
         let logger = ConsoleLoggerMock()
-        engine = PairingEngine(
+
+        appPairService = AppPairService(
             networkingInteractor: networkingInteractor,
             kms: cryptoMock,
-            pairingStore: storageMock,
-            metadata: meta,
-            logger: logger,
-            topicGenerator: topicGenerator.getTopic
+            pairingStorage: storageMock
+        )
+        service = AppProposeService(
+            metadata: .stub(),
+            networkingInteractor: networkingInteractor,
+            kms: cryptoMock,
+            logger: logger
         )
         approveEngine = ApproveEngine(
             networkingInteractor: networkingInteractor,
             proposalPayloadsStore: .init(defaults: RuntimeKeyValueStorage(), identifier: ""),
             sessionToPairingTopic: CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: ""),
+            pairingRegisterer: pairingRegisterer,
             metadata: meta,
             kms: cryptoMock,
             logger: logger,
@@ -62,21 +72,13 @@ final class PairingEngineTests: XCTestCase {
         )
     }
 
-    func testCreate() async {
-        let uri = try! await engine.create()
-        XCTAssert(cryptoMock.hasSymmetricKey(for: uri.topic), "Proposer must store the symmetric key matching the URI.")
-        XCTAssert(storageMock.hasPairing(forTopic: uri.topic), "The engine must store a pairing after creating one")
-        XCTAssert(networkingInteractor.didSubscribe(to: uri.topic), "Proposer must subscribe to pairing topic.")
-        XCTAssert(storageMock.getPairing(forTopic: uri.topic)?.active == false, "Recently created pairing must be inactive.")
-    }
-
     func testPropose() async {
         let pairing = Pairing.stub()
         let topicA = pairing.topic
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
 
         // FIXME: namespace stub
-        try! await engine.propose(pairingTopic: pairing.topic, namespaces: ProposalNamespace.stubDictionary(), relay: relayOptions)
+        try! await service.propose(pairingTopic: pairing.topic, namespaces: ProposalNamespace.stubDictionary(), relay: relayOptions)
 
         guard let publishTopic = networkingInteractor.requests.first?.topic,
               let proposal = try? networkingInteractor.requests.first?.request.params?.get(SessionType.ProposeParams.self) else {
@@ -88,14 +90,14 @@ final class PairingEngineTests: XCTestCase {
 
     func testHandleSessionProposeResponse() async {
         let exp = expectation(description: "testHandleSessionProposeResponse")
-        let uri = try! await engine.create()
+        let uri = try! await appPairService.create()
         let pairing = storageMock.getPairing(forTopic: uri.topic)!
         let topicA = pairing.topic
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
 
         // Client proposes session
         // FIXME: namespace stub
-        try! await engine.propose(pairingTopic: pairing.topic, namespaces: ProposalNamespace.stubDictionary(), relay: relayOptions)
+        try! await service.propose(pairingTopic: pairing.topic, namespaces: ProposalNamespace.stubDictionary(), relay: relayOptions)
 
         guard let request = networkingInteractor.requests.first?.request,
               let proposal = try? networkingInteractor.requests.first?.request.params?.get(SessionType.ProposeParams.self) else {
@@ -127,14 +129,14 @@ final class PairingEngineTests: XCTestCase {
     }
 
     func testSessionProposeError() async {
-        let uri = try! await engine.create()
+        let uri = try! await appPairService.create()
         let pairing = storageMock.getPairing(forTopic: uri.topic)!
         let topicA = pairing.topic
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
 
         // Client propose session
         // FIXME: namespace stub
-        try! await engine.propose(pairingTopic: pairing.topic, namespaces: ProposalNamespace.stubDictionary(), relay: relayOptions)
+        try! await service.propose(pairingTopic: pairing.topic, namespaces: ProposalNamespace.stubDictionary(), relay: relayOptions)
 
         guard let request = networkingInteractor.requests.first?.request,
               let proposal = try? networkingInteractor.requests.first?.request.params?.get(SessionType.ProposeParams.self) else {
@@ -151,14 +153,14 @@ final class PairingEngineTests: XCTestCase {
     }
 
     func testSessionProposeErrorOnActivePairing() async {
-        let uri = try! await engine.create()
+        let uri = try! await appPairService.create()
         let pairing = storageMock.getPairing(forTopic: uri.topic)!
         let topicA = pairing.topic
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
 
         // Client propose session
         // FIXME: namespace stub
-        try? await engine.propose(pairingTopic: pairing.topic, namespaces: ProposalNamespace.stubDictionary(), relay: relayOptions)
+        try? await service.propose(pairingTopic: pairing.topic, namespaces: ProposalNamespace.stubDictionary(), relay: relayOptions)
 
         guard let request = networkingInteractor.requests.first?.request,
               let proposal = try? networkingInteractor.requests.first?.request.params?.get(SessionType.ProposeParams.self) else {
@@ -176,13 +178,5 @@ final class PairingEngineTests: XCTestCase {
         XCTAssert(storageMock.hasPairing(forTopic: pairing.topic), "Proposer must not delete an active pairing.")
         XCTAssert(cryptoMock.hasSymmetricKey(for: pairing.topic), "Proposer must not delete symmetric key if pairing is active.")
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must remove private key for rejected session")
-    }
-
-    func testPairingExpiration() async {
-        let uri = try! await engine.create()
-        let pairing = storageMock.getPairing(forTopic: uri.topic)!
-        storageMock.onPairingExpiration?(pairing)
-        XCTAssertFalse(cryptoMock.hasSymmetricKey(for: uri.topic))
-        XCTAssert(networkingInteractor.didUnsubscribe(to: uri.topic))
     }
 }

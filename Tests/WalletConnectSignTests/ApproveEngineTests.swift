@@ -16,6 +16,7 @@ final class ApproveEngineTests: XCTestCase {
     var cryptoMock: KeyManagementServiceMock!
     var pairingStorageMock: WCPairingStorageMock!
     var sessionStorageMock: WCSessionStorageMock!
+    var pairingRegisterer: PairingRegistererMock<SessionProposal>!
     var proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>!
 
     var publishers = Set<AnyCancellable>()
@@ -26,11 +27,13 @@ final class ApproveEngineTests: XCTestCase {
         cryptoMock = KeyManagementServiceMock()
         pairingStorageMock = WCPairingStorageMock()
         sessionStorageMock = WCSessionStorageMock()
+        pairingRegisterer = PairingRegistererMock()
         proposalPayloadsStore = CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>(defaults: RuntimeKeyValueStorage(), identifier: "")
         engine = ApproveEngine(
             networkingInteractor: networkingInteractor,
             proposalPayloadsStore: proposalPayloadsStore,
             sessionToPairingTopic: CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: ""),
+            pairingRegisterer: pairingRegisterer,
             metadata: metadata,
             kms: cryptoMock,
             logger: ConsoleLoggerMock(),
@@ -43,6 +46,7 @@ final class ApproveEngineTests: XCTestCase {
         networkingInteractor = nil
         metadata = nil
         cryptoMock = nil
+        pairingRegisterer = nil
         pairingStorageMock = nil
         engine = nil
     }
@@ -54,8 +58,7 @@ final class ApproveEngineTests: XCTestCase {
         pairingStorageMock.setPairing(pairing)
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
-        let request = RPCRequest(method: SessionProposeProtocolMethod().method, params: proposal)
-        networkingInteractor.requestPublisherSubject.send((topicA, request))
+        pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal))
 
         try await engine.approveProposal(proposerPubKey: proposal.proposer.publicKey, validating: SessionNamespace.stubDictionary())
 
@@ -75,13 +78,12 @@ final class ApproveEngineTests: XCTestCase {
         var sessionProposed = false
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
-        let request = RPCRequest(method: SessionProposeProtocolMethod().method, params: proposal)
 
         engine.onSessionProposal = { _ in
             sessionProposed = true
         }
 
-        networkingInteractor.requestPublisherSubject.send((topicA, request))
+        pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal))
         XCTAssertNotNil(try! proposalPayloadsStore.get(key: proposal.proposer.publicKey), "Proposer must store proposal payload")
         XCTAssertTrue(sessionProposed)
     }

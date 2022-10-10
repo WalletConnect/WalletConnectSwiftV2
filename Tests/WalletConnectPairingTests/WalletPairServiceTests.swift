@@ -1,14 +1,13 @@
 import XCTest
-@testable import WalletConnectSign
+@testable import WalletConnectPairing
 @testable import TestingUtils
 @testable import WalletConnectKMS
 import WalletConnectUtils
 import WalletConnectNetworking
 
-final class PairEngineTests: XCTestCase {
+final class WalletPairServiceTestsTests: XCTestCase {
 
-    var engine: PairEngine!
-
+    var service: WalletPairService!
     var networkingInteractor: NetworkingInteractorMock!
     var storageMock: WCPairingStorageMock!
     var cryptoMock: KeyManagementServiceMock!
@@ -17,30 +16,16 @@ final class PairEngineTests: XCTestCase {
         networkingInteractor = NetworkingInteractorMock()
         storageMock = WCPairingStorageMock()
         cryptoMock = KeyManagementServiceMock()
-        setupEngine()
-    }
-
-    override func tearDown() {
-        networkingInteractor = nil
-        storageMock = nil
-        cryptoMock = nil
-        engine = nil
-    }
-
-    func setupEngine() {
-        engine = PairEngine(
-            networkingInteractor: networkingInteractor,
-            kms: cryptoMock,
-            pairingStore: storageMock)
+        service = WalletPairService(networkingInteractor: networkingInteractor, kms: cryptoMock, pairingStorage: storageMock)
     }
 
     func testPairMultipleTimesOnSameURIThrows() async {
         let uri = WalletConnectURI.stub()
         for i in 1...10 {
             if i == 1 {
-                await XCTAssertNoThrowAsync(try await engine.pair(uri))
+                await XCTAssertNoThrowAsync(try await service.pair(uri))
             } else {
-                await XCTAssertThrowsErrorAsync(try await engine.pair(uri))
+                await XCTAssertThrowsErrorAsync(try await service.pair(uri))
             }
         }
     }
@@ -48,7 +33,7 @@ final class PairEngineTests: XCTestCase {
     func testPair() async {
         let uri = WalletConnectURI.stub()
         let topic = uri.topic
-        try! await engine.pair(uri)
+        try! await service.pair(uri)
         XCTAssert(networkingInteractor.didSubscribe(to: topic), "Responder must subscribe to pairing topic.")
         XCTAssert(cryptoMock.hasSymmetricKey(for: topic), "Responder must store the symmetric key matching the pairing topic")
         XCTAssert(storageMock.hasPairing(forTopic: topic), "The engine must store a pairing")
