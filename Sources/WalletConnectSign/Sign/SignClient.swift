@@ -165,6 +165,7 @@ public final class SignClient {
     ///   - requiredNamespaces: required namespaces for a session
     ///   - topic: Optional parameter - use it if you already have an established pairing with peer client.
     /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
+    @available(*, deprecated, message: "use Pair.instance.create() and connect(requiredNamespaces: [String: ProposalNamespace]): instead")
     public func connect(requiredNamespaces: [String: ProposalNamespace], topic: String? = nil) async throws -> WalletConnectURI? {
         logger.debug("Connecting Application")
         if let topic = topic {
@@ -186,6 +187,21 @@ public final class SignClient {
         }
     }
 
+    /// For a dApp to propose a session to a wallet.
+    /// Function will propose a session on existing pairing.
+    /// - Parameters:
+    ///   - requiredNamespaces: required namespaces for a session
+    ///   - topic: pairing topic
+    public func connect(requiredNamespaces: [String: ProposalNamespace], topic: String) async throws  {
+        logger.debug("Connecting Application")
+        try pairingClient.validatePairingExistance(topic)
+        try await appProposeService.propose(
+            pairingTopic: topic,
+            namespaces: requiredNamespaces,
+            relay: RelayProtocolOptions(protocol: "irn", data: nil)
+        )
+    }
+
     /// For wallet to receive a session proposal from a dApp
     /// Responder should call this function in order to accept peer's pairing and be able to subscribe for future session proposals.
     /// - Parameter uri: Pairing URI that is commonly presented as a QR code by a dapp.
@@ -193,6 +209,7 @@ public final class SignClient {
     /// Should Error:
     /// - When URI has invalid format or missing params
     /// - When topic is already in use
+    @available(*, deprecated, message: "use Pair.instance.pair(uri: WalletConnectURI): instead")
     public func pair(uri: WalletConnectURI) async throws {
         try await pairingClient.pair(uri: uri)
     }
@@ -297,6 +314,7 @@ public final class SignClient {
 
     /// Query pairings
     /// - Returns: All pairings
+    @available(*, deprecated, message: "use Pair.instance.getPairings(uri: WalletConnectURI): instead")
     public func getPairings() -> [Pairing] {
         pairingClient.getPairings()
     }
