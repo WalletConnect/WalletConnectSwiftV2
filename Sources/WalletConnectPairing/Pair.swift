@@ -5,7 +5,7 @@ import Combine
 public class Pair {
 
     /// Pairing client instance
-    public static var instance: PairingClient = {
+    public static var instance: PairingInteracting = {
         guard let config = Pair.config else {
             fatalError("Error - you must call Pair.configure(_:) before accessing the shared instance.")
         }

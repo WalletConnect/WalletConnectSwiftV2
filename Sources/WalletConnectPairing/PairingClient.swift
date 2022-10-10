@@ -5,7 +5,7 @@ import WalletConnectNetworking
 import Combine
 import JSONRPC
 
-public class PairingClient: PairingRegisterer {
+public class PairingClient: PairingRegisterer, PairingInteracting {
     public var pingResponsePublisher: AnyPublisher<(String), Never> {
         pingResponsePublisherSubject.eraseToAnyPublisher()
     }
