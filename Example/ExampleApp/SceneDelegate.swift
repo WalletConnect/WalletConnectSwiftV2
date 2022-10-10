@@ -4,6 +4,7 @@ import Combine
 import WalletConnectSign
 import WalletConnectNetworking
 import WalletConnectRelay
+import WalletConnectPairing
 import Starscream
 
 extension WebSocket: WebSocketConnecting { }
@@ -27,7 +28,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             icons: ["https://avatars.githubusercontent.com/u/37784886"])
 
         Networking.configure(projectId: InputConfig.projectId, socketFactory: SocketFactory())
-        Sign.configure(metadata: metadata)
+        Pair.configure(metadata: metadata)
 #if DEBUG
         if CommandLine.arguments.contains("-cleanInstall") {
             try? Sign.instance.cleanup()

@@ -1,6 +1,7 @@
 import UIKit
 import WalletConnectSign
 import WalletConnectUtils
+import WalletConnectPairing
 import WalletConnectRouter
 import Web3
 import CryptoSwift
@@ -122,7 +123,7 @@ final class WalletViewController: UIViewController {
         print("[WALLET] Pairing to: \(uri)")
         Task {
             do {
-                try await Sign.instance.pair(uri: uri)
+                try await Pair.instance.pair(uri: uri)
             } catch {
                 print("[DAPP] Pairing connect error: \(error)")
             }
