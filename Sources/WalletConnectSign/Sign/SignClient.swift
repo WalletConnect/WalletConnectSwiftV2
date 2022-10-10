@@ -13,6 +13,9 @@ import WalletConnectPairing
 ///
 /// Access via `Sign.instance`
 public final class SignClient {
+    enum Errors: Error {
+        case sessionForTopicNotFound
+    }
 
     // MARK: - Public Properties
 
@@ -268,17 +271,12 @@ public final class SignClient {
     ///
     ///  Should Error:
     ///  - When the session topic is not found
-    ///  - When the response is neither result or error
     ///
     /// - Parameters:
-    ///   - topic: Topic of a session or a pairing
-    ///   - completion: Result will be success on response or an error
+    ///   - topic: Topic of a session
     public func ping(topic: String) async throws {
-        if let _ = try? pairingClient.validatePairingExistance(topic) {
-            try await pairingPingService.ping(topic: topic)
-        } else if sessionEngine.hasSession(for: topic) {
-            try await sessionPingService.ping(topic: topic)
-        }
+        guard sessionEngine.hasSession(for: topic) else { Errors.sessionForTopicNotFound }
+        try await sessionPingService.ping(topic: topic)
     }
 
     /// For the wallet to emit an event to a dApp
