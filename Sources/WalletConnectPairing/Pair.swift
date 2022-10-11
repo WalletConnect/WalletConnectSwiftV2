@@ -9,7 +9,7 @@ public class Pair {
         guard let config = Pair.config else {
             fatalError("Error - you must call Pair.configure(_:) before accessing the shared instance.")
         }
-        return PairingClientFactory.create(networkingClient: Networking.instance)
+        return PairingClientFactory.create(networkingClient: Networking.instance as! NetworkingInteractor)
     }()
 
     public static var metadata: AppMetadata {

@@ -1,7 +1,6 @@
 import Foundation
 import Combine
 import JSONRPC
-import WalletConnectRelay
 import WalletConnectUtils
 import WalletConnectKMS
 import WalletConnectNetworking
@@ -100,7 +99,7 @@ public final class SignClient {
     // MARK: - Private properties
 
     private let pairingClient: PairingClient
-    private let relayClient: RelayClient
+    private let networkingClient: NetworkingInteractor
     private let sessionEngine: SessionEngine
     private let approveEngine: ApproveEngine
     private let disconnectService: DisconnectService
@@ -129,7 +128,7 @@ public final class SignClient {
     // MARK: - Initialization
 
     init(logger: ConsoleLogging,
-         relayClient: RelayClient,
+         networkingClient: NetworkingInteractor,
          sessionEngine: SessionEngine,
          approveEngine: ApproveEngine,
          pairingPingService: PairingPingService,
@@ -143,7 +142,7 @@ public final class SignClient {
          pairingClient: PairingClient
     ) {
         self.logger = logger
-        self.relayClient = relayClient
+        self.networkingClient = networkingClient
         self.sessionEngine = sessionEngine
         self.approveEngine = approveEngine
         self.pairingPingService = pairingPingService
@@ -398,7 +397,7 @@ public final class SignClient {
     }
 
     private func setUpConnectionObserving() {
-        relayClient.socketConnectionStatusPublisher.sink { [weak self] status in
+        networkingClient.socketConnectionStatusPublisher.sink { [weak self] status in
             self?.socketConnectionStatusPublisherSubject.send(status)
         }.store(in: &publishers)
     }
