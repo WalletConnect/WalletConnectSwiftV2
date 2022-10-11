@@ -18,38 +18,24 @@ public class Auth {
 
     /// Auth client instance
     public static var instance: AuthClient = {
-        guard let config = Auth.config else {
-            fatalError("Error - you must call Auth.configure(_:) before accessing the shared instance.")
-        }
+
         return AuthClientFactory.create(
-            metadata: config.metadata,
-            account: config.account,
+            metadata: Pair.metadata,
+            account: config?.account,
             networkingClient: Networking.instance as! NetworkingInteractor,
-            pairingRegisterer: Pair.instance as! PairingRegisterer
+            pairingRegisterer: Pair.registerer
         )
     }()
+
 
     private static var config: Config?
 
     private init() { }
 
-    /// Auth instance config method
+    /// Auth instance wallet config method
     /// - Parameters:
-    ///   - metadata: App metadata
-    ///   - account: account that wallet will be authenticating with. Should be nil for non wallet clients.
-    @available(*, deprecated, message: "Use Pair.configure(metadata:) with Auth.configure(account:) instead")
-    static public func configure(metadata: AppMetadata, account: Account?) {
-        Auth.config = Auth.Config(
-            metadata: metadata,
-            account: account)
-    }
-
-    /// Auth instance config method
-    /// - Parameters:
-    ///   - account: account that wallet will be authenticating with. Should be nil for non wallet clients.
-    static public func configure(account: Account?) {
-        Auth.config = Auth.Config(
-            metadata: Pair.metadata,
-            account: account)
+    ///   - account: account that wallet will be authenticating with.
+    static public func configure(account: Account) {
+        Auth.config = Auth.Config(account: account)
     }
 }
