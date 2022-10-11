@@ -24,7 +24,7 @@ public class Auth {
         return AuthClientFactory.create(
             metadata: config.metadata,
             account: config.account,
-            networkingClient: Networking.instance,
+            networkingClient: Networking.instance as! NetworkingInteractor,
             pairingRegisterer: Pair.instance as! PairingRegisterer
         )
     }()
