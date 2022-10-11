@@ -5,22 +5,6 @@ import WalletConnectRelay
 import WalletConnectUtils
 import WalletConnectKMS
 
-public protocol NetworkingClient {
-    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> { get }
-    func connect() throws
-    func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws
-}
-
-extension NetworkingInteractor: NetworkingClient {
-    public func connect() throws {
-        try relayClient.connect()
-    }
-
-    public func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
-        try relayClient.disconnect(closeCode: closeCode)
-    }
-}
-
 public class NetworkingInteractor: NetworkInteracting {
     private var publishers = Set<AnyCancellable>()
     private let relayClient: RelayClient
@@ -184,5 +168,16 @@ public class NetworkingInteractor: NetworkInteracting {
         } catch {
             logger.debug("Handle json rpc response error: \(error)")
         }
+    }
+}
+
+
+extension NetworkingInteractor: NetworkingClient {
+    public func connect() throws {
+        try relayClient.connect()
+    }
+
+    public func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
+        try relayClient.disconnect(closeCode: closeCode)
     }
 }
