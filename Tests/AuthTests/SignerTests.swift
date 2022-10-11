@@ -19,7 +19,6 @@ class SignerTest: XCTestCase {
         let result = try signer.sign(message: message, with: privateKey)
 
         XCTAssertEqual(signature.toHexString(), result.toHexString())
-//        XCTAssertTrue(try signer.isValid(signature: result, message: message, address: address))
     }
 
     private func prefixed(_ message: Data) -> Data {

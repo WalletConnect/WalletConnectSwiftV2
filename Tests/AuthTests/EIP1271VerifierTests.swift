@@ -1,8 +1,7 @@
-//
-//  File.swift
-//  
-//
-//  Created by WalletConnect on 10.10.2022.
-//
-
 import Foundation
+import XCTest
+@testable import Auth
+
+class EIP1271VerifierTests: XCTestCase {
+
+}
