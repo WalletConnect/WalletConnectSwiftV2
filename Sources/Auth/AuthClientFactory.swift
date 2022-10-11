@@ -7,19 +7,19 @@ import WalletConnectNetworking
 
 public struct AuthClientFactory {
 
-    public static func create(metadata: AppMetadata, account: Account?, networkingClient: NetworkingInteractor, pairingRegisterer: PairingRegisterer) -> AuthClient {
+    public static func create(metadata: AppMetadata, account: Account?, projectId: String, networkingClient: NetworkingInteractor, pairingRegisterer: PairingRegisterer) -> AuthClient {
         let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults.standard
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
-        return AuthClientFactory.create(metadata: metadata, account: account, logger: logger, keyValueStorage: keyValueStorage, keychainStorage: keychainStorage, networkingClient: networkingClient, pairingRegisterer: pairingRegisterer)
+        return AuthClientFactory.create(metadata: metadata, account: account, projectId: projectId, logger: logger, keyValueStorage: keyValueStorage, keychainStorage: keychainStorage, networkingClient: networkingClient, pairingRegisterer: pairingRegisterer)
     }
 
-    static func create(metadata: AppMetadata, account: Account?, logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, networkingClient: NetworkingInteractor, pairingRegisterer: PairingRegisterer) -> AuthClient {
+    static func create(metadata: AppMetadata, account: Account?, projectId: String, logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, networkingClient: NetworkingInteractor, pairingRegisterer: PairingRegisterer) -> AuthClient {
         let kms = KeyManagementService(keychain: keychainStorage)
         let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
         let messageFormatter = SIWEMessageFormatter()
         let appRequestService = AppRequestService(networkingInteractor: networkingClient, kms: kms, appMetadata: metadata, logger: logger)
-        let messageSigner = MessageSigner(signer: Signer())
+        let messageSigner = MessageSignerFactory.create(projectId: projectId)
         let appRespondSubscriber = AppRespondSubscriber(networkingInteractor: networkingClient, logger: logger, rpcHistory: history, signatureVerifier: messageSigner, pairingRegisterer: pairingRegisterer, messageFormatter: messageFormatter)
         let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: history)
         let walletRequestSubscriber = WalletRequestSubscriber(networkingInteractor: networkingClient, logger: logger, kms: kms, messageFormatter: messageFormatter, address: account?.address, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingRegisterer)

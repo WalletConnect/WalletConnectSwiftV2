@@ -5,6 +5,8 @@ import TestingUtils
 
 class CacaoSignerTest: XCTestCase {
 
+    let signer = MessageSignerFactory.create(projectId: "project-id")
+
     let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
 
     let message: String =
@@ -24,17 +26,13 @@ class CacaoSignerTest: XCTestCase {
         - https://example.com/my-web2-claim.json
         """
 
-    let signature = CacaoSignature(t: "eip191", s: "0x438effc459956b57fcd9f3dac6c675f9cee88abf21acab7305e8e32aa0303a883b06dcbd956279a7a2ca21ffa882ff55cc22e8ab8ec0f3fe90ab45f306938cfa1b")
+    let signature = CacaoSignature(t: .eip191, s: "0x438effc459956b57fcd9f3dac6c675f9cee88abf21acab7305e8e32aa0303a883b06dcbd956279a7a2ca21ffa882ff55cc22e8ab8ec0f3fe90ab45f306938cfa1b")
 
     func testCacaoSign() throws {
-        let signer = MessageSigner(signer: Signer())
-
         XCTAssertEqual(try signer.sign(message: message, privateKey: privateKey), signature)
     }
 
-    func testCacaoVerify() throws {
-        let signer = MessageSigner(signer: Signer())
-
-        try signer.verify(signature: signature, message: message, address: "0x15bca56b6e2728aec2532df9d436bd1600e86688")
+    func testCacaoVerify() async throws {
+        try await signer.verify(signature: signature, message: message, address: "0x15bca56b6e2728aec2532df9d436bd1600e86688")
     }
 }

@@ -20,10 +20,11 @@ public class Auth {
     public static var instance: AuthClient = {
 
         return AuthClientFactory.create(
-            metadata: Pair.metadata,
-            account: config?.account,
-            networkingClient: Networking.interactor,
-            pairingRegisterer: Pair.registerer
+            metadata: config.metadata,
+            account: config.account,
+            projectId: Networking.projectId,
+            networkingClient: Networking.instance,
+            pairingRegisterer: Pair.instance
         )
     }()
 

@@ -22,7 +22,7 @@ class AppRespondSubscriberTests: XCTestCase {
     override func setUp() {
         networkingInteractor = NetworkingInteractorMock()
         messageFormatter = SIWEMessageFormatter()
-        messageSigner = MessageSigner()
+        messageSigner = MessageSignerFactory.create(projectId: "project-id")
         rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: RuntimeKeyValueStorage())
         pairingStorage = WCPairingStorageMock()
         pairingRegisterer = PairingRegistererMock<AuthRequestParams>()
