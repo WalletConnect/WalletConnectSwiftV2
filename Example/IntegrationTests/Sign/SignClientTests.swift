@@ -134,24 +134,6 @@ final class SignClientTests: XCTestCase {
         wait(for: [sessionDeleteExpectation], timeout: InputConfig.defaultTimeout)
     }
 
-    func testPairingPing() async throws {
-        let pongResponseExpectation = expectation(description: "Ping sender receives a pong response")
-
-        let uri = try await dapp.client.connect(requiredNamespaces: ProposalNamespace.stubRequired())!
-        try await wallet.client.pair(uri: uri)
-
-        let pairing = wallet.client.getPairings().first!
-
-        wallet.onPing = { topic in
-            XCTAssertEqual(topic, pairing.topic)
-            pongResponseExpectation.fulfill()
-        }
-
-        try await wallet.client.ping(topic: pairing.topic)
-        
-        wait(for: [pongResponseExpectation], timeout: InputConfig.defaultTimeout)
-    }
-
     func testSessionPing() async throws {
         let expectation = expectation(description: "Proposer receives ping response")
 

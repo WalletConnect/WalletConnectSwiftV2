@@ -1,10 +1,11 @@
 import Foundation
 import UIKit
 import WalletConnectSign
+import WalletConnectPairing
 
 class ConnectViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     let uri: WalletConnectURI
-    let activePairings: [Pairing] = Sign.instance.getPairings()
+    let activePairings: [Pairing] = Pair.instance.getPairings()
     let segmentedControl = UISegmentedControl(items: ["Pairings", "New Pairing"])
 
     init(uri: WalletConnectURI) {
