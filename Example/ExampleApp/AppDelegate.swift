@@ -1,5 +1,6 @@
 import UIKit
 import UserNotifications
+import WalletConnectNetworking
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -46,6 +47,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             print("Permission granted: \(granted)")
             guard granted else { return }
             self?.getNotificationSettings()
+            let clientId  = try! Networking.instance.getClientId()
+                self?.registerClient(clientId: clientId, deviceToken: "9D11CA68-4D73-4AD7-AE9F-9A7BE7F3D4B3") { result in
+                print(result)
+            }
           }
     }
     
@@ -57,9 +62,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       let token = tokenParts.joined()
       print("Device Token: \(token)")
         
-      let url = URL(string: "https://push.walletconnect.com")!
-        
-        // register in echo server
+        let clientId  = try! Networking.instance.getClientId()
+
+        registerClient(clientId: clientId, deviceToken: token) { result in
+            print(result)
+        }
     }
 
     func application(
@@ -72,14 +79,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func registerClient(
         clientId: String,
         deviceToken: String,
-        body: Data,
         then handler: @escaping (Result<Data, Error>) -> Void
     ) {
         var urlSession = URLSession.shared
         // To ensure that our request is always sent, we tell
         // the system to ignore all local cache data:
         var request = URLRequest(
-            url: URL(string: "https://rpc.walletconnect.com/")!,
+            url: URL(string: "https://dev.push.walletconnect.com/clients")!,
             cachePolicy: .reloadIgnoringLocalCacheData
         )
         
@@ -88,12 +94,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         request.httpMethod = "POST"
 request.httpBody = jsonData
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let task = urlSession.dataTask(
             with: request,
             completionHandler: { data, response, error in
                 // Validate response and call handler
-                print("Yeay")
+                print("Yeay \(data), \(response), \(error)")
             }
         )
 
