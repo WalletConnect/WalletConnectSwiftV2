@@ -15,7 +15,7 @@ public enum PairError: Codable, Equatable, Error, Reason {
     public var code: Int {
         switch self {
         case .methodUnsupported:
-            return 0
+            return 10001
         }
     }
 
