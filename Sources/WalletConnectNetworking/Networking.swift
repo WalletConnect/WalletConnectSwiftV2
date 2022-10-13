@@ -6,13 +6,17 @@ import Foundation
 public class Networking {
 
     /// Networking client instance
-    public static var instance: NetworkingClient = {
-        guard let config = Networking.config else {
+    public static var instance: NetworkingClient {
+        return Networking.interactor
+    }
+
+    public static var interactor: NetworkingInteractor {
+        guard let _ = Networking.config else {
             fatalError("Error - you must call Networking.configure(_:) before accessing the shared instance.")
         }
 
         return NetworkingClientFactory.create(relayClient: Relay.instance)
-    }()
+    }
 
     private static var config: Config?
 
@@ -43,4 +47,3 @@ public class Networking {
             socketConnectionType: socketConnectionType)
     }
 }
-

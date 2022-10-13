@@ -28,9 +28,8 @@ public class Sign {
     public static var instance: SignClient = {
         return SignClientFactory.create(
             metadata: Sign.metadata ?? Pair.metadata,
-            relayClient: Relay.instance,
             pairingClient: Pair.instance as! PairingClient,
-            networkingClient: Networking.instance
+            networkingClient: Networking.instance as! NetworkingInteractor
         )
     }()
 

@@ -42,7 +42,6 @@ final class SignClientTests: XCTestCase {
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
-            relayClient: relayClient,
             pairingClient: pairingClient,
             networkingClient: networkingClient
         )

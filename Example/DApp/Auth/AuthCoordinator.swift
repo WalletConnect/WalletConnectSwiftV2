@@ -32,8 +32,6 @@ final class AuthCoordinator {
             icons: ["https://avatars.githubusercontent.com/u/37784886"])
 
         Pair.configure(metadata: metadata)
-        Auth.configure(account: nil)
-
         navigationController.viewControllers = [authViewController]
     }
 }

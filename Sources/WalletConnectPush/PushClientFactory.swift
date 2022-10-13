@@ -7,7 +7,7 @@ import WalletConnectPairing
 
 public struct PushClientFactory {
 
-    static public func create(logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, networkingClient: NetworkingClient, pairingClient: PairingClient) -> PushClient {
+    static public func create(logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, networkingClient: NetworkingInteractor, pairingClient: PairingClient) -> PushClient {
         let kms = KeyManagementService(keychain: keychainStorage)
         let pushProposer = PushProposer(networkingInteractor: networkingClient, kms: kms, logger: logger)
         let proposalResponseSubscriber = ProposalResponseSubscriber(networkingInteractor: networkingClient, kms: kms, logger: logger)
