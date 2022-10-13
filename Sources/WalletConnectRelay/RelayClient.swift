@@ -41,6 +41,8 @@ public final class RelayClient {
         requestAcknowledgePublisherSubject.eraseToAnyPublisher()
     }
 
+    private let clientIdStorage: ClientIdStoring
+
     private var dispatcher: Dispatching
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
@@ -52,11 +54,13 @@ public final class RelayClient {
     init(
         dispatcher: Dispatching,
         logger: ConsoleLogging,
-        keyValueStorage: KeyValueStorage
+        keyValueStorage: KeyValueStorage,
+        clientIdStorage: ClientIdStoring
     ) {
         self.logger = logger
         self.dispatcher = dispatcher
         self.rpcHistory = RPCHistoryFactory.createForRelay(keyValueStorage: keyValueStorage)
+        self.clientIdStorage = clientIdStorage
         setUpBindings()
     }
 
@@ -82,9 +86,11 @@ public final class RelayClient {
         socketConnectionType: SocketConnectionType = .automatic,
         logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off)
     ) {
+        let didKeyFactory = ED25519DIDKeyFactory()
+        let clientIdStorage = ClientIdStorage(keychain: keychainStorage, didKeyFactory: didKeyFactory)
         let socketAuthenticator = SocketAuthenticator(
-            clientIdStorage: ClientIdStorage(keychain: keychainStorage),
-            didKeyFactory: ED25519DIDKeyFactory(),
+            clientIdStorage: clientIdStorage,
+            didKeyFactory: didKeyFactory,
             relayHost: relayHost
         )
         let relayUrlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)
@@ -101,7 +107,7 @@ public final class RelayClient {
             socketConnectionHandler = ManualSocketConnectionHandler(socket: socket)
         }
         let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: socketConnectionHandler, logger: logger)
-        self.init(dispatcher: dispatcher, logger: logger, keyValueStorage: keyValueStorage)
+        self.init(dispatcher: dispatcher, logger: logger, keyValueStorage: keyValueStorage, clientIdStorage: clientIdStorage)
     }
 
     /// Connects web socket
@@ -229,6 +235,10 @@ public final class RelayClient {
                 completion(nil)
             }
         }
+    }
+
+    public func getClientId() throws -> String {
+        try clientIdStorage.getClientId()
     }
 
     // FIXME: Parse data to string once before trying to decode -> respond error on fail

@@ -180,4 +180,8 @@ extension NetworkingInteractor: NetworkingClient {
     public func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
         try relayClient.disconnect(closeCode: closeCode)
     }
+
+    public func getClientId() throws -> String {
+        try relayClient.getClientId()
+    }
 }
