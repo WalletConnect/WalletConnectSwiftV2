@@ -1,5 +1,5 @@
 import Foundation
-import WalletConnectRelay
+import WalletConnectNetworking
 import WalletConnectUtils
 
 struct ResolveService: HTTPService {

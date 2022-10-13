@@ -1,14 +1,14 @@
 import Foundation
 
-protocol MessageSignatureVerifying {
+public protocol MessageSignatureVerifying {
     func verify(signature: CacaoSignature, message: String, address: String) async throws
 }
 
-protocol MessageSigning {
+public protocol MessageSigning {
     func sign(message: String, privateKey: Data) throws -> CacaoSignature
 }
 
-public struct MessageSigner: MessageSignatureVerifying, MessageSigning {
+struct MessageSigner: MessageSignatureVerifying, MessageSigning {
 
     enum Errors: Error {
         case utf8EncodingFailed
@@ -24,14 +24,14 @@ public struct MessageSigner: MessageSignatureVerifying, MessageSigning {
         self.eip1271Verifier = eip1271Verifier
     }
 
-    public func sign(message: String, privateKey: Data) throws -> CacaoSignature {
+    func sign(message: String, privateKey: Data) throws -> CacaoSignature {
         guard let messageData = message.data(using: .utf8) else { throw Errors.utf8EncodingFailed }
         let signature = try signer.sign(message: prefixed(messageData), with: privateKey)
         let prefixedHexSignature = "0x" + signature.toHexString()
         return CacaoSignature(t: .eip191, s: prefixedHexSignature)
     }
 
-    public func verify(signature: CacaoSignature, message: String, address: String) async throws {
+    func verify(signature: CacaoSignature, message: String, address: String) async throws {
         guard let messageData = message.data(using: .utf8) else {
             throw Errors.utf8EncodingFailed
         }

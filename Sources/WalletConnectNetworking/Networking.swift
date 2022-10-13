@@ -18,6 +18,13 @@ public class Networking {
         return NetworkingClientFactory.create(relayClient: Relay.instance)
     }
 
+    public static var projectId: String {
+        guard let projectId = config?.projectId else {
+            fatalError("Error - you must configure projectId with Networking.configure(_:)")
+        }
+        return projectId
+    }
+
     private static var config: Config?
 
     private init() { }

@@ -45,6 +45,7 @@ final class AuthTests: XCTestCase {
         let authClient = AuthClientFactory.create(
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
             account: account,
+            projectId: InputConfig.projectId,
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
@@ -74,7 +75,8 @@ final class AuthTests: XCTestCase {
         try! await walletPairingClient.pair(uri: uri)
         walletAuthClient.authRequestPublisher.sink { [unowned self] request in
             Task(priority: .high) {
-                let signature = try! MessageSigner().sign(message: request.message, privateKey: prvKey)
+                let signer = MessageSignerFactory.create(projectId: InputConfig.projectId)
+                let signature = try! signer.sign(message: request.message, privateKey: prvKey)
                 try! await walletAuthClient.respond(requestId: request.id, signature: signature)
             }
         }
@@ -117,7 +119,7 @@ final class AuthTests: XCTestCase {
         walletAuthClient.authRequestPublisher.sink { [unowned self] request in
             Task(priority: .high) {
                 let invalidSignature = "438effc459956b57fcd9f3dac6c675f9cee88abf21acab7305e8e32aa0303a883b06dcbd956279a7a2ca21ffa882ff55cc22e8ab8ec0f3fe90ab45f306938cfa1b"
-                let cacaoSignature = CacaoSignature(t: "eip191", s: invalidSignature)
+                let cacaoSignature = CacaoSignature(t: .eip191, s: invalidSignature)
                 try! await walletAuthClient.respond(requestId: request.id, signature: cacaoSignature)
             }
         }

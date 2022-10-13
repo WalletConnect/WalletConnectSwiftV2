@@ -1,5 +1,5 @@
 import XCTest
-import WalletConnectRelay
+import WalletConnectNetworking
 import WalletConnectKMS
 import WalletConnectUtils
 @testable import Chat

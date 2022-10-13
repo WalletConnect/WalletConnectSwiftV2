@@ -1,9 +1,13 @@
 import Foundation
-import WalletConnectRelay
+import WalletConnectNetworking
 
 public struct MessageSignerFactory {
 
-    public static func create(projectId: String) -> MessageSigner {
+    public static func create() -> MessageSigning & MessageSignatureVerifying {
+        return create(projectId: Networking.projectId)
+    }
+
+    static func create(projectId: String) -> MessageSigning & MessageSignatureVerifying {
         return MessageSigner(
             signer: Signer(),
             eip191Verifier: EIP191Verifier(),

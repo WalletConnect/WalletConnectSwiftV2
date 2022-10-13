@@ -1,7 +1,7 @@
 import Foundation
 import JSONRPC
+import WalletConnectNetworking
 import WalletConnectUtils
-import WalletConnectRelay
 
 actor EIP1271Verifier {
     private let projectId: String

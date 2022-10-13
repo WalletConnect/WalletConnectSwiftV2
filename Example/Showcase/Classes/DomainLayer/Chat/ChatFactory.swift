@@ -1,7 +1,8 @@
 import Foundation
 import Chat
-import WalletConnectKMS
+import WalletConnectNetworking
 import WalletConnectRelay
+import WalletConnectKMS
 import WalletConnectUtils
 
 class ChatFactory {
