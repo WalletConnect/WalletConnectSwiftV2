@@ -10,10 +10,11 @@ final class RelayClientEndToEndTests: XCTestCase {
     private var publishers = Set<AnyCancellable>()
 
     func makeRelayClient() -> RelayClient {
-        let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock())
+        let didKeyFactory = ED25519DIDKeyFactory()
+        let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock(), didKeyFactory: didKeyFactory)
         let socketAuthenticator = SocketAuthenticator(
             clientIdStorage: clientIdStorage,
-            didKeyFactory: ED25519DIDKeyFactory(),
+            didKeyFactory: didKeyFactory,
             relayHost: InputConfig.relayHost
         )
         let urlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)
@@ -21,7 +22,7 @@ final class RelayClientEndToEndTests: XCTestCase {
 
         let logger = ConsoleLogger()
         let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket), logger: logger)
-        return RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
+        return RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), clientIdStorage: clientIdStorage)
     }
 
     func testSubscribe() {
