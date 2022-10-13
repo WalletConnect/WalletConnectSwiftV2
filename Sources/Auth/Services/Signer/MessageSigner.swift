@@ -46,7 +46,7 @@ struct MessageSigner: MessageSignatureVerifying, MessageSigning {
                 address: address
             )
         case .eip1271:
-            return try await eip191Verifier.verify(
+            return try await eip1271Verifier.verify(
                 signature: signatureData,
                 message: prefixed(messageData),
                 address: address

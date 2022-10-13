@@ -11,14 +11,14 @@ public struct AuthClientFactory {
         let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults.standard
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
-        return AuthClientFactory.create(metadata: metadata, account: account, projectId: projectId, logger: logger, keyValueStorage: keyValueStorage, keychainStorage: keychainStorage, networkingClient: networkingClient, pairingRegisterer: pairingRegisterer)
+        return AuthClientFactory.create(metadata: metadata, account: account, projectId: projectId, logger: logger, keyValueStorage: keyValueStorage, keychainStorage: keychainStorage, networkingClient: networkingClient, pairingRegisterer: pairingRegisterer, iatProvider: DefaultIATProvider())
     }
 
-    static func create(metadata: AppMetadata, account: Account?, projectId: String, logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, networkingClient: NetworkingInteractor, pairingRegisterer: PairingRegisterer) -> AuthClient {
+    static func create(metadata: AppMetadata, account: Account?, projectId: String, logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, networkingClient: NetworkingInteractor, pairingRegisterer: PairingRegisterer, iatProvider: IATProvider) -> AuthClient {
         let kms = KeyManagementService(keychain: keychainStorage)
         let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
         let messageFormatter = SIWEMessageFormatter()
-        let appRequestService = AppRequestService(networkingInteractor: networkingClient, kms: kms, appMetadata: metadata, logger: logger)
+        let appRequestService = AppRequestService(networkingInteractor: networkingClient, kms: kms, appMetadata: metadata, logger: logger, iatProvader: iatProvider)
         let messageSigner = MessageSignerFactory.create(projectId: projectId)
         let appRespondSubscriber = AppRespondSubscriber(networkingInteractor: networkingClient, logger: logger, rpcHistory: history, signatureVerifier: messageSigner, pairingRegisterer: pairingRegisterer, messageFormatter: messageFormatter)
         let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: history)
