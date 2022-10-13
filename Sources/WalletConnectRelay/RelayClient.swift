@@ -41,7 +41,7 @@ public final class RelayClient {
         requestAcknowledgePublisherSubject.eraseToAnyPublisher()
     }
 
-    private let clientIdStorage: ClientIdStorage
+    private let clientIdStorage: ClientIdStoring
 
     private var dispatcher: Dispatching
     private let rpcHistory: RPCHistory
@@ -55,7 +55,7 @@ public final class RelayClient {
         dispatcher: Dispatching,
         logger: ConsoleLogging,
         keyValueStorage: KeyValueStorage,
-        clientIdStorage: ClientIdStorage
+        clientIdStorage: ClientIdStoring
     ) {
         self.logger = logger
         self.dispatcher = dispatcher

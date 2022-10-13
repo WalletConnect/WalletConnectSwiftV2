@@ -9,10 +9,10 @@ protocol ClientIdStoring {
 struct ClientIdStorage: ClientIdStoring {
     private let key = "com.walletconnect.iridium.client_id"
     private let keychain: KeychainStorageProtocol
-    private let didKeyFactory: ED25519DIDKeyFactory
+    private let didKeyFactory: DIDKeyFactory
 
     init(keychain: KeychainStorageProtocol,
-         didKeyFactory: ED25519DIDKeyFactory) {
+         didKeyFactory: DIDKeyFactory) {
         self.keychain = keychain
         self.didKeyFactory = didKeyFactory
     }

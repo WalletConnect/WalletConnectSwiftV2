@@ -9,13 +9,13 @@ final class RelayClientTests: XCTestCase {
 
     var sut: RelayClient!
     var dispatcher: DispatcherMock!
-
     var publishers = Set<AnyCancellable>()
 
     override func setUp() {
         dispatcher = DispatcherMock()
         let logger = ConsoleLogger()
-        sut = RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
+        let clientIdStorage = ClientIdStorageMock()
+        sut = RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), clientIdStorage: clientIdStorage)
     }
 
     override func tearDown() {
