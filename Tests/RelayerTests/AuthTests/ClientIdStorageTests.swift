@@ -25,4 +25,14 @@ final class ClientIdStorageTests: XCTestCase {
         let restored = try sut.getOrCreateKeyPair()
         XCTAssertEqual(saved, restored)
     }
+
+    func testGetClientId() {
+        let did = "did:key:z6MkodHZwneVRShtaLf8JKYkxpDGp1vGZnpGmdBpX8M2exxH"
+        didKeyFactory.did = did
+        _ = try! sut.getOrCreateKeyPair()
+        
+        let clientId = try! sut.getClientId()
+        XCTAssertEqual(did, clientId)
+
+    }
 }
