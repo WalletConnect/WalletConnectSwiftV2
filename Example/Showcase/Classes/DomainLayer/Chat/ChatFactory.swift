@@ -9,7 +9,7 @@ class ChatFactory {
 
     static func create() -> ChatClient {
         let keychain = KeychainStorage(serviceIdentifier: "com.walletconnect.showcase")
-        let client = HTTPClient(host: "keys.walletconnect.com")
+        let client = HTTPNetworkClient(host: "keys.walletconnect.com")
         let registry = KeyserverRegistryProvider(client: client)
         return ChatClientFactory.create(
             registry: registry,

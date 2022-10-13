@@ -5,7 +5,7 @@ import WalletConnectUtils
 
 actor EIP1271Verifier {
     private let projectId: String
-    private let httpClient: HTTPClient // TODO: Move in Networking package?
+    private let httpClient: HTTPClient
 
     init(projectId: String, httpClient: HTTPClient) {
         self.projectId = projectId
