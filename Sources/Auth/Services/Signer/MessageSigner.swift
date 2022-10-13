@@ -5,7 +5,7 @@ public protocol MessageSignatureVerifying {
 }
 
 public protocol MessageSigning {
-    func sign(message: String, privateKey: Data) throws -> CacaoSignature
+    func sign(message: String, privateKey: Data, type: CacaoSignatureType) throws -> CacaoSignature
 }
 
 struct MessageSigner: MessageSignatureVerifying, MessageSigning {
@@ -24,11 +24,11 @@ struct MessageSigner: MessageSignatureVerifying, MessageSigning {
         self.eip1271Verifier = eip1271Verifier
     }
 
-    func sign(message: String, privateKey: Data) throws -> CacaoSignature {
+    func sign(message: String, privateKey: Data, type: CacaoSignatureType) throws -> CacaoSignature {
         guard let messageData = message.data(using: .utf8) else { throw Errors.utf8EncodingFailed }
         let signature = try signer.sign(message: prefixed(messageData), with: privateKey)
         let prefixedHexSignature = "0x" + signature.toHexString()
-        return CacaoSignature(t: .eip191, s: prefixedHexSignature)
+        return CacaoSignature(t: type, s: prefixedHexSignature)
     }
 
     func verify(signature: CacaoSignature, message: String, address: String) async throws {

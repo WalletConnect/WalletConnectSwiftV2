@@ -67,7 +67,7 @@ final class AuthTests: XCTestCase {
         wait(for: [requestExpectation], timeout: InputConfig.defaultTimeout)
     }
 
-    func testRespondSuccess() async {
+    func testEIP191RespondSuccess() async {
         let responseExpectation = expectation(description: "successful response delivered")
         let uri = try! await appPairingClient.create()
         try! await appAuthClient.request(RequestParams.stub(), topic: uri.topic)
@@ -76,7 +76,7 @@ final class AuthTests: XCTestCase {
         walletAuthClient.authRequestPublisher.sink { [unowned self] request in
             Task(priority: .high) {
                 let signer = MessageSignerFactory.create(projectId: InputConfig.projectId)
-                let signature = try! signer.sign(message: request.message, privateKey: prvKey)
+                let signature = try! signer.sign(message: request.message, privateKey: prvKey, type: .eip191)
                 try! await walletAuthClient.respond(requestId: request.id, signature: signature)
             }
         }
