@@ -6,7 +6,6 @@ struct ValidSignatureMethod {
     static let signatureLength = "0000000000000000000000000000000000000000000000000000000000000041"
     static let signaturePadding = "00000000000000000000000000000000000000000000000000000000000000"
 
-
     let signature: Data
     let messageHash: Data
 

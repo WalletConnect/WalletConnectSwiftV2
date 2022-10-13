@@ -57,7 +57,7 @@ class AppRespondSubscriberTests: XCTestCase {
         let payload = CacaoPayload(params: AuthPayload.stub(nonce: "compromised nonce"), didpkh: DIDPKH(account: walletAccount))
 
         let message = try! messageFormatter.formatMessage(from: payload)
-        let cacaoSignature = try! messageSigner.sign(message: message, privateKey: prvKey)
+        let cacaoSignature = try! messageSigner.sign(message: message, privateKey: prvKey, type: .eip191)
 
         let cacao = Cacao(h: header, p: payload, s: cacaoSignature)
 

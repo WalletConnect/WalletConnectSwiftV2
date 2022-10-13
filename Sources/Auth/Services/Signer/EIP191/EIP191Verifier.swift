@@ -14,7 +14,6 @@ actor EIP191Verifier {
         try verifyPublicKey(publicKey, address: address)
     }
 
-    // TODO: typalias file ???
     private func decompose(signature: Data) -> Signer.Signature {
         let v = signature.bytes[signature.count-1]
         let r = signature.bytes[0..<32]
