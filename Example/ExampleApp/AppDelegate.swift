@@ -47,11 +47,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             print("Permission granted: \(granted)")
             guard granted else { return }
             self?.getNotificationSettings()
-            let clientId  = try! Networking.instance.getClientId()
-                self?.registerClient(clientId: clientId, deviceToken: "9D11CA68-4D73-4AD7-AE9F-9A7BE7F3D4B3") { result in
+            let clientId = try! Networking.instance.getClientId()
+            self?.registerClient(clientId: clientId, deviceToken: "9D11CA68-4D73-4AD7-AE9F-9A7BE7F3D4B3") { result in
                 print(result)
             }
-          }
+        }
     }
     
     func application(
@@ -82,28 +82,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         then handler: @escaping (Result<Data, Error>) -> Void
     ) {
         var urlSession = URLSession.shared
-        // To ensure that our request is always sent, we tell
-        // the system to ignore all local cache data:
-        var request = URLRequest(
-            url: URL(string: "https://dev.push.walletconnect.com/clients")!,
-            cachePolicy: .reloadIgnoringLocalCacheData
-        )
         
+        //Request Body
         let json: [String: Any] = ["client_id": clientId, "type": "APNS", "token": deviceToken]
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
-        
+         
+        // create post request
+        let url = URL(string: "https://push.walletconnect.com/clients")!
+        var request = URLRequest(url: url)
         request.httpMethod = "POST"
-request.httpBody = jsonData
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        let task = urlSession.dataTask(
-            with: request,
-            completionHandler: { data, response, error in
-                // Validate response and call handler
-                print("Yeay \(data), \(response), \(error)")
+         
+        // insert json data to the request
+        request.httpBody = jsonData
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data, error == nil else {
+                print(error?.localizedDescription ?? "No data")
+                return
             }
-        )
-
+            let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
+            if let responseJSON = responseJSON as? [String: Any] {
+                print(responseJSON)
+            }
+        }
         task.resume()
     }
 }
