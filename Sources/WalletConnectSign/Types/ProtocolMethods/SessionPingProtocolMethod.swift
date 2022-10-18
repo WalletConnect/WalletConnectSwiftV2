@@ -8,4 +8,3 @@ struct SessionPingProtocolMethod: ProtocolMethod {
 
     let responseConfig = RelayConfig(tag: 1115, prompt: false, ttl: 30)
 }
-

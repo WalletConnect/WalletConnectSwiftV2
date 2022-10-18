@@ -194,7 +194,7 @@ public final class SignClient {
     /// - Parameters:
     ///   - requiredNamespaces: required namespaces for a session
     ///   - topic: pairing topic
-    public func connect(requiredNamespaces: [String: ProposalNamespace], topic: String) async throws  {
+    public func connect(requiredNamespaces: [String: ProposalNamespace], topic: String) async throws {
         logger.debug("Connecting Application")
         try pairingClient.validatePairingExistance(topic)
         try await appProposeService.propose(

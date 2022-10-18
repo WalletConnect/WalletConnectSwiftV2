@@ -8,7 +8,7 @@ public class PairingPingService {
     private let pingResponder: PingResponder
     private let pingResponseSubscriber: PingResponseSubscriber
 
-    public var onResponse: ((String)->())? {
+    public var onResponse: ((String)->Void)? {
         get {
             return pingResponseSubscriber.onResponse
         }

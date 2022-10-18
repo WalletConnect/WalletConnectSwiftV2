@@ -10,7 +10,7 @@ public struct RelayConfig {
     let tag: Int
     let prompt: Bool
     let ttl: Int
-    
+
     public init(tag: Int, prompt: Bool, ttl: Int) {
         self.tag = tag
         self.prompt = prompt

@@ -25,7 +25,6 @@ actor WalletErrorResponder {
         self.rpcHistory = rpcHistory
     }
 
-
     func respondError(_ error: AuthError, requestId: RPCID) async throws {
         let authRequestParams = try getAuthRequestParams(requestId: requestId)
         let (topic, keys) = try generateAgreementKeys(requestParams: authRequestParams)
@@ -51,7 +50,7 @@ actor WalletErrorResponder {
         let topic = peerPubKey.rawRepresentation.sha256().toHexString()
         let selfPubKey = try kms.createX25519KeyPair()
         let keys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey.hexRepresentation)
-        //TODO -  remove keys
+        // TODO -  remove keys
         return (topic, keys)
     }
 }

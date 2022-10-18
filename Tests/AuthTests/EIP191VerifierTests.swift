@@ -11,7 +11,6 @@ class EIP191VerifierTests: XCTestCase {
     private let message = "\u{19}Ethereum Signed Message:\n7Message".data(using: .utf8)!
     private let signature = Data(hex: "66121e60cccc01fbf7fcba694a1e08ac5db35fb4ec6c045bedba7860445b95c021cad2c595f0bf68ff896964c7c02bb2f3a3e9540e8e4595c98b737ce264cc541b")
 
-
     func testVerify() async throws {
         try await verifier.verify(signature: signature, message: message, address: address)
     }

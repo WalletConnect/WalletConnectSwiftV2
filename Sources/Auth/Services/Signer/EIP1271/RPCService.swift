@@ -22,7 +22,7 @@ struct RPCService: HTTPService {
         return data
     }
 
-    var queryParameters: [String : String]? {
+    var queryParameters: [String: String]? {
         return [
             "chainId": chainId,
             "projectId": projectId

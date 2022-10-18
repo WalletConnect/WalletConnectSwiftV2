@@ -27,7 +27,6 @@ public class Auth {
         )
     }()
 
-
     private static var config: Config?
 
     private init() { }

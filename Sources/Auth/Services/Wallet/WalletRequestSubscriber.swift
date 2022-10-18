@@ -51,4 +51,3 @@ class WalletRequestSubscriber {
             }.store(in: &publishers)
     }
 }
-

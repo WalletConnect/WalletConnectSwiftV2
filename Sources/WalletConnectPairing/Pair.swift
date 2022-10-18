@@ -13,7 +13,6 @@ public class Pair {
         return Pair.client
     }
 
-
     public static var metadata: AppMetadata {
         guard let metadata = config?.metadata else {
             fatalError("Error - you must configure metadata with Pair.configure(metadata:)")

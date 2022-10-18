@@ -9,7 +9,6 @@ struct AuthRequestProtocolMethod: ProtocolMethod {
     let responseConfig = RelayConfig(tag: 3001, prompt: false, ttl: 86400)
 }
 
-
 struct PairingPingProtocolMethod: ProtocolMethod {
     let method: String = "wc_pairingPing"
 
@@ -17,7 +16,6 @@ struct PairingPingProtocolMethod: ProtocolMethod {
 
     let responseConfig = RelayConfig(tag: 1003, prompt: false, ttl: 30)
 }
-
 
 struct PairingDeleteProtocolMethod: ProtocolMethod {
     let method: String = "wc_pairingDelete"
