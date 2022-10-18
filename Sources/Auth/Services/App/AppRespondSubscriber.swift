@@ -61,7 +61,8 @@ class AppRespondSubscriber {
                         try await signatureVerifier.verify(
                             signature: cacao.s,
                             message: message,
-                            address: address
+                            address: address,
+                            chainId: requestPayload.payloadParams.chainId
                         )
                         onResponse?(requestId, .success(cacao))
                     } catch {

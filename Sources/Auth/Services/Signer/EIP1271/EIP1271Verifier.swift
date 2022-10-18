@@ -12,13 +12,13 @@ actor EIP1271Verifier {
         self.httpClient = httpClient
     }
 
-    func verify(signature: Data, message: Data, address: String) async throws {
+    func verify(signature: Data, message: Data, address: String, chainId: String) async throws {
         let encoder = ValidSignatureMethod(signature: signature, messageHash: message.keccak256)
         let call = EthCall(to: address, data: encoder.encode())
         let params = AnyCodable([AnyCodable(call), AnyCodable("latest")])
         let request = RPCRequest(method: "eth_call", params: params)
         let data = try JSONEncoder().encode(request)
-        let httpService = RPCService(data: data, projectId: projectId)
+        let httpService = RPCService(data: data, projectId: projectId, chainId: chainId)
         let response = try await httpClient.request(RPCResponse.self, at: httpService)
         try validateResponse(response)
     }

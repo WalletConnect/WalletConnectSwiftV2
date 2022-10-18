@@ -4,6 +4,7 @@ import WalletConnectNetworking
 struct RPCService: HTTPService {
     let data: Data
     let projectId: String
+    let chainId: String
 
     var path: String {
         return "/v1"
@@ -23,7 +24,7 @@ struct RPCService: HTTPService {
 
     var queryParameters: [String : String]? {
         return [
-            "chainId": "eip155:1",
+            "chainId": chainId,
             "projectId": projectId
         ]
     }

@@ -128,7 +128,7 @@ final class AuthTests: XCTestCase {
     }
 
     func testEIP191RespondError() async {
-        let responseExpectation = expectation(description: "successful response delivered")
+        let responseExpectation = expectation(description: "error response delivered")
         let uri = try! await appPairingClient.create()
         try! await appAuthClient.request(RequestParams.stub(), topic: uri.topic)
 

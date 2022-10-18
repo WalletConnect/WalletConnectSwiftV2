@@ -1,7 +1,7 @@
 import Foundation
 
 public protocol MessageSignatureVerifying {
-    func verify(signature: CacaoSignature, message: String, address: String) async throws
+    func verify(signature: CacaoSignature, message: String, address: String, chainId: String) async throws
 }
 
 public protocol MessageSigning {
@@ -31,7 +31,7 @@ struct MessageSigner: MessageSignatureVerifying, MessageSigning {
         return CacaoSignature(t: type, s: prefixedHexSignature)
     }
 
-    func verify(signature: CacaoSignature, message: String, address: String) async throws {
+    func verify(signature: CacaoSignature, message: String, address: String, chainId: String) async throws {
         guard let messageData = message.data(using: .utf8) else {
             throw Errors.utf8EncodingFailed
         }
@@ -49,7 +49,8 @@ struct MessageSigner: MessageSignatureVerifying, MessageSigning {
             return try await eip1271Verifier.verify(
                 signature: signatureData,
                 message: prefixed(messageData),
-                address: address
+                address: address,
+                chainId: chainId
             )
         }
     }
