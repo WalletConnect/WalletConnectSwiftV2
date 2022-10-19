@@ -8,4 +8,3 @@ struct SessionDeleteProtocolMethod: ProtocolMethod {
 
     let responseConfig = RelayConfig(tag: 1113, prompt: false, ttl: 86400)
 }
-

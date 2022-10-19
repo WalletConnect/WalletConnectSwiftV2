@@ -3,7 +3,7 @@ import Foundation
 @testable import WalletConnectRelay
 @testable import WalletConnectSign
 
-//class MockedRelayClient: NetworkRelaying {
+// class MockedRelayClient: NetworkRelaying {
 //
 //    var messagePublisherSubject = PassthroughSubject<(topic: String, message: String), Never>()
 //    var messagePublisher: AnyPublisher<(topic: String, message: String), Never> {
@@ -41,4 +41,4 @@ import Foundation
 //    func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) {
 //    }
 //
-//}
+// }

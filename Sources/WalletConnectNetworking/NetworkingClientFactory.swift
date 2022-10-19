@@ -12,7 +12,7 @@ public struct NetworkingClientFactory {
         return NetworkingClientFactory.create(relayClient: relayClient, logger: logger, keychainStorage: keychainStorage, keyValueStorage: keyValueStorage)
     }
 
-    public static func create(relayClient: RelayClient, logger: ConsoleLogging, keychainStorage: KeychainStorageProtocol, keyValueStorage: KeyValueStorage) -> NetworkingInteractor{
+    public static func create(relayClient: RelayClient, logger: ConsoleLogging, keychainStorage: KeychainStorageProtocol, keyValueStorage: KeyValueStorage) -> NetworkingInteractor {
         let kms = KeyManagementService(keychain: keychainStorage)
 
         let serializer = Serializer(kms: kms)

@@ -8,4 +8,3 @@ struct SessionUpdateProtocolMethod: ProtocolMethod {
 
     let responseConfig = RelayConfig(tag: 1105, prompt: false, ttl: 86400)
 }
-

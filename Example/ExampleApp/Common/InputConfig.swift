@@ -1,5 +1,5 @@
 import Foundation
- 
+
 struct InputConfig {
 
     static var projectId: String {

@@ -277,7 +277,7 @@ final class SignClientTests: XCTestCase {
             let pairingTopic = dapp.client.getPairings().first!.topic
             if !initiatedSecondSession {
                 Task(priority: .high) {
-                    let _ = try! await dapp.client.connect(requiredNamespaces: requiredNamespaces, topic: pairingTopic)
+                    _ = try! await dapp.client.connect(requiredNamespaces: requiredNamespaces, topic: pairingTopic)
                 }
                 initiatedSecondSession = true
             }
@@ -313,7 +313,6 @@ final class SignClientTests: XCTestCase {
         try! await wallet.client.pair(uri: uri!)
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
-
 
     func testSuccessfulSessionExtend() async {
         let expectation = expectation(description: "Dapp extends session")

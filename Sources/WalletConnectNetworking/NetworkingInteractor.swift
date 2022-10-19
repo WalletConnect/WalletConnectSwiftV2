@@ -171,7 +171,6 @@ public class NetworkingInteractor: NetworkInteracting {
     }
 }
 
-
 extension NetworkingInteractor: NetworkingClient {
     public func connect() throws {
         try relayClient.connect()

@@ -44,7 +44,7 @@ class MessagingService {
 
     private func setUpResponseHandling() {
         networkingInteractor.responseSubscription(on: ChatMessageProtocolMethod())
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<AnyCodable, AnyCodable>) in
+            .sink { [unowned self] (_: ResponseSubscriptionPayload<AnyCodable, AnyCodable>) in
                 logger.debug("Received Message response")
             }.store(in: &publishers)
     }

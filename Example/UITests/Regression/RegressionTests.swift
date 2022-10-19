@@ -10,7 +10,6 @@ class PairingTests: XCTestCase {
         engine.routing.launch(app: .wallet, clean: true)
     }
 
-
     /// Check pairing proposal approval via QR code or uri
     /// - TU001
     func test01PairingCreation() {

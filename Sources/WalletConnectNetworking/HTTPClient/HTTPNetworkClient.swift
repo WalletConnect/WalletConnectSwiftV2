@@ -1,6 +1,6 @@
 import Foundation
 
-public actor HTTPClient {
+public actor HTTPNetworkClient: HTTPClient {
 
     let host: String
 
@@ -32,14 +32,14 @@ public actor HTTPClient {
         }
     }
 
-    func request<T: Decodable>(_ type: T.Type, at service: HTTPService, completion: @escaping (Result<T, Error>) -> Void) {
+    private func request<T: Decodable>(_ type: T.Type, at service: HTTPService, completion: @escaping (Result<T, Error>) -> Void) {
         guard let request = service.resolve(for: host) else {
             completion(.failure(HTTPError.malformedURL(service)))
             return
         }
         session.dataTask(with: request) { data, response, error in
             do {
-                try HTTPClient.validate(response, error)
+                try HTTPNetworkClient.validate(response, error)
                 guard let validData = data else {
                     throw HTTPError.responseDataNil
                 }
@@ -51,14 +51,14 @@ public actor HTTPClient {
         }.resume()
     }
 
-    func request(service: HTTPService, completion: @escaping (Result<Void, Error>) -> Void) {
+    private func request(service: HTTPService, completion: @escaping (Result<Void, Error>) -> Void) {
         guard let request = service.resolve(for: host) else {
             completion(.failure(HTTPError.malformedURL(service)))
             return
         }
         session.dataTask(with: request) { _, response, error in
             do {
-                try HTTPClient.validate(response, error)
+                try HTTPNetworkClient.validate(response, error)
                 completion(.success(()))
             } catch {
                 completion(.failure(error))

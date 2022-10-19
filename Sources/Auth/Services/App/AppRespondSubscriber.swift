@@ -56,11 +56,20 @@ class AppRespondSubscriber {
                 guard messageFormatter.formatMessage(from: requestPayload.payloadParams, address: address) == message
                 else { self.onResponse?(requestId, .failure(.messageCompromised)); return }
 
-                guard let _ = try? signatureVerifier.verify(signature: cacao.s, message: message, address: address)
-                else { self.onResponse?(requestId, .failure(.signatureVerificationFailed)); return }
-
-                onResponse?(requestId, .success(cacao))
-
+                Task(priority: .high) {
+                    do {
+                        try await signatureVerifier.verify(
+                            signature: cacao.s,
+                            message: message,
+                            address: address,
+                            chainId: requestPayload.payloadParams.chainId
+                        )
+                        onResponse?(requestId, .success(cacao))
+                    } catch {
+                        logger.error("Signature verification failed with: \(error.localizedDescription)")
+                        onResponse?(requestId, .failure(.signatureVerificationFailed))
+                    }
+                }
             }.store(in: &publishers)
     }
 }

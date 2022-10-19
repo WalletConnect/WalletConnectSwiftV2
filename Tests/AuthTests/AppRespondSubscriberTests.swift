@@ -15,14 +15,14 @@ class AppRespondSubscriberTests: XCTestCase {
     let defaultTimeout: TimeInterval = 0.01
     let walletAccount = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
     let prvKey = Data(hex: "462c1dad6832d7d96ccf87bd6a686a4110e114aaaebd5512e552c0e3a87b480f")
-    var messageSigner: MessageSigner!
+    var messageSigner: (MessageSigning & MessageSignatureVerifying)!
     var pairingStorage: WCPairingStorageMock!
     var pairingRegisterer: PairingRegistererMock<AuthRequestParams>!
 
     override func setUp() {
         networkingInteractor = NetworkingInteractorMock()
         messageFormatter = SIWEMessageFormatter()
-        messageSigner = MessageSigner()
+        messageSigner = MessageSignerFactory.create(projectId: "project-id")
         rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: RuntimeKeyValueStorage())
         pairingStorage = WCPairingStorageMock()
         pairingRegisterer = PairingRegistererMock<AuthRequestParams>()
@@ -57,7 +57,7 @@ class AppRespondSubscriberTests: XCTestCase {
         let payload = CacaoPayload(params: AuthPayload.stub(nonce: "compromised nonce"), didpkh: DIDPKH(account: walletAccount))
 
         let message = try! messageFormatter.formatMessage(from: payload)
-        let cacaoSignature = try! messageSigner.sign(message: message, privateKey: prvKey)
+        let cacaoSignature = try! messageSigner.sign(message: message, privateKey: prvKey, type: .eip191)
 
         let cacao = Cacao(h: header, p: payload, s: cacaoSignature)
 

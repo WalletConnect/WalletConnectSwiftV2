@@ -40,7 +40,7 @@ class WalletRequestSubscriberTests: XCTestCase {
             message = request.message
             messageExpectation.fulfill()
         }
-        
+
         let payload = RequestSubscriptionPayload<AuthRequestParams>(id: expectedRequestId, topic: "123", request: AuthRequestParams.stub(id: expectedRequestId))
 
         pairingRegisterer.subject.send(payload)

@@ -66,7 +66,7 @@ final class Dispatcher: NSObject, Dispatching {
                     completion(error)
                 case .finished: break
                 }
-            }, receiveValue: { [unowned self] status in
+            }, receiveValue: { [unowned self] _ in
                 cancellable?.cancel()
                 send(string, completion: completion)
             })

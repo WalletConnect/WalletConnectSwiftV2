@@ -3,20 +3,20 @@ import WalletConnectPairing
 import Combine
 import WalletConnectNetworking
 
-public class PairingRegistererMock<RequestParams>: PairingRegisterer where RequestParams : Codable {
+public class PairingRegistererMock<RequestParams>: PairingRegisterer where RequestParams: Codable {
 
     public let subject = PassthroughSubject<RequestSubscriptionPayload<RequestParams>, Never>()
 
     public var isActivateCalled: Bool = false
 
-    public func register<RequestParams>(method: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> where RequestParams : Decodable, RequestParams : Encodable {
+    public func register<RequestParams>(method: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> where RequestParams: Decodable, RequestParams: Encodable {
         subject.eraseToAnyPublisher() as! AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never>
     }
 
     public func activate(pairingTopic: String) {
         isActivateCalled = true
     }
-    
+
     public func validatePairingExistance(_ topic: String) throws {
 
     }

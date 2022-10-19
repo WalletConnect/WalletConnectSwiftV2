@@ -1,4 +1,3 @@
-
 import Foundation
 
 public class SetStore<T: Hashable>: CustomStringConvertible {
@@ -7,7 +6,7 @@ public class SetStore<T: Hashable>: CustomStringConvertible {
 
     private var store: Set<T> = Set()
 
-    public init(label: String){
+    public init(label: String) {
         self.concurrentQueue = DispatchQueue(label: label, attributes: .concurrent)
     }
 

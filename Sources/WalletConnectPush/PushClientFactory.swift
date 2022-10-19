@@ -11,7 +11,7 @@ public struct PushClientFactory {
         let kms = KeyManagementService(keychain: keychainStorage)
         let pushProposer = PushProposer(networkingInteractor: networkingClient, kms: kms, logger: logger)
         let proposalResponseSubscriber = ProposalResponseSubscriber(networkingInteractor: networkingClient, kms: kms, logger: logger)
-        
+
         return PushClient(
             networkInteractor: networkingClient,
             logger: logger,

@@ -9,7 +9,7 @@ class SessionPingService {
     private let pingResponder: PingResponder
     private let pingResponseSubscriber: PingResponseSubscriber
 
-    var onResponse: ((String)->())? {
+    var onResponse: ((String)->Void)? {
         get {
             return pingResponseSubscriber.onResponse
         }

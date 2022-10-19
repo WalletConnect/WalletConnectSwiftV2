@@ -41,4 +41,3 @@ struct UnsupportedProtocolMethod: ProtocolMethod {
 
     let responseConfig = RelayConfig(tag: 0, prompt: false, ttl: 86400)
 }
-
