@@ -10,13 +10,13 @@ public class Networking {
         return Networking.interactor
     }
 
-    public static var interactor: NetworkingInteractor {
+    public static var interactor: NetworkingInteractor = {
         guard let _ = Networking.config else {
             fatalError("Error - you must call Networking.configure(_:) before accessing the shared instance.")
         }
 
         return NetworkingClientFactory.create(relayClient: Relay.instance)
-    }
+    }()
 
     public static var projectId: String {
         guard let projectId = config?.projectId else {
