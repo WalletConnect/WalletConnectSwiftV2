@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/Boilertalk/secp256k1.swift.git",
         "state": {
           "branch": null,
-          "revision": "cd187c632fb812fd93711a9f7e644adb7e5f97f0",
-          "version": "0.1.7"
+          "revision": "45e458ec3be46cf0a6eb68bc947f797852dc65d8",
+          "version": "0.1.6"
         }
       },
       {

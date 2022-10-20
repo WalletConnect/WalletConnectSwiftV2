@@ -14,7 +14,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if
           let notification = notificationOption as? [String: AnyObject],
           let aps = notification["aps"] as? [String: AnyObject] {
-
         }
 
         return true
@@ -46,12 +45,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             print("Permission granted: \(granted)")
             guard granted else { return }
             self?.getNotificationSettings()
+            #if targetEnvironment(simulator)
+            // Avoid networking not instantiated error by sleeping...
+            Thread.sleep(forTimeInterval: 1)
             let clientId = try! Networking.instance.getClientId()
-                // If simulator
-//            self?.registerClientWithPushServer(clientId: clientId, deviceToken: "9D11CA68-4D73-4AD7-AE9F-9A7BE7F3D4B3") { result in
-//                print(result)
-//            }
+            let deviceToken = InputConfig.simulatorIdentifier
+            assert(deviceToken != "SIMULATOR_IDENTIFIER", "Please set your Simulator identifier")
+            self?.registerClientWithPushServer(clientId: clientId, deviceToken: deviceToken, then: { result in
+                
+            })
+            #endif
+            //   print(result)
+            // }
         }
+    }
+    
+    func modelIdentifier() -> String {
+        if let simulatorModelIdentifier = ProcessInfo().environment["SIMULATOR_MODEL_IDENTIFIER"] { return simulatorModelIdentifier }
+        var sysinfo = utsname()
+        uname(&sysinfo) // ignore return value
+        return String(bytes: Data(bytes: &sysinfo.machine, count: Int(_SYS_NAMELEN)), encoding: .ascii)!.trimmingCharacters(in: .controlCharacters)
     }
     
     func application(
