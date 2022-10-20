@@ -23,6 +23,14 @@ public class PingResponseSubscriber {
         networkingInteractor.responseSubscription(on: method)
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<PairingPingParams, Bool>) in
                 onResponse?(payload.topic)
+
+                Task(priority: .high) {
+                    try await networkingInteractor.respondSuccess(
+                        topic: payload.topic,
+                        requestId: payload.id,
+                        protocolMethod: method
+                    )
+                }
             }
             .store(in: &publishers)
     }
