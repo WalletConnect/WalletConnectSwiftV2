@@ -1,8 +1,10 @@
 import Foundation
-import WalletConnectRelay
+import Combine
+import JSONRPC
 import WalletConnectUtils
 import WalletConnectKMS
-import Combine
+import WalletConnectNetworking
+import WalletConnectPairing
 
 /// WalletConnect Sign Client
 ///
@@ -10,6 +12,9 @@ import Combine
 ///
 /// Access via `Sign.instance`
 public final class SignClient {
+    enum Errors: Error {
+        case sessionForTopicNotFound
+    }
 
     // MARK: - Public Properties
 
@@ -81,20 +86,29 @@ public final class SignClient {
         sessionExtendPublisherSubject.eraseToAnyPublisher()
     }
 
+    /// Publisher that sends session topic when session ping received
+    ///
+    /// Event will be emited on controller and non-controller clients.
+    public var pingResponsePublisher: AnyPublisher<String, Never> {
+        pingResponsePublisherSubject.eraseToAnyPublisher()
+    }
+
     /// An object that loggs SDK's errors and info messages
     public let logger: ConsoleLogging
 
     // MARK: - Private properties
 
-    private let relayClient: RelayClient
-    private let pairingEngine: PairingEngine
-    private let pairEngine: PairEngine
+    private let pairingClient: PairingClient
+    private let networkingClient: NetworkingInteractor
     private let sessionEngine: SessionEngine
     private let approveEngine: ApproveEngine
     private let disconnectService: DisconnectService
+    private let pairingPingService: PairingPingService
+    private let sessionPingService: SessionPingService
     private let nonControllerSessionStateMachine: NonControllerSessionStateMachine
     private let controllerSessionStateMachine: ControllerSessionStateMachine
-    private let history: JsonRpcHistory
+    private let appProposeService: AppProposeService
+    private let history: RPCHistory
     private let cleanupService: CleanupService
 
     private let sessionProposalPublisherSubject = PassthroughSubject<Session.Proposal, Never>()
@@ -107,34 +121,40 @@ public final class SignClient {
     private let sessionUpdatePublisherSubject = PassthroughSubject<(sessionTopic: String, namespaces: [String: SessionNamespace]), Never>()
     private let sessionEventPublisherSubject = PassthroughSubject<(event: Session.Event, sessionTopic: String, chainId: Blockchain?), Never>()
     private let sessionExtendPublisherSubject = PassthroughSubject<(sessionTopic: String, date: Date), Never>()
+    private let pingResponsePublisherSubject = PassthroughSubject<String, Never>()
 
     private var publishers = Set<AnyCancellable>()
 
     // MARK: - Initialization
 
     init(logger: ConsoleLogging,
-         relayClient: RelayClient,
-         pairingEngine: PairingEngine,
-         pairEngine: PairEngine,
+         networkingClient: NetworkingInteractor,
          sessionEngine: SessionEngine,
          approveEngine: ApproveEngine,
+         pairingPingService: PairingPingService,
+         sessionPingService: SessionPingService,
          nonControllerSessionStateMachine: NonControllerSessionStateMachine,
          controllerSessionStateMachine: ControllerSessionStateMachine,
+         appProposeService: AppProposeService,
          disconnectService: DisconnectService,
-         history: JsonRpcHistory,
-         cleanupService: CleanupService
+         history: RPCHistory,
+         cleanupService: CleanupService,
+         pairingClient: PairingClient
     ) {
         self.logger = logger
-        self.relayClient = relayClient
-        self.pairingEngine = pairingEngine
-        self.pairEngine = pairEngine
+        self.networkingClient = networkingClient
         self.sessionEngine = sessionEngine
         self.approveEngine = approveEngine
+        self.pairingPingService = pairingPingService
+        self.sessionPingService = sessionPingService
         self.nonControllerSessionStateMachine = nonControllerSessionStateMachine
         self.controllerSessionStateMachine = controllerSessionStateMachine
+        self.appProposeService = appProposeService
         self.history = history
         self.cleanupService = cleanupService
         self.disconnectService = disconnectService
+        self.pairingClient = pairingClient
+
         setUpConnectionObserving()
         setUpEnginesCallbacks()
     }
@@ -147,20 +167,41 @@ public final class SignClient {
     ///   - requiredNamespaces: required namespaces for a session
     ///   - topic: Optional parameter - use it if you already have an established pairing with peer client.
     /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
+    @available(*, deprecated, message: "use Pair.instance.create() and connect(requiredNamespaces: [String: ProposalNamespace]): instead")
     public func connect(requiredNamespaces: [String: ProposalNamespace], topic: String? = nil) async throws -> WalletConnectURI? {
         logger.debug("Connecting Application")
         if let topic = topic {
-            guard let pairing = pairingEngine.getSettledPairing(for: topic) else {
-                throw WalletConnectError.noPairingMatchingTopic(topic)
-            }
-            logger.debug("Proposing session on existing pairing")
-            try await pairingEngine.propose(pairingTopic: topic, namespaces: requiredNamespaces, relay: pairing.relay)
+            try pairingClient.validatePairingExistance(topic)
+            try await appProposeService.propose(
+                pairingTopic: topic,
+                namespaces: requiredNamespaces,
+                relay: RelayProtocolOptions(protocol: "irn", data: nil)
+            )
             return nil
         } else {
-            let pairingURI = try await pairingEngine.create()
-            try await pairingEngine.propose(pairingTopic: pairingURI.topic, namespaces: requiredNamespaces, relay: pairingURI.relay)
+            let pairingURI = try await pairingClient.create()
+            try await appProposeService.propose(
+                pairingTopic: pairingURI.topic,
+                namespaces: requiredNamespaces,
+                relay: RelayProtocolOptions(protocol: "irn", data: nil)
+            )
             return pairingURI
         }
+    }
+
+    /// For a dApp to propose a session to a wallet.
+    /// Function will propose a session on existing pairing.
+    /// - Parameters:
+    ///   - requiredNamespaces: required namespaces for a session
+    ///   - topic: pairing topic
+    public func connect(requiredNamespaces: [String: ProposalNamespace], topic: String) async throws {
+        logger.debug("Connecting Application")
+        try pairingClient.validatePairingExistance(topic)
+        try await appProposeService.propose(
+            pairingTopic: topic,
+            namespaces: requiredNamespaces,
+            relay: RelayProtocolOptions(protocol: "irn", data: nil)
+        )
     }
 
     /// For wallet to receive a session proposal from a dApp
@@ -170,11 +211,9 @@ public final class SignClient {
     /// Should Error:
     /// - When URI has invalid format or missing params
     /// - When topic is already in use
+    @available(*, deprecated, message: "use Pair.instance.pair(uri: WalletConnectURI): instead")
     public func pair(uri: WalletConnectURI) async throws {
-        guard uri.api == .sign else {
-            throw WalletConnectError.pairingUriWrongApiParam
-        }
-        try await pairEngine.pair(uri)
+        try await pairingClient.pair(uri: uri)
     }
 
     /// For a wallet to approve a session proposal.
@@ -221,30 +260,22 @@ public final class SignClient {
     /// For the wallet to respond on pending dApp's JSON-RPC request
     /// - Parameters:
     ///   - topic: Topic of the session for which the request was received.
+    ///   - requestId: RPC request ID
     ///   - response: Your JSON RPC response or an error.
-    public func respond(topic: String, response: JsonRpcResult) async throws {
-        try await sessionEngine.respondSessionRequest(topic: topic, response: response)
+    public func respond(topic: String, requestId: RPCID, response: RPCResult) async throws {
+        try await sessionEngine.respondSessionRequest(topic: topic, requestId: requestId, response: response)
     }
 
     /// Ping method allows to check if peer client is online and is subscribing for given topic
     ///
     ///  Should Error:
     ///  - When the session topic is not found
-    ///  - When the response is neither result or error
     ///
     /// - Parameters:
-    ///   - topic: Topic of a session or a pairing
-    ///   - completion: Result will be success on response or an error
-    public func ping(topic: String, completion: @escaping ((Result<Void, Error>) -> Void)) {
-        if pairingEngine.hasPairing(for: topic) {
-            pairingEngine.ping(topic: topic) { result in
-                completion(result)
-            }
-        } else if sessionEngine.hasSession(for: topic) {
-            sessionEngine.ping(topic: topic) { result in
-                completion(result)
-            }
-        }
+    ///   - topic: Topic of a session
+    public func ping(topic: String) async throws {
+        guard sessionEngine.hasSession(for: topic) else { throw Errors.sessionForTopicNotFound }
+        try await sessionPingService.ping(topic: topic)
     }
 
     /// For the wallet to emit an event to a dApp
@@ -280,8 +311,9 @@ public final class SignClient {
 
     /// Query pairings
     /// - Returns: All pairings
+    @available(*, deprecated, message: "use Pair.instance.getPairings(uri: WalletConnectURI): instead")
     public func getPairings() -> [Pairing] {
-        pairingEngine.getPairings()
+        pairingClient.getPairings()
     }
 
     /// Query pending requests
@@ -289,10 +321,9 @@ public final class SignClient {
     /// - Parameter topic: topic representing session for which you want to get pending requests. If nil, you will receive pending requests for all active sessions.
     public func getPendingRequests(topic: String? = nil) -> [Request] {
         let pendingRequests: [Request] = history.getPending()
-            .filter {$0.request.method == .sessionRequest}
             .compactMap {
-                guard case let .sessionRequest(payloadRequest) = $0.request.params else {return nil}
-                return Request(id: $0.id, topic: $0.topic, method: payloadRequest.request.method, params: payloadRequest.request.params, chainId: payloadRequest.chainId)
+                guard let request = try? $0.request.params?.get(SessionType.RequestParams.self) else { return nil }
+                return Request(id: $0.id, topic: $0.topic, method: request.request.method, params: request.request.params, chainId: request.chainId)
             }
         if let topic = topic {
             return pendingRequests.filter {$0.topic == topic}
@@ -303,11 +334,13 @@ public final class SignClient {
 
     /// - Parameter id: id of a wc_sessionRequest jsonrpc request
     /// - Returns: json rpc record object for given id or nil if record for give id does not exits
-    public func getSessionRequestRecord(id: Int64) -> WalletConnectUtils.JsonRpcRecord? {
-        guard let record = history.get(id: id),
-              case .sessionRequest(let payload) = record.request.params else {return nil}
-        let request = WalletConnectUtils.JsonRpcRecord.Request(method: payload.request.method, params: payload.request.params)
-        return WalletConnectUtils.JsonRpcRecord(id: record.id, topic: record.topic, request: request, response: record.response, chainId: record.chainId)
+    public func getSessionRequestRecord(id: RPCID) -> Request? {
+        guard
+            let record = history.get(recordId: id),
+            let request = try? record.request.params?.get(SessionType.RequestParams.self)
+        else { return nil }
+
+        return Request(id: record.id, topic: record.topic, method: record.request.method, params: request, chainId: request.chainId)
     }
 
 #if DEBUG
@@ -326,7 +359,7 @@ public final class SignClient {
             sessionProposalPublisherSubject.send(proposal)
         }
         approveEngine.onSessionRejected = { [unowned self] proposal, reason in
-            sessionRejectionPublisherSubject.send((proposal, reason.publicRepresentation()))
+            sessionRejectionPublisherSubject.send((proposal, reason))
         }
         approveEngine.onSessionSettle = { [unowned self] settledSession in
             sessionSettlePublisherSubject.send(settledSession)
@@ -335,7 +368,7 @@ public final class SignClient {
             sessionRequestPublisherSubject.send(sessionRequest)
         }
         sessionEngine.onSessionDelete = { [unowned self] topic, reason in
-            sessionDeletePublisherSubject.send((topic, reason.publicRepresentation()))
+            sessionDeletePublisherSubject.send((topic, reason))
         }
         controllerSessionStateMachine.onNamespacesUpdate = { [unowned self] topic, namespaces in
             sessionUpdatePublisherSubject.send((topic, namespaces))
@@ -355,10 +388,16 @@ public final class SignClient {
         sessionEngine.onSessionResponse = { [unowned self] response in
             sessionResponsePublisherSubject.send(response)
         }
+        pairingPingService.onResponse = { [unowned self] topic in
+            pingResponsePublisherSubject.send(topic)
+        }
+        sessionPingService.onResponse = { [unowned self] topic in
+            pingResponsePublisherSubject.send(topic)
+        }
     }
 
     private func setUpConnectionObserving() {
-        relayClient.socketConnectionStatusPublisher.sink { [weak self] status in
+        networkingClient.socketConnectionStatusPublisher.sink { [weak self] status in
             self?.socketConnectionStatusPublisherSubject.send(status)
         }.store(in: &publishers)
     }

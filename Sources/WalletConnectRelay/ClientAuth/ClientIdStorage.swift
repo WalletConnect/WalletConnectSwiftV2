@@ -3,14 +3,18 @@ import WalletConnectKMS
 
 protocol ClientIdStoring {
     func getOrCreateKeyPair() throws -> SigningPrivateKey
+    func getClientId() throws -> String
 }
 
 struct ClientIdStorage: ClientIdStoring {
     private let key = "com.walletconnect.iridium.client_id"
     private let keychain: KeychainStorageProtocol
+    private let didKeyFactory: DIDKeyFactory
 
-    init(keychain: KeychainStorageProtocol) {
+    init(keychain: KeychainStorageProtocol,
+         didKeyFactory: DIDKeyFactory) {
         self.keychain = keychain
+        self.didKeyFactory = didKeyFactory
     }
 
     func getOrCreateKeyPair() throws -> SigningPrivateKey {
@@ -21,5 +25,11 @@ struct ClientIdStorage: ClientIdStoring {
             try keychain.add(privateKey, forKey: key)
             return privateKey
         }
+    }
+
+    func getClientId() throws -> String {
+        let privateKey: SigningPrivateKey = try keychain.read(key: key)
+        let pubKey = privateKey.publicKey.rawRepresentation
+        return didKeyFactory.make(pubKey: pubKey, prefix: true)
     }
 }

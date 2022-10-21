@@ -25,8 +25,9 @@ enum EnvironmentInfo {
 #if os(iOS)
         return "\(UIDevice.current.systemName)-\(UIDevice.current.systemVersion)"
 #elseif os(macOS)
-        let systemVersion = ProcessInfo.processInfo.operatingSystemVersion
-        return "macOS-\(systemVersion)"
+        return "macOS-\(ProcessInfo.processInfo.operatingSystemVersion)"
+#elseif os(tvOS)
+        return "tvOS-\(ProcessInfo.processInfo.operatingSystemVersion)"
 #endif
     }
 }

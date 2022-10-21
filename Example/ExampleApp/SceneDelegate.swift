@@ -1,6 +1,10 @@
 import UIKit
+import Foundation
+import Combine
 import WalletConnectSign
+import WalletConnectNetworking
 import WalletConnectRelay
+import WalletConnectPairing
 import Starscream
 
 extension WebSocket: WebSocketConnecting { }
@@ -23,8 +27,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             url: "example.wallet",
             icons: ["https://avatars.githubusercontent.com/u/37784886"])
 
-        Relay.configure(projectId: "3ca2919724fbfa5456a25194e369a8b4", socketFactory: SocketFactory())
-        Sign.configure(metadata: metadata)
+        Networking.configure(projectId: InputConfig.projectId, socketFactory: SocketFactory())
+        Pair.configure(metadata: metadata)
 #if DEBUG
         if CommandLine.arguments.contains("-cleanInstall") {
             try? Sign.instance.cleanup()
@@ -35,24 +39,25 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = UITabBarController.createExampleApp()
         window?.makeKeyAndVisible()
+
+        if let userActivity = connectionOptions.userActivities.first {
+            handle(userActivity: userActivity)
+        }
     }
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
-        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
-              let incomingURL = userActivity.webpageURL else {
-                  return
-              }
-        let wcUri = incomingURL.absoluteString.deletingPrefix("https://walletconnect.com/wc?uri=")
-        let vc = ((window!.rootViewController as! UINavigationController).viewControllers[0] as! WalletViewController)
-        Task(priority: .high) {try? await Sign.instance.pair(uri: WalletConnectURI(string: wcUri)!)}
-        vc.onClientConnected = {
-            Task(priority: .high) {
-                do {
-                    try await Sign.instance.pair(uri: WalletConnectURI(string: wcUri)!)
-                } catch {
-                    print(error)
-                }
-            }
+        handle(userActivity: userActivity)
+    }
+
+    private func handle(userActivity: NSUserActivity) {
+        guard
+            let url = userActivity.webpageURL,
+            userActivity.activityType == NSUserActivityTypeBrowsingWeb
+        else { return }
+
+        let wcUri = url.absoluteString.deletingPrefix("https://walletconnect.com/wc?uri=")
+        Task(priority: .high) {
+            try! await Pair.instance.pair(uri: WalletConnectURI(string: wcUri)!)
         }
     }
 }

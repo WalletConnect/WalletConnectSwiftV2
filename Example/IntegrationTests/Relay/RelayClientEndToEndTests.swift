@@ -7,24 +7,22 @@ import Starscream
 
 final class RelayClientEndToEndTests: XCTestCase {
 
-    let defaultTimeout: TimeInterval = 10
-
-    let projectId = "3ca2919724fbfa5456a25194e369a8b4"
     private var publishers = Set<AnyCancellable>()
 
     func makeRelayClient() -> RelayClient {
-        let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock())
+        let didKeyFactory = ED25519DIDKeyFactory()
+        let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock(), didKeyFactory: didKeyFactory)
         let socketAuthenticator = SocketAuthenticator(
             clientIdStorage: clientIdStorage,
-            didKeyFactory: ED25519DIDKeyFactory(),
-            relayHost: URLConfig.relayHost
+            didKeyFactory: didKeyFactory,
+            relayHost: InputConfig.relayHost
         )
         let urlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)
-        let socket = WebSocket(url: urlFactory.create(host: URLConfig.relayHost, projectId: projectId))
+        let socket = WebSocket(url: urlFactory.create(host: InputConfig.relayHost, projectId: InputConfig.projectId))
 
         let logger = ConsoleLogger()
         let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket), logger: logger)
-        return RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
+        return RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), clientIdStorage: clientIdStorage)
     }
 
     func testSubscribe() {
@@ -42,7 +40,7 @@ final class RelayClientEndToEndTests: XCTestCase {
             }
         }.store(in: &publishers)
 
-        wait(for: [subscribeExpectation], timeout: defaultTimeout)
+        wait(for: [subscribeExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testEndToEndPayload() {
@@ -77,7 +75,7 @@ final class RelayClientEndToEndTests: XCTestCase {
         }.store(in: &publishers)
 
         relayA.socketConnectionStatusPublisher.sink {  _ in
-            relayA.publish(topic: randomTopic, payload: payloadA, tag: 0, onNetworkAcknowledge: { error in
+            relayA.publish(topic: randomTopic, payload: payloadA, tag: 0, prompt: false, ttl: 60, onNetworkAcknowledge: { error in
                 XCTAssertNil(error)
             })
             relayA.subscribe(topic: randomTopic) { error in
@@ -85,7 +83,7 @@ final class RelayClientEndToEndTests: XCTestCase {
             }
         }.store(in: &publishers)
         relayB.socketConnectionStatusPublisher.sink {  _ in
-            relayB.publish(topic: randomTopic, payload: payloadB, tag: 0, onNetworkAcknowledge: { error in
+            relayB.publish(topic: randomTopic, payload: payloadB, tag: 0, prompt: false, ttl: 60, onNetworkAcknowledge: { error in
                 XCTAssertNil(error)
             })
             relayB.subscribe(topic: randomTopic) { error in
@@ -93,7 +91,7 @@ final class RelayClientEndToEndTests: XCTestCase {
             }
         }.store(in: &publishers)
 
-        wait(for: [expectationA, expectationB], timeout: defaultTimeout)
+        wait(for: [expectationA, expectationB], timeout: InputConfig.defaultTimeout)
 
         XCTAssertEqual(subscriptionATopic, randomTopic)
         XCTAssertEqual(subscriptionBTopic, randomTopic)

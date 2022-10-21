@@ -1,6 +1,7 @@
 import UIKit
 import Starscream
 import WalletConnectRelay
+import WalletConnectNetworking
 
 extension WebSocket: WebSocketConnecting { }
 
@@ -18,7 +19,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private let authCoordinator = AuthCoordinator()
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        Relay.configure(projectId: "3ca2919724fbfa5456a25194e369a8b4", socketFactory: SocketFactory())
+        Networking.configure(projectId: InputConfig.projectId, socketFactory: SocketFactory())
 
         setupWindow(scene: scene)
     }

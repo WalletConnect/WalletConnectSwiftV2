@@ -8,6 +8,21 @@ import WalletConnectNetworking
 public class NetworkingInteractorMock: NetworkInteracting {
 
     private(set) var subscriptions: [String] = []
+    private(set) var unsubscriptions: [String] = []
+
+    private(set) var requests: [(topic: String, request: RPCRequest)] = []
+
+    private(set) var didRespondSuccess = false
+    private(set) var didRespondError = false
+    private(set) var didCallSubscribe = false
+    private(set) var didCallUnsubscribe = false
+    private(set) var didRespondOnTopic: String?
+    private(set) var lastErrorCode = -1
+
+    private(set) var requestCallCount = 0
+    var didCallRequest: Bool { requestCallCount > 0 }
+
+    var onSubscribeCalled: (() -> Void)?
 
     public let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
@@ -17,7 +32,7 @@ public class NetworkingInteractorMock: NetworkInteracting {
     public let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest), Never>()
     public let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse), Never>()
 
-    private var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest), Never> {
+    public var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest), Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
@@ -25,9 +40,12 @@ public class NetworkingInteractorMock: NetworkInteracting {
         responsePublisherSubject.eraseToAnyPublisher()
     }
 
+    // TODO: Avoid copy paste from NetworkInteractor
     public func requestSubscription<Request: Codable>(on request: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never> {
         return requestPublisher
-            .filter { $0.request.method == request.method }
+            .filter { rpcRequest in
+                return rpcRequest.request.method == request.method
+            }
             .compactMap { topic, rpcRequest in
                 guard let id = rpcRequest.id, let request = try? rpcRequest.params?.get(Request.self) else { return nil }
                 return RequestSubscriptionPayload(id: id, topic: topic, request: request)
@@ -35,9 +53,12 @@ public class NetworkingInteractorMock: NetworkInteracting {
             .eraseToAnyPublisher()
     }
 
+    // TODO: Avoid copy paste from NetworkInteractor
     public func responseSubscription<Request: Codable, Response: Codable>(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionPayload<Request, Response>, Never> {
         return responsePublisher
-            .filter { $0.request.method == request.method }
+            .filter { rpcRequest in
+                return rpcRequest.request.method == request.method
+            }
             .compactMap { topic, rpcRequest, rpcResponse in
                 guard
                     let id = rpcRequest.id,
@@ -48,45 +69,56 @@ public class NetworkingInteractorMock: NetworkInteracting {
             .eraseToAnyPublisher()
     }
 
-    public func responseErrorSubscription(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionErrorPayload, Never> {
+    // TODO: Avoid copy paste from NetworkInteractor
+    public func responseErrorSubscription<Request: Codable>(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionErrorPayload<Request>, Never> {
         return responsePublisher
             .filter { $0.request.method == request.method }
-            .compactMap { (_, _, rpcResponse) in
-                guard let id = rpcResponse.id, let error = rpcResponse.error else { return nil }
-                return ResponseSubscriptionErrorPayload(id: id, error: error)
+            .compactMap { (topic, rpcRequest, rpcResponse) in
+                guard let id = rpcResponse.id, let request = try? rpcRequest.params?.get(Request.self), let error = rpcResponse.error else { return nil }
+                return ResponseSubscriptionErrorPayload(id: id, topic: topic, request: request, error: error)
             }
             .eraseToAnyPublisher()
     }
 
     public func subscribe(topic: String) async throws {
+        defer { onSubscribeCalled?() }
         subscriptions.append(topic)
+        didCallSubscribe = true
     }
 
     func didSubscribe(to topic: String) -> Bool {
-         subscriptions.contains { $0 == topic }
+        subscriptions.contains { $0 == topic }
+    }
+
+    func didUnsubscribe(to topic: String) -> Bool {
+        unsubscriptions.contains { $0 == topic }
     }
 
     public func unsubscribe(topic: String) {
-
+        unsubscriptions.append(topic)
+        didCallUnsubscribe = true
     }
 
-    public func request(_ request: RPCRequest, topic: String, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {
-
+    public func request(_ request: RPCRequest, topic: String, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
+        requestCallCount += 1
+        requests.append((topic, request))
     }
 
-    public func respond(topic: String, response: RPCResponse, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {
-
+    public func respond(topic: String, response: RPCResponse, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
+        didRespondOnTopic = topic
     }
 
-    public func respondSuccess(topic: String, requestId: RPCID, tag: Int, envelopeType: Envelope.EnvelopeType) async throws {
-
+    public func respondSuccess(topic: String, requestId: RPCID, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
+        didRespondSuccess = true
     }
 
-    public func respondError(topic: String, requestId: RPCID, tag: Int, reason: Reason, envelopeType: Envelope.EnvelopeType) async throws {
-
+    public func respondError(topic: String, requestId: RPCID, protocolMethod: ProtocolMethod, reason: Reason, envelopeType: Envelope.EnvelopeType) async throws {
+        lastErrorCode = reason.code
+        didRespondError = true
     }
 
-    public func requestNetworkAck(_ request: RPCRequest, topic: String, tag: Int) async throws {
-
+    public func requestNetworkAck(_ request: RPCRequest, topic: String, protocolMethod: ProtocolMethod) async throws {
+        requestCallCount += 1
+        requests.append((topic, request))
     }
 }

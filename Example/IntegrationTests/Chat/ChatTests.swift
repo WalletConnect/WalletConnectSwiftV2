@@ -16,34 +16,12 @@ final class ChatTests: XCTestCase {
         registry = KeyValueRegistry()
         invitee = makeClient(prefix: "🦖 Registered")
         inviter = makeClient(prefix: "🍄 Inviter")
-
-        waitClientsConnected()
-    }
-
-    private func waitClientsConnected() {
-        let expectation = expectation(description: "Wait Clients Connected")
-        expectation.expectedFulfillmentCount = 2
-
-        invitee.socketConnectionStatusPublisher.sink { status in
-            if status == .connected {
-                expectation.fulfill()
-            }
-        }.store(in: &publishers)
-
-        inviter.socketConnectionStatusPublisher.sink { status in
-            if status == .connected {
-                expectation.fulfill()
-            }
-        }.store(in: &publishers)
-
-        wait(for: [expectation], timeout: 5)
     }
 
     func makeClient(prefix: String) -> ChatClient {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
-        let projectId = "3ca2919724fbfa5456a25194e369a8b4"
         let keychain = KeychainStorageMock()
-        let relayClient = RelayClient(relayHost: URLConfig.relayHost, projectId: projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
+        let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
         return ChatClientFactory.create(registry: registry, relayClient: relayClient, kms: KeyManagementService(keychain: keychain), logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
 
@@ -56,7 +34,7 @@ final class ChatTests: XCTestCase {
         invitee.invitePublisher.sink { _ in
             inviteExpectation.fulfill()
         }.store(in: &publishers)
-        wait(for: [inviteExpectation], timeout: 4)
+        wait(for: [inviteExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testAcceptAndCreateNewThread() {
@@ -83,7 +61,7 @@ final class ChatTests: XCTestCase {
             newThreadInviterExpectation.fulfill()
         }.store(in: &publishers)
 
-        wait(for: [newThreadinviteeExpectation, newThreadInviterExpectation], timeout: 10)
+        wait(for: [newThreadinviteeExpectation, newThreadInviterExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testMessage() {
@@ -118,6 +96,6 @@ final class ChatTests: XCTestCase {
             messageExpectation.fulfill()
         }.store(in: &publishers)
 
-        wait(for: [messageExpectation], timeout: 10)
+        wait(for: [messageExpectation], timeout: InputConfig.defaultTimeout)
     }
 }

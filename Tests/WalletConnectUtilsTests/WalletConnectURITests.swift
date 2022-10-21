@@ -1,17 +1,15 @@
 import XCTest
 @testable import WalletConnectUtils
 
-private func stubURI(api: WalletConnectURI.TargetAPI? = nil) -> (uri: WalletConnectURI, string: String) {
+private func stubURI() -> (uri: WalletConnectURI, string: String) {
     let topic = Data.randomBytes(count: 32).toHexString()
     let symKey = Data.randomBytes(count: 32).toHexString()
     let protocolName = "irn"
-    let uriBase = api == nil ? "wc:" : "wc:\(api!.rawValue)-"
-    let uriString = "\(uriBase)\(topic)@2?symKey=\(symKey)&relay-protocol=\(protocolName)"
+    let uriString = "wc:\(topic)@2?symKey=\(symKey)&relay-protocol=\(protocolName)"
     let uri = WalletConnectURI(
         topic: topic,
         symKey: symKey,
-        relay: RelayProtocolOptions(protocol: protocolName, data: nil),
-        api: api)
+        relay: RelayProtocolOptions(protocol: protocolName, data: nil))
     return (uri, uriString)
 }
 
@@ -40,25 +38,6 @@ final class WalletConnectURITests: XCTestCase {
         let uri = WalletConnectURI(string: inputURIString)
         let outputURIString = uri?.absoluteString
         XCTAssertEqual(expectedString, outputURIString)
-    }
-
-    // MARK: - Init URI with prefix API identifier
-
-    func testInitFromPrefixedURIString() {
-        WalletConnectURI.TargetAPI.allCases.forEach { api in
-            let uriString = stubURI(api: api).string
-            let uri = WalletConnectURI(string: uriString)
-            XCTAssertEqual(uri?.api, api)
-            XCTAssertEqual(uri?.absoluteString, uriString)
-        }
-    }
-
-    func testAbsentPrefixFallbackToSign() {
-        let input = stubURI()
-        let uriFromParams = input.uri
-        let uriFromString = WalletConnectURI(string: input.string)
-        XCTAssertEqual(uriFromParams.api, .sign)
-        XCTAssertEqual(uriFromString?.api, .sign)
     }
 
     // MARK: - Init URI failure cases

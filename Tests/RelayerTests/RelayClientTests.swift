@@ -9,13 +9,13 @@ final class RelayClientTests: XCTestCase {
 
     var sut: RelayClient!
     var dispatcher: DispatcherMock!
-
     var publishers = Set<AnyCancellable>()
 
     override func setUp() {
         dispatcher = DispatcherMock()
         let logger = ConsoleLogger()
-        sut = RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
+        let clientIdStorage = ClientIdStorageMock()
+        sut = RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), clientIdStorage: clientIdStorage)
     }
 
     override func tearDown() {
@@ -55,7 +55,7 @@ final class RelayClientTests: XCTestCase {
 
     func testPublishRequestAcknowledge() {
         let expectation = expectation(description: "Publish must callback on relay server acknowledgement")
-        sut.publish(topic: "", payload: "{}", tag: 0) { error in
+        sut.publish(topic: "", payload: "{}", tag: 0, prompt: false, ttl: 60) { error in
             XCTAssertNil(error)
             expectation.fulfill()
         }
@@ -93,7 +93,7 @@ final class RelayClientTests: XCTestCase {
     }
 
     func testSendOnPublish() {
-        sut.publish(topic: "", payload: "", tag: 0, onNetworkAcknowledge: { _ in})
+        sut.publish(topic: "", payload: "", tag: 0, prompt: false, ttl: 60, onNetworkAcknowledge: { _ in})
         XCTAssertTrue(dispatcher.sent)
     }
 

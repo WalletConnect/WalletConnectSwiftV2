@@ -7,48 +7,33 @@ import WalletConnectNetworking
 
 public struct AuthClientFactory {
 
-    public static func create(metadata: AppMetadata, account: Account?, relayClient: RelayClient) -> AuthClient {
+    public static func create(metadata: AppMetadata, account: Account?, projectId: String, networkingClient: NetworkingInteractor, pairingRegisterer: PairingRegisterer) -> AuthClient {
         let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults.standard
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
-        return AuthClientFactory.create(metadata: metadata, account: account, logger: logger, keyValueStorage: keyValueStorage, keychainStorage: keychainStorage, relayClient: relayClient)
+        return AuthClientFactory.create(metadata: metadata, account: account, projectId: projectId, logger: logger, keyValueStorage: keyValueStorage, keychainStorage: keychainStorage, networkingClient: networkingClient, pairingRegisterer: pairingRegisterer, iatProvider: DefaultIATProvider())
     }
 
-    static func create(metadata: AppMetadata, account: Account?, logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, relayClient: RelayClient) -> AuthClient {
-        let historyStorage = CodableStore<RPCHistory.Record>(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue)
-        let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue)))
+    static func create(metadata: AppMetadata, account: Account?, projectId: String, logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, networkingClient: NetworkingInteractor, pairingRegisterer: PairingRegisterer, iatProvider: IATProvider) -> AuthClient {
         let kms = KeyManagementService(keychain: keychainStorage)
-        let serializer = Serializer(kms: kms)
-        let history = RPCHistory(keyValueStore: historyStorage)
-        let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serializer, logger: logger, rpcHistory: history)
+        let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
         let messageFormatter = SIWEMessageFormatter()
-        let appPairService = AppPairService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore)
-        let appRequestService = AppRequestService(networkingInteractor: networkingInteractor, kms: kms, appMetadata: metadata, logger: logger)
-        let messageSigner = MessageSigner(signer: Signer())
-        let appRespondSubscriber = AppRespondSubscriber(networkingInteractor: networkingInteractor, logger: logger, rpcHistory: history, signatureVerifier: messageSigner, messageFormatter: messageFormatter, pairingStorage: pairingStore)
-        let walletPairService = WalletPairService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore)
-        let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingInteractor, logger: logger, kms: kms, rpcHistory: history)
-        let walletRequestSubscriber = WalletRequestSubscriber(networkingInteractor: networkingInteractor, logger: logger, kms: kms, messageFormatter: messageFormatter, address: account?.address, walletErrorResponder: walletErrorResponder)
-        let walletRespondService = WalletRespondService(networkingInteractor: networkingInteractor, logger: logger, kms: kms, rpcHistory: history, walletErrorResponder: walletErrorResponder)
+        let appRequestService = AppRequestService(networkingInteractor: networkingClient, kms: kms, appMetadata: metadata, logger: logger, iatProvader: iatProvider)
+        let messageSigner = MessageSignerFactory.create(projectId: projectId)
+        let appRespondSubscriber = AppRespondSubscriber(networkingInteractor: networkingClient, logger: logger, rpcHistory: history, signatureVerifier: messageSigner, pairingRegisterer: pairingRegisterer, messageFormatter: messageFormatter)
+        let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: history)
+        let walletRequestSubscriber = WalletRequestSubscriber(networkingInteractor: networkingClient, logger: logger, kms: kms, messageFormatter: messageFormatter, address: account?.address, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingRegisterer)
+        let walletRespondService = WalletRespondService(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: history, walletErrorResponder: walletErrorResponder)
         let pendingRequestsProvider = PendingRequestsProvider(rpcHistory: history)
-        let cleanupService = CleanupService(pairingStore: pairingStore, kms: kms)
-        let deletePairingService = DeletePairingService(networkingInteractor: networkingInteractor, kms: kms, pairingStorage: pairingStore, logger: logger)
-        let pingService = PairingPingService(pairingStorage: pairingStore, networkingInteractor: networkingInteractor, logger: logger)
-        let pairingsProvider = PairingsProvider(pairingStorage: pairingStore)
 
-        return AuthClient(appPairService: appPairService,
-                          appRequestService: appRequestService,
+        return AuthClient(appRequestService: appRequestService,
                           appRespondSubscriber: appRespondSubscriber,
-                          walletPairService: walletPairService,
                           walletRequestSubscriber: walletRequestSubscriber,
-                          walletRespondService: walletRespondService, deletePairingService: deletePairingService,
+                          walletRespondService: walletRespondService,
                           account: account,
                           pendingRequestsProvider: pendingRequestsProvider,
-                          cleanupService: cleanupService,
                           logger: logger,
-                          pairingStorage: pairingStore,
-                          socketConnectionStatusPublisher: relayClient.socketConnectionStatusPublisher,
-                          pingService: pingService,
-                          pairingsProvider: pairingsProvider)
+                          socketConnectionStatusPublisher: networkingClient.socketConnectionStatusPublisher,
+                          pairingRegisterer: pairingRegisterer)
     }
 }

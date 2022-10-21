@@ -20,9 +20,6 @@ public final class RelayClient {
         case subscriptionIdNotFound
     }
 
-    static let historyIdentifier = "com.walletconnect.sdk.relayer_client.subscription_json_rpc_record"
-
-    let defaultTtl = 6*Time.hour
     var subscriptions: [String: String] = [:]
 
     public var messagePublisher: AnyPublisher<(topic: String, message: String), Never> {
@@ -30,11 +27,10 @@ public final class RelayClient {
     }
 
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
-        socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
+        dispatcher.socketConnectionStatusPublisher
     }
 
     private let messagePublisherSubject = PassthroughSubject<(topic: String, message: String), Never>()
-    private let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
 
     private let subscriptionResponsePublisherSubject = PassthroughSubject<(RPCID?, String), Never>()
     private var subscriptionResponsePublisher: AnyPublisher<(RPCID?, String), Never> {
@@ -44,6 +40,8 @@ public final class RelayClient {
     private var requestAcknowledgePublisher: AnyPublisher<RPCID?, Never> {
         requestAcknowledgePublisherSubject.eraseToAnyPublisher()
     }
+
+    private let clientIdStorage: ClientIdStoring
 
     private var dispatcher: Dispatching
     private let rpcHistory: RPCHistory
@@ -56,20 +54,19 @@ public final class RelayClient {
     init(
         dispatcher: Dispatching,
         logger: ConsoleLogging,
-        keyValueStorage: KeyValueStorage
+        keyValueStorage: KeyValueStorage,
+        clientIdStorage: ClientIdStoring
     ) {
         self.logger = logger
         self.dispatcher = dispatcher
-        self.rpcHistory = RPCHistory(keyValueStore: CodableStore<RPCHistory.Record>(defaults: keyValueStorage, identifier: Self.historyIdentifier))
+        self.rpcHistory = RPCHistoryFactory.createForRelay(keyValueStorage: keyValueStorage)
+        self.clientIdStorage = clientIdStorage
         setUpBindings()
     }
 
     private func setUpBindings() {
         dispatcher.onMessage = { [weak self] payload in
             self?.handlePayloadMessage(payload)
-        }
-        dispatcher.onConnect = { [unowned self] in
-            self.socketConnectionStatusPublisherSubject.send(.connected)
         }
     }
 
@@ -89,9 +86,11 @@ public final class RelayClient {
         socketConnectionType: SocketConnectionType = .automatic,
         logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off)
     ) {
+        let didKeyFactory = ED25519DIDKeyFactory()
+        let clientIdStorage = ClientIdStorage(keychain: keychainStorage, didKeyFactory: didKeyFactory)
         let socketAuthenticator = SocketAuthenticator(
-            clientIdStorage: ClientIdStorage(keychain: keychainStorage),
-            didKeyFactory: ED25519DIDKeyFactory(),
+            clientIdStorage: clientIdStorage,
+            didKeyFactory: didKeyFactory,
             relayHost: relayHost
         )
         let relayUrlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)
@@ -108,7 +107,7 @@ public final class RelayClient {
             socketConnectionHandler = ManualSocketConnectionHandler(socket: socket)
         }
         let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: socketConnectionHandler, logger: logger)
-        self.init(dispatcher: dispatcher, logger: logger, keyValueStorage: keyValueStorage)
+        self.init(dispatcher: dispatcher, logger: logger, keyValueStorage: keyValueStorage, clientIdStorage: clientIdStorage)
     }
 
     /// Connects web socket
@@ -126,13 +125,13 @@ public final class RelayClient {
     }
 
     /// Completes when networking client sends a request, error if it fails on client side
-    public func publish(topic: String, payload: String, tag: Int, prompt: Bool = false) async throws {
-        let request = Publish(params: .init(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag))
+    public func publish(topic: String, payload: String, tag: Int, prompt: Bool, ttl: Int) async throws {
+        let request = Publish(params: .init(topic: topic, message: payload, ttl: ttl, prompt: prompt, tag: tag))
             .wrapToIRN()
             .asRPCRequest()
         let message = try request.asJSONEncodedString()
         logger.debug("Publishing payload on topic: \(topic)")
-        try await dispatcher.send(message)
+        try await dispatcher.protectedSend(message)
     }
 
     /// Completes with an acknowledgement from the relay network.
@@ -140,10 +139,11 @@ public final class RelayClient {
         topic: String,
         payload: String,
         tag: Int,
-        prompt: Bool = false,
+        prompt: Bool,
+        ttl: Int,
         onNetworkAcknowledge: @escaping ((Error?) -> Void)
     ) {
-        let rpc = Publish(params: .init(topic: topic, message: payload, ttl: defaultTtl, prompt: prompt, tag: tag))
+        let rpc = Publish(params: .init(topic: topic, message: payload, ttl: ttl, prompt: prompt, tag: tag))
         let request = rpc
             .wrapToIRN()
             .asRPCRequest()
@@ -156,7 +156,7 @@ public final class RelayClient {
             cancellable?.cancel()
                 onNetworkAcknowledge(nil)
         }
-        dispatcher.send(message) { [weak self] error in
+        dispatcher.protectedSend(message) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to Publish Payload, error: \(error)")
                 cancellable?.cancel()
@@ -183,7 +183,7 @@ public final class RelayClient {
                 }
                 completion(nil)
         }
-        dispatcher.send(message) { [weak self] error in
+        dispatcher.protectedSend(message) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to subscribe to topic \(error)")
                 cancellable?.cancel()
@@ -223,7 +223,7 @@ public final class RelayClient {
                 cancellable?.cancel()
                 completion(nil)
             }
-        dispatcher.send(message) { [weak self] error in
+        dispatcher.protectedSend(message) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to unsubscribe from topic")
                 cancellable?.cancel()
@@ -235,6 +235,10 @@ public final class RelayClient {
                 completion(nil)
             }
         }
+    }
+
+    public func getClientId() throws -> String {
+        try clientIdStorage.getClientId()
     }
 
     // FIXME: Parse data to string once before trying to decode -> respond error on fail
@@ -253,13 +257,13 @@ public final class RelayClient {
             }
         } else if let response = tryDecode(RPCResponse.self, from: payload) {
             switch response.outcome {
-            case .success(let anyCodable):
+            case .response(let anyCodable):
                 if let _ = try? anyCodable.get(Bool.self) { // TODO: Handle success vs. error
                     requestAcknowledgePublisherSubject.send(response.id)
                 } else if let subscriptionId = try? anyCodable.get(String.self) {
                     subscriptionResponsePublisherSubject.send((response.id, subscriptionId))
                 }
-            case .failure(let rpcError):
+            case .error(let rpcError):
                 logger.error("Received RPC error from relay network: \(rpcError)")
             }
         } else {
@@ -279,7 +283,7 @@ public final class RelayClient {
     private func acknowledgeRequest(_ request: RPCRequest) throws {
         let response = RPCResponse(matchingRequest: request, result: true)
         let message = try response.asJSONEncodedString()
-        dispatcher.send(message) { [unowned self] in
+        dispatcher.protectedSend(message) { [unowned self] in
             if let error = $0 {
                 logger.debug("Failed to dispatch response: \(response), error: \(error)")
             } else {

@@ -12,4 +12,10 @@ public struct Pairing {
         self.peer = peer
         self.expiryDate = expiryDate
     }
+
+    init(_ pairing: WCPairing) {
+        self.topic = pairing.topic
+        self.peer = pairing.peerMetadata
+        self.expiryDate = pairing.expiryDate
+    }
 }

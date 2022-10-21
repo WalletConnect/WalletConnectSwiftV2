@@ -2,6 +2,7 @@ import UIKit
 import Combine
 import WalletConnectSign
 import WalletConnectRelay
+import WalletConnectPairing
 
 final class SignCoordinator {
 
@@ -25,7 +26,7 @@ final class SignCoordinator {
             url: "wallet.connect",
             icons: ["https://avatars.githubusercontent.com/u/37784886"])
 
-        Sign.configure(metadata: metadata)
+        Pair.configure(metadata: metadata)
 #if DEBUG
         if CommandLine.arguments.contains("-cleanInstall") {
             try? Sign.instance.cleanup()
@@ -44,6 +45,12 @@ final class SignCoordinator {
                 presentResponse(for: response)
             }.store(in: &publishers)
 
+        Sign.instance.sessionSettlePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] session in
+                showAccountsScreen(session)
+            }.store(in: &publishers)
+
         if let session = Sign.instance.getSessions().first {
             showAccountsScreen(session)
         } else {
@@ -53,9 +60,6 @@ final class SignCoordinator {
 
     private func showSelectChainScreen() {
         let controller = SelectChainViewController()
-        controller.onSessionSettled = { [unowned self] session in
-            showAccountsScreen(session)
-        }
         navigationController.viewControllers = [controller]
     }
 
@@ -64,6 +68,7 @@ final class SignCoordinator {
         controller.onDisconnect = { [unowned self]  in
             showSelectChainScreen()
         }
+        navigationController.presentedViewController?.dismiss(animated: false)
         navigationController.viewControllers = [controller]
     }
 

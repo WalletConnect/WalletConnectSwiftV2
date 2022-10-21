@@ -1,6 +1,7 @@
 import UIKit
 import Combine
 import Auth
+import WalletConnectPairing
 
 final class AuthViewModel: ObservableObject {
 
@@ -13,10 +14,10 @@ final class AuthViewModel: ObservableObject {
     private var disposeBag = Set<AnyCancellable>()
 
     @Published var state: SigningState = .none
-    @Published var uri: String?
+    @Published var uriString: String?
 
     var qrImage: UIImage? {
-        return uri.map { QRCodeGenerator.generateQRCode(from: $0) }
+        return uriString.map { QRCodeGenerator.generateQRCode(from: $0) }
     }
 
     init() {
@@ -26,12 +27,14 @@ final class AuthViewModel: ObservableObject {
     @MainActor
     func setupInitialState() async throws {
         state = .none
-        uri = nil
-        uri = try await Auth.instance.request(.stub()).absoluteString
+        uriString = nil
+        let uri = try! await Pair.instance.create()
+        uriString = uri.absoluteString
+        try await Auth.instance.request(.stub(), topic: uri.topic)
     }
 
     func copyDidPressed() {
-        UIPasteboard.general.string = uri
+        UIPasteboard.general.string = uriString
     }
 
     func walletDidPressed() {
@@ -39,7 +42,7 @@ final class AuthViewModel: ObservableObject {
     }
 
     func deeplinkPressed() {
-        guard let uri = uri else { return }
+        guard let uri = uriString else { return }
         UIApplication.shared.open(URL(string: "showcase://wc?uri=\(uri)")!)
     }
 }

@@ -1,5 +1,6 @@
 @testable import WalletConnectSign
 import Foundation
+import JSONRPC
 import WalletConnectKMS
 import WalletConnectUtils
 import TestingUtils
@@ -41,12 +42,6 @@ extension SessionNamespace {
     }
 }
 
-extension RelayProtocolOptions {
-    static func stub() -> RelayProtocolOptions {
-        RelayProtocolOptions(protocol: "", data: nil)
-    }
-}
-
 extension Participant {
     static func stub(publicKey: String = AgreementPrivateKey().publicKey.hexRepresentation) -> Participant {
         Participant(publicKey: publicKey, metadata: AppMetadata.stub())
@@ -59,29 +54,25 @@ extension AgreementPeer {
     }
 }
 
-extension WCRequestSubscriptionPayload {
+extension RPCRequest {
 
-    static func stubUpdateNamespaces(topic: String, namespaces: [String: SessionNamespace] = SessionNamespace.stubDictionary()) -> WCRequestSubscriptionPayload {
-        let updateMethod = WCMethod.wcSessionUpdate(SessionType.UpdateParams(namespaces: namespaces)).asRequest()
-        return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateMethod)
+    static func stubUpdateNamespaces(namespaces: [String: SessionNamespace] = SessionNamespace.stubDictionary()) -> RPCRequest {
+        return RPCRequest(method: SessionUpdateProtocolMethod().method, params: SessionType.UpdateParams(namespaces: namespaces))
     }
 
-    static func stubUpdateExpiry(topic: String, expiry: Int64) -> WCRequestSubscriptionPayload {
-        let updateExpiryMethod = WCMethod.wcSessionExtend(SessionType.UpdateExpiryParams(expiry: expiry)).asRequest()
-        return WCRequestSubscriptionPayload(topic: topic, wcRequest: updateExpiryMethod)
+    static func stubUpdateExpiry(expiry: Int64) -> RPCRequest {
+        return RPCRequest(method: SessionExtendProtocolMethod().method, params: SessionType.UpdateExpiryParams(expiry: expiry))
     }
 
-    static func stubSettle(topic: String) -> WCRequestSubscriptionPayload {
-        let method = WCMethod.wcSessionSettle(SessionType.SettleParams.stub())
-        return WCRequestSubscriptionPayload(topic: topic, wcRequest: method.asRequest())
+    static func stubSettle() -> RPCRequest {
+        return RPCRequest(method: SessionSettleProtocolMethod().method, params: SessionType.SettleParams.stub())
     }
 
-    static func stubRequest(topic: String, method: String, chainId: Blockchain) -> WCRequestSubscriptionPayload {
+    static func stubRequest(method: String, chainId: Blockchain) -> RPCRequest {
         let params = SessionType.RequestParams(
             request: SessionType.RequestParams.Request(method: method, params: AnyCodable(EmptyCodable())),
             chainId: chainId)
-        let request = WCRequest(method: .sessionRequest, params: .sessionRequest(params))
-        return WCRequestSubscriptionPayload(topic: topic, wcRequest: request)
+        return RPCRequest(method: SessionRequestProtocolMethod().method, params: params)
     }
 }
 
@@ -95,15 +86,8 @@ extension SessionProposal {
     }
 }
 
-extension WCResponse {
-    static func stubError(forRequest request: WCRequest, topic: String) -> WCResponse {
-        let errorResponse = JSONRPCErrorResponse(id: request.id, error: JSONRPCErrorResponse.Error(code: 0, message: ""))
-        return WCResponse(
-            topic: topic,
-            chainId: nil,
-            requestMethod: request.method,
-            requestParams: request.params,
-            result: .error(errorResponse)
-        )
+extension RPCResponse {
+    static func stubError(forRequest request: RPCRequest) -> RPCResponse {
+        return RPCResponse(matchingRequest: request, error: JSONRPCError(code: 0, message: ""))
     }
 }

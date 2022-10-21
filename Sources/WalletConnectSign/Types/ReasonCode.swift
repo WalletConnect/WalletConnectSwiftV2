@@ -1,4 +1,6 @@
-enum ReasonCode: Codable, Equatable {
+import WalletConnectNetworking
+
+enum ReasonCode: Reason, Codable, Equatable {
 
     enum Context: String, Codable {
         case pairing = "pairing"

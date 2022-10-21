@@ -26,6 +26,11 @@
             value = "$(RELAY_HOST)"
             isEnabled = "YES">
          </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "PROJECT_ID"
+            value = "$(PROJECT_ID)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
       </EnvironmentVariables>
       <Testables>
          <TestableReference

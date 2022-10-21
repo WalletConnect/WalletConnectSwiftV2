@@ -4,6 +4,7 @@ import JSONRPC
 import WalletConnectNetworking
 import WalletConnectUtils
 import WalletConnectKMS
+import WalletConnectPairing
 
 class WalletRequestSubscriber {
     private let networkingInteractor: NetworkInteracting
@@ -13,6 +14,7 @@ class WalletRequestSubscriber {
     private var publishers = [AnyCancellable]()
     private let messageFormatter: SIWEMessageFormatting
     private let walletErrorResponder: WalletErrorResponder
+    private let pairingRegisterer: PairingRegisterer
     var onRequest: ((AuthRequest) -> Void)?
 
     init(networkingInteractor: NetworkInteracting,
@@ -20,20 +22,22 @@ class WalletRequestSubscriber {
          kms: KeyManagementServiceProtocol,
          messageFormatter: SIWEMessageFormatting,
          address: String?,
-         walletErrorResponder: WalletErrorResponder) {
+         walletErrorResponder: WalletErrorResponder,
+         pairingRegisterer: PairingRegisterer) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.kms = kms
         self.address = address
         self.messageFormatter = messageFormatter
         self.walletErrorResponder = walletErrorResponder
+        self.pairingRegisterer = pairingRegisterer
         subscribeForRequest()
     }
 
     private func subscribeForRequest() {
         guard let address = address else { return }
 
-        networkingInteractor.requestSubscription(on: AuthProtocolMethod.authRequest)
+        pairingRegisterer.register(method: AuthRequestProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<AuthRequestParams>) in
                 logger.debug("WalletRequestSubscriber: Received request")
                 guard let message = messageFormatter.formatMessage(from: payload.request.payloadParams, address: address) else {
@@ -42,8 +46,8 @@ class WalletRequestSubscriber {
                     }
                     return
                 }
+                pairingRegisterer.activate(pairingTopic: payload.topic)
                 onRequest?(.init(id: payload.id, message: message))
             }.store(in: &publishers)
     }
 }
-

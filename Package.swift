@@ -20,6 +20,12 @@ let package = Package(
             name: "WalletConnectAuth",
             targets: ["Auth"]),
         .library(
+            name: "WalletConnectPairing",
+            targets: ["WalletConnectPairing"]),
+        .library(
+            name: "WalletConnectPush",
+            targets: ["WalletConnectPush"]),
+        .library(
             name: "WalletConnectRouter",
             targets: ["WalletConnectRouter"]),
         .library(
@@ -27,12 +33,12 @@ let package = Package(
             targets: ["WalletConnectNetworking"])
     ],
     dependencies: [
-        .package(url: "https://github.com/flypaper0/Web3.swift", .branch("feature/eip-155"))
+        .package(url: "https://github.com/WalletConnect/Web3.swift", .exact("1.0.0"))
     ],
     targets: [
         .target(
             name: "WalletConnectSign",
-            dependencies: ["WalletConnectRelay", "WalletConnectUtils", "WalletConnectKMS", "WalletConnectPairing"],
+            dependencies: ["WalletConnectNetworking", "WalletConnectPairing"],
             path: "Sources/WalletConnectSign"),
         .target(
             name: "Chat",
@@ -43,6 +49,10 @@ let package = Package(
             dependencies: ["WalletConnectPairing", "WalletConnectNetworking", .product(name: "Web3", package: "Web3.swift")],
             path: "Sources/Auth"),
         .target(
+            name: "WalletConnectPush",
+            dependencies: ["WalletConnectPairing", "WalletConnectNetworking"],
+            path: "Sources/WalletConnectPush"),
+        .target(
             name: "WalletConnectRelay",
             dependencies: ["WalletConnectUtils", "WalletConnectKMS"],
             path: "Sources/WalletConnectRelay"),
@@ -52,7 +62,7 @@ let package = Package(
             path: "Sources/WalletConnectKMS"),
         .target(
             name: "WalletConnectPairing",
-            dependencies: ["WalletConnectUtils", "WalletConnectNetworking", "JSONRPC"]),
+            dependencies: ["WalletConnectNetworking"]),
         .target(
             name: "WalletConnectUtils",
             dependencies: ["Commons", "JSONRPC"]),
@@ -71,6 +81,9 @@ let package = Package(
         .testTarget(
             name: "WalletConnectSignTests",
             dependencies: ["WalletConnectSign", "TestingUtils"]),
+        .testTarget(
+            name: "WalletConnectPairingTests",
+            dependencies: ["WalletConnectPairing", "TestingUtils"]),
         .testTarget(
             name: "ChatTests",
             dependencies: ["Chat", "WalletConnectUtils", "TestingUtils"]),

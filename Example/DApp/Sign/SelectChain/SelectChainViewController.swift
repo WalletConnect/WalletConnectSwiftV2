@@ -1,5 +1,6 @@
 import Foundation
 import WalletConnectSign
+import WalletConnectPairing
 import UIKit
 import Combine
 
@@ -15,16 +16,12 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
     private var publishers = [AnyCancellable]()
 
     let chains = [Chain(name: "Ethereum", id: "eip155:1"), Chain(name: "Polygon", id: "eip155:137")]
-    var onSessionSettled: ((Session) -> Void)?
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Available Chains"
         selectChainView.tableView.dataSource = self
         selectChainView.connectButton.addTarget(self, action: #selector(connect), for: .touchUpInside)
         selectChainView.openWallet.addTarget(self, action: #selector(openWallet), for: .touchUpInside)
-        Sign.instance.sessionSettlePublisher.sink {[unowned self] session in
-            onSessionSettled?(session)
-        }.store(in: &publishers)
     }
 
     override func loadView() {
@@ -38,8 +35,9 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
         let blockchains: Set<Blockchain> = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
         let namespaces: [String: ProposalNamespace] = ["eip155": ProposalNamespace(chains: blockchains, methods: methods, events: [], extensions: nil)]
         Task {
-            let uri = try await Sign.instance.connect(requiredNamespaces: namespaces)
-            showConnectScreen(uri: uri!)
+            let uri = try await Pair.instance.create()
+            try await Sign.instance.connect(requiredNamespaces: namespaces, topic: uri.topic)
+            showConnectScreen(uri: uri)
         }
     }
 

@@ -1,8 +1,8 @@
 import Foundation
 import XCTest
 @testable import Auth
-import WalletConnectUtils
-import WalletConnectNetworking
+@testable import WalletConnectUtils
+@testable import WalletConnectNetworking
 @testable import WalletConnectKMS
 @testable import TestingUtils
 import JSONRPC
@@ -15,23 +15,24 @@ class AppRespondSubscriberTests: XCTestCase {
     let defaultTimeout: TimeInterval = 0.01
     let walletAccount = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
     let prvKey = Data(hex: "462c1dad6832d7d96ccf87bd6a686a4110e114aaaebd5512e552c0e3a87b480f")
-    var messageSigner: MessageSigner!
+    var messageSigner: (MessageSigning & MessageSignatureVerifying)!
     var pairingStorage: WCPairingStorageMock!
+    var pairingRegisterer: PairingRegistererMock<AuthRequestParams>!
 
     override func setUp() {
         networkingInteractor = NetworkingInteractorMock()
         messageFormatter = SIWEMessageFormatter()
-        messageSigner = MessageSigner()
-        let historyStorage = CodableStore<RPCHistory.Record>(defaults: RuntimeKeyValueStorage(), identifier: StorageDomainIdentifiers.jsonRpcHistory.rawValue)
-        rpcHistory = RPCHistory(keyValueStore: historyStorage)
+        messageSigner = MessageSignerFactory.create(projectId: "project-id")
+        rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: RuntimeKeyValueStorage())
         pairingStorage = WCPairingStorageMock()
+        pairingRegisterer = PairingRegistererMock<AuthRequestParams>()
         sut = AppRespondSubscriber(
             networkingInteractor: networkingInteractor,
             logger: ConsoleLoggerMock(),
             rpcHistory: rpcHistory,
             signatureVerifier: messageSigner,
-            messageFormatter: messageFormatter,
-            pairingStorage: pairingStorage)
+            pairingRegisterer: pairingRegisterer,
+            messageFormatter: messageFormatter)
     }
 
     func testMessageCompromisedFailure() {
@@ -56,7 +57,7 @@ class AppRespondSubscriberTests: XCTestCase {
         let payload = CacaoPayload(params: AuthPayload.stub(nonce: "compromised nonce"), didpkh: DIDPKH(account: walletAccount))
 
         let message = try! messageFormatter.formatMessage(from: payload)
-        let cacaoSignature = try! messageSigner.sign(message: message, privateKey: prvKey)
+        let cacaoSignature = try! messageSigner.sign(message: message, privateKey: prvKey, type: .eip191)
 
         let cacao = Cacao(h: header, p: payload, s: cacaoSignature)
 
@@ -64,6 +65,7 @@ class AppRespondSubscriberTests: XCTestCase {
         networkingInteractor.responsePublisherSubject.send((topic, request, response))
 
         wait(for: [messageExpectation], timeout: defaultTimeout)
+        XCTAssertTrue(pairingRegisterer.isActivateCalled)
         XCTAssertEqual(result, .failure(AuthError.messageCompromised))
         XCTAssertEqual(messageId, requestId)
     }
