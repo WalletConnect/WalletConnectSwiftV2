@@ -71,12 +71,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       _ application: UIApplication,
       didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
-      let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
-      let token = tokenParts.joined()
+        let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
+        let token = tokenParts.joined()
         let clientId  = try! Networking.instance.getClientId()
-
-        registerClientWithPushServer(clientId: clientId, deviceToken: token) { result in
-            print(result)
+        let sanitizedClientId = clientId.replacingOccurrences(of: "did:key:", with: "")
+        print(sanitizedClientId)
+        print(token)
+        registerClientWithPushServer(clientId: sanitizedClientId, deviceToken: token) { result in
+            print("Successfully registered")
         }
     }
 
@@ -98,7 +100,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
          
         // create post request
-        let url = URL(string: "https://push.walletconnect.com/clients")!
+        let url = URL(string: "https://echo.walletconnect.com/clients")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
