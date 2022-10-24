@@ -23,26 +23,30 @@ public class PushClient {
     public let logger: ConsoleLogging
 
     private let pushProposer: PushProposer
-    private let networkInteractor: NetworkInteracting
     private let pairingRegisterer: PairingRegisterer
+    private let registerService: PushRegisterService
     private let proposalResponseSubscriber: ProposalResponseSubscriber
 
-    init(networkInteractor: NetworkInteracting,
-         logger: ConsoleLogging,
+    init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
          pushProposer: PushProposer,
+         registerService: PushRegisterService,
          proposalResponseSubscriber: ProposalResponseSubscriber,
          pairingRegisterer: PairingRegisterer) {
-        self.networkInteractor = networkInteractor
         self.logger = logger
         self.pushProposer = pushProposer
         self.pairingRegisterer = pairingRegisterer
+        self.registerService = registerService
         self.proposalResponseSubscriber = proposalResponseSubscriber
         setupSubscriptions()
     }
 
     public func propose(topic: String) async throws {
         try await pushProposer.request(topic: topic, params: PushRequestParams())
+    }
+
+    public func register(deviceToken: Data) async throws {
+        try await registerService.register(deviceToken: deviceToken)
     }
 }
 

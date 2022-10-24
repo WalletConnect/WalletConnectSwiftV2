@@ -73,7 +73,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     ) {
         let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
         let token = tokenParts.joined()
-        let clientId  = try! Networking.instance.getClientId()
+        let clientId  = try! Networking.interactor.getClientId()
         let sanitizedClientId = clientId.replacingOccurrences(of: "did:key:", with: "")
         print(sanitizedClientId)
         print(token)
