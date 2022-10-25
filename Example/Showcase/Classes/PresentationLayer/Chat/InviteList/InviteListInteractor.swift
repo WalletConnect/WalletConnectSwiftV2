@@ -1,4 +1,4 @@
-import Chat
+import WalletConnectChat
 
 final class InviteListInteractor {
     private let chatService: ChatService

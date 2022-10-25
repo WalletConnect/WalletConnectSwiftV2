@@ -1,5 +1,5 @@
 import UIKit
-import Chat
+import WalletConnectChat
 
 final class ChatListRouter {
 
@@ -21,7 +21,7 @@ final class ChatListRouter {
         InviteListModule.create(app: app, account: account).push(from: viewController)
     }
 
-    func presentChat(thread: Chat.Thread) {
+    func presentChat(thread: WalletConnectChat.Thread) {
         ChatModule.create(thread: thread, app: app).push(from: viewController)
     }
 

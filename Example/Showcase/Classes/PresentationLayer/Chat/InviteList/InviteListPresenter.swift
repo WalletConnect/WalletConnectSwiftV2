@@ -1,6 +1,6 @@
 import UIKit
 import Combine
-import Chat
+import WalletConnectChat
 
 final class InviteListPresenter: ObservableObject {
 

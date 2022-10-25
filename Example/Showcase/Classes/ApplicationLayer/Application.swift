@@ -1,10 +1,10 @@
 import Foundation
-import Chat
+import WalletConnectChat
 
 final class Application {
 
     lazy var chatService: ChatService = {
-        return ChatService(client: ChatFactory.create())
+        return ChatService(client: Chat.instance)
     }()
 
     lazy var accountStorage: AccountStorage = {
