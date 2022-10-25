@@ -1,11 +1,11 @@
 import Foundation
-import Chat
+import WalletConnectChat
 
 struct MessageViewModel {
     private let message: Message
-    private let thread: Chat.Thread
+    private let thread: WalletConnectChat.Thread
 
-    init(message: Message, thread: Chat.Thread) {
+    init(message: Message, thread: WalletConnectChat.Thread) {
         self.message = message
         self.thread = thread
     }

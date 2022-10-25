@@ -1,5 +1,5 @@
 import Foundation
-import Chat
+import WalletConnectChat
 
 struct InviteViewModel {
     let invite: Invite

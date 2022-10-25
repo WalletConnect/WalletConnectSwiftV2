@@ -1,8 +1,8 @@
 import Foundation
-import Chat
+import WalletConnectChat
 
 struct ThreadViewModel: Identifiable {
-    let thread: Chat.Thread
+    let thread: WalletConnectChat.Thread
 
     var topic: String {
         return thread.topic

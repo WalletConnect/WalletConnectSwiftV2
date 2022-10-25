@@ -1,6 +1,6 @@
 import Foundation
 import Combine
-import Chat
+import WalletConnectChat
 import WalletConnectRelay
 
 typealias Stream<T> = AsyncPublisher<AnyPublisher<T, Never>>
@@ -21,7 +21,7 @@ final class ChatService {
         return client.messagePublisher.values
     }
 
-    var threadPublisher: Stream<Chat.Thread> {
+    var threadPublisher: Stream<WalletConnectChat.Thread> {
         return client.newThreadPublisher.values
     }
 
@@ -29,15 +29,15 @@ final class ChatService {
         return client.invitePublisher.values
     }
 
-    func getMessages(thread: Chat.Thread) async -> [Chat.Message] {
+    func getMessages(thread: WalletConnectChat.Thread) async -> [WalletConnectChat.Message] {
         await client.getMessages(topic: thread.topic)
     }
 
-    func getThreads() async -> [Chat.Thread] {
+    func getThreads() async -> [WalletConnectChat.Thread] {
         await client.getThreads()
     }
 
-    func getInvites(account: Account) async -> [Chat.Invite] {
+    func getInvites(account: Account) async -> [WalletConnectChat.Invite] {
         client.getInvites(account: account)
     }
 

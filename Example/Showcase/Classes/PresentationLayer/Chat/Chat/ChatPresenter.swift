@@ -1,10 +1,10 @@
 import UIKit
 import Combine
-import Chat
+import WalletConnectChat
 
 final class ChatPresenter: ObservableObject {
 
-    private let thread: Chat.Thread
+    private let thread: WalletConnectChat.Thread
     private let interactor: ChatInteractor
     private let router: ChatRouter
     private var disposeBag = Set<AnyCancellable>()
@@ -12,7 +12,7 @@ final class ChatPresenter: ObservableObject {
     @Published var messages: [MessageViewModel] = []
     @Published var input: String = .empty
 
-    init(thread: Chat.Thread, interactor: ChatInteractor, router: ChatRouter) {
+    init(thread: WalletConnectChat.Thread, interactor: ChatInteractor, router: ChatRouter) {
         self.thread = thread
         self.interactor = interactor
         self.router = router
