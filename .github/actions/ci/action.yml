@@ -24,7 +24,7 @@ runs:
         -scheme WalletConnect \
         -clonedSourcePackagesDirPath SourcePackagesCache \
         -destination 'platform=iOS Simulator,name=iPhone 13' \
-        -derivedDataPath ~/tmp/ddata \
+        -derivedDataPath DerivedDataCache \
         test"
 
     # Integration tests
@@ -39,7 +39,7 @@ runs:
         -scheme IntegrationTests \
         -clonedSourcePackagesDirPath SourcePackagesCache \
         -destination 'platform=iOS Simulator,name=iPhone 13' \
-        -derivedDataPath ~/tmp/ddata \
+        -derivedDataPath DerivedDataCache \
         RELAY_HOST='$RELAY_ENDPOINT' \
         PROJECT_ID='$PROJECT_ID' \
         test"
@@ -52,7 +52,7 @@ runs:
        -project Example/ExampleApp.xcodeproj \
        -scheme Wallet \
        -clonedSourcePackagesDirPath SourcePackagesCache \
-       -derivedDataPath ~/tmp/ddata \
+       -derivedDataPath DerivedDataCache \
        -sdk iphonesimulator"
 
     # DApp build
@@ -63,7 +63,7 @@ runs:
         -project Example/ExampleApp.xcodeproj \
         -scheme DApp \
         -clonedSourcePackagesDirPath SourcePackagesCache \
-        -derivedDataPath ~/tmp/ddata \
+        -derivedDataPath DerivedDataCache \
         -sdk iphonesimulator"
 
     # UI tests
@@ -73,7 +73,7 @@ runs:
       run: "xcodebuild \
         -project Example/ExampleApp.xcodeproj \
         -scheme UITests \
-        -derivedDataPath ~/tmp/ddata \
+        -derivedDataPath DerivedDataCache \
         -clonedSourcePackagesDirPath SourcePackagesCache \
         -destination 'platform=iOS Simulator,name=iPhone 13' test"
       continue-on-error: true
