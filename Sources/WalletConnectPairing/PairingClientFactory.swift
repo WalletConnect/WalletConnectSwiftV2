@@ -14,7 +14,7 @@ public struct PairingClientFactory {
     }
 
     public static func create(logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, networkingClient: NetworkingInteractor) -> PairingClient {
-        let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: keyValueStorage, identifier: StorageDomainIdentifiers.pairings.rawValue)))
+        let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: keyValueStorage, identifier: PairStorageIdentifiers.pairings.rawValue)))
         let kms = KeyManagementService(keychain: keychainStorage)
         let appPairService = AppPairService(networkingInteractor: networkingClient, kms: kms, pairingStorage: pairingStore)
         let walletPairService = WalletPairService(networkingInteractor: networkingClient, kms: kms, pairingStorage: pairingStore)
