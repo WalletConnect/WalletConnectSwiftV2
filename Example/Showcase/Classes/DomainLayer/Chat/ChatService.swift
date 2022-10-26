@@ -53,8 +53,8 @@ final class ChatService {
         try await client.reject(inviteId: invite.id)
     }
 
-    func invite(peerPubkey publicKey: String, peerAccount: Account, message: String, selfAccount: Account) async throws {
-        try await client.invite(publicKey: publicKey, peerAccount: peerAccount, openingMessage: message, account: selfAccount)
+    func invite(peerAccount: Account, message: String, selfAccount: Account) async throws {
+        try await client.invite(peerAccount: peerAccount, openingMessage: message, account: selfAccount)
     }
 
     func register(account: Account) async throws {

@@ -73,6 +73,7 @@ public class ChatClient {
     /// record is a blockchain account with a client generated public key
     /// - Parameter account: CAIP10 blockchain account
     /// - Returns: public key
+    @discardableResult
     public func register(account: Account) async throws -> String {
         try await registryService.register(account: account)
     }
@@ -89,8 +90,8 @@ public class ChatClient {
     ///   - publicKey: publicKey associated with a peer
     ///   - openingMessage: oppening message for a chat invite
     ///   TODO - peerAccount should be derived
-    public func invite(publicKey: String, peerAccount: Account, openingMessage: String, account: Account) async throws {
-        try await inviteService.invite(peerPubKey: publicKey, peerAccount: peerAccount, openingMessage: openingMessage, account: account)
+    public func invite(peerAccount: Account, openingMessage: String, account: Account) async throws {
+        try await inviteService.invite(peerAccount: peerAccount, openingMessage: openingMessage, account: account)
     }
 
     public func accept(inviteId: String) async throws {

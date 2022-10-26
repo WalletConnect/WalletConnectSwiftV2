@@ -29,8 +29,8 @@ final class ChatTests: XCTestCase {
         let inviteExpectation = expectation(description: "invitation expectation")
         let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
         let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
-        let pubKey = try! await invitee.register(account: inviteeAccount)
-        try! await inviter.invite(publicKey: pubKey, peerAccount: inviteeAccount, openingMessage: "", account: inviterAccount)
+        try! await invitee.register(account: inviteeAccount)
+        try! await inviter.invite(peerAccount: inviteeAccount, openingMessage: "", account: inviterAccount)
         invitee.invitePublisher.sink { _ in
             inviteExpectation.fulfill()
         }.store(in: &publishers)
@@ -44,9 +44,8 @@ final class ChatTests: XCTestCase {
         let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
 
         Task(priority: .high) {
-            let pubKey = try! await invitee.register(account: inviteeAccount)
-
-            try! await inviter.invite(publicKey: pubKey, peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
+            try! await invitee.register(account: inviteeAccount)
+            try! await inviter.invite(peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
         }
 
         invitee.invitePublisher.sink { [unowned self] invite in
@@ -72,8 +71,8 @@ final class ChatTests: XCTestCase {
         let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
 
         Task(priority: .high) {
-            let pubKey = try! await invitee.register(account: inviteeAccount)
-            try! await inviter.invite(publicKey: pubKey, peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
+            try! await invitee.register(account: inviteeAccount)
+            try! await inviter.invite(peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
         }
 
         invitee.invitePublisher.sink { [unowned self] invite in
