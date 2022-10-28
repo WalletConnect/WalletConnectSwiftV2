@@ -15,7 +15,7 @@ let package = Package(
             targets: ["WalletConnectSign"]),
         .library(
             name: "WalletConnectChat",
-            targets: ["Chat"]),
+            targets: ["WalletConnectChat"]),
         .library(
             name: "WalletConnectAuth",
             targets: ["Auth"]),
@@ -41,7 +41,7 @@ let package = Package(
             dependencies: ["WalletConnectNetworking", "WalletConnectPairing"],
             path: "Sources/WalletConnectSign"),
         .target(
-            name: "Chat",
+            name: "WalletConnectChat",
             dependencies: ["WalletConnectNetworking"],
             path: "Sources/Chat"),
         .target(
@@ -86,7 +86,7 @@ let package = Package(
             dependencies: ["WalletConnectPairing", "TestingUtils"]),
         .testTarget(
             name: "ChatTests",
-            dependencies: ["Chat", "WalletConnectUtils", "TestingUtils"]),
+            dependencies: ["WalletConnectChat", "WalletConnectUtils", "TestingUtils"]),
         .testTarget(
             name: "AuthTests",
             dependencies: ["Auth", "WalletConnectUtils", "TestingUtils"]),

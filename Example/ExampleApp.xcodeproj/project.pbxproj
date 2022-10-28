@@ -84,7 +84,6 @@
 		A5629AE42876E6D200094373 /* ThreadViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AE32876E6D200094373 /* ThreadViewModel.swift */; };
 		A5629AE828772A0100094373 /* InviteViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AE728772A0100094373 /* InviteViewModel.swift */; };
 		A5629AEA2877F2D600094373 /* WalletConnectChat in Frameworks */ = {isa = PBXBuildFile; productRef = A5629AE92877F2D600094373 /* WalletConnectChat */; };
-		A5629AED2877F6A600094373 /* ChatFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AEC2877F6A600094373 /* ChatFactory.swift */; };
 		A5629AF02877F73000094373 /* SocketFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AEF2877F73000094373 /* SocketFactory.swift */; };
 		A5629AF22877F75100094373 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5629AF12877F75100094373 /* Starscream */; };
 		A578FA322873036400AA7720 /* InputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA312873036400AA7720 /* InputView.swift */; };
@@ -277,7 +276,6 @@
 		A5629ADD2876CC6E00094373 /* InviteListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteListView.swift; sourceTree = "<group>"; };
 		A5629AE32876E6D200094373 /* ThreadViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadViewModel.swift; sourceTree = "<group>"; };
 		A5629AE728772A0100094373 /* InviteViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteViewModel.swift; sourceTree = "<group>"; };
-		A5629AEC2877F6A600094373 /* ChatFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatFactory.swift; sourceTree = "<group>"; };
 		A5629AEF2877F73000094373 /* SocketFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketFactory.swift; sourceTree = "<group>"; };
 		A578FA312873036400AA7720 /* InputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputView.swift; sourceTree = "<group>"; };
 		A578FA34287304A300AA7720 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
@@ -717,7 +715,6 @@
 			isa = PBXGroup;
 			children = (
 				A5629AA82876A23100094373 /* ChatService.swift */,
-				A5629AEC2877F6A600094373 /* ChatFactory.swift */,
 				A5C20225287EB099007E3188 /* AccountNameResolver.swift */,
 				A5C2022C287EC3F0007E3188 /* RegisterService.swift */,
 			);
@@ -1452,7 +1449,6 @@
 				A59EBEFA28B54A2A003EDAAF /* AuthRequestRouter.swift in Sources */,
 				A5629AF02877F73000094373 /* SocketFactory.swift in Sources */,
 				A55CAAB228B92AFF00844382 /* ScanRouter.swift in Sources */,
-				A5629AED2877F6A600094373 /* ChatFactory.swift in Sources */,
 				A5C20221287EA5B8007E3188 /* TextFieldView.swift in Sources */,
 				A5C2022B287EB89A007E3188 /* WelcomeInteractor.swift in Sources */,
 				A5C2020C287D9DEE007E3188 /* WelcomePresenter.swift in Sources */,

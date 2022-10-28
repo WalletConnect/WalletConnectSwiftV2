@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import Chat
+@testable import WalletConnectChat
 import WalletConnectUtils
 import WalletConnectNetworking
 import WalletConnectKMS

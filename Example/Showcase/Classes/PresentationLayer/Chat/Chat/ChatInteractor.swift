@@ -1,5 +1,5 @@
 import Foundation
-import Chat
+import WalletConnectChat
 
 final class ChatInteractor {
 
@@ -9,7 +9,7 @@ final class ChatInteractor {
         self.chatService = chatService
     }
 
-    func getMessages(thread: Chat.Thread) async -> [Message] {
+    func getMessages(thread: WalletConnectChat.Thread) async -> [Message] {
         return await chatService.getMessages(thread: thread)
     }
 

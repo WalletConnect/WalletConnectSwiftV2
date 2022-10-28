@@ -33,6 +33,7 @@ jobs:
         path: |
           .build
           SourcePackagesCache
+          DerivedDataCache
         key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
         restore-keys: |
           ${{ runner.os }}-spm-

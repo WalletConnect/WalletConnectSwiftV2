@@ -12,31 +12,37 @@ class InviteService {
     private let kms: KeyManagementService
     private let threadStore: Database<Thread>
     private let rpcHistory: RPCHistory
+    private let registry: Registry
 
     var onNewThread: ((Thread) -> Void)?
     var onInvite: ((Invite) -> Void)?
 
-    init(networkingInteractor: NetworkInteracting,
-         kms: KeyManagementService,
-         threadStore: Database<Thread>,
-         rpcHistory: RPCHistory,
-         logger: ConsoleLogging) {
+    init(
+        networkingInteractor: NetworkInteracting,
+        kms: KeyManagementService,
+        threadStore: Database<Thread>,
+        rpcHistory: RPCHistory,
+        logger: ConsoleLogging,
+        registry: Registry
+    ) {
         self.kms = kms
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.threadStore = threadStore
         self.rpcHistory = rpcHistory
+        self.registry = registry
         setUpResponseHandling()
     }
 
     var peerAccount: Account!
 
-    func invite(peerPubKey: String, peerAccount: Account, openingMessage: String, account: Account) async throws {
+    func invite(peerAccount: Account, openingMessage: String, account: Account) async throws {
         // TODO ad storage
         let protocolMethod = ChatInviteProtocolMethod()
         self.peerAccount = peerAccount
         let selfPubKeyY = try kms.createX25519KeyPair()
         let invite = Invite(message: openingMessage, account: account, publicKey: selfPubKeyY.hexRepresentation)
+        let peerPubKey = try await registry.resolve(account: peerAccount)
         let symKeyI = try kms.performKeyAgreement(selfPublicKey: selfPubKeyY, peerPublicKey: peerPubKey)
         let inviteTopic = try AgreementPublicKey(hex: peerPubKey).rawRepresentation.sha256().toHexString()
 
