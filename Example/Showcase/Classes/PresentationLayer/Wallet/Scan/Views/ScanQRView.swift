@@ -63,12 +63,12 @@ final class ScanQRView: UIView {
 extension ScanQRView: AVCaptureMetadataOutputObjectsDelegate {
 
     func metadataOutput(_ metadataOutput: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
+        defer { stopCaptureSession() }
         guard
             let metadataObject = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
             let value = metadataObject.stringValue else {
                 return
             }
-
         delegate?.scanDidDetect(value: value)
     }
 }
