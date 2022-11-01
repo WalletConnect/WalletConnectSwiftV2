@@ -249,7 +249,7 @@ final class AnyCodableTests: XCTestCase {
         }
         let nullData = "null".data(using: .utf8)!
         XCTAssertThrowsError(try JSONDecoder().decode(AnyCodable.self, from: nullData)) { error in
-            XCTAssert(error is DecodingError)
+            XCTAssert(error is AnyCodableError)
         }
     }
 }

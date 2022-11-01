@@ -133,10 +133,6 @@ extension AnyCodable: Decodable, Encodable {
         }
     }
 
-    enum Errors: Error {
-        case nullFound
-    }
-
     public init(from decoder: Decoder) throws {
         if let container = try? decoder.container(keyedBy: CodingKeys.self) {
             var result = [String: Any]()
@@ -144,7 +140,7 @@ extension AnyCodable: Decodable, Encodable {
                 do {
                     let codable = try container.decode(AnyCodable.self, forKey: key)
                     result[key.stringValue] = codable.value
-                } catch Errors.nullFound {
+                } catch AnyCodableError.nullFound {
                     // Ignoring that key
                 }
             }
@@ -165,7 +161,7 @@ extension AnyCodable: Decodable, Encodable {
             } else if let stringVal = try? container.decode(String.self) {
                 value = stringVal
             } else if container.decodeNil() {
-                throw Errors.nullFound
+                throw AnyCodableError.nullFound
             } else {
                 throw DecodingError.dataCorruptedError(in: container, debugDescription: "The container contains nothing serializable.")
             }
