@@ -111,6 +111,12 @@ final class AnyCodableTests: XCTestCase {
         XCTAssertNotEqual(a, b)
     }
 
+    func testNullDecoding() throws {
+        let data = "{\"key\":\"value\",\"null\":null}".data(using: .utf8)!
+        let codable = try JSONDecoder().decode(AnyCodable.self, from: data)
+        XCTAssertEqual(codable, AnyCodable(["key": "value"]))
+    }
+
     func testTwoWayDataRepresentation() throws {
         let fromInit = AnyCodable(SampleStruct.stubFixed())
         let fromJSON = try JSONDecoder().decode(AnyCodable.self, from: SampleStruct.sampleJSONData)

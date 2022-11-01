@@ -133,11 +133,20 @@ extension AnyCodable: Decodable, Encodable {
         }
     }
 
+    enum Errors: Error {
+        case nullFound
+    }
+
     public init(from decoder: Decoder) throws {
         if let container = try? decoder.container(keyedBy: CodingKeys.self) {
             var result = [String: Any]()
             try container.allKeys.forEach { (key) throws in
-                result[key.stringValue] = try container.decode(AnyCodable.self, forKey: key).value
+                do {
+                    let codable = try container.decode(AnyCodable.self, forKey: key)
+                    result[key.stringValue] = codable.value
+                } catch Errors.nullFound {
+                    // Ignoring that key
+                }
             }
             value = result
         } else if var container = try? decoder.unkeyedContainer() {
@@ -155,6 +164,8 @@ extension AnyCodable: Decodable, Encodable {
                 value = boolVal
             } else if let stringVal = try? container.decode(String.self) {
                 value = stringVal
+            } else if container.decodeNil() {
+                throw Errors.nullFound
             } else {
                 throw DecodingError.dataCorruptedError(in: container, debugDescription: "The container contains nothing serializable.")
             }
@@ -179,6 +190,8 @@ extension AnyCodable: Decodable, Encodable {
                 let decodable = AnyCodable(value)
                 try container.encode(decodable, forKey: codingKey)
             }
+        } else if value is NSNull {
+            // ignoring that key
         } else {
             var container = encoder.singleValueContainer()
             if let intVal = value as? Int {
