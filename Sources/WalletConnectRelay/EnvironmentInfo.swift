@@ -18,7 +18,7 @@ enum EnvironmentInfo {
     }
 
     static var sdkVersion: String {
-        "v1.0.3"
+        "v1.0.4"
     }
 
     static var operatingSystem: String {
