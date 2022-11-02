@@ -8,7 +8,11 @@ import CryptoSwift
 import Combine
 
 final class WalletViewController: UIViewController {
-    lazy  var account = Signer.privateKey.address.hex(eip55: true)
+    lazy var accounts = [
+        "eip155": Signer.privateKey.address.hex(eip55: true),
+        "solana": "BvQtshZCDdzXeuC6Hrp2tBjJThUf3LN2Qeup3avrStTX"
+    ]
+
     var sessionItems: [ActiveSessionItem] = []
     var currentProposal: Session.Proposal?
     private var publishers = [AnyCancellable]()
@@ -215,10 +219,10 @@ extension WalletViewController: ProposalViewControllerDelegate {
         proposal.requiredNamespaces.forEach {
             let caip2Namespace = $0.key
             let proposalNamespace = $0.value
-            let accounts = Set(proposalNamespace.chains.compactMap { Account($0.absoluteString + ":\(account)") })
+            let accounts = Set(proposalNamespace.chains.compactMap { Account($0.absoluteString + ":\(self.accounts[$0.namespace]!)") })
 
             let extensions: [SessionNamespace.Extension]? = proposalNamespace.extensions?.map { element in
-                let accounts = Set(element.chains.compactMap { Account($0.absoluteString + ":\(account)") })
+                let accounts = Set(element.chains.compactMap { Account($0.absoluteString + ":\(self.accounts[$0.namespace]!)") })
                 return SessionNamespace.Extension(accounts: accounts, methods: element.methods, events: element.events)
             }
             let sessionNamespace = SessionNamespace(accounts: accounts, methods: proposalNamespace.methods, events: proposalNamespace.events, extensions: extensions)
