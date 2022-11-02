@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name        = "WalletConnectSwiftV2"
-  spec.version     = "1.0.5"
+  spec.version     = "1.0.0-test-tag"
   spec.summary     = "Swift implementation of WalletConnect v.2 protocol for native iOS applications."
   spec.description = "The communications protocol for web3, WalletConnect brings the ecosystem together by enabling wallets and apps to securely connect and interact."
   spec.homepage    = "https://walletconnect.com"
