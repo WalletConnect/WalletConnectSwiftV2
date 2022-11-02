@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name        = "WalletConnectSwiftV2"
-  spec.version     = "1.0.4"
+  spec.version     = "1.0.5"
   spec.summary     = "Swift implementation of WalletConnect v.2 protocol for native iOS applications."
   spec.description = "The communications protocol for web3, WalletConnect brings the ecosystem together by enabling wallets and apps to securely connect and interact."
   spec.homepage    = "https://walletconnect.com"
@@ -41,9 +41,9 @@ Pod::Spec.new do |spec|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  spec.source                  = {
+  spec.source = {
     :git => 'https://github.com/WalletConnect/WalletConnectSwiftV2.git',
-    :tag => 'v' + s.version.to_s
+    :tag => 'v' + spec.version.to_s
   }
 
   # ――― Platform Specifics ――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
@@ -52,12 +52,14 @@ Pod::Spec.new do |spec|
   #  the deployment target. You can optionally include the target after the platform.
   #
 
-  ios_deployment_target = '13.0'
-  osx_deployment_target = '10.15'
+  ios_deployment_target  = '13.0'
+  osx_deployment_target  = '10.15'
   tvos_deployment_target = '13.0'
 
-  spec.ios.deployment_target = ios_deployment_target
-  spec.osx.deployment_target = osx_deployment_target
+  spec.swift_versions = '5.3'
+
+  spec.ios.deployment_target  = ios_deployment_target
+  spec.osx.deployment_target  = osx_deployment_target
   spec.tvos.deployment_target = tvos_deployment_target
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
@@ -68,7 +70,7 @@ Pod::Spec.new do |spec|
   #  Not including the public_header_files will make all headers public.
   #
 
-  spec.source_files  = "Sources"
+  spec.source_files = "Sources/**/*.swift"
 
   # ――― Project Settings ――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
   #
@@ -76,6 +78,6 @@ Pod::Spec.new do |spec|
   #  where they will only apply to your library. If you depend on other Podspecs
   #  you can include multiple dependencies to ensure it works.
 
-  spec.dependency "JSONKit", "~> 1.4"
+  spec.dependency "WalletConnectWeb3", "1.0.0"
 
 end
