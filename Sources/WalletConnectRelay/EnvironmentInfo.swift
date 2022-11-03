@@ -14,7 +14,7 @@ enum EnvironmentInfo {
     }
 
     static var sdkName: String {
-        "swift-\(sdkVersion)"
+        "swift-\(packageVersion)"
     }
 
     static var sdkVersion: String {
