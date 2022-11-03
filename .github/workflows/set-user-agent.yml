@@ -1,0 +1,22 @@
+# This workflow sets the package version for user agent
+# when pull request is to main is opened
+# it takes pull request name and makes it a package version
+# pull request name should always be a version of a new release
+
+name: set-user-agent
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  set-user-agent
+  steps:
+    - name: Set pull request name as PACKAGE_VERSION env var
+      shell: bash
+      run: export PACKAGE_VERSION=${{ github.event.pull_request.title }}
+
+    - name: Set User Agent
+      shell: bash
+      run: ./.github/scripts/set-user-agent.sh
+

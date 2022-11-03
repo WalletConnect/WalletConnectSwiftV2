@@ -27,11 +27,6 @@ runs:
         -derivedDataPath DerivedDataCache \
         test"
 
-    - name: Set User Agent
-      if: inputs.type == 'set-user-agent'
-      shell: bash
-      run: ./.github/scripts/set-user-agent.sh
-
     # Integration tests
     - name: Run integration tests
       if: inputs.type == 'integration-tests'
