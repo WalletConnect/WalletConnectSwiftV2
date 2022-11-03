@@ -10,7 +10,7 @@ on:
     branches: [ main ]
 
 jobs:
-  set-user-agent
+  set-user-agent:
     steps:
       - name: Set pull request name as PACKAGE_VERSION env var
         shell: bash
