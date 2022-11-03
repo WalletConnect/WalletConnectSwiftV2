@@ -11,15 +11,15 @@ on:
 
 jobs:
   set-user-agent
-  steps:
-    - name: Set pull request name as PACKAGE_VERSION env var
-      shell: bash
-      run: export PACKAGE_VERSION=${{ github.event.pull_request.title }}
+    steps:
+      - name: Set pull request name as PACKAGE_VERSION env var
+        shell: bash
+        run: export PACKAGE_VERSION=${{ github.event.pull_request.title }}
 
-    - name: Set User Agent
-      shell: bash
-      run: ./.github/scripts/set-user-agent.sh
+      - name: Set User Agent
+        shell: bash
+        run: ./.github/scripts/set-user-agent.sh
 
-    - uses: stefanzweifel/git-auto-commit-action@v4
-      with:
-      commit_message: Set user agent
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+        commit_message: Set user agent
