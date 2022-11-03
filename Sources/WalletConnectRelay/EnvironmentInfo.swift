@@ -14,11 +14,11 @@ enum EnvironmentInfo {
     }
 
     static var sdkName: String {
-        "swift-\(packageVersion)"
+        "swift-\(sdkVersion)"
     }
 
     static var sdkVersion: String {
-        "v1.0.4"
+        packageVersion
     }
 
     static var operatingSystem: String {
