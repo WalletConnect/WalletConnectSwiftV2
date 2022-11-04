@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name        = "WalletConnectSwiftV2"
-  spec.version     = "1.0.0-test-tag-2"
+  spec.version     = "1.0.0-test-tag-3"
   spec.summary     = "Swift implementation of WalletConnect v.2 protocol for native iOS applications."
   spec.description = "The communications protocol for web3, WalletConnect brings the ecosystem together by enabling wallets and apps to securely connect and interact."
   spec.homepage    = "https://walletconnect.com"
@@ -62,22 +62,72 @@ Pod::Spec.new do |spec|
   spec.osx.deployment_target  = osx_deployment_target
   spec.tvos.deployment_target = tvos_deployment_target
 
-  # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
-  #
-  #  CocoaPods is smart about how it includes source code. For source files
-  #  giving a folder will include any swift, h, m, mm, c & cpp files.
-  #  For header files it will include any header in the folder.
-  #  Not including the public_header_files will make all headers public.
-  #
+  # ――― Sub Specs ――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
 
-  spec.source_files = "Sources/**/*.swift"
+  spec.default_subspecs = 'WalletConnect'
 
-  # ――― Project Settings ――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
-  #
-  #  If your library depends on compiler flags you can set them in the xcconfig hash
-  #  where they will only apply to your library. If you depend on other Podspecs
-  #  you can include multiple dependencies to ensure it works.
+  spec.subspec 'WalletConnect' do |ss|
+    ss.source_files = 'Sources/WalletConnectNetworking/**/*'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectPairing'
+  end
 
-  spec.dependency "WalletConnectWeb3", "1.0.0"
+  spec.subspec 'WalletConnectAuth' do |ss|
+    ss.source_files = 'Sources/Auth/**/*'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectPairing'
+    ss.dependency "WalletConnectWeb3", "1.0.0"
+  end
+
+  spec.subspec 'WalletConnectChat' do |ss|
+    ss.source_files = 'Sources/Chat/**/*'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectNetworking'
+  end
+
+  spec.subspec 'WalletConnectNetworking' do |ss|
+    ss.source_files = 'Sources/WalletConnectNetworking/**/*'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectRelay'
+  end
+
+  spec.subspec 'WalletConnectPairing' do |ss|
+    ss.source_files = 'Sources/WalletConnectPairing/**/*'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectNetworking'
+  end
+
+  spec.subspec 'WalletConnectPush' do |ss|
+    ss.source_files = 'Sources/WalletConnectPush/**/*'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectPairing'
+  end
+
+  spec.subspec 'WalletConnectRouter' do |ss|
+    ss.source_files = 'Sources/WalletConnectRouter/**/*'
+  end
+
+  spec.subspec 'WalletConnectNetworking' do |ss|
+    ss.source_files = 'Sources/WalletConnectNetworking/**/*'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectRelay'
+  end
+
+  spec.subspec 'WalletConnectRelay' do |ss|
+    ss.source_files = 'Sources/WalletConnectRelay/**/*'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectKMS'
+  end
+
+  spec.subspec 'WalletConnectUtils' do |ss|
+    ss.source_files = 'Sources/WalletConnectUtils/**/*'
+    ss.dependency 'WalletConnectSwiftV2/JSONRPC'
+  end
+
+  spec.subspec 'WalletConnectKMS' do |ss|
+    ss.source_files = 'Sources/WalletConnectKMS/**/*'
+  end
+
+  spec.subspec 'Commons' do |ss|
+    ss.module_name = 'Commons'
+    ss.source_files = 'Sources/Commons/**/*'
+  end
+
+  spec.subspec 'JSONRPC' do |ss|
+    ss.source_files = 'Sources/JSONRPC/**/*'
+    ss.dependency 'WalletConnectSwiftV2/Commons'
+  end
 
 end
