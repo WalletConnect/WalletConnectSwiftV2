@@ -1,8 +1,3 @@
-import JSONRPC
-import WalletConnectRelay
-import WalletConnectPairing
-import WalletConnectUtils
-import WalletConnectNetworking
 
 public typealias Account = WalletConnectUtils.Account
 public typealias Blockchain = WalletConnectUtils.Blockchain

@@ -1,10 +1,5 @@
 import Foundation
 import Combine
-import JSONRPC
-import WalletConnectUtils
-import WalletConnectKMS
-import WalletConnectPairing
-import WalletConnectNetworking
 
 final class ApproveEngine {
     enum Errors: Error {

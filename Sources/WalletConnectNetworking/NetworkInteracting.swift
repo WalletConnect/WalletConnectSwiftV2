@@ -1,8 +1,5 @@
 import Foundation
 import Combine
-import JSONRPC
-import WalletConnectKMS
-import WalletConnectRelay
 
 public protocol NetworkInteracting {
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> { get }

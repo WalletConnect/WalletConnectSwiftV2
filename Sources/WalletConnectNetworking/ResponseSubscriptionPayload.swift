@@ -1,5 +1,4 @@
 import Foundation
-import JSONRPC
 
 public struct ResponseSubscriptionPayload<Request: Codable, Response: Codable>: SubscriptionPayload {
     public let id: RPCID

@@ -1,8 +1,5 @@
 import Foundation
 import Combine
-import JSONRPC
-import WalletConnectUtils
-import WalletConnectNetworking
 
 class MessagingService {
     enum Errors: Error {

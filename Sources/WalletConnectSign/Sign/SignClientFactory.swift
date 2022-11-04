@@ -1,9 +1,4 @@
 import Foundation
-import WalletConnectRelay
-import WalletConnectUtils
-import WalletConnectKMS
-import WalletConnectPairing
-import WalletConnectNetworking
 
 public struct SignClientFactory {
 

@@ -1,6 +1,4 @@
 import Foundation
-import WalletConnectNetworking
-import WalletConnectPairing
 import Combine
 
 /// Auth instatnce wrapper

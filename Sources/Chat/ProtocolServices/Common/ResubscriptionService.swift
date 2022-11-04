@@ -1,8 +1,5 @@
 import Foundation
 import Combine
-import WalletConnectRelay
-import WalletConnectUtils
-import WalletConnectNetworking
 
 class ResubscriptionService {
     private let networkingInteractor: NetworkInteracting

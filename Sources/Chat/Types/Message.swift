@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectUtils
 
 public struct Message: Codable, Equatable {
     public var topic: String?

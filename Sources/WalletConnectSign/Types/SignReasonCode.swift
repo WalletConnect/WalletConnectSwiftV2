@@ -1,4 +1,3 @@
-import WalletConnectNetworking
 
 enum SignReasonCode: Reason, Codable, Equatable {
 

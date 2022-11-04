@@ -1,6 +1,4 @@
 import Foundation
-import JSONRPC
-import WalletConnectUtils
 
 public struct Request: Codable, Equatable {
     public let id: RPCID

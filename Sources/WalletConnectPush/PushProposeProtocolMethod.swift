@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectNetworking
 
 struct PushProposeProtocolMethod: ProtocolMethod {
     let method: String = "wc_pushPropose"

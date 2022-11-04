@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectNetworking
 
 enum PairingProtocolMethod: CaseIterable, ProtocolMethod {
     case ping

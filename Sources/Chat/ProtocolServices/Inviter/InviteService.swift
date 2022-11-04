@@ -1,9 +1,5 @@
 import Foundation
 import Combine
-import JSONRPC
-import WalletConnectKMS
-import WalletConnectUtils
-import WalletConnectNetworking
 
 class InviteService {
     private var publishers = [AnyCancellable]()

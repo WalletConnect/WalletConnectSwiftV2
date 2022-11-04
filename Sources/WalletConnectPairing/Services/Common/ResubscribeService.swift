@@ -1,6 +1,5 @@
 import Foundation
 import Combine
-import WalletConnectNetworking
 
 final class ResubscribeService {
 

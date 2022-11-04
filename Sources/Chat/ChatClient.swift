@@ -1,8 +1,4 @@
 import Foundation
-import WalletConnectUtils
-import WalletConnectKMS
-import WalletConnectRelay
-import WalletConnectNetworking
 import Combine
 
 public class ChatClient {

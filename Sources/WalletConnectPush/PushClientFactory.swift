@@ -1,9 +1,4 @@
 import Foundation
-import WalletConnectRelay
-import WalletConnectUtils
-import WalletConnectKMS
-import WalletConnectNetworking
-import WalletConnectPairing
 
 public struct PushClientFactory {
 

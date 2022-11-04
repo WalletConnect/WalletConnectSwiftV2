@@ -1,8 +1,4 @@
 import Foundation
-import JSONRPC
-import WalletConnectKMS
-import WalletConnectUtils
-import WalletConnectNetworking
 
 class DeleteSessionService {
     private let networkingInteractor: NetworkInteracting

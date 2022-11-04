@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectKMS
 
 protocol ClientIdStoring {
     func getOrCreateKeyPair() throws -> SigningPrivateKey

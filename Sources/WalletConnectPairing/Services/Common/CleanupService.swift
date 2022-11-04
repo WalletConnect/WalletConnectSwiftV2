@@ -1,6 +1,4 @@
 import Foundation
-import WalletConnectKMS
-import WalletConnectUtils
 
 final class CleanupService {
 

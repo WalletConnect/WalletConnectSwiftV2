@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectKMS
 
 protocol SocketAuthenticating {
     func createAuthToken() throws -> String

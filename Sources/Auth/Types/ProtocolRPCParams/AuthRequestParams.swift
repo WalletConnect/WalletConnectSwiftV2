@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectUtils
 
 /// wc_authRequest RPC method request param
 struct AuthRequestParams: Codable, Equatable {

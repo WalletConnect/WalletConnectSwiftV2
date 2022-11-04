@@ -58,6 +58,10 @@ Pod::Spec.new do |spec|
 
   spec.swift_versions = '5.3'
 
+  spec.pod_target_xcconfig = {
+    'OTHER_SWIFT_FLAGS' => '-DCocoaPods'
+  }
+
   spec.ios.deployment_target  = ios_deployment_target
   spec.osx.deployment_target  = osx_deployment_target
   spec.tvos.deployment_target = tvos_deployment_target
