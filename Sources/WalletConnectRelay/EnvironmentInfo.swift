@@ -14,10 +14,10 @@ enum EnvironmentInfo {
     }
 
     static var sdkName: String {
-        "swift-\(sdkVersion)"
+        "swift-\(packageVersion)"
     }
 
-    static var sdkVersion: String {
+    static var packageVersion: String {
         let configURL = Bundle.module.url(forResource: "PackageConfig", withExtension: "json")!
         let jsonData = try! Data(contentsOf: configURL)
         let config = try! JSONDecoder().decode(PackageConfig.self, from: jsonData)
