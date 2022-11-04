@@ -11,6 +11,7 @@ on:
 
 jobs:
   set-user-agent:
+    runs-on: macos-latest
     steps:
       - name: Set pull request name as PACKAGE_VERSION env var
         shell: bash
