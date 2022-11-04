@@ -8,6 +8,8 @@ name: set-user-agent
 on:
   pull_request:
     branches: [ main ]
+env:
+  PACKAGE_VERSION: ${{ github.event.pull_request.title }}
 
 jobs:
   set-user-agent:
