@@ -5,6 +5,7 @@ set -e
 printf '\nset user agent\n\n'
 
 FILE=Sources/WalletConnectRelay/PackageVersion.swift
+PACKAGE_VERSION=${{ github.event.pull_request.title }}
 
 if [ -f "$FILE" ];
 then

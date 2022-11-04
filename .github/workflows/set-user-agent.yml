@@ -14,10 +14,6 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set pull request name as PACKAGE_VERSION env var
-        shell: bash
-        run: export PACKAGE_VERSION=${{ github.event.pull_request.title }}
-
       - name: Set User Agent
         shell: bash
         run: ./.github/scripts/set-user-agent.sh
