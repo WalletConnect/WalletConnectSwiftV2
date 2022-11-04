@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectNetworking
 
 enum ChatError: Error {
     case noInviteForId

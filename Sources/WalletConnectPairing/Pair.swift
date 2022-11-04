@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectNetworking
 import Combine
 
 public class Pair {

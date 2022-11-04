@@ -1,4 +1,3 @@
-import JSONRPC
 
 public final class RPCHistory {
 

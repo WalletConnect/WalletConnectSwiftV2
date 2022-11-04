@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectNetworking
 
 struct RegisterService: HTTPService {
 

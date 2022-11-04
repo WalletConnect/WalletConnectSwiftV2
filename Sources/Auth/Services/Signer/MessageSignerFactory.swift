@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectNetworking
 
 public struct MessageSignerFactory {
 

@@ -1,10 +1,5 @@
 import Foundation
-import JSONRPC
 import Combine
-import WalletConnectKMS
-import WalletConnectUtils
-import WalletConnectNetworking
-import WalletConnectPairing
 
 public class PushClient {
 

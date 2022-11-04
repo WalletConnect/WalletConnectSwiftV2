@@ -1,4 +1,3 @@
-import WalletConnectUtils
 
 struct UserAccount: Codable {
     let account: Account

@@ -1,9 +1,5 @@
 import Foundation
-import WalletConnectUtils
-import WalletConnectRelay
-import WalletConnectNetworking
 import Combine
-import JSONRPC
 
 public class PairingClient: PairingRegisterer, PairingInteracting {
     public var pingResponsePublisher: AnyPublisher<(String), Never> {

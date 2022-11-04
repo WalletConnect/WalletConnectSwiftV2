@@ -1,10 +1,5 @@
 import Foundation
 import Combine
-import JSONRPC
-import WalletConnectKMS
-import WalletConnectUtils
-import WalletConnectRelay
-import WalletConnectNetworking
 
 class InvitationHandlingService {
     enum Error: Swift.Error {

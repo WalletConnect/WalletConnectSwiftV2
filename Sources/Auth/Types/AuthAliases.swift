@@ -1,6 +1,3 @@
-import JSONRPC
-import WalletConnectUtils
-import WalletConnectPairing
 
 public typealias RPCID = JSONRPC.RPCID
 public typealias AppMetadata = WalletConnectPairing.AppMetadata

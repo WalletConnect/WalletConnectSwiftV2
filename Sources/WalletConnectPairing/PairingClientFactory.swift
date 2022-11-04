@@ -1,8 +1,4 @@
 import Foundation
-import WalletConnectRelay
-import WalletConnectUtils
-import WalletConnectKMS
-import WalletConnectNetworking
 
 public struct PairingClientFactory {
 

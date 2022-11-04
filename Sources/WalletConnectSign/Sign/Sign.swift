@@ -1,10 +1,5 @@
 import Foundation
 import Combine
-import JSONRPC
-import WalletConnectUtils
-import WalletConnectRelay
-import WalletConnectNetworking
-import WalletConnectPairing
 
 /// Sign instatnce wrapper
 ///

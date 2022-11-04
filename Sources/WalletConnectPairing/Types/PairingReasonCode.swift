@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectNetworking
 
 enum PairingReasonCode: Reason, Codable {
     case userDisconnected

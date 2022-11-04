@@ -1,6 +1,4 @@
 import Foundation
-import JSONRPC
-import WalletConnectNetworking
 
 public class PingRequester {
     private let method: ProtocolMethod

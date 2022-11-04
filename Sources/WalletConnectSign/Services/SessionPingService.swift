@@ -1,7 +1,4 @@
 import Foundation
-import WalletConnectPairing
-import WalletConnectUtils
-import WalletConnectNetworking
 
 class SessionPingService {
     private let sessionStorage: WCSessionStorage

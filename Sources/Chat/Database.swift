@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectUtils
 
 class Database<Element> where Element: Codable {
 

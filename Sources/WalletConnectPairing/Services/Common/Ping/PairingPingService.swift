@@ -1,6 +1,4 @@
 import Foundation
-import WalletConnectUtils
-import WalletConnectNetworking
 
 public class PairingPingService {
     private let pairingStorage: WCPairingStorage

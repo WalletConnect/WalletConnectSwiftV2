@@ -1,7 +1,4 @@
 import Foundation
-import WalletConnectUtils
-import WalletConnectKMS
-import WalletConnectNetworking
 import Combine
 
 final class NonControllerSessionStateMachine {

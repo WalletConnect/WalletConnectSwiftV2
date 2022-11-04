@@ -1,6 +1,4 @@
 import Foundation
-import WalletConnectNetworking
-import WalletConnectKMS
 
 final class ExpirationService {
     private let pairingStorage: WCPairingStorage

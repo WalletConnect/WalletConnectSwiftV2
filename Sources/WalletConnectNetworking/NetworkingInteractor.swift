@@ -1,9 +1,5 @@
 import Foundation
 import Combine
-import JSONRPC
-import WalletConnectRelay
-import WalletConnectUtils
-import WalletConnectKMS
 
 public class NetworkingInteractor: NetworkInteracting {
     private var publishers = Set<AnyCancellable>()

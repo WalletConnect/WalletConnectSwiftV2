@@ -1,6 +1,4 @@
 import Foundation
-import WalletConnectUtils
-import WalletConnectNetworking
 
 // Internal namespace for session payloads.
 internal enum SessionType {

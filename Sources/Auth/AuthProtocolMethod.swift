@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectNetworking
 
 struct AuthRequestProtocolMethod: ProtocolMethod {
     let method: String = "wc_authRequest"
