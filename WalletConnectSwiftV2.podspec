@@ -122,6 +122,7 @@ Pod::Spec.new do |spec|
 
   spec.subspec 'WalletConnectKMS' do |ss|
     ss.source_files = 'Sources/WalletConnectKMS/**/*'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectUtils'
   end
 
   spec.subspec 'Commons' do |ss|
