@@ -4,7 +4,7 @@ set -e
 
 printf '\nset user agent\n\n'
 
-FILE=Sources/WalletConnectRelay/PackageConfig.swift
+FILE=Sources/WalletConnectRelay/PackageConfig.json
 
 if [ -f "$FILE" ];
 then
