@@ -12,7 +12,7 @@ enum WalletConnectError: Error {
     case pairingAlreadyExist
     case topicGenerationFailed
     case invalidPermissions // TODO: Refactor into actual cases
-    case unsupportedNamespace(ReasonCode)
+    case unsupportedNamespace(SignReasonCode)
 
     case `internal`(_ reason: InternalReason)
 
