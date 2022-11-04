@@ -126,7 +126,6 @@ Pod::Spec.new do |spec|
   end
 
   spec.subspec 'Commons' do |ss|
-    ss.module_name = 'Commons'
     ss.source_files = 'Sources/Commons/**/*'
   end
 
