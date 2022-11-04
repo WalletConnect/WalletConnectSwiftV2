@@ -1,6 +1,7 @@
 # This workflow sets the package version for user agent
-# when pull request is to main is opened
-# it takes pull request name and makes it a package version
+# when pull request to main branch is opened
+# it takes pull request name
+# and automatically commit it as a package version
 # pull request name should always be a version of a new release
 
 name: set-user-agent
@@ -21,4 +22,6 @@ jobs:
         run: ./.github/scripts/set-user-agent.sh
 
       - uses: stefanzweifel/git-auto-commit-action@v4
+          with:
+          commit_message: Set User Agent
 
