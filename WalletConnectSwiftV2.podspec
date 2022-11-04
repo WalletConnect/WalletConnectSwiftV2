@@ -103,7 +103,7 @@ Pod::Spec.new do |spec|
 
   spec.subspec 'WalletConnectRouter' do |ss|
     ss.source_files = 'Sources/WalletConnectRouter/**/*'
-    ss.requires_arc = true
+    ss.platform = :ios
   end
 
   spec.subspec 'WalletConnectNetworking' do |ss|
