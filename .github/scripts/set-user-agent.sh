@@ -4,14 +4,14 @@ set -e
 
 printf '\nset user agent\n\n'
 
-FILE=Sources/WalletConnectRelay/PackageVersion.swift
+FILE=Sources/WalletConnectRelay/PackageConfig.swift
 
 if [ -f "$FILE" ];
 then
     printf '\ncurrent user agent:\n'
     cat "$FILE"
     printf '\nsetting user agent... \n'
-    echo "var packageVersion = \"$PACKAGE_VERSION\"" > "$FILE"
+    echo "{\"version\": \"$PACKAGE_VERSION\"}" > "$FILE"
     printf '\nuser agent set for:\n'
     cat "$FILE"
 
