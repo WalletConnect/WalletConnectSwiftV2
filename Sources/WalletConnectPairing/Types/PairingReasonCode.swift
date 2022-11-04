@@ -1,7 +1,7 @@
 import Foundation
 import WalletConnectNetworking
 
-enum ReasonCode: Reason, Codable {
+enum PairingReasonCode: Reason, Codable {
     case userDisconnected
 
     var code: Int {

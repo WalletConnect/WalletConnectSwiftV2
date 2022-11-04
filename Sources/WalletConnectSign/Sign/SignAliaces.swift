@@ -12,3 +12,4 @@ public typealias AppMetadata = WalletConnectPairing.AppMetadata
 public typealias SocketConnectionStatus = WalletConnectRelay.SocketConnectionStatus
 public typealias Pairing = WalletConnectPairing.Pairing
 public typealias WalletConnectURI = WalletConnectUtils.WalletConnectURI
+public typealias RelayProtocolOptions = WalletConnectUtils.RelayProtocolOptions

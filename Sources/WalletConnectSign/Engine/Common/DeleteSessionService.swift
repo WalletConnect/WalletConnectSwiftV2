@@ -21,7 +21,7 @@ class DeleteSessionService {
     }
 
     func delete(topic: String) async throws {
-        let reasonCode = ReasonCode.userDisconnected
+        let reasonCode = SignReasonCode.userDisconnected
         let protocolMethod = SessionDeleteProtocolMethod()
         let reason = SessionType.Reason(code: reasonCode.code, message: reasonCode.message)
         logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
