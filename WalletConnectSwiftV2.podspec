@@ -78,7 +78,7 @@ Pod::Spec.new do |spec|
   spec.subspec 'WalletConnectAuth' do |ss|
     ss.source_files = 'Sources/Auth/**/*'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectPairing'
-    ss.dependency "WalletConnectWeb3", "1.0.0"
+    ss.dependency "WalletConnectWeb3", "1.0.1"
   end
 
   spec.subspec 'WalletConnectChat' do |ss|
@@ -103,6 +103,7 @@ Pod::Spec.new do |spec|
 
   spec.subspec 'WalletConnectRouter' do |ss|
     ss.source_files = 'Sources/WalletConnectRouter/**/*'
+    ss.requires_arc = true
   end
 
   spec.subspec 'WalletConnectNetworking' do |ss|
