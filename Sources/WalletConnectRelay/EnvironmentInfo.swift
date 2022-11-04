@@ -18,7 +18,10 @@ enum EnvironmentInfo {
     }
 
     static var sdkVersion: String {
-        packageVersion
+        let configURL = Bundle.module.url(forResource: "PackageConfig", withExtension: "json")!
+        let jsonData = try! Data(contentsOf: configURL)
+        let config = try! JSONDecoder().decode(PackageConfig.self, from: jsonData)
+        return config.version
     }
 
     static var operatingSystem: String {
