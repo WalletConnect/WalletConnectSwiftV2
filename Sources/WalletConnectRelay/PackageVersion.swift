@@ -1,1 +1,1 @@
-var packageVersion = "debug"
+var packageVersion = ""
