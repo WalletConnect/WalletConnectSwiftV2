@@ -71,7 +71,7 @@ Pod::Spec.new do |spec|
   spec.default_subspecs = 'WalletConnect'
 
   spec.subspec 'WalletConnect' do |ss|
-    ss.source_files = 'Sources/WalletConnectNetworking/**/*'
+    ss.source_files = 'Sources/WalletConnectSign/**/*'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectPairing'
   end
 
