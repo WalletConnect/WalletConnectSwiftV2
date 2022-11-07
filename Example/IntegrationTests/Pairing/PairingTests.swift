@@ -5,7 +5,7 @@ import WalletConnectUtils
 import WalletConnectRelay
 import Combine
 import WalletConnectNetworking
-import WalletConnectPush
+@testable import WalletConnectPush
 @testable import WalletConnectPairing
 
 final class PairingTests: XCTestCase {
@@ -53,8 +53,8 @@ final class PairingTests: XCTestCase {
             logger: pushLogger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
-            networkingClient: networkingClient,
-            pairingClient: pairingClient)
+            networkInteractor: networkingClient,
+            pairingRegisterer: pairingClient)
 
         return (pairingClient, pushClient)
     }
