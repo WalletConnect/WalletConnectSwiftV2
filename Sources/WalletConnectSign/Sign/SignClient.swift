@@ -104,7 +104,7 @@ public final class SignClient {
     private let controllerSessionStateMachine: ControllerSessionStateMachine
     private let appProposeService: AppProposeService
     private let history: RPCHistory
-    private let cleanupService: CleanupService
+    private let cleanupService: SignCleanupService
 
     private let sessionProposalPublisherSubject = PassthroughSubject<Session.Proposal, Never>()
     private let sessionRequestPublisherSubject = PassthroughSubject<Request, Never>()
@@ -133,7 +133,7 @@ public final class SignClient {
          appProposeService: AppProposeService,
          disconnectService: DisconnectService,
          history: RPCHistory,
-         cleanupService: CleanupService,
+         cleanupService: SignCleanupService,
          pairingClient: PairingClient
     ) {
         self.logger = logger
