@@ -1,6 +1,6 @@
 import Foundation
 
-typealias NetworkingReason = Reason
+fileprivate typealias NetworkingReason = Reason
 
 // Internal namespace for session payloads.
 internal enum SessionType {
