@@ -1,5 +1,7 @@
 import Foundation
 
+typealias NetworkingReason = Reason
+
 // Internal namespace for session payloads.
 internal enum SessionType {
 
@@ -23,7 +25,7 @@ internal enum SessionType {
 
     typealias DeleteParams = SessionType.Reason
 
-    struct Reason: Codable, Equatable, WalletConnectNetworking.Reason {
+    struct Reason: Codable, Equatable, NetworkingReason {
         let code: Int
         let message: String
 
