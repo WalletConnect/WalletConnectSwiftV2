@@ -1,6 +1,6 @@
 import Foundation
 
-final class CleanupService {
+final class PairingCleanupService {
 
     private let pairingStore: WCPairingStorage
     private let kms: KeyManagementServiceProtocol

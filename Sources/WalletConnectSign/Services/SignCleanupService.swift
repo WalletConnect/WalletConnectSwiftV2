@@ -1,6 +1,6 @@
 import Foundation
 
-final class CleanupService {
+final class SignCleanupService {
 
     private let pairingStore: WCPairingStorage
     private let sessionStore: WCSessionStorage
