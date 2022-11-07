@@ -1,3 +1,7 @@
+require "json"
+
+package = JSON.parse(File.read(File.join(__dir__, "Sources/WalletConnectRelay/PackageConfig.json")))
+
 #
 #  Be sure to run `pod spec lint WalletConnectSwiftV2.podspec' to ensure this is a
 #  valid spec and to remove all comments including this before submitting the spec.
@@ -16,7 +20,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name        = "WalletConnectSwiftV2"
-  spec.version     = "1.0.5"
+  spec.version     = package["version"]
   spec.summary     = "Swift implementation of WalletConnect v.2 protocol for native iOS applications."
   spec.description = "The communications protocol for web3, WalletConnect brings the ecosystem together by enabling wallets and apps to securely connect and interact."
   spec.homepage    = "https://walletconnect.com"
@@ -43,7 +47,7 @@ Pod::Spec.new do |spec|
 
   spec.source = {
     :git => 'https://github.com/WalletConnect/WalletConnectSwiftV2.git',
-    :tag => 'v' + spec.version.to_s
+    :tag => spec.version.to_s
   }
 
   # ――― Platform Specifics ――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
