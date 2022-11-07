@@ -121,4 +121,8 @@ public class NetworkingInteractorMock: NetworkInteracting {
         requestCallCount += 1
         requests.append((topic, request))
     }
+
+    public func getClientId() throws -> String {
+        return ""
+    }
 }

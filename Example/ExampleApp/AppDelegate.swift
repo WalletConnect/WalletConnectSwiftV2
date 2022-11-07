@@ -48,7 +48,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             #if targetEnvironment(simulator)
             // Avoid networking not instantiated error by sleeping...
             Thread.sleep(forTimeInterval: 1)
-            let clientId = try! Networking.instance.getClientId()
+            let clientId = try! Networking.interactor.getClientId()
             let deviceToken = InputConfig.simulatorIdentifier
             assert(deviceToken != "SIMULATOR_IDENTIFIER", "Please set your Simulator identifier")
             self?.registerClientWithPushServer(clientId: clientId, deviceToken: deviceToken, then: { result in
