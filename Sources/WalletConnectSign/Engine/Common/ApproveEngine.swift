@@ -1,10 +1,5 @@
 import Foundation
 import Combine
-import JSONRPC
-import WalletConnectUtils
-import WalletConnectKMS
-import WalletConnectPairing
-import WalletConnectNetworking
 
 final class ApproveEngine {
     enum Errors: Error {
@@ -100,7 +95,7 @@ final class ApproveEngine {
         try await settle(topic: sessionTopic, proposal: proposal, namespaces: sessionNamespaces)
     }
 
-    func reject(proposerPubKey: String, reason: ReasonCode) async throws {
+    func reject(proposerPubKey: String, reason: SignReasonCode) async throws {
         guard let payload = try proposalPayloadsStore.get(key: proposerPubKey) else {
             throw Errors.proposalPayloadsNotFound
         }
@@ -193,7 +188,7 @@ private extension ApproveEngine {
             }.store(in: &publishers)
     }
 
-    func respondError(payload: SubscriptionPayload, reason: ReasonCode, protocolMethod: ProtocolMethod) {
+    func respondError(payload: SubscriptionPayload, reason: SignReasonCode, protocolMethod: ProtocolMethod) {
         Task(priority: .high) {
             do {
                 try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod, reason: reason)

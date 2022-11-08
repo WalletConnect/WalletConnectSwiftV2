@@ -1,5 +1,4 @@
 import Foundation
-import JSONRPC
 
 struct WalletConnectRPCID: IdentifierGenerator {
 

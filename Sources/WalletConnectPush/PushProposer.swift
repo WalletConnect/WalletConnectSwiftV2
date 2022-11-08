@@ -1,9 +1,5 @@
 import Foundation
 import Combine
-import JSONRPC
-import WalletConnectUtils
-import WalletConnectKMS
-import WalletConnectNetworking
 
 class PushProposer {
     private let networkingInteractor: NetworkInteracting

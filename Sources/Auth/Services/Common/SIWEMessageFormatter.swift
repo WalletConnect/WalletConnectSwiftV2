@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectUtils
 
 protocol SIWEMessageFormatting {
     func formatMessage(from authPayload: AuthPayload, address: String) -> String?

@@ -1,9 +1,5 @@
 import Foundation
 import Combine
-import JSONRPC
-import WalletConnectUtils
-import WalletConnectKMS
-import WalletConnectNetworking
 
 final class ControllerSessionStateMachine {
 

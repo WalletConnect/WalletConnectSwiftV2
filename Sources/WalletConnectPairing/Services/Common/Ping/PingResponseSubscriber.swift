@@ -1,6 +1,4 @@
 import Combine
-import WalletConnectUtils
-import WalletConnectNetworking
 
 public class PingResponseSubscriber {
     private let networkingInteractor: NetworkInteracting

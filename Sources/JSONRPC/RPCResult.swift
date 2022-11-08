@@ -1,5 +1,4 @@
 import Foundation
-import Commons
 
 public enum RPCResult: Codable, Equatable {
     enum Errors: Error {

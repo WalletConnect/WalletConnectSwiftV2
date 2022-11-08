@@ -1,7 +1,4 @@
 import Foundation
-import WalletConnectKMS
-import WalletConnectNetworking
-import WalletConnectUtils
 
 actor AppPairService {
     private let networkingInteractor: NetworkInteracting

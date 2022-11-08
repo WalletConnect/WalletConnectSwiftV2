@@ -1,4 +1,3 @@
-import WalletConnectUtils
 import Foundation
 
 struct InviteResponse: Codable {

@@ -1,4 +1,3 @@
-import WalletConnectUtils
 
 public struct ProposalNamespace: Equatable, Codable {
 

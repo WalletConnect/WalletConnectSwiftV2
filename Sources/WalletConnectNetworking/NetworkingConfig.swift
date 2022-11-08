@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectRelay
 
 extension Networking {
     struct Config {

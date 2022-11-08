@@ -1,10 +1,5 @@
 import Foundation
 import Combine
-import JSONRPC
-import WalletConnectUtils
-import WalletConnectKMS
-import WalletConnectNetworking
-import WalletConnectPairing
 
 class ProposalResponseSubscriber {
     private let networkingInteractor: NetworkInteracting

@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectUtils
 
 struct DIDPKH {
     static let didPrefix: String = "did:pkh"

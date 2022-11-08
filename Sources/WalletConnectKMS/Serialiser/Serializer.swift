@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectUtils
 
 public class Serializer: Serializing {
 

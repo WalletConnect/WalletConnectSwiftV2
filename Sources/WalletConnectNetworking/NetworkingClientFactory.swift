@@ -1,7 +1,4 @@
 import Foundation
-import WalletConnectKMS
-import WalletConnectRelay
-import WalletConnectUtils
 
 public struct NetworkingClientFactory {
 

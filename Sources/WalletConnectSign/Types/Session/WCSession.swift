@@ -1,6 +1,4 @@
 import Foundation
-import WalletConnectKMS
-import WalletConnectUtils
 
 struct WCSession: SequenceObject, Equatable {
     enum Error: Swift.Error {

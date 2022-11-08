@@ -1,5 +1,3 @@
-import Commons
-
 public struct JSONRPCError: Error, Equatable, Codable {
     public let code: Int
     public let message: String

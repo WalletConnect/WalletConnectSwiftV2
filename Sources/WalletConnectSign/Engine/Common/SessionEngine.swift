@@ -1,9 +1,5 @@
 import Foundation
 import Combine
-import JSONRPC
-import WalletConnectUtils
-import WalletConnectKMS
-import WalletConnectNetworking
 
 final class SessionEngine {
     enum Errors: Error {
@@ -143,7 +139,7 @@ private extension SessionEngine {
         }
     }
 
-    func respondError(payload: SubscriptionPayload, reason: ReasonCode, protocolMethod: ProtocolMethod) {
+    func respondError(payload: SubscriptionPayload, reason: SignReasonCode, protocolMethod: ProtocolMethod) {
         Task(priority: .high) {
             do {
                 try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod, reason: reason)

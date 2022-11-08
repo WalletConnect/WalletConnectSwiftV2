@@ -1,8 +1,4 @@
 import Foundation
-import JSONRPC
-import WalletConnectNetworking
-import WalletConnectKMS
-import WalletConnectUtils
 
 final class AppProposeService {
     private let metadata: AppMetadata

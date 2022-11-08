@@ -1,7 +1,4 @@
 import Foundation
-import WalletConnectUtils
-import WalletConnectKMS
-import WalletConnectNetworking
 import Combine
 
 final class NonControllerSessionStateMachine {
@@ -38,7 +35,7 @@ final class NonControllerSessionStateMachine {
             }.store(in: &publishers)
     }
 
-    private func respondError(payload: SubscriptionPayload, reason: ReasonCode, protocolMethod: ProtocolMethod) {
+    private func respondError(payload: SubscriptionPayload, reason: SignReasonCode, protocolMethod: ProtocolMethod) {
         Task(priority: .high) {
             do {
                 try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod, reason: reason)

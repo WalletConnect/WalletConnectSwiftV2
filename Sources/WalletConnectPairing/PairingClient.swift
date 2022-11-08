@@ -1,9 +1,5 @@
 import Foundation
-import WalletConnectUtils
-import WalletConnectRelay
-import WalletConnectNetworking
 import Combine
-import JSONRPC
 
 public class PairingClient: PairingRegisterer, PairingInteracting {
     public var pingResponsePublisher: AnyPublisher<(String), Never> {
@@ -25,7 +21,7 @@ public class PairingClient: PairingRegisterer, PairingInteracting {
     private let resubscribeService: ResubscribeService
     private let expirationService: ExpirationService
 
-    private let cleanupService: CleanupService
+    private let cleanupService: PairingCleanupService
 
     init(appPairService: AppPairService,
          networkingInteractor: NetworkInteracting,
@@ -37,7 +33,7 @@ public class PairingClient: PairingRegisterer, PairingInteracting {
          pairingRequestsSubscriber: PairingRequestsSubscriber,
          appPairActivateService: AppPairActivationService,
          appUpdateMetadataService: AppUpdateMetadataService,
-         cleanupService: CleanupService,
+         cleanupService: PairingCleanupService,
          pingService: PairingPingService,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
          pairingsProvider: PairingsProvider

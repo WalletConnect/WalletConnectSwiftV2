@@ -1,8 +1,6 @@
 import Foundation
-import WalletConnectKMS
-import WalletConnectUtils
 
-final class CleanupService {
+final class PairingCleanupService {
 
     private let pairingStore: WCPairingStorage
     private let kms: KeyManagementServiceProtocol
