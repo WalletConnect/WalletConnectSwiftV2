@@ -1,6 +1,4 @@
 import Foundation
-import JSONRPC
-import WalletConnectUtils
 
 class PendingRequestsProvider {
     private let rpcHistory: RPCHistory

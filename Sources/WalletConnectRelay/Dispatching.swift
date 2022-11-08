@@ -1,6 +1,5 @@
 import Foundation
 import Combine
-import WalletConnectUtils
 
 protocol Dispatching {
     var onMessage: ((String) -> Void)? { get set }

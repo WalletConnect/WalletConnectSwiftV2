@@ -38,7 +38,7 @@ let package = Package(
     targets: [
         .target(
             name: "WalletConnectSign",
-            dependencies: ["WalletConnectNetworking", "WalletConnectPairing"],
+            dependencies: ["WalletConnectPairing"],
             path: "Sources/WalletConnectSign"),
         .target(
             name: "WalletConnectChat",
@@ -46,16 +46,17 @@ let package = Package(
             path: "Sources/Chat"),
         .target(
             name: "Auth",
-            dependencies: ["WalletConnectPairing", "WalletConnectNetworking", .product(name: "Web3", package: "Web3.swift")],
+            dependencies: ["WalletConnectPairing", .product(name: "Web3", package: "Web3.swift")],
             path: "Sources/Auth"),
         .target(
             name: "WalletConnectPush",
-            dependencies: ["WalletConnectPairing", "WalletConnectNetworking"],
+            dependencies: ["WalletConnectPairing"],
             path: "Sources/WalletConnectPush"),
         .target(
             name: "WalletConnectRelay",
-            dependencies: ["WalletConnectUtils", "WalletConnectKMS"],
-            path: "Sources/WalletConnectRelay"),
+            dependencies: ["WalletConnectKMS"],
+            path: "Sources/WalletConnectRelay",
+            resources: [.copy("PackageConfig.json")]),
         .target(
             name: "WalletConnectKMS",
             dependencies: ["WalletConnectUtils"],
@@ -65,7 +66,7 @@ let package = Package(
             dependencies: ["WalletConnectNetworking"]),
         .target(
             name: "WalletConnectUtils",
-            dependencies: ["Commons", "JSONRPC"]),
+            dependencies: ["JSONRPC"]),
         .target(
             name: "JSONRPC",
             dependencies: ["Commons"]),
@@ -74,7 +75,7 @@ let package = Package(
             dependencies: []),
         .target(
             name: "WalletConnectNetworking",
-            dependencies: ["JSONRPC", "WalletConnectKMS", "WalletConnectRelay", "WalletConnectUtils"]),
+            dependencies: ["WalletConnectRelay"]),
         .target(
             name: "WalletConnectRouter",
             dependencies: []),
@@ -98,7 +99,7 @@ let package = Package(
             dependencies: ["WalletConnectKMS", "WalletConnectUtils", "TestingUtils"]),
         .target(
             name: "TestingUtils",
-            dependencies: ["WalletConnectPairing", "WalletConnectNetworking"],
+            dependencies: ["WalletConnectPairing"],
             path: "Tests/TestingUtils"),
         .testTarget(
             name: "WalletConnectUtilsTests",

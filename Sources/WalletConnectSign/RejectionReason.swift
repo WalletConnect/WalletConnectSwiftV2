@@ -9,16 +9,16 @@ public enum RejectionReason {
 }
 
 internal extension RejectionReason {
-    func internalRepresentation() -> ReasonCode {
+    func internalRepresentation() -> SignReasonCode {
         switch self {
         case .userRejected:
-            return ReasonCode.userRejected
+            return SignReasonCode.userRejected
         case .userRejectedChains:
-            return ReasonCode.userRejectedChains
+            return SignReasonCode.userRejectedChains
         case .userRejectedMethods:
-            return ReasonCode.userRejectedMethods
+            return SignReasonCode.userRejectedMethods
         case  .userRejectedEvents:
-            return ReasonCode.userRejectedEvents
+            return SignReasonCode.userRejectedEvents
         }
     }
 }

@@ -1,4 +1,3 @@
-import JSONRPC
 
 protocol RelayRPC: RPCMethod {}
 

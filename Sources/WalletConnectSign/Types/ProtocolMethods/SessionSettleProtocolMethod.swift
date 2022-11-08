@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectNetworking
 
 struct SessionSettleProtocolMethod: ProtocolMethod {
     let method: String = "wc_sessionSettle"

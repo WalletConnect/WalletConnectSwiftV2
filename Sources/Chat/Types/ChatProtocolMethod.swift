@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectNetworking
 
 struct ChatInviteProtocolMethod: ProtocolMethod {
     let method: String = "wc_chatInvite"

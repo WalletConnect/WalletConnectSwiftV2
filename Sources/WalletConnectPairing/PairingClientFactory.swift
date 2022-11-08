@@ -1,8 +1,4 @@
 import Foundation
-import WalletConnectRelay
-import WalletConnectUtils
-import WalletConnectKMS
-import WalletConnectNetworking
 
 public struct PairingClientFactory {
 
@@ -20,7 +16,7 @@ public struct PairingClientFactory {
         let walletPairService = WalletPairService(networkingInteractor: networkingClient, kms: kms, pairingStorage: pairingStore)
         let pairingRequestsSubscriber = PairingRequestsSubscriber(networkingInteractor: networkingClient, pairingStorage: pairingStore, logger: logger)
         let pairingsProvider = PairingsProvider(pairingStorage: pairingStore)
-        let cleanupService = CleanupService(pairingStore: pairingStore, kms: kms)
+        let cleanupService = PairingCleanupService(pairingStore: pairingStore, kms: kms)
         let deletePairingService = DeletePairingService(networkingInteractor: networkingClient, kms: kms, pairingStorage: pairingStore, logger: logger)
         let pingService = PairingPingService(pairingStorage: pairingStore, networkingInteractor: networkingClient, logger: logger)
         let appPairActivateService = AppPairActivationService(pairingStorage: pairingStore, logger: logger)

@@ -1,6 +1,3 @@
-import WalletConnectRelay
-import WalletConnectUtils
-import WalletConnectKMS
 import Foundation
 
 public class Networking {

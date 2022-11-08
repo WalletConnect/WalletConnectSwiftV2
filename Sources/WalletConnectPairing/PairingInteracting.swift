@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectUtils
 
 public protocol PairingInteracting {
     func pair(uri: WalletConnectURI) async throws

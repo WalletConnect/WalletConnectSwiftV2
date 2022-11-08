@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectNetworking
 
 struct RPCService: HTTPService {
     let data: Data

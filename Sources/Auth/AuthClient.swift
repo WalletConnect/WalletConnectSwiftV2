@@ -1,8 +1,5 @@
 import Foundation
 import Combine
-import WalletConnectUtils
-import WalletConnectPairing
-import WalletConnectRelay
 
 /// WalletConnect Auth Client
 ///

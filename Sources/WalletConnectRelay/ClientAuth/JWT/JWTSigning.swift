@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectKMS
 
 protocol JWTSigning {
     var alg: String {get}

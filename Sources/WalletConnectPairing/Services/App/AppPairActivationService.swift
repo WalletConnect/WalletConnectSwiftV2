@@ -1,7 +1,5 @@
 import Foundation
 import Combine
-import WalletConnectNetworking
-import WalletConnectUtils
 
 final class AppPairActivationService {
     private let pairingStorage: PairingStorage

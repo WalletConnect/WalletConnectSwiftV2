@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectNetworking
 
 struct SessionDeleteProtocolMethod: ProtocolMethod {
     let method: String = "wc_sessionDelete"

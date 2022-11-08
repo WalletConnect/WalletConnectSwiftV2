@@ -1,8 +1,5 @@
 import Foundation
 import Combine
-import WalletConnectUtils
-import WalletConnectKMS
-import JSONRPC
 
 public enum SocketConnectionStatus {
     case connected

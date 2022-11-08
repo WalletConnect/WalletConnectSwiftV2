@@ -1,6 +1,4 @@
 import Foundation
-import WalletConnectNetworking
-import WalletConnectUtils
 
 public protocol Registry {
     func register(account: Account, pubKey: String) async throws

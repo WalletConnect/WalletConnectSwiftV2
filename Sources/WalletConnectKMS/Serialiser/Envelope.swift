@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectUtils
 
 /// A type representing envelope with it's serialization policy
 public struct Envelope: Equatable {
