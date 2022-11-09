@@ -256,9 +256,9 @@ public final class SignClient {
     /// - Parameters:
     ///   - topic: Topic of the session for which the request was received.
     ///   - requestId: RPC request ID
-    ///   - response: Your JSON RPC response or an error.
-    public func respond(topic: String, requestId: RPCID, response: RPCResult) async throws {
-        try await sessionEngine.respondSessionRequest(topic: topic, requestId: requestId, response: response)
+    ///   - result: Your JSON RPC response or an error.
+    public func respond(topic: String, requestId: RPCID, result: RPCResult) async throws {
+        try await sessionEngine.respondSessionRequest(topic: topic, requestId: requestId, result: result)
     }
 
     /// Ping method allows to check if peer client is online and is subscribing for given topic

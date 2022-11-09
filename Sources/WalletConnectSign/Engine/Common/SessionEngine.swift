@@ -59,11 +59,16 @@ final class SessionEngine {
         try await networkingInteractor.request(rpcRequest, topic: request.topic, protocolMethod: SessionRequestProtocolMethod())
     }
 
-    func respondSessionRequest(topic: String, requestId: RPCID, response: RPCResult) async throws {
+    func respondSessionRequest(topic: String, requestId: RPCID, result: RPCResult) async throws {
         guard sessionStore.hasSession(forTopic: topic) else {
             throw Errors.sessionNotFound(topic: topic)
         }
-        let response = RPCResponse(id: requestId, result: response)
+      
+      var response = RPCResponse(id: requestId, result: result)
+      
+      if case .error(let value) = result {
+        response = RPCResponse(id: requestId, error: value);
+      }
         try await networkingInteractor.respond(topic: topic, response: response, protocolMethod: SessionRequestProtocolMethod())
     }
 
