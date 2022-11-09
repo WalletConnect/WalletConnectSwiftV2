@@ -30,7 +30,10 @@ let package = Package(
             targets: ["WalletConnectRouter"]),
         .library(
             name: "WalletConnectNetworking",
-            targets: ["WalletConnectNetworking"])
+            targets: ["WalletConnectNetworking"]),
+        .library(
+            name: "WalletConnectVerify",
+            targets: ["WalletConnectVerify"])
     ],
     dependencies: [
         .package(url: "https://github.com/WalletConnect/Web3.swift", .exact("1.0.0"))
@@ -78,6 +81,9 @@ let package = Package(
             dependencies: ["WalletConnectRelay"]),
         .target(
             name: "WalletConnectRouter",
+            dependencies: []),
+        .target(
+            name: "WalletConnectVerify",
             dependencies: []),
         .testTarget(
             name: "WalletConnectSignTests",
