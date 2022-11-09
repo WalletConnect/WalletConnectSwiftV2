@@ -21,7 +21,7 @@ extension Session {
         public let requiredNamespaces: [String: ProposalNamespace]
 
         // TODO: Refactor internal objects to manage only needed data
-        internal let proposal: SessionProposal
+        public let proposal: SessionProposal
     }
 
     public struct Event: Equatable, Hashable {

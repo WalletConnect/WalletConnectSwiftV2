@@ -1,7 +1,7 @@
 import Foundation
 
-struct Participant: Codable, Equatable {
-    let publicKey: String
+public struct Participant: Codable, Equatable {
+    public let publicKey: String
     let metadata: AppMetadata
 
     init(publicKey: String, metadata: AppMetadata) {
