@@ -41,8 +41,8 @@
         "package": "SolanaSwift",
         "repositoryURL": "https://github.com/flypaper0/solana-swift",
         "state": {
-          "branch": "flypaper0-patch-1",
-          "revision": "697b6232be5dcd33d4b5b95fe21721cab5be1050",
+          "branch": "feature/available-13",
+          "revision": "a98811518e0a90c2dfc60c30cfd3ec85c33b6790",
           "version": null
         }
       },

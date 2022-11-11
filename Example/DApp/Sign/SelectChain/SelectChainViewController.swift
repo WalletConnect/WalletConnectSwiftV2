@@ -15,7 +15,12 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
     }()
     private var publishers = [AnyCancellable]()
 
-    let chains = [Chain(name: "Ethereum", id: "eip155:1"), Chain(name: "Polygon", id: "eip155:137")]
+    let chains = [
+        Chain(name: "Ethereum", id: "eip155:1"),
+        Chain(name: "Polygon", id: "eip155:137"),
+        Chain(name: "Solana", id: "solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")
+    ]
+
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Available Chains"

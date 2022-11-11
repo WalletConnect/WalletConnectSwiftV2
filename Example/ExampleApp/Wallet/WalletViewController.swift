@@ -76,7 +76,7 @@ final class WalletViewController: UIViewController {
     private func showSessionRequest(_ request: Request) {
         let requestVC = RequestViewController(request)
         requestVC.onSign = { [unowned self] in
-            let result = Signer.signEth(request: request)
+            let result = Signer.sign(request: request)
             respondOnSign(request: request, response: result)
             reloadSessionDetailsIfNeeded()
         }

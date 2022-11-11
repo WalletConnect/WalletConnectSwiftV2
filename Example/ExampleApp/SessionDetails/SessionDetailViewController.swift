@@ -23,7 +23,7 @@ final class SessionDetailViewController: UIHostingController<SessionDetailView> 
     private func showSessionRequest(_ request: Request) {
         let viewController = RequestViewController(request)
         viewController.onSign = { [unowned self] in
-            let result = Signer.signEth(request: request)
+            let result = Signer.sign(request: request)
             respondOnSign(request: request, response: result)
             reload()
         }

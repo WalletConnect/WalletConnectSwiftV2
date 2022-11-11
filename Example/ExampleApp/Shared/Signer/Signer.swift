@@ -6,7 +6,7 @@ class Signer {
 
     private init() {}
 
-    static func signEth(request: Request) -> AnyCodable {
+    static func sign(request: Request) -> AnyCodable {
         switch request.method {
         case "personal_sign":
             return EthereumSigner.personalSign(request.params)
