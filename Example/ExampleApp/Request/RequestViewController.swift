@@ -43,15 +43,6 @@ class RequestViewController: UIViewController {
     }
 
     private func getParamsDescription() -> String {
-        let method = sessionRequest.method
-        if method == "personal_sign" {
-            return try! sessionRequest.params.get([String].self).description
-        } else if method == "eth_signTypedData" {
-            return try! sessionRequest.params.get([String].self).description
-        } else if method == "eth_sendTransaction" {
-            let params = try! sessionRequest.params.get([EthereumTransaction].self)
-            return params[0].description
-        }
-        fatalError("not implemented")
+        return String(describing: sessionRequest.params.value)
     }
 }

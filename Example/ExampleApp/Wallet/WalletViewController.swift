@@ -9,8 +9,8 @@ import Combine
 
 final class WalletViewController: UIViewController {
     lazy var accounts = [
-        "eip155": Signer.privateKey.address.hex(eip55: true),
-        "solana": "BvQtshZCDdzXeuC6Hrp2tBjJThUf3LN2Qeup3avrStTX"
+        "eip155": EthereumSigner.address,
+        "solana": SolanaSigner.address
     ]
 
     var sessionItems: [ActiveSessionItem] = []
