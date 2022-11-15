@@ -102,7 +102,7 @@ let package = Package(
             dependencies: ["WalletConnectRelay", "WalletConnectUtils", "TestingUtils"]),
         .testTarget(
             name: "VerifyTests",
-            dependencies: ["WalletConnectVerify"]),
+            dependencies: ["WalletConnectVerify", "TestingUtils"]),
         .testTarget(
             name: "WalletConnectKMSTests",
             dependencies: ["WalletConnectKMS", "WalletConnectUtils", "TestingUtils"]),

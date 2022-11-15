@@ -11,14 +11,7 @@ class AttestKeyGenerator: AttestKeyGenerating {
     private let service = DCAppAttestService.shared
 
     func generateKeys() async throws -> String {
-        service.generateKey { [unowned self] keyId, error in
-            guard error == nil else {
-                logger.debug(error!.localizedDescription)
-                return
-            }
-
-            // Cache keyId for subsequent operations.
-        }
-        fatalError("not implemented")
+        try await service.generateKey()
+        //TODO Cache keyId for subsequent operations.
     }
 }

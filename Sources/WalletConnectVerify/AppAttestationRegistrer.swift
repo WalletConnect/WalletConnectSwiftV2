@@ -20,7 +20,7 @@ class AppAttestationRegistrer {
          attestKeyGenerator: AttestKeyGenerating,
          attestChallengeProvider: AttestChallengeProviding,
          keyAttestationService: KeyAttesting
-    ) throws {
+    ) {
         self.service = DCAppAttestService.shared
         self.logger = logger
         self.keyIdStorage = keyIdStorage
