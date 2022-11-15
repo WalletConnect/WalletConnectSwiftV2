@@ -2,7 +2,7 @@ import DeviceCheck
 import Foundation
 
 protocol AttestKeyGenerating {
-    func generateKeys() -> String
+    func generateKeys() async throws -> String
 }
 
 @available(iOS 14.0, *)
@@ -10,7 +10,7 @@ protocol AttestKeyGenerating {
 class AttestKeyGenerator: AttestKeyGenerating {
     private let service = DCAppAttestService.shared
 
-    func generateKeys() -> String {
+    func generateKeys() async throws -> String {
         service.generateKey { [unowned self] keyId, error in
             guard error == nil else {
                 logger.debug(error!.localizedDescription)

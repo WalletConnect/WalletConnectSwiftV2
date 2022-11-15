@@ -22,16 +22,17 @@ public actor VerifyClient {
         self.appAttestationRegistrer = appAttestationRegistrer
     }
 
+    private  func registerAttestationIfNeeded() async throws {
+        try await appAttestationRegistrer.registerAttestationIfNeeded()()
+    }
+
     public func verifyOrigin() async throws {
-
+        originVerifier.verifyOrigin()
     }
 
-    public func registerAttestation() async throws {
-
-    }
 
     public func registerAssertion() async throws {
-
+        assertionRegistrer.registerAssertion()
     }
     
 }
