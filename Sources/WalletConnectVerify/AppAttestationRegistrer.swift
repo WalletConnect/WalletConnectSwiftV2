@@ -1,6 +1,7 @@
 import Foundation
 import DeviceCheck
 import WalletConnectUtils
+import CryptoKit
 
 @available(iOS 14.0, *)
 @available(macOS 11.0, *)
@@ -29,18 +30,18 @@ class AppAttestationRegistrer {
     }
 
     func registerAttestationIfNeeded() async throws {
-        guard keyIdStorage.get(key: keyIdStorageKey) == nil else { return }
-        let keyId = generateKeys()
+        if let _ = try? keyIdStorage.get(key: keyIdStorageKey) { return }
+        let keyId = try await generateKeys()
         let challenge = try await getChallenge()
         let hash = Data(SHA256.hash(data: challenge))
-        attestKey(keyId: keyId, clientDataHash: hash)
+        try await attestKey(keyId: keyId, clientDataHash: hash)
     }
 
     private func generateKeys() async throws -> String {
         try await attestKeyGenerator.generateKeys()
     }
 
-    private func getChallenge() async throws {
+    private func getChallenge() async throws -> Data {
         try await attestChallengeProvider.getChallenge()
     }
 
