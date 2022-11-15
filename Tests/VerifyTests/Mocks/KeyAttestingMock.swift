@@ -1,4 +1,3 @@
-//     
 @testable import WalletConnectVerify
 import Foundation
 

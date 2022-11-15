@@ -31,6 +31,7 @@ class AppAttestationRegistrer {
 
     func registerAttestationIfNeeded() async throws {
         if let _ = try? keyIdStorage.get(key: keyIdStorageKey) { return }
+        print(keyIdStorage.getAll())
         let keyId = try await generateKeys()
         let challenge = try await getChallenge()
         let hash = Data(SHA256.hash(data: challenge))

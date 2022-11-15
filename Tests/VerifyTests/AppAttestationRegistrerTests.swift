@@ -12,17 +12,19 @@ class AppAttestationRegistrerTests: XCTestCase {
     var attestChallengeProvider: AttestChallengeProvidingMock!
     var keyAttestationService: KeyAttestingMock!
     var sut: AppAttestationRegistrer!
+    var keyIdStorage: CodableStore<String>!
 
     override func setUp() {
         let kvStorage = RuntimeKeyValueStorage()
 
+        keyIdStorage = CodableStore(defaults: kvStorage, identifier: "")
         attestKeyGenerator = AttestKeyGeneratingMock()
         attestChallengeProvider = AttestChallengeProvidingMock()
         keyAttestationService = KeyAttestingMock()
 
         sut = AppAttestationRegistrer(
             logger: ConsoleLoggerMock(),
-            keyIdStorage: CodableStore(defaults: kvStorage, identifier: ""),
+            keyIdStorage: keyIdStorage,
             attestKeyGenerator: attestKeyGenerator,
             attestChallengeProvider: attestChallengeProvider,
             keyAttestationService: keyAttestationService)
@@ -35,7 +37,11 @@ class AppAttestationRegistrerTests: XCTestCase {
         XCTAssertTrue(keyAttestationService.keyAttested)
     }
 
-    func testAttestationAlreadyRegistered() {
-
+    func testAttestationAlreadyRegistered() async {
+        keyIdStorage.set("123", forKey: "attested_key_id")
+        try! await sut.registerAttestationIfNeeded()
+        XCTAssertFalse(attestKeyGenerator.keysGenerated)
+        XCTAssertFalse(attestChallengeProvider.challengeProvided)
+        XCTAssertFalse(keyAttestationService.keyAttested)
     }
 }
