@@ -56,6 +56,7 @@ final class ApproveEngine {
     }
 
     func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace]) async throws {
+        print("approving: \(Int64((Date().timeIntervalSince1970 * 1000.0).rounded()))")
         guard let payload = try proposalPayloadsStore.get(key: proposerPubKey) else {
             throw Errors.wrongRequestParams
         }
@@ -87,12 +88,14 @@ final class ApproveEngine {
 
         let result = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
         let response = RPCResponse(id: payload.id, result: result)
+        Task {
         try await networkingInteractor.respond(topic: payload.topic, response: response, protocolMethod: SessionProposeProtocolMethod())
+        }
 
         try pairing.updateExpiry()
         pairingStore.setPairing(pairing)
 
-        try await settle(topic: sessionTopic, proposal: proposal, namespaces: sessionNamespaces)
+        try settle(topic: sessionTopic, proposal: proposal, namespaces: sessionNamespaces)
     }
 
     func reject(proposerPubKey: String, reason: SignReasonCode) async throws {
@@ -104,7 +107,7 @@ final class ApproveEngine {
         // TODO: Delete pairing if inactive 
     }
 
-    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace]) async throws {
+    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace]) throws {
         guard let agreementKeys = kms.getAgreementSecret(for: topic) else {
             throw Errors.agreementMissingOrInvalid
         }
@@ -138,12 +141,18 @@ final class ApproveEngine {
 
         logger.debug("Sending session settle request")
 
-        try await networkingInteractor.subscribe(topic: topic)
+        Task {
+            try await networkingInteractor.subscribe(topic: topic)
+            print("subscription end: \(Int64((Date().timeIntervalSince1970 * 1000.0).rounded()))")
+        }
         sessionStore.setSession(session)
 
         let protocolMethod = SessionSettleProtocolMethod()
         let request = RPCRequest(method: protocolMethod.method, params: settleParams)
-        try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
+        Task {
+            try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
+            print("settle sent: \(Int64((Date().timeIntervalSince1970 * 1000.0).rounded()))")
+        }
         onSessionSettle?(session.publicRepresentation())
     }
 }
