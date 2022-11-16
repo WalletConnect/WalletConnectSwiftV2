@@ -56,7 +56,6 @@ final class ApproveEngine {
     }
 
     func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace]) async throws {
-        print("approving: \(Int64((Date().timeIntervalSince1970 * 1000.0).rounded()))")
         guard let payload = try proposalPayloadsStore.get(key: proposerPubKey) else {
             throw Errors.wrongRequestParams
         }
@@ -143,7 +142,6 @@ final class ApproveEngine {
 
         Task {
             try await networkingInteractor.subscribe(topic: topic)
-            print("subscription end: \(Int64((Date().timeIntervalSince1970 * 1000.0).rounded()))")
         }
         sessionStore.setSession(session)
 
@@ -151,7 +149,6 @@ final class ApproveEngine {
         let request = RPCRequest(method: protocolMethod.method, params: settleParams)
         Task {
             try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
-            print("settle sent: \(Int64((Date().timeIntervalSince1970 * 1000.0).rounded()))")
         }
         onSessionSettle?(session.publicRepresentation())
     }
