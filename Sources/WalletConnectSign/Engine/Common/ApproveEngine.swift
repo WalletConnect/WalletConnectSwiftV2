@@ -87,14 +87,15 @@ final class ApproveEngine {
 
         let result = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
         let response = RPCResponse(id: payload.id, result: result)
-        Task {
-        try await networkingInteractor.respond(topic: payload.topic, response: response, protocolMethod: SessionProposeProtocolMethod())
-        }
+
+        async let proposeResponse: () = networkingInteractor.respond(topic: payload.topic, response: response, protocolMethod: SessionProposeProtocolMethod())
+
+        async let settleRequest: () = settle(topic: sessionTopic, proposal: proposal, namespaces: sessionNamespaces)
+
+        let _ = try await [proposeResponse, settleRequest]
 
         try pairing.updateExpiry()
         pairingStore.setPairing(pairing)
-
-        try settle(topic: sessionTopic, proposal: proposal, namespaces: sessionNamespaces)
     }
 
     func reject(proposerPubKey: String, reason: SignReasonCode) async throws {
@@ -106,7 +107,7 @@ final class ApproveEngine {
         // TODO: Delete pairing if inactive 
     }
 
-    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace]) throws {
+    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace]) async throws {
         guard let agreementKeys = kms.getAgreementSecret(for: topic) else {
             throw Errors.agreementMissingOrInvalid
         }
@@ -140,16 +141,16 @@ final class ApproveEngine {
 
         logger.debug("Sending session settle request")
 
-        Task {
-            try await networkingInteractor.subscribe(topic: topic)
-        }
         sessionStore.setSession(session)
 
         let protocolMethod = SessionSettleProtocolMethod()
         let request = RPCRequest(method: protocolMethod.method, params: settleParams)
-        Task {
-            try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
-        }
+
+        async let subscription: () = networkingInteractor.subscribe(topic: topic)
+        async let settleRequest: () = networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
+
+        let _ = try await [settleRequest, subscription]
+
         onSessionSettle?(session.publicRepresentation())
     }
 }
