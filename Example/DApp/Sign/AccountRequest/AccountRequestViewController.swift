@@ -7,7 +7,7 @@ class AccountRequestViewController: UIViewController, UITableViewDelegate, UITab
     private let session: Session
     private let chainId: String
     private let account: String
-    private let methods = ["eth_sendTransaction", "personal_sign", "eth_signTypedData"]
+    private let methods: [String]
     private let accountRequestView = {
         AccountRequestView()
     }()
@@ -16,6 +16,7 @@ class AccountRequestViewController: UIViewController, UITableViewDelegate, UITab
         self.session = session
         self.chainId = accountDetails.chain
         self.account = accountDetails.account
+        self.methods = accountDetails.methods
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -37,7 +38,7 @@ class AccountRequestViewController: UIViewController, UITableViewDelegate, UITab
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        methods.count
+        return methods.count
     }
 
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
