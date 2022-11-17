@@ -3,11 +3,10 @@ import DeviceCheck
 import WalletConnectUtils
 import CryptoKit
 
+
 @available(iOS 14.0, *)
 @available(macOS 11.0, *)
 class AppAttestationRegistrer {
-    private let keyIdStorageKey = "attested_key_id"
-    private let service: DCAppAttestService
     private let logger: ConsoleLogging
     private let keyIdStorage: CodableStore<String>
 
@@ -21,7 +20,6 @@ class AppAttestationRegistrer {
          attestChallengeProvider: AttestChallengeProviding,
          keyAttestationService: KeyAttesting
     ) {
-        self.service = DCAppAttestService.shared
         self.logger = logger
         self.keyIdStorage = keyIdStorage
         self.attestKeyGenerator = attestKeyGenerator
@@ -30,7 +28,7 @@ class AppAttestationRegistrer {
     }
 
     func registerAttestationIfNeeded() async throws {
-        if let _ = try? keyIdStorage.get(key: keyIdStorageKey) { return }
+        if let _ = try? keyIdStorage.get(key: Constants.keyIdStorageKey) { return }
         let keyId = try await generateKeys()
         let challenge = try await getChallenge()
         let hash = Data(SHA256.hash(data: challenge))
