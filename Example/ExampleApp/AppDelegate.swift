@@ -1,13 +1,9 @@
 import UIKit
-import WalletConnectVerify
+
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    let cl = try! VerifyClientFactory.create()
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        Task{
-            try await cl.registerAttestationIfNeeded()
 
-        }
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         return true
     }
 
