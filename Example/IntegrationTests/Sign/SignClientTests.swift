@@ -194,7 +194,7 @@ final class SignClientTests: XCTestCase {
             XCTAssertEqual(sessionRequest.method, requestMethod)
             requestExpectation.fulfill()
             Task(priority: .high) {
-                try await wallet.client.respond(topic: sessionRequest.topic, requestId: sessionRequest.id, response: .response(AnyCodable(responseParams)))
+                try await wallet.client.respond(topic: sessionRequest.topic, requestId: sessionRequest.id, result: .response(AnyCodable(responseParams)))
             }
         }
         dapp.onSessionResponse = { response in
@@ -236,7 +236,7 @@ final class SignClientTests: XCTestCase {
         }
         wallet.onSessionRequest = { [unowned self] sessionRequest in
             Task(priority: .high) {
-                try await wallet.client.respond(topic: sessionRequest.topic, requestId: sessionRequest.id, response: .error(error))
+                try await wallet.client.respond(topic: sessionRequest.topic, requestId: sessionRequest.id, result: .error(error))
             }
         }
         dapp.onSessionResponse = { response in

@@ -95,7 +95,7 @@ final class WalletViewController: UIViewController {
         print("[WALLET] Respond on Sign")
         Task {
             do {
-                try await Sign.instance.respond(topic: request.topic, requestId: request.id, response: .response(response))
+                try await Sign.instance.respond(topic: request.topic, requestId: request.id, result: .response(response))
             } catch {
                 print("[DAPP] Respond Error: \(error.localizedDescription)")
             }
@@ -110,7 +110,7 @@ final class WalletViewController: UIViewController {
                 try await Sign.instance.respond(
                     topic: request.topic,
                     requestId: request.id,
-                    response: .error(.init(code: 0, message: ""))
+                    result: .error(.init(code: 0, message: ""))
                 )
             } catch {
                 print("[DAPP] Respond Error: \(error.localizedDescription)")

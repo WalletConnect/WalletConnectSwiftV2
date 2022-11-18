@@ -64,11 +64,11 @@ final class SessionEngine {
             throw Errors.sessionNotFound(topic: topic)
         }
       
-      var response = RPCResponse(id: requestId, result: result)
+        var response = RPCResponse(id: requestId, result: result)
       
-      if case .error(let value) = result {
-        response = RPCResponse(id: requestId, error: value);
-      }
+        if case .error(let value) = result {
+          response = RPCResponse(id: requestId, error: value);
+        }
         try await networkingInteractor.respond(topic: topic, response: response, protocolMethod: SessionRequestProtocolMethod())
     }
 
