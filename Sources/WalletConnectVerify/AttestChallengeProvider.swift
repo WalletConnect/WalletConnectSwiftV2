@@ -6,6 +6,7 @@ protocol AttestChallengeProviding {
 
 class AttestChallengeProvider: AttestChallengeProviding {
     func getChallenge() async throws -> Data {
+        return Data()
         fatalError("not implemented")
     }
 }
