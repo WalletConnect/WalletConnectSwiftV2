@@ -63,7 +63,7 @@ final class SessionEngine {
         guard sessionStore.hasSession(forTopic: topic) else {
             throw Errors.sessionNotFound(topic: topic)
         }
-        let response = RPCResponse(id: requestId, result: response)
+        let response = RPCResponse(id: requestId, outcome: response)
         try await networkingInteractor.respond(topic: topic, response: response, protocolMethod: SessionRequestProtocolMethod())
     }
 
