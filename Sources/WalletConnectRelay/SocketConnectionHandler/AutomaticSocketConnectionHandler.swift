@@ -10,8 +10,7 @@ class AutomaticSocketConnectionHandler {
         case manualSocketConnectionForbidden, manualSocketDisconnectionForbidden
     }
 
-    let socket: WebSocketConnecting
-
+    private let socket: WebSocketConnecting
     private let appStateObserver: AppStateObserving
     private let networkMonitor: NetworkMonitoring
     private let backgroundTaskRegistrar: BackgroundTaskRegistering
@@ -82,6 +81,8 @@ extension AutomaticSocketConnectionHandler: SocketConnectionHandler {
     }
 
     func handleDisconnection() {
-        reconnect()
+        if appStateObserver.currentState == .foreground {
+            reconnect()
+        }
     }
 }

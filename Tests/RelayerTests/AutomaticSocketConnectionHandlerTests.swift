@@ -6,8 +6,9 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
     var sut: AutomaticSocketConnectionHandler!
     var webSocketSession: WebSocketMock!
     var networkMonitor: NetworkMonitoringMock!
-    var appStateObserver: AppStateObserving!
+    var appStateObserver: AppStateObserverMock!
     var backgroundTaskRegistrar: BackgroundTaskRegistrarMock!
+
     override func setUp() {
         webSocketSession = WebSocketMock()
         networkMonitor = NetworkMonitoringMock()
@@ -22,9 +23,9 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
 
     func testConnectsOnConnectionSatisfied() {
         webSocketSession.disconnect()
-        XCTAssertFalse(sut.socket.isConnected)
+        XCTAssertFalse(webSocketSession.isConnected)
         networkMonitor.onSatisfied?()
-        XCTAssertTrue(sut.socket.isConnected)
+        XCTAssertTrue(webSocketSession.isConnected)
     }
 
     func testHandleConnectThrows() {
@@ -38,7 +39,7 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
     func testReconnectsOnEnterForeground() {
         webSocketSession.disconnect()
         appStateObserver.onWillEnterForeground?()
-        XCTAssertTrue(sut.socket.isConnected)
+        XCTAssertTrue(webSocketSession.isConnected)
     }
 
     func testRegisterTaskOnEnterBackground() {
@@ -49,8 +50,24 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
 
     func testDisconnectOnEndBackgroundTask() {
         appStateObserver.onWillEnterBackground?()
-        XCTAssertTrue(sut.socket.isConnected)
+        XCTAssertTrue(webSocketSession.isConnected)
         backgroundTaskRegistrar.completion!()
-        XCTAssertFalse(sut.socket.isConnected)
+        XCTAssertFalse(webSocketSession.isConnected)
+    }
+
+    func testReconnectOnDisconnectForeground() {
+        appStateObserver.currentState = .foreground
+        XCTAssertTrue(webSocketSession.isConnected)
+        webSocketSession.disconnect()
+        sut.handleDisconnection()
+        XCTAssertTrue(webSocketSession.isConnected)
+    }
+
+    func testReconnectOnDisconnectBackground() {
+        appStateObserver.currentState = .background
+        XCTAssertTrue(webSocketSession.isConnected)
+        webSocketSession.disconnect()
+        sut.handleDisconnection()
+        XCTAssertFalse(webSocketSession.isConnected)
     }
 }
