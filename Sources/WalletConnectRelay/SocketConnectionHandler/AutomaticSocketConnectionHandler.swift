@@ -40,13 +40,13 @@ class AutomaticSocketConnectionHandler {
         }
 
         appStateObserver.onWillEnterForeground = { [unowned self] in
-            reconnect()
+            reconnectIfNeeded()
         }
     }
 
     private func setUpNetworkMonitoring() {
         networkMonitor.onSatisfied = { [weak self] in
-            self?.reconnect()
+            self?.reconnectIfNeeded()
         }
         networkMonitor.startMonitoring()
     }
@@ -61,7 +61,7 @@ class AutomaticSocketConnectionHandler {
         socket.disconnect()
     }
 
-    private func reconnect() {
+    private func reconnectIfNeeded() {
         if !socket.isConnected {
             socket.connect()
         }
@@ -82,7 +82,7 @@ extension AutomaticSocketConnectionHandler: SocketConnectionHandler {
 
     func handleDisconnection() {
         if appStateObserver.currentState == .foreground {
-            reconnect()
+            reconnectIfNeeded()
         }
     }
 }
