@@ -23,6 +23,8 @@ public protocol NetworkInteracting {
     func responseErrorSubscription<Request: Codable>(
         on request: ProtocolMethod
     ) -> AnyPublisher<ResponseSubscriptionErrorPayload<Request>, Never>
+
+    func getClientId() throws -> String
 }
 
 extension NetworkInteracting {
