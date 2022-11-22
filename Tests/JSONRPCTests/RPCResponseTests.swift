@@ -10,7 +10,8 @@ private func makeResultResponses() -> [RPCResponse] {
         RPCResponse(id: Int64.random(), result: String.random()),
         RPCResponse(id: Int64.random(), result: (1...10).map { String($0) }),
         RPCResponse(id: Int64.random(), result: EmptyCodable()),
-        RPCResponse(id: String.random(), result: Int.random())
+        RPCResponse(id: String.random(), result: Int.random()),
+        RPCResponse(id: RPCID(String.random()), outcome: .response(AnyCodable(Int.random())))
     ]
 }
 
@@ -19,7 +20,8 @@ private func makeErrorResponses() -> [RPCResponse] {
         RPCResponse(id: Int64.random(), error: JSONRPCError.stub()),
         RPCResponse(id: String.random(), error: JSONRPCError.stub(data: AnyCodable(Int.random()))),
         RPCResponse(id: Int64.random(), errorCode: Int.random(), message: String.random(), associatedData: AnyCodable(String.random())),
-        RPCResponse(id: String.random(), errorCode: Int.random(), message: String.random(), associatedData: nil)
+        RPCResponse(id: String.random(), errorCode: Int.random(), message: String.random(), associatedData: nil),
+        RPCResponse(id: RPCID(String.random()), outcome: .error(JSONRPCError.stub()))
     ]
 }
 
