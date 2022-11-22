@@ -1,7 +1,7 @@
 import Foundation
 import Network
 
-protocol NetworkMonitoring {
+protocol NetworkMonitoring: AnyObject {
     var onSatisfied: (() -> Void)? {get set}
     var onUnsatisfied: (() -> Void)? {get set}
     func startMonitoring()

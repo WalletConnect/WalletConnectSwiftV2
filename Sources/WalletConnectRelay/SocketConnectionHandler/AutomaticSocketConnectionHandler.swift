@@ -4,26 +4,31 @@ import UIKit
 import Foundation
 import Combine
 
-class AutomaticSocketConnectionHandler: SocketConnectionHandler {
-    enum Error: Swift.Error {
-        case manualSocketConnectionForbidden
-        case manualSocketDisconnectionForbidden
+class AutomaticSocketConnectionHandler {
+
+    enum Errors: Error {
+        case manualSocketConnectionForbidden, manualSocketDisconnectionForbidden
     }
-    private var appStateObserver: AppStateObserving
+
     let socket: WebSocketConnecting
-    private var networkMonitor: NetworkMonitoring
+
+    private let appStateObserver: AppStateObserving
+    private let networkMonitor: NetworkMonitoring
     private let backgroundTaskRegistrar: BackgroundTaskRegistering
 
     private var publishers = Set<AnyCancellable>()
 
-    init(networkMonitor: NetworkMonitoring = NetworkMonitor(),
-         socket: WebSocketConnecting,
-         appStateObserver: AppStateObserving = AppStateObserver(),
-         backgroundTaskRegistrar: BackgroundTaskRegistering = BackgroundTaskRegistrar()) {
+    init(
+        socket: WebSocketConnecting,
+        networkMonitor: NetworkMonitoring = NetworkMonitor(),
+        appStateObserver: AppStateObserving = AppStateObserver(),
+        backgroundTaskRegistrar: BackgroundTaskRegistering = BackgroundTaskRegistrar()
+    ) {
         self.appStateObserver = appStateObserver
         self.socket = socket
         self.networkMonitor = networkMonitor
         self.backgroundTaskRegistrar = backgroundTaskRegistrar
+
         setUpStateObserving()
         setUpNetworkMonitoring()
 
@@ -59,17 +64,26 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
         socket.disconnect()
     }
 
-    func handleConnect() throws {
-        throw Error.manualSocketConnectionForbidden
-    }
-
-    func handleDisconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
-        throw Error.manualSocketDisconnectionForbidden
-    }
-
     func handleNetworkSatisfied() {
         if !socket.isConnected {
             socket.connect()
         }
+    }
+}
+
+// MARK: - SocketConnectionHandler
+
+extension AutomaticSocketConnectionHandler: SocketConnectionHandler {
+
+    func handleConnect() throws {
+        throw Errors.manualSocketConnectionForbidden
+    }
+
+    func handleDisconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
+        throw Errors.manualSocketDisconnectionForbidden
+    }
+
+    func handleDisconnection() {
+
     }
 }

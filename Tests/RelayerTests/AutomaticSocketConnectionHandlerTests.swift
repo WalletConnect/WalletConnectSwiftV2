@@ -14,8 +14,8 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
         appStateObserver = AppStateObserverMock()
         backgroundTaskRegistrar = BackgroundTaskRegistrarMock()
         sut = AutomaticSocketConnectionHandler(
-            networkMonitor: networkMonitor,
             socket: webSocketSession,
+            networkMonitor: networkMonitor,
             appStateObserver: appStateObserver,
         backgroundTaskRegistrar: backgroundTaskRegistrar)
     }

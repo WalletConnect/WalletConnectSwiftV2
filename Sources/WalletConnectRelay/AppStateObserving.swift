@@ -3,7 +3,7 @@ import Foundation
 import UIKit
 #endif
 
-protocol AppStateObserving {
+protocol AppStateObserving: AnyObject {
     var onWillEnterForeground: (() -> Void)? {get set}
     var onWillEnterBackground: (() -> Void)? {get set}
 }
