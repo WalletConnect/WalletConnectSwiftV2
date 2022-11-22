@@ -19,7 +19,7 @@ public struct RPCResponse: Equatable {
 
     public let outcome: RPCResult
 
-    internal init(id: RPCID?, outcome: RPCResult) {
+    public init(id: RPCID?, outcome: RPCResult) {
         self.jsonrpc = "2.0"
         self.id = id
         self.outcome = outcome

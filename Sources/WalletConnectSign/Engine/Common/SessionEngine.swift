@@ -63,7 +63,7 @@ final class SessionEngine {
         guard sessionStore.hasSession(forTopic: topic) else {
             throw Errors.sessionNotFound(topic: topic)
         }
-        let response = RPCResponse(id: requestId, result: response)
+        let response = RPCResponse(id: requestId, outcome: response)
         try await networkingInteractor.respond(topic: topic, response: response, protocolMethod: SessionRequestProtocolMethod())
     }
 
@@ -121,12 +121,23 @@ private extension SessionEngine {
 
     func setupResponseSubscriptions() {
         networkingInteractor.responseSubscription(on: SessionRequestProtocolMethod())
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionType.RequestParams, RPCResult>) in
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionType.RequestParams, AnyCodable>) in
                 onSessionResponse?(Response(
                     id: payload.id,
                     topic: payload.topic,
                     chainId: payload.request.chainId.absoluteString,
-                    result: payload.response
+                    result: .response(payload.response)
+                ))
+            }
+            .store(in: &publishers)
+
+        networkingInteractor.responseErrorSubscription(on: SessionRequestProtocolMethod())
+            .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<SessionType.RequestParams>) in
+                onSessionResponse?(Response(
+                    id: payload.id,
+                    topic: payload.topic,
+                    chainId: payload.request.chainId.absoluteString,
+                    result: .error(payload.error)
                 ))
             }
             .store(in: &publishers)
