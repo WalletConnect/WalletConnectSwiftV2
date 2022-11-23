@@ -1,9 +1,7 @@
 import Foundation
 import Combine
 import WalletConnectUtils
-public struct PushMessage: Codable {
 
-}
 public class DappPushClient {
 
     private let responsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<PushResponseParams, PairError>), Never>()
