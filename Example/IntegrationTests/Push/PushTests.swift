@@ -10,11 +10,11 @@ import WalletConnectNetworking
 
 final class PushTests: XCTestCase {
 
-    var appPairingClient: PairingClient!
+    var dappPairingClient: PairingClient!
     var walletPairingClient: PairingClient!
 
-    var appPushClient: PushClient!
-    var walletPushClient: PushClient!
+    var dappPushClient: DappPushClient!
+    var walletPushClient: WalletPushClient!
 
     var pairingStorage: PairingStorage!
 
@@ -52,21 +52,36 @@ final class PushTests: XCTestCase {
         return (pairingClient, networkingClient, keychain, keyValueStorage)
     }
 
-    func makeDappPushClient() -> DappPushClient {
+    func makeDappClients()  {
         let prefix = "🦄"
-        let (_, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
+        let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
-        return DappPushClientFactory.create(logger: pushLogger, keyValueStorage: keyValueStorage, keychainStorage: keychain, networkInteractor: networkingInteractor)
+        dappPairingClient = pairingClient
+        dappPushClient = DappPushClientFactory.create(logger: pushLogger, keyValueStorage: keyValueStorage, keychainStorage: keychain, networkInteractor: networkingInteractor)
     }
 
-    func makeWalletPushClient() -> WalletPushClient {
+    func makeWalletClients()  {
         let prefix = "🦋"
         let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
-        return WalletPushClientFactory.create(logger: pushLogger, keyValueStorage: keyValueStorage, keychainStorage: keychain, networkInteractor: networkingInteractor, pairingRegisterer: pairingClient)
+        walletPairingClient = pairingClient
+        walletPushClient = WalletPushClientFactory.create(logger: pushLogger, keyValueStorage: keyValueStorage, keychainStorage: keychain, networkInteractor: networkingInteractor, pairingRegisterer: pairingClient)
+    }
+
+    override func setUp() {
+        makeDappClients()
+        makeWalletClients()
     }
 
     func testRequestPush() async {
+        let expectation = expectation(description: "expects to receive push request")
 
+        let uri = try! await dappPairingClient.create()
+        try! await walletPairingClient.pair(uri: uri)
+
+        walletPushClient.proposalPublisher.sink { (topic, request) in
+            expectation.fulfill()
+        }.store(in: &publishers)
+        wait(for: [expectation], timeout: 2)
     }
 }
