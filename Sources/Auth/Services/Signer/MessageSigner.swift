@@ -14,11 +14,11 @@ struct MessageSigner: MessageSignatureVerifying, MessageSigning {
         case utf8EncodingFailed
     }
 
-    private let signer: Signer
+    private let signer: EthereumSigner
     private let eip191Verifier: EIP191Verifier
     private let eip1271Verifier: EIP1271Verifier
 
-    init(signer: Signer, eip191Verifier: EIP191Verifier, eip1271Verifier: EIP1271Verifier) {
+    init(signer: EthereumSigner, eip191Verifier: EIP191Verifier, eip1271Verifier: EIP1271Verifier) {
         self.signer = signer
         self.eip191Verifier = eip191Verifier
         self.eip1271Verifier = eip1271Verifier
@@ -27,8 +27,7 @@ struct MessageSigner: MessageSignatureVerifying, MessageSigning {
     func sign(message: String, privateKey: Data, type: CacaoSignatureType) throws -> CacaoSignature {
         guard let messageData = message.data(using: .utf8) else { throw Errors.utf8EncodingFailed }
         let signature = try signer.sign(message: prefixed(messageData), with: privateKey)
-        let prefixedHexSignature = "0x" + signature.toHexString()
-        return CacaoSignature(t: type, s: prefixedHexSignature)
+        return CacaoSignature(t: type, s: signature.hex())
     }
 
     func verify(signature: CacaoSignature, message: String, address: String, chainId: String) async throws {

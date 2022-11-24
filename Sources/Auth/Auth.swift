@@ -16,10 +16,14 @@ public class Auth {
 
     /// Auth client instance
     public static var instance: AuthClient = {
+        guard let config = Auth.config else {
+            fatalError("Error - you must call Auth.configure(_:) before accessing the shared instance.")
+        }
         return AuthClientFactory.create(
             metadata: Pair.metadata,
-            account: config?.account,
+            account: config.account,
             projectId: Networking.projectId,
+            signerFactory: config.signerFactory,
             networkingClient: Networking.interactor,
             pairingRegisterer: Pair.registerer
         )
@@ -32,7 +36,8 @@ public class Auth {
     /// Auth instance wallet config method
     /// - Parameters:
     ///   - account: account that wallet will be authenticating with.
-    static public func configure(account: Account) {
-        Auth.config = Auth.Config(account: account)
+    ///   - signerFactory: Multichain signers factory
+    static public func configure(account: Account, signerFactory: SignerFactory) {
+        Auth.config = Auth.Config(account: account, signerFactory: signerFactory)
     }
 }
