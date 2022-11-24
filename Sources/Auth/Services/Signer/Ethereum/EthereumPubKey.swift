@@ -1,6 +1,6 @@
 import Foundation
 
-public struct EthereumPublicKey {
+public struct EthereumPubKey {
     public let data: [UInt8]
 
     public init(data: [UInt8]) {

@@ -10,11 +10,11 @@ actor EIP191Verifier {
 
     func verify(signature: Data, message: Data, address: String) async throws {
         let sig = EthereumSignature(serialized: signature)
-        let publicKey = try signer.recover(signature: sig)
+        let publicKey = try signer.recover(signature: sig, message: message)
         try verifyPublicKey(publicKey, address: address)
     }
 
-    private func verifyPublicKey(_ publicKey: EthereumPublicKey, address: String) throws {
+    private func verifyPublicKey(_ publicKey: EthereumPubKey, address: String) throws {
         guard publicKey.hex() == address.lowercased() else {
             throw Errors.invalidSignature
         }

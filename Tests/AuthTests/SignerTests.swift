@@ -1,8 +1,6 @@
 import Foundation
 import XCTest
 @testable import Auth
-import secp256k1
-import Web3
 import WalletConnectUtils
 import WalletConnectRelay
 

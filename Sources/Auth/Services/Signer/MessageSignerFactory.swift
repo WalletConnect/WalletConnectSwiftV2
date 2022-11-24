@@ -18,7 +18,8 @@ public struct MessageSignerFactory {
             eip191Verifier: EIP191Verifier(signer: signerFactory.createEthereum()),
             eip1271Verifier: EIP1271Verifier(
                 projectId: projectId,
-                httpClient: HTTPNetworkClient(host: "rpc.walletconnect.com")
+                httpClient: HTTPNetworkClient(host: "rpc.walletconnect.com"),
+                signer: signerFactory.createEthereum()
             )
         )
     }

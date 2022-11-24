@@ -12,9 +12,10 @@ public struct EthereumSignature {
     }
 
     public init(serialized: Data) {
-        v = UInt8(serialized.bytes[serialized.count-1])
-        r = [UInt8](serialized.bytes[0..<32])
-        s = [UInt8](serialized.bytes[32..<64])
+        let bytes = [UInt8](serialized)
+        v = UInt8(bytes[serialized.count-1])
+        r = [UInt8](bytes[0..<32])
+        s = [UInt8](bytes[32..<64])
     }
 
     public var serialized: Data {
