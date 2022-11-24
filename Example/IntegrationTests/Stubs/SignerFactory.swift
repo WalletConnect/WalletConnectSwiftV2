@@ -18,14 +18,14 @@ public struct Web3Signer: EthereumSigner {
         return EthereumSignature(v: UInt8(signature.v), r: signature.r, s: signature.s)
     }
 
-    public func recover(signature: EthereumSignature, message: Data) throws -> EthereumPubKey {
+    public func recoverPubKey(signature: EthereumSignature, message: Data) throws -> Data {
         let publicKey = try EthereumPublicKey(
             message: message.bytes,
             v: EthereumQuantity(quantity: BigUInt(signature.v)),
             r: EthereumQuantity(signature.r),
             s: EthereumQuantity(signature.s)
         )
-        return EthereumPubKey(data: publicKey.rawPublicKey)
+        return Data(publicKey.rawPublicKey)
     }
 
     public func keccak256(_ data: Data) -> Data {
