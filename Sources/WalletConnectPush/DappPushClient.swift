@@ -26,7 +26,7 @@ public class DappPushClient {
     }
 
     public func request(account: Account, topic: String) async throws {
-        try await pushProposer.request(topic: topic, params: PushRequestParams())
+        try await pushProposer.request(topic: topic, account: account)
     }
 
     public func notify(topic: String, message: PushMessage) async throws {

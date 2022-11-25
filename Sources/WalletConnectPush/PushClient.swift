@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import WalletConnectUtils
 
 public class PushClient {
 
@@ -36,8 +37,8 @@ public class PushClient {
         setupSubscriptions()
     }
 
-    public func propose(topic: String) async throws {
-        try await pushProposer.request(topic: topic, params: PushRequestParams())
+    public func propose(topic: String, account: Account) async throws {
+        try await pushProposer.request(topic: topic, account: account)
     }
 
     public func register(deviceToken: Data) async throws {

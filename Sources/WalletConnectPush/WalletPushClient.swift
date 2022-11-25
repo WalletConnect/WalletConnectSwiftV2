@@ -9,7 +9,7 @@ public class WalletPushClient {
 
     private let requestPublisherSubject = PassthroughSubject<(id: RPCID, metadata: AppMetadata), Never>()
 
-    public var proposalPublisher: AnyPublisher<(id: RPCID, metadata: AppMetadata), Never> {
+    public var requestPublisher: AnyPublisher<(id: RPCID, metadata: AppMetadata), Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
@@ -62,7 +62,7 @@ private extension WalletPushClient {
 
         pairingRegisterer.register(method: protocolMethod)
             .sink { [unowned self] (payload: RequestSubscriptionPayload<PushRequestParams>) in
-                requestPublisherSubject.send((topic: payload.topic, params: payload.request))
+                requestPublisherSubject.send((id: payload.id, metadata: payload.request.metadata))
         }.store(in: &publishers)
     }
 }

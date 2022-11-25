@@ -53,19 +53,27 @@ final class PushTests: XCTestCase {
     }
 
     func makeDappClients()  {
-        let prefix = "🦄"
+        let prefix = "🦄 Dapp: "
         let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
         dappPairingClient = pairingClient
-        dappPushClient = DappPushClientFactory.create(logger: pushLogger, keyValueStorage: keyValueStorage, keychainStorage: keychain, networkInteractor: networkingInteractor)
+        dappPushClient = DappPushClientFactory.create(metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
+                                                      logger: pushLogger,
+                                                      keyValueStorage: keyValueStorage,
+                                                      keychainStorage: keychain,
+                                                      networkInteractor: networkingInteractor)
     }
 
     func makeWalletClients()  {
-        let prefix = "🦋"
+        let prefix = "🦋 Wallet: "
         let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
         walletPairingClient = pairingClient
-        walletPushClient = WalletPushClientFactory.create(logger: pushLogger, keyValueStorage: keyValueStorage, keychainStorage: keychain, networkInteractor: networkingInteractor, pairingRegisterer: pairingClient)
+        walletPushClient = WalletPushClientFactory.create(logger: pushLogger,
+                                                          keyValueStorage: keyValueStorage,
+                                                          keychainStorage: keychain,
+                                                          networkInteractor: networkingInteractor,
+                                                          pairingRegisterer: pairingClient)
     }
 
     override func setUp() {
@@ -78,26 +86,29 @@ final class PushTests: XCTestCase {
 
         let uri = try! await dappPairingClient.create()
         try! await walletPairingClient.pair(uri: uri)
+        let account = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
+        try! await dappPushClient.request(account: account, topic: uri.topic)
 
-        walletPushClient.proposalPublisher.sink { (topic, request) in
+        walletPushClient.requestPublisher.sink { (topic, request) in
             expectation.fulfill()
         }.store(in: &publishers)
         wait(for: [expectation], timeout: 5)
     }
 
-    func tesWalletApprovesPushRequest() async {
+    func testWalletApprovesPushRequest() async {
         let expectation = expectation(description: "expects dapp to receive successful response")
 
         let uri = try! await dappPairingClient.create()
         try! await walletPairingClient.pair(uri: uri)
 
-        walletPushClient.proposalPublisher.sink { [unowned self] (id, _) in
-            try! walletPushClient.approve(proposalId: id)
+        walletPushClient.requestPublisher.sink { [unowned self] (id, _) in
+            Task{ try! await walletPushClient.approve(id: id) }
         }.store(in: &publishers)
 
         dappPushClient.responsePublisher.sink { (id, result) in
             guard case .success = result else {
                 XCTFail()
+                return
             }
             expectation.fulfill()
         }.store(in: &publishers)
