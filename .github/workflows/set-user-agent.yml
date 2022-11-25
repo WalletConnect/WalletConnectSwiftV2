@@ -17,6 +17,9 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+
       - name: Set User Agent
         shell: bash
         run: ./.github/scripts/set-user-agent.sh
