@@ -82,6 +82,26 @@ final class PushTests: XCTestCase {
         walletPushClient.proposalPublisher.sink { (topic, request) in
             expectation.fulfill()
         }.store(in: &publishers)
-        wait(for: [expectation], timeout: 2)
+        wait(for: [expectation], timeout: 5)
+    }
+
+    func tesWalletApprovesPushRequest() async {
+        let expectation = expectation(description: "expects dapp to receive successful response")
+
+        let uri = try! await dappPairingClient.create()
+        try! await walletPairingClient.pair(uri: uri)
+
+        walletPushClient.proposalPublisher.sink { [unowned self] (id, _) in
+            try! walletPushClient.approve(proposalId: id)
+        }.store(in: &publishers)
+
+        dappPushClient.responsePublisher.sink { (id, result) in
+            guard case .success = result else {
+                XCTFail()
+            }
+            expectation.fulfill()
+        }.store(in: &publishers)
+
+        wait(for: [expectation], timeout: 5)
     }
 }

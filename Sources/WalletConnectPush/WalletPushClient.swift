@@ -1,14 +1,15 @@
 import Foundation
 import Combine
 import WalletConnectNetworking
+import WalletConnectPairing
 
 public class WalletPushClient {
 
     private var publishers = Set<AnyCancellable>()
 
-    private let requestPublisherSubject = PassthroughSubject<(topic: String, params: PushRequestParams), Never>()
+    private let requestPublisherSubject = PassthroughSubject<(id: RPCID, metadata: AppMetadata), Never>()
 
-    public var proposalPublisher: AnyPublisher<(topic: String, params: PushRequestParams), Never> {
+    public var proposalPublisher: AnyPublisher<(id: RPCID, metadata: AppMetadata), Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
@@ -28,7 +29,7 @@ public class WalletPushClient {
     }
 
 
-    public func approve(proposalId: String) async throws {
+    public func approve(id: RPCID) async throws {
         fatalError("not implemented")
     }
 
