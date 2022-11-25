@@ -181,6 +181,7 @@
 		A5E22D222840C8D300E36487 /* WalletEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D212840C8D300E36487 /* WalletEngine.swift */; };
 		A5E22D242840C8DB00E36487 /* SafariEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D232840C8DB00E36487 /* SafariEngine.swift */; };
 		A5E22D2C2840EAC300E36487 /* XCUIElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D2B2840EAC300E36487 /* XCUIElement.swift */; };
+		A5EA27542930D7830094D272 /* MultichainSignerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EA27532930D7830094D272 /* MultichainSignerFactory.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -369,6 +370,7 @@
 		A5E22D212840C8D300E36487 /* WalletEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletEngine.swift; sourceTree = "<group>"; };
 		A5E22D232840C8DB00E36487 /* SafariEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariEngine.swift; sourceTree = "<group>"; };
 		A5E22D2B2840EAC300E36487 /* XCUIElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCUIElement.swift; sourceTree = "<group>"; };
+		A5EA27532930D7830094D272 /* MultichainSignerFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultichainSignerFactory.swift; sourceTree = "<group>"; };
 		A5F48A0528E43D3F0034CBFB /* Configuration.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Configuration.xcconfig; path = ../Configuration.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -660,6 +662,7 @@
 		A5629AA42876A19D00094373 /* DomainLayer */ = {
 			isa = PBXGroup;
 			children = (
+				A5EA27522930D7760094D272 /* SignerFactory */,
 				A5C20227287EB342007E3188 /* AccountStorage */,
 				A5629AEE2877F72B00094373 /* SocketFactory */,
 				A5629AEB2877F69C00094373 /* Chat */,
@@ -1132,6 +1135,14 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		A5EA27522930D7760094D272 /* SignerFactory */ = {
+			isa = PBXGroup;
+			children = (
+				A5EA27532930D7830094D272 /* MultichainSignerFactory.swift */,
+			);
+			path = SignerFactory;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1458,6 +1469,7 @@
 				A59F877128B53EA000A9CD80 /* WalletRouter.swift in Sources */,
 				A5C20226287EB099007E3188 /* AccountNameResolver.swift in Sources */,
 				A5C2020D287D9DEE007E3188 /* WelcomeRouter.swift in Sources */,
+				A5EA27542930D7830094D272 /* MultichainSignerFactory.swift in Sources */,
 				A55CAAB328B92AFF00844382 /* ScanInteractor.swift in Sources */,
 				A55CAABA28B92B4600844382 /* ScanTargetView.swift in Sources */,
 				A578FA372873D8EE00AA7720 /* UIColor.swift in Sources */,
