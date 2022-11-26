@@ -15,7 +15,14 @@ actor EIP191Verifier {
     }
 
     private func decompose(signature: Data) -> Signer.Signature {
-        let v = signature.bytes[signature.count-1]
+        var v = signature.bytes[signature.count-1]
+        if v >= 27 && v <= 30 {
+            v -= 27
+        } else if v >= 31 && v <= 34 {
+            v -= 31
+        } else if v >= 35 && v <= 38 {
+            v -= 35
+        }
         let r = signature.bytes[0..<32]
         let s = signature.bytes[32..<64]
         return (UInt(v), [UInt8](r), [UInt8](s))

@@ -14,6 +14,6 @@ struct Signer {
     }
 
     private func serialized(signature: Signature) -> Data {
-        return Data(signature.r + signature.s + [UInt8(signature.v)])
+        return Data(signature.r + signature.s + [UInt8(signature.v + 27)])
     }
 }
