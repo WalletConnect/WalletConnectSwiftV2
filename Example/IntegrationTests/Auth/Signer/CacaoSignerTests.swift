@@ -1,11 +1,11 @@
 import Foundation
 import XCTest
 @testable import Auth
-import TestingUtils
 
 class CacaoSignerTest: XCTestCase {
 
-    let signer = MessageSignerFactory.create(projectId: "project-id")
+    let signer = MessageSignerFactory(signerFactory: MultichainSignerFactory())
+        .create(projectId: InputConfig.projectId)
 
     let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
 

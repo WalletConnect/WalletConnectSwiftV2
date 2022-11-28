@@ -57,6 +57,10 @@
 		A51AC0D928E436A3001BACF9 /* InputConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51AC0D828E436A3001BACF9 /* InputConfig.swift */; };
 		A51AC0DD28E43727001BACF9 /* InputConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51AC0DB28E436E6001BACF9 /* InputConfig.swift */; };
 		A51AC0DF28E4379F001BACF9 /* InputConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51AC0DE28E4379F001BACF9 /* InputConfig.swift */; };
+		A541959E2934BFEF0035AD19 /* CacaoSignerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A541959A2934BFEF0035AD19 /* CacaoSignerTests.swift */; };
+		A541959F2934BFEF0035AD19 /* SignerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A541959B2934BFEF0035AD19 /* SignerTests.swift */; };
+		A54195A02934BFEF0035AD19 /* EIP1271VerifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A541959C2934BFEF0035AD19 /* EIP1271VerifierTests.swift */; };
+		A54195A12934BFEF0035AD19 /* EIP191VerifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A541959D2934BFEF0035AD19 /* EIP191VerifierTests.swift */; };
 		A5434023291E6A270068F706 /* SolanaSwift in Frameworks */ = {isa = PBXBuildFile; productRef = A5434022291E6A270068F706 /* SolanaSwift */; };
 		A55CAAB028B92AFF00844382 /* ScanModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55CAAAB28B92AFF00844382 /* ScanModule.swift */; };
 		A55CAAB128B92AFF00844382 /* ScanPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55CAAAC28B92AFF00844382 /* ScanPresenter.swift */; };
@@ -256,6 +260,10 @@
 		A51AC0D828E436A3001BACF9 /* InputConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputConfig.swift; sourceTree = "<group>"; };
 		A51AC0DB28E436E6001BACF9 /* InputConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputConfig.swift; sourceTree = "<group>"; };
 		A51AC0DE28E4379F001BACF9 /* InputConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputConfig.swift; sourceTree = "<group>"; };
+		A541959A2934BFEF0035AD19 /* CacaoSignerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CacaoSignerTests.swift; sourceTree = "<group>"; };
+		A541959B2934BFEF0035AD19 /* SignerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignerTests.swift; sourceTree = "<group>"; };
+		A541959C2934BFEF0035AD19 /* EIP1271VerifierTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EIP1271VerifierTests.swift; sourceTree = "<group>"; };
+		A541959D2934BFEF0035AD19 /* EIP191VerifierTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EIP191VerifierTests.swift; sourceTree = "<group>"; };
 		A55CAAAB28B92AFF00844382 /* ScanModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanModule.swift; sourceTree = "<group>"; };
 		A55CAAAC28B92AFF00844382 /* ScanPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanPresenter.swift; sourceTree = "<group>"; };
 		A55CAAAD28B92AFF00844382 /* ScanRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanRouter.swift; sourceTree = "<group>"; };
@@ -615,6 +623,7 @@
 		84D2A66728A4F5260088AE09 /* Auth */ = {
 			isa = PBXGroup;
 			children = (
+				A54195992934BFDD0035AD19 /* Signer */,
 				84D2A66528A4F51E0088AE09 /* AuthTests.swift */,
 			);
 			path = Auth;
@@ -634,6 +643,17 @@
 				A51AC0DB28E436E6001BACF9 /* InputConfig.swift */,
 			);
 			path = Common;
+			sourceTree = "<group>";
+		};
+		A54195992934BFDD0035AD19 /* Signer */ = {
+			isa = PBXGroup;
+			children = (
+				A541959A2934BFEF0035AD19 /* CacaoSignerTests.swift */,
+				A541959D2934BFEF0035AD19 /* EIP191VerifierTests.swift */,
+				A541959C2934BFEF0035AD19 /* EIP1271VerifierTests.swift */,
+				A541959B2934BFEF0035AD19 /* SignerTests.swift */,
+			);
+			path = Signer;
 			sourceTree = "<group>";
 		};
 		A55CAAAA28B92AF200844382 /* Scan */ = {
@@ -1528,14 +1548,18 @@
 				84CEC64628D89D6B00D081A8 /* PairingTests.swift in Sources */,
 				767DC83528997F8E00080FA9 /* EthSendTransaction.swift in Sources */,
 				A518B31428E33A6500A2CE93 /* InputConfig.swift in Sources */,
+				A541959E2934BFEF0035AD19 /* CacaoSignerTests.swift in Sources */,
 				A59CF4F6292F83D50031A42F /* SignerFactory.swift in Sources */,
 				A5E03E03286466F400888481 /* ChatTests.swift in Sources */,
 				84D2A66628A4F51E0088AE09 /* AuthTests.swift in Sources */,
 				84FE684628ACDB4700C893FF /* RequestParams.swift in Sources */,
 				7694A5262874296A0001257E /* RegistryTests.swift in Sources */,
+				A541959F2934BFEF0035AD19 /* SignerTests.swift in Sources */,
 				A50C036528AAD32200FE72D3 /* ClientDelegate.swift in Sources */,
 				A5E03E0D28646AD200888481 /* RelayClientEndToEndTests.swift in Sources */,
 				A5E03DFA286465C700888481 /* SignClientTests.swift in Sources */,
+				A54195A02934BFEF0035AD19 /* EIP1271VerifierTests.swift in Sources */,
+				A54195A12934BFEF0035AD19 /* EIP191VerifierTests.swift in Sources */,
 				A5E03E0F28646D8A00888481 /* WebSocketFactory.swift in Sources */,
 				84AA01DB28CF0CD7005D48D8 /* XCTest.swift in Sources */,
 				A5E03E1128646F8000888481 /* KeychainStorageMock.swift in Sources */,

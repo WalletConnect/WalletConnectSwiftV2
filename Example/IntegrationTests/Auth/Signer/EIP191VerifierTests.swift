@@ -1,11 +1,10 @@
 import Foundation
 import XCTest
-import TestingUtils
 @testable import Auth
 
 class EIP191VerifierTests: XCTestCase {
 
-    private let verifier = EIP191Verifier()
+    private let verifier = EIP191Verifier(signer: MultichainSignerFactory().createEthereum())
 
     private let address = "0x15bca56b6e2728aec2532df9d436bd1600e86688"
     private let message = "\u{19}Ethereum Signed Message:\n7Message".data(using: .utf8)!

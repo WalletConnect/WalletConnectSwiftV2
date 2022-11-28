@@ -15,11 +15,11 @@ actor EIP191Verifier {
     }
 
     private func verifyPublicKey(_ publicKey: Data, address: String) throws {
-        let address = "0x" + signer.keccak256(publicKey)
+        let recovered = "0x" + signer.keccak256(publicKey)
             .suffix(20)
             .toHexString()
 
-        guard address == address.lowercased() else {
+        guard recovered == address.lowercased() else {
             throw Errors.invalidSignature
         }
     }
