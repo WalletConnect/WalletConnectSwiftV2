@@ -91,7 +91,8 @@ final class PushTests: XCTestCase {
 
         walletPushClient.requestPublisher.sink { (topic, request) in
             expectation.fulfill()
-        }.store(in: &publishers)
+        }
+        .store(in: &publishers)
         wait(for: [expectation], timeout: 5)
     }
 
