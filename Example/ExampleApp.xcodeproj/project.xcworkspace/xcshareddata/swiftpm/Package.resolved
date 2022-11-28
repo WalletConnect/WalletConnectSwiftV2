@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/WalletConnect/Web3.swift",
         "state": {
           "branch": null,
-          "revision": "5042fbdaf0674e973a374fca6e66e19683f6437e",
-          "version": "1.0.1"
+          "revision": "569255adcfff0b37e4cb8004aea29d0e2d6266df",
+          "version": "1.0.2"
         }
       }
     ]

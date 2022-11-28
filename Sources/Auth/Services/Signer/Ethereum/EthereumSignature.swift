@@ -13,13 +13,23 @@ public struct EthereumSignature {
 
     public init(serialized: Data) {
         let bytes = [UInt8](serialized)
-        v = UInt8(bytes[serialized.count-1])
-        r = [UInt8](bytes[0..<32])
-        s = [UInt8](bytes[32..<64])
+
+        var v = bytes[bytes.count-1]
+        if v >= 27 && v <= 30 {
+            v -= 27
+        } else if v >= 31 && v <= 34 {
+            v -= 31
+        } else if v >= 35 && v <= 38 {
+            v -= 35
+        }
+
+        self.v = v
+        self.r = [UInt8](bytes[0..<32])
+        self.s = [UInt8](bytes[32..<64])
     }
 
     public var serialized: Data {
-        return Data(r + s + [UInt8(v)])
+        return Data(r + s + [UInt8(v + 27)])
     }
 
     public func hex() -> String {
