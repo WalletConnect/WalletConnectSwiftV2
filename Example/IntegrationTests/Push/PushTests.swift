@@ -86,8 +86,7 @@ final class PushTests: XCTestCase {
 
         let uri = try! await dappPairingClient.create()
         try! await walletPairingClient.pair(uri: uri)
-        let account = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
-        try! await dappPushClient.request(account: account, topic: uri.topic)
+        try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
 
         walletPushClient.requestPublisher.sink { (topic, request) in
             expectation.fulfill()
@@ -101,9 +100,11 @@ final class PushTests: XCTestCase {
 
         let uri = try! await dappPairingClient.create()
         try! await walletPairingClient.pair(uri: uri)
+        try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
 
         walletPushClient.requestPublisher.sink { [unowned self] (id, _) in
-            Task{ try! await walletPushClient.approve(id: id) }
+
+            Task(priority: .high) { try! await walletPushClient.approve(id: id) }
         }.store(in: &publishers)
 
         dappPushClient.responsePublisher.sink { (id, result) in
@@ -115,5 +116,11 @@ final class PushTests: XCTestCase {
         }.store(in: &publishers)
 
         wait(for: [expectation], timeout: 5)
+    }
+}
+
+extension Account {
+    static func stub() -> Account {
+        return Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
     }
 }

@@ -8,11 +8,3 @@ struct PushProposeProtocolMethod: ProtocolMethod {
 
     let responseConfig: RelayConfig = RelayConfig(tag: 112, prompt: true, ttl: 300)
 }
-
-public struct PushRequestParams: Codable {
-    let publicKey: String
-    let metadata: AppMetadata
-    let account: Account
-}
-
-public struct PushResponseParams: Codable, Equatable {}

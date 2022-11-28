@@ -17,20 +17,23 @@ public class WalletPushClient {
 
     private let pairingRegisterer: PairingRegisterer
     private let registerService: PushRegisterService
+    private let proposeResponder: ProposeResponder
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
          registerService: PushRegisterService,
-         pairingRegisterer: PairingRegisterer) {
+         pairingRegisterer: PairingRegisterer,
+         proposeResponder: ProposeResponder) {
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
         self.registerService = registerService
+        self.proposeResponder = proposeResponder
         setupSubscriptions()
     }
 
 
     public func approve(id: RPCID) async throws {
-        fatalError("not implemented")
+        try await  proposeResponder.respond(requestId: id)
     }
 
     public func reject(proposalId: String, reason: Reason) async throws {

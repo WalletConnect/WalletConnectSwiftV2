@@ -1,4 +1,5 @@
 import Foundation
+import WalletConnectUtils
 
 public struct WalletPushClientFactory {
 
@@ -19,12 +20,15 @@ public struct WalletPushClientFactory {
         let kms = KeyManagementService(keychain: keychainStorage)
         let httpClient = HTTPNetworkClient(host: "echo.walletconnect.com")
         let registerService = PushRegisterService(networkInteractor: networkInteractor, httpClient: httpClient)
+        let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
 
+        let proposeResponder = ProposeResponder(networkingInteractor: networkInteractor, logger: logger, kms: kms, rpcHistory: history)
         return WalletPushClient(
             logger: logger,
             kms: kms,
             registerService: registerService,
-            pairingRegisterer: pairingRegisterer
+            pairingRegisterer: pairingRegisterer,
+            proposeResponder: proposeResponder
         )
     }
 }
