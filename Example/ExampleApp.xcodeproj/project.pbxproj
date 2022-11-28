@@ -57,6 +57,7 @@
 		A51AC0D928E436A3001BACF9 /* InputConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51AC0D828E436A3001BACF9 /* InputConfig.swift */; };
 		A51AC0DD28E43727001BACF9 /* InputConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51AC0DB28E436E6001BACF9 /* InputConfig.swift */; };
 		A51AC0DF28E4379F001BACF9 /* InputConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51AC0DE28E4379F001BACF9 /* InputConfig.swift */; };
+		A5434023291E6A270068F706 /* SolanaSwift in Frameworks */ = {isa = PBXBuildFile; productRef = A5434022291E6A270068F706 /* SolanaSwift */; };
 		A55CAAB028B92AFF00844382 /* ScanModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55CAAAB28B92AFF00844382 /* ScanModule.swift */; };
 		A55CAAB128B92AFF00844382 /* ScanPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55CAAAC28B92AFF00844382 /* ScanPresenter.swift */; };
 		A55CAAB228B92AFF00844382 /* ScanRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55CAAAD28B92AFF00844382 /* ScanRouter.swift */; };
@@ -91,6 +92,8 @@
 		A578FA372873D8EE00AA7720 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA362873D8EE00AA7720 /* UIColor.swift */; };
 		A578FA392873FCE000AA7720 /* ChatScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA382873FCE000AA7720 /* ChatScrollView.swift */; };
 		A578FA3D2874002400AA7720 /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA3C2874002400AA7720 /* View.swift */; };
+		A57E71A6291CF76400325797 /* EthereumSigner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57E71A5291CF76400325797 /* EthereumSigner.swift */; };
+		A57E71A8291CF8A500325797 /* SolanaSigner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57E71A7291CF8A500325797 /* SolanaSigner.swift */; };
 		A58E7CEB28729F550082D443 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58E7CEA28729F550082D443 /* AppDelegate.swift */; };
 		A58E7CED28729F550082D443 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58E7CEC28729F550082D443 /* SceneDelegate.swift */; };
 		A58E7CF428729F550082D443 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A58E7CF328729F550082D443 /* Assets.xcassets */; };
@@ -282,6 +285,8 @@
 		A578FA362873D8EE00AA7720 /* UIColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
 		A578FA382873FCE000AA7720 /* ChatScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatScrollView.swift; sourceTree = "<group>"; };
 		A578FA3C2874002400AA7720 /* View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
+		A57E71A5291CF76400325797 /* EthereumSigner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthereumSigner.swift; sourceTree = "<group>"; };
+		A57E71A7291CF8A500325797 /* SolanaSigner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolanaSigner.swift; sourceTree = "<group>"; };
 		A58E7CE828729F550082D443 /* Showcase.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Showcase.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A58E7CEA28729F550082D443 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A58E7CEC28729F550082D443 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -370,6 +375,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A5AE354728A1A2AC0059AE8A /* Web3 in Frameworks */,
+				A5434023291E6A270068F706 /* SolanaSwift in Frameworks */,
 				764E1D5826F8DBAB00A1FB15 /* WalletConnect in Frameworks */,
 				A5D85226286333D500DAF5C3 /* Starscream in Frameworks */,
 				A5C4DD8728A2DE88006A626D /* WalletConnectRouter in Frameworks */,
@@ -434,10 +440,10 @@
 		761248182819FA8B00CB6D48 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				A57E71A4291CF73300325797 /* Signer */,
 				761C64A526FCB0AA004239D1 /* SessionInfo.swift */,
 				84F568C32795832A00D0A289 /* EthereumTransaction.swift */,
 				A5A4FC5D283D23CA00BBEC1E /* Array.swift */,
-				84F568C1279582D200D0A289 /* Signer.swift */,
 				765056262821989600F9AE79 /* Color+Extension.swift */,
 				84494387278D9C1B00CC26BB /* UIAlertController.swift */,
 				76235E882820198B004ED0AA /* UIKit+Previews.swift */,
@@ -753,6 +759,16 @@
 				A578FA3C2874002400AA7720 /* View.swift */,
 			);
 			path = SwiftUI;
+			sourceTree = "<group>";
+		};
+		A57E71A4291CF73300325797 /* Signer */ = {
+			isa = PBXGroup;
+			children = (
+				84F568C1279582D200D0A289 /* Signer.swift */,
+				A57E71A5291CF76400325797 /* EthereumSigner.swift */,
+				A57E71A7291CF8A500325797 /* SolanaSigner.swift */,
+			);
+			path = Signer;
 			sourceTree = "<group>";
 		};
 		A58E7CE928729F550082D443 /* Showcase */ = {
@@ -1132,6 +1148,7 @@
 				A5D85225286333D500DAF5C3 /* Starscream */,
 				A5AE354628A1A2AC0059AE8A /* Web3 */,
 				A5C4DD8628A2DE88006A626D /* WalletConnectRouter */,
+				A5434022291E6A270068F706 /* SolanaSwift */,
 			);
 			productName = ExampleApp;
 			productReference = 764E1D3C26F8D3FC00A1FB15 /* WalletConnect Wallet.app */;
@@ -1263,6 +1280,7 @@
 			packageReferences = (
 				A5D85224286333D500DAF5C3 /* XCRemoteSwiftPackageReference "Starscream" */,
 				A5AE354528A1A2AC0059AE8A /* XCRemoteSwiftPackageReference "Web3" */,
+				A5434021291E6A270068F706 /* XCRemoteSwiftPackageReference "solana-swift" */,
 			);
 			productRefGroup = 764E1D3D26F8D3FC00A1FB15 /* Products */;
 			projectDirPath = "";
@@ -1339,9 +1357,11 @@
 				76235E8B28201C9C004ED0AA /* Utilities.swift in Sources */,
 				76744CF726FE4D5400B77ED9 /* ActiveSessionItem.swift in Sources */,
 				A5A4FC5A283CC08600BBEC1E /* SessionNamespaceViewModel.swift in Sources */,
+				A57E71A8291CF8A500325797 /* SolanaSigner.swift in Sources */,
 				764E1D4226F8D3FC00A1FB15 /* SceneDelegate.swift in Sources */,
 				84F568C2279582D200D0A289 /* Signer.swift in Sources */,
 				A5A4FC56283CBB7800BBEC1E /* SessionDetailView.swift in Sources */,
+				A57E71A6291CF76400325797 /* EthereumSigner.swift in Sources */,
 				7600223B2819FC0B0011DD38 /* ProposalView.swift in Sources */,
 				761248172819F9E600CB6D48 /* WalletView.swift in Sources */,
 				A5A4FC58283CBB9F00BBEC1E /* SessionDetailViewModel.swift in Sources */,
@@ -1983,6 +2003,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		A5434021291E6A270068F706 /* XCRemoteSwiftPackageReference "solana-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/flypaper0/solana-swift";
+			requirement = {
+				branch = "feature/available-13";
+				kind = branch;
+			};
+		};
 		A5AE354528A1A2AC0059AE8A /* XCRemoteSwiftPackageReference "Web3" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/WalletConnect/Web3.swift";
@@ -2017,6 +2045,11 @@
 		84DDB4EC28ABB663003D66ED /* WalletConnectAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectAuth;
+		};
+		A5434022291E6A270068F706 /* SolanaSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A5434021291E6A270068F706 /* XCRemoteSwiftPackageReference "solana-swift" */;
+			productName = SolanaSwift;
 		};
 		A5629AE92877F2D600094373 /* WalletConnectChat */ = {
 			isa = XCSwiftPackageProductDependency;

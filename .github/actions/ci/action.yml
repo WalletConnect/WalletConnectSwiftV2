@@ -52,8 +52,8 @@ runs:
        -project Example/ExampleApp.xcodeproj \
        -scheme Wallet \
        -clonedSourcePackagesDirPath SourcePackagesCache \
-       -derivedDataPath DerivedDataCache \
-       -sdk iphonesimulator"
+       -destination 'platform=iOS Simulator,name=iPhone 13' \
+       -derivedDataPath DerivedDataCache"
 
     # DApp build
     - name: Build Example Dapp
@@ -63,8 +63,8 @@ runs:
         -project Example/ExampleApp.xcodeproj \
         -scheme DApp \
         -clonedSourcePackagesDirPath SourcePackagesCache \
-        -derivedDataPath DerivedDataCache \
-        -sdk iphonesimulator"
+        -destination 'platform=iOS Simulator,name=iPhone 13' \
+        -derivedDataPath DerivedDataCache"
 
     # UI tests
     - name: UI Tests

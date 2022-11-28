@@ -15,7 +15,12 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
     }()
     private var publishers = [AnyCancellable]()
 
-    let chains = [Chain(name: "Ethereum", id: "eip155:1"), Chain(name: "Polygon", id: "eip155:137")]
+    let chains = [
+        Chain(name: "Ethereum", id: "eip155:1"),
+        Chain(name: "Polygon", id: "eip155:137"),
+        Chain(name: "Solana", id: "solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")
+    ]
+
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Available Chains"
@@ -31,9 +36,28 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
     @objc
     private func connect() {
         print("[PROPOSER] Connecting to a pairing...")
-        let methods: Set<String> = ["eth_sendTransaction", "personal_sign", "eth_signTypedData"]
-        let blockchains: Set<Blockchain> = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
-        let namespaces: [String: ProposalNamespace] = ["eip155": ProposalNamespace(chains: blockchains, methods: methods, events: [], extensions: nil)]
+        let namespaces: [String: ProposalNamespace] = [
+            "eip155": ProposalNamespace(
+                chains: [
+                    Blockchain("eip155:1")!,
+                    Blockchain("eip155:137")!
+                ],
+                methods: [
+                    "eth_sendTransaction",
+                    "personal_sign",
+                    "eth_signTypedData"
+                ], events: [], extensions: nil
+            ),
+            "solana": ProposalNamespace(
+                chains: [
+                    Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!,
+                ],
+                methods: [
+                    "solana_signMessage",
+                    "solana_signTransaction",
+                ], events: [], extensions: nil
+            )
+        ]
         Task {
             let uri = try await Pair.instance.create()
             try await Sign.instance.connect(requiredNamespaces: namespaces, topic: uri.topic)

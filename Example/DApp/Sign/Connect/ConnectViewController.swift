@@ -81,9 +81,28 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let pairingTopic = activePairings[indexPath.row].topic
-        let blockchains: Set<Blockchain> = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
-        let methods: Set<String> = ["eth_sendTransaction", "personal_sign", "eth_signTypedData"]
-        let namespaces: [String: ProposalNamespace] = ["eip155": ProposalNamespace(chains: blockchains, methods: methods, events: [], extensions: nil)]
+        let namespaces: [String: ProposalNamespace] = [
+            "eip155": ProposalNamespace(
+                chains: [
+                    Blockchain("eip155:1")!,
+                    Blockchain("eip155:137")!
+                ],
+                methods: [
+                    "eth_sendTransaction",
+                    "personal_sign",
+                    "eth_signTypedData"
+                ], events: [], extensions: nil
+            ),
+            "solana": ProposalNamespace(
+                chains: [
+                    Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!,
+                ],
+                methods: [
+                    "solana_signMessage",
+                    "solana_signTransaction",
+                ], events: [], extensions: nil
+            )
+        ]
         Task {
             _ = try await Sign.instance.connect(requiredNamespaces: namespaces, topic: pairingTopic)
             connectWithExampleWallet()
