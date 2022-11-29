@@ -23,15 +23,20 @@ class ProposeResponder {
 
     func respond(requestId: RPCID) async throws {
         logger.debug("Approving Push Proposal")
-        let peerPublicKey = try getPeerPublicKey(requestId: requestId)
-        let (topic, keys) = try generateAgreementKeys(peerPublicKey: peerPublicKey)
 
-        try kms.setAgreementSecret(keys, topic: topic)
+        let requestRecord = try getRecord(requestId: requestId)
+        let peerPublicKey = try getPeerPublicKey(for: requestRecord)
+        let pairingTopic = requestRecord.topic
+
+        let keys = try generateAgreementKeys(peerPublicKey: peerPublicKey)
+        let pushTopic = keys.derivedTopic()
+
+        try kms.setAgreementSecret(keys, topic: pushTopic)
 
         let responseParams = PushResponseParams(publicKey: keys.publicKey.hexRepresentation)
 
         let response = RPCResponse(id: requestId, result: responseParams)
-        try await networkingInteractor.respond(topic: topic, response: response, protocolMethod: PushProposeProtocolMethod(), envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
+        try await networkingInteractor.respond(topic: pairingTopic, response: response, protocolMethod: PushProposeProtocolMethod())
     }
 
     func respondError(requestId: RPCID) async throws {
@@ -39,21 +44,23 @@ class ProposeResponder {
         fatalError("not implemented")
     }
 
-    private func getPeerPublicKey(requestId: RPCID) throws -> AgreementPublicKey {
-        guard let request = rpcHistory.get(recordId: requestId)?.request
+    private func getRecord(requestId: RPCID) throws -> RPCHistory.Record {
+        guard let record = rpcHistory.get(recordId: requestId)
         else { throw Errors.recordForIdNotFound }
+        return record
+    }
 
-        guard let params = try request.params?.get(PushResponseParams.self)
+    private func getPeerPublicKey(for record: RPCHistory.Record) throws -> AgreementPublicKey {
+        guard let params = try record.request.params?.get(PushResponseParams.self)
         else { throw Errors.malformedRequestParams }
 
         let peerPublicKey = try AgreementPublicKey(hex: params.publicKey)
         return peerPublicKey
     }
 
-    private func generateAgreementKeys(peerPublicKey: AgreementPublicKey) throws -> (topic: String, keys: AgreementKeys) {
-        let topic = peerPublicKey.rawRepresentation.sha256().toHexString()
+    private func generateAgreementKeys(peerPublicKey: AgreementPublicKey) throws -> AgreementKeys {
         let selfPubKey = try kms.createX25519KeyPair()
         let keys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPublicKey.hexRepresentation)
-        return (topic, keys)
+        return keys
     }
 }

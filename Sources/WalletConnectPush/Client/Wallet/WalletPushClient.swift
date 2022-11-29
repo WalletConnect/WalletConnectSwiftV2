@@ -33,7 +33,7 @@ public class WalletPushClient {
 
 
     public func approve(id: RPCID) async throws {
-        try await  proposeResponder.respond(requestId: id)
+        try await proposeResponder.respond(requestId: id)
     }
 
     public func reject(proposalId: String, reason: Reason) async throws {
