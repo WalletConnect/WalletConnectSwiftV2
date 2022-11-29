@@ -4,9 +4,9 @@ import WalletConnectUtils
 
 public class DappPushClient {
 
-    private let responsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<PushResponseParams, PairError>), Never>()
+    private let responsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<PushSubscription, PairError>), Never>()
 
-    public var responsePublisher: AnyPublisher<(id: RPCID, result: Result<PushResponseParams, PairError>), Never> {
+    public var responsePublisher: AnyPublisher<(id: RPCID, result: Result<PushSubscription, PairError>), Never> {
         responsePublisherSubject.eraseToAnyPublisher()
     }
 

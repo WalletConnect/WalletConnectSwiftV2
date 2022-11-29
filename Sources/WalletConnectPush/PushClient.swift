@@ -49,15 +49,15 @@ public class PushClient {
 private extension PushClient {
 
     func setupSubscriptions() {
-        let protocolMethod = PushProposeProtocolMethod()
-
-        pairingRegisterer.register(method: protocolMethod)
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<PushRequestParams>) in
-                requestPublisherSubject.send((topic: payload.topic, params: payload.request))
-        }.store(in: &publishers)
-
-        proposalResponseSubscriber.onResponse = {[unowned self] (id, result) in
-            responsePublisherSubject.send((id, result))
-        }
+//        let protocolMethod = PushProposeProtocolMethod()
+//
+//        pairingRegisterer.register(method: protocolMethod)
+//            .sink { [unowned self] (payload: RequestSubscriptionPayload<PushRequestParams>) in
+//                requestPublisherSubject.send((topic: payload.topic, params: payload.request))
+//        }.store(in: &publishers)
+//
+//        proposalResponseSubscriber.onResponse = {[unowned self] (id, result) in
+//            responsePublisherSubject.send((id, result))
+//        }
     }
 }

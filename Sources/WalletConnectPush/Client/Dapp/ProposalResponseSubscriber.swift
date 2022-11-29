@@ -6,7 +6,7 @@ class ProposalResponseSubscriber {
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
     private var publishers = [AnyCancellable]()
-    var onResponse: ((_ id: RPCID, _ result: Result<PushResponseParams, PairError>) -> Void)?
+    var onResponse: ((_ id: RPCID, _ result: Result<PushSubscription, PairError>) -> Void)?
 
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
@@ -15,16 +15,23 @@ class ProposalResponseSubscriber {
         self.kms = kms
         self.logger = logger
         subscribeForProposalErrors()
+        subscribeForProposalResponse()
     }
 
     private func subscribeForProposalResponse() {
         let protocolMethod = PushProposeProtocolMethod()
         networkingInteractor.responseSubscription(on: protocolMethod)
-            .sink { [unowned self] in
-                <#code#>
-            }
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<PushRequestParams, PushResponseParams>) in
+                let pushSubscription = getPushSubscription()
+                onResponse?(payload.id, .success(pushSubscription))
+            }.store(in: &publishers)
     }
 
+
+
+    private func getPushSubscription(for payload: ResponseSubscriptionPayload<PushRequestParams, PushResponseParams>) -> PushSubscription {
+        PushSubscription(topic: <#T##String#>, relay: <#T##RelayProtocolOptions#>, metadata: <#T##AppMetadata#>, acknowledged: <#T##Bool#>)
+    }
     private func subscribeForProposalErrors() {
         let protocolMethod = PushProposeProtocolMethod()
         networkingInteractor.responseErrorSubscription(on: protocolMethod)
