@@ -5,7 +5,7 @@ import WalletConnectRelay
 
 class SignerTest: XCTestCase {
 
-    private let signer = MultichainSignerFactory().createEthereum()
+    private let signer = AuthSignerFactory().createEthereumSigner()
 
     private let message = "\u{19}Ethereum Signed Message:\n7Message".data(using: .utf8)!
     private let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")

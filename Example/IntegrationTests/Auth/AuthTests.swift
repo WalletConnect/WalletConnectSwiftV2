@@ -50,7 +50,7 @@ final class AuthTests: XCTestCase {
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
             account: account,
             projectId: InputConfig.projectId,
-            signerFactory: MultichainSignerFactory(),
+            signerFactory: AuthSignerFactory(),
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
@@ -81,7 +81,7 @@ final class AuthTests: XCTestCase {
         try! await walletPairingClient.pair(uri: uri)
         walletAuthClient.authRequestPublisher.sink { [unowned self] request in
             Task(priority: .high) {
-                let signerFactory = MultichainSignerFactory()
+                let signerFactory = AuthSignerFactory()
                 let signer = MessageSignerFactory(signerFactory: signerFactory).create(projectId: InputConfig.projectId)
                 let signature = try! signer.sign(message: request.message, privateKey: prvKey, type: .eip191)
                 try! await walletAuthClient.respond(requestId: request.id, signature: signature)

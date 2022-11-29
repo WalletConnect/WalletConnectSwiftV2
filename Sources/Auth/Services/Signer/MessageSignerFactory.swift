@@ -14,12 +14,12 @@ public struct MessageSignerFactory {
 
     func create(projectId: String) -> MessageSigning & MessageSignatureVerifying {
         return MessageSigner(
-            signer: signerFactory.createEthereum(),
-            eip191Verifier: EIP191Verifier(signer: signerFactory.createEthereum()),
+            signer: signerFactory.createEthereumSigner(),
+            eip191Verifier: EIP191Verifier(signer: signerFactory.createEthereumSigner()),
             eip1271Verifier: EIP1271Verifier(
                 projectId: projectId,
                 httpClient: HTTPNetworkClient(host: "rpc.walletconnect.com"),
-                signer: signerFactory.createEthereum()
+                signer: signerFactory.createEthereumSigner()
             )
         )
     }

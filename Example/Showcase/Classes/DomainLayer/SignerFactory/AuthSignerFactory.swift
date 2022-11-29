@@ -3,9 +3,9 @@ import CryptoSwift
 import Web3
 import Auth
 
-public struct MultichainSignerFactory: SignerFactory {
+public struct AuthSignerFactory: SignerFactory {
 
-    public func createEthereum() -> EthereumSigner {
+    public func createEthereumSigner() -> EthereumSigner {
         return Web3Signer()
     }
 }

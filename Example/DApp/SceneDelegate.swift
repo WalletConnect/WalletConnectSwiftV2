@@ -21,7 +21,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         Networking.configure(projectId: InputConfig.projectId, socketFactory: SocketFactory())
-        Auth.configure(signerFactory: MultichainSignerFactory())
+        Auth.configure(signerFactory: AuthSignerFactory())
 
         setupWindow(scene: scene)
     }

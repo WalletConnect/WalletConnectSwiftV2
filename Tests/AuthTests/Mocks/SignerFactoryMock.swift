@@ -3,7 +3,7 @@ import Auth
 
 struct SignerFactoryMock: SignerFactory {
 
-    func createEthereum() -> EthereumSigner {
+    func createEthereumSigner() -> EthereumSigner {
         return EthereumSignerMock()
     }
 }
