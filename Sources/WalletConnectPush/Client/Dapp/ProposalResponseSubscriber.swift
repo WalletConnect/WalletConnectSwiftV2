@@ -17,6 +17,14 @@ class ProposalResponseSubscriber {
         subscribeForProposalErrors()
     }
 
+    private func subscribeForProposalResponse() {
+        let protocolMethod = PushProposeProtocolMethod()
+        networkingInteractor.responseSubscription(on: protocolMethod)
+            .sink { [unowned self] in
+                <#code#>
+            }
+    }
+
     private func subscribeForProposalErrors() {
         let protocolMethod = PushProposeProtocolMethod()
         networkingInteractor.responseErrorSubscription(on: protocolMethod)
