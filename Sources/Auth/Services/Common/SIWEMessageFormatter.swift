@@ -7,13 +7,13 @@ protocol SIWEMessageFormatting {
 
 struct SIWEMessageFormatter: SIWEMessageFormatting {
     func formatMessage(from payload: AuthPayload, address: String) -> String? {
-        guard let chain = Blockchain(payload.chainId) else {return nil}
+        guard let chain = Blockchain(payload.chainId) else { return nil }
         let message = SIWEMessage(domain: payload.domain,
                     uri: payload.aud,
                     address: address,
                     version: payload.version,
                     nonce: payload.nonce,
-                                  chainId: chain.reference,
+                    chainId: chain.reference,
                     iat: payload.iat,
                     nbf: payload.nbf,
                     exp: payload.exp,

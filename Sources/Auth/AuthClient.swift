@@ -7,9 +7,6 @@ import Combine
 ///
 /// Access via `Auth.instance`
 public class AuthClient {
-    enum Errors: Error {
-        case unknownWalletAddress
-    }
 
     // MARK: - Public Properties
 
@@ -46,13 +43,11 @@ public class AuthClient {
     private let walletRequestSubscriber: WalletRequestSubscriber
     private let walletRespondService: WalletRespondService
     private let pendingRequestsProvider: PendingRequestsProvider
-    private var account: Account?
 
     init(appRequestService: AppRequestService,
          appRespondSubscriber: AppRespondSubscriber,
          walletRequestSubscriber: WalletRequestSubscriber,
          walletRespondService: WalletRespondService,
-         account: Account?,
          pendingRequestsProvider: PendingRequestsProvider,
          logger: ConsoleLogging,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
@@ -62,7 +57,6 @@ public class AuthClient {
         self.walletRequestSubscriber = walletRequestSubscriber
         self.walletRespondService = walletRespondService
         self.appRespondSubscriber = appRespondSubscriber
-        self.account = account
         self.pendingRequestsProvider = pendingRequestsProvider
         self.logger = logger
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
@@ -83,8 +77,7 @@ public class AuthClient {
     /// - Parameters:
     ///   - requestId: authentication request id
     ///   - signature: CACAO signature of requested message
-    public func respond(requestId: RPCID, signature: CacaoSignature) async throws {
-        guard let account = account else { throw Errors.unknownWalletAddress }
+    public func respond(requestId: RPCID, signature: CacaoSignature, from account: Account) async throws {
         try await walletRespondService.respond(requestId: requestId, signature: signature, account: account)
     }
 
@@ -96,8 +89,7 @@ public class AuthClient {
 
     /// Query pending authentication requests
     /// - Returns: Pending authentication requests
-    public func getPendingRequests() throws -> [AuthRequest] {
-        guard let account = account else { throw Errors.unknownWalletAddress }
+    public func getPendingRequests(account: Account) throws -> [AuthRequest] {
         return try pendingRequestsProvider.getPendingRequests(account: account)
     }
 

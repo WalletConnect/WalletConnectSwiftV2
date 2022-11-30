@@ -17,7 +17,7 @@ final class AuthRequestPresenter: ObservableObject {
     }
 
     var message: String {
-        return request.message
+        return interactor.formatted(request: request)
     }
 
     @MainActor

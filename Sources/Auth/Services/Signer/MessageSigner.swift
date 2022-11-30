@@ -1,36 +1,77 @@
 import Foundation
 
 public protocol MessageSignatureVerifying {
-    func verify(signature: CacaoSignature, message: String, address: String, chainId: String) async throws
+    func verify(signature: CacaoSignature,
+        message: String,
+        address: String,
+        chainId: String
+    ) async throws
 }
 
 public protocol MessageSigning {
-    func sign(message: String, privateKey: Data, type: CacaoSignatureType) throws -> CacaoSignature
+    func sign(request: AuthRequest,
+        address: String,
+        privateKey: Data,
+        type: CacaoSignatureType
+    ) throws -> CacaoSignature
 }
 
-struct MessageSigner: MessageSignatureVerifying, MessageSigning {
+public protocol MessageFormatting {
+    func format(request: AuthRequest, address: String) throws -> String
+}
+
+public typealias AuthMessageSigner = MessageSignatureVerifying & MessageSigning & MessageFormatting
+
+struct MessageSigner: AuthMessageSigner {
 
     enum Errors: Error {
         case utf8EncodingFailed
+        case malformedRequestParams
     }
 
     private let signer: EthereumSigner
     private let eip191Verifier: EIP191Verifier
     private let eip1271Verifier: EIP1271Verifier
+    private let messageFormatter: SIWEMessageFormatting
 
-    init(signer: EthereumSigner, eip191Verifier: EIP191Verifier, eip1271Verifier: EIP1271Verifier) {
+    init(signer: Signer, eip191Verifier: EIP191Verifier, eip1271Verifier: EIP1271Verifier, messageFormatter: SIWEMessageFormatting) {
         self.signer = signer
         self.eip191Verifier = eip191Verifier
         self.eip1271Verifier = eip1271Verifier
+        self.messageFormatter = messageFormatter
     }
 
-    func sign(message: String, privateKey: Data, type: CacaoSignatureType) throws -> CacaoSignature {
-        guard let messageData = message.data(using: .utf8) else { throw Errors.utf8EncodingFailed }
+    func format(request: AuthRequest, address: String) throws -> String {
+        guard let message = messageFormatter.formatMessage(
+            from: request.params.payloadParams,
+            address: address
+        ) else { throw Errors.malformedRequestParams }
+
+        return message
+    }
+
+    func sign(request: AuthRequest,
+        address: String,
+        privateKey: Data,
+        type: CacaoSignatureType
+    ) throws -> CacaoSignature {
+
+        let message = try format(request: request, address: address)
+
+        guard let messageData = message.data(using: .utf8)else {
+            throw Errors.utf8EncodingFailed
+        }
+
         let signature = try signer.sign(message: prefixed(messageData), with: privateKey)
         return CacaoSignature(t: type, s: signature.hex())
     }
 
-    func verify(signature: CacaoSignature, message: String, address: String, chainId: String) async throws {
+    func verify(signature: CacaoSignature,
+        message: String,
+        address: String,
+        chainId: String
+    ) async throws {
+
         guard let messageData = message.data(using: .utf8) else {
             throw Errors.utf8EncodingFailed
         }
