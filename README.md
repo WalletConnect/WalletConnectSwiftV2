@@ -25,6 +25,16 @@ dependencies: [
     .package(url: "https://github.com/WalletConnect/WalletConnectSwiftV2", .branch("main")),
 ],
 ```
+### Cocoapods
+Add pod to your Podfile:
+
+```Ruby
+pod 'WalletConnectSwiftV2'
+```
+If you encounter any problems during package installation, you can specify the exact path to the repository
+```Ruby
+pod 'WalletConnectSwiftV2', :git => 'https://github.com/WalletConnect/WalletConnectSwiftV2.git', :tag => '1.0.5'
+```
 ## Setting Project ID
 Follow instructions from *Configuration.xcconfig* and configure PROJECT_ID with your ID from WalletConnect Dashboard
 ```
