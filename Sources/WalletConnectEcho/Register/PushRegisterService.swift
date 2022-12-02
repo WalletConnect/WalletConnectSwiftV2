@@ -1,7 +1,7 @@
 import Foundation
 import WalletConnectNetworking
 
-actor PushRegisterService {
+actor EchoRegisterService {
     private let networkInteractor: NetworkInteracting
     private let httpClient: HTTPClient
 

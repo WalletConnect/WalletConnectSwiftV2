@@ -26,6 +26,9 @@ let package = Package(
             name: "WalletConnectPush",
             targets: ["WalletConnectPush"]),
         .library(
+            name: "WalletConnectEcho",
+            targets: ["WalletConnectEcho"]),
+        .library(
             name: "WalletConnectRouter",
             targets: ["WalletConnectRouter"]),
         .library(
@@ -52,6 +55,9 @@ let package = Package(
             name: "WalletConnectPush",
             dependencies: ["WalletConnectPairing"],
             path: "Sources/WalletConnectPush"),
+        .target(
+            name: "WalletConnectEcho",
+            path: "Sources/WalletConnectEcho"),
         .target(
             name: "WalletConnectRelay",
             dependencies: ["WalletConnectKMS"],
