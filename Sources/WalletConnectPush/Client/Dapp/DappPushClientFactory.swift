@@ -3,7 +3,7 @@ import WalletConnectPairing
 
 public struct DappPushClientFactory {
 
-    public static func create(metadata: AppMetadata, networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer) -> DappPushClient {
+    public static func create(metadata: AppMetadata, networkInteractor: NetworkInteracting) -> DappPushClient {
         let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults.standard
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
