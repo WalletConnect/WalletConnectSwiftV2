@@ -5,15 +5,6 @@ import WalletConnectSign
 import WalletConnectNetworking
 import WalletConnectRelay
 import WalletConnectPairing
-import Starscream
-
-extension WebSocket: WebSocketConnecting { }
-
-struct SocketFactory: WebSocketFactory {
-    func create(with url: URL) -> WebSocketConnecting {
-        return WebSocket(url: url)
-    }
-}
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -27,7 +18,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             url: "example.wallet",
             icons: ["https://avatars.githubusercontent.com/u/37784886"])
 
-        Networking.configure(projectId: InputConfig.projectId, socketFactory: SocketFactory())
+        Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
         Pair.configure(metadata: metadata)
 #if DEBUG
         if CommandLine.arguments.contains("-cleanInstall") {

@@ -35,9 +35,7 @@ let package = Package(
             name: "WalletConnectVerify",
             targets: ["WalletConnectVerify"])
     ],
-    dependencies: [
-        .package(url: "https://github.com/WalletConnect/Web3.swift", .exact("1.0.0"))
-    ],
+    dependencies: [],
     targets: [
         .target(
             name: "WalletConnectSign",
@@ -49,7 +47,7 @@ let package = Package(
             path: "Sources/Chat"),
         .target(
             name: "Auth",
-            dependencies: ["WalletConnectPairing", .product(name: "Web3", package: "Web3.swift")],
+            dependencies: ["WalletConnectPairing"],
             path: "Sources/Auth"),
         .target(
             name: "WalletConnectPush",

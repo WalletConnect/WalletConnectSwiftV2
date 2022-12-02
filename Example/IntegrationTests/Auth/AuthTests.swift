@@ -31,7 +31,7 @@ final class AuthTests: XCTestCase {
     func makeClients(prefix: String, account: Account? = nil, iatProvider: IATProvider) -> (PairingClient, AuthClient) {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let keychain = KeychainStorageMock()
-        let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keychainStorage: keychain, socketFactory: SocketFactory(), logger: logger)
+        let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keychainStorage: keychain, socketFactory: DefaultSocketFactory(), logger: logger)
         let keyValueStorage = RuntimeKeyValueStorage()
 
         let networkingClient = NetworkingClientFactory.create(
@@ -50,6 +50,7 @@ final class AuthTests: XCTestCase {
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
             account: account,
             projectId: InputConfig.projectId,
+            signerFactory: DefaultSignerFactory(),
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
@@ -80,7 +81,8 @@ final class AuthTests: XCTestCase {
         try! await walletPairingClient.pair(uri: uri)
         walletAuthClient.authRequestPublisher.sink { [unowned self] request in
             Task(priority: .high) {
-                let signer = MessageSignerFactory.create(projectId: InputConfig.projectId)
+                let signerFactory = DefaultSignerFactory()
+                let signer = MessageSignerFactory(signerFactory: signerFactory).create(projectId: InputConfig.projectId)
                 let signature = try! signer.sign(message: request.message, privateKey: prvKey, type: .eip191)
                 try! await walletAuthClient.respond(requestId: request.id, signature: signature)
             }

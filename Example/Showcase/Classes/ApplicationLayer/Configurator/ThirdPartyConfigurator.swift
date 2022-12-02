@@ -5,7 +5,7 @@ import Auth
 struct ThirdPartyConfigurator: Configurator {
 
     func configure() {
-        Networking.configure(projectId: InputConfig.projectId, socketFactory: SocketFactory())
+        Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
         Pair.configure(
             metadata: AppMetadata(
                 name: "Showcase App",
@@ -15,7 +15,8 @@ struct ThirdPartyConfigurator: Configurator {
             ))
 
         Auth.configure(
-            account: Account("eip155:1:0xe5EeF1368781911d265fDB6946613dA61915a501")!
+            account: Account("eip155:1:0xe5EeF1368781911d265fDB6946613dA61915a501")!,
+            signerFactory: DefaultSignerFactory()
         )
     }
 }
