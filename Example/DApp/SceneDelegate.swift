@@ -1,16 +1,7 @@
 import UIKit
-import Starscream
 import Auth
 import WalletConnectRelay
 import WalletConnectNetworking
-
-extension WebSocket: WebSocketConnecting { }
-
-struct SocketFactory: WebSocketFactory {
-    func create(with url: URL) -> WebSocketConnecting {
-        return WebSocket(url: url)
-    }
-}
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -20,8 +11,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private let authCoordinator = AuthCoordinator()
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        Networking.configure(projectId: InputConfig.projectId, socketFactory: SocketFactory())
-        Auth.configure(signerFactory: AuthSignerFactory())
+        Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
+        Auth.configure(signerFactory: DefaultSignerFactory())
 
         setupWindow(scene: scene)
     }

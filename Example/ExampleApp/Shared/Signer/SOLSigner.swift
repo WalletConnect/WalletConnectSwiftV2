@@ -3,7 +3,7 @@ import Commons
 import SolanaSwift
 import TweetNacl
 
-struct SolanaSigner {
+struct SOLSigner {
 
     static var address: String {
         return account.publicKey.base58EncodedString

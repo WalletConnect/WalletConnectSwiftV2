@@ -3,7 +3,7 @@ import CryptoSwift
 import Web3
 import Auth
 
-public struct AuthSignerFactory: SignerFactory {
+public struct DefaultSignerFactory: SignerFactory {
 
     public func createEthereumSigner() -> EthereumSigner {
         return Web3Signer()
