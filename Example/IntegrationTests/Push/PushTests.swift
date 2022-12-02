@@ -117,4 +117,9 @@ final class PushTests: XCTestCase {
 
         wait(for: [expectation], timeout: 5)
     }
+
+    func testWalletRejectsPushRequest() {
+        XCTExpectFailure()
+        XCTFail()
+    }
 }
