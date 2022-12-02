@@ -83,7 +83,7 @@ final class AuthTests: XCTestCase {
             Task(priority: .high) {
                 let signerFactory = DefaultSignerFactory()
                 let signer = MessageSignerFactory(signerFactory: signerFactory).create(projectId: InputConfig.projectId)
-                let signature = try! signer.sign(request: request, address: walletAccount.address, privateKey: prvKey, type: .eip191)
+                let signature = try! signer.sign(payload: request.payload, address: walletAccount.address, privateKey: prvKey, type: .eip191)
                 try! await walletAuthClient.respond(requestId: request.id, signature: signature, from: walletAccount)
             }
         }
@@ -97,6 +97,8 @@ final class AuthTests: XCTestCase {
     }
 
     func testEIP1271RespondSuccess() async {
+        setupClients(iatProvider: IATProviderMock())
+
         let account = Account(chainIdentifier: "eip155:1", address: "0x2faf83c542b68f1b4cdc0e770e8cb9f567b08f71")!
 
         let responseExpectation = expectation(description: "successful response delivered")
