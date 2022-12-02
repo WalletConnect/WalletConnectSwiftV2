@@ -5,8 +5,11 @@ protocol SIWEMessageFormatting {
     func formatMessage(from payload: CacaoPayload) throws -> String
 }
 
-struct SIWEMessageFormatter: SIWEMessageFormatting {
-    func formatMessage(from payload: AuthPayload, address: String) -> String? {
+public struct SIWEMessageFormatter: SIWEMessageFormatting {
+
+    public init() { }
+
+    public func formatMessage(from payload: AuthPayload, address: String) -> String? {
         guard let chain = Blockchain(payload.chainId) else { return nil }
         let message = SIWEMessage(domain: payload.domain,
                     uri: payload.aud,

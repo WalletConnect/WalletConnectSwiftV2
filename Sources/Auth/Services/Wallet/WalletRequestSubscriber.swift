@@ -30,7 +30,9 @@ class WalletRequestSubscriber {
             .sink { [unowned self] (payload: RequestSubscriptionPayload<AuthRequestParams>) in
                 logger.debug("WalletRequestSubscriber: Received request")
                 pairingRegisterer.activate(pairingTopic: payload.topic)
-                onRequest?(AuthRequest(id: payload.id, params: payload.request))
+
+                let request = AuthRequest(id: payload.id, payload: payload.request.payloadParams)
+                onRequest?(request)
             }.store(in: &publishers)
     }
 }

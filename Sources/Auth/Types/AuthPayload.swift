@@ -14,7 +14,7 @@ public struct AuthPayload: Codable, Equatable {
     public let requestId: String?
     public let resources: [String]?
 
-    public init(requestParams: RequestParams, iat: String) {
+    init(requestParams: RequestParams, iat: String) {
         self.type = "eip4361"
         self.chainId = requestParams.chainId
         self.domain = requestParams.domain

@@ -19,9 +19,9 @@ public struct MessageSignerFactory {
             eip1271Verifier: EIP1271Verifier(
                 projectId: projectId,
                 httpClient: HTTPNetworkClient(host: "rpc.walletconnect.com"),
-                signer: signerFactory.createEthereumSigner(),
-                messageFormatter: SIWEMessageFormatter()
-            )
+                signer: signerFactory.createEthereumSigner()
+            ),
+            messageFormatter: SIWEMessageFormatter()
         )
     }
 }

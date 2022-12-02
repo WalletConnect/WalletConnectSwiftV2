@@ -9,18 +9,14 @@ public protocol MessageSignatureVerifying {
 }
 
 public protocol MessageSigning {
-    func sign(request: AuthRequest,
+    func sign(payload: AuthPayload,
         address: String,
         privateKey: Data,
         type: CacaoSignatureType
     ) throws -> CacaoSignature
 }
 
-public protocol MessageFormatting {
-    func format(request: AuthRequest, address: String) throws -> String
-}
-
-public typealias AuthMessageSigner = MessageSignatureVerifying & MessageSigning & MessageFormatting
+public typealias AuthMessageSigner = MessageSignatureVerifying & MessageSigning
 
 struct MessageSigner: AuthMessageSigner {
 
@@ -34,29 +30,23 @@ struct MessageSigner: AuthMessageSigner {
     private let eip1271Verifier: EIP1271Verifier
     private let messageFormatter: SIWEMessageFormatting
 
-    init(signer: Signer, eip191Verifier: EIP191Verifier, eip1271Verifier: EIP1271Verifier, messageFormatter: SIWEMessageFormatting) {
+    init(signer: EthereumSigner, eip191Verifier: EIP191Verifier, eip1271Verifier: EIP1271Verifier, messageFormatter: SIWEMessageFormatting) {
         self.signer = signer
         self.eip191Verifier = eip191Verifier
         self.eip1271Verifier = eip1271Verifier
         self.messageFormatter = messageFormatter
     }
 
-    func format(request: AuthRequest, address: String) throws -> String {
-        guard let message = messageFormatter.formatMessage(
-            from: request.params.payloadParams,
-            address: address
-        ) else { throw Errors.malformedRequestParams }
-
-        return message
-    }
-
-    func sign(request: AuthRequest,
+    func sign(payload: AuthPayload,
         address: String,
         privateKey: Data,
         type: CacaoSignatureType
     ) throws -> CacaoSignature {
 
-        let message = try format(request: request, address: address)
+        guard let message = messageFormatter.formatMessage(
+            from: payload,
+            address: address
+        ) else { throw Errors.malformedRequestParams }
 
         guard let messageData = message.data(using: .utf8)else {
             throw Errors.utf8EncodingFailed

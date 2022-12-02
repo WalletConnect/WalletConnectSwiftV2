@@ -28,12 +28,14 @@ public class Auth {
         )
     }()
 
+    private static var config: Config?
+
     private init() { }
 
     /// Auth instance wallet config method.  For DApp usage
     /// - Parameters:
     ///   - signerFactory: Auth signers factory
     static public func configure(signerFactory: SignerFactory) {
-        Auth.config = Auth.Config(account: nil, signerFactory: signerFactory)
+        Auth.config = Auth.Config(signerFactory: signerFactory)
     }
 }

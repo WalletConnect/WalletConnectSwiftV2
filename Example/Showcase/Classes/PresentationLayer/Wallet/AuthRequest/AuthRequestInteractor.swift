@@ -10,7 +10,7 @@ final class AuthRequestInteractor {
     func approve(request: AuthRequest) async throws {
         let privateKey = Data(hex: "e56da0e170b5e09a8bb8f1b693392c7d56c3739a9c75740fbc558a2877868540")
         let signature = try signer.sign(
-            request: request,
+            payload: request.payload,
             address: account.address,
             privateKey: privateKey,
             type: .eip191)
@@ -22,6 +22,9 @@ final class AuthRequestInteractor {
     }
 
     func formatted(request: AuthRequest) -> String {
-        return try! signer.format(request: request, address: account.address)
+        return SIWEMessageFormatter().formatMessage(
+            from: request.payload,
+            address: account.address
+        )!
     }
 }
