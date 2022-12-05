@@ -24,7 +24,7 @@ let package = Package(
             targets: ["WalletConnectPairing"]),
         .library(
             name: "WalletConnectPush",
-            targets: ["WalletConnectPush", "WalletConnectEcho"]),
+            targets: ["WalletConnectPush"]),
         .library(
             name: "WalletConnectEcho",
             targets: ["WalletConnectEcho"]),
@@ -53,10 +53,11 @@ let package = Package(
             path: "Sources/Auth"),
         .target(
             name: "WalletConnectPush",
-            dependencies: ["WalletConnectPairing"],
+            dependencies: ["WalletConnectPairing", "WalletConnectEcho"],
             path: "Sources/WalletConnectPush"),
         .target(
             name: "WalletConnectEcho",
+            dependencies: ["WalletConnectNetworking"],
             path: "Sources/WalletConnectEcho"),
         .target(
             name: "WalletConnectRelay",

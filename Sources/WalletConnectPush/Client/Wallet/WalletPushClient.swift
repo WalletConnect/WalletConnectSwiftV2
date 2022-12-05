@@ -22,13 +22,14 @@ public class WalletPushClient {
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
-         registerService: PushRegisterService,
+         echoRegisterer: EchoClient,
          pairingRegisterer: PairingRegisterer,
          proposeResponder: ProposeResponder) {
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
         self.registerService = registerService
         self.proposeResponder = proposeResponder
+        self.echoRegisterer = echoRegisterer
         setupSubscriptions()
     }
 

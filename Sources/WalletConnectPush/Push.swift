@@ -19,7 +19,8 @@ public class Push {
         public static var instance: WalletPushClient = {
             return WalletPushClientFactory.create(
                 networkInteractor: Networking.interactor,
-                pairingRegisterer: Pair.registerer
+                pairingRegisterer: Pair.registerer,
+                echoClient: Echo.intance
             )
         }()
 

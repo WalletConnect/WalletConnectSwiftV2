@@ -1,9 +1,10 @@
 import Foundation
 import WalletConnectUtils
+import WalletConnectEcho
 
 public struct WalletPushClientFactory {
 
-    public static func create(networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer) -> WalletPushClient {
+    public static func create(networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, echoClient: EchoClient) -> WalletPushClient {
         let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults.standard
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
@@ -12,21 +13,21 @@ public struct WalletPushClientFactory {
             keyValueStorage: keyValueStorage,
             keychainStorage: keychainStorage,
             networkInteractor: networkInteractor,
-            pairingRegisterer: pairingRegisterer
+            pairingRegisterer: pairingRegisterer,
+            echoClient: echoClient
         )
     }
 
-    static func create(logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer) -> WalletPushClient {
+    static func create(logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, echoClient: EchoClient) -> WalletPushClient {
         let kms = KeyManagementService(keychain: keychainStorage)
-        let httpClient = HTTPNetworkClient(host: "echo.walletconnect.com")
-        let registerService = PushRegisterService(networkInteractor: networkInteractor, httpClient: httpClient)
+
         let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
 
         let proposeResponder = ProposeResponder(networkingInteractor: networkInteractor, logger: logger, kms: kms, rpcHistory: history)
         return WalletPushClient(
             logger: logger,
             kms: kms,
-            registerService: registerService,
+            echoRegisterer: echoClient,
             pairingRegisterer: pairingRegisterer,
             proposeResponder: proposeResponder
         )

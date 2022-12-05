@@ -1,5 +1,6 @@
 
 import Foundation
+import WalletConnectNetworking
 
 public class EchoClient {
     private let registerService: EchoRegisterService
