@@ -1,6 +1,7 @@
 import Foundation
 import WalletConnectNetworking
 import WalletConnectPairing
+import WalletConnectEcho
 
 public class Push {
 
@@ -20,7 +21,7 @@ public class Push {
             return WalletPushClientFactory.create(
                 networkInteractor: Networking.interactor,
                 pairingRegisterer: Pair.registerer,
-                echoClient: Echo.intance
+                echoClient: Echo.instance
             )
         }()
 

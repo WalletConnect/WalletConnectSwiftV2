@@ -1,5 +1,6 @@
 
 import Foundation
+import WalletConnectNetworking
 
 public struct EchoClientFactory {
     public static func create(tenantId: String, clientId: String) -> EchoClient {

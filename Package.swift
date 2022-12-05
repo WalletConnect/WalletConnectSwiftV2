@@ -53,7 +53,7 @@ let package = Package(
             path: "Sources/Auth"),
         .target(
             name: "WalletConnectPush",
-            dependencies: ["WalletConnectPairing", "WalletConnectEcho"],
+            dependencies: ["WalletConnectPairing", "WalletConnectEcho", "WalletConnectNetworking"],
             path: "Sources/WalletConnectPush"),
         .target(
             name: "WalletConnectEcho",

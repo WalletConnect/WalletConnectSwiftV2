@@ -17,7 +17,7 @@ public class WalletPushClient {
     public let logger: ConsoleLogging
 
     private let pairingRegisterer: PairingRegisterer
-    private let echoRegisterer: EchoCLient
+    private let echoRegisterer: EchoClient
     private let proposeResponder: ProposeResponder
 
     init(logger: ConsoleLogging,
@@ -27,7 +27,6 @@ public class WalletPushClient {
          proposeResponder: ProposeResponder) {
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
-        self.registerService = registerService
         self.proposeResponder = proposeResponder
         self.echoRegisterer = echoRegisterer
         setupSubscriptions()
@@ -56,7 +55,7 @@ public class WalletPushClient {
 
 
     public func register(deviceToken: Data) async throws {
-        try await registerService.register(deviceToken: deviceToken)
+        try await echoRegisterer.register(deviceToken: deviceToken)
     }
 }
 

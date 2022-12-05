@@ -5,6 +5,7 @@ import WalletConnectUtils
 import WalletConnectRelay
 import Combine
 import WalletConnectNetworking
+import WalletConnectEcho
 @testable import WalletConnectPush
 @testable import WalletConnectPairing
 
@@ -69,11 +70,13 @@ final class PushTests: XCTestCase {
         let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
         walletPairingClient = pairingClient
+        let echoClient = EchoClientFactory.create(tenantId: "", clientId: "")
         walletPushClient = WalletPushClientFactory.create(logger: pushLogger,
                                                           keyValueStorage: keyValueStorage,
                                                           keychainStorage: keychain,
                                                           networkInteractor: networkingInteractor,
-                                                          pairingRegisterer: pairingClient)
+                                                          pairingRegisterer: pairingClient,
+                                                          echoClient: echoClient)
     }
 
     override func setUp() {
