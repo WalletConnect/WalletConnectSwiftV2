@@ -24,7 +24,7 @@ let package = Package(
             targets: ["WalletConnectPairing"]),
         .library(
             name: "WalletConnectPush",
-            targets: ["WalletConnectPush"]),
+            targets: ["WalletConnectPush", "WalletConnectEcho"]),
         .library(
             name: "WalletConnectEcho",
             targets: ["WalletConnectEcho"]),

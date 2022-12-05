@@ -1,7 +1,7 @@
 
 import Foundation
 
-class EchoClient {
+public class EchoClient {
     private let registerService: EchoRegisterService
 
     init(registerService: EchoRegisterService) {

@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import WalletConnectNetworking
 import WalletConnectPairing
+import WalletConnectEcho
 
 public class WalletPushClient {
 
@@ -16,7 +17,7 @@ public class WalletPushClient {
     public let logger: ConsoleLogging
 
     private let pairingRegisterer: PairingRegisterer
-    private let registerService: PushRegisterService
+    private let echoRegisterer: EchoCLient
     private let proposeResponder: ProposeResponder
 
     init(logger: ConsoleLogging,
