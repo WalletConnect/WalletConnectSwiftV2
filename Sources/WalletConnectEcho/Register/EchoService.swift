@@ -2,15 +2,15 @@ import Foundation
 import WalletConnectNetworking
 
 enum EchoAPI: HTTPService {
-    case register(clientId: String, token: String)
-    case unregister(clientId: String)
+    case register(clientId: String, token: String, tenantId: String)
+    case unregister(clientId: String, tenantId: String)
 
     var path: String {
         switch self {
-        case .register:
-            return "/clients"
-        case .unregister(let clientId):
-            return "/clients\(clientId)"
+        case .register(_, _, let tenantId):
+            return "/\(tenantId)/clients"
+        case .unregister(let clientId, let tenantId):
+            return "/\(tenantId)/clients\(clientId)"
         }
     }
 
@@ -25,7 +25,7 @@ enum EchoAPI: HTTPService {
 
     var body: Data? {
         switch self {
-        case .register(let clientId, let token):
+        case .register(let clientId, let token, _):
             return try? JSONEncoder().encode([
                 "client_id": clientId,
                 "type": "apns",
