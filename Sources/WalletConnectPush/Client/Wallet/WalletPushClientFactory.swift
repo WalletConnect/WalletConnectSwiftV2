@@ -24,12 +24,16 @@ public struct WalletPushClientFactory {
         let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
 
         let proposeResponder = ProposeResponder(networkingInteractor: networkInteractor, logger: logger, kms: kms, rpcHistory: history)
+
+        let pushMessageSubscriber = PushMessageSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger)
+
         return WalletPushClient(
             logger: logger,
             kms: kms,
             echoRegisterer: echoClient,
             pairingRegisterer: pairingRegisterer,
-            proposeResponder: proposeResponder
+            proposeResponder: proposeResponder,
+            pushMessageSubscriber: pushMessageSubscriber
         )
     }
 }

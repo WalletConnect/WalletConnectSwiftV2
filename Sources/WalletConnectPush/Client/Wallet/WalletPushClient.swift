@@ -19,16 +19,19 @@ public class WalletPushClient {
     private let pairingRegisterer: PairingRegisterer
     private let echoRegisterer: EchoClient
     private let proposeResponder: ProposeResponder
+    private let pushMessageSubscriber: PushMessageSubscriber
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
          echoRegisterer: EchoClient,
          pairingRegisterer: PairingRegisterer,
-         proposeResponder: ProposeResponder) {
+         proposeResponder: ProposeResponder,
+         pushMessageSubscriber: PushMessageSubscriber) {
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
         self.proposeResponder = proposeResponder
         self.echoRegisterer = echoRegisterer
+        self.pushMessageSubscriber = pushMessageSubscriber
         setupSubscriptions()
     }
 
