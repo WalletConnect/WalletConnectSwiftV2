@@ -32,6 +32,7 @@ class ProposeResponder {
         let pushTopic = keys.derivedTopic()
 
         try kms.setAgreementSecret(keys, topic: pushTopic)
+        try await networkingInteractor.subscribe(topic: pushTopic)
 
         let responseParams = PushResponseParams(publicKey: keys.publicKey.hexRepresentation)
 

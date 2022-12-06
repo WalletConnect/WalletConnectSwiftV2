@@ -49,7 +49,9 @@ class ProposalResponseSubscriber {
     private func generateAgreementKeys(peerPublicKeyHex: String, selfpublicKeyHex: String) throws -> (topic: String, keys: AgreementKeys) {
         let selfPublicKey = try AgreementPublicKey(hex: selfpublicKeyHex)
         let keys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: peerPublicKeyHex)
-        return (topic: keys.derivedTopic(), keys: keys)
+        let topic = keys.derivedTopic()
+        try kms.setAgreementSecret(keys, topic: topic)
+        return (topic: topic, keys: keys)
     }
 
     private func subscribeForProposalErrors() {

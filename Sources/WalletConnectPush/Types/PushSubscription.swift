@@ -5,6 +5,6 @@ import WalletConnectPairing
 
 public struct PushSubscription: Codable {
     let topic: String
-     let relay: RelayProtocolOptions
-     let metadata: AppMetadata
+    let relay: RelayProtocolOptions
+    let metadata: AppMetadata
 }

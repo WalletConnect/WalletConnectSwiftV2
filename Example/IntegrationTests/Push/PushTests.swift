@@ -146,6 +146,11 @@ final class PushTests: XCTestCase {
             Task(priority: .userInitiated) { try! await dappPushClient.notify(topic: subscription.topic, message: PushMessage.stub()) }
         }.store(in: &publishers)
 
+        walletPushClient.pushMessagePublisher.sink { _ in
+            expectation.fulfill()
+        }.store(in: &publishers)
+
+
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
 
     }

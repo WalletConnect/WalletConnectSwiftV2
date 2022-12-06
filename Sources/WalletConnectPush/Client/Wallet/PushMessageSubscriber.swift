@@ -1,13 +1,14 @@
 import Foundation
 import Combine
 import WalletConnectKMS
+import WalletConnectPairing
 
 class PushMessageSubscriber {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
     private var publishers = [AnyCancellable]()
-    var onResponse: ((_ id: RPCID, _ result: Result<PushSubscription, PairError>) -> Void)?
+    var onPushMessage: ((_ message: PushMessage) -> Void)?
 
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
@@ -25,6 +26,9 @@ class PushMessageSubscriber {
         networkingInteractor.requestSubscription(on: protocolMethod)
             .sink { [unowned self] (payload: RequestSubscriptionPayload<PushMessage>) in
                 logger.debug("Received Push Message")
+
+
+                onPushMessage?(payload.request)
 
 
             }.store(in: &publishers)
