@@ -95,7 +95,7 @@ final class PushTests: XCTestCase {
             expectation.fulfill()
         }
         .store(in: &publishers)
-        wait(for: [expectation], timeout: 5)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testWalletApprovesPushRequest() async {
@@ -118,11 +118,35 @@ final class PushTests: XCTestCase {
             expectation.fulfill()
         }.store(in: &publishers)
 
-        wait(for: [expectation], timeout: 5)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testWalletRejectsPushRequest() {
         XCTExpectFailure()
         XCTFail()
+    }
+
+    func testDappSendsPushMessage() async {
+        let expectation = expectation(description: "expects wallet to receive push message")
+
+        let uri = try! await dappPairingClient.create()
+        try! await walletPairingClient.pair(uri: uri)
+        try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
+
+        walletPushClient.requestPublisher.sink { [unowned self] (id, _) in
+
+            Task(priority: .high) { try! await walletPushClient.approve(id: id) }
+        }.store(in: &publishers)
+
+        dappPushClient.responsePublisher.sink { [unowned self] (id, result) in
+            guard case .success(let subscription) = result else {
+                XCTFail()
+                return
+            }
+            Task(priority: .userInitiated) { try! await dappPushClient.notify(topic: subscription.topic, message: PushMessage.stub()) }
+        }.store(in: &publishers)
+
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+
     }
 }
