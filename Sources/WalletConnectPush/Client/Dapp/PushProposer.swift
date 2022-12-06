@@ -22,9 +22,7 @@ class PushProposer {
         logger.debug("PushProposer: Sending Push Proposal")
         let protocolMethod = PushProposeProtocolMethod()
         let pubKey = try kms.createX25519KeyPair()
-        let responseTopic = pubKey.rawRepresentation.sha256().toHexString()
         let params = PushRequestParams(publicKey: pubKey.hexRepresentation, metadata: appMetadata, account: account)
-        try kms.setPublicKey(publicKey: pubKey, for: responseTopic)
         let request = RPCRequest(method: protocolMethod.method, params: params)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
     }
