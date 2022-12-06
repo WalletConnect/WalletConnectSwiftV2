@@ -20,11 +20,13 @@ public struct DappPushClientFactory {
         let kms = KeyManagementService(keychain: keychainStorage)
         let pushProposer = PushProposer(networkingInteractor: networkInteractor, kms: kms, appMetadata: metadata, logger: logger)
         let proposalResponseSubscriber = ProposalResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, metadata: metadata, relay: RelayProtocolOptions(protocol: "irn", data: nil))
+        let pushMessageSender = PushMessageSender(networkingInteractor: networkInteractor, kms: kms, logger: logger)
         return DappPushClient(
             logger: logger,
             kms: kms,
             pushProposer: pushProposer,
-            proposalResponseSubscriber: proposalResponseSubscriber
+            proposalResponseSubscriber: proposalResponseSubscriber,
+            pushMessageSender: pushMessageSender
         )
     }
 }

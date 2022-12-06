@@ -13,15 +13,18 @@ public class DappPushClient {
     public let logger: ConsoleLogging
 
     private let pushProposer: PushProposer
+    private let pushMessageSender: PushMessageSender
     private let proposalResponseSubscriber: ProposalResponseSubscriber
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
          pushProposer: PushProposer,
-         proposalResponseSubscriber: ProposalResponseSubscriber) {
+         proposalResponseSubscriber: ProposalResponseSubscriber,
+         pushMessageSender: PushMessageSender) {
         self.logger = logger
         self.pushProposer = pushProposer
         self.proposalResponseSubscriber = proposalResponseSubscriber
+        self.pushMessageSender = pushMessageSender
         setupSubscriptions()
     }
 
@@ -30,7 +33,7 @@ public class DappPushClient {
     }
 
     public func notify(topic: String, message: PushMessage) async throws {
-        fatalError("not implemented")
+        try await pushMessageSender.request(topic: topic, message: message)
     }
 
     public func getActiveSubscriptions() -> [PushSubscription] {
