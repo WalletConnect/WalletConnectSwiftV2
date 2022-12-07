@@ -128,13 +128,12 @@ final class PushTests: XCTestCase {
 
     func testDappSendsPushMessage() async {
         let expectation = expectation(description: "expects wallet to receive push message")
-
+        let pushMessage = PushMessage.stub()
         let uri = try! await dappPairingClient.create()
         try! await walletPairingClient.pair(uri: uri)
         try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
 
         walletPushClient.requestPublisher.sink { [unowned self] (id, _) in
-
             Task(priority: .high) { try! await walletPushClient.approve(id: id) }
         }.store(in: &publishers)
 
@@ -143,10 +142,11 @@ final class PushTests: XCTestCase {
                 XCTFail()
                 return
             }
-            Task(priority: .userInitiated) { try! await dappPushClient.notify(topic: subscription.topic, message: PushMessage.stub()) }
+            Task(priority: .userInitiated) { try! await dappPushClient.notify(topic: subscription.topic, message: pushMessage) }
         }.store(in: &publishers)
 
-        walletPushClient.pushMessagePublisher.sink { _ in
+        walletPushClient.pushMessagePublisher.sink { receivedPushMessage in
+            XCTAssertEqual(pushMessage, receivedPushMessage)
             expectation.fulfill()
         }.store(in: &publishers)
 

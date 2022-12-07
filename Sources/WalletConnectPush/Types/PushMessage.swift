@@ -1,7 +1,7 @@
 
 import Foundation
 
-public struct PushMessage: Codable {
+public struct PushMessage: Codable, Equatable {
     let title: String
     let body: String
     let icon: String
