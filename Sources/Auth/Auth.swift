@@ -21,7 +21,6 @@ public class Auth {
         }
         return AuthClientFactory.create(
             metadata: Pair.metadata,
-            account: config.account,
             projectId: Networking.projectId,
             signerFactory: config.signerFactory,
             networkingClient: Networking.interactor,
@@ -33,18 +32,10 @@ public class Auth {
 
     private init() { }
 
-    /// Auth instance wallet config method. For Wallet usage
-    /// - Parameters:
-    ///   - account: account that wallet will be authenticating with.
-    ///   - signerFactory: Auth signers factory
-    static public func configure(account: Account, signerFactory: SignerFactory) {
-        Auth.config = Auth.Config(account: account, signerFactory: signerFactory)
-    }
-
     /// Auth instance wallet config method.  For DApp usage
     /// - Parameters:
     ///   - signerFactory: Auth signers factory
     static public func configure(signerFactory: SignerFactory) {
-        Auth.config = Auth.Config(account: nil, signerFactory: signerFactory)
+        Auth.config = Auth.Config(signerFactory: signerFactory)
     }
 }
