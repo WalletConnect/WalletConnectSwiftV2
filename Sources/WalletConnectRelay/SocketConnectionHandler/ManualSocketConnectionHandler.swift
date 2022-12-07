@@ -14,4 +14,9 @@ class ManualSocketConnectionHandler: SocketConnectionHandler {
     func handleDisconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
         socket.disconnect()
     }
+
+    func handleDisconnection() {
+        // No operation
+        // ManualSocketConnectionHandler does not support reconnection logic
+    }
 }

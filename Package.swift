@@ -33,11 +33,12 @@ let package = Package(
             targets: ["WalletConnectRouter"]),
         .library(
             name: "WalletConnectNetworking",
-            targets: ["WalletConnectNetworking"])
+            targets: ["WalletConnectNetworking"]),
+        .library(
+            name: "WalletConnectVerify",
+            targets: ["WalletConnectVerify"])
     ],
-    dependencies: [
-        .package(url: "https://github.com/WalletConnect/Web3.swift", .exact("1.0.0"))
-    ],
+    dependencies: [],
     targets: [
         .target(
             name: "WalletConnectSign",
@@ -49,7 +50,7 @@ let package = Package(
             path: "Sources/Chat"),
         .target(
             name: "Auth",
-            dependencies: ["WalletConnectPairing", .product(name: "Web3", package: "Web3.swift")],
+            dependencies: ["WalletConnectPairing"],
             path: "Sources/Auth"),
         .target(
             name: "WalletConnectPush",
@@ -86,6 +87,9 @@ let package = Package(
         .target(
             name: "WalletConnectRouter",
             dependencies: []),
+        .target(
+            name: "WalletConnectVerify",
+            dependencies: ["WalletConnectUtils"]),
         .testTarget(
             name: "WalletConnectSignTests",
             dependencies: ["WalletConnectSign", "TestingUtils"]),
@@ -101,6 +105,9 @@ let package = Package(
         .testTarget(
             name: "RelayerTests",
             dependencies: ["WalletConnectRelay", "WalletConnectUtils", "TestingUtils"]),
+        .testTarget(
+            name: "VerifyTests",
+            dependencies: ["WalletConnectVerify", "TestingUtils"]),
         .testTarget(
             name: "WalletConnectKMSTests",
             dependencies: ["WalletConnectKMS", "WalletConnectUtils", "TestingUtils"]),

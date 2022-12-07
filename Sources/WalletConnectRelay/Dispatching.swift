@@ -103,6 +103,7 @@ final class Dispatcher: NSObject, Dispatching {
         }
         socket.onDisconnect = { [unowned self] _ in
             self.socketConnectionStatusPublisherSubject.send(.disconnected)
+            self.socketConnectionHandler.handleDisconnection()
         }
     }
 }

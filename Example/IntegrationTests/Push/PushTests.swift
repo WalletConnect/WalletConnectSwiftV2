@@ -34,7 +34,7 @@ final class PushTests: XCTestCase {
             projectId: InputConfig.projectId,
             keyValueStorage: RuntimeKeyValueStorage(),
             keychainStorage: keychain,
-            socketFactory: SocketFactory(),
+            socketFactory: DefaultSocketFactory(),
             logger: relayLogger)
 
         let networkingClient = NetworkingClientFactory.create(

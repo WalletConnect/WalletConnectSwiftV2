@@ -4,26 +4,30 @@ import UIKit
 import Foundation
 import Combine
 
-class AutomaticSocketConnectionHandler: SocketConnectionHandler {
-    enum Error: Swift.Error {
-        case manualSocketConnectionForbidden
-        case manualSocketDisconnectionForbidden
+class AutomaticSocketConnectionHandler {
+
+    enum Errors: Error {
+        case manualSocketConnectionForbidden, manualSocketDisconnectionForbidden
     }
-    private var appStateObserver: AppStateObserving
-    let socket: WebSocketConnecting
-    private var networkMonitor: NetworkMonitoring
+
+    private let socket: WebSocketConnecting
+    private let appStateObserver: AppStateObserving
+    private let networkMonitor: NetworkMonitoring
     private let backgroundTaskRegistrar: BackgroundTaskRegistering
 
     private var publishers = Set<AnyCancellable>()
 
-    init(networkMonitor: NetworkMonitoring = NetworkMonitor(),
-         socket: WebSocketConnecting,
-         appStateObserver: AppStateObserving = AppStateObserver(),
-         backgroundTaskRegistrar: BackgroundTaskRegistering = BackgroundTaskRegistrar()) {
+    init(
+        socket: WebSocketConnecting,
+        networkMonitor: NetworkMonitoring = NetworkMonitor(),
+        appStateObserver: AppStateObserving = AppStateObserver(),
+        backgroundTaskRegistrar: BackgroundTaskRegistering = BackgroundTaskRegistrar()
+    ) {
         self.appStateObserver = appStateObserver
         self.socket = socket
         self.networkMonitor = networkMonitor
         self.backgroundTaskRegistrar = backgroundTaskRegistrar
+
         setUpStateObserving()
         setUpNetworkMonitoring()
 
@@ -36,40 +40,49 @@ class AutomaticSocketConnectionHandler: SocketConnectionHandler {
         }
 
         appStateObserver.onWillEnterForeground = { [unowned self] in
-            if !socket.isConnected {
-                socket.connect()
-            }
+            reconnectIfNeeded()
         }
     }
 
     private func setUpNetworkMonitoring() {
         networkMonitor.onSatisfied = { [weak self] in
-            self?.handleNetworkSatisfied()
+            self?.reconnectIfNeeded()
         }
         networkMonitor.startMonitoring()
     }
 
-    func registerBackgroundTask() {
+    private func registerBackgroundTask() {
         backgroundTaskRegistrar.register(name: "Finish Network Tasks") { [unowned self] in
             endBackgroundTask()
         }
     }
 
-    func endBackgroundTask() {
+    private func endBackgroundTask() {
         socket.disconnect()
     }
 
+    private func reconnectIfNeeded() {
+        if !socket.isConnected {
+            socket.connect()
+        }
+    }
+}
+
+// MARK: - SocketConnectionHandler
+
+extension AutomaticSocketConnectionHandler: SocketConnectionHandler {
+
     func handleConnect() throws {
-        throw Error.manualSocketConnectionForbidden
+        throw Errors.manualSocketConnectionForbidden
     }
 
     func handleDisconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
-        throw Error.manualSocketDisconnectionForbidden
+        throw Errors.manualSocketDisconnectionForbidden
     }
 
-    func handleNetworkSatisfied() {
-        if !socket.isConnected {
-            socket.connect()
+    func handleDisconnection() {
+        if appStateObserver.currentState == .foreground {
+            reconnectIfNeeded()
         }
     }
 }
