@@ -45,7 +45,7 @@ class CacaoSignerTest: XCTestCase {
 
     func testCacaoSign() throws {
         let address = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
-        let formatted = SIWEMessageFormatter().formatMessage(
+        let formatted = try SIWEMessageFormatter().formatMessage(
             from: payload,
             address: address
         )

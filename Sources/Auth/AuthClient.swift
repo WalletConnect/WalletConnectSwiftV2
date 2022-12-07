@@ -93,6 +93,10 @@ public class AuthClient {
         return try pendingRequestsProvider.getPendingRequests(account: account)
     }
 
+    public func formatMessage(payload: AuthPayload, address: String) throws -> String {
+        return try SIWEMessageFormatter().formatMessage(from: payload, address: address)
+    }
+
     private func setUpPublishers() {
         appRespondSubscriber.onResponse = { [unowned self] (id, result) in
             authResponsePublisherSubject.send((id, result))

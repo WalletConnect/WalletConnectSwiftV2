@@ -22,9 +22,9 @@ final class AuthRequestInteractor {
     }
 
     func formatted(request: AuthRequest) -> String {
-        return SIWEMessageFormatter().formatMessage(
-            from: request.payload,
+        return try! Auth.instance.formatMessage(
+            payload: request.payload,
             address: account.address
-        )!
+        )
     }
 }

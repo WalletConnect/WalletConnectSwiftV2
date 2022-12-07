@@ -22,7 +22,6 @@ struct MessageSigner: AuthMessageSigner {
 
     enum Errors: Error {
         case utf8EncodingFailed
-        case malformedRequestParams
     }
 
     private let signer: EthereumSigner
@@ -43,10 +42,7 @@ struct MessageSigner: AuthMessageSigner {
         type: CacaoSignatureType
     ) throws -> CacaoSignature {
 
-        guard let message = messageFormatter.formatMessage(
-            from: payload,
-            address: address
-        ) else { throw Errors.malformedRequestParams }
+        let message = try messageFormatter.formatMessage(from: payload, address: address)
 
         guard let messageData = message.data(using: .utf8)else {
             throw Errors.utf8EncodingFailed
