@@ -20,16 +20,11 @@ class PushMessageSubscriber {
     }
 
     private func subscribeForPushMessages() {
-
-
         let protocolMethod = PushMessageProtocolMethod()
         networkingInteractor.requestSubscription(on: protocolMethod)
             .sink { [unowned self] (payload: RequestSubscriptionPayload<PushMessage>) in
                 logger.debug("Received Push Message")
-
-
                 onPushMessage?(payload.request)
-
 
             }.store(in: &publishers)
 

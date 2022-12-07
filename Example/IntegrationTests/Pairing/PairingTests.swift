@@ -79,12 +79,18 @@ final class PairingTests: XCTestCase {
                                                           echoClient: echoClient)
     }
 
+    func makeWalletPairingClient() {
+        let prefix = "🐶 Wallet: "
+        let (pairingClient, _, _, _) = makeClientDependencies(prefix: prefix)
+        walletPairingClient = pairingClient
+    }
+
     override func setUp() {
         makeDappClients()
-        makeWalletClients()
     }
 
     func testProposePushOnPairing() async {
+        makeWalletClients()
         let expectation = expectation(description: "propose push on pairing")
 
         walletPushClient.requestPublisher.sink { _ in
@@ -102,7 +108,7 @@ final class PairingTests: XCTestCase {
 
     func testPing() async {
         let expectation = expectation(description: "expects ping response")
-
+        makeWalletClients()
         let uri = try! await appPairingClient.create()
         try! await walletPairingClient.pair(uri: uri)
         try! await walletPairingClient.ping(topic: uri.topic)
@@ -115,7 +121,7 @@ final class PairingTests: XCTestCase {
     }
 
     func testResponseErrorForMethodUnregistered() async {
-
+        makeWalletPairingClient()
         let expectation = expectation(description: "wallet responds unsupported method for unregistered method")
 
         appPushClient.responsePublisher.sink { (_, response) in
