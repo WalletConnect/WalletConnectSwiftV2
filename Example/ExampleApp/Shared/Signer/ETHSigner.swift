@@ -2,7 +2,7 @@ import Foundation
 import Commons
 import Web3
 
-struct EthereumSigner {
+struct ETHSigner {
 
     private init() {}
 

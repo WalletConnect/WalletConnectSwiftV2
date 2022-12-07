@@ -8,21 +8,20 @@ import XCTest
 import JSONRPC
 
 class AppRespondSubscriberTests: XCTestCase {
+
     var networkingInteractor: NetworkingInteractorMock!
     var sut: AppRespondSubscriber!
     var messageFormatter: SIWEMessageFormatter!
     var rpcHistory: RPCHistory!
     let defaultTimeout: TimeInterval = 0.01
-    let walletAccount = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
-    let prvKey = Data(hex: "462c1dad6832d7d96ccf87bd6a686a4110e114aaaebd5512e552c0e3a87b480f")
-    var messageSigner: (MessageSigning & MessageSignatureVerifying)!
+    var messageSigner: AuthMessageSigner!
     var pairingStorage: WCPairingStorageMock!
     var pairingRegisterer: PairingRegistererMock<AuthRequestParams>!
 
     override func setUp() {
         networkingInteractor = NetworkingInteractorMock()
         messageFormatter = SIWEMessageFormatter()
-        messageSigner = MessageSignerFactory.create(projectId: "project-id")
+        messageSigner = MessageSignerMock()
         rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: RuntimeKeyValueStorage())
         pairingStorage = WCPairingStorageMock()
         pairingRegisterer = PairingRegistererMock<AuthRequestParams>()
@@ -41,6 +40,12 @@ class AppRespondSubscriberTests: XCTestCase {
         // set history record for a request
         let topic = "topic"
         let requestId: RPCID = RPCID(1234)
+
+        let params = AuthRequestParams.stub()
+        let compromissedParams = AuthRequestParams.stub(nonce: "Compromissed nonce")
+
+        XCTAssertNotEqual(params.payloadParams, compromissedParams.payloadParams)
+
         let request = RPCRequest(method: "wc_authRequest", params: AuthRequestParams.stub(), id: requestId.right!)
         try! rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
 
@@ -53,13 +58,12 @@ class AppRespondSubscriberTests: XCTestCase {
         }
 
         // subscribe on compromised cacao
-        let header = CacaoHeader(t: "eip4361")
-        let payload = CacaoPayload(params: AuthPayload.stub(nonce: "compromised nonce"), didpkh: DIDPKH(account: walletAccount))
+        let account = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
+        let cacaoHeader = CacaoHeader(t: "eip4361")
+        let cacaoPayload = CacaoPayload(params: compromissedParams.payloadParams, didpkh: DIDPKH(account: account))
+        let cacaoSignature = CacaoSignature(t: .eip191, s: "")
 
-        let message = try! messageFormatter.formatMessage(from: payload)
-        let cacaoSignature = try! messageSigner.sign(message: message, privateKey: prvKey, type: .eip191)
-
-        let cacao = Cacao(h: header, p: payload, s: cacaoSignature)
+        let cacao = Cacao(h: cacaoHeader, p: cacaoPayload, s: cacaoSignature)
 
         let response = RPCResponse(id: requestId, result: cacao)
         networkingInteractor.responsePublisherSubject.send((topic, request, response))

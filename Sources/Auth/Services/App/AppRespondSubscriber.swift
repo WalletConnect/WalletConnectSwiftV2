@@ -49,7 +49,11 @@ class AppRespondSubscriber {
                     let message = try? messageFormatter.formatMessage(from: cacao.p)
                 else { self.onResponse?(requestId, .failure(.malformedResponseParams)); return }
 
-                guard messageFormatter.formatMessage(from: requestPayload.payloadParams, address: address) == message
+                guard
+                    let recovered = try? messageFormatter.formatMessage(
+                        from: requestPayload.payloadParams,
+                        address: address
+                    ), recovered == message
                 else { self.onResponse?(requestId, .failure(.messageCompromised)); return }
 
                 Task(priority: .high) {
