@@ -23,9 +23,9 @@ public class EchoClient {
 import WalletConnectKMS
 
 class DecryptionService {
-    private let kms: KeyManagementServiceProtocol
+    private let serialiser: Serializing
 
     public func decryptMessage(topic: String, ciphertext: String) throws -> String {
-        kms.
+        serialiser.deserialize(topic: topic, encodedEnvelope: ciphertext)
     }
 }
