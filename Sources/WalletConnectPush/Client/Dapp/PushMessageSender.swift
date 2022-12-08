@@ -1,7 +1,7 @@
-import Foundation
-import Combine
 
-class PushProposer {
+import Foundation
+
+class PushMessageSender {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
@@ -14,10 +14,10 @@ class PushProposer {
         self.logger = logger
     }
 
-    func request(topic: String, params: PushRequestParams) async throws {
-        logger.debug("Sending Push Proposal")
-        let protocolMethod = PushProposeProtocolMethod()
-        let request = RPCRequest(method: protocolMethod.method, params: params)
-        try await networkingInteractor.requestNetworkAck(request, topic: topic, protocolMethod: protocolMethod)
+    func request(topic: String, message: PushMessage) async throws {
+        logger.debug("PushMessageSender: Sending Push Message")
+        let protocolMethod = PushMessageProtocolMethod()
+        let request = RPCRequest(method: protocolMethod.method, params: message)
+        try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
     }
 }

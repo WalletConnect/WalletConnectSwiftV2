@@ -131,6 +131,10 @@ public class NetworkingInteractor: NetworkInteracting {
         try await respond(topic: topic, response: response, protocolMethod: protocolMethod, envelopeType: envelopeType)
     }
 
+    public func getClientId() throws -> String {
+        try relayClient.getClientId()
+    }
+
     public func respondError(topic: String, requestId: RPCID, protocolMethod: ProtocolMethod, reason: Reason, envelopeType: Envelope.EnvelopeType) async throws {
         let error = JSONRPCError(code: reason.code, message: reason.message)
         let response = RPCResponse(id: requestId, error: error)
@@ -174,9 +178,5 @@ extension NetworkingInteractor: NetworkingClient {
 
     public func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
         try relayClient.disconnect(closeCode: closeCode)
-    }
-
-    public func getClientId() throws -> String {
-        try relayClient.getClientId()
     }
 }

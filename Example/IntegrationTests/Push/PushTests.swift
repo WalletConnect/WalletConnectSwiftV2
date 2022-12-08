@@ -9,12 +9,12 @@ import WalletConnectEcho
 @testable import WalletConnectPush
 @testable import WalletConnectPairing
 
-final class PairingTests: XCTestCase {
+final class PushTests: XCTestCase {
 
-    var appPairingClient: PairingClient!
+    var dappPairingClient: PairingClient!
     var walletPairingClient: PairingClient!
 
-    var appPushClient: DappPushClient!
+    var dappPushClient: DappPushClient!
     var walletPushClient: WalletPushClient!
 
     var pairingStorage: PairingStorage!
@@ -54,11 +54,11 @@ final class PairingTests: XCTestCase {
     }
 
     func makeDappClients()  {
-        let prefix = "🤖 Dapp: "
+        let prefix = "🦄 Dapp: "
         let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
-        appPairingClient = pairingClient
-        appPushClient = DappPushClientFactory.create(metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
+        dappPairingClient = pairingClient
+        dappPushClient = DappPushClientFactory.create(metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
                                                       logger: pushLogger,
                                                       keyValueStorage: keyValueStorage,
                                                       keychainStorage: keychain,
@@ -66,7 +66,7 @@ final class PairingTests: XCTestCase {
     }
 
     func makeWalletClients()  {
-        let prefix = "🐶 Wallet: "
+        let prefix = "🦋 Wallet: "
         let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
         walletPairingClient = pairingClient
@@ -79,67 +79,79 @@ final class PairingTests: XCTestCase {
                                                           echoClient: echoClient)
     }
 
-    func makeWalletPairingClient() {
-        let prefix = "🐶 Wallet: "
-        let (pairingClient, _, _, _) = makeClientDependencies(prefix: prefix)
-        walletPairingClient = pairingClient
-    }
-
     override func setUp() {
         makeDappClients()
+        makeWalletClients()
     }
 
-    func testProposePushOnPairing() async {
-        makeWalletClients()
-        let expectation = expectation(description: "propose push on pairing")
+    func testRequestPush() async {
+        let expectation = expectation(description: "expects to receive push request")
 
-        walletPushClient.requestPublisher.sink { _ in
+        let uri = try! await dappPairingClient.create()
+        try! await walletPairingClient.pair(uri: uri)
+        try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
+
+        walletPushClient.requestPublisher.sink { (topic, request) in
+            expectation.fulfill()
+        }
+        .store(in: &publishers)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+    }
+
+    func testWalletApprovesPushRequest() async {
+        let expectation = expectation(description: "expects dapp to receive successful response")
+
+        let uri = try! await dappPairingClient.create()
+        try! await walletPairingClient.pair(uri: uri)
+        try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
+
+        walletPushClient.requestPublisher.sink { [unowned self] (id, _) in
+
+            Task(priority: .high) { try! await walletPushClient.approve(id: id) }
+        }.store(in: &publishers)
+
+        dappPushClient.responsePublisher.sink { (id, result) in
+            guard case .success = result else {
+                XCTFail()
+                return
+            }
             expectation.fulfill()
         }.store(in: &publishers)
 
-        let uri = try! await appPairingClient.create()
-
-        try! await walletPairingClient.pair(uri: uri)
-
-        try! await appPushClient.request(account: Account.stub(), topic: uri.topic)
-
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
-    func testPing() async {
-        let expectation = expectation(description: "expects ping response")
-        makeWalletClients()
-        let uri = try! await appPairingClient.create()
-        try! await walletPairingClient.pair(uri: uri)
-        try! await walletPairingClient.ping(topic: uri.topic)
-        walletPairingClient.pingResponsePublisher
-            .sink { topic in
-                XCTAssertEqual(topic, uri.topic)
-                expectation.fulfill()
-            }.store(in: &publishers)
-        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+    func testWalletRejectsPushRequest() {
+        XCTExpectFailure()
+        XCTFail()
     }
 
-    func testResponseErrorForMethodUnregistered() async {
-        makeWalletPairingClient()
-        let expectation = expectation(description: "wallet responds unsupported method for unregistered method")
+    func testDappSendsPushMessage() async {
+        let expectation = expectation(description: "expects wallet to receive push message")
+        let pushMessage = PushMessage.stub()
+        let uri = try! await dappPairingClient.create()
+        try! await walletPairingClient.pair(uri: uri)
+        try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
 
-        appPushClient.responsePublisher.sink { (_, response) in
-            XCTAssertEqual(response, .failure(WalletConnectPairing.PairError(code: 10001)!))
+        walletPushClient.requestPublisher.sink { [unowned self] (id, _) in
+            Task(priority: .high) { try! await walletPushClient.approve(id: id) }
+        }.store(in: &publishers)
+
+        dappPushClient.responsePublisher.sink { [unowned self] (id, result) in
+            guard case .success(let subscription) = result else {
+                XCTFail()
+                return
+            }
+            Task(priority: .userInitiated) { try! await dappPushClient.notify(topic: subscription.topic, message: pushMessage) }
+        }.store(in: &publishers)
+
+        walletPushClient.pushMessagePublisher.sink { receivedPushMessage in
+            XCTAssertEqual(pushMessage, receivedPushMessage)
             expectation.fulfill()
         }.store(in: &publishers)
 
-        let uri = try! await appPairingClient.create()
-
-        try! await walletPairingClient.pair(uri: uri)
-
-        try! await appPushClient.request(account: Account.stub(), topic: uri.topic)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
 
-    }
-
-    func testDisconnect() {
-        // TODO
     }
 }

@@ -4,6 +4,8 @@
 <dict>
 	<key>PROJECT_ID</key>
 	<string>$(PROJECT_ID)</string>
+	<key>SIMULATOR_IDENTIFIER</key>
+	<string>$(SIMULATOR_IDENTIFIER)</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
