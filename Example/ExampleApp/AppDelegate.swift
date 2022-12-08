@@ -100,7 +100,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
          
         // create post request
-        let url = URL(string: "https://echo.walletconnect.com/a43fdd31-5f92-43a3-88f8-98664b313113/clients")!
+        let url = URL(string: "https://echo.walletconnect.com/f1e0fcb9-75f8-49b5-a05b-00c35ac8418f/clients")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
