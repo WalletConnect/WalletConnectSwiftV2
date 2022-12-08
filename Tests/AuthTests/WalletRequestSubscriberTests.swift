@@ -23,31 +23,31 @@ class WalletRequestSubscriberTests: XCTestCase {
         sut = WalletRequestSubscriber(networkingInteractor: networkingInteractor,
                                       logger: ConsoleLoggerMock(),
                                       kms: KeyManagementServiceMock(),
-                                      messageFormatter: messageFormatter, address: "",
                                       walletErrorResponder: walletErrorResponder,
                                       pairingRegisterer: pairingRegisterer)
     }
 
     func testSubscribeRequest() {
-        let expectedMessage = "Expected Message"
+        let iat = ISO8601DateFormatter().string(from: Date())
+        let expectedPayload = AuthPayload(requestParams: .stub(), iat: iat)
         let expectedRequestId: RPCID = RPCID(1234)
         let messageExpectation = expectation(description: "receives formatted message")
-        messageFormatter.formattedMessage = expectedMessage
-        var messageId: RPCID!
-        var message: String!
+
+        var requestId: RPCID!
+        var requestPayload: AuthPayload!
         sut.onRequest = { request in
-            messageId = request.id
-            message = request.message
+            requestId = request.id
+            requestPayload = request.payload
             messageExpectation.fulfill()
         }
 
-        let payload = RequestSubscriptionPayload<AuthRequestParams>(id: expectedRequestId, topic: "123", request: AuthRequestParams.stub(id: expectedRequestId))
+        let payload = RequestSubscriptionPayload<AuthRequestParams>(id: expectedRequestId, topic: "123", request: AuthRequestParams.stub(id: expectedRequestId, iat: iat))
 
         pairingRegisterer.subject.send(payload)
 
         wait(for: [messageExpectation], timeout: defaultTimeout)
         XCTAssertTrue(pairingRegisterer.isActivateCalled)
-        XCTAssertEqual(message, expectedMessage)
-        XCTAssertEqual(messageId, expectedRequestId)
+        XCTAssertEqual(requestPayload, expectedPayload)
+        XCTAssertEqual(requestId, expectedRequestId)
     }
 }

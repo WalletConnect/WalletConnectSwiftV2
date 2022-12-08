@@ -1,18 +1,18 @@
 import Foundation
 
-struct AuthPayload: Codable, Equatable {
-    let domain: String
-    let aud: String
-    let version: String
-    let nonce: String
-    let chainId: String
-    let type: String
-    let iat: String
-    let nbf: String?
-    let exp: String?
-    let statement: String?
-    let requestId: String?
-    let resources: [String]?
+public struct AuthPayload: Codable, Equatable {
+    public let domain: String
+    public let aud: String
+    public let version: String
+    public let nonce: String
+    public let chainId: String
+    public let type: String
+    public let iat: String
+    public let nbf: String?
+    public let exp: String?
+    public let statement: String?
+    public let requestId: String?
+    public let resources: [String]?
 
     init(requestParams: RequestParams, iat: String) {
         self.type = "eip4361"
