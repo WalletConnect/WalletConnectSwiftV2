@@ -20,7 +20,7 @@ class PushProposer {
 
     func request(topic: String, account: Account) async throws {
         logger.debug("PushProposer: Sending Push Proposal")
-        let protocolMethod = PushProposeProtocolMethod()
+        let protocolMethod = PushRequestProtocolMethod()
         let pubKey = try kms.createX25519KeyPair()
         let params = PushRequestParams(publicKey: pubKey.hexRepresentation, metadata: appMetadata, account: account)
         let request = RPCRequest(method: protocolMethod.method, params: params)

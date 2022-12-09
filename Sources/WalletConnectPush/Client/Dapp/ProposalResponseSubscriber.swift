@@ -26,7 +26,7 @@ class ProposalResponseSubscriber {
     }
 
     private func subscribeForProposalResponse() {
-        let protocolMethod = PushProposeProtocolMethod()
+        let protocolMethod = PushRequestProtocolMethod()
         networkingInteractor.responseSubscription(on: protocolMethod)
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<PushRequestParams, PushResponseParams>) in
                 logger.debug("Received Push Proposal response")
@@ -55,7 +55,7 @@ class ProposalResponseSubscriber {
     }
 
     private func subscribeForProposalErrors() {
-        let protocolMethod = PushProposeProtocolMethod()
+        let protocolMethod = PushRequestProtocolMethod()
         networkingInteractor.responseErrorSubscription(on: protocolMethod)
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<PushRequestParams>) in
                 guard let error = PairError(code: payload.error.code) else { return }

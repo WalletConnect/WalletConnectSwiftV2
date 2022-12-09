@@ -24,22 +24,22 @@ public class WalletPushClient {
     public let logger: ConsoleLogging
 
     private let pairingRegisterer: PairingRegisterer
-    private let echoRegisterer: EchoClient
-    private let proposeResponder: ProposeResponder
+    private let echoClient: EchoClient
+    private let proposeResponder: PushRequestResponder
     private let pushMessageSubscriber: PushMessageSubscriber
     private let subscriptionsProvider: SubscriptionsProvider
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
-         echoRegisterer: EchoClient,
+         echoClient: EchoClient,
          pairingRegisterer: PairingRegisterer,
-         proposeResponder: ProposeResponder,
+         proposeResponder: PushRequestResponder,
          pushMessageSubscriber: PushMessageSubscriber,
          subscriptionsProvider: SubscriptionsProvider) {
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
         self.proposeResponder = proposeResponder
-        self.echoRegisterer = echoRegisterer
+        self.echoClient = echoClient
         self.pushMessageSubscriber = pushMessageSubscriber
         self.subscriptionsProvider = subscriptionsProvider
         setupSubscriptions()
@@ -50,8 +50,8 @@ public class WalletPushClient {
         try await proposeResponder.respond(requestId: id)
     }
 
-    public func reject(proposalId: String, reason: Reason) async throws {
-        fatalError("not implemented")
+    public func reject(id: RPCID, reason: Reason) async throws {
+        try await proposeResponder.respondError(requestId: id)
     }
 
     public func getActiveSubscriptions() -> [PushSubscription] {
@@ -62,20 +62,20 @@ public class WalletPushClient {
         fatalError("not implemented")
     }
 
-    public func decryptMessage(topic: String, ciphertext: String) -> String {
-        fatalError("not implemented")
+    public func decryptMessage(topic: String, ciphertext: String) throws -> String {
+        try echoClient.decryptMessage(topic: topic, ciphertext: ciphertext)
     }
 
 
     public func register(deviceToken: Data) async throws {
-        try await echoRegisterer.register(deviceToken: deviceToken)
+        try await echoClient.register(deviceToken: deviceToken)
     }
 }
 
 private extension WalletPushClient {
 
     func setupSubscriptions() {
-        let protocolMethod = PushProposeProtocolMethod()
+        let protocolMethod = PushRequestProtocolMethod()
 
         pairingRegisterer.register(method: protocolMethod)
             .sink { [unowned self] (payload: RequestSubscriptionPayload<PushRequestParams>) in

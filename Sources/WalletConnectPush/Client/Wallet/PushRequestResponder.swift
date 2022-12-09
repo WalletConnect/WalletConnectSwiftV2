@@ -1,7 +1,7 @@
 import WalletConnectNetworking
 import Foundation
 
-class ProposeResponder {
+class PushRequestResponder {
     enum Errors: Error {
         case recordForIdNotFound
         case malformedRequestParams
@@ -37,12 +37,19 @@ class ProposeResponder {
         let responseParams = PushResponseParams(publicKey: keys.publicKey.hexRepresentation)
 
         let response = RPCResponse(id: requestId, result: responseParams)
-        try await networkingInteractor.respond(topic: pairingTopic, response: response, protocolMethod: PushProposeProtocolMethod())
+        try await networkingInteractor.respond(topic: pairingTopic, response: response, protocolMethod: PushRequestProtocolMethod())
     }
 
     func respondError(requestId: RPCID) async throws {
         //TODO
         fatalError("not implemented")
+
+        let requestRecord = try getRecord(requestId: requestId)
+        let pairingTopic = requestRecord.topic
+
+        try await networkingInteractor.respondError(topic: pairingTopic, requestId: requestId, protocolMethod: PushRequestProtocolMethod(), reason: PushError.rejected)
+
+
     }
 
     private func getRecord(requestId: RPCID) throws -> RPCHistory.Record {
@@ -65,3 +72,4 @@ class ProposeResponder {
         return keys
     }
 }
+
