@@ -8,7 +8,7 @@ public class EchoClient {
     init(registerService: EchoRegisterService,
          decryptionService: DecryptionService) {
         self.registerService = registerService
-        self.decryptionService =          decryptionService
+        self.decryptionService = decryptionService
     }
 
     public func register(deviceToken: Data) async throws {
@@ -16,16 +16,6 @@ public class EchoClient {
     }
 
     public func decryptMessage(topic: String, ciphertext: String) throws -> String {
-        try decryptMessage(topic: topic, ciphertext: ciphertext)
-    }
-}
-
-import WalletConnectKMS
-
-class DecryptionService {
-    private let serialiser: Serializing
-
-    public func decryptMessage(topic: String, ciphertext: String) throws -> String {
-        serialiser.deserialize(topic: topic, encodedEnvelope: ciphertext)
+        try decryptionService.decryptMessage(topic: topic, ciphertext: ciphertext)
     }
 }
