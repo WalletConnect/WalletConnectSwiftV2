@@ -2,13 +2,13 @@
 import WalletConnectKMS
 
 class DecryptionService {
-    private let serialiser: Serializing
+    private let serializer: Serializing
 
-    init(serialiser: Serializing) {
-        self.serialiser = serialiser
+    init(serializer: Serializing) {
+        self.serializer = serializer
     }
 
     public func decryptMessage(topic: String, ciphertext: String) throws -> String {
-        try serialiser.deserialize(topic: topic, encodedEnvelope: ciphertext)
+        try serializer.deserialize(topic: topic, encodedEnvelope: ciphertext)
     }
 }

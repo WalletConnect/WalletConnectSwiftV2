@@ -27,18 +27,21 @@ public class WalletPushClient {
     private let echoRegisterer: EchoClient
     private let proposeResponder: ProposeResponder
     private let pushMessageSubscriber: PushMessageSubscriber
+    private let subscriptionsProvider: SubscriptionsProvider
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
          echoRegisterer: EchoClient,
          pairingRegisterer: PairingRegisterer,
          proposeResponder: ProposeResponder,
-         pushMessageSubscriber: PushMessageSubscriber) {
+         pushMessageSubscriber: PushMessageSubscriber,
+         subscriptionsProvider: SubscriptionsProvider) {
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
         self.proposeResponder = proposeResponder
         self.echoRegisterer = echoRegisterer
         self.pushMessageSubscriber = pushMessageSubscriber
+        self.subscriptionsProvider = subscriptionsProvider
         setupSubscriptions()
     }
 
@@ -52,7 +55,7 @@ public class WalletPushClient {
     }
 
     public func getActiveSubscriptions() -> [PushSubscription] {
-        fatalError("not implemented")
+        subscriptionsProvider.getActiveSubscriptions()
     }
 
     public func delete(topic: String) async throws {

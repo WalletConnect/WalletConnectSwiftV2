@@ -21,12 +21,15 @@ public struct DappPushClientFactory {
         let pushProposer = PushProposer(networkingInteractor: networkInteractor, kms: kms, appMetadata: metadata, logger: logger)
         let proposalResponseSubscriber = ProposalResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, metadata: metadata, relay: RelayProtocolOptions(protocol: "irn", data: nil))
         let pushMessageSender = PushMessageSender(networkingInteractor: networkInteractor, kms: kms, logger: logger)
+        let subscriptionStore = CodableStore<PushSubscription>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.pushSubscription)
+        let subscriptionProvider = SubscriptionsProvider(store: subscriptionStore)
         return DappPushClient(
             logger: logger,
             kms: kms,
             pushProposer: pushProposer,
             proposalResponseSubscriber: proposalResponseSubscriber,
-            pushMessageSender: pushMessageSender
+            pushMessageSender: pushMessageSender,
+            subscriptionsProvider: subscriptionProvider
         )
     }
 }
