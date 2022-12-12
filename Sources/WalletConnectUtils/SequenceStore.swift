@@ -55,9 +55,8 @@ private extension SequenceStore {
     func verifyExpiry(on sequence: T) -> T? {
         let now = dateInitializer()
         if now >= sequence.expiryDate {
-            store.delete(forKey: sequence.topic)
+            delete(topic: sequence.topic)
             onSequenceExpiration?(sequence)
-            onSequenceUpdate?()
             return nil
         }
         return sequence

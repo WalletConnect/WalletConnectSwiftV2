@@ -35,7 +35,6 @@ public final class SignClient {
     /// Publisher that sends session when one is settled
     ///
     /// Event is emited on proposer and responder client when both communicating peers have successfully established a session.
-    @available(*, deprecated, message: "use sessionsPublisher instead")
     public var sessionSettlePublisher: AnyPublisher<Session, Never> {
         sessionSettlePublisherSubject.eraseToAnyPublisher()
     }
@@ -64,6 +63,7 @@ public final class SignClient {
     /// Publisher that sends session topic and namespaces on session update
     ///
     /// Event will be emited controller and non-controller client when both communicating peers have successfully updated methods requested by the controller client.
+    @available(*, deprecated, message: "use sessionsPublisher instead")
     public var sessionUpdatePublisher: AnyPublisher<(sessionTopic: String, namespaces: [String: SessionNamespace]), Never> {
         sessionUpdatePublisherSubject.eraseToAnyPublisher()
     }
