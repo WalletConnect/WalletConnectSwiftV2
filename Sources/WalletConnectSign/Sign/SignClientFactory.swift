@@ -35,7 +35,6 @@ public struct SignClientFactory {
         let sessionPingService = SessionPingService(sessionStorage: sessionStore, networkingInteractor: networkingClient, logger: logger)
         let pairingPingService = PairingPingService(pairingStorage: pairingStore, networkingInteractor: networkingClient, logger: logger)
         let appProposerService = AppProposeService(metadata: metadata, networkingInteractor: networkingClient, kms: kms, logger: logger)
-        let sessionsSubscriber = SessionsSubscriber()
 
         let client = SignClient(
             logger: logger,
@@ -50,8 +49,7 @@ public struct SignClientFactory {
             disconnectService: disconnectService,
             history: rpcHistory,
             cleanupService: cleanupService,
-            pairingClient: pairingClient,
-            sessionsSubscriber: sessionsSubscriber
+            pairingClient: pairingClient
         )
         return client
     }

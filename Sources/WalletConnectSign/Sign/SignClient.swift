@@ -35,6 +35,7 @@ public final class SignClient {
     /// Publisher that sends session when one is settled
     ///
     /// Event is emited on proposer and responder client when both communicating peers have successfully established a session.
+    @available(*, deprecated, message: "use sessionsPublisher instead")
     public var sessionSettlePublisher: AnyPublisher<Session, Never> {
         sessionSettlePublisherSubject.eraseToAnyPublisher()
     }
@@ -112,7 +113,6 @@ public final class SignClient {
     private let appProposeService: AppProposeService
     private let history: RPCHistory
     private let cleanupService: SignCleanupService
-    private let sessionsSubscriber: SessionsSubscriber
 
     private let sessionProposalPublisherSubject = PassthroughSubject<Session.Proposal, Never>()
     private let sessionRequestPublisherSubject = PassthroughSubject<Request, Never>()
@@ -143,8 +143,7 @@ public final class SignClient {
          disconnectService: DisconnectService,
          history: RPCHistory,
          cleanupService: SignCleanupService,
-         pairingClient: PairingClient,
-         sessionsSubscriber: SessionsSubscriber
+         pairingClient: PairingClient
     ) {
         self.logger = logger
         self.networkingClient = networkingClient
@@ -159,7 +158,6 @@ public final class SignClient {
         self.cleanupService = cleanupService
         self.disconnectService = disconnectService
         self.pairingClient = pairingClient
-        self.sessionsSubscriber = sessionsSubscriber
 
         setUpConnectionObserving()
         setUpEnginesCallbacks()
@@ -400,7 +398,7 @@ public final class SignClient {
         sessionPingService.onResponse = { [unowned self] topic in
             pingResponsePublisherSubject.send(topic)
         }
-        sessionsSubscriber.onSessionsUpdate = { [unowned self] sessions in
+        sessionEngine.onSessionsUpdate = { [unowned self] sessions in
             sessionsPublisherSubject.send(sessions)
         }
     }

@@ -6,6 +6,7 @@ final class SessionEngine {
         case sessionNotFound(topic: String)
     }
 
+    var onSessionsUpdate: (([Session]) -> Void)?
     var onSessionRequest: ((Request) -> Void)?
     var onSessionResponse: ((Response) -> Void)?
     var onSessionRejected: ((String, SessionType.Reason) -> Void)?
@@ -32,6 +33,7 @@ final class SessionEngine {
         setupConnectionSubscriptions()
         setupRequestSubscriptions()
         setupResponseSubscriptions()
+        setupUpdateSubscriptions()
         setupExpirationSubscriptions()
     }
 
@@ -147,6 +149,13 @@ private extension SessionEngine {
         sessionStore.onSessionExpiration = { [weak self] session in
             self?.kms.deletePrivateKey(for: session.selfParticipant.publicKey)
             self?.kms.deleteAgreementSecret(for: session.topic)
+        }
+    }
+
+    func setupUpdateSubscriptions() {
+        sessionStore.onSessionsUpdate = { [weak self] in
+            guard let self else { return }
+            self.onSessionsUpdate?(self.getSessions())
         }
     }
 

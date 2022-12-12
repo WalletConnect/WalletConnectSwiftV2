@@ -7,6 +7,7 @@ public protocol SequenceObject: Codable {
 
 public final class SequenceStore<T> where T: SequenceObject {
 
+    public var onSequenceUpdate: (() -> Void)?
     public var onSequenceExpiration: ((_ sequence: T) -> Void)?
 
     private let store: CodableStore<T>
@@ -23,6 +24,7 @@ public final class SequenceStore<T> where T: SequenceObject {
 
     public func setSequence(_ sequence: T) {
         store.set(sequence, forKey: sequence.topic)
+        onSequenceUpdate?()
     }
 
     public func getSequence(forTopic topic: String) throws -> T? {
@@ -37,10 +39,12 @@ public final class SequenceStore<T> where T: SequenceObject {
 
     public func delete(topic: String) {
         store.delete(forKey: topic)
+        onSequenceUpdate?()
     }
 
     public func deleteAll() {
         store.deleteAll()
+        onSequenceUpdate?()
     }
 }
 
@@ -53,6 +57,7 @@ private extension SequenceStore {
         if now >= sequence.expiryDate {
             store.delete(forKey: sequence.topic)
             onSequenceExpiration?(sequence)
+            onSequenceUpdate?()
             return nil
         }
         return sequence
