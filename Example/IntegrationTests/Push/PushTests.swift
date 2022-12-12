@@ -121,9 +121,27 @@ final class PushTests: XCTestCase {
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
-    func testWalletRejectsPushRequest() {
-        XCTExpectFailure()
-        XCTFail()
+    func testWalletRejectsPushRequest() async {
+        let expectation = expectation(description: "expects dapp to receive error response")
+
+        let uri = try! await dappPairingClient.create()
+        try! await walletPairingClient.pair(uri: uri)
+        try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
+
+        walletPushClient.requestPublisher.sink { [unowned self] (id, _) in
+
+            Task(priority: .high) { try! await walletPushClient.reject(id: id) }
+        }.store(in: &publishers)
+
+        dappPushClient.responsePublisher.sink { (id, result) in
+            guard case .failure = result else {
+                XCTFail()
+                return
+            }
+            expectation.fulfill()
+        }.store(in: &publishers)
+
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testDappSendsPushMessage() async {

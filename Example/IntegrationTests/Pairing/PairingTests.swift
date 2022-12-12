@@ -125,7 +125,7 @@ final class PairingTests: XCTestCase {
         let expectation = expectation(description: "wallet responds unsupported method for unregistered method")
 
         appPushClient.responsePublisher.sink { (_, response) in
-            XCTAssertEqual(response, .failure(WalletConnectPairing.PairError(code: 10001)!))
+            XCTAssertEqual(response, .failure(PushError(code: 10001)!))
             expectation.fulfill()
         }.store(in: &publishers)
 
@@ -136,7 +136,6 @@ final class PairingTests: XCTestCase {
         try! await appPushClient.request(account: Account.stub(), topic: uri.topic)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
-
     }
 
     func testDisconnect() {

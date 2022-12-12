@@ -9,7 +9,7 @@ class ProposalResponseSubscriber {
     private var publishers = [AnyCancellable]()
     private let metadata: AppMetadata
     private let relay: RelayProtocolOptions
-    var onResponse: ((_ id: RPCID, _ result: Result<PushSubscription, PairError>) -> Void)?
+    var onResponse: ((_ id: RPCID, _ result: Result<PushSubscription, PushError>) -> Void)?
 
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
@@ -58,7 +58,7 @@ class ProposalResponseSubscriber {
         let protocolMethod = PushRequestProtocolMethod()
         networkingInteractor.responseErrorSubscription(on: protocolMethod)
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<PushRequestParams>) in
-                guard let error = PairError(code: payload.error.code) else { return }
+                guard let error = PushError(code: payload.error.code) else { return }
                 onResponse?(payload.id, .failure(error))
             }.store(in: &publishers)
     }

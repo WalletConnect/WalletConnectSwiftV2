@@ -41,15 +41,11 @@ class PushRequestResponder {
     }
 
     func respondError(requestId: RPCID) async throws {
-        //TODO
-        fatalError("not implemented")
-
+        logger.debug("PushRequestResponder - rejecting rush request")
         let requestRecord = try getRecord(requestId: requestId)
         let pairingTopic = requestRecord.topic
 
         try await networkingInteractor.respondError(topic: pairingTopic, requestId: requestId, protocolMethod: PushRequestProtocolMethod(), reason: PushError.rejected)
-
-
     }
 
     private func getRecord(requestId: RPCID) throws -> RPCHistory.Record {

@@ -50,7 +50,7 @@ public class WalletPushClient {
         try await proposeResponder.respond(requestId: id)
     }
 
-    public func reject(id: RPCID, reason: Reason) async throws {
+    public func reject(id: RPCID) async throws {
         try await proposeResponder.respondError(requestId: id)
     }
 

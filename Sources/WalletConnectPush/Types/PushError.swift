@@ -1,8 +1,9 @@
 
 import Foundation
 
-enum PushError: Codable, Equatable, Error {
+public enum PushError: Codable, Equatable, Error {
     case rejected
+    case methodUnsupported
 }
 
 extension PushError: Reason {
@@ -11,21 +12,27 @@ extension PushError: Reason {
         switch code {
         case Self.rejected.code:
             self = .rejected
+        case Self.methodUnsupported.code:
+            self = .methodUnsupported
         default:
             return nil
         }
     }
-    var code: Int {
+    public var code: Int {
         switch self {
+        case .methodUnsupported:
+            return 10001
         case .rejected:
             return 15000
         }
     }
 
-    var message: String {
+    public var message: String {
         switch self {
         case .rejected:
             return "Push request rejected"
+        case .methodUnsupported:
+            return "Method Unsupported"
         }
     }
 
