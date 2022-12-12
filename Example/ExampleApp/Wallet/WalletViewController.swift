@@ -292,8 +292,7 @@ extension WalletViewController {
     }
 
     private func reloadSessions(_ sessions: [Session]) {
-        let settledSessions = Sign.instance.getSessions()
-        sessionItems = getActiveSessionItem(for: settledSessions)
+        sessionItems = getActiveSessionItem(for: sessions)
         walletView.tableView.reloadData()
     }
 }
