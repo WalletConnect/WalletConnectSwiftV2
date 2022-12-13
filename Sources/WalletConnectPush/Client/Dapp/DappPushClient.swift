@@ -16,18 +16,21 @@ public class DappPushClient {
     private let pushMessageSender: PushMessageSender
     private let proposalResponseSubscriber: ProposalResponseSubscriber
     private let subscriptionsProvider: SubscriptionsProvider
+    private let deletePushSubscriptionService: DeletePushSubscriptionService
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
          pushProposer: PushProposer,
          proposalResponseSubscriber: ProposalResponseSubscriber,
          pushMessageSender: PushMessageSender,
-         subscriptionsProvider: SubscriptionsProvider) {
+         subscriptionsProvider: SubscriptionsProvider,
+         deletePushSubscriptionService: DeletePushSubscriptionService) {
         self.logger = logger
         self.pushProposer = pushProposer
         self.proposalResponseSubscriber = proposalResponseSubscriber
         self.pushMessageSender = pushMessageSender
         self.subscriptionsProvider = subscriptionsProvider
+        self.deletePushSubscriptionService = deletePushSubscriptionService
         setupSubscriptions()
     }
 

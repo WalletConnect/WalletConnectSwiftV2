@@ -28,6 +28,7 @@ public struct WalletPushClientFactory {
         let pushMessageSubscriber = PushMessageSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger)
         let subscriptionStore = CodableStore<PushSubscription>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.pushSubscription)
         let subscriptionProvider = SubscriptionsProvider(store: subscriptionStore)
+        let deletePushSubscriptionService = DeletePushSubscriptionService(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore)
 
         return WalletPushClient(
             logger: logger,
@@ -36,7 +37,8 @@ public struct WalletPushClientFactory {
             pairingRegisterer: pairingRegisterer,
             proposeResponder: proposeResponder,
             pushMessageSubscriber: pushMessageSubscriber,
-            subscriptionsProvider: subscriptionProvider
+            subscriptionsProvider: subscriptionProvider,
+            deletePushSubscriptionService: deletePushSubscriptionService
         )
     }
 }

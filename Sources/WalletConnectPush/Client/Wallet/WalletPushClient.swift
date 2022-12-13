@@ -20,6 +20,8 @@ public class WalletPushClient {
     public var pushMessagePublisher: AnyPublisher<PushMessage, Never> {
         pushMessagePublisherSubject.eraseToAnyPublisher()
     }
+    private let deletePushSubscriptionService: DeletePushSubscriptionService
+
 
     public let logger: ConsoleLogging
 
@@ -35,13 +37,15 @@ public class WalletPushClient {
          pairingRegisterer: PairingRegisterer,
          proposeResponder: PushRequestResponder,
          pushMessageSubscriber: PushMessageSubscriber,
-         subscriptionsProvider: SubscriptionsProvider) {
+         subscriptionsProvider: SubscriptionsProvider,
+         deletePushSubscriptionService: DeletePushSubscriptionService) {
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
         self.proposeResponder = proposeResponder
         self.echoClient = echoClient
         self.pushMessageSubscriber = pushMessageSubscriber
         self.subscriptionsProvider = subscriptionsProvider
+        self.deletePushSubscriptionService = deletePushSubscriptionService
         setupSubscriptions()
     }
 

@@ -23,13 +23,15 @@ public struct DappPushClientFactory {
         let pushMessageSender = PushMessageSender(networkingInteractor: networkInteractor, kms: kms, logger: logger)
         let subscriptionStore = CodableStore<PushSubscription>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.pushSubscription)
         let subscriptionProvider = SubscriptionsProvider(store: subscriptionStore)
+        let deletePushSubscriptionService = DeletePushSubscriptionService(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore)
         return DappPushClient(
             logger: logger,
             kms: kms,
             pushProposer: pushProposer,
             proposalResponseSubscriber: proposalResponseSubscriber,
             pushMessageSender: pushMessageSender,
-            subscriptionsProvider: subscriptionProvider
+            subscriptionsProvider: subscriptionProvider,
+            deletePushSubscriptionService: deletePushSubscriptionService
         )
     }
 }
