@@ -1,4 +1,3 @@
-
 import Foundation
 
 public enum PushError: Codable, Equatable, Error {

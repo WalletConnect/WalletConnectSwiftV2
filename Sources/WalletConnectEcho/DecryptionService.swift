@@ -1,4 +1,3 @@
-
 import WalletConnectKMS
 
 class DecryptionService {

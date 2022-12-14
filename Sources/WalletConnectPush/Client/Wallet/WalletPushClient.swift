@@ -14,14 +14,12 @@ public class WalletPushClient {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
-
     private let pushMessagePublisherSubject = PassthroughSubject<PushMessage, Never>()
 
     public var pushMessagePublisher: AnyPublisher<PushMessage, Never> {
         pushMessagePublisherSubject.eraseToAnyPublisher()
     }
     private let deletePushSubscriptionService: DeletePushSubscriptionService
-
 
     public let logger: ConsoleLogging
 
@@ -49,7 +47,6 @@ public class WalletPushClient {
         setupSubscriptions()
     }
 
-
     public func approve(id: RPCID) async throws {
         try await proposeResponder.respond(requestId: id)
     }
@@ -69,7 +66,6 @@ public class WalletPushClient {
     public func decryptMessage(topic: String, ciphertext: String) throws -> String {
         try echoClient.decryptMessage(topic: topic, ciphertext: ciphertext)
     }
-
 
     public func register(deviceToken: Data) async throws {
         try await echoClient.register(deviceToken: deviceToken)
@@ -91,5 +87,3 @@ private extension WalletPushClient {
         }
     }
 }
-
-

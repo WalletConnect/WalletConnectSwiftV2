@@ -36,7 +36,7 @@ enum EchoAPI: HTTPService {
         }
     }
 
-    var queryParameters: [String : String]? {
+    var queryParameters: [String: String]? {
         return nil
     }
 

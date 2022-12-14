@@ -15,8 +15,7 @@ class WalletRequestSubscriber {
         logger: ConsoleLogging,
         kms: KeyManagementServiceProtocol,
         walletErrorResponder: WalletErrorResponder,
-        pairingRegisterer: PairingRegisterer)
-    {
+        pairingRegisterer: PairingRegisterer) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.kms = kms

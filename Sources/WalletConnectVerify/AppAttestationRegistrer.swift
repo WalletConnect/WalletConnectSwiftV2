@@ -3,7 +3,6 @@ import DeviceCheck
 import WalletConnectUtils
 import CryptoKit
 
-
 @available(iOS 14.0, *)
 @available(macOS 11.0, *)
 class AppAttestationRegistrer {

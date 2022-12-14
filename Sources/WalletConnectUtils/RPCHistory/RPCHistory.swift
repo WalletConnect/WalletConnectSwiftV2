@@ -1,4 +1,3 @@
-
 public final class RPCHistory {
 
     public struct Record: Codable {

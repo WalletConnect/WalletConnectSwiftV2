@@ -1,4 +1,3 @@
-
 public enum PairError: Codable, Equatable, Error, Reason {
     case methodUnsupported
 

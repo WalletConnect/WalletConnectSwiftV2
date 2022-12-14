@@ -49,11 +49,10 @@ final class PairingTests: XCTestCase {
             keychainStorage: keychain,
             networkingClient: networkingClient)
 
-
         return (pairingClient, networkingClient, keychain, keyValueStorage)
     }
 
-    func makeDappClients()  {
+    func makeDappClients() {
         let prefix = "🤖 Dapp: "
         let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
@@ -65,7 +64,7 @@ final class PairingTests: XCTestCase {
                                                       networkInteractor: networkingInteractor)
     }
 
-    func makeWalletClients()  {
+    func makeWalletClients() {
         let prefix = "🐶 Wallet: "
         let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)

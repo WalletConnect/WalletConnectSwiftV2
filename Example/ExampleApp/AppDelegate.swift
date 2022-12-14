@@ -30,13 +30,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
         Pair.configure(metadata: metadata)
 
-
         let clientId  = try! Networking.interactor.getClientId()
         let sanitizedClientId = clientId.replacingOccurrences(of: "did:key:", with: "")
 
-
         Echo.configure(projectId: InputConfig.projectId, clientId: sanitizedClientId)
-        Push.wallet.requestPublisher.sink { id, metadata in
+        Push.wallet.requestPublisher.sink { id, _ in
             Task(priority: .high) { try! await Push.wallet.approve(id: id) }
         }.store(in: &publishers)
         Push.wallet.pushMessagePublisher.sink { pm in
@@ -54,7 +52,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
     }
-    
+
     func getNotificationSettings() {
       UNUserNotificationCenter.current().getNotificationSettings { settings in
         print("Notification settings: \(settings)")
@@ -64,7 +62,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
           }
       }
     }
-    
+
     func registerForPushNotifications() {
         UNUserNotificationCenter.current()
           .requestAuthorization(
@@ -84,14 +82,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             #endif
         }
     }
-    
+
     func modelIdentifier() -> String {
         if let simulatorModelIdentifier = ProcessInfo().environment["SIMULATOR_MODEL_IDENTIFIER"] { return simulatorModelIdentifier }
         var sysinfo = utsname()
         uname(&sysinfo) // ignore return value
         return String(bytes: Data(bytes: &sysinfo.machine, count: Int(_SYS_NAMELEN)), encoding: .ascii)!.trimmingCharacters(in: .controlCharacters)
     }
-    
+
     func application(
       _ application: UIApplication,
       didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
@@ -108,7 +106,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // TODO: when is this invoked?
         print("Failed to register: \(error)")
     }
-
-
 
 }

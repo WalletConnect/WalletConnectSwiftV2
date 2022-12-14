@@ -92,7 +92,7 @@ final class ApproveEngine {
 
         async let settleRequest: () = settle(topic: sessionTopic, proposal: proposal, namespaces: sessionNamespaces)
 
-        let _ = try await [proposeResponse, settleRequest]
+        _ = try await [proposeResponse, settleRequest]
 
         try pairing.updateExpiry()
         pairingStore.setPairing(pairing)
@@ -149,7 +149,7 @@ final class ApproveEngine {
         async let subscription: () = networkingInteractor.subscribe(topic: topic)
         async let settleRequest: () = networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
 
-        let _ = try await [settleRequest, subscription]
+        _ = try await [settleRequest, subscription]
 
         onSessionSettle?(session.publicRepresentation())
     }

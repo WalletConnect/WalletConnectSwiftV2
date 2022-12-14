@@ -1,4 +1,3 @@
-
 import Foundation
 import WalletConnectNetworking
 
@@ -7,13 +6,11 @@ public struct EchoClientFactory {
 
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
 
-
         return EchoClientFactory.create(
             projectId: projectId,
             clientId: clientId,
             keychainStorage: keychainStorage)
     }
-
 
     static func create(projectId: String,
                                    clientId: String,
