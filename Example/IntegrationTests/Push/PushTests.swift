@@ -172,4 +172,8 @@ final class PushTests: XCTestCase {
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
 
     }
+
+    func testDeletePushSubscription() {
+        //TODO
+    }
 }
