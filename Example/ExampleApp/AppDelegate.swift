@@ -38,7 +38,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Echo.configure(projectId: InputConfig.projectId, clientId: sanitizedClientId)
         Push.wallet.requestPublisher.sink { id, metadata in
             Task(priority: .high) { try! await Push.wallet.approve(id: id) }
-        }
+        }.store(in: &publishers)
         Push.wallet.pushMessagePublisher.sink { pm in
             print(pm)
         }.store(in: &publishers)
@@ -115,5 +115,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // TODO: when is this invoked?
         print("Failed to register: \(error)")
     }
+
+
 
 }
