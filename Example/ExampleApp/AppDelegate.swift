@@ -2,10 +2,13 @@ import UIKit
 import UserNotifications
 import WalletConnectNetworking
 import WalletConnectEcho
-
+import WalletConnectPairing
+import WalletConnectPush
+import Combine
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
+    private var publishers = [AnyCancellable]()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         registerForPushNotifications()
@@ -18,7 +21,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
           let aps = notification["aps"] as? [String: AnyObject] {
         }
 
+        let metadata = AppMetadata(
+            name: "Example Wallet",
+            description: "wallet description",
+            url: "example.wallet",
+            icons: ["https://avatars.githubusercontent.com/u/37784886"])
 
+        Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
+        Pair.configure(metadata: metadata)
+
+
+        let clientId  = try! Networking.interactor.getClientId()
+        let sanitizedClientId = clientId.replacingOccurrences(of: "did:key:", with: "")
+
+
+        Echo.configure(projectId: InputConfig.projectId, clientId: sanitizedClientId)
+        Push.wallet.requestPublisher.sink { id, metadata in
+            Task(priority: .high) { try! await Push.wallet.approve(id: id) }
+        }
+        Push.wallet.pushMessagePublisher.sink { pm in
+            print(pm)
+        }.store(in: &publishers)
 
         return true
     }
@@ -77,15 +100,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     ) {
         let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
         let token = tokenParts.joined()
-        let clientId  = try! Networking.interactor.getClientId()
-        let sanitizedClientId = clientId.replacingOccurrences(of: "did:key:", with: "")
-        print(sanitizedClientId)
-        print(token)
 
-        Echo.configure(projectId: "59052d52644235f3c870aba1076a0f9e", clientId: sanitizedClientId)
         Task(priority: .high) {
             try await Echo.instance.register(deviceToken: deviceToken)
         }
+
+
     }
 
     func application(
