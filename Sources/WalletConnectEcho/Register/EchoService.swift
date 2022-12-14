@@ -2,15 +2,15 @@ import Foundation
 import WalletConnectNetworking
 
 enum EchoAPI: HTTPService {
-    case register(clientId: String, token: String, tenantId: String)
-    case unregister(clientId: String, tenantId: String)
+    case register(clientId: String, token: String, projectId: String)
+    case unregister(clientId: String, projectId: String)
 
     var path: String {
         switch self {
-        case .register(_, _, let tenantId):
-            return "/\(tenantId)/clients"
-        case .unregister(let clientId, let tenantId):
-            return "/\(tenantId)/clients\(clientId)"
+        case .register(_, _, let projectId):
+            return "/\(projectId)/clients"
+        case .unregister(let clientId, let projectId):
+            return "/\(projectId)/clients\(clientId)"
         }
     }
 

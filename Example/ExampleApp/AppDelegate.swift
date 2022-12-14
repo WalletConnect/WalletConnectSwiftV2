@@ -1,6 +1,8 @@
 import UIKit
 import UserNotifications
 import WalletConnectNetworking
+import WalletConnectEcho
+
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -15,6 +17,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
           let notification = notificationOption as? [String: AnyObject],
           let aps = notification["aps"] as? [String: AnyObject] {
         }
+
+
 
         return true
     }
@@ -77,9 +81,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let sanitizedClientId = clientId.replacingOccurrences(of: "did:key:", with: "")
         print(sanitizedClientId)
         print(token)
-        registerClientWithPushServer(clientId: sanitizedClientId, deviceToken: token) { result in
-            print("Successfully registered")
+
+        Echo.configure(projectId: "59052d52644235f3c870aba1076a0f9e", clientId: sanitizedClientId)
+        Task(priority: .high) {
+            try await Echo.instance.register(deviceToken: deviceToken)
         }
+
+
+//        registerClientWithPushServer(clientId: sanitizedClientId, deviceToken: token) { result in
+//            print("Successfully registered")
+//        }
     }
 
     func application(
@@ -98,6 +109,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //Request Body
         let json: [String: Any] = ["client_id": clientId, "type": "apns", "token": deviceToken]
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
+
+        print(json)
          
         // create post request
         let url = URL(string: "https://echo.walletconnect.com/59052d52644235f3c870aba1076a0f9e/clients")!
@@ -105,6 +118,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = jsonData
+        print(request.httpBody!.toHexString())
          
         // Send request
         let task = URLSession.shared.dataTask(with: request) { data, response, error in

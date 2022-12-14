@@ -3,25 +3,25 @@ import Foundation
 import WalletConnectNetworking
 
 public struct EchoClientFactory {
-    public static func create(tenantId: String, clientId: String) -> EchoClient {
+    public static func create(projectId: String, clientId: String) -> EchoClient {
 
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
 
 
         return EchoClientFactory.create(
-            tenantId: tenantId,
+            projectId: projectId,
             clientId: clientId,
             keychainStorage: keychainStorage)
     }
 
 
-    static func create(tenantId: String,
-                       clientId: String,
-                       keychainStorage: KeychainStorageProtocol) -> EchoClient {
+    static func create(projectId: String,
+                                   clientId: String,
+                                   keychainStorage: KeychainStorageProtocol) -> EchoClient {
 
         let httpClient = HTTPNetworkClient(host: "echo.walletconnect.com")
 
-        let registerService = EchoRegisterService(httpClient: httpClient, tenantId: tenantId, clientId: clientId)
+        let registerService = EchoRegisterService(httpClient: httpClient, projectId: projectId, clientId: clientId)
 
         let kms = KeyManagementService(keychain: keychainStorage)
 

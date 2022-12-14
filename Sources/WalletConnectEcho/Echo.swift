@@ -8,7 +8,7 @@ public class Echo {
         }
 
         return EchoClientFactory.create(
-            tenantId: config.tenantId,
+            projectId: config.projectId,
             clientId: config.clientId)
     }()
 
@@ -19,7 +19,7 @@ public class Echo {
     /// Echo instance config method
     /// - Parameters:
     ///   - tenantId:
-    static public func configure(tenantId: String, clientId: String) {
-        Echo.config = Echo.Config(tenantId: tenantId, clientId: clientId)
+    static public func configure(projectId: String, clientId: String) {
+        Echo.config = Echo.Config(clientId: projectId, projectId: clientId)
     }
 }

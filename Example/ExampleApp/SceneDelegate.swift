@@ -5,10 +5,13 @@ import WalletConnectSign
 import WalletConnectNetworking
 import WalletConnectRelay
 import WalletConnectPairing
+import WalletConnectPush
+import Combine
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    private var publishers = [AnyCancellable]()
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
 
@@ -20,6 +23,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
         Pair.configure(metadata: metadata)
+
+
 #if DEBUG
         if CommandLine.arguments.contains("-cleanInstall") {
             try? Sign.instance.cleanup()
