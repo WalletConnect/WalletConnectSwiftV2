@@ -1,6 +1,7 @@
 import Foundation
 
 protocol WCSessionStorage: AnyObject {
+    var onSessionsUpdate: (() -> Void)? { get set }
     var onSessionExpiration: ((WCSession) -> Void)? { get set }
     @discardableResult
     func setSessionIfNewer(_ session: WCSession) -> Bool
@@ -14,12 +15,16 @@ protocol WCSessionStorage: AnyObject {
 
 final class SessionStorage: WCSessionStorage {
 
+    var onSessionsUpdate: (() -> Void)?
     var onSessionExpiration: ((WCSession) -> Void)?
 
     private let storage: SequenceStore<WCSession>
 
     init(storage: SequenceStore<WCSession>) {
         self.storage = storage
+        storage.onSequenceUpdate = { [unowned self] in
+            onSessionsUpdate?()
+        }
         storage.onSequenceExpiration = { [unowned self] session in
             onSessionExpiration?(session)
         }

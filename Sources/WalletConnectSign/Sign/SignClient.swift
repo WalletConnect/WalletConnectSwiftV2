@@ -88,6 +88,13 @@ public final class SignClient {
         pingResponsePublisherSubject.eraseToAnyPublisher()
     }
 
+    /// Publisher that sends sessions on every sessions update
+    ///
+    /// Event will be emited on controller and non-controller clients.
+    public var sessionsPublisher: AnyPublisher<[Session], Never> {
+        sessionsPublisherSubject.eraseToAnyPublisher()
+    }
+
     /// An object that loggs SDK's errors and info messages
     public let logger: ConsoleLogging
 
@@ -117,6 +124,7 @@ public final class SignClient {
     private let sessionEventPublisherSubject = PassthroughSubject<(event: Session.Event, sessionTopic: String, chainId: Blockchain?), Never>()
     private let sessionExtendPublisherSubject = PassthroughSubject<(sessionTopic: String, date: Date), Never>()
     private let pingResponsePublisherSubject = PassthroughSubject<String, Never>()
+    private let sessionsPublisherSubject = PassthroughSubject<[Session], Never>()
 
     private var publishers = Set<AnyCancellable>()
 
@@ -388,6 +396,9 @@ public final class SignClient {
         }
         sessionPingService.onResponse = { [unowned self] topic in
             pingResponsePublisherSubject.send(topic)
+        }
+        sessionEngine.onSessionsUpdate = { [unowned self] sessions in
+            sessionsPublisherSubject.send(sessions)
         }
     }
 
