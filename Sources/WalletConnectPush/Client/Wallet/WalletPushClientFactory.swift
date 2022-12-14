@@ -5,7 +5,7 @@ import WalletConnectEcho
 public struct WalletPushClientFactory {
 
     public static func create(networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, echoClient: EchoClient) -> WalletPushClient {
-        let logger = ConsoleLogger(loggingLevel: .debug)
+        let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults.standard
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
         return WalletPushClientFactory.create(

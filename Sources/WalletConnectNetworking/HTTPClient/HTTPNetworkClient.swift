@@ -37,7 +37,6 @@ public actor HTTPNetworkClient: HTTPClient {
             completion(.failure(HTTPError.malformedURL(service)))
             return
         }
-        print(request.httpBody!.toHexString())
         session.dataTask(with: request) { data, response, error in
             do {
                 try HTTPNetworkClient.validate(response, error)

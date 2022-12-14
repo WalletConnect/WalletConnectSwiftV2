@@ -78,12 +78,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             let clientId = try! Networking.interactor.getClientId()
             let deviceToken = InputConfig.simulatorIdentifier
             assert(deviceToken != "SIMULATOR_IDENTIFIER", "Please set your Simulator identifier")
-            self?.registerClientWithPushServer(clientId: clientId, deviceToken: deviceToken, then: { result in
-                
-            })
+                Task(priority: .high) {
+                    try await Echo.instance.register(deviceToken: deviceToken)
+                }
             #endif
-            //   print(result)
-            // }
         }
     }
     
@@ -98,14 +96,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       _ application: UIApplication,
       didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
-        let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
-        let token = tokenParts.joined()
-
         Task(priority: .high) {
             try await Echo.instance.register(deviceToken: deviceToken)
         }
-
-
     }
 
     func application(

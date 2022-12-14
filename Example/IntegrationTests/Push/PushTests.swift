@@ -70,7 +70,7 @@ final class PushTests: XCTestCase {
         let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
         walletPairingClient = pairingClient
-        let echoClient = EchoClientFactory.create(tenantId: "", clientId: "")
+        let echoClient = EchoClientFactory.create(projectId: "", clientId: "")
         walletPushClient = WalletPushClientFactory.create(logger: pushLogger,
                                                           keyValueStorage: keyValueStorage,
                                                           keychainStorage: keychain,
