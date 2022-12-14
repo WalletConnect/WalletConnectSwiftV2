@@ -86,11 +86,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Task(priority: .high) {
             try await Echo.instance.register(deviceToken: deviceToken)
         }
-
-
-//        registerClientWithPushServer(clientId: sanitizedClientId, deviceToken: token) { result in
-//            print("Successfully registered")
-//        }
     }
 
     func application(
@@ -100,38 +95,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // TODO: when is this invoked?
         print("Failed to register: \(error)")
     }
-    
-    func registerClientWithPushServer(
-        clientId: String,
-        deviceToken: String,
-        then handler: @escaping (Result<Data, Error>) -> Void
-    ) {
-        //Request Body
-        let json: [String: Any] = ["client_id": clientId, "type": "apns", "token": deviceToken]
-        let jsonData = try? JSONSerialization.data(withJSONObject: json)
 
-        print(json)
-         
-        // create post request
-        let url = URL(string: "https://echo.walletconnect.com/59052d52644235f3c870aba1076a0f9e/clients")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = jsonData
-        print(request.httpBody!.toHexString())
-         
-        // Send request
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let data = data, error == nil else {
-                // TODO: Error handling?
-                return
-            }
-            let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
-            if let responseJSON = responseJSON as? [String: Any] {
-                // TODO: Error handling?
-                print(responseJSON)
-            }
-        }
-        task.resume()
-    }
 }
