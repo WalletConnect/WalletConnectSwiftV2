@@ -56,6 +56,11 @@ public class NetworkingInteractor: NetworkInteracting {
         }
     }
 
+    public func batchUnsubscribe(topics: [String]) async throws {
+        try await relayClient.batchUnsubscribe(topics: topics)
+        rpcHistory.deleteAll(forTopics: topics)
+    }
+
     public func requestSubscription<RequestParams: Codable>(on request: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {
         return requestPublisher
             .filter { rpcRequest in

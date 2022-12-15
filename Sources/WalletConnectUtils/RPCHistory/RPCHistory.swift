@@ -58,12 +58,16 @@ public final class RPCHistory {
         return record
     }
 
-    public func deleteAll(forTopic topic: String) {
+    public func deleteAll(forTopics topics: [String]){
         storage.getAll().forEach { record in
-            if record.topic == topic {
+            if topics.contains(record.topic) {
                 storage.delete(forKey: "\(record.id)")
             }
         }
+    }
+
+    public func deleteAll(forTopic topic: String) {
+        deleteAll(forTopics: [topic])
     }
 
     public func getPending() -> [Record] {
