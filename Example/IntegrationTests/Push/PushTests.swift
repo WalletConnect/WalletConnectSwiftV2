@@ -171,27 +171,57 @@ final class PushTests: XCTestCase {
 
     }
 
-    func testDeletePushSubscription() async {
-        let expectation = expectation(description: "expects wallet to delete push subscription")
+    func testWalletDeletePushSubscription() async {
+        let expectation = expectation(description: "expects to delete push subscription")
         let uri = try! await dappPairingClient.create()
         try! await walletPairingClient.pair(uri: uri)
         try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
+        var subscriptionTopic: String!
 
         walletPushClient.requestPublisher.sink { [unowned self] (id, _) in
             Task(priority: .high) { try! await walletPushClient.approve(id: id) }
         }.store(in: &publishers)
-
 
         dappPushClient.responsePublisher.sink { [unowned self] (_, result) in
             guard case .success(let subscription) = result else {
                 XCTFail()
                 return
             }
+            subscriptionTopic = subscription.topic
             Task(priority: .userInitiated) { try! await walletPushClient.delete(topic: subscription.topic)}
         }.store(in: &publishers)
 
+        dappPushClient.deleteSubscriptionPublisher.sink { topic in
+            XCTAssertEqual(subscriptionTopic, topic)
+            expectation.fulfill()
+        }.store(in: &publishers)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+    }
 
-        dappPushClient.
+    func testDappDeletePushSubscription() async {
+        let expectation = expectation(description: "expects to delete push subscription")
+        let uri = try! await dappPairingClient.create()
+        try! await walletPairingClient.pair(uri: uri)
+        try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
+        var subscriptionTopic: String!
+
+        walletPushClient.requestPublisher.sink { [unowned self] (id, _) in
+            Task(priority: .high) { try! await walletPushClient.approve(id: id) }
+        }.store(in: &publishers)
+
+        dappPushClient.responsePublisher.sink { [unowned self] (_, result) in
+            guard case .success(let subscription) = result else {
+                XCTFail()
+                return
+            }
+            subscriptionTopic = subscription.topic
+            Task(priority: .userInitiated) { try! await dappPushClient.delete(topic: subscription.topic)}
+        }.store(in: &publishers)
+
+        walletPushClient.deleteSubscriptionPublisher.sink { topic in
+            XCTAssertEqual(subscriptionTopic, topic)
+            expectation.fulfill()
+        }.store(in: &publishers)
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 }

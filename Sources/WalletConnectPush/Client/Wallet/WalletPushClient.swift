@@ -70,7 +70,7 @@ public class WalletPushClient {
     }
 
     public func delete(topic: String) async throws {
-        fatalError("not implemented")
+        try await deletePushSubscriptionService.delete(topic: topic)
     }
 
     public func decryptMessage(topic: String, ciphertext: String) throws -> String {

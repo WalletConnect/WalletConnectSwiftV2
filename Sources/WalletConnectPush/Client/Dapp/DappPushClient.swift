@@ -56,7 +56,7 @@ public class DappPushClient {
     }
 
     public func delete(topic: String) async throws {
-        fatalError("not implemented")
+        try await deletePushSubscriptionService.delete(topic: topic)
     }
 
 }

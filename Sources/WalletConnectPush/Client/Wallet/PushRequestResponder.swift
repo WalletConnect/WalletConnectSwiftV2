@@ -10,15 +10,20 @@ class PushRequestResponder {
     private let kms: KeyManagementService
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
+    private let subscriptionsStore: CodableStore<PushSubscription>
+
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
          kms: KeyManagementService,
-         rpcHistory: RPCHistory) {
+         rpcHistory: RPCHistory,
+         subscriptionsStore: CodableStore<PushSubscription>
+    ) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.kms = kms
         self.rpcHistory = rpcHistory
+        self.subscriptionsStore = subscriptionsStore
     }
 
     func respond(requestId: RPCID) async throws {
@@ -37,6 +42,11 @@ class PushRequestResponder {
         let responseParams = PushResponseParams(publicKey: keys.publicKey.hexRepresentation)
 
         let response = RPCResponse(id: requestId, result: responseParams)
+
+        let requestParams = try requestRecord.request.params!.get(PushRequestParams.self)
+        let pushSubscription = PushSubscription(topic: pushTopic, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: requestParams.metadata)
+        subscriptionsStore.set(pushSubscription, forKey: pushTopic)
+
         try await networkingInteractor.respond(topic: pairingTopic, response: response, protocolMethod: PushRequestProtocolMethod())
     }
 

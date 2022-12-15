@@ -25,12 +25,14 @@ class DeletePushSubscriptionService {
         guard let _ = try? pushSubscriptionStore.get(key: topic)
         else { throw Errors.pushSubscriptionNotFound}
         let protocolMethod = PushDeleteProtocolMethod()
-        let reason = PushReasonCode.userDisconnected
-        logger.debug("Will delete push subscription for reason: message: \(reason.message) code: \(reason.code)")
-        let request = RPCRequest(method: protocolMethod.method, params: reason)
+        let params = PushDeleteParams.userDisconnected
+        logger.debug("Will delete push subscription for reason: message: \(params.message) code: \(params.code)")
+        let request = RPCRequest(method: protocolMethod.method, params: params)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
-        pushSubscriptionStore.delete(forKey: topic)
-        kms.deleteSymmetricKey(for: topic)
+
         networkingInteractor.unsubscribe(topic: topic)
+        pushSubscriptionStore.delete(forKey: topic)
+
+        kms.deleteSymmetricKey(for: topic)
     }
 }
