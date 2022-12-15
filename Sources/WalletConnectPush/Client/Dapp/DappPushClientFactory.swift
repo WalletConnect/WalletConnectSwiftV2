@@ -24,6 +24,7 @@ public struct DappPushClientFactory {
         let subscriptionStore = CodableStore<PushSubscription>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.pushSubscription)
         let subscriptionProvider = SubscriptionsProvider(store: subscriptionStore)
         let deletePushSubscriptionService = DeletePushSubscriptionService(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore)
+        let deletePushSubscriptionSubscriber = DeletePushSubscriptionSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger)
         return DappPushClient(
             logger: logger,
             kms: kms,
@@ -31,7 +32,8 @@ public struct DappPushClientFactory {
             proposalResponseSubscriber: proposalResponseSubscriber,
             pushMessageSender: pushMessageSender,
             subscriptionsProvider: subscriptionProvider,
-            deletePushSubscriptionService: deletePushSubscriptionService
+            deletePushSubscriptionService: deletePushSubscriptionService,
+            deletePushSubscriptionSubscriber: deletePushSubscriptionSubscriber
         )
     }
 }

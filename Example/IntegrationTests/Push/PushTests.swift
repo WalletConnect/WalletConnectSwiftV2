@@ -171,7 +171,27 @@ final class PushTests: XCTestCase {
 
     }
 
-    func testDeletePushSubscription() {
-        // TODO
+    func testDeletePushSubscription() async {
+        let expectation = expectation(description: "expects wallet to delete push subscription")
+        let uri = try! await dappPairingClient.create()
+        try! await walletPairingClient.pair(uri: uri)
+        try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
+
+        walletPushClient.requestPublisher.sink { [unowned self] (id, _) in
+            Task(priority: .high) { try! await walletPushClient.approve(id: id) }
+        }.store(in: &publishers)
+
+
+        dappPushClient.responsePublisher.sink { [unowned self] (_, result) in
+            guard case .success(let subscription) = result else {
+                XCTFail()
+                return
+            }
+            Task(priority: .userInitiated) { try! await walletPushClient.delete(topic: subscription.topic)}
+        }.store(in: &publishers)
+
+
+        dappPushClient.
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 }
