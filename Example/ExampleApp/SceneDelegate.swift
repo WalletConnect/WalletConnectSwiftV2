@@ -10,7 +10,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) async {
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
 
         let metadata = AppMetadata(
             name: "Example Wallet",
@@ -22,7 +22,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         Pair.configure(metadata: metadata)
 #if DEBUG
         if CommandLine.arguments.contains("-cleanInstall") {
-            try? await Sign.instance.cleanup()
+            try? Sign.instance.cleanup()
         }
 #endif
 
