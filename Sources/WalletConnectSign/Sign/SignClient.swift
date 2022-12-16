@@ -347,9 +347,20 @@ public final class SignClient {
     }
 
     /// Delete all stored data such as: pairings, sessions, keys
+    ///
+    /// - Note: Will unsubscribe from all topics
     public func cleanup() async throws {
         try await cleanupService.cleanup()
     }
+
+#if DEBUG
+    /// Delete all stored data such as: pairings, sessions, keys
+    ///
+    /// - Note: Doesn't unsubscribe from topics
+    public func cleanup() throws {
+        try cleanupService.cleanup()
+    }
+#endif
 
     // MARK: - Private
 

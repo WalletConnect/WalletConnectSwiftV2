@@ -18,11 +18,11 @@ final class SignCleanupService {
 
     func cleanup() async throws {
         try await unsubscribe()
+        try cleanupStorages()
+    }
 
-        pairingStore.deleteAll()
-        sessionStore.deleteAll()
-        sessionToPairingTopic.deleteAll()
-        try kms.deleteAll()
+    func cleanup() throws {
+        try cleanupStorages()
     }
 }
 
@@ -33,5 +33,12 @@ private extension SignCleanupService {
         let session = sessionStore.getAll().map { $0.topic }
 
         try await networkInteractor.batchUnsubscribe(topics: pairing + session)
+    }
+
+    func cleanupStorages() throws {
+        pairingStore.deleteAll()
+        sessionStore.deleteAll()
+        sessionToPairingTopic.deleteAll()
+        try kms.deleteAll()
     }
 }
