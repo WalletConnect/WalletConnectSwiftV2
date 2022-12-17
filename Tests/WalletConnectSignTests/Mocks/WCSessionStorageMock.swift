@@ -3,6 +3,7 @@ import Foundation
 
 final class WCSessionStorageMock: WCSessionStorage {
 
+    var onSessionsUpdate: (() -> Void)?
     var onSessionExpiration: ((WCSession) -> Void)?
 
     private(set) var sessions: [String: WCSession] = [:]

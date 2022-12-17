@@ -107,6 +107,22 @@ final class SequenceStoreTests: XCTestCase {
         XCTAssertFalse(sut2.getAll().isEmpty)
     }
 
+    func testUpdateHandler() {
+        let expectation = expectation(description: "TestUpdateHandler")
+        expectation.expectedFulfillmentCount = 3
+        let sequence = stubSequence()
+
+        sut.onSequenceUpdate = {
+            expectation.fulfill()
+        }
+
+        sut.setSequence(sequence)
+        sut.delete(topic: sequence.topic)
+        sut.deleteAll()
+
+        wait(for: [expectation], timeout: 1.0)
+    }
+
     // MARK: - Expiration Tests
 
     func testHasSequenceExpiration() {
