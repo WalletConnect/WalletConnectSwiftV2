@@ -35,6 +35,7 @@
 		845B8D8C2934B36C0084A966 /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845B8D8B2934B36C0084A966 /* Account.swift */; };
 		8460DCFC274F98A10081F94C /* RequestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8460DCFB274F98A10081F94C /* RequestViewController.swift */; };
 		847CF3AF28E3141700F1D760 /* WalletConnectPush in Frameworks */ = {isa = PBXBuildFile; productRef = 847CF3AE28E3141700F1D760 /* WalletConnectPush */; settings = {ATTRIBUTES = (Required, ); }; };
+		8485617D295079730064877B /* WalletConnectPairing in Frameworks */ = {isa = PBXBuildFile; productRef = 8485617C295079730064877B /* WalletConnectPairing */; };
 		849D7A90292665D3006A2BD4 /* WalletConnectVerify in Frameworks */ = {isa = PBXBuildFile; productRef = 849D7A8F292665D3006A2BD4 /* WalletConnectVerify */; };
 		849D7A93292E2169006A2BD4 /* PushTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849D7A92292E2169006A2BD4 /* PushTests.swift */; };
 		84AA01DB28CF0CD7005D48D8 /* XCTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA01DA28CF0CD7005D48D8 /* XCTest.swift */; };
@@ -402,6 +403,7 @@
 				A5434023291E6A270068F706 /* SolanaSwift in Frameworks */,
 				849D7A90292665D3006A2BD4 /* WalletConnectVerify in Frameworks */,
 				840BCF162949C6C100CB0655 /* WalletConnectEcho in Frameworks */,
+				8485617D295079730064877B /* WalletConnectPairing in Frameworks */,
 				764E1D5826F8DBAB00A1FB15 /* WalletConnect in Frameworks */,
 				840BCF142949B9F900CB0655 /* WalletConnectPush in Frameworks */,
 				A5D85226286333D500DAF5C3 /* Starscream in Frameworks */,
@@ -1204,6 +1206,7 @@
 				849D7A8F292665D3006A2BD4 /* WalletConnectVerify */,
 				840BCF132949B9F900CB0655 /* WalletConnectPush */,
 				840BCF152949C6C100CB0655 /* WalletConnectEcho */,
+				8485617C295079730064877B /* WalletConnectPairing */,
 			);
 			productName = ExampleApp;
 			productReference = 764E1D3C26F8D3FC00A1FB15 /* WalletConnect Wallet.app */;
@@ -2118,6 +2121,10 @@
 		847CF3AE28E3141700F1D760 /* WalletConnectPush */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectPush;
+		};
+		8485617C295079730064877B /* WalletConnectPairing */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = WalletConnectPairing;
 		};
 		849D7A8F292665D3006A2BD4 /* WalletConnectVerify */ = {
 			isa = XCSwiftPackageProductDependency;
