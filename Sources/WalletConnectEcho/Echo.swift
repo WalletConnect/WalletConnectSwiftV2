@@ -20,6 +20,6 @@ public class Echo {
     /// - Parameters:
     ///   - tenantId:
     static public func configure(projectId: String, clientId: String) {
-        Echo.config = Echo.Config(clientId: projectId, projectId: clientId)
+        Echo.config = Echo.Config(clientId: clientId, projectId: projectId)
     }
 }
