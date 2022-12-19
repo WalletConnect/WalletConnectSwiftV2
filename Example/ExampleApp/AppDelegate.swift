@@ -13,13 +13,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         registerForPushNotifications()
 
-        let notificationOption = launchOptions?[.remoteNotification]
-
-        // 1
-        if
-          let notification = notificationOption as? [String: AnyObject],
-          let aps = notification["aps"] as? [String: AnyObject] {
-        }
 
         let metadata = AppMetadata(
             name: "Example Wallet",
@@ -71,16 +64,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             guard granted else { return }
             self?.getNotificationSettings()
             #if targetEnvironment(simulator)
-            // Avoid networking not instantiated error by sleeping...
-            Thread.sleep(forTimeInterval: 1)
-            let clientId = try! Networking.interactor.getClientId()
-            let deviceToken = InputConfig.simulatorIdentifier
-            assert(deviceToken != "SIMULATOR_IDENTIFIER", "Please set your Simulator identifier")
-                Task(priority: .high) {
-                    try await Echo.instance.register(deviceToken: deviceToken)
-                }
+
+//                let clientId = try! Networking.interactor.socketConnectionStatusPublisher
+//                    .first {$0  == .connected}
+//                    .sink(receiveValue: { status in
+//                        let deviceToken = InputConfig.simulatorIdentifier
+//                        assert(deviceToken != "SIMULATOR_IDENTIFIER", "Please set your Simulator identifier")
+//                        Task(priority: .high) {
+//                            try await Echo.instance.register(deviceToken: deviceToken)
+//                        }
+//                    })
             #endif
-        }
+            }
     }
 
     func modelIdentifier() -> String {
