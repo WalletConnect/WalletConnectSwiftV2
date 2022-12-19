@@ -14,65 +14,78 @@ public class WalletPushClient {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
-
     private let pushMessagePublisherSubject = PassthroughSubject<PushMessage, Never>()
 
     public var pushMessagePublisher: AnyPublisher<PushMessage, Never> {
         pushMessagePublisherSubject.eraseToAnyPublisher()
     }
 
+    private let deleteSubscriptionPublisherSubject = PassthroughSubject<String, Never>()
+
+    public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
+        deleteSubscriptionPublisherSubject.eraseToAnyPublisher()
+    }
+
+    private let deletePushSubscriptionService: DeletePushSubscriptionService
+    private let deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
+
     public let logger: ConsoleLogging
 
     private let pairingRegisterer: PairingRegisterer
-    private let echoRegisterer: EchoClient
-    private let proposeResponder: ProposeResponder
+    private let echoClient: EchoClient
+    private let proposeResponder: PushRequestResponder
     private let pushMessageSubscriber: PushMessageSubscriber
+    private let subscriptionsProvider: SubscriptionsProvider
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
-         echoRegisterer: EchoClient,
+         echoClient: EchoClient,
          pairingRegisterer: PairingRegisterer,
-         proposeResponder: ProposeResponder,
-         pushMessageSubscriber: PushMessageSubscriber) {
+         proposeResponder: PushRequestResponder,
+         pushMessageSubscriber: PushMessageSubscriber,
+         subscriptionsProvider: SubscriptionsProvider,
+         deletePushSubscriptionService: DeletePushSubscriptionService,
+         deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber) {
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
         self.proposeResponder = proposeResponder
-        self.echoRegisterer = echoRegisterer
+        self.echoClient = echoClient
         self.pushMessageSubscriber = pushMessageSubscriber
+        self.subscriptionsProvider = subscriptionsProvider
+        self.deletePushSubscriptionService = deletePushSubscriptionService
+        self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
         setupSubscriptions()
     }
-
 
     public func approve(id: RPCID) async throws {
         try await proposeResponder.respond(requestId: id)
     }
 
-    public func reject(proposalId: String, reason: Reason) async throws {
-        fatalError("not implemented")
+    public func reject(id: RPCID) async throws {
+        try await proposeResponder.respondError(requestId: id)
     }
 
     public func getActiveSubscriptions() -> [PushSubscription] {
-        fatalError("not implemented")
+        subscriptionsProvider.getActiveSubscriptions()
     }
 
     public func delete(topic: String) async throws {
-        fatalError("not implemented")
+        try await deletePushSubscriptionService.delete(topic: topic)
     }
 
-    public func decryptMessage(topic: String, ciphertext: String) -> String {
-        fatalError("not implemented")
+    public func decryptMessage(topic: String, ciphertext: String) throws -> String {
+        try echoClient.decryptMessage(topic: topic, ciphertext: ciphertext)
     }
-
 
     public func register(deviceToken: Data) async throws {
-        try await echoRegisterer.register(deviceToken: deviceToken)
+        try await echoClient.register(deviceToken: deviceToken)
     }
 }
 
 private extension WalletPushClient {
 
     func setupSubscriptions() {
-        let protocolMethod = PushProposeProtocolMethod()
+        let protocolMethod = PushRequestProtocolMethod()
 
         pairingRegisterer.register(method: protocolMethod)
             .sink { [unowned self] (payload: RequestSubscriptionPayload<PushRequestParams>) in
@@ -81,6 +94,9 @@ private extension WalletPushClient {
 
         pushMessageSubscriber.onPushMessage = { [unowned self] pushMessage in
             pushMessagePublisherSubject.send(pushMessage)
+        }
+        deletePushSubscriptionSubscriber.onDelete = {[unowned self] topic in
+            deleteSubscriptionPublisherSubject.send(topic)
         }
     }
 }

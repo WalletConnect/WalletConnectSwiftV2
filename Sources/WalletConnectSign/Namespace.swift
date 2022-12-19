@@ -1,4 +1,3 @@
-
 public struct ProposalNamespace: Equatable, Codable {
 
     public let chains: Set<Blockchain>

@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import WalletConnectKMS
+import WalletConnectNetworking
 
 class ProposalResponseSubscriber {
     private let networkingInteractor: NetworkInteracting
@@ -9,41 +10,46 @@ class ProposalResponseSubscriber {
     private var publishers = [AnyCancellable]()
     private let metadata: AppMetadata
     private let relay: RelayProtocolOptions
-    var onResponse: ((_ id: RPCID, _ result: Result<PushSubscription, PairError>) -> Void)?
+    var onResponse: ((_ id: RPCID, _ result: Result<PushSubscription, PushError>) -> Void)?
+    private let subscriptionsStore: CodableStore<PushSubscription>
 
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
          logger: ConsoleLogging,
          metadata: AppMetadata,
-         relay: RelayProtocolOptions) {
+         relay: RelayProtocolOptions,
+         subscriptionsStore: CodableStore<PushSubscription>) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.logger = logger
         self.metadata = metadata
         self.relay = relay
+        self.subscriptionsStore = subscriptionsStore
         subscribeForProposalErrors()
         subscribeForProposalResponse()
     }
 
     private func subscribeForProposalResponse() {
-        let protocolMethod = PushProposeProtocolMethod()
+        let protocolMethod = PushRequestProtocolMethod()
         networkingInteractor.responseSubscription(on: protocolMethod)
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<PushRequestParams, PushResponseParams>) in
                 logger.debug("Received Push Proposal response")
-                do {
-                    let pushSubscription = try handleResponse(payload: payload)
+                Task(priority: .userInitiated) {
+                    let pushSubscription = try await handleResponse(payload: payload)
                     onResponse?(payload.id, .success(pushSubscription))
-                } catch {
-                    logger.error("ProposalResponseSubscriber: \(error)")
                 }
             }.store(in: &publishers)
     }
 
-    private func handleResponse(payload: ResponseSubscriptionPayload<PushRequestParams, PushResponseParams>) throws -> PushSubscription {
+    private func handleResponse(payload: ResponseSubscriptionPayload<PushRequestParams, PushResponseParams>) async throws -> PushSubscription {
         let peerPublicKeyHex = payload.response.publicKey
         let selfpublicKeyHex = payload.request.publicKey
         let (topic, _) = try generateAgreementKeys(peerPublicKeyHex: peerPublicKeyHex, selfpublicKeyHex: selfpublicKeyHex)
-        return PushSubscription(topic: topic, relay: relay, metadata: metadata)
+
+        let pushSubscription = PushSubscription(topic: topic, relay: relay, metadata: metadata)
+        subscriptionsStore.set(pushSubscription, forKey: topic)
+        try await networkingInteractor.subscribe(topic: topic)
+        return pushSubscription
     }
 
     private func generateAgreementKeys(peerPublicKeyHex: String, selfpublicKeyHex: String) throws -> (topic: String, keys: AgreementKeys) {
@@ -55,10 +61,10 @@ class ProposalResponseSubscriber {
     }
 
     private func subscribeForProposalErrors() {
-        let protocolMethod = PushProposeProtocolMethod()
+        let protocolMethod = PushRequestProtocolMethod()
         networkingInteractor.responseErrorSubscription(on: protocolMethod)
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<PushRequestParams>) in
-                guard let error = PairError(code: payload.error.code) else { return }
+                guard let error = PushError(code: payload.error.code) else { return }
                 onResponse?(payload.id, .failure(error))
             }.store(in: &publishers)
     }
