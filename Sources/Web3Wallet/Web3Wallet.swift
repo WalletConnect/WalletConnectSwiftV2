@@ -24,11 +24,8 @@ public class Web3Wallet {
         }
         
         return Web3WalletClientFactory.create(
-            metadata: Pair.metadata,
-            projectId: Networking.projectId,
-            signerFactory: config.signerFactory,
-            networkingClient: Networking.interactor,
-            pairingRegisterer: Pair.registerer,
+            authClient: Auth.instance,
+            signClient: Sign.instance,
             pairingClient: Pair.instance as! PairingClient
         )
     }()
@@ -43,7 +40,6 @@ public class Web3Wallet {
     ///   - signerFactory: Auth signers factory
     static public func configure(metadata: AppMetadata, signerFactory: SignerFactory) {
         Pair.configure(metadata: metadata)
-        Sign.configure(metadata: metadata)
         Auth.configure(signerFactory: signerFactory)
         
         Web3Wallet.config = Web3Wallet.Config(signerFactory: signerFactory)

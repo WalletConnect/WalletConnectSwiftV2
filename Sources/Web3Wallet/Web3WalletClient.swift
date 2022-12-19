@@ -34,17 +34,20 @@ public class Web3WalletClient {
     }
 
     // MARK: - Private Properties
-    public let authClient: AuthClient
-    public let signClient: SignClient
+    private let authClient: AuthClient
+    private let signClient: SignClient
+    private let pairingClient: PairingClient
     
     private var account: Account?
 
     init(
         authClient: AuthClient,
-        signClient: SignClient
+        signClient: SignClient,
+        pairingClient: PairingClient
     ) {
         self.authClient = authClient
         self.signClient = signClient
+        self.pairingClient = pairingClient
     }
     
     /// For a wallet to approve a session proposal.
@@ -100,6 +103,17 @@ public class Web3WalletClient {
     ///   - chainId: CAIP-2 chain
     public func emit(topic: String, event: Session.Event, chainId: Blockchain) async throws {
         try await signClient.emit(topic: topic, event: event, chainId: chainId)
+    }
+    
+    /// For wallet to receive a session proposal from a dApp
+    /// Responder should call this function in order to accept peer's pairing and be able to subscribe for future session proposals.
+    /// - Parameter uri: Pairing URI that is commonly presented as a QR code by a dapp.
+    ///
+    /// Should Error:
+    /// - When URI has invalid format or missing params
+    /// - When topic is already in use
+    public func pair(uri: WalletConnectURI) async throws {
+        try await pairingClient.pair(uri: uri)
     }
     
     /// For a wallet and a dApp to terminate a session

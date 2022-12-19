@@ -194,8 +194,6 @@
 		A5E22D222840C8D300E36487 /* WalletEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D212840C8D300E36487 /* WalletEngine.swift */; };
 		A5E22D242840C8DB00E36487 /* SafariEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D232840C8DB00E36487 /* SafariEngine.swift */; };
 		A5E22D2C2840EAC300E36487 /* XCUIElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D2B2840EAC300E36487 /* XCUIElement.swift */; };
-		C5B7C993294E000C0007F864 /* Web3WalletClientTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B7C992294E000C0007F864 /* Web3WalletClientTest.swift */; };
-		C5B7C995294E06800007F864 /* Web3ClientDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B7C994294E06800007F864 /* Web3ClientDelegate.swift */; };
 		C5DD5BE1294E09E3008FD3A4 /* Web3Wallet in Frameworks */ = {isa = PBXBuildFile; productRef = C5DD5BE0294E09E3008FD3A4 /* Web3Wallet */; };
 /* End PBXBuildFile section */
 
@@ -392,8 +390,6 @@
 		A5E22D232840C8DB00E36487 /* SafariEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariEngine.swift; sourceTree = "<group>"; };
 		A5E22D2B2840EAC300E36487 /* XCUIElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCUIElement.swift; sourceTree = "<group>"; };
 		A5F48A0528E43D3F0034CBFB /* Configuration.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Configuration.xcconfig; path = ../Configuration.xcconfig; sourceTree = "<group>"; };
-		C5B7C992294E000C0007F864 /* Web3WalletClientTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Web3WalletClientTest.swift; sourceTree = "<group>"; };
-		C5B7C994294E06800007F864 /* Web3ClientDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Web3ClientDelegate.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1115,7 +1111,6 @@
 		A5E03DEE286464DB00888481 /* IntegrationTests */ = {
 			isa = PBXGroup;
 			children = (
-				C5B7C991294DFFF70007F864 /* Web3Wallet */,
 				849D7A91292E2115006A2BD4 /* Push */,
 				84CEC64728D8A98900D081A8 /* Pairing */,
 				A5E03E0B28646AA500888481 /* Relay */,
@@ -1180,15 +1175,6 @@
 				A5E22D2B2840EAC300E36487 /* XCUIElement.swift */,
 			);
 			path = Extensions;
-			sourceTree = "<group>";
-		};
-		C5B7C991294DFFF70007F864 /* Web3Wallet */ = {
-			isa = PBXGroup;
-			children = (
-				C5B7C994294E06800007F864 /* Web3ClientDelegate.swift */,
-				C5B7C992294E000C0007F864 /* Web3WalletClientTest.swift */,
-			);
-			path = Web3Wallet;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1588,7 +1574,6 @@
 				A5E03E03286466F400888481 /* ChatTests.swift in Sources */,
 				849D7A93292E2169006A2BD4 /* PushTests.swift in Sources */,
 				845B8D8C2934B36C0084A966 /* Account.swift in Sources */,
-				C5B7C995294E06800007F864 /* Web3ClientDelegate.swift in Sources */,
 				84D2A66628A4F51E0088AE09 /* AuthTests.swift in Sources */,
 				84FE684628ACDB4700C893FF /* RequestParams.swift in Sources */,
 				7694A5262874296A0001257E /* RegistryTests.swift in Sources */,
@@ -1597,7 +1582,6 @@
 				A5E03E0D28646AD200888481 /* RelayClientEndToEndTests.swift in Sources */,
 				A5E03DFA286465C700888481 /* SignClientTests.swift in Sources */,
 				A54195A02934BFEF0035AD19 /* EIP1271VerifierTests.swift in Sources */,
-				C5B7C993294E000C0007F864 /* Web3WalletClientTest.swift in Sources */,
 				A54195A12934BFEF0035AD19 /* EIP191VerifierTests.swift in Sources */,
 				84AA01DB28CF0CD7005D48D8 /* XCTest.swift in Sources */,
 				A5E03E1128646F8000888481 /* KeychainStorageMock.swift in Sources */,
