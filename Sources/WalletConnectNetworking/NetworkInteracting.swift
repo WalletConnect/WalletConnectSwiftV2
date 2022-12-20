@@ -6,6 +6,7 @@ public protocol NetworkInteracting {
     var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest), Never> { get }
     func subscribe(topic: String) async throws
     func unsubscribe(topic: String)
+    func batchUnsubscribe(topics: [String]) async throws
     func request(_ request: RPCRequest, topic: String, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws
     func requestNetworkAck(_ request: RPCRequest, topic: String, protocolMethod: ProtocolMethod) async throws
     func respond(topic: String, response: RPCResponse, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws
