@@ -101,5 +101,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // TODO: when is this invoked?
         print("Failed to register: \(error)")
     }
-
 }
+
