@@ -37,7 +37,8 @@ class AppRespondSubscriber {
         networkingInteractor.responseSubscription(on: AuthRequestProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<AuthRequestParams, Cacao>)  in
 
-                pairingRegisterer.activate(pairingTopic: payload.topic)
+                pairingRegisterer.activate(pairingTopic: payload.topic, peerMetadata: nil)
+
                 networkingInteractor.unsubscribe(topic: payload.topic)
 
                 let requestId = payload.id

@@ -7,8 +7,8 @@ public struct WCPairing: SequenceObject {
 
     public let topic: String
     public let relay: RelayProtocolOptions
-    public var peerMetadata: AppMetadata?
 
+    public private (set) var peerMetadata: AppMetadata?
     public private (set) var expiryDate: Date
     public private (set) var active: Bool
 
@@ -51,6 +51,10 @@ public struct WCPairing: SequenceObject {
     public mutating func activate() {
         active = true
         try? updateExpiry()
+    }
+
+    public mutating func updatePeerMetadata(_ metadata: AppMetadata?) {
+        peerMetadata = metadata
     }
 
     public mutating func updateExpiry(_ ttl: TimeInterval = WCPairing.timeToLiveActive) throws {

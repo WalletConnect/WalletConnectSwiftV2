@@ -10,7 +10,6 @@ public class PairingClient: PairingRegisterer, PairingInteracting {
     private let walletPairService: WalletPairService
     private let appPairService: AppPairService
     private let appPairActivateService: AppPairActivationService
-    private let appUpdateMetadataService: AppUpdateMetadataService
     private var pingResponsePublisherSubject = PassthroughSubject<String, Never>()
     private let logger: ConsoleLogging
     private let pingService: PairingPingService
@@ -32,7 +31,6 @@ public class PairingClient: PairingRegisterer, PairingInteracting {
          expirationService: ExpirationService,
          pairingRequestsSubscriber: PairingRequestsSubscriber,
          appPairActivateService: AppPairActivationService,
-         appUpdateMetadataService: AppUpdateMetadataService,
          cleanupService: PairingCleanupService,
          pingService: PairingPingService,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
@@ -45,7 +43,6 @@ public class PairingClient: PairingRegisterer, PairingInteracting {
         self.logger = logger
         self.deletePairingService = deletePairingService
         self.appPairActivateService = appPairActivateService
-        self.appUpdateMetadataService = appUpdateMetadataService
         self.resubscribeService = resubscribeService
         self.expirationService = expirationService
         self.cleanupService = cleanupService
@@ -81,12 +78,8 @@ public class PairingClient: PairingRegisterer, PairingInteracting {
         return try await appPairService.create()
     }
 
-    public func activate(pairingTopic: String) {
-        appPairActivateService.activate(for: pairingTopic)
-    }
-
-    public func updateMetadata(_ topic: String, metadata: AppMetadata) {
-        appUpdateMetadataService.updatePairingMetadata(topic: topic, metadata: metadata)
+    public func activate(pairingTopic: String, peerMetadata: AppMetadata?) {
+        appPairActivateService.activate(for: pairingTopic, peerMetadata: peerMetadata)
     }
 
     public func getPairings() -> [Pairing] {
