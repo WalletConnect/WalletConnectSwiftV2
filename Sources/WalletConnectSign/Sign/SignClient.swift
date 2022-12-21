@@ -6,7 +6,7 @@ import Combine
 /// Cannot be instantiated outside of the SDK
 ///
 /// Access via `Sign.instance`
-public final class SignClient {
+public final class SignClient: SignClientProtocol {
     enum Errors: Error {
         case sessionForTopicNotFound
     }

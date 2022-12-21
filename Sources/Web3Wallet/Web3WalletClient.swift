@@ -34,16 +34,16 @@ public class Web3WalletClient {
     }
 
     // MARK: - Private Properties
-    private let authClient: AuthClient
-    private let signClient: SignClient
-    private let pairingClient: PairingClient
+    private let authClient: AuthClientProtocol
+    private let signClient: SignClientProtocol
+    private let pairingClient: PairingClientProtocol
     
     private var account: Account?
 
     init(
-        authClient: AuthClient,
-        signClient: SignClient,
-        pairingClient: PairingClient
+        authClient: AuthClientProtocol,
+        signClient: SignClientProtocol,
+        pairingClient: PairingClientProtocol
     ) {
         self.authClient = authClient
         self.signClient = signClient

@@ -99,7 +99,10 @@ let package = Package(
             dependencies: ["WalletConnectUtils"]),
         .testTarget(
             name: "WalletConnectSignTests",
-            dependencies: ["WalletConnectSign", "TestingUtils"]),
+            dependencies: ["WalletConnectSign", "WalletConnectUtils", "TestingUtils"]),
+        .testTarget(
+            name: "Web3WalletTests",
+            dependencies: ["Web3Wallet", "TestingUtils"]),
         .testTarget(
             name: "WalletConnectPairingTests",
             dependencies: ["WalletConnectPairing", "TestingUtils"]),

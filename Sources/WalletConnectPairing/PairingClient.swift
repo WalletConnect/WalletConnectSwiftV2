@@ -1,7 +1,7 @@
 import Foundation
 import Combine
 
-public class PairingClient: PairingRegisterer, PairingInteracting {
+public class PairingClient: PairingRegisterer, PairingInteracting, PairingClientProtocol {
     public var pingResponsePublisher: AnyPublisher<(String), Never> {
         pingResponsePublisherSubject.eraseToAnyPublisher()
     }
