@@ -9,15 +9,17 @@ class PushNotificationTests: XCTestCase {
     func testPushNotification() {
         wallet.launch()
 
-//        waitForElementToAppear(object: wallet.staticTexts["Mussel Push Notification Example"])
         sleep(1)
+
         // Launch springboard
         springboard.activate()
 
 
         let notification = springboard.otherElements["Notification"].descendants(matching: .any)["NotificationShortLookView"]
+        XCTAssertTrue(notification.waitExists())
 
-        waitForElementToAppear(object: notification)
+//        waitForElementToAppear(object: notification)
+        notification.tap()
     }
 
     func waitForElementToAppear(object: Any) {
