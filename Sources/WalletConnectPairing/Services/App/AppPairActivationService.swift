@@ -6,10 +6,10 @@ final class AppPairActivationService {
         case pairingNotFound
     }
 
-    private let pairingStorage: PairingStorage
+    private let pairingStorage: WCPairingStorage
     private let logger: ConsoleLogging
 
-    init(pairingStorage: PairingStorage, logger: ConsoleLogging) {
+    init(pairingStorage: WCPairingStorage, logger: ConsoleLogging) {
         self.pairingStorage = pairingStorage
         self.logger = logger
     }
