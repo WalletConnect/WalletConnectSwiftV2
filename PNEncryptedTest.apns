@@ -3,9 +3,10 @@
 
    "aps": {
        "badge": 0,
+       "mutable-content" : 1,
        "alert": {
-           "title": "Push Notification Test",
-           "subtitle": "Hey! 👋",
+           "title": "Encrypted Test",
+           "subtitle": "Hey! 🐙",
            "body": "Is this working?",
        },
       "sound":"default"

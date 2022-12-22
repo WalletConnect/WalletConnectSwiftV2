@@ -42,7 +42,6 @@
 		84AA01DB28CF0CD7005D48D8 /* XCTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA01DA28CF0CD7005D48D8 /* XCTest.swift */; };
 		84B767792954554A00E92316 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B767782954554A00E92316 /* NotificationService.swift */; };
 		84B7677D2954554A00E92316 /* PushDecryptionService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 84B767762954554A00E92316 /* PushDecryptionService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		84B767832954567000E92316 /* PNTest.apns in Resources */ = {isa = PBXBuildFile; fileRef = 84B767822954567000E92316 /* PNTest.apns */; };
 		84B767852954569B00E92316 /* PNEncryptedTest.apns in Resources */ = {isa = PBXBuildFile; fileRef = 84B767842954569B00E92316 /* PNEncryptedTest.apns */; };
 		84CE641F27981DED00142511 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE641E27981DED00142511 /* AppDelegate.swift */; };
 		84CE642127981DED00142511 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE642027981DED00142511 /* SceneDelegate.swift */; };
@@ -279,7 +278,6 @@
 		84B767762954554A00E92316 /* PushDecryptionService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PushDecryptionService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		84B767782954554A00E92316 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		84B7677A2954554A00E92316 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		84B767822954567000E92316 /* PNTest.apns */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PNTest.apns; sourceTree = "<group>"; };
 		84B767842954569B00E92316 /* PNEncryptedTest.apns */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PNEncryptedTest.apns; sourceTree = "<group>"; };
 		84CE641C27981DED00142511 /* DApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		84CE641E27981DED00142511 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -535,7 +533,6 @@
 		764E1D3326F8D3FC00A1FB15 = {
 			isa = PBXGroup;
 			children = (
-				84B767822954567000E92316 /* PNTest.apns */,
 				84B767842954569B00E92316 /* PNEncryptedTest.apns */,
 				A5A8E479293A1C4400FEB97D /* Shared */,
 				A5F48A0528E43D3F0034CBFB /* Configuration.xcconfig */,
@@ -1439,7 +1436,6 @@
 				84B767852954569B00E92316 /* PNEncryptedTest.apns in Resources */,
 				764E1D4C26F8D3FE00A1FB15 /* LaunchScreen.storyboard in Resources */,
 				764E1D4926F8D3FE00A1FB15 /* Assets.xcassets in Resources */,
-				84B767832954567000E92316 /* PNTest.apns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
