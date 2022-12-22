@@ -1,4 +1,3 @@
-//  Copyright © 2021 Compass. All rights reserved.
 
 import XCTest
 
@@ -13,13 +12,14 @@ class PushNotificationTests: XCTestCase {
 
         // Launch springboard
         springboard.activate()
+        let text = "Is this working"
+        let predicate = NSPredicate(format: "label CONTAINS %@", text)
 
-
-        let notification = springboard.otherElements["Notification"].descendants(matching: .any)["NotificationShortLookView"]
-        XCTAssertTrue(notification.waitExists())
+        let notification = springboard.staticTexts.matching(predicate).firstMatch
+        XCTAssertTrue(notification.waitForExistence(timeout: 5))
+        notification.tap()
 
 //        waitForElementToAppear(object: notification)
-        notification.tap()
     }
 
     func waitForElementToAppear(object: Any) {
