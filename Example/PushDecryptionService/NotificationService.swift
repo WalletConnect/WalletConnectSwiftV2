@@ -1,7 +1,6 @@
 //     
 
 import UserNotifications
-import WalletConnectEcho
 
 class NotificationService: UNNotificationServiceExtension {
 
