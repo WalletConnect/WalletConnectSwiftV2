@@ -1272,6 +1272,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				84B767872954918000E92316 /* PBXTargetDependency */,
 			);
 			name = PushDecryptionService;
 			productName = PushDecryptionService;
@@ -1689,6 +1690,10 @@
 			isa = PBXTargetDependency;
 			target = 84B767752954554A00E92316 /* PushDecryptionService */;
 			targetProxy = 84B7677B2954554A00E92316 /* PBXContainerItemProxy */;
+		};
+		84B767872954918000E92316 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 84B767862954918000E92316 /* WalletConnectPush */;
 		};
 		A5A4FC7E2840C5D400BBEC1E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -2287,6 +2292,10 @@
 		849D7A8F292665D3006A2BD4 /* WalletConnectVerify */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectVerify;
+		};
+		84B767862954918000E92316 /* WalletConnectPush */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = WalletConnectPush;
 		};
 		84DDB4EC28ABB663003D66ED /* WalletConnectAuth */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -73,7 +73,7 @@ public class WalletPushClient {
         try await deletePushSubscriptionService.delete(topic: topic)
     }
 
-    public func decryptMessage(topic: String, ciphertext: String) throws -> String {
+    public func decryptMessage(topic: String, ciphertext: String) throws -> PushMessage {
         try echoClient.decryptMessage(topic: topic, ciphertext: ciphertext)
     }
 

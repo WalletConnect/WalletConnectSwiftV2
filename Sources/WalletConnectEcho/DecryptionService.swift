@@ -7,7 +7,7 @@ class DecryptionService {
         self.serializer = serializer
     }
 
-    public func decryptMessage(topic: String, ciphertext: String) throws -> String {
+    public func decryptMessage<T: Codable>(topic: String, ciphertext: String) throws -> T {
         try serializer.deserialize(topic: topic, encodedEnvelope: ciphertext)
     }
 }

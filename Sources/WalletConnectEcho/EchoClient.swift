@@ -15,7 +15,7 @@ public class EchoClient {
         try await registerService.register(deviceToken: deviceToken)
     }
 
-    public func decryptMessage(topic: String, ciphertext: String) throws -> String {
+    public func decryptMessage<T: Codable>(topic: String, ciphertext: String) throws -> T {
         try decryptionService.decryptMessage(topic: topic, ciphertext: ciphertext)
     }
 }
