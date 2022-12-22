@@ -42,6 +42,7 @@
 		84AA01DB28CF0CD7005D48D8 /* XCTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA01DA28CF0CD7005D48D8 /* XCTest.swift */; };
 		84B767792954554A00E92316 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B767782954554A00E92316 /* NotificationService.swift */; };
 		84B7677D2954554A00E92316 /* PushDecryptionService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 84B767762954554A00E92316 /* PushDecryptionService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		84B76789295494D500E92316 /* WalletConnectPush in Frameworks */ = {isa = PBXBuildFile; productRef = 84B76788295494D500E92316 /* WalletConnectPush */; };
 		84CE641F27981DED00142511 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE641E27981DED00142511 /* AppDelegate.swift */; };
 		84CE642127981DED00142511 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE642027981DED00142511 /* SceneDelegate.swift */; };
 		84CE642827981DF000142511 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 84CE642727981DF000142511 /* Assets.xcassets */; };
@@ -443,6 +444,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84B76789295494D500E92316 /* WalletConnectPush in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1272,9 +1274,11 @@
 			buildRules = (
 			);
 			dependencies = (
-				84B767872954918000E92316 /* PBXTargetDependency */,
 			);
 			name = PushDecryptionService;
+			packageProductDependencies = (
+				84B76788295494D500E92316 /* WalletConnectPush */,
+			);
 			productName = PushDecryptionService;
 			productReference = 84B767762954554A00E92316 /* PushDecryptionService.appex */;
 			productType = "com.apple.product-type.app-extension";
@@ -1690,10 +1694,6 @@
 			isa = PBXTargetDependency;
 			target = 84B767752954554A00E92316 /* PushDecryptionService */;
 			targetProxy = 84B7677B2954554A00E92316 /* PBXContainerItemProxy */;
-		};
-		84B767872954918000E92316 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = 84B767862954918000E92316 /* WalletConnectPush */;
 		};
 		A5A4FC7E2840C5D400BBEC1E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -2293,7 +2293,7 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectVerify;
 		};
-		84B767862954918000E92316 /* WalletConnectPush */ = {
+		84B76788295494D500E92316 /* WalletConnectPush */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectPush;
 		};
