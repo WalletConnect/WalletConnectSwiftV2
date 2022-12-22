@@ -39,8 +39,6 @@ public actor HTTPNetworkClient: HTTPClient {
         }
         session.dataTask(with: request) { data, response, error in
             do {
-                print(response)
-                print(error)
                 try HTTPNetworkClient.validate(response, error)
                 guard let validData = data else {
                     throw HTTPError.responseDataNil
