@@ -13,9 +13,8 @@ class PushNotificationTests: XCTestCase {
         // Launch springboard
         springboard.activate()
         let text = "Is this working"
-        let predicate = NSPredicate(format: "label CONTAINS %@", text)
 
-        let notification = springboard.staticTexts.matching(predicate).firstMatch
+        let notification = springboard.otherElements["Notification"].descendants(matching: .any)["NotificationShortLookView"]
         XCTAssertTrue(notification.waitForExistence(timeout: 5))
         notification.tap()
 
