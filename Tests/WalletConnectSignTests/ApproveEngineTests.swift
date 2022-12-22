@@ -64,11 +64,10 @@ final class ApproveEngineTests: XCTestCase {
 
         let topicB = networkingInteractor.subscriptions.last!
 
-        let extendedPairing = pairingStorageMock.getPairing(forTopic: topicA)!
         XCTAssertTrue(networkingInteractor.didCallSubscribe)
         XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must store agreement key for topic B")
         XCTAssertEqual(networkingInteractor.didRespondOnTopic!, topicA, "Responder must respond on topic A")
-        XCTAssertEqual(extendedPairing.expiryDate.timeIntervalSince1970, Date(timeIntervalSinceNow: 2_592_000).timeIntervalSince1970, accuracy: 1, "pairing expiry has been extended by 30 days")
+        XCTAssertTrue(pairingRegisterer.isActivateCalled)
     }
 
     func testReceiveProposal() {
