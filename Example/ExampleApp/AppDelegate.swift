@@ -61,20 +61,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
           .requestAuthorization(
             options: [.alert, .sound, .badge]) { [weak self] granted, _ in
             print("Permission granted: \(granted)")
-            guard granted else { return }
-            self?.getNotificationSettings()
-            #if targetEnvironment(simulator)
-
-//                let clientId = try! Networking.interactor.socketConnectionStatusPublisher
-//                    .first {$0  == .connected}
-//                    .sink(receiveValue: { status in
-//                        let deviceToken = InputConfig.simulatorIdentifier
-//                        assert(deviceToken != "SIMULATOR_IDENTIFIER", "Please set your Simulator identifier")
-//                        Task(priority: .high) {
-//                            try await Echo.instance.register(deviceToken: deviceToken)
-//                        }
-//                    })
-            #endif
+                guard granted else { return }
+                self?.getNotificationSettings()
+#if targetEnvironment(simulator)
+                Networking.interactor.socketConnectionStatusPublisher
+                    .first {$0  == .connected}
+                    .sink{ status in
+                        let deviceToken = InputConfig.simulatorIdentifier
+                        assert(deviceToken != "SIMULATOR_IDENTIFIER", "Please set your Simulator identifier")
+                        Task(priority: .high) {
+                            try await Echo.instance.register(deviceToken: deviceToken)
+                        }
+                    }.store(in: &self!.publishers)
+#endif
             }
     }
 

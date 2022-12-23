@@ -18,4 +18,11 @@ public class EchoClient {
     public func decryptMessage<T: Codable>(topic: String, ciphertext: String) throws -> T {
         try decryptionService.decryptMessage(topic: topic, ciphertext: ciphertext)
     }
+#if DEBUG
+    public func register(deviceToken: String) async throws {
+        try await registerService.register(deviceToken: deviceToken)
+    }
+#endif
+
+    
 }

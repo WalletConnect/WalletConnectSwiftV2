@@ -27,4 +27,16 @@ actor EchoRegisterService {
             throw Errors.registrationFailed
         }
     }
+
+#if DEBUG
+    public func register(deviceToken: String) async throws {
+        let response = try await httpClient.request(
+            EchoResponse.self,
+            at: EchoAPI.register(clientId: clientId, token: deviceToken, projectId: projectId)
+        )
+        guard response.status == .ok else {
+            throw Errors.registrationFailed
+        }
+    }
+#endif
 }
