@@ -39,7 +39,10 @@ let package = Package(
             targets: ["WalletConnectNetworking"]),
         .library(
             name: "WalletConnectVerify",
-            targets: ["WalletConnectVerify"])
+            targets: ["WalletConnectVerify"]),
+        .library(
+            name: "Web3Inbox",
+            targets: ["Web3Inbox"]),
     ],
     dependencies: [],
     targets: [
@@ -79,6 +82,9 @@ let package = Package(
         .target(
             name: "WalletConnectPairing",
             dependencies: ["WalletConnectNetworking"]),
+        .target(
+            name: "Web3Inbox",
+            dependencies: ["WalletConnectChat"]),
         .target(
             name: "WalletConnectUtils",
             dependencies: ["JSONRPC"]),
