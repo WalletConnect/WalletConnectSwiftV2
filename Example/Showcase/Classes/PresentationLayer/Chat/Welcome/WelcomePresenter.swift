@@ -1,5 +1,6 @@
 import UIKit
 import Combine
+import Auth
 
 final class WelcomePresenter: ObservableObject {
 
@@ -22,14 +23,36 @@ final class WelcomePresenter: ObservableObject {
     }
 
     var buttonTitle: String {
-        return interactor.isAuthorized() ? "Start Messaging" : "Import account"
+        return interactor.isAuthorized() ? "Start Messaging" : "Connect wallet"
     }
 
-    func didPressImport() {
+    func didPressImport() async {
         if let account = interactor.account {
             router.presentChats(account: account)
         } else {
-            router.presentImport()
+            await authWithWallet()
+        }
+    }
+    
+    private func authWithWallet() async {
+        let uri = await interactor.generateUri()
+        try? await interactor.authClient?.request(
+            RequestParams(
+                domain: "example.wallet",
+                chainId: "eip155:1",
+                nonce: "32891756",
+                aud: "https://example.wallet/login",
+                nbf: nil,
+                exp: nil,
+                statement: "I accept the ServiceOrg Terms of Service: https://service.invalid/tos",
+                requestId: nil,
+                resources: ["ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/", "https://example.com/my-web2-claim.json"]
+            ),
+            topic: uri.topic
+        )
+        
+        DispatchQueue.main.async {
+            self.router.openWallet(uri: uri.absoluteString)
         }
     }
 }

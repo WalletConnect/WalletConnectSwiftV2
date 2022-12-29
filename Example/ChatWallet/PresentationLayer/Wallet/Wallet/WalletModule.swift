@@ -4,9 +4,9 @@ final class WalletModule {
     @discardableResult
     static func create(app: Application) -> UIViewController {
         let router = WalletRouter(app: app)
-        let presenter = WalletPresenter()
-        let interactor = WalletInteractor(presenter: presenter, router: router)
-        let view = WalletView(interactor: interactor, presenter: presenter)
+        let interactor = WalletInteractor()
+        let presenter = WalletPresenter(interactor: interactor, router: router, uri: app.uri)
+        let view = WalletView().environmentObject(presenter)
         let viewController = SceneViewController(viewModel: presenter, content: view)
 
         router.viewController = viewController

@@ -1,7 +1,6 @@
 import Foundation
 
 struct InputConfig {
-
     static var projectId: String {
         return config(for: "PROJECT_ID")!
     }

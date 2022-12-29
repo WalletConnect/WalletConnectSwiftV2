@@ -12,8 +12,17 @@ final class WalletRouter {
 
     func present(request: AuthRequest) {
         AuthRequestModule.create(app: app, request: request)
-            .wrapToNavigationController()
-            .present(from: viewController)
+            .presentFullScreen(from: viewController, transparentBackground: true)
+    }
+    
+    func presentPaste(onValue: @escaping (String) -> Void, onError: @escaping (Error) -> Void) {
+        PasteUriModule.create(app: app, onValue: onValue, onError: onError)
+            .presentFullScreen(from: viewController, transparentBackground: true)
+    }
+    
+    func presentConnectionDetails() {
+        ConnectionDetailsModule.create(app: app)
+            .push(from: viewController)
     }
 
     func presentScan(onValue: @escaping (String) -> Void, onError: @escaping (Error) -> Void) {

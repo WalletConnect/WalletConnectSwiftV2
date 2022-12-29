@@ -27,15 +27,16 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         window = UIWindow(windowScene: windowScene)
         window?.makeKeyAndVisible()
+        
+        app.uri = connectionOptions.urlContexts.first?.url.absoluteString.replacingOccurrences(of: "chatwallet://wc?uri=", with: "")
 
-        print("Lolo")
         configurators.configure()
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard let context = URLContexts.first else { return }
 
-        let uri = context.url.absoluteString.replacingOccurrences(of: "showcase://wc?uri=", with: "")
+        let uri = context.url.absoluteString.replacingOccurrences(of: "chatwallet://wc?uri=", with: "")
         Task {
             try await Pair.instance.pair(uri: WalletConnectURI(string: uri)!)
         }

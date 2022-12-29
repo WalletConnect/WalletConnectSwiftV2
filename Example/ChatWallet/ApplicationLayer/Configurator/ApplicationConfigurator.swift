@@ -11,6 +11,6 @@ struct ApplicationConfigurator: Configurator {
     }
 
     func configure() {
-        WalletModule.create(app: app).present()
+        WelcomeModule.create(app: app).present()
     }
 }

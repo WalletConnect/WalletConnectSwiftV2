@@ -3,54 +3,48 @@ import Combine
 import Auth
 
 final class AuthRequestPresenter: ObservableObject {
-
-    private let request: AuthRequest
     private let interactor: AuthRequestInteractor
     private let router: AuthRequestRouter
-    private var disposeBag = Set<AnyCancellable>()
-
-    init(request: AuthRequest, interactor: AuthRequestInteractor, router: AuthRequestRouter) {
-        defer { setupInitialState() }
-        self.request = request
-        self.interactor = interactor
-        self.router = router
-    }
-
+    
+    private let request: AuthRequest
     var message: String {
         return request.message
     }
+    
+    private var disposeBag = Set<AnyCancellable>()
+
+    init(
+        interactor: AuthRequestInteractor,
+        router: AuthRequestRouter,
+        request: AuthRequest
+    ) {
+        defer { setupInitialState() }
+        self.interactor = interactor
+        self.router = router
+        self.request = request
+    }
 
     @MainActor
-    func approvePressed() async throws {
+    func onApprove() async throws {
         try await interactor.approve(request: request)
         router.dismiss()
     }
 
     @MainActor
-    func rejectPressed() async throws {
+    func onReject() async throws {
         try await interactor.reject(request: request)
         router.dismiss()
     }
 }
 
-// MARK: SceneViewModel
-
-extension AuthRequestPresenter: SceneViewModel {
-
-    var sceneTitle: String? {
-        return "Auth Request"
-    }
-
-    var largeTitleDisplayMode: UINavigationItem.LargeTitleDisplayMode {
-        return .always
-    }
-}
-
-// MARK: Privates
-
+// MARK: - Private functions
 private extension AuthRequestPresenter {
-
     func setupInitialState() {
 
     }
+}
+
+// MARK: - SceneViewModel
+extension AuthRequestPresenter: SceneViewModel {
+
 }

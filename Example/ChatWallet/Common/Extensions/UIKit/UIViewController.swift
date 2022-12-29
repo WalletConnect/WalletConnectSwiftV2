@@ -22,6 +22,14 @@ extension UIViewController {
     func present(from viewController: UIViewController) {
         viewController.present(self, animated: true, completion: nil)
     }
+    
+    func presentFullScreen(from viewController: UIViewController, transparentBackground: Bool = false) {
+        if transparentBackground {
+            view.backgroundColor = .clear
+        }
+        modalPresentationStyle = .overCurrentContext
+        viewController.present(self, animated: true, completion: nil)
+    }
 
     func pop() {
         _ = navigationController?.popViewController(animated: true)
