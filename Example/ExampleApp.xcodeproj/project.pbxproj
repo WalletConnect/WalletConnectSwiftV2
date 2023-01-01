@@ -197,6 +197,7 @@
 		A5E22D222840C8D300E36487 /* WalletEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D212840C8D300E36487 /* WalletEngine.swift */; };
 		A5E22D242840C8DB00E36487 /* SafariEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D232840C8DB00E36487 /* SafariEngine.swift */; };
 		A5E22D2C2840EAC300E36487 /* XCUIElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D2B2840EAC300E36487 /* XCUIElement.swift */; };
+		C5DD5BE1294E09E3008FD3A4 /* Web3Wallet in Frameworks */ = {isa = PBXBuildFile; productRef = C5DD5BE0294E09E3008FD3A4 /* Web3Wallet */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -449,6 +450,7 @@
 				847CF3AF28E3141700F1D760 /* WalletConnectPush in Frameworks */,
 				A5C8BE85292FE20B006CC85C /* Web3 in Frameworks */,
 				84DDB4ED28ABB663003D66ED /* WalletConnectAuth in Frameworks */,
+				C5DD5BE1294E09E3008FD3A4 /* Web3Wallet in Frameworks */,
 				A5E03E01286466EA00888481 /* WalletConnectChat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1297,6 +1299,7 @@
 				84DDB4EC28ABB663003D66ED /* WalletConnectAuth */,
 				847CF3AE28E3141700F1D760 /* WalletConnectPush */,
 				A5C8BE84292FE20B006CC85C /* Web3 */,
+				C5DD5BE0294E09E3008FD3A4 /* Web3Wallet */,
 			);
 			productName = IntegrationTests;
 			productReference = A5E03DED286464DB00888481 /* IntegrationTests.xctest */;
@@ -2202,6 +2205,10 @@
 		A5E03E00286466EA00888481 /* WalletConnectChat */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectChat;
+		};
+		C5DD5BE0294E09E3008FD3A4 /* Web3Wallet */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Web3Wallet;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
