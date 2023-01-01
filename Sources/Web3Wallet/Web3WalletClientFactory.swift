@@ -1,8 +1,5 @@
 import Foundation
 
-import Auth
-import WalletConnectSign
-
 public struct Web3WalletClientFactory {
     public static func create(
         authClient: AuthClientProtocol,

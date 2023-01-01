@@ -1,9 +1,6 @@
 import Foundation
 import Combine
 
-import Auth
-import WalletConnectSign
-
 /// Web3Wallet instance wrapper
 ///
 /// ```Swift

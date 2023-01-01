@@ -23,17 +23,25 @@ public struct WalletPushClientFactory {
 
         let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
 
-        let proposeResponder = ProposeResponder(networkingInteractor: networkInteractor, logger: logger, kms: kms, rpcHistory: history)
+        let subscriptionStore = CodableStore<PushSubscription>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.pushSubscription)
+
+        let proposeResponder = PushRequestResponder(networkingInteractor: networkInteractor, logger: logger, kms: kms, rpcHistory: history, subscriptionsStore: subscriptionStore)
 
         let pushMessageSubscriber = PushMessageSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger)
+        let subscriptionProvider = SubscriptionsProvider(store: subscriptionStore)
+        let deletePushSubscriptionService = DeletePushSubscriptionService(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore)
+        let deletePushSubscriptionSubscriber = DeletePushSubscriptionSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore)
 
         return WalletPushClient(
             logger: logger,
             kms: kms,
-            echoRegisterer: echoClient,
+            echoClient: echoClient,
             pairingRegisterer: pairingRegisterer,
             proposeResponder: proposeResponder,
-            pushMessageSubscriber: pushMessageSubscriber
+            pushMessageSubscriber: pushMessageSubscriber,
+            subscriptionsProvider: subscriptionProvider,
+            deletePushSubscriptionService: deletePushSubscriptionService,
+            deletePushSubscriptionSubscriber: deletePushSubscriptionSubscriber
         )
     }
 }

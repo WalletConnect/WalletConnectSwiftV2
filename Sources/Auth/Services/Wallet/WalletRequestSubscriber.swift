@@ -15,8 +15,7 @@ class WalletRequestSubscriber {
         logger: ConsoleLogging,
         kms: KeyManagementServiceProtocol,
         walletErrorResponder: WalletErrorResponder,
-        pairingRegisterer: PairingRegisterer)
-    {
+        pairingRegisterer: PairingRegisterer) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.kms = kms
@@ -29,7 +28,11 @@ class WalletRequestSubscriber {
         pairingRegisterer.register(method: AuthRequestProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<AuthRequestParams>) in
                 logger.debug("WalletRequestSubscriber: Received request")
-                pairingRegisterer.activate(pairingTopic: payload.topic)
+
+                pairingRegisterer.activate(
+                    pairingTopic: payload.topic,
+                    peerMetadata: payload.request.requester.metadata
+                )
 
                 let request = AuthRequest(id: payload.id, payload: payload.request.payloadParams)
                 onRequest?(request)

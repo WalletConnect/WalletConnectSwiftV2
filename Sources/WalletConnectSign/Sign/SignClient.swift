@@ -346,6 +346,13 @@ public final class SignClient: SignClientProtocol {
         return Request(id: record.id, topic: record.topic, method: record.request.method, params: request, chainId: request.chainId)
     }
 
+    /// Delete all stored data such as: pairings, sessions, keys
+    ///
+    /// - Note: Will unsubscribe from all topics
+    public func cleanup() async throws {
+        try await cleanupService.cleanup()
+    }
+
 #if DEBUG
     /// Delete all stored data such as: pairings, sessions, keys
     ///

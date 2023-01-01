@@ -5,21 +5,15 @@ import WalletConnectSign
 import WalletConnectNetworking
 import WalletConnectRelay
 import WalletConnectPairing
+import Combine
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    private var publishers = [AnyCancellable]()
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
 
-        let metadata = AppMetadata(
-            name: "Example Wallet",
-            description: "wallet description",
-            url: "example.wallet",
-            icons: ["https://avatars.githubusercontent.com/u/37784886"])
-
-        Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
-        Pair.configure(metadata: metadata)
 #if DEBUG
         if CommandLine.arguments.contains("-cleanInstall") {
             try? Sign.instance.cleanup()

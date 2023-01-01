@@ -1,4 +1,3 @@
-
 protocol RelayRPC: RPCMethod {}
 
 extension RelayRPC where Parameters: Codable {

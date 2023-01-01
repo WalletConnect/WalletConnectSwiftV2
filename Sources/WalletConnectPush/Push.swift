@@ -20,6 +20,5 @@ public class Push {
         )
     }()
 
-
     private init() { }
 }

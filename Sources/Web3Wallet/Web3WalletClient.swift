@@ -1,9 +1,6 @@
 import Foundation
 import Combine
 
-import Auth
-import WalletConnectSign
-
 /// Web3 Wallet Client
 ///
 /// Cannot be instantiated outside of the SDK

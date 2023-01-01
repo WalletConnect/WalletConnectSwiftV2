@@ -95,11 +95,11 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
             ),
             "solana": ProposalNamespace(
                 chains: [
-                    Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!,
+                    Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!
                 ],
                 methods: [
                     "solana_signMessage",
-                    "solana_signTransaction",
+                    "solana_signTransaction"
                 ], events: [], extensions: nil
             )
         ]

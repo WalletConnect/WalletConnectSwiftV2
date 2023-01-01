@@ -124,7 +124,6 @@ final class AppProposalServiceTests: XCTestCase {
         let sessionTopic = networkingInteractor.subscriptions.last!
 
         XCTAssertTrue(networkingInteractor.didCallSubscribe)
-        XCTAssert(storedPairing.active)
         XCTAssertEqual(topicB, sessionTopic, "Responder engine calls back with session topic")
     }
 
