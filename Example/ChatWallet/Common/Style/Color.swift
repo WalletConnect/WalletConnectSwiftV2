@@ -21,7 +21,7 @@ extension Color {
 }
 
 extension UIColor {
-    static let w_background: UIColor = UIColor(rgb: 0x141414)
+    static let w_background = UIColor(named: "grey100")!
     static let w_secondaryBackground: UIColor = UIColor(rgb: 0x272A2A)
     static let w_tertiaryBackground: UIColor = UIColor(rgb: 0x3B4040)
 

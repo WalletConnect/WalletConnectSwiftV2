@@ -13,7 +13,5 @@ struct AppearanceConfigurator: Configurator {
         UINavigationBar.appearance().standardAppearance = appearance
         UINavigationBar.appearance().scrollEdgeAppearance = appearance
         UINavigationBar.appearance().compactAppearance = appearance
-
-        UIApplication.currentWindow.overrideUserInterfaceStyle = .dark
     }
 }

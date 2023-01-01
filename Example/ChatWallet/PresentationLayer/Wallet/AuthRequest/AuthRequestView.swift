@@ -47,7 +47,7 @@ struct AuthRequestView: View {
                             
                             VStack(spacing: 0) {
                                 HStack {
-                                    Text("presenter.message")
+                                    Text(presenter.message)
                                         .foregroundColor(.grey50)
                                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                                     

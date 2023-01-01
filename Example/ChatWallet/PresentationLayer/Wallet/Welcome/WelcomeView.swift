@@ -7,6 +7,9 @@ struct WelcomeView: View {
     
     var body: some View {
         ZStack {
+            Color.grey100
+                .edgesIgnoringSafeArea(.all)
+            
             VStack(spacing: 0) {
                 Text("Welcome")
                     .foregroundColor(.grey8)

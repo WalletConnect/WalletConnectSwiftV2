@@ -12,6 +12,8 @@ struct PasteUriView: View {
     var body: some View {
         ZStack {
             Color(red: 20/255, green: 20/255, blue: 20/255, opacity: 0.4)
+                .edgesIgnoringSafeArea(.all)
+            
             VStack {
                 Spacer()
                 VStack(spacing: 6) {

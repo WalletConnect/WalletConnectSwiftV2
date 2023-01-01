@@ -2,7 +2,6 @@ import UIKit
 import Combine
 
 final class ScanPresenter: ObservableObject {
-
     private let interactor: ScanInteractor
     private let router: ScanRouter
 
@@ -23,26 +22,21 @@ final class ScanPresenter: ObservableObject {
         self.onValue = onValue
         self.onError = onError
     }
-}
-
-// MARK: SceneViewModel
-
-extension ScanPresenter: SceneViewModel {
-
-    var sceneTitle: String? {
-        return "Scan URI"
-    }
-
-    var largeTitleDisplayMode: UINavigationItem.LargeTitleDisplayMode {
-        return .always
+    
+    func dismiss() {
+        router.dismiss()
     }
 }
 
-// MARK: Privates
 
+// MARK: - Private functions
 private extension ScanPresenter {
-
     func setupInitialState() {
 
     }
+}
+
+// MARK: - SceneViewModel
+extension ScanPresenter: SceneViewModel {
+
 }

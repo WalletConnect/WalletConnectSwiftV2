@@ -22,8 +22,7 @@ final class ScanQRView: UIView {
     private var captureSession: AVCaptureSession?
 
     private lazy var borderView: UIView = {
-        let borderView = ScanTargetView(radius: 24.0, color: .white, strokeWidth: 2.0, length: 36.0)
-        borderView.alpha = 0.85
+        let borderView = ScanTargetView(radius: 24.0, color: UIColor(displayP3Red: 184/255, green: 245/255, blue: 61/255, alpha: 1.0), strokeWidth: 7, length: 60)
         return borderView
     }()
 

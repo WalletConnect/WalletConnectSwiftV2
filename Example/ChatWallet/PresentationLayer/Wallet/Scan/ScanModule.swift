@@ -1,7 +1,6 @@
 import SwiftUI
 
 final class ScanModule {
-
     @discardableResult
     static func create(
         app: Application,
@@ -18,5 +17,4 @@ final class ScanModule {
 
         return viewController
     }
-
 }
