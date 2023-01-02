@@ -37,7 +37,8 @@ class AppRespondSubscriber {
         networkingInteractor.responseSubscription(on: AuthRequestProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<AuthRequestParams, Cacao>)  in
 
-                pairingRegisterer.activate(pairingTopic: payload.topic)
+                pairingRegisterer.activate(pairingTopic: payload.topic, peerMetadata: nil)
+
                 networkingInteractor.unsubscribe(topic: payload.topic)
 
                 let requestId = payload.id
@@ -49,7 +50,11 @@ class AppRespondSubscriber {
                     let message = try? messageFormatter.formatMessage(from: cacao.p)
                 else { self.onResponse?(requestId, .failure(.malformedResponseParams)); return }
 
-                guard messageFormatter.formatMessage(from: requestPayload.payloadParams, address: address) == message
+                guard
+                    let recovered = try? messageFormatter.formatMessage(
+                        from: requestPayload.payloadParams,
+                        address: address
+                    ), recovered == message
                 else { self.onResponse?(requestId, .failure(.messageCompromised)); return }
 
                 Task(priority: .high) {

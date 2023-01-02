@@ -10,7 +10,7 @@ class SIWEMessageFormatterTests: XCTestCase {
         sut = SIWEMessageFormatter()
     }
 
-    func testFormatMessage() {
+    func testFormatMessage() throws {
         let expectedMessage =
             """
             service.invalid wants you to sign in with your Ethereum account:
@@ -27,11 +27,11 @@ class SIWEMessageFormatterTests: XCTestCase {
             - ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/
             - https://example.com/my-web2-claim.json
             """
-        let message = sut.formatMessage(from: AuthPayload.stub(), address: address)
+        let message = try sut.formatMessage(from: AuthPayload.stub(), address: address)
         XCTAssertEqual(message, expectedMessage)
     }
 
-    func testNilStatement() {
+    func testNilStatement() throws {
         let expectedMessage =
             """
             service.invalid wants you to sign in with your Ethereum account:
@@ -46,14 +46,14 @@ class SIWEMessageFormatterTests: XCTestCase {
             - ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/
             - https://example.com/my-web2-claim.json
             """
-        let message = sut.formatMessage(
+        let message = try sut.formatMessage(
             from: AuthPayload.stub(
                 requestParams: RequestParams.stub(statement: nil)),
             address: address)
         XCTAssertEqual(message, expectedMessage)
     }
 
-    func testNilResources() {
+    func testNilResources() throws {
         let expectedMessage =
             """
             service.invalid wants you to sign in with your Ethereum account:
@@ -67,14 +67,14 @@ class SIWEMessageFormatterTests: XCTestCase {
             Nonce: 32891756
             Issued At: 2021-09-30T16:25:24Z
             """
-        let message = sut.formatMessage(
+        let message = try sut.formatMessage(
             from: AuthPayload.stub(
                 requestParams: RequestParams.stub(resources: nil)),
             address: address)
         XCTAssertEqual(message, expectedMessage)
     }
 
-    func testNilAllOptionalParams() {
+    func testNilAllOptionalParams() throws {
         let expectedMessage =
             """
             service.invalid wants you to sign in with your Ethereum account:
@@ -86,7 +86,7 @@ class SIWEMessageFormatterTests: XCTestCase {
             Nonce: 32891756
             Issued At: 2021-09-30T16:25:24Z
             """
-        let message = sut.formatMessage(
+        let message = try sut.formatMessage(
             from: AuthPayload.stub(
                 requestParams: RequestParams.stub(statement: nil,
                                                   resources: nil)),

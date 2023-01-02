@@ -1,25 +1,35 @@
 import Foundation
 
 protocol SIWEMessageFormatting {
-    func formatMessage(from authPayload: AuthPayload, address: String) -> String?
+    func formatMessage(from payload: AuthPayload, address: String) throws -> String
     func formatMessage(from payload: CacaoPayload) throws -> String
 }
 
-struct SIWEMessageFormatter: SIWEMessageFormatting {
-    func formatMessage(from payload: AuthPayload, address: String) -> String? {
-        guard let chain = Blockchain(payload.chainId) else {return nil}
-        let message = SIWEMessage(domain: payload.domain,
-                    uri: payload.aud,
-                    address: address,
-                    version: payload.version,
-                    nonce: payload.nonce,
-                                  chainId: chain.reference,
-                    iat: payload.iat,
-                    nbf: payload.nbf,
-                    exp: payload.exp,
-                    statement: payload.statement,
-                    requestId: payload.requestId,
-                    resources: payload.resources
+public struct SIWEMessageFormatter: SIWEMessageFormatting {
+
+    enum Errors: Error {
+        case invalidChainID
+    }
+
+    public init() { }
+
+    public func formatMessage(from payload: AuthPayload, address: String) throws -> String {
+        guard let chain = Blockchain(payload.chainId) else {
+            throw Errors.invalidChainID
+        }
+        let message = SIWEMessage(
+            domain: payload.domain,
+            uri: payload.aud,
+            address: address,
+            version: payload.version,
+            nonce: payload.nonce,
+            chainId: chain.reference,
+            iat: payload.iat,
+            nbf: payload.nbf,
+            exp: payload.exp,
+            statement: payload.statement,
+            requestId: payload.requestId,
+            resources: payload.resources
         )
         return message.formatted
     }

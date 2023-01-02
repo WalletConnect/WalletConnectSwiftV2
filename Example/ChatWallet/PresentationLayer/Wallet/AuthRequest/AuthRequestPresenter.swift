@@ -8,7 +8,7 @@ final class AuthRequestPresenter: ObservableObject {
     
     private let request: AuthRequest
     var message: String {
-        return request.message
+        return interactor.formatted(request: request)
     }
     
     private var disposeBag = Set<AnyCancellable>()

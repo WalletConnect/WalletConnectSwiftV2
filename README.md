@@ -40,6 +40,9 @@ Follow instructions from *Configuration.xcconfig* and configure PROJECT_ID with 
 ```
 // Uncomment next line and paste your project id. Get this on: https://cloud.walletconnect.com/sign-in
 // PROJECT_ID = YOUR_PROJECT_ID
+// To use Push Notifications on the Simulator you need to grab the simulator identifier
+// from Window->Devices and Simulators->Simulator you're using->Identifier
+SIMULATOR_IDENTIFIER = YOUR_SIMULATOR_IDENTIFIER
 ```
 ## Example App
 open `Example/ExampleApp.xcodeproj`

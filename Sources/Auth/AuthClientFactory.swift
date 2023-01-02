@@ -4,7 +4,6 @@ public struct AuthClientFactory {
 
     public static func create(
         metadata: AppMetadata,
-        account: Account?,
         projectId: String,
         signerFactory: SignerFactory,
         networkingClient: NetworkingInteractor,
@@ -18,7 +17,6 @@ public struct AuthClientFactory {
 
         return AuthClientFactory.create(
             metadata: metadata,
-            account: account,
             projectId: projectId,
             signerFactory: signerFactory,
             logger: logger,
@@ -32,7 +30,6 @@ public struct AuthClientFactory {
 
     static func create(
         metadata: AppMetadata,
-        account: Account?,
         projectId: String,
         signerFactory: SignerFactory,
         logger: ConsoleLogging,
@@ -51,7 +48,7 @@ public struct AuthClientFactory {
         let messageSigner = messageSignerFactory.create(projectId: projectId)
         let appRespondSubscriber = AppRespondSubscriber(networkingInteractor: networkingClient, logger: logger, rpcHistory: history, signatureVerifier: messageSigner, pairingRegisterer: pairingRegisterer, messageFormatter: messageFormatter)
         let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: history)
-        let walletRequestSubscriber = WalletRequestSubscriber(networkingInteractor: networkingClient, logger: logger, kms: kms, messageFormatter: messageFormatter, address: account?.address, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingRegisterer)
+        let walletRequestSubscriber = WalletRequestSubscriber(networkingInteractor: networkingClient, logger: logger, kms: kms, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingRegisterer)
         let walletRespondService = WalletRespondService(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: history, walletErrorResponder: walletErrorResponder)
         let pendingRequestsProvider = PendingRequestsProvider(rpcHistory: history)
 
@@ -60,7 +57,6 @@ public struct AuthClientFactory {
             appRespondSubscriber: appRespondSubscriber,
             walletRequestSubscriber: walletRequestSubscriber,
             walletRespondService: walletRespondService,
-            account: account,
             pendingRequestsProvider: pendingRequestsProvider,
             logger: logger,
             socketConnectionStatusPublisher: networkingClient.socketConnectionStatusPublisher,

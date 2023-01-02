@@ -6,7 +6,7 @@ public class PingResponseSubscriber {
     private let logger: ConsoleLogging
     private var publishers = [AnyCancellable]()
 
-    public var onResponse: ((String)->Void)?
+    public var onResponse: ((String) -> Void)?
 
     public init(networkingInteractor: NetworkInteracting,
          method: ProtocolMethod,

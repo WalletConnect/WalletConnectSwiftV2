@@ -56,6 +56,7 @@ final class ApproveEngine {
     }
 
     func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace]) async throws {
+
         guard let payload = try proposalPayloadsStore.get(key: proposerPubKey) else {
             throw Errors.wrongRequestParams
         }
@@ -76,13 +77,10 @@ final class ApproveEngine {
 
         let sessionTopic = agreementKey.derivedTopic()
         try kms.setAgreementSecret(agreementKey, topic: sessionTopic)
+        sessionToPairingTopic.set(payload.topic, forKey: sessionTopic)
 
         guard let relay = proposal.relays.first else {
             throw Errors.relayNotFound
-        }
-
-        guard var pairing = pairingStore.getPairing(forTopic: payload.topic) else {
-            throw Errors.pairingNotFound
         }
 
         let result = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
@@ -92,10 +90,12 @@ final class ApproveEngine {
 
         async let settleRequest: () = settle(topic: sessionTopic, proposal: proposal, namespaces: sessionNamespaces)
 
-        let _ = try await [proposeResponse, settleRequest]
+        _ = try await [proposeResponse, settleRequest]
 
-        try pairing.updateExpiry()
-        pairingStore.setPairing(pairing)
+        pairingRegisterer.activate(
+            pairingTopic: payload.topic,
+            peerMetadata: payload.request.proposer.metadata
+        )
     }
 
     func reject(proposerPubKey: String, reason: SignReasonCode) async throws {
@@ -149,7 +149,7 @@ final class ApproveEngine {
         async let subscription: () = networkingInteractor.subscribe(topic: topic)
         async let settleRequest: () = networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
 
-        let _ = try await [settleRequest, subscription]
+        _ = try await [settleRequest, subscription]
 
         onSessionSettle?(session.publicRepresentation())
     }
@@ -209,21 +209,6 @@ private extension ApproveEngine {
     // TODO: Move to Non-Controller SettleEngine
     func handleSessionProposeResponse(payload: ResponseSubscriptionPayload<SessionType.ProposeParams, SessionType.ProposeResponse>) {
         do {
-            let pairingTopic = payload.topic
-
-            guard var pairing = pairingStore.getPairing(forTopic: pairingTopic) else {
-                throw Errors.pairingNotFound
-            }
-
-            // Activate the pairing
-            if !pairing.active {
-                pairing.activate()
-            } else {
-                try pairing.updateExpiry()
-            }
-
-            pairingStore.setPairing(pairing)
-
             let selfPublicKey = try AgreementPublicKey(hex: payload.request.proposer.publicKey)
             let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: payload.response.responderPublicKey)
 
@@ -231,7 +216,7 @@ private extension ApproveEngine {
             logger.debug("Received Session Proposal response")
 
             try kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
-            sessionToPairingTopic.set(pairingTopic, forKey: sessionTopic)
+            sessionToPairingTopic.set(payload.topic, forKey: sessionTopic)
 
             settlingProposal = payload.request
 
@@ -329,8 +314,12 @@ private extension ApproveEngine {
             publicKey: agreementKeys.publicKey.hexRepresentation,
             metadata: metadata
         )
+
         if let pairingTopic = try? sessionToPairingTopic.get(key: topic) {
-            pairingRegisterer.updateMetadata(pairingTopic, metadata: params.controller.metadata)
+            pairingRegisterer.activate(
+                pairingTopic: pairingTopic,
+                peerMetadata: params.controller.metadata
+            )
         }
 
         let session = WCSession(
@@ -343,6 +332,7 @@ private extension ApproveEngine {
             acknowledged: true
         )
         sessionStore.setSession(session)
+
         Task(priority: .high) {
             try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod)
         }

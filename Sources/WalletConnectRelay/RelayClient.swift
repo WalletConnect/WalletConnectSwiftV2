@@ -194,9 +194,31 @@ public final class RelayClient {
             subscribe(topic: topic) { error in
                 if let error = error {
                     continuation.resume(throwing: error)
-                    return
+                } else {
+                    continuation.resume(returning: ())
                 }
-                continuation.resume(returning: ())
+            }
+        }
+    }
+
+    public func unsubscribe(topic: String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            unsubscribe(topic: topic) { error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: ())
+                }
+            }
+        }
+    }
+
+    public func batchUnsubscribe(topics: [String]) async throws {
+        await withThrowingTaskGroup(of: Void.self) { group in
+            for topic in topics {
+                group.addTask {
+                    try await self.unsubscribe(topic: topic)
+                }
             }
         }
     }

@@ -20,11 +20,17 @@ let package = Package(
             name: "WalletConnectAuth",
             targets: ["Auth"]),
         .library(
+            name: "Web3Wallet",
+            targets: ["Web3Wallet"]),
+        .library(
             name: "WalletConnectPairing",
             targets: ["WalletConnectPairing"]),
         .library(
             name: "WalletConnectPush",
             targets: ["WalletConnectPush"]),
+        .library(
+            name: "WalletConnectEcho",
+            targets: ["WalletConnectEcho"]),
         .library(
             name: "WalletConnectRouter",
             targets: ["WalletConnectRouter"]),
@@ -50,9 +56,17 @@ let package = Package(
             dependencies: ["WalletConnectPairing"],
             path: "Sources/Auth"),
         .target(
+            name: "Web3Wallet",
+            dependencies: ["Auth", "WalletConnectSign"],
+            path: "Sources/Web3Wallet"),
+        .target(
             name: "WalletConnectPush",
-            dependencies: ["WalletConnectPairing"],
+            dependencies: ["WalletConnectPairing", "WalletConnectEcho", "WalletConnectNetworking"],
             path: "Sources/WalletConnectPush"),
+        .target(
+            name: "WalletConnectEcho",
+            dependencies: ["WalletConnectNetworking"],
+            path: "Sources/WalletConnectEcho"),
         .target(
             name: "WalletConnectRelay",
             dependencies: ["WalletConnectKMS"],
@@ -85,7 +99,10 @@ let package = Package(
             dependencies: ["WalletConnectUtils"]),
         .testTarget(
             name: "WalletConnectSignTests",
-            dependencies: ["WalletConnectSign", "TestingUtils"]),
+            dependencies: ["WalletConnectSign", "WalletConnectUtils", "TestingUtils"]),
+        .testTarget(
+            name: "Web3WalletTests",
+            dependencies: ["Web3Wallet", "TestingUtils"]),
         .testTarget(
             name: "WalletConnectPairingTests",
             dependencies: ["WalletConnectPairing", "TestingUtils"]),
