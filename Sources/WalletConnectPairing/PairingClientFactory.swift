@@ -22,7 +22,7 @@ public struct PairingClientFactory {
         let appPairActivateService = AppPairActivationService(pairingStorage: pairingStore, logger: logger)
         let appUpdateMetadataService = AppUpdateMetadataService(pairingStore: pairingStore)
         let expirationService = ExpirationService(pairingStorage: pairingStore, networkInteractor: networkingClient, kms: kms)
-        let resubscribeService = ResubscribeService(networkInteractor: networkingClient, pairingStorage: pairingStore)
+        let resubscribeService = PairingResubscribeService(networkInteractor: networkingClient, pairingStorage: pairingStore)
 
         return PairingClient(
             appPairService: appPairService,

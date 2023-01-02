@@ -24,6 +24,7 @@ public class DappPushClient {
     private let subscriptionsProvider: SubscriptionsProvider
     private let deletePushSubscriptionService: DeletePushSubscriptionService
     private let deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
+    private let resubscribeService: PushResubscribeService
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
@@ -32,7 +33,8 @@ public class DappPushClient {
          pushMessageSender: PushMessageSender,
          subscriptionsProvider: SubscriptionsProvider,
          deletePushSubscriptionService: DeletePushSubscriptionService,
-         deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber) {
+         deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber,
+         resubscribeService: PushResubscribeService) {
         self.logger = logger
         self.pushProposer = pushProposer
         self.proposalResponseSubscriber = proposalResponseSubscriber
@@ -40,6 +42,7 @@ public class DappPushClient {
         self.subscriptionsProvider = subscriptionsProvider
         self.deletePushSubscriptionService = deletePushSubscriptionService
         self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
+        self.resubscribeService = resubscribeService
         setupSubscriptions()
     }
 
