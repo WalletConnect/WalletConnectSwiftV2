@@ -6,7 +6,7 @@ class SessionPingService {
     private let pingResponder: PingResponder
     private let pingResponseSubscriber: PingResponseSubscriber
 
-    var onResponse: ((String)->Void)? {
+    var onResponse: ((String) -> Void)? {
         get {
             return pingResponseSubscriber.onResponse
         }

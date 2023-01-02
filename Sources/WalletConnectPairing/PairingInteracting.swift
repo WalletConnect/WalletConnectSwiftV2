@@ -12,7 +12,7 @@ public protocol PairingInteracting {
     func ping(topic: String) async throws
 
     func disconnect(topic: String) async throws
-    
+
 #if DEBUG
     func cleanup() throws
 #endif

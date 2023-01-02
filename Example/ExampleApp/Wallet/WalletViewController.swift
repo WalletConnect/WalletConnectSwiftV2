@@ -8,12 +8,14 @@ import CryptoSwift
 import Combine
 
 final class WalletViewController: UIViewController {
+
     lazy var accounts = [
         "eip155": ETHSigner.address,
         "solana": SOLSigner.address
     ]
 
     var sessionItems: [ActiveSessionItem] = []
+
     var currentProposal: Session.Proposal?
     private var publishers = [AnyCancellable]()
 
@@ -36,9 +38,13 @@ final class WalletViewController: UIViewController {
 
         walletView.tableView.dataSource = self
         walletView.tableView.delegate = self
-        let settledSessions = Sign.instance.getSessions()
-        sessionItems = getActiveSessionItem(for: settledSessions)
+
+        setUpSessions()
         setUpAuthSubscribing()
+    }
+
+    private func setUpSessions() {
+        reloadSessions(Sign.instance.getSessions())
     }
 
     @objc
@@ -178,10 +184,6 @@ extension WalletViewController: UITableViewDataSource, UITableViewDelegate {
             Task {
                 do {
                     try await Sign.instance.disconnect(topic: item.topic)
-                    DispatchQueue.main.async { [weak self] in
-                        self?.sessionItems.remove(at: indexPath.row)
-                        tableView.deleteRows(at: [indexPath], with: .automatic)
-                    }
                 } catch {
                     print(error)
                 }
@@ -258,12 +260,6 @@ extension WalletViewController {
                     self?.showSessionProposal(Proposal(proposal: sessionProposal)) // FIXME: Remove mock
             }.store(in: &publishers)
 
-        Sign.instance.sessionSettlePublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.reloadActiveSessions()
-            }.store(in: &publishers)
-
         Sign.instance.sessionRequestPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] sessionRequest in
@@ -274,8 +270,13 @@ extension WalletViewController {
         Sign.instance.sessionDeletePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.reloadActiveSessions()
                 self?.navigationController?.popToRootViewController(animated: true)
+            }.store(in: &publishers)
+
+        Sign.instance.sessionsPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] sessions in
+                self?.reloadSessions(sessions)
             }.store(in: &publishers)
     }
 
@@ -290,12 +291,8 @@ extension WalletViewController {
         }
     }
 
-    private func reloadActiveSessions() {
-        let settledSessions = Sign.instance.getSessions()
-        let activeSessions = getActiveSessionItem(for: settledSessions)
-        DispatchQueue.main.async { // FIXME: Delegate being called from background thread
-            self.sessionItems = activeSessions
-            self.walletView.tableView.reloadData()
-        }
+    private func reloadSessions(_ sessions: [Session]) {
+        sessionItems = getActiveSessionItem(for: sessions)
+        walletView.tableView.reloadData()
     }
 }

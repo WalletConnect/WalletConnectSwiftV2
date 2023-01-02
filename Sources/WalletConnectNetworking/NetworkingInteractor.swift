@@ -56,6 +56,11 @@ public class NetworkingInteractor: NetworkInteracting {
         }
     }
 
+    public func batchUnsubscribe(topics: [String]) async throws {
+        try await relayClient.batchUnsubscribe(topics: topics)
+        rpcHistory.deleteAll(forTopics: topics)
+    }
+
     public func requestSubscription<RequestParams: Codable>(on request: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {
         return requestPublisher
             .filter { rpcRequest in
@@ -131,6 +136,10 @@ public class NetworkingInteractor: NetworkInteracting {
         try await respond(topic: topic, response: response, protocolMethod: protocolMethod, envelopeType: envelopeType)
     }
 
+    public func getClientId() throws -> String {
+        try relayClient.getClientId()
+    }
+
     public func respondError(topic: String, requestId: RPCID, protocolMethod: ProtocolMethod, reason: Reason, envelopeType: Envelope.EnvelopeType) async throws {
         let error = JSONRPCError(code: reason.code, message: reason.message)
         let response = RPCResponse(id: requestId, error: error)
@@ -174,9 +183,5 @@ extension NetworkingInteractor: NetworkingClient {
 
     public func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
         try relayClient.disconnect(closeCode: closeCode)
-    }
-
-    public func getClientId() throws -> String {
-        try relayClient.getClientId()
     }
 }

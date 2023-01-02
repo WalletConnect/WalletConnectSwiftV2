@@ -99,6 +99,12 @@ public class NetworkingInteractorMock: NetworkInteracting {
         didCallUnsubscribe = true
     }
 
+    public func batchUnsubscribe(topics: [String]) async throws {
+        for topic in topics {
+            unsubscribe(topic: topic)
+        }
+    }
+
     public func request(_ request: RPCRequest, topic: String, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
         requestCallCount += 1
         requests.append((topic, request))
@@ -120,5 +126,9 @@ public class NetworkingInteractorMock: NetworkInteracting {
     public func requestNetworkAck(_ request: RPCRequest, topic: String, protocolMethod: ProtocolMethod) async throws {
         requestCallCount += 1
         requests.append((topic, request))
+    }
+
+    public func getClientId() throws -> String {
+        return ""
     }
 }

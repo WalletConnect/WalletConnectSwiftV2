@@ -34,5 +34,5 @@ public actor VerifyClient {
     public func registerAssertion() async throws {
         try await assertionRegistrer.registerAssertion()
     }
-    
+
 }

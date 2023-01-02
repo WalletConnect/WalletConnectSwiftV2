@@ -33,7 +33,7 @@ public class ConsoleLogger: ConsoleLogging {
     public func debug(_ items: Any...) {
         if loggingLevel >= .debug {
             items.forEach {
-                Swift.print("\(suffix) \($0)")
+                Swift.print("\(suffix) \($0) - \(logFormattedDate(Date()))")
             }
         }
     }
@@ -69,4 +69,12 @@ public enum LoggingLevel: Comparable {
     case warn
     case info
     case debug
+}
+
+
+fileprivate func logFormattedDate(_ date: Date) -> String {
+    let dateFormatter = DateFormatter()
+    dateFormatter.locale = NSLocale.current
+    dateFormatter.dateFormat = "HH:mm:ss.SSSS"
+    return  dateFormatter.string(from: date)
 }

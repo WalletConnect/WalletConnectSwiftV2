@@ -13,7 +13,6 @@ class AttestKeyGenerator: AttestKeyGenerating {
     private let logger: ConsoleLogging
     private let keyIdStorage: CodableStore<String>
 
-
     init(logger: ConsoleLogging,
          keyIdStorage: CodableStore<String>
     ) {
