@@ -9,17 +9,7 @@ final class WebViewProxy {
         self.webView = webView
     }
 
-    func execute(request: ChatClientRequest) {
-        switch request {
-        case .chatInvite(let invite):
-            break // TODO: Implement me
-        }
-    }
-
-    func execute(response: WebViewResponse) {
-        switch response {
-        case .getInvites(let invites):
-            break // TODO: Implement me
-        }
+    func execute(script: WebViewScript) {
+        webView.evaluateJavaScript(script.build())
     }
 }

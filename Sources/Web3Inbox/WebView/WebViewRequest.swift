@@ -1,14 +1,17 @@
 import Foundation
 import WalletConnectChat
 
-enum WebViewRequestMethod: String {
-    case getInvites
-}
-
 enum WebViewRequest: Codable {
     case getInvites(account: String)
 }
 
-enum WebViewResponse: Codable {
+enum WebViewResponse: Codable, WebViewScript {
     case getInvites(invites: [Invite])
+
+    var command: String {
+        switch self {
+        case .getInvites:
+            return "getInvites"
+        }
+    }
 }
