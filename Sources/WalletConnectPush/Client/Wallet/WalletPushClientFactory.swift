@@ -8,7 +8,7 @@ public struct WalletPushClientFactory {
         let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults.standard
         
-        let keychainStorage = GroupKeychainStorage(serviceIdentifier: "group.com.walletconnect.sdk")
+        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
         return WalletPushClientFactory.create(
             logger: logger,
             keyValueStorage: keyValueStorage,
@@ -26,7 +26,9 @@ public struct WalletPushClientFactory {
 
         let subscriptionStore = CodableStore<PushSubscription>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.pushSubscription)
 
-        let proposeResponder = PushRequestResponder(networkingInteractor: networkInteractor, logger: logger, kms: kms, rpcHistory: history, subscriptionsStore: subscriptionStore)
+        let groupKeychainService = GroupKeychainStorage(serviceIdentifier: "group.com.walletconnect.sdk")
+
+        let proposeResponder = PushRequestResponder(networkingInteractor: networkInteractor, logger: logger, kms: kms, groupKeychainService: groupKeychainService, rpcHistory: history, subscriptionsStore: subscriptionStore)
 
         let pushMessageSubscriber = PushMessageSubscriber(networkingInteractor: networkInteractor, logger: logger)
         let subscriptionProvider = SubscriptionsProvider(store: subscriptionStore)
