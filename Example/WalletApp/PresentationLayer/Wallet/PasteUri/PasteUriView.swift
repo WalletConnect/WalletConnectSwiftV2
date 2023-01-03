@@ -7,7 +7,9 @@ private enum FocusField: Hashable {
 struct PasteUriView: View {
     @Environment(\.dismiss) var dismiss
     
-    @State var text = ""
+    @EnvironmentObject var presenter: PasteUriPresenter
+    
+    @State private var text = ""
 
     var body: some View {
         ZStack {
@@ -39,7 +41,7 @@ struct PasteUriView: View {
                                 .font(.system(size: 17, weight: .regular, design: .rounded))
                             
                             Button {
-                                //
+                                text = ""
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundColor(.systemGrayLight)
@@ -52,7 +54,8 @@ struct PasteUriView: View {
                     .ignoresSafeArea(.keyboard)
                     
                     Button {
-                        //
+                        presenter.onValue(text)
+                        dismiss()
                     } label: {
                         Text("Connect")
                             .frame(maxWidth: .infinity)
@@ -71,6 +74,7 @@ struct PasteUriView: View {
                     }
                     .padding(.top, 20)
                     .shadow(color: .white.opacity(0.25), radius: 8, y: 2)
+                    .disabled(text.isEmpty)
                     
                     Button {
                         dismiss()

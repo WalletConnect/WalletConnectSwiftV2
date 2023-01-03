@@ -69,7 +69,7 @@ extension WalletPresenter {
         }
         .store(in: &disposeBag)
         
-        pairFropDapp()
+        pairFromDapp()
     }
 
     private func pair(uri: WalletConnectURI) {
@@ -78,7 +78,7 @@ extension WalletPresenter {
         }
     }
     
-    private func pairFropDapp() {
+    private func pairFromDapp() {
         guard let uri = uri,
               let walletConnectUri = WalletConnectURI(string: uri)
         else {
