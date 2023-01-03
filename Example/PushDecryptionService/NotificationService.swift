@@ -12,7 +12,7 @@ class NotificationService: UNNotificationServiceExtension {
         self.contentHandler = contentHandler
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
         if let bestAttemptContent = bestAttemptContent {
-            // Modify the notification content here...
+
             let topic = bestAttemptContent.userInfo["topic"] as! String
             let ciphertext = bestAttemptContent.userInfo["encrypted_message"] as! String
             do {
@@ -31,7 +31,7 @@ class NotificationService: UNNotificationServiceExtension {
                 print(error)
             }
            // bestAttemptContent.title = pushMessage.title
-            bestAttemptContent.body = "dupa"
+            bestAttemptContent.body = "content not set"
             contentHandler(bestAttemptContent)
         }
     }
