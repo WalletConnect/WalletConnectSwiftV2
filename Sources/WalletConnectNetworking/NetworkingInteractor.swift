@@ -1,50 +1,6 @@
 import Foundation
 import Combine
 
-//class KeyChainMigrationService {
-//    enum Errors: Error {
-//        case er
-//    }
-//    func migrate() {
-//
-//    }
-//
-//    func getItems() throws  {
-//        let service = "com.walletconnect.sdk"
-//        var query: [String: Any] = [
-//           kSecClass as String: kSecClassGenericPassword,
-//           kSecAttrService as String: service,
-//           kSecReturnData as String: true,
-//           kSecMatchLimit as String: kSecMatchLimitAll
-//        ]
-//
-//        query[kSecAttrType as String] = type(of: query)
-//
-//        // 2. retrieve the data
-//        var extractedData: AnyObject?
-//        let status = SecItemCopyMatching(query as CFDictionary, &extractedData)
-//
-//        // 3. handle the result
-//        guard status == errSecItemNotFound || status == errSecSuccess else {
-//            throw Errors.er
-//        }
-//
-//        guard status != errSecItemNotFound else {
-//            print("error")
-//            return
-//        }
-//
-//        let array = extractedData as! CFArray
-//        let dictionaries: [[String: Any]] = array.toSwiftArray()
-//        print(dictionaries)
-//    }
-//}
-//extension CFArray {
-//  func toSwiftArray<T>() -> [T] {
-//    let array = Array<AnyObject>(_immutableCocoaArray: self)
-//    return array.compactMap { $0 as? T }
-//  }
-//}
 
 public class NetworkingInteractor: NetworkInteracting {
     private var publishers = Set<AnyCancellable>()

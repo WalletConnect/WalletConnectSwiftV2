@@ -4,19 +4,17 @@ import WalletConnectNetworking
 public struct EchoClientFactory {
     public static func create(projectId: String, clientId: String) -> EchoClient {
 
-        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
+        let httpClient = HTTPNetworkClient(host: "echo.walletconnect.com")
 
         return EchoClientFactory.create(
             projectId: projectId,
             clientId: clientId,
-            keychainStorage: keychainStorage)
+            httpClient: httpClient)
     }
 
     static func create(projectId: String,
-                                   clientId: String,
-                                   keychainStorage: KeychainStorageProtocol) -> EchoClient {
-
-        let httpClient = HTTPNetworkClient(host: "echo.walletconnect.com")
+                       clientId: String,
+                       httpClient: HTTPClient) -> EchoClient {
 
         let registerService = EchoRegisterService(httpClient: httpClient, projectId: projectId, clientId: clientId)
 
