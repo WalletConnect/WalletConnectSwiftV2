@@ -69,7 +69,6 @@ final class WelcomeInteractor {
         
         authClient = AuthClientFactory.create(
             metadata: AppMetadata(name: "chatapp", description: "", url: "", icons: [""]),
-            account: nil,
             projectId: InputConfig.projectId,
             signerFactory: DefaultSignerFactory(),
             networkingClient: networkingClient,

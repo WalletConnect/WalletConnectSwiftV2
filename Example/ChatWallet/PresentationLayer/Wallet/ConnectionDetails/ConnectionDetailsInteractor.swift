@@ -1,13 +1,12 @@
 import Combine
-import Auth
-import WalletConnectPairing
+import Web3Wallet
 
 final class ConnectionDetailsInteractor {
     func pair(uri: WalletConnectURI) async throws {
-        try await Pair.instance.pair(uri: uri)
+        try await Web3Wallet.instance.pair(uri: uri)
     }
 
     var requestPublisher: AnyPublisher<AuthRequest, Never> {
-        return Auth.instance.authRequestPublisher
+        return Web3Wallet.instance.authRequestPublisher
     }
 }

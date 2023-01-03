@@ -1,5 +1,5 @@
 import SwiftUI
-import Auth
+import Web3Wallet
 
 final class AuthRequestModule {
     @discardableResult
@@ -14,5 +14,4 @@ final class AuthRequestModule {
 
         return viewController
     }
-
 }

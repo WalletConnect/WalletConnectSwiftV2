@@ -17,7 +17,7 @@ struct AuthRequestView: View {
                         .resizable()
                         .scaledToFit()
                     
-                    Text("Foundation")
+                    Text(presenter.request.payload.domain)
                         .foregroundColor(.grey8)
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .padding(.top, 10)
@@ -26,7 +26,7 @@ struct AuthRequestView: View {
                         .foregroundColor(.grey8)
                         .font(.system(size: 22, weight: .medium, design: .rounded))
                     
-                    Text("foundation.app")
+                    Text(presenter.request.payload.domain)
                         .foregroundColor(.grey50)
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .multilineTextAlignment(.center)

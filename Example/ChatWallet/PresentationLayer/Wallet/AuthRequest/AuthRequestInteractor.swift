@@ -1,6 +1,5 @@
 import Foundation
-import Auth
-import WalletConnectUtils
+import Web3Wallet
 
 final class AuthRequestInteractor {
     private let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
@@ -13,15 +12,15 @@ final class AuthRequestInteractor {
             address: account.address,
             privateKey: privateKey,
             type: .eip191)
-        try await Auth.instance.respond(requestId: request.id, signature: signature, from: account)
+        try await Web3Wallet.instance.respond(requestId: request.id, signature: signature, from: account)
     }
 
     func reject(request: AuthRequest) async throws {
-        try await Auth.instance.reject(requestId: request.id)
+        try await Web3Wallet.instance.reject(requestId: request.id)
     }
 
     func formatted(request: AuthRequest) -> String {
-        return try! Auth.instance.formatMessage(
+        return try! Web3Wallet.instance.formatMessage(
             payload: request.payload,
             address: account.address
         )

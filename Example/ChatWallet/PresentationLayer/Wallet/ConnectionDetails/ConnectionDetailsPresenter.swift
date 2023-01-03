@@ -1,17 +1,26 @@
 import UIKit
 import Combine
+
 import Auth
+import Web3Wallet
 
 final class ConnectionDetailsPresenter: ObservableObject {
-
     private let interactor: ConnectionDetailsInteractor
     private let router: ConnectionDetailsRouter
+    
+    let session: Session
+    
     private var disposeBag = Set<AnyCancellable>()
 
-    init(interactor: ConnectionDetailsInteractor, router: ConnectionDetailsRouter) {
+    init(
+        interactor: ConnectionDetailsInteractor,
+        router: ConnectionDetailsRouter,
+        session: Session
+    ) {
         defer { setupInitialState() }
         self.interactor = interactor
         self.router = router
+        self.session = session
     }
 
     func didPastePairingURI() {

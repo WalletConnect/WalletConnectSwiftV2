@@ -1,18 +1,16 @@
 import WalletConnectNetworking
-import WalletConnectPairing
-import Auth
+import Web3Wallet
 
 struct ThirdPartyConfigurator: Configurator {
     func configure() {
         Networking.configure(projectId: InputConfig.projectId, socketFactory: SocketFactory())
-        Pair.configure(
-            metadata: AppMetadata(
-                name: "Showcase App",
-                description: "Showcase description",
-                url: "example.wallet",
-                icons: ["https://avatars.githubusercontent.com/u/37784886"]
-            ))
 
-        Auth.configure(signerFactory: DefaultSignerFactory())
+        let metadata = AppMetadata(
+            name: "Example Wallet",
+            description: "wallet description",
+            url: "example.wallet",
+            icons: ["https://avatars.githubusercontent.com/u/37784886"]
+        )
+        Web3Wallet.configure(metadata: metadata, signerFactory: DefaultSignerFactory())
     }
 }

@@ -1,10 +1,13 @@
 import UIKit
 import Combine
-import Auth
+
+import Web3Wallet
 
 final class WalletPresenter: ObservableObject {
     private let interactor: WalletInteractor
     private let router: WalletRouter
+    
+    @Published var sessions = [Session]()
     
     private let uri: String?
     
@@ -23,8 +26,8 @@ final class WalletPresenter: ObservableObject {
         self.uri = uri
     }
     
-    func onConnection() {
-        router.presentConnectionDetails()
+    func onConnection(session: Session) {
+        router.presentConnectionDetails(session: session)
     }
 
     func onPasteUri() {
@@ -56,9 +59,15 @@ final class WalletPresenter: ObservableObject {
 // MARK: - Private functions
 extension WalletPresenter {
     private func setupInitialState() {
-        interactor.requestPublisher.sink { [unowned self] request in
-            self.router.present(request: request)
-        }.store(in: &disposeBag)
+        interactor.requestPublisher.sink { [weak self] request in
+            self?.router.present(request: request)
+        }
+        .store(in: &disposeBag)
+
+        interactor.sessionsPublisher.sink { [weak self] sessions in
+            self?.sessions = sessions
+        }
+        .store(in: &disposeBag)
         
         pairFropDapp()
     }

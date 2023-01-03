@@ -11,18 +11,26 @@ struct ConnectionDetailsView: View {
             ScrollView {
                 VStack(spacing: 0) {
                     VStack(spacing: 2) {
-                        Image("foundation")
-                            .resizable()
-                            .frame(width: 60, height: 60)
-                            .background(Color.black)
-                            .cornerRadius(30, corners: .allCorners)
-                            .padding(.bottom, 6)
+                        AsyncImage(url: URL(string: session.peer.icons.first ?? "")) { phase in
+                            if let image = phase.image {
+                                image
+                                    .resizable()
+                                    .frame(width: 60, height: 60)
+                                    .background(Color.black)
+                                    .cornerRadius(30, corners: .allCorners)
+                            } else {
+                                Color.black
+                                    .frame(width: 60, height: 60)
+                                    .cornerRadius(30, corners: .allCorners)
+                            }
+                        }
+                        .padding(.bottom, 6)
                         
-                        Text("Foundation")
+                        Text(presenter.session.peer.name)
                             .foregroundColor(.grey8)
                             .font(.system(size: 22, weight: .bold, design: .rounded))
                         
-                        Text("foundation.app")
+                        Text(presenter.session.peer.url)
                             .foregroundColor(.grey50)
                             .font(.system(size: 13, weight: .medium, design: .rounded))
                     }

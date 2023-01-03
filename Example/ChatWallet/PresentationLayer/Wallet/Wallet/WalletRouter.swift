@@ -1,5 +1,6 @@
 import UIKit
-import Auth
+
+import Web3Wallet
 
 final class WalletRouter {
     weak var viewController: UIViewController!
@@ -20,8 +21,8 @@ final class WalletRouter {
             .presentFullScreen(from: viewController, transparentBackground: true)
     }
     
-    func presentConnectionDetails() {
-        ConnectionDetailsModule.create(app: app)
+    func presentConnectionDetails(session: Session) {
+        ConnectionDetailsModule.create(app: app, session: session)
             .push(from: viewController)
     }
 

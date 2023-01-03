@@ -1,12 +1,14 @@
 import UIKit
 import Combine
-import Auth
+
+import Web3Wallet
 
 final class AuthRequestPresenter: ObservableObject {
     private let interactor: AuthRequestInteractor
     private let router: AuthRequestRouter
     
-    private let request: AuthRequest
+    let request: AuthRequest
+    
     var message: String {
         return interactor.formatted(request: request)
     }

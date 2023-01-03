@@ -1,4 +1,5 @@
 import SwiftUI
+import Web3Wallet
 
 struct WalletView: View {
     @EnvironmentObject var presenter: WalletPresenter
@@ -10,7 +11,7 @@ struct WalletView: View {
             
             VStack(alignment: .leading, spacing: 16) {
                 ZStack {
-                    if false {
+                    if presenter.sessions.isEmpty {
                         VStack(spacing: 10) {
                             Image("connect-template")
                             
@@ -23,9 +24,15 @@ struct WalletView: View {
                     }
                     
                     VStack {
-                        ScrollView {
-                            connectionView()
+                        if !presenter.sessions.isEmpty {
+                            ScrollView {
+                                ForEach(presenter.sessions, id: \.peer.name) { session in
+                                    connectionView(session: session)
+                                }
+                            }
                         }
+                        
+                        Spacer()
                         
                         HStack(spacing: 20) {
                             Spacer()
@@ -55,24 +62,32 @@ struct WalletView: View {
         }
     }
     
-    private func connectionView() -> some View {
+    private func connectionView(session: Session) -> some View {
         Button {
-            presenter.onConnection()
+            presenter.onConnection(session: session)
         } label: {
             VStack {
                 HStack(spacing: 10) {
-                    Image("foundation")
-                        .resizable()
-                        .frame(width: 60, height: 60)
-                        .background(Color.black)
-                        .cornerRadius(30, corners: .allCorners)
+                    AsyncImage(url: URL(string: session.peer.icons.first ?? "")) { phase in
+                        if let image = phase.image {
+                            image
+                                .resizable()
+                                .frame(width: 60, height: 60)
+                                .background(Color.black)
+                                .cornerRadius(30, corners: .allCorners)
+                        } else {
+                            Color.black
+                                .frame(width: 60, height: 60)
+                                .cornerRadius(30, corners: .allCorners)
+                        }
+                    }
                     
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Foundation")
+                        Text(session.peer.name)
                             .foregroundColor(.grey8)
                             .font(.system(size: 20, weight: .semibold, design: .rounded))
                         
-                        Text("foundation.app")
+                        Text(session.peer.url)
                             .foregroundColor(.grey50)
                             .font(.system(size: 13, weight: .medium, design: .rounded))
                     }

@@ -1,5 +1,5 @@
 import UIKit
-import Auth
+import Web3Wallet
 
 final class ConnectionDetailsRouter {
     weak var viewController: UIViewController!

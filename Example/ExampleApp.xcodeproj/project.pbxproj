@@ -197,6 +197,7 @@
 		C55D3495295DFA750004314A /* WelcomeRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D3490295DFA750004314A /* WelcomeRouter.swift */; };
 		C55D3496295DFA750004314A /* WelcomeInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D3491295DFA750004314A /* WelcomeInteractor.swift */; };
 		C55D3497295DFA750004314A /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D3492295DFA750004314A /* WelcomeView.swift */; };
+		C55D349929630D440004314A /* Web3Wallet in Frameworks */ = {isa = PBXBuildFile; productRef = C55D349829630D440004314A /* Web3Wallet */; };
 		C56EE222293F55EE004840D1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C56EE221293F55EE004840D1 /* Assets.xcassets */; };
 		C56EE240293F566D004840D1 /* ScanQRView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE23F293F566C004840D1 /* ScanQRView.swift */; };
 		C56EE241293F566D004840D1 /* WalletModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE22D293F5669004840D1 /* WalletModule.swift */; };
@@ -236,13 +237,13 @@
 		C56EE29C293F5773004840D1 /* ChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE295293F5773004840D1 /* ChatService.swift */; };
 		C56EE29D293F5773004840D1 /* RegisterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE294293F5773004840D1 /* RegisterService.swift */; };
 		C56EE2A3293F6BAF004840D1 /* UIPasteboardWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE2A2293F6BAF004840D1 /* UIPasteboardWrapper.swift */; };
+		C5DD5BE1294E09E3008FD3A4 /* Web3Wallet in Frameworks */ = {isa = PBXBuildFile; productRef = C5DD5BE0294E09E3008FD3A4 /* Web3Wallet */; };
 		C5F32A2C2954814200A6476E /* ConnectionDetailsModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F32A2B2954814200A6476E /* ConnectionDetailsModule.swift */; };
 		C5F32A2E2954814A00A6476E /* ConnectionDetailsRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F32A2D2954814A00A6476E /* ConnectionDetailsRouter.swift */; };
 		C5F32A302954816100A6476E /* ConnectionDetailsInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F32A2F2954816100A6476E /* ConnectionDetailsInteractor.swift */; };
 		C5F32A322954816C00A6476E /* ConnectionDetailsPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F32A312954816C00A6476E /* ConnectionDetailsPresenter.swift */; };
 		C5F32A342954817600A6476E /* ConnectionDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F32A332954817600A6476E /* ConnectionDetailsView.swift */; };
 		C5F32A362954FE3C00A6476E /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C5F32A352954FE3C00A6476E /* Colors.xcassets */; };
-		C5DD5BE1294E09E3008FD3A4 /* Web3Wallet in Frameworks */ = {isa = PBXBuildFile; productRef = C5DD5BE0294E09E3008FD3A4 /* Web3Wallet */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -548,6 +549,7 @@
 			files = (
 				C56EE27D293F56F8004840D1 /* WalletConnectChat in Frameworks */,
 				C5133A78294125CC00A8314C /* Web3 in Frameworks */,
+				C55D349929630D440004314A /* Web3Wallet in Frameworks */,
 				C56EE255293F569A004840D1 /* Starscream in Frameworks */,
 				C56EE27B293F56F8004840D1 /* WalletConnectAuth in Frameworks */,
 			);
@@ -1631,6 +1633,7 @@
 				C56EE27A293F56F8004840D1 /* WalletConnectAuth */,
 				C56EE27C293F56F8004840D1 /* WalletConnectChat */,
 				C5133A77294125CC00A8314C /* Web3 */,
+				C55D349829630D440004314A /* Web3Wallet */,
 			);
 			productName = ChatWallet;
 			productReference = C56EE21B293F55ED004840D1 /* ChatWallet.app */;
@@ -2668,6 +2671,10 @@
 			package = A5AE354528A1A2AC0059AE8A /* XCRemoteSwiftPackageReference "Web3" */;
 			productName = Web3;
 		};
+		C55D349829630D440004314A /* Web3Wallet */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Web3Wallet;
+		};
 		C56EE254293F569A004840D1 /* Starscream */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = A5D85224286333D500DAF5C3 /* XCRemoteSwiftPackageReference "Starscream" */;
@@ -2680,7 +2687,7 @@
 		C56EE27C293F56F8004840D1 /* WalletConnectChat */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectChat;
-        };
+		};
 		C5DD5BE0294E09E3008FD3A4 /* Web3Wallet */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Web3Wallet;
