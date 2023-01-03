@@ -8,7 +8,7 @@ public struct WalletPushClientFactory {
         let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults.standard
         
-        let keychainStorage = GroupKeychainStorage(serviceIdentifier: "group.com.walletconnect.example")
+        let keychainStorage = GroupKeychainStorage(serviceIdentifier: "group.com.walletconnect.sdk")
         return WalletPushClientFactory.create(
             logger: logger,
             keyValueStorage: keyValueStorage,
