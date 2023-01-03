@@ -17,13 +17,5 @@ class PushNotificationTests: XCTestCase {
         let notification = springboard.otherElements["Notification"].descendants(matching: .any)["NotificationShortLookView"]
         XCTAssertTrue(notification.waitForExistence(timeout: 5))
         notification.tap()
-
-//        waitForElementToAppear(object: notification)
-    }
-
-    func waitForElementToAppear(object: Any) {
-        let exists = NSPredicate(format: "exists == true")
-        expectation(for: exists, evaluatedWith: object, handler: nil)
-        waitForExpectations(timeout: 5, handler: nil)
     }
 }

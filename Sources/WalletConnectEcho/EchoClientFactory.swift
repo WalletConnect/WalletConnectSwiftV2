@@ -16,7 +16,8 @@ public struct EchoClientFactory {
                        clientId: String,
                        httpClient: HTTPClient) -> EchoClient {
 
-        let registerService = EchoRegisterService(httpClient: httpClient, projectId: projectId, clientId: clientId)
+        let logger = ConsoleLogger(loggingLevel: .debug)
+        let registerService = EchoRegisterService(httpClient: httpClient, projectId: projectId, clientId: clientId, logger: logger)
 
         return EchoClient(
             registerService: registerService)

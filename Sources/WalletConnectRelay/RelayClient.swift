@@ -267,8 +267,8 @@ public final class RelayClient {
                 do {
                     try acknowledgeRequest(request)
                     try rpcHistory.set(request, forTopic: params.data.topic, emmitedBy: .remote)
-                    print(params.data.topic)
-                    print(params.data.message)
+                    logger.debug("topic \(params.data.topic)")
+                    logger.debug("message: \(params.data.message)")
                     messagePublisherSubject.send((params.data.topic, params.data.message))
                 } catch {
                     logger.error("[RelayClient] RPC History 'set()' error: \(error)")
