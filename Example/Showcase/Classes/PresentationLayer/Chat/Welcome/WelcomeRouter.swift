@@ -23,6 +23,6 @@ final class WelcomeRouter {
     }
     
     func openWallet(uri: String) {
-        UIApplication.shared.open(URL(string: "chatwallet://wc?uri=\(uri)")!)
+        UIApplication.shared.open(URL(string: "walletapp://wc?uri=\(uri)")!)
     }
 }

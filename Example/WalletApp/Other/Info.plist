@@ -11,7 +11,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>chatwallet</string>
+				<string>walletapp</string>
 			</array>
 		</dict>
 	</array>

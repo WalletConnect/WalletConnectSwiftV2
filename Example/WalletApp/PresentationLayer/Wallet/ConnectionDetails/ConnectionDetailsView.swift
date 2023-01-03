@@ -11,7 +11,7 @@ struct ConnectionDetailsView: View {
             ScrollView {
                 VStack(spacing: 0) {
                     VStack(spacing: 2) {
-                        AsyncImage(url: URL(string: session.peer.icons.first ?? "")) { phase in
+                        AsyncImage(url: URL(string: presenter.session.peer.icons.first ?? "")) { phase in
                             if let image = phase.image {
                                 image
                                     .resizable()

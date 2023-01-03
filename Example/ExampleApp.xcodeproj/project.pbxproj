@@ -437,7 +437,7 @@
 		C55D3490295DFA750004314A /* WelcomeRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeRouter.swift; sourceTree = "<group>"; };
 		C55D3491295DFA750004314A /* WelcomeInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeInteractor.swift; sourceTree = "<group>"; };
 		C55D3492295DFA750004314A /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
-		C56EE21B293F55ED004840D1 /* ChatWallet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChatWallet.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C56EE21B293F55ED004840D1 /* WalletApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WalletApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C56EE221293F55EE004840D1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C56EE22B293F5668004840D1 /* WalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletView.swift; sourceTree = "<group>"; };
 		C56EE22C293F5668004840D1 /* WalletPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletPresenter.swift; sourceTree = "<group>"; };
@@ -606,7 +606,7 @@
 				A5A4FC732840C12C00BBEC1E /* UITests */,
 				A5E03DEE286464DB00888481 /* IntegrationTests */,
 				A58E7CE928729F550082D443 /* Showcase */,
-				C56EE21C293F55ED004840D1 /* ChatWallet */,
+				C56EE21C293F55ED004840D1 /* WalletApp */,
 				764E1D3D26F8D3FC00A1FB15 /* Products */,
 				764E1D5326F8DAC800A1FB15 /* Frameworks */,
 				764E1D5626F8DB6000A1FB15 /* WalletConnectSwiftV2 */,
@@ -621,7 +621,7 @@
 				A5A4FC722840C12C00BBEC1E /* UITests.xctest */,
 				A5E03DED286464DB00888481 /* IntegrationTests.xctest */,
 				A58E7CE828729F550082D443 /* Showcase.app */,
-				C56EE21B293F55ED004840D1 /* ChatWallet.app */,
+				C56EE21B293F55ED004840D1 /* WalletApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1272,7 +1272,7 @@
 			path = Welcome;
 			sourceTree = "<group>";
 		};
-		C56EE21C293F55ED004840D1 /* ChatWallet */ = {
+		C56EE21C293F55ED004840D1 /* WalletApp */ = {
 			isa = PBXGroup;
 			children = (
 				C56EE25C293F56D6004840D1 /* Common */,
@@ -1281,7 +1281,7 @@
 				C56EE29E293F577B004840D1 /* PresentationLayer */,
 				C56EE2A0293F6B10004840D1 /* Other */,
 			);
-			path = ChatWallet;
+			path = WalletApp;
 			sourceTree = "<group>";
 		};
 		C56EE229293F5668004840D1 /* Wallet */ = {
@@ -1615,9 +1615,9 @@
 			productReference = A5E03DED286464DB00888481 /* IntegrationTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		C56EE21A293F55ED004840D1 /* ChatWallet */ = {
+		C56EE21A293F55ED004840D1 /* WalletApp */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C56EE228293F55EE004840D1 /* Build configuration list for PBXNativeTarget "ChatWallet" */;
+			buildConfigurationList = C56EE228293F55EE004840D1 /* Build configuration list for PBXNativeTarget "WalletApp" */;
 			buildPhases = (
 				C56EE217293F55ED004840D1 /* Sources */,
 				C56EE218293F55ED004840D1 /* Frameworks */,
@@ -1627,7 +1627,7 @@
 			);
 			dependencies = (
 			);
-			name = ChatWallet;
+			name = WalletApp;
 			packageProductDependencies = (
 				C56EE254293F569A004840D1 /* Starscream */,
 				C56EE27A293F56F8004840D1 /* WalletConnectAuth */,
@@ -1636,7 +1636,7 @@
 				C55D349829630D440004314A /* Web3Wallet */,
 			);
 			productName = ChatWallet;
-			productReference = C56EE21B293F55ED004840D1 /* ChatWallet.app */;
+			productReference = C56EE21B293F55ED004840D1 /* WalletApp.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -1691,7 +1691,7 @@
 				A5A4FC712840C12C00BBEC1E /* UITests */,
 				A5E03DEC286464DB00888481 /* IntegrationTests */,
 				A58E7CE728729F550082D443 /* Showcase */,
-				C56EE21A293F55ED004840D1 /* ChatWallet */,
+				C56EE21A293F55ED004840D1 /* WalletApp */,
 			);
 		};
 /* End PBXProject section */
@@ -2421,7 +2421,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = ChatWallet/Other/Info.plist;
+				INFOPLIST_FILE = WalletApp/Other/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -2432,7 +2432,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.ChatWallet;
+				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.walletapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -2450,7 +2450,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = ChatWallet/Other/Info.plist;
+				INFOPLIST_FILE = WalletApp/Other/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -2461,7 +2461,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.ChatWallet;
+				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.walletapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -2526,7 +2526,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C56EE228293F55EE004840D1 /* Build configuration list for PBXNativeTarget "ChatWallet" */ = {
+		C56EE228293F55EE004840D1 /* Build configuration list for PBXNativeTarget "WalletApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C56EE226293F55EE004840D1 /* Debug */,

@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C56EE21A293F55ED004840D1"
-               BuildableName = "ChatWallet.app"
-               BlueprintName = "ChatWallet"
+               BuildableName = "WalletApp.app"
+               BlueprintName = "WalletApp"
                ReferencedContainer = "container:ExampleApp.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -45,8 +45,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C56EE21A293F55ED004840D1"
-            BuildableName = "ChatWallet.app"
-            BlueprintName = "ChatWallet"
+            BuildableName = "WalletApp.app"
+            BlueprintName = "WalletApp"
             ReferencedContainer = "container:ExampleApp.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -62,8 +62,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C56EE21A293F55ED004840D1"
-            BuildableName = "ChatWallet.app"
-            BlueprintName = "ChatWallet"
+            BuildableName = "WalletApp.app"
+            BlueprintName = "WalletApp"
             ReferencedContainer = "container:ExampleApp.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
