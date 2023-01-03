@@ -1,21 +1,15 @@
+
 import Foundation
 
-public protocol KeychainStorageProtocol {
-    func add<T: GenericPasswordConvertible>(_ item: T, forKey key: String) throws
-    func read<T: GenericPasswordConvertible>(key: String) throws -> T
-    func delete(key: String) throws
-    func deleteAll() throws
-}
+public final class GroupKeychainStorage: KeychainStorageProtocol {
 
-public final class KeychainStorage: KeychainStorageProtocol {
-
-    private let service: String
+    private let accessGroup: String
 
     private let secItem: KeychainServiceProtocol
 
     public init(keychainService: KeychainServiceProtocol = KeychainServiceWrapper(), serviceIdentifier: String) {
         self.secItem = keychainService
-        service = serviceIdentifier
+        accessGroup = serviceIdentifier
     }
 
     public func add<T>(_ item: T, forKey key: String) throws where T: GenericPasswordConvertible {
@@ -89,7 +83,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
     public func deleteAll() throws {
         let query = [
             kSecClass: kSecClassGenericPassword,
-            kSecAttrService: service
+            kSecAttrService: accessGroup
         ] as [String: Any]
         let status = secItem.delete(query as CFDictionary)
         guard status == errSecSuccess else {
@@ -103,7 +97,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
             kSecAttrAccessible: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
             kSecAttrIsInvisible: true,
             kSecUseDataProtectionKeychain: true,
-            kSecAttrService: service,
+            kSecAttrAccessGroup: accessGroup,
             kSecAttrAccount: key
         ]
     }
