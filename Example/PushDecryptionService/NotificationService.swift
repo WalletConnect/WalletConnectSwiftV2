@@ -16,7 +16,7 @@ class NotificationService: UNNotificationServiceExtension {
             let topic = bestAttemptContent.userInfo["topic"] as! String
             let ciphertext = bestAttemptContent.userInfo["encrypted_message"] as! String
             do {
-                let keychainStorage = GroupKeychainStorage(serviceIdentifier: "W5R8AG9K22.com.walletconnect.sdk")
+                let keychainStorage = GroupKeychainStorage(serviceIdentifier: "group.com.walletconnect.example")
 
                 let kms = KeyManagementService(keychain: keychainStorage)
 
@@ -24,6 +24,7 @@ class NotificationService: UNNotificationServiceExtension {
                 let service = PushDecryptionService(serializer: serializer)
                 let pushMessage = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
                 bestAttemptContent.body = pushMessage.body
+                contentHandler(bestAttemptContent)
 
             }
             catch {

@@ -7,7 +7,8 @@ public struct WalletPushClientFactory {
     public static func create(networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, echoClient: EchoClient) -> WalletPushClient {
         let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults.standard
-        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
+        
+        let keychainStorage = GroupKeychainStorage(serviceIdentifier: "group.com.walletconnect.example")
         return WalletPushClientFactory.create(
             logger: logger,
             keyValueStorage: keyValueStorage,
@@ -27,7 +28,7 @@ public struct WalletPushClientFactory {
 
         let proposeResponder = PushRequestResponder(networkingInteractor: networkInteractor, logger: logger, kms: kms, rpcHistory: history, subscriptionsStore: subscriptionStore)
 
-        let pushMessageSubscriber = PushMessageSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger)
+        let pushMessageSubscriber = PushMessageSubscriber(networkingInteractor: networkInteractor, logger: logger)
         let subscriptionProvider = SubscriptionsProvider(store: subscriptionStore)
         let deletePushSubscriptionService = DeletePushSubscriptionService(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore)
         let deletePushSubscriptionSubscriber = DeletePushSubscriptionSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore)

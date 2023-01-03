@@ -1,6 +1,23 @@
 import Foundation
 import Combine
 
+//class KeyChainMigrationService {
+//    func migrate() {
+//
+//    }
+//
+//    func getItems() {
+//        let service = "com.walletconnect.sdk"
+//        let query: [String: Any] = [
+//           kSecClass as String: kSecClassGenericPassword,
+//           kSecAttrService as String: service,
+//           kSecReturnData as String: true,
+//           kSecMatchLimit as String: kSecMatchLimitAll
+//         ]
+//
+//    }
+//}
+
 public class NetworkingInteractor: NetworkInteracting {
     private var publishers = Set<AnyCancellable>()
     private let relayClient: RelayClient
