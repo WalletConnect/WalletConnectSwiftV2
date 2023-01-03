@@ -11,6 +11,7 @@ struct ThirdPartyConfigurator: Configurator {
             url: "example.wallet",
             icons: ["https://avatars.githubusercontent.com/u/37784886"]
         )
+        
         Web3Wallet.configure(metadata: metadata, signerFactory: DefaultSignerFactory())
     }
 }

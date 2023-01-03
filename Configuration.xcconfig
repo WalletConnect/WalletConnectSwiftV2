@@ -2,3 +2,4 @@ RELAY_HOST = relay.walletconnect.com
 
 // Uncomment next line and paste your project id. Get this on: https://cloud.walletconnect.com/sign-in
 PROJECT_ID = 1012db890ca3cab0c1cdc929fdd657bf
+// PROJECT_ID = YOUR_PROJECT_ID
