@@ -20,14 +20,7 @@ public struct EchoClientFactory {
 
         let registerService = EchoRegisterService(httpClient: httpClient, projectId: projectId, clientId: clientId)
 
-        let kms = KeyManagementService(keychain: keychainStorage)
-
-        let serializer = Serializer(kms: kms)
-
-        let decryptionService = DecryptionService(serializer: serializer)
-
         return EchoClient(
-            registerService: registerService,
-            decryptionService: decryptionService)
+            registerService: registerService)
     }
 }

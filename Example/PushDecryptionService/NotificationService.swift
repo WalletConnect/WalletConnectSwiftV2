@@ -15,8 +15,20 @@ class NotificationService: UNNotificationServiceExtension {
             // Modify the notification content here...
             let topic = bestAttemptContent.userInfo["topic"] as! String
             let ciphertext = bestAttemptContent.userInfo["encrypted_message"] as! String
-            print(ciphertext)
-            //let pushMessage = try! Push.wallet.decryptMessage(topic: topic, ciphertext: ciphertext)
+            do {
+                let keychainStorage = GroupKeychainStorage(serviceIdentifier: "W5R8AG9K22.com.walletconnect.sdk")
+
+                let kms = KeyManagementService(keychain: keychainStorage)
+
+                let serializer = Serializer(kms: kms)
+                let service = PushDecryptionService(serializer: serializer)
+                let pushMessage = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
+                bestAttemptContent.body = pushMessage.body
+
+            }
+            catch {
+                print(error)
+            }
            // bestAttemptContent.title = pushMessage.title
             bestAttemptContent.body = "dupa"
             contentHandler(bestAttemptContent)

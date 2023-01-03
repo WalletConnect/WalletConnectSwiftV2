@@ -3,7 +3,7 @@ import Foundation
 public struct ChatClientFactory {
 
     static func create() -> ChatClient {
-        let keychain = KeychainStorage(serviceIdentifier: "com.walletconnect.showcase")
+        let keychain = KeychainStorage(serviceIdentifier: "W5R8AG9K22.com.walletconnect.sdk")
         let client = HTTPNetworkClient(host: "keys.walletconnect.com")
         let registry = KeyserverRegistryProvider(client: client)
         return ChatClientFactory.create(

@@ -71,6 +71,7 @@ public class Serializer: Serializing {
 
     private func decode<T: Codable>(sealbox: Data, symmetricKey: Data) throws -> T {
         let decryptedData = try codec.decode(sealbox: sealbox, symmetricKey: symmetricKey)
+        let str = String(decoding: decryptedData, as: UTF8.self)
         return try JSONDecoder().decode(T.self, from: decryptedData)
     }
 }
