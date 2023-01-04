@@ -6,8 +6,14 @@ public class PushDecryptionService {
     }
     private let serializer: Serializing
 
-    public init(serializer: Serializing) {
+    init(serializer: Serializing) {
         self.serializer = serializer
+    }
+
+    public init() {
+        let keychainStorage = GroupKeychainStorage(serviceIdentifier: "group.com.walletconnect.sdk")
+        let kms = KeyManagementService(keychain: keychainStorage)
+        self.serializer = Serializer(kms: kms)
     }
 
     public func decryptMessage(topic: String, ciphertext: String) throws -> PushMessage {

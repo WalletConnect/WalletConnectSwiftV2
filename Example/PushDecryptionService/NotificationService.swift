@@ -12,25 +12,18 @@ class NotificationService: UNNotificationServiceExtension {
         self.contentHandler = contentHandler
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
         if let bestAttemptContent = bestAttemptContent {
-
             let topic = bestAttemptContent.userInfo["topic"] as! String
-            let ciphertext = bestAttemptContent.userInfo["encrypted_message"] as! String
+            let ciphertext = bestAttemptContent.userInfo["ciphertext"] as! String
             do {
-                let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
-
-                let kms = KeyManagementService(keychain: keychainStorage)
-
-                let serializer = Serializer(kms: kms)
-                let service = PushDecryptionService(serializer: serializer)
+                let service = PushDecryptionService()
                 let pushMessage = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
                 bestAttemptContent.body = pushMessage.body
                 contentHandler(bestAttemptContent)
-
             }
             catch {
                 print(error)
             }
-           // bestAttemptContent.title = pushMessage.title
+            bestAttemptContent.title = ""
             bestAttemptContent.body = "content not set"
             contentHandler(bestAttemptContent)
         }
