@@ -17,6 +17,7 @@ class NotificationService: UNNotificationServiceExtension {
             do {
                 let service = PushDecryptionService()
                 let pushMessage = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
+                bestAttemptContent.title = pushMessage.title
                 bestAttemptContent.body = pushMessage.body
                 contentHandler(bestAttemptContent)
             }

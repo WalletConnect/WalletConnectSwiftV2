@@ -73,6 +73,7 @@ final class PairingTests: XCTestCase {
         walletPushClient = WalletPushClientFactory.create(logger: pushLogger,
                                                           keyValueStorage: keyValueStorage,
                                                           keychainStorage: keychain,
+                                                          groupKeychainStorage: KeychainStorageMock(),
                                                           networkInteractor: networkingInteractor,
                                                           pairingRegisterer: pairingClient,
                                                           echoClient: echoClient)
