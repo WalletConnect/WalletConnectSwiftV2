@@ -117,10 +117,12 @@ public class ChatClient {
     }
 
     public func getInvites(account: Account) -> [Invite] {
+        // TODO: Account based storage
         return invitePayloadStore.getAll().map { $0.request }
     }
 
-    public func getThreads() async -> [Thread] {
+    public func getThreads(account: Account) async -> [Thread] {
+        // TODO: Account based storage
         await threadStore.getAll()
     }
 

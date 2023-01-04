@@ -60,6 +60,9 @@
 		84FE684628ACDB4700C893FF /* RequestParams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FE684528ACDB4700C893FF /* RequestParams.swift */; };
 		A50C036528AAD32200FE72D3 /* ClientDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50C036428AAD32200FE72D3 /* ClientDelegate.swift */; };
 		A50F3946288005B200064555 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50F3945288005B200064555 /* Types.swift */; };
+		A518A98729683FB60035247E /* Web3InboxViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A518A98429683FB60035247E /* Web3InboxViewController.swift */; };
+		A518A98829683FB60035247E /* Web3InboxModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A518A98529683FB60035247E /* Web3InboxModule.swift */; };
+		A518A98929683FB60035247E /* Web3InboxRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A518A98629683FB60035247E /* Web3InboxRouter.swift */; };
 		A518B31428E33A6500A2CE93 /* InputConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A518B31328E33A6500A2CE93 /* InputConfig.swift */; };
 		A51AC0D928E436A3001BACF9 /* InputConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51AC0D828E436A3001BACF9 /* InputConfig.swift */; };
 		A51AC0DD28E43727001BACF9 /* InputConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51AC0DB28E436E6001BACF9 /* InputConfig.swift */; };
@@ -90,6 +93,7 @@
 		A5629AE828772A0100094373 /* InviteViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AE728772A0100094373 /* InviteViewModel.swift */; };
 		A5629AEA2877F2D600094373 /* WalletConnectChat in Frameworks */ = {isa = PBXBuildFile; productRef = A5629AE92877F2D600094373 /* WalletConnectChat */; };
 		A5629AF22877F75100094373 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5629AF12877F75100094373 /* Starscream */; };
+		A574B3582964560C00C2BB91 /* Web3Inbox in Frameworks */ = {isa = PBXBuildFile; productRef = A574B3572964560C00C2BB91 /* Web3Inbox */; };
 		A578FA322873036400AA7720 /* InputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA312873036400AA7720 /* InputView.swift */; };
 		A578FA35287304A300AA7720 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA34287304A300AA7720 /* Color.swift */; };
 		A578FA372873D8EE00AA7720 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA362873D8EE00AA7720 /* UIColor.swift */; };
@@ -319,6 +323,9 @@
 		84FE684528ACDB4700C893FF /* RequestParams.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestParams.swift; sourceTree = "<group>"; };
 		A50C036428AAD32200FE72D3 /* ClientDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientDelegate.swift; sourceTree = "<group>"; };
 		A50F3945288005B200064555 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
+		A518A98429683FB60035247E /* Web3InboxViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Web3InboxViewController.swift; sourceTree = "<group>"; };
+		A518A98529683FB60035247E /* Web3InboxModule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Web3InboxModule.swift; sourceTree = "<group>"; };
+		A518A98629683FB60035247E /* Web3InboxRouter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Web3InboxRouter.swift; sourceTree = "<group>"; };
 		A518B31328E33A6500A2CE93 /* InputConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputConfig.swift; sourceTree = "<group>"; };
 		A51AC0D828E436A3001BACF9 /* InputConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputConfig.swift; sourceTree = "<group>"; };
 		A51AC0DB28E436E6001BACF9 /* InputConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputConfig.swift; sourceTree = "<group>"; };
@@ -521,6 +528,7 @@
 				A5629AEA2877F2D600094373 /* WalletConnectChat in Frameworks */,
 				A59FAEC928B7B93A002BB66F /* Web3 in Frameworks */,
 				A5629AF22877F75100094373 /* Starscream in Frameworks */,
+				A574B3582964560C00C2BB91 /* Web3Inbox in Frameworks */,
 				A59F877628B5462900A9CD80 /* WalletConnectAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -862,6 +870,16 @@
 			path = Chat;
 			sourceTree = "<group>";
 		};
+		A574B3592964570000C2BB91 /* Web3Inbox */ = {
+			isa = PBXGroup;
+			children = (
+				A518A98529683FB60035247E /* Web3InboxModule.swift */,
+				A518A98629683FB60035247E /* Web3InboxRouter.swift */,
+				A518A98429683FB60035247E /* Web3InboxViewController.swift */,
+			);
+			path = Web3Inbox;
+			sourceTree = "<group>";
+		};
 		A578FA332873049400AA7720 /* Style */ = {
 			isa = PBXGroup;
 			children = (
@@ -961,6 +979,7 @@
 		A58E7D062872A4390082D443 /* PresentationLayer */ = {
 			isa = PBXGroup;
 			children = (
+				A574B3592964570000C2BB91 /* Web3Inbox */,
 				A59F876828B53E6400A9CD80 /* Chat */,
 			);
 			path = PresentationLayer;
@@ -1545,6 +1564,7 @@
 				A5629AF12877F75100094373 /* Starscream */,
 				A59F877528B5462900A9CD80 /* WalletConnectAuth */,
 				A59FAEC828B7B93A002BB66F /* Web3 */,
+				A574B3572964560C00C2BB91 /* Web3Inbox */,
 			);
 			productName = Showcase;
 			productReference = A58E7CE828729F550082D443 /* Showcase.app */;
@@ -1829,14 +1849,17 @@
 				A58E7D0C2872A45B0082D443 /* MainModule.swift in Sources */,
 				A5C2021C287E1FD8007E3188 /* ImportInteractor.swift in Sources */,
 				A58E7D0D2872A45B0082D443 /* MainPresenter.swift in Sources */,
+				A518A98829683FB60035247E /* Web3InboxModule.swift in Sources */,
 				A5C20219287E1FD8007E3188 /* ImportModule.swift in Sources */,
 				A5629AD62876CC5700094373 /* InviteInteractor.swift in Sources */,
 				A5629AE12876CC6E00094373 /* InviteListInteractor.swift in Sources */,
 				A58E7CED28729F550082D443 /* SceneDelegate.swift in Sources */,
 				A5C2020F287D9DEE007E3188 /* WelcomeView.swift in Sources */,
+				A518A98929683FB60035247E /* Web3InboxRouter.swift in Sources */,
 				A5C20226287EB099007E3188 /* AccountNameResolver.swift in Sources */,
 				A5C2020D287D9DEE007E3188 /* WelcomeRouter.swift in Sources */,
 				A578FA372873D8EE00AA7720 /* UIColor.swift in Sources */,
+				A518A98729683FB60035247E /* Web3InboxViewController.swift in Sources */,
 				A5C2021D287E1FD8007E3188 /* ImportView.swift in Sources */,
 				A5C2021A287E1FD8007E3188 /* ImportPresenter.swift in Sources */,
 				A5629AE828772A0100094373 /* InviteViewModel.swift in Sources */,
@@ -2599,6 +2622,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A5D85224286333D500DAF5C3 /* XCRemoteSwiftPackageReference "Starscream" */;
 			productName = Starscream;
+		};
+		A574B3572964560C00C2BB91 /* Web3Inbox */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Web3Inbox;
 		};
 		A59F877528B5462900A9CD80 /* WalletConnectAuth */ = {
 			isa = XCSwiftPackageProductDependency;

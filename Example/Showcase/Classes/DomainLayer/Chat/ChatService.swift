@@ -33,8 +33,8 @@ final class ChatService {
         await client.getMessages(topic: thread.topic)
     }
 
-    func getThreads() async -> [WalletConnectChat.Thread] {
-        await client.getThreads()
+    func getThreads(account: Account) async -> [WalletConnectChat.Thread] {
+        await client.getThreads(account: account)
     }
 
     func getInvites(account: Account) async -> [WalletConnectChat.Invite] {

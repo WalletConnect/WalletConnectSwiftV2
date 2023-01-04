@@ -1,29 +1,33 @@
 import Foundation
 import WebKit
-import WalletConnectChat
 
 public final class Web3InboxClient {
 
     private let webView: WKWebView
+    private let logger: ConsoleLogging
 
     private let clientProxy: ChatClientProxy
-    private let clientSubscriber: ChatClientRequestSubscriper
+    private let clientSubscriber: ChatClientRequestSubscriber
 
     private let webviewProxy: WebViewProxy
     private let webviewSubscriber: WebViewRequestSubscriber
 
     init(
         webView: WKWebView,
+        logger: ConsoleLogging,
         clientProxy: ChatClientProxy,
-        clientSubscriber: ChatClientRequestSubscriper,
+        clientSubscriber: ChatClientRequestSubscriber,
         webviewProxy: WebViewProxy,
         webviewSubscriber: WebViewRequestSubscriber
     ) {
         self.webView = webView
+        self.logger = logger
         self.clientProxy = clientProxy
         self.clientSubscriber = clientSubscriber
         self.webviewProxy = webviewProxy
         self.webviewSubscriber = webviewSubscriber
+
+        setupSubscriptions()
     }
 
     public func getWebView() -> WKWebView {
@@ -37,13 +41,13 @@ private extension Web3InboxClient {
 
     func setupSubscriptions() {
         webviewSubscriber.onRequest = { [unowned self] request in
-            clientProxy.execute(request: request)
+            try await self.clientProxy.request(request)
         }
         clientProxy.onResponse = { [unowned self] response in
-            webviewProxy.execute(script: response)
+            try await self.webviewProxy.respond(response)
         }
         clientSubscriber.onRequest = { [unowned self] request in
-            webviewProxy.execute(script: request)
+            try await self.webviewProxy.request(request)
         }
     }
 }

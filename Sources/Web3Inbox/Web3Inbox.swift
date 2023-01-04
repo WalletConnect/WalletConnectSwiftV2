@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectChat
 
 public final class Web3Inbox {
 

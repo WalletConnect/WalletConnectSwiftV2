@@ -1,12 +1,17 @@
 import Foundation
 import WebKit
-import JSONRPC
 
 final class WebViewRequestSubscriber: NSObject, WKScriptMessageHandler {
 
-    static let name = "web3InboxHandler"
+    static let name = "web3inbox"
 
-    var onRequest: ((WebViewRequest) -> Void)?
+    var onRequest: ((RPCRequest) async throws -> Void)?
+
+    private let logger: ConsoleLogging
+
+    init(logger: ConsoleLogging) {
+        self.logger = logger
+    }
 
     func userContentController(
         _ userContentController: WKUserContentController,
@@ -17,10 +22,15 @@ final class WebViewRequestSubscriber: NSObject, WKScriptMessageHandler {
         guard
             let dict = message.body as? [String: Any],
             let data = try? JSONSerialization.data(withJSONObject: dict),
-            let request = try? JSONDecoder().decode(RPCRequest.self, from: data),
-            let event = try? request.params?.get(WebViewRequest.self)
+            let request = try? JSONDecoder().decode(RPCRequest.self, from: data)
         else { return }
 
-        onRequest?(event)
+        Task { @MainActor in
+            do {
+                try await onRequest?(request)
+            } catch {
+                logger.error("WebView Request error: \(error.localizedDescription)")
+            }
+        }
     }
 }

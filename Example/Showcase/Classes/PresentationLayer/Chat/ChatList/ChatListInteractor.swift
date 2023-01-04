@@ -10,8 +10,8 @@ final class ChatListInteractor {
         self.accountStorage = accountStorage
     }
 
-    func getThreads() async -> [WalletConnectChat.Thread] {
-        return await chatService.getThreads()
+    func getThreads(account: Account) async -> [WalletConnectChat.Thread] {
+        return await chatService.getThreads(account: account)
     }
 
     func threadsSubscription() -> Stream<WalletConnectChat.Thread> {

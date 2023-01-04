@@ -3,6 +3,7 @@ import UIKit
 enum TabPage: CaseIterable {
     case chat
     case wallet
+    case web3Inbox
 
     var title: String {
         switch self {
@@ -10,6 +11,8 @@ enum TabPage: CaseIterable {
             return "Chat"
         case .wallet:
             return "Wallet"
+        case .web3Inbox:
+            return "Web3Inbox"
         }
     }
 
@@ -19,6 +22,8 @@ enum TabPage: CaseIterable {
             return UIImage(systemName: "message.fill")!
         case .wallet:
             return UIImage(systemName: "signature")!
+        case .web3Inbox:
+            return UIImage(systemName: "safari.fill")!
         }
     }
 

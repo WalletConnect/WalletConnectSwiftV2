@@ -1,19 +1,20 @@
 import Foundation
 import WebKit
-import WalletConnectChat
 
 final class Web3InboxClientFactory {
 
     static func create(chatClient: ChatClient) -> Web3InboxClient {
-        let host = "https://web3inbox-dev-hidden-git-feat-add-w3i-proxy-walletconnect1.vercel.app/?noClientMode=true"
-        let webviewSubscriber = WebViewRequestSubscriber()
+        let host = "https://web3inbox-dev-hidden-git-feat-add-w3i-proxy-walletconnect1.vercel.app/?chatProvider=ios"
+        let logger = ConsoleLogger(suffix: "📬")
+        let webviewSubscriber = WebViewRequestSubscriber(logger: logger)
         let webView = WebViewFactory(host: host, webviewSubscriber: webviewSubscriber).create()
         let webViewProxy = WebViewProxy(webView: webView)
         let clientProxy = ChatClientProxy(client: chatClient)
-        let clientSubscriber = ChatClientRequestSubscriper(chatClient: chatClient)
+        let clientSubscriber = ChatClientRequestSubscriber(chatClient: chatClient, logger: logger)
 
         return Web3InboxClient(
             webView: webView,
+            logger: ConsoleLogger(),
             clientProxy: clientProxy,
             clientSubscriber: clientSubscriber,
             webviewProxy: webViewProxy,

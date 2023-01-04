@@ -1,13 +1,9 @@
 import Foundation
-import WalletConnectChat
 
-enum ChatClientRequest: Codable, WebViewScript {
-    case chatInvite(invite: Invite)
+enum ChatClientRequest: String {
+    case chatInvite
 
-    var command: String {
-        switch self {
-        case .chatInvite:
-            return "chatInvite"
-        }
+    var method: String {
+        return rawValue
     }
 }
