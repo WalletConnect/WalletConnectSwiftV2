@@ -63,11 +63,18 @@ extension WalletPresenter {
             self?.router.present(request: request)
         }
         .store(in: &disposeBag)
+        
+        interactor.sessionProposalPublisher.sink { [weak self] proposal in
+            self?.router.present(proposal: proposal)
+        }
+        .store(in: &disposeBag)
 
         interactor.sessionsPublisher.sink { [weak self] sessions in
             self?.sessions = sessions
         }
         .store(in: &disposeBag)
+        
+        sessions = interactor.getSessions()
         
         pairFromDapp()
     }

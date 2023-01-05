@@ -16,6 +16,11 @@ final class WalletRouter {
             .presentFullScreen(from: viewController, transparentBackground: true)
     }
     
+    func present(proposal: Session.Proposal) {
+        SessionRequestModule.create(app: app, proposal: proposal)
+            .presentFullScreen(from: viewController, transparentBackground: true)
+    }
+    
     func presentPaste(onValue: @escaping (String) -> Void, onError: @escaping (Error) -> Void) {
         PasteUriModule.create(app: app, onValue: onValue, onError: onError)
             .presentFullScreen(from: viewController, transparentBackground: true)

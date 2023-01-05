@@ -23,6 +23,6 @@ final class ConnectionDetailsRouter {
     }
 
     func dismiss() {
-        viewController.navigationController?.dismiss()
+        viewController.navigationController?.popViewController(animated: true)
     }
 }

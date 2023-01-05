@@ -24,6 +24,8 @@
 	</dict>
 	<key>PROJECT_ID</key>
 	<string>$(PROJECT_ID)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera access for scanning QR code</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

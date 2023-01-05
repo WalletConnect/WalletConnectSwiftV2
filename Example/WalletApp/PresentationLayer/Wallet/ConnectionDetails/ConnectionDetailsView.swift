@@ -35,116 +35,84 @@ struct ConnectionDetailsView: View {
                             .font(.system(size: 13, weight: .medium, design: .rounded))
                     }
                     
-                    VStack {
-                        VStack(alignment: .leading) {
-                            Text("IEP155:1")
-                                .font(.system(size: 15, weight: .semibold, design: .rounded))
-                                .foregroundColor(.whiteBackground)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 5)
-                                .background(Color.grey70)
-                                .cornerRadius(28, corners: .allCorners)
-                                .padding(.leading, 15)
-                                .padding(.top, 9)
-                            
-                            VStack(spacing: 0) {
-                                HStack {
-                                    Text("Accounts")
-                                        .foregroundColor(.grey50)
-                                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                                    
-                                    Spacer()
-                                    
-                                    Button {
-                                        // action
-                                    } label: {
-                                        Text("Add Account")
-                                            .foregroundColor(.blue100)
+                    ForEach(presenter.session.namespaces.keys.sorted(), id: \.self) { namespace in
+                        VStack {
+                            VStack(alignment: .leading) {
+                                Text(namespace)
+                                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                    .foregroundColor(.whiteBackground)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 5)
+                                    .background(Color.grey70)
+                                    .cornerRadius(28, corners: .allCorners)
+                                    .padding(.leading, 15)
+                                    .padding(.top, 9)
+                                
+                                VStack(spacing: 0) {
+                                    HStack {
+                                        Text("Accounts")
+                                            .foregroundColor(.grey50)
                                             .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                        
+                                        Spacer()
                                     }
-                                }
-                                .padding(.horizontal, 18)
-                                .padding(.top, 10)
-                                
-                                VStack {
-                                    Text("eip:155:1:0xe5eFf13687819212d25665fdB6946613dA6195a501")
-                                        .foregroundColor(.cyanBackround)
-                                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 3)
-                                        .background(Color.cyanBackround.opacity(0.2))
-                                        .cornerRadius(10, corners: .allCorners)
-                                }
-                                .padding(10)
-                                
-                            }
-                            .background(Color.whiteBackground)
-                            .cornerRadius(20, corners: .allCorners)
-                            .padding(.horizontal, 5)
-                            
-                            VStack(spacing: 0) {
-                                HStack {
-                                    Text("Methods")
-                                        .foregroundColor(.grey50)
-                                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                    .padding(.horizontal, 18)
+                                    .padding(.top, 10)
                                     
-                                    Spacer()
-                                }
-                                .padding(.horizontal, 18)
-                                .padding(.top, 10)
-                                
-                                VStack {
-                                    Text("eip:155:1:0xe5eFf13687819212d25665fdB6946613dA6195a501")
-                                        .foregroundColor(.cyanBackround)
-                                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 3)
-                                        .background(Color.cyanBackround.opacity(0.2))
-                                        .cornerRadius(10, corners: .allCorners)
-                                }
-                                .padding(10)
-                                
-                            }
-                            .background(Color.whiteBackground)
-                            .cornerRadius(20, corners: .allCorners)
-                            .padding(.horizontal, 5)
-                            
-                            VStack(spacing: 0) {
-                                HStack {
-                                    Text("Events")
-                                        .foregroundColor(.grey50)
-                                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                    HStack(spacing: 0) {
+                                        Text("\(presenter.session.namespaces[namespace]?.accounts.first?.namespace ?? "") : \((presenter.session.namespaces[namespace]?.accounts.first?.reference ?? ""))")
+                                            .foregroundColor(.cyanBackround)
+                                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 3)
+                                            .background(Color.cyanBackround.opacity(0.2))
+                                            .cornerRadius(10, corners: .allCorners)
+                                        
+                                        Spacer()
+                                    }
+                                    .padding(10)
                                     
-                                    Spacer()
                                 }
-                                .padding(.horizontal, 18)
-                                .padding(.top, 10)
+                                .background(Color.whiteBackground)
+                                .cornerRadius(20, corners: .allCorners)
+                                .padding(.horizontal, 5)
                                 
-                                VStack {
-                                    Text("eip:155:1:0xe5eFf13687819212d25665fdB6946613dA6195a501")
-                                        .foregroundColor(.cyanBackround)
-                                        .font(.system(size: 13, weight: .regular))
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 3)
-                                        .background(Color.cyanBackround.opacity(0.2))
-                                        .cornerRadius(10, corners: .allCorners)
+                                VStack(alignment: .leading, spacing: 0) {
+                                    HStack {
+                                        Text("Methods")
+                                            .foregroundColor(.grey50)
+                                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                        
+                                        Spacer()
+                                    }
+                                    .padding(.horizontal, 18)
+                                    .padding(.top, 10)
+                                    
+                                    TagsView(items: Array(presenter.session.namespaces[namespace]?.methods ?? [])) {
+                                        Text($0)
+                                            .foregroundColor(.cyanBackround)
+                                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 3)
+                                            .background(Color.cyanBackround.opacity(0.2))
+                                            .cornerRadius(10, corners: .allCorners)
+                                    }
+                                    .padding(10)
                                 }
-                                .padding(10)
-                                
+                                .background(Color.whiteBackground)
+                                .cornerRadius(20, corners: .allCorners)
+                                .padding(.horizontal, 5)
+                                .padding(.bottom, 5)
                             }
-                            .background(Color.whiteBackground)
-                            .cornerRadius(20, corners: .allCorners)
-                            .padding(.horizontal, 5)
-                            .padding(.bottom, 5)
+                            .background(Color("grey95"))
+                            .cornerRadius(25, corners: .allCorners)
                         }
-                        .background(Color("grey95"))
-                        .cornerRadius(25, corners: .allCorners)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 30)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 30)
                     
                     Button {
-                        // action
+                        presenter.onDelete()
                     } label: {
                         Text("Delete")
                             .foregroundColor(.lightForegroundNegative)
