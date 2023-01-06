@@ -180,7 +180,6 @@
 		A5E22D242840C8DB00E36487 /* SafariEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D232840C8DB00E36487 /* SafariEngine.swift */; };
 		A5E22D2C2840EAC300E36487 /* XCUIElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D2B2840EAC300E36487 /* XCUIElement.swift */; };
 		C5133A78294125CC00A8314C /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = C5133A77294125CC00A8314C /* Web3 */; };
-		C53AA435294124BC008EA57C /* SocketFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = C53AA434294124B3008EA57C /* SocketFactory.swift */; };
 		C53AA4362941251C008EA57C /* DefaultSignerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59CF4F5292F83D50031A42F /* DefaultSignerFactory.swift */; };
 		C55D347F295DD7140004314A /* AuthRequestModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D347A295DD7140004314A /* AuthRequestModule.swift */; };
 		C55D3480295DD7140004314A /* AuthRequestPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D347B295DD7140004314A /* AuthRequestPresenter.swift */; };
@@ -238,8 +237,8 @@
 		C56EE28D293F5757004840D1 /* AppearanceConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE287293F5757004840D1 /* AppearanceConfigurator.swift */; };
 		C56EE28E293F5757004840D1 /* ApplicationConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE284293F5757004840D1 /* ApplicationConfigurator.swift */; };
 		C56EE28F293F5757004840D1 /* MigrationConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE283293F5757004840D1 /* MigrationConfigurator.swift */; };
-		C56EE29B293F5773004840D1 /* SocketFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE292293F5773004840D1 /* SocketFactory.swift */; };
 		C56EE2A3293F6BAF004840D1 /* UIPasteboardWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE2A2293F6BAF004840D1 /* UIPasteboardWrapper.swift */; };
+		C5D4603A29687A5700302C7E /* DefaultSocketFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AEF2877F73000094373 /* DefaultSocketFactory.swift */; };
 		C5DD5BE1294E09E3008FD3A4 /* Web3Wallet in Frameworks */ = {isa = PBXBuildFile; productRef = C5DD5BE0294E09E3008FD3A4 /* Web3Wallet */; };
 		C5F32A2C2954814200A6476E /* ConnectionDetailsModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F32A2B2954814200A6476E /* ConnectionDetailsModule.swift */; };
 		C5F32A2E2954814A00A6476E /* ConnectionDetailsRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F32A2D2954814A00A6476E /* ConnectionDetailsRouter.swift */; };
@@ -424,7 +423,6 @@
 		A5E22D232840C8DB00E36487 /* SafariEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariEngine.swift; sourceTree = "<group>"; };
 		A5E22D2B2840EAC300E36487 /* XCUIElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCUIElement.swift; sourceTree = "<group>"; };
 		A5F48A0528E43D3F0034CBFB /* Configuration.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Configuration.xcconfig; path = ../Configuration.xcconfig; sourceTree = "<group>"; };
-		C53AA434294124B3008EA57C /* SocketFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketFactory.swift; sourceTree = "<group>"; };
 		C55D347A295DD7140004314A /* AuthRequestModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRequestModule.swift; sourceTree = "<group>"; };
 		C55D347B295DD7140004314A /* AuthRequestPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRequestPresenter.swift; sourceTree = "<group>"; };
 		C55D347C295DD7140004314A /* AuthRequestRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRequestRouter.swift; sourceTree = "<group>"; };
@@ -478,7 +476,6 @@
 		C56EE285293F5757004840D1 /* Configurator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configurator.swift; sourceTree = "<group>"; };
 		C56EE286293F5757004840D1 /* ThirdPartyConfigurator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThirdPartyConfigurator.swift; sourceTree = "<group>"; };
 		C56EE287293F5757004840D1 /* AppearanceConfigurator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceConfigurator.swift; sourceTree = "<group>"; };
-		C56EE292293F5773004840D1 /* SocketFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketFactory.swift; sourceTree = "<group>"; };
 		C56EE29F293F5C4F004840D1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C56EE2A2293F6BAF004840D1 /* UIPasteboardWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIPasteboardWrapper.swift; sourceTree = "<group>"; };
 		C5F32A2B2954814200A6476E /* ConnectionDetailsModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionDetailsModule.swift; sourceTree = "<group>"; };
@@ -796,7 +793,6 @@
 			isa = PBXGroup;
 			children = (
 				A5C20227287EB342007E3188 /* AccountStorage */,
-				C53AA433294124B3008EA57C /* SocketFactory */,
 				A5629AEB2877F69C00094373 /* Chat */,
 			);
 			path = DomainLayer;
@@ -1234,14 +1230,6 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
-		C53AA433294124B3008EA57C /* SocketFactory */ = {
-			isa = PBXGroup;
-			children = (
-				C53AA434294124B3008EA57C /* SocketFactory.swift */,
-			);
-			path = SocketFactory;
-			sourceTree = "<group>";
-		};
 		C55D3471295DC5F60004314A /* PasteUri */ = {
 			isa = PBXGroup;
 			children = (
@@ -1304,7 +1292,6 @@
 			children = (
 				C56EE25C293F56D6004840D1 /* Common */,
 				C56EE27E293F5756004840D1 /* ApplicationLayer */,
-				C56EE290293F5773004840D1 /* DomainLayer */,
 				C56EE29E293F577B004840D1 /* PresentationLayer */,
 				C56EE2A0293F6B10004840D1 /* Other */,
 			);
@@ -1445,22 +1432,6 @@
 				C56EE287293F5757004840D1 /* AppearanceConfigurator.swift */,
 			);
 			path = Configurator;
-			sourceTree = "<group>";
-		};
-		C56EE290293F5773004840D1 /* DomainLayer */ = {
-			isa = PBXGroup;
-			children = (
-				C56EE291293F5773004840D1 /* SocketFactory */,
-			);
-			path = DomainLayer;
-			sourceTree = "<group>";
-		};
-		C56EE291293F5773004840D1 /* SocketFactory */ = {
-			isa = PBXGroup;
-			children = (
-				C56EE292293F5773004840D1 /* SocketFactory.swift */,
-			);
-			path = SocketFactory;
 			sourceTree = "<group>";
 		};
 		C56EE29E293F577B004840D1 /* PresentationLayer */ = {
@@ -1890,7 +1861,6 @@
 				A58E7D1E2872A57B0082D443 /* ThirdPartyConfigurator.swift in Sources */,
 				A5629AD42876CC5700094373 /* InvitePresenter.swift in Sources */,
 				A58E7D3A2872D55F0082D443 /* ChatRouter.swift in Sources */,
-				C53AA435294124BC008EA57C /* SocketFactory.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1942,6 +1912,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C5D4603A29687A5700302C7E /* DefaultSocketFactory.swift in Sources */,
 				C53AA4362941251C008EA57C /* DefaultSignerFactory.swift in Sources */,
 				C55D3480295DD7140004314A /* AuthRequestPresenter.swift in Sources */,
 				C5F32A2E2954814A00A6476E /* ConnectionDetailsRouter.swift in Sources */,
@@ -2000,7 +1971,6 @@
 				C56EE24E293F566D004840D1 /* WalletInteractor.swift in Sources */,
 				C55D34AF2965FB750004314A /* SessionRequestPresenter.swift in Sources */,
 				C5F32A302954816100A6476E /* ConnectionDetailsInteractor.swift in Sources */,
-				C56EE29B293F5773004840D1 /* SocketFactory.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

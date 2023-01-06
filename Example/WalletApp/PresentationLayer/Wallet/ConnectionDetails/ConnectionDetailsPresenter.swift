@@ -34,6 +34,10 @@ final class ConnectionDetailsPresenter: ObservableObject {
             }
         }
     }
+    
+    func accountReference(namespace: String) -> String {
+        "\(session.namespaces[namespace]?.accounts.first?.namespace ?? ""):\((session.namespaces[namespace]?.accounts.first?.reference ?? ""))"
+    }
 }
 
 // MARK: - Private functions

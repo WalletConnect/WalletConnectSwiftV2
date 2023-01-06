@@ -36,7 +36,7 @@ final class WelcomePresenter: ObservableObject {
     
     private func authWithWallet() async {
         let uri = await interactor.generateUri()
-        try? await interactor.authClient?.request(
+        try? await Auth.instance.request(
             RequestParams(
                 domain: "example.wallet",
                 chainId: "eip155:1",

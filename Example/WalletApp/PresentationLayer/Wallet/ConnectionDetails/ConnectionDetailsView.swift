@@ -60,7 +60,7 @@ struct ConnectionDetailsView: View {
                                     .padding(.top, 10)
                                     
                                     HStack(spacing: 0) {
-                                        Text("\(presenter.session.namespaces[namespace]?.accounts.first?.namespace ?? "") : \((presenter.session.namespaces[namespace]?.accounts.first?.reference ?? ""))")
+                                        Text(presenter.accountReference(namespace: namespace))
                                             .foregroundColor(.cyanBackround)
                                             .font(.system(size: 13, weight: .semibold, design: .rounded))
                                             .padding(.horizontal, 8)

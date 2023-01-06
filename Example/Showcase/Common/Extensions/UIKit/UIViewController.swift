@@ -1,9 +1,7 @@
 import UIKit
 import SwiftUI
-import StoreKit
 
 extension UIViewController {
-
     var topController: UIViewController {
         var topController = self
         while let presentedViewController = topController.presentedViewController {
@@ -44,7 +42,6 @@ extension UIViewController {
 }
 
 extension UIApplication {
-
     static var currentWindow: UIWindow {
         return UIApplication.shared.connectedScenes
             .compactMap { $0.delegate as? SceneDelegate }

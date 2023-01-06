@@ -15,7 +15,7 @@ struct WalletView: View {
                         VStack(spacing: 10) {
                             Image("connect-template")
                             
-                            Text("Apps you connect with will appear here. To connect 􀎹 scan or 􀐅 paste the code that’s displayed in the app.")
+                            Text("Apps you connect with will appear here. To connect scan or paste the code that’s displayed in the app.")
                                 .foregroundColor(.grey50)
                                 .font(.system(size: 15, weight: .regular, design: .rounded))
                                 .multilineTextAlignment(.center)

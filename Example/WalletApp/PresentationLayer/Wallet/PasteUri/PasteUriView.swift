@@ -23,7 +23,7 @@ struct PasteUriView: View {
                         .foregroundColor(.grey8)
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                     
-                    Text("To get the URI press the 􀐅 copy to clipboard button in wallet connection interfaces.")
+                    Text("To get the URI press the copy to clipboard button in wallet connection interfaces.")
                         .foregroundColor(.grey50)
                         .font(.system(size: 15, weight: .medium, design: .rounded))
                         .multilineTextAlignment(.center)
@@ -35,7 +35,6 @@ struct PasteUriView: View {
                         
                         HStack {
                             TextField("wc://a13aef...", text: $text)
-                            //.focused($focusedField, equals: .field)
                                 .padding(.horizontal, 17)
                                 .foregroundColor(.grey50)
                                 .font(.system(size: 17, weight: .regular, design: .rounded))

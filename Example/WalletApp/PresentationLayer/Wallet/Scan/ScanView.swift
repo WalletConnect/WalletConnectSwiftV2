@@ -5,10 +5,14 @@ struct ScanView: View {
 
     var body: some View {
         ZStack {
-            //        ScanQR(onValue: presenter.onValue, onError: presenter.onError)
-            //            .ignoresSafeArea()
-            ScanQR(onValue: { _ in }, onError: { _ in })
-                .ignoresSafeArea()
+            ScanQR(onValue: { value in
+                presenter.onValue(value)
+                presenter.dismiss()
+            }, onError: { error in
+                presenter.onError(error)
+                presenter.dismiss()
+            })
+            .ignoresSafeArea()
 
             VStack {
                 ZStack {

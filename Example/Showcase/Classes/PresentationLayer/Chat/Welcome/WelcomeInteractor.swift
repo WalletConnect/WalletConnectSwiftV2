@@ -10,8 +10,6 @@ final class WelcomeInteractor {
     
     private let chatService: ChatService
     private let accountStorage: AccountStorage
-    
-    var authClient: AuthClient?
 
     init(chatService: ChatService, accountStorage: AccountStorage) {
         self.chatService = chatService
@@ -31,7 +29,6 @@ final class WelcomeInteractor {
     }
     
     func generateUri() async -> WalletConnectURI {
-        authClient = Auth.instance
         return try! await Pair.instance.create()
     }
 }
