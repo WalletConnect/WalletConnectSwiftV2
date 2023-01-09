@@ -11,7 +11,7 @@ final class MainPresenter {
 
     var viewControllers: [UIViewController] {
         return [
-            router.chatViewController
+            router.chatViewController,
             router.web3InboxViewController,
         ]
     }
