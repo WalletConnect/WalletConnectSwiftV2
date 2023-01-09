@@ -4,6 +4,7 @@ import Combine
 public protocol SignClientProtocol {
     var sessionProposalPublisher: AnyPublisher<Session.Proposal, Never> { get }
     var sessionRequestPublisher: AnyPublisher<Request, Never> { get }
+    var sessionsPublisher: AnyPublisher<[Session], Never> { get }
     
     func approve(proposalId: String, namespaces: [String: SessionNamespace]) async throws
     func reject(proposalId: String, reason: RejectionReason) async throws

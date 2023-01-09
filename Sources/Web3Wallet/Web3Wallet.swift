@@ -17,7 +17,7 @@ public class Web3Wallet {
     /// Web3Wallett client instance
     public static var instance: Web3WalletClient = {
         guard let config = Web3Wallet.config else {
-            fatalError("Error - you must call Wallet.configure(_:) before accessing the shared instance.")
+            fatalError("Error - you must call Web3Wallet.configure(_:) before accessing the shared instance.")
         }
         
         return Web3WalletClientFactory.create(

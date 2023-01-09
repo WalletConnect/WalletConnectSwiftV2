@@ -29,6 +29,13 @@ public class Web3WalletClient {
     public var authRequestPublisher: AnyPublisher<AuthRequest, Never> {
         authClient.authRequestPublisher.eraseToAnyPublisher()
     }
+    
+    /// Publisher that sends sessions on every sessions update
+    ///
+    /// Event will be emited on controller and non-controller clients.
+    public var sessionsPublisher: AnyPublisher<[Session], Never> {
+        signClient.sessionsPublisher.eraseToAnyPublisher()
+    }
 
     // MARK: - Private Properties
     private let authClient: AuthClientProtocol
@@ -61,6 +68,12 @@ public class Web3WalletClient {
     ///   - reason: Reason why the session proposal has been rejected. Conforms to CAIP25.
     public func reject(proposalId: String, reason: RejectionReason) async throws {
         try await signClient.reject(proposalId: proposalId, reason: reason)
+    }
+    
+    /// For wallet to reject authentication request
+    /// - Parameter requestId: authentication request id
+    public func reject(requestId: RPCID) async throws {
+        try await authClient.reject(requestId: requestId)
     }
 
     /// For the wallet to update session namespaces
@@ -123,7 +136,6 @@ public class Web3WalletClient {
         try await signClient.disconnect(topic: topic)
     }
 
-    
     /// Query sessions
     /// - Returns: All sessions
     public func getSessions() -> [Session] {

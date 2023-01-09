@@ -21,4 +21,8 @@ final class WelcomeRouter {
             .wrapToNavigationController()
             .present()
     }
+    
+    func openWallet(uri: String) {
+        UIApplication.shared.open(URL(string: "walletapp://wc?uri=\(uri)")!)
+    }
 }
