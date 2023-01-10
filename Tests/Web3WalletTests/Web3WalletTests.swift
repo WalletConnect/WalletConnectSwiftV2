@@ -69,14 +69,34 @@ final class Web3WalletTests: XCTestCase {
         }
     }
     
+    func testSessionsCalled() {
+        var success = false
+        web3WalletClient.sessionsPublisher.sink { value in
+            success = true
+            XCTAssertTrue(true)
+        }
+        .store(in: &disposeBag)
+        
+        let expectation = expectation(description: "Fail after 0.1s timeout")
+        let result = XCTWaiter.wait(for: [expectation], timeout: 0.1)
+        if result == XCTWaiter.Result.timedOut && success == false {
+            XCTFail()
+        }
+    }
+    
     func testApproveCalled() async {
         try! await web3WalletClient.approve(proposalId: "", namespaces: [:])
         XCTAssertTrue(signClient.approveCalled)
     }
     
-    func testRejectCalled() async {
+    func testRejectSessionCalled() async {
         try! await web3WalletClient.reject(proposalId: "", reason: .userRejected)
         XCTAssertTrue(signClient.rejectCalled)
+    }
+    
+    func testRejectAuthRequestCalled() async {
+        try! await web3WalletClient.reject(requestId: .left(""))
+        XCTAssertTrue(authClient.rejectCalled)
     }
     
     func testUpdateCalled() async {
@@ -171,4 +191,3 @@ final class Web3WalletTests: XCTestCase {
         XCTAssertEqual(1, pendingRequests.count)
     }
 }
-

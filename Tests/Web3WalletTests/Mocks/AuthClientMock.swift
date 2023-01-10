@@ -5,6 +5,7 @@ import Combine
 
 final class AuthClientMock: AuthClientProtocol {
     var respondCalled = false
+    var rejectCalled = false
     
     private var authRequest: AuthRequest {
         let requestParams = RequestParams(
@@ -35,6 +36,10 @@ final class AuthClientMock: AuthClientProtocol {
     
     func respond(requestId: JSONRPC.RPCID, signature: CacaoSignature, from account: WalletConnectUtils.Account) async throws {
         respondCalled = true
+    }
+    
+    func reject(requestId: JSONRPC.RPCID) async throws {
+        rejectCalled = true
     }
     
     func getPendingRequests(account: WalletConnectUtils.Account) throws -> [AuthRequest] {

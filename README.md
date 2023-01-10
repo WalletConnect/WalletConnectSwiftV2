@@ -4,7 +4,7 @@
 ![CI develop](https://github.com/WalletConnect/WalletConnectSwiftV2/actions/workflows/ci.yml/badge.svg?branch=develop)
 
 Swift implementation of WalletConnect v.2 protocol for native iOS applications.
-## Requirements 
+## Requirements
 - iOS 13
 - XCode 13
 - Swift 5
@@ -15,6 +15,7 @@ Swift implementation of WalletConnect v.2 protocol for native iOS applications.
 - [Beginner guide to WalletConnect v2.0 for iOS Developers](https://medium.com/walletconnect/beginner-guide-to-walletconnect-v2-0-for-swift-developers-4534b0975218)
 - [Protocol Documentation](https://github.com/WalletConnect/walletconnect-specs)
 - [Glossary](https://docs.walletconnect.com/2.0/introduction/glossary)
+- [Migration guide from Sign and Auth to Web3Wallet](https://github.com/WalletConnect/walletconnect-docs/blob/main/docs/swift/guides/web3wallet-migration.md)
 
 
 ## Installation
@@ -46,6 +47,10 @@ SIMULATOR_IDENTIFIER = YOUR_SIMULATOR_IDENTIFIER
 ```
 ## Example App
 open `Example/ExampleApp.xcodeproj`
+
+## Web3Wallet
+Web3Wallet SDK introduces a new interface for all wallets that wraps the Sign and Auth clients internally.
+- [Migration guide from Sign and Auth to Web3Wallet](https://github.com/WalletConnect/walletconnect-docs/blob/main/docs/swift/guides/web3wallet-migration.md)
 
 ## License
 

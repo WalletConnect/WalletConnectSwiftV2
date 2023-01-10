@@ -4,6 +4,8 @@ import Combine
 @testable import WalletConnectSign
 
 final class SignClientMock: SignClientProtocol {
+    
+    
     var approveCalled = false
     var rejectCalled = false
     var updateCalled = false
@@ -25,11 +27,18 @@ final class SignClientMock: SignClientProtocol {
         )
         .publicRepresentation()
 
-        return Result.Publisher(sessionProposal).eraseToAnyPublisher()
+        return Result.Publisher(sessionProposal)
+            .eraseToAnyPublisher()
     }
     
     var sessionRequestPublisher: AnyPublisher<WalletConnectSign.Request, Never> {
-        return Result.Publisher(request).eraseToAnyPublisher()
+        return Result.Publisher(request)
+            .eraseToAnyPublisher()
+    }
+    
+    var sessionsPublisher: AnyPublisher<[WalletConnectSign.Session], Never> {
+        return Result.Publisher([WalletConnectSign.Session(topic: "", peer: metadata, namespaces: [:], expiryDate: Date())])
+            .eraseToAnyPublisher()
     }
     
     func approve(proposalId: String, namespaces: [String : WalletConnectSign.SessionNamespace]) async throws {
