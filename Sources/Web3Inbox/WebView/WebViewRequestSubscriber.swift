@@ -6,6 +6,7 @@ final class WebViewRequestSubscriber: NSObject, WKScriptMessageHandler {
     static let name = "web3inbox"
 
     var onRequest: ((RPCRequest) async throws -> Void)?
+    var onLogin: (() async throws -> Void)?
 
     private let logger: ConsoleLogging
 
@@ -25,12 +26,25 @@ final class WebViewRequestSubscriber: NSObject, WKScriptMessageHandler {
             let request = try? JSONDecoder().decode(RPCRequest.self, from: data)
         else { return }
 
-        Task { @MainActor in
+        Task {
             do {
                 try await onRequest?(request)
             } catch {
                 logger.error("WebView Request error: \(error.localizedDescription)")
             }
+        }
+    }
+}
+
+// MARK: - WKNavigationDelegate
+
+extension WebViewRequestSubscriber: WKNavigationDelegate {
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        guard webView.url?.path == "/login" else { return }
+
+        Task {
+            try await onLogin?()
         }
     }
 }

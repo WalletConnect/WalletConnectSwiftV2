@@ -6,4 +6,5 @@ enum WebViewEvent: String {
     case register
     case getMessages
     case message
+    case accept
 }

@@ -3,7 +3,7 @@ import WebKit
 
 final class Web3InboxClientFactory {
 
-    static func create(chatClient: ChatClient) -> Web3InboxClient {
+    static func create(chatClient: ChatClient, account: Account) -> Web3InboxClient {
         let host = "https://web3inbox-dev-hidden-git-feat-add-w3i-proxy-walletconnect1.vercel.app/?chatProvider=ios"
         let logger = ConsoleLogger(suffix: "📬")
         let webviewSubscriber = WebViewRequestSubscriber(logger: logger)
@@ -14,6 +14,7 @@ final class Web3InboxClientFactory {
 
         return Web3InboxClient(
             webView: webView,
+            account: account,
             logger: ConsoleLogger(),
             clientProxy: clientProxy,
             clientSubscriber: clientSubscriber,

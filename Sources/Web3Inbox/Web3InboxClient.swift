@@ -4,6 +4,7 @@ import WebKit
 public final class Web3InboxClient {
 
     private let webView: WKWebView
+    private var account: Account
     private let logger: ConsoleLogging
 
     private let clientProxy: ChatClientProxy
@@ -14,6 +15,7 @@ public final class Web3InboxClient {
 
     init(
         webView: WKWebView,
+        account: Account,
         logger: ConsoleLogging,
         clientProxy: ChatClientProxy,
         clientSubscriber: ChatClientRequestSubscriber,
@@ -21,6 +23,7 @@ public final class Web3InboxClient {
         webviewSubscriber: WebViewRequestSubscriber
     ) {
         self.webView = webView
+        self.account = account
         self.logger = logger
         self.clientProxy = clientProxy
         self.clientSubscriber = clientSubscriber
@@ -33,6 +36,10 @@ public final class Web3InboxClient {
     public func getWebView() -> WKWebView {
         return webView
     }
+
+    public func setAccount(_ account: Account) async throws {
+        try await authorize(account: account)
+    }
 }
 
 // MARK: - Privates
@@ -40,6 +47,9 @@ public final class Web3InboxClient {
 private extension Web3InboxClient {
 
     func setupSubscriptions() {
+        webviewSubscriber.onLogin = { [unowned self] in
+            try await self.authorize(account: self.account)
+        }
         webviewSubscriber.onRequest = { [unowned self] request in
             try await self.clientProxy.request(request)
         }
@@ -49,5 +59,15 @@ private extension Web3InboxClient {
         clientSubscriber.onRequest = { [unowned self] request in
             try await self.webviewProxy.request(request)
         }
+    }
+
+    func authorize(account: Account) async throws {
+        self.account = account
+
+        let request = RPCRequest(
+            method: ChatClientRequest.setAccount.method,
+            params: ["account": account.address]
+        )
+        try await webviewProxy.request(request)
     }
 }

@@ -9,16 +9,18 @@ actor WebViewProxy {
         self.webView = webView
     }
 
+    @MainActor
     func respond(_ response: RPCResponse) async throws {
         let body = try response.json()
-        let script = formatScript(body: body)
-        await webView.evaluateJavaScript(script, completionHandler: nil)
+        let script = await formatScript(body: body)
+        webView.evaluateJavaScript(script, completionHandler: nil)
     }
 
+    @MainActor
     func request(_ request: RPCRequest) async throws {
         let body = try request.json()
-        let script = formatScript(body: body)
-        await webView.evaluateJavaScript(script, completionHandler: nil)
+        let script = await formatScript(body: body)
+        webView.evaluateJavaScript(script, completionHandler: nil)
     }
 }
 

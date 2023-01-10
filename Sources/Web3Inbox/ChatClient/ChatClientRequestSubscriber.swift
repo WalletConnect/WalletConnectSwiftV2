@@ -20,7 +20,7 @@ final class ChatClientRequestSubscriber {
     func setupSubscriptions() {
         chatClient.invitePublisher
             .sink { [unowned self] invite in
-                Task { @MainActor in
+                Task {
                     do {
                         let request = RPCRequest(
                             method: ChatClientRequest.chatInvite.method,
