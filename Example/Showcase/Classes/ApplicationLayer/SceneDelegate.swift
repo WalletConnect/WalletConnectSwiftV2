@@ -30,8 +30,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let context = URLContexts.first else { return }
 
         let uri = context.url.absoluteString.replacingOccurrences(of: "showcase://wc?uri=", with: "")
+        guard let walletConnectUri = WalletConnectURI(string: uri) else {
+            return
+        }
+        
         Task {
-            try await Pair.instance.pair(uri: WalletConnectURI(string: uri)!)
+            try await Pair.instance.pair(uri: walletConnectUri)
         }
     }
 }

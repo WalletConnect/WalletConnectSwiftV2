@@ -6,10 +6,6 @@ final class MainRouter {
 
     private let app: Application
 
-    var walletViewController: UIViewController {
-        return WalletModule.create(app: app).wrapToNavigationController()
-    }
-
     var chatViewController: UIViewController {
         return WelcomeModule.create(app: app)
     }

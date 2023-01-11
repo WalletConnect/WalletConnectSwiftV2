@@ -4,6 +4,8 @@
 <dict>
 	<key>PROJECT_ID</key>
 	<string>$(PROJECT_ID)</string>
+	<key>RELAY_HOST</key>
+	<string>$(RELAY_HOST)</string>
 	<key>CFBundleIconName</key>
 	<string>AppIcon</string>
 	<key>CFBundleURLTypes</key>

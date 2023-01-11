@@ -6,7 +6,7 @@ import Combine
 /// Cannot be instantiated outside of the SDK
 ///
 /// Access via `Auth.instance`
-public class AuthClient {
+public class AuthClient: AuthClientProtocol {
 
     // MARK: - Public Properties
 
