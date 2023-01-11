@@ -84,6 +84,12 @@ Pod::Spec.new do |spec|
     ss.dependency 'WalletConnectSwiftV2/WalletConnectPairing'
   end
 
+  spec.subspec 'Web3Wallet' do |ss|
+    ss.source_files = 'Sources/Web3Wallet/**/*'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnect'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectAuth'
+  end
+
   spec.subspec 'WalletConnectChat' do |ss|
     ss.source_files = 'Sources/Chat/**/*'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectNetworking'
@@ -97,11 +103,6 @@ Pod::Spec.new do |spec|
   spec.subspec 'WalletConnectPairing' do |ss|
     ss.source_files = 'Sources/WalletConnectPairing/**/*'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectNetworking'
-  end
-
-  spec.subspec 'WalletConnectPush' do |ss|
-    ss.source_files = 'Sources/WalletConnectPush/**/*'
-    ss.dependency 'WalletConnectSwiftV2/WalletConnectPairing'
   end
 
   spec.subspec 'WalletConnectRouter' do |ss|
