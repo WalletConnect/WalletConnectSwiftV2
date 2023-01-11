@@ -70,8 +70,13 @@ final class PushTests: XCTestCase {
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
         walletPairingClient = pairingClient
         let echoClient = EchoClientFactory.create(projectId: "", clientId: "")
-        let groupKeychainStorage = KeychainStorageMock()
-        walletPushClient = WalletPushClientFactory.create(logger: pushLogger, keyValueStorage: keyValueStorage, keychainStorage: keychain, groupKeychainStorage: groupKeychainStorage, networkInteractor: networkingInteractor, pairingRegisterer: pairingClient, echoClient: echoClient)
+        walletPushClient = WalletPushClientFactory.create(logger: pushLogger,
+                                                          keyValueStorage: keyValueStorage,
+                                                          keychainStorage: keychain,
+                                                          groupKeychainStorage: KeychainStorageMock(),
+                                                          networkInteractor: networkingInteractor,
+                                                          pairingRegisterer: pairingClient,
+                                                          echoClient: echoClient)
     }
 
     override func setUp() {
