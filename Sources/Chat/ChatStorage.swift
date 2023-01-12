@@ -2,7 +2,13 @@ import Foundation
 
 struct ChatStorage {
 
-    let history: RPCHistory
+    private let history: RPCHistory
+    private let threadStore: Database<Thread>
+
+    init(history: RPCHistory, threadStore: Database<Thread>) {
+        self.history = history
+        self.threadStore = threadStore
+    }
 
     // MARK: - Invites
 
@@ -31,12 +37,18 @@ struct ChatStorage {
     // MARK: - Threads
 
     func getThreads() -> [Thread] {
-        return history.getAll(of: Thread.self)
+        return threadStore.getAll()
     }
 
     func getThread(topic: String) -> Thread? {
         return getThreads().first(where: { $0.topic == topic })
     }
+
+    func add(thread: Thread) {
+        threadStore.add(thread)
+    }
+
+    // MARK: - Messages
 
     func getMessages(topic: String) -> [Message] {
         return history.getAll(of: Message.self).filter { $0.topic == topic }

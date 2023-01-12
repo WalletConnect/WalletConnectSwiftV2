@@ -63,13 +63,16 @@ class InvitationHandlingService {
         // TODO - derive account
         let selfAccount = try! topicToRegistryRecordStore.get(key: inviteTopic)!.account
 
-        chatStorage.delete(invite: invite)
-
-        onNewThread?(Thread(
+        let thread = Thread(
             topic: threadTopic,
             selfAccount: selfAccount,
             peerAccount: invite.account
-        ))
+        )
+
+        chatStorage.add(thread: thread)
+        chatStorage.delete(invite: invite)
+
+        onNewThread?(thread)
     }
 
     func reject(inviteId: Int64) async throws {

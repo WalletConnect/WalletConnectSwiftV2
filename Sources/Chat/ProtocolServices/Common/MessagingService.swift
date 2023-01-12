@@ -8,9 +8,9 @@ class MessagingService {
 
     var onMessage: ((Message) -> Void)?
 
-    let networkingInteractor: NetworkInteracting
-    let chatStorage: ChatStorage
-    let logger: ConsoleLogging
+    private let networkingInteractor: NetworkInteracting
+    private let chatStorage: ChatStorage
+    private let logger: ConsoleLogging
 
     private var publishers = [AnyCancellable]()
 

@@ -79,11 +79,15 @@ class InviteService {
 
         try await networkingInteractor.subscribe(topic: threadTopic)
 
-        onNewThread?(Thread(
+        let thread = Thread(
             topic: threadTopic,
             selfAccount: account,
-            peerAccount: peerAccount)
+            peerAccount: peerAccount
         )
+
+        chatStorage.add(thread: thread)
+
+        onNewThread?(thread)
         // TODO - remove symKeyI
     }
 }
