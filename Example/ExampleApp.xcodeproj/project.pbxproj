@@ -203,11 +203,11 @@
 		C55D349929630D440004314A /* Web3Wallet in Frameworks */ = {isa = PBXBuildFile; productRef = C55D349829630D440004314A /* Web3Wallet */; };
 		C55D349B2965BC2F0004314A /* TagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D349A2965BC2F0004314A /* TagsView.swift */; };
 		C55D349D2965F8D40004314A /* Proposal.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D349C2965F8D30004314A /* Proposal.swift */; };
-		C55D34AE2965FB750004314A /* SessionRequestModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D34A92965FB750004314A /* SessionRequestModule.swift */; };
-		C55D34AF2965FB750004314A /* SessionRequestPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D34AA2965FB750004314A /* SessionRequestPresenter.swift */; };
-		C55D34B02965FB750004314A /* SessionRequestRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D34AB2965FB750004314A /* SessionRequestRouter.swift */; };
-		C55D34B12965FB750004314A /* SessionRequestInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D34AC2965FB750004314A /* SessionRequestInteractor.swift */; };
-		C55D34B22965FB750004314A /* SessionRequestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D34AD2965FB750004314A /* SessionRequestView.swift */; };
+		C55D34AE2965FB750004314A /* SessionProposalModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D34A92965FB750004314A /* SessionProposalModule.swift */; };
+		C55D34AF2965FB750004314A /* SessionProposalPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D34AA2965FB750004314A /* SessionProposalPresenter.swift */; };
+		C55D34B02965FB750004314A /* SessionProposalRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D34AB2965FB750004314A /* SessionProposalRouter.swift */; };
+		C55D34B12965FB750004314A /* SessionProposalInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D34AC2965FB750004314A /* SessionProposalInteractor.swift */; };
+		C55D34B22965FB750004314A /* SessionProposalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D34AD2965FB750004314A /* SessionProposalView.swift */; };
 		C56EE222293F55EE004840D1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C56EE221293F55EE004840D1 /* Assets.xcassets */; };
 		C56EE240293F566D004840D1 /* ScanQRView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE23F293F566C004840D1 /* ScanQRView.swift */; };
 		C56EE241293F566D004840D1 /* WalletModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE22D293F5669004840D1 /* WalletModule.swift */; };
@@ -223,7 +223,6 @@
 		C56EE24F293F566D004840D1 /* WalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE22B293F5668004840D1 /* WalletView.swift */; };
 		C56EE250293F566D004840D1 /* ScanTargetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE23D293F566C004840D1 /* ScanTargetView.swift */; };
 		C56EE255293F569A004840D1 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = C56EE254293F569A004840D1 /* Starscream */; };
-		C56EE26F293F56D7004840D1 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE266293F56D6004840D1 /* Types.swift */; };
 		C56EE270293F56D7004840D1 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE26A293F56D6004840D1 /* String.swift */; };
 		C56EE271293F56D7004840D1 /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE26E293F56D7004840D1 /* View.swift */; };
 		C56EE273293F56D7004840D1 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE26B293F56D6004840D1 /* UIColor.swift */; };
@@ -242,6 +241,17 @@
 		C56EE28E293F5757004840D1 /* ApplicationConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE284293F5757004840D1 /* ApplicationConfigurator.swift */; };
 		C56EE28F293F5757004840D1 /* MigrationConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE283293F5757004840D1 /* MigrationConfigurator.swift */; };
 		C56EE2A3293F6BAF004840D1 /* UIPasteboardWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE2A2293F6BAF004840D1 /* UIPasteboardWrapper.swift */; };
+		C5B2F6F629705293000DBA0E /* SessionRequestModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B2F6F12970511B000DBA0E /* SessionRequestModule.swift */; };
+		C5B2F6F729705293000DBA0E /* SessionRequestRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B2F6F32970511B000DBA0E /* SessionRequestRouter.swift */; };
+		C5B2F6F829705293000DBA0E /* SessionRequestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B2F6F52970511B000DBA0E /* SessionRequestView.swift */; };
+		C5B2F6F929705293000DBA0E /* SessionRequestPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B2F6F22970511B000DBA0E /* SessionRequestPresenter.swift */; };
+		C5B2F6FA29705293000DBA0E /* SessionRequestInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B2F6F42970511B000DBA0E /* SessionRequestInteractor.swift */; };
+		C5B2F6FB297055B0000DBA0E /* ETHSigner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57E71A5291CF76400325797 /* ETHSigner.swift */; };
+		C5B2F6FC297055B0000DBA0E /* SOLSigner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57E71A7291CF8A500325797 /* SOLSigner.swift */; };
+		C5B2F6FD297055B0000DBA0E /* Signer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C1279582D200D0A289 /* Signer.swift */; };
+		C5B2F7052970573D000DBA0E /* SolanaSwift in Frameworks */ = {isa = PBXBuildFile; productRef = C5B2F7042970573D000DBA0E /* SolanaSwift */; };
+		C5B2F71029705827000DBA0E /* EthereumTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C32795832A00D0A289 /* EthereumTransaction.swift */; };
+		C5B2F7112970583B000DBA0E /* SessionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761C64A526FCB0AA004239D1 /* SessionInfo.swift */; };
 		C5D4603A29687A5700302C7E /* DefaultSocketFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AEF2877F73000094373 /* DefaultSocketFactory.swift */; };
 		C5DD5BE1294E09E3008FD3A4 /* Web3Wallet in Frameworks */ = {isa = PBXBuildFile; productRef = C5DD5BE0294E09E3008FD3A4 /* Web3Wallet */; };
 		C5F32A2C2954814200A6476E /* ConnectionDetailsModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F32A2B2954814200A6476E /* ConnectionDetailsModule.swift */; };
@@ -470,11 +480,11 @@
 		C55D3492295DFA750004314A /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		C55D349A2965BC2F0004314A /* TagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsView.swift; sourceTree = "<group>"; };
 		C55D349C2965F8D30004314A /* Proposal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Proposal.swift; sourceTree = "<group>"; };
-		C55D34A92965FB750004314A /* SessionRequestModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRequestModule.swift; sourceTree = "<group>"; };
-		C55D34AA2965FB750004314A /* SessionRequestPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRequestPresenter.swift; sourceTree = "<group>"; };
-		C55D34AB2965FB750004314A /* SessionRequestRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRequestRouter.swift; sourceTree = "<group>"; };
-		C55D34AC2965FB750004314A /* SessionRequestInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRequestInteractor.swift; sourceTree = "<group>"; };
-		C55D34AD2965FB750004314A /* SessionRequestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRequestView.swift; sourceTree = "<group>"; };
+		C55D34A92965FB750004314A /* SessionProposalModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionProposalModule.swift; sourceTree = "<group>"; };
+		C55D34AA2965FB750004314A /* SessionProposalPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionProposalPresenter.swift; sourceTree = "<group>"; };
+		C55D34AB2965FB750004314A /* SessionProposalRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionProposalRouter.swift; sourceTree = "<group>"; };
+		C55D34AC2965FB750004314A /* SessionProposalInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionProposalInteractor.swift; sourceTree = "<group>"; };
+		C55D34AD2965FB750004314A /* SessionProposalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionProposalView.swift; sourceTree = "<group>"; };
 		C56EE21B293F55ED004840D1 /* WalletApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WalletApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C56EE221293F55EE004840D1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C56EE22B293F5668004840D1 /* WalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletView.swift; sourceTree = "<group>"; };
@@ -492,7 +502,6 @@
 		C56EE23F293F566C004840D1 /* ScanQRView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanQRView.swift; sourceTree = "<group>"; };
 		C56EE25D293F56D6004840D1 /* InputConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputConfig.swift; sourceTree = "<group>"; };
 		C56EE264293F56D6004840D1 /* SceneViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneViewController.swift; sourceTree = "<group>"; };
-		C56EE266293F56D6004840D1 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		C56EE268293F56D6004840D1 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		C56EE26A293F56D6004840D1 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		C56EE26B293F56D6004840D1 /* UIColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
@@ -508,6 +517,11 @@
 		C56EE287293F5757004840D1 /* AppearanceConfigurator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceConfigurator.swift; sourceTree = "<group>"; };
 		C56EE29F293F5C4F004840D1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C56EE2A2293F6BAF004840D1 /* UIPasteboardWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIPasteboardWrapper.swift; sourceTree = "<group>"; };
+		C5B2F6F12970511B000DBA0E /* SessionRequestModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRequestModule.swift; sourceTree = "<group>"; };
+		C5B2F6F22970511B000DBA0E /* SessionRequestPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRequestPresenter.swift; sourceTree = "<group>"; };
+		C5B2F6F32970511B000DBA0E /* SessionRequestRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRequestRouter.swift; sourceTree = "<group>"; };
+		C5B2F6F42970511B000DBA0E /* SessionRequestInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRequestInteractor.swift; sourceTree = "<group>"; };
+		C5B2F6F52970511B000DBA0E /* SessionRequestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRequestView.swift; sourceTree = "<group>"; };
 		C5F32A2B2954814200A6476E /* ConnectionDetailsModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionDetailsModule.swift; sourceTree = "<group>"; };
 		C5F32A2D2954814A00A6476E /* ConnectionDetailsRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionDetailsRouter.swift; sourceTree = "<group>"; };
 		C5F32A2F2954816100A6476E /* ConnectionDetailsInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionDetailsInteractor.swift; sourceTree = "<group>"; };
@@ -590,6 +604,7 @@
 			files = (
 				C56EE27D293F56F8004840D1 /* WalletConnectChat in Frameworks */,
 				C5133A78294125CC00A8314C /* Web3 in Frameworks */,
+				C5B2F7052970573D000DBA0E /* SolanaSwift in Frameworks */,
 				C55D349929630D440004314A /* Web3Wallet in Frameworks */,
 				C56EE255293F569A004840D1 /* Starscream in Frameworks */,
 				C56EE27B293F56F8004840D1 /* WalletConnectAuth in Frameworks */,
@@ -1317,25 +1332,25 @@
 			path = Welcome;
 			sourceTree = "<group>";
 		};
-		C55D349E2965FAC30004314A /* SessionRequest */ = {
+		C55D349E2965FAC30004314A /* SessionProposal */ = {
 			isa = PBXGroup;
 			children = (
-				C55D34B32965FF750004314A /* Modela */,
-				C55D34A92965FB750004314A /* SessionRequestModule.swift */,
-				C55D34AA2965FB750004314A /* SessionRequestPresenter.swift */,
-				C55D34AB2965FB750004314A /* SessionRequestRouter.swift */,
-				C55D34AC2965FB750004314A /* SessionRequestInteractor.swift */,
-				C55D34AD2965FB750004314A /* SessionRequestView.swift */,
+				C55D34B32965FF750004314A /* Models */,
+				C55D34A92965FB750004314A /* SessionProposalModule.swift */,
+				C55D34AA2965FB750004314A /* SessionProposalPresenter.swift */,
+				C55D34AB2965FB750004314A /* SessionProposalRouter.swift */,
+				C55D34AC2965FB750004314A /* SessionProposalInteractor.swift */,
+				C55D34AD2965FB750004314A /* SessionProposalView.swift */,
 			);
-			path = SessionRequest;
+			path = SessionProposal;
 			sourceTree = "<group>";
 		};
-		C55D34B32965FF750004314A /* Modela */ = {
+		C55D34B32965FF750004314A /* Models */ = {
 			isa = PBXGroup;
 			children = (
 				C55D349C2965F8D30004314A /* Proposal.swift */,
 			);
-			path = Modela;
+			path = Models;
 			sourceTree = "<group>";
 		};
 		C56EE21C293F55ED004840D1 /* WalletApp */ = {
@@ -1352,9 +1367,10 @@
 		C56EE229293F5668004840D1 /* Wallet */ = {
 			isa = PBXGroup;
 			children = (
-				C55D349E2965FAC30004314A /* SessionRequest */,
 				C55D3477295DD4AA0004314A /* Welcome */,
 				C55D3474295DCB850004314A /* AuthRequest */,
+				C55D349E2965FAC30004314A /* SessionProposal */,
+				C5B2F6F029705111000DBA0E /* SessionRequest */,
 				C55D3471295DC5F60004314A /* PasteUri */,
 				C5F32A2A2954812900A6476E /* ConnectionDetails */,
 				C56EE236293F566A004840D1 /* Scan */,
@@ -1402,7 +1418,6 @@
 			isa = PBXGroup;
 			children = (
 				C56EE25D293F56D6004840D1 /* InputConfig.swift */,
-				C56EE265293F56D6004840D1 /* Types */,
 				C56EE267293F56D6004840D1 /* Style */,
 				C56EE2A1293F6B9E004840D1 /* Helpers */,
 				C56EE262293F56D6004840D1 /* Extensions */,
@@ -1426,14 +1441,6 @@
 				C56EE264293F56D6004840D1 /* SceneViewController.swift */,
 			);
 			path = VIPER;
-			sourceTree = "<group>";
-		};
-		C56EE265293F56D6004840D1 /* Types */ = {
-			isa = PBXGroup;
-			children = (
-				C56EE266293F56D6004840D1 /* Types.swift */,
-			);
-			path = Types;
 			sourceTree = "<group>";
 		};
 		C56EE267293F56D6004840D1 /* Style */ = {
@@ -1510,6 +1517,18 @@
 				C55D349A2965BC2F0004314A /* TagsView.swift */,
 			);
 			path = Helpers;
+			sourceTree = "<group>";
+		};
+		C5B2F6F029705111000DBA0E /* SessionRequest */ = {
+			isa = PBXGroup;
+			children = (
+				C5B2F6F12970511B000DBA0E /* SessionRequestModule.swift */,
+				C5B2F6F22970511B000DBA0E /* SessionRequestPresenter.swift */,
+				C5B2F6F32970511B000DBA0E /* SessionRequestRouter.swift */,
+				C5B2F6F42970511B000DBA0E /* SessionRequestInteractor.swift */,
+				C5B2F6F52970511B000DBA0E /* SessionRequestView.swift */,
+			);
+			path = SessionRequest;
 			sourceTree = "<group>";
 		};
 		C5F32A2A2954812900A6476E /* ConnectionDetails */ = {
@@ -1687,6 +1706,7 @@
 				C56EE27C293F56F8004840D1 /* WalletConnectChat */,
 				C5133A77294125CC00A8314C /* Web3 */,
 				C55D349829630D440004314A /* Web3Wallet */,
+				C5B2F7042970573D000DBA0E /* SolanaSwift */,
 			);
 			productName = ChatWallet;
 			productReference = C56EE21B293F55ED004840D1 /* WalletApp.app */;
@@ -2010,11 +2030,11 @@
 				C55D3480295DD7140004314A /* AuthRequestPresenter.swift in Sources */,
 				C5F32A2E2954814A00A6476E /* ConnectionDetailsRouter.swift in Sources */,
 				C55D3482295DD7140004314A /* AuthRequestInteractor.swift in Sources */,
-				C55D34B12965FB750004314A /* SessionRequestInteractor.swift in Sources */,
+				C55D34B12965FB750004314A /* SessionProposalInteractor.swift in Sources */,
 				C56EE247293F566D004840D1 /* ScanModule.swift in Sources */,
 				C56EE28D293F5757004840D1 /* AppearanceConfigurator.swift in Sources */,
+				C5B2F7112970583B000DBA0E /* SessionInfo.swift in Sources */,
 				C56EE241293F566D004840D1 /* WalletModule.swift in Sources */,
-				C56EE26F293F56D7004840D1 /* Types.swift in Sources */,
 				C56EE245293F566D004840D1 /* WalletPresenter.swift in Sources */,
 				C56EE240293F566D004840D1 /* ScanQRView.swift in Sources */,
 				C56EE250293F566D004840D1 /* ScanTargetView.swift in Sources */,
@@ -2022,7 +2042,9 @@
 				C55D348B295DD8CA0004314A /* PasteUriRouter.swift in Sources */,
 				C55D348C295DD8CA0004314A /* PasteUriInteractor.swift in Sources */,
 				C55D3497295DFA750004314A /* WelcomeView.swift in Sources */,
+				C5B2F71029705827000DBA0E /* EthereumTransaction.swift in Sources */,
 				C56EE271293F56D7004840D1 /* View.swift in Sources */,
+				C5B2F6FD297055B0000DBA0E /* Signer.swift in Sources */,
 				C56EE24D293F566D004840D1 /* WalletRouter.swift in Sources */,
 				C5F32A342954817600A6476E /* ConnectionDetailsView.swift in Sources */,
 				C55D348A295DD8CA0004314A /* PasteUriPresenter.swift in Sources */,
@@ -2038,11 +2060,13 @@
 				C55D3483295DD7140004314A /* AuthRequestView.swift in Sources */,
 				C56EE243293F566D004840D1 /* ScanView.swift in Sources */,
 				C56EE288293F5757004840D1 /* ThirdPartyConfigurator.swift in Sources */,
-				C55D34AE2965FB750004314A /* SessionRequestModule.swift in Sources */,
-				C55D34B02965FB750004314A /* SessionRequestRouter.swift in Sources */,
+				C5B2F6FA29705293000DBA0E /* SessionRequestInteractor.swift in Sources */,
+				C55D34AE2965FB750004314A /* SessionProposalModule.swift in Sources */,
+				C55D34B02965FB750004314A /* SessionProposalRouter.swift in Sources */,
 				C55D3495295DFA750004314A /* WelcomeRouter.swift in Sources */,
+				C5B2F6F729705293000DBA0E /* SessionRequestRouter.swift in Sources */,
 				C56EE24F293F566D004840D1 /* WalletView.swift in Sources */,
-				C55D34B22965FB750004314A /* SessionRequestView.swift in Sources */,
+				C55D34B22965FB750004314A /* SessionProposalView.swift in Sources */,
 				C56EE248293F566D004840D1 /* ScanQR.swift in Sources */,
 				C55D349B2965BC2F0004314A /* TagsView.swift in Sources */,
 				C56EE289293F5757004840D1 /* Application.swift in Sources */,
@@ -2051,18 +2075,23 @@
 				C56EE246293F566D004840D1 /* ScanRouter.swift in Sources */,
 				C55D349D2965F8D40004314A /* Proposal.swift in Sources */,
 				C55D3481295DD7140004314A /* AuthRequestRouter.swift in Sources */,
+				C5B2F6F829705293000DBA0E /* SessionRequestView.swift in Sources */,
 				C56EE28C293F5757004840D1 /* Configurator.swift in Sources */,
 				C55D3489295DD8CA0004314A /* PasteUriModule.swift in Sources */,
 				C55D3494295DFA750004314A /* WelcomePresenter.swift in Sources */,
+				C5B2F6F929705293000DBA0E /* SessionRequestPresenter.swift in Sources */,
+				C5B2F6FB297055B0000DBA0E /* ETHSigner.swift in Sources */,
 				C56EE274293F56D7004840D1 /* SceneViewController.swift in Sources */,
 				C55D3496295DFA750004314A /* WelcomeInteractor.swift in Sources */,
+				C5B2F6FC297055B0000DBA0E /* SOLSigner.swift in Sources */,
 				C55D348D295DD8CA0004314A /* PasteUriView.swift in Sources */,
 				C5F32A2C2954814200A6476E /* ConnectionDetailsModule.swift in Sources */,
 				C56EE249293F566D004840D1 /* ScanInteractor.swift in Sources */,
 				C56EE28A293F5757004840D1 /* AppDelegate.swift in Sources */,
 				C56EE2A3293F6BAF004840D1 /* UIPasteboardWrapper.swift in Sources */,
+				C5B2F6F629705293000DBA0E /* SessionRequestModule.swift in Sources */,
 				C56EE24E293F566D004840D1 /* WalletInteractor.swift in Sources */,
-				C55D34AF2965FB750004314A /* SessionRequestPresenter.swift in Sources */,
+				C55D34AF2965FB750004314A /* SessionProposalPresenter.swift in Sources */,
 				C5F32A302954816100A6476E /* ConnectionDetailsInteractor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2842,6 +2871,11 @@
 		C56EE27C293F56F8004840D1 /* WalletConnectChat */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectChat;
+		};
+		C5B2F7042970573D000DBA0E /* SolanaSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A5434021291E6A270068F706 /* XCRemoteSwiftPackageReference "solana-swift" */;
+			productName = SolanaSwift;
 		};
 		C5DD5BE0294E09E3008FD3A4 /* Web3Wallet */ = {
 			isa = XCSwiftPackageProductDependency;

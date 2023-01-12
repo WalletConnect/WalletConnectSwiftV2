@@ -11,6 +11,10 @@ final class WalletInteractor {
         return Web3Wallet.instance.sessionProposalPublisher
     }
     
+    var sessionRequestPublisher: AnyPublisher<Request, Never> {
+        return Web3Wallet.instance.sessionRequestPublisher
+    }
+    
     var sessionsPublisher: AnyPublisher<[Session], Never> {
         return Web3Wallet.instance.sessionsPublisher
     }
