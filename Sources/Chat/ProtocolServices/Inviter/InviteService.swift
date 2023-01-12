@@ -60,7 +60,7 @@ class InviteService {
 
     private func setUpResponseHandling() {
         networkingInteractor.responseSubscription(on: ChatInviteProtocolMethod())
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<Invite, InviteResponse>) in
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<InvitePayload, InviteResponse>) in
                 logger.debug("Invite has been accepted")
 
                 Task(priority: .background) {
