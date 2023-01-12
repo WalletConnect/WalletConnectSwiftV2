@@ -20,6 +20,7 @@ class NotificationService: UNNotificationServiceExtension {
                 bestAttemptContent.title = pushMessage.title
                 bestAttemptContent.body = pushMessage.body
                 contentHandler(bestAttemptContent)
+                return
             }
             catch {
                 print(error)
