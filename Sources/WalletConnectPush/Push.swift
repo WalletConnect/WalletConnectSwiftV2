@@ -4,6 +4,9 @@ import WalletConnectPairing
 import WalletConnectEcho
 
 public class Push {
+    enum Errors: Error {
+        case failedToGetClientId
+    }
 
     public static var dapp: DappPushClient = {
         return DappPushClientFactory.create(
@@ -28,11 +31,14 @@ public class Push {
 
     private init() { }
 
-    /// Wallet's configure method
-    /// - Parameter clientId: https://github.com/WalletConnect/walletconnect-docs/blob/main/docs/specs/clients/core/relay/relay-client-auth.md#overview
-    ///
-    /// get client id with Networking.instance.getClientId()
-    static public func configure(clientId: String) {
+    /// Wallet's configuration method
+    static public func configure() throws {
+        var clientId: String!
+        do {
+            clientId = try Networking.interactor.getClientId()
+        } catch {
+            throw Errors.failedToGetClientId
+        }
         Push.config = Push.Config(clientId: clientId)
     }
 
