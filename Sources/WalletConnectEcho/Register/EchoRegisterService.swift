@@ -6,6 +6,10 @@ actor EchoRegisterService {
     private let projectId: String
     private let clientId: String
     private let logger: ConsoleLogging
+    // DID method specific identifier
+    private var clientIdMutlibas: String {
+        return clientId.replacingOccurrences(of: "did:key:", with: "")
+    }
 
     enum Errors: Error {
         case registrationFailed
@@ -27,7 +31,7 @@ actor EchoRegisterService {
         logger.debug("APNS device token: \(token)")
         let response = try await httpClient.request(
             EchoResponse.self,
-            at: EchoAPI.register(clientId: clientId, token: token, projectId: projectId)
+            at: EchoAPI.register(clientId: clientIdMutlibas, token: token, projectId: projectId)
         )
         guard response.status == .ok else {
             throw Errors.registrationFailed
@@ -38,7 +42,7 @@ actor EchoRegisterService {
     public func register(deviceToken: String) async throws {
         let response = try await httpClient.request(
             EchoResponse.self,
-            at: EchoAPI.register(clientId: clientId, token: deviceToken, projectId: projectId)
+            at: EchoAPI.register(clientId: clientIdMutlibas, token: deviceToken, projectId: projectId)
         )
         guard response.status == .ok else {
             throw Errors.registrationFailed

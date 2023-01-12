@@ -18,6 +18,9 @@ public class Echo {
     private init() { }
 
     /// Echo instance config method
+    /// - Parameter clientId: https://github.com/WalletConnect/walletconnect-docs/blob/main/docs/specs/clients/core/relay/relay-client-auth.md#overview
+    /// 
+    /// get client id with Networking.instance.getClientId()
     static public func configure(clientId: String) {
         Echo.config = Echo.Config(clientId: clientId)
     }

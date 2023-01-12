@@ -28,7 +28,10 @@ public class Push {
 
     private init() { }
 
-    // Wallet's configure method
+    /// Wallet's configure method
+    /// - Parameter clientId: https://github.com/WalletConnect/walletconnect-docs/blob/main/docs/specs/clients/core/relay/relay-client-auth.md#overview
+    ///
+    /// get client id with Networking.instance.getClientId()
     static public func configure(clientId: String) {
         Push.config = Push.Config(clientId: clientId)
     }
