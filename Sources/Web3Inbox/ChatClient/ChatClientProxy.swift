@@ -41,7 +41,7 @@ final class ChatClientProxy {
 
         case .accept:
             let params = try parse(AcceptRequest.self, params: request.params)
-            try await client.accept(inviteId: params.id.description)
+            try await client.accept(inviteId: params.id)
         }
     }
 }
@@ -74,7 +74,7 @@ private extension ChatClientProxy {
     }
 
     struct AcceptRequest: Codable {
-        let id: Int
+        let id: Int64
     }
 
     func parse<Request: Codable>(_ type: Request.Type, params: AnyCodable?) throws -> Request {
