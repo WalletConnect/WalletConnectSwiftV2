@@ -26,7 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let clientId  = try! Networking.interactor.getClientId()
         let sanitizedClientId = clientId.replacingOccurrences(of: "did:key:", with: "")
 
-        Echo.configure(projectId: InputConfig.projectId, clientId: sanitizedClientId)
+        Push.configure(clientId: sanitizedClientId)
         Push.wallet.requestPublisher.sink { id, _ in
             Task(priority: .high) { try! await Push.wallet.approve(id: id) }
         }.store(in: &publishers)
