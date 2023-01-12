@@ -8,7 +8,7 @@ class InvitationHandlingService {
     var onInvite: ((Invite) -> Void)?
     var onNewThread: ((Thread) -> Void)?
     private let networkingInteractor: NetworkInteracting
-    private let invitePayloadStore: CodableStore<RequestSubscriptionPayload<Invite>>
+    private let chatStorage: ChatStorage
     private let topicToRegistryRecordStore: CodableStore<RegistryRecord>
     private let registry: Registry
     private let logger: ConsoleLogging
@@ -21,32 +21,42 @@ class InvitationHandlingService {
          kms: KeyManagementService,
          logger: ConsoleLogging,
          topicToRegistryRecordStore: CodableStore<RegistryRecord>,
-         invitePayloadStore: CodableStore<RequestSubscriptionPayload<Invite>>,
+         chatStorage: ChatStorage,
          threadsStore: Database<Thread>) {
         self.registry = registry
         self.kms = kms
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.topicToRegistryRecordStore = topicToRegistryRecordStore
-        self.invitePayloadStore = invitePayloadStore
+        self.chatStorage = chatStorage
         self.threadsStore = threadsStore
         setUpRequestHandling()
     }
 
-    func accept(inviteId: String) async throws {
-        let protocolMethod = ChatInviteProtocolMethod()
-
-        guard let payload = try invitePayloadStore.get(key: inviteId) else { throw Error.inviteForIdNotFound }
+    func accept(inviteId: Int64) async throws {
+        guard
+            let invite = chatStorage.getInvite(id: inviteId),
+            let inviteTopic = chatStorage.getInviteTopic(id: inviteId)
+        else { throw Error.inviteForIdNotFound }
 
         let selfThreadPubKey = try kms.createX25519KeyPair()
 
         let inviteResponse = InviteResponse(publicKey: selfThreadPubKey.hexRepresentation)
 
-        let response = RPCResponse(id: payload.id, result: inviteResponse)
-        let responseTopic = try getInviteResponseTopic(requestTopic: payload.topic, invite: payload.request)
-        try await networkingInteractor.respond(topic: responseTopic, response: response, protocolMethod: protocolMethod)
+        let responseTopic = try getInviteResponseTopic(
+            requestTopic: inviteTopic,
+            invite: invite
+        )
+        try await networkingInteractor.respond(
+            topic: responseTopic,
+            response: RPCResponse(id: inviteId, result: inviteResponse),
+            protocolMethod: ChatInviteProtocolMethod()
+        )
 
-        let threadAgreementKeys = try kms.performKeyAgreement(selfPublicKey: selfThreadPubKey, peerPublicKey: payload.request.publicKey)
+        let threadAgreementKeys = try kms.performKeyAgreement(
+            selfPublicKey: selfThreadPubKey,
+            peerPublicKey: invite.publicKey
+        )
         let threadTopic = threadAgreementKeys.derivedTopic()
         try kms.setSymmetricKey(threadAgreementKeys.sharedKey, for: threadTopic)
         try await networkingInteractor.subscribe(topic: threadTopic)
@@ -54,31 +64,45 @@ class InvitationHandlingService {
         logger.debug("Accepting an invite on topic: \(threadTopic)")
 
         // TODO - derive account
-        let selfAccount = try! topicToRegistryRecordStore.get(key: payload.topic)!.account
-        let thread = Thread(topic: threadTopic, selfAccount: selfAccount, peerAccount: payload.request.account)
+        let selfAccount = try! topicToRegistryRecordStore.get(key: inviteTopic)!.account
+        let thread = Thread(
+            topic: threadTopic,
+            selfAccount: selfAccount,
+            peerAccount: invite.account
+        )
         await threadsStore.add(thread)
 
-        invitePayloadStore.delete(forKey: inviteId)
+        chatStorage.delete(invite: invite)
 
         onNewThread?(thread)
     }
 
-    func reject(inviteId: String) async throws {
-        guard let payload = try invitePayloadStore.get(key: inviteId) else { throw Error.inviteForIdNotFound }
+    func reject(inviteId: Int64) async throws {
+        guard
+            let invite = chatStorage.getInvite(id: inviteId),
+            let inviteTopic = chatStorage.getInviteTopic(id: inviteId)
+        else { throw Error.inviteForIdNotFound }
 
-        let responseTopic = try getInviteResponseTopic(requestTopic: payload.topic, invite: payload.request)
+        let responseTopic = try getInviteResponseTopic(requestTopic: inviteTopic, invite: invite)
 
-        try await networkingInteractor.respondError(topic: responseTopic, requestId: payload.id, protocolMethod: ChatInviteProtocolMethod(), reason: ChatError.userRejected)
+        try await networkingInteractor.respondError(
+            topic: responseTopic,
+            requestId: RPCID(inviteId),
+            protocolMethod: ChatInviteProtocolMethod(),
+            reason: ChatError.userRejected
+        )
 
-        invitePayloadStore.delete(forKey: inviteId)
+        chatStorage.delete(invite: invite)
     }
 
     private func setUpRequestHandling() {
         networkingInteractor.requestSubscription(on: ChatInviteProtocolMethod())
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<Invite>) in
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<InvitePayload>) in
                 logger.debug("did receive an invite")
-                invitePayloadStore.set(payload, forKey: payload.request.publicKey)
-                onInvite?(payload.request)
+                onInvite?(Invite(
+                    id: payload.id.integer,
+                    payload: payload.request
+                ))
             }.store(in: &publishers)
     }
 

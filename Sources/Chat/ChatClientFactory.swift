@@ -26,11 +26,11 @@ public struct ChatClientFactory {
         let serialiser = Serializer(kms: kms)
         let rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
         let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serialiser, logger: logger, rpcHistory: rpcHistory)
-        let invitePayloadStore = CodableStore<RequestSubscriptionPayload<Invite>>(defaults: keyValueStorage, identifier: ChatStorageIdentifiers.invite.rawValue)
+        let chatStorage = ChatStorage(history: rpcHistory)
         let registryService = RegistryService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToRegistryRecordStore: topicToRegistryRecordStore)
         let threadStore = Database<Thread>(keyValueStorage: keyValueStorage, identifier: ChatStorageIdentifiers.threads.rawValue)
         let resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, threadStore: threadStore, logger: logger)
-        let invitationHandlingService = InvitationHandlingService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToRegistryRecordStore: topicToRegistryRecordStore, invitePayloadStore: invitePayloadStore, threadsStore: threadStore)
+        let invitationHandlingService = InvitationHandlingService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToRegistryRecordStore: topicToRegistryRecordStore, chatStorage: chatStorage, threadsStore: threadStore)
         let inviteService = InviteService(networkingInteractor: networkingInteractor, kms: kms, threadStore: threadStore, rpcHistory: rpcHistory, logger: logger, registry: registry)
         let leaveService = LeaveService()
         let messagesStore = Database<Message>(keyValueStorage: keyValueStorage, identifier: ChatStorageIdentifiers.messages.rawValue)
@@ -47,7 +47,7 @@ public struct ChatClientFactory {
             kms: kms,
             threadStore: threadStore,
             messagesStore: messagesStore,
-            invitePayloadStore: invitePayloadStore,
+            chatStorage: chatStorage,
             socketConnectionStatusPublisher: relayClient.socketConnectionStatusPublisher
         )
 

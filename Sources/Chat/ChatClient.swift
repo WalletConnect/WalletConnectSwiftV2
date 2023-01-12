@@ -13,7 +13,7 @@ public class ChatClient {
     private let kms: KeyManagementService
     private let threadStore: Database<Thread>
     private let messagesStore: Database<Message>
-    private let invitePayloadStore: CodableStore<RequestSubscriptionPayload<Invite>>
+    private let chatStorage: ChatStorage
 
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
@@ -44,7 +44,7 @@ public class ChatClient {
          kms: KeyManagementService,
          threadStore: Database<Thread>,
          messagesStore: Database<Message>,
-         invitePayloadStore: CodableStore<RequestSubscriptionPayload<Invite>>,
+         chatStorage: ChatStorage,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
     ) {
         self.registry = registry
@@ -57,7 +57,7 @@ public class ChatClient {
         self.kms = kms
         self.threadStore = threadStore
         self.messagesStore = messagesStore
-        self.invitePayloadStore = invitePayloadStore
+        self.chatStorage = chatStorage
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
 
         setUpEnginesCallbacks()
@@ -90,11 +90,11 @@ public class ChatClient {
         try await inviteService.invite(peerAccount: peerAccount, openingMessage: openingMessage, account: account)
     }
 
-    public func accept(inviteId: String) async throws {
+    public func accept(inviteId: Int64) async throws {
         try await invitationHandlingService.accept(inviteId: inviteId)
     }
 
-    public func reject(inviteId: String) async throws {
+    public func reject(inviteId: Int64) async throws {
         try await invitationHandlingService.reject(inviteId: inviteId)
     }
 
@@ -118,7 +118,7 @@ public class ChatClient {
 
     public func getInvites(account: Account) -> [Invite] {
         // TODO: Account based storage
-        return invitePayloadStore.getAll().map { $0.request }
+        return chatStorage.getInvites()
     }
 
     public func getThreads(account: Account) async -> [Thread] {

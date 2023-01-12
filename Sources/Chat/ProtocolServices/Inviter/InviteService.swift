@@ -37,7 +37,7 @@ class InviteService {
         let protocolMethod = ChatInviteProtocolMethod()
         self.peerAccount = peerAccount
         let selfPubKeyY = try kms.createX25519KeyPair()
-        let invite = Invite(message: openingMessage, account: account, publicKey: selfPubKeyY.hexRepresentation)
+        let invite = InvitePayload(message: openingMessage, account: account, publicKey: selfPubKeyY.hexRepresentation)
         let peerPubKey = try await registry.resolve(account: peerAccount)
         let symKeyI = try kms.performKeyAgreement(selfPublicKey: selfPubKeyY, peerPublicKey: peerPubKey)
         let inviteTopic = try AgreementPublicKey(hex: peerPubKey).rawRepresentation.sha256().toHexString()
