@@ -1,7 +1,6 @@
 import XCTest
 
 class PairingTests: XCTestCase {
-
     private let engine: Engine = Engine()
 
     override class func setUp() {

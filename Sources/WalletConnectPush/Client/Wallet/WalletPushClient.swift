@@ -36,6 +36,7 @@ public class WalletPushClient {
     private let proposeResponder: PushRequestResponder
     private let pushMessageSubscriber: PushMessageSubscriber
     private let subscriptionsProvider: SubscriptionsProvider
+    private let resubscribeService: PushResubscribeService
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
@@ -45,7 +46,8 @@ public class WalletPushClient {
          pushMessageSubscriber: PushMessageSubscriber,
          subscriptionsProvider: SubscriptionsProvider,
          deletePushSubscriptionService: DeletePushSubscriptionService,
-         deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber) {
+         deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber,
+         resubscribeService: PushResubscribeService) {
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
         self.proposeResponder = proposeResponder
@@ -54,6 +56,7 @@ public class WalletPushClient {
         self.subscriptionsProvider = subscriptionsProvider
         self.deletePushSubscriptionService = deletePushSubscriptionService
         self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
+        self.resubscribeService = resubscribeService
         setupSubscriptions()
     }
 
@@ -71,10 +74,6 @@ public class WalletPushClient {
 
     public func delete(topic: String) async throws {
         try await deletePushSubscriptionService.delete(topic: topic)
-    }
-
-    public func decryptMessage(topic: String, ciphertext: String) throws -> String {
-        try echoClient.decryptMessage(topic: topic, ciphertext: ciphertext)
     }
 
     public func register(deviceToken: Data) async throws {

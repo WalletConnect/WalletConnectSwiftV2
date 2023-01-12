@@ -25,6 +25,7 @@ public struct DappPushClientFactory {
         let subscriptionProvider = SubscriptionsProvider(store: subscriptionStore)
         let deletePushSubscriptionService = DeletePushSubscriptionService(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore)
         let deletePushSubscriptionSubscriber = DeletePushSubscriptionSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore)
+        let resubscribeService = PushResubscribeService(networkInteractor: networkInteractor, subscriptionsStorage: subscriptionStore)
         return DappPushClient(
             logger: logger,
             kms: kms,
@@ -33,7 +34,8 @@ public struct DappPushClientFactory {
             pushMessageSender: pushMessageSender,
             subscriptionsProvider: subscriptionProvider,
             deletePushSubscriptionService: deletePushSubscriptionService,
-            deletePushSubscriptionSubscriber: deletePushSubscriptionSubscriber
+            deletePushSubscriptionSubscriber: deletePushSubscriptionSubscriber,
+            resubscribeService: resubscribeService
         )
     }
 }

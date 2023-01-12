@@ -1,0 +1,13 @@
+{
+    "Simulator Target Bundle": "com.walletconnect.example",
+    
+    "aps": {
+        "badge": 0,
+        "alert": {
+            "title": "Push Notification Test",
+            "subtitle": "Hey! 👋",
+            "body": "Is this working?",
+        },
+        "sound":"default"
+    }
+}

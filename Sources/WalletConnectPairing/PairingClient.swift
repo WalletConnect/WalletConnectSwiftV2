@@ -17,7 +17,7 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
     private let pairingRequestsSubscriber: PairingRequestsSubscriber
     private let pairingsProvider: PairingsProvider
     private let deletePairingService: DeletePairingService
-    private let resubscribeService: ResubscribeService
+    private let resubscribeService: PairingResubscribeService
     private let expirationService: ExpirationService
 
     private let cleanupService: PairingCleanupService
@@ -27,7 +27,7 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
          logger: ConsoleLogging,
          walletPairService: WalletPairService,
          deletePairingService: DeletePairingService,
-         resubscribeService: ResubscribeService,
+         resubscribeService: PairingResubscribeService,
          expirationService: ExpirationService,
          pairingRequestsSubscriber: PairingRequestsSubscriber,
          appPairActivateService: AppPairActivationService,
