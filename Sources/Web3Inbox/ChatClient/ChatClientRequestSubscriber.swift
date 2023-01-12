@@ -20,17 +20,30 @@ final class ChatClientRequestSubscriber {
     func setupSubscriptions() {
         chatClient.invitePublisher
             .sink { [unowned self] invite in
-                Task {
-                    do {
-                        let request = RPCRequest(
-                            method: ChatClientRequest.chatInvite.method,
-                            params: invite
-                        )
-                        try await onRequest?(request)
-                    } catch {
-                        logger.error("Client Request error: \(error.localizedDescription)")
-                    }
-                }
+                handle(event: .chatInvite, params: invite)
             }.store(in: &publishers)
+
+        // TODO: Should we listen it? 
+        chatClient.newThreadPublisher
+            .sink { [unowned self] thread in
+                handle(event: .chatThread, params: thread)
+            }.store(in: &publishers)
+    }
+}
+
+private extension ChatClientRequestSubscriber {
+
+    func handle(event: ChatClientRequest, params: Codable) {
+        Task {
+            do {
+                let request = RPCRequest(
+                    method: event.method,
+                    params: params
+                )
+                try await onRequest?(request)
+            } catch {
+                logger.error("Client Request error: \(error.localizedDescription)")
+            }
+        }
     }
 }

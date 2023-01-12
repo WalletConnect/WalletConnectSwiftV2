@@ -22,7 +22,7 @@ final class ChatClientProxy {
 
         case .getThreads:
             let params = try parse(GetThreadsRequest.self, params: request.params)
-            let threads = await client.getThreads(account: params.account)
+            let threads = client.getThreads(account: params.account)
             try await respond(with: threads, request: request)
 
         case .register:
@@ -31,7 +31,7 @@ final class ChatClientProxy {
 
         case .getMessages:
             let params = try parse(GetMessagesRequest.self, params: request.params)
-            let messages = await client.getMessages(topic: params.topic)
+            let messages = client.getMessages(topic: params.topic)
             try await respond(with: messages, request: request)
 
         case .message:
