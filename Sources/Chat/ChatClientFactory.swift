@@ -28,13 +28,11 @@ public struct ChatClientFactory {
         let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serialiser, logger: logger, rpcHistory: rpcHistory)
         let chatStorage = ChatStorage(history: rpcHistory)
         let registryService = RegistryService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToRegistryRecordStore: topicToRegistryRecordStore)
-        let threadStore = Database<Thread>(keyValueStorage: keyValueStorage, identifier: ChatStorageIdentifiers.threads.rawValue)
-        let resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, threadStore: threadStore, logger: logger)
-        let invitationHandlingService = InvitationHandlingService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToRegistryRecordStore: topicToRegistryRecordStore, chatStorage: chatStorage, threadsStore: threadStore)
-        let inviteService = InviteService(networkingInteractor: networkingInteractor, kms: kms, threadStore: threadStore, rpcHistory: rpcHistory, logger: logger, registry: registry)
+        let resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, chatStorage: chatStorage, logger: logger)
+        let invitationHandlingService = InvitationHandlingService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToRegistryRecordStore: topicToRegistryRecordStore, chatStorage: chatStorage)
+        let inviteService = InviteService(networkingInteractor: networkingInteractor, kms: kms, chatStorage: chatStorage, logger: logger, registry: registry)
         let leaveService = LeaveService()
-        let messagesStore = Database<Message>(keyValueStorage: keyValueStorage, identifier: ChatStorageIdentifiers.messages.rawValue)
-        let messagingService = MessagingService(networkingInteractor: networkingInteractor, messagesStore: messagesStore, threadStore: threadStore, logger: logger)
+        let messagingService = MessagingService(networkingInteractor: networkingInteractor, chatStorage: chatStorage, logger: logger)
 
         let client = ChatClient(
             registry: registry,
@@ -45,8 +43,6 @@ public struct ChatClientFactory {
             leaveService: leaveService,
             resubscriptionService: resubscriptionService,
             kms: kms,
-            threadStore: threadStore,
-            messagesStore: messagesStore,
             chatStorage: chatStorage,
             socketConnectionStatusPublisher: relayClient.socketConnectionStatusPublisher
         )

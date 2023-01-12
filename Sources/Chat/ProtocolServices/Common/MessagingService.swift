@@ -5,38 +5,39 @@ class MessagingService {
     enum Errors: Error {
         case threadDoNotExist
     }
-    let networkingInteractor: NetworkInteracting
-    var messagesStore: Database<Message>
-    let logger: ConsoleLogging
+
     var onMessage: ((Message) -> Void)?
-    var threadStore: Database<Thread>
+
+    let networkingInteractor: NetworkInteracting
+    let chatStorage: ChatStorage
+    let logger: ConsoleLogging
+
     private var publishers = [AnyCancellable]()
 
     init(networkingInteractor: NetworkInteracting,
-         messagesStore: Database<Message>,
-         threadStore: Database<Thread>,
+         chatStorage: ChatStorage,
          logger: ConsoleLogging) {
         self.networkingInteractor = networkingInteractor
-        self.messagesStore = messagesStore
+        self.chatStorage = chatStorage
         self.logger = logger
-        self.threadStore = threadStore
         setUpResponseHandling()
         setUpRequestHandling()
     }
 
     func send(topic: String, messageString: String) async throws {
         // TODO - manage author account
-        let protocolMethod = ChatMessageProtocolMethod()
-        let thread = await threadStore.first {$0.topic == topic}
-        guard let authorAccount = thread?.selfAccount else { throw Errors.threadDoNotExist}
+
+        guard let authorAccount = chatStorage.getThread(topic: topic)?.selfAccount
+        else { throw Errors.threadDoNotExist}
+
         let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
         let message = Message(topic: topic, message: messageString, authorAccount: authorAccount, timestamp: timestamp)
+
+        let protocolMethod = ChatMessageProtocolMethod()
         let request = RPCRequest(method: protocolMethod.method, params: message)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
-        Task(priority: .background) {
-            await messagesStore.add(message)
-            onMessage?(message)
-        }
+
+        onMessage?(message)
     }
 
     private func setUpResponseHandling() {
@@ -56,9 +57,12 @@ class MessagingService {
     }
 
     private func handleMessage(_ message: Message, topic: String, requestId: RPCID) {
-        Task(priority: .background) {
-            try await networkingInteractor.respondSuccess(topic: topic, requestId: requestId, protocolMethod: ChatMessageProtocolMethod())
-            await messagesStore.add(message)
+        Task(priority: .high) {
+            try await networkingInteractor.respondSuccess(
+                topic: topic,
+                requestId: requestId,
+                protocolMethod: ChatMessageProtocolMethod()
+            )
             logger.debug("Received message")
             onMessage?(message)
         }

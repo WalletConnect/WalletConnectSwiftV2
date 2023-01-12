@@ -13,7 +13,6 @@ class InvitationHandlingService {
     private let registry: Registry
     private let logger: ConsoleLogging
     private let kms: KeyManagementService
-    private let threadsStore: Database<Thread>
     private var publishers = [AnyCancellable]()
 
     init(registry: Registry,
@@ -21,15 +20,13 @@ class InvitationHandlingService {
          kms: KeyManagementService,
          logger: ConsoleLogging,
          topicToRegistryRecordStore: CodableStore<RegistryRecord>,
-         chatStorage: ChatStorage,
-         threadsStore: Database<Thread>) {
+         chatStorage: ChatStorage) {
         self.registry = registry
         self.kms = kms
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.topicToRegistryRecordStore = topicToRegistryRecordStore
         self.chatStorage = chatStorage
-        self.threadsStore = threadsStore
         setUpRequestHandling()
     }
 
@@ -65,16 +62,14 @@ class InvitationHandlingService {
 
         // TODO - derive account
         let selfAccount = try! topicToRegistryRecordStore.get(key: inviteTopic)!.account
-        let thread = Thread(
-            topic: threadTopic,
-            selfAccount: selfAccount,
-            peerAccount: invite.account
-        )
-        await threadsStore.add(thread)
 
         chatStorage.delete(invite: invite)
 
-        onNewThread?(thread)
+        onNewThread?(Thread(
+            topic: threadTopic,
+            selfAccount: selfAccount,
+            peerAccount: invite.account
+        ))
     }
 
     func reject(inviteId: Int64) async throws {

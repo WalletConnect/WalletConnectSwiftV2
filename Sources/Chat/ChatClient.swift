@@ -11,8 +11,6 @@ public class ChatClient {
     private let leaveService: LeaveService
     private let resubscriptionService: ResubscriptionService
     private let kms: KeyManagementService
-    private let threadStore: Database<Thread>
-    private let messagesStore: Database<Message>
     private let chatStorage: ChatStorage
 
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
@@ -42,8 +40,6 @@ public class ChatClient {
          leaveService: LeaveService,
          resubscriptionService: ResubscriptionService,
          kms: KeyManagementService,
-         threadStore: Database<Thread>,
-         messagesStore: Database<Message>,
          chatStorage: ChatStorage,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
     ) {
@@ -55,8 +51,6 @@ public class ChatClient {
         self.leaveService = leaveService
         self.resubscriptionService = resubscriptionService
         self.kms = kms
-        self.threadStore = threadStore
-        self.messagesStore = messagesStore
         self.chatStorage = chatStorage
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
 
@@ -121,13 +115,13 @@ public class ChatClient {
         return chatStorage.getInvites()
     }
 
-    public func getThreads(account: Account) async -> [Thread] {
+    public func getThreads(account: Account) -> [Thread] {
         // TODO: Account based storage
-        await threadStore.getAll()
+        return chatStorage.getThreads()
     }
 
-    public func getMessages(topic: String) async -> [Message] {
-        await messagesStore.filter {$0.topic == topic} ?? []
+    public func getMessages(topic: String) -> [Message] {
+        return chatStorage.getMessages(topic: topic)
     }
 
     private func setUpEnginesCallbacks() {

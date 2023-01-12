@@ -6,8 +6,7 @@ class InviteService {
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging
     private let kms: KeyManagementService
-    private let threadStore: Database<Thread>
-    private let rpcHistory: RPCHistory
+    private let chatStorage: ChatStorage
     private let registry: Registry
 
     var onNewThread: ((Thread) -> Void)?
@@ -16,16 +15,14 @@ class InviteService {
     init(
         networkingInteractor: NetworkInteracting,
         kms: KeyManagementService,
-        threadStore: Database<Thread>,
-        rpcHistory: RPCHistory,
+        chatStorage: ChatStorage,
         logger: ConsoleLogging,
         registry: Registry
     ) {
         self.kms = kms
         self.networkingInteractor = networkingInteractor
         self.logger = logger
-        self.threadStore = threadStore
-        self.rpcHistory = rpcHistory
+        self.chatStorage = chatStorage
         self.registry = registry
         setUpResponseHandling()
     }
@@ -63,7 +60,7 @@ class InviteService {
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<InvitePayload, InviteResponse>) in
                 logger.debug("Invite has been accepted")
 
-                Task(priority: .background) {
+                Task(priority: .high) {
                     try await createThread(
                         selfPubKeyHex: payload.request.publicKey,
                         peerPubKey: payload.response.publicKey,
@@ -79,10 +76,14 @@ class InviteService {
         let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey)
         let threadTopic = agreementKeys.derivedTopic()
         try kms.setSymmetricKey(agreementKeys.sharedKey, for: threadTopic)
+
         try await networkingInteractor.subscribe(topic: threadTopic)
-        let thread = Thread(topic: threadTopic, selfAccount: account, peerAccount: peerAccount)
-        await threadStore.add(thread)
-        onNewThread?(thread)
+
+        onNewThread?(Thread(
+            topic: threadTopic,
+            selfAccount: account,
+            peerAccount: peerAccount)
+        )
         // TODO - remove symKeyI
     }
 }
