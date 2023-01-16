@@ -103,7 +103,7 @@ private extension WalletPushClient {
 #if DEBUG
 extension WalletPushClient {
     public func register(deviceToken: String) async throws {
-        try await registerService.register(deviceToken: deviceToken)
+        try await echoClient.register(deviceToken: deviceToken)
     }
 }
 #endif
