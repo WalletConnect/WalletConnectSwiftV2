@@ -57,7 +57,7 @@ final class ApproveEngineTests: XCTestCase {
         let pairing = WCPairing.stub(expiryDate: Date(timeIntervalSinceNow: 10000), topic: topicA)
         pairingStorageMock.setPairing(pairing)
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
-        let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
+        let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey, topic: topicA)
         pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal))
 
         try await engine.approveProposal(proposerPubKey: proposal.proposer.publicKey, validating: SessionNamespace.stubDictionary())
