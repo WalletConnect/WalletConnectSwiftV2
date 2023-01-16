@@ -66,7 +66,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         let deviceToken = InputConfig.simulatorIdentifier
                         assert(deviceToken != "SIMULATOR_IDENTIFIER", "Please set your Simulator identifier")
                         Task(priority: .high) {
-                            try await Echo.instance.register(deviceToken: deviceToken)
+                            try await Push.wallet.register(deviceToken: deviceToken)
                         }
                     }.store(in: &self!.publishers)
 #endif

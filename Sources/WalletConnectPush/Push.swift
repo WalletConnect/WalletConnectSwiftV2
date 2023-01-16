@@ -32,8 +32,8 @@ public class Push {
     private init() { }
 
     /// Wallet's configuration method
-    static public func configure() throws {
-        let clientId = try Networking.interactor.getClientId()
+    static public func configure() {
+        let clientId = try! Networking.interactor.getClientId()
         Push.config = Push.Config(clientId: clientId)
     }
 
