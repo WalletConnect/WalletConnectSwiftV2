@@ -24,7 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Pair.configure(metadata: metadata)
 
         try! Push.configure()
-        Push.wallet.requestPublisher.sink { id, _ in
+        Push.wallet.requestPublisher.sink { id, _, _ in
             Task(priority: .high) { try! await Push.wallet.approve(id: id) }
         }.store(in: &publishers)
         Push.wallet.pushMessagePublisher.sink { pm in

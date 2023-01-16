@@ -8,9 +8,9 @@ public class WalletPushClient {
 
     private var publishers = Set<AnyCancellable>()
 
-    private let requestPublisherSubject = PassthroughSubject<(id: RPCID, metadata: AppMetadata), Never>()
+    private let requestPublisherSubject = PassthroughSubject<(id: RPCID, account: Account, metadata: AppMetadata), Never>()
 
-    public var requestPublisher: AnyPublisher<(id: RPCID, metadata: AppMetadata), Never> {
+    public var requestPublisher: AnyPublisher<(id: RPCID, account: Account, metadata: AppMetadata), Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
@@ -88,7 +88,7 @@ private extension WalletPushClient {
 
         pairingRegisterer.register(method: protocolMethod)
             .sink { [unowned self] (payload: RequestSubscriptionPayload<PushRequestParams>) in
-                requestPublisherSubject.send((id: payload.id, metadata: payload.request.metadata))
+                requestPublisherSubject.send((id: payload.id, account: payload.request.account, metadata: payload.request.metadata))
         }.store(in: &publishers)
 
         pushMessageSubscriber.onPushMessage = { [unowned self] pushMessage in
