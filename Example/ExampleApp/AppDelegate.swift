@@ -1,7 +1,6 @@
 import UIKit
 import UserNotifications
 import WalletConnectNetworking
-import WalletConnectEcho
 import WalletConnectPairing
 import WalletConnectPush
 import Combine
@@ -86,7 +85,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
         Task(priority: .high) {
-            try await Echo.instance.register(deviceToken: deviceToken)
+            try await Push.wallet.register(deviceToken: deviceToken)
         }
     }
 

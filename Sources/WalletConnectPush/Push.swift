@@ -32,13 +32,9 @@ public class Push {
     private init() { }
 
     /// Wallet's configuration method
-    static public func configure() throws {
+    static public func configure() {
         var clientId: String!
-        do {
-            clientId = try Networking.interactor.getClientId()
-        } catch {
-            throw Errors.failedToGetClientId
-        }
+        try! Networking.interactor.getClientId()
         Push.config = Push.Config(clientId: clientId)
     }
 
