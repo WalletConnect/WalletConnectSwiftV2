@@ -29,6 +29,7 @@ final class AppProposeService {
         let proposal = SessionProposal(
             relays: [relay],
             proposer: proposer,
+            pairingTopic: pairingTopic,
             requiredNamespaces: namespaces)
 
         let request = RPCRequest(method: protocolMethod.method, params: proposal)
