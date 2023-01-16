@@ -70,7 +70,7 @@ extension RPCRequest {
 
     static func stubRequest(method: String, chainId: Blockchain) -> RPCRequest {
         let params = SessionType.RequestParams(
-            request: SessionType.RequestParams.Request(method: method, params: AnyCodable(EmptyCodable())),
+            request: SessionType.RequestParams.Request(method: method, params: AnyCodable(EmptyCodable()), expiry: nil),
             chainId: chainId)
         return RPCRequest(method: SessionRequestProtocolMethod().method, params: params)
     }

@@ -54,7 +54,7 @@ final class SessionEngine {
         guard session.hasPermission(forMethod: request.method, onChain: request.chainId) else {
             throw WalletConnectError.invalidPermissions
         }
-        let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params)
+        let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params, expiry: request.expiry)
         let sessionRequestParams = SessionType.RequestParams(request: chainRequest, chainId: request.chainId)
         let protocolMethod = SessionRequestProtocolMethod()
         let rpcRequest = RPCRequest(method: protocolMethod.method, params: sessionRequestParams)
@@ -191,7 +191,9 @@ private extension SessionEngine {
             topic: payload.topic,
             method: payload.request.request.method,
             params: payload.request.request.params,
-            chainId: payload.request.chainId)
+            chainId: payload.request.chainId,
+            expiry: payload.request.request.expiry
+        )
 
         guard let session = sessionStore.getSession(forTopic: topic) else {
             return respondError(payload: payload, reason: .noSessionForTopic, protocolMethod: protocolMethod)
@@ -202,6 +204,11 @@ private extension SessionEngine {
         guard session.hasPermission(forMethod: request.method, onChain: request.chainId) else {
             return respondError(payload: payload, reason: .unauthorizedMethod(request.method), protocolMethod: protocolMethod)
         }
+
+        guard !request.isExpired() else {
+            return respondError(payload: payload, reason: .sessionRequestExpired, protocolMethod: protocolMethod)
+        }
+
         onSessionRequest?(request)
     }
 

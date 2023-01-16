@@ -42,6 +42,7 @@ internal enum SessionType {
         struct Request: Codable, Equatable {
             let method: String
             let params: AnyCodable
+            let expiry: UInt64?
         }
     }
 

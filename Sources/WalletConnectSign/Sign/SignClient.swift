@@ -326,7 +326,7 @@ public final class SignClient: SignClientProtocol {
         let pendingRequests: [Request] = history.getPending()
             .compactMap {
                 guard let request = try? $0.request.params?.get(SessionType.RequestParams.self) else { return nil }
-                return Request(id: $0.id, topic: $0.topic, method: request.request.method, params: request.request.params, chainId: request.chainId)
+                return Request(id: $0.id, topic: $0.topic, method: request.request.method, params: request.request.params, chainId: request.chainId, expiry: request.request.expiry)
             }
         if let topic = topic {
             return pendingRequests.filter {$0.topic == topic}
@@ -343,7 +343,7 @@ public final class SignClient: SignClientProtocol {
             let request = try? record.request.params?.get(SessionType.RequestParams.self)
         else { return nil }
 
-        return Request(id: record.id, topic: record.topic, method: record.request.method, params: request, chainId: request.chainId)
+        return Request(id: record.id, topic: record.topic, method: record.request.method, params: request, chainId: request.chainId, expiry: request.request.expiry)
     }
 
     /// Delete all stored data such as: pairings, sessions, keys
