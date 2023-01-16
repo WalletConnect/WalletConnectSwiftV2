@@ -23,10 +23,14 @@ final class ChatClientRequestSubscriber {
                 handle(event: .chatInvite, params: invite)
             }.store(in: &publishers)
 
-        // TODO: Should we listen it? 
         chatClient.newThreadPublisher
             .sink { [unowned self] thread in
                 handle(event: .chatThread, params: thread)
+            }.store(in: &publishers)
+
+        chatClient.messagePublisher
+            .sink { [unowned self] message in
+                handle(event: .chatMessage, params: message)
             }.store(in: &publishers)
     }
 }

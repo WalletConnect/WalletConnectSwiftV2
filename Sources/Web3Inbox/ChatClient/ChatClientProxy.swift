@@ -28,6 +28,7 @@ final class ChatClientProxy {
         case .register:
             let params = try parse(RegisterRequest.self, params: request.params)
             try await client.register(account: params.account)
+            try await respond(request: request)
 
         case .getMessages:
             let params = try parse(GetMessagesRequest.self, params: request.params)
@@ -42,11 +43,15 @@ final class ChatClientProxy {
         case .accept:
             let params = try parse(AcceptRequest.self, params: request.params)
             try await client.accept(inviteId: params.id)
+            try await respond(request: request)
         }
     }
 }
 
 private extension ChatClientProxy {
+
+    private typealias Blob = Dictionary<String, String>
+
     enum Errors: Error {
         case unregisteredMethod
         case unregisteredParams
@@ -78,12 +83,12 @@ private extension ChatClientProxy {
     }
 
     func parse<Request: Codable>(_ type: Request.Type, params: AnyCodable?) throws -> Request {
-        guard let params = try? params?.get([Request].self).first
+        guard let params = try params?.get([Request].self).first
         else { throw Errors.unregisteredParams }
         return params
     }
 
-    func respond<Object: Codable>(with object: Object, request: RPCRequest) async throws {
+    func respond<Object: Codable>(with object: Object = Blob(), request: RPCRequest) async throws {
         let response = RPCResponse(matchingRequest: request, result: object)
         try await onResponse?(response)
     }
