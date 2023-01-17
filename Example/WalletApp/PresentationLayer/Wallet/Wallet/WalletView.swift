@@ -21,15 +21,24 @@ struct WalletView: View {
                                 .multilineTextAlignment(.center)
                                 .lineSpacing(4)
                         }
+                        .padding(20)
                     }
                     
                     VStack {
                         if !presenter.sessions.isEmpty {
-                            ScrollView {
+                            List {
                                 ForEach(presenter.sessions, id: \.peer.name) { session in
                                     connectionView(session: session)
+                                        .listRowSeparator(.hidden)
+                                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
+                                }
+                                .onDelete { indexSet in
+                                    Task(priority: .high) {
+                                        await presenter.removeSession(at: indexSet)
+                                    }
                                 }
                             }
+                            .listStyle(PlainListStyle())
                         }
                         
                         Spacer()
@@ -55,10 +64,11 @@ struct WalletView: View {
                             }
                             .shadow(color: .black.opacity(0.25), radius: 8, y: 4)
                         }
+                        .padding(.horizontal, 20)
                     }
                 }
             }
-            .padding(20)
+            .padding(.vertical, 20)
         }
     }
     
@@ -81,6 +91,7 @@ struct WalletView: View {
                                 .cornerRadius(30, corners: .allCorners)
                         }
                     }
+                    .padding(.leading, 20)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text(session.peer.name)
@@ -96,6 +107,7 @@ struct WalletView: View {
                     
                     Image("forward-shevron")
                         .foregroundColor(.grey8)
+                        .padding(.trailing, 20)
                 }
             }
         }

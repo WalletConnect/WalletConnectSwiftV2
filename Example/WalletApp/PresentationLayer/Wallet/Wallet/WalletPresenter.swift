@@ -105,6 +105,12 @@ extension WalletPresenter {
         }
         pair(uri: walletConnectUri)
     }
+    
+    func removeSession(at indexSet: IndexSet) async {
+        if let index = indexSet.first {
+            try? await interactor.disconnectSession(session: sessions[index])
+        }
+    }
 }
 
 // MARK: - SceneViewModel
