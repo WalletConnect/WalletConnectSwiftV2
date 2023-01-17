@@ -23,7 +23,7 @@ enum TabPage: CaseIterable {
     }
 
     static var selectedIndex: Int {
-        return 1
+        return 0
     }
 
     static var enabledTabs: [TabPage] {

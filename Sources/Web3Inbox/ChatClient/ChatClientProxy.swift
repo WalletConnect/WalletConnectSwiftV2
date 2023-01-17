@@ -44,6 +44,16 @@ final class ChatClientProxy {
             let params = try parse(AcceptRequest.self, params: request.params)
             try await client.accept(inviteId: params.id)
             try await respond(request: request)
+
+        case .reject:
+            let params = try parse(RejectRequest.self, params: request.params)
+            try await client.reject(inviteId: params.id)
+            try await respond(request: request)
+
+        case .invite:
+            let params = try parse(InviteRequest.self, params: request.params)
+            try await client.invite(peerAccount: params.invite.account, openingMessage: params.invite.message, account: params.account)
+            try await respond(request: request)
         }
     }
 }
@@ -80,6 +90,19 @@ private extension ChatClientProxy {
 
     struct AcceptRequest: Codable {
         let id: Int64
+    }
+
+    struct RejectRequest: Codable {
+        let id: Int64
+    }
+
+    struct InviteRequest: Codable {
+        struct Invite: Codable {
+            let account: Account
+            let message: String
+        }
+        let account: Account
+        let invite: Invite
     }
 
     func parse<Request: Codable>(_ type: Request.Type, params: AnyCodable?) throws -> Request {
