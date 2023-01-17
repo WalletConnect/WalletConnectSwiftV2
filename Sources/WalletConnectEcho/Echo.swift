@@ -1,4 +1,5 @@
 import Foundation
+import WalletConnectNetworking
 
 public class Echo {
 
@@ -8,7 +9,7 @@ public class Echo {
         }
 
         return EchoClientFactory.create(
-            projectId: config.projectId,
+            projectId: Networking.projectId,
             clientId: config.clientId)
     }()
 
@@ -17,9 +18,8 @@ public class Echo {
     private init() { }
 
     /// Echo instance config method
-    /// - Parameters:
-    ///   - tenantId:
-    static public func configure(projectId: String, clientId: String) {
-        Echo.config = Echo.Config(clientId: clientId, projectId: projectId)
+    /// - Parameter clientId: https://github.com/WalletConnect/walletconnect-docs/blob/main/docs/specs/clients/core/relay/relay-client-auth.md#overview
+    static public func configure(clientId: String) {
+        Echo.config = Echo.Config(clientId: clientId)
     }
 }

@@ -1,7 +1,6 @@
 import UIKit
 import UserNotifications
 import WalletConnectNetworking
-import WalletConnectEcho
 import WalletConnectPairing
 import WalletConnectPush
 import Combine
@@ -23,13 +22,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
         Pair.configure(metadata: metadata)
 
-        let clientId  = try! Networking.interactor.getClientId()
-        let sanitizedClientId = clientId.replacingOccurrences(of: "did:key:", with: "")
-
-        Echo.configure(projectId: InputConfig.projectId, clientId: sanitizedClientId)
-        Push.wallet.requestPublisher.sink { id, _ in
+        Push.configure()
+        Push.wallet.requestPublisher.sink { (id: RPCID, account: Account, metadata: AppMetadata) in
             Task(priority: .high) { try! await Push.wallet.approve(id: id) }
         }.store(in: &publishers)
+
         Push.wallet.pushMessagePublisher.sink { pm in
             print(pm)
         }.store(in: &publishers)
@@ -70,7 +67,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         let deviceToken = InputConfig.simulatorIdentifier
                         assert(deviceToken != "SIMULATOR_IDENTIFIER", "Please set your Simulator identifier")
                         Task(priority: .high) {
-                            try await Echo.instance.register(deviceToken: deviceToken)
+                            try await Push.wallet.register(deviceToken: deviceToken)
                         }
                     }.store(in: &self!.publishers)
 #endif
@@ -89,7 +86,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
         Task(priority: .high) {
-            try await Echo.instance.register(deviceToken: deviceToken)
+            try await Push.wallet.register(deviceToken: deviceToken)
         }
     }
 
