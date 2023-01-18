@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct WelcomeView: View {
+    @Environment(\.colorScheme) var colorScheme
+    
     @EnvironmentObject var presenter: WelcomePresenter
     
     @State private var presentWallet = false
@@ -9,6 +11,14 @@ struct WelcomeView: View {
         ZStack {
             Color.grey100
                 .edgesIgnoringSafeArea(.all)
+            
+            VStack {
+                Spacer()
+                
+                Image((colorScheme == .light) ? "welcome-light" : "welcome-dark")
+                    .scaledToFill()
+            }
+            .edgesIgnoringSafeArea(.all)
             
             VStack(spacing: 0) {
                 Text("Welcome")
@@ -47,6 +57,7 @@ struct WelcomeView: View {
                 .fullScreenCover(isPresented: $presentWallet, content: WalletView.init)
             }
             .padding([.horizontal, .vertical], 20)
+            .padding(.top, 20)
         }
     }
 }

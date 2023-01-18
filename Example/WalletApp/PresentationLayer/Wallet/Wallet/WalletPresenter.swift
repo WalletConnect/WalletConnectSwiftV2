@@ -59,20 +59,32 @@ final class WalletPresenter: ObservableObject {
 // MARK: - Private functions
 extension WalletPresenter {
     private func setupInitialState() {
-        interactor.requestPublisher.sink { [weak self] request in
-            self?.router.present(request: request)
-        }
-        .store(in: &disposeBag)
+        interactor.requestPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] request in
+                self?.router.present(request: request)
+            }
+            .store(in: &disposeBag)
         
-        interactor.sessionProposalPublisher.sink { [weak self] proposal in
-            self?.router.present(proposal: proposal)
-        }
-        .store(in: &disposeBag)
+        interactor.sessionRequestPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] sessionRequest in
+                self?.router.present(sessionRequest: sessionRequest)
+            }.store(in: &disposeBag)
+        
+        interactor.sessionProposalPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] proposal in
+                self?.router.present(proposal: proposal)
+            }
+            .store(in: &disposeBag)
 
-        interactor.sessionsPublisher.sink { [weak self] sessions in
-            self?.sessions = sessions
-        }
-        .store(in: &disposeBag)
+        interactor.sessionsPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] sessions in
+                self?.sessions = sessions
+            }
+            .store(in: &disposeBag)
         
         sessions = interactor.getSessions()
         
@@ -92,6 +104,12 @@ extension WalletPresenter {
             return
         }
         pair(uri: walletConnectUri)
+    }
+    
+    func removeSession(at indexSet: IndexSet) async {
+        if let index = indexSet.first {
+            try? await interactor.disconnectSession(session: sessions[index])
+        }
     }
 }
 

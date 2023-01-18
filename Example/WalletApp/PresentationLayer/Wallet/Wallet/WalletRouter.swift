@@ -17,7 +17,12 @@ final class WalletRouter {
     }
     
     func present(proposal: Session.Proposal) {
-        SessionRequestModule.create(app: app, proposal: proposal)
+        SessionProposalModule.create(app: app, proposal: proposal)
+            .presentFullScreen(from: viewController, transparentBackground: true)
+    }
+    
+    func present(sessionRequest: Request) {
+        SessionRequestModule.create(app: app, sessionRequest: sessionRequest)
             .presentFullScreen(from: viewController, transparentBackground: true)
     }
     
