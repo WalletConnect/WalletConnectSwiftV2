@@ -3,10 +3,9 @@ import Foundation
 struct SessionProposal: Codable, Equatable {
     let relays: [RelayProtocolOptions]
     let proposer: Participant
-    let pairingTopic: String
     let requiredNamespaces: [String: ProposalNamespace]
 
-    func publicRepresentation() -> Session.Proposal {
+    func publicRepresentation(pairingTopic: String) -> Session.Proposal {
         return Session.Proposal(
             id: proposer.publicKey,
             pairingTopic: pairingTopic,

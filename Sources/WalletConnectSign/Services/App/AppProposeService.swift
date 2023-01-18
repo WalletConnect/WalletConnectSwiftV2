@@ -26,12 +26,12 @@ final class AppProposeService {
         let proposer = Participant(
             publicKey: publicKey.hexRepresentation,
             metadata: metadata)
+        
         let proposal = SessionProposal(
             relays: [relay],
             proposer: proposer,
-            pairingTopic: pairingTopic,
             requiredNamespaces: namespaces)
-
+        
         let request = RPCRequest(method: protocolMethod.method, params: proposal)
         try await networkingInteractor.requestNetworkAck(request, topic: pairingTopic, protocolMethod: protocolMethod)
     }
