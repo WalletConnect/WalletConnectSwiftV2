@@ -77,7 +77,7 @@ extension RPCRequest {
 }
 
 extension SessionProposal {
-    static func stub(proposerPubKey: String = "", topic: String = "") -> SessionProposal {
+    static func stub(proposerPubKey: String = "") -> SessionProposal {
         let relayOptions = RelayProtocolOptions(protocol: "irn", data: nil)
         return SessionType.ProposeParams(
             relays: [relayOptions],
