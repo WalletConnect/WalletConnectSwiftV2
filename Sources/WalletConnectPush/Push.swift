@@ -4,9 +4,6 @@ import WalletConnectPairing
 import WalletConnectEcho
 
 public class Push {
-    enum Errors: Error {
-        case failedToGetClientId
-    }
 
     public static var dapp: DappPushClient = {
         return DappPushClientFactory.create(
