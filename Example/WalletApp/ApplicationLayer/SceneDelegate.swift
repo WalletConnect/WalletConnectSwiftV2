@@ -2,8 +2,10 @@ import UIKit
 import Auth
 import WalletConnectPairing
 
+
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
+
 
     private let app = Application()
 
@@ -40,5 +42,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         Task {
             try await Pair.instance.pair(uri: WalletConnectURI(string: uri)!)
         }
+
     }
 }

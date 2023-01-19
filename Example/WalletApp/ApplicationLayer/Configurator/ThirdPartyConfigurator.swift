@@ -1,7 +1,9 @@
 import WalletConnectNetworking
 import Web3Wallet
+import WalletConnectPush
 
 struct ThirdPartyConfigurator: Configurator {
+
     func configure() {
         Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
 
@@ -13,5 +15,8 @@ struct ThirdPartyConfigurator: Configurator {
         )
         
         Web3Wallet.configure(metadata: metadata, signerFactory: DefaultSignerFactory())
+    Push.configure()
+
     }
+
 }

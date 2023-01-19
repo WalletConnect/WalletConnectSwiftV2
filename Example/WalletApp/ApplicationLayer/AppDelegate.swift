@@ -1,9 +1,20 @@
 import UIKit
+import WalletConnectPush
+import Combine
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
+    private var publishers = [AnyCancellable]()
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+
+        Push.wallet.requestPublisher.sink { (id: RPCID, account: Account, metadata: AppMetadata) in
+            Task(priority: .high) { try! await Push.wallet.approve(id: id) }
+        }.store(in: &publishers)
+        Push.wallet.pushMessagePublisher.sink { pm in
+            print(pm)
+        }.store(in: &publishers)
         return true
     }
 
