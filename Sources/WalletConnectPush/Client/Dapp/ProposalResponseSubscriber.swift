@@ -48,6 +48,7 @@ class ProposalResponseSubscriber {
 
         let pushSubscription = PushSubscription(topic: topic, relay: relay, metadata: metadata)
         subscriptionsStore.set(pushSubscription, forKey: topic)
+        removeExchangeKeyPair(for: selfpublicKeyHex)
         try await networkingInteractor.subscribe(topic: topic)
         return pushSubscription
     }
@@ -60,10 +61,15 @@ class ProposalResponseSubscriber {
         return (topic: topic, keys: keys)
     }
 
+    private func removeExchangeKeyPair(for pubKey: String) {
+        kms.deletePrivateKey(for: pubKey)
+    }
+
     private func subscribeForProposalErrors() {
         let protocolMethod = PushRequestProtocolMethod()
         networkingInteractor.responseErrorSubscription(on: protocolMethod)
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<PushRequestParams>) in
+                removeExchangeKeyPair(for: payload.request.publicKey)
                 guard let error = PushError(code: payload.error.code) else { return }
                 onResponse?(payload.id, .failure(error))
             }.store(in: &publishers)
