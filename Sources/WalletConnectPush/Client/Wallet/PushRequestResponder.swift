@@ -56,7 +56,7 @@ class PushRequestResponder {
 
         try await networkingInteractor.respond(topic: pairingTopic, response: response, protocolMethod: PushRequestProtocolMethod())
 
-        removeExchangeKeyPair(for: keys.publicKey.hexRepresentation)
+        kms.deletePrivateKey(for: keys.publicKey.hexRepresentation)
     }
 
     func respondError(requestId: RPCID) async throws {
@@ -65,10 +65,6 @@ class PushRequestResponder {
         let pairingTopic = requestRecord.topic
 
         try await networkingInteractor.respondError(topic: pairingTopic, requestId: requestId, protocolMethod: PushRequestProtocolMethod(), reason: PushError.rejected)
-    }
-
-    private func removeExchangeKeyPair(for pubKey: String) {
-        kms.deletePrivateKey(for: pubKey)
     }
 
     private func getRecord(requestId: RPCID) throws -> RPCHistory.Record {
