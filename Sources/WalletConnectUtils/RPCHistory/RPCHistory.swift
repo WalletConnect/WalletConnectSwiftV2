@@ -65,6 +65,16 @@ public final class RPCHistory {
         }
     }
 
+    public func getAll<Object: Codable>(of type: Object.Type, topic: String) -> [Object] {
+        return storage.getAll()
+            .filter{$0.topic == topic}
+            .compactMap { record in
+                guard let object = try? record.request.params?.get(Object.self)
+                else { return nil }
+                return object
+            }
+    }
+
     public func deleteAll(forTopic topic: String) {
         deleteAll(forTopics: [topic])
     }
