@@ -55,6 +55,8 @@ class PushRequestResponder {
         subscriptionsStore.set(pushSubscription, forKey: pushTopic)
 
         try await networkingInteractor.respond(topic: pairingTopic, response: response, protocolMethod: PushRequestProtocolMethod())
+
+        kms.deletePrivateKey(for: keys.publicKey.hexRepresentation)
     }
 
     func respondError(requestId: RPCID) async throws {
