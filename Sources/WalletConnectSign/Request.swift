@@ -37,6 +37,15 @@ public struct Request: Codable, Equatable {
 
         return expiryDate < Date()
     }
+
+    func calculateTtl() -> Int {
+        guard let expiry = expiry else { return SessionRequestProtocolMethod.defaultTtl }
+
+        let expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
+        let diff = expiryDate - Date().timeIntervalSince1970
+
+        return Int(diff.timeIntervalSince1970)
+    }
 }
 
 private extension Request {
