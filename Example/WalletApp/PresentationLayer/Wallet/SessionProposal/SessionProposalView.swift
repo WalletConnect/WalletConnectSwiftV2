@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct AuthRequestView: View {
-    @EnvironmentObject var presenter: AuthRequestPresenter
+struct SessionProposalView: View {
+    @EnvironmentObject var presenter: SessionProposalPresenter
     
     @State var text = ""
     
@@ -17,7 +17,7 @@ struct AuthRequestView: View {
                         .resizable()
                         .scaledToFit()
                     
-                    Text(presenter.request.payload.domain)
+                    Text(presenter.proposal.proposerName)
                         .foregroundColor(.grey8)
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .padding(.top, 10)
@@ -26,14 +26,14 @@ struct AuthRequestView: View {
                         .foregroundColor(.grey8)
                         .font(.system(size: 22, weight: .medium, design: .rounded))
                     
-                    Text(presenter.request.payload.domain)
+                    Text(presenter.proposal.proposerName)
                         .foregroundColor(.grey50)
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .multilineTextAlignment(.center)
                         .lineSpacing(4)
                         .padding(.top, 8)
                     
-                    authRequestView()
+                    sessionProposalView()
                     
                     HStack(spacing: 20) {
                         Button {
@@ -93,10 +93,10 @@ struct AuthRequestView: View {
         .edgesIgnoringSafeArea(.all)
     }
     
-    private func authRequestView() -> some View {
+    private func sessionProposalView() -> some View {
         VStack {
             VStack(alignment: .leading) {
-                Text("Message")
+                Text(presenter.proposal.permissions.first?.chains.first ?? "Chain")
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .foregroundColor(.whiteBackground)
                     .padding(.horizontal, 8)
@@ -107,20 +107,57 @@ struct AuthRequestView: View {
                     .padding(.top, 9)
                 
                 VStack(spacing: 0) {
-                    ScrollView {
-                        Text(presenter.message)
+                    HStack {
+                        Text("Methods")
                             .foregroundColor(.grey50)
                             .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        
+                        Spacer()
                     }
                     .padding(.horizontal, 18)
-                    .padding(.vertical, 10)
-                    .frame(height: 250)
+                    .padding(.top, 10)
+                    
+                    TagsView(items: presenter.proposal.permissions.first?.methods ?? []) {
+                        Text($0)
+                            .foregroundColor(.cyanBackround)
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Color.cyanBackround.opacity(0.2))
+                            .cornerRadius(10, corners: .allCorners)
+                    }
+                    .padding(10)
+                }
+                .background(Color.whiteBackground)
+                .cornerRadius(20, corners: .allCorners)
+                .padding(.horizontal, 5)
+                
+                VStack(spacing: 0) {
+                    HStack {
+                        Text("Events")
+                            .foregroundColor(.grey50)
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        
+                        Spacer()
+                    }
+                    .padding(.horizontal, 18)
+                    .padding(.top, 10)
+                    
+                    TagsView(items: presenter.proposal.permissions.first?.events ?? []) {
+                        Text($0)
+                            .foregroundColor(.cyanBackround)
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Color.cyanBackround.opacity(0.2))
+                            .cornerRadius(10, corners: .allCorners)
+                    }
+                    .padding(10)
                 }
                 .background(Color.whiteBackground)
                 .cornerRadius(20, corners: .allCorners)
                 .padding(.horizontal, 5)
                 .padding(.bottom, 5)
-
             }
             .background(.thinMaterial)
             .cornerRadius(25, corners: .allCorners)
@@ -130,9 +167,9 @@ struct AuthRequestView: View {
 }
 
 #if DEBUG
-struct AuthRequestView_Previews: PreviewProvider {
+struct SessionProposalView_Previews: PreviewProvider {
     static var previews: some View {
-        AuthRequestView()
+        SessionProposalView()
     }
 }
 #endif

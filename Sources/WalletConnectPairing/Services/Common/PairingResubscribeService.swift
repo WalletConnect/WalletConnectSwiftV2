@@ -1,7 +1,7 @@
 import Foundation
 import Combine
 
-final class ResubscribeService {
+final class PairingResubscribeService {
 
     private var publishers = Set<AnyCancellable>()
 

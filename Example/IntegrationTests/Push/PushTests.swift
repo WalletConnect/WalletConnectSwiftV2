@@ -73,6 +73,7 @@ final class PushTests: XCTestCase {
         walletPushClient = WalletPushClientFactory.create(logger: pushLogger,
                                                           keyValueStorage: keyValueStorage,
                                                           keychainStorage: keychain,
+                                                          groupKeychainStorage: KeychainStorageMock(),
                                                           networkInteractor: networkingInteractor,
                                                           pairingRegisterer: pairingClient,
                                                           echoClient: echoClient)
@@ -90,7 +91,7 @@ final class PushTests: XCTestCase {
         try! await walletPairingClient.pair(uri: uri)
         try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
 
-        walletPushClient.requestPublisher.sink { (_, _) in
+        walletPushClient.requestPublisher.sink { (_, _, _) in
             expectation.fulfill()
         }
         .store(in: &publishers)
@@ -104,7 +105,7 @@ final class PushTests: XCTestCase {
         try! await walletPairingClient.pair(uri: uri)
         try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
 
-        walletPushClient.requestPublisher.sink { [unowned self] (id, _) in
+        walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
 
             Task(priority: .high) { try! await walletPushClient.approve(id: id) }
         }.store(in: &publishers)
@@ -127,7 +128,7 @@ final class PushTests: XCTestCase {
         try! await walletPairingClient.pair(uri: uri)
         try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
 
-        walletPushClient.requestPublisher.sink { [unowned self] (id, _) in
+        walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
 
             Task(priority: .high) { try! await walletPushClient.reject(id: id) }
         }.store(in: &publishers)
@@ -150,7 +151,7 @@ final class PushTests: XCTestCase {
         try! await walletPairingClient.pair(uri: uri)
         try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
 
-        walletPushClient.requestPublisher.sink { [unowned self] (id, _) in
+        walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
             Task(priority: .high) { try! await walletPushClient.approve(id: id) }
         }.store(in: &publishers)
 
@@ -178,7 +179,7 @@ final class PushTests: XCTestCase {
         try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
         var subscriptionTopic: String!
 
-        walletPushClient.requestPublisher.sink { [unowned self] (id, _) in
+        walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
             Task(priority: .high) { try! await walletPushClient.approve(id: id) }
         }.store(in: &publishers)
 
@@ -205,7 +206,7 @@ final class PushTests: XCTestCase {
         try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
         var subscriptionTopic: String!
 
-        walletPushClient.requestPublisher.sink { [unowned self] (id, _) in
+        walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
             Task(priority: .high) { try! await walletPushClient.approve(id: id) }
         }.store(in: &publishers)
 

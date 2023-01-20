@@ -5,7 +5,13 @@ struct SessionProposal: Codable, Equatable {
     let proposer: Participant
     let requiredNamespaces: [String: ProposalNamespace]
 
-    func publicRepresentation() -> Session.Proposal {
-        return Session.Proposal(id: proposer.publicKey, proposer: proposer.metadata, requiredNamespaces: requiredNamespaces, proposal: self)
+    func publicRepresentation(pairingTopic: String) -> Session.Proposal {
+        return Session.Proposal(
+            id: proposer.publicKey,
+            pairingTopic: pairingTopic,
+            proposer: proposer.metadata,
+            requiredNamespaces: requiredNamespaces,
+            proposal: self
+        )
     }
 }

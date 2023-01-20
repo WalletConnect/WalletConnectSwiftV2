@@ -81,8 +81,7 @@ extension SessionProposal {
         let relayOptions = RelayProtocolOptions(protocol: "irn", data: nil)
         return SessionType.ProposeParams(
             relays: [relayOptions],
-            proposer: Participant(publicKey: proposerPubKey, metadata: AppMetadata.stub()),
-            requiredNamespaces: ProposalNamespace.stubDictionary())
+            proposer: Participant(publicKey: proposerPubKey, metadata: AppMetadata.stub()), requiredNamespaces: ProposalNamespace.stubDictionary())
     }
 }
 

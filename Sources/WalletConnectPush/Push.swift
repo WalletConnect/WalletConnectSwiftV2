@@ -13,6 +13,10 @@ public class Push {
     }()
 
     public static var wallet: WalletPushClient = {
+        guard let config = Push.config else {
+            fatalError("Error - you must call Push.configure(_:) before accessing the shared wallet instance.")
+        }
+        Echo.configure(clientId: config.clientId)
         return WalletPushClientFactory.create(
             networkInteractor: Networking.interactor,
             pairingRegisterer: Pair.registerer,
@@ -20,5 +24,14 @@ public class Push {
         )
     }()
 
+    private static var config: Config?
+
     private init() { }
+
+    /// Wallet's configuration method
+    static public func configure() {
+        let clientId = try! Networking.interactor.getClientId()
+        Push.config = Push.Config(clientId: clientId)
+    }
+
 }

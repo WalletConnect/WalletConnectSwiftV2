@@ -11,17 +11,21 @@ class PushRequestResponder {
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
     private let subscriptionsStore: CodableStore<PushSubscription>
+    // Keychain shared with UNNotificationServiceExtension in order to decrypt PNs
+    private let groupKeychainStorage: KeychainStorageProtocol
 
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
          kms: KeyManagementService,
+         groupKeychainStorage: KeychainStorageProtocol,
          rpcHistory: RPCHistory,
          subscriptionsStore: CodableStore<PushSubscription>
     ) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.kms = kms
+        self.groupKeychainStorage = groupKeychainStorage
         self.rpcHistory = rpcHistory
         self.subscriptionsStore = subscriptionsStore
     }
@@ -37,6 +41,9 @@ class PushRequestResponder {
         let pushTopic = keys.derivedTopic()
 
         try kms.setAgreementSecret(keys, topic: pushTopic)
+
+        try groupKeychainStorage.add(keys, forKey: pushTopic)
+
         try await networkingInteractor.subscribe(topic: pushTopic)
 
         let responseParams = PushResponseParams(publicKey: keys.publicKey.hexRepresentation)
@@ -48,6 +55,8 @@ class PushRequestResponder {
         subscriptionsStore.set(pushSubscription, forKey: pushTopic)
 
         try await networkingInteractor.respond(topic: pairingTopic, response: response, protocolMethod: PushRequestProtocolMethod())
+
+        kms.deletePrivateKey(for: keys.publicKey.hexRepresentation)
     }
 
     func respondError(requestId: RPCID) async throws {

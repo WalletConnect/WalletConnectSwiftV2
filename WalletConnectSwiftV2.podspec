@@ -75,47 +75,48 @@ Pod::Spec.new do |spec|
   spec.default_subspecs = 'WalletConnect'
 
   spec.subspec 'WalletConnect' do |ss|
-    ss.source_files = 'Sources/WalletConnectSign/**/*'
+    ss.source_files = 'Sources/WalletConnectSign/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectPairing'
   end
 
   spec.subspec 'WalletConnectAuth' do |ss|
-    ss.source_files = 'Sources/Auth/**/*'
+    ss.source_files = 'Sources/Auth/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectPairing'
   end
 
+  spec.subspec 'Web3Wallet' do |ss|
+    ss.source_files = 'Sources/Web3Wallet/**/*.{h,m,swift}'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnect'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectAuth'
+  end
+
   spec.subspec 'WalletConnectChat' do |ss|
-    ss.source_files = 'Sources/Chat/**/*'
+    ss.source_files = 'Sources/Chat/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectNetworking'
   end
 
   spec.subspec 'WalletConnectNetworking' do |ss|
-    ss.source_files = 'Sources/WalletConnectNetworking/**/*'
+    ss.source_files = 'Sources/WalletConnectNetworking/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectRelay'
   end
 
   spec.subspec 'WalletConnectPairing' do |ss|
-    ss.source_files = 'Sources/WalletConnectPairing/**/*'
+    ss.source_files = 'Sources/WalletConnectPairing/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectNetworking'
   end
 
-  spec.subspec 'WalletConnectPush' do |ss|
-    ss.source_files = 'Sources/WalletConnectPush/**/*'
-    ss.dependency 'WalletConnectSwiftV2/WalletConnectPairing'
-  end
-
   spec.subspec 'WalletConnectRouter' do |ss|
-    ss.source_files = 'Sources/WalletConnectRouter/**/*'
+    ss.source_files = 'Sources/WalletConnectRouter/**/*.{h,m,swift}'
     ss.platform = :ios
   end
 
   spec.subspec 'WalletConnectNetworking' do |ss|
-    ss.source_files = 'Sources/WalletConnectNetworking/**/*'
+    ss.source_files = 'Sources/WalletConnectNetworking/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectRelay'
   end
 
   spec.subspec 'WalletConnectRelay' do |ss|
-    ss.source_files = 'Sources/WalletConnectRelay/**/*'
+    ss.source_files = 'Sources/WalletConnectRelay/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectKMS'
     ss.resource_bundles = {
       'WalletConnect_WalletConnectRelay' => [

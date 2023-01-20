@@ -17,6 +17,7 @@ extension Session {
 
     public struct Proposal: Equatable {
         public var id: String
+        public let pairingTopic: String
         public let proposer: AppMetadata
         public let requiredNamespaces: [String: ProposalNamespace]
 

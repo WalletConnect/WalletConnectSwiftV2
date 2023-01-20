@@ -5,16 +5,13 @@ import WalletConnectPairing
 
 class PushMessageSubscriber {
     private let networkingInteractor: NetworkInteracting
-    private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
     private var publishers = [AnyCancellable]()
     var onPushMessage: ((_ message: PushMessage) -> Void)?
 
     init(networkingInteractor: NetworkInteracting,
-         kms: KeyManagementServiceProtocol,
          logger: ConsoleLogging) {
         self.networkingInteractor = networkingInteractor
-        self.kms = kms
         self.logger = logger
         subscribeForPushMessages()
     }

@@ -1,6 +1,6 @@
 import Foundation
 
-extension Echo {
+extension Push {
     struct Config {
         let clientId: String
     }
