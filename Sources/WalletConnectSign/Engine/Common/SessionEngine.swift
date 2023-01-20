@@ -4,6 +4,7 @@ import Combine
 final class SessionEngine {
     enum Errors: Error {
         case sessionNotFound(topic: String)
+        case sessionRequestExpired
     }
 
     var onSessionsUpdate: (([Session]) -> Void)?
@@ -15,17 +16,20 @@ final class SessionEngine {
 
     private let sessionStore: WCSessionStorage
     private let networkingInteractor: NetworkInteracting
+    private let historyService: HistoryService
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
 
     init(
         networkingInteractor: NetworkInteracting,
+        historyService: HistoryService,
         kms: KeyManagementServiceProtocol,
         sessionStore: WCSessionStorage,
         logger: ConsoleLogging
     ) {
         self.networkingInteractor = networkingInteractor
+        self.historyService = historyService
         self.kms = kms
         self.sessionStore = sessionStore
         self.logger = logger
@@ -65,8 +69,24 @@ final class SessionEngine {
         guard sessionStore.hasSession(forTopic: topic) else {
             throw Errors.sessionNotFound(topic: topic)
         }
-        let response = RPCResponse(id: requestId, outcome: response)
-        try await networkingInteractor.respond(topic: topic, response: response, protocolMethod: SessionRequestProtocolMethod())
+
+        let protocolMethod = SessionRequestProtocolMethod()
+
+        guard sessionRequestNotExpired(requestId: requestId) else {
+            try await networkingInteractor.respondError(
+                topic: topic,
+                requestId: requestId,
+                protocolMethod: protocolMethod,
+                reason: SignReasonCode.sessionRequestExpired
+            )
+            throw Errors.sessionRequestExpired
+        }
+
+        try await networkingInteractor.respond(
+            topic: topic,
+            response: RPCResponse(id: requestId, outcome: response),
+            protocolMethod: protocolMethod
+        )
     }
 
     func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain) async throws {
@@ -157,6 +177,13 @@ private extension SessionEngine {
             guard let self else { return }
             self.onSessionsUpdate?(self.getSessions())
         }
+    }
+
+    func sessionRequestNotExpired(requestId: RPCID) -> Bool {
+        guard let request = historyService.getSessionRequest(id: requestId)
+        else { return false }
+
+        return !request.isExpired()
     }
 
     func respondError(payload: SubscriptionPayload, reason: SignReasonCode, protocolMethod: ProtocolMethod) {
