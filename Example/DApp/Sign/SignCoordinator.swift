@@ -48,11 +48,12 @@ final class SignCoordinator {
         Sign.instance.sessionSettlePublisher
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] session in
-                showAccountsScreen(session)
+                let vc = showAccountsScreen(session)
+                vc.proposePushSubscription()
             }.store(in: &publishers)
 
         if let session = Sign.instance.getSessions().first {
-            showAccountsScreen(session)
+            _ = showAccountsScreen(session)
         } else {
             showSelectChainScreen()
         }
@@ -63,13 +64,14 @@ final class SignCoordinator {
         navigationController.viewControllers = [controller]
     }
 
-    private func showAccountsScreen(_ session: Session) {
+    private func showAccountsScreen(_ session: Session) -> AccountsViewController {
         let controller = AccountsViewController(session: session)
         controller.onDisconnect = { [unowned self]  in
             showSelectChainScreen()
         }
         navigationController.presentedViewController?.dismiss(animated: false)
         navigationController.viewControllers = [controller]
+        return controller
     }
 
     private func presentResponse(for response: Response) {
