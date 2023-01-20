@@ -31,8 +31,8 @@ public struct Request: Codable, Equatable {
         let expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
 
         guard
-            currentDate.distance(to: expiryDate) < Constants.maxExpiry,
-            currentDate.distance(to: expiryDate) > Constants.minExpiry
+            abs(currentDate.distance(to: expiryDate)) < Constants.maxExpiry,
+            abs(currentDate.distance(to: expiryDate)) > Constants.minExpiry
         else { return true  }
 
         return expiryDate < currentDate
