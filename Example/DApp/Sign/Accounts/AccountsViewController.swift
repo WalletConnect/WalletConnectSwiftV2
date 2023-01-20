@@ -1,5 +1,6 @@
 import UIKit
 import WalletConnectSign
+import WalletConnectPush
 
 struct AccountDetails {
     let chain: String
@@ -47,6 +48,13 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
                 accountsDetails.append(AccountDetails(chain: account.blockchainIdentifier, methods: Array(namespace.methods), account: account.address)) // TODO: Rethink how this info is displayed on example
             }
         }
+    }
+
+    private func proposePushSubscription() {
+        let account = session.namespaces.values.first!.accounts.first!
+        // temp solution
+        let pairingTopic = Pair.instance.getPairings().last!.topic
+        Task(priority: .high){ try! await Push.dapp.request(account: account, topic: pairingTopic)}
     }
 
     @objc

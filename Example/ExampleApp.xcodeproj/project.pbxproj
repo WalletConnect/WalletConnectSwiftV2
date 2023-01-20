@@ -58,6 +58,7 @@
 		84CEC64628D89D6B00D081A8 /* PairingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CEC64528D89D6B00D081A8 /* PairingTests.swift */; };
 		84D2A66628A4F51E0088AE09 /* AuthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D2A66528A4F51E0088AE09 /* AuthTests.swift */; };
 		84DDB4ED28ABB663003D66ED /* WalletConnectAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 84DDB4EC28ABB663003D66ED /* WalletConnectAuth */; };
+		84E6B85629797CDE00428BAF /* WalletConnectPush in Frameworks */ = {isa = PBXBuildFile; productRef = 84E6B85529797CDE00428BAF /* WalletConnectPush */; };
 		84F568C2279582D200D0A289 /* Signer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C1279582D200D0A289 /* Signer.swift */; };
 		84F568C42795832A00D0A289 /* EthereumTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C32795832A00D0A289 /* EthereumTransaction.swift */; };
 		84FE684628ACDB4700C893FF /* RequestParams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FE684528ACDB4700C893FF /* RequestParams.swift */; };
@@ -559,6 +560,7 @@
 			files = (
 				8448F1D427E4726F0000B866 /* WalletConnect in Frameworks */,
 				A54195A52934E83F0035AD19 /* Web3 in Frameworks */,
+				84E6B85629797CDE00428BAF /* WalletConnectPush in Frameworks */,
 				A5D85228286333E300DAF5C3 /* Starscream in Frameworks */,
 				A5BB7FA328B6A50400707FC6 /* WalletConnectAuth in Frameworks */,
 			);
@@ -1611,6 +1613,7 @@
 				A5D85227286333E300DAF5C3 /* Starscream */,
 				A5BB7FA228B6A50400707FC6 /* WalletConnectAuth */,
 				A54195A42934E83F0035AD19 /* Web3 */,
+				84E6B85529797CDE00428BAF /* WalletConnectPush */,
 			);
 			productName = DApp;
 			productReference = 84CE641C27981DED00142511 /* DApp.app */;
@@ -2773,6 +2776,10 @@
 		84DDB4EC28ABB663003D66ED /* WalletConnectAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectAuth;
+		};
+		84E6B85529797CDE00428BAF /* WalletConnectPush */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = WalletConnectPush;
 		};
 		A54195A42934E83F0035AD19 /* Web3 */ = {
 			isa = XCSwiftPackageProductDependency;
