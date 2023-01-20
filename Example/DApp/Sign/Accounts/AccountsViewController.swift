@@ -81,7 +81,7 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
     @objc
     private func pushTest() {
         guard let pushTopic = pushSubscription?.topic else {return}
-        let message = PushMessage(title: "Push Message", body: "Hey this is a message from swift client", icon: "", url: "")
+        let message = PushMessage(title: "Push Message", body: "He,y this is a message from the swift client", icon: "", url: "")
         Task(priority: .userInitiated) { try! await Push.dapp.notify(topic: pushTopic, message: message) }
     }
 
