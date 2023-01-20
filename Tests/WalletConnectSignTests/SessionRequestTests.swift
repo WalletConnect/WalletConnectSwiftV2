@@ -32,6 +32,41 @@ final class SessionRequestTests: XCTestCase {
 
         XCTAssertEqual(request.calculateTtl(currentDate: currentDate), SessionRequestProtocolMethod.defaultTtl)
     }
+
+    func testIsExpiredDefault() {
+        let request = Request.stub()
+
+        XCTAssertFalse(request.isExpired())
+    }
+
+    func testIsExpiredTrue() {
+        let currentDate = Date(timeIntervalSince1970: 500)
+        let expiry = Date(timeIntervalSince1970: 0)
+        let request = Request.stub(expiry: UInt64(expiry.timeIntervalSince1970))
+        XCTAssertTrue(request.isExpired(currentDate: currentDate))
+    }
+
+    func testIsExpiredTrueMinValidation() {
+        let currentDate = Date(timeIntervalSince1970: 500)
+        let expiry = Date(timeIntervalSince1970: 600)
+        let request = Request.stub(expiry: UInt64(expiry.timeIntervalSince1970))
+        XCTAssertTrue(request.isExpired(currentDate: currentDate))
+    }
+
+    func testIsExpiredTrueMaxValidation() {
+        let currentDate = Date(timeIntervalSince1970: 500)
+        let expiry = Date(timeIntervalSince1970: 700000)
+        let request = Request.stub(expiry: UInt64(expiry.timeIntervalSince1970))
+        XCTAssertTrue(request.isExpired(currentDate: currentDate))
+    }
+
+    func testIsExpiredFalse() {
+        let currentDate = Date(timeIntervalSince1970: 0)
+        let expiry = Date(timeIntervalSince1970: 500)
+        let request = Request.stub(expiry: UInt64(expiry.timeIntervalSince1970))
+
+        XCTAssertFalse(request.isExpired(currentDate: currentDate))
+    }
 }
 
 private extension Request {

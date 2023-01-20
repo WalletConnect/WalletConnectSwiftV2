@@ -25,17 +25,17 @@ public struct Request: Codable, Equatable {
         self.init(id: id, topic: topic, method: method, params: AnyCodable(params), chainId: chainId, expiry: expiry)
     }
 
-    func isExpired() -> Bool {
+    func isExpired(currentDate: Date = Date()) -> Bool {
         guard let expiry = expiry else { return false }
 
         let expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
 
         guard
-            Date().distance(to: expiryDate) < Constants.maxExpiry,
-            Date().distance(to: expiryDate) > Constants.minExpiry
+            currentDate.distance(to: expiryDate) < Constants.maxExpiry,
+            currentDate.distance(to: expiryDate) > Constants.minExpiry
         else { return true  }
 
-        return expiryDate < Date()
+        return expiryDate < currentDate
     }
 
     func calculateTtl(currentDate: Date = Date()) -> Int {
