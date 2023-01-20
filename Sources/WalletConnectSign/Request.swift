@@ -31,18 +31,23 @@ public struct Request: Codable, Equatable {
         let expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
 
         guard
-            Date().distance(to: expiryDate) > Constants.maxExpiry,
-            Date().distance(to: expiryDate) < Constants.minExpiry
+            Date().distance(to: expiryDate) < Constants.maxExpiry,
+            Date().distance(to: expiryDate) > Constants.minExpiry
         else { return true  }
 
         return expiryDate < Date()
     }
 
-    func calculateTtl() -> Int {
+    func calculateTtl(currentDate: Date = Date()) -> Int {
         guard let expiry = expiry else { return SessionRequestProtocolMethod.defaultTtl }
 
         let expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
-        let diff = expiryDate - Date().timeIntervalSince1970
+        let diff = expiryDate - currentDate.timeIntervalSince1970
+
+        guard
+            diff.timeIntervalSince1970 < Constants.maxExpiry,
+            diff.timeIntervalSince1970 > Constants.minExpiry
+        else { return SessionRequestProtocolMethod.defaultTtl }
 
         return Int(diff.timeIntervalSince1970)
     }
