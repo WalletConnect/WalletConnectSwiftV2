@@ -7,6 +7,7 @@ struct WCSession: SequenceObject, Equatable {
     }
 
     let topic: String
+    let pairingTopic: String
     let relay: RelayProtocolOptions
     let selfParticipant: Participant
     let peerParticipant: Participant
@@ -27,6 +28,7 @@ struct WCSession: SequenceObject, Equatable {
     }
 
     init(topic: String,
+         pairingTopic: String,
          timestamp: Date,
          selfParticipant: Participant,
          peerParticipant: Participant,
@@ -34,6 +36,7 @@ struct WCSession: SequenceObject, Equatable {
          requiredNamespaces: [String: ProposalNamespace],
          acknowledged: Bool) {
         self.topic = topic
+        self.pairingTopic = pairingTopic
         self.timestamp = timestamp
         self.relay = settleParams.relay
         self.controller = AgreementPeer(publicKey: settleParams.controller.publicKey)
@@ -179,6 +182,7 @@ struct WCSession: SequenceObject, Equatable {
     func publicRepresentation() -> Session {
         return Session(
             topic: topic,
+            pairingTopic: pairingTopic,
             peer: peerParticipant.metadata,
             namespaces: namespaces,
             expiryDate: expiryDate)

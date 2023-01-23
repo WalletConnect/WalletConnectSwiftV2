@@ -5,6 +5,7 @@ import Foundation
  */
 public struct Session {
     public let topic: String
+    public let pairingTopic: String
     public let peer: AppMetadata
     public let namespaces: [String: SessionNamespace]
     public let expiryDate: Date

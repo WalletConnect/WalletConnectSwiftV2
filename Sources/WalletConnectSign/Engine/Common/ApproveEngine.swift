@@ -62,6 +62,7 @@ final class ApproveEngine {
         }
 
         let proposal = payload.request
+        let pairingTopic = payload.topic
 
         proposalPayloadsStore.delete(forKey: proposerPubKey)
 
@@ -88,7 +89,7 @@ final class ApproveEngine {
 
         async let proposeResponse: () = networkingInteractor.respond(topic: payload.topic, response: response, protocolMethod: SessionProposeProtocolMethod())
 
-        async let settleRequest: () = settle(topic: sessionTopic, proposal: proposal, namespaces: sessionNamespaces)
+        async let settleRequest: () = settle(topic: sessionTopic, proposal: proposal, namespaces: sessionNamespaces, pairingTopic: pairingTopic)
 
         _ = try await [proposeResponse, settleRequest]
 
@@ -107,7 +108,7 @@ final class ApproveEngine {
         // TODO: Delete pairing if inactive 
     }
 
-    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace]) async throws {
+    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace], pairingTopic: String) async throws {
         guard let agreementKeys = kms.getAgreementSecret(for: topic) else {
             throw Errors.agreementMissingOrInvalid
         }
@@ -132,6 +133,7 @@ final class ApproveEngine {
 
         let session = WCSession(
             topic: topic,
+            pairingTopic: pairingTopic
             timestamp: Date(),
             selfParticipant: selfParticipant,
             peerParticipant: proposal.proposer,
