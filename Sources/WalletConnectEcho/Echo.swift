@@ -10,7 +10,8 @@ public class Echo {
 
         return EchoClientFactory.create(
             projectId: Networking.projectId,
-            clientId: config.clientId)
+            clientId: config.clientId,
+            echoHost: config.echoHost)
     }()
 
     private static var config: Config?
@@ -19,7 +20,10 @@ public class Echo {
 
     /// Echo instance config method
     /// - Parameter clientId: https://github.com/WalletConnect/walletconnect-docs/blob/main/docs/specs/clients/core/relay/relay-client-auth.md#overview
-    static public func configure(clientId: String) {
-        Echo.config = Echo.Config(clientId: clientId)
+    static public func configure(
+        clientId: String,
+        echoHost: String = "echo.walletconnect.com"
+    ) {
+        Echo.config = Echo.Config(clientId: clientId, echoHost: echoHost)
     }
 }
