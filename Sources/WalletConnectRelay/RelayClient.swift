@@ -213,6 +213,16 @@ public final class RelayClient {
         }
     }
 
+    public func batchSubscribe(topics: [String]) async throws {
+        await withThrowingTaskGroup(of: Void.self) { group in
+            for topic in topics {
+                group.addTask {
+                    try await self.subscribe(topic: topic)
+                }
+            }
+        }
+    }
+
     public func batchUnsubscribe(topics: [String]) async throws {
         await withThrowingTaskGroup(of: Void.self) { group in
             for topic in topics {

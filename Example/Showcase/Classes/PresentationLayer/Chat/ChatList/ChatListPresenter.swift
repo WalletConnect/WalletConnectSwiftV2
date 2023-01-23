@@ -97,7 +97,7 @@ private extension ChatListPresenter {
 
     @MainActor
     func loadThreads() async {
-        let threads = await interactor.getThreads()
+        let threads = await interactor.getThreads(account: account)
         self.threads = threads
             .filter { $0.selfAccount == account }
             .sorted(by: { $0.topic < $1.topic })

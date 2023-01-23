@@ -57,6 +57,10 @@ public class NetworkingInteractor: NetworkInteracting {
         }
     }
 
+    public func batchSubscribe(topics: [String]) async throws {
+        try await relayClient.batchSubscribe(topics: topics)
+    }
+
     public func batchUnsubscribe(topics: [String]) async throws {
         try await relayClient.batchUnsubscribe(topics: topics)
         rpcHistory.deleteAll(forTopics: topics)

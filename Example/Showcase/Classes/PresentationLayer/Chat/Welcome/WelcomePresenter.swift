@@ -26,11 +26,11 @@ final class WelcomePresenter: ObservableObject {
         return interactor.isAuthorized() ? "Start Messaging" : "Connect wallet"
     }
 
-    func didPressImport() async {
+    func didPressImport() {
         if let account = interactor.account {
             router.presentChats(account: account)
         } else {
-            await authWithWallet()
+            router.presentImport()
         }
     }
     
