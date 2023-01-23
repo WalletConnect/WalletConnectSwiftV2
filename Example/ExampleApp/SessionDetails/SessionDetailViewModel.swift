@@ -175,8 +175,7 @@ private extension SessionNamespace {
         self.init(
             accounts: accounts ?? namespace.accounts,
             methods: methods ?? namespace.methods,
-            events: events ?? namespace.events,
-            extensions: namespace.extensions
+            events: events ?? namespace.events
         )
     }
 }

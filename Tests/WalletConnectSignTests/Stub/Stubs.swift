@@ -24,8 +24,7 @@ extension ProposalNamespace {
             "eip155": ProposalNamespace(
                 chains: [Blockchain("eip155:1")!],
                 methods: ["method"],
-                events: ["event"],
-                extensions: nil)
+                events: ["event"])
         ]
     }
 }
@@ -36,8 +35,7 @@ extension SessionNamespace {
             "eip155": SessionNamespace(
                 accounts: [Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!],
                 methods: ["method"],
-                events: ["event"],
-                extensions: nil)
+                events: ["event"])
         ]
     }
 }
