@@ -65,9 +65,8 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
 
     func proposePushSubscription() {
         let account = session.namespaces.values.first!.accounts.first!
-        // temp solution
-        let pairingTopic = Pair.instance.getPairings().last!.topic
-        Task(priority: .high){ try! await Push.dapp.request(account: account, topic: pairingTopic)}
+
+        Task(priority: .high){ try! await Push.dapp.request(account: account, topic: session.pairingTopic)}
         Push.dapp.responsePublisher.sink { (id: RPCID, result: Result<PushSubscription, PushError>) in
             switch result {
             case .success(let subscription):
