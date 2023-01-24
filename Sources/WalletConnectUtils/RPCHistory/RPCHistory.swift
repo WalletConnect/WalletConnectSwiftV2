@@ -73,8 +73,9 @@ public final class RPCHistory {
                 else { return nil }
                 return object
             }
+    }
 
-        public func getAll<Object: Codable>(of type: Object.Type) -> [Object] {
+    public func getAll<Object: Codable>(of type: Object.Type) -> [Object] {
         return getAllWithIDs(of: type).map { $0.value }
     }
 
