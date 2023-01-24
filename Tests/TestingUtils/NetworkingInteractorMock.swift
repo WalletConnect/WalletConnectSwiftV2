@@ -105,6 +105,12 @@ public class NetworkingInteractorMock: NetworkInteracting {
         }
     }
 
+    public func batchSubscribe(topics: [String]) async throws {
+        for topic in topics {
+            try await subscribe(topic: topic)
+        }
+    }
+
     public func request(_ request: RPCRequest, topic: String, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
         requestCallCount += 1
         requests.append((topic, request))
