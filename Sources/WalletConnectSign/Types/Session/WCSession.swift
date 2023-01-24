@@ -209,12 +209,8 @@ extension WCSession {
         self.namespaces = try container.decode([String: SessionNamespace].self, forKey: .namespaces)
         self.acknowledged = try container.decode(Bool.self, forKey: .acknowledged)
         self.expiryDate = try container.decode(Date.self, forKey: .expiryDate)
-
-        // Migration beta.102
-        self.timestamp = try container.decodeIfPresent(Date.self, forKey: .timestamp) ?? .distantPast
-        self.requiredNamespaces = try container.decodeIfPresent([String: ProposalNamespace].self, forKey: .requiredNamespaces) ?? [:]
-
-        //
+        self.timestamp = try container.decode(Date.self, forKey: .timestamp)
+        self.requiredNamespaces = try container.decode([String: ProposalNamespace].self, forKey: .requiredNamespaces)
         self.pairingTopic = try container.decode(String.self, forKey: .pairingTopic)
     }
 
