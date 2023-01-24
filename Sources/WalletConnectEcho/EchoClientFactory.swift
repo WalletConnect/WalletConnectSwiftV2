@@ -2,9 +2,9 @@ import Foundation
 import WalletConnectNetworking
 
 public struct EchoClientFactory {
-    public static func create(projectId: String, clientId: String) -> EchoClient {
+    public static func create(projectId: String, clientId: String, echoHost: String) -> EchoClient {
 
-        let httpClient = HTTPNetworkClient(host: "echo.walletconnect.com")
+        let httpClient = HTTPNetworkClient(host: echoHost)
 
         return EchoClientFactory.create(
             projectId: projectId,
