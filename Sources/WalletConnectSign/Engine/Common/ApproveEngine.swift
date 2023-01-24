@@ -133,7 +133,7 @@ final class ApproveEngine {
 
         let session = WCSession(
             topic: topic,
-            pairingTopic: pairingTopic
+            pairingTopic: pairingTopic,
             timestamp: Date(),
             selfParticipant: selfParticipant,
             peerParticipant: proposal.proposer,
@@ -317,15 +317,17 @@ private extension ApproveEngine {
             metadata: metadata
         )
 
-        if let pairingTopic = try? sessionToPairingTopic.get(key: topic) {
-            pairingRegisterer.activate(
-                pairingTopic: pairingTopic,
-                peerMetadata: params.controller.metadata
-            )
+        guard let pairingTopic = try? sessionToPairingTopic.get(key: topic) else {
+            return
         }
+        pairingRegisterer.activate(
+            pairingTopic: pairingTopic,
+            peerMetadata: params.controller.metadata
+        )
 
         let session = WCSession(
             topic: topic,
+            pairingTopic: pairingTopic,
             timestamp: Date(),
             selfParticipant: selfParticipant,
             peerParticipant: params.controller,

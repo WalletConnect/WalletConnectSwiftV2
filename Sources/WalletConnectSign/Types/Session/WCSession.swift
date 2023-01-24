@@ -51,6 +51,7 @@ struct WCSession: SequenceObject, Equatable {
 #if DEBUG
     internal init(
         topic: String,
+        pairingTopic: String,
         timestamp: Date,
         relay: RelayProtocolOptions,
         controller: AgreementPeer,
@@ -64,6 +65,7 @@ struct WCSession: SequenceObject, Equatable {
         expiry: Int64
     ) {
         self.topic = topic
+        self.pairingTopic = pairingTopic
         self.timestamp = timestamp
         self.relay = relay
         self.controller = controller
@@ -194,7 +196,7 @@ struct WCSession: SequenceObject, Equatable {
 extension WCSession {
 
     enum CodingKeys: String, CodingKey {
-        case topic, relay, selfParticipant, peerParticipant, expiryDate, acknowledged, controller, namespaces, timestamp, requiredNamespaces
+        case topic, pairingTopic, relay, selfParticipant, peerParticipant, expiryDate, acknowledged, controller, namespaces, timestamp, requiredNamespaces
     }
 
     init(from decoder: Decoder) throws {
@@ -211,6 +213,9 @@ extension WCSession {
         // Migration beta.102
         self.timestamp = try container.decodeIfPresent(Date.self, forKey: .timestamp) ?? .distantPast
         self.requiredNamespaces = try container.decodeIfPresent([String: ProposalNamespace].self, forKey: .requiredNamespaces) ?? [:]
+
+        //
+        self.pairingTopic = try container.decode(String.self, forKey: .pairingTopic)
     }
 
     func encode(to encoder: Encoder) throws {
