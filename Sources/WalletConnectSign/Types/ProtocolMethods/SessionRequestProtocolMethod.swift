@@ -1,9 +1,22 @@
 import Foundation
 
 struct SessionRequestProtocolMethod: ProtocolMethod {
+
+    static let defaultTtl: Int = 300
+
     let method: String = "wc_sessionRequest"
 
-    let requestConfig = RelayConfig(tag: 1108, prompt: true, ttl: 300)
+    private let ttl: Int
 
-    let responseConfig = RelayConfig(tag: 1109, prompt: false, ttl: 300)
+    var requestConfig: RelayConfig {
+        RelayConfig(tag: 1108, prompt: true, ttl: ttl)
+    }
+
+    var responseConfig: RelayConfig {
+        RelayConfig(tag: 1109, prompt: false, ttl: ttl)
+    }
+
+    init(ttl: Int = Self.defaultTtl) {
+        self.ttl = ttl
+    }
 }

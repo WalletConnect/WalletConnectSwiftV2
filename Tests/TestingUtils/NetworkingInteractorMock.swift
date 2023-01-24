@@ -23,6 +23,7 @@ public class NetworkingInteractorMock: NetworkInteracting {
     var didCallRequest: Bool { requestCallCount > 0 }
 
     var onSubscribeCalled: (() -> Void)?
+    var onRespondError: ((Int) -> Void)?
 
     public let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
@@ -127,6 +128,7 @@ public class NetworkingInteractorMock: NetworkInteracting {
     public func respondError(topic: String, requestId: RPCID, protocolMethod: ProtocolMethod, reason: Reason, envelopeType: Envelope.EnvelopeType) async throws {
         lastErrorCode = reason.code
         didRespondError = true
+        onRespondError?(reason.code)
     }
 
     public func requestNetworkAck(_ request: RPCRequest, topic: String, protocolMethod: ProtocolMethod) async throws {

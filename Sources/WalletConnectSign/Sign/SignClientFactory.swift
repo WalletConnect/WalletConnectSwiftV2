@@ -25,7 +25,8 @@ public struct SignClientFactory {
         let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(store: .init(defaults: keyValueStorage, identifier: SignStorageIdentifiers.sessions.rawValue)))
         let sessionToPairingTopic = CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: SignStorageIdentifiers.sessionToPairingTopic.rawValue)
         let proposalPayloadsStore = CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>(defaults: RuntimeKeyValueStorage(), identifier: SignStorageIdentifiers.proposals.rawValue)
-        let sessionEngine = SessionEngine(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
+        let historyService = HistoryService(history: rpcHistory)
+        let sessionEngine = SessionEngine(networkingInteractor: networkingClient, historyService: historyService, kms: kms, sessionStore: sessionStore, logger: logger)
         let nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let approveEngine = ApproveEngine(networkingInteractor: networkingClient, proposalPayloadsStore: proposalPayloadsStore, sessionToPairingTopic: sessionToPairingTopic, pairingRegisterer: pairingClient, metadata: metadata, kms: kms, logger: logger, pairingStore: pairingStore, sessionStore: sessionStore)
@@ -47,7 +48,7 @@ public struct SignClientFactory {
             controllerSessionStateMachine: controllerSessionStateMachine,
             appProposeService: appProposerService,
             disconnectService: disconnectService,
-            history: rpcHistory,
+            historyService: historyService,
             cleanupService: cleanupService,
             pairingClient: pairingClient
         )

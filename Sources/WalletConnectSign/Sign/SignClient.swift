@@ -110,7 +110,7 @@ public final class SignClient: SignClientProtocol {
     private let nonControllerSessionStateMachine: NonControllerSessionStateMachine
     private let controllerSessionStateMachine: ControllerSessionStateMachine
     private let appProposeService: AppProposeService
-    private let history: RPCHistory
+    private let historyService: HistoryService
     private let cleanupService: SignCleanupService
 
     private let sessionProposalPublisherSubject = PassthroughSubject<Session.Proposal, Never>()
@@ -140,7 +140,7 @@ public final class SignClient: SignClientProtocol {
          controllerSessionStateMachine: ControllerSessionStateMachine,
          appProposeService: AppProposeService,
          disconnectService: DisconnectService,
-         history: RPCHistory,
+         historyService: HistoryService,
          cleanupService: SignCleanupService,
          pairingClient: PairingClient
     ) {
@@ -153,7 +153,7 @@ public final class SignClient: SignClientProtocol {
         self.nonControllerSessionStateMachine = nonControllerSessionStateMachine
         self.controllerSessionStateMachine = controllerSessionStateMachine
         self.appProposeService = appProposeService
-        self.history = history
+        self.historyService = historyService
         self.cleanupService = cleanupService
         self.disconnectService = disconnectService
         self.pairingClient = pairingClient
@@ -323,27 +323,17 @@ public final class SignClient: SignClientProtocol {
     /// - Returns: Pending requests received from peer with `wc_sessionRequest` protocol method
     /// - Parameter topic: topic representing session for which you want to get pending requests. If nil, you will receive pending requests for all active sessions.
     public func getPendingRequests(topic: String? = nil) -> [Request] {
-        let pendingRequests: [Request] = history.getPending()
-            .compactMap {
-                guard let request = try? $0.request.params?.get(SessionType.RequestParams.self) else { return nil }
-                return Request(id: $0.id, topic: $0.topic, method: request.request.method, params: request.request.params, chainId: request.chainId)
-            }
         if let topic = topic {
-            return pendingRequests.filter {$0.topic == topic}
+            return historyService.getPendingRequests(topic: topic)
         } else {
-            return pendingRequests
+            return historyService.getPendingRequests()
         }
     }
 
     /// - Parameter id: id of a wc_sessionRequest jsonrpc request
     /// - Returns: json rpc record object for given id or nil if record for give id does not exits
     public func getSessionRequestRecord(id: RPCID) -> Request? {
-        guard
-            let record = history.get(recordId: id),
-            let request = try? record.request.params?.get(SessionType.RequestParams.self)
-        else { return nil }
-
-        return Request(id: record.id, topic: record.topic, method: record.request.method, params: request, chainId: request.chainId)
+        return historyService.getSessionRequest(id: id)
     }
 
     /// Delete all stored data such as: pairings, sessions, keys

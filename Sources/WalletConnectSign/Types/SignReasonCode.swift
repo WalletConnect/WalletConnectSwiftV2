@@ -37,6 +37,9 @@ enum SignReasonCode: Reason, Codable, Equatable {
     // 6000
     case userDisconnected
 
+    // 8000
+    case sessionRequestExpired
+
     var code: Int {
         switch self {
         case .invalidMethod: return 1001
@@ -66,6 +69,8 @@ enum SignReasonCode: Reason, Codable, Equatable {
         case .userDisconnected: return 6000
 
         case .noSessionForTopic: return 7001
+
+        case .sessionRequestExpired: return 8000
         }
     }
 
@@ -117,6 +122,8 @@ enum SignReasonCode: Reason, Codable, Equatable {
             return "Unsupported namespace key"
         case .userDisconnected:
             return "User discconnected"
+        case .sessionRequestExpired:
+            return "Session request expired or expiry param validation failed (MIN_INTERVAL: 300, MAX_INTERVAL: 604800)"
         }
     }
 }
