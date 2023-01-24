@@ -221,6 +221,7 @@ extension WCSession {
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(topic, forKey: .topic)
+        try container.encode(pairingTopic, forKey: .pairingTopic)
         try container.encode(relay, forKey: .relay)
         try container.encode(controller, forKey: .controller)
         try container.encode(selfParticipant, forKey: .selfParticipant)

@@ -78,7 +78,6 @@ final class ApproveEngine {
 
         let sessionTopic = agreementKey.derivedTopic()
         try kms.setAgreementSecret(agreementKey, topic: sessionTopic)
-        sessionToPairingTopic.set(payload.topic, forKey: sessionTopic)
 
         guard let relay = proposal.relays.first else {
             throw Errors.relayNotFound
@@ -152,7 +151,6 @@ final class ApproveEngine {
         async let settleRequest: () = networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
 
         _ = try await [settleRequest, subscription]
-
         onSessionSettle?(session.publicRepresentation())
     }
 }
