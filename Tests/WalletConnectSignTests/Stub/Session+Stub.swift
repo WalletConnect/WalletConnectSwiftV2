@@ -18,6 +18,7 @@ extension WCSession {
             let controllerKey = isSelfController ? selfKey : peerKey
             return WCSession(
                 topic: topic,
+                pairingTopic: "",
                 timestamp: timestamp,
                 relay: RelayProtocolOptions.stub(),
                 controller: AgreementPeer(publicKey: controllerKey),

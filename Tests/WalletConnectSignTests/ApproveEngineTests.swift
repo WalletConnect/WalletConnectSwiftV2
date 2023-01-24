@@ -18,6 +18,7 @@ final class ApproveEngineTests: XCTestCase {
     var sessionStorageMock: WCSessionStorageMock!
     var pairingRegisterer: PairingRegistererMock<SessionProposal>!
     var proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>!
+    var sessionToPairingTopic: CodableStore<String>!
 
     var publishers = Set<AnyCancellable>()
 
@@ -29,10 +30,11 @@ final class ApproveEngineTests: XCTestCase {
         sessionStorageMock = WCSessionStorageMock()
         pairingRegisterer = PairingRegistererMock()
         proposalPayloadsStore = CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>(defaults: RuntimeKeyValueStorage(), identifier: "")
+        sessionToPairingTopic = CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: "")
         engine = ApproveEngine(
             networkingInteractor: networkingInteractor,
             proposalPayloadsStore: proposalPayloadsStore,
-            sessionToPairingTopic: CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: ""),
+            sessionToPairingTopic: sessionToPairingTopic,
             pairingRegisterer: pairingRegisterer,
             metadata: metadata,
             kms: cryptoMock,
@@ -92,7 +94,7 @@ final class ApproveEngineTests: XCTestCase {
         let topicB = String.generateTopic()
         cryptoMock.setAgreementSecret(agreementKeys, topic: topicB)
         let proposal = SessionProposal.stub(proposerPubKey: AgreementPrivateKey().publicKey.hexRepresentation)
-        try await engine.settle(topic: topicB, proposal: proposal, namespaces: SessionNamespace.stubDictionary())
+        try await engine.settle(topic: topicB, proposal: proposal, namespaces: SessionNamespace.stubDictionary(), pairingTopic: "")
         XCTAssertTrue(sessionStorageMock.hasSession(forTopic: topicB), "Responder must persist session on topic B")
         XCTAssert(networkingInteractor.didSubscribe(to: topicB), "Responder must subscribe for topic B")
         XCTAssertTrue(networkingInteractor.didCallRequest, "Responder must send session settle payload on topic B")
@@ -105,7 +107,7 @@ final class ApproveEngineTests: XCTestCase {
         engine.onSessionSettle = { _ in
             didCallBackOnSessionApproved = true
         }
-
+        sessionToPairingTopic.set("", forKey: sessionTopic)
         engine.settlingProposal = SessionProposal.stub()
         networkingInteractor.requestPublisherSubject.send((sessionTopic, RPCRequest.stubSettle()))
 
