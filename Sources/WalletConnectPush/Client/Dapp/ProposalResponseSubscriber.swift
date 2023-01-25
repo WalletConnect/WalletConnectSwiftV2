@@ -46,7 +46,7 @@ class ProposalResponseSubscriber {
         let selfpublicKeyHex = payload.request.publicKey
         let (topic, _) = try generateAgreementKeys(peerPublicKeyHex: peerPublicKeyHex, selfpublicKeyHex: selfpublicKeyHex)
 
-        let pushSubscription = PushSubscription(topic: topic, relay: relay, metadata: metadata)
+        let pushSubscription = PushSubscription(topic: topic, account: payload.request.account, relay: relay, metadata: metadata)
         subscriptionsStore.set(pushSubscription, forKey: topic)
         kms.deletePrivateKey(for: selfpublicKeyHex)
         try await networkingInteractor.subscribe(topic: topic)

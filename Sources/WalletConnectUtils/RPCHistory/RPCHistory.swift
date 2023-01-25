@@ -65,6 +65,12 @@ public final class RPCHistory {
         }
     }
 
+    public func getAll<Object: Codable>(of type: Object.Type, topic: String) -> [Object] {
+        return storage.getAll()
+            .filter{$0.topic == topic}
+            .compactMap { try? $0.request.params?.get(Object.self) }
+    }
+
     public func getAll<Object: Codable>(of type: Object.Type) -> [Object] {
         return getAllWithIDs(of: type).map { $0.value }
     }
