@@ -307,4 +307,11 @@ final class WCSessionTests: XCTestCase {
         var session = WCSession.stub(requiredNamespaces: stubRequiredNamespacesWithExtension())
         XCTAssertThrowsError(try session.updateNamespaces(invalid))
     }
+
+    func testEncodeDecode() {
+        let session = WCSession.stub()
+        let encodedSession = try! JSONEncoder().encode(session)
+        let decodedSession = try! JSONDecoder().decode(WCSession.self, from: encodedSession)
+        XCTAssertEqual(session, decodedSession)
+    }
 }
