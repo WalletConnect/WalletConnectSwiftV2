@@ -62,6 +62,10 @@
 		84E6B84E29787A8000428BAF /* PNDecryptionService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 84E6B84729787A8000428BAF /* PNDecryptionService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		84E6B85429787AAE00428BAF /* WalletConnectPush in Frameworks */ = {isa = PBXBuildFile; productRef = 84E6B85329787AAE00428BAF /* WalletConnectPush */; };
 		84E6B8582981624F00428BAF /* PushRequestModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E6B8572981624F00428BAF /* PushRequestModule.swift */; };
+		84E6B85B298162EF00428BAF /* PushRequestPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E6B85A298162EF00428BAF /* PushRequestPresenter.swift */; };
+		84E6B85D298162F700428BAF /* PushRequestRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E6B85C298162F700428BAF /* PushRequestRouter.swift */; };
+		84E6B85F2981630000428BAF /* PushRequestInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E6B85E2981630000428BAF /* PushRequestInteractor.swift */; };
+		84E6B8612981630C00428BAF /* PushRequestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E6B8602981630C00428BAF /* PushRequestView.swift */; };
 		84F568C2279582D200D0A289 /* Signer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C1279582D200D0A289 /* Signer.swift */; };
 		84F568C42795832A00D0A289 /* EthereumTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C32795832A00D0A289 /* EthereumTransaction.swift */; };
 		84FE684628ACDB4700C893FF /* RequestParams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FE684528ACDB4700C893FF /* RequestParams.swift */; };
@@ -383,6 +387,10 @@
 		84E6B84929787A8000428BAF /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		84E6B84B29787A8000428BAF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		84E6B8572981624F00428BAF /* PushRequestModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushRequestModule.swift; sourceTree = "<group>"; };
+		84E6B85A298162EF00428BAF /* PushRequestPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushRequestPresenter.swift; sourceTree = "<group>"; };
+		84E6B85C298162F700428BAF /* PushRequestRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushRequestRouter.swift; sourceTree = "<group>"; };
+		84E6B85E2981630000428BAF /* PushRequestInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushRequestInteractor.swift; sourceTree = "<group>"; };
+		84E6B8602981630C00428BAF /* PushRequestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushRequestView.swift; sourceTree = "<group>"; };
 		84F568C1279582D200D0A289 /* Signer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Signer.swift; sourceTree = "<group>"; };
 		84F568C32795832A00D0A289 /* EthereumTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthereumTransaction.swift; sourceTree = "<group>"; };
 		84FE684528ACDB4700C893FF /* RequestParams.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestParams.swift; sourceTree = "<group>"; };
@@ -882,6 +890,10 @@
 			isa = PBXGroup;
 			children = (
 				84E6B8572981624F00428BAF /* PushRequestModule.swift */,
+				84E6B85A298162EF00428BAF /* PushRequestPresenter.swift */,
+				84E6B85C298162F700428BAF /* PushRequestRouter.swift */,
+				84E6B85E2981630000428BAF /* PushRequestInteractor.swift */,
+				84E6B8602981630C00428BAF /* PushRequestView.swift */,
 			);
 			path = PushRequest;
 			sourceTree = "<group>";
@@ -2142,6 +2154,7 @@
 				C53AA4362941251C008EA57C /* DefaultSignerFactory.swift in Sources */,
 				84E6B8582981624F00428BAF /* PushRequestModule.swift in Sources */,
 				C55D3480295DD7140004314A /* AuthRequestPresenter.swift in Sources */,
+				84E6B85B298162EF00428BAF /* PushRequestPresenter.swift in Sources */,
 				C5F32A2E2954814A00A6476E /* ConnectionDetailsRouter.swift in Sources */,
 				C55D3482295DD7140004314A /* AuthRequestInteractor.swift in Sources */,
 				C55D34B12965FB750004314A /* SessionProposalInteractor.swift in Sources */,
@@ -2171,6 +2184,8 @@
 				C55D3493295DFA750004314A /* WelcomeModule.swift in Sources */,
 				C56EE270293F56D7004840D1 /* String.swift in Sources */,
 				C56EE279293F56D7004840D1 /* Color.swift in Sources */,
+				84E6B8612981630C00428BAF /* PushRequestView.swift in Sources */,
+				84E6B85F2981630000428BAF /* PushRequestInteractor.swift in Sources */,
 				C55D3483295DD7140004314A /* AuthRequestView.swift in Sources */,
 				C56EE243293F566D004840D1 /* ScanView.swift in Sources */,
 				C56EE288293F5757004840D1 /* ThirdPartyConfigurator.swift in Sources */,
@@ -2197,6 +2212,7 @@
 				C5B2F6FB297055B0000DBA0E /* ETHSigner.swift in Sources */,
 				C56EE274293F56D7004840D1 /* SceneViewController.swift in Sources */,
 				C55D3496295DFA750004314A /* WelcomeInteractor.swift in Sources */,
+				84E6B85D298162F700428BAF /* PushRequestRouter.swift in Sources */,
 				C5B2F6FC297055B0000DBA0E /* SOLSigner.swift in Sources */,
 				C55D348D295DD8CA0004314A /* PasteUriView.swift in Sources */,
 				C5F32A2C2954814200A6476E /* ConnectionDetailsModule.swift in Sources */,
