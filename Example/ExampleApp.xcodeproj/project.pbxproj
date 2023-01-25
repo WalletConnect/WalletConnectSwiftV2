@@ -66,6 +66,7 @@
 		84E6B85D298162F700428BAF /* PushRequestRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E6B85C298162F700428BAF /* PushRequestRouter.swift */; };
 		84E6B85F2981630000428BAF /* PushRequestInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E6B85E2981630000428BAF /* PushRequestInteractor.swift */; };
 		84E6B8612981630C00428BAF /* PushRequestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E6B8602981630C00428BAF /* PushRequestView.swift */; };
+		84E6B86329816A7900428BAF /* WalletConnectPush in Frameworks */ = {isa = PBXBuildFile; productRef = 84E6B86229816A7900428BAF /* WalletConnectPush */; };
 		84F568C2279582D200D0A289 /* Signer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C1279582D200D0A289 /* Signer.swift */; };
 		84F568C42795832A00D0A289 /* EthereumTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C32795832A00D0A289 /* EthereumTransaction.swift */; };
 		84FE684628ACDB4700C893FF /* RequestParams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FE684528ACDB4700C893FF /* RequestParams.swift */; };
@@ -609,6 +610,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84E6B86329816A7900428BAF /* WalletConnectPush in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1714,6 +1716,9 @@
 			dependencies = (
 			);
 			name = PNDecryptionService;
+			packageProductDependencies = (
+				84E6B86229816A7900428BAF /* WalletConnectPush */,
+			);
 			productName = PNDecryptionService;
 			productReference = 84E6B84729787A8000428BAF /* PNDecryptionService.appex */;
 			productType = "com.apple.product-type.app-extension";
@@ -2978,6 +2983,10 @@
 			productName = WalletConnectAuth;
 		};
 		84E6B85329787AAE00428BAF /* WalletConnectPush */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = WalletConnectPush;
+		};
+		84E6B86229816A7900428BAF /* WalletConnectPush */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectPush;
 		};

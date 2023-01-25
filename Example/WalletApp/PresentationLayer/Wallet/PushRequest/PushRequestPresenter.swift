@@ -39,13 +39,13 @@ final class PushRequestPresenter: ObservableObject {
 }
 
 // MARK: - Private functions
-private extension SessionRequestPresenter {
+private extension PushRequestPresenter {
     func setupInitialState() {
 
     }
 }
 
 // MARK: - SceneViewModel
-extension SessionRequestPresenter: SceneViewModel {
+extension PushRequestPresenter: SceneViewModel {
 
 }
