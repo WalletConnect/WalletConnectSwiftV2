@@ -6,8 +6,7 @@ class InviteService {
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging
     private let kms: KeyManagementService
-    private let threadStore: Database<Thread>
-    private let rpcHistory: RPCHistory
+    private let chatStorage: ChatStorage
     private let registry: Registry
 
     var onNewThread: ((Thread) -> Void)?
@@ -16,16 +15,14 @@ class InviteService {
     init(
         networkingInteractor: NetworkInteracting,
         kms: KeyManagementService,
-        threadStore: Database<Thread>,
-        rpcHistory: RPCHistory,
+        chatStorage: ChatStorage,
         logger: ConsoleLogging,
         registry: Registry
     ) {
         self.kms = kms
         self.networkingInteractor = networkingInteractor
         self.logger = logger
-        self.threadStore = threadStore
-        self.rpcHistory = rpcHistory
+        self.chatStorage = chatStorage
         self.registry = registry
         setUpResponseHandling()
     }
@@ -37,7 +34,7 @@ class InviteService {
         let protocolMethod = ChatInviteProtocolMethod()
         self.peerAccount = peerAccount
         let selfPubKeyY = try kms.createX25519KeyPair()
-        let invite = Invite(message: openingMessage, account: account, publicKey: selfPubKeyY.hexRepresentation)
+        let invite = InvitePayload(message: openingMessage, account: account, publicKey: selfPubKeyY.hexRepresentation)
         let peerPubKey = try await registry.resolve(account: peerAccount)
         let symKeyI = try kms.performKeyAgreement(selfPublicKey: selfPubKeyY, peerPublicKey: peerPubKey)
         let inviteTopic = try AgreementPublicKey(hex: peerPubKey).rawRepresentation.sha256().toHexString()
@@ -60,10 +57,10 @@ class InviteService {
 
     private func setUpResponseHandling() {
         networkingInteractor.responseSubscription(on: ChatInviteProtocolMethod())
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<Invite, InviteResponse>) in
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<InvitePayload, InviteResponse>) in
                 logger.debug("Invite has been accepted")
 
-                Task(priority: .background) {
+                Task(priority: .high) {
                     try await createThread(
                         selfPubKeyHex: payload.request.publicKey,
                         peerPubKey: payload.response.publicKey,
@@ -79,9 +76,17 @@ class InviteService {
         let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey)
         let threadTopic = agreementKeys.derivedTopic()
         try kms.setSymmetricKey(agreementKeys.sharedKey, for: threadTopic)
+
         try await networkingInteractor.subscribe(topic: threadTopic)
-        let thread = Thread(topic: threadTopic, selfAccount: account, peerAccount: peerAccount)
-        await threadStore.add(thread)
+
+        let thread = Thread(
+            topic: threadTopic,
+            selfAccount: account,
+            peerAccount: peerAccount
+        )
+
+        chatStorage.add(thread: thread)
+
         onNewThread?(thread)
         // TODO - remove symKeyI
     }

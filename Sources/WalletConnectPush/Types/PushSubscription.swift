@@ -3,7 +3,8 @@ import WalletConnectUtils
 import WalletConnectPairing
 
 public struct PushSubscription: Codable, Equatable {
-    let topic: String
-    let relay: RelayProtocolOptions
-    let metadata: AppMetadata
+    public let topic: String
+    public let account: Account
+    public let relay: RelayProtocolOptions
+    public let metadata: AppMetadata
 }

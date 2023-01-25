@@ -32,9 +32,7 @@ struct WelcomeView: View {
                         .multilineTextAlignment(.center)
 
                     BrandButton(title: presenter.buttonTitle, action: {
-                        Task {
-                            await presenter.didPressImport()
-                        }
+                        presenter.didPressImport()
                     })
 
                     Text("By connecting your wallet you agree with our\nTerms of Service")
