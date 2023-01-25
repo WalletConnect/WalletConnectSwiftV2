@@ -37,6 +37,7 @@ class MessagingService {
         let request = RPCRequest(method: protocolMethod.method, params: message)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
 
+        chatStorage.set(message: message)
         onMessage?(message)
     }
 
@@ -64,6 +65,7 @@ class MessagingService {
                 protocolMethod: ChatMessageProtocolMethod()
             )
             logger.debug("Received message")
+            chatStorage.set(message: message)
             onMessage?(message)
         }
     }

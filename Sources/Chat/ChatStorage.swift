@@ -26,7 +26,7 @@ struct ChatStorage {
             .first(where: { $0.id == id })
     }
 
-    func set(_ invite: Invite) {
+    func set(invite: Invite) {
         inviteStore.set(invite, for: accountKey)
     }
 
@@ -57,6 +57,14 @@ struct ChatStorage {
     }
 
     // MARK: - Messages
+
+    func set(message: Message) {
+        messageStore.set(message, for: accountKey)
+    }
+
+    func getMessages() -> [Message] {
+        return messageStore.getElements(for: accountKey)
+    }
 
     func getMessages(topic: String) -> [Message] {
         return messageStore.getElements(for: accountKey).filter { $0.topic == topic }

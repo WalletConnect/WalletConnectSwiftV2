@@ -97,11 +97,13 @@ class InvitationHandlingService {
         networkingInteractor.requestSubscription(on: ChatInviteProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<InvitePayload>) in
                 logger.debug("did receive an invite")
-                onInvite?(Invite(
+                let invite = Invite(
                     id: payload.id.integer,
                     topic: payload.topic,
                     payload: payload.request
-                ))
+                )
+                chatStorage.set(invite: invite)
+                onInvite?(invite)
             }.store(in: &publishers)
     }
 
