@@ -28,7 +28,8 @@ final class WalletRouter {
     }
 
     func present(pushRequest: PushRequest) {
-
+        PushRequestModule.create(app: app, pushRequest: pushRequest)
+            .presentFullScreen(from: viewController, transparentBackground: true)
     }
     
     func presentPaste(onValue: @escaping (String) -> Void, onError: @escaping (Error) -> Void) {

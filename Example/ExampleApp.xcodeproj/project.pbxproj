@@ -67,6 +67,7 @@
 		84E6B85F2981630000428BAF /* PushRequestInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E6B85E2981630000428BAF /* PushRequestInteractor.swift */; };
 		84E6B8612981630C00428BAF /* PushRequestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E6B8602981630C00428BAF /* PushRequestView.swift */; };
 		84E6B86329816A7900428BAF /* WalletConnectPush in Frameworks */ = {isa = PBXBuildFile; productRef = 84E6B86229816A7900428BAF /* WalletConnectPush */; };
+		84E6B8652981720400428BAF /* WalletConnectPush in Frameworks */ = {isa = PBXBuildFile; productRef = 84E6B8642981720400428BAF /* WalletConnectPush */; };
 		84F568C2279582D200D0A289 /* Signer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C1279582D200D0A289 /* Signer.swift */; };
 		84F568C42795832A00D0A289 /* EthereumTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C32795832A00D0A289 /* EthereumTransaction.swift */; };
 		84FE684628ACDB4700C893FF /* RequestParams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FE684528ACDB4700C893FF /* RequestParams.swift */; };
@@ -601,6 +602,7 @@
 			files = (
 				8448F1D427E4726F0000B866 /* WalletConnect in Frameworks */,
 				A54195A52934E83F0035AD19 /* Web3 in Frameworks */,
+				84E6B8652981720400428BAF /* WalletConnectPush in Frameworks */,
 				A5D85228286333E300DAF5C3 /* Starscream in Frameworks */,
 				A5BB7FA328B6A50400707FC6 /* WalletConnectAuth in Frameworks */,
 			);
@@ -1698,6 +1700,7 @@
 				A5D85227286333E300DAF5C3 /* Starscream */,
 				A5BB7FA228B6A50400707FC6 /* WalletConnectAuth */,
 				A54195A42934E83F0035AD19 /* Web3 */,
+				84E6B8642981720400428BAF /* WalletConnectPush */,
 			);
 			productName = DApp;
 			productReference = 84CE641C27981DED00142511 /* DApp.app */;
@@ -2987,6 +2990,10 @@
 			productName = WalletConnectPush;
 		};
 		84E6B86229816A7900428BAF /* WalletConnectPush */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = WalletConnectPush;
+		};
+		84E6B8642981720400428BAF /* WalletConnectPush */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectPush;
 		};
