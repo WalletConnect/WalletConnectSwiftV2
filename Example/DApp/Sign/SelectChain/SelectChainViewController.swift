@@ -58,9 +58,20 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
                 ], events: []
             )
         ]
+        let optionalNamespaces: [String: OptionalNamespace] = [
+            "eip155:42161": OptionalNamespace(
+                methods: [
+                    "eth_sendTransaction",
+                    "eth_signTransaction",
+                    "get_balance",
+                    "personal_sign"
+                ],
+                events: ["accountsChanged", "chainChanged"]
+            )
+        ]
         Task {
             let uri = try await Pair.instance.create()
-            try await Sign.instance.connect(requiredNamespaces: namespaces, topic: uri.topic)
+            try await Sign.instance.connect(requiredNamespaces: namespaces, optionalNamespaces: optionalNamespaces, topic: uri.topic)
             showConnectScreen(uri: uri)
         }
     }

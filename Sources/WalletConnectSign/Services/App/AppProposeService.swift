@@ -18,7 +18,12 @@ final class AppProposeService {
         self.logger = logger
     }
 
-    func propose(pairingTopic: String, namespaces: [String: ProposalNamespace], relay: RelayProtocolOptions) async throws {
+    func propose(
+        pairingTopic: String,
+        namespaces: [String: ProposalNamespace],
+        optionalNamespaces: [String: OptionalNamespace]?,
+        relay: RelayProtocolOptions
+    ) async throws {
         logger.debug("Propose Session on topic: \(pairingTopic)")
         try Namespace.validate(namespaces)
         let protocolMethod = SessionProposeProtocolMethod()
@@ -30,7 +35,9 @@ final class AppProposeService {
         let proposal = SessionProposal(
             relays: [relay],
             proposer: proposer,
-            requiredNamespaces: namespaces)
+            requiredNamespaces: namespaces,
+            optionalNamespaces: optionalNamespaces
+        )
         
         let request = RPCRequest(method: protocolMethod.method, params: proposal)
         try await networkingInteractor.requestNetworkAck(request, topic: pairingTopic, protocolMethod: protocolMethod)

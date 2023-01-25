@@ -20,6 +20,7 @@ extension Session {
         public let pairingTopic: String
         public let proposer: AppMetadata
         public let requiredNamespaces: [String: ProposalNamespace]
+        public let optionalNamespaces: [String: OptionalNamespace]?
 
         // TODO: Refactor internal objects to manage only needed data
         internal let proposal: SessionProposal

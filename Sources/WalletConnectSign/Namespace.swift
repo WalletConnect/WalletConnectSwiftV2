@@ -11,6 +11,16 @@ public struct ProposalNamespace: Equatable, Codable {
     }
 }
 
+public struct OptionalNamespace: Equatable, Codable {
+    public let methods: Set<String>
+    public let events: Set<String>
+
+    public init(methods: Set<String>, events: Set<String>) {
+        self.methods = methods
+        self.events = events
+    }
+}
+
 public struct SessionNamespace: Equatable, Codable {
 
     public let accounts: Set<Account>
