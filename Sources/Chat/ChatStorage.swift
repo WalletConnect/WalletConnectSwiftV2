@@ -2,55 +2,70 @@ import Foundation
 
 struct ChatStorage {
 
-    private let history: RPCHistory
-    private let threadStore: Database<Thread>
+    private let accountService: AccountService
+    private let messageStore: KeyedDatabase<Message>
+    private let inviteStore: KeyedDatabase<Invite>
+    private let threadStore: KeyedDatabase<Thread>
 
-    init(history: RPCHistory, threadStore: Database<Thread>) {
-        self.history = history
+    init(
+        accountService: AccountService,
+        messageStore: KeyedDatabase<Message>,
+        inviteStore: KeyedDatabase<Invite>,
+        threadStore: KeyedDatabase<Thread>
+    ) {
+        self.accountService = accountService
+        self.messageStore = messageStore
+        self.inviteStore = inviteStore
         self.threadStore = threadStore
     }
 
     // MARK: - Invites
 
     func getInvite(id: Int64) -> Invite? {
-        guard
-            let record = history.get(recordId: RPCID(id)),
-            let payload = try? record.request.params?.get(InvitePayload.self)
-        else { return nil }
+        return inviteStore.getElements(for: accountKey)
+            .first(where: { $0.id == id })
+    }
 
-        return Invite(id: record.id.integer, payload: payload)
+    func set(_ invite: Invite) {
+        inviteStore.set(invite, for: accountKey)
     }
 
     func getInviteTopic(id: Int64) -> String? {
-        return history.get(recordId: RPCID(id))?.topic
+        return getInvites().first(where: { $0.id == id })?.topic
     }
 
     func getInvites() -> [Invite] {
-        return history.getAllWithIDs(of: InvitePayload.self)
-            .map { Invite(id: $0.id.integer, payload: $0.value) }
+        return inviteStore.getElements(for: accountKey)
     }
 
     func delete(invite: Invite) {
-        history.delete(id: RPCID(invite.id))
+        inviteStore.delete(invite, for: accountKey)
     }
 
     // MARK: - Threads
 
     func getThreads() -> [Thread] {
-        return threadStore.getAll()
+        return threadStore.getElements(for: accountKey)
     }
 
     func getThread(topic: String) -> Thread? {
         return getThreads().first(where: { $0.topic == topic })
     }
 
-    func add(thread: Thread) {
-        threadStore.add(thread)
+    func set(thread: Thread) {
+        threadStore.set(thread, for: accountKey)
     }
 
     // MARK: - Messages
 
     func getMessages(topic: String) -> [Message] {
-        return history.getAll(of: Message.self).filter { $0.topic == topic }
+        return messageStore.getElements(for: accountKey).filter { $0.topic == topic }
+    }
+}
+
+private extension ChatStorage {
+
+    var accountKey: String {
+        return accountService.currentAccount.absoluteString
     }
 }

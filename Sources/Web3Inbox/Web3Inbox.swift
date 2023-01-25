@@ -14,9 +14,9 @@ public final class Web3Inbox {
 
     private init() { }
 
-    /// Sign instance config method
+    /// Web3Inbox instance config method
     /// - Parameters:
-    ///   - metadata: App metadata
+    ///   - account: Web3Inbox initial account
     static public func configure(account: Account) {
         Web3Inbox.account = account
     }

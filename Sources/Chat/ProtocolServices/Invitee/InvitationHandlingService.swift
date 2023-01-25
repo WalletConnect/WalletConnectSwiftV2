@@ -69,7 +69,7 @@ class InvitationHandlingService {
             peerAccount: invite.account
         )
 
-        chatStorage.add(thread: thread)
+        chatStorage.set(thread: thread)
         chatStorage.delete(invite: invite)
 
         onNewThread?(thread)
@@ -99,6 +99,7 @@ class InvitationHandlingService {
                 logger.debug("did receive an invite")
                 onInvite?(Invite(
                     id: payload.id.integer,
+                    topic: payload.topic,
                     payload: payload.request
                 ))
             }.store(in: &publishers)

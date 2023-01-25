@@ -85,7 +85,7 @@ class InviteService {
             peerAccount: peerAccount
         )
 
-        chatStorage.add(thread: thread)
+        chatStorage.set(thread: thread)
 
         onNewThread?(thread)
         // TODO - remove symKeyI
