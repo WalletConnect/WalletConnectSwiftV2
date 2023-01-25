@@ -61,6 +61,7 @@
 		84E6B84A29787A8000428BAF /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E6B84929787A8000428BAF /* NotificationService.swift */; };
 		84E6B84E29787A8000428BAF /* PNDecryptionService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 84E6B84729787A8000428BAF /* PNDecryptionService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		84E6B85429787AAE00428BAF /* WalletConnectPush in Frameworks */ = {isa = PBXBuildFile; productRef = 84E6B85329787AAE00428BAF /* WalletConnectPush */; };
+		84E6B8582981624F00428BAF /* PushRequestModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E6B8572981624F00428BAF /* PushRequestModule.swift */; };
 		84F568C2279582D200D0A289 /* Signer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C1279582D200D0A289 /* Signer.swift */; };
 		84F568C42795832A00D0A289 /* EthereumTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C32795832A00D0A289 /* EthereumTransaction.swift */; };
 		84FE684628ACDB4700C893FF /* RequestParams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FE684528ACDB4700C893FF /* RequestParams.swift */; };
@@ -381,6 +382,7 @@
 		84E6B84729787A8000428BAF /* PNDecryptionService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PNDecryptionService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		84E6B84929787A8000428BAF /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		84E6B84B29787A8000428BAF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		84E6B8572981624F00428BAF /* PushRequestModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushRequestModule.swift; sourceTree = "<group>"; };
 		84F568C1279582D200D0A289 /* Signer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Signer.swift; sourceTree = "<group>"; };
 		84F568C32795832A00D0A289 /* EthereumTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthereumTransaction.swift; sourceTree = "<group>"; };
 		84FE684528ACDB4700C893FF /* RequestParams.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestParams.swift; sourceTree = "<group>"; };
@@ -590,7 +592,6 @@
 			files = (
 				8448F1D427E4726F0000B866 /* WalletConnect in Frameworks */,
 				A54195A52934E83F0035AD19 /* Web3 in Frameworks */,
-				84E6B85629797CDE00428BAF /* WalletConnectPush in Frameworks */,
 				A5D85228286333E300DAF5C3 /* Starscream in Frameworks */,
 				A5BB7FA328B6A50400707FC6 /* WalletConnectAuth in Frameworks */,
 			);
@@ -875,6 +876,14 @@
 				84E6B84B29787A8000428BAF /* Info.plist */,
 			);
 			path = PNDecryptionService;
+			sourceTree = "<group>";
+		};
+		84E6B8592981625A00428BAF /* PushRequest */ = {
+			isa = PBXGroup;
+			children = (
+				84E6B8572981624F00428BAF /* PushRequestModule.swift */,
+			);
+			path = PushRequest;
 			sourceTree = "<group>";
 		};
 		A50F3944288005A700064555 /* Types */ = {
@@ -1436,6 +1445,7 @@
 				C5F32A2A2954812900A6476E /* ConnectionDetails */,
 				C56EE236293F566A004840D1 /* Scan */,
 				C56EE22A293F5668004840D1 /* Wallet */,
+				84E6B8592981625A00428BAF /* PushRequest */,
 			);
 			path = Wallet;
 			sourceTree = "<group>";
@@ -1674,7 +1684,6 @@
 				A5D85227286333E300DAF5C3 /* Starscream */,
 				A5BB7FA228B6A50400707FC6 /* WalletConnectAuth */,
 				A54195A42934E83F0035AD19 /* Web3 */,
-				84E6B85529797CDE00428BAF /* WalletConnectPush */,
 			);
 			productName = DApp;
 			productReference = 84CE641C27981DED00142511 /* DApp.app */;
@@ -2131,6 +2140,7 @@
 			files = (
 				C5D4603A29687A5700302C7E /* DefaultSocketFactory.swift in Sources */,
 				C53AA4362941251C008EA57C /* DefaultSignerFactory.swift in Sources */,
+				84E6B8582981624F00428BAF /* PushRequestModule.swift in Sources */,
 				C55D3480295DD7140004314A /* AuthRequestPresenter.swift in Sources */,
 				C5F32A2E2954814A00A6476E /* ConnectionDetailsRouter.swift in Sources */,
 				C55D3482295DD7140004314A /* AuthRequestInteractor.swift in Sources */,

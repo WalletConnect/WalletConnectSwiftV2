@@ -1,6 +1,7 @@
 import UIKit
 
 import Web3Wallet
+import WalletConnectPush
 
 final class WalletRouter {
     weak var viewController: UIViewController!
@@ -24,6 +25,10 @@ final class WalletRouter {
     func present(sessionRequest: Request) {
         SessionRequestModule.create(app: app, sessionRequest: sessionRequest)
             .presentFullScreen(from: viewController, transparentBackground: true)
+    }
+
+    func present(pushRequest: PushRequest) {
+
     }
     
     func presentPaste(onValue: @escaping (String) -> Void, onError: @escaping (Error) -> Void) {
