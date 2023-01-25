@@ -33,7 +33,7 @@ public struct ChatClientFactory {
         let inviteStore = KeyedDatabase<Invite>(storage: keyValueStorage, identifier: ChatStorageIdentifiers.invites.rawValue)
         let threadStore = KeyedDatabase<Thread>(storage: keyValueStorage, identifier: ChatStorageIdentifiers.threads.rawValue)
         let chatStorage = ChatStorage(accountService: accountService, messageStore: messageStore, inviteStore: inviteStore, threadStore: threadStore)
-        let registryService = RegistryService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToRegistryRecordStore: topicToRegistryRecordStore)
+        let registryService = RegistryService(registry: registry, accountService: accountService, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToRegistryRecordStore: topicToRegistryRecordStore)
         let resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, chatStorage: chatStorage, logger: logger)
         let invitationHandlingService = InvitationHandlingService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToRegistryRecordStore: topicToRegistryRecordStore, chatStorage: chatStorage)
         let inviteService = InviteService(networkingInteractor: networkingInteractor, kms: kms, chatStorage: chatStorage, logger: logger, registry: registry)

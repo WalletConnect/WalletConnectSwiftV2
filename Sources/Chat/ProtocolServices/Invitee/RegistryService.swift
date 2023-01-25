@@ -1,19 +1,22 @@
 import Foundation
 
 actor RegistryService {
-    let networkingInteractor: NetworkInteracting
-    let topicToRegistryRecordStore: CodableStore<RegistryRecord>
-    let registry: Registry
-    let logger: ConsoleLogging
-    let kms: KeyManagementServiceProtocol
+    private let networkingInteractor: NetworkInteracting
+    private let accountService: AccountService
+    private let topicToRegistryRecordStore: CodableStore<RegistryRecord>
+    private let registry: Registry
+    private let logger: ConsoleLogging
+    private let kms: KeyManagementServiceProtocol
 
     init(registry: Registry,
+         accountService: AccountService,
          networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
          logger: ConsoleLogging,
          topicToRegistryRecordStore: CodableStore<RegistryRecord>) {
         self.registry = registry
         self.kms = kms
+        self.accountService = accountService
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.topicToRegistryRecordStore = topicToRegistryRecordStore
@@ -28,6 +31,7 @@ actor RegistryService {
         let record = RegistryRecord(account: account, pubKey: pubKeyHex)
         topicToRegistryRecordStore.set(record, forKey: topic)
         try await networkingInteractor.subscribe(topic: topic)
+        accountService.setAccount(account)
         logger.debug("Did register an account: \(account) and is subscribing on topic: \(topic)")
         return pubKeyHex
     }
