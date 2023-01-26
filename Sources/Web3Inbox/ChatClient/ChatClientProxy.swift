@@ -75,7 +75,7 @@ private extension ChatClientProxy {
 
     struct MessageRequest: Codable {
         let topic: String
-        let payload: Message
+        let payload: MessagePayload
     }
 
     struct AcceptRequest: Codable {

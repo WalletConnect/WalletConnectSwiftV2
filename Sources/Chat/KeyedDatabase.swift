@@ -3,7 +3,7 @@ import Foundation
 class KeyedDatabase<Element> where Element: Codable & Equatable {
 
     private var index: [String: [Element]] = [:] {
-        didSet { storage.set(index, forKey: identifier) }
+        didSet { self.set(index, for: identifier) }
     }
 
     private let storage: KeyValueStorage
@@ -38,5 +38,10 @@ private extension KeyedDatabase {
         else { return }
 
         index = decoded
+    }
+
+    func set(_ value: [String: [Element]], for key: String) {
+        let data = try! JSONEncoder().encode(value)
+        storage.set(data, forKey: key)
     }
 }

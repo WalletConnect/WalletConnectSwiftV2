@@ -21,8 +21,8 @@ public struct Message: Codable, Equatable {
     }
 }
 
-struct MessagePayload: Codable {
-    let message: String
-    let authorAccount: Account
-    let timestamp: Int64
+public struct MessagePayload: Codable {
+    public let message: String
+    public let authorAccount: Account
+    public let timestamp: Int64
 }
