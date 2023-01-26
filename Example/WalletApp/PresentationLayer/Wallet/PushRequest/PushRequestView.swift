@@ -17,12 +17,12 @@ struct PushRequestView: View {
                         .resizable()
                         .scaledToFit()
 
-                    Text(presenter.pushRequest.account.absoluteString)
+                    Text("would you like to send notifications")
                         .foregroundColor(.grey8)
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .padding(.top, 10)
 
-                    authRequestView()
+                    pushRequestView()
 
                     HStack(spacing: 20) {
                         Button {
@@ -82,10 +82,10 @@ struct PushRequestView: View {
         .edgesIgnoringSafeArea(.all)
     }
 
-    private func authRequestView() -> some View {
+    private func pushRequestView() -> some View {
         VStack {
             VStack(alignment: .leading) {
-                Text("Message")
+                Text("Notifications")
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .foregroundColor(.whiteBackground)
                     .padding(.horizontal, 8)

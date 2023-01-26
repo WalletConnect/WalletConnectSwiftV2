@@ -364,6 +364,8 @@
 		845B8D8B2934B36C0084A966 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
 		8460DCFB274F98A10081F94C /* RequestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestViewController.swift; sourceTree = "<group>"; };
 		8485617E295307C20064877B /* PushNotificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationTests.swift; sourceTree = "<group>"; };
+		849A4F18298281E300E61ACE /* WalletAppRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WalletAppRelease.entitlements; sourceTree = "<group>"; };
+		849A4F19298281F100E61ACE /* PNDecryptionServiceRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PNDecryptionServiceRelease.entitlements; sourceTree = "<group>"; };
 		849D7A92292E2169006A2BD4 /* PushTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushTests.swift; sourceTree = "<group>"; };
 		84AA01DA28CF0CD7005D48D8 /* XCTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTest.swift; sourceTree = "<group>"; };
 		84B767762954554A00E92316 /* PushDecryptionService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PushDecryptionService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -385,6 +387,8 @@
 		84CE645427A29D4C00142511 /* ResponseViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseViewController.swift; sourceTree = "<group>"; };
 		84CEC64528D89D6B00D081A8 /* PairingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingTests.swift; sourceTree = "<group>"; };
 		84D2A66528A4F51E0088AE09 /* AuthTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthTests.swift; sourceTree = "<group>"; };
+		84DB38F029828A7C00BFEE37 /* WalletApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WalletApp.entitlements; sourceTree = "<group>"; };
+		84DB38F129828A7F00BFEE37 /* PNDecryptionService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PNDecryptionService.entitlements; sourceTree = "<group>"; };
 		84E6B84729787A8000428BAF /* PNDecryptionService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PNDecryptionService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		84E6B84929787A8000428BAF /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		84E6B84B29787A8000428BAF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -884,6 +888,8 @@
 		84E6B84829787A8000428BAF /* PNDecryptionService */ = {
 			isa = PBXGroup;
 			children = (
+				84DB38F129828A7F00BFEE37 /* PNDecryptionService.entitlements */,
+				849A4F19298281F100E61ACE /* PNDecryptionServiceRelease.entitlements */,
 				84E6B84929787A8000428BAF /* NotificationService.swift */,
 				84E6B84B29787A8000428BAF /* Info.plist */,
 			);
@@ -1442,6 +1448,8 @@
 		C56EE21C293F55ED004840D1 /* WalletApp */ = {
 			isa = PBXGroup;
 			children = (
+				84DB38F029828A7C00BFEE37 /* WalletApp.entitlements */,
+				849A4F18298281E300E61ACE /* WalletAppRelease.entitlements */,
 				C56EE25C293F56D6004840D1 /* Common */,
 				C56EE27E293F5756004840D1 /* ApplicationLayer */,
 				C56EE29E293F577B004840D1 /* PresentationLayer */,
@@ -2588,9 +2596,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = PNDecryptionService/PNDecryptionService.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = RQ4NX29V75;
+				DEVELOPMENT_TEAM = W5R8AG9K22;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PNDecryptionService/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = PNDecryptionService;
@@ -2615,9 +2624,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = PNDecryptionService/PNDecryptionServiceRelease.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = RQ4NX29V75;
+				DEVELOPMENT_TEAM = W5R8AG9K22;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PNDecryptionService/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = PNDecryptionService;
@@ -2631,6 +2642,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.walletapp.PNDecryptionService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -2784,9 +2796,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = WalletApp/WalletApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = RQ4NX29V75;
+				DEVELOPMENT_TEAM = W5R8AG9K22;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WalletApp/Other/Info.plist;
@@ -2815,9 +2828,11 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = WalletApp/WalletAppRelease.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = RQ4NX29V75;
+				DEVELOPMENT_TEAM = W5R8AG9K22;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WalletApp/Other/Info.plist;
@@ -2833,6 +2848,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.walletapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
