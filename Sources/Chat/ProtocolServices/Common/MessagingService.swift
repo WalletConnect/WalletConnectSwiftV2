@@ -50,9 +50,8 @@ class MessagingService {
 
     private func setUpRequestHandling() {
         networkingInteractor.requestSubscription(on: ChatMessageProtocolMethod())
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<Message>) in
-                var message = payload.request
-                message.topic = payload.topic
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<MessagePayload>) in
+                let message = Message(topic: payload.topic, payload: payload.request)
                 handleMessage(message, topic: payload.topic, requestId: payload.id)
             }.store(in: &publishers)
     }

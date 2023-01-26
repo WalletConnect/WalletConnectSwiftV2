@@ -16,13 +16,11 @@ final class ChatClientProxy {
 
         switch event {
         case .getInvites:
-            let params = try parse(GetInvitesRequest.self, params: request.params)
-            let invites = client.getInvites(account: params.account)
+            let invites = client.getInvites()
             try await respond(with: invites, request: request)
 
         case .getThreads:
-            let params = try parse(GetThreadsRequest.self, params: request.params)
-            let threads = client.getThreads(account: params.account)
+            let threads = client.getThreads()
             try await respond(with: threads, request: request)
 
         case .register:
@@ -52,7 +50,7 @@ final class ChatClientProxy {
 
         case .invite:
             let params = try parse(InviteRequest.self, params: request.params)
-            try await client.invite(peerAccount: params.invite.account, openingMessage: params.invite.message, account: params.account)
+            try await client.invite(peerAccount: params.invite.account, openingMessage: params.invite.message)
             try await respond(request: request)
         }
     }
@@ -65,14 +63,6 @@ private extension ChatClientProxy {
     enum Errors: Error {
         case unregisteredMethod
         case unregisteredParams
-    }
-
-    struct GetInvitesRequest: Codable {
-        let account: Account
-    }
-
-    struct GetThreadsRequest: Codable {
-        let account: Account
     }
 
     struct RegisterRequest: Codable {

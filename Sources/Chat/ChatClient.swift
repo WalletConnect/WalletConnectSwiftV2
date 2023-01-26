@@ -80,8 +80,8 @@ public class ChatClient {
     ///   - publicKey: publicKey associated with a peer
     ///   - openingMessage: oppening message for a chat invite
     ///   TODO - peerAccount should be derived
-    public func invite(peerAccount: Account, openingMessage: String, account: Account) async throws {
-        try await inviteService.invite(peerAccount: peerAccount, openingMessage: openingMessage, account: account)
+    public func invite(peerAccount: Account, openingMessage: String) async throws {
+        try await inviteService.invite(peerAccount: peerAccount, openingMessage: openingMessage)
     }
 
     public func accept(inviteId: Int64) async throws {
@@ -110,13 +110,11 @@ public class ChatClient {
         try await leaveService.leave(topic: topic)
     }
 
-    public func getInvites(account: Account) -> [Invite] {
-        // TODO: Account based storage
+    public func getInvites() -> [Invite] {
         return chatStorage.getInvites()
     }
 
-    public func getThreads(account: Account) -> [Thread] {
-        // TODO: Account based storage
+    public func getThreads() -> [Thread] {
         return chatStorage.getThreads()
     }
 

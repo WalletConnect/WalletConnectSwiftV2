@@ -4,6 +4,7 @@ import Combine
 class InviteService {
     private var publishers = [AnyCancellable]()
     private let networkingInteractor: NetworkInteracting
+    private let accountService: AccountService
     private let logger: ConsoleLogging
     private let kms: KeyManagementService
     private let chatStorage: ChatStorage
@@ -14,6 +15,7 @@ class InviteService {
 
     init(
         networkingInteractor: NetworkInteracting,
+        accountService: AccountService,
         kms: KeyManagementService,
         chatStorage: ChatStorage,
         logger: ConsoleLogging,
@@ -21,6 +23,7 @@ class InviteService {
     ) {
         self.kms = kms
         self.networkingInteractor = networkingInteractor
+        self.accountService = accountService
         self.logger = logger
         self.chatStorage = chatStorage
         self.registry = registry
@@ -29,12 +32,11 @@ class InviteService {
 
     var peerAccount: Account!
 
-    func invite(peerAccount: Account, openingMessage: String, account: Account) async throws {
+    func invite(peerAccount: Account, openingMessage: String) async throws {
         // TODO ad storage
         let protocolMethod = ChatInviteProtocolMethod()
         self.peerAccount = peerAccount
         let selfPubKeyY = try kms.createX25519KeyPair()
-        let invite = InvitePayload(message: openingMessage, account: account, publicKey: selfPubKeyY.hexRepresentation)
         let peerPubKey = try await registry.resolve(account: peerAccount)
         let symKeyI = try kms.performKeyAgreement(selfPublicKey: selfPubKeyY, peerPublicKey: peerPubKey)
         let inviteTopic = try AgreementPublicKey(hex: peerPubKey).rawRepresentation.sha256().toHexString()
@@ -42,7 +44,11 @@ class InviteService {
         // overrides on invite toipic
         try kms.setSymmetricKey(symKeyI.sharedKey, for: inviteTopic)
 
-        let request = RPCRequest(method: protocolMethod.method, params: invite)
+        let request = RPCRequest(method: protocolMethod.method, params: InvitePayload(
+            message: openingMessage,
+            account: accountService.currentAccount,
+            publicKey: selfPubKeyY.hexRepresentation
+        ))
 
         // 2. Proposer subscribes to topic R which is the hash of the derived symKey
         let responseTopic = symKeyI.derivedTopic()

@@ -36,7 +36,7 @@ public struct ChatClientFactory {
         let registryService = RegistryService(registry: registry, accountService: accountService, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToRegistryRecordStore: topicToRegistryRecordStore)
         let resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, chatStorage: chatStorage, logger: logger)
         let invitationHandlingService = InvitationHandlingService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToRegistryRecordStore: topicToRegistryRecordStore, chatStorage: chatStorage)
-        let inviteService = InviteService(networkingInteractor: networkingInteractor, kms: kms, chatStorage: chatStorage, logger: logger, registry: registry)
+        let inviteService = InviteService(networkingInteractor: networkingInteractor, accountService: accountService, kms: kms, chatStorage: chatStorage, logger: logger, registry: registry)
         let leaveService = LeaveService()
         let messagingService = MessagingService(networkingInteractor: networkingInteractor, chatStorage: chatStorage, logger: logger)
 
