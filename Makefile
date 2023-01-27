@@ -30,4 +30,7 @@ unit_tests:
 	fastlane tests scheme:WalletConnect
 
 integration_tests:
-	fastlane tests scheme:IntegrationTests
+	fastlane tests scheme:IntegrationTests relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID)
+
+resolve_packages: 
+	fastlane resolve scheme:WalletApp
