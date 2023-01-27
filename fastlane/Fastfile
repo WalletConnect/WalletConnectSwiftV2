@@ -18,25 +18,25 @@
 default_platform(:ios)
 
 platform :ios do
-  
-  lane :unit_tests do
-    run_tests(
-      project: 'Example/ExampleApp.xcodeproj',
-      scheme: 'WalletConnect',
-      cloned_source_packages_path: 'SourcePackagesCache',
-      destination: 'platform=iOS Simulator,name=iPhone 13',
-      derived_data_path: 'DerivedDataCache'
-    )
-  end
 
-  lane :integration_tests do
+  lane :tests do |options|
     run_tests(
       project: 'Example/ExampleApp.xcodeproj',
-      scheme: 'IntegrationTests',
+      scheme: options[:scheme],
       cloned_source_packages_path: 'SourcePackagesCache',
       destination: 'platform=iOS Simulator,name=iPhone 13',
       derived_data_path: 'DerivedDataCache',
-      skip_package_dependencies_resolution: true
+      skip_package_dependencies_resolution: true,
+      skip_build: true
+    )
+  end
+
+  lane :build do |options|
+    xcodebuild(
+      project: 'Example/ExampleApp.xcodeproj',
+      scheme: options[:scheme],
+      destination: 'platform=iOS Simulator,name=iPhone 13',
+      xcargs: "-clonedSourcePackagesDirPath SourcePackagesCache -derivedDataPath DerivedDataCache"
     )
   end
 
