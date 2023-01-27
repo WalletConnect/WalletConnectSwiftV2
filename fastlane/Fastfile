@@ -29,13 +29,15 @@ platform :ios do
     )
   end
 
-  # "xcodebuild \
-  #       -project Example/ExampleApp.xcodeproj \ 
-  #       -scheme WalletConnect \
-  #       -clonedSourcePackagesDirPath SourcePackagesCache \
-  #       -destination 'platform=iOS Simulator,name=iPhone 13' \
-  #       -derivedDataPath DerivedDataCache \
-  #       test"
-
+  lane :integration_tests do
+    run_tests(
+      project: 'Example/ExampleApp.xcodeproj',
+      scheme: 'IntegrationTests',
+      cloned_source_packages_path: 'SourcePackagesCache',
+      destination: 'platform=iOS Simulator,name=iPhone 13',
+      derived_data_path: 'DerivedDataCache',
+      skip_package_dependencies_resolution: true
+    )
+  end
 
 end
