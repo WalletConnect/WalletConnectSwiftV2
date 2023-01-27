@@ -16,7 +16,6 @@ ifeq "${EXISTS_FASTLANE}" ""
 endif		
 	@echo "All dependencies was installed"
 
-
 build_dapp:
 	fastlane build scheme:DApp
 
