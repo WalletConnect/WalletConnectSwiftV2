@@ -17,8 +17,17 @@ endif
 	@echo "All dependencies was installed"
 
 
+build_dapp:
+	fastlane build scheme:DApp
+
+build_wallet:
+	fastlane build scheme:WalletApp
+
+ui_tests:
+	echo "UI Tests disabled"
+
 unit_tests:
-	fastlane unit_tests
+	fastlane tests scheme:WalletConnect
 
 integration_tests:
-	fastlane integration_tests
+	fastlane tests scheme:IntegrationTests
