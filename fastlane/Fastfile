@@ -13,6 +13,8 @@
 # Uncomment the line if you want fastlane to automatically update itself
 # update_fastlane
 
+ENV["FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT"] = "120"
+
 default_platform(:ios)
 
 platform :ios do
@@ -45,6 +47,34 @@ platform :ios do
       scheme: options[:scheme],
       destination: 'platform=iOS Simulator,name=iPhone 13',
       xcargs: "-resolvePackageDependencies -clonedSourcePackagesDirPath SourcePackagesCache -derivedDataPath DerivedDataCache"
+    )
+  end
+
+  lane :release_testflight do |options|
+    match(
+      readonly: false,
+      type: "appstore",
+      app_identifier: options[:app_identifier],
+      git_url: "https://github.com/WalletConnect/match-swift.git",
+      username: options[:username],
+    )
+    number = latest_testflight_build_number(
+      app_identifier: options[:app_identifier],
+      username: options[:username],
+    )
+    increment_build_number(
+      build_number: number + 1,
+      xcodeproj: "Example/ExampleApp.xcodeproj"
+    )
+    build_app(
+      project: "Example/ExampleApp.xcodeproj",
+      scheme: options[:scheme]
+    )
+    upload_to_testflight(
+      app_identifier: options[:app_identifier],
+      username: options[:username],
+      apple_id: options[:apple_id],
+      skip_waiting_for_build_processing: true,
     )
   end
 
