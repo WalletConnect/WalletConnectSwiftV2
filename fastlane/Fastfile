@@ -1,0 +1,41 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+# ENV['FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD'] = ""
+
+default_platform(:ios)
+
+platform :ios do
+  
+  lane :unit_tests do
+    run_tests(
+      project: 'Example/ExampleApp.xcodeproj',
+      scheme: 'WalletConnect',
+      cloned_source_packages_path: 'SourcePackagesCache',
+      destination: 'platform=iOS Simulator,name=iPhone 13',
+      derived_data_path: 'DerivedDataCache'
+    )
+  end
+
+  # "xcodebuild \
+  #       -project Example/ExampleApp.xcodeproj \ 
+  #       -scheme WalletConnect \
+  #       -clonedSourcePackagesDirPath SourcePackagesCache \
+  #       -destination 'platform=iOS Simulator,name=iPhone 13' \
+  #       -derivedDataPath DerivedDataCache \
+  #       test"
+
+
+end
