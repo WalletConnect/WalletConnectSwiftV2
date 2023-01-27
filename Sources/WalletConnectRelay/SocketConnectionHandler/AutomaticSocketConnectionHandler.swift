@@ -81,7 +81,8 @@ extension AutomaticSocketConnectionHandler: SocketConnectionHandler {
     }
 
     func handleDisconnection() {
-        if appStateObserver.currentState == .foreground {
+        Task {
+            guard await appStateObserver.currentState == .foreground else { return }
             reconnectIfNeeded()
         }
     }
