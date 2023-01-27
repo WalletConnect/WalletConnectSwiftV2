@@ -2,10 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>PROJECT_ID</key>
-	<string>$(PROJECT_ID)</string>
+	<key>CFBundleVersion</key>
+	<string>5</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>PROJECT_ID</key>
+	<string>$(PROJECT_ID)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
