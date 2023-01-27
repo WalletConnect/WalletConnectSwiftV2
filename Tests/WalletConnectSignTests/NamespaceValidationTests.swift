@@ -28,6 +28,20 @@ final class NamespaceValidationTests: XCTestCase {
         ]
         XCTAssertNoThrow(try Namespace.validate(namespace))
     }
+    
+    func testValidOptionalProposalNamespace() {
+        let namespace = [
+            "eip155": OptionalNamespace(
+                methods: ["method"],
+                events: ["event"]
+            ),
+            "cosmos": OptionalNamespace(
+                methods: ["someMethod"],
+                events: ["someEvent"]
+            )
+        ]
+        XCTAssertNoThrow(try Namespace.validate(namespace))
+    }
 
     func testChainsMustNotNotBeEmpty() {
         let namespace = [

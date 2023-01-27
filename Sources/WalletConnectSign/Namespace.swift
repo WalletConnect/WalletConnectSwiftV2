@@ -57,6 +57,17 @@ enum Namespace {
             }
         }
     }
+    
+    static func validate(_ namespaces: [String: OptionalNamespace]) throws {
+        for (_, namespace) in namespaces {
+            if namespace.methods.isEmpty {
+                throw WalletConnectError.unsupportedNamespace(.unsupportedMethods)
+            }
+            if namespace.events.isEmpty {
+                throw WalletConnectError.unsupportedNamespace(.unsupportedEvents)
+            }
+        }
+    }
 
     static func validate(_ namespaces: [String: SessionNamespace]) throws {
         for (key, namespace) in namespaces {

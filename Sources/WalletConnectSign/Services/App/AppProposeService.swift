@@ -21,7 +21,7 @@ final class AppProposeService {
     func propose(
         pairingTopic: String,
         namespaces: [String: ProposalNamespace],
-        optionalNamespaces: [String: OptionalNamespace]?,
+        optionalNamespaces: [String: OptionalNamespace]? = nil,
         relay: RelayProtocolOptions
     ) async throws {
         logger.debug("Propose Session on topic: \(pairingTopic)")
