@@ -173,7 +173,7 @@ public final class SignClient: SignClientProtocol {
     @available(*, deprecated, message: "use Pair.instance.create() and connect(requiredNamespaces: [String: ProposalNamespace]): instead")
     public func connect(
         requiredNamespaces: [String: ProposalNamespace],
-        optionalNamespaces: [String: OptionalNamespace]?,
+        optionalNamespaces: [String: OptionalNamespace]? = nil,
         topic: String? = nil
     ) async throws -> WalletConnectURI? {
         logger.debug("Connecting Application")

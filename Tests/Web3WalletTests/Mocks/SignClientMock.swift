@@ -16,16 +16,17 @@ final class SignClientMock: SignClientProtocol {
     var disconnectCalled = false
     
     private let metadata = AppMetadata(name: "", description: "", url: "", icons: [])
-    private let request = WalletConnectSign.Request(id: .left(""), topic: "", method: "", params: "", chainId: Blockchain("eip155:1")!)
+    private let request = WalletConnectSign.Request(id: .left(""), topic: "", method: "", params: "", chainId: Blockchain("eip155:1")!, expiry: 0)
     
     var sessionProposalPublisher: AnyPublisher<WalletConnectSign.Session.Proposal, Never> {
         let proposer = Participant(publicKey: "", metadata: metadata)
         let sessionProposal = WalletConnectSign.SessionProposal(
             relays: [],
             proposer: proposer,
-            requiredNamespaces: [:]
+            requiredNamespaces: [:],
+            optionalNamespaces: nil
         )
-        .publicRepresentation()
+        .publicRepresentation(pairingTopic: "")
 
         return Result.Publisher(sessionProposal)
             .eraseToAnyPublisher()
