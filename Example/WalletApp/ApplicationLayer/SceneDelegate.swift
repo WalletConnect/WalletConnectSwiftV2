@@ -8,6 +8,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 
     private let app = Application()
+    private let pushRegisterer = PushRegisterer()
 
     private var configurators: [Configurator] {
         return [
@@ -33,6 +34,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         app.uri = connectionOptions.urlContexts.first?.url.absoluteString.replacingOccurrences(of: "walletapp://wc?uri=", with: "")
 
         configurators.configure()
+        pushRegisterer.registerForPushNotifications()
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
