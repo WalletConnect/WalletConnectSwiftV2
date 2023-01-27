@@ -19,3 +19,6 @@ endif
 
 unit_tests:
 	fastlane unit_tests
+
+integration_tests:
+	fastlane integration_tests
