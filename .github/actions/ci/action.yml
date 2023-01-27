@@ -40,7 +40,7 @@ runs:
     - name: Build Example Dapp
       if: inputs.type == 'build-example-dapp'
       shell: bash
-      run: build_dapp
+      run: make build_dapp
 
     # UI tests
     - name: UI Tests

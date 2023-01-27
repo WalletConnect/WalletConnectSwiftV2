@@ -40,16 +40,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-spm-
 
-    - name: Ruby setup
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: 2.7
-        bundler-cache: true
-
-    - name: Install environment
-      shell: bash
-      run: make install_env
-
     - name: Resolve Dependencies
       shell: bash
       run: make resolve_packages
