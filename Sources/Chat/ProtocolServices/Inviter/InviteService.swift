@@ -44,11 +44,8 @@ class InviteService {
         // overrides on invite toipic
         try kms.setSymmetricKey(symKeyI.sharedKey, for: inviteTopic)
 
-        let request = RPCRequest(method: protocolMethod.method, params: InvitePayload(
-            message: openingMessage,
-            account: accountService.currentAccount,
-            publicKey: selfPubKeyY.hexRepresentation
-        ))
+        let invite = InvitePayload(message: openingMessage, account: accountService.currentAccount, publicKey: selfPubKeyY.hexRepresentation)
+        let request = RPCRequest(method: protocolMethod.method, params: invite)
 
         // 2. Proposer subscribes to topic R which is the hash of the derived symKey
         let responseTopic = symKeyI.derivedTopic()
@@ -91,7 +88,7 @@ class InviteService {
             peerAccount: peerAccount
         )
 
-        chatStorage.set(thread: thread)
+        chatStorage.set(thread: thread, account: accountService.currentAccount)
 
         onNewThread?(thread)
         // TODO - remove symKeyI

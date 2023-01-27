@@ -6,10 +6,10 @@ public class ChatClient {
     private let registry: Registry
     private let registryService: RegistryService
     private let messagingService: MessagingService
+    private let accountService: AccountService
     private let invitationHandlingService: InvitationHandlingService
     private let inviteService: InviteService
     private let leaveService: LeaveService
-    private let resubscriptionService: ResubscriptionService
     private let kms: KeyManagementService
     private let chatStorage: ChatStorage
 
@@ -35,10 +35,10 @@ public class ChatClient {
     init(registry: Registry,
          registryService: RegistryService,
          messagingService: MessagingService,
+         accountService: AccountService,
          invitationHandlingService: InvitationHandlingService,
          inviteService: InviteService,
          leaveService: LeaveService,
-         resubscriptionService: ResubscriptionService,
          kms: KeyManagementService,
          chatStorage: ChatStorage,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
@@ -46,10 +46,10 @@ public class ChatClient {
         self.registry = registry
         self.registryService = registryService
         self.messagingService = messagingService
+        self.accountService = accountService
         self.invitationHandlingService = invitationHandlingService
         self.inviteService = inviteService
         self.leaveService = leaveService
-        self.resubscriptionService = resubscriptionService
         self.kms = kms
         self.chatStorage = chatStorage
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
@@ -111,15 +111,15 @@ public class ChatClient {
     }
 
     public func getInvites() -> [Invite] {
-        return chatStorage.getInvites()
+        return chatStorage.getInvites(account: accountService.currentAccount)
     }
 
     public func getThreads() -> [Thread] {
-        return chatStorage.getThreads()
+        return chatStorage.getThreads(account: accountService.currentAccount)
     }
 
     public func getMessages(topic: String) -> [Message] {
-        return chatStorage.getMessages(topic: topic)
+        return chatStorage.getMessages(topic: topic, account: accountService.currentAccount)
     }
 
     private func setUpEnginesCallbacks() {

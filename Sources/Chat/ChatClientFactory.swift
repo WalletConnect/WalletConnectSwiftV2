@@ -28,26 +28,26 @@ public struct ChatClientFactory {
         let serialiser = Serializer(kms: kms)
         let rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
         let networkingInteractor = NetworkingInteractor(relayClient: relayClient, serializer: serialiser, logger: logger, rpcHistory: rpcHistory)
-        let accountService = AccountService(currentAccount: account)
         let messageStore = KeyedDatabase<Message>(storage: keyValueStorage, identifier: ChatStorageIdentifiers.messages.rawValue)
         let inviteStore = KeyedDatabase<Invite>(storage: keyValueStorage, identifier: ChatStorageIdentifiers.invites.rawValue)
         let threadStore = KeyedDatabase<Thread>(storage: keyValueStorage, identifier: ChatStorageIdentifiers.threads.rawValue)
-        let chatStorage = ChatStorage(accountService: accountService, messageStore: messageStore, inviteStore: inviteStore, threadStore: threadStore)
-        let registryService = RegistryService(registry: registry, accountService: accountService, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToRegistryRecordStore: topicToRegistryRecordStore)
-        let resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, chatStorage: chatStorage, logger: logger)
-        let invitationHandlingService = InvitationHandlingService(registry: registry, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToRegistryRecordStore: topicToRegistryRecordStore, chatStorage: chatStorage)
+        let accountService = AccountService(currentAccount: account)
+        let chatStorage = ChatStorage(messageStore: messageStore, inviteStore: inviteStore, threadStore: threadStore)
+        let resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, accountService: accountService, chatStorage: chatStorage, logger: logger)
+        let registryService = RegistryService(registry: registry, accountService: accountService, resubscriptionService: resubscriptionService, networkingInteractor: networkingInteractor, kms: kms, logger: logger, topicToRegistryRecordStore: topicToRegistryRecordStore)
+        let invitationHandlingService = InvitationHandlingService(registry: registry, networkingInteractor: networkingInteractor, accountService: accountService, kms: kms, logger: logger, topicToRegistryRecordStore: topicToRegistryRecordStore, chatStorage: chatStorage)
         let inviteService = InviteService(networkingInteractor: networkingInteractor, accountService: accountService, kms: kms, chatStorage: chatStorage, logger: logger, registry: registry)
         let leaveService = LeaveService()
-        let messagingService = MessagingService(networkingInteractor: networkingInteractor, chatStorage: chatStorage, logger: logger)
+        let messagingService = MessagingService(networkingInteractor: networkingInteractor, accountService: accountService, chatStorage: chatStorage, logger: logger)
 
         let client = ChatClient(
             registry: registry,
             registryService: registryService,
             messagingService: messagingService,
+            accountService: accountService,
             invitationHandlingService: invitationHandlingService,
             inviteService: inviteService,
             leaveService: leaveService,
-            resubscriptionService: resubscriptionService,
             kms: kms,
             chatStorage: chatStorage,
             socketConnectionStatusPublisher: relayClient.socketConnectionStatusPublisher
