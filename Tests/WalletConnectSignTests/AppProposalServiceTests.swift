@@ -62,7 +62,7 @@ final class AppProposalServiceTests: XCTestCase {
         approveEngine = ApproveEngine(
             networkingInteractor: networkingInteractor,
             proposalPayloadsStore: .init(defaults: RuntimeKeyValueStorage(), identifier: ""),
-            sessionToPairingTopic: CodableStore<String>(defaults: RuntimeKeyValueStorage(), identifier: ""),
+            sessionTopicToProposal: CodableStore<Session.Proposal>(defaults: RuntimeKeyValueStorage(), identifier: ""),
             pairingRegisterer: pairingRegisterer,
             metadata: meta,
             kms: cryptoMock,
@@ -117,7 +117,7 @@ final class AppProposalServiceTests: XCTestCase {
         networkingInteractor.responsePublisherSubject.send((topicA, request, response))
         let privateKey = try! cryptoMock.getPrivateKey(for: proposal.proposer.publicKey)!
         let topicB = deriveTopic(publicKey: responder.publicKey, privateKey: privateKey)
-        let storedPairing = storageMock.getPairing(forTopic: topicA)!
+        _ = storageMock.getPairing(forTopic: topicA)!
 
         wait(for: [exp], timeout: 5)
 
