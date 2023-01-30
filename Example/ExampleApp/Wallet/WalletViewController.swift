@@ -223,11 +223,7 @@ extension WalletViewController: ProposalViewControllerDelegate {
             let proposalNamespace = $0.value
             let accounts = Set(proposalNamespace.chains.compactMap { Account($0.absoluteString + ":\(self.accounts[$0.namespace]!)") })
 
-            let extensions: [SessionNamespace.Extension]? = proposalNamespace.extensions?.map { element in
-                let accounts = Set(element.chains.compactMap { Account($0.absoluteString + ":\(self.accounts[$0.namespace]!)") })
-                return SessionNamespace.Extension(accounts: accounts, methods: element.methods, events: element.events)
-            }
-            let sessionNamespace = SessionNamespace(accounts: accounts, methods: proposalNamespace.methods, events: proposalNamespace.events, extensions: extensions)
+            let sessionNamespace = SessionNamespace(accounts: accounts, methods: proposalNamespace.methods, events: proposalNamespace.events)
             sessionNamespaces[caip2Namespace] = sessionNamespace
         }
         approve(proposalId: proposal.id, namespaces: sessionNamespaces)

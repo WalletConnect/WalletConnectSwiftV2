@@ -100,15 +100,6 @@ struct WCSession: SequenceObject, Equatable {
                 if namespace.methods.contains(method) {
                     return true
                 }
-                if let extensions = namespace.extensions {
-                    for extended in extensions {
-                        if extended.accounts.contains(where: { $0.blockchain == chain }) {
-                            if extended.methods.contains(method) {
-                                return true
-                            }
-                        }
-                    }
-                }
             }
         }
         return false
@@ -119,15 +110,6 @@ struct WCSession: SequenceObject, Equatable {
             if namespace.accounts.contains(where: { $0.blockchain == chain }) {
                 if namespace.events.contains(event) {
                     return true
-                }
-                if let extensions = namespace.extensions {
-                    for extended in extensions {
-                        if extended.accounts.contains(where: { $0.blockchain == chain }) {
-                            if extended.events.contains(event) {
-                                return true
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -143,16 +125,6 @@ struct WCSession: SequenceObject, Equatable {
                 compliantNamespace.events.isSuperset(of: item.value.events)
             else {
                 throw Error.unsatisfiedUpdateNamespaceRequirement
-            }
-            if let extensions = item.value.extensions {
-                guard let compliantExtensions = compliantNamespace.extensions else {
-                    throw Error.unsatisfiedUpdateNamespaceRequirement
-                }
-                for existingExtension in extensions {
-                    guard compliantExtensions.contains(where: { $0.isCompliant(to: existingExtension) }) else {
-                        throw Error.unsatisfiedUpdateNamespaceRequirement
-                    }
-                }
             }
         }
         self.namespaces = namespaces

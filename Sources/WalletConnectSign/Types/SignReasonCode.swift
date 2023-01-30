@@ -39,6 +39,8 @@ enum SignReasonCode: Reason, Codable, Equatable {
 
     // 7000
     case sessionSettlementFailed
+    // 8000
+    case sessionRequestExpired
 
     var code: Int {
         switch self {
@@ -70,7 +72,7 @@ enum SignReasonCode: Reason, Codable, Equatable {
 
         case .sessionSettlementFailed: return 7000
         case .noSessionForTopic: return 7001
-            
+        case .sessionRequestExpired: return 8000
         }
     }
 
@@ -84,9 +86,6 @@ enum SignReasonCode: Reason, Codable, Equatable {
             return "Invalid update namespace request"
         case .invalidExtendRequest:
             return "Invalid update expiry request"
-        case .noSessionForTopic:
-            return "No matching session matching topic"
-
         case .unauthorizedMethod(let method):
             return "Unauthorized JSON-RPC method requested: \(method)"
         case .unauthorizedEvent(let type):
@@ -124,6 +123,10 @@ enum SignReasonCode: Reason, Codable, Equatable {
             return "User discconnected"
         case .sessionSettlementFailed:
             return "Session Settlement Failed"
+        case .noSessionForTopic:
+            return "No matching session matching topic"
+        case .sessionRequestExpired:
+            return "Session request expired or expiry param validation failed (MIN_INTERVAL: 300, MAX_INTERVAL: 604800)"
         }
     }
 }

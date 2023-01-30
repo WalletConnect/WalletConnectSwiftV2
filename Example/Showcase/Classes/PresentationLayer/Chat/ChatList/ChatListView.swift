@@ -47,6 +47,7 @@ struct ChatListView: View {
                     presenter.didLogoutPress()
                 }
                 .foregroundColor(.red)
+                .padding(.bottom, 16)
             }
             .onAppear {
                 presenter.setupInitialState()

@@ -15,11 +15,12 @@ final class ImportPresenter: ObservableObject {
         self.router = router
     }
 
-    func didPressImport() {
+    @MainActor
+    func didPressImport() async {
         guard let account = AccountNameResolver.resolveAccount(input)
         else { return input = .empty }
         interactor.save(account: account)
-        register(account: account)
+        await interactor.register(account: account)
         router.presentChat(account: account)
     }
 }
@@ -43,11 +44,5 @@ private extension ImportPresenter {
 
     func setupInitialState() {
 
-    }
-
-    func register(account: Account) {
-        Task(priority: .high) {
-            await interactor.register(account: account)
-        }
     }
 }
