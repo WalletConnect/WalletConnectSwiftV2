@@ -54,12 +54,12 @@ platform :ios do
     match(
       readonly: false,
       type: "appstore",
-      app_identifier: options[:app_identifier],
+      app_identifier: ENV["APP_IDENTIFIER"],
       git_url: "https://github.com/WalletConnect/match-swift.git",
       username: options[:username],
     )
     number = latest_testflight_build_number(
-      app_identifier: options[:app_identifier],
+      app_identifier: ENV["APP_IDENTIFIER"],
       username: options[:username],
     )
     increment_build_number(
@@ -68,12 +68,12 @@ platform :ios do
     )
     build_app(
       project: "Example/ExampleApp.xcodeproj",
-      scheme: options[:scheme]
+      scheme: ENV["SCHEME"]
     )
     upload_to_testflight(
-      app_identifier: options[:app_identifier],
+      app_identifier: ENV["APP_IDENTIFIER"],
       username: options[:username],
-      apple_id: options[:apple_id],
+      apple_id: ENV["APPLE_ID"],
       skip_waiting_for_build_processing: true,
     )
   end
