@@ -76,6 +76,7 @@ platform :ios do
       apple_id: ENV["APPLE_ID"],
       skip_waiting_for_build_processing: true,
     )
+    clean_build_artifacts()
   end
 
 end

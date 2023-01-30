@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<string>7</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>

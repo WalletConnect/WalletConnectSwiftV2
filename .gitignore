@@ -26,3 +26,6 @@ Configuration.xcconfig
 # Cache
 SourcePackagesCache
 DerivedDataCache
+
+# Artifacts
+*.ipa

@@ -5,7 +5,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<string>7</string>
 	<key>PROJECT_ID</key>
 	<string>$(PROJECT_ID)</string>
 	<key>RELAY_HOST</key>
