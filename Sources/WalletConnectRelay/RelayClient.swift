@@ -261,7 +261,6 @@ public final class RelayClient {
                 self?.concurrentQueue.async(flags: .barrier) {
                     self?.subscriptions[topic] = nil
                 }
-                completion(nil)
             }
         }
     }

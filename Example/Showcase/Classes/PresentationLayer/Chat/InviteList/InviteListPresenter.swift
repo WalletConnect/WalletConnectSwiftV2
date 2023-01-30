@@ -19,10 +19,10 @@ final class InviteListPresenter: ObservableObject {
 
     @MainActor
     func setupInitialState() async {
-        await loadInvites(account: account)
+        loadInvites()
 
         for await _ in interactor.invitesSubscription() {
-            await loadInvites(account: account)
+            loadInvites()
         }
     }
 
@@ -58,10 +58,9 @@ extension InviteListPresenter: SceneViewModel {
 
 private extension InviteListPresenter {
 
-    @MainActor
-    func loadInvites(account: Account) async {
-        let invites = await interactor.getInvites(account: account)
-        self.invites = invites.sorted(by: { $0.publicKey < $1.publicKey })
+    func loadInvites() {
+        invites = interactor.getInvites()
+            .sorted(by: { $0.publicKey < $1.publicKey })
             .map { InviteViewModel(invite: $0) }
     }
 

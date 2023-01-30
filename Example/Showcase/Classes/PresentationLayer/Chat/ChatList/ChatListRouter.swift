@@ -25,7 +25,7 @@ final class ChatListRouter {
         ChatModule.create(thread: thread, app: app).push(from: viewController)
     }
 
-    func presentMain() {
-        MainModule.create(app: app).present()
+    func presentWelcome() {
+        WelcomeModule.create(app: app).present()
     }
 }
