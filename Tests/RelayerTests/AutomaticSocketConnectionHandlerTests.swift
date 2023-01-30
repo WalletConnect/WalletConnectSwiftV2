@@ -55,15 +55,18 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
         XCTAssertFalse(webSocketSession.isConnected)
     }
 
-    func testReconnectOnDisconnectForeground() async {
+    func testReconnectOnDisconnectForeground() {
+        let expectation = expectation(description: "expects to reconnect on disconnect")
         appStateObserver.currentState = .foreground
         XCTAssertTrue(webSocketSession.isConnected)
         webSocketSession.disconnect()
         sut.handleDisconnection()
-        Task { @MainActor in
-            // Simulate time for reconnect
-            XCTAssertTrue(webSocketSession.isConnected)
+        DispatchQueue.main.async {
+            // Simulate reconnect time by asserting in next runloop
+            XCTAssertTrue(self.webSocketSession.isConnected)
+            expectation.fulfill()
         }
+        waitForExpectations(timeout: 0.1, handler: nil)
     }
 
     func testReconnectOnDisconnectBackground() {
