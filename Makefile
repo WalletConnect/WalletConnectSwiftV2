@@ -16,6 +16,26 @@ ifeq "${EXISTS_FASTLANE}" ""
 endif		
 	@echo "All dependencies was installed"
 
+build_dapp:
+	fastlane build scheme:DApp
+
+build_wallet:
+	fastlane build scheme:WalletApp
+
+ui_tests:
+	echo "UI Tests disabled"
 
 unit_tests:
-	fastlane unit_tests
+	fastlane tests scheme:WalletConnect
+
+integration_tests:
+	fastlane tests scheme:IntegrationTests relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID)
+
+resolve_packages: 
+	fastlane resolve scheme:WalletApp
+
+release_wallet:
+	fastlane release_testflight username:$(APPLE_ID) --env WalletApp
+
+release_showcase:
+	fastlane release_testflight username:$(APPLE_ID) --env Showcase
