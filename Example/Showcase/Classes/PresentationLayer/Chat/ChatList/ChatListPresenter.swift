@@ -44,7 +44,7 @@ final class ChatListPresenter: ObservableObject {
 
     func didLogoutPress() {
         interactor.logout()
-        router.presentMain()
+        router.presentWelcome()
     }
 
     func didPressNewChat() {
