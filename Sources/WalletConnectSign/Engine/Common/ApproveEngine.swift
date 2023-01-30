@@ -19,7 +19,7 @@ final class ApproveEngine {
     private let pairingStore: WCPairingStorage
     private let sessionStore: WCSessionStorage
     private let proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>
-    private var sessionTopicToProposal: CodableStore<Session.Proposal>
+    private let sessionTopicToProposal: CodableStore<Session.Proposal>
     private let pairingRegisterer: PairingRegisterer
     private let metadata: AppMetadata
     private let kms: KeyManagementServiceProtocol
