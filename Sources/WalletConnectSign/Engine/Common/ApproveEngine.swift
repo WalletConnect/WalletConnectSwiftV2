@@ -15,13 +15,11 @@ final class ApproveEngine {
     var onSessionRejected: ((Session.Proposal, Reason) -> Void)?
     var onSessionSettle: ((Session) -> Void)?
 
-    var settlingProposal: SessionProposal?
-
     private let networkingInteractor: NetworkInteracting
     private let pairingStore: WCPairingStorage
     private let sessionStore: WCSessionStorage
     private let proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>
-    private let sessionToPairingTopic: CodableStore<String>
+    private var sessionTopicToProposal: CodableStore<Session.Proposal>
     private let pairingRegisterer: PairingRegisterer
     private let metadata: AppMetadata
     private let kms: KeyManagementServiceProtocol
@@ -32,7 +30,7 @@ final class ApproveEngine {
     init(
         networkingInteractor: NetworkInteracting,
         proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>,
-        sessionToPairingTopic: CodableStore<String>,
+        sessionTopicToProposal: CodableStore<Session.Proposal>,
         pairingRegisterer: PairingRegisterer,
         metadata: AppMetadata,
         kms: KeyManagementServiceProtocol,
@@ -42,7 +40,7 @@ final class ApproveEngine {
     ) {
         self.networkingInteractor = networkingInteractor
         self.proposalPayloadsStore = proposalPayloadsStore
-        self.sessionToPairingTopic = sessionToPairingTopic
+        self.sessionTopicToProposal = sessionTopicToProposal
         self.pairingRegisterer = pairingRegisterer
         self.metadata = metadata
         self.kms = kms
@@ -216,10 +214,9 @@ private extension ApproveEngine {
             logger.debug("Received Session Proposal response")
 
             try kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
-            sessionToPairingTopic.set(payload.topic, forKey: sessionTopic)
 
-            settlingProposal = payload.request
-
+            let proposal = payload.request.publicRepresentation(pairingTopic: payload.topic)
+            sessionTopicToProposal.set(proposal, forKey: sessionTopic)
             Task(priority: .high) {
                 try await networkingInteractor.subscribe(topic: sessionTopic)
             }
@@ -290,11 +287,13 @@ private extension ApproveEngine {
 
         let protocolMethod = SessionSettleProtocolMethod()
 
-        guard let proposedNamespaces = settlingProposal?.requiredNamespaces else {
-            return respondError(payload: payload, reason: .invalidUpdateRequest, protocolMethod: protocolMethod)
-        }
+        let sessionTopic = payload.topic
 
-        settlingProposal = nil
+        guard let proposal = try? sessionTopicToProposal.get(key: sessionTopic) else {
+            return respondError(payload: payload, reason: .sessionSettlementFailed, protocolMethod: protocolMethod)
+        }
+        let pairingTopic = proposal.pairingTopic
+        let proposedNamespaces = proposal.requiredNamespaces
 
         let params = payload.request
         let sessionNamespaces = params.namespaces
@@ -308,23 +307,19 @@ private extension ApproveEngine {
             return respondError(payload: payload, reason: .invalidUpdateRequest, protocolMethod: protocolMethod)
         }
 
-        let topic = payload.topic
-        let agreementKeys = kms.getAgreementSecret(for: topic)!
+        let agreementKeys = kms.getAgreementSecret(for: sessionTopic)!
         let selfParticipant = Participant(
             publicKey: agreementKeys.publicKey.hexRepresentation,
             metadata: metadata
         )
 
-        guard let pairingTopic = try? sessionToPairingTopic.get(key: topic) else {
-            return
-        }
         pairingRegisterer.activate(
             pairingTopic: pairingTopic,
             peerMetadata: params.controller.metadata
         )
 
         let session = WCSession(
-            topic: topic,
+            topic: sessionTopic,
             pairingTopic: pairingTopic,
             timestamp: Date(),
             selfParticipant: selfParticipant,

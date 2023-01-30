@@ -37,6 +37,9 @@ enum SignReasonCode: Reason, Codable, Equatable {
     // 6000
     case userDisconnected
 
+    // 7000
+    case sessionSettlementFailed
+
     var code: Int {
         switch self {
         case .invalidMethod: return 1001
@@ -65,7 +68,9 @@ enum SignReasonCode: Reason, Codable, Equatable {
 
         case .userDisconnected: return 6000
 
+        case .sessionSettlementFailed: return 7000
         case .noSessionForTopic: return 7001
+            
         }
     }
 
@@ -117,6 +122,8 @@ enum SignReasonCode: Reason, Codable, Equatable {
             return "Unsupported namespace key"
         case .userDisconnected:
             return "User discconnected"
+        case .sessionSettlementFailed:
+            return "Session Settlement Failed"
         }
     }
 }

@@ -16,7 +16,7 @@ public struct Session {
 
 extension Session {
 
-    public struct Proposal: Equatable {
+    public struct Proposal: Equatable, Codable {
         public var id: String
         public let pairingTopic: String
         public let proposer: AppMetadata
