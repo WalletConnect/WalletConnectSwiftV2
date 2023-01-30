@@ -43,5 +43,7 @@
 			</array>
 		</dict>
 	</dict>
+	<key>SIMULATOR_IDENTIFIER</key>
+	<string>$(SIMULATOR_IDENTIFIER)</string>
 </dict>
 </plist>

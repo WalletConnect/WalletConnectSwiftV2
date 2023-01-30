@@ -4,13 +4,14 @@ import WalletConnectNetworking
 import WalletConnectPairing
 import WalletConnectEcho
 
+
 public class WalletPushClient {
 
     private var publishers = Set<AnyCancellable>()
 
-    private let requestPublisherSubject = PassthroughSubject<(id: RPCID, account: Account, metadata: AppMetadata), Never>()
+    private let requestPublisherSubject = PassthroughSubject<PushRequest, Never>()
 
-    public var requestPublisher: AnyPublisher<(id: RPCID, account: Account, metadata: AppMetadata), Never> {
+    public var requestPublisher: AnyPublisher<PushRequest, Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 

@@ -60,7 +60,6 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
                 accountsDetails.append(AccountDetails(chain: account.blockchainIdentifier, methods: Array(namespace.methods), account: account.address)) // TODO: Rethink how this info is displayed on example
             }
         }
-        proposePushSubscription()
     }
 
     func proposePushSubscription() {
