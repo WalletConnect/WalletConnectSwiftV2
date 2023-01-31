@@ -33,9 +33,10 @@ actor EchoRegisterService {
             EchoResponse.self,
             at: EchoAPI.register(clientId: clientIdMutlibase, token: token, projectId: projectId)
         )
-        guard response.status == .ok else {
+        guard response.status == .success else {
             throw Errors.registrationFailed
         }
+        logger.debug("Successfully registered at Echo Server")
     }
 
 #if DEBUG
@@ -44,9 +45,10 @@ actor EchoRegisterService {
             EchoResponse.self,
             at: EchoAPI.register(clientId: clientIdMutlibase, token: deviceToken, projectId: projectId)
         )
-        guard response.status == .ok else {
+        guard response.status == .success else {
             throw Errors.registrationFailed
         }
+        logger.debug("Successfully registered at Echo Server")
     }
 #endif
 }

@@ -2,7 +2,7 @@ import Foundation
 
 struct EchoResponse: Codable {
     enum Status: String, Codable {
-        case ok = "OK"
+        case success = "SUCCESS"
         case failed = "FAILED"
     }
 
