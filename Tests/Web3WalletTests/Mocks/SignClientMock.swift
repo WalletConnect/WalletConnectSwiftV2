@@ -36,7 +36,7 @@ final class SignClientMock: SignClientProtocol {
     }
     
     var sessionsPublisher: AnyPublisher<[WalletConnectSign.Session], Never> {
-        return Result.Publisher([WalletConnectSign.Session(topic: "", peer: metadata, namespaces: [:], expiryDate: Date())])
+        return Result.Publisher([WalletConnectSign.Session(topic: "", pairingTopic: "", peer: metadata, namespaces: [:], expiryDate: Date())])
             .eraseToAnyPublisher()
     }
     
@@ -73,7 +73,7 @@ final class SignClientMock: SignClientProtocol {
     }
     
     func getSessions() -> [WalletConnectSign.Session] {
-        return [WalletConnectSign.Session(topic: "", peer: metadata, namespaces: [:], expiryDate: Date())]
+        return [WalletConnectSign.Session(topic: "", pairingTopic: "", peer: metadata, namespaces: [:], expiryDate: Date())]
     }
     
     func getPendingRequests(topic: String?) -> [WalletConnectSign.Request] {
