@@ -8,6 +8,7 @@ final class MainRouter {
 
     func walletViewController() -> UIViewController {
         return WalletModule.create(app: app)
+            .wrapToNavigationController()
     }
 
     func notificationsViewController() -> UIViewController {
