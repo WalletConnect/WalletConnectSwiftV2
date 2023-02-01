@@ -10,8 +10,7 @@ final class WelcomeRouter {
     }
     
     func presentWallet() {
-        WalletModule.create(app: app)
-            .wrapToNavigationController()
-            .presentFullScreen(from: viewController)
+        MainModule.create(app: app)
+            .present()
     }
 }
