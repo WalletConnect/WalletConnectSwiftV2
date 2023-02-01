@@ -1,17 +1,18 @@
 import Foundation
 
-struct DIDPKH {
-    static let didPrefix: String = "did:pkh"
+public struct DIDPKH {
+
+    private static let didPrefix: String = "did:pkh"
 
     enum Errors: Error {
         case invalidDIDPKH
         case invalidAccount
     }
 
-    let account: Account
-    let iss: String
+    public let account: Account
+    public let iss: String
 
-    init(iss: String) throws {
+    public init(iss: String) throws {
         guard iss.starts(with: DIDPKH.didPrefix)
         else { throw Errors.invalidDIDPKH }
 
@@ -25,7 +26,7 @@ struct DIDPKH {
         self.account = account
     }
 
-    init(account: Account) {
+    public init(account: Account) {
         self.iss = "\(DIDPKH.didPrefix):\(account.absoluteString)"
         self.account = account
     }

@@ -60,7 +60,7 @@ class AppRespondSubscriberTests: XCTestCase {
         // subscribe on compromised cacao
         let account = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
         let cacaoHeader = CacaoHeader(t: "eip4361")
-        let cacaoPayload = CacaoPayload(params: compromissedParams.payloadParams, didpkh: DIDPKH(account: account))
+        let cacaoPayload = compromissedParams.payloadParams.cacaoPayload(didpkh: DIDPKH(account: account))
         let cacaoSignature = CacaoSignature(t: .eip191, s: "")
 
         let cacao = Cacao(h: cacaoHeader, p: cacaoPayload, s: cacaoSignature)
