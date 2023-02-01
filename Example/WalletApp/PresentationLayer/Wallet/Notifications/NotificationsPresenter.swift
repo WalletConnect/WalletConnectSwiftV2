@@ -30,7 +30,13 @@ final class NotificationsPresenter: ObservableObject {
 // MARK: SceneViewModel
 
 extension NotificationsPresenter: SceneViewModel {
+    var sceneTitle: String? {
+        return "Notifications"
+    }
 
+    var largeTitleDisplayMode: UINavigationItem.LargeTitleDisplayMode {
+        return .always
+    }
 }
 
 // MARK: Privates
