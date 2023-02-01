@@ -5,28 +5,50 @@ struct NotificationsView: View {
     @EnvironmentObject var presenter: NotificationsPresenter
 
 
-
-
-
-
     var body: some View {
-        GeometryReader { geometry in
-            VStack {
-                ScrollView(showsIndicators: false) {
+        ZStack {
+            Color.grey100
+                .edgesIgnoringSafeArea(.all)
+
+            VStack(alignment: .leading, spacing: 16) {
+                ZStack {
+                    if presenter.subscriptions.isEmpty {
+                        VStack(spacing: 10) {
+                            Image(systemName: "bell.badge.fill")
+                                .resizable()
+                                .frame(width: 32, height: 32)
+                                .aspectRatio(contentMode: .fit)
+                                .foregroundColor(.grey50)
+
+                            Text("Notifications from connected apps will appear here. To enable notifications, visit the app in your browser and look for a \(Image(systemName: "bell.fill")) notifications toggle \(Image(systemName: "switch.2"))")
+                                .foregroundColor(.grey50)
+                                .font(.system(size: 15, weight: .regular, design: .rounded))
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(4)
+                        }
+                        .padding(20)
+                    }
+
                     VStack {
-                        if presenter.subscriptions.isEmpty {
-                            Spacer()
-                            emptyView(size: geometry.size)
-                            Spacer()
-                        } else {
-                            subscriptionsList()
+                        if !presenter.subscriptions.isEmpty {
+                            List {
+                                ForEach(presenter.subscriptions, id: \.title) { subscription in
+                                    subscriptionsView(subscription: subscription)
+                                        .listRowSeparator(.hidden)
+                                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
+                                }
+                                .onDelete { indexSet in
+                                    Task(priority: .high) {
+                                        await presenter.removeSubscribtion(at: indexSet)
+                                    }
+                                }
+                            }
+                            .listStyle(PlainListStyle())
                         }
                     }
                 }
             }
-            .onAppear {
-                presenter.setupInitialState()
-            }
+            .padding(.vertical, 20)
         }
     }
 
@@ -34,45 +56,45 @@ struct NotificationsView: View {
 
 
 
-    private func subscriptionsList() -> some View {
-        ForEach(presenter.subscriptions) { subscription in
-            Button(action: {
-                presenter.didPress(subscription)
-            }) {
-                HStack(spacing: 16.0) {
-                    Image("avatar")
-                        .resizable()
-                        .frame(width: 64.0, height: 64.0)
+    private func subscriptionsView(subscription: SubscriptionsViewModel) -> some View {
+        Button {
+            presenter.didPress(subscription)
+        } label: {
+            VStack {
+                HStack(spacing: 10) {
+                    AsyncImage(url: URL(string: subscription.imageUrl)) { phase in
+                        if let image = phase.image {
+                            image
+                                .resizable()
+                                .frame(width: 60, height: 60)
+                                .background(Color.black)
+                                .cornerRadius(30, corners: .allCorners)
+                        } else {
+                            Color.black
+                                .frame(width: 60, height: 60)
+                                .cornerRadius(30, corners: .allCorners)
+                        }
+                    }
+                    .padding(.leading, 20)
 
-                    VStack(alignment: .leading) {
+                    VStack(alignment: .leading, spacing: 2) {
                         Text(subscription.title)
-                            .font(.title3)
-                            .foregroundColor(.blue)
-                            .lineLimit(1)
+                            .foregroundColor(.grey8)
+                            .font(.system(size: 20, weight: .semibold, design: .rounded))
 
                         Text(subscription.subtitle)
-                            .font(.subheadline)
-                            .foregroundColor(.yellow)
-                            .multilineTextAlignment(.leading)
+                            .foregroundColor(.grey50)
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
                     }
+
+                    Spacer()
+
+                    Image("forward-shevron")
+                        .foregroundColor(.grey8)
+                        .padding(.trailing, 20)
                 }
-                .frame(height: 64.0)
             }
         }
-        .padding(16.0)
-    }
-
-
-
-    private func emptyView(size: CGSize) -> some View {
-        VStack(spacing: 8.0) {
-            Text("It’s empty in here")
-                .font(.system(.title3))
-                .foregroundColor(.blue)
-
-        }
-        .frame(width: size.width)
-        .frame(minHeight: size.height)
     }
 }
 

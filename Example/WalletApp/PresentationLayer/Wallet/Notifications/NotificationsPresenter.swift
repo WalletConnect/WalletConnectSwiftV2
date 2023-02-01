@@ -25,6 +25,10 @@ final class NotificationsPresenter: ObservableObject {
             await setupSubscriptions()
         }
     }
+
+    func removeSubscribtion(at index: IndexSet) async {
+        //todo
+    }
 }
 
 // MARK: SceneViewModel

@@ -8,6 +8,10 @@ struct SubscriptionsViewModel: Identifiable {
         return subscription.topic
     }
 
+    var imageUrl: String {
+        return subscription.metadata.url
+    }
+
     var title: String {
         return subscription.metadata.name
     }
