@@ -11,8 +11,8 @@ final class MainRouter {
     }
 
     func notificationsViewController() -> UIViewController {
-        return WalletModule.create(app: app)
-//        return Web3InboxModule.create(app: app, account: account).wrapToNavigationController()
+        return NotificationsModule.create(app: app)
+            .wrapToNavigationController()
     }
 
     init(app: Application) {

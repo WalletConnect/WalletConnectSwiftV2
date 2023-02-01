@@ -38,6 +38,12 @@
 		847BD1D92989492500076C90 /* MainPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1D42989492500076C90 /* MainPresenter.swift */; };
 		847BD1DA2989492500076C90 /* MainRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1D52989492500076C90 /* MainRouter.swift */; };
 		847BD1DD2989494F00076C90 /* TabPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1DC2989494F00076C90 /* TabPage.swift */; };
+		847BD1E4298A806800076C90 /* NotificationsModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1DF298A806800076C90 /* NotificationsModule.swift */; };
+		847BD1E5298A806800076C90 /* NotificationsPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1E0298A806800076C90 /* NotificationsPresenter.swift */; };
+		847BD1E6298A806800076C90 /* NotificationsRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1E1298A806800076C90 /* NotificationsRouter.swift */; };
+		847BD1E7298A806800076C90 /* NotificationsInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1E2298A806800076C90 /* NotificationsInteractor.swift */; };
+		847BD1E8298A806800076C90 /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1E3298A806800076C90 /* NotificationsView.swift */; };
+		847BD1EB298A87AB00076C90 /* SubscriptionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1EA298A87AB00076C90 /* SubscriptionsViewModel.swift */; };
 		847CF3AF28E3141700F1D760 /* WalletConnectPush in Frameworks */ = {isa = PBXBuildFile; productRef = 847CF3AE28E3141700F1D760 /* WalletConnectPush */; settings = {ATTRIBUTES = (Required, ); }; };
 		8485617D295079730064877B /* WalletConnectPairing in Frameworks */ = {isa = PBXBuildFile; productRef = 8485617C295079730064877B /* WalletConnectPairing */; };
 		8485617F295307C20064877B /* PushNotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8485617E295307C20064877B /* PushNotificationTests.swift */; };
@@ -374,6 +380,12 @@
 		847BD1D42989492500076C90 /* MainPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainPresenter.swift; sourceTree = "<group>"; };
 		847BD1D52989492500076C90 /* MainRouter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainRouter.swift; sourceTree = "<group>"; };
 		847BD1DC2989494F00076C90 /* TabPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabPage.swift; sourceTree = "<group>"; };
+		847BD1DF298A806800076C90 /* NotificationsModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsModule.swift; sourceTree = "<group>"; };
+		847BD1E0298A806800076C90 /* NotificationsPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsPresenter.swift; sourceTree = "<group>"; };
+		847BD1E1298A806800076C90 /* NotificationsRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsRouter.swift; sourceTree = "<group>"; };
+		847BD1E2298A806800076C90 /* NotificationsInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsInteractor.swift; sourceTree = "<group>"; };
+		847BD1E3298A806800076C90 /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
+		847BD1EA298A87AB00076C90 /* SubscriptionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionsViewModel.swift; sourceTree = "<group>"; };
 		8485617E295307C20064877B /* PushNotificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationTests.swift; sourceTree = "<group>"; };
 		849A4F18298281E300E61ACE /* WalletAppRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WalletAppRelease.entitlements; sourceTree = "<group>"; };
 		849A4F19298281F100E61ACE /* PNDecryptionServiceRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PNDecryptionServiceRelease.entitlements; sourceTree = "<group>"; };
@@ -829,6 +841,27 @@
 				847BD1DC2989494F00076C90 /* TabPage.swift */,
 			);
 			path = Model;
+			sourceTree = "<group>";
+		};
+		847BD1E9298A807000076C90 /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				847BD1DF298A806800076C90 /* NotificationsModule.swift */,
+				847BD1E0298A806800076C90 /* NotificationsPresenter.swift */,
+				847BD1E1298A806800076C90 /* NotificationsRouter.swift */,
+				847BD1E2298A806800076C90 /* NotificationsInteractor.swift */,
+				847BD1E3298A806800076C90 /* NotificationsView.swift */,
+				847BD1EC298A87C300076C90 /* Models */,
+			);
+			path = Notifications;
+			sourceTree = "<group>";
+		};
+		847BD1EC298A87C300076C90 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				847BD1EA298A87AB00076C90 /* SubscriptionsViewModel.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		849D7A91292E2115006A2BD4 /* Push */ = {
@@ -1503,6 +1536,7 @@
 				C56EE236293F566A004840D1 /* Scan */,
 				C56EE22A293F5668004840D1 /* Wallet */,
 				84E6B8592981625A00428BAF /* PushRequest */,
+				847BD1E9298A807000076C90 /* Notifications */,
 			);
 			path = Wallet;
 			sourceTree = "<group>";
@@ -2213,6 +2247,7 @@
 				C56EE28D293F5757004840D1 /* AppearanceConfigurator.swift in Sources */,
 				847BD1D82989492500076C90 /* MainModule.swift in Sources */,
 				C5B2F7112970583B000DBA0E /* SessionInfo.swift in Sources */,
+				847BD1E7298A806800076C90 /* NotificationsInteractor.swift in Sources */,
 				C56EE241293F566D004840D1 /* WalletModule.swift in Sources */,
 				C56EE245293F566D004840D1 /* WalletPresenter.swift in Sources */,
 				C56EE240293F566D004840D1 /* ScanQRView.swift in Sources */,
@@ -2220,6 +2255,7 @@
 				C56EE28F293F5757004840D1 /* MigrationConfigurator.swift in Sources */,
 				847BD1DD2989494F00076C90 /* TabPage.swift in Sources */,
 				C55D348B295DD8CA0004314A /* PasteUriRouter.swift in Sources */,
+				847BD1E4298A806800076C90 /* NotificationsModule.swift in Sources */,
 				C55D348C295DD8CA0004314A /* PasteUriInteractor.swift in Sources */,
 				847BD1D92989492500076C90 /* MainPresenter.swift in Sources */,
 				C55D3497295DFA750004314A /* WelcomeView.swift in Sources */,
@@ -2238,6 +2274,7 @@
 				C55D3493295DFA750004314A /* WelcomeModule.swift in Sources */,
 				C56EE270293F56D7004840D1 /* String.swift in Sources */,
 				C56EE279293F56D7004840D1 /* Color.swift in Sources */,
+				847BD1E6298A806800076C90 /* NotificationsRouter.swift in Sources */,
 				84E6B8612981630C00428BAF /* PushRequestView.swift in Sources */,
 				84E6B85F2981630000428BAF /* PushRequestInteractor.swift in Sources */,
 				C55D3483295DD7140004314A /* AuthRequestView.swift in Sources */,
@@ -2252,6 +2289,7 @@
 				C56EE24F293F566D004840D1 /* WalletView.swift in Sources */,
 				C55D34B22965FB750004314A /* SessionProposalView.swift in Sources */,
 				C56EE248293F566D004840D1 /* ScanQR.swift in Sources */,
+				847BD1EB298A87AB00076C90 /* SubscriptionsViewModel.swift in Sources */,
 				C55D349B2965BC2F0004314A /* TagsView.swift in Sources */,
 				C56EE289293F5757004840D1 /* Application.swift in Sources */,
 				C56EE273293F56D7004840D1 /* UIColor.swift in Sources */,
@@ -2267,6 +2305,7 @@
 				84DB38F32983CDAE00BFEE37 /* PushRegisterer.swift in Sources */,
 				C5B2F6FB297055B0000DBA0E /* ETHSigner.swift in Sources */,
 				C56EE274293F56D7004840D1 /* SceneViewController.swift in Sources */,
+				847BD1E5298A806800076C90 /* NotificationsPresenter.swift in Sources */,
 				C55D3496295DFA750004314A /* WelcomeInteractor.swift in Sources */,
 				84E6B85D298162F700428BAF /* PushRequestRouter.swift in Sources */,
 				C5B2F6FC297055B0000DBA0E /* SOLSigner.swift in Sources */,
@@ -2279,6 +2318,7 @@
 				C56EE24E293F566D004840D1 /* WalletInteractor.swift in Sources */,
 				C55D34AF2965FB750004314A /* SessionProposalPresenter.swift in Sources */,
 				C5F32A302954816100A6476E /* ConnectionDetailsInteractor.swift in Sources */,
+				847BD1E8298A806800076C90 /* NotificationsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
