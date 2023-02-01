@@ -16,9 +16,9 @@ enum TabPage: CaseIterable {
     var icon: UIImage {
         switch self {
         case .wallet:
-            return UIImage(systemName: "message.fill")!
+            return UIImage(systemName: "house.fill")!
         case .notifications:
-            return UIImage(systemName: "safari.fill")!
+            return UIImage(systemName: "bell.fill")!
         }
     }
 
