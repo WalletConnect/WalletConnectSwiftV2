@@ -9,6 +9,11 @@ public class WalletPushClient {
 
     private var publishers = Set<AnyCancellable>()
 
+    public var subscriptionsPublisher: AnyPublisher<[PushSubscription], Never> {
+        subscriptionsPublisherSubject.eraseToAnyPublisher()
+    }
+    private let subscriptionsPublisherSubject = PassthroughSubject<[PushSubscription], Never>()
+
     private let requestPublisherSubject = PassthroughSubject<PushRequest, Never>()
 
     public var requestPublisher: AnyPublisher<PushRequest, Never> {

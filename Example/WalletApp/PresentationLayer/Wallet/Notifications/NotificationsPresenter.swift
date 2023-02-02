@@ -26,8 +26,10 @@ final class NotificationsPresenter: ObservableObject {
         }
     }
 
-    func removeSubscribtion(at index: IndexSet) async {
-        //todo
+    func removeSubscribtion(at indexSet: IndexSet) async {
+        if let index = indexSet.first {
+            await interactor.removeSubscription(subscriptions[index].subscription)
+        }
     }
 }
 

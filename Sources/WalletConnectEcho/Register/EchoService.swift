@@ -28,7 +28,7 @@ enum EchoAPI: HTTPService {
         case .register(let clientId, let token, _):
             return try? JSONEncoder().encode([
                 "client_id": clientId,
-                "type": "apns",
+                "type": "apns-sandbox",
                 "token": token
             ])
         case .unregister:
