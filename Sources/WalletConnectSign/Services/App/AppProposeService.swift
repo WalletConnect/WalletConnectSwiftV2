@@ -21,11 +21,14 @@ final class AppProposeService {
     func propose(
         pairingTopic: String,
         namespaces: [String: ProposalNamespace],
-        optionalNamespaces: [String: OptionalNamespace]? = nil,
+        optionalNamespaces: [String: ProposalNamespace]? = nil,
         relay: RelayProtocolOptions
     ) async throws {
         logger.debug("Propose Session on topic: \(pairingTopic)")
         try Namespace.validate(namespaces)
+        if let optionalNamespaces {
+            try Namespace.validate(optionalNamespaces)
+        }
         let protocolMethod = SessionProposeProtocolMethod()
         let publicKey = try! kms.createX25519KeyPair()
         let proposer = Participant(

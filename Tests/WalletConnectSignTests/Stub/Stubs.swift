@@ -29,16 +29,6 @@ extension ProposalNamespace {
     }
 }
 
-extension OptionalNamespace {
-    static func stubDictionary() -> [String: OptionalNamespace] {
-        return [
-            "eip155": OptionalNamespace(
-                methods: ["optional_method"],
-                events: ["optional_event"])
-        ]
-    }
-}
-
 extension SessionNamespace {
     static func stubDictionary() -> [String: SessionNamespace] {
         return [
@@ -89,7 +79,7 @@ extension SessionProposal {
         let relayOptions = RelayProtocolOptions(protocol: "irn", data: nil)
         return SessionType.ProposeParams(
             relays: [relayOptions],
-            proposer: Participant(publicKey: proposerPubKey, metadata: AppMetadata.stub()), requiredNamespaces: ProposalNamespace.stubDictionary(), optionalNamespaces: OptionalNamespace.stubDictionary())
+            proposer: Participant(publicKey: proposerPubKey, metadata: AppMetadata.stub()), requiredNamespaces: ProposalNamespace.stubDictionary(), optionalNamespaces: ProposalNamespace.stubDictionary())
     }
 }
 

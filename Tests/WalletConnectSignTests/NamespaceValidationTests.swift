@@ -13,7 +13,7 @@ final class NamespaceValidationTests: XCTestCase {
 
     // MARK: - Proposal namespace validation
 
-    func testValidProposalNamespace() {
+    func testValidProposalNamespaceWithChains() {
         let namespace = [
             "eip155": ProposalNamespace(
                 chains: [ethChain],
@@ -29,13 +29,24 @@ final class NamespaceValidationTests: XCTestCase {
         XCTAssertNoThrow(try Namespace.validate(namespace))
     }
     
-    func testValidOptionalProposalNamespace() {
+    func testValidProposalNamespaceNoChains() {
         let namespace = [
-            "eip155": OptionalNamespace(
+            "eip155:1": ProposalNamespace(
+                methods: ["method"],
+                events: ["event"]
+            )
+        ]
+        XCTAssertNoThrow(try Namespace.validate(namespace))
+    }
+    
+    func testValidProposalNamespaceMixed() {
+        let namespace = [
+            "eip155:1": ProposalNamespace(
                 methods: ["method"],
                 events: ["event"]
             ),
-            "cosmos": OptionalNamespace(
+            "eip155": ProposalNamespace(
+                chains: [polyChain],
                 methods: ["someMethod"],
                 events: ["someEvent"]
             )

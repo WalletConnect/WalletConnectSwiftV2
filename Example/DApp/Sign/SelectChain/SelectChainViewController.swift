@@ -39,7 +39,6 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
         let namespaces: [String: ProposalNamespace] = [
             "eip155": ProposalNamespace(
                 chains: [
-                    Blockchain("eip155:1")!,
                     Blockchain("eip155:137")!
                 ],
                 methods: [
@@ -48,6 +47,16 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
                     "eth_signTypedData"
                 ], events: []
             ),
+            "eip155:1": ProposalNamespace(
+                methods: [
+                    "eth_sendTransaction",
+                    "personal_sign",
+                    "eth_signTypedData"
+                ],
+                events: []
+            )
+        ]
+        let optionalNamespaces: [String: ProposalNamespace] = [
             "solana": ProposalNamespace(
                 chains: [
                     Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!
@@ -56,17 +65,6 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
                     "solana_signMessage",
                     "solana_signTransaction"
                 ], events: []
-            )
-        ]
-        let optionalNamespaces: [String: OptionalNamespace] = [
-            "eip155:42161": OptionalNamespace(
-                methods: [
-                    "eth_sendTransaction",
-                    "eth_signTransaction",
-                    "get_balance",
-                    "personal_sign"
-                ],
-                events: ["accountsChanged", "chainChanged"]
             )
         ]
         Task {

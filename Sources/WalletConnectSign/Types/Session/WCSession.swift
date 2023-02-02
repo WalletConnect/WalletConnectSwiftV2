@@ -86,11 +86,18 @@ struct WCSession: SequenceObject, Equatable {
     }
 
     func hasNamespace(for chain: Blockchain) -> Bool {
-        return namespaces[chain.namespace] != nil
+        return namespaces[chain.namespace] != nil || namespaces[chain.namespace + ":\(chain.reference)"] != nil
     }
 
     func hasPermission(forMethod method: String, onChain chain: Blockchain) -> Bool {
         if let namespace = namespaces[chain.namespace] {
+            if namespace.accounts.contains(where: { $0.blockchain == chain }) {
+                if namespace.methods.contains(method) {
+                    return true
+                }
+            }
+        }
+        if let namespace = namespaces[chain.namespace + ":\(chain.reference)"] {
             if namespace.accounts.contains(where: { $0.blockchain == chain }) {
                 if namespace.methods.contains(method) {
                     return true
@@ -115,7 +122,7 @@ struct WCSession: SequenceObject, Equatable {
         for item in requiredNamespaces {
             guard
                 let compliantNamespace = namespaces[item.key],
-                SessionNamespace.accountsAreCompliant(compliantNamespace.accounts, toChains: item.value.chains),
+                SessionNamespace.accountsAreCompliant(compliantNamespace.accounts, toChains: item.value.chains!),
                 compliantNamespace.methods.isSuperset(of: item.value.methods),
                 compliantNamespace.events.isSuperset(of: item.value.events)
             else {

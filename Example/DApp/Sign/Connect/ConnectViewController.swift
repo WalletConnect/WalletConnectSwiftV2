@@ -103,8 +103,8 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
                 ], events: []
             )
         ]
-        let optionalNamespaces: [String: OptionalNamespace] = [
-            "eip155:42161": OptionalNamespace(
+        let optionalNamespaces: [String: ProposalNamespace] = [
+            "eip155:42161": ProposalNamespace(
                 methods: [
                     "eth_sendTransaction",
                     "eth_signTransaction",
