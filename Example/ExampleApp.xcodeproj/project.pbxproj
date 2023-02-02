@@ -28,6 +28,7 @@
 		76B149F02821C03B00F05F91 /* Proposal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76B149EF2821C03B00F05F91 /* Proposal.swift */; };
 		76B6E39F2807A3B6004DF775 /* WalletViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76B6E39E2807A3B6004DF775 /* WalletViewController.swift */; };
 		840BCF142949B9F900CB0655 /* WalletConnectPush in Frameworks */ = {isa = PBXBuildFile; productRef = 840BCF132949B9F900CB0655 /* WalletConnectPush */; };
+		84310D05298BC980000C15B6 /* MainInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84310D04298BC980000C15B6 /* MainInteractor.swift */; };
 		8439CB89293F658E00F2F2E2 /* PushMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8439CB88293F658E00F2F2E2 /* PushMessage.swift */; };
 		8448F1D427E4726F0000B866 /* WalletConnect in Frameworks */ = {isa = PBXBuildFile; productRef = 8448F1D327E4726F0000B866 /* WalletConnect */; };
 		84494388278D9C1B00CC26BB /* UIAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84494387278D9C1B00CC26BB /* UIAlertController.swift */; };
@@ -371,6 +372,7 @@
 		76B149EF2821C03B00F05F91 /* Proposal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Proposal.swift; sourceTree = "<group>"; };
 		76B6E39E2807A3B6004DF775 /* WalletViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WalletViewController.swift; sourceTree = "<group>"; };
 		8414FC832962F3D9007E20C9 /* PushDecryptionService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PushDecryptionService.entitlements; sourceTree = "<group>"; };
+		84310D04298BC980000C15B6 /* MainInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainInteractor.swift; sourceTree = "<group>"; };
 		8439CB88293F658E00F2F2E2 /* PushMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushMessage.swift; sourceTree = "<group>"; };
 		84494387278D9C1B00CC26BB /* UIAlertController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIAlertController.swift; sourceTree = "<group>"; };
 		845B8D8B2934B36C0084A966 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
@@ -828,6 +830,7 @@
 			children = (
 				847BD1D32989492500076C90 /* MainModule.swift */,
 				847BD1D42989492500076C90 /* MainPresenter.swift */,
+				84310D04298BC980000C15B6 /* MainInteractor.swift */,
 				847BD1D52989492500076C90 /* MainRouter.swift */,
 				847BD1D12989492500076C90 /* MainViewController.swift */,
 				847BD1DE2989495C00076C90 /* Model */,
@@ -2279,6 +2282,7 @@
 				84E6B85F2981630000428BAF /* PushRequestInteractor.swift in Sources */,
 				C55D3483295DD7140004314A /* AuthRequestView.swift in Sources */,
 				C56EE243293F566D004840D1 /* ScanView.swift in Sources */,
+				84310D05298BC980000C15B6 /* MainInteractor.swift in Sources */,
 				C56EE288293F5757004840D1 /* ThirdPartyConfigurator.swift in Sources */,
 				847BD1D62989492500076C90 /* MainViewController.swift in Sources */,
 				C5B2F6FA29705293000DBA0E /* SessionRequestInteractor.swift in Sources */,

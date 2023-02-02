@@ -72,19 +72,6 @@ extension WalletPresenter {
                 self?.router.present(sessionRequest: sessionRequest)
             }.store(in: &disposeBag)
 
-        interactor.pushRequestPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] request in
-                self?.router.present(pushRequest: request)
-            }.store(in: &disposeBag)
-
-        interactor.sessionProposalPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] proposal in
-                self?.router.present(proposal: proposal)
-            }
-            .store(in: &disposeBag)
-
         interactor.sessionsPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] sessions in
