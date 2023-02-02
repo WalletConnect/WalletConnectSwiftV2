@@ -14,7 +14,7 @@ class AppRespondSubscriberTests: XCTestCase {
     var messageFormatter: SIWECacaoFormatter!
     var rpcHistory: RPCHistory!
     let defaultTimeout: TimeInterval = 0.01
-    var messageSigner: AuthMessageSigner!
+    var messageSigner: CacaoMessageSigner!
     var pairingStorage: WCPairingStorageMock!
     var pairingRegisterer: PairingRegistererMock<AuthRequestParams>!
 

@@ -15,9 +15,9 @@ public protocol MessageSigning {
     ) throws -> CacaoSignature
 }
 
-public typealias AuthMessageSigner = MessageSignatureVerifying & MessageSigning
+public typealias CacaoMessageSigner = MessageSignatureVerifying & MessageSigning
 
-struct MessageSigner: AuthMessageSigner {
+struct MessageSigner: CacaoMessageSigner {
 
     enum Errors: Error {
         case utf8EncodingFailed

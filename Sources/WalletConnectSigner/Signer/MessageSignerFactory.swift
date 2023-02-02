@@ -8,11 +8,11 @@ public struct MessageSignerFactory {
         self.signerFactory = signerFactory
     }
 
-    public func create() -> AuthMessageSigner {
+    public func create() -> CacaoMessageSigner {
         return create(projectId: Networking.projectId)
     }
 
-    func create(projectId: String) -> AuthMessageSigner {
+    public func create(projectId: String) -> CacaoMessageSigner {
         return MessageSigner(
             signer: signerFactory.createEthereumSigner(),
             eip191Verifier: EIP191Verifier(signer: signerFactory.createEthereumSigner()),

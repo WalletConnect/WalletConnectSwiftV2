@@ -43,6 +43,9 @@ let package = Package(
         .library(
             name: "Web3Inbox",
             targets: ["Web3Inbox"]),
+        .library(
+            name: "WalletConnectSigner",
+            targets: ["WalletConnectSigner"]),
     ],
     dependencies: [],
     targets: [
@@ -85,6 +88,9 @@ let package = Package(
         .target(
             name: "Web3Inbox",
             dependencies: ["WalletConnectChat"]),
+        .target(
+            name: "WalletConnectSigner",
+            dependencies: ["WalletConnectNetworking"]),
         .target(
             name: "WalletConnectUtils",
             dependencies: ["JSONRPC"]),

@@ -1,7 +1,7 @@
 import Foundation
 import Auth
 
-struct MessageSignerMock: AuthMessageSigner {
+struct MessageSignerMock: CacaoMessageSigner {
 
     func verify(signature: CacaoSignature,
         message: String,
