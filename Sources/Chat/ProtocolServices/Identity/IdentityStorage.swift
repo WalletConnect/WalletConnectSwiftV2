@@ -11,16 +11,12 @@ final class IdentityStorage {
         self.keychain = keychain
     }
 
-    func createIdentityKey(for account: Account) throws -> IdentityKey {
-        let key = IdentityKey()
+    func saveIdentityKey(_ key: IdentityKey, for account: Account) throws {
         try keychain.add(key, forKey: identityKeyIdentifier(for: account))
-        return key
     }
 
-    func createInviteKey(for account: Account) throws -> InviteKey {
-        let key = InviteKey()
+    func saveInviteKey(_ key: InviteKey, for account: Account) throws {
         try keychain.add(key, forKey: inviteKeyIdentifier(for: account))
-        return key
     }
 
     func getIdentityKey(for account: Account) -> IdentityKey? {
