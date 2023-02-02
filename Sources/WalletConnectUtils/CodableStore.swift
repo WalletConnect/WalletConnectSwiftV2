@@ -3,6 +3,7 @@ import Foundation
 public final class CodableStore<T> where T: Codable {
     private let defaults: KeyValueStorage
     private let prefix: String
+    public var onStoreUpdate: (() -> Void)?
 
     public init(defaults: KeyValueStorage, identifier: String) {
         self.defaults = defaults
@@ -13,6 +14,7 @@ public final class CodableStore<T> where T: Codable {
         // This force-unwrap is safe because T are JSON Encodable
         let encoded = try! JSONEncoder().encode(item)
         defaults.set(encoded, forKey: getContextPrefixedKey(for: key))
+        onStoreUpdate?()
     }
 
     public func get(key: String) throws -> T? {
@@ -33,11 +35,13 @@ public final class CodableStore<T> where T: Codable {
 
     public func delete(forKey key: String) {
         defaults.removeObject(forKey: getContextPrefixedKey(for: key))
+        onStoreUpdate?()
     }
 
     public func deleteAll() {
         dictionaryForIdentifier()
             .forEach { defaults.removeObject(forKey: $0.key) }
+        onStoreUpdate?()
     }
 
     private func getContextPrefixedKey(for key: String) -> String {

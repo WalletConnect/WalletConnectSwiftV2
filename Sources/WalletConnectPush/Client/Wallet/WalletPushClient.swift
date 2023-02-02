@@ -10,9 +10,10 @@ public class WalletPushClient {
     private var publishers = Set<AnyCancellable>()
 
     public var subscriptionsPublisher: AnyPublisher<[PushSubscription], Never> {
-        subscriptionsPublisherSubject.eraseToAnyPublisher()
+        return pushSubscriptionsObserver.subscriptionsPublisher
     }
-    private let subscriptionsPublisherSubject = PassthroughSubject<[PushSubscription], Never>()
+
+    private let pushSubscriptionsObserver: PushSubscriptionsObserver
 
     private let requestPublisherSubject = PassthroughSubject<PushRequest, Never>()
 
@@ -55,7 +56,8 @@ public class WalletPushClient {
          pushMessagesProvider: PushMessagesProvider,
          deletePushSubscriptionService: DeletePushSubscriptionService,
          deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber,
-         resubscribeService: PushResubscribeService) {
+         resubscribeService: PushResubscribeService,
+         pushSubscriptionsObserver: PushSubscriptionsObserver) {
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
         self.proposeResponder = proposeResponder
@@ -66,6 +68,7 @@ public class WalletPushClient {
         self.deletePushSubscriptionService = deletePushSubscriptionService
         self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
         self.resubscribeService = resubscribeService
+        self.pushSubscriptionsObserver = pushSubscriptionsObserver
         setupSubscriptions()
     }
 
@@ -120,3 +123,22 @@ extension WalletPushClient {
     }
 }
 #endif
+
+class PushSubscriptionsObserver {
+    public var subscriptionsPublisher: AnyPublisher<[PushSubscription], Never> {
+        subscriptionsPublisherSubject.eraseToAnyPublisher()
+    }
+    private let subscriptionsPublisherSubject = PassthroughSubject<[PushSubscription], Never>()
+
+    private let store: CodableStore<PushSubscription>
+    
+    init(store: CodableStore<PushSubscription>) {
+        self.store = store
+    }
+
+    func setUpSubscription() {
+        store.onStoreUpdate = { [unowned self] in
+            subscriptionsPublisherSubject.send(store.getAll())
+        }
+    }
+}
