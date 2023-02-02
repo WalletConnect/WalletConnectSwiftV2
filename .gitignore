@@ -14,12 +14,18 @@ Package.resolved
 /*.xcodeproj
 
 # Fastlane
-*/fastlane/report.xml
-*/fastlane/Preview.html
-*/fastlane/screenshots/**/*.png
-*/fastlane/test_output
-*/fastlane/README.md
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+fastlane/README.md
 
 # Configuration
 Configuration.xcconfig
 
+# Cache
+SourcePackagesCache
+DerivedDataCache
+
+# Artifacts
+*.ipa
