@@ -2,37 +2,52 @@ import Foundation
 
 enum IdentityKeyAPI: HTTPService {
 
-    case register(cacao: String) // TODO: Cacao
-    case resolve(publicKey: String)
+    case registerIdentity(cacao: Cacao)
+    case resolveIdentity(publicKey: String)
+    case removeIdentity(cacao: Cacao)
+    case registerInvite(idAuth: String)
+    case resolveInvite(account: String)
+    case removeInvite(idAuth: String)
 
     var path: String {
-        return "/identity"
+        switch self {
+        case .registerIdentity, .resolveIdentity, .removeIdentity:
+            return "/identity"
+        case .registerInvite, .resolveInvite, .removeInvite:
+            return "/invite"
+        }
     }
 
     var method: WalletConnectNetworking.HTTPMethod {
         switch self {
-        case .register:
+        case .registerIdentity, .registerInvite:
             return .post
-        case .resolve:
+        case .resolveIdentity, .resolveInvite:
             return .get
+        case .removeInvite, .removeIdentity:
+            return .delete
         }
     }
 
     var body: Data? {
         switch self {
-        case .register(let cacao):
+        case .registerIdentity(let cacao), .removeIdentity(let cacao):
             return try? JSONEncoder().encode(cacao)
-        case .resolve:
+        case .registerInvite(let idAuth), .removeInvite(let idAuth):
+            return try? JSONEncoder().encode(["idAuth": idAuth])
+        case .resolveIdentity, .resolveInvite:
             return nil
         }
     }
 
     var queryParameters: [String : String]? {
         switch self {
-        case .register:
-            return nil
-        case .resolve(let publicKey):
+        case .resolveIdentity(let publicKey):
             return ["publicKey": publicKey]
+        case .resolveInvite(let account):
+            return ["account": account]
+        case .registerIdentity, .registerInvite, .removeInvite, .removeIdentity:
+            return nil
         }
     }
 }
