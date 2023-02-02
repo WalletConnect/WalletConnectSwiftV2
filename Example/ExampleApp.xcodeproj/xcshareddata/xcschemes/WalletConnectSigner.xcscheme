@@ -17,7 +17,7 @@
                BlueprintIdentifier = "WalletConnectSigner"
                BuildableName = "WalletConnectSigner"
                BlueprintName = "WalletConnectSigner"
-               ReferencedContainer = "container:">
+               ReferencedContainer = "container:..">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -53,7 +53,7 @@
             BlueprintIdentifier = "WalletConnectSigner"
             BuildableName = "WalletConnectSigner"
             BlueprintName = "WalletConnectSigner"
-            ReferencedContainer = "container:">
+            ReferencedContainer = "container:..">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>
