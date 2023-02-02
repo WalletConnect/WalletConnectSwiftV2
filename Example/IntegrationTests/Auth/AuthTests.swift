@@ -83,7 +83,8 @@ final class AuthTests: XCTestCase {
             Task(priority: .high) {
                 let signerFactory = DefaultSignerFactory()
                 let signer = MessageSignerFactory(signerFactory: signerFactory).create(projectId: InputConfig.projectId)
-                let signature = try! signer.sign(payload: request.payload, address: walletAccount.address, privateKey: prvKey, type: .eip191)
+                let payload = try! request.payload.cacaoPayload(address: walletAccount.address)
+                let signature = try! signer.sign(payload: payload, privateKey: prvKey, type: .eip191)
                 try! await walletAuthClient.respond(requestId: request.id, signature: signature, from: walletAccount)
             }
         }

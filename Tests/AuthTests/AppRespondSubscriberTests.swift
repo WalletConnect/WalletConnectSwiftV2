@@ -11,7 +11,7 @@ class AppRespondSubscriberTests: XCTestCase {
 
     var networkingInteractor: NetworkingInteractorMock!
     var sut: AppRespondSubscriber!
-    var messageFormatter: SIWEMessageFormatter!
+    var messageFormatter: SIWECacaoFormatter!
     var rpcHistory: RPCHistory!
     let defaultTimeout: TimeInterval = 0.01
     var messageSigner: AuthMessageSigner!
@@ -20,7 +20,7 @@ class AppRespondSubscriberTests: XCTestCase {
 
     override func setUp() {
         networkingInteractor = NetworkingInteractorMock()
-        messageFormatter = SIWEMessageFormatter()
+        messageFormatter = SIWECacaoFormatter()
         messageSigner = MessageSignerMock()
         rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: RuntimeKeyValueStorage())
         pairingStorage = WCPairingStorageMock()
@@ -58,9 +58,8 @@ class AppRespondSubscriberTests: XCTestCase {
         }
 
         // subscribe on compromised cacao
-        let account = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
         let cacaoHeader = CacaoHeader(t: "eip4361")
-        let cacaoPayload = compromissedParams.payloadParams.cacaoPayload(didpkh: DIDPKH(account: account))
+        let cacaoPayload = try! compromissedParams.payloadParams.cacaoPayload(address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")
         let cacaoSignature = CacaoSignature(t: .eip191, s: "")
 
         let cacao = Cacao(h: cacaoHeader, p: cacaoPayload, s: cacaoSignature)

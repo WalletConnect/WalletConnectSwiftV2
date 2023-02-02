@@ -45,12 +45,10 @@ class CacaoSignerTest: XCTestCase {
 
     func testCacaoSign() throws {
         let address = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
-        let formatted = try SIWEMessageFormatter().formatMessage(
-            from: payload,
-            address: address
-        )
+        let cacaoPayload = try payload.cacaoPayload(address: address)
+        let formatted = try SIWECacaoFormatter().formatMessage(from: cacaoPayload)
         XCTAssertEqual(formatted, message)
-        XCTAssertEqual(try signer.sign(payload: payload, address: address, privateKey: privateKey, type: .eip191), signature)
+        XCTAssertEqual(try signer.sign(payload: cacaoPayload, privateKey: privateKey, type: .eip191), signature)
     }
 
     func testCacaoVerify() async throws {

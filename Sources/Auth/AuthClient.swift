@@ -94,7 +94,7 @@ public class AuthClient: AuthClientProtocol {
     }
 
     public func formatMessage(payload: AuthPayload, address: String) throws -> String {
-        return try SIWEMessageFormatter().formatMessage(from: payload, address: address)
+        return try SIWECacaoFormatter().formatMessage(from: payload.cacaoPayload(address: address))
     }
 
     private func setUpPublishers() {

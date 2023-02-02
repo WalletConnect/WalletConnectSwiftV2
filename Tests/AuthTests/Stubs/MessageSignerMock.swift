@@ -11,8 +11,7 @@ struct MessageSignerMock: AuthMessageSigner {
 
     }
 
-    func sign(payload: AuthPayload,
-        address: String,
+    func sign(payload: CacaoPayload,
         privateKey: Data,
         type: CacaoSignatureType
     ) throws -> CacaoSignature {

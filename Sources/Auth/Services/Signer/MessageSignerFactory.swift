@@ -21,7 +21,7 @@ public struct MessageSignerFactory {
                 httpClient: HTTPNetworkClient(host: "rpc.walletconnect.com"),
                 signer: signerFactory.createEthereumSigner()
             ),
-            messageFormatter: SIWEMessageFormatter()
+            messageFormatter: SIWECacaoFormatter()
         )
     }
 }
