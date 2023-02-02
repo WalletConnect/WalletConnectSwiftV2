@@ -27,7 +27,7 @@ struct WalletView: View {
                     VStack {
                         if !presenter.sessions.isEmpty {
                             List {
-                                ForEach(presenter.sessions, id: \.peer.name) { session in
+                                ForEach(presenter.sessions, id: \.topic) { session in
                                     connectionView(session: session)
                                         .listRowSeparator(.hidden)
                                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
