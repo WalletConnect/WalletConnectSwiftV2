@@ -1,6 +1,11 @@
 import WalletConnectPush
+import Combine
 
 final class NotificationsInteractor {
+
+    var subscriptionsPublisher: AnyPublisher<[PushSubscription], Never> {
+        return Push.wallet.subscriptionsPublisher
+    }
 
     func getSubscriptions() -> [PushSubscription] {
         Push.wallet.getActiveSubscriptions()

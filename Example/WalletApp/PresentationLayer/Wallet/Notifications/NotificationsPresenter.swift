@@ -13,6 +13,7 @@ final class NotificationsPresenter: ObservableObject {
         defer { setupInitialState() }
         self.interactor = interactor
         self.router = router
+        
     }
 
     func didPress(_ subscription: SubscriptionsViewModel) {
@@ -20,10 +21,7 @@ final class NotificationsPresenter: ObservableObject {
     }
 
     func setupInitialState() {
-
-        Task(priority: .userInitiated) {
-            await setupSubscriptions()
-        }
+        setupSubscriptions()
     }
 
     func removeSubscribtion(at indexSet: IndexSet) async {
@@ -48,18 +46,17 @@ extension NotificationsPresenter: SceneViewModel {
 // MARK: Privates
 
 private extension NotificationsPresenter {
-    @MainActor
-    func setupSubscriptions() async {
-        await loadSubscriptions()
 
-//        for await _ in interactor.subscriptionsSubscription() {
-//            await loadSubscriptions()
-//        }
-    }
-
-    @MainActor
-    func loadSubscriptions() async {
+    func setupSubscriptions() {
         self.subscriptions = interactor.getSubscriptions()
             .map { SubscriptionsViewModel(subscription: $0) }
+        interactor.subscriptionsPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] pushSubscriptions in
+                self?.subscriptions = pushSubscriptions
+                    .map { SubscriptionsViewModel(subscription: $0) }
+            }
+            .store(in: &disposeBag)
     }
+
 }

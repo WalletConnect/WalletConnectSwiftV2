@@ -134,6 +134,7 @@ class PushSubscriptionsObserver {
     
     init(store: CodableStore<PushSubscription>) {
         self.store = store
+        setUpSubscription()
     }
 
     func setUpSubscription() {
