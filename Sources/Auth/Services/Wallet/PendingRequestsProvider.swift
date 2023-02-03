@@ -7,7 +7,7 @@ class PendingRequestsProvider {
         self.rpcHistory = rpcHistory
     }
 
-    public func getPendingRequests(account: Account) throws -> [AuthRequest] {
+    public func getPendingRequests() throws -> [AuthRequest] {
         let pendingRequests: [AuthRequest] = rpcHistory.getPending()
             .filter {$0.request.method == "wc_authRequest"}
             .compactMap {
