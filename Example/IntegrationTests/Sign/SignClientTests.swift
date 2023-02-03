@@ -184,7 +184,7 @@ final class SignClientTests: XCTestCase {
         }
         dapp.onSessionSettled = { [unowned self] settledSession in
             Task(priority: .high) {
-                let request = Request(id: RPCID(0), topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain)
+                let request = Request(id: RPCID(0), topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain, expiry: nil)
                 try await dapp.client.request(params: request)
             }
         }
@@ -230,7 +230,7 @@ final class SignClientTests: XCTestCase {
         }
         dapp.onSessionSettled = { [unowned self] settledSession in
             Task(priority: .high) {
-                let request = Request(id: RPCID(0), topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain)
+                let request = Request(id: RPCID(0), topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain, expiry: nil)
                 try await dapp.client.request(params: request)
             }
         }

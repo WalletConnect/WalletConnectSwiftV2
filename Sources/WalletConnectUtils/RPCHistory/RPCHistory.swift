@@ -27,7 +27,7 @@ public final class RPCHistory {
     }
 
     public func get(recordId: RPCID) -> Record? {
-        try? storage.get(key: "\(recordId)")
+        try? storage.get(key: recordId.string)
     }
 
     public func set(_ request: RPCRequest, forTopic topic: String, emmitedBy origin: Record.Origin) throws {
@@ -65,11 +65,33 @@ public final class RPCHistory {
         }
     }
 
+    public func getAll<Object: Codable>(of type: Object.Type, topic: String) -> [Object] {
+        return storage.getAll()
+            .filter{$0.topic == topic}
+            .compactMap { try? $0.request.params?.get(Object.self) }
+    }
+
+    public func getAll<Object: Codable>(of type: Object.Type) -> [Object] {
+        return getAllWithIDs(of: type).map { $0.value }
+    }
+
+    public func getAllWithIDs<Object: Codable>(of type: Object.Type) -> [(id: RPCID, value: Object)] {
+        return storage.getAll().compactMap { record in
+            guard let object = try? record.request.params?.get(Object.self)
+            else { return nil }
+            return (record.id, object)
+        }
+    }
+
+    public func delete(id: RPCID) {
+        storage.delete(forKey: id.string)
+    }
+
     public func deleteAll(forTopic topic: String) {
         deleteAll(forTopics: [topic])
     }
 
     public func getPending() -> [Record] {
-        storage.getAll().filter {$0.response == nil}
+        storage.getAll().filter { $0.response == nil }
     }
 }

@@ -40,7 +40,16 @@ public struct AnyCodable {
         genericEncoding = { encoder in
             try codable.encode(to: encoder)
         }
+    }
 
+    /**
+     Creates a type-erased codable value that wraps the given instance.
+
+     - parameters:
+        - any: Any value which supposed to be codable
+     */
+    public init(any value: Any) {
+        self.init(AnyCodable(value))
     }
 
     /**

@@ -8,45 +8,59 @@ class InvitationHandlingService {
     var onInvite: ((Invite) -> Void)?
     var onNewThread: ((Thread) -> Void)?
     private let networkingInteractor: NetworkInteracting
-    private let invitePayloadStore: CodableStore<RequestSubscriptionPayload<Invite>>
+    private let chatStorage: ChatStorage
+    private let accountService: AccountService
     private let topicToRegistryRecordStore: CodableStore<RegistryRecord>
     private let registry: Registry
     private let logger: ConsoleLogging
     private let kms: KeyManagementService
-    private let threadsStore: Database<Thread>
     private var publishers = [AnyCancellable]()
+
+    private var currentAccount: Account {
+        return accountService.currentAccount
+    }
 
     init(registry: Registry,
          networkingInteractor: NetworkInteracting,
+         accountService: AccountService,
          kms: KeyManagementService,
          logger: ConsoleLogging,
          topicToRegistryRecordStore: CodableStore<RegistryRecord>,
-         invitePayloadStore: CodableStore<RequestSubscriptionPayload<Invite>>,
-         threadsStore: Database<Thread>) {
+         chatStorage: ChatStorage) {
         self.registry = registry
         self.kms = kms
         self.networkingInteractor = networkingInteractor
+        self.accountService = accountService
         self.logger = logger
         self.topicToRegistryRecordStore = topicToRegistryRecordStore
-        self.invitePayloadStore = invitePayloadStore
-        self.threadsStore = threadsStore
+        self.chatStorage = chatStorage
         setUpRequestHandling()
     }
 
-    func accept(inviteId: String) async throws {
-        let protocolMethod = ChatInviteProtocolMethod()
-
-        guard let payload = try invitePayloadStore.get(key: inviteId) else { throw Error.inviteForIdNotFound }
+    func accept(inviteId: Int64) async throws {
+        guard
+            let invite = chatStorage.getInvite(id: inviteId, account: currentAccount),
+            let inviteTopic = chatStorage.getInviteTopic(id: inviteId, account: currentAccount)
+        else { throw Error.inviteForIdNotFound }
 
         let selfThreadPubKey = try kms.createX25519KeyPair()
 
         let inviteResponse = InviteResponse(publicKey: selfThreadPubKey.hexRepresentation)
 
-        let response = RPCResponse(id: payload.id, result: inviteResponse)
-        let responseTopic = try getInviteResponseTopic(requestTopic: payload.topic, invite: payload.request)
-        try await networkingInteractor.respond(topic: responseTopic, response: response, protocolMethod: protocolMethod)
+        let responseTopic = try getInviteResponseTopic(
+            requestTopic: inviteTopic,
+            invite: invite
+        )
+        try await networkingInteractor.respond(
+            topic: responseTopic,
+            response: RPCResponse(id: inviteId, result: inviteResponse),
+            protocolMethod: ChatInviteProtocolMethod()
+        )
 
-        let threadAgreementKeys = try kms.performKeyAgreement(selfPublicKey: selfThreadPubKey, peerPublicKey: payload.request.publicKey)
+        let threadAgreementKeys = try kms.performKeyAgreement(
+            selfPublicKey: selfThreadPubKey,
+            peerPublicKey: invite.publicKey
+        )
         let threadTopic = threadAgreementKeys.derivedTopic()
         try kms.setSymmetricKey(threadAgreementKeys.sharedKey, for: threadTopic)
         try await networkingInteractor.subscribe(topic: threadTopic)
@@ -54,31 +68,49 @@ class InvitationHandlingService {
         logger.debug("Accepting an invite on topic: \(threadTopic)")
 
         // TODO - derive account
-        let selfAccount = try! topicToRegistryRecordStore.get(key: payload.topic)!.account
-        let thread = Thread(topic: threadTopic, selfAccount: selfAccount, peerAccount: payload.request.account)
-        await threadsStore.add(thread)
+        let selfAccount = try! topicToRegistryRecordStore.get(key: inviteTopic)!.account
 
-        invitePayloadStore.delete(forKey: inviteId)
+        let thread = Thread(
+            topic: threadTopic,
+            selfAccount: selfAccount,
+            peerAccount: invite.account
+        )
+
+        chatStorage.set(thread: thread, account: currentAccount)
+        chatStorage.delete(invite: invite, account: currentAccount)
 
         onNewThread?(thread)
     }
 
-    func reject(inviteId: String) async throws {
-        guard let payload = try invitePayloadStore.get(key: inviteId) else { throw Error.inviteForIdNotFound }
+    func reject(inviteId: Int64) async throws {
+        guard
+            let invite = chatStorage.getInvite(id: inviteId, account: currentAccount),
+            let inviteTopic = chatStorage.getInviteTopic(id: inviteId, account: currentAccount)
+        else { throw Error.inviteForIdNotFound }
 
-        let responseTopic = try getInviteResponseTopic(requestTopic: payload.topic, invite: payload.request)
+        let responseTopic = try getInviteResponseTopic(requestTopic: inviteTopic, invite: invite)
 
-        try await networkingInteractor.respondError(topic: responseTopic, requestId: payload.id, protocolMethod: ChatInviteProtocolMethod(), reason: ChatError.userRejected)
+        try await networkingInteractor.respondError(
+            topic: responseTopic,
+            requestId: RPCID(inviteId),
+            protocolMethod: ChatInviteProtocolMethod(),
+            reason: ChatError.userRejected
+        )
 
-        invitePayloadStore.delete(forKey: inviteId)
+        chatStorage.delete(invite: invite, account: currentAccount)
     }
 
     private func setUpRequestHandling() {
         networkingInteractor.requestSubscription(on: ChatInviteProtocolMethod())
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<Invite>) in
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<InvitePayload>) in
                 logger.debug("did receive an invite")
-                invitePayloadStore.set(payload, forKey: payload.request.publicKey)
-                onInvite?(payload.request)
+                let invite = Invite(
+                    id: payload.id.integer,
+                    topic: payload.topic,
+                    payload: payload.request
+                )
+                chatStorage.set(invite: invite, account: currentAccount)
+                onInvite?(invite)
             }.store(in: &publishers)
     }
 

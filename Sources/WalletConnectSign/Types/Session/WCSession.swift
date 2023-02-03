@@ -7,6 +7,7 @@ struct WCSession: SequenceObject, Equatable {
     }
 
     let topic: String
+    let pairingTopic: String
     let relay: RelayProtocolOptions
     let selfParticipant: Participant
     let peerParticipant: Participant
@@ -27,6 +28,7 @@ struct WCSession: SequenceObject, Equatable {
     }
 
     init(topic: String,
+         pairingTopic: String,
          timestamp: Date,
          selfParticipant: Participant,
          peerParticipant: Participant,
@@ -34,6 +36,7 @@ struct WCSession: SequenceObject, Equatable {
          requiredNamespaces: [String: ProposalNamespace],
          acknowledged: Bool) {
         self.topic = topic
+        self.pairingTopic = pairingTopic
         self.timestamp = timestamp
         self.relay = settleParams.relay
         self.controller = AgreementPeer(publicKey: settleParams.controller.publicKey)
@@ -48,6 +51,7 @@ struct WCSession: SequenceObject, Equatable {
 #if DEBUG
     internal init(
         topic: String,
+        pairingTopic: String,
         timestamp: Date,
         relay: RelayProtocolOptions,
         controller: AgreementPeer,
@@ -61,6 +65,7 @@ struct WCSession: SequenceObject, Equatable {
         expiry: Int64
     ) {
         self.topic = topic
+        self.pairingTopic = pairingTopic
         self.timestamp = timestamp
         self.relay = relay
         self.controller = controller
@@ -95,15 +100,6 @@ struct WCSession: SequenceObject, Equatable {
                 if namespace.methods.contains(method) {
                     return true
                 }
-                if let extensions = namespace.extensions {
-                    for extended in extensions {
-                        if extended.accounts.contains(where: { $0.blockchain == chain }) {
-                            if extended.methods.contains(method) {
-                                return true
-                            }
-                        }
-                    }
-                }
             }
         }
         return false
@@ -114,15 +110,6 @@ struct WCSession: SequenceObject, Equatable {
             if namespace.accounts.contains(where: { $0.blockchain == chain }) {
                 if namespace.events.contains(event) {
                     return true
-                }
-                if let extensions = namespace.extensions {
-                    for extended in extensions {
-                        if extended.accounts.contains(where: { $0.blockchain == chain }) {
-                            if extended.events.contains(event) {
-                                return true
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -138,16 +125,6 @@ struct WCSession: SequenceObject, Equatable {
                 compliantNamespace.events.isSuperset(of: item.value.events)
             else {
                 throw Error.unsatisfiedUpdateNamespaceRequirement
-            }
-            if let extensions = item.value.extensions {
-                guard let compliantExtensions = compliantNamespace.extensions else {
-                    throw Error.unsatisfiedUpdateNamespaceRequirement
-                }
-                for existingExtension in extensions {
-                    guard compliantExtensions.contains(where: { $0.isCompliant(to: existingExtension) }) else {
-                        throw Error.unsatisfiedUpdateNamespaceRequirement
-                    }
-                }
             }
         }
         self.namespaces = namespaces
@@ -179,6 +156,7 @@ struct WCSession: SequenceObject, Equatable {
     func publicRepresentation() -> Session {
         return Session(
             topic: topic,
+            pairingTopic: pairingTopic,
             peer: peerParticipant.metadata,
             namespaces: namespaces,
             expiryDate: expiryDate)
@@ -190,7 +168,7 @@ struct WCSession: SequenceObject, Equatable {
 extension WCSession {
 
     enum CodingKeys: String, CodingKey {
-        case topic, relay, selfParticipant, peerParticipant, expiryDate, acknowledged, controller, namespaces, timestamp, requiredNamespaces
+        case topic, pairingTopic, relay, selfParticipant, peerParticipant, expiryDate, acknowledged, controller, namespaces, timestamp, requiredNamespaces
     }
 
     init(from decoder: Decoder) throws {
@@ -203,15 +181,15 @@ extension WCSession {
         self.namespaces = try container.decode([String: SessionNamespace].self, forKey: .namespaces)
         self.acknowledged = try container.decode(Bool.self, forKey: .acknowledged)
         self.expiryDate = try container.decode(Date.self, forKey: .expiryDate)
-
-        // Migration beta.102
-        self.timestamp = try container.decodeIfPresent(Date.self, forKey: .timestamp) ?? .distantPast
-        self.requiredNamespaces = try container.decodeIfPresent([String: ProposalNamespace].self, forKey: .requiredNamespaces) ?? [:]
+        self.timestamp = try container.decode(Date.self, forKey: .timestamp)
+        self.requiredNamespaces = try container.decode([String: ProposalNamespace].self, forKey: .requiredNamespaces)
+        self.pairingTopic = try container.decode(String.self, forKey: .pairingTopic)
     }
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(topic, forKey: .topic)
+        try container.encode(pairingTopic, forKey: .pairingTopic)
         try container.encode(relay, forKey: .relay)
         try container.encode(controller, forKey: .controller)
         try container.encode(selfParticipant, forKey: .selfParticipant)

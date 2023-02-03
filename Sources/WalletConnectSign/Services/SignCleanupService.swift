@@ -5,13 +5,13 @@ final class SignCleanupService {
     private let pairingStore: WCPairingStorage
     private let sessionStore: WCSessionStorage
     private let kms: KeyManagementServiceProtocol
-    private let sessionToPairingTopic: CodableStore<String>
+    private let sessionTopicToProposal: CodableStore<Session.Proposal>
     private let networkInteractor: NetworkInteracting
 
-    init(pairingStore: WCPairingStorage, sessionStore: WCSessionStorage, kms: KeyManagementServiceProtocol, sessionToPairingTopic: CodableStore<String>, networkInteractor: NetworkInteracting) {
+    init(pairingStore: WCPairingStorage, sessionStore: WCSessionStorage, kms: KeyManagementServiceProtocol, sessionTopicToProposal: CodableStore<Session.Proposal>, networkInteractor: NetworkInteracting) {
         self.pairingStore = pairingStore
         self.sessionStore = sessionStore
-        self.sessionToPairingTopic = sessionToPairingTopic
+        self.sessionTopicToProposal = sessionTopicToProposal
         self.networkInteractor = networkInteractor
         self.kms = kms
     }
@@ -38,7 +38,7 @@ private extension SignCleanupService {
     func cleanupStorages() throws {
         pairingStore.deleteAll()
         sessionStore.deleteAll()
-        sessionToPairingTopic.deleteAll()
+        sessionTopicToProposal.deleteAll()
         try kms.deleteAll()
     }
 }

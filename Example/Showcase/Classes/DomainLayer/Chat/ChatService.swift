@@ -7,14 +7,26 @@ typealias Stream<T> = AsyncPublisher<AnyPublisher<T, Never>>
 
 final class ChatService {
 
-    private let client: ChatClient
+    private lazy var client: ChatClient = {
+        guard let account = accountStorage.account else {
+            fatalError("Error - you must call Chat.configure(_:) before accessing the shared instance.")
+        }
+        Chat.configure(account: account)
+        return Chat.instance
+    }()
 
-    init(client: ChatClient) {
-        self.client = client
+    private lazy var networking: NetworkingClient = {
+        return Networking.instance
+    }()
+
+    private let accountStorage: AccountStorage
+
+    init(accountStorage: AccountStorage) {
+        self.accountStorage = accountStorage
     }
 
     var connectionPublisher: Stream<SocketConnectionStatus> {
-        return client.socketConnectionStatusPublisher.values
+        return networking.socketConnectionStatusPublisher.values
     }
 
     var messagePublisher: Stream<Message> {
@@ -29,16 +41,16 @@ final class ChatService {
         return client.invitePublisher.values
     }
 
-    func getMessages(thread: WalletConnectChat.Thread) async -> [WalletConnectChat.Message] {
-        await client.getMessages(topic: thread.topic)
+    func getMessages(thread: WalletConnectChat.Thread) -> [WalletConnectChat.Message] {
+        client.getMessages(topic: thread.topic)
     }
 
-    func getThreads() async -> [WalletConnectChat.Thread] {
-        await client.getThreads()
+    func getThreads() -> [WalletConnectChat.Thread] {
+        client.getThreads()
     }
 
-    func getInvites(account: Account) async -> [WalletConnectChat.Invite] {
-        client.getInvites(account: account)
+    func getInvites() -> [WalletConnectChat.Invite] {
+        client.getInvites()
     }
 
     func sendMessage(topic: String, message: String) async throws {
@@ -53,8 +65,8 @@ final class ChatService {
         try await client.reject(inviteId: invite.id)
     }
 
-    func invite(peerAccount: Account, message: String, selfAccount: Account) async throws {
-        try await client.invite(peerAccount: peerAccount, openingMessage: message, account: selfAccount)
+    func invite(peerAccount: Account, message: String) async throws {
+        try await client.invite(peerAccount: peerAccount, openingMessage: message)
     }
 
     func register(account: Account) async throws {

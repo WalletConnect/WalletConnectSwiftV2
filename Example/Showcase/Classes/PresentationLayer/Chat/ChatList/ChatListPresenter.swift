@@ -44,7 +44,7 @@ final class ChatListPresenter: ObservableObject {
 
     func didLogoutPress() {
         interactor.logout()
-        router.presentMain()
+        router.presentWelcome()
     }
 
     func didPressNewChat() {
@@ -88,26 +88,24 @@ private extension ChatListPresenter {
 
     @MainActor
     func setupInvites() async {
-        await loadInvites()
+        loadInvites()
 
         for await _ in interactor.invitesSubscription() {
-            await loadInvites()
+            loadInvites()
         }
     }
 
     @MainActor
     func loadThreads() async {
-        let threads = await interactor.getThreads()
-        self.threads = threads
-            .filter { $0.selfAccount == account }
+        self.threads = interactor.getThreads()
             .sorted(by: { $0.topic < $1.topic })
             .map { ThreadViewModel(thread: $0) }
     }
 
     @MainActor
-    func loadInvites() async {
-        let invites = await interactor.getInvites(account: account)
-        self.invites = invites.sorted(by: { $0.publicKey < $1.publicKey })
+    func loadInvites() {
+        self.invites = interactor.getInvites()
+            .sorted(by: { $0.publicKey < $1.publicKey })
             .map { InviteViewModel(invite: $0) }
     }
 

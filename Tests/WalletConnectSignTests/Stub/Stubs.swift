@@ -24,8 +24,7 @@ extension ProposalNamespace {
             "eip155": ProposalNamespace(
                 chains: [Blockchain("eip155:1")!],
                 methods: ["method"],
-                events: ["event"],
-                extensions: nil)
+                events: ["event"])
         ]
     }
 }
@@ -36,8 +35,7 @@ extension SessionNamespace {
             "eip155": SessionNamespace(
                 accounts: [Account("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!],
                 methods: ["method"],
-                events: ["event"],
-                extensions: nil)
+                events: ["event"])
         ]
     }
 }
@@ -68,9 +66,9 @@ extension RPCRequest {
         return RPCRequest(method: SessionSettleProtocolMethod().method, params: SessionType.SettleParams.stub())
     }
 
-    static func stubRequest(method: String, chainId: Blockchain) -> RPCRequest {
+    static func stubRequest(method: String, chainId: Blockchain, expiry: UInt64? = nil) -> RPCRequest {
         let params = SessionType.RequestParams(
-            request: SessionType.RequestParams.Request(method: method, params: AnyCodable(EmptyCodable())),
+            request: SessionType.RequestParams.Request(method: method, params: AnyCodable(EmptyCodable()), expiry: expiry),
             chainId: chainId)
         return RPCRequest(method: SessionRequestProtocolMethod().method, params: params)
     }

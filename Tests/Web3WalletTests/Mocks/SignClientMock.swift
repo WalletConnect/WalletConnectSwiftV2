@@ -16,7 +16,7 @@ final class SignClientMock: SignClientProtocol {
     var disconnectCalled = false
     
     private let metadata = AppMetadata(name: "", description: "", url: "", icons: [])
-    private let request = WalletConnectSign.Request(id: .left(""), topic: "", method: "", params: "", chainId: Blockchain("eip155:1")!)
+    private let request = WalletConnectSign.Request(id: .left(""), topic: "", method: "", params: "", chainId: Blockchain("eip155:1")!, expiry: nil)
     
     var sessionProposalPublisher: AnyPublisher<WalletConnectSign.Session.Proposal, Never> {
         let proposer = Participant(publicKey: "", metadata: metadata)
@@ -24,8 +24,7 @@ final class SignClientMock: SignClientProtocol {
             relays: [],
             proposer: proposer,
             requiredNamespaces: [:]
-        )
-        .publicRepresentation()
+        ).publicRepresentation(pairingTopic: "")
 
         return Result.Publisher(sessionProposal)
             .eraseToAnyPublisher()
@@ -37,7 +36,7 @@ final class SignClientMock: SignClientProtocol {
     }
     
     var sessionsPublisher: AnyPublisher<[WalletConnectSign.Session], Never> {
-        return Result.Publisher([WalletConnectSign.Session(topic: "", peer: metadata, namespaces: [:], expiryDate: Date())])
+        return Result.Publisher([WalletConnectSign.Session(topic: "", pairingTopic: "", peer: metadata, namespaces: [:], expiryDate: Date())])
             .eraseToAnyPublisher()
     }
     
@@ -74,7 +73,7 @@ final class SignClientMock: SignClientProtocol {
     }
     
     func getSessions() -> [WalletConnectSign.Session] {
-        return [WalletConnectSign.Session(topic: "", peer: metadata, namespaces: [:], expiryDate: Date())]
+        return [WalletConnectSign.Session(topic: "", pairingTopic: "", peer: metadata, namespaces: [:], expiryDate: Date())]
     }
     
     func getPendingRequests(topic: String?) -> [WalletConnectSign.Request] {

@@ -4,13 +4,14 @@ import WalletConnectNetworking
 import WalletConnectPairing
 import WalletConnectEcho
 
+
 public class WalletPushClient {
 
     private var publishers = Set<AnyCancellable>()
 
-    private let requestPublisherSubject = PassthroughSubject<(id: RPCID, account: Account, metadata: AppMetadata), Never>()
+    private let requestPublisherSubject = PassthroughSubject<PushRequest, Never>()
 
-    public var requestPublisher: AnyPublisher<(id: RPCID, account: Account, metadata: AppMetadata), Never> {
+    public var requestPublisher: AnyPublisher<PushRequest, Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
@@ -36,6 +37,7 @@ public class WalletPushClient {
     private let proposeResponder: PushRequestResponder
     private let pushMessageSubscriber: PushMessageSubscriber
     private let subscriptionsProvider: SubscriptionsProvider
+    private let pushMessagesProvider: PushMessagesProvider
     private let resubscribeService: PushResubscribeService
 
     init(logger: ConsoleLogging,
@@ -45,6 +47,7 @@ public class WalletPushClient {
          proposeResponder: PushRequestResponder,
          pushMessageSubscriber: PushMessageSubscriber,
          subscriptionsProvider: SubscriptionsProvider,
+         pushMessagesProvider: PushMessagesProvider,
          deletePushSubscriptionService: DeletePushSubscriptionService,
          deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber,
          resubscribeService: PushResubscribeService) {
@@ -54,6 +57,7 @@ public class WalletPushClient {
         self.echoClient = echoClient
         self.pushMessageSubscriber = pushMessageSubscriber
         self.subscriptionsProvider = subscriptionsProvider
+        self.pushMessagesProvider = pushMessagesProvider
         self.deletePushSubscriptionService = deletePushSubscriptionService
         self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
         self.resubscribeService = resubscribeService
@@ -70,6 +74,10 @@ public class WalletPushClient {
 
     public func getActiveSubscriptions() -> [PushSubscription] {
         subscriptionsProvider.getActiveSubscriptions()
+    }
+
+    public func getMessageHistory(topic: String) -> [PushMessage] {
+        pushMessagesProvider.getMessageHistory(topic: topic)
     }
 
     public func delete(topic: String) async throws {

@@ -6,14 +6,12 @@ public class ChatClient {
     private let registry: Registry
     private let registryService: RegistryService
     private let messagingService: MessagingService
+    private let accountService: AccountService
     private let invitationHandlingService: InvitationHandlingService
     private let inviteService: InviteService
     private let leaveService: LeaveService
-    private let resubscriptionService: ResubscriptionService
     private let kms: KeyManagementService
-    private let threadStore: Database<Thread>
-    private let messagesStore: Database<Message>
-    private let invitePayloadStore: CodableStore<RequestSubscriptionPayload<Invite>>
+    private let chatStorage: ChatStorage
 
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
@@ -37,27 +35,23 @@ public class ChatClient {
     init(registry: Registry,
          registryService: RegistryService,
          messagingService: MessagingService,
+         accountService: AccountService,
          invitationHandlingService: InvitationHandlingService,
          inviteService: InviteService,
          leaveService: LeaveService,
-         resubscriptionService: ResubscriptionService,
          kms: KeyManagementService,
-         threadStore: Database<Thread>,
-         messagesStore: Database<Message>,
-         invitePayloadStore: CodableStore<RequestSubscriptionPayload<Invite>>,
+         chatStorage: ChatStorage,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
     ) {
         self.registry = registry
         self.registryService = registryService
         self.messagingService = messagingService
+        self.accountService = accountService
         self.invitationHandlingService = invitationHandlingService
         self.inviteService = inviteService
         self.leaveService = leaveService
-        self.resubscriptionService = resubscriptionService
         self.kms = kms
-        self.threadStore = threadStore
-        self.messagesStore = messagesStore
-        self.invitePayloadStore = invitePayloadStore
+        self.chatStorage = chatStorage
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
 
         setUpEnginesCallbacks()
@@ -86,15 +80,15 @@ public class ChatClient {
     ///   - publicKey: publicKey associated with a peer
     ///   - openingMessage: oppening message for a chat invite
     ///   TODO - peerAccount should be derived
-    public func invite(peerAccount: Account, openingMessage: String, account: Account) async throws {
-        try await inviteService.invite(peerAccount: peerAccount, openingMessage: openingMessage, account: account)
+    public func invite(peerAccount: Account, openingMessage: String) async throws {
+        try await inviteService.invite(peerAccount: peerAccount, openingMessage: openingMessage)
     }
 
-    public func accept(inviteId: String) async throws {
+    public func accept(inviteId: Int64) async throws {
         try await invitationHandlingService.accept(inviteId: inviteId)
     }
 
-    public func reject(inviteId: String) async throws {
+    public func reject(inviteId: Int64) async throws {
         try await invitationHandlingService.reject(inviteId: inviteId)
     }
 
@@ -116,16 +110,16 @@ public class ChatClient {
         try await leaveService.leave(topic: topic)
     }
 
-    public func getInvites(account: Account) -> [Invite] {
-        return invitePayloadStore.getAll().map { $0.request }
+    public func getInvites() -> [Invite] {
+        return chatStorage.getInvites(account: accountService.currentAccount)
     }
 
-    public func getThreads() async -> [Thread] {
-        await threadStore.getAll()
+    public func getThreads() -> [Thread] {
+        return chatStorage.getThreads(account: accountService.currentAccount)
     }
 
-    public func getMessages(topic: String) async -> [Message] {
-        await messagesStore.filter {$0.topic == topic} ?? []
+    public func getMessages(topic: String) -> [Message] {
+        return chatStorage.getMessages(topic: topic, account: accountService.currentAccount)
     }
 
     private func setUpEnginesCallbacks() {

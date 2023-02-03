@@ -15,9 +15,9 @@ struct ImportView: View {
 
             Spacer()
 
-            BrandButton(title: "Ok, done", action: {
-                presenter.didPressImport()
-            })
+            BrandButton(title: "Ok, done" ) { Task(priority: .userInitiated) {
+                await presenter.didPressImport()
+            }}
             .padding(16.0)
         }
     }

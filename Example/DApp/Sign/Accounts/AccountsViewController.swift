@@ -1,5 +1,7 @@
 import UIKit
 import WalletConnectSign
+import WalletConnectPush
+import Combine
 
 struct AccountDetails {
     let chain: String
@@ -12,7 +14,9 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
     let session: Session
     var accountsDetails: [AccountDetails] = []
     var onDisconnect: (() -> Void)?
+    var pushSubscription: PushSubscription?
 
+    private var publishers = [AnyCancellable]()
     private let accountsView: AccountsView = {
         AccountsView()
     }()
@@ -34,12 +38,21 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
         super.viewDidLoad()
         navigationItem.title = "Accounts"
 
+
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             title: "Disconnect",
             style: .plain,
             target: self,
             action: #selector(disconnect)
         )
+
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            title: "Push Test",
+            style: .plain,
+            target: self,
+            action: #selector(pushTest)
+        )
+
         accountsView.tableView.dataSource = self
         accountsView.tableView.delegate = self
         session.namespaces.values.forEach { namespace in
@@ -47,6 +60,27 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
                 accountsDetails.append(AccountDetails(chain: account.blockchainIdentifier, methods: Array(namespace.methods), account: account.address)) // TODO: Rethink how this info is displayed on example
             }
         }
+    }
+
+    func proposePushSubscription() {
+        let account = session.namespaces.values.first!.accounts.first!
+
+        Task(priority: .high){ try! await Push.dapp.request(account: account, topic: session.pairingTopic)}
+        Push.dapp.responsePublisher.sink { (id: RPCID, result: Result<PushSubscription, PushError>) in
+            switch result {
+            case .success(let subscription):
+                self.pushSubscription = subscription
+            case .failure(let error):
+                print(error)
+            }
+        }.store(in: &publishers)
+    }
+
+    @objc
+    private func pushTest() {
+        guard let pushTopic = pushSubscription?.topic else {return}
+        let message = PushMessage(title: "Push Message", body: "He,y this is a message from the swift client", icon: "", url: "")
+        Task(priority: .userInitiated) { try! await Push.dapp.notify(topic: pushTopic, message: message) }
     }
 
     @objc

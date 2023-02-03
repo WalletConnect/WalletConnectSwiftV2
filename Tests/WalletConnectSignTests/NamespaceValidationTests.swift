@@ -18,16 +18,12 @@ final class NamespaceValidationTests: XCTestCase {
             "eip155": ProposalNamespace(
                 chains: [ethChain],
                 methods: ["method"],
-                events: ["event"],
-                extensions: [
-                    ProposalNamespace.Extension(chains: [Blockchain("eip155:137")!], methods: ["otherMethod"], events: ["otherEvent"])
-                ]
+                events: ["event"]
             ),
             "cosmos": ProposalNamespace(
                 chains: [cosmosChain],
                 methods: ["someMethod"],
-                events: ["someEvent"],
-                extensions: nil
+                events: ["someEvent"]
             )
         ]
         XCTAssertNoThrow(try Namespace.validate(namespace))
@@ -38,8 +34,7 @@ final class NamespaceValidationTests: XCTestCase {
             "eip155": ProposalNamespace(
                 chains: [],
                 methods: ["method"],
-                events: ["event"],
-                extensions: nil)
+                events: ["event"])
         ]
         XCTAssertThrowsError(try Namespace.validate(namespace))
     }
@@ -49,8 +44,7 @@ final class NamespaceValidationTests: XCTestCase {
             "eip155": ProposalNamespace(
                 chains: [ethChain],
                 methods: [],
-                events: ["event"],
-                extensions: nil)
+                events: ["event"])
         ]
         XCTAssertNoThrow(try Namespace.validate(namespace))
     }
@@ -60,8 +54,7 @@ final class NamespaceValidationTests: XCTestCase {
             "eip155": ProposalNamespace(
                 chains: [ethChain],
                 methods: ["method"],
-                events: [],
-                extensions: nil)
+                events: [])
         ]
         XCTAssertNoThrow(try Namespace.validate(namespace))
     }
@@ -71,32 +64,16 @@ final class NamespaceValidationTests: XCTestCase {
             "eip155": ProposalNamespace(
                 chains: [ethChain, Blockchain("eip155:137")!, Blockchain("eip155:10")!],
                 methods: ["method"],
-                events: ["event"],
-                extensions: nil)
+                events: ["event"])
         ]
         let invalidNamespace = [
             "eip155": ProposalNamespace(
                 chains: [ethChain, Blockchain("cosmos:cosmoshub-4")!],
                 methods: ["method"],
-                events: ["event"],
-                extensions: nil)
+                events: ["event"])
         ]
         XCTAssertNoThrow(try Namespace.validate(validNamespace))
         XCTAssertThrowsError(try Namespace.validate(invalidNamespace))
-    }
-
-    func testExtensionChainsMustNotBeEmpty() {
-        let namespace = [
-            "eip155": ProposalNamespace(
-                chains: [ethChain],
-                methods: ["method"],
-                events: ["event"],
-                extensions: [
-                    ProposalNamespace.Extension(chains: [], methods: ["otherMethod"], events: ["otherEvent"])
-                ]
-            )
-        ]
-        XCTAssertThrowsError(try Namespace.validate(namespace))
     }
 
     func testValidateAllProposalNamespaces() {
@@ -104,10 +81,9 @@ final class NamespaceValidationTests: XCTestCase {
             "eip155": ProposalNamespace(
                 chains: [ethChain],
                 methods: ["method"],
-                events: ["event"],
-                extensions: nil),
+                events: ["event"]),
             "cosmos": ProposalNamespace(
-                chains: [], methods: [], events: [], extensions: nil)
+                chains: [], methods: [], events: [])
         ]
         XCTAssertThrowsError(try Namespace.validate(namespace))
     }
@@ -119,10 +95,7 @@ final class NamespaceValidationTests: XCTestCase {
             "eip155": SessionNamespace(
                 accounts: [ethAccount],
                 methods: ["method"],
-                events: ["event"],
-                extensions: [
-                    SessionNamespace.Extension(accounts: [polyAccount], methods: ["otherMethod"], events: ["otherEvent"])
-                ]
+                events: ["event"]
             )
         ]
         XCTAssertNoThrow(try Namespace.validate(namespace))
@@ -133,8 +106,7 @@ final class NamespaceValidationTests: XCTestCase {
             "eip155": SessionNamespace(
                 accounts: [],
                 methods: ["method"],
-                events: ["event"],
-                extensions: nil)
+                events: ["event"])
         ]
         XCTAssertThrowsError(try Namespace.validate(namespace))
     }
@@ -144,8 +116,7 @@ final class NamespaceValidationTests: XCTestCase {
             "eip155": SessionNamespace(
                 accounts: [ethAccount],
                 methods: [],
-                events: ["event"],
-                extensions: nil)
+                events: ["event"])
         ]
         XCTAssertNoThrow(try Namespace.validate(namespace))
     }
@@ -155,8 +126,7 @@ final class NamespaceValidationTests: XCTestCase {
             "eip155": SessionNamespace(
                 accounts: [ethAccount],
                 methods: ["method"],
-                events: [],
-                extensions: nil)
+                events: [])
         ]
         XCTAssertNoThrow(try Namespace.validate(namespace))
     }
@@ -166,32 +136,16 @@ final class NamespaceValidationTests: XCTestCase {
             "eip155": SessionNamespace(
                 accounts: [ethAccount, polyAccount],
                 methods: ["method"],
-                events: ["event"],
-                extensions: nil)
+                events: ["event"])
         ]
         let invalidNamespace = [
             "eip155": SessionNamespace(
                 accounts: [ethAccount, cosmosAccount],
                 methods: ["method"],
-                events: ["event"],
-                extensions: nil)
+                events: ["event"])
         ]
         XCTAssertNoThrow(try Namespace.validate(validNamespace))
         XCTAssertThrowsError(try Namespace.validate(invalidNamespace))
-    }
-
-    func testExtensionAccountsMustNotBeEmpty() {
-        let namespace = [
-            "eip155": SessionNamespace(
-                accounts: [ethAccount],
-                methods: ["method"],
-                events: ["event"],
-                extensions: [
-                    SessionNamespace.Extension(accounts: [], methods: ["otherMethod"], events: ["otherEvent"])
-                ]
-            )
-        ]
-        XCTAssertThrowsError(try Namespace.validate(namespace))
     }
 
     func testValidateAllSessionNamespaces() {
@@ -199,10 +153,9 @@ final class NamespaceValidationTests: XCTestCase {
             "eip155": SessionNamespace(
                 accounts: [ethAccount],
                 methods: ["method"],
-                events: ["event"],
-                extensions: nil),
+                events: ["event"]),
             "cosmos": SessionNamespace(
-                accounts: [], methods: [], events: [], extensions: nil)
+                accounts: [], methods: [], events: [])
         ]
         XCTAssertThrowsError(try Namespace.validate(namespace))
     }
@@ -214,22 +167,19 @@ final class NamespaceValidationTests: XCTestCase {
             "eip155": ProposalNamespace(
                 chains: [ethChain],
                 methods: ["eth_sign"],
-                events: [],
-                extensions: nil)
+                events: [])
         ]
         let validSessionNamespace = [
             "eip155": SessionNamespace(
                 accounts: [ethAccount],
                 methods: ["eth_sign"],
-                events: [],
-                extensions: nil)
+                events: [])
         ]
         let invalidSessionNamespace = [
             "eip155": SessionNamespace(
                 accounts: [ethAccount],
                 methods: [],
-                events: [],
-                extensions: nil)
+                events: [])
         ]
         XCTAssertNoThrow(try Namespace.validateApproved(validSessionNamespace, against: proposalNamespace))
         XCTAssertThrowsError(try Namespace.validateApproved(invalidSessionNamespace, against: proposalNamespace))
@@ -240,22 +190,19 @@ final class NamespaceValidationTests: XCTestCase {
             "eip155": ProposalNamespace(
                 chains: [ethChain, polyChain],
                 methods: ["eth_sign"],
-                events: ["accountsChanged"],
-                extensions: nil)
+                events: ["accountsChanged"])
         ]
         let validSessionNamespace = [
             "eip155": SessionNamespace(
                 accounts: [ethAccount, polyAccount],
                 methods: ["eth_sign"],
-                events: ["accountsChanged"],
-                extensions: nil)
+                events: ["accountsChanged"])
         ]
         let invalidSessionNamespace = [
             "eip155": SessionNamespace(
                 accounts: [ethAccount],
                 methods: ["eth_sign"],
-                events: ["accountsChanged"],
-                extensions: nil)
+                events: ["accountsChanged"])
         ]
         XCTAssertNoThrow(try Namespace.validateApproved(validSessionNamespace, against: proposalNamespace))
         XCTAssertThrowsError(try Namespace.validateApproved(invalidSessionNamespace, against: proposalNamespace))
@@ -266,8 +213,7 @@ final class NamespaceValidationTests: XCTestCase {
             "eip155": ProposalNamespace(
                 chains: [ethChain],
                 methods: ["eth_sign"],
-                events: ["accountsChanged"],
-                extensions: nil)
+                events: ["accountsChanged"])
         ]
         let sessionNamespace = [
             "eip155": SessionNamespace(
@@ -277,8 +223,7 @@ final class NamespaceValidationTests: XCTestCase {
                     Account("eip155:1:0xEA674fdDe714fd979de3EdF0F56AA9716B898ec8")!,
                     Account("eip155:1:0xEB2F31B0224222D774541BfF89A221e7eb15a17E")!],
                 methods: ["eth_sign"],
-                events: ["accountsChanged"],
-                extensions: nil)
+                events: ["accountsChanged"])
         ]
         XCTAssertNoThrow(try Namespace.validateApproved(sessionNamespace, against: proposalNamespace))
     }
@@ -288,15 +233,13 @@ final class NamespaceValidationTests: XCTestCase {
             "eip155": ProposalNamespace(
                 chains: [ethChain],
                 methods: ["eth_sign"],
-                events: ["accountsChanged"],
-                extensions: nil)
+                events: ["accountsChanged"])
         ]
         let sessionNamespace = [
             "eip155": SessionNamespace(
                 accounts: [ethAccount],
                 methods: ["eth_sign", "personalSign"],
-                events: ["accountsChanged", "someEvent"],
-                extensions: nil)
+                events: ["accountsChanged", "someEvent"])
         ]
         XCTAssertNoThrow(try Namespace.validateApproved(sessionNamespace, against: proposalNamespace))
     }
@@ -306,15 +249,13 @@ final class NamespaceValidationTests: XCTestCase {
             "eip155": ProposalNamespace(
                 chains: [ethChain],
                 methods: ["eth_sign"],
-                events: ["accountsChanged"],
-                extensions: nil)
+                events: ["accountsChanged"])
         ]
         let sessionNamespace = [
             "eip155": SessionNamespace(
                 accounts: [ethAccount, polyAccount],
                 methods: ["eth_sign"],
-                events: ["accountsChanged"],
-                extensions: nil)
+                events: ["accountsChanged"])
         ]
         XCTAssertNoThrow(try Namespace.validateApproved(sessionNamespace, against: proposalNamespace))
     }
@@ -324,56 +265,30 @@ final class NamespaceValidationTests: XCTestCase {
             "eip155": ProposalNamespace(
                 chains: [ethChain],
                 methods: ["eth_sign"],
-                events: ["accountsChanged"],
-                extensions: nil),
+                events: ["accountsChanged"]),
             "cosmos": ProposalNamespace(
                 chains: [cosmosChain],
                 methods: ["cosmos_signDirect"],
-                events: ["someEvent"],
-                extensions: nil)
+                events: ["someEvent"])
         ]
         let validNamespace = [
             "eip155": SessionNamespace(
                 accounts: [ethAccount],
                 methods: ["eth_sign"],
-                events: ["accountsChanged"],
-                extensions: nil),
+                events: ["accountsChanged"]),
             "cosmos": SessionNamespace(
                 accounts: [cosmosAccount],
                 methods: ["cosmos_signDirect"],
-                events: ["someEvent"],
-                extensions: nil)
+                events: ["someEvent"])
         ]
         let invalidNamespace = [
             "eip155": SessionNamespace(
                 accounts: [ethAccount],
                 methods: ["eth_sign", "cosmos_signDirect"],
-                events: ["accountsChanged", "someEvent"],
-                extensions: nil)
+                events: ["accountsChanged", "someEvent"])
         ]
         XCTAssertNoThrow(try Namespace.validateApproved(validNamespace, against: proposalNamespace))
         XCTAssertThrowsError(try Namespace.validateApproved(invalidNamespace, against: proposalNamespace))
-    }
-
-    func testExtensionsMayBeMerged() {
-        let proposalNamespace = [
-            "eip155": ProposalNamespace(
-                chains: [ethChain, polyChain],
-                methods: ["eth_sign"],
-                events: ["accountsChanged"],
-                extensions: [
-                    ProposalNamespace.Extension(chains: [polyChain], methods: ["personalSign"], events: [])
-                ]
-            )
-        ]
-        let sessionNamespace = [
-            "eip155": SessionNamespace(
-                accounts: [ethAccount, polyAccount],
-                methods: ["eth_sign"],
-                events: ["accountsChanged", "personalSign"],
-                extensions: nil)
-        ]
-        XCTAssertNoThrow(try Namespace.validateApproved(sessionNamespace, against: proposalNamespace))
     }
 
     func testApprovalMustContainAllEvents() {
@@ -381,97 +296,14 @@ final class NamespaceValidationTests: XCTestCase {
             "eip155": ProposalNamespace(
                 chains: [ethChain],
                 methods: [],
-                events: ["chainChanged"],
-                extensions: nil)
+                events: ["chainChanged"])
         ]
         let sessionNamespace = [
             "eip155": SessionNamespace(
                 accounts: [ethAccount],
                 methods: [],
-                events: [],
-                extensions: nil)
+                events: [])
         ]
         XCTAssertThrowsError(try Namespace.validateApproved(sessionNamespace, against: proposalNamespace))
-    }
-
-    func testApprovalMayExtendoMethodsAndEventsInExtensions() {
-        let proposalNamespace = [
-            "eip155": ProposalNamespace(
-                chains: [ethChain, polyChain],
-                methods: [],
-                events: ["chainChanged"],
-                extensions: [
-                    ProposalNamespace.Extension(chains: [polyChain], methods: ["eth_sign"], events: [])
-                ]
-            )
-        ]
-        let sessionNamespace = [
-            "eip155": SessionNamespace(
-                accounts: [ethAccount, polyAccount],
-                methods: [],
-                events: ["chainChanged"],
-                extensions: [
-                    SessionNamespace.Extension(
-                        accounts: [polyAccount],
-                        methods: ["eth_sign", "personalSign"],
-                        events: ["accountsChanged"]
-                    )
-                ]
-            )
-        ]
-        XCTAssertNoThrow(try Namespace.validateApproved(sessionNamespace, against: proposalNamespace))
-    }
-
-    func testApprovalExtensionsMayContainAccountsNotDefinedInProposal() {
-        let proposalNamespace = [
-            "eip155": ProposalNamespace(
-                chains: [ethChain, polyChain],
-                methods: ["eth_sign"],
-                events: ["accountsChanged"],
-                extensions: [
-                    ProposalNamespace.Extension(chains: [polyChain], methods: ["personalSign"], events: [])
-                ]
-            )
-        ]
-        let sessionNamespace = [
-            "eip155": SessionNamespace(
-                accounts: [ethAccount, polyAccount],
-                methods: ["eth_sign"],
-                events: ["accountsChanged"],
-                extensions: [
-                    SessionNamespace.Extension(
-                        accounts: [polyAccount, Account("eip155:42:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb")!],
-                        methods: ["personalSign"],
-                        events: []
-                    )
-                ]
-            )
-        ]
-        XCTAssertNoThrow(try Namespace.validateApproved(sessionNamespace, against: proposalNamespace))
-    }
-
-    func testApprovalMayAddExtensionsNotDefinedInProposal() {
-        let proposalNamespace = [
-            "eip155": ProposalNamespace(
-                chains: [ethChain, polyChain],
-                methods: ["eth_sign"],
-                events: ["accountsChanged"],
-                extensions: nil)
-        ]
-        let sessionNamespace = [
-            "eip155": SessionNamespace(
-                accounts: [ethAccount, polyAccount],
-                methods: ["eth_sign"],
-                events: ["accountsChanged"],
-                extensions: [
-                    SessionNamespace.Extension(
-                        accounts: [polyAccount],
-                        methods: ["personalSign"],
-                        events: ["accountsChanged"]
-                    )
-                ]
-            )
-        ]
-        XCTAssertNoThrow(try Namespace.validateApproved(sessionNamespace, against: proposalNamespace))
     }
 }

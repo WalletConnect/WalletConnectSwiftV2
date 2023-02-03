@@ -2,8 +2,10 @@ import UIKit
 import Auth
 import WalletConnectPairing
 
+
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
+
 
     private let app = Application()
 
@@ -31,6 +33,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         app.uri = connectionOptions.urlContexts.first?.url.absoluteString.replacingOccurrences(of: "walletapp://wc?uri=", with: "")
 
         configurators.configure()
+        app.pushRegisterer.registerForPushNotifications()
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
@@ -40,5 +43,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         Task {
             try await Pair.instance.pair(uri: WalletConnectURI(string: uri)!)
         }
+
     }
 }

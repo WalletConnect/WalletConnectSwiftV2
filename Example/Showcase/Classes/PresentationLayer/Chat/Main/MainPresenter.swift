@@ -3,6 +3,7 @@ import Combine
 
 final class MainPresenter {
 
+    private let account: Account
     private let router: MainRouter
 
     var tabs: [TabPage] {
@@ -11,11 +12,13 @@ final class MainPresenter {
 
     var viewControllers: [UIViewController] {
         return [
-            router.chatViewController
+            router.chatViewController(account: account),
+            router.web3InboxViewController(account: account),
         ]
     }
 
-    init(router: MainRouter) {
+    init(router: MainRouter, account: Account) {
+        self.account = account
         self.router = router
     }
 }

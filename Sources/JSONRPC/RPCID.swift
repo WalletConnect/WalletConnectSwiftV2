@@ -17,6 +17,24 @@ struct IntIdentifierGenerator: IdentifierGenerator {
 
 extension RPCID {
 
+    public var string: String {
+        switch self {
+        case .right(let int):
+            return int.description
+        case .left(let string):
+            return string
+        }
+    }
+
+    public var integer: Int64 {
+        switch self {
+        case .right(let int):
+            return int
+        case .left(let string):
+            return Int64(string) ?? 0
+        }
+    }
+
     public var timestamp: Date {
         guard let id = self.right else { return .distantPast }
         let interval = TimeInterval(id / 1000 / 1000)

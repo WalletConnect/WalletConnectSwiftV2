@@ -4,6 +4,7 @@ import Combine
 final class SessionEngine {
     enum Errors: Error {
         case sessionNotFound(topic: String)
+        case sessionRequestExpired
     }
 
     var onSessionsUpdate: (([Session]) -> Void)?
@@ -15,17 +16,20 @@ final class SessionEngine {
 
     private let sessionStore: WCSessionStorage
     private let networkingInteractor: NetworkInteracting
+    private let historyService: HistoryService
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
 
     init(
         networkingInteractor: NetworkInteracting,
+        historyService: HistoryService,
         kms: KeyManagementServiceProtocol,
         sessionStore: WCSessionStorage,
         logger: ConsoleLogging
     ) {
         self.networkingInteractor = networkingInteractor
+        self.historyService = historyService
         self.kms = kms
         self.sessionStore = sessionStore
         self.logger = logger
@@ -54,9 +58,9 @@ final class SessionEngine {
         guard session.hasPermission(forMethod: request.method, onChain: request.chainId) else {
             throw WalletConnectError.invalidPermissions
         }
-        let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params)
+        let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params, expiry: request.expiry)
         let sessionRequestParams = SessionType.RequestParams(request: chainRequest, chainId: request.chainId)
-        let protocolMethod = SessionRequestProtocolMethod()
+        let protocolMethod = SessionRequestProtocolMethod(ttl: request.calculateTtl())
         let rpcRequest = RPCRequest(method: protocolMethod.method, params: sessionRequestParams)
         try await networkingInteractor.request(rpcRequest, topic: request.topic, protocolMethod: SessionRequestProtocolMethod())
     }
@@ -65,8 +69,24 @@ final class SessionEngine {
         guard sessionStore.hasSession(forTopic: topic) else {
             throw Errors.sessionNotFound(topic: topic)
         }
-        let response = RPCResponse(id: requestId, outcome: response)
-        try await networkingInteractor.respond(topic: topic, response: response, protocolMethod: SessionRequestProtocolMethod())
+
+        let protocolMethod = SessionRequestProtocolMethod()
+
+        guard sessionRequestNotExpired(requestId: requestId) else {
+            try await networkingInteractor.respondError(
+                topic: topic,
+                requestId: requestId,
+                protocolMethod: protocolMethod,
+                reason: SignReasonCode.sessionRequestExpired
+            )
+            throw Errors.sessionRequestExpired
+        }
+
+        try await networkingInteractor.respond(
+            topic: topic,
+            response: RPCResponse(id: requestId, outcome: response),
+            protocolMethod: protocolMethod
+        )
     }
 
     func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain) async throws {
@@ -159,6 +179,13 @@ private extension SessionEngine {
         }
     }
 
+    func sessionRequestNotExpired(requestId: RPCID) -> Bool {
+        guard let request = historyService.getSessionRequest(id: requestId)
+        else { return false }
+
+        return !request.isExpired()
+    }
+
     func respondError(payload: SubscriptionPayload, reason: SignReasonCode, protocolMethod: ProtocolMethod) {
         Task(priority: .high) {
             do {
@@ -191,7 +218,9 @@ private extension SessionEngine {
             topic: payload.topic,
             method: payload.request.request.method,
             params: payload.request.request.params,
-            chainId: payload.request.chainId)
+            chainId: payload.request.chainId,
+            expiry: payload.request.request.expiry
+        )
 
         guard let session = sessionStore.getSession(forTopic: topic) else {
             return respondError(payload: payload, reason: .noSessionForTopic, protocolMethod: protocolMethod)
@@ -202,6 +231,11 @@ private extension SessionEngine {
         guard session.hasPermission(forMethod: request.method, onChain: request.chainId) else {
             return respondError(payload: payload, reason: .unauthorizedMethod(request.method), protocolMethod: protocolMethod)
         }
+
+        guard !request.isExpired() else {
+            return respondError(payload: payload, reason: .sessionRequestExpired, protocolMethod: protocolMethod)
+        }
+
         onSessionRequest?(request)
     }
 

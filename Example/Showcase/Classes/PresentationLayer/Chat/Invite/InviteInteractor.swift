@@ -6,6 +6,6 @@ final class InviteInteractor {
     }
 
     func invite(peerAccount: Account, message: String, selfAccount: Account) async {
-        try! await chatService.invite(peerAccount: peerAccount, message: message, selfAccount: selfAccount)
+        try! await chatService.invite(peerAccount: peerAccount, message: message)
     }
 }

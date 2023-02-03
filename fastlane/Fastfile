@@ -1,0 +1,82 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+ENV["FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT"] = "120"
+
+default_platform(:ios)
+
+platform :ios do
+
+  lane :tests do |options|
+    run_tests(
+      project: 'Example/ExampleApp.xcodeproj',
+      scheme: options[:scheme],
+      cloned_source_packages_path: 'SourcePackagesCache',
+      destination: 'platform=iOS Simulator,name=iPhone 13',
+      derived_data_path: 'DerivedDataCache',
+      skip_package_dependencies_resolution: true,
+      skip_build: true,
+      xcargs: "RELAY_HOST='#{options[:relay_host]}' PROJECT_ID='#{options[:project_id]}'"
+    )
+  end
+
+  lane :build do |options|
+    xcodebuild(
+      project: 'Example/ExampleApp.xcodeproj',
+      scheme: options[:scheme],
+      destination: 'platform=iOS Simulator,name=iPhone 13',
+      xcargs: "-clonedSourcePackagesDirPath SourcePackagesCache -derivedDataPath DerivedDataCache"
+    )
+  end
+
+  lane :resolve do |options|
+    xcodebuild(
+      project: 'Example/ExampleApp.xcodeproj',
+      scheme: options[:scheme],
+      destination: 'platform=iOS Simulator,name=iPhone 13',
+      xcargs: "-resolvePackageDependencies -clonedSourcePackagesDirPath SourcePackagesCache -derivedDataPath DerivedDataCache"
+    )
+  end
+
+  lane :release_testflight do |options|
+    match(
+      readonly: false,
+      type: "appstore",
+      app_identifier: ENV["APP_IDENTIFIER"],
+      git_url: "https://github.com/WalletConnect/match-swift.git",
+      username: options[:username],
+    )
+    number = latest_testflight_build_number(
+      app_identifier: ENV["APP_IDENTIFIER"],
+      username: options[:username],
+    )
+    increment_build_number(
+      build_number: number + 1,
+      xcodeproj: "Example/ExampleApp.xcodeproj"
+    )
+    build_app(
+      project: "Example/ExampleApp.xcodeproj",
+      scheme: ENV["SCHEME"]
+    )
+    upload_to_testflight(
+      app_identifier: ENV["APP_IDENTIFIER"],
+      username: options[:username],
+      apple_id: ENV["APPLE_ID"],
+      skip_waiting_for_build_processing: true,
+    )
+    clean_build_artifacts()
+  end
+
+end

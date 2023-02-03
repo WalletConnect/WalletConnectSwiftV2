@@ -42,37 +42,9 @@ jobs:
 
     - name: Resolve Dependencies
       shell: bash
-      run: "
-        xcodebuild -resolvePackageDependencies -project Example/ExampleApp.xcodeproj -scheme DApp -clonedSourcePackagesDirPath SourcePackagesCache -derivedDataPath DerivedDataCache -destination 'platform=iOS Simulator,name=iPhone 13'; \
-        xcodebuild -resolvePackageDependencies -project Example/ExampleApp.xcodeproj -scheme WalletConnect -clonedSourcePackagesDirPath SourcePackagesCache -derivedDataPath DerivedDataCache -destination 'platform=iOS Simulator,name=iPhone 13'"
+      run: make resolve_packages
 
     - uses: ./.github/actions/ci
       with:
         type: ${{ matrix.test-type }}
         project-id: ${{ secrets.PROJECT_ID }}
-
-  test-ui:
-    if: github.ref == 'refs/heads/main'
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        test-type: [ui-tests]
-
-    steps:
-    - uses: actions/checkout@v2
-      
-    - name: Setup Xcode Version
-      uses: maxim-lobanov/setup-xcode@v1
-
-    - uses: actions/cache@v2
-      with:
-        path: |
-          .build
-          SourcePackagesCache
-        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
-        restore-keys: |
-          ${{ runner.os }}-spm-
-
-    - uses: ./.github/actions/ci
-      with:
-        type: ${{ matrix.test-type }}

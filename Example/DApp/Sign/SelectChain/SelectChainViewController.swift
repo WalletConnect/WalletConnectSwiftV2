@@ -46,7 +46,7 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
                     "eth_sendTransaction",
                     "personal_sign",
                     "eth_signTypedData"
-                ], events: [], extensions: nil
+                ], events: []
             ),
             "solana": ProposalNamespace(
                 chains: [
@@ -55,7 +55,7 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
                 methods: [
                     "solana_signMessage",
                     "solana_signTransaction"
-                ], events: [], extensions: nil
+                ], events: []
             )
         ]
         Task {

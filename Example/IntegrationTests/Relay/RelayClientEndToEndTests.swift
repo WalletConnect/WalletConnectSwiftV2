@@ -33,7 +33,7 @@ final class RelayClientEndToEndTests: XCTestCase {
         subscribeExpectation.assertForOverFulfill = true
         relayClient.socketConnectionStatusPublisher.sink { status in
             if status == .connected {
-                relayClient.subscribe(topic: "qwerty") { error in
+                relayClient.subscribe(topic: "ecb78f2df880c43d3418ddbf871092b847801932e21765b250cc50b9e96a9131") { error in
                     XCTAssertNil(error)
                     subscribeExpectation.fulfill()
                 }

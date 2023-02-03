@@ -7,8 +7,8 @@ final class InviteListInteractor {
         self.chatService = chatService
     }
 
-    func getInvites(account: Account) async -> [Invite] {
-        return await chatService.getInvites(account: account)
+    func getInvites() -> [Invite] {
+        return chatService.getInvites()
     }
 
     func invitesSubscription() -> Stream<Invite> {
