@@ -79,4 +79,10 @@ public struct SigningPrivateKey: GenericPasswordConvertible, Equatable {
     public func signature(_ data: Data) throws -> Data {
         return try key.signature(for: data)
     }
+
+    public var DIDKey: String {
+        return ED25519DIDKeyFactory().make(
+            pubKey: publicKey.rawRepresentation, prefix: true
+        )
+    }
 }

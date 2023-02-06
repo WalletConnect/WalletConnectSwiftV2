@@ -1,8 +1,5 @@
 import Foundation
 
-typealias IdentityKey = SigningPrivateKey
-typealias InviteKey = SigningPrivateKey
-
 final class IdentityStorage {
 
     private let keychain: KeychainStorageProtocol
@@ -15,7 +12,7 @@ final class IdentityStorage {
         try keychain.add(key, forKey: identityKeyIdentifier(for: account))
     }
 
-    func saveInviteKey(_ key: InviteKey, for account: Account) throws {
+    func saveInviteKey(_ key: IdentityKey, for account: Account) throws {
         try keychain.add(key, forKey: inviteKeyIdentifier(for: account))
     }
 
@@ -23,7 +20,7 @@ final class IdentityStorage {
         return try? keychain.read(key: identityKeyIdentifier(for: account))
     }
 
-    func getInviteKey(for account: Account) -> InviteKey? {
+    func getInviteKey(for account: Account) -> IdentityKey? {
         return try? keychain.read(key: inviteKeyIdentifier(for: account))
     }
 }

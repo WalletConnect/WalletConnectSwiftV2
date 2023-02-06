@@ -31,3 +31,10 @@ public struct DIDPKH {
         self.account = account
     }
 }
+
+extension Account {
+
+    public var iss: String {
+        return DIDPKH(account: self).iss
+    }
+}

@@ -43,6 +43,11 @@ let package = Package(
         .library(
             name: "Web3Inbox",
             targets: ["Web3Inbox"]),
+        // TODO: Remove library
+        .library(
+            name: "WalletConnectJWT",
+            targets: ["WalletConnectJWT"]),
+        // TODO: Remove library
         .library(
             name: "WalletConnectSigner",
             targets: ["WalletConnectSigner"]),
@@ -59,7 +64,7 @@ let package = Package(
             path: "Sources/Chat"),
         .target(
             name: "Auth",
-            dependencies: ["WalletConnectPairing"],
+            dependencies: ["WalletConnectPairing", "WalletConnectSigner"],
             path: "Sources/Auth"),
         .target(
             name: "Web3Wallet",
@@ -75,7 +80,7 @@ let package = Package(
             path: "Sources/WalletConnectEcho"),
         .target(
             name: "WalletConnectRelay",
-            dependencies: ["WalletConnectKMS"],
+            dependencies: ["WalletConnectJWT"],
             path: "Sources/WalletConnectRelay",
             resources: [.copy("PackageConfig.json")]),
         .target(
@@ -91,6 +96,9 @@ let package = Package(
         .target(
             name: "WalletConnectSigner",
             dependencies: ["WalletConnectNetworking"]),
+        .target(
+            name: "WalletConnectJWT",
+            dependencies: ["WalletConnectKMS"]),
         .target(
             name: "WalletConnectUtils",
             dependencies: ["JSONRPC"]),
