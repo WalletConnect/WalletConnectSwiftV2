@@ -56,8 +56,18 @@ actor IdentityRegisterService {
             publicKeyString: inviteKey.publicKey.hexRepresentation
         ))
 
+        // TODO: Handle private mode
+
         try identityStorage.saveIdentityKey(inviteKey, for: account)
         return inviteKey.publicKey.hexRepresentation
+    }
+
+    func resolveIdentity(publicKey: String) async throws -> Cacao {
+        return try await identityNetworkService.resolveIdentity(publicKey: publicKey)
+    }
+
+    func resolveInvite(account: Account) async throws -> String {
+        return try await identityNetworkService.resolveInvite(account: account.absoluteString)
     }
 }
 
