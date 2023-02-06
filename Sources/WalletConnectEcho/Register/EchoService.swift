@@ -44,8 +44,3 @@ enum EchoAPI: HTTPService {
         return "https"
     }
 }
-
-public enum APNSEnvironment: String {
-    case production = "apns"
-    case sandbox = "apns-sandbox"
-}
