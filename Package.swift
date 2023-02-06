@@ -43,14 +43,6 @@ let package = Package(
         .library(
             name: "Web3Inbox",
             targets: ["Web3Inbox"]),
-        // TODO: Remove library
-        .library(
-            name: "WalletConnectJWT",
-            targets: ["WalletConnectJWT"]),
-        // TODO: Remove library
-        .library(
-            name: "WalletConnectSigner",
-            targets: ["WalletConnectSigner"]),
     ],
     dependencies: [],
     targets: [
