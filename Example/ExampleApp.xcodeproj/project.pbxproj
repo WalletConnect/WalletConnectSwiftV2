@@ -209,7 +209,6 @@
 		A5E22D222840C8D300E36487 /* WalletEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D212840C8D300E36487 /* WalletEngine.swift */; };
 		A5E22D242840C8DB00E36487 /* SafariEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D232840C8DB00E36487 /* SafariEngine.swift */; };
 		A5E22D2C2840EAC300E36487 /* XCUIElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D2B2840EAC300E36487 /* XCUIElement.swift */; };
-		A5F145D7298BCCDD0051B18A /* WalletConnectSigner in Frameworks */ = {isa = PBXBuildFile; productRef = A5F145D6298BCCDD0051B18A /* WalletConnectSigner */; };
 		C5133A78294125CC00A8314C /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = C5133A77294125CC00A8314C /* Web3 */; };
 		C53AA4362941251C008EA57C /* DefaultSignerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59CF4F5292F83D50031A42F /* DefaultSignerFactory.swift */; };
 		C55D347F295DD7140004314A /* AuthRequestModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D347A295DD7140004314A /* AuthRequestModule.swift */; };
@@ -676,7 +675,6 @@
 				A5C8BE85292FE20B006CC85C /* Web3 in Frameworks */,
 				84DDB4ED28ABB663003D66ED /* WalletConnectAuth in Frameworks */,
 				C5DD5BE1294E09E3008FD3A4 /* Web3Wallet in Frameworks */,
-				A5F145D7298BCCDD0051B18A /* WalletConnectSigner in Frameworks */,
 				A5E03E01286466EA00888481 /* WalletConnectChat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1871,7 +1869,6 @@
 				847CF3AE28E3141700F1D760 /* WalletConnectPush */,
 				A5C8BE84292FE20B006CC85C /* Web3 */,
 				C5DD5BE0294E09E3008FD3A4 /* Web3Wallet */,
-				A5F145D6298BCCDD0051B18A /* WalletConnectSigner */,
 			);
 			productName = IntegrationTests;
 			productReference = A5E03DED286464DB00888481 /* IntegrationTests.xctest */;
@@ -3174,10 +3171,6 @@
 		A5E03E00286466EA00888481 /* WalletConnectChat */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectChat;
-		};
-		A5F145D6298BCCDD0051B18A /* WalletConnectSigner */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = WalletConnectSigner;
 		};
 		C5133A77294125CC00A8314C /* Web3 */ = {
 			isa = XCSwiftPackageProductDependency;
