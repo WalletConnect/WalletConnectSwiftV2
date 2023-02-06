@@ -1,4 +1,3 @@
-//     
 
 import UserNotifications
 import WalletConnectPush

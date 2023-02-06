@@ -1,6 +1,7 @@
 import Combine
 
 import Web3Wallet
+import WalletConnectPush
 
 final class WalletInteractor {
     var requestPublisher: AnyPublisher<AuthRequest, Never> {
@@ -15,10 +16,14 @@ final class WalletInteractor {
         return Web3Wallet.instance.sessionRequestPublisher
     }
     
+    var pushRequestPublisher: AnyPublisher<(id: RPCID, account: Account, metadata: AppMetadata), Never> {
+        return Push.wallet.requestPublisher
+    }
+
     var sessionsPublisher: AnyPublisher<[Session], Never> {
         return Web3Wallet.instance.sessionsPublisher
     }
-    
+
     func getSessions() -> [Session] {
         return Web3Wallet.instance.getSessions()
     }

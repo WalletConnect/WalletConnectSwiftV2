@@ -5,6 +5,7 @@ import Foundation
  */
 public struct Session {
     public let topic: String
+    public let pairingTopic: String
     public let peer: AppMetadata
     public let namespaces: [String: SessionNamespace]
     public let expiryDate: Date
@@ -15,7 +16,7 @@ public struct Session {
 
 extension Session {
 
-    public struct Proposal: Equatable {
+    public struct Proposal: Equatable, Codable {
         public var id: String
         public let pairingTopic: String
         public let proposer: AppMetadata

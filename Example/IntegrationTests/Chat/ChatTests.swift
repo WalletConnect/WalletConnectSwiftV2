@@ -12,25 +12,26 @@ final class ChatTests: XCTestCase {
     var registry: KeyValueRegistry!
     private var publishers = [AnyCancellable]()
 
+    let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
+    let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
+
     override func setUp() {
         registry = KeyValueRegistry()
-        invitee = makeClient(prefix: "🦖 Registered")
-        inviter = makeClient(prefix: "🍄 Inviter")
+        invitee = makeClient(prefix: "🦖 Registered", account: inviteeAccount)
+        inviter = makeClient(prefix: "🍄 Inviter", account: inviterAccount)
     }
 
-    func makeClient(prefix: String) -> ChatClient {
+    func makeClient(prefix: String, account: Account) -> ChatClient {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let keychain = KeychainStorageMock()
         let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keychainStorage: keychain, socketFactory: DefaultSocketFactory(), logger: logger)
-        return ChatClientFactory.create(registry: registry, relayClient: relayClient, kms: KeyManagementService(keychain: keychain), logger: logger, keyValueStorage: RuntimeKeyValueStorage())
+        return ChatClientFactory.create(account: account, registry: registry, relayClient: relayClient, kms: KeyManagementService(keychain: keychain), logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
 
     func testInvite() async {
         let inviteExpectation = expectation(description: "invitation expectation")
-        let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
-        let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
         try! await invitee.register(account: inviteeAccount)
-        try! await inviter.invite(peerAccount: inviteeAccount, openingMessage: "", account: inviterAccount)
+        try! await inviter.invite(peerAccount: inviteeAccount, openingMessage: "")
         invitee.invitePublisher.sink { _ in
             inviteExpectation.fulfill()
         }.store(in: &publishers)
@@ -40,12 +41,10 @@ final class ChatTests: XCTestCase {
     func testAcceptAndCreateNewThread() {
         let newThreadInviterExpectation = expectation(description: "new thread on inviting client expectation")
         let newThreadinviteeExpectation = expectation(description: "new thread on invitee client expectation")
-        let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
-        let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
 
         Task(priority: .high) {
             try! await invitee.register(account: inviteeAccount)
-            try! await inviter.invite(peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
+            try! await inviter.invite(peerAccount: inviteeAccount, openingMessage: "opening message")
         }
 
         invitee.invitePublisher.sink { [unowned self] invite in
@@ -67,12 +66,9 @@ final class ChatTests: XCTestCase {
         let messageExpectation = expectation(description: "message received")
         messageExpectation.expectedFulfillmentCount = 4 // expectedFulfillmentCount 4 because onMessage() called on send too
 
-        let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
-        let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
-
         Task(priority: .high) {
             try! await invitee.register(account: inviteeAccount)
-            try! await inviter.invite(peerAccount: inviteeAccount, openingMessage: "opening message", account: inviterAccount)
+            try! await inviter.invite(peerAccount: inviteeAccount, openingMessage: "opening message")
         }
 
         invitee.invitePublisher.sink { [unowned self] invite in

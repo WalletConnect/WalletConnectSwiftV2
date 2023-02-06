@@ -9,14 +9,20 @@ class InvitationHandlingService {
     var onNewThread: ((Thread) -> Void)?
     private let networkingInteractor: NetworkInteracting
     private let chatStorage: ChatStorage
+    private let accountService: AccountService
     private let topicToRegistryRecordStore: CodableStore<RegistryRecord>
     private let registry: Registry
     private let logger: ConsoleLogging
     private let kms: KeyManagementService
     private var publishers = [AnyCancellable]()
 
+    private var currentAccount: Account {
+        return accountService.currentAccount
+    }
+
     init(registry: Registry,
          networkingInteractor: NetworkInteracting,
+         accountService: AccountService,
          kms: KeyManagementService,
          logger: ConsoleLogging,
          topicToRegistryRecordStore: CodableStore<RegistryRecord>,
@@ -24,6 +30,7 @@ class InvitationHandlingService {
         self.registry = registry
         self.kms = kms
         self.networkingInteractor = networkingInteractor
+        self.accountService = accountService
         self.logger = logger
         self.topicToRegistryRecordStore = topicToRegistryRecordStore
         self.chatStorage = chatStorage
@@ -32,8 +39,8 @@ class InvitationHandlingService {
 
     func accept(inviteId: Int64) async throws {
         guard
-            let invite = chatStorage.getInvite(id: inviteId),
-            let inviteTopic = chatStorage.getInviteTopic(id: inviteId)
+            let invite = chatStorage.getInvite(id: inviteId, account: currentAccount),
+            let inviteTopic = chatStorage.getInviteTopic(id: inviteId, account: currentAccount)
         else { throw Error.inviteForIdNotFound }
 
         let selfThreadPubKey = try kms.createX25519KeyPair()
@@ -69,16 +76,16 @@ class InvitationHandlingService {
             peerAccount: invite.account
         )
 
-        chatStorage.add(thread: thread)
-        chatStorage.delete(invite: invite)
+        chatStorage.set(thread: thread, account: currentAccount)
+        chatStorage.delete(invite: invite, account: currentAccount)
 
         onNewThread?(thread)
     }
 
     func reject(inviteId: Int64) async throws {
         guard
-            let invite = chatStorage.getInvite(id: inviteId),
-            let inviteTopic = chatStorage.getInviteTopic(id: inviteId)
+            let invite = chatStorage.getInvite(id: inviteId, account: currentAccount),
+            let inviteTopic = chatStorage.getInviteTopic(id: inviteId, account: currentAccount)
         else { throw Error.inviteForIdNotFound }
 
         let responseTopic = try getInviteResponseTopic(requestTopic: inviteTopic, invite: invite)
@@ -90,17 +97,20 @@ class InvitationHandlingService {
             reason: ChatError.userRejected
         )
 
-        chatStorage.delete(invite: invite)
+        chatStorage.delete(invite: invite, account: currentAccount)
     }
 
     private func setUpRequestHandling() {
         networkingInteractor.requestSubscription(on: ChatInviteProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<InvitePayload>) in
                 logger.debug("did receive an invite")
-                onInvite?(Invite(
+                let invite = Invite(
                     id: payload.id.integer,
+                    topic: payload.topic,
                     payload: payload.request
-                ))
+                )
+                chatStorage.set(invite: invite, account: currentAccount)
+                onInvite?(invite)
             }.store(in: &publishers)
     }
 

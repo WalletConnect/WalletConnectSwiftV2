@@ -17,21 +17,7 @@
                BlueprintIdentifier = "WalletConnect"
                BuildableName = "WalletConnect"
                BlueprintName = "WalletConnect"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "NO"
-            buildForArchiving = "NO"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "WalletConnectTests"
-               BuildableName = "WalletConnectTests"
-               BlueprintName = "WalletConnectTests"
-               ReferencedContainer = "container:">
+               ReferencedContainer = "container:..">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -42,10 +28,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Relayer"
-               BuildableName = "Relayer"
-               BlueprintName = "Relayer"
-               ReferencedContainer = "container:">
+               BlueprintIdentifier = "Web3Inbox"
+               BuildableName = "Web3Inbox"
+               BlueprintName = "Web3Inbox"
+               ReferencedContainer = "container:..">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -56,10 +42,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "WalletConnectUtils"
-               BuildableName = "WalletConnectUtils"
-               BlueprintName = "WalletConnectUtils"
-               ReferencedContainer = "container:">
+               BlueprintIdentifier = "WalletConnectPush"
+               BuildableName = "WalletConnectPush"
+               BlueprintName = "WalletConnectPush"
+               ReferencedContainer = "container:..">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -70,10 +56,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "TestingUtils"
-               BuildableName = "TestingUtils"
-               BlueprintName = "TestingUtils"
-               ReferencedContainer = "container:">
+               BlueprintIdentifier = "WalletConnectVerify"
+               BuildableName = "WalletConnectVerify"
+               BlueprintName = "WalletConnectVerify"
+               ReferencedContainer = "container:..">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -84,10 +70,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "WalletConnectKMS"
-               BuildableName = "WalletConnectKMS"
-               BlueprintName = "WalletConnectKMS"
-               ReferencedContainer = "container:">
+               BlueprintIdentifier = "WalletConnectPairing"
+               BuildableName = "WalletConnectPairing"
+               BlueprintName = "WalletConnectPairing"
+               ReferencedContainer = "container:..">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -98,10 +84,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "WalletConnectRelay"
-               BuildableName = "WalletConnectRelay"
-               BlueprintName = "WalletConnectRelay"
-               ReferencedContainer = "container:">
+               BlueprintIdentifier = "WalletConnectAuth"
+               BuildableName = "WalletConnectAuth"
+               BlueprintName = "WalletConnectAuth"
+               ReferencedContainer = "container:..">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -112,24 +98,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "WalletConnectSign"
-               BuildableName = "WalletConnectSign"
-               BlueprintName = "WalletConnectSign"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "NO"
-            buildForProfiling = "NO"
-            buildForArchiving = "NO"
-            buildForAnalyzing = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "ChatTests"
-               BuildableName = "ChatTests"
-               BlueprintName = "ChatTests"
-               ReferencedContainer = "container:">
+               BlueprintIdentifier = "Web3Wallet"
+               BuildableName = "Web3Wallet"
+               BlueprintName = "Web3Wallet"
+               ReferencedContainer = "container:..">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -140,10 +112,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Chat"
-               BuildableName = "Chat"
-               BlueprintName = "Chat"
-               ReferencedContainer = "container:">
+               BlueprintIdentifier = "WalletConnectRouter"
+               BuildableName = "WalletConnectRouter"
+               BlueprintName = "WalletConnectRouter"
+               ReferencedContainer = "container:..">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -154,10 +126,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Commons"
-               BuildableName = "Commons"
-               BlueprintName = "Commons"
-               ReferencedContainer = "container:">
+               BlueprintIdentifier = "WalletConnectEcho"
+               BuildableName = "WalletConnectEcho"
+               BlueprintName = "WalletConnectEcho"
+               ReferencedContainer = "container:..">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -168,10 +140,24 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "JSONRPC"
-               BuildableName = "JSONRPC"
-               BlueprintName = "JSONRPC"
-               ReferencedContainer = "container:">
+               BlueprintIdentifier = "WalletConnectNetworking"
+               BuildableName = "WalletConnectNetworking"
+               BlueprintName = "WalletConnectNetworking"
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "WalletConnectChat"
+               BuildableName = "WalletConnectChat"
+               BlueprintName = "WalletConnectChat"
+               ReferencedContainer = "container:..">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -188,7 +174,7 @@
             BlueprintIdentifier = "WalletConnect"
             BuildableName = "WalletConnect"
             BlueprintName = "WalletConnect"
-            ReferencedContainer = "container:">
+            ReferencedContainer = "container:..">
          </BuildableReference>
       </CodeCoverageTargets>
       <Testables>
@@ -196,60 +182,10 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "RelayerTests"
-               BuildableName = "RelayerTests"
-               BlueprintName = "RelayerTests"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "WalletConnectKMSTests"
-               BuildableName = "WalletConnectKMSTests"
-               BlueprintName = "WalletConnectKMSTests"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "WalletConnectSignTests"
-               BuildableName = "WalletConnectSignTests"
-               BlueprintName = "WalletConnectSignTests"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "CommonsTests"
-               BuildableName = "CommonsTests"
-               BlueprintName = "CommonsTests"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "WalletConnectUtilsTests"
-               BuildableName = "WalletConnectUtilsTests"
-               BlueprintName = "WalletConnectUtilsTests"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "JSONRPCTests"
-               BuildableName = "JSONRPCTests"
-               BlueprintName = "JSONRPCTests"
-               ReferencedContainer = "container:">
+               BlueprintIdentifier = "AuthTests"
+               BuildableName = "AuthTests"
+               BlueprintName = "AuthTests"
+               ReferencedContainer = "container:..">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -259,17 +195,57 @@
                BlueprintIdentifier = "ChatTests"
                BuildableName = "ChatTests"
                BlueprintName = "ChatTests"
-               ReferencedContainer = "container:">
+               ReferencedContainer = "container:..">
             </BuildableReference>
          </TestableReference>
          <TestableReference
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "AuthTests"
-               BuildableName = "AuthTests"
-               BlueprintName = "AuthTests"
-               ReferencedContainer = "container:">
+               BlueprintIdentifier = "CommonsTests"
+               BuildableName = "CommonsTests"
+               BlueprintName = "CommonsTests"
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "JSONRPCTests"
+               BuildableName = "JSONRPCTests"
+               BlueprintName = "JSONRPCTests"
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "RelayerTests"
+               BuildableName = "RelayerTests"
+               BlueprintName = "RelayerTests"
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "VerifyTests"
+               BuildableName = "VerifyTests"
+               BlueprintName = "VerifyTests"
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "WalletConnectKMSTests"
+               BuildableName = "WalletConnectKMSTests"
+               BlueprintName = "WalletConnectKMSTests"
+               ReferencedContainer = "container:..">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -279,7 +255,37 @@
                BlueprintIdentifier = "WalletConnectPairingTests"
                BuildableName = "WalletConnectPairingTests"
                BlueprintName = "WalletConnectPairingTests"
-               ReferencedContainer = "container:">
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "WalletConnectSignTests"
+               BuildableName = "WalletConnectSignTests"
+               BlueprintName = "WalletConnectSignTests"
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "WalletConnectUtilsTests"
+               BuildableName = "WalletConnectUtilsTests"
+               BlueprintName = "WalletConnectUtilsTests"
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Web3WalletTests"
+               BuildableName = "Web3WalletTests"
+               BlueprintName = "Web3WalletTests"
+               ReferencedContainer = "container:..">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -307,7 +313,7 @@
             BlueprintIdentifier = "WalletConnect"
             BuildableName = "WalletConnect"
             BlueprintName = "WalletConnect"
-            ReferencedContainer = "container:">
+            ReferencedContainer = "container:..">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

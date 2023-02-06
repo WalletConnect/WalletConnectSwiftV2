@@ -2,55 +2,64 @@ import Foundation
 
 struct ChatStorage {
 
-    private let history: RPCHistory
-    private let threadStore: Database<Thread>
+    private let messageStore: KeyedDatabase<Message>
+    private let inviteStore: KeyedDatabase<Invite>
+    private let threadStore: KeyedDatabase<Thread>
 
-    init(history: RPCHistory, threadStore: Database<Thread>) {
-        self.history = history
+    init(
+        messageStore: KeyedDatabase<Message>,
+        inviteStore: KeyedDatabase<Invite>,
+        threadStore: KeyedDatabase<Thread>
+    ) {
+        self.messageStore = messageStore
+        self.inviteStore = inviteStore
         self.threadStore = threadStore
     }
 
     // MARK: - Invites
 
-    func getInvite(id: Int64) -> Invite? {
-        guard
-            let record = history.get(recordId: RPCID(id)),
-            let payload = try? record.request.params?.get(InvitePayload.self)
-        else { return nil }
-
-        return Invite(id: record.id.integer, payload: payload)
+    func getInvite(id: Int64, account: Account) -> Invite? {
+        return inviteStore.getElements(for: account.absoluteString)
+            .first(where: { $0.id == id })
     }
 
-    func getInviteTopic(id: Int64) -> String? {
-        return history.get(recordId: RPCID(id))?.topic
+    func set(invite: Invite, account: Account) {
+        inviteStore.set(invite, for: account.absoluteString)
     }
 
-    func getInvites() -> [Invite] {
-        return history.getAllWithIDs(of: InvitePayload.self)
-            .map { Invite(id: $0.id.integer, payload: $0.value) }
+    func getInviteTopic(id: Int64, account: Account) -> String? {
+        return getInvites(account: account).first(where: { $0.id == id })?.topic
     }
 
-    func delete(invite: Invite) {
-        history.delete(id: RPCID(invite.id))
+    func getInvites(account: Account) -> [Invite] {
+        return inviteStore.getElements(for: account.absoluteString)
+    }
+
+    func delete(invite: Invite, account: Account) {
+        inviteStore.delete(invite, for: account.absoluteString)
     }
 
     // MARK: - Threads
 
-    func getThreads() -> [Thread] {
-        return threadStore.getAll()
+    func getThreads(account: Account) -> [Thread] {
+        return threadStore.getElements(for: account.absoluteString)
     }
 
-    func getThread(topic: String) -> Thread? {
-        return getThreads().first(where: { $0.topic == topic })
-    }
-
-    func add(thread: Thread) {
-        threadStore.add(thread)
+    func set(thread: Thread, account: Account) {
+        threadStore.set(thread, for: account.absoluteString)
     }
 
     // MARK: - Messages
 
-    func getMessages(topic: String) -> [Message] {
-        return history.getAll(of: Message.self).filter { $0.topic == topic }
+    func set(message: Message, account: Account) {
+        messageStore.set(message, for: account.absoluteString)
+    }
+
+    func getMessages(account: Account) -> [Message] {
+        return messageStore.getElements(for: account.absoluteString)
+    }
+
+    func getMessages(topic: String, account: Account) -> [Message] {
+        return messageStore.getElements(for: account.absoluteString).filter { $0.topic == topic }
     }
 }

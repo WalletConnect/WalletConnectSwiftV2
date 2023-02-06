@@ -60,14 +60,12 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
                 accountsDetails.append(AccountDetails(chain: account.blockchainIdentifier, methods: Array(namespace.methods), account: account.address)) // TODO: Rethink how this info is displayed on example
             }
         }
-        proposePushSubscription()
     }
 
     func proposePushSubscription() {
         let account = session.namespaces.values.first!.accounts.first!
-        // temp solution
-        let pairingTopic = Pair.instance.getPairings().last!.topic
-        Task(priority: .high){ try! await Push.dapp.request(account: account, topic: pairingTopic)}
+
+        Task(priority: .high){ try! await Push.dapp.request(account: account, topic: session.pairingTopic)}
         Push.dapp.responsePublisher.sink { (id: RPCID, result: Result<PushSubscription, PushError>) in
             switch result {
             case .success(let subscription):
