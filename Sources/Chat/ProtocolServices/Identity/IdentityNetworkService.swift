@@ -38,7 +38,7 @@ actor IdentityNetworkService {
     func resolveInvite(account: String) async throws -> String {
         let api = IdentityKeyAPI.resolveInvite(account: account)
         let response = try await httpService.request(ResolveInviteResponse.self, at: api)
-        return response.inviteKey
+        return response.value.inviteKey
     }
 
     func removeInvite(idAuth: String) async throws {
@@ -57,6 +57,9 @@ private extension IdentityNetworkService {
     }
 
     struct ResolveInviteResponse: Codable {
-        let inviteKey: String
+        struct Value: Codable {
+            let inviteKey: String
+        }
+        let value: Value
     }
 }

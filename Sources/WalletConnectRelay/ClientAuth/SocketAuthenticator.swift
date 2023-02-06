@@ -23,6 +23,7 @@ struct SocketAuthenticator: SocketAuthenticating {
     private func createAndSignJWT(keyPair: SigningPrivateKey) throws -> String {
         return try JWTFactory().createAndSignJWT(
             keyPair: keyPair,
+            sub: getSubject(),
             aud: getAudience(),
             exp: getExpiry(),
             pkh: nil
@@ -39,5 +40,9 @@ struct SocketAuthenticator: SocketAuthenticating {
 
     private func getAudience() -> String {
         return "wss://\(relayHost)"
+    }
+
+    private func getSubject() -> String {
+        return Data.randomBytes(count: 32).toHexString()
     }
 }

@@ -51,7 +51,8 @@ actor IdentityRegisterService {
         }
 
         let inviteKey = IdentityKey()
-        let idAuth = try makeIDAuth(account: account, inviteKey: inviteKey)
+        let invitePublicKey = inviteKey.publicKey.hexRepresentation
+        let idAuth = try makeIDAuth(account: account, invitePublicKey: invitePublicKey)
         try await identityNetworkService.registerInvite(idAuth: idAuth)
 
         // TODO: Handle private mode
@@ -97,9 +98,12 @@ private extension IdentityRegisterService {
         return Cacao(h: cacaoHeader, p: cacaoPayload, s: cacaoSignature)
     }
 
-    func makeIDAuth(account: Account, inviteKey: IdentityKey) throws -> String {
+    func makeIDAuth(account: Account, invitePublicKey: String) throws -> String {
+        guard let identityKey = identityStorage.getIdentityKey(for: account)
+        else { throw Errors.identityKeyNotFound }
         return try JWTFactory().createAndSignJWT(
-            keyPair: inviteKey,
+            keyPair: identityKey,
+            sub: invitePublicKey,
             aud: getAudience(),
             exp: getExpiry(),
             pkh: account.iss

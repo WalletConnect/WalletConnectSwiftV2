@@ -29,7 +29,7 @@ final class RegistryTests: XCTestCase {
         signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
     }
 
-    func testRegisterIdentity() async throws {
+    func testRegisterIdentityAndInviteKey() async throws {
         var message: String!
         let publicKey = try await sut.registerIdentity(account: account, isPrivate: false) { msg in
             message = msg
@@ -37,18 +37,19 @@ final class RegistryTests: XCTestCase {
         }
 
         let cacao = try await sut.resolveIdentity(publicKey: publicKey)
-        let recovered = storage.getIdentityKey(for: account)!.publicKey.hexRepresentation
-
         XCTAssertEqual(try SIWECacaoFormatter().formatMessage(from: cacao.p), message)
-        XCTAssertEqual(publicKey, recovered)
-    }
 
-    func testRegisterInviteKey() async throws {
+        let recovered = storage.getIdentityKey(for: account)!.publicKey.hexRepresentation
+        XCTAssertEqual(publicKey, recovered)
+
         let inviteKey = try await sut.registerInvite(account: account, isPrivate: false, onSign: { msg in
             return try! signer.sign(message: msg, privateKey: privateKey, type: .eip191)
         })
 
-        let recovered = storage.getInviteKey(for: account)!
-        XCTAssertEqual(inviteKey, recovered.publicKey.hexRepresentation)
+        let recoveredKey = storage.getInviteKey(for: account)!
+        XCTAssertEqual(inviteKey, recoveredKey.publicKey.hexRepresentation)
+
+        let resolvedKey = try await sut.resolveInvite(account: account)
+        XCTAssertEqual(inviteKey, resolvedKey)
     }
 }
