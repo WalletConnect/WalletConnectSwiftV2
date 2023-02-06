@@ -5,7 +5,7 @@ import WalletConnectEcho
 public struct WalletPushClientFactory {
 
     public static func create(networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, echoClient: EchoClient) -> WalletPushClient {
-        let logger = ConsoleLogger(loggingLevel: .off)
+        let logger = ConsoleLogger(loggingLevel: .debug)
         let keyValueStorage = UserDefaults.standard
         
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
@@ -37,6 +37,7 @@ public struct WalletPushClientFactory {
         let deletePushSubscriptionSubscriber = DeletePushSubscriptionSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore)
         let resubscribeService = PushResubscribeService(networkInteractor: networkInteractor, subscriptionsStorage: subscriptionStore)
         let pushMessagesProvider = PushMessagesProvider(history: history)
+        let pushSubscriptionsObserver = PushSubscriptionsObserver(store: subscriptionStore)
         return WalletPushClient(
             logger: logger,
             kms: kms,
@@ -48,7 +49,8 @@ public struct WalletPushClientFactory {
             pushMessagesProvider: pushMessagesProvider,
             deletePushSubscriptionService: deletePushSubscriptionService,
             deletePushSubscriptionSubscriber: deletePushSubscriptionSubscriber,
-            resubscribeService: resubscribeService
+            resubscribeService: resubscribeService,
+            pushSubscriptionsObserver: pushSubscriptionsObserver
         )
     }
 }

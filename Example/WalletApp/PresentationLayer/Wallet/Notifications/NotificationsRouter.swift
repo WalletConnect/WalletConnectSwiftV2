@@ -1,6 +1,8 @@
 import UIKit
+import WalletConnectPush
 
-final class WelcomeRouter {
+final class NotificationsRouter {
+
     weak var viewController: UIViewController!
 
     private let app: Application
@@ -8,9 +10,8 @@ final class WelcomeRouter {
     init(app: Application) {
         self.app = app
     }
-    
-    func presentWallet() {
-        MainModule.create(app: app)
-            .present()
+
+    func presentNotifications(subscription: WalletConnectPush.PushSubscription) {
+
     }
 }
