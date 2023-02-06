@@ -9,6 +9,11 @@ public protocol MessageSignatureVerifying {
 }
 
 public protocol MessageSigning {
+    func sign(message: String,
+        privateKey: Data,
+        type: CacaoSignatureType
+    ) throws -> CacaoSignature
+
     func sign(payload: CacaoPayload,
         privateKey: Data,
         type: CacaoSignatureType
@@ -41,6 +46,13 @@ struct MessageSigner: CacaoMessageSigner {
     ) throws -> CacaoSignature {
 
         let message = try messageFormatter.formatMessage(from: payload)
+        return try sign(message: message, privateKey: privateKey, type: type)
+    }
+
+    func sign(message: String,
+        privateKey: Data,
+        type: CacaoSignatureType
+    ) throws -> CacaoSignature {
 
         guard let messageData = message.data(using: .utf8)else {
             throw Errors.utf8EncodingFailed

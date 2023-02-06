@@ -51,19 +51,19 @@ actor IdentityRegisterService {
         }
 
         let inviteKey = IdentityKey()
-        try await identityNetworkService.registerInvite(idAuth: makeIDAuth(
-            account: account,
-            publicKeyString: inviteKey.publicKey.hexRepresentation
-        ))
+        let idAuth = try makeIDAuth(account: account, inviteKey: inviteKey)
+        try await identityNetworkService.registerInvite(idAuth: idAuth)
 
         // TODO: Handle private mode
 
-        try identityStorage.saveIdentityKey(inviteKey, for: account)
+        try identityStorage.saveInviteKey(inviteKey, for: account)
         return inviteKey.publicKey.hexRepresentation
     }
 
     func resolveIdentity(publicKey: String) async throws -> Cacao {
-        return try await identityNetworkService.resolveIdentity(publicKey: publicKey)
+        let data = Data(hex: publicKey)
+        let did = ED25519DIDKeyFactory().make(pubKey: data, prefix: false)
+        return try await identityNetworkService.resolveIdentity(publicKey: did)
     }
 
     func resolveInvite(account: Account) async throws -> String {
@@ -97,10 +97,7 @@ private extension IdentityRegisterService {
         return Cacao(h: cacaoHeader, p: cacaoPayload, s: cacaoSignature)
     }
 
-    func makeIDAuth(account: Account, publicKeyString: String) throws -> String {
-        guard let inviteKey = identityStorage.getInviteKey(for: account)
-        else { throw Errors.identityKeyNotFound }
-
+    func makeIDAuth(account: Account, inviteKey: IdentityKey) throws -> String {
         return try JWTFactory().createAndSignJWT(
             keyPair: inviteKey,
             aud: getAudience(),

@@ -32,9 +32,9 @@ enum IdentityKeyAPI: HTTPService {
     var body: Data? {
         switch self {
         case .registerIdentity(let cacao), .removeIdentity(let cacao):
-            return try? JSONEncoder().encode(cacao)
+            return try? JSONEncoder().encode(RegisterIdentityRequest(cacao: cacao))
         case .registerInvite(let idAuth), .removeInvite(let idAuth):
-            return try? JSONEncoder().encode(["idAuth": idAuth])
+            return try? JSONEncoder().encode(RegisterInviteRequest(idAuth: idAuth))
         case .resolveIdentity, .resolveInvite:
             return nil
         }
@@ -49,5 +49,16 @@ enum IdentityKeyAPI: HTTPService {
         case .registerIdentity, .registerInvite, .removeInvite, .removeIdentity:
             return nil
         }
+    }
+}
+
+private extension IdentityKeyAPI {
+
+    struct RegisterIdentityRequest: Codable {
+        let cacao: Cacao
+    }
+
+    struct RegisterInviteRequest: Codable {
+        let idAuth: String
     }
 }

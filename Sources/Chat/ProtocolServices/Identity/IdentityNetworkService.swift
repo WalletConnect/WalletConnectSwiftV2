@@ -20,7 +20,7 @@ actor IdentityNetworkService {
     func resolveIdentity(publicKey: String) async throws -> Cacao {
         let api = IdentityKeyAPI.resolveIdentity(publicKey: publicKey)
         let response = try await httpService.request(ResolveIdentityResponse.self, at: api)
-        return response.cacao
+        return response.value.cacao
     }
 
     func removeIdentity(cacao: Cacao) async throws {
@@ -50,7 +50,10 @@ actor IdentityNetworkService {
 private extension IdentityNetworkService {
 
     struct ResolveIdentityResponse: Codable {
-        let cacao: Cacao
+        struct Value: Codable {
+            let cacao: Cacao
+        }
+        let value: Value
     }
 
     struct ResolveInviteResponse: Codable {
