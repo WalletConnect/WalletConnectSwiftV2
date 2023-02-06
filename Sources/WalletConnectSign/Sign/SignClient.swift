@@ -174,6 +174,7 @@ public final class SignClient: SignClientProtocol {
     public func connect(
         requiredNamespaces: [String: ProposalNamespace],
         optionalNamespaces: [String: ProposalNamespace]? = nil,
+        sessionProperties: [String: String]? = nil,
         topic: String? = nil
     ) async throws -> WalletConnectURI? {
         logger.debug("Connecting Application")
@@ -183,6 +184,7 @@ public final class SignClient: SignClientProtocol {
                 pairingTopic: topic,
                 namespaces: requiredNamespaces,
                 optionalNamespaces: optionalNamespaces,
+                sessionProperties: sessionProperties,
                 relay: RelayProtocolOptions(protocol: "irn", data: nil)
             )
             return nil
@@ -192,6 +194,7 @@ public final class SignClient: SignClientProtocol {
                 pairingTopic: pairingURI.topic,
                 namespaces: requiredNamespaces,
                 optionalNamespaces: optionalNamespaces,
+                sessionProperties: sessionProperties,
                 relay: RelayProtocolOptions(protocol: "irn", data: nil)
             )
             return pairingURI
@@ -206,6 +209,7 @@ public final class SignClient: SignClientProtocol {
     public func connect(
         requiredNamespaces: [String: ProposalNamespace],
         optionalNamespaces: [String: ProposalNamespace]? = nil,
+        sessionProperties: [String: String]? = nil,
         topic: String
     ) async throws {
         logger.debug("Connecting Application")
@@ -214,6 +218,7 @@ public final class SignClient: SignClientProtocol {
             pairingTopic: topic,
             namespaces: requiredNamespaces,
             optionalNamespaces: optionalNamespaces,
+            sessionProperties: sessionProperties,
             relay: RelayProtocolOptions(protocol: "irn", data: nil)
         )
     }

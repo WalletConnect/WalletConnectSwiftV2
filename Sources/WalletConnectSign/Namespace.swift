@@ -105,3 +105,11 @@ enum Namespace {
         }
     }
 }
+
+enum SessionProperties {
+    static func validate(_ sessionProperties: [String: String]) throws {
+        if sessionProperties.isEmpty {
+            throw WalletConnectError.emptySessionProperties
+        }
+    }
+}

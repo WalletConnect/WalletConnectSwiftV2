@@ -67,9 +67,17 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
                 ], events: []
             )
         ]
+        let sessionProperties: [String: String] = [
+            "caip154-mandatory": "true"
+        ]
         Task {
             let uri = try await Pair.instance.create()
-            try await Sign.instance.connect(requiredNamespaces: namespaces, optionalNamespaces: optionalNamespaces, topic: uri.topic)
+            try await Sign.instance.connect(
+                requiredNamespaces: namespaces,
+                optionalNamespaces: optionalNamespaces,
+                sessionProperties: sessionProperties,
+                topic: uri.topic
+            )
             showConnectScreen(uri: uri)
         }
     }

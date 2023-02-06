@@ -22,12 +22,16 @@ final class AppProposeService {
         pairingTopic: String,
         namespaces: [String: ProposalNamespace],
         optionalNamespaces: [String: ProposalNamespace]? = nil,
+        sessionProperties: [String: String]? = nil,
         relay: RelayProtocolOptions
     ) async throws {
         logger.debug("Propose Session on topic: \(pairingTopic)")
         try Namespace.validate(namespaces)
         if let optionalNamespaces {
             try Namespace.validate(optionalNamespaces)
+        }
+        if let sessionProperties {
+            try SessionProperties.validate(sessionProperties)
         }
         let protocolMethod = SessionProposeProtocolMethod()
         let publicKey = try! kms.createX25519KeyPair()
@@ -39,7 +43,8 @@ final class AppProposeService {
             relays: [relay],
             proposer: proposer,
             requiredNamespaces: namespaces,
-            optionalNamespaces: optionalNamespaces
+            optionalNamespaces: optionalNamespaces,
+            sessionProperties: sessionProperties
         )
         
         let request = RPCRequest(method: protocolMethod.method, params: proposal)

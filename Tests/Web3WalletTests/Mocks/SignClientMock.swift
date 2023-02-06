@@ -24,7 +24,8 @@ final class SignClientMock: SignClientProtocol {
             relays: [],
             proposer: proposer,
             requiredNamespaces: [:],
-            optionalNamespaces: nil
+            optionalNamespaces: nil,
+            sessionProperties: nil
         ).publicRepresentation(pairingTopic: "")
 
         return Result.Publisher(sessionProposal)
