@@ -26,6 +26,8 @@
 	<string>$(PROJECT_ID)</string>
 	<key>SIMULATOR_IDENTIFIER</key>
 	<string>$(SIMULATOR_IDENTIFIER)</string>
+	<key>CONFIGURATION</key>
+	<string>$(CONFIGURATION)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

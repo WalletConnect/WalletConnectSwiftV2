@@ -54,6 +54,7 @@
 		84B767792954554A00E92316 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B767782954554A00E92316 /* NotificationService.swift */; };
 		84B7677D2954554A00E92316 /* PushDecryptionService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 84B767762954554A00E92316 /* PushDecryptionService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		84B76789295494D500E92316 /* WalletConnectPush in Frameworks */ = {isa = PBXBuildFile; productRef = 84B76788295494D500E92316 /* WalletConnectPush */; };
+		84B8154E2991099000FAD54E /* BuildConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B8154D2991099000FAD54E /* BuildConfiguration.swift */; };
 		84CE641F27981DED00142511 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE641E27981DED00142511 /* AppDelegate.swift */; };
 		84CE642127981DED00142511 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE642027981DED00142511 /* SceneDelegate.swift */; };
 		84CE642827981DF000142511 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 84CE642727981DF000142511 /* Assets.xcassets */; };
@@ -396,6 +397,7 @@
 		84B767762954554A00E92316 /* PushDecryptionService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PushDecryptionService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		84B767782954554A00E92316 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		84B7677A2954554A00E92316 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		84B8154D2991099000FAD54E /* BuildConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildConfiguration.swift; sourceTree = "<group>"; };
 		84CE641C27981DED00142511 /* DApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		84CE641E27981DED00142511 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		84CE642027981DED00142511 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -1583,6 +1585,7 @@
 			isa = PBXGroup;
 			children = (
 				C56EE25D293F56D6004840D1 /* InputConfig.swift */,
+				84B8154D2991099000FAD54E /* BuildConfiguration.swift */,
 				C56EE267293F56D6004840D1 /* Style */,
 				C56EE2A1293F6B9E004840D1 /* Helpers */,
 				C56EE262293F56D6004840D1 /* Extensions */,
@@ -2295,6 +2298,7 @@
 				C56EE248293F566D004840D1 /* ScanQR.swift in Sources */,
 				847BD1EB298A87AB00076C90 /* SubscriptionsViewModel.swift in Sources */,
 				C55D349B2965BC2F0004314A /* TagsView.swift in Sources */,
+				84B8154E2991099000FAD54E /* BuildConfiguration.swift in Sources */,
 				C56EE289293F5757004840D1 /* Application.swift in Sources */,
 				C56EE273293F56D7004840D1 /* UIColor.swift in Sources */,
 				C5F32A322954816C00A6476E /* ConnectionDetailsPresenter.swift in Sources */,

@@ -6,6 +6,7 @@ actor EchoRegisterService {
     private let projectId: String
     private let clientId: String
     private let logger: ConsoleLogging
+    private let environment: APNSEnvironment
     // DID method specific identifier
     private var clientIdMutlibase: String {
         return clientId.replacingOccurrences(of: "did:key:", with: "")
@@ -18,11 +19,13 @@ actor EchoRegisterService {
     init(httpClient: HTTPClient,
          projectId: String,
          clientId: String,
-         logger: ConsoleLogging) {
+         logger: ConsoleLogging,
+         environment: APNSEnvironment) {
         self.httpClient = httpClient
         self.clientId = clientId
         self.projectId = projectId
         self.logger = logger
+        self.environment = environment
     }
 
     func register(deviceToken: Data) async throws {
@@ -31,7 +34,7 @@ actor EchoRegisterService {
         logger.debug("APNS device token: \(token)")
         let response = try await httpClient.request(
             EchoResponse.self,
-            at: EchoAPI.register(clientId: clientIdMutlibase, token: token, projectId: projectId)
+            at: EchoAPI.register(clientId: clientIdMutlibase, token: token, projectId: projectId, environment: environment)
         )
         guard response.status == .success else {
             throw Errors.registrationFailed
@@ -43,7 +46,7 @@ actor EchoRegisterService {
     public func register(deviceToken: String) async throws {
         let response = try await httpClient.request(
             EchoResponse.self,
-            at: EchoAPI.register(clientId: clientIdMutlibase, token: deviceToken, projectId: projectId)
+            at: EchoAPI.register(clientId: clientIdMutlibase, token: deviceToken, projectId: projectId, environment: environment)
         )
         guard response.status == .success else {
             throw Errors.registrationFailed
