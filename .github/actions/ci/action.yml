@@ -19,13 +19,7 @@ runs:
     - name: Run tests
       if: inputs.type == 'unit-tests'
       shell: bash
-      run: "xcodebuild \
-        -project Example/ExampleApp.xcodeproj \ 
-        -scheme WalletConnect \
-        -clonedSourcePackagesDirPath SourcePackagesCache \
-        -destination 'platform=iOS Simulator,name=iPhone 13' \
-        -derivedDataPath DerivedDataCache \
-        test"
+      run: make unit_tests
 
     # Integration tests
     - name: Run integration tests
@@ -34,46 +28,23 @@ runs:
       env:
         RELAY_ENDPOINT: ${{ inputs.relay-endpoint }}
         PROJECT_ID: ${{ inputs.project-id }}
-      run: "xcodebuild \
-        -project Example/ExampleApp.xcodeproj \ 
-        -scheme IntegrationTests \
-        -clonedSourcePackagesDirPath SourcePackagesCache \
-        -destination 'platform=iOS Simulator,name=iPhone 13' \
-        -derivedDataPath DerivedDataCache \
-        RELAY_HOST='$RELAY_ENDPOINT' \
-        PROJECT_ID='$PROJECT_ID' \
-        test"
+      run: make integration_tests RELAY_HOST=$RELAY_ENDPOINT PROJECT_ID=$PROJECT_ID
 
     # Wallet build
     - name: Build Example Wallet
       if: inputs.type == 'build-example-wallet'
       shell: bash
-      run: "xcodebuild \
-       -project Example/ExampleApp.xcodeproj \
-       -scheme Wallet \
-       -clonedSourcePackagesDirPath SourcePackagesCache \
-       -destination 'platform=iOS Simulator,name=iPhone 13' \
-       -derivedDataPath DerivedDataCache"
+      run: make build_wallet
 
     # DApp build
     - name: Build Example Dapp
       if: inputs.type == 'build-example-dapp'
       shell: bash
-      run: "xcodebuild \
-        -project Example/ExampleApp.xcodeproj \
-        -scheme DApp \
-        -clonedSourcePackagesDirPath SourcePackagesCache \
-        -destination 'platform=iOS Simulator,name=iPhone 13' \
-        -derivedDataPath DerivedDataCache"
+      run: make build_dapp
 
     # UI tests
     - name: UI Tests
       if: inputs.type == 'ui-tests'
       shell: bash
-      run: "xcodebuild \
-        -project Example/ExampleApp.xcodeproj \
-        -scheme UITests \
-        -derivedDataPath DerivedDataCache \
-        -clonedSourcePackagesDirPath SourcePackagesCache \
-        -destination 'platform=iOS Simulator,name=iPhone 13' test"
+      run: make ui_tests
       continue-on-error: true
