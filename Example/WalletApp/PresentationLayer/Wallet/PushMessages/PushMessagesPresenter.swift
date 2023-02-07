@@ -18,7 +18,7 @@ final class PushMessagesPresenter: ObservableObject {
 
 extension PushMessagesPresenter: SceneViewModel {
     var sceneTitle: String? {
-        return interactor.subscriptionProvider
+        return interactor.subscription.metadata.name
     }
 
     var largeTitleDisplayMode: UINavigationItem.LargeTitleDisplayMode {

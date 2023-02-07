@@ -12,6 +12,8 @@ final class NotificationsRouter {
     }
 
     func presentNotifications(subscription: WalletConnectPush.PushSubscription) {
-
+        PushMessagesModule.create(app: app, subscription: subscription)
+            .wrapToNavigationController()
+            .present(from: viewController)
     }
 }
