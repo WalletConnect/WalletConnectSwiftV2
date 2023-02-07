@@ -186,8 +186,7 @@ final class Web3WalletTests: XCTestCase {
     }
     
     func testAuthPendingRequestsCalledAndNotEmpty() async {
-        let account = Account("eip155:56:0xe5EeF1368781911d265fDB6946613dA61915a501")!
-        let pendingRequests = try! web3WalletClient.getPendingRequests(account: account)
+        let pendingRequests = try! web3WalletClient.getPendingRequests()
         XCTAssertEqual(1, pendingRequests.count)
     }
 }
