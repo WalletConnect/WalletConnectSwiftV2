@@ -43,7 +43,7 @@ public class WalletPushClient {
     private let proposeResponder: PushRequestResponder
     private let pushMessageSubscriber: PushMessageSubscriber
     private let subscriptionsProvider: SubscriptionsProvider
-    private let pushMessagesProvider: PushMessagesProvider
+    private let pushMessagesStore: PushMessagesStore
     private let resubscribeService: PushResubscribeService
 
     init(logger: ConsoleLogging,
@@ -53,7 +53,7 @@ public class WalletPushClient {
          proposeResponder: PushRequestResponder,
          pushMessageSubscriber: PushMessageSubscriber,
          subscriptionsProvider: SubscriptionsProvider,
-         pushMessagesProvider: PushMessagesProvider,
+         pushMessagesStore: PushMessagesStore,
          deletePushSubscriptionService: DeletePushSubscriptionService,
          deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber,
          resubscribeService: PushResubscribeService,
@@ -64,7 +64,7 @@ public class WalletPushClient {
         self.echoClient = echoClient
         self.pushMessageSubscriber = pushMessageSubscriber
         self.subscriptionsProvider = subscriptionsProvider
-        self.pushMessagesProvider = pushMessagesProvider
+        self.pushMessagesStore = pushMessagesStore
         self.deletePushSubscriptionService = deletePushSubscriptionService
         self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
         self.resubscribeService = resubscribeService
@@ -85,7 +85,7 @@ public class WalletPushClient {
     }
 
     public func getMessageHistory(topic: String) -> [PushMessage] {
-        pushMessagesProvider.getMessageHistory(topic: topic)
+        pushMessagesStore.getPushMessages(topic: topic)
     }
 
     public func delete(topic: String) async throws {
