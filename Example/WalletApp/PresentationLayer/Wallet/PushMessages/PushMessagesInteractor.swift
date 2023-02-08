@@ -12,8 +12,7 @@ final class PushMessagesInteractor {
         self.subscription = subscription
     }
 
-    func getPushMessages() -> [PushMessage] {
-        print(subscription.topic)
+    func getPushMessages() -> [PushMessageRecord] {
         return Push.wallet.getMessageHistory(topic: subscription.topic)
     }
 }

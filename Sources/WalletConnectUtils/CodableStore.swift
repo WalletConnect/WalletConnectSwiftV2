@@ -38,6 +38,13 @@ public final class CodableStore<T> where T: Codable {
         onStoreUpdate?()
     }
 
+    public func delete(forKeys keys: [String]) {
+        keys.forEach { key in
+            defaults.removeObject(forKey: getContextPrefixedKey(for: key))
+        }
+        onStoreUpdate?()
+    }
+
     public func deleteAll() {
         dictionaryForIdentifier()
             .forEach { defaults.removeObject(forKey: $0.key) }

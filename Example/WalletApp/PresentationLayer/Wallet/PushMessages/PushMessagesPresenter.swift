@@ -33,8 +33,8 @@ extension PushMessagesPresenter: SceneViewModel {
 private extension PushMessagesPresenter {
 
     func setupInitialState() {
-        self.pushMessages = interactor.getPushMessages().map({ pushMessage in
-            PushMessageViewModel(pushMessage: pushMessage)
+        self.pushMessages = interactor.getPushMessages().map({ pushMessageRecord in
+            PushMessageViewModel(pushMessageRecord: pushMessageRecord)
         })
     }
 }

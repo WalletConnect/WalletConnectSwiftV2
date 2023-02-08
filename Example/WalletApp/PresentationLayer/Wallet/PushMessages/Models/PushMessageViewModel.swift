@@ -3,17 +3,17 @@ import Foundation
 import WalletConnectPush
 
 struct PushMessageViewModel {
-    let pushMessage: WalletConnectPush.PushMessage
+    let pushMessageRecord: WalletConnectPush.PushMessageRecord
 
     var imageUrl: String {
-        return pushMessage.icon
+        return pushMessageRecord.message.icon
     }
 
     var title: String {
-        return pushMessage.title
+        return pushMessageRecord.message.title
     }
 
     var subtitle: String {
-        return pushMessage.body
+        return pushMessageRecord.message.body
     }
 }
