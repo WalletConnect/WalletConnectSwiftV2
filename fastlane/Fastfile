@@ -91,6 +91,7 @@ platform :ios do
       app_identifier: ENV["APP_IDENTIFIER"],
       skip_waiting_for_build_processing: true,
       distribute_external: true,
+      changelog: "#{ENV["SCHEME"]} app weekly build 🚀",
       notify_external_testers: false,
     )
     clean_build_artifacts()
