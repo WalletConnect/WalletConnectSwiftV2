@@ -62,7 +62,7 @@ platform :ios do
     match(
       readonly: false,
       type: "appstore",
-      app_identifier: ENV["APP_IDENTIFIER"],
+      app_identifier: ENV["MATCH_IDENTIFIERS"],
       git_url: "https://github.com/WalletConnect/match-swift.git",
       git_basic_authorization: options[:token],
       api_key: api_key
@@ -80,11 +80,6 @@ platform :ios do
       project: "Example/ExampleApp.xcodeproj",
       scheme: ENV["SCHEME"],
       export_method: "app-store",
-      export_options: {
-        provisioningProfiles: { 
-            ENV["APP_IDENTIFIER"] => ENV["PROVISIONING_PROFILE_SPECIFIER"]
-        }
-      }
     )
     upload_to_testflight(
       apple_id: ENV["APPLE_ID"],
