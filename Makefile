@@ -35,7 +35,11 @@ resolve_packages:
 	fastlane resolve scheme:WalletApp
 
 release_wallet:
-	fastlane release_testflight username:$(APPLE_ID) --env WalletApp
+	fastlane release_testflight username:$(APPLE_ID) token:$(TOKEN) --env WalletApp
 
 release_showcase:
-	fastlane release_testflight username:$(APPLE_ID) --env Showcase
+	fastlane release_testflight username:$(APPLE_ID) token:$(TOKEN) --env Showcase
+
+release_all: 
+	fastlane release_testflight username:$(APPLE_ID) token:$(TOKEN) --env WalletApp
+	fastlane release_testflight username:$(APPLE_ID) token:$(TOKEN) --env Showcase

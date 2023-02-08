@@ -3,8 +3,8 @@ name: ci
 on:
   push:
     branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+  # pull_request:
+  #   branches: [ main, develop ]
 
 concurrency:
   # Support push/pr as event types with different behaviors each:
