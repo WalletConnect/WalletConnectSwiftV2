@@ -32,7 +32,7 @@ struct NotificationsView: View {
                     VStack {
                         if !presenter.subscriptions.isEmpty {
                             List {
-                                ForEach(presenter.subscriptions, id: \.title) { subscription in
+                                ForEach(presenter.subscriptions, id: \.id) { subscription in
                                     subscriptionsView(subscription: subscription)
                                         .listRowSeparator(.hidden)
                                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))

@@ -11,7 +11,8 @@ class PushMessagesDatabase {
     }
 
     func getPushMessages(topic: String) -> [PushMessageRecord] {
-        store.getAll().filter{$0.topic == topic}
+        print(store.getAll().filter{$0.topic == topic})
+        return store.getAll().filter{$0.topic == topic}
     }
 
     func deletePushMessages(topic: String) {

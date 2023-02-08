@@ -9,7 +9,7 @@ final class NotificationsInteractor {
 
     func getSubscriptions() -> [PushSubscription] {
         let subs = Push.wallet.getActiveSubscriptions()
-        print(subs)
+        print(subs.map{$0.topic})
         return subs
     }
 

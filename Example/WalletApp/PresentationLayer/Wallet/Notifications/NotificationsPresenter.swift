@@ -51,7 +51,6 @@ private extension NotificationsPresenter {
     func setupSubscriptions() {
         self.subscriptions = interactor.getSubscriptions()
             .map {
-                print($0)
                 return SubscriptionsViewModel(subscription: $0)
 
             }
