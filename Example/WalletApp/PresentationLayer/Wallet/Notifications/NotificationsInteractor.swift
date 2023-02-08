@@ -8,7 +8,9 @@ final class NotificationsInteractor {
     }
 
     func getSubscriptions() -> [PushSubscription] {
-        Push.wallet.getActiveSubscriptions()
+        let subs = Push.wallet.getActiveSubscriptions()
+        print(subs)
+        return subs
     }
 
     func removeSubscription(_ subscription: PushSubscription) async {

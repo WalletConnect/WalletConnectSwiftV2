@@ -1,11 +1,13 @@
 import UIKit
 import Combine
+import WalletConnectPush
 
 final class PushMessagesPresenter: ObservableObject {
 
     private let interactor: PushMessagesInteractor
     private let router: PushMessagesRouter
     private var disposeBag = Set<AnyCancellable>()
+    @Published var pushMessages: [PushMessageViewModel] = []
 
     init(interactor: PushMessagesInteractor, router: PushMessagesRouter) {
         defer { setupInitialState() }
@@ -31,6 +33,9 @@ extension PushMessagesPresenter: SceneViewModel {
 private extension PushMessagesPresenter {
 
     func setupInitialState() {
-
+        self.pushMessages = interactor.getPushMessages().map({ pushMessage in
+            PushMessageViewModel(pushMessage: pushMessage)
+        })
     }
 }
+

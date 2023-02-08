@@ -60,6 +60,7 @@
 		84B815562991217900FAD54E /* PushMessagesRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B815512991217900FAD54E /* PushMessagesRouter.swift */; };
 		84B815572991217900FAD54E /* PushMessagesInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B815522991217900FAD54E /* PushMessagesInteractor.swift */; };
 		84B815582991217900FAD54E /* PushMessagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B815532991217900FAD54E /* PushMessagesView.swift */; };
+		84B8155B2992A18D00FAD54E /* PushMessageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B8155A2992A18D00FAD54E /* PushMessageViewModel.swift */; };
 		84CE641F27981DED00142511 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE641E27981DED00142511 /* AppDelegate.swift */; };
 		84CE642127981DED00142511 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE642027981DED00142511 /* SceneDelegate.swift */; };
 		84CE642827981DF000142511 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 84CE642727981DF000142511 /* Assets.xcassets */; };
@@ -408,6 +409,7 @@
 		84B815512991217900FAD54E /* PushMessagesRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushMessagesRouter.swift; sourceTree = "<group>"; };
 		84B815522991217900FAD54E /* PushMessagesInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushMessagesInteractor.swift; sourceTree = "<group>"; };
 		84B815532991217900FAD54E /* PushMessagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushMessagesView.swift; sourceTree = "<group>"; };
+		84B8155A2992A18D00FAD54E /* PushMessageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushMessageViewModel.swift; sourceTree = "<group>"; };
 		84CE641C27981DED00142511 /* DApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		84CE641E27981DED00142511 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		84CE642027981DED00142511 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -905,8 +907,17 @@
 				84B815512991217900FAD54E /* PushMessagesRouter.swift */,
 				84B815522991217900FAD54E /* PushMessagesInteractor.swift */,
 				84B815532991217900FAD54E /* PushMessagesView.swift */,
+				84B8155C2992A19200FAD54E /* Models */,
 			);
 			path = PushMessages;
+			sourceTree = "<group>";
+		};
+		84B8155C2992A19200FAD54E /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				84B8155A2992A18D00FAD54E /* PushMessageViewModel.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		84CE641D27981DED00142511 /* DApp */ = {
@@ -2297,6 +2308,7 @@
 				C5F32A342954817600A6476E /* ConnectionDetailsView.swift in Sources */,
 				C55D348A295DD8CA0004314A /* PasteUriPresenter.swift in Sources */,
 				C56EE28E293F5757004840D1 /* ApplicationConfigurator.swift in Sources */,
+				84B8155B2992A18D00FAD54E /* PushMessageViewModel.swift in Sources */,
 				C55D347F295DD7140004314A /* AuthRequestModule.swift in Sources */,
 				C56EE242293F566D004840D1 /* ScanPresenter.swift in Sources */,
 				C56EE28B293F5757004840D1 /* SceneDelegate.swift in Sources */,

@@ -27,12 +27,13 @@ class DeletePushSubscriptionService {
         let protocolMethod = PushDeleteProtocolMethod()
         let params = PushDeleteParams.userDisconnected
         logger.debug("Will delete push subscription for reason: message: \(params.message) code: \(params.code)")
+        pushSubscriptionStore.delete(forKey: topic)
+
         let request = RPCRequest(method: protocolMethod.method, params: params)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
 
         networkingInteractor.unsubscribe(topic: topic)
-        pushSubscriptionStore.delete(forKey: topic)
-        logger.debug("Subscription removed")
+        logger.debug("Subscription removed, topic: \(topic)")
 
         kms.deleteSymmetricKey(for: topic)
     }

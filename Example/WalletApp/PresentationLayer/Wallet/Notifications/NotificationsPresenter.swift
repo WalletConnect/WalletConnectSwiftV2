@@ -17,6 +17,7 @@ final class NotificationsPresenter: ObservableObject {
     }
 
     func didPress(_ subscription: SubscriptionsViewModel) {
+        print(subscription.id)
         router.presentNotifications(subscription: subscription.subscription)
     }
 
@@ -49,7 +50,11 @@ private extension NotificationsPresenter {
 
     func setupSubscriptions() {
         self.subscriptions = interactor.getSubscriptions()
-            .map { SubscriptionsViewModel(subscription: $0) }
+            .map {
+                print($0)
+                return SubscriptionsViewModel(subscription: $0)
+
+            }
         interactor.subscriptionsPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] pushSubscriptions in

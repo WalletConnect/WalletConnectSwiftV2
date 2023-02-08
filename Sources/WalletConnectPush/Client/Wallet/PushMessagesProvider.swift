@@ -1,6 +1,7 @@
 
 import Foundation
 import WalletConnectUtils
+import Combine
 
 class PushMessagesProvider {
     private let history: RPCHistory
@@ -12,4 +13,5 @@ class PushMessagesProvider {
     public func getMessageHistory(topic: String) -> [PushMessage] {
         history.getAll(of: PushMessage.self, topic: topic)
     }
+
 }
