@@ -7,10 +7,6 @@ on:
 
   workflow_dispatch:
 
-# TODO: REMOVE
-  pull_request:
-    branches: [ develop ]
-
 jobs:
   build:    
     runs-on: macos-12
