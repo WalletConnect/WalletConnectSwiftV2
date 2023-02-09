@@ -12,12 +12,13 @@ public struct ProposalNamespace: Equatable, Codable {
 }
 
 public struct SessionNamespace: Equatable, Codable {
+    public var chains: Set<Blockchain>?
+    public var accounts: Set<Account>
+    public var methods: Set<String>
+    public var events: Set<String>
 
-    public let accounts: Set<Account>
-    public let methods: Set<String>
-    public let events: Set<String>
-
-    public init(accounts: Set<Account>, methods: Set<String>, events: Set<String>) {
+    public init(chains: Set<Blockchain>? = nil, accounts: Set<Account>, methods: Set<String>, events: Set<String>) {
+        self.chains = chains
         self.accounts = accounts
         self.methods = methods
         self.events = events
