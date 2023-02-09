@@ -165,10 +165,10 @@ final class PushTests: XCTestCase {
             Task(priority: .userInitiated) { try! await dappPushClient.notify(topic: subscription.topic, message: pushMessage) }
         }.store(in: &publishers)
 
-        walletPushClient.pushMessagePublisher.sink { [unowned self] receivedPushMessage in
+        walletPushClient.pushMessagePublisher.sink { [unowned self] receivedPushMessageRecord in
             let messageHistory = walletPushClient.getMessageHistory(topic: pushSubscription.topic)
-            XCTAssertEqual(pushMessage, receivedPushMessage)
-            XCTAssertTrue(messageHistory.contains(receivedPushMessage))
+            XCTAssertEqual(pushMessage, receivedPushMessageRecord.message)
+            XCTAssertTrue(messageHistory.contains(receivedPushMessageRecord))
             expectation.fulfill()
         }.store(in: &publishers)
 
