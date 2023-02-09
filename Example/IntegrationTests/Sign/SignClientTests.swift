@@ -398,4 +398,278 @@ final class SignClientTests: XCTestCase {
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
+    
+    func testCaip25SatisfyAllRequiredAllOptionalNamespacesSuccessful() async throws {
+        let dappSettlementExpectation = expectation(description: "Dapp expects to settle a session")
+        let walletSettlementExpectation = expectation(description: "Wallet expects to settle a session")
+        
+        let requiredNamespaces: [String: ProposalNamespace] = [
+            "eip155:1": ProposalNamespace(
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            ),
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:137")!],
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            )
+        ]
+        
+        let optionalNamespaces: [String: ProposalNamespace] = [
+            "eip155:5": ProposalNamespace(
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            ),
+            "solana": ProposalNamespace(
+                chains: [Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!],
+                methods: ["solana_signMessage"],
+                events: ["any"]
+            )
+        ]
+        
+        let sessionNamespaces: [String: SessionNamespace] = [
+            "eip155:1": SessionNamespace(
+                accounts: [Account(blockchain: Blockchain("eip155:1")!, address: "0x00")!],
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            ),
+            "eip155": SessionNamespace(
+                chains: [Blockchain("eip155:137")!],
+                accounts: [Account(blockchain: Blockchain("eip155:137")!, address: "0x00")!],
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            ),
+            "eip155:5": SessionNamespace(
+                accounts: [Account(blockchain: Blockchain("eip155:5")!, address: "0x00")!],
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            ),
+            "solana": SessionNamespace(
+                chains: [Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!],
+                accounts: [Account(blockchain: Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!, address: "0x00")!],
+                methods: ["solana_signMessage"],
+                events: ["any"]
+            )
+        ]
+        
+        wallet.onSessionProposal = { [unowned self] proposal in
+            Task(priority: .high) {
+                do {
+                    try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                } catch {
+                    XCTFail("\(error)")
+                }
+            }
+        }
+        dapp.onSessionSettled = { _ in
+            dappSettlementExpectation.fulfill()
+        }
+        wallet.onSessionSettled = { _ in
+            walletSettlementExpectation.fulfill()
+        }
+
+        let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+        try await wallet.client.pair(uri: uri!)
+        wait(for: [dappSettlementExpectation, walletSettlementExpectation], timeout: InputConfig.defaultTimeout)
+    }
+    
+    func testCaip25SatisfyAllRequiredNamespacesSuccessful() async throws {
+        let dappSettlementExpectation = expectation(description: "Dapp expects to settle a session")
+        let walletSettlementExpectation = expectation(description: "Wallet expects to settle a session")
+        
+        let requiredNamespaces: [String: ProposalNamespace] = [
+            "eip155:1": ProposalNamespace(
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            ),
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:137")!],
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            )
+        ]
+        
+        let optionalNamespaces: [String: ProposalNamespace] = [
+            "eip155:5": ProposalNamespace(
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            )
+        ]
+        
+        let sessionNamespaces: [String: SessionNamespace] = [
+            "eip155:1": SessionNamespace(
+                accounts: [Account(blockchain: Blockchain("eip155:1")!, address: "0x00")!],
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            ),
+            "eip155": SessionNamespace(
+                chains: [Blockchain("eip155:137")!],
+                accounts: [Account(blockchain: Blockchain("eip155:137")!, address: "0x00")!],
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            ),
+        ]
+        
+        wallet.onSessionProposal = { [unowned self] proposal in
+            Task(priority: .high) {
+                do {
+                    try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                } catch {
+                    XCTFail("\(error)")
+                }
+            }
+        }
+        dapp.onSessionSettled = { _ in
+            dappSettlementExpectation.fulfill()
+        }
+        wallet.onSessionSettled = { _ in
+            walletSettlementExpectation.fulfill()
+        }
+
+        let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+        try await wallet.client.pair(uri: uri!)
+        wait(for: [dappSettlementExpectation, walletSettlementExpectation], timeout: InputConfig.defaultTimeout)
+    }
+    
+    func testCaip25SatisfyEmptyRequiredNamespacesExtraOptionalNamespacesSuccessful() async throws {
+        let dappSettlementExpectation = expectation(description: "Dapp expects to settle a session")
+        let walletSettlementExpectation = expectation(description: "Wallet expects to settle a session")
+        
+        let requiredNamespaces: [String: ProposalNamespace] = [:]
+        
+        let optionalNamespaces: [String: ProposalNamespace] = [
+            "eip155:5": ProposalNamespace(
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            )
+        ]
+        
+        let sessionNamespaces: [String: SessionNamespace] = [
+            "eip155:5": SessionNamespace(
+                accounts: [Account(blockchain: Blockchain("eip155:5")!, address: "0x00")!],
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            ),
+            "eip155:1": SessionNamespace(
+                accounts: [Account(blockchain: Blockchain("eip155:1")!, address: "0x00")!],
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            )
+        ]
+        
+        wallet.onSessionProposal = { [unowned self] proposal in
+            Task(priority: .high) {
+                do {
+                    try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                } catch {
+                    XCTFail("\(error)")
+                }
+            }
+        }
+        dapp.onSessionSettled = { _ in
+            dappSettlementExpectation.fulfill()
+        }
+        wallet.onSessionSettled = { _ in
+            walletSettlementExpectation.fulfill()
+        }
+
+        let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+        try await wallet.client.pair(uri: uri!)
+        wait(for: [dappSettlementExpectation, walletSettlementExpectation], timeout: InputConfig.defaultTimeout)
+    }
+    
+    func testCaip25SatisfyPartiallyRequiredNamespacesFails() async throws {
+        let settlementFailedExpectation = expectation(description: "Dapp fails to settle a session")
+        
+        let requiredNamespaces: [String: ProposalNamespace] = [
+            "eip155:1": ProposalNamespace(
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            ),
+            "eip155:137": ProposalNamespace(
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            )
+        ]
+        
+        let optionalNamespaces: [String: ProposalNamespace] = [
+            "eip155:5": ProposalNamespace(
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            )
+        ]
+        
+        let sessionNamespaces: [String: SessionNamespace] = [
+            "eip155:1": SessionNamespace(
+                accounts: [Account(blockchain: Blockchain("eip155:1")!, address: "0x00")!],
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            ),
+        ]
+        
+        wallet.onSessionProposal = { [unowned self] proposal in
+            Task(priority: .high) {
+                do {
+                    try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                } catch {
+                    settlementFailedExpectation.fulfill()
+                }
+            }
+        }
+        
+        let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+        try await wallet.client.pair(uri: uri!)
+        wait(for: [settlementFailedExpectation], timeout: 1)
+    }
+    
+    func testCaip25SatisfyPartiallyRequiredNamespacesMethodsFails() async throws {
+        let settlementFailedExpectation = expectation(description: "Dapp fails to settle a session")
+        
+        let requiredNamespaces: [String: ProposalNamespace] = [
+            "eip155:1": ProposalNamespace(
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            ),
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:137")!],
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            )
+        ]
+        
+        let optionalNamespaces: [String: ProposalNamespace] = [
+            "eip155:5": ProposalNamespace(
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            )
+        ]
+        
+        let sessionNamespaces: [String: SessionNamespace] = [
+            "eip155:1": SessionNamespace(
+                accounts: [Account(blockchain: Blockchain("eip155:1")!, address: "0x00")!],
+                methods: ["personal_sign"],
+                events: ["any"]
+            ),
+            "eip155": SessionNamespace(
+                chains: [Blockchain("eip155:137")!],
+                accounts: [Account(blockchain: Blockchain("eip155:137")!, address: "0x00")!],
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"]
+            ),
+        ]
+        
+        wallet.onSessionProposal = { [unowned self] proposal in
+            Task(priority: .high) {
+                do {
+                    try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                } catch {
+                    settlementFailedExpectation.fulfill()
+                }
+            }
+        }
+
+        let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+        try await wallet.client.pair(uri: uri!)
+        wait(for: [settlementFailedExpectation], timeout: InputConfig.defaultTimeout)
+    }
 }
