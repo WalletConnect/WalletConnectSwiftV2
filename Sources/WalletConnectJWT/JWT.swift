@@ -1,15 +1,15 @@
 import Foundation
 
-struct JWT: Codable, Equatable {
+struct JWT<JWTClaims: JWTEncodable>: Codable, Equatable {
     enum Errors: Error {
         case jwtNotSigned
     }
 
-    var header: Header
-    var claims: Claims
+    var header: JWTHeader
+    var claims: JWTClaims
     var signature: String?
 
-    init(header: Header = Header(), claims: Claims) {
+    init(header: JWTHeader = JWTHeader(), claims: JWTClaims) {
         self.header = header
         self.claims = claims
     }

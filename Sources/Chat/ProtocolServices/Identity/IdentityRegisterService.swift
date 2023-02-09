@@ -101,7 +101,7 @@ private extension IdentityRegisterService {
     func makeIDAuth(account: Account, invitePublicKey: String) throws -> String {
         guard let identityKey = identityStorage.getIdentityKey(for: account)
         else { throw Errors.identityKeyNotFound }
-        return try JWTFactory().createAndSignJWT(
+        return try JWTFactory().createChatInviteJWT(
             keyPair: identityKey,
             sub: invitePublicKey,
             aud: getAudience(),

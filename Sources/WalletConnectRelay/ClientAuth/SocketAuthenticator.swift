@@ -16,17 +16,12 @@ struct SocketAuthenticator: SocketAuthenticating {
     }
 
     func createAuthToken() throws -> String {
-        let clientIdKeyPair = try clientIdStorage.getOrCreateKeyPair()
-        return try createAndSignJWT(keyPair: clientIdKeyPair)
-    }
-
-    private func createAndSignJWT(keyPair: SigningPrivateKey) throws -> String {
-        return try JWTFactory().createAndSignJWT(
+        let keyPair = try clientIdStorage.getOrCreateKeyPair()
+        return try JWTFactory().createRelayJWT(
             keyPair: keyPair,
             sub: getSubject(),
             aud: getAudience(),
-            exp: getExpiry(),
-            pkh: nil
+            exp: getExpiry()
         )
     }
 
