@@ -15,8 +15,7 @@ struct ThirdPartyConfigurator: Configurator {
         )
         
         Web3Wallet.configure(metadata: metadata, signerFactory: DefaultSignerFactory())
-        Push.configure()
-        
+        Push.configure(environment: BuildConfiguration.shared.apnsEnvironment)
     }
     
 }

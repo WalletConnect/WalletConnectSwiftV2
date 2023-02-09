@@ -51,12 +51,21 @@ platform :ios do
   end
 
   lane :release_testflight do |options|
+    setup_ci
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APPLE_KEY_ID"],
+      issuer_id: ENV["APPLE_ISSUER_ID"],
+      key_content: ENV["APPLE_KEY_CONTENT"],            
+      duration: 1200,            
+      in_house: false,
+    )
     match(
       readonly: false,
       type: "appstore",
-      app_identifier: ENV["APP_IDENTIFIER"],
+      app_identifier: ENV["MATCH_IDENTIFIERS"],
       git_url: "https://github.com/WalletConnect/match-swift.git",
-      username: options[:username],
+      git_basic_authorization: options[:token],
+      api_key: api_key
     )
     number = latest_testflight_build_number(
       app_identifier: ENV["APP_IDENTIFIER"],
@@ -66,17 +75,22 @@ platform :ios do
       build_number: number + 1,
       xcodeproj: "Example/ExampleApp.xcodeproj"
     )
-    build_app(
+    gym(
+      configuration: "Release",
       project: "Example/ExampleApp.xcodeproj",
-      scheme: ENV["SCHEME"]
+      scheme: ENV["SCHEME"],
+      export_method: "app-store",
     )
     upload_to_testflight(
-      app_identifier: ENV["APP_IDENTIFIER"],
-      username: options[:username],
       apple_id: ENV["APPLE_ID"],
+      app_identifier: ENV["APP_IDENTIFIER"],
       skip_waiting_for_build_processing: true,
+      distribute_external: true,
+      changelog: "#{ENV["SCHEME"]} app weekly build 🚀",
+      notify_external_testers: false,
     )
     clean_build_artifacts()
   end
+
 
 end

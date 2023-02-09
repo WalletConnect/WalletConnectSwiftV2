@@ -32,6 +32,7 @@ class DeletePushSubscriptionService {
 
         networkingInteractor.unsubscribe(topic: topic)
         pushSubscriptionStore.delete(forKey: topic)
+        logger.debug("Subscription removed")
 
         kms.deleteSymmetricKey(for: topic)
     }
