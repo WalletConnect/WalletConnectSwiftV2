@@ -17,7 +17,6 @@ class PushSubscriptionsObserver {
     func setUpSubscription() {
         store.onStoreUpdate = { [unowned self] in
             let subscriptions = store.getAll()
-            print("subscriptions update: \(subscriptions.map{$0.topic})")
             subscriptionsPublisherSubject.send(subscriptions)
         }
     }

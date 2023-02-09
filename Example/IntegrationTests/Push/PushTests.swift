@@ -194,7 +194,7 @@ final class PushTests: XCTestCase {
                 return
             }
             subscriptionTopic = subscription.topic
-            Task(priority: .userInitiated) { try! await walletPushClient.delete(topic: subscription.topic)}
+            Task(priority: .userInitiated) { try! await walletPushClient.deleteSubscription(topic: subscription.topic)}
         }.store(in: &publishers)
 
         dappPushClient.deleteSubscriptionPublisher.sink { topic in

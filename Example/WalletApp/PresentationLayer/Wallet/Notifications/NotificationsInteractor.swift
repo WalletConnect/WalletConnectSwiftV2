@@ -15,7 +15,7 @@ final class NotificationsInteractor {
 
     func removeSubscription(_ subscription: PushSubscription) async {
         do {
-            try await Push.wallet.delete(topic: subscription.topic)
+            try await Push.wallet.deleteSubscription(topic: subscription.topic)
         } catch {
             print(error)
         }

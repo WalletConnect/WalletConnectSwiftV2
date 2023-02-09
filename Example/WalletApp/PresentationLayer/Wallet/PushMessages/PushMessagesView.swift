@@ -31,15 +31,13 @@ struct PushMessagesView: View {
                     VStack {
                         if !presenter.pushMessages.isEmpty {
                             List {
-                                ForEach(presenter.pushMessages, id: \.title) { pm in
+                                ForEach(presenter.pushMessages, id: \.id) { pm in
                                     notificationView(pushMessage: pm)
                                         .listRowSeparator(.hidden)
                                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
                                 }
                                 .onDelete { indexSet in
-                                    Task(priority: .high) {
-                                        //                                        await presenter.removeSubscribtion(at: indexSet)
-                                    }
+                                    presenter.deletePushMessage(at: indexSet)
                                 }
                             }
                             .listStyle(PlainListStyle())

@@ -10,9 +10,16 @@ final class PushMessagesPresenter: ObservableObject {
     @Published var pushMessages: [PushMessageViewModel] = []
 
     init(interactor: PushMessagesInteractor, router: PushMessagesRouter) {
-        defer { setupInitialState() }
+        defer { reloadPushMessages() }
         self.interactor = interactor
         self.router = router
+    }
+
+    func deletePushMessage(at indexSet: IndexSet) {
+        if let index = indexSet.first {
+            interactor.deletePushMessage(id: pushMessages[index].id)
+        }
+        reloadPushMessages()
     }
 }
 
@@ -32,7 +39,7 @@ extension PushMessagesPresenter: SceneViewModel {
 
 private extension PushMessagesPresenter {
 
-    func setupInitialState() {
+    func reloadPushMessages() {
         self.pushMessages = interactor.getPushMessages().map({ pushMessageRecord in
             PushMessageViewModel(pushMessageRecord: pushMessageRecord)
         })

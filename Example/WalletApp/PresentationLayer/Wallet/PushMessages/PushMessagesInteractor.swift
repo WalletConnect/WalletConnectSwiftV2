@@ -15,4 +15,8 @@ final class PushMessagesInteractor {
     func getPushMessages() -> [PushMessageRecord] {
         return Push.wallet.getMessageHistory(topic: subscription.topic)
     }
+
+    func deletePushMessage(id: String) {
+        Push.wallet.deletePushMessage(id: id)
+    }
 }

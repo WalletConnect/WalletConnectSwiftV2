@@ -88,8 +88,12 @@ public class WalletPushClient {
         pushMessagesDatabase.getPushMessages(topic: topic)
     }
 
-    public func delete(topic: String) async throws {
+    public func deleteSubscription(topic: String) async throws {
         try await deletePushSubscriptionService.delete(topic: topic)
+    }
+
+    public func deletePushMessage(id: String) {
+        pushMessagesDatabase.deletePushMessage(id: id)
     }
 
     public func register(deviceToken: Data) async throws {

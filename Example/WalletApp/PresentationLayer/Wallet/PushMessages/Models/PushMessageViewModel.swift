@@ -2,9 +2,14 @@
 import Foundation
 import WalletConnectPush
 
-struct PushMessageViewModel {
+struct PushMessageViewModel: Identifiable {
+
     let pushMessageRecord: WalletConnectPush.PushMessageRecord
 
+    var id: String {
+        return pushMessageRecord.id
+    }
+    
     var imageUrl: String {
         return pushMessageRecord.message.icon
     }
