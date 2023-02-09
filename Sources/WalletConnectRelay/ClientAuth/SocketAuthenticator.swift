@@ -17,20 +17,10 @@ struct SocketAuthenticator: SocketAuthenticating {
 
     func createAuthToken() throws -> String {
         let keyPair = try clientIdStorage.getOrCreateKeyPair()
-        return try JWTFactory().createRelayJWT(
-            keyPair: keyPair,
+        return try JWTFactory(keyPair: keyPair).createRelayJWT(
             sub: getSubject(),
-            aud: getAudience(),
-            exp: getExpiry()
+            aud: getAudience()
         )
-    }
-
-    private func getExpiry() -> Int {
-        var components = DateComponents()
-        components.setValue(1, for: .day)
-        // safe to unwrap as the date must be calculated
-        let date = Calendar.current.date(byAdding: components, to: Date())!
-        return Int(date.timeIntervalSince1970)
     }
 
     private func getAudience() -> String {

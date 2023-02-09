@@ -101,11 +101,9 @@ private extension IdentityRegisterService {
     func makeIDAuth(account: Account, invitePublicKey: String) throws -> String {
         guard let identityKey = identityStorage.getIdentityKey(for: account)
         else { throw Errors.identityKeyNotFound }
-        return try JWTFactory().createChatInviteJWT(
-            keyPair: identityKey,
+        return try JWTFactory(keyPair: identityKey).createChatInviteJWT(
             sub: invitePublicKey,
             aud: getAudience(),
-            exp: getExpiry(),
             pkh: account.iss
         )
     }
@@ -116,13 +114,6 @@ private extension IdentityRegisterService {
 
     private func getVersion() -> String {
         return "1"
-    }
-
-    private func getExpiry() -> Int {
-        var components = DateComponents()
-        components.setValue(1, for: .hour)
-        let date = Calendar.current.date(byAdding: components, to: Date())!
-        return Int(date.timeIntervalSince1970)
     }
 
     private func getAudience() -> String {
