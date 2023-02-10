@@ -61,7 +61,7 @@ final class SessionEngine {
         let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params, expiry: request.expiry)
         let sessionRequestParams = SessionType.RequestParams(request: chainRequest, chainId: request.chainId)
         let protocolMethod = SessionRequestProtocolMethod(ttl: request.calculateTtl())
-        let rpcRequest = RPCRequest(method: protocolMethod.method, params: sessionRequestParams, id: request.id.integer)
+        let rpcRequest = RPCRequest(method: protocolMethod.method, params: sessionRequestParams, rpcid: request.id)
         try await networkingInteractor.request(rpcRequest, topic: request.topic, protocolMethod: SessionRequestProtocolMethod())
     }
 
