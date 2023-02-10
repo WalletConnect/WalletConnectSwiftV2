@@ -1,5 +1,7 @@
 import Foundation
 
+// TODO: Remove
+
 public protocol Registry {
     func register(account: Account, pubKey: String) async throws
     func resolve(account: Account) async throws -> String

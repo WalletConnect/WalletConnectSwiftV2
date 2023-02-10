@@ -3,7 +3,9 @@ import Combine
 
 class InviteService {
     private var publishers = [AnyCancellable]()
+    private let keyserverURL: URL
     private let networkingInteractor: NetworkInteracting
+    private let identityStorage: IdentityStorage
     private let accountService: AccountService
     private let logger: ConsoleLogging
     private let kms: KeyManagementService
@@ -14,7 +16,9 @@ class InviteService {
     var onInvite: ((Invite) -> Void)?
 
     init(
+        keyserverURL: URL,
         networkingInteractor: NetworkInteracting,
+        identityStorage: IdentityStorage,
         accountService: AccountService,
         kms: KeyManagementService,
         chatStorage: ChatStorage,
@@ -22,7 +26,9 @@ class InviteService {
         registry: Registry
     ) {
         self.kms = kms
+        self.keyserverURL = keyserverURL
         self.networkingInteractor = networkingInteractor
+        self.identityStorage = identityStorage
         self.accountService = accountService
         self.logger = logger
         self.chatStorage = chatStorage
@@ -30,12 +36,9 @@ class InviteService {
         setUpResponseHandling()
     }
 
-    var peerAccount: Account!
-
     func invite(peerAccount: Account, openingMessage: String) async throws {
         // TODO ad storage
         let protocolMethod = ChatInviteProtocolMethod()
-        self.peerAccount = peerAccount
         let selfPubKeyY = try kms.createX25519KeyPair()
         let peerPubKey = try await registry.resolve(account: peerAccount)
         let symKeyI = try kms.performKeyAgreement(selfPublicKey: selfPubKeyY, peerPublicKey: peerPubKey)
@@ -44,8 +47,9 @@ class InviteService {
         // overrides on invite toipic
         try kms.setSymmetricKey(symKeyI.sharedKey, for: inviteTopic)
 
-        let invite = InvitePayload(message: openingMessage, account: accountService.currentAccount, publicKey: selfPubKeyY.hexRepresentation)
-        let request = RPCRequest(method: protocolMethod.method, params: invite)
+        let authID = try makeInviteJWT(message: openingMessage, publicKey: selfPubKeyY.hexRepresentation)
+        let payload = InvitePayload(inviteAuth: authID)
+        let request = RPCRequest(method: protocolMethod.method, params: payload)
 
         // 2. Proposer subscribes to topic R which is the hash of the derived symKey
         let responseTopic = symKeyI.derivedTopic()
@@ -57,24 +61,36 @@ class InviteService {
 
         logger.debug("invite sent on topic: \(inviteTopic)")
     }
+}
 
-    private func setUpResponseHandling() {
+private extension InviteService {
+
+    enum Errors: Error {
+        case identityKeyNotFound
+    }
+
+    func setUpResponseHandling() {
         networkingInteractor.responseSubscription(on: ChatInviteProtocolMethod())
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<InvitePayload, InviteResponse>) in
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<InvitePayload, AcceptPayload>) in
                 logger.debug("Invite has been accepted")
+
+                guard
+                    let decodedRequest = try? payload.request.decode(),
+                    let decodedResponse = try? payload.response.decode()
+                else { fatalError() /* TODO: Handle error */ }
 
                 Task(priority: .high) {
                     try await createThread(
-                        selfPubKeyHex: payload.request.publicKey,
-                        peerPubKey: payload.response.publicKey,
-                        account: payload.request.account,
-                        peerAccount: peerAccount
+                        selfPubKeyHex: decodedRequest.publicKey,
+                        peerPubKey: decodedResponse.publicKey,
+                        account: decodedRequest.account,
+                        peerAccount: decodedResponse.account
                     )
                 }
             }.store(in: &publishers)
     }
 
-    private func createThread(selfPubKeyHex: String, peerPubKey: String, account: Account, peerAccount: Account) async throws {
+    func createThread(selfPubKeyHex: String, peerPubKey: String, account: Account, peerAccount: Account) async throws {
         let selfPubKey = try AgreementPublicKey(hex: selfPubKeyHex)
         let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey)
         let threadTopic = agreementKeys.derivedTopic()
@@ -92,5 +108,17 @@ class InviteService {
 
         onNewThread?(thread)
         // TODO - remove symKeyI
+    }
+
+    func makeInviteJWT(message: String, publicKey: String) throws -> String {
+        guard let identityKey = identityStorage.getIdentityKey(for: accountService.currentAccount)
+        else { throw Errors.identityKeyNotFound }
+
+        return try JWTFactory(keyPair: identityKey).createChatInviteProposalJWT(
+            ksu: keyserverURL.absoluteString,
+            aud: accountService.currentAccount.did,
+            sub: message,
+            pke: publicKey
+        )
     }
 }

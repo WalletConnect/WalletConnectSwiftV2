@@ -6,12 +6,10 @@ protocol SocketAuthenticating {
 
 struct SocketAuthenticator: SocketAuthenticating {
     private let clientIdStorage: ClientIdStoring
-    private let didKeyFactory: DIDKeyFactory
     private let relayHost: String
 
-    init(clientIdStorage: ClientIdStoring, didKeyFactory: DIDKeyFactory, relayHost: String) {
+    init(clientIdStorage: ClientIdStoring, relayHost: String) {
         self.clientIdStorage = clientIdStorage
-        self.didKeyFactory = didKeyFactory
         self.relayHost = relayHost
     }
 

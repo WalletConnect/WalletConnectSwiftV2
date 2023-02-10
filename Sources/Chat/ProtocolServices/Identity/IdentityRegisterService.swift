@@ -32,7 +32,7 @@ actor IdentityRegisterService {
         }
 
         let identityKey = IdentityKey()
-        let cacao = try makeCacao(DIDKey: identityKey.DIDKey, account: account, onSign: onSign)
+        let cacao = try makeCacao(DIDKey: identityKey.didPublicKey, account: account, onSign: onSign)
         try await identityNetworkService.registerIdentity(cacao: cacao)
 
         // TODO: Handle private mode
@@ -63,7 +63,7 @@ actor IdentityRegisterService {
 
     func resolveIdentity(publicKey: String) async throws -> Cacao {
         let data = Data(hex: publicKey)
-        let did = ED25519DIDKeyFactory().make(pubKey: data, prefix: false)
+        let did = DIDKey(rawData: data).did(prefix: false)
         return try await identityNetworkService.resolveIdentity(publicKey: did)
     }
 
@@ -85,7 +85,7 @@ private extension IdentityRegisterService {
     ) throws -> Cacao {
         let cacaoHeader = CacaoHeader(t: "eip4361")
         let cacaoPayload = CacaoPayload(
-            iss: account.iss,
+            iss: account.did,
             domain: keyserverURL.host!,
             aud: getAudience(),
             version: getVersion(),
@@ -104,7 +104,7 @@ private extension IdentityRegisterService {
         return try JWTFactory(keyPair: identityKey).createChatInviteJWT(
             sub: invitePublicKey,
             aud: getAudience(),
-            pkh: account.iss
+            pkh: account.did
         )
     }
 

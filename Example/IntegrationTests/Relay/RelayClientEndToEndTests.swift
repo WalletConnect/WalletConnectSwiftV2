@@ -10,11 +10,9 @@ final class RelayClientEndToEndTests: XCTestCase {
     private var publishers = Set<AnyCancellable>()
 
     func makeRelayClient() -> RelayClient {
-        let didKeyFactory = ED25519DIDKeyFactory()
-        let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock(), didKeyFactory: didKeyFactory)
+        let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock())
         let socketAuthenticator = SocketAuthenticator(
             clientIdStorage: clientIdStorage,
-            didKeyFactory: didKeyFactory,
             relayHost: InputConfig.relayHost
         )
         let urlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)

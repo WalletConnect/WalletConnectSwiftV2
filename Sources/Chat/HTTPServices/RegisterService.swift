@@ -1,5 +1,7 @@
 import Foundation
 
+// TODO: Remove
+
 struct RegisterService: HTTPService {
 
     let userAccount: UserAccount

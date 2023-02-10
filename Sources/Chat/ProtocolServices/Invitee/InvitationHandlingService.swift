@@ -2,12 +2,13 @@ import Foundation
 import Combine
 
 class InvitationHandlingService {
-    enum Error: Swift.Error {
-        case inviteForIdNotFound
-    }
+
     var onInvite: ((Invite) -> Void)?
     var onNewThread: ((Thread) -> Void)?
+
+    private let keyserverURL: URL
     private let networkingInteractor: NetworkInteracting
+    private let identityStorage: IdentityStorage
     private let chatStorage: ChatStorage
     private let accountService: AccountService
     private let topicToRegistryRecordStore: CodableStore<RegistryRecord>
@@ -20,16 +21,22 @@ class InvitationHandlingService {
         return accountService.currentAccount
     }
 
-    init(registry: Registry,
-         networkingInteractor: NetworkInteracting,
-         accountService: AccountService,
-         kms: KeyManagementService,
-         logger: ConsoleLogging,
-         topicToRegistryRecordStore: CodableStore<RegistryRecord>,
-         chatStorage: ChatStorage) {
+    init(
+        keyserverURL: URL,
+        registry: Registry,
+        networkingInteractor: NetworkInteracting,
+        identityStorage: IdentityStorage,
+        accountService: AccountService,
+        kms: KeyManagementService,
+        logger: ConsoleLogging,
+        topicToRegistryRecordStore: CodableStore<RegistryRecord>,
+        chatStorage: ChatStorage
+    ) {
+        self.keyserverURL = keyserverURL
         self.registry = registry
         self.kms = kms
         self.networkingInteractor = networkingInteractor
+        self.identityStorage = identityStorage
         self.accountService = accountService
         self.logger = logger
         self.topicToRegistryRecordStore = topicToRegistryRecordStore
@@ -41,19 +48,16 @@ class InvitationHandlingService {
         guard
             let invite = chatStorage.getInvite(id: inviteId, account: currentAccount),
             let inviteTopic = chatStorage.getInviteTopic(id: inviteId, account: currentAccount)
-        else { throw Error.inviteForIdNotFound }
+        else { throw Errors.inviteForIdNotFound }
 
         let selfThreadPubKey = try kms.createX25519KeyPair()
+        let responseTopic = try getInviteResponseTopic(requestTopic: inviteTopic, invite: invite)
+        let jwt = try makeAcceptJWT(publicKey: selfThreadPubKey.rawRepresentation)
+        let payload = AcceptPayload(responseAuth: jwt)
 
-        let inviteResponse = InviteResponse(publicKey: selfThreadPubKey.hexRepresentation)
-
-        let responseTopic = try getInviteResponseTopic(
-            requestTopic: inviteTopic,
-            invite: invite
-        )
         try await networkingInteractor.respond(
             topic: responseTopic,
-            response: RPCResponse(id: inviteId, result: inviteResponse),
+            response: RPCResponse(id: inviteId, result: payload),
             protocolMethod: ChatInviteProtocolMethod()
         )
 
@@ -67,7 +71,7 @@ class InvitationHandlingService {
 
         logger.debug("Accepting an invite on topic: \(threadTopic)")
 
-        // TODO - derive account
+        // TODO: - derive account
         let selfAccount = try! topicToRegistryRecordStore.get(key: inviteTopic)!.account
 
         let thread = Thread(
@@ -86,7 +90,7 @@ class InvitationHandlingService {
         guard
             let invite = chatStorage.getInvite(id: inviteId, account: currentAccount),
             let inviteTopic = chatStorage.getInviteTopic(id: inviteId, account: currentAccount)
-        else { throw Error.inviteForIdNotFound }
+        else { throw Errors.inviteForIdNotFound }
 
         let responseTopic = try getInviteResponseTopic(requestTopic: inviteTopic, invite: invite)
 
@@ -99,28 +103,40 @@ class InvitationHandlingService {
 
         chatStorage.delete(invite: invite, account: currentAccount)
     }
+}
 
-    private func setUpRequestHandling() {
+private extension InvitationHandlingService {
+
+    enum Errors: Error {
+        case inviteForIdNotFound
+        case identityKeyNotFound
+    }
+
+    func setUpRequestHandling() {
         networkingInteractor.requestSubscription(on: ChatInviteProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<InvitePayload>) in
-                logger.debug("did receive an invite")
+                logger.debug("Did receive an invite")
+
+                guard let decoded = try? payload.request.decode()
+                else { fatalError() /* TODO: Handle error */ }
+
                 let invite = Invite(
                     id: payload.id.integer,
                     topic: payload.topic,
-                    payload: payload.request
+                    message: decoded.message,
+                    account: decoded.account,
+                    publicKey: decoded.publicKey
                 )
                 chatStorage.set(invite: invite, account: currentAccount)
                 onInvite?(invite)
             }.store(in: &publishers)
     }
 
-    private func getInviteResponseTopic(requestTopic: String, invite: Invite) throws -> String {
-        // todo - remove topicToInvitationPubKeyStore ?
+    func getInviteResponseTopic(requestTopic: String, invite: Invite) throws -> String {
+        // TODO: - remove topicToInvitationPubKeyStore ?
 
-        guard let record = try? topicToRegistryRecordStore.get(key: requestTopic) else {
-            logger.debug("PubKey for invitation topic not found")
-            fatalError("todo")
-        }
+        guard let record = try? topicToRegistryRecordStore.get(key: requestTopic)
+        else { fatalError() /* TODO: Handle error */ }
 
         let selfPubKey = try AgreementPublicKey(hex: record.pubKey)
 
@@ -129,5 +145,16 @@ class InvitationHandlingService {
         // agreement keys already stored by serializer
         let responseTopic = agreementKeysI.derivedTopic()
         return responseTopic
+    }
+
+    func makeAcceptJWT(publicKey: Data) throws -> String {
+        guard let identityKey = identityStorage.getIdentityKey(for: accountService.currentAccount)
+        else { throw Errors.identityKeyNotFound }
+
+        return try JWTFactory(keyPair: identityKey).createChatInviteApprovalJWT(
+            ksu: keyserverURL.absoluteString,
+            aud: accountService.currentAccount.did,
+            sub: DIDKey(rawData: publicKey).did(prefix: true)
+        )
     }
 }

@@ -45,6 +45,10 @@ struct ChatStorage {
         return threadStore.getElements(for: account.absoluteString)
     }
 
+    func getThread(topic: String, account: Account) -> Thread? {
+        return getThreads(account: account).first(where: { $0.topic == topic })
+    }
+
     func set(thread: Thread, account: Account) {
         threadStore.set(thread, for: account.absoluteString)
     }

@@ -83,11 +83,9 @@ public final class RelayClient {
         socketConnectionType: SocketConnectionType = .automatic,
         logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off)
     ) {
-        let didKeyFactory = ED25519DIDKeyFactory()
-        let clientIdStorage = ClientIdStorage(keychain: keychainStorage, didKeyFactory: didKeyFactory)
+        let clientIdStorage = ClientIdStorage(keychain: keychainStorage)
         let socketAuthenticator = SocketAuthenticator(
             clientIdStorage: clientIdStorage,
-            didKeyFactory: didKeyFactory,
             relayHost: relayHost
         )
         let relayUrlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)

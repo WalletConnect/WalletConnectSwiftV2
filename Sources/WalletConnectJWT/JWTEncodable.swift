@@ -1,12 +1,12 @@
 import Foundation
 
-protocol JWTEncodable: Codable, Equatable {
+public protocol JWTEncodable: Codable, Equatable {
     func encode() throws -> String
 }
 
 extension JWTEncodable {
 
-    func encode() throws -> String {
+    public func encode() throws -> String {
         let jsonEncoder = JSONEncoder()
         jsonEncoder.outputFormatting = .withoutEscapingSlashes
         jsonEncoder.dateEncodingStrategy = .secondsSince1970

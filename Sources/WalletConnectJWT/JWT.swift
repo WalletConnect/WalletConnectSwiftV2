@@ -3,6 +3,8 @@ import Foundation
 struct JWT<JWTClaims: JWTEncodable>: Codable, Equatable {
     enum Errors: Error {
         case jwtNotSigned
+        case notUTF8String
+        case notBase64Data
     }
 
     var header: JWTHeader
@@ -12,6 +14,12 @@ struct JWT<JWTClaims: JWTEncodable>: Codable, Equatable {
     init(header: JWTHeader = JWTHeader(), claims: JWTClaims) {
         self.header = header
         self.claims = claims
+    }
+
+    init(string: String) throws {
+        guard let base64 = string.data(using: .utf8) else { throw Errors.notUTF8String }
+        guard let data = Data(base64Encoded: base64) else { throw Errors.notBase64Data }
+        self = try JSONDecoder().decode(JWT.self, from: data)
     }
 
     mutating func sign(using jwtSigner: JWTSigning) throws {

@@ -80,9 +80,8 @@ public struct SigningPrivateKey: GenericPasswordConvertible, Equatable {
         return try key.signature(for: data)
     }
 
-    public var DIDKey: String {
-        return ED25519DIDKeyFactory().make(
-            pubKey: publicKey.rawRepresentation, prefix: true
-        )
+    public var didPublicKey: String {
+        let key = DIDKey(rawData: publicKey.rawRepresentation)
+        return key.did(prefix: true)
     }
 }

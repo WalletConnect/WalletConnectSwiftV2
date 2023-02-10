@@ -1,6 +1,6 @@
 import Foundation
 
-struct RelayClaims: JWTEncodable {
+public struct RelayClaims: JWTEncodable {
     let iss: String
     let sub: String
     let aud: String
