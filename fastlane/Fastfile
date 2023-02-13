@@ -65,7 +65,8 @@ platform :ios do
       app_identifier: ENV["MATCH_IDENTIFIERS"],
       git_url: "https://github.com/WalletConnect/match-swift.git",
       git_basic_authorization: options[:token],
-      api_key: api_key
+      api_key: api_key,
+      include_all_certificates: true
     )
     number = latest_testflight_build_number(
       app_identifier: ENV["APP_IDENTIFIER"],
@@ -80,6 +81,7 @@ platform :ios do
       project: "Example/ExampleApp.xcodeproj",
       scheme: ENV["SCHEME"],
       export_method: "app-store",
+      xcargs: "RELAY_HOST='#{options[:relay_host]}' PROJECT_ID='#{options[:project_id]}'"
     )
     upload_to_testflight(
       apple_id: ENV["APPLE_ID"],
