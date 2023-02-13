@@ -17,25 +17,20 @@ struct SocketAuthenticator: SocketAuthenticating {
 
     func createAuthToken() throws -> String {
         let clientIdKeyPair = try clientIdStorage.getOrCreateKeyPair()
-        let subject = generateSubject()
-        return try createAndSignJWT(subject: subject, keyPair: clientIdKeyPair)
+        return try createAndSignJWT(keyPair: clientIdKeyPair)
     }
 
-    private func createAndSignJWT(subject: String, keyPair: SigningPrivateKey) throws -> String {
-        let issuer = didKeyFactory.make(pubKey: keyPair.publicKey.rawRepresentation, prefix: true)
-        let now = Int(Date().timeIntervalSince1970)
-        let claims = JWT.Claims(iss: issuer, sub: subject, aud: getAudience(), iat: now, exp: getExpiry())
-        var jwt = JWT(claims: claims)
-        try jwt.sign(using: EdDSASigner(keyPair))
-        return try jwt.encoded()
-    }
-
-    private func generateSubject() -> String {
-        return Data.randomBytes(count: 32).toHexString()
+    private func createAndSignJWT(keyPair: SigningPrivateKey) throws -> String {
+        return try JWTFactory().createAndSignJWT(
+            keyPair: keyPair,
+            sub: getSubject(),
+            aud: getAudience(),
+            exp: getExpiry(),
+            pkh: nil
+        )
     }
 
     private func getExpiry() -> Int {
-
         var components = DateComponents()
         components.setValue(1, for: .day)
         // safe to unwrap as the date must be calculated
@@ -45,5 +40,9 @@ struct SocketAuthenticator: SocketAuthenticating {
 
     private func getAudience() -> String {
         return "wss://\(relayHost)"
+    }
+
+    private func getSubject() -> String {
+        return Data.randomBytes(count: 32).toHexString()
     }
 }

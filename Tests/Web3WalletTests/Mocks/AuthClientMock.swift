@@ -42,7 +42,7 @@ final class AuthClientMock: AuthClientProtocol {
         rejectCalled = true
     }
     
-    func getPendingRequests(account: WalletConnectUtils.Account) throws -> [AuthRequest] {
+    func getPendingRequests() throws -> [AuthRequest] {
         return [authRequest]
     }
 }

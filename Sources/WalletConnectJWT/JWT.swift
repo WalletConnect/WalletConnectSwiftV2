@@ -9,12 +9,12 @@ struct JWT: Codable, Equatable {
     var claims: Claims
     var signature: String?
 
-    public init(header: Header = Header(), claims: Claims) {
+    init(header: Header = Header(), claims: Claims) {
         self.header = header
         self.claims = claims
     }
 
-    public mutating func sign(using jwtSigner: JWTSigning) throws {
+    mutating func sign(using jwtSigner: JWTSigning) throws {
         header.alg = jwtSigner.alg
         let headerString = try header.encode()
         let claimsString = try claims.encode()

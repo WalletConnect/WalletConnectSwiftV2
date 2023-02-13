@@ -1,6 +1,7 @@
 import Foundation
 import XCTest
 @testable import WalletConnectRelay
+@testable import WalletConnectJWT
 
 final class JWTTests: XCTestCase {
     let expectedJWT =  "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTY5MTAwOTcsImV4cCI6MTY1Njk5NjQ5NywiaXNzIjoiZGlkOmtleTp6Nk1rb2RIWnduZVZSU2h0YUxmOEpLWWt4cERHcDF2R1pucEdtZEJwWDhNMmV4eEgiLCJzdWIiOiJjNDc5ZmU1ZGM0NjRlNzcxZTc4YjE5M2QyMzlhNjViNThkMjc4Y2FkMWMzNGJmYjBiNTcxNmU1YmI1MTQ5MjhlIiwiYXVkIjoid3NzOi8vcmVsYXkud2FsbGV0Y29ubmVjdC5jb20ifQ.0JkxOM-FV21U7Hk-xycargj_qNRaYV2H5HYtE4GzAeVQYiKWj7YySY5AdSqtCgGzX4Gt98XWXn2kSr9rE1qvCA"
@@ -27,6 +28,6 @@ extension JWT.Claims {
         let aud = "wss://relay.walletconnect.com"
         let expDate = Calendar.current.date(byAdding: components, to: iatDate)!
         let exp = Int(expDate.timeIntervalSince1970)
-        return JWT.Claims(iss: iss, sub: sub, aud: aud, iat: iat, exp: exp)
+        return JWT.Claims(iss: iss, sub: sub, aud: aud, iat: iat, exp: exp, pkh: nil)
     }
 }

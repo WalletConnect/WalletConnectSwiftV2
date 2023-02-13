@@ -28,4 +28,32 @@ public struct AuthPayload: Codable, Equatable {
         self.requestId = requestParams.requestId
         self.resources = requestParams.resources
     }
+
+    public func cacaoPayload(address: String) throws -> CacaoPayload {
+        guard
+            let blockchain = Blockchain(chainId),
+            let account = Account(blockchain: blockchain, address: address) else {
+            throw Errors.invalidChainID
+        }
+        return CacaoPayload(
+            iss: DIDPKH(account: account).iss,
+            domain: domain,
+            aud: aud,
+            version: version,
+            nonce: nonce,
+            iat: iat,
+            nbf: nbf,
+            exp: exp,
+            statement: statement,
+            requestId: requestId,
+            resources: resources
+        )
+    }
+}
+
+private extension AuthPayload {
+
+    enum Errors: Error {
+        case invalidChainID
+    }
 }

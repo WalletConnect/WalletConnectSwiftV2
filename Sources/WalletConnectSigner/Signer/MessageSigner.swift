@@ -9,16 +9,20 @@ public protocol MessageSignatureVerifying {
 }
 
 public protocol MessageSigning {
-    func sign(payload: AuthPayload,
-        address: String,
+    func sign(message: String,
+        privateKey: Data,
+        type: CacaoSignatureType
+    ) throws -> CacaoSignature
+
+    func sign(payload: CacaoPayload,
         privateKey: Data,
         type: CacaoSignatureType
     ) throws -> CacaoSignature
 }
 
-public typealias AuthMessageSigner = MessageSignatureVerifying & MessageSigning
+public typealias CacaoMessageSigner = MessageSignatureVerifying & MessageSigning
 
-struct MessageSigner: AuthMessageSigner {
+struct MessageSigner: CacaoMessageSigner {
 
     enum Errors: Error {
         case utf8EncodingFailed
@@ -27,22 +31,28 @@ struct MessageSigner: AuthMessageSigner {
     private let signer: EthereumSigner
     private let eip191Verifier: EIP191Verifier
     private let eip1271Verifier: EIP1271Verifier
-    private let messageFormatter: SIWEMessageFormatting
+    private let messageFormatter: SIWECacaoFormatting
 
-    init(signer: EthereumSigner, eip191Verifier: EIP191Verifier, eip1271Verifier: EIP1271Verifier, messageFormatter: SIWEMessageFormatting) {
+    init(signer: EthereumSigner, eip191Verifier: EIP191Verifier, eip1271Verifier: EIP1271Verifier, messageFormatter: SIWECacaoFormatting) {
         self.signer = signer
         self.eip191Verifier = eip191Verifier
         self.eip1271Verifier = eip1271Verifier
         self.messageFormatter = messageFormatter
     }
 
-    func sign(payload: AuthPayload,
-        address: String,
+    func sign(payload: CacaoPayload,
         privateKey: Data,
         type: CacaoSignatureType
     ) throws -> CacaoSignature {
 
-        let message = try messageFormatter.formatMessage(from: payload, address: address)
+        let message = try messageFormatter.formatMessage(from: payload)
+        return try sign(message: message, privateKey: privateKey, type: type)
+    }
+
+    func sign(message: String,
+        privateKey: Data,
+        type: CacaoSignatureType
+    ) throws -> CacaoSignature {
 
         guard let messageData = message.data(using: .utf8)else {
             throw Errors.utf8EncodingFailed

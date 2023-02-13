@@ -1,6 +1,7 @@
 import Foundation
 import XCTest
 @testable import Auth
+@testable import WalletConnectSigner
 import JSONRPC
 
 class EIP1271VerifierTests: XCTestCase {

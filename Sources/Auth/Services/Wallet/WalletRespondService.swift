@@ -29,9 +29,8 @@ actor WalletRespondService {
 
         try kms.setAgreementSecret(keys, topic: topic)
 
-        let didpkh = DIDPKH(account: account)
         let header = CacaoHeader(t: "eip4361")
-        let payload = CacaoPayload(params: authRequestParams.payloadParams, didpkh: didpkh)
+        let payload = try authRequestParams.payloadParams.cacaoPayload(address: account.address)
         let responseParams =  AuthResponseParams(h: header, p: payload, s: signature)
 
         let response = RPCResponse(id: requestId, result: responseParams)
