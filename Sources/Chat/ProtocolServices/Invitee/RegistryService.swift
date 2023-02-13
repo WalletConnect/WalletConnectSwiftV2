@@ -1,23 +1,22 @@
 import Foundation
 
-// TODO: RegistryService / register service naming
 actor RegistryService {
     private let networkingInteractor: NetworkInteracting
     private let accountService: AccountService
     private let resubscriptionService: ResubscriptionService
-    private let registerService: IdentityRegisterService
+    private let identityService: IdentityService
     private let logger: ConsoleLogging
     private let kms: KeyManagementServiceProtocol
 
     init(
-        registerService: IdentityRegisterService,
+        identityService: IdentityService,
         accountService: AccountService,
         resubscriptionService: ResubscriptionService,
         networkingInteractor: NetworkInteracting,
         kms: KeyManagementServiceProtocol,
         logger: ConsoleLogging
     ) {
-        self.registerService = registerService
+        self.identityService = identityService
         self.kms = kms
         self.accountService = accountService
         self.resubscriptionService = resubscriptionService
@@ -29,7 +28,7 @@ actor RegistryService {
         isPrivate: Bool,
         onSign: (String) -> CacaoSignature
     ) async throws -> String {
-        let publicKey = try await registerService.registerIdentity(account: account, onSign: onSign)
+        let publicKey = try await identityService.registerIdentity(account: account, onSign: onSign)
 
         guard !isPrivate else { return publicKey }
 
@@ -38,7 +37,7 @@ actor RegistryService {
     }
 
     func goPublic(account: Account, onSign: (String) -> CacaoSignature) async throws {
-        let pubKey = try await registerService.registerInvite(account: account, onSign: onSign)
+        let pubKey = try await identityService.registerInvite(account: account, onSign: onSign)
 
         let topic = pubKey.rawRepresentation.sha256().toHexString()
         try kms.setPublicKey(publicKey: pubKey, for: topic)
@@ -53,7 +52,7 @@ actor RegistryService {
     }
 
     func resolve(account: Account) async throws -> String {
-        return try await registerService.resolveInvite(account: account)
+        return try await identityService.resolveInvite(account: account)
     }
 }
 

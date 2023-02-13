@@ -5,13 +5,9 @@ public struct ChatClientFactory {
     static func create(account: Account) -> ChatClient {
         let keychain = KeychainStorage(serviceIdentifier: "com.walletconnect.showcase")
         let keyserverURL = URL(string: "https://staging.keys.walletconnect.com")!
-        let accountService = AccountService(currentAccount: account)
-        let httpService = HTTPNetworkClient(host: keyserverURL.host!)
-        let registry = IdentityNetworkService(accountService: accountService, httpService: httpService)
         return ChatClientFactory.create(
             account: account,
             keyserverURL: keyserverURL,
-            registry: registry,
             relayClient: Relay.instance,
             keychain: keychain,
             logger: ConsoleLogger(),
@@ -22,12 +18,14 @@ public struct ChatClientFactory {
     public static func create(
         account: Account,
         keyserverURL: URL,
-        registry: Registry,
         relayClient: RelayClient,
         keychain: KeychainStorageProtocol,
         logger: ConsoleLogging,
         keyValueStorage: KeyValueStorage
     ) -> ChatClient {
+        let accountService = AccountService(currentAccount: account)
+        let httpService = HTTPNetworkClient(host: keyserverURL.host!)
+        let identityNetworkService = IdentityNetworkService(accountService: accountService, httpService: httpService)
         let kms = KeyManagementService(keychain: keychain)
         let serialiser = Serializer(kms: kms)
         let rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
@@ -35,12 +33,11 @@ public struct ChatClientFactory {
         let messageStore = KeyedDatabase<Message>(storage: keyValueStorage, identifier: ChatStorageIdentifiers.messages.rawValue)
         let inviteStore = KeyedDatabase<Invite>(storage: keyValueStorage, identifier: ChatStorageIdentifiers.invites.rawValue)
         let threadStore = KeyedDatabase<Thread>(storage: keyValueStorage, identifier: ChatStorageIdentifiers.threads.rawValue)
-        let accountService = AccountService(currentAccount: account)
         let identityStorage = IdentityStorage(keychain: keychain)
         let chatStorage = ChatStorage(messageStore: messageStore, inviteStore: inviteStore, threadStore: threadStore)
         let resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, accountService: accountService, chatStorage: chatStorage, logger: logger)
-        let registerService = IdentityRegisterService(keyserverURL: keyserverURL, kms: kms, identityStorage: identityStorage, identityNetworkService: registry, iatProvader: DefaultIATProvider(), messageFormatter: SIWECacaoFormatter())
-        let registryService = RegistryService(registerService: registerService, accountService: accountService, resubscriptionService: resubscriptionService, networkingInteractor: networkingInteractor, kms: kms, logger: logger)
+        let identityService = IdentityService(keyserverURL: keyserverURL, kms: kms, storage: identityStorage, networkService: identityNetworkService, iatProvader: DefaultIATProvider(), messageFormatter: SIWECacaoFormatter())
+        let registryService = RegistryService(identityService: identityService, accountService: accountService, resubscriptionService: resubscriptionService, networkingInteractor: networkingInteractor, kms: kms, logger: logger)
         let invitationHandlingService = InvitationHandlingService(keyserverURL: keyserverURL, networkingInteractor: networkingInteractor, identityStorage: identityStorage, accountService: accountService, kms: kms, logger: logger, chatStorage: chatStorage)
         let inviteService = InviteService(keyserverURL: keyserverURL, networkingInteractor: networkingInteractor, identityStorage: identityStorage, accountService: accountService, kms: kms, chatStorage: chatStorage, logger: logger, registryService: registryService)
         let leaveService = LeaveService()

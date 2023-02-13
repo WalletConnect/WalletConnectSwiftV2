@@ -9,7 +9,7 @@ final class RegistryTests: XCTestCase {
     let account = Account("eip155:1:0x15bca56b6e2728aec2532df9d436bd1600e86688")!
     let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
 
-    var sut: IdentityRegisterService!
+    var sut: IdentityService!
     var storage: IdentityStorage!
     var signer: CacaoMessageSigner!
 
@@ -21,11 +21,11 @@ final class RegistryTests: XCTestCase {
         let keychain = KeychainStorageMock()
         let ksm = KeyManagementService(keychain: keychain)
         storage = IdentityStorage(keychain: keychain)
-        sut = IdentityRegisterService(
+        sut = IdentityService(
             keyserverURL: keyserverURL,
             kms: ksm,
-            identityStorage: storage,
-            identityNetworkService: identityNetworkService,
+            storage: storage,
+            networkService: identityNetworkService,
             iatProvader: DefaultIATProvider(),
             messageFormatter: SIWECacaoFormatter()
         )
@@ -53,6 +53,6 @@ final class RegistryTests: XCTestCase {
         XCTAssertEqual(inviteKey, recoveredKey)
 
         let resolvedKey = try await sut.resolveInvite(account: account)
-        XCTAssertEqual(inviteKey, recoveredKey)
+        XCTAssertEqual(inviteKey.hexRepresentation, resolvedKey)
     }
 }

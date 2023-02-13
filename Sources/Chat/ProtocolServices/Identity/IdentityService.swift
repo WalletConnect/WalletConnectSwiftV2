@@ -1,26 +1,26 @@
 import Foundation
 
-actor IdentityRegisterService {
+actor IdentityService {
 
     private let keyserverURL: URL
     private let kms: KeyManagementServiceProtocol
-    private let identityStorage: IdentityStorage
-    private let identityNetworkService: Registry
+    private let storage: IdentityStorage
+    private let networkService: IdentityNetworkService
     private let iatProvader: IATProvider
     private let messageFormatter: SIWECacaoFormatting
 
     init(
         keyserverURL: URL,
         kms: KeyManagementServiceProtocol,
-        identityStorage: IdentityStorage,
-        identityNetworkService: Registry,
+        storage: IdentityStorage,
+        networkService: IdentityNetworkService,
         iatProvader: IATProvider,
         messageFormatter: SIWECacaoFormatting
     ) {
         self.keyserverURL = keyserverURL
         self.kms = kms
-        self.identityStorage = identityStorage
-        self.identityNetworkService = identityNetworkService
+        self.storage = storage
+        self.networkService = networkService
         self.iatProvader = iatProvader
         self.messageFormatter = messageFormatter
     }
@@ -29,45 +29,45 @@ actor IdentityRegisterService {
         onSign: (String) -> CacaoSignature
     ) async throws -> String {
 
-        if let identityKey = identityStorage.getIdentityKey(for: account) {
+        if let identityKey = storage.getIdentityKey(for: account) {
             return identityKey.publicKey.hexRepresentation
         }
 
         let identityKey = SigningPrivateKey()
         let cacao = try makeCacao(DIDKey: identityKey.publicKey.did, account: account, onSign: onSign)
-        try await identityNetworkService.registerIdentity(cacao: cacao)
+        try await networkService.registerIdentity(cacao: cacao)
 
-        return try identityStorage.saveIdentityKey(identityKey, for: account).publicKey.hexRepresentation
+        return try storage.saveIdentityKey(identityKey, for: account).publicKey.hexRepresentation
     }
 
     func registerInvite(account: Account,
         onSign: (String) -> CacaoSignature
     ) async throws -> AgreementPublicKey {
 
-        if let inviteKey = identityStorage.getInviteKey(for: account) {
+        if let inviteKey = storage.getInviteKey(for: account) {
             return inviteKey
         }
 
         let inviteKey = try kms.createX25519KeyPair()
         let invitePublicKey = inviteKey.hexRepresentation
         let idAuth = try makeIDAuth(account: account, invitePublicKey: invitePublicKey)
-        try await identityNetworkService.registerInvite(idAuth: idAuth)
+        try await networkService.registerInvite(idAuth: idAuth)
 
-        return try identityStorage.saveInviteKey(inviteKey, for: account)
+        return try storage.saveInviteKey(inviteKey, for: account)
     }
 
     func resolveIdentity(publicKey: String) async throws -> Cacao {
         let data = Data(hex: publicKey)
         let did = DIDKey(rawData: data).did(prefix: false)
-        return try await identityNetworkService.resolveIdentity(publicKey: did)
+        return try await networkService.resolveIdentity(publicKey: did)
     }
 
     func resolveInvite(account: Account) async throws -> String {
-        return try await identityNetworkService.resolveInvite(account: account.absoluteString)
+        return try await networkService.resolveInvite(account: account.absoluteString)
     }
 }
 
-private extension IdentityRegisterService {
+private extension IdentityService {
 
     enum Errors: Error {
         case identityKeyNotFound
@@ -94,7 +94,7 @@ private extension IdentityRegisterService {
     }
 
     func makeIDAuth(account: Account, invitePublicKey: String) throws -> String {
-        guard let identityKey = identityStorage.getIdentityKey(for: account)
+        guard let identityKey = storage.getIdentityKey(for: account)
         else { throw Errors.identityKeyNotFound }
         return try JWTFactory(keyPair: identityKey).createChatInviteJWT(
             sub: invitePublicKey,
