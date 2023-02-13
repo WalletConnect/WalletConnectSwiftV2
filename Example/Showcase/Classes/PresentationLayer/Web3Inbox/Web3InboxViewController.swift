@@ -1,5 +1,4 @@
 import UIKit
-import Web3Inbox
 import WebKit
 
 final class Web3InboxViewController: UIViewController {
@@ -18,8 +17,8 @@ final class Web3InboxViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        Web3Inbox.configure(account: account)
-        view = Web3Inbox.instance.getWebView()
+//        Web3Inbox.configure(account: account)
+//        view = Web3Inbox.instance.getWebView()
 
         navigationItem.title = "Web3Inbox SDK"
     }
