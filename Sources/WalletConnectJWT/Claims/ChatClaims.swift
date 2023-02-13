@@ -42,13 +42,3 @@ public struct ChatMessageClaims: JWTEncodable {
     // TODO: Media not implemented
     // public let xma: Media?
 }
-
-public struct ChatReceiptClaims: JWTEncodable {
-    public let iss: String
-    public let iat: Int
-    public let exp: Int
-    public let ksu: String
-
-    public let aud:  String // sender blockchain account (did:pkh)
-    public let sub:  String // hash of the message received
-}

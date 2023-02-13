@@ -43,10 +43,6 @@ class MessagingService {
         let protocolMethod = ChatMessageProtocolMethod()
         let request = RPCRequest(method: protocolMethod.method, params: payload)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
-
-// TODO: Add to storage on receive
-//        chatStorage.set(message: message, account: currentAccount)
-//        onMessage?(message)
     }
 }
 
@@ -59,14 +55,9 @@ private extension MessagingService {
 
     func setUpResponseHandling() {
         networkingInteractor.responseSubscription(on: ChatMessageProtocolMethod())
-            .sink { [unowned self] (_: ResponseSubscriptionPayload<AnyCodable, AnyCodable>) in
-                logger.debug("Received Message response")
-            }.store(in: &publishers)
-    }
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<MessagePayload, ReceiptPayload>) in
 
-    func setUpRequestHandling() {
-        networkingInteractor.requestSubscription(on: ChatMessageProtocolMethod())
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<MessagePayload>) in
+                logger.debug("Received Message response")
 
                 guard
                     let decoded = try? payload.request.decode(),
@@ -80,21 +71,43 @@ private extension MessagingService {
                     recipientAccount: decoded.recipientAccount,
                     timestamp: decoded.timestamp
                 )
-                handleMessage(message, topic: payload.topic, requestId: payload.id)
+
+                chatStorage.set(message: message, account: currentAccount)
+                onMessage?(message)
             }.store(in: &publishers)
     }
 
-    func handleMessage(_ message: Message, topic: String, requestId: RPCID) {
-        Task(priority: .high) {
-            try await networkingInteractor.respondSuccess(
-                topic: topic,
-                requestId: requestId,
-                protocolMethod: ChatMessageProtocolMethod()
-            )
-            logger.debug("Received message")
-            chatStorage.set(message: message, account: message.recipientAccount)
-            onMessage?(message)
-        }
+    func setUpRequestHandling() {
+        networkingInteractor.requestSubscription(on: ChatMessageProtocolMethod())
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<MessagePayload>) in
+
+                logger.debug("Received message")
+
+                guard
+                    let decoded = try? payload.request.decode(),
+                    let peerAccount = try? getPeerAccount(topic: payload.topic)
+                else { fatalError() /* TODO: Handle error */ }
+
+                let message = Message(
+                    topic: payload.topic,
+                    message: decoded.message,
+                    authorAccount: peerAccount,
+                    recipientAccount: decoded.recipientAccount,
+                    timestamp: decoded.timestamp
+                )
+
+                chatStorage.set(message: message, account: message.recipientAccount)
+                onMessage?(message)
+
+                Task(priority: .high) {
+                    let params = ReceiptPayload(receiptAuth: payload.request.messageAuth)
+                    let response = RPCResponse(id: payload.id, result: params)
+                    try await networkingInteractor.respond(topic: payload.topic,
+                        response: response,
+                        protocolMethod: ChatMessageProtocolMethod()
+                    )
+                }
+            }.store(in: &publishers)
     }
 
     func getPeerAccount(topic: String) throws -> Account {

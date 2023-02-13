@@ -55,8 +55,3 @@ actor RegistryService {
         return try await identityService.resolveInvite(account: account)
     }
 }
-
-struct RegistryRecord: Codable {
-    let account: Account
-    let pubKey: String
-}

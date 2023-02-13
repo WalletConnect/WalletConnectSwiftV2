@@ -73,7 +73,7 @@ final class ChatTests: XCTestCase {
 
     func testMessage() {
         let messageExpectation = expectation(description: "message received")
-        messageExpectation.expectedFulfillmentCount = 2
+        messageExpectation.expectedFulfillmentCount = 4
 
         Task(priority: .high) {
             try! await inviter.invite(peerAccount: inviteeAccount, openingMessage: "opening message")
