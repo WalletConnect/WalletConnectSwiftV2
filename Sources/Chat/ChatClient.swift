@@ -3,7 +3,6 @@ import Combine
 
 public class ChatClient {
     private var publishers = [AnyCancellable]()
-    private let registry: Registry
     private let registryService: RegistryService
     private let messagingService: MessagingService
     private let accountService: AccountService
@@ -32,8 +31,7 @@ public class ChatClient {
 
     // MARK: - Initialization
 
-    init(registry: Registry,
-         registryService: RegistryService,
+    init(registryService: RegistryService,
          messagingService: MessagingService,
          accountService: AccountService,
          invitationHandlingService: InvitationHandlingService,
@@ -43,7 +41,6 @@ public class ChatClient {
          chatStorage: ChatStorage,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
     ) {
-        self.registry = registry
         self.registryService = registryService
         self.messagingService = messagingService
         self.accountService = accountService
@@ -64,15 +61,22 @@ public class ChatClient {
     /// - Parameter account: CAIP10 blockchain account
     /// - Returns: public key
     @discardableResult
-    public func register(account: Account) async throws -> String {
-        try await registryService.register(account: account)
+    public func register(account: Account,
+        isPrivate: Bool = false,
+        onSign: (String) -> CacaoSignature
+    ) async throws -> String {
+        return try await registryService.register(
+            account: account,
+            isPrivate: isPrivate,
+            onSign: onSign
+        )
     }
 
     /// Queries the default keyserver with a blockchain account
     /// - Parameter account: CAIP10 blockachain account
     /// - Returns: public key associated with an account in chat's keyserver
     public func resolve(account: Account) async throws -> String {
-        try await registry.resolve(account: account)
+        try await registryService.resolve(account: account)
     }
 
     /// Sends a chat invite with opening message

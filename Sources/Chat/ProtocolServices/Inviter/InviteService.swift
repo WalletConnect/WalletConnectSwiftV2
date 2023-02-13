@@ -10,7 +10,7 @@ class InviteService {
     private let logger: ConsoleLogging
     private let kms: KeyManagementService
     private let chatStorage: ChatStorage
-    private let registry: Registry
+    private let registryService: RegistryService
 
     var onNewThread: ((Thread) -> Void)?
     var onInvite: ((Invite) -> Void)?
@@ -23,7 +23,7 @@ class InviteService {
         kms: KeyManagementService,
         chatStorage: ChatStorage,
         logger: ConsoleLogging,
-        registry: Registry
+        registryService: RegistryService
     ) {
         self.kms = kms
         self.keyserverURL = keyserverURL
@@ -32,7 +32,7 @@ class InviteService {
         self.accountService = accountService
         self.logger = logger
         self.chatStorage = chatStorage
-        self.registry = registry
+        self.registryService = registryService
         setUpResponseHandling()
     }
 
@@ -40,14 +40,14 @@ class InviteService {
         // TODO ad storage
         let protocolMethod = ChatInviteProtocolMethod()
         let selfPubKeyY = try kms.createX25519KeyPair()
-        let peerPubKey = try await registry.resolve(account: peerAccount)
+        let peerPubKey = try await registryService.resolve(account: peerAccount)
         let symKeyI = try kms.performKeyAgreement(selfPublicKey: selfPubKeyY, peerPublicKey: peerPubKey)
         let inviteTopic = try AgreementPublicKey(hex: peerPubKey).rawRepresentation.sha256().toHexString()
 
         // overrides on invite toipic
         try kms.setSymmetricKey(symKeyI.sharedKey, for: inviteTopic)
 
-        let authID = try makeInviteJWT(message: openingMessage, publicKey: selfPubKeyY.hexRepresentation)
+        let authID = try makeInviteJWT(message: openingMessage, publicKey: DIDKey(rawData: selfPubKeyY.rawRepresentation))
         let payload = InvitePayload(inviteAuth: authID)
         let request = RPCRequest(method: protocolMethod.method, params: payload)
 
@@ -110,15 +110,14 @@ private extension InviteService {
         // TODO - remove symKeyI
     }
 
-    func makeInviteJWT(message: String, publicKey: String) throws -> String {
+    func makeInviteJWT(message: String, publicKey: DIDKey) throws -> String {
         guard let identityKey = identityStorage.getIdentityKey(for: accountService.currentAccount)
         else { throw Errors.identityKeyNotFound }
-
         return try JWTFactory(keyPair: identityKey).createChatInviteProposalJWT(
             ksu: keyserverURL.absoluteString,
             aud: accountService.currentAccount.did,
             sub: message,
-            pke: publicKey
+            pke: publicKey.did(prefix: true)
         )
     }
 }

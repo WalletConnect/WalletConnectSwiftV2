@@ -77,7 +77,7 @@ private extension JWTFactory {
     }
 
     func getIss() -> String {
-        return keyPair.didPublicKey
+        return keyPair.publicKey.did
     }
 
     func getChatExp() -> Int {

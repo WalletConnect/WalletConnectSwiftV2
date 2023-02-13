@@ -40,6 +40,11 @@ public struct SigningPublicKey: GenericPasswordConvertible, Equatable {
     public var hexRepresentation: String {
         key.rawRepresentation.toHexString()
     }
+
+    public var did: String {
+        let key = DIDKey(rawData: rawRepresentation)
+        return key.did(prefix: true)
+    }
 }
 
 extension SigningPublicKey: Codable {
@@ -78,10 +83,5 @@ public struct SigningPrivateKey: GenericPasswordConvertible, Equatable {
 
     public func signature(_ data: Data) throws -> Data {
         return try key.signature(for: data)
-    }
-
-    public var didPublicKey: String {
-        let key = DIDKey(rawData: publicKey.rawRepresentation)
-        return key.did(prefix: true)
     }
 }

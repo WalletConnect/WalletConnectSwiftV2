@@ -9,20 +9,30 @@ import Combine
 final class ChatTests: XCTestCase {
     var invitee: ChatClient!
     var inviter: ChatClient!
-    var registry: KeyValueRegistry!
     private var publishers = [AnyCancellable]()
 
-    let inviteeAccount = Account(chainIdentifier: "eip155:1", address: "0x3627523167367216556273151")!
-    let inviterAccount = Account(chainIdentifier: "eip155:1", address: "0x36275231673672234423f")!
+    let inviteeAccount = Account("eip155:1:0x15bca56b6e2728aec2532df9d436bd1600e86688")!
+    let inviterAccount = Account("eip155:2:0x15bca56b6e2728aec2532df9d436bd1600e86688")!
+
+    let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
+
+    override func setUp() async throws {
+        invitee = makeClient(prefix: "🦖 Invitee", account: inviteeAccount)
+        inviter = makeClient(prefix: "🍄 Inviter", account: inviterAccount)
+
+        try await invitee.register(account: inviteeAccount, onSign: sign)
+        try await inviter.register(account: inviterAccount, onSign: sign)
+    }
 
     override func setUp() {
-        registry = KeyValueRegistry()
-        invitee = makeClient(prefix: "🦖 Registered", account: inviteeAccount)
-        inviter = makeClient(prefix: "🍄 Inviter", account: inviterAccount)
+
     }
 
     func makeClient(prefix: String, account: Account) -> ChatClient {
         let keyserverURL = URL(string: "https://staging.keys.walletconnect.com")!
+        let accountService = AccountService(currentAccount: account)
+        let httpService = HTTPNetworkClient(host: keyserverURL.host!)
+        let registry = IdentityNetworkService(accountService: accountService, httpService: httpService)
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let keychain = KeychainStorageMock()
         let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keychainStorage: keychain, socketFactory: DefaultSocketFactory(), logger: logger)
@@ -31,7 +41,6 @@ final class ChatTests: XCTestCase {
 
     func testInvite() async {
         let inviteExpectation = expectation(description: "invitation expectation")
-        try! await invitee.register(account: inviteeAccount)
         try! await inviter.invite(peerAccount: inviteeAccount, openingMessage: "")
         invitee.invitePublisher.sink { _ in
             inviteExpectation.fulfill()
@@ -44,12 +53,11 @@ final class ChatTests: XCTestCase {
         let newThreadinviteeExpectation = expectation(description: "new thread on invitee client expectation")
 
         Task(priority: .high) {
-            try! await invitee.register(account: inviteeAccount)
             try! await inviter.invite(peerAccount: inviteeAccount, openingMessage: "opening message")
         }
 
         invitee.invitePublisher.sink { [unowned self] invite in
-            Task {try! await invitee.accept(inviteId: invite.id)}
+            Task { try! await invitee.accept(inviteId: invite.id) }
         }.store(in: &publishers)
 
         invitee.newThreadPublisher.sink { _ in
@@ -65,10 +73,9 @@ final class ChatTests: XCTestCase {
 
     func testMessage() {
         let messageExpectation = expectation(description: "message received")
-        messageExpectation.expectedFulfillmentCount = 4 // expectedFulfillmentCount 4 because onMessage() called on send too
+        messageExpectation.expectedFulfillmentCount = 2
 
         Task(priority: .high) {
-            try! await invitee.register(account: inviteeAccount)
             try! await inviter.invite(peerAccount: inviteeAccount, openingMessage: "opening message")
         }
 
@@ -93,5 +100,11 @@ final class ChatTests: XCTestCase {
         }.store(in: &publishers)
 
         wait(for: [messageExpectation], timeout: InputConfig.defaultTimeout)
+    }
+
+    private func sign(_ message: String) -> CacaoSignature {
+        let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
+        let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
+        return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
     }
 }

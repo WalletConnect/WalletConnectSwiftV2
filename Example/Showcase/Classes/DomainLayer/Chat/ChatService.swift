@@ -70,7 +70,11 @@ final class ChatService {
     }
 
     func register(account: Account) async throws {
-        _ = try await client.register(account: account)
+        _ = try await client.register(account: account) { message in
+            let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
+            let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
+            return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
+        }
     }
 
     func resolve(account: Account) async throws -> String {

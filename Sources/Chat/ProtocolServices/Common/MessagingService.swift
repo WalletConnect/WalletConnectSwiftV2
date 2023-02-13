@@ -37,7 +37,6 @@ class MessagingService {
     }
 
     func send(topic: String, messageString: String) async throws {
-        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
         let recipientAccount = try getPeerAccount(topic: topic)
         let jwt = try makeMessageJWT(recipientAccount: recipientAccount, message: messageString)
         let payload = MessagePayload(messageAuth: jwt)

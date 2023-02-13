@@ -18,9 +18,12 @@ final class RegistryTests: XCTestCase {
         let httpService = HTTPNetworkClient(host: keyserverURL.host!)
         let accountService = AccountService(currentAccount: account)
         let identityNetworkService = IdentityNetworkService(accountService: accountService, httpService: httpService)
-        storage = IdentityStorage(keychain: KeychainStorageMock())
+        let keychain = KeychainStorageMock()
+        let ksm = KeyManagementService(keychain: keychain)
+        storage = IdentityStorage(keychain: keychain)
         sut = IdentityRegisterService(
             keyserverURL: keyserverURL,
+            kms: ksm,
             identityStorage: storage,
             identityNetworkService: identityNetworkService,
             iatProvader: DefaultIATProvider(),
@@ -31,7 +34,7 @@ final class RegistryTests: XCTestCase {
 
     func testRegisterIdentityAndInviteKey() async throws {
         var message: String!
-        let publicKey = try await sut.registerIdentity(account: account, isPrivate: false) { msg in
+        let publicKey = try await sut.registerIdentity(account: account) { msg in
             message = msg
             return try! signer.sign(message: msg, privateKey: privateKey, type: .eip191)
         }
@@ -42,14 +45,14 @@ final class RegistryTests: XCTestCase {
         let recovered = storage.getIdentityKey(for: account)!.publicKey.hexRepresentation
         XCTAssertEqual(publicKey, recovered)
 
-        let inviteKey = try await sut.registerInvite(account: account, isPrivate: false, onSign: { msg in
+        let inviteKey = try await sut.registerInvite(account: account, onSign: { msg in
             return try! signer.sign(message: msg, privateKey: privateKey, type: .eip191)
         })
 
         let recoveredKey = storage.getInviteKey(for: account)!
-        XCTAssertEqual(inviteKey, recoveredKey.publicKey.hexRepresentation)
+        XCTAssertEqual(inviteKey, recoveredKey)
 
         let resolvedKey = try await sut.resolveInvite(account: account)
-        XCTAssertEqual(inviteKey, resolvedKey)
+        XCTAssertEqual(inviteKey, recoveredKey)
     }
 }

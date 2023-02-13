@@ -3,19 +3,22 @@ import Foundation
 actor IdentityRegisterService {
 
     private let keyserverURL: URL
+    private let kms: KeyManagementServiceProtocol
     private let identityStorage: IdentityStorage
-    private let identityNetworkService: IdentityNetworkService
+    private let identityNetworkService: Registry
     private let iatProvader: IATProvider
     private let messageFormatter: SIWECacaoFormatting
 
     init(
         keyserverURL: URL,
+        kms: KeyManagementServiceProtocol,
         identityStorage: IdentityStorage,
-        identityNetworkService: IdentityNetworkService,
+        identityNetworkService: Registry,
         iatProvader: IATProvider,
         messageFormatter: SIWECacaoFormatting
     ) {
         self.keyserverURL = keyserverURL
+        self.kms = kms
         self.identityStorage = identityStorage
         self.identityNetworkService = identityNetworkService
         self.iatProvader = iatProvader
@@ -23,7 +26,6 @@ actor IdentityRegisterService {
     }
 
     func registerIdentity(account: Account,
-        isPrivate: Bool,
         onSign: (String) -> CacaoSignature
     ) async throws -> String {
 
@@ -31,34 +33,27 @@ actor IdentityRegisterService {
             return identityKey.publicKey.hexRepresentation
         }
 
-        let identityKey = IdentityKey()
-        let cacao = try makeCacao(DIDKey: identityKey.didPublicKey, account: account, onSign: onSign)
+        let identityKey = SigningPrivateKey()
+        let cacao = try makeCacao(DIDKey: identityKey.publicKey.did, account: account, onSign: onSign)
         try await identityNetworkService.registerIdentity(cacao: cacao)
 
-        // TODO: Handle private mode
-
-        try identityStorage.saveIdentityKey(identityKey, for: account)
-        return identityKey.publicKey.hexRepresentation
+        return try identityStorage.saveIdentityKey(identityKey, for: account).publicKey.hexRepresentation
     }
 
     func registerInvite(account: Account,
-        isPrivate: Bool,
         onSign: (String) -> CacaoSignature
-    ) async throws -> String {
+    ) async throws -> AgreementPublicKey {
 
         if let inviteKey = identityStorage.getInviteKey(for: account) {
-            return inviteKey.publicKey.hexRepresentation
+            return inviteKey
         }
 
-        let inviteKey = IdentityKey()
-        let invitePublicKey = inviteKey.publicKey.hexRepresentation
+        let inviteKey = try kms.createX25519KeyPair()
+        let invitePublicKey = inviteKey.hexRepresentation
         let idAuth = try makeIDAuth(account: account, invitePublicKey: invitePublicKey)
         try await identityNetworkService.registerInvite(idAuth: idAuth)
 
-        // TODO: Handle private mode
-
-        try identityStorage.saveInviteKey(inviteKey, for: account)
-        return inviteKey.publicKey.hexRepresentation
+        return try identityStorage.saveInviteKey(inviteKey, for: account)
     }
 
     func resolveIdentity(publicKey: String) async throws -> Cacao {
