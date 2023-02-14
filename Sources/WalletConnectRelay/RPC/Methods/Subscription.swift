@@ -15,7 +15,7 @@ struct Subscription: RelayRPC {
     let params: Params
 
     var method: String {
-        "subscription"
+        "irn_subscription"
     }
 
     init(id: String, topic: String, message: String) {

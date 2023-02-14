@@ -7,7 +7,7 @@ struct Subscribe: RelayRPC {
     let params: Params
 
     var method: String {
-        "subscribe"
+        "irn_subscribe"
     }
 }
 

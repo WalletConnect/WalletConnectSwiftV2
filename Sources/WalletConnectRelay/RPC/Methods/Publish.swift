@@ -14,7 +14,7 @@ struct Publish: RelayRPC {
     let params: Params
 
     var method: String {
-        "publish"
+        "irn_publish"
     }
 }
 

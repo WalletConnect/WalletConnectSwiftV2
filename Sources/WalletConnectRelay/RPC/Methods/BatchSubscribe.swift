@@ -10,7 +10,7 @@ struct BatchSubscribe: RelayRPC {
     let params: Params
 
     var method: String {
-        "batchSubscribe"
+        "irn_batchSubscribe"
     }
 }
 

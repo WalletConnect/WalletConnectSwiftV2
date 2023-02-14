@@ -11,7 +11,7 @@ struct Unsubscribe: RelayRPC {
     let params: Params
 
     var method: String {
-        "unsubscribe"
+        "irn_unsubscribe"
     }
 }
 
