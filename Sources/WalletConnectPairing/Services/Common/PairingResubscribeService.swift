@@ -18,10 +18,10 @@ final class PairingResubscribeService {
         networkInteractor.socketConnectionStatusPublisher
             .sink { [unowned self] status in
                 guard status == .connected else { return }
-                pairingStorage.getAll()
-                    .forEach { pairing in
-                        Task(priority: .high) { try await networkInteractor.subscribe(topic: pairing.topic) }
-                    }
+                let topics = pairingStorage.getAll().map{$0.topic}
+                Task(priority: .high) {
+                    try await networkInteractor.batchSubscribe(topics: topics)
+                }
             }
             .store(in: &publishers)
     }
