@@ -56,10 +56,10 @@ public class ChatClient {
 
     // MARK: - Public interface
 
-    /// Registers a new record on Chat keyserver,
-    /// record is a blockchain account with a client generated public key
-    /// - Parameter account: CAIP10 blockchain account
-    /// - Returns: public key
+    /// Registers a blockchain account with an identity key if not yet registered on this client
+    /// Registers invite key if not yet registered on this client and starts listening on invites if private is false
+    /// - Parameter onSign: Callback for signing CAIP-122 message to verify blockchain account ownership
+    /// - Returns: Returns the public identity key
     @discardableResult
     public func register(account: Account,
         isPrivate: Bool = false,
@@ -72,31 +72,61 @@ public class ChatClient {
         )
     }
 
-    /// Queries the default keyserver with a blockchain account
+    /// Unregisters a blockchain account with previously registered identity key
+    /// Must not unregister invite key but must stop listening for invites
+    /// - Parameter onSign: Callback for signing CAIP-122 message to verify blockchain account ownership
+    public func unregister(account: Account,
+        onSign: (String) -> CacaoSignature
+    ) async throws {
+        fatalError("Not implemented")
+    }
+
+    /// Queries the keyserver with a blockchain account
     /// - Parameter account: CAIP10 blockachain account
-    /// - Returns: public key associated with an account in chat's keyserver
+    /// - Returns: Returns the invite key
     public func resolve(account: Account) async throws -> String {
         try await registryService.resolve(account: account)
     }
 
-    /// Sends a chat invite with opening message
-    /// - Parameters:
-    ///   - publicKey: publicKey associated with a peer
-    ///   - openingMessage: oppening message for a chat invite
-    ///   TODO - peerAccount should be derived
-    public func invite(peerAccount: Account, openingMessage: String) async throws {
-        try await inviteService.invite(peerAccount: peerAccount, openingMessage: openingMessage)
+    /// Sends a chat invite
+    /// Creates and stores SentInvite with `pending` state
+    /// - Parameter invite: An Invite object
+    /// - Returns: Returns an invite id
+    public func invite(invite: Invite) async throws -> Int64 {
+        fatalError("TODO: Implement me")
+//        try await inviteService.invite(peerAccount: peerAccount, openingMessage: openingMessage)
     }
 
-    public func accept(inviteId: Int64) async throws {
+    /// Unregisters an invite key from keyserver
+    /// Stops listening for invites
+    /// - Parameter account: CAIP10 blockachain account
+    public func goPrivate(account: Account) async throws {
+        fatalError("Not implemented")
+    }
+
+    /// Registers an invite key if not yet registered on this client from keyserver
+    /// Starts listening for invites
+    /// - Parameter account: CAIP10 blockachain account
+    /// - Returns: The public invite key
+    public func goPublic(account: Account) async throws {
+        fatalError("Not implemented")
+    }
+
+    /// Accepts a chat invite by id from account specified as inviteeAccount in Invite
+    /// - Parameter inviteId: Invite id
+    /// - Returns: Thread topic
+    public func accept(inviteId: Int64) async throws -> String {
+        fatalError("TODO: Implement me")
         try await invitationHandlingService.accept(inviteId: inviteId)
     }
 
+    /// Rejects a chat invite by id from account specified as inviteeAccount in Invite
+    /// - Parameter inviteId: Invite id
     public func reject(inviteId: Int64) async throws {
         try await invitationHandlingService.reject(inviteId: inviteId)
     }
 
-    /// Sends a chat message to an active chat thread
+    /// Sends a chat message to an active chat thread from account specified as selfAccount in Thread
     /// - Parameters:
     ///   - topic: thread topic
     ///   - message: chat message
@@ -104,18 +134,31 @@ public class ChatClient {
         try await messagingService.send(topic: topic, messageString: message)
     }
 
-    /// To Ping peer client
+    /// Ping its peer to evaluate if it's currently online
     /// - Parameter topic: chat thread topic
     public func ping(topic: String) {
         fatalError("not implemented")
     }
 
+    /// Leaves a chat thread and stops receiving messages
+    /// - Parameter topic: chat thread topic
     public func leave(topic: String) async throws {
         try await leaveService.leave(topic: topic)
     }
 
-    public func getInvites() -> [Invite] {
+    /// Sets peer account with public key
+    /// - Parameter account: CAIP10 blockachain account
+    /// - Parameter publicKey: Account associated publicKey hex string
+    public func setContact(account: Account, publicKey: String) async throws {
+        fatalError("not implemented")
+    }
+
+    public func getReceivedInvites() -> [Invite] {
         return chatStorage.getInvites(account: accountService.currentAccount)
+    }
+
+    public func getSentInvites() -> [Invite] {
+        fatalError("not implemented")
     }
 
     public func getThreads() -> [Thread] {
