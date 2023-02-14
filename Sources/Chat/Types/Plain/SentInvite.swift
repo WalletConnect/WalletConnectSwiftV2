@@ -5,6 +5,7 @@ public struct SentInvite: Codable, Equatable {
     public let message: String
     public let inviterAccount: Account
     public let inviteeAccount: Account
+    public let timestamp: Int64
     public var status: Status
 
     public init(
@@ -14,12 +15,14 @@ public struct SentInvite: Codable, Equatable {
         inviteeAccount: Account,
         inviterPublicKey: String,
         inviteePublicKey: String,
+        timestamp: Int64,
         status: SentInvite.Status = .pending // TODO: Implement statuses
     ) {
         self.id = id
         self.message = message
         self.inviterAccount = inviterAccount
         self.inviteeAccount = inviteeAccount
+        self.timestamp = timestamp
         self.status = status
     }
 }

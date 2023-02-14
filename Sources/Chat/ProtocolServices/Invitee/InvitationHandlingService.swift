@@ -62,7 +62,7 @@ class InvitationHandlingService {
             protocolMethod: ChatInviteProtocolMethod()
         )
 
-        let threadSymmetricKey = try kms.performKeyAgreement(selfPublicKey: publicKey, peerPublicKey: invite.inviteePublicKey)
+        let threadSymmetricKey = try kms.performKeyAgreement(selfPublicKey: publicKey, peerPublicKey: invite.inviterPublicKey)
         let threadTopic = threadSymmetricKey.derivedTopic()
         try kms.setSymmetricKey(threadSymmetricKey.sharedKey, for: threadTopic)
         try await networkingInteractor.subscribe(topic: threadTopic)
@@ -132,7 +132,8 @@ private extension InvitationHandlingService {
                         inviterAccount: inviterAccount,
                         inviteeAccount: decoded.account,
                         inviterPublicKey: decoded.publicKey,
-                        inviteePublicKey: inviteePublicKey
+                        inviteePublicKey: inviteePublicKey,
+                        timestamp: decoded.iat // TODO: Replace with relay message receivedAt
                     )
                     chatStorage.set(receivedInvite: invite, account: currentAccount)
                     onReceivedInvite?(invite)

@@ -5,6 +5,7 @@ struct InvitePayload: Codable {
 
     func decode() throws -> (
         iss: String,
+        iat: Int64,
         message: String,
         account: Account,
         publicKey: String
@@ -13,6 +14,12 @@ struct InvitePayload: Codable {
         let message = claims.sub
         let account = try Account(DIDPKHString: claims.aud)
         let publicKey = try DIDKey(did: claims.pke).hexString
-        return (iss: claims.iss, message: message, account: account, publicKey: publicKey)
+        return (
+            iss: claims.iss,
+            iat: claims.iat,
+            message: message,
+            account: account,
+            publicKey: publicKey
+        )
     }
 }

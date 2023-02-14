@@ -24,10 +24,6 @@ final class ChatTests: XCTestCase {
         try await inviter.register(account: inviterAccount, onSign: sign)
     }
 
-    override func setUp() {
-
-    }
-
     func makeClient(prefix: String, account: Account) -> ChatClient {
         let keyserverURL = URL(string: "https://staging.keys.walletconnect.com")!
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
@@ -83,15 +79,15 @@ final class ChatTests: XCTestCase {
         }
 
         invitee.invitePublisher.sink { [unowned self] invite in
-            Task {try! await invitee.accept(inviteId: invite.id)}
+            Task { try! await invitee.accept(inviteId: invite.id) }
         }.store(in: &publishers)
 
         invitee.newThreadPublisher.sink { [unowned self] thread in
-            Task {try! await invitee.message(topic: thread.topic, message: "message")}
+            Task { try! await invitee.message(topic: thread.topic, message: "message") }
         }.store(in: &publishers)
 
         inviter.newThreadPublisher.sink { [unowned self] thread in
-            Task {try! await inviter.message(topic: thread.topic, message: "message")}
+            Task { try! await inviter.message(topic: thread.topic, message: "message") }
         }.store(in: &publishers)
 
         inviter.messagePublisher.sink { _ in
