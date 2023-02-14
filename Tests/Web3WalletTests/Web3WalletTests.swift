@@ -127,6 +127,11 @@ final class Web3WalletTests: XCTestCase {
         XCTAssertTrue(pairingClient.pairCalled)
     }
     
+    func testDisconnectPairingCalled() async {
+        try! await web3WalletClient.disconnectPairing(topic: "topic")
+        XCTAssertTrue(pairingClient.disconnectPairingCalled)
+    }
+    
     func testDisconnectCalled() async {
         try! await web3WalletClient.disconnect(topic: "")
         XCTAssertTrue(signClient.disconnectCalled)
