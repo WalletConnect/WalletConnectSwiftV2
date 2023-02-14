@@ -48,7 +48,7 @@ class InvitationHandlingService {
         guard let inviteePublicKey = identityStorage.getInviteKey(for: currentAccount)
         else { throw Errors.inviteKeyNotFound }
 
-        let symmetricKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: invite.inviteePublicKey)
+        let symmetricKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: invite.inviterPublicKey)
         let acceptTopic = symmetricKey.derivedTopic()
         try kms.setSymmetricKey(symmetricKey.sharedKey, for: acceptTopic)
 
@@ -90,7 +90,7 @@ class InvitationHandlingService {
         guard let inviteePublicKey = identityStorage.getInviteKey(for: currentAccount)
         else { throw Errors.inviteKeyNotFound }
 
-        let symmetricKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: invite.inviteePublicKey)
+        let symmetricKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: invite.inviterPublicKey)
         let rejectTopic = symmetricKey.derivedTopic()
         try kms.setSymmetricKey(symmetricKey.sharedKey, for: rejectTopic)
 
