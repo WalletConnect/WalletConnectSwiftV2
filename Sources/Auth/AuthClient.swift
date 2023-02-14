@@ -89,12 +89,12 @@ public class AuthClient: AuthClientProtocol {
 
     /// Query pending authentication requests
     /// - Returns: Pending authentication requests
-    public func getPendingRequests(account: Account) throws -> [AuthRequest] {
-        return try pendingRequestsProvider.getPendingRequests(account: account)
+    public func getPendingRequests() throws -> [AuthRequest] {
+        return try pendingRequestsProvider.getPendingRequests()
     }
 
     public func formatMessage(payload: AuthPayload, address: String) throws -> String {
-        return try SIWEMessageFormatter().formatMessage(from: payload, address: address)
+        return try SIWECacaoFormatter().formatMessage(from: payload.cacaoPayload(address: address))
     }
 
     private func setUpPublishers() {

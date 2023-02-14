@@ -6,9 +6,9 @@ public enum CacaoSignatureType: String, Codable {
 }
 
 public struct CacaoSignature: Codable, Equatable {
-    let t: CacaoSignatureType
-    let s: String
-    let m: String?
+    public let t: CacaoSignatureType
+    public let s: String
+    public let m: String?
 
     public init(t: CacaoSignatureType, s: String, m: String? = nil) {
         self.t = t

@@ -1,4 +1,5 @@
 import Foundation
+@testable import WalletConnectJWT
 @testable import WalletConnectRelay
 
 class EdDSASignerMock: JWTSigning {
