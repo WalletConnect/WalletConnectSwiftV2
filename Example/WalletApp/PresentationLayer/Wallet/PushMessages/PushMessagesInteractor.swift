@@ -4,9 +4,6 @@ import Combine
 final class PushMessagesInteractor {
 
     let subscription: PushSubscription
-//    var pushMessagesPublisher: AnyPublisher<[PushMessage], Never> {
-//        return Push.wallet.pushMessagesPublisher
-//    }
 
     init(subscription: PushSubscription) {
         self.subscription = subscription
