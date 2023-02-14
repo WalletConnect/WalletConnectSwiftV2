@@ -189,6 +189,46 @@ public final class RelayClient {
         }
     }
 
+    @available(*, renamed: "batchSubscribe(topics:)")
+    public func batchSubscribe(topics: [String], completion: @escaping (Error?) -> Void) {
+        logger.debug("Relay: Subscribing to topics: \(topics)")
+        let rpc = BatchSubscribe(params: .init(topics: topics))
+        let request = rpc
+            .wrapToIRN()
+            .asRPCRequest()
+        let message = try! request.asJSONEncodedString()
+        var cancellable: AnyCancellable?
+        cancellable = subscriptionResponsePublisher
+            .filter { $0.0 == request.id }
+            .sink { [unowned self] (_, subscriptionId) in
+                cancellable?.cancel()
+                concurrentQueue.async(flags: .barrier) { [unowned self] in
+                    topics.forEach{ subscriptions[$0] = subscriptionId }
+                }
+                completion(nil)
+        }
+        dispatcher.protectedSend(message) { [weak self] error in
+            if let error = error {
+                self?.logger.debug("Failed to subscribe to topics \(error)")
+                cancellable?.cancel()
+                completion(error)
+            }
+        }
+    }
+
+    public func batchSubscribe(topics: [String]) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            batchSubscribe(topics: topics) { error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                continuation.resume(returning: ())
+            }
+        }
+    }
+
+
     public func subscribe(topic: String) async throws {
         return try await withCheckedThrowingContinuation { continuation in
             subscribe(topic: topic) { error in
@@ -208,16 +248,6 @@ public final class RelayClient {
                     continuation.resume(throwing: error)
                 } else {
                     continuation.resume(returning: ())
-                }
-            }
-        }
-    }
-
-    public func batchSubscribe(topics: [String]) async throws {
-        await withThrowingTaskGroup(of: Void.self) { group in
-            for topic in topics {
-                group.addTask {
-                    try await self.subscribe(topic: topic)
                 }
             }
         }
