@@ -1,17 +1,20 @@
 import Foundation
 
-public struct Invite: Codable, Equatable {
-    public let id: Int64
-    public let topic: String
+public struct Invite {
     public let message: String
-    public let account: Account
-    public let publicKey: String
+    public let inviterAccount: Account
+    public let inviteeAccount: Account
+    public let inviteePublicKey: String
 
-    init(id: Int64, topic: String, message: String, account: Account, publicKey: String) {
-        self.id = id
-        self.topic = topic
+    public init(
+        message: String,
+        inviterAccount: Account,
+        inviteeAccount: Account,
+        inviteePublicKey: String
+    ) {
         self.message = message
-        self.account = account
-        self.publicKey = publicKey
+        self.inviterAccount = inviterAccount
+        self.inviteeAccount = inviteeAccount
+        self.inviteePublicKey = inviteePublicKey
     }
 }

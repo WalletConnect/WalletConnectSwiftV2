@@ -3,40 +3,49 @@ import Foundation
 struct ChatStorage {
 
     private let messageStore: KeyedDatabase<Message>
-    private let inviteStore: KeyedDatabase<Invite>
+    private let receivedInviteStore: KeyedDatabase<ReceivedInvite>
+    private let sentInviteStore: KeyedDatabase<SentInvite>
     private let threadStore: KeyedDatabase<Thread>
 
     init(
         messageStore: KeyedDatabase<Message>,
-        inviteStore: KeyedDatabase<Invite>,
+        receivedInviteStore: KeyedDatabase<ReceivedInvite>,
+        sentInviteStore: KeyedDatabase<SentInvite>,
         threadStore: KeyedDatabase<Thread>
     ) {
         self.messageStore = messageStore
-        self.inviteStore = inviteStore
+        self.receivedInviteStore = receivedInviteStore
+        self.sentInviteStore = sentInviteStore
         self.threadStore = threadStore
     }
 
     // MARK: - Invites
 
-    func getInvite(id: Int64, account: Account) -> Invite? {
-        return inviteStore.getElements(for: account.absoluteString)
+    func getReceivedInvite(id: Int64, account: Account) -> ReceivedInvite? {
+        return receivedInviteStore.getElements(for: account.absoluteString)
             .first(where: { $0.id == id })
     }
 
-    func set(invite: Invite, account: Account) {
-        inviteStore.set(invite, for: account.absoluteString)
+    func set(receivedInvite: ReceivedInvite, account: Account) {
+        receivedInviteStore.set(receivedInvite, for: account.absoluteString)
     }
 
-    func getInviteTopic(id: Int64, account: Account) -> String? {
-        return getInvites(account: account).first(where: { $0.id == id })?.topic
+    func getReceivedInvites(account: Account) -> [ReceivedInvite] {
+        return receivedInviteStore.getElements(for: account.absoluteString)
     }
 
-    func getInvites(account: Account) -> [Invite] {
-        return inviteStore.getElements(for: account.absoluteString)
+    func accept(invite: ReceivedInvite, account: Account) {
+        receivedInviteStore.delete(invite, for: account.absoluteString)
+
+        let accepted = ReceivedInvite(invite: invite, status: .approved)
+        receivedInviteStore.set(accepted, for: account.absoluteString)
     }
 
-    func delete(invite: Invite, account: Account) {
-        inviteStore.delete(invite, for: account.absoluteString)
+    func reject(invite: ReceivedInvite, account: Account) {
+        receivedInviteStore.delete(invite, for: account.absoluteString)
+
+        let rejected = ReceivedInvite(invite: invite, status: .rejected)
+        receivedInviteStore.set(rejected, for: account.absoluteString)
     }
 
     // MARK: - Threads

@@ -19,8 +19,8 @@ public class ChatClient {
         newThreadPublisherSubject.eraseToAnyPublisher()
     }
 
-    private var invitePublisherSubject = PassthroughSubject<Invite, Never>()
-    public var invitePublisher: AnyPublisher<Invite, Never> {
+    private var invitePublisherSubject = PassthroughSubject<ReceivedInvite, Never>()
+    public var invitePublisher: AnyPublisher<ReceivedInvite, Never> {
         invitePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -92,9 +92,9 @@ public class ChatClient {
     /// Creates and stores SentInvite with `pending` state
     /// - Parameter invite: An Invite object
     /// - Returns: Returns an invite id
+    @discardableResult
     public func invite(invite: Invite) async throws -> Int64 {
-        fatalError("TODO: Implement me")
-//        try await inviteService.invite(peerAccount: peerAccount, openingMessage: openingMessage)
+        return try await inviteService.invite(invite: invite)
     }
 
     /// Unregisters an invite key from keyserver
@@ -115,9 +115,9 @@ public class ChatClient {
     /// Accepts a chat invite by id from account specified as inviteeAccount in Invite
     /// - Parameter inviteId: Invite id
     /// - Returns: Thread topic
+    @discardableResult
     public func accept(inviteId: Int64) async throws -> String {
-        fatalError("TODO: Implement me")
-        try await invitationHandlingService.accept(inviteId: inviteId)
+        return try await invitationHandlingService.accept(inviteId: inviteId)
     }
 
     /// Rejects a chat invite by id from account specified as inviteeAccount in Invite
@@ -153,11 +153,11 @@ public class ChatClient {
         fatalError("not implemented")
     }
 
-    public func getReceivedInvites() -> [Invite] {
-        return chatStorage.getInvites(account: accountService.currentAccount)
+    public func getReceivedInvites() -> [ReceivedInvite] {
+        return chatStorage.getReceivedInvites(account: accountService.currentAccount)
     }
 
-    public func getSentInvites() -> [Invite] {
+    public func getSentInvites() -> [SentInvite] {
         fatalError("not implemented")
     }
 
@@ -170,7 +170,7 @@ public class ChatClient {
     }
 
     private func setUpEnginesCallbacks() {
-        invitationHandlingService.onInvite = { [unowned self] invite in
+        invitationHandlingService.onReceivedInvite = { [unowned self] invite in
             invitePublisherSubject.send(invite)
         }
         invitationHandlingService.onNewThread = { [unowned self] newThread in

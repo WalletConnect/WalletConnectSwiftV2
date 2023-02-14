@@ -36,20 +36,21 @@ class InviteService {
         setUpResponseHandling()
     }
 
-    func invite(peerAccount: Account, openingMessage: String) async throws {
+    @discardableResult
+    func invite(invite: Invite) async throws -> Int64 {
         // TODO ad storage
         let protocolMethod = ChatInviteProtocolMethod()
         let selfPubKeyY = try kms.createX25519KeyPair()
-        let peerPubKey = try await registryService.resolve(account: peerAccount)
-        let symKeyI = try kms.performKeyAgreement(selfPublicKey: selfPubKeyY, peerPublicKey: peerPubKey)
-        let inviteTopic = try AgreementPublicKey(hex: peerPubKey).rawRepresentation.sha256().toHexString()
+        let symKeyI = try kms.performKeyAgreement(selfPublicKey: selfPubKeyY, peerPublicKey: invite.inviteePublicKey)
+        let inviteTopic = try AgreementPublicKey(hex: invite.inviteePublicKey).rawRepresentation.sha256().toHexString()
 
         // overrides on invite toipic
         try kms.setSymmetricKey(symKeyI.sharedKey, for: inviteTopic)
 
-        let authID = try makeInviteJWT(message: openingMessage, publicKey: DIDKey(rawData: selfPubKeyY.rawRepresentation))
+        let authID = try makeInviteJWT(message: invite.message, publicKey: DIDKey(rawData: selfPubKeyY.rawRepresentation))
         let payload = InvitePayload(inviteAuth: authID)
-        let request = RPCRequest(method: protocolMethod.method, params: payload)
+        let inviteId = RPCID()
+        let request = RPCRequest(method: protocolMethod.method, params: payload, rpcid: inviteId)
 
         // 2. Proposer subscribes to topic R which is the hash of the derived symKey
         let responseTopic = symKeyI.derivedTopic()
@@ -60,6 +61,7 @@ class InviteService {
         try await networkingInteractor.request(request, topic: inviteTopic, protocolMethod: protocolMethod, envelopeType: .type1(pubKey: selfPubKeyY.rawRepresentation))
 
         logger.debug("invite sent on topic: \(inviteTopic)")
+        return inviteId.integer
     }
 }
 

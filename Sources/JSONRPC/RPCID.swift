@@ -17,6 +17,10 @@ struct IntIdentifierGenerator: IdentifierGenerator {
 
 extension RPCID {
 
+    public init() {
+        self = IntIdentifierGenerator().next()
+    }
+
     public var string: String {
         switch self {
         case .right(let int):

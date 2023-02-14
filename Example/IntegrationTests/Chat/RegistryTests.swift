@@ -33,14 +33,13 @@ final class RegistryTests: XCTestCase {
     }
 
     func testRegisterIdentityAndInviteKey() async throws {
-        var message: String!
         let publicKey = try await sut.registerIdentity(account: account) { msg in
-            message = msg
             return try! signer.sign(message: msg, privateKey: privateKey, type: .eip191)
         }
 
-        let cacao = try await sut.resolveIdentity(publicKey: publicKey)
-        XCTAssertEqual(try SIWECacaoFormatter().formatMessage(from: cacao.p), message)
+        let iss = DIDKey(rawData: Data(hex: publicKey)).did(prefix: true)
+        let resolvedAccount = try await sut.resolveIdentity(iss: iss)
+        XCTAssertEqual(resolvedAccount, account)
 
         let recovered = storage.getIdentityKey(for: account)!.publicKey.hexRepresentation
         XCTAssertEqual(publicKey, recovered)

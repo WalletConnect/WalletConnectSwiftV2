@@ -2,17 +2,17 @@ import Foundation
 
 public struct ChatInviteKeyClaims: JWTEncodable {
     public let iss: String
-    public let sub:  String
-    public let aud:  String
-    public let iat:  Int
-    public let exp:  Int
-    public let pkh:  String
+    public let sub: String
+    public let aud: String
+    public let iat: Int64
+    public let exp: Int64
+    public let pkh: String
 }
 
 public struct ChatInviteProposalClaims: JWTEncodable {
     public let iss: String
-    public let iat: Int
-    public let exp: Int
+    public let iat: Int64
+    public let exp: Int64
     public let ksu: String
 
     public let aud: String // responder/invitee blockchain account (did:pkh)
@@ -22,8 +22,8 @@ public struct ChatInviteProposalClaims: JWTEncodable {
 
 public struct ChatInviteApprovalClaims: JWTEncodable {
     public let iss: String
-    public let iat: Int
-    public let exp: Int
+    public let iat: Int64
+    public let exp: Int64
     public let ksu: String
 
     public let aud:  String // proposer/inviter blockchain account (did:pkh)
@@ -32,8 +32,8 @@ public struct ChatInviteApprovalClaims: JWTEncodable {
 
 public struct ChatMessageClaims: JWTEncodable {
     public let iss: String
-    public let iat: Int
-    public let exp: Int
+    public let iat: Int64
+    public let exp: Int64
     public let ksu: String
 
     public let aud: String // recipient blockchain account (did:pkh)

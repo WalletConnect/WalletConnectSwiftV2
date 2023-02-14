@@ -8,6 +8,7 @@ class MessagingService {
     private let keyserverURL: URL
     private let networkingInteractor: NetworkInteracting
     private let identityStorage: IdentityStorage
+    private let identityService: IdentityService
     private let accountService: AccountService
     private let chatStorage: ChatStorage
     private let logger: ConsoleLogging
@@ -22,6 +23,7 @@ class MessagingService {
         keyserverURL: URL,
         networkingInteractor: NetworkInteracting,
         identityStorage: IdentityStorage,
+        identityService: IdentityService,
         accountService: AccountService,
         chatStorage: ChatStorage,
         logger: ConsoleLogging
@@ -29,6 +31,7 @@ class MessagingService {
         self.keyserverURL = keyserverURL
         self.networkingInteractor = networkingInteractor
         self.identityStorage = identityStorage
+        self.identityService = identityService
         self.accountService = accountService
         self.chatStorage = chatStorage
         self.logger = logger
@@ -59,16 +62,13 @@ private extension MessagingService {
 
                 logger.debug("Received Message response")
 
-                guard
-                    let decoded = try? payload.request.decode(),
-                    let peerAccount = try? getPeerAccount(topic: payload.topic)
+                guard let decoded = try? payload.request.decode()
                 else { fatalError() /* TODO: Handle error */ }
 
                 let message = Message(
                     topic: payload.topic,
                     message: decoded.message,
-                    authorAccount: peerAccount,
-                    recipientAccount: decoded.recipientAccount,
+                    authorAccount: currentAccount,
                     timestamp: decoded.timestamp
                 )
 
@@ -83,26 +83,29 @@ private extension MessagingService {
 
                 logger.debug("Received message")
 
-                guard
-                    let decoded = try? payload.request.decode(),
-                    let peerAccount = try? getPeerAccount(topic: payload.topic)
+                guard let decoded = try? payload.request.decode()
                 else { fatalError() /* TODO: Handle error */ }
 
-                let message = Message(
-                    topic: payload.topic,
-                    message: decoded.message,
-                    authorAccount: peerAccount,
-                    recipientAccount: decoded.recipientAccount,
-                    timestamp: decoded.timestamp
-                )
-
-                chatStorage.set(message: message, account: message.recipientAccount)
-                onMessage?(message)
-
                 Task(priority: .high) {
-                    let params = ReceiptPayload(receiptAuth: payload.request.messageAuth)
+
+                    let authorAccount = try await identityService.resolveIdentity(iss: decoded.iss)
+
+                    let message = Message(
+                        topic: payload.topic,
+                        message: decoded.message,
+                        authorAccount: authorAccount,
+                        timestamp: decoded.timestamp
+                    )
+
+                    chatStorage.set(message: message, account: currentAccount)
+                    onMessage?(message)
+
+                    let jwt = try makeMessageJWT(recipientAccount: decoded.recipientAccount, message: decoded.message)
+                    let params = ReceiptPayload(receiptAuth: jwt)
                     let response = RPCResponse(id: payload.id, result: params)
-                    try await networkingInteractor.respond(topic: payload.topic,
+
+                    try await networkingInteractor.respond(
+                        topic: payload.topic,
                         response: response,
                         protocolMethod: ChatMessageProtocolMethod()
                     )

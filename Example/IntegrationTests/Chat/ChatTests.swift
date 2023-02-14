@@ -30,18 +30,17 @@ final class ChatTests: XCTestCase {
 
     func makeClient(prefix: String, account: Account) -> ChatClient {
         let keyserverURL = URL(string: "https://staging.keys.walletconnect.com")!
-        let accountService = AccountService(currentAccount: account)
-        let httpService = HTTPNetworkClient(host: keyserverURL.host!)
-        let registry = IdentityNetworkService(accountService: accountService, httpService: httpService)
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let keychain = KeychainStorageMock()
         let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keychainStorage: keychain, socketFactory: DefaultSocketFactory(), logger: logger)
         return ChatClientFactory.create(account: account, keyserverURL: keyserverURL, relayClient: relayClient, keychain:  keychain, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
     }
 
-    func testInvite() async {
+    func testInvite() async throws {
         let inviteExpectation = expectation(description: "invitation expectation")
-        try! await inviter.invite(peerAccount: inviteeAccount, openingMessage: "")
+        let inviteePublicKey = try await inviter.resolve(account: inviteeAccount)
+        let invite = Invite(message: "", inviterAccount: inviterAccount, inviteeAccount: inviteeAccount, inviteePublicKey: inviteePublicKey)
+        _ = try await inviter.invite(invite: invite)
         invitee.invitePublisher.sink { _ in
             inviteExpectation.fulfill()
         }.store(in: &publishers)
@@ -53,7 +52,9 @@ final class ChatTests: XCTestCase {
         let newThreadinviteeExpectation = expectation(description: "new thread on invitee client expectation")
 
         Task(priority: .high) {
-            try! await inviter.invite(peerAccount: inviteeAccount, openingMessage: "opening message")
+            let inviteePublicKey = try await inviter.resolve(account: inviteeAccount)
+            let invite = Invite(message: "", inviterAccount: inviterAccount, inviteeAccount: inviteeAccount, inviteePublicKey: inviteePublicKey)
+            try! await inviter.invite(invite: invite)
         }
 
         invitee.invitePublisher.sink { [unowned self] invite in
@@ -76,7 +77,9 @@ final class ChatTests: XCTestCase {
         messageExpectation.expectedFulfillmentCount = 4
 
         Task(priority: .high) {
-            try! await inviter.invite(peerAccount: inviteeAccount, openingMessage: "opening message")
+            let inviteePublicKey = try await inviter.resolve(account: inviteeAccount)
+            let invite = Invite(message: "", inviterAccount: inviterAccount, inviteeAccount: inviteeAccount, inviteePublicKey: inviteePublicKey)
+            try! await inviter.invite(invite: invite)
         }
 
         invitee.invitePublisher.sink { [unowned self] invite in

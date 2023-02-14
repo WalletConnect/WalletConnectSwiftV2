@@ -6,7 +6,7 @@ struct ReceiptPayload: Codable {
     func decode() throws  -> (
         message: String,
         recipientAccount: Account,
-        timestamp: Int
+        timestamp: Int64
     ) {
         let claims = try JWTClaimsDecoder.claims(of: ChatMessageClaims.self, from: receiptAuth)
         return (

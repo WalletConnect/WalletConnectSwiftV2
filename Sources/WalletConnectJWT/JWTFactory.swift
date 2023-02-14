@@ -63,22 +63,22 @@ private extension JWTFactory {
         return try jwt.encoded()
     }
 
-    func getIat() -> Int {
-        return Int(Date().timeIntervalSince1970)
+    func getIat() -> Int64 {
+        return Int64(Date().timeIntervalSince1970)
     }
 
     func getIss() -> String {
         return keyPair.publicKey.did
     }
 
-    func getChatExp() -> Int {
+    func getChatExp() -> Int64 {
         return expiry(days: 30)
     }
 
-    func expiry(days: Int) -> Int {
+    func expiry(days: Int) -> Int64 {
         var components = DateComponents()
         components.setValue(days, for: .day)
         let date = Calendar.current.date(byAdding: components, to: Date())!
-        return Int(date.timeIntervalSince1970)
+        return Int64(date.timeIntervalSince1970)
     }
 }

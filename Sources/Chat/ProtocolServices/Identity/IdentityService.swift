@@ -56,10 +56,10 @@ actor IdentityService {
         return try storage.saveInviteKey(inviteKey, for: account)
     }
 
-    func resolveIdentity(publicKey: String) async throws -> Cacao {
-        let data = Data(hex: publicKey)
-        let did = DIDKey(rawData: data).did(prefix: false)
-        return try await networkService.resolveIdentity(publicKey: did)
+    func resolveIdentity(iss: String) async throws -> Account {
+        let did = try DIDKey(did: iss).did(prefix: false)
+        let cacao = try await networkService.resolveIdentity(publicKey: did)
+        return try Account(DIDPKHString: cacao.p.iss)
     }
 
     func resolveInvite(account: Account) async throws -> String {

@@ -3,12 +3,13 @@ import Combine
 
 class InvitationHandlingService {
 
-    var onInvite: ((Invite) -> Void)?
+    var onReceivedInvite: ((ReceivedInvite) -> Void)?
     var onNewThread: ((Thread) -> Void)?
 
     private let keyserverURL: URL
     private let networkingInteractor: NetworkInteracting
     private let identityStorage: IdentityStorage
+    private let identityService: IdentityService
     private let chatStorage: ChatStorage
     private let accountService: AccountService
     private let logger: ConsoleLogging
@@ -23,6 +24,7 @@ class InvitationHandlingService {
         keyserverURL: URL,
         networkingInteractor: NetworkInteracting,
         identityStorage: IdentityStorage,
+        identityService: IdentityService,
         accountService: AccountService,
         kms: KeyManagementService,
         logger: ConsoleLogging,
@@ -31,6 +33,7 @@ class InvitationHandlingService {
         self.keyserverURL = keyserverURL
         self.kms = kms
         self.networkingInteractor = networkingInteractor
+        self.identityService = identityService
         self.identityStorage = identityStorage
         self.accountService = accountService
         self.logger = logger
@@ -38,19 +41,19 @@ class InvitationHandlingService {
         setUpRequestHandling()
     }
 
-    func accept(inviteId: Int64) async throws {
-        guard let invite = chatStorage.getInvite(id: inviteId, account: currentAccount)
+    func accept(inviteId: Int64) async throws -> String {
+        guard let invite = chatStorage.getReceivedInvite(id: inviteId, account: currentAccount)
         else { throw Errors.inviteForIdNotFound }
 
         guard let inviteePublicKey = identityStorage.getInviteKey(for: currentAccount)
         else { throw Errors.inviteKeyNotFound }
 
-        let symmetricKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: invite.publicKey)
+        let symmetricKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: invite.inviteePublicKey)
         let acceptTopic = symmetricKey.derivedTopic()
         try kms.setSymmetricKey(symmetricKey.sharedKey, for: acceptTopic)
 
         let publicKey = try kms.createX25519KeyPair()
-        let jwt = try makeAcceptJWT(publicKey: publicKey.rawRepresentation, inviter: invite.account)
+        let jwt = try makeAcceptJWT(publicKey: publicKey.rawRepresentation, inviter: invite.inviterAccount)
         let payload = AcceptPayload(responseAuth: jwt)
         
         try await networkingInteractor.respond(
@@ -59,7 +62,7 @@ class InvitationHandlingService {
             protocolMethod: ChatInviteProtocolMethod()
         )
 
-        let threadSymmetricKey = try kms.performKeyAgreement(selfPublicKey: publicKey, peerPublicKey: invite.publicKey)
+        let threadSymmetricKey = try kms.performKeyAgreement(selfPublicKey: publicKey, peerPublicKey: invite.inviteePublicKey)
         let threadTopic = threadSymmetricKey.derivedTopic()
         try kms.setSymmetricKey(threadSymmetricKey.sharedKey, for: threadTopic)
         try await networkingInteractor.subscribe(topic: threadTopic)
@@ -69,23 +72,25 @@ class InvitationHandlingService {
         let thread = Thread(
             topic: threadTopic,
             selfAccount: currentAccount,
-            peerAccount: invite.account
+            peerAccount: invite.inviteeAccount
         )
 
         chatStorage.set(thread: thread, account: currentAccount)
-        chatStorage.delete(invite: invite, account: currentAccount)
+        chatStorage.accept(invite: invite, account: currentAccount)
 
         onNewThread?(thread)
+
+        return thread.topic
     }
 
     func reject(inviteId: Int64) async throws {
-        guard let invite = chatStorage.getInvite(id: inviteId, account: currentAccount)
+        guard let invite = chatStorage.getReceivedInvite(id: inviteId, account: currentAccount)
         else { throw Errors.inviteForIdNotFound }
 
         guard let inviteePublicKey = identityStorage.getInviteKey(for: currentAccount)
         else { throw Errors.inviteKeyNotFound }
 
-        let symmetricKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: invite.publicKey)
+        let symmetricKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: invite.inviteePublicKey)
         let rejectTopic = symmetricKey.derivedTopic()
         try kms.setSymmetricKey(symmetricKey.sharedKey, for: rejectTopic)
 
@@ -96,7 +101,7 @@ class InvitationHandlingService {
             reason: ChatError.userRejected
         )
 
-        chatStorage.delete(invite: invite, account: currentAccount)
+        chatStorage.reject(invite: invite, account: currentAccount)
     }
 }
 
@@ -116,15 +121,22 @@ private extension InvitationHandlingService {
                 guard let decoded = try? payload.request.decode()
                 else { fatalError() /* TODO: Handle error */ }
 
-                let invite = Invite(
-                    id: payload.id.integer,
-                    topic: payload.topic,
-                    message: decoded.message,
-                    account: decoded.account,
-                    publicKey: decoded.publicKey
-                )
-                chatStorage.set(invite: invite, account: currentAccount)
-                onInvite?(invite)
+                Task(priority: .high) {
+                    let inviterAccount = try await identityService.resolveIdentity(iss: decoded.iss)
+                    // TODO: Should we cache it?
+                    let inviteePublicKey = try await identityService.resolveInvite(account: inviterAccount)
+
+                    let invite = ReceivedInvite(
+                        id: payload.id.integer,
+                        message: decoded.message,
+                        inviterAccount: inviterAccount,
+                        inviteeAccount: decoded.account,
+                        inviterPublicKey: decoded.publicKey,
+                        inviteePublicKey: inviteePublicKey
+                    )
+                    chatStorage.set(receivedInvite: invite, account: currentAccount)
+                    onReceivedInvite?(invite)
+                }
             }.store(in: &publishers)
     }
 
