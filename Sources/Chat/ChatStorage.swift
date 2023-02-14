@@ -1,15 +1,54 @@
 import Foundation
+import Combine
 
-struct ChatStorage {
-
-    enum Errors: Error {
-        case notFound
-    }
+final class ChatStorage {
 
     private let messageStore: KeyedDatabase<Message>
     private let receivedInviteStore: KeyedDatabase<ReceivedInvite>
     private let sentInviteStore: KeyedDatabase<SentInvite>
     private let threadStore: KeyedDatabase<Thread>
+
+    private var messagesPublisherSubject = PassthroughSubject<[Message], Never>()
+    private var receivedInvitesPublisherSubject = PassthroughSubject<[ReceivedInvite], Never>()
+    private var sentInvitesPublisherSubject = PassthroughSubject<[SentInvite], Never>()
+    private var threadsPublisherSubject = PassthroughSubject<[Thread], Never>()
+
+    private var newMessagePublisherSubject = PassthroughSubject<Message, Never>()
+    private var newReceivedInvitePublisherSubject = PassthroughSubject<ReceivedInvite, Never>()
+    private var newSentInvitePublisherSubject = PassthroughSubject<SentInvite, Never>()
+    private var newThreadPublisherSubject = PassthroughSubject<Thread, Never>()
+
+    var messagesPublisher: AnyPublisher<[Message], Never> {
+        messagesPublisherSubject.eraseToAnyPublisher()
+    }
+
+    var receivedInvitesPublisher: AnyPublisher<[ReceivedInvite], Never> {
+        receivedInvitesPublisherSubject.eraseToAnyPublisher()
+    }
+
+    var sentInvitesPublisher: AnyPublisher<[SentInvite], Never> {
+        sentInvitesPublisherSubject.eraseToAnyPublisher()
+    }
+
+    var threadsPublisher: AnyPublisher<[Thread], Never> {
+        threadsPublisherSubject.eraseToAnyPublisher()
+    }
+
+    var newMessagePublisher: AnyPublisher<Message, Never> {
+        newMessagePublisherSubject.eraseToAnyPublisher()
+    }
+
+    var newReceivedInvitePublisher: AnyPublisher<ReceivedInvite, Never> {
+        newReceivedInvitePublisherSubject.eraseToAnyPublisher()
+    }
+
+    var newSentInvitePublisher: AnyPublisher<SentInvite, Never> {
+        newSentInvitePublisherSubject.eraseToAnyPublisher()
+    }
+
+    var newThreadPublisher: AnyPublisher<Thread, Never> {
+        newThreadPublisherSubject.eraseToAnyPublisher()
+    }
 
     init(
         messageStore: KeyedDatabase<Message>,
@@ -21,6 +60,21 @@ struct ChatStorage {
         self.receivedInviteStore = receivedInviteStore
         self.sentInviteStore = sentInviteStore
         self.threadStore = threadStore
+    }
+
+    func setupSubscriptions(account: Account) {
+        messageStore.onUpdate = { [unowned self] in
+            messagesPublisherSubject.send(getMessages(account: account))
+        }
+        receivedInviteStore.onUpdate = { [unowned self] in
+            receivedInvitesPublisherSubject.send(getReceivedInvites(account: account))
+        }
+        sentInviteStore.onUpdate = { [unowned self] in
+            sentInvitesPublisherSubject.send(getSentInvites(account: account))
+        }
+        threadStore.onUpdate = { [unowned self] in
+            threadsPublisherSubject.send(getThreads(account: account))
+        }
     }
 
     // MARK: - Invites
@@ -37,10 +91,12 @@ struct ChatStorage {
 
     func set(receivedInvite: ReceivedInvite, account: Account) {
         receivedInviteStore.set(receivedInvite, for: account.absoluteString)
+        newReceivedInvitePublisherSubject.send(receivedInvite)
     }
 
     func set(sentInvite: SentInvite, account: Account) {
         sentInviteStore.set(sentInvite, for: account.absoluteString)
+        newSentInvitePublisherSubject.send(sentInvite)
     }
 
     func getReceivedInvites(account: Account) -> [ReceivedInvite] {
@@ -92,12 +148,14 @@ struct ChatStorage {
 
     func set(thread: Thread, account: Account) {
         threadStore.set(thread, for: account.absoluteString)
+        newThreadPublisherSubject.send(thread)
     }
 
     // MARK: - Messages
 
     func set(message: Message, account: Account) {
         messageStore.set(message, for: account.absoluteString)
+        newMessagePublisherSubject.send(message)
     }
 
     func getMessages(account: Account) -> [Message] {

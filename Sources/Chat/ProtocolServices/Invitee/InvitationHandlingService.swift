@@ -3,9 +3,6 @@ import Combine
 
 class InvitationHandlingService {
 
-    var onReceivedInvite: ((ReceivedInvite) -> Void)?
-    var onNewThread: ((Thread) -> Void)?
-
     private let keyserverURL: URL
     private let networkingInteractor: NetworkInteracting
     private let identityStorage: IdentityStorage
@@ -78,8 +75,6 @@ class InvitationHandlingService {
         chatStorage.set(thread: thread, account: currentAccount)
         chatStorage.accept(receivedInvite: invite, account: currentAccount)
 
-        onNewThread?(thread)
-
         return thread.topic
     }
 
@@ -136,7 +131,6 @@ private extension InvitationHandlingService {
                         timestamp: decoded.iat // TODO: Replace with relay message receivedAt
                     )
                     chatStorage.set(receivedInvite: invite, account: currentAccount)
-                    onReceivedInvite?(invite)
                 }
             }.store(in: &publishers)
     }

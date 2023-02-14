@@ -2,6 +2,7 @@ import Foundation
 import Combine
 
 class InviteService {
+
     private var publishers = [AnyCancellable]()
     private let keyserverURL: URL
     private let networkingInteractor: NetworkInteracting
@@ -11,9 +12,6 @@ class InviteService {
     private let kms: KeyManagementService
     private let chatStorage: ChatStorage
     private let registryService: RegistryService
-
-    var onNewThread: ((Thread) -> Void)?
-    var onInvite: ((Invite) -> Void)?
 
     init(
         keyserverURL: URL,
@@ -121,8 +119,6 @@ private extension InviteService {
         )
 
         chatStorage.set(thread: thread, account: accountService.currentAccount)
-
-        onNewThread?(thread)
         // TODO - remove symKeyI
     }
 

@@ -3,11 +3,17 @@ import Foundation
 class KeyedDatabase<Element> where Element: Codable & Equatable {
 
     private var index: [String: [Element]] = [:] {
-        didSet { self.set(index, for: identifier) }
+        didSet {
+            guard oldValue != index else { return }
+            set(index, for: identifier)
+            onUpdate?()
+        }
     }
 
     private let storage: KeyValueStorage
     private let identifier: String
+
+    var onUpdate: (() -> Void)?
 
     init(storage: KeyValueStorage, identifier: String) {
         self.storage = storage

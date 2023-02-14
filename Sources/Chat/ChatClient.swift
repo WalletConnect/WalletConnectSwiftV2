@@ -14,19 +14,36 @@ public class ChatClient {
 
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
-    private var newThreadPublisherSubject = PassthroughSubject<Thread, Never>()
+    public var messagesPublisher: AnyPublisher<[Message], Never> {
+        return chatStorage.messagesPublisher
+    }
+
+    public var receivedInvitesPublisher: AnyPublisher<[ReceivedInvite], Never> {
+        return chatStorage.receivedInvitesPublisher
+    }
+
+    public var sentInvitesPublisher: AnyPublisher<[SentInvite], Never> {
+        return chatStorage.sentInvitesPublisher
+    }
+
+    public var threadsPublisher: AnyPublisher<[Thread], Never> {
+        return chatStorage.threadsPublisher
+    }
+
+    public var newMessagePublisher: AnyPublisher<Message, Never> {
+        return chatStorage.newMessagePublisher
+    }
+
+    public var newReceivedInvitePublisher: AnyPublisher<ReceivedInvite, Never> {
+        return chatStorage.newReceivedInvitePublisher
+    }
+
+    public var newSentInvitePublisher: AnyPublisher<SentInvite, Never> {
+        return chatStorage.newSentInvitePublisher
+    }
+
     public var newThreadPublisher: AnyPublisher<Thread, Never> {
-        newThreadPublisherSubject.eraseToAnyPublisher()
-    }
-
-    private var invitePublisherSubject = PassthroughSubject<ReceivedInvite, Never>()
-    public var invitePublisher: AnyPublisher<ReceivedInvite, Never> {
-        invitePublisherSubject.eraseToAnyPublisher()
-    }
-
-    private var messagePublisherSubject = PassthroughSubject<Message, Never>()
-    public var messagePublisher: AnyPublisher<Message, Never> {
-        messagePublisherSubject.eraseToAnyPublisher()
+        return chatStorage.newThreadPublisher
     }
 
     // MARK: - Initialization
@@ -50,8 +67,6 @@ public class ChatClient {
         self.kms = kms
         self.chatStorage = chatStorage
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
-
-        setUpEnginesCallbacks()
     }
 
     // MARK: - Public interface
@@ -65,11 +80,9 @@ public class ChatClient {
         isPrivate: Bool = false,
         onSign: (String) -> CacaoSignature
     ) async throws -> String {
-        return try await registryService.register(
-            account: account,
-            isPrivate: isPrivate,
-            onSign: onSign
-        )
+        let pubKey = try await registryService.register(account: account, isPrivate: isPrivate, onSign: onSign)
+        chatStorage.setupSubscriptions(account: account)
+        return pubKey
     }
 
     /// Unregisters a blockchain account with previously registered identity key
@@ -167,20 +180,5 @@ public class ChatClient {
 
     public func getMessages(topic: String) -> [Message] {
         return chatStorage.getMessages(topic: topic, account: accountService.currentAccount)
-    }
-
-    private func setUpEnginesCallbacks() {
-        invitationHandlingService.onReceivedInvite = { [unowned self] invite in
-            invitePublisherSubject.send(invite)
-        }
-        invitationHandlingService.onNewThread = { [unowned self] newThread in
-            newThreadPublisherSubject.send(newThread)
-        }
-        inviteService.onNewThread = { [unowned self] newThread in
-            newThreadPublisherSubject.send(newThread)
-        }
-        messagingService.onMessage = { [unowned self] message in
-            messagePublisherSubject.send(message)
-        }
     }
 }

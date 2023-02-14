@@ -34,26 +34,28 @@ final class ChatTests: XCTestCase {
 
     func testInvite() async throws {
         let inviteExpectation = expectation(description: "invitation expectation")
+        inviteExpectation.expectedFulfillmentCount = 2
+
+        invitee.newReceivedInvitePublisher.sink { _ in
+            inviteExpectation.fulfill()
+        }.store(in: &publishers)
+
+        inviter.newSentInvitePublisher.sink { _ in
+            inviteExpectation.fulfill()
+        }.store(in: &publishers)
+
         let inviteePublicKey = try await inviter.resolve(account: inviteeAccount)
         let invite = Invite(message: "", inviterAccount: inviterAccount, inviteeAccount: inviteeAccount, inviteePublicKey: inviteePublicKey)
         _ = try await inviter.invite(invite: invite)
-        invitee.invitePublisher.sink { _ in
-            inviteExpectation.fulfill()
-        }.store(in: &publishers)
+
         wait(for: [inviteExpectation], timeout: InputConfig.defaultTimeout)
     }
 
-    func testAcceptAndCreateNewThread() {
+    func testAcceptAndCreateNewThread() async throws {
         let newThreadInviterExpectation = expectation(description: "new thread on inviting client expectation")
         let newThreadinviteeExpectation = expectation(description: "new thread on invitee client expectation")
 
-        Task(priority: .high) {
-            let inviteePublicKey = try await inviter.resolve(account: inviteeAccount)
-            let invite = Invite(message: "", inviterAccount: inviterAccount, inviteeAccount: inviteeAccount, inviteePublicKey: inviteePublicKey)
-            try! await inviter.invite(invite: invite)
-        }
-
-        invitee.invitePublisher.sink { [unowned self] invite in
+        invitee.newReceivedInvitePublisher.sink { [unowned self] invite in
             Task { try! await invitee.accept(inviteId: invite.id) }
         }.store(in: &publishers)
 
@@ -65,20 +67,18 @@ final class ChatTests: XCTestCase {
             newThreadInviterExpectation.fulfill()
         }.store(in: &publishers)
 
+        let inviteePublicKey = try await inviter.resolve(account: inviteeAccount)
+        let invite = Invite(message: "", inviterAccount: inviterAccount, inviteeAccount: inviteeAccount, inviteePublicKey: inviteePublicKey)
+        try await inviter.invite(invite: invite)
+
         wait(for: [newThreadinviteeExpectation, newThreadInviterExpectation], timeout: InputConfig.defaultTimeout)
     }
 
-    func testMessage() {
+    func testMessage() async throws {
         let messageExpectation = expectation(description: "message received")
         messageExpectation.expectedFulfillmentCount = 4
 
-        Task(priority: .high) {
-            let inviteePublicKey = try await inviter.resolve(account: inviteeAccount)
-            let invite = Invite(message: "", inviterAccount: inviterAccount, inviteeAccount: inviteeAccount, inviteePublicKey: inviteePublicKey)
-            try! await inviter.invite(invite: invite)
-        }
-
-        invitee.invitePublisher.sink { [unowned self] invite in
+        invitee.newReceivedInvitePublisher.sink { [unowned self] invite in
             Task { try! await invitee.accept(inviteId: invite.id) }
         }.store(in: &publishers)
 
@@ -90,13 +90,17 @@ final class ChatTests: XCTestCase {
             Task { try! await inviter.message(topic: thread.topic, message: "message") }
         }.store(in: &publishers)
 
-        inviter.messagePublisher.sink { _ in
+        inviter.newMessagePublisher.sink { _ in
             messageExpectation.fulfill()
         }.store(in: &publishers)
 
-        invitee.messagePublisher.sink { _ in
+        invitee.newMessagePublisher.sink { _ in
             messageExpectation.fulfill()
         }.store(in: &publishers)
+
+        let inviteePublicKey = try await inviter.resolve(account: inviteeAccount)
+        let invite = Invite(message: "", inviterAccount: inviterAccount, inviteeAccount: inviteeAccount, inviteePublicKey: inviteePublicKey)
+        try await inviter.invite(invite: invite)
 
         wait(for: [messageExpectation], timeout: InputConfig.defaultTimeout)
     }

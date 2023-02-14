@@ -3,8 +3,6 @@ import Combine
 
 class MessagingService {
 
-    var onMessage: ((Message) -> Void)?
-
     private let keyserverURL: URL
     private let networkingInteractor: NetworkInteracting
     private let identityStorage: IdentityStorage
@@ -73,7 +71,6 @@ private extension MessagingService {
                 )
 
                 chatStorage.set(message: message, account: currentAccount)
-                onMessage?(message)
             }.store(in: &publishers)
     }
 
@@ -98,7 +95,6 @@ private extension MessagingService {
                     )
 
                     chatStorage.set(message: message, account: currentAccount)
-                    onMessage?(message)
 
                     let jwt = try makeMessageJWT(recipientAccount: decoded.recipientAccount, message: decoded.message)
                     let params = ReceiptPayload(receiptAuth: jwt)
