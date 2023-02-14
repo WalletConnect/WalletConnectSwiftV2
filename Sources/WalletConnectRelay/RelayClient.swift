@@ -155,9 +155,9 @@ public final class RelayClient {
         cancellable = requestAcknowledgePublisher
             .filter { $0 == request.id }
             .sink { (_) in
-            cancellable?.cancel()
+                cancellable?.cancel()
                 onNetworkAcknowledge(nil)
-        }
+            }
         dispatcher.protectedSend(message) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to Publish Payload, error: \(error)")
@@ -183,7 +183,7 @@ public final class RelayClient {
                     self?.subscriptions[topic] = subscriptionInfo.1
                 }
                 completion(nil)
-        }
+            }
         dispatcher.protectedSend(message) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to subscribe to topic \(error)")
@@ -193,12 +193,8 @@ public final class RelayClient {
         }
     }
 
-    @available(*, renamed: "batchSubscribe(topics:)")
-    public func batchSubscribe(topics: [String], completion: @escaping (Error?) -> Void) {
-        guard !topics.isEmpty else {
-            completion(Errors.batchContainsNoItems)
-            return
-        }
+    public func batchSubscribe(topics: [String]) async throws {
+        guard !topics.isEmpty else { throw Errors.batchContainsNoItems }
         logger.debug("Relay: Subscribing to topics: \(topics)")
         let rpc = BatchSubscribe(params: .init(topics: topics))
         let request = rpc
@@ -219,29 +215,15 @@ public final class RelayClient {
                         subscriptions[topics[i]] = subscriptionIds[i]
                     }
                 }
-                completion(nil)
-        }
-        dispatcher.protectedSend(message) { [unowned self] error in
-            if let error = error {
-                logger.debug("Failed to subscribe to topics \(error)")
-                cancellable?.cancel()
-                completion(error)
             }
+        do {
+            try await dispatcher.protectedSend(message)
+        } catch {
+            logger.debug("Failed to subscribe to topics \(error)")
+            cancellable?.cancel()
+            throw error
         }
     }
-
-    public func batchSubscribe(topics: [String]) async throws {
-        return try await withCheckedThrowingContinuation { continuation in
-            batchSubscribe(topics: topics) { error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-                continuation.resume(returning: ())
-            }
-        }
-    }
-
 
     public func subscribe(topic: String) async throws {
         return try await withCheckedThrowingContinuation { continuation in
