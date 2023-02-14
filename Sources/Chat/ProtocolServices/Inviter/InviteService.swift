@@ -60,7 +60,18 @@ class InviteService {
         try await networkingInteractor.subscribe(topic: responseTopic)
         try await networkingInteractor.request(request, topic: inviteTopic, protocolMethod: protocolMethod, envelopeType: .type1(pubKey: selfPubKeyY.rawRepresentation))
 
+        let sentInvite = SentInvite(
+            id: inviteId.integer,
+            message: invite.message,
+            inviterAccount: invite.inviterAccount,
+            inviteeAccount: invite.inviteeAccount,
+            timestamp: Int64(Date().timeIntervalSince1970)
+        )
+
+        chatStorage.set(sentInvite: sentInvite, account: accountService.currentAccount)
+
         logger.debug("invite sent on topic: \(inviteTopic)")
+
         return inviteId.integer
     }
 }
@@ -82,6 +93,9 @@ private extension InviteService {
                 else { fatalError() /* TODO: Handle error */ }
 
                 Task(priority: .high) {
+                    // TODO: Implement reject for sentInvite
+                    chatStorage.accept(sentInviteId: payload.id.integer, account: decodedRequest.account)
+
                     try await createThread(
                         selfPubKeyHex: decodedRequest.publicKey,
                         peerPubKey: decodedResponse.publicKey,

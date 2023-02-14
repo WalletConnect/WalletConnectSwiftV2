@@ -158,7 +158,7 @@ public class ChatClient {
     }
 
     public func getSentInvites() -> [SentInvite] {
-        fatalError("not implemented")
+        return chatStorage.getSentInvites(account: accountService.currentAccount)
     }
 
     public func getThreads() -> [Thread] {

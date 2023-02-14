@@ -76,7 +76,7 @@ class InvitationHandlingService {
         )
 
         chatStorage.set(thread: thread, account: currentAccount)
-        chatStorage.accept(invite: invite, account: currentAccount)
+        chatStorage.accept(receivedInvite: invite, account: currentAccount)
 
         onNewThread?(thread)
 
@@ -101,7 +101,7 @@ class InvitationHandlingService {
             reason: ChatError.userRejected
         )
 
-        chatStorage.reject(invite: invite, account: currentAccount)
+        chatStorage.reject(receivedInvite: invite, account: currentAccount)
     }
 }
 
