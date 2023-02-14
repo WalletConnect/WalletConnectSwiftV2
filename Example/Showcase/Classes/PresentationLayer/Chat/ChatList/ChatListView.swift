@@ -33,7 +33,7 @@ struct ChatListView: View {
                             .padding(16.0)
                         }
 
-                        if presenter.threads.isEmpty {
+                        if presenter.threadViewModels.isEmpty {
                             Spacer()
                             emptyView(size: geometry.size)
                             Spacer()
@@ -56,7 +56,7 @@ struct ChatListView: View {
     }
 
     private func chatsList() -> some View {
-        ForEach(presenter.threads) { thread in
+        ForEach(presenter.threadViewModels) { thread in
             Button(action: {
                 presenter.didPressThread(thread)
             }) {

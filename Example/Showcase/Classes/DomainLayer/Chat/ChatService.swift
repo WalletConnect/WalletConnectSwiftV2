@@ -8,10 +8,10 @@ typealias Stream<T> = AsyncPublisher<AnyPublisher<T, Never>>
 final class ChatService {
 
     private lazy var client: ChatClient = {
-        guard let account = accountStorage.account else {
+        guard let importAccount = accountStorage.importAccount else {
             fatalError("Error - you must call Chat.configure(_:) before accessing the shared instance.")
         }
-        Chat.configure(account: account)
+        Chat.configure(account: importAccount.account)
         return Chat.instance
     }()
 
@@ -29,16 +29,22 @@ final class ChatService {
         return networking.socketConnectionStatusPublisher.values
     }
 
-    var messagePublisher: Stream<Message> {
-        return client.messagePublisher.values
+    var threadPublisher: Stream<[WalletConnectChat.Thread]> {
+        return client.threadsPublisher.values
     }
 
-    var threadPublisher: Stream<WalletConnectChat.Thread> {
-        return client.newThreadPublisher.values
+    var receivedInvitePublisher: Stream<[ReceivedInvite]> {
+        return client.receivedInvitesPublisher.values
     }
 
-    var invitePublisher: Stream<Invite> {
-        return client.invitePublisher.values
+    var sentInvitePublisher: Stream<[SentInvite]> {
+        return client.sentInvitesPublisher.values
+    }
+
+    func messagePublisher(thread: WalletConnectChat.Thread) -> Stream<[Message]> {
+        return client.messagesPublisher
+            .map { $0.filter { $0.topic == thread.topic } }
+            .eraseToAnyPublisher().values
     }
 
     func getMessages(thread: WalletConnectChat.Thread) -> [WalletConnectChat.Message] {
@@ -49,29 +55,31 @@ final class ChatService {
         client.getThreads()
     }
 
-    func getInvites() -> [WalletConnectChat.Invite] {
-        client.getInvites()
+    func getReceivedInvites() -> [ReceivedInvite] {
+        client.getReceivedInvites()
     }
 
     func sendMessage(topic: String, message: String) async throws {
         try await client.message(topic: topic, message: message)
     }
 
-    func accept(invite: Invite) async throws {
+    func accept(invite: ReceivedInvite) async throws {
         try await client.accept(inviteId: invite.id)
     }
 
-    func reject(invite: Invite) async throws {
+    func reject(invite: ReceivedInvite) async throws {
         try await client.reject(inviteId: invite.id)
     }
 
-    func invite(peerAccount: Account, message: String) async throws {
-        try await client.invite(peerAccount: peerAccount, openingMessage: message)
+    func invite(inviterAccount: Account, inviteeAccount: Account, message: String) async throws {
+        let inviteePublicKey = try await client.resolve(account: inviteeAccount)
+        let invite = Invite(message: message, inviterAccount: inviterAccount, inviteeAccount: inviteeAccount, inviteePublicKey: inviteePublicKey)
+        try await client.invite(invite: invite)
     }
 
-    func register(account: Account) async throws {
+    func register(account: Account, privateKey: String) async throws {
         _ = try await client.register(account: account) { message in
-            let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
+            let privateKey = Data(hex: privateKey)
             let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
             return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
         }

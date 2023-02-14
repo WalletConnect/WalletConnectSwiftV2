@@ -9,7 +9,13 @@ final class InviteListPresenter: ObservableObject {
     private let account: Account
     private var disposeBag = Set<AnyCancellable>()
 
-    @Published var invites: [InviteViewModel] = []
+    @Published private var receivedInvites: [ReceivedInvite] = []
+
+    var invites: [InviteViewModel] {
+        return receivedInvites
+            .sorted(by: { $0.timestamp > $1.timestamp })
+            .map { InviteViewModel(invite: $0) }
+    }
 
     init(interactor: InviteListInteractor, router: InviteListRouter, account: Account) {
         self.interactor = interactor
@@ -19,10 +25,10 @@ final class InviteListPresenter: ObservableObject {
 
     @MainActor
     func setupInitialState() async {
-        loadInvites()
+        receivedInvites = interactor.getReceivedInvites()
 
-        for await _ in interactor.invitesSubscription() {
-            loadInvites()
+        for await invites in interactor.invitesReceivedSubscription() {
+            receivedInvites = invites
         }
     }
 
@@ -57,12 +63,6 @@ extension InviteListPresenter: SceneViewModel {
 // MARK: Privates
 
 private extension InviteListPresenter {
-
-    func loadInvites() {
-        invites = interactor.getInvites()
-            .sorted(by: { $0.publicKey < $1.publicKey })
-            .map { InviteViewModel(invite: $0) }
-    }
 
     @MainActor
     func dismiss() {

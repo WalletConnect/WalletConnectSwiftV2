@@ -9,12 +9,12 @@ final class ChatInteractor {
         self.chatService = chatService
     }
 
-    func getMessages(thread: WalletConnectChat.Thread) async -> [Message] {
-        return await chatService.getMessages(thread: thread)
+    func getMessages(thread: WalletConnectChat.Thread) -> [Message] {
+        return chatService.getMessages(thread: thread)
     }
 
-    func messagesSubscription() -> Stream<Message> {
-        return chatService.messagePublisher
+    func messagesSubscription(thread: WalletConnectChat.Thread) -> Stream<[Message]> {
+        return chatService.messagePublisher(thread: thread)
     }
 
     func sendMessage(topic: String, message: String) async throws {

@@ -9,8 +9,13 @@ final class ChatPresenter: ObservableObject {
     private let router: ChatRouter
     private var disposeBag = Set<AnyCancellable>()
 
-    @Published var messages: [MessageViewModel] = []
+    @Published private var messages: [Message] = []
     @Published var input: String = .empty
+
+    var messageViewModels: [MessageViewModel] {
+        return messages.sorted(by: { $0.timestamp < $1.timestamp })
+            .map { MessageViewModel(message: $0, thread: thread) }
+    }
 
     init(thread: WalletConnectChat.Thread, interactor: ChatInteractor, router: ChatRouter) {
         self.thread = thread
@@ -20,10 +25,10 @@ final class ChatPresenter: ObservableObject {
 
     @MainActor
     func setupInitialState() async {
-        await loadMessages()
+        messages = interactor.getMessages(thread: thread)
 
-        for await _ in interactor.messagesSubscription() {
-            await loadMessages()
+        for await newMessages in interactor.messagesSubscription(thread: thread) {
+            messages = newMessages
         }
     }
 
@@ -39,19 +44,13 @@ final class ChatPresenter: ObservableObject {
 extension ChatPresenter: SceneViewModel {
 
     var sceneTitle: String? {
-        return AccountNameResolver.resolveName(thread.peerAccount)
+        return thread.peerAccount.address
     }
 }
 
 // MARK: Privates
 
 private extension ChatPresenter {
-
-    func loadMessages() async {
-        let messages = await interactor.getMessages(thread: thread)
-        self.messages = messages.sorted(by: { $0.timestamp < $1.timestamp })
-            .map { MessageViewModel(message: $0, thread: thread) }
-    }
 
     @MainActor
     func sendMessage() async {

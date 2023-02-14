@@ -17,11 +17,11 @@ final class WelcomeInteractor {
     }
 
     var account: Account? {
-        return accountStorage.account
+        return accountStorage.importAccount?.account
     }
 
     func isAuthorized() -> Bool {
-        accountStorage.account != nil
+        accountStorage.importAccount != nil
     }
 
     func trackConnection() -> Stream<SocketConnectionStatus> {

@@ -54,9 +54,9 @@ private extension InvitePresenter {
 
     @MainActor
     @objc func invite() {
-        guard let peerAccount = AccountNameResolver.resolveAccount(input) else { return }
+        guard let inviteeAccount = ImportAccount(input: input)?.account else { return }
         Task(priority: .userInitiated) {
-            await interactor.invite(peerAccount: peerAccount, message: "Welcome to WalletConnect Chat!", selfAccount: account)
+            await interactor.invite(inviterAccount: self.account, inviteeAccount: inviteeAccount, message: "Welcome to WalletConnect Chat!")
             router.dismiss()
         }
     }

@@ -8,7 +8,7 @@ struct ChatView: View {
         ZStack {
             ChatScrollView {
                 // TODO: Replace id
-                ForEach(presenter.messages, id: \.text) { message in
+                ForEach(presenter.messageViewModels, id: \.text) { message in
                     MessageView(message: message)
                 }
 

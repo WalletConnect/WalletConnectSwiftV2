@@ -2,14 +2,14 @@ import Foundation
 import WalletConnectChat
 
 struct InviteViewModel {
-    let invite: Invite
+    let invite: ReceivedInvite
 
-    init(invite: Invite) {
+    init(invite: ReceivedInvite) {
         self.invite = invite
     }
 
     var title: String {
-        return AccountNameResolver.resolveName(invite.account)
+        return invite.inviterAccount.address
     }
 
     var subtitle: String {
