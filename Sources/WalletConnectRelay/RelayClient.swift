@@ -34,6 +34,12 @@ public final class RelayClient {
     private var subscriptionResponsePublisher: AnyPublisher<(RPCID?, String), Never> {
         subscriptionResponsePublisherSubject.eraseToAnyPublisher()
     }
+
+    private let batchSubscriptionResponsePublisherSubject = PassthroughSubject<(RPCID?, [String]), Never>()
+    private var batchSubscriptionResponsePublisher: AnyPublisher<(RPCID?, [String]), Never> {
+        batchSubscriptionResponsePublisherSubject.eraseToAnyPublisher()
+    }
+
     private let requestAcknowledgePublisherSubject = PassthroughSubject<RPCID?, Never>()
     private var requestAcknowledgePublisher: AnyPublisher<RPCID?, Never> {
         requestAcknowledgePublisherSubject.eraseToAnyPublisher()
@@ -82,7 +88,7 @@ public final class RelayClient {
         keychainStorage: KeychainStorageProtocol = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk"),
         socketFactory: WebSocketFactory,
         socketConnectionType: SocketConnectionType = .automatic,
-        logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off)
+        logger: ConsoleLogging = ConsoleLogger(loggingLevel: .debug)
     ) {
         let didKeyFactory = ED25519DIDKeyFactory()
         let clientIdStorage = ClientIdStorage(keychain: keychainStorage, didKeyFactory: didKeyFactory)
@@ -203,18 +209,25 @@ public final class RelayClient {
             .asRPCRequest()
         let message = try! request.asJSONEncodedString()
         var cancellable: AnyCancellable?
-        cancellable = subscriptionResponsePublisher
+        cancellable = batchSubscriptionResponsePublisher
             .filter { $0.0 == request.id }
-            .sink { [unowned self] (_, subscriptionId) in
+            .sink { [unowned self] (_, subscriptionIds) in
                 cancellable?.cancel()
                 concurrentQueue.async(flags: .barrier) { [unowned self] in
-                    topics.forEach{ subscriptions[$0] = subscriptionId }
+                    logger.debug("Subscribed to topics: \(topics)")
+                    guard topics.count == subscriptionIds.count else {
+                        logger.warn("Number of topics in batch subscribe does not match number of subscriptions")
+                        return
+                    }
+                    for i in 0..<topics.count {
+                        subscriptions[topics[i]] = subscriptionIds[i]
+                    }
                 }
                 completion(nil)
         }
-        dispatcher.protectedSend(message) { [weak self] error in
+        dispatcher.protectedSend(message) { [unowned self] error in
             if let error = error {
-                self?.logger.debug("Failed to subscribe to topics \(error)")
+                logger.debug("Failed to subscribe to topics \(error)")
                 cancellable?.cancel()
                 completion(error)
             }
@@ -327,6 +340,8 @@ public final class RelayClient {
                     requestAcknowledgePublisherSubject.send(response.id)
                 } else if let subscriptionId = try? anyCodable.get(String.self) {
                     subscriptionResponsePublisherSubject.send((response.id, subscriptionId))
+                } else if let subscriptionIds = try? anyCodable.get([String].self) {
+                    batchSubscriptionResponsePublisherSubject.send((response.id, subscriptionIds))
                 }
             case .error(let rpcError):
                 logger.error("Received RPC error from relay network: \(rpcError)")
