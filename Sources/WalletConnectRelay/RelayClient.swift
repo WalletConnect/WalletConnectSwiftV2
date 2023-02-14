@@ -15,6 +15,7 @@ public final class RelayClient {
 
     enum Errors: Error {
         case subscriptionIdNotFound
+        case batchContainsNoItems
     }
 
     var subscriptions: [String: String] = [:]
@@ -191,6 +192,10 @@ public final class RelayClient {
 
     @available(*, renamed: "batchSubscribe(topics:)")
     public func batchSubscribe(topics: [String], completion: @escaping (Error?) -> Void) {
+        guard !topics.isEmpty else {
+            completion(Errors.batchContainsNoItems)
+            return
+        }
         logger.debug("Relay: Subscribing to topics: \(topics)")
         let rpc = BatchSubscribe(params: .init(topics: topics))
         let request = rpc
