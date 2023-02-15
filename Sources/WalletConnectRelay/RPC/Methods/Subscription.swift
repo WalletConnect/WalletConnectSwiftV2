@@ -1,5 +1,6 @@
 
 import Foundation
+import WalletConnectUtils
 
 struct Subscription: RelayRPC {
 
@@ -7,6 +8,7 @@ struct Subscription: RelayRPC {
         struct Contents: Codable {
             let topic: String
             let message: String
+            let publishedAt: UInt64
         }
         let id: String
         let data: Contents
@@ -19,6 +21,6 @@ struct Subscription: RelayRPC {
     }
 
     init(id: String, topic: String, message: String) {
-        self.params = Params(id: id, data: Params.Contents(topic: topic, message: message))
+        self.params = Params(id: id, data: Params.Contents(topic: topic, message: message, publishedAt: Date().millisecondsSince1970))
     }
 }
