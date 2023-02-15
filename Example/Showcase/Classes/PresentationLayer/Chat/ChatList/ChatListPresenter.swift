@@ -49,8 +49,8 @@ final class ChatListPresenter: ObservableObject {
     }
 
     @MainActor
-    func didLogoutPress() async {
-        try! await interactor.logout()
+    func didLogoutPress() async throws {
+        try await interactor.logout()
         router.presentWelcome()
     }
 

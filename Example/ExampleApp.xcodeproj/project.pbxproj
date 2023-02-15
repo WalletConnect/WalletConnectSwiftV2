@@ -154,6 +154,8 @@
 		A58E7D432872EE320082D443 /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58E7D422872EE320082D443 /* MessageView.swift */; };
 		A58E7D452872EE570082D443 /* ContentMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58E7D442872EE570082D443 /* ContentMessageView.swift */; };
 		A58E7D482872EF610082D443 /* MessageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58E7D472872EF610082D443 /* MessageViewModel.swift */; };
+		A58EC611299D57B800F3452A /* AsyncButton in Frameworks */ = {isa = PBXBuildFile; productRef = A58EC610299D57B800F3452A /* AsyncButton */; };
+		A58EC616299D5C6400F3452A /* PlainButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58EC615299D5C6400F3452A /* PlainButton.swift */; };
 		A59CF4F6292F83D50031A42F /* DefaultSignerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59CF4F5292F83D50031A42F /* DefaultSignerFactory.swift */; };
 		A59F877628B5462900A9CD80 /* WalletConnectAuth in Frameworks */ = {isa = PBXBuildFile; productRef = A59F877528B5462900A9CD80 /* WalletConnectAuth */; };
 		A59FAEC928B7B93A002BB66F /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = A59FAEC828B7B93A002BB66F /* Web3 */; };
@@ -494,6 +496,7 @@
 		A58E7D422872EE320082D443 /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
 		A58E7D442872EE570082D443 /* ContentMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentMessageView.swift; sourceTree = "<group>"; };
 		A58E7D472872EF610082D443 /* MessageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageViewModel.swift; sourceTree = "<group>"; };
+		A58EC615299D5C6400F3452A /* PlainButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlainButton.swift; sourceTree = "<group>"; };
 		A59CF4F5292F83D50031A42F /* DefaultSignerFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultSignerFactory.swift; sourceTree = "<group>"; };
 		A5A4FC55283CBB7800BBEC1E /* SessionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailView.swift; sourceTree = "<group>"; };
 		A5A4FC57283CBB9F00BBEC1E /* SessionDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailViewModel.swift; sourceTree = "<group>"; };
@@ -653,6 +656,7 @@
 				A59FAEC928B7B93A002BB66F /* Web3 in Frameworks */,
 				A5629AF22877F75100094373 /* Starscream in Frameworks */,
 				A59F877628B5462900A9CD80 /* WalletConnectAuth in Frameworks */,
+				A58EC611299D57B800F3452A /* AsyncButton in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1371,6 +1375,7 @@
 				A578FA312873036400AA7720 /* InputView.swift */,
 				A5C20220287EA5B8007E3188 /* TextFieldView.swift */,
 				A5C20222287EA7E2007E3188 /* BrandButton.swift */,
+				A58EC615299D5C6400F3452A /* PlainButton.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -1821,6 +1826,7 @@
 				A5629AF12877F75100094373 /* Starscream */,
 				A59F877528B5462900A9CD80 /* WalletConnectAuth */,
 				A59FAEC828B7B93A002BB66F /* Web3 */,
+				A58EC610299D57B800F3452A /* AsyncButton */,
 			);
 			productName = Showcase;
 			productReference = A58E7CE828729F550082D443 /* Showcase.app */;
@@ -1947,6 +1953,7 @@
 				A5D85224286333D500DAF5C3 /* XCRemoteSwiftPackageReference "Starscream" */,
 				A5AE354528A1A2AC0059AE8A /* XCRemoteSwiftPackageReference "Web3" */,
 				A5434021291E6A270068F706 /* XCRemoteSwiftPackageReference "solana-swift" */,
+				A58EC60F299D57B800F3452A /* XCRemoteSwiftPackageReference "swiftui-async-button" */,
 			);
 			productRefGroup = 764E1D3D26F8D3FC00A1FB15 /* Products */;
 			projectDirPath = "";
@@ -2128,6 +2135,7 @@
 				A58E7D0E2872A45B0082D443 /* MainRouter.swift in Sources */,
 				A58E7D432872EE320082D443 /* MessageView.swift in Sources */,
 				A58E7D3F2872E99A0082D443 /* TabPage.swift in Sources */,
+				A58EC616299D5C6400F3452A /* PlainButton.swift in Sources */,
 				A58E7D3C2872D55F0082D443 /* ChatPresenter.swift in Sources */,
 				A5C2020B287D9DEE007E3188 /* WelcomeModule.swift in Sources */,
 				A58E7D152872A5410082D443 /* UIViewController.swift in Sources */,
@@ -2763,7 +2771,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2797,7 +2805,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -3058,6 +3066,14 @@
 				kind = branch;
 			};
 		};
+		A58EC60F299D57B800F3452A /* XCRemoteSwiftPackageReference "swiftui-async-button" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/lorenzofiamingo/swiftui-async-button";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 		A5AE354528A1A2AC0059AE8A /* XCRemoteSwiftPackageReference "Web3" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/WalletConnect/Web3.swift";
@@ -3139,6 +3155,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A5D85224286333D500DAF5C3 /* XCRemoteSwiftPackageReference "Starscream" */;
 			productName = Starscream;
+		};
+		A58EC610299D57B800F3452A /* AsyncButton */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A58EC60F299D57B800F3452A /* XCRemoteSwiftPackageReference "swiftui-async-button" */;
+			productName = AsyncButton;
 		};
 		A59F877528B5462900A9CD80 /* WalletConnectAuth */ = {
 			isa = XCSwiftPackageProductDependency;

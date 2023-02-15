@@ -12,16 +12,9 @@ final class InvitePresenter: ObservableObject {
         didSet { didInputChanged() }
     }
 
-    lazy var rightBarButtonItem: UIBarButtonItem? = {
-        let item = UIBarButtonItem(
-            title: "Invite",
-            style: .plain,
-            target: self,
-            action: #selector(invite)
-        )
-        item.isEnabled = false
-        return item
-    }()
+    var showButton: Bool {
+        return ImportAccount(input: input) != nil
+    }
 
     init(interactor: InviteInteractor, router: InviteRouter, account: Account) {
         self.interactor = interactor
@@ -30,8 +23,10 @@ final class InvitePresenter: ObservableObject {
     }
 
     @MainActor
-    func setupInitialState() async {
-
+    func invite() async throws {
+        guard let inviteeAccount = ImportAccount(input: input)?.account else { return }
+        try await interactor.invite(inviterAccount: self.account, inviteeAccount: inviteeAccount, message: "Welcome to WalletConnect Chat!")
+        router.dismiss()
     }
 }
 
@@ -51,15 +46,6 @@ extension InvitePresenter: SceneViewModel {
 // MARK: Privates
 
 private extension InvitePresenter {
-
-    @MainActor
-    @objc func invite() {
-        guard let inviteeAccount = ImportAccount(input: input)?.account else { return }
-        Task(priority: .userInitiated) {
-            await interactor.invite(inviterAccount: self.account, inviteeAccount: inviteeAccount, message: "Welcome to WalletConnect Chat!")
-            router.dismiss()
-        }
-    }
 
     func didInputChanged() {
         rightBarButtonItem?.isEnabled = !input.isEmpty

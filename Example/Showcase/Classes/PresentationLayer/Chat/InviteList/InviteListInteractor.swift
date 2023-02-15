@@ -15,11 +15,11 @@ final class InviteListInteractor {
         return chatService.receivedInvitePublisher
     }
 
-    func accept(invite: ReceivedInvite) async {
-        try! await chatService.accept(invite: invite)
+    func accept(invite: ReceivedInvite) async throws {
+        try await chatService.accept(invite: invite)
     }
 
-    func reject(invite: ReceivedInvite) async {
-        try! await chatService.reject(invite: invite)
+    func reject(invite: ReceivedInvite) async throws {
+        try await chatService.reject(invite: invite)
     }
 }

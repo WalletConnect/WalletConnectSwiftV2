@@ -12,7 +12,7 @@ final class ImportInteractor {
         accountStorage.importAccount = importAccount
     }
 
-    func register(importAccount: ImportAccount) async {
-        try! await chatService.register(account: importAccount.account, privateKey: importAccount.privateKey)
+    func register(importAccount: ImportAccount) async throws {
+        try await chatService.register(account: importAccount.account, privateKey: importAccount.privateKey)
     }
 }

@@ -32,9 +32,9 @@ final class WelcomeInteractor {
         return try! await Pair.instance.create()
     }
 
-    func goPublic() async {
+    func goPublic() async throws {
         guard let importAccount = importAccount else { return }
-        try! await chatService.goPublic(account: importAccount.account, privateKey: importAccount.privateKey)
+        try await chatService.goPublic(account: importAccount.account, privateKey: importAccount.privateKey)
     }
 }
 

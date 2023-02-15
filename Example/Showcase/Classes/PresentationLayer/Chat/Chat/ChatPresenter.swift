@@ -26,7 +26,7 @@ final class ChatPresenter: ObservableObject {
 
     func didPressSend() {
         Task(priority: .userInitiated) {
-            await sendMessage()
+            try await sendMessage()
         }
     }
 }
@@ -54,8 +54,8 @@ private extension ChatPresenter {
     }
 
     @MainActor
-    func sendMessage() async {
-        try! await interactor.sendMessage(topic: thread.topic, message: input)
+    func sendMessage() async throws {
+        try await interactor.sendMessage(topic: thread.topic, message: input)
         input = .empty
     }
 }

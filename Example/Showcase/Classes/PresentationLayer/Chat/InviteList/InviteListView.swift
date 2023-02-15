@@ -32,12 +32,17 @@ struct InviteListView: View {
 
                         if invite.showActions {
                             HStack(spacing: 8.0) {
-                                Button(action: { presenter.didPressAccept(invite: invite) }) {
+                                PlainButton {
+                                    try await presenter.didPressAccept(invite: invite)
+                                } label: {
                                     Image("checkmark_icon")
                                         .resizable()
                                         .frame(width: 32, height: 32)
                                 }
-                                Button(action: { presenter.didPressReject(invite: invite) }) {
+
+                                PlainButton {
+                                    try await presenter.didPressReject(invite: invite)
+                                } label: {
                                     Image("cross_icon")
                                         .resizable()
                                         .frame(width: 32, height: 32)

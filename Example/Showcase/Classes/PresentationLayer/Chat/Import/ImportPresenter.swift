@@ -16,12 +16,12 @@ final class ImportPresenter: ObservableObject {
     }
 
     @MainActor
-    func didPressImport() async {
+    func didPressImport() async throws {
         guard let importAccount = ImportAccount(input: input)
         else { return input = .empty }
 
         interactor.save(importAccount: importAccount)
-        await interactor.register(importAccount: importAccount)
+        try await interactor.register(importAccount: importAccount)
         router.presentChat(account: importAccount.account)
     }
 }

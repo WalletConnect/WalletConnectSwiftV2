@@ -42,11 +42,13 @@ struct ChatListView: View {
                         }
                     }
                 }
-                
-                Button("Log out") { Task(priority: .userInitiated) {
-                    await presenter.didLogoutPress()
-                }}
-                .foregroundColor(.red)
+
+                PlainButton {
+                    try await presenter.didLogoutPress()
+                } label: {
+                    Text("Log out")
+                        .foregroundColor(.red)
+                }
                 .padding(.bottom, 16)
             }
         }

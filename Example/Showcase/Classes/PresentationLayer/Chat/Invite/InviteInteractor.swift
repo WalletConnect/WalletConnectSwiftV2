@@ -8,7 +8,7 @@ final class InviteInteractor {
         self.chatService = chatService
     }
 
-    func invite(inviterAccount: Account, inviteeAccount: Account, message: String) async {
-        try! await chatService.invite(inviterAccount: inviterAccount, inviteeAccount: inviteeAccount, message: message)
+    func invite(inviterAccount: Account, inviteeAccount: Account, message: String) async throws {
+        try await chatService.invite(inviterAccount: inviterAccount, inviteeAccount: inviteeAccount, message: message)
     }
 }

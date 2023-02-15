@@ -31,9 +31,9 @@ struct WelcomeView: View {
                         .foregroundColor(.w_foreground)
                         .multilineTextAlignment(.center)
 
-                    BrandButton(title: presenter.buttonTitle) { Task(priority: .userInitiated) {
-                        await presenter.didPressImport()
-                    }}
+                    BrandButton(title: presenter.buttonTitle) {
+                        try await presenter.didPressImport()
+                    }
 
                     Text("By connecting your wallet you agree with our\nTerms of Service")
                         .font(.footnote)
