@@ -2,6 +2,7 @@ import Foundation
 import XCTest
 import WalletConnectKMS
 @testable import WalletConnectRelay
+@testable import WalletConnectJWT
 
 final class EdDSASignerTests: XCTestCase {
     var sut: EdDSASigner!

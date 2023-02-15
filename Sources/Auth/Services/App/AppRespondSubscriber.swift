@@ -6,7 +6,7 @@ class AppRespondSubscriber {
     private let logger: ConsoleLogging
     private let rpcHistory: RPCHistory
     private let signatureVerifier: MessageSignatureVerifying
-    private let messageFormatter: SIWEMessageFormatting
+    private let messageFormatter: SIWECacaoFormatting
     private let pairingRegisterer: PairingRegisterer
     private var publishers = [AnyCancellable]()
 
@@ -17,7 +17,7 @@ class AppRespondSubscriber {
          rpcHistory: RPCHistory,
          signatureVerifier: MessageSignatureVerifying,
          pairingRegisterer: PairingRegisterer,
-         messageFormatter: SIWEMessageFormatting) {
+         messageFormatter: SIWECacaoFormatting) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.rpcHistory = rpcHistory
@@ -52,8 +52,7 @@ class AppRespondSubscriber {
 
                 guard
                     let recovered = try? messageFormatter.formatMessage(
-                        from: requestPayload.payloadParams,
-                        address: address
+                        from: requestPayload.payloadParams.cacaoPayload(address: address)
                     ), recovered == message
                 else { self.onResponse?(requestId, .failure(.messageCompromised)); return }
 

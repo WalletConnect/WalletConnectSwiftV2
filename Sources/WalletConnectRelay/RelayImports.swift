@@ -1,3 +1,3 @@
 #if !CocoaPods
-@_exported import WalletConnectKMS
+@_exported import WalletConnectJWT
 #endif

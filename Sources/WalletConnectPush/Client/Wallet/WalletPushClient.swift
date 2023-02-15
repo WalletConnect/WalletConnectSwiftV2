@@ -9,6 +9,12 @@ public class WalletPushClient {
 
     private var publishers = Set<AnyCancellable>()
 
+    public var subscriptionsPublisher: AnyPublisher<[PushSubscription], Never> {
+        return pushSubscriptionsObserver.subscriptionsPublisher
+    }
+
+    private let pushSubscriptionsObserver: PushSubscriptionsObserver
+
     private let requestPublisherSubject = PassthroughSubject<PushRequest, Never>()
 
     public var requestPublisher: AnyPublisher<PushRequest, Never> {
@@ -50,7 +56,8 @@ public class WalletPushClient {
          pushMessagesProvider: PushMessagesProvider,
          deletePushSubscriptionService: DeletePushSubscriptionService,
          deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber,
-         resubscribeService: PushResubscribeService) {
+         resubscribeService: PushResubscribeService,
+         pushSubscriptionsObserver: PushSubscriptionsObserver) {
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
         self.proposeResponder = proposeResponder
@@ -61,6 +68,7 @@ public class WalletPushClient {
         self.deletePushSubscriptionService = deletePushSubscriptionService
         self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
         self.resubscribeService = resubscribeService
+        self.pushSubscriptionsObserver = pushSubscriptionsObserver
         setupSubscriptions()
     }
 
@@ -115,3 +123,4 @@ extension WalletPushClient {
     }
 }
 #endif
+

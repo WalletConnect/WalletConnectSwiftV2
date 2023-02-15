@@ -1,0 +1,42 @@
+name: release
+
+on:
+  schedule:
+    # Runs "Every Monday 10am CET"
+    - cron: '0 10 * * 1'
+
+  workflow_dispatch:
+
+jobs:
+  build:    
+    runs-on: macos-12
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Setup Xcode Version
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: 14.1
+
+    - uses: actions/cache@v2
+      with:
+        path: |
+          .build
+          SourcePackagesCache
+          DerivedDataCache
+        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-
+
+    - name: Release
+      shell: bash
+      env: 
+        MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        GH_USER: ${{ secrets.GH_USER }}
+        APPLE_ISSUER_ID: ${{ secrets.APPLE_ISSUER_ID }}
+        APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
+        APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
+      run: |
+        make release_all APPLE_ID=${{ secrets.APPLE_ID }} TOKEN=$(echo -n $GH_USER:$GH_TOKEN | base64) PROJECT_ID=${{ secrets.RELEASE_PROJECT_ID }}

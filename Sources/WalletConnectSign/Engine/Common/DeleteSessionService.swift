@@ -24,6 +24,7 @@ class DeleteSessionService {
         let request = RPCRequest(method: protocolMethod.method, params: reason)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
         sessionStore.delete(topic: topic)
+        logger.debug("Session disconnected")
         kms.deleteSymmetricKey(for: topic)
         networkingInteractor.unsubscribe(topic: topic)
     }

@@ -28,8 +28,10 @@
 	</dict>
 	<key>PROJECT_ID</key>
 	<string>$(PROJECT_ID)</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Camera access for scanning QR code</string>
+	<key>SIMULATOR_IDENTIFIER</key>
+	<string>$(SIMULATOR_IDENTIFIER)</string>
+	<key>CONFIGURATION</key>
+	<string>$(CONFIGURATION)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -47,7 +49,9 @@
 			</array>
 		</dict>
 	</dict>
-	<key>SIMULATOR_IDENTIFIER</key>
-	<string>$(SIMULATOR_IDENTIFIER)</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>

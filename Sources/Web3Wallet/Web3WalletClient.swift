@@ -125,6 +125,10 @@ public class Web3WalletClient {
     public func pair(uri: WalletConnectURI) async throws {
         try await pairingClient.pair(uri: uri)
     }
+
+    public func disconnectPairing(topic: String) async throws {
+        try await pairingClient.disconnect(topic: topic)
+    }
     
     /// For a wallet and a dApp to terminate a session
     ///
@@ -169,7 +173,7 @@ public class Web3WalletClient {
     
     /// Query pending authentication requests
     /// - Returns: Pending authentication requests
-    public func getPendingRequests(account: Account) throws -> [AuthRequest] {
-        try authClient.getPendingRequests(account: account)
+    public func getPendingRequests() throws -> [AuthRequest] {
+        try authClient.getPendingRequests()
     }
 }

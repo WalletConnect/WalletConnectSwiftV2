@@ -7,6 +7,7 @@ extension JWT {
         let aud: String
         let iat: Int
         let exp: Int
+        let pkh: String?
 
         func encode() throws -> String {
             let jsonEncoder = JSONEncoder()

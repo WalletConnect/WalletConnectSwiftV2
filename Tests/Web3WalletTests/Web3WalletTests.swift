@@ -127,6 +127,11 @@ final class Web3WalletTests: XCTestCase {
         XCTAssertTrue(pairingClient.pairCalled)
     }
     
+    func testDisconnectPairingCalled() async {
+        try! await web3WalletClient.disconnectPairing(topic: "topic")
+        XCTAssertTrue(pairingClient.disconnectPairingCalled)
+    }
+    
     func testDisconnectCalled() async {
         try! await web3WalletClient.disconnect(topic: "")
         XCTAssertTrue(signClient.disconnectCalled)
@@ -186,8 +191,7 @@ final class Web3WalletTests: XCTestCase {
     }
     
     func testAuthPendingRequestsCalledAndNotEmpty() async {
-        let account = Account("eip155:56:0xe5EeF1368781911d265fDB6946613dA61915a501")!
-        let pendingRequests = try! web3WalletClient.getPendingRequests(account: account)
+        let pendingRequests = try! web3WalletClient.getPendingRequests()
         XCTAssertEqual(1, pendingRequests.count)
     }
 }
