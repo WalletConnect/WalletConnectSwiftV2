@@ -13,6 +13,7 @@ enum WalletConnectError: Error {
     case topicGenerationFailed
     case invalidPermissions // TODO: Refactor into actual cases
     case unsupportedNamespace(SignReasonCode)
+    case emptySessionProperties
 
     case `internal`(_ reason: InternalReason)
 
@@ -54,6 +55,8 @@ extension WalletConnectError {
             return reason.message
         case .internal: // TODO: Remove internal case
             return ""
+        case .emptySessionProperties:
+            return "Session properties cannot be empty when set"
         }
     }
 }
