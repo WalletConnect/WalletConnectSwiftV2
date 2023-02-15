@@ -20,7 +20,7 @@ struct ChatListView: View {
                                         .foregroundColor(.w_greenBackground)
                                         .font(.system(size: 17.0, weight: .bold))
                                         .clipShape(Circle())
-
+                                    
                                     Text("Chat Requests")
                                         .foregroundColor(.w_greenForground)
                                         .font(.system(size: 17.0, weight: .bold))
@@ -32,7 +32,7 @@ struct ChatListView: View {
                             .clipShape(Capsule())
                             .padding(16.0)
                         }
-
+                        
                         if presenter.threadViewModels.isEmpty {
                             Spacer()
                             emptyView(size: geometry.size)
@@ -42,15 +42,12 @@ struct ChatListView: View {
                         }
                     }
                 }
-
-                Button("Log out") {
-                    presenter.didLogoutPress()
-                }
+                
+                Button("Log out") { Task(priority: .userInitiated) {
+                    await presenter.didLogoutPress()
+                }}
                 .foregroundColor(.red)
                 .padding(.bottom, 16)
-            }
-            .onAppear {
-                presenter.setupInitialState()
             }
         }
     }

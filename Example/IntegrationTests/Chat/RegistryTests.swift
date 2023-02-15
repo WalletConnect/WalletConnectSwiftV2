@@ -33,9 +33,7 @@ final class RegistryTests: XCTestCase {
     }
 
     func testRegisterIdentityAndInviteKey() async throws {
-        let publicKey = try await sut.registerIdentity(account: account) { msg in
-            return try! signer.sign(message: msg, privateKey: privateKey, type: .eip191)
-        }
+        let publicKey = try await sut.registerIdentity(account: account, onSign: onSign)
 
         let iss = DIDKey(rawData: Data(hex: publicKey)).did(prefix: true)
         let resolvedAccount = try await sut.resolveIdentity(iss: iss)
@@ -44,14 +42,22 @@ final class RegistryTests: XCTestCase {
         let recovered = storage.getIdentityKey(for: account)!.publicKey.hexRepresentation
         XCTAssertEqual(publicKey, recovered)
 
-        let inviteKey = try await sut.registerInvite(account: account, onSign: { msg in
-            return try! signer.sign(message: msg, privateKey: privateKey, type: .eip191)
-        })
+        let inviteKey = try await sut.registerInvite(account: account, onSign: onSign)
 
         let recoveredKey = storage.getInviteKey(for: account)!
         XCTAssertEqual(inviteKey, recoveredKey)
 
         let resolvedKey = try await sut.resolveInvite(account: account)
         XCTAssertEqual(inviteKey.hexRepresentation, resolvedKey)
+
+        _ = try await sut.goPrivate(account: account)
+        try await sut.unregister(account: account, onSign: onSign)
+    }
+}
+
+private extension RegistryTests {
+
+    func onSign(_ message: String) -> CacaoSignature {
+        return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
     }
 }

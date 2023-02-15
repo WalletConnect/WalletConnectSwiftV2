@@ -45,7 +45,7 @@ class InviteService {
         // overrides on invite toipic
         try kms.setSymmetricKey(symKeyI.sharedKey, for: inviteTopic)
 
-        let authID = try makeInviteJWT(message: invite.message, publicKey: DIDKey(rawData: selfPubKeyY.rawRepresentation))
+        let authID = try makeInviteJWT(message: invite.message, inviteeAccount: invite.inviteeAccount, publicKey: DIDKey(rawData: selfPubKeyY.rawRepresentation))
         let payload = InvitePayload(inviteAuth: authID)
         let inviteId = RPCID()
         let request = RPCRequest(method: protocolMethod.method, params: payload, rpcid: inviteId)
@@ -66,7 +66,7 @@ class InviteService {
             timestamp: Int64(Date().timeIntervalSince1970)
         )
 
-        chatStorage.set(sentInvite: sentInvite, account: accountService.currentAccount)
+        chatStorage.set(sentInvite: sentInvite, account: invite.inviterAccount)
 
         logger.debug("invite sent on topic: \(inviteTopic)")
 
@@ -91,14 +91,21 @@ private extension InviteService {
                 else { fatalError() /* TODO: Handle error */ }
 
                 Task(priority: .high) {
+                    // TODO: Improve claims parsing
+                    let sentInviteId = payload.id.integer
+                    let inviterAccount = decodedResponse.account
+                    let inviteeAccount = decodedRequest.account
+                    let inviterPublicKey = decodedRequest.publicKey
+                    let inviteePublicKey = decodedResponse.publicKey
+
                     // TODO: Implement reject for sentInvite
-                    chatStorage.accept(sentInviteId: payload.id.integer, account: decodedRequest.account)
+                    chatStorage.accept(sentInviteId: sentInviteId, account: inviterAccount)
 
                     try await createThread(
-                        selfPubKeyHex: decodedRequest.publicKey,
-                        peerPubKey: decodedResponse.publicKey,
-                        account: decodedRequest.account,
-                        peerAccount: decodedResponse.account
+                        selfPubKeyHex: inviterPublicKey,
+                        peerPubKey: inviteePublicKey,
+                        account: inviterAccount,
+                        peerAccount: inviteeAccount
                     )
                 }
             }.store(in: &publishers)
@@ -118,16 +125,16 @@ private extension InviteService {
             peerAccount: peerAccount
         )
 
-        chatStorage.set(thread: thread, account: accountService.currentAccount)
+        chatStorage.set(thread: thread, account: account)
         // TODO - remove symKeyI
     }
 
-    func makeInviteJWT(message: String, publicKey: DIDKey) throws -> String {
+    func makeInviteJWT(message: String, inviteeAccount: Account, publicKey: DIDKey) throws -> String {
         guard let identityKey = identityStorage.getIdentityKey(for: accountService.currentAccount)
         else { throw Errors.identityKeyNotFound }
         return try JWTFactory(keyPair: identityKey).createChatInviteProposalJWT(
             ksu: keyserverURL.absoluteString,
-            aud: accountService.currentAccount.did,
+            aud: inviteeAccount.did,
             sub: message,
             pke: publicKey.did(prefix: true)
         )

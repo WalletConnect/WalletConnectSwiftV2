@@ -26,6 +26,14 @@ final class IdentityStorage {
         return key
     }
 
+    func removeIdentityKey(for account: Account) throws {
+        try keychain.delete(key: identityKeyIdentifier(for: account))
+    }
+
+    func removeInviteKey(for account: Account) throws {
+        try keychain.delete(key: inviteKeyIdentifier(for: account))
+    }
+
     func getIdentityKey(for account: Account) -> SigningPrivateKey? {
         return try? keychain.read(key: identityKeyIdentifier(for: account))
     }

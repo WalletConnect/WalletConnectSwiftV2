@@ -83,18 +83,28 @@ final class ChatTests: XCTestCase {
         }.store(in: &publishers)
 
         invitee.newThreadPublisher.sink { [unowned self] thread in
-            Task { try! await invitee.message(topic: thread.topic, message: "message") }
+            Task { try! await invitee.message(topic: thread.topic, message: "message1") }
         }.store(in: &publishers)
 
         inviter.newThreadPublisher.sink { [unowned self] thread in
-            Task { try! await inviter.message(topic: thread.topic, message: "message") }
+            Task { try! await inviter.message(topic: thread.topic, message: "message2") }
         }.store(in: &publishers)
 
-        inviter.newMessagePublisher.sink { _ in
+        inviter.newMessagePublisher.sink { message in
+            if message.authorAccount == self.inviterAccount {
+                XCTAssertEqual(message.message, "message2")
+            } else {
+                XCTAssertEqual(message.message, "message1")
+            }
             messageExpectation.fulfill()
         }.store(in: &publishers)
 
-        invitee.newMessagePublisher.sink { _ in
+        invitee.newMessagePublisher.sink { message in
+            if message.authorAccount == self.inviteeAccount {
+                XCTAssertEqual(message.message, "message1")
+            } else {
+                XCTAssertEqual(message.message, "message2")
+            }
             messageExpectation.fulfill()
         }.store(in: &publishers)
 

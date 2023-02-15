@@ -18,18 +18,10 @@ final class ChatPresenter: ObservableObject {
     }
 
     init(thread: WalletConnectChat.Thread, interactor: ChatInteractor, router: ChatRouter) {
+        defer { setupInitialState() }
         self.thread = thread
         self.interactor = interactor
         self.router = router
-    }
-
-    @MainActor
-    func setupInitialState() async {
-        messages = interactor.getMessages(thread: thread)
-
-        for await newMessages in interactor.messagesSubscription(thread: thread) {
-            messages = newMessages
-        }
     }
 
     func didPressSend() {
@@ -51,6 +43,15 @@ extension ChatPresenter: SceneViewModel {
 // MARK: Privates
 
 private extension ChatPresenter {
+
+    func setupInitialState() {
+        messages = interactor.getMessages(thread: thread)
+
+        interactor.messagesSubscription(thread: thread)
+            .sink { [unowned self] messages in
+                self.messages = messages
+            }.store(in: &disposeBag)
+    }
 
     @MainActor
     func sendMessage() async {

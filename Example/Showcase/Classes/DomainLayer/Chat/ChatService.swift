@@ -3,7 +3,7 @@ import Combine
 import WalletConnectChat
 import WalletConnectRelay
 
-typealias Stream<T> = AsyncPublisher<AnyPublisher<T, Never>>
+typealias Stream<T> = AnyPublisher<T, Never>
 
 final class ChatService {
 
@@ -26,25 +26,36 @@ final class ChatService {
     }
 
     var connectionPublisher: Stream<SocketConnectionStatus> {
-        return networking.socketConnectionStatusPublisher.values
+        return networking.socketConnectionStatusPublisher
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
 
     var threadPublisher: Stream<[WalletConnectChat.Thread]> {
-        return client.threadsPublisher.values
+        return client.threadsPublisher
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
 
     var receivedInvitePublisher: Stream<[ReceivedInvite]> {
-        return client.receivedInvitesPublisher.values
+        return client.receivedInvitesPublisher
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
 
     var sentInvitePublisher: Stream<[SentInvite]> {
-        return client.sentInvitesPublisher.values
+        return client.sentInvitesPublisher
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
 
     func messagePublisher(thread: WalletConnectChat.Thread) -> Stream<[Message]> {
         return client.messagesPublisher
-            .map { $0.filter { $0.topic == thread.topic } }
-            .eraseToAnyPublisher().values
+            .map {
+                $0.filter { $0.topic == thread.topic }
+            }
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
 
     func getMessages(thread: WalletConnectChat.Thread) -> [WalletConnectChat.Message] {
@@ -71,6 +82,12 @@ final class ChatService {
         try await client.reject(inviteId: invite.id)
     }
 
+    func goPublic(account: Account, privateKey: String) async throws {
+        try await client.goPublic(account: account) { message in
+            return onSign(message: message, privateKey: privateKey)
+        }
+    }
+
     func invite(inviterAccount: Account, inviteeAccount: Account, message: String) async throws {
         let inviteePublicKey = try await client.resolve(account: inviteeAccount)
         let invite = Invite(message: message, inviterAccount: inviterAccount, inviteeAccount: inviteeAccount, inviteePublicKey: inviteePublicKey)
@@ -79,13 +96,30 @@ final class ChatService {
 
     func register(account: Account, privateKey: String) async throws {
         _ = try await client.register(account: account) { message in
-            let privateKey = Data(hex: privateKey)
-            let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
-            return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
+            return onSign(message: message, privateKey: privateKey)
         }
+    }
+
+    func unregister(account: Account, privateKey: String) async throws {
+        try await client.unregister(account: account) { message in
+            return onSign(message: message, privateKey: privateKey)
+        }
+    }
+
+    func goPrivate(account: Account) async throws {
+        try await client.goPrivate(account: account)
     }
 
     func resolve(account: Account) async throws -> String {
         return try await client.resolve(account: account)
+    }
+}
+
+private extension ChatService {
+
+    func onSign(message: String, privateKey: String) -> CacaoSignature {
+        let privateKey = Data(hex: privateKey)
+        let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
+        return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
     }
 }

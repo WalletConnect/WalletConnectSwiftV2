@@ -20,31 +20,24 @@ final class ChatListPresenter: ObservableObject {
 
     var inviteViewModels: [InviteViewModel] {
         return receivedInvites
+            .filter { $0.status == .pending }
             .sorted(by: { $0.timestamp < $1.timestamp })
             .map { InviteViewModel(invite: $0) }
     }
 
     init(account: Account, interactor: ChatListInteractor, router: ChatListRouter) {
+        defer { setupInitialState() }
         self.account = account
         self.interactor = interactor
         self.router = router
     }
 
-    func setupInitialState() {
-        Task(priority: .userInitiated) {
-            await setupThreads()
-        }
-        Task(priority: .userInitiated) {
-            await setupInvites()
-        }
-    }
-
     var requestsCount: String {
-        return String(receivedInvites.count)
+        return String(inviteViewModels.count)
     }
 
     var showRequests: Bool {
-        return !receivedInvites.isEmpty
+        return !inviteViewModels.isEmpty
     }
 
     func didPressThread(_ thread: ThreadViewModel) {
@@ -55,8 +48,9 @@ final class ChatListPresenter: ObservableObject {
         router.presentInviteList(account: account)
     }
 
-    func didLogoutPress() {
-        interactor.logout()
+    @MainActor
+    func didLogoutPress() async {
+        try! await interactor.logout()
         router.presentWelcome()
     }
 
@@ -90,22 +84,19 @@ extension ChatListPresenter: SceneViewModel {
 
 private extension ChatListPresenter {
 
-    @MainActor
-    func setupThreads() async {
+    func setupInitialState() {
         threads = interactor.getThreads()
-
-        for await newThreads in interactor.threadsSubscription() {
-            threads = newThreads
-        }
-    }
-
-    @MainActor
-    func setupInvites() async {
         receivedInvites = interactor.getInvites()
 
-        for await invites in interactor.receivedInvitesSubscription() {
-            receivedInvites = invites
-        }
+        interactor.threadsSubscription()
+            .sink { [unowned self] threads in
+                self.threads = threads
+            }.store(in: &disposeBag)
+
+        interactor.receivedInvitesSubscription()
+            .sink { [unowned self] receivedInvites in
+                self.receivedInvites = receivedInvites
+            }.store(in: &disposeBag)
     }
 
     @objc func presentInvite() {

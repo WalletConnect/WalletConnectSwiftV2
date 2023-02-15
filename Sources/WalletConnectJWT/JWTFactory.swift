@@ -51,6 +51,15 @@ public struct JWTFactory {
         let claims = ChatMessageClaims(iss: getIss(), iat: getIat(), exp: getChatExp(), ksu: ksu, aud: aud, sub: sub)
         return try createAndSignJWT( claims: claims)
     }
+
+    public func createChatReceiptJWT(
+        ksu: String,
+        aud: String,
+        sub: String
+    ) throws -> String {
+        let claims = ChatReceiptClaims(iss: getIss(), iat: getIat(), exp: getChatExp(), ksu: ksu, sub: sub, aud: aud)
+        return try createAndSignJWT( claims: claims)
+    }
 }
 
 private extension JWTFactory {

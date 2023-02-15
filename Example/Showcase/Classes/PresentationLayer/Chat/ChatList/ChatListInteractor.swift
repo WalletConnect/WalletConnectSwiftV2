@@ -26,7 +26,10 @@ final class ChatListInteractor {
         return chatService.receivedInvitePublisher
     }
 
-    func logout() {
+    func logout() async throws {
+        guard let importAccount = accountStorage.importAccount else { return }
+        try await chatService.goPrivate(account: importAccount.account)
+        try await chatService.unregister(account: importAccount.account, privateKey: importAccount.privateKey)
         accountStorage.importAccount = nil
     }
 }

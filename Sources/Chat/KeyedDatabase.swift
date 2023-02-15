@@ -22,6 +22,10 @@ class KeyedDatabase<Element> where Element: Codable & Equatable {
         initializeIndex()
     }
 
+    func getAll() -> [Element] {
+        return index.values.reduce([], +)
+    }
+
     func getElements(for key: String) -> [Element] {
         return index[key] ?? []
     }

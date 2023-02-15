@@ -3,6 +3,8 @@ import Combine
 
 final class ChatStorage {
 
+    private let accountService: AccountService
+
     private let messageStore: KeyedDatabase<Message>
     private let receivedInviteStore: KeyedDatabase<ReceivedInvite>
     private let sentInviteStore: KeyedDatabase<SentInvite>
@@ -50,30 +52,38 @@ final class ChatStorage {
         newThreadPublisherSubject.eraseToAnyPublisher()
     }
 
+    var currentAccount: Account {
+        return accountService.currentAccount
+    }
+
     init(
+        accountService: AccountService,
         messageStore: KeyedDatabase<Message>,
         receivedInviteStore: KeyedDatabase<ReceivedInvite>,
         sentInviteStore: KeyedDatabase<SentInvite>,
         threadStore: KeyedDatabase<Thread>
     ) {
+        self.accountService = accountService
         self.messageStore = messageStore
         self.receivedInviteStore = receivedInviteStore
         self.sentInviteStore = sentInviteStore
         self.threadStore = threadStore
+
+        setupSubscriptions()
     }
 
-    func setupSubscriptions(account: Account) {
+    func setupSubscriptions() {
         messageStore.onUpdate = { [unowned self] in
-            messagesPublisherSubject.send(getMessages(account: account))
+            messagesPublisherSubject.send(getMessages(account: currentAccount))
         }
         receivedInviteStore.onUpdate = { [unowned self] in
-            receivedInvitesPublisherSubject.send(getReceivedInvites(account: account))
+            receivedInvitesPublisherSubject.send(getReceivedInvites(account: currentAccount))
         }
         sentInviteStore.onUpdate = { [unowned self] in
-            sentInvitesPublisherSubject.send(getSentInvites(account: account))
+            sentInvitesPublisherSubject.send(getSentInvites(account: currentAccount))
         }
         threadStore.onUpdate = { [unowned self] in
-            threadsPublisherSubject.send(getThreads(account: account))
+            threadsPublisherSubject.send(getThreads(account: currentAccount))
         }
     }
 
@@ -137,6 +147,10 @@ final class ChatStorage {
     }
 
     // MARK: - Threads
+
+    func getAllThreads() -> [Thread] {
+        return threadStore.getAll()
+    }
 
     func getThreads(account: Account) -> [Thread] {
         return threadStore.getElements(for: account.absoluteString)

@@ -69,7 +69,7 @@ class InvitationHandlingService {
         let thread = Thread(
             topic: threadTopic,
             selfAccount: currentAccount,
-            peerAccount: invite.inviteeAccount
+            peerAccount: invite.inviterAccount
         )
 
         chatStorage.set(thread: thread, account: currentAccount)
@@ -117,6 +117,7 @@ private extension InvitationHandlingService {
                 else { fatalError() /* TODO: Handle error */ }
 
                 Task(priority: .high) {
+                    let inviteeAccount = decoded.account
                     let inviterAccount = try await identityService.resolveIdentity(iss: decoded.iss)
                     // TODO: Should we cache it?
                     let inviteePublicKey = try await identityService.resolveInvite(account: inviterAccount)
@@ -125,12 +126,12 @@ private extension InvitationHandlingService {
                         id: payload.id.integer,
                         message: decoded.message,
                         inviterAccount: inviterAccount,
-                        inviteeAccount: decoded.account,
+                        inviteeAccount: inviteeAccount,
                         inviterPublicKey: decoded.publicKey,
                         inviteePublicKey: inviteePublicKey,
                         timestamp: decoded.iat // TODO: Replace with relay message receivedAt
                     )
-                    chatStorage.set(receivedInvite: invite, account: currentAccount)
+                    chatStorage.set(receivedInvite: invite, account: inviteeAccount)
                 }
             }.store(in: &publishers)
     }

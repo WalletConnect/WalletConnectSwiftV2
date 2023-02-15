@@ -10,7 +10,7 @@ public struct ChatClientFactory {
             keyserverURL: keyserverURL,
             relayClient: Relay.instance,
             keychain: keychain,
-            logger: ConsoleLogger(),
+            logger: ConsoleLogger(loggingLevel: .debug),
             keyValueStorage: UserDefaults.standard
         )
     }
@@ -35,10 +35,10 @@ public struct ChatClientFactory {
         let sentInviteStore = KeyedDatabase<SentInvite>(storage: keyValueStorage, identifier: ChatStorageIdentifiers.sentInvites.rawValue)
         let threadStore = KeyedDatabase<Thread>(storage: keyValueStorage, identifier: ChatStorageIdentifiers.threads.rawValue)
         let identityStorage = IdentityStorage(keychain: keychain)
-        let chatStorage = ChatStorage(messageStore: messageStore, receivedInviteStore: receivedInviteStore, sentInviteStore: sentInviteStore, threadStore: threadStore)
+        let chatStorage = ChatStorage(accountService: accountService, messageStore: messageStore, receivedInviteStore: receivedInviteStore, sentInviteStore: sentInviteStore, threadStore: threadStore)
         let resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, accountService: accountService, chatStorage: chatStorage, logger: logger)
         let identityService = IdentityService(keyserverURL: keyserverURL, kms: kms, storage: identityStorage, networkService: identityNetworkService, iatProvader: DefaultIATProvider(), messageFormatter: SIWECacaoFormatter())
-        let registryService = RegistryService(identityService: identityService, accountService: accountService, resubscriptionService: resubscriptionService, networkingInteractor: networkingInteractor, kms: kms, logger: logger)
+        let registryService = RegistryService(identityService: identityService, networkingInteractor: networkingInteractor, kms: kms, logger: logger)
         let invitationHandlingService = InvitationHandlingService(keyserverURL: keyserverURL, networkingInteractor: networkingInteractor, identityStorage: identityStorage, identityService: identityService, accountService: accountService, kms: kms, logger: logger, chatStorage: chatStorage)
         let inviteService = InviteService(keyserverURL: keyserverURL, networkingInteractor: networkingInteractor, identityStorage: identityStorage, accountService: accountService, kms: kms, chatStorage: chatStorage, logger: logger, registryService: registryService)
         let leaveService = LeaveService()
@@ -48,6 +48,7 @@ public struct ChatClientFactory {
             registryService: registryService,
             messagingService: messagingService,
             accountService: accountService,
+            resubscriptionService: resubscriptionService,
             invitationHandlingService: invitationHandlingService,
             inviteService: inviteService,
             leaveService: leaveService,

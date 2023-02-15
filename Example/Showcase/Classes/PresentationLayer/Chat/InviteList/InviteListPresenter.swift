@@ -18,31 +18,21 @@ final class InviteListPresenter: ObservableObject {
     }
 
     init(interactor: InviteListInteractor, router: InviteListRouter, account: Account) {
+        defer { setupInitialState() }
         self.interactor = interactor
         self.router = router
         self.account = account
     }
 
-    @MainActor
-    func setupInitialState() async {
-        receivedInvites = interactor.getReceivedInvites()
-
-        for await invites in interactor.invitesReceivedSubscription() {
-            receivedInvites = invites
-        }
-    }
-
     func didPressAccept(invite: InviteViewModel) {
         Task(priority: .userInitiated) {
             await interactor.accept(invite: invite.invite)
-            await dismiss()
         }
     }
 
     func didPressReject(invite: InviteViewModel) {
         Task(priority: .userInitiated) {
             await interactor.reject(invite: invite.invite)
-            await dismiss()
         }
     }
 }
@@ -63,6 +53,15 @@ extension InviteListPresenter: SceneViewModel {
 // MARK: Privates
 
 private extension InviteListPresenter {
+
+    func setupInitialState() {
+        receivedInvites = interactor.getReceivedInvites()
+
+        interactor.invitesReceivedSubscription()
+            .sink { [unowned self] receivedInvites in
+                self.receivedInvites = receivedInvites
+            }.store(in: &disposeBag)
+    }
 
     @MainActor
     func dismiss() {

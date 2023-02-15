@@ -6,6 +6,7 @@ public class ChatClient {
     private let registryService: RegistryService
     private let messagingService: MessagingService
     private let accountService: AccountService
+    private let resubscriptionService: ResubscriptionService
     private let invitationHandlingService: InvitationHandlingService
     private let inviteService: InviteService
     private let leaveService: LeaveService
@@ -51,6 +52,7 @@ public class ChatClient {
     init(registryService: RegistryService,
          messagingService: MessagingService,
          accountService: AccountService,
+         resubscriptionService: ResubscriptionService,
          invitationHandlingService: InvitationHandlingService,
          inviteService: InviteService,
          leaveService: LeaveService,
@@ -61,6 +63,7 @@ public class ChatClient {
         self.registryService = registryService
         self.messagingService = messagingService
         self.accountService = accountService
+        self.resubscriptionService = resubscriptionService
         self.invitationHandlingService = invitationHandlingService
         self.inviteService = inviteService
         self.leaveService = leaveService
@@ -80,18 +83,24 @@ public class ChatClient {
         isPrivate: Bool = false,
         onSign: (String) -> CacaoSignature
     ) async throws -> String {
-        let pubKey = try await registryService.register(account: account, isPrivate: isPrivate, onSign: onSign)
-        chatStorage.setupSubscriptions(account: account)
-        return pubKey
+        let publicKey = try await registryService.register(account: account, onSign: onSign)
+
+        accountService.setAccount(account)
+
+        guard !isPrivate else {
+            return publicKey
+        }
+
+        try await goPublic(account: account, onSign: onSign)
+
+        return publicKey
     }
 
     /// Unregisters a blockchain account with previously registered identity key
     /// Must not unregister invite key but must stop listening for invites
     /// - Parameter onSign: Callback for signing CAIP-122 message to verify blockchain account ownership
-    public func unregister(account: Account,
-        onSign: (String) -> CacaoSignature
-    ) async throws {
-        fatalError("Not implemented")
+    public func unregister(account: Account, onSign: (String) -> CacaoSignature) async throws {
+        try await registryService.unregister(account: account, onSign: onSign)
     }
 
     /// Queries the keyserver with a blockchain account
@@ -114,15 +123,15 @@ public class ChatClient {
     /// Stops listening for invites
     /// - Parameter account: CAIP10 blockachain account
     public func goPrivate(account: Account) async throws {
-        fatalError("Not implemented")
+        try await registryService.goPrivate(account: account)
     }
 
     /// Registers an invite key if not yet registered on this client from keyserver
     /// Starts listening for invites
     /// - Parameter account: CAIP10 blockachain account
     /// - Returns: The public invite key
-    public func goPublic(account: Account) async throws {
-        fatalError("Not implemented")
+    public func goPublic(account: Account, onSign: (String) -> CacaoSignature) async throws {
+        try await registryService.goPublic(account: account, onSign: onSign)
     }
 
     /// Accepts a chat invite by id from account specified as inviteeAccount in Invite

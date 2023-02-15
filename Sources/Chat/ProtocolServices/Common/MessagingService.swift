@@ -38,12 +38,16 @@ class MessagingService {
     }
 
     func send(topic: String, messageString: String) async throws {
-        let recipientAccount = try getPeerAccount(topic: topic)
-        let jwt = try makeMessageJWT(recipientAccount: recipientAccount, message: messageString)
+        guard let thread = chatStorage.getThread(topic: topic, account: currentAccount) else {
+            throw Errors.threadDoNotExist
+        }
+        let jwt = try makeMessageJWT(recipientAccount: thread.peerAccount, message: messageString)
         let payload = MessagePayload(messageAuth: jwt)
         let protocolMethod = ChatMessageProtocolMethod()
         let request = RPCRequest(method: protocolMethod.method, params: payload)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
+
+        logger.debug("Message sent on topic: \(topic)")
     }
 }
 
@@ -58,19 +62,21 @@ private extension MessagingService {
         networkingInteractor.responseSubscription(on: ChatMessageProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<MessagePayload, ReceiptPayload>) in
 
-                logger.debug("Received Message response")
+                logger.debug("Received Receipt response")
 
-                guard let decoded = try? payload.request.decode()
+                guard
+                    let messagePayload = try? payload.request.decode(),
+                    let receiptPayload = try? payload.response.decode()
                 else { fatalError() /* TODO: Handle error */ }
 
                 let message = Message(
                     topic: payload.topic,
-                    message: decoded.message,
-                    authorAccount: currentAccount,
-                    timestamp: decoded.timestamp
+                    message: messagePayload.message,
+                    authorAccount: receiptPayload.senderAccount,
+                    timestamp: messagePayload.timestamp
                 )
 
-                chatStorage.set(message: message, account: currentAccount)
+                chatStorage.set(message: message, account: receiptPayload.senderAccount)
             }.store(in: &publishers)
     }
 
@@ -78,7 +84,7 @@ private extension MessagingService {
         networkingInteractor.requestSubscription(on: ChatMessageProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<MessagePayload>) in
 
-                logger.debug("Received message")
+                logger.debug("Received Message Request")
 
                 guard let decoded = try? payload.request.decode()
                 else { fatalError() /* TODO: Handle error */ }
@@ -94,9 +100,14 @@ private extension MessagingService {
                         timestamp: decoded.timestamp
                     )
 
-                    chatStorage.set(message: message, account: currentAccount)
+                    chatStorage.set(message: message, account: decoded.recipientAccount)
 
-                    let jwt = try makeMessageJWT(recipientAccount: decoded.recipientAccount, message: decoded.message)
+                    let messageHash = message.message
+                        .data(using: .utf8)!
+                        .sha256()
+                        .toHexString()
+
+                    let jwt = try makeReceiptJWT(senderAccount: authorAccount, messageHash: messageHash)
                     let params = ReceiptPayload(receiptAuth: jwt)
                     let response = RPCResponse(id: payload.id, result: params)
 
@@ -105,14 +116,10 @@ private extension MessagingService {
                         response: response,
                         protocolMethod: ChatMessageProtocolMethod()
                     )
+
+                    logger.debug("Sent Receipt Response")
                 }
             }.store(in: &publishers)
-    }
-
-    func getPeerAccount(topic: String) throws -> Account {
-        guard let thread = chatStorage.getThread(topic: topic, account: currentAccount)
-        else { throw Errors.threadDoNotExist }
-        return thread.peerAccount
     }
 
     func makeMessageJWT(recipientAccount: Account, message: String) throws -> String {
@@ -123,6 +130,17 @@ private extension MessagingService {
             ksu: keyserverURL.absoluteString,
             aud: DIDPKH(account: recipientAccount).string,
             sub: message
+        )
+    }
+
+    func makeReceiptJWT(senderAccount: Account, messageHash: String) throws -> String {
+        guard let identityKey = identityStorage.getIdentityKey(for: accountService.currentAccount)
+        else { throw Errors.identityKeyNotFound }
+
+        return try JWTFactory(keyPair: identityKey).createChatMessageJWT(
+            ksu: keyserverURL.absoluteString,
+            aud: DIDPKH(account: senderAccount).string,
+            sub: messageHash
         )
     }
 }

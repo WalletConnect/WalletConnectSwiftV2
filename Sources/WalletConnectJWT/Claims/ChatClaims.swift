@@ -26,8 +26,8 @@ public struct ChatInviteApprovalClaims: JWTEncodable {
     public let exp: Int64
     public let ksu: String
 
-    public let aud:  String // proposer/inviter blockchain account (did:pkh)
-    public let sub:  String // public key sent by the responder/invitee
+    public let aud: String // proposer/inviter blockchain account (did:pkh)
+    public let sub: String // public key sent by the responder/invitee
 }
 
 public struct ChatMessageClaims: JWTEncodable {
@@ -41,4 +41,14 @@ public struct ChatMessageClaims: JWTEncodable {
 
     // TODO: Media not implemented
     // public let xma: Media?
+}
+
+public struct ChatReceiptClaims: JWTEncodable {
+    public let iss: String
+    public let iat: Int64
+    public let exp: Int64
+    public let ksu: String
+
+    public let sub: String // hash of the message received
+    public let aud: String // sender blockchain account (did:pkh)
 }

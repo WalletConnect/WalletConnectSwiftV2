@@ -56,6 +56,27 @@ actor IdentityService {
         return try storage.saveInviteKey(inviteKey, for: account)
     }
 
+    func unregister(account: Account, onSign: (String) -> CacaoSignature) async throws {
+        guard let identityKey = storage.getIdentityKey(for: account)
+        else { throw Errors.identityKeyNotFound }
+
+        let cacao = try makeCacao(DIDKey: identityKey.publicKey.did, account: account, onSign: onSign)
+        try await networkService.removeIdentity(cacao: cacao)
+        try storage.removeIdentityKey(for: account)
+    }
+
+    func goPrivate(account: Account) async throws -> AgreementPublicKey {
+        guard let inviteKey = storage.getInviteKey(for: account)
+        else { throw Errors.inviteKeyNotFound }
+
+        let invitePublicKey = inviteKey.hexRepresentation
+        let idAuth = try makeIDAuth(account: account, invitePublicKey: invitePublicKey)
+        try await networkService.removeInvite(idAuth: idAuth)
+        try storage.removeInviteKey(for: account)
+
+        return inviteKey
+    }
+
     func resolveIdentity(iss: String) async throws -> Account {
         let did = try DIDKey(did: iss).did(prefix: false)
         let cacao = try await networkService.resolveIdentity(publicKey: did)
@@ -71,6 +92,7 @@ private extension IdentityService {
 
     enum Errors: Error {
         case identityKeyNotFound
+        case inviteKeyNotFound
     }
 
     func makeCacao(

@@ -16,8 +16,8 @@ final class WelcomeInteractor {
         self.accountStorage = accountStorage
     }
 
-    var account: Account? {
-        return accountStorage.importAccount?.account
+    var importAccount: ImportAccount? {
+        return accountStorage.importAccount
     }
 
     func isAuthorized() -> Bool {
@@ -30,6 +30,11 @@ final class WelcomeInteractor {
     
     func generateUri() async -> WalletConnectURI {
         return try! await Pair.instance.create()
+    }
+
+    func goPublic() async {
+        guard let importAccount = importAccount else { return }
+        try! await chatService.goPublic(account: importAccount.account, privateKey: importAccount.privateKey)
     }
 }
 

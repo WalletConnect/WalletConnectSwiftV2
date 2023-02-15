@@ -11,7 +11,7 @@ struct ImportView: View {
                 .frame(width: 128, height: 128)
                 .padding(.top, 24.0)
 
-            TextFieldView(title: "Username", placeholder: "username.eth or 0x0…", input: $presenter.input)
+            TextFieldView(title: "Private key", placeholder: "4dc0055d1831…", input: $presenter.input)
 
             Spacer()
 

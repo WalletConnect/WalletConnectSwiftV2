@@ -2,56 +2,60 @@ import Foundation
 
 actor RegistryService {
     private let networkingInteractor: NetworkInteracting
-    private let accountService: AccountService
-    private let resubscriptionService: ResubscriptionService
     private let identityService: IdentityService
     private let logger: ConsoleLogging
     private let kms: KeyManagementServiceProtocol
 
     init(
         identityService: IdentityService,
-        accountService: AccountService,
-        resubscriptionService: ResubscriptionService,
         networkingInteractor: NetworkInteracting,
         kms: KeyManagementServiceProtocol,
         logger: ConsoleLogging
     ) {
         self.identityService = identityService
         self.kms = kms
-        self.accountService = accountService
-        self.resubscriptionService = resubscriptionService
         self.networkingInteractor = networkingInteractor
         self.logger = logger
     }
 
-    func register(account: Account,
-        isPrivate: Bool,
-        onSign: (String) -> CacaoSignature
-    ) async throws -> String {
-        let publicKey = try await identityService.registerIdentity(account: account, onSign: onSign)
-
-        guard !isPrivate else { return publicKey }
-
-        try await goPublic(account: account, onSign: onSign)
-        return publicKey
+    func register(account: Account, onSign: (String) -> CacaoSignature) async throws -> String {
+        return try await identityService.registerIdentity(account: account, onSign: onSign)
+        logger.debug("Did register an account: \(account)")
     }
 
     func goPublic(account: Account, onSign: (String) -> CacaoSignature) async throws {
-        let pubKey = try await identityService.registerInvite(account: account, onSign: onSign)
+        let inviteKey = try await identityService.registerInvite(account: account, onSign: onSign)
+        try await subscribeForInvites(inviteKey: inviteKey)
+        logger.debug("Did goPublic an account: \(account)")
+    }
 
-        let topic = pubKey.rawRepresentation.sha256().toHexString()
-        try kms.setPublicKey(publicKey: pubKey, for: topic)
-        try await networkingInteractor.subscribe(topic: topic)
+    func unregister(account: Account, onSign: (String) -> CacaoSignature) async throws {
+        try await identityService.unregister(account: account, onSign: onSign)
+        logger.debug("Did unregister an account: \(account)")
+    }
 
-        let oldAccount = accountService.currentAccount
-        try await resubscriptionService.unsubscribe(account: oldAccount)
-        accountService.setAccount(account)
-        try await resubscriptionService.resubscribe(account: account)
-
-        logger.debug("Did register an account: \(account) and is subscribing on topic: \(topic)")
+    func goPrivate(account: Account) async throws {
+        let inviteKey = try await identityService.goPrivate(account: account)
+        try await unsubscribeFromInvites(inviteKey: inviteKey)
+        logger.debug("Did goPrivate an account: \(account)")
     }
 
     func resolve(account: Account) async throws -> String {
         return try await identityService.resolveInvite(account: account)
+    }
+}
+
+private extension RegistryService {
+
+    func subscribeForInvites(inviteKey: AgreementPublicKey) async throws {
+        let topic = inviteKey.rawRepresentation.sha256().toHexString()
+        try kms.setPublicKey(publicKey: inviteKey, for: topic)
+        try await networkingInteractor.subscribe(topic: topic)
+    }
+
+    func unsubscribeFromInvites(inviteKey: AgreementPublicKey) async throws {
+        let topic = inviteKey.rawRepresentation.sha256().toHexString()
+        kms.deletePublicKey(for: topic)
+        try await networkingInteractor.subscribe(topic: topic)
     }
 }
