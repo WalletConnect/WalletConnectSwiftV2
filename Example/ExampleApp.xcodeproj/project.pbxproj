@@ -156,6 +156,7 @@
 		A58E7D482872EF610082D443 /* MessageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58E7D472872EF610082D443 /* MessageViewModel.swift */; };
 		A58EC611299D57B800F3452A /* AsyncButton in Frameworks */ = {isa = PBXBuildFile; productRef = A58EC610299D57B800F3452A /* AsyncButton */; };
 		A58EC616299D5C6400F3452A /* PlainButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58EC615299D5C6400F3452A /* PlainButton.swift */; };
+		A58EC618299D665A00F3452A /* Web3Inbox in Frameworks */ = {isa = PBXBuildFile; productRef = A58EC617299D665A00F3452A /* Web3Inbox */; };
 		A59CF4F6292F83D50031A42F /* DefaultSignerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59CF4F5292F83D50031A42F /* DefaultSignerFactory.swift */; };
 		A59F877628B5462900A9CD80 /* WalletConnectAuth in Frameworks */ = {isa = PBXBuildFile; productRef = A59F877528B5462900A9CD80 /* WalletConnectAuth */; };
 		A59FAEC928B7B93A002BB66F /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = A59FAEC828B7B93A002BB66F /* Web3 */; };
@@ -652,6 +653,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A58EC618299D665A00F3452A /* Web3Inbox in Frameworks */,
 				A5629AEA2877F2D600094373 /* WalletConnectChat in Frameworks */,
 				A59FAEC928B7B93A002BB66F /* Web3 in Frameworks */,
 				A5629AF22877F75100094373 /* Starscream in Frameworks */,
@@ -1827,6 +1829,7 @@
 				A59F877528B5462900A9CD80 /* WalletConnectAuth */,
 				A59FAEC828B7B93A002BB66F /* Web3 */,
 				A58EC610299D57B800F3452A /* AsyncButton */,
+				A58EC617299D665A00F3452A /* Web3Inbox */,
 			);
 			productName = Showcase;
 			productReference = A58E7CE828729F550082D443 /* Showcase.app */;
@@ -3160,6 +3163,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A58EC60F299D57B800F3452A /* XCRemoteSwiftPackageReference "swiftui-async-button" */;
 			productName = AsyncButton;
+		};
+		A58EC617299D665A00F3452A /* Web3Inbox */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Web3Inbox;
 		};
 		A59F877528B5462900A9CD80 /* WalletConnectAuth */ = {
 			isa = XCSwiftPackageProductDependency;

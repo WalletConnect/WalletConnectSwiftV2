@@ -21,9 +21,9 @@ final class WelcomePresenter: ObservableObject {
 
     @MainActor
     func didPressImport() async throws {
-        if let account = interactor.importAccount?.account {
+        if let importAccount = interactor.importAccount {
             try await interactor.goPublic()
-            router.presentMain(account: account)
+            router.presentMain(importAccount: importAccount)
         } else {
             router.presentImport()
         }

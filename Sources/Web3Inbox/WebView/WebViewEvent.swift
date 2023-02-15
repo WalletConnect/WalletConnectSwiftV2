@@ -1,9 +1,11 @@
 import Foundation
 
 enum WebViewEvent: String {
-    case getInvites
+    case getReceivedInvites
+    case getSentInvites
     case getThreads
     case register
+    case resolve
     case getMessages
     case message
     case accept

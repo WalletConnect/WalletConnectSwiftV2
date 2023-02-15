@@ -37,7 +37,11 @@ public final class Web3InboxClient {
         return webView
     }
 
-    public func setAccount(_ account: Account) async throws {
+    public func setAccount(
+        _ account: Account,
+        onSign: @escaping (String) -> CacaoSignature
+    ) async throws {
+        clientProxy.onSign = onSign
         try await authorize(account: account)
     }
 }

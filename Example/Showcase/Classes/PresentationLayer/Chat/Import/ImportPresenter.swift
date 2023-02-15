@@ -22,7 +22,7 @@ final class ImportPresenter: ObservableObject {
 
         interactor.save(importAccount: importAccount)
         try await interactor.register(importAccount: importAccount)
-        router.presentChat(account: importAccount.account)
+        router.presentChat(importAccount: importAccount)
     }
 }
 

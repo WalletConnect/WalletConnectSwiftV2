@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Invite {
+public struct Invite: Codable, Equatable {
     public let message: String
     public let inviterAccount: Account
     public let inviteeAccount: Account
