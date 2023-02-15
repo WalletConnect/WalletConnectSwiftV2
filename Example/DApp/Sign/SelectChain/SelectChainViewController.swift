@@ -39,7 +39,6 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
         let namespaces: [String: ProposalNamespace] = [
             "eip155": ProposalNamespace(
                 chains: [
-                    Blockchain("eip155:1")!,
                     Blockchain("eip155:137")!
                 ],
                 methods: [
@@ -48,6 +47,16 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
                     "eth_signTypedData"
                 ], events: []
             ),
+            "eip155:1": ProposalNamespace(
+                methods: [
+                    "eth_sendTransaction",
+                    "personal_sign",
+                    "eth_signTypedData"
+                ],
+                events: []
+            )
+        ]
+        let optionalNamespaces: [String: ProposalNamespace] = [
             "solana": ProposalNamespace(
                 chains: [
                     Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!
@@ -58,9 +67,17 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
                 ], events: []
             )
         ]
+        let sessionProperties: [String: String] = [
+            "caip154-mandatory": "true"
+        ]
         Task {
             let uri = try await Pair.instance.create()
-            try await Sign.instance.connect(requiredNamespaces: namespaces, topic: uri.topic)
+            try await Sign.instance.connect(
+                requiredNamespaces: namespaces,
+                optionalNamespaces: optionalNamespaces,
+                sessionProperties: sessionProperties,
+                topic: uri.topic
+            )
             showConnectScreen(uri: uri)
         }
     }

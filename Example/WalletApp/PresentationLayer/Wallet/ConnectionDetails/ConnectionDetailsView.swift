@@ -59,16 +59,14 @@ struct ConnectionDetailsView: View {
                                     .padding(.horizontal, 18)
                                     .padding(.top, 10)
                                     
-                                    HStack(spacing: 0) {
-                                        Text(presenter.accountReference(namespace: namespace))
+                                    TagsView(items: presenter.accountReferences(namespace: namespace)) {
+                                        Text($0)
                                             .foregroundColor(.cyanBackround)
                                             .font(.system(size: 13, weight: .semibold, design: .rounded))
                                             .padding(.horizontal, 8)
                                             .padding(.vertical, 3)
                                             .background(Color.cyanBackround.opacity(0.2))
                                             .cornerRadius(10, corners: .allCorners)
-                                        
-                                        Spacer()
                                     }
                                     .padding(10)
                                     
