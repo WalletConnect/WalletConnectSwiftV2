@@ -1,4 +1,5 @@
 import Foundation
+import WalletConnectEcho
 import Combine
 
 /// Web3 Wallet Client
@@ -41,17 +42,20 @@ public class Web3WalletClient {
     private let authClient: AuthClientProtocol
     private let signClient: SignClientProtocol
     private let pairingClient: PairingClientProtocol
+    private let echoClient: EchoClientProtocol
     
     private var account: Account?
 
     init(
         authClient: AuthClientProtocol,
         signClient: SignClientProtocol,
-        pairingClient: PairingClientProtocol
+        pairingClient: PairingClientProtocol,
+        echoClient: EchoClientProtocol
     ) {
         self.authClient = authClient
         self.signClient = signClient
         self.pairingClient = pairingClient
+        self.echoClient = echoClient
     }
     
     /// For a wallet to approve a session proposal.
@@ -175,5 +179,9 @@ public class Web3WalletClient {
     /// - Returns: Pending authentication requests
     public func getPendingRequests() throws -> [AuthRequest] {
         try authClient.getPendingRequests()
+    }
+    
+    public func registerEchoClient(deviceToken: Data) async throws {
+        try await echoClient.register(deviceToken: deviceToken)
     }
 }

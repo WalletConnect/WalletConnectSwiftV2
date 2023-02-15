@@ -1,4 +1,5 @@
 import Foundation
+import WalletConnectEcho
 import Combine
 
 /// Web3Wallet instance wrapper
@@ -23,7 +24,8 @@ public class Web3Wallet {
         return Web3WalletClientFactory.create(
             authClient: Auth.instance,
             signClient: Sign.instance,
-            pairingClient: Pair.instance as! PairingClient
+            pairingClient: Pair.instance as! PairingClient,
+            echoClient: Echo.instance
         )
     }()
     

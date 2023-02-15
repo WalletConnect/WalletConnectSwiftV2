@@ -60,7 +60,7 @@ let package = Package(
             path: "Sources/Auth"),
         .target(
             name: "Web3Wallet",
-            dependencies: ["Auth", "WalletConnectSign"],
+            dependencies: ["Auth", "WalletConnectSign", "WalletConnectEcho"],
             path: "Sources/Web3Wallet"),
         .target(
             name: "WalletConnectPush",
