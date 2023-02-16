@@ -30,14 +30,9 @@ public final class RelayClient {
 
     private let messagePublisherSubject = PassthroughSubject<(topic: String, message: String), Never>()
 
-    private let subscriptionResponsePublisherSubject = PassthroughSubject<(RPCID?, String), Never>()
-    private var subscriptionResponsePublisher: AnyPublisher<(RPCID?, String), Never> {
+    private let subscriptionResponsePublisherSubject = PassthroughSubject<(RPCID?, [String]), Never>()
+    private var subscriptionResponsePublisher: AnyPublisher<(RPCID?, [String]), Never> {
         subscriptionResponsePublisherSubject.eraseToAnyPublisher()
-    }
-
-    private let batchSubscriptionResponsePublisherSubject = PassthroughSubject<(RPCID?, [String]), Never>()
-    private var batchSubscriptionResponsePublisher: AnyPublisher<(RPCID?, [String]), Never> {
-        batchSubscriptionResponsePublisherSubject.eraseToAnyPublisher()
     }
 
     private let requestAcknowledgePublisherSubject = PassthroughSubject<RPCID?, Never>()
@@ -180,7 +175,8 @@ public final class RelayClient {
             .sink { [weak self] subscriptionInfo in
                 cancellable?.cancel()
                 self?.concurrentQueue.async(flags: .barrier) {
-                    self?.subscriptions[topic] = subscriptionInfo.1
+                    guard let subscriptionId = subscriptionInfo.1.first else {return}
+                    self?.subscriptions[topic] = subscriptionId
                 }
                 completion(nil)
             }
@@ -201,7 +197,7 @@ public final class RelayClient {
             .asRPCRequest()
         let message = try! request.asJSONEncodedString()
         var cancellable: AnyCancellable?
-        cancellable = batchSubscriptionResponsePublisher
+        cancellable = subscriptionResponsePublisher
             .filter { $0.0 == request.id }
             .sink { [unowned self] (_, subscriptionIds) in
                 cancellable?.cancel()
@@ -316,9 +312,9 @@ public final class RelayClient {
                 if let _ = try? anyCodable.get(Bool.self) { // TODO: Handle success vs. error
                     requestAcknowledgePublisherSubject.send(response.id)
                 } else if let subscriptionId = try? anyCodable.get(String.self) {
-                    subscriptionResponsePublisherSubject.send((response.id, subscriptionId))
+                    subscriptionResponsePublisherSubject.send((response.id, [subscriptionId]))
                 } else if let subscriptionIds = try? anyCodable.get([String].self) {
-                    batchSubscriptionResponsePublisherSubject.send((response.id, subscriptionIds))
+                    subscriptionResponsePublisherSubject.send((response.id, subscriptionIds))
                 }
             case .error(let rpcError):
                 logger.error("Received RPC error from relay network: \(rpcError)")
