@@ -18,17 +18,17 @@ final class ChatClientRequestSubscriber {
     }
 
     func setupSubscriptions() {
-        chatClient.receivedInvitesPublisher
+        chatClient.newReceivedInvitePublisher
             .sink { [unowned self] invite in
                 handle(event: .chatInvite, params: invite)
             }.store(in: &publishers)
 
-        chatClient.threadsPublisher
+        chatClient.newMessagePublisher
             .sink { [unowned self] thread in
                 handle(event: .chatThread, params: thread)
             }.store(in: &publishers)
 
-        chatClient.messagesPublisher
+        chatClient.newMessagePublisher
             .sink { [unowned self] message in
                 handle(event: .chatMessage, params: message)
             }.store(in: &publishers)
