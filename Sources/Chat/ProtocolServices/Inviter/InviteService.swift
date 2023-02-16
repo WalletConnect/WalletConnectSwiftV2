@@ -39,8 +39,9 @@ class InviteService {
         // TODO ad storage
         let protocolMethod = ChatInviteProtocolMethod()
         let selfPubKeyY = try kms.createX25519KeyPair()
-        let symKeyI = try kms.performKeyAgreement(selfPublicKey: selfPubKeyY, peerPublicKey: invite.inviteePublicKey)
-        let inviteTopic = try AgreementPublicKey(hex: invite.inviteePublicKey).rawRepresentation.sha256().toHexString()
+        let inviteePublicKey = try DIDKey(did: invite.inviteePublicKey)
+        let symKeyI = try kms.performKeyAgreement(selfPublicKey: selfPubKeyY, peerPublicKey: inviteePublicKey.hexString)
+        let inviteTopic = try AgreementPublicKey(hex: inviteePublicKey.hexString).rawRepresentation.sha256().toHexString()
 
         // overrides on invite toipic
         try kms.setSymmetricKey(symKeyI.sharedKey, for: inviteTopic)
@@ -136,7 +137,7 @@ private extension InviteService {
             ksu: keyserverURL.absoluteString,
             aud: inviteeAccount.did,
             sub: message,
-            pke: publicKey.did(prefix: true)
+            pke: publicKey.did(prefix: true, variant: .X25519)
         )
     }
 }

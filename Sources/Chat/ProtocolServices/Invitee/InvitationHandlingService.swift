@@ -143,7 +143,7 @@ private extension InvitationHandlingService {
         return try JWTFactory(keyPair: identityKey).createChatInviteApprovalJWT(
             ksu: keyserverURL.absoluteString,
             aud: inviter.did,
-            sub: DIDKey(rawData: publicKey).did(prefix: true)
+            sub: DIDKey(rawData: publicKey).did(prefix: true, variant: .X25519)
         )
     }
 }

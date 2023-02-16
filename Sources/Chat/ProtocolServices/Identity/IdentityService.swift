@@ -49,7 +49,7 @@ actor IdentityService {
         }
 
         let inviteKey = try kms.createX25519KeyPair()
-        let invitePublicKey = inviteKey.hexRepresentation
+        let invitePublicKey = DIDKey(rawData: inviteKey.rawRepresentation)
         let idAuth = try makeIDAuth(account: account, invitePublicKey: invitePublicKey)
         try await networkService.registerInvite(idAuth: idAuth)
 
@@ -69,7 +69,7 @@ actor IdentityService {
         guard let inviteKey = storage.getInviteKey(for: account)
         else { throw Errors.inviteKeyNotFound }
 
-        let invitePublicKey = inviteKey.hexRepresentation
+        let invitePublicKey = DIDKey(rawData: inviteKey.rawRepresentation)
         let idAuth = try makeIDAuth(account: account, invitePublicKey: invitePublicKey)
         try await networkService.removeInvite(idAuth: idAuth)
         try storage.removeInviteKey(for: account)
@@ -78,7 +78,7 @@ actor IdentityService {
     }
 
     func resolveIdentity(iss: String) async throws -> Account {
-        let did = try DIDKey(did: iss).did(prefix: false)
+        let did = try DIDKey(did: iss).did(prefix: false, variant: .ED25519)
         let cacao = try await networkService.resolveIdentity(publicKey: did)
         return try Account(DIDPKHString: cacao.p.iss)
     }
@@ -115,11 +115,11 @@ private extension IdentityService {
         return Cacao(h: cacaoHeader, p: cacaoPayload, s: cacaoSignature)
     }
 
-    func makeIDAuth(account: Account, invitePublicKey: String) throws -> String {
+    func makeIDAuth(account: Account, invitePublicKey: DIDKey) throws -> String {
         guard let identityKey = storage.getIdentityKey(for: account)
         else { throw Errors.identityKeyNotFound }
         return try JWTFactory(keyPair: identityKey).createChatInviteJWT(
-            sub: invitePublicKey,
+            sub: invitePublicKey.did(prefix: true, variant: .X25519),
             aud: getAudience(),
             pkh: account.did
         )

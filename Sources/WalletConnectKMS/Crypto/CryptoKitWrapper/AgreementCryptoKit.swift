@@ -44,7 +44,7 @@ public struct AgreementPublicKey: GenericPasswordConvertible, Equatable {
 
     public var did: String {
         let key = DIDKey(rawData: rawRepresentation)
-        return key.did(prefix: true)
+        return key.did(prefix: true, variant: .X25519)
     }
 }
 
