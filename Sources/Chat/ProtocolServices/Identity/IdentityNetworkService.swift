@@ -1,6 +1,6 @@
 import Foundation
 
-actor IdentityNetworkService {
+actor IdentityNetworkService: IdentityNetworking {
 
     private let accountService: AccountService
     private let httpService: HTTPClient

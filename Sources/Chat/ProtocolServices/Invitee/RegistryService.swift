@@ -19,8 +19,9 @@ actor RegistryService {
     }
 
     func register(account: Account, onSign: (String) -> CacaoSignature) async throws -> String {
-        return try await identityService.registerIdentity(account: account, onSign: onSign)
+        let pubKey = try await identityService.registerIdentity(account: account, onSign: onSign)
         logger.debug("Did register an account: \(account)")
+        return pubKey
     }
 
     func goPublic(account: Account, onSign: (String) -> CacaoSignature) async throws {
@@ -36,7 +37,7 @@ actor RegistryService {
 
     func goPrivate(account: Account) async throws {
         let inviteKey = try await identityService.goPrivate(account: account)
-        try await unsubscribeFromInvites(inviteKey: inviteKey)
+        unsubscribeFromInvites(inviteKey: inviteKey)
         logger.debug("Did goPrivate an account: \(account)")
     }
 
@@ -53,9 +54,9 @@ private extension RegistryService {
         try await networkingInteractor.subscribe(topic: topic)
     }
 
-    func unsubscribeFromInvites(inviteKey: AgreementPublicKey) async throws {
+    func unsubscribeFromInvites(inviteKey: AgreementPublicKey) {
         let topic = inviteKey.rawRepresentation.sha256().toHexString()
         kms.deletePublicKey(for: topic)
-        try await networkingInteractor.subscribe(topic: topic)
+        networkingInteractor.unsubscribe(topic: topic)
     }
 }

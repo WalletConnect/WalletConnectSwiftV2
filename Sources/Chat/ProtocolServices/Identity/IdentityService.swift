@@ -5,7 +5,7 @@ actor IdentityService {
     private let keyserverURL: URL
     private let kms: KeyManagementServiceProtocol
     private let storage: IdentityStorage
-    private let networkService: IdentityNetworkService
+    private let networkService: IdentityNetworking
     private let iatProvader: IATProvider
     private let messageFormatter: SIWECacaoFormatting
 
@@ -13,7 +13,7 @@ actor IdentityService {
         keyserverURL: URL,
         kms: KeyManagementServiceProtocol,
         storage: IdentityStorage,
-        networkService: IdentityNetworkService,
+        networkService: IdentityNetworking,
         iatProvader: IATProvider,
         messageFormatter: SIWECacaoFormatting
     ) {

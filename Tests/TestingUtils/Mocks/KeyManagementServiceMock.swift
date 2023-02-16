@@ -33,6 +33,10 @@ final class KeyManagementServiceMock: KeyManagementServiceProtocol {
         symmetricKeys[topic] = nil
     }
 
+    func deletePublicKey(for topic: String) {
+        publicKeys[topic] = nil
+    }
+
     func getPublicKey(for topic: String) -> AgreementPublicKey? {
         publicKeys[topic]
     }
