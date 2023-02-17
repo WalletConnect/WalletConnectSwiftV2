@@ -75,17 +75,13 @@ final class RelayClientEndToEndTests: XCTestCase {
         }.store(in: &publishers)
 
         relayA.socketConnectionStatusPublisher.sink {  _ in
-            relayA.publish(topic: randomTopic, payload: payloadA, tag: 0, prompt: false, ttl: 60, onNetworkAcknowledge: { error in
-                XCTAssertNil(error)
-            })
+            Task(priority: .high) { try await relayA.publish(topic: randomTopic, payload: payloadA, tag: 0, prompt: false, ttl: 60) }
             relayA.subscribe(topic: randomTopic) { error in
                 XCTAssertNil(error)
             }
         }.store(in: &publishers)
         relayB.socketConnectionStatusPublisher.sink {  _ in
-            relayB.publish(topic: randomTopic, payload: payloadB, tag: 0, prompt: false, ttl: 60, onNetworkAcknowledge: { error in
-                XCTAssertNil(error)
-            })
+            Task(priority: .high) { try await relayB.publish(topic: randomTopic, payload: payloadB, tag: 0, prompt: false, ttl: 60) }
             relayB.subscribe(topic: randomTopic) { error in
                 XCTAssertNil(error)
             }
