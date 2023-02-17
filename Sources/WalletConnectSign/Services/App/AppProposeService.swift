@@ -18,9 +18,21 @@ final class AppProposeService {
         self.logger = logger
     }
 
-    func propose(pairingTopic: String, namespaces: [String: ProposalNamespace], relay: RelayProtocolOptions) async throws {
+    func propose(
+        pairingTopic: String,
+        namespaces: [String: ProposalNamespace],
+        optionalNamespaces: [String: ProposalNamespace]? = nil,
+        sessionProperties: [String: String]? = nil,
+        relay: RelayProtocolOptions
+    ) async throws {
         logger.debug("Propose Session on topic: \(pairingTopic)")
         try Namespace.validate(namespaces)
+        if let optionalNamespaces {
+            try Namespace.validate(optionalNamespaces)
+        }
+        if let sessionProperties {
+            try SessionProperties.validate(sessionProperties)
+        }
         let protocolMethod = SessionProposeProtocolMethod()
         let publicKey = try! kms.createX25519KeyPair()
         let proposer = Participant(
@@ -30,9 +42,12 @@ final class AppProposeService {
         let proposal = SessionProposal(
             relays: [relay],
             proposer: proposer,
-            requiredNamespaces: namespaces)
+            requiredNamespaces: namespaces,
+            optionalNamespaces: optionalNamespaces,
+            sessionProperties: sessionProperties
+        )
         
         let request = RPCRequest(method: protocolMethod.method, params: proposal)
-        try await networkingInteractor.requestNetworkAck(request, topic: pairingTopic, protocolMethod: protocolMethod)
+        try await networkingInteractor.request(request, topic: pairingTopic, protocolMethod: protocolMethod)
     }
 }

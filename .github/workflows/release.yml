@@ -39,4 +39,4 @@ jobs:
         APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
         APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
       run: |
-        make release_all APPLE_ID=${{ secrets.APPLE_ID }} TOKEN=$(echo -n $GH_USER:$GH_TOKEN | base64)
+        make release_all APPLE_ID=${{ secrets.APPLE_ID }} TOKEN=$(echo -n $GH_USER:$GH_TOKEN | base64) PROJECT_ID=${{ secrets.RELEASE_PROJECT_ID }}

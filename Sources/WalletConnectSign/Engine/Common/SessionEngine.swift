@@ -61,7 +61,7 @@ final class SessionEngine {
         let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params, expiry: request.expiry)
         let sessionRequestParams = SessionType.RequestParams(request: chainRequest, chainId: request.chainId)
         let protocolMethod = SessionRequestProtocolMethod(ttl: request.calculateTtl())
-        let rpcRequest = RPCRequest(method: protocolMethod.method, params: sessionRequestParams)
+        let rpcRequest = RPCRequest(method: protocolMethod.method, params: sessionRequestParams, rpcid: request.id)
         try await networkingInteractor.request(rpcRequest, topic: request.topic, protocolMethod: SessionRequestProtocolMethod())
     }
 
@@ -111,10 +111,10 @@ private extension SessionEngine {
         networkingInteractor.socketConnectionStatusPublisher
             .sink { [unowned self] status in
                 guard status == .connected else { return }
-                sessionStore.getAll()
-                    .forEach { session in
-                        Task(priority: .high) { try await networkingInteractor.subscribe(topic: session.topic) }
-                    }
+                let topics = sessionStore.getAll().map{$0.topic}
+                Task(priority: .high) {
+                    try await networkingInteractor.batchSubscribe(topics: topics)
+                }
             }
             .store(in: &publishers)
     }

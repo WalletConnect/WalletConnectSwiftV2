@@ -15,7 +15,7 @@ extension SessionNamespace {
     static func make(toRespond namespaces: [String: ProposalNamespace]) -> [String: SessionNamespace] {
         return namespaces.mapValues { proposalNamespace in
             SessionNamespace(
-                accounts: Set(proposalNamespace.chains.map { Account(blockchain: $0, address: "0x00")! }),
+                accounts: Set(proposalNamespace.chains!.map { Account(blockchain: $0, address: "0x00")! }),
                 methods: proposalNamespace.methods,
                 events: proposalNamespace.events
             )

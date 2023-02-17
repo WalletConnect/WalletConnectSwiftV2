@@ -3,11 +3,11 @@ import Foundation
 import XCTest
 
 class SIWEMessageFormatterTests: XCTestCase {
-    var sut: SIWEMessageFormatter!
+    var sut: SIWECacaoFormatter!
     let address = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
 
     override func setUp() {
-        sut = SIWEMessageFormatter()
+        sut = SIWECacaoFormatter()
     }
 
     func testFormatMessage() throws {
@@ -27,7 +27,7 @@ class SIWEMessageFormatterTests: XCTestCase {
             - ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/
             - https://example.com/my-web2-claim.json
             """
-        let message = try sut.formatMessage(from: AuthPayload.stub(), address: address)
+        let message = try sut.formatMessage(from: AuthPayload.stub().cacaoPayload(address: address))
         XCTAssertEqual(message, expectedMessage)
     }
 
@@ -48,8 +48,9 @@ class SIWEMessageFormatterTests: XCTestCase {
             """
         let message = try sut.formatMessage(
             from: AuthPayload.stub(
-                requestParams: RequestParams.stub(statement: nil)),
-            address: address)
+                requestParams: RequestParams.stub(statement: nil)
+            ).cacaoPayload(address: address)
+        )
         XCTAssertEqual(message, expectedMessage)
     }
 
@@ -69,8 +70,8 @@ class SIWEMessageFormatterTests: XCTestCase {
             """
         let message = try sut.formatMessage(
             from: AuthPayload.stub(
-                requestParams: RequestParams.stub(resources: nil)),
-            address: address)
+                requestParams: RequestParams.stub(resources: nil)).cacaoPayload(address: address)
+            )
         XCTAssertEqual(message, expectedMessage)
     }
 
@@ -88,9 +89,8 @@ class SIWEMessageFormatterTests: XCTestCase {
             """
         let message = try sut.formatMessage(
             from: AuthPayload.stub(
-                requestParams: RequestParams.stub(statement: nil,
-                                                  resources: nil)),
-            address: address)
+                requestParams: RequestParams.stub(statement: nil, resources: nil)).cacaoPayload(address: address)
+        )
         XCTAssertEqual(message, expectedMessage)
     }
 }

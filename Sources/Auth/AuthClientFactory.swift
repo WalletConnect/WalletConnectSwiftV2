@@ -42,7 +42,7 @@ public struct AuthClientFactory {
 
         let kms = KeyManagementService(keychain: keychainStorage)
         let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
-        let messageFormatter = SIWEMessageFormatter()
+        let messageFormatter = SIWECacaoFormatter()
         let appRequestService = AppRequestService(networkingInteractor: networkingClient, kms: kms, appMetadata: metadata, logger: logger, iatProvader: iatProvider)
         let messageSignerFactory = MessageSignerFactory(signerFactory: signerFactory)
         let messageSigner = messageSignerFactory.create(projectId: projectId)

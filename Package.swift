@@ -56,7 +56,7 @@ let package = Package(
             path: "Sources/Chat"),
         .target(
             name: "Auth",
-            dependencies: ["WalletConnectPairing"],
+            dependencies: ["WalletConnectPairing", "WalletConnectSigner"],
             path: "Sources/Auth"),
         .target(
             name: "Web3Wallet",
@@ -72,7 +72,7 @@ let package = Package(
             path: "Sources/WalletConnectEcho"),
         .target(
             name: "WalletConnectRelay",
-            dependencies: ["WalletConnectKMS"],
+            dependencies: ["WalletConnectJWT"],
             path: "Sources/WalletConnectRelay",
             resources: [.copy("PackageConfig.json")]),
         .target(
@@ -85,6 +85,12 @@ let package = Package(
         .target(
             name: "Web3Inbox",
             dependencies: ["WalletConnectChat"]),
+        .target(
+            name: "WalletConnectSigner",
+            dependencies: ["WalletConnectNetworking"]),
+        .target(
+            name: "WalletConnectJWT",
+            dependencies: ["WalletConnectKMS"]),
         .target(
             name: "WalletConnectUtils",
             dependencies: ["JSONRPC"]),
