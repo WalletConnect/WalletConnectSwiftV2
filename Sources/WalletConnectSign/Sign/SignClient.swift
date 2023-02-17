@@ -171,13 +171,20 @@ public final class SignClient: SignClientProtocol {
     ///   - topic: Optional parameter - use it if you already have an established pairing with peer client.
     /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
     @available(*, deprecated, message: "use Pair.instance.create() and connect(requiredNamespaces: [String: ProposalNamespace]): instead")
-    public func connect(requiredNamespaces: [String: ProposalNamespace], topic: String? = nil) async throws -> WalletConnectURI? {
+    public func connect(
+        requiredNamespaces: [String: ProposalNamespace],
+        optionalNamespaces: [String: ProposalNamespace]? = nil,
+        sessionProperties: [String: String]? = nil,
+        topic: String? = nil
+    ) async throws -> WalletConnectURI? {
         logger.debug("Connecting Application")
         if let topic = topic {
             try pairingClient.validatePairingExistance(topic)
             try await appProposeService.propose(
                 pairingTopic: topic,
                 namespaces: requiredNamespaces,
+                optionalNamespaces: optionalNamespaces,
+                sessionProperties: sessionProperties,
                 relay: RelayProtocolOptions(protocol: "irn", data: nil)
             )
             return nil
@@ -186,6 +193,8 @@ public final class SignClient: SignClientProtocol {
             try await appProposeService.propose(
                 pairingTopic: pairingURI.topic,
                 namespaces: requiredNamespaces,
+                optionalNamespaces: optionalNamespaces,
+                sessionProperties: sessionProperties,
                 relay: RelayProtocolOptions(protocol: "irn", data: nil)
             )
             return pairingURI
@@ -197,12 +206,19 @@ public final class SignClient: SignClientProtocol {
     /// - Parameters:
     ///   - requiredNamespaces: required namespaces for a session
     ///   - topic: pairing topic
-    public func connect(requiredNamespaces: [String: ProposalNamespace], topic: String) async throws {
+    public func connect(
+        requiredNamespaces: [String: ProposalNamespace],
+        optionalNamespaces: [String: ProposalNamespace]? = nil,
+        sessionProperties: [String: String]? = nil,
+        topic: String
+    ) async throws {
         logger.debug("Connecting Application")
         try pairingClient.validatePairingExistance(topic)
         try await appProposeService.propose(
             pairingTopic: topic,
             namespaces: requiredNamespaces,
+            optionalNamespaces: optionalNamespaces,
+            sessionProperties: sessionProperties,
             relay: RelayProtocolOptions(protocol: "irn", data: nil)
         )
     }

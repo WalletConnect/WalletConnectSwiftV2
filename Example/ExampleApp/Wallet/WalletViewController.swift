@@ -221,7 +221,7 @@ extension WalletViewController: ProposalViewControllerDelegate {
         proposal.requiredNamespaces.forEach {
             let caip2Namespace = $0.key
             let proposalNamespace = $0.value
-            let accounts = Set(proposalNamespace.chains.compactMap { Account($0.absoluteString + ":\(self.accounts[$0.namespace]!)") })
+            let accounts = Set(proposalNamespace.chains!.compactMap { Account($0.absoluteString + ":\(self.accounts[$0.namespace]!)") })
 
             let sessionNamespace = SessionNamespace(accounts: accounts, methods: proposalNamespace.methods, events: proposalNamespace.events)
             sessionNamespaces[caip2Namespace] = sessionNamespace

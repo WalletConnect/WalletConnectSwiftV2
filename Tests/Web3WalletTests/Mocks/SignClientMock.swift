@@ -23,7 +23,9 @@ final class SignClientMock: SignClientProtocol {
         let sessionProposal = WalletConnectSign.SessionProposal(
             relays: [],
             proposer: proposer,
-            requiredNamespaces: [:]
+            requiredNamespaces: [:],
+            optionalNamespaces: nil,
+            sessionProperties: nil
         ).publicRepresentation(pairingTopic: "")
 
         return Result.Publisher(sessionProposal)

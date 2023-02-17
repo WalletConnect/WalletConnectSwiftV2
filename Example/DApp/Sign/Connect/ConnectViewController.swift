@@ -81,7 +81,7 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let pairingTopic = activePairings[indexPath.row].topic
-        let namespaces: [String: ProposalNamespace] = [
+        let requiredNamespaces: [String: ProposalNamespace] = [
             "eip155": ProposalNamespace(
                 chains: [
                     Blockchain("eip155:1")!,
@@ -103,8 +103,19 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
                 ], events: []
             )
         ]
+        let optionalNamespaces: [String: ProposalNamespace] = [
+            "eip155:42161": ProposalNamespace(
+                methods: [
+                    "eth_sendTransaction",
+                    "eth_signTransaction",
+                    "get_balance",
+                    "personal_sign"
+                ],
+                events: ["accountsChanged", "chainChanged"]
+            )
+        ]
         Task {
-            _ = try await Sign.instance.connect(requiredNamespaces: namespaces, topic: pairingTopic)
+            _ = try await Sign.instance.connect(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces, topic: pairingTopic)
             connectWithExampleWallet()
         }
     }
