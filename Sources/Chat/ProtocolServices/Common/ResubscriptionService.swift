@@ -32,7 +32,6 @@ class ResubscriptionService {
 
     func resubscribe(account: Account) async throws {
         let topics = chatStorage.getThreads(account: account).map { $0.topic }
-        guard !topics.isEmpty else { return }
         try await networkingInteractor.batchSubscribe(topics: topics)
     }
 

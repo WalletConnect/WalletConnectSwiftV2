@@ -15,7 +15,6 @@ public final class RelayClient {
 
     enum Errors: Error {
         case subscriptionIdNotFound
-        case batchContainsNoItems
     }
 
     var subscriptions: [String: String] = [:]
@@ -30,19 +29,9 @@ public final class RelayClient {
 
     private let messagePublisherSubject = PassthroughSubject<(topic: String, message: String, publishedAt: Date), Never>()
 
-    private let subscriptionResponsePublisherSubject = PassthroughSubject<(RPCID?, String), Never>()
-    private var subscriptionResponsePublisher: AnyPublisher<(RPCID?, String), Never> {
+    private let subscriptionResponsePublisherSubject = PassthroughSubject<(RPCID?, [String]), Never>()
+    private var subscriptionResponsePublisher: AnyPublisher<(RPCID?, [String]), Never> {
         subscriptionResponsePublisherSubject.eraseToAnyPublisher()
-    }
-
-    private let batchSubscriptionResponsePublisherSubject = PassthroughSubject<(RPCID?, [String]), Never>()
-    private var batchSubscriptionResponsePublisher: AnyPublisher<(RPCID?, [String]), Never> {
-        batchSubscriptionResponsePublisherSubject.eraseToAnyPublisher()
-    }
-
-    private let requestAcknowledgePublisherSubject = PassthroughSubject<RPCID?, Never>()
-    private var requestAcknowledgePublisher: AnyPublisher<RPCID?, Never> {
-        requestAcknowledgePublisherSubject.eraseToAnyPublisher()
     }
 
     private let clientIdStorage: ClientIdStoring
@@ -137,104 +126,25 @@ public final class RelayClient {
         try await dispatcher.protectedSend(message)
     }
 
-    /// Completes with an acknowledgement from the relay network.
-    public func publish(
-        topic: String,
-        payload: String,
-        tag: Int,
-        prompt: Bool,
-        ttl: Int,
-        onNetworkAcknowledge: @escaping ((Error?) -> Void)
-    ) {
-        let rpc = Publish(params: .init(topic: topic, message: payload, ttl: ttl, prompt: prompt, tag: tag))
-        let request = rpc
-            .asRPCRequest()
-        let message = try! request.asJSONEncodedString()
-        logger.debug("Publishing Payload on Topic: \(topic)")
-        var cancellable: AnyCancellable?
-        cancellable = requestAcknowledgePublisher
-            .filter { $0 == request.id }
-            .sink { (_) in
-                cancellable?.cancel()
-                onNetworkAcknowledge(nil)
-            }
-        dispatcher.protectedSend(message) { [weak self] error in
-            if let error = error {
-                self?.logger.debug("Failed to Publish Payload, error: \(error)")
-                cancellable?.cancel()
-                onNetworkAcknowledge(error)
-            }
-        }
-    }
-
-    @available(*, renamed: "subscribe(topic:)")
-    public func subscribe(topic: String, completion: @escaping (Error?) -> Void) {
+    public func subscribe(topic: String) async throws {
         logger.debug("Relay: Subscribing to topic: \(topic)")
         let rpc = Subscribe(params: .init(topic: topic))
         let request = rpc
             .asRPCRequest()
         let message = try! request.asJSONEncodedString()
-        var cancellable: AnyCancellable?
-        cancellable = subscriptionResponsePublisher
-            .filter { $0.0 == request.id }
-            .sink { [weak self] subscriptionInfo in
-                cancellable?.cancel()
-                self?.concurrentQueue.async(flags: .barrier) {
-                    self?.subscriptions[topic] = subscriptionInfo.1
-                }
-                completion(nil)
-            }
-        dispatcher.protectedSend(message) { [weak self] error in
-            if let error = error {
-                self?.logger.debug("Failed to subscribe to topic \(error)")
-                cancellable?.cancel()
-                completion(error)
-            }
-        }
+        try await dispatcher.protectedSend(message)
+        observeSubscription(requestId: request.id!, topics: [topic])
     }
 
     public func batchSubscribe(topics: [String]) async throws {
-        guard !topics.isEmpty else { throw Errors.batchContainsNoItems }
+        guard !topics.isEmpty else { return }
         logger.debug("Relay: Subscribing to topics: \(topics)")
         let rpc = BatchSubscribe(params: .init(topics: topics))
         let request = rpc
             .asRPCRequest()
         let message = try! request.asJSONEncodedString()
-        var cancellable: AnyCancellable?
-        cancellable = batchSubscriptionResponsePublisher
-            .filter { $0.0 == request.id }
-            .sink { [unowned self] (_, subscriptionIds) in
-                cancellable?.cancel()
-                concurrentQueue.async(flags: .barrier) { [unowned self] in
-                    logger.debug("Subscribed to topics: \(topics)")
-                    guard topics.count == subscriptionIds.count else {
-                        logger.warn("Number of topics in batch subscribe does not match number of subscriptions")
-                        return
-                    }
-                    for i in 0..<topics.count {
-                        subscriptions[topics[i]] = subscriptionIds[i]
-                    }
-                }
-            }
-        do {
-            try await dispatcher.protectedSend(message)
-        } catch {
-            logger.debug("Failed to subscribe to topics \(error)")
-            cancellable?.cancel()
-            throw error
-        }
-    }
-
-    public func subscribe(topic: String) async throws {
-        return try await withCheckedThrowingContinuation { continuation in
-            subscribe(topic: topic) { error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: ())
-                }
-            }
-        }
+        try await dispatcher.protectedSend(message)
+        observeSubscription(requestId: request.id!, topics: topics)
     }
 
     public func unsubscribe(topic: String) async throws {
@@ -270,24 +180,37 @@ public final class RelayClient {
             .asRPCRequest()
         let message = try! request.asJSONEncodedString()
         rpcHistory.deleteAll(forTopic: topic)
-        var cancellable: AnyCancellable?
-        cancellable = requestAcknowledgePublisher
-            .filter { $0 == request.id }
-            .sink { (_) in
-                cancellable?.cancel()
-                completion(nil)
-            }
         dispatcher.protectedSend(message) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to unsubscribe from topic")
-                cancellable?.cancel()
                 completion(error)
             } else {
                 self?.concurrentQueue.async(flags: .barrier) {
                     self?.subscriptions[topic] = nil
                 }
+                completion(nil)
             }
         }
+    }
+
+
+    private func observeSubscription(requestId: RPCID, topics: [String]) {
+        var cancellable: AnyCancellable?
+        cancellable = subscriptionResponsePublisher
+            .filter { $0.0 == requestId }
+            .sink { [unowned self] (_, subscriptionIds) in
+                cancellable?.cancel()
+                concurrentQueue.async(flags: .barrier) { [unowned self] in
+                    logger.debug("Subscribed to topics: \(topics)")
+                    guard topics.count == subscriptionIds.count else {
+                        logger.warn("Number of topics in (batch)subscribe does not match number of subscriptions")
+                        return
+                    }
+                    for i in 0..<topics.count {
+                        subscriptions[topics[i]] = subscriptionIds[i]
+                    }
+                }
+            }
     }
 
     public func getClientId() throws -> String {
@@ -313,18 +236,16 @@ public final class RelayClient {
         } else if let response = tryDecode(RPCResponse.self, from: payload) {
             switch response.outcome {
             case .response(let anyCodable):
-                if let _ = try? anyCodable.get(Bool.self) { // TODO: Handle success vs. error
-                    requestAcknowledgePublisherSubject.send(response.id)
-                } else if let subscriptionId = try? anyCodable.get(String.self) {
-                    subscriptionResponsePublisherSubject.send((response.id, subscriptionId))
+                if let subscriptionId = try? anyCodable.get(String.self) {
+                    subscriptionResponsePublisherSubject.send((response.id, [subscriptionId]))
                 } else if let subscriptionIds = try? anyCodable.get([String].self) {
-                    batchSubscriptionResponsePublisherSubject.send((response.id, subscriptionIds))
+                    subscriptionResponsePublisherSubject.send((response.id, subscriptionIds))
                 }
             case .error(let rpcError):
                 logger.error("Received RPC error from relay network: \(rpcError)")
             }
         } else {
-            logger.error("Unexpected response from network")
+            logger.error("Unexpected request/response from network")
         }
     }
 

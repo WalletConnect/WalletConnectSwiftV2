@@ -33,10 +33,8 @@ final class RelayClientEndToEndTests: XCTestCase {
         subscribeExpectation.assertForOverFulfill = true
         relayClient.socketConnectionStatusPublisher.sink { status in
             if status == .connected {
-                relayClient.subscribe(topic: "ecb78f2df880c43d3418ddbf871092b847801932e21765b250cc50b9e96a9131") { error in
-                    XCTAssertNil(error)
-                    subscribeExpectation.fulfill()
-                }
+                Task(priority: .high) {  try await relayClient.subscribe(topic: "ecb78f2df880c43d3418ddbf871092b847801932e21765b250cc50b9e96a9131") }
+                subscribeExpectation.fulfill()
             }
         }.store(in: &publishers)
 
@@ -75,19 +73,15 @@ final class RelayClientEndToEndTests: XCTestCase {
         }.store(in: &publishers)
 
         relayA.socketConnectionStatusPublisher.sink {  _ in
-            relayA.publish(topic: randomTopic, payload: payloadA, tag: 0, prompt: false, ttl: 60, onNetworkAcknowledge: { error in
-                XCTAssertNil(error)
-            })
-            relayA.subscribe(topic: randomTopic) { error in
-                XCTAssertNil(error)
+            Task(priority: .high) {
+                try await relayA.publish(topic: randomTopic, payload: payloadA, tag: 0, prompt: false, ttl: 60)
+                try await relayA.subscribe(topic: randomTopic)
             }
         }.store(in: &publishers)
         relayB.socketConnectionStatusPublisher.sink {  _ in
-            relayB.publish(topic: randomTopic, payload: payloadB, tag: 0, prompt: false, ttl: 60, onNetworkAcknowledge: { error in
-                XCTAssertNil(error)
-            })
-            relayB.subscribe(topic: randomTopic) { error in
-                XCTAssertNil(error)
+            Task(priority: .high) {
+                try await relayB.publish(topic: randomTopic, payload: payloadB, tag: 0, prompt: false, ttl: 60)
+                try await relayB.subscribe(topic: randomTopic)
             }
         }.store(in: &publishers)
 

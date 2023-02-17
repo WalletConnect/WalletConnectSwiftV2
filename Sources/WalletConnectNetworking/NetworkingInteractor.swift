@@ -109,27 +109,6 @@ public class NetworkingInteractor: NetworkInteracting {
         try await relayClient.publish(topic: topic, payload: message, tag: protocolMethod.requestConfig.tag, prompt: protocolMethod.requestConfig.prompt, ttl: protocolMethod.requestConfig.ttl)
     }
 
-    /// Completes with an acknowledgement from the relay network.
-    /// completes with error if networking client was not able to send a message
-    /// TODO - relay client should provide async function - continualion should be removed from here
-    public func requestNetworkAck(_ request: RPCRequest, topic: String, protocolMethod: ProtocolMethod) async throws {
-        do {
-            try rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
-            let message = try serializer.serialize(topic: topic, encodable: request)
-            return try await withCheckedThrowingContinuation { continuation in
-                relayClient.publish(topic: topic, payload: message, tag: protocolMethod.requestConfig.tag, prompt: protocolMethod.requestConfig.prompt, ttl: protocolMethod.requestConfig.ttl) { error in
-                    if let error = error {
-                        continuation.resume(throwing: error)
-                    } else {
-                        continuation.resume()
-                    }
-                }
-            }
-        } catch {
-            logger.error(error)
-        }
-    }
-
     public func respond(topic: String, response: RPCResponse, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
         try rpcHistory.resolve(response)
         let message = try! serializer.serialize(topic: topic, encodable: response, envelopeType: envelopeType)
