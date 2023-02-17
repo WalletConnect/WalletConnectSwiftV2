@@ -146,31 +146,14 @@ public final class RelayClient {
             }
     }
 
-    @available(*, renamed: "subscribe(topic:)")
-    public func subscribe(topic: String, completion: @escaping (Error?) -> Void) {
+    public func subscribe(topic: String) async throws {
         logger.debug("Relay: Subscribing to topic: \(topic)")
         let rpc = Subscribe(params: .init(topic: topic))
         let request = rpc
             .asRPCRequest()
         let message = try! request.asJSONEncodedString()
-        var cancellable: AnyCancellable?
-        cancellable = subscriptionResponsePublisher
-            .filter { $0.0 == request.id }
-            .sink { [weak self] subscriptionInfo in
-                cancellable?.cancel()
-                self?.concurrentQueue.async(flags: .barrier) {
-                    guard let subscriptionId = subscriptionInfo.1.first else {return}
-                    self?.subscriptions[topic] = subscriptionId
-                }
-                completion(nil)
-            }
-        dispatcher.protectedSend(message) { [weak self] error in
-            if let error = error {
-                self?.logger.debug("Failed to subscribe to topic \(error)")
-                cancellable?.cancel()
-                completion(error)
-            }
-        }
+        try await dispatcher.protectedSend(message)
+        observeSubscription(requestId: request.id!, topics: [topic])
     }
 
     public func batchSubscribe(topics: [String]) async throws {
@@ -182,18 +165,6 @@ public final class RelayClient {
         let message = try! request.asJSONEncodedString()
         try await dispatcher.protectedSend(message)
         observeSubscription(requestId: request.id!, topics: topics)
-    }
-
-    public func subscribe(topic: String) async throws {
-        return try await withCheckedThrowingContinuation { continuation in
-            subscribe(topic: topic) { error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: ())
-                }
-            }
-        }
     }
 
     public func unsubscribe(topic: String) async throws {
@@ -274,7 +245,7 @@ public final class RelayClient {
                 logger.error("Received RPC error from relay network: \(rpcError)")
             }
         } else {
-            logger.error("Unexpected response from network")
+            logger.error("Unexpected request/response from network")
         }
     }
 
