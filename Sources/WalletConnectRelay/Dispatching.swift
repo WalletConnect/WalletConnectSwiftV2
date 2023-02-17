@@ -19,7 +19,7 @@ final class Dispatcher: NSObject, Dispatching {
     private let logger: ConsoleLogging
     private let defaultTimeout: Int = 5
 
-    private let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
+    private let socketConnectionStatusPublisherSubject = CurrentValueSubject<SocketConnectionStatus, Never>(.disconnected)
 
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()

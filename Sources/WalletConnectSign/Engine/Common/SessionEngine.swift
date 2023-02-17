@@ -111,10 +111,10 @@ private extension SessionEngine {
         networkingInteractor.socketConnectionStatusPublisher
             .sink { [unowned self] status in
                 guard status == .connected else { return }
-                sessionStore.getAll()
-                    .forEach { session in
-                        Task(priority: .high) { try await networkingInteractor.subscribe(topic: session.topic) }
-                    }
+                let topics = sessionStore.getAll().map{$0.topic}
+                Task(priority: .high) {
+                    try await networkingInteractor.batchSubscribe(topics: topics)
+                }
             }
             .store(in: &publishers)
     }
