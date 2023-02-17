@@ -15,7 +15,6 @@ public final class RelayClient {
 
     enum Errors: Error {
         case subscriptionIdNotFound
-        case batchContainsNoItems
     }
 
     var subscriptions: [String: String] = [:]
@@ -127,25 +126,6 @@ public final class RelayClient {
         try await dispatcher.protectedSend(message)
     }
 
-    private func observeSubscription(requestId: RPCID, topics: [String]) {
-        var cancellable: AnyCancellable?
-        cancellable = subscriptionResponsePublisher
-            .filter { $0.0 == requestId }
-            .sink { [unowned self] (_, subscriptionIds) in
-                cancellable?.cancel()
-                concurrentQueue.async(flags: .barrier) { [unowned self] in
-                    logger.debug("Subscribed to topics: \(topics)")
-                    guard topics.count == subscriptionIds.count else {
-                        logger.warn("Number of topics in (batch)subscribe does not match number of subscriptions")
-                        return
-                    }
-                    for i in 0..<topics.count {
-                        subscriptions[topics[i]] = subscriptionIds[i]
-                    }
-                }
-            }
-    }
-
     public func subscribe(topic: String) async throws {
         logger.debug("Relay: Subscribing to topic: \(topic)")
         let rpc = Subscribe(params: .init(topic: topic))
@@ -157,7 +137,7 @@ public final class RelayClient {
     }
 
     public func batchSubscribe(topics: [String]) async throws {
-        guard !topics.isEmpty else { throw Errors.batchContainsNoItems }
+        guard !topics.isEmpty else { return }
         logger.debug("Relay: Subscribing to topics: \(topics)")
         let rpc = BatchSubscribe(params: .init(topics: topics))
         let request = rpc
@@ -211,6 +191,26 @@ public final class RelayClient {
                 completion(nil)
             }
         }
+    }
+
+
+    private func observeSubscription(requestId: RPCID, topics: [String]) {
+        var cancellable: AnyCancellable?
+        cancellable = subscriptionResponsePublisher
+            .filter { $0.0 == requestId }
+            .sink { [unowned self] (_, subscriptionIds) in
+                cancellable?.cancel()
+                concurrentQueue.async(flags: .barrier) { [unowned self] in
+                    logger.debug("Subscribed to topics: \(topics)")
+                    guard topics.count == subscriptionIds.count else {
+                        logger.warn("Number of topics in (batch)subscribe does not match number of subscriptions")
+                        return
+                    }
+                    for i in 0..<topics.count {
+                        subscriptions[topics[i]] = subscriptionIds[i]
+                    }
+                }
+            }
     }
 
     public func getClientId() throws -> String {
