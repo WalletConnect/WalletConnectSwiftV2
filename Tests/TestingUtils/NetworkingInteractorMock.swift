@@ -30,10 +30,10 @@ public class NetworkingInteractorMock: NetworkInteracting {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
     }
 
-    public let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest), Never>()
+    public let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, publishedAt: Date), Never>()
     public let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse), Never>()
 
-    public var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest), Never> {
+    public var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest, publishedAt: Date), Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
