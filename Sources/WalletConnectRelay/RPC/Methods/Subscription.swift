@@ -28,6 +28,14 @@ struct Subscription: RelayRPC {
                 let publishedAtMiliseconds = try container.decode(UInt64.self, forKey: .publishedAt)
                 publishedAt = Date(milliseconds: publishedAtMiliseconds)
             }
+
+            func encode(to encoder: Encoder) throws {
+                var container = encoder.container(keyedBy: Subscription.Params.Contents.CodingKeys.self)
+                try container.encode(self.topic, forKey: Subscription.Params.Contents.CodingKeys.topic)
+                try container.encode(self.message, forKey: Subscription.Params.Contents.CodingKeys.message)
+                let publishedAtmilliseconds = publishedAt.millisecondsSince1970
+                try container.encode(publishedAtmilliseconds, forKey: Subscription.Params.Contents.CodingKeys.publishedAt)
+            }
         }
         let id: String
         let data: Contents

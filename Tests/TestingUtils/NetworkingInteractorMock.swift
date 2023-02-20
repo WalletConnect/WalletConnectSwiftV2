@@ -47,9 +47,9 @@ public class NetworkingInteractorMock: NetworkInteracting {
             .filter { rpcRequest in
                 return rpcRequest.request.method == request.method
             }
-            .compactMap { topic, rpcRequest in
+            .compactMap { topic, rpcRequest, publishedAt in
                 guard let id = rpcRequest.id, let request = try? rpcRequest.params?.get(Request.self) else { return nil }
-                return RequestSubscriptionPayload(id: id, topic: topic, request: request)
+                return RequestSubscriptionPayload(id: id, topic: topic, request: request, publishedAt: publishedAt)
             }
             .eraseToAnyPublisher()
     }
