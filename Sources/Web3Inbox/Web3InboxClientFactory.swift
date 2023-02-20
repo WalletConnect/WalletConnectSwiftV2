@@ -6,7 +6,7 @@ final class Web3InboxClientFactory {
     static func create(
         chatClient: ChatClient,
         account: Account,
-        onSign: @escaping (String) -> CacaoSignature
+        onSign: @escaping SigningCallback
     ) -> Web3InboxClient {
         let host = "https://web3inbox-dev-hidden-git-feat-pending-threads-ui-walletconnect1.vercel.app/?chatProvider=ios"
         let logger = ConsoleLogger(suffix: "📬")

@@ -115,9 +115,9 @@ final class ChatTests: XCTestCase {
         wait(for: [messageExpectation], timeout: InputConfig.defaultTimeout)
     }
 
-    private func sign(_ message: String) -> CacaoSignature {
+    private func sign(_ message: String) -> SigningResult {
         let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
         let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
-        return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
+        return .signed(try! signer.sign(message: message, privateKey: privateKey, type: .eip191))
     }
 }

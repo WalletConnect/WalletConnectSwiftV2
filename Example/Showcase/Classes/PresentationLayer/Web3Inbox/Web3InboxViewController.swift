@@ -27,9 +27,10 @@ final class Web3InboxViewController: UIViewController {
 
 private extension Web3InboxViewController {
 
-    func onSing(_ message: String) -> CacaoSignature {
+    func onSing(_ message: String) -> SigningResult {
         let privateKey = Data(hex: importAccount.privateKey)
         let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
-        return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
+        let signature = try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
+        return .signed(signature)
     }
 }

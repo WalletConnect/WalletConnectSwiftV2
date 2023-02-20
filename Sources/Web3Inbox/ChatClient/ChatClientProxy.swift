@@ -4,10 +4,10 @@ final class ChatClientProxy {
 
     private let client: ChatClient
 
-    var onSign: (String) -> CacaoSignature
+    var onSign: SigningCallback
     var onResponse: ((RPCResponse) async throws -> Void)?
 
-    init(client: ChatClient, onSign: @escaping (String) -> CacaoSignature) {
+    init(client: ChatClient, onSign: @escaping SigningCallback) {
         self.client = client
         self.onSign = onSign
     }

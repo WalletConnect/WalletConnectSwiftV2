@@ -1,6 +1,13 @@
 import Foundation
 import Combine
 
+public enum SigningResult {
+    case signed(CacaoSignature)
+    case rejected
+}
+
+public typealias SigningCallback = (String) async -> SigningResult
+
 public class ChatClient {
     private var publishers = [AnyCancellable]()
     private let registryService: RegistryService
@@ -81,7 +88,7 @@ public class ChatClient {
     @discardableResult
     public func register(account: Account,
         isPrivate: Bool = false,
-        onSign: (String) -> CacaoSignature
+        onSign: @escaping SigningCallback
     ) async throws -> String {
         let publicKey = try await registryService.register(account: account, onSign: onSign)
 
@@ -91,7 +98,7 @@ public class ChatClient {
             return publicKey
         }
 
-        try await goPublic(account: account, onSign: onSign)
+        try await goPublic(account: account)
 
         return publicKey
     }
@@ -99,7 +106,7 @@ public class ChatClient {
     /// Unregisters a blockchain account with previously registered identity key
     /// Must not unregister invite key but must stop listening for invites
     /// - Parameter onSign: Callback for signing CAIP-122 message to verify blockchain account ownership
-    public func unregister(account: Account, onSign: (String) -> CacaoSignature) async throws {
+    public func unregister(account: Account, onSign: @escaping SigningCallback) async throws {
         try await registryService.unregister(account: account, onSign: onSign)
     }
 
@@ -130,8 +137,8 @@ public class ChatClient {
     /// Starts listening for invites
     /// - Parameter account: CAIP10 blockachain account
     /// - Returns: The public invite key
-    public func goPublic(account: Account, onSign: (String) -> CacaoSignature) async throws {
-        try await registryService.goPublic(account: account, onSign: onSign)
+    public func goPublic(account: Account) async throws {
+        try await registryService.goPublic(account: account)
     }
 
     /// Accepts a chat invite by id from account specified as inviteeAccount in Invite

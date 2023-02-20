@@ -42,7 +42,7 @@ final class RegistryTests: XCTestCase {
         let recovered = storage.getIdentityKey(for: account)!.publicKey.hexRepresentation
         XCTAssertEqual(publicKey, recovered)
 
-        let inviteKey = try await sut.registerInvite(account: account, onSign: onSign)
+        let inviteKey = try await sut.registerInvite(account: account)
 
         let recoveredKey = storage.getInviteKey(for: account)!
         XCTAssertEqual(inviteKey, recoveredKey)
@@ -57,7 +57,8 @@ final class RegistryTests: XCTestCase {
 
 private extension RegistryTests {
 
-    func onSign(_ message: String) -> CacaoSignature {
-        return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
+    func onSign(_ message: String) -> SigningResult {
+        let signature = try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
+        return .signed(signature)
     }
 }

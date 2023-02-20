@@ -53,7 +53,7 @@ final class RegistryServiceTests: XCTestCase {
         XCTAssertTrue(networkingInteractor.subscriptions.isEmpty)
 
         _ = try await registryService.register(account: account, onSign: onSign)
-        try await registryService.goPublic(account: account, onSign: onSign)
+        try await registryService.goPublic(account: account)
 
         XCTAssertNotNil(identityStorage.getInviteKey(for: account))
         XCTAssertTrue(networkService.callRegisterInvite)
@@ -94,7 +94,7 @@ final class RegistryServiceTests: XCTestCase {
         XCTAssertEqual(inviteKey, inviteKeyStub)
     }
 
-    private func onSign(_ message: String) -> CacaoSignature {
-        return CacaoSignature(t: .eip191, s: "")
+    private func onSign(_ message: String) -> SigningResult {
+        return .signed(CacaoSignature(t: .eip191, s: ""))
     }
 }

@@ -26,7 +26,7 @@ actor IdentityService {
     }
 
     func registerIdentity(account: Account,
-        onSign: (String) -> CacaoSignature
+        onSign: SigningCallback
     ) async throws -> String {
 
         if let identityKey = storage.getIdentityKey(for: account) {
@@ -34,15 +34,13 @@ actor IdentityService {
         }
 
         let identityKey = SigningPrivateKey()
-        let cacao = try makeCacao(DIDKey: identityKey.publicKey.did, account: account, onSign: onSign)
+        let cacao = try await makeCacao(DIDKey: identityKey.publicKey.did, account: account, onSign: onSign)
         try await networkService.registerIdentity(cacao: cacao)
 
         return try storage.saveIdentityKey(identityKey, for: account).publicKey.hexRepresentation
     }
 
-    func registerInvite(account: Account,
-        onSign: (String) -> CacaoSignature
-    ) async throws -> AgreementPublicKey {
+    func registerInvite(account: Account) async throws -> AgreementPublicKey {
 
         if let inviteKey = storage.getInviteKey(for: account) {
             return inviteKey
@@ -56,11 +54,11 @@ actor IdentityService {
         return try storage.saveInviteKey(inviteKey, for: account)
     }
 
-    func unregister(account: Account, onSign: (String) -> CacaoSignature) async throws {
+    func unregister(account: Account, onSign: SigningCallback) async throws {
         guard let identityKey = storage.getIdentityKey(for: account)
         else { throw Errors.identityKeyNotFound }
 
-        let cacao = try makeCacao(DIDKey: identityKey.publicKey.did, account: account, onSign: onSign)
+        let cacao = try await makeCacao(DIDKey: identityKey.publicKey.did, account: account, onSign: onSign)
         try await networkService.removeIdentity(cacao: cacao)
         try storage.removeIdentityKey(for: account)
     }
@@ -98,8 +96,9 @@ private extension IdentityService {
     func makeCacao(
         DIDKey: String,
         account: Account,
-        onSign: (String) -> CacaoSignature
-    ) throws -> Cacao {
+        onSign: SigningCallback
+    ) async throws -> Cacao {
+
         let cacaoHeader = CacaoHeader(t: "eip4361")
         let cacaoPayload = CacaoPayload(
             iss: account.did,
@@ -111,8 +110,15 @@ private extension IdentityService {
             nbf: nil, exp: nil, statement: nil, requestId: nil,
             resources: [DIDKey]
         )
-        let cacaoSignature = onSign(try messageFormatter.formatMessage(from: cacaoPayload))
-        return Cacao(h: cacaoHeader, p: cacaoPayload, s: cacaoSignature)
+
+        let result = await onSign(try messageFormatter.formatMessage(from: cacaoPayload))
+
+        switch result {
+        case .signed(let cacaoSignature):
+            return Cacao(h: cacaoHeader, p: cacaoPayload, s: cacaoSignature)
+        case .rejected:
+            throw ChatError.signatureRejected
+        }
     }
 
     func makeIDAuth(account: Account, invitePublicKey: DIDKey) throws -> String {

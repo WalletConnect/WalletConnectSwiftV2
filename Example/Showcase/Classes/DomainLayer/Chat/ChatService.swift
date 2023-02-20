@@ -83,9 +83,7 @@ final class ChatService {
     }
 
     func goPublic(account: Account, privateKey: String) async throws {
-        try await client.goPublic(account: account) { message in
-            return onSign(message: message, privateKey: privateKey)
-        }
+        try await client.goPublic(account: account)
     }
 
     func invite(inviterAccount: Account, inviteeAccount: Account, message: String) async throws {
@@ -96,13 +94,15 @@ final class ChatService {
 
     func register(account: Account, privateKey: String) async throws {
         _ = try await client.register(account: account) { message in
-            return onSign(message: message, privateKey: privateKey)
+            let signature = self.onSign(message: message, privateKey: privateKey)
+            return SigningResult.signed(signature)
         }
     }
 
     func unregister(account: Account, privateKey: String) async throws {
         try await client.unregister(account: account) { message in
-            return onSign(message: message, privateKey: privateKey)
+            let signature = self.onSign(message: message, privateKey: privateKey)
+            return SigningResult.signed(signature)
         }
     }
 

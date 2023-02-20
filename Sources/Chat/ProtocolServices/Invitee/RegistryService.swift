@@ -18,19 +18,19 @@ actor RegistryService {
         self.logger = logger
     }
 
-    func register(account: Account, onSign: (String) -> CacaoSignature) async throws -> String {
+    func register(account: Account, onSign: SigningCallback) async throws -> String {
         let pubKey = try await identityService.registerIdentity(account: account, onSign: onSign)
         logger.debug("Did register an account: \(account)")
         return pubKey
     }
 
-    func goPublic(account: Account, onSign: (String) -> CacaoSignature) async throws {
-        let inviteKey = try await identityService.registerInvite(account: account, onSign: onSign)
+    func goPublic(account: Account) async throws {
+        let inviteKey = try await identityService.registerInvite(account: account)
         try await subscribeForInvites(inviteKey: inviteKey)
         logger.debug("Did goPublic an account: \(account)")
     }
 
-    func unregister(account: Account, onSign: (String) -> CacaoSignature) async throws {
+    func unregister(account: Account, onSign: SigningCallback) async throws {
         try await identityService.unregister(account: account, onSign: onSign)
         logger.debug("Did unregister an account: \(account)")
     }

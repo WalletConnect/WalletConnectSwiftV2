@@ -11,14 +11,14 @@ public final class Web3Inbox {
     }()
 
     private static var account: Account?
-    private static var onSign: ((String) -> CacaoSignature)?
+    private static var onSign: SigningCallback?
 
     private init() { }
 
     /// Web3Inbox instance config method
     /// - Parameters:
     ///   - account: Web3Inbox initial account
-    static public func configure(account: Account, onSign: @escaping (String) -> CacaoSignature) {
+    static public func configure(account: Account, onSign: @escaping SigningCallback) {
         Chat.configure(account: account)
         Web3Inbox.account = account
         Web3Inbox.onSign = onSign
