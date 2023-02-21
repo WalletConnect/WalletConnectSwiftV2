@@ -62,12 +62,12 @@ final class RelayClientEndToEndTests: XCTestCase {
         expectationA.assertForOverFulfill = false
         expectationB.assertForOverFulfill = false
 
-        relayA.messagePublisher.sink { topic, payload in
+        relayA.messagePublisher.sink { topic, payload, _ in
             (subscriptionATopic, subscriptionAPayload) = (topic, payload)
             expectationA.fulfill()
         }.store(in: &publishers)
 
-        relayB.messagePublisher.sink { topic, payload in
+        relayB.messagePublisher.sink { topic, payload, _ in
             (subscriptionBTopic, subscriptionBPayload) = (topic, payload)
             expectationB.fulfill()
         }.store(in: &publishers)
