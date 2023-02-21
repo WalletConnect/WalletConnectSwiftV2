@@ -10,8 +10,6 @@ final class SocketAuthenticatorTests: XCTestCase {
 
     override func setUp() {
         clientIdStorage = ClientIdStorageMock()
-//        DIDKeyFactory = ED25519DIDKeyFactoryMock()
-//        DIDKeyFactory.did = "did:key:z6MkodHZwneVRShtaLf8JKYkxpDGp1vGZnpGmdBpX8M2exxH"
         sut = SocketAuthenticator(
             clientIdStorage: clientIdStorage,
             relayHost: "relay.walletconnect.com"
