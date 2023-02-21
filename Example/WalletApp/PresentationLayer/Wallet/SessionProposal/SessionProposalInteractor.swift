@@ -31,7 +31,7 @@ extension SessionProposalInteractor {
             if let chains = proposalNamespace.chains {
                 accounts = Set(
                     chains.compactMap {
-                        Account($0.absoluteString + ":\(self.accounts[$0.namespace] ?? "\($0.namespace)")")
+                        Account($0.absoluteString + ":\(self.accounts[$0.namespace]!)")
                     }
                 )
                 let sessionNamespace = SessionNamespace(chains: chains, accounts: accounts, methods: proposalNamespace.methods, events: proposalNamespace.events)
