@@ -60,3 +60,10 @@ extension WalletConnectError {
         }
     }
 }
+
+
+extension WalletConnectError: LocalizedError {
+    public var errorDescription: String? {
+        return self.localizedDescription
+    }
+}
