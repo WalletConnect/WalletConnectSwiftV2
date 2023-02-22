@@ -35,26 +35,32 @@ class PushRequestResponder {
 
         let requestRecord = try getRecord(requestId: requestId)
         let peerPublicKey = try getPeerPublicKey(for: requestRecord)
-        let pairingTopic = requestRecord.topic
+        let responseTopic = peerPublicKey.rawRepresentation.sha256().toHexString()
 
         let keys = try generateAgreementKeys(peerPublicKey: peerPublicKey)
         let pushTopic = keys.derivedTopic()
+
+        try kms.setAgreementSecret(keys, topic: responseTopic)
+
+        logger.debug("PushRequestResponder: responding on response topic \(responseTopic) \(pushTopic)")
 
         try kms.setAgreementSecret(keys, topic: pushTopic)
 
         try groupKeychainStorage.add(keys, forKey: pushTopic)
 
+        logger.debug("Subscribing to push topic: \(pushTopic)")
         try await networkingInteractor.subscribe(topic: pushTopic)
 
-        let responseParams = PushResponseParams(publicKey: keys.publicKey.hexRepresentation)
+        let responseParams = PushResponseParams(subscriptionAuth: "to_do", publicKey: keys.publicKey.hexRepresentation)
 
         let response = RPCResponse(id: requestId, result: responseParams)
 
         let requestParams = try requestRecord.request.params!.get(PushRequestParams.self)
         let pushSubscription = PushSubscription(topic: pushTopic, account: requestParams.account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: requestParams.metadata)
+
         subscriptionsStore.set(pushSubscription, forKey: pushTopic)
 
-        try await networkingInteractor.respond(topic: pairingTopic, response: response, protocolMethod: PushRequestProtocolMethod())
+        try await networkingInteractor.respond(topic: responseTopic, response: response, protocolMethod: PushRequestProtocolMethod(), envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
 
         kms.deletePrivateKey(for: keys.publicKey.hexRepresentation)
     }
@@ -74,7 +80,7 @@ class PushRequestResponder {
     }
 
     private func getPeerPublicKey(for record: RPCHistory.Record) throws -> AgreementPublicKey {
-        guard let params = try record.request.params?.get(PushResponseParams.self)
+        guard let params = try record.request.params?.get(PushRequestParams.self)
         else { throw Errors.malformedRequestParams }
 
         let peerPublicKey = try AgreementPublicKey(hex: params.publicKey)
