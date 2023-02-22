@@ -7,15 +7,32 @@ final class AccountStorage {
         self.defaults = defaults
     }
 
-    var account: Account? {
+    var importAccount: ImportAccount? {
         get {
             guard let value = UserDefaults.standard.string(forKey: "account") else {
                 return nil
             }
-            return Account(value)
+            guard let account = ImportAccount(input: value) else {
+                // Migration
+                self.importAccount = nil
+                return nil
+            }
+            return account
         }
         set {
-            UserDefaults.standard.set(newValue?.absoluteString, forKey: "account")
+            UserDefaults.standard.set(newValue?.storageId, forKey: "account")
+        }
+    }
+}
+
+private extension ImportAccount {
+
+    var storageId: String {
+        switch self {
+        case .swift, .kotlin, .js:
+            return name
+        case .custom(let privateKey):
+            return privateKey
         }
     }
 }

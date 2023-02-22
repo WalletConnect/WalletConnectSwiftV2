@@ -13,7 +13,7 @@ struct ThreadViewModel: Identifiable {
     }
 
     var title: String {
-        return AccountNameResolver.resolveName(thread.peerAccount)
+        return thread.peerAccount.address
     }
 
     var subtitle: String {

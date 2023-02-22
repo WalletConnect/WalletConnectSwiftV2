@@ -20,7 +20,7 @@ struct ChatListView: View {
                                         .foregroundColor(.w_greenBackground)
                                         .font(.system(size: 17.0, weight: .bold))
                                         .clipShape(Circle())
-
+                                    
                                     Text("Chat Requests")
                                         .foregroundColor(.w_greenForground)
                                         .font(.system(size: 17.0, weight: .bold))
@@ -32,8 +32,8 @@ struct ChatListView: View {
                             .clipShape(Capsule())
                             .padding(16.0)
                         }
-
-                        if presenter.threads.isEmpty {
+                        
+                        if presenter.threadViewModels.isEmpty {
                             Spacer()
                             emptyView(size: geometry.size)
                             Spacer()
@@ -43,20 +43,19 @@ struct ChatListView: View {
                     }
                 }
 
-                Button("Log out") {
-                    presenter.didLogoutPress()
+                PlainButton {
+                    try await presenter.didLogoutPress()
+                } label: {
+                    Text("Log out")
+                        .foregroundColor(.red)
                 }
-                .foregroundColor(.red)
                 .padding(.bottom, 16)
-            }
-            .onAppear {
-                presenter.setupInitialState()
             }
         }
     }
 
     private func chatsList() -> some View {
-        ForEach(presenter.threads) { thread in
+        ForEach(presenter.threadViewModels) { thread in
             Button(action: {
                 presenter.didPressThread(thread)
             }) {

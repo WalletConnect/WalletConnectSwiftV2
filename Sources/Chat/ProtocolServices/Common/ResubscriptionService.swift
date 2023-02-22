@@ -16,6 +16,7 @@ class ResubscriptionService {
         self.accountService = accountService
         self.logger = logger
         self.chatStorage = chatStorage
+
         setUpResubscription()
     }
 
@@ -25,18 +26,9 @@ class ResubscriptionService {
                 guard status == .connected else { return }
 
                 Task(priority: .high) {
-                    try await resubscribe(account: accountService.currentAccount)
+                    let topics = chatStorage.getAllThreads().map { $0.topic }
+                    try await networkingInteractor.batchSubscribe(topics: topics)
                 }
             }.store(in: &publishers)
-    }
-
-    func resubscribe(account: Account) async throws {
-        let topics = chatStorage.getThreads(account: account).map { $0.topic }
-        try await networkingInteractor.batchSubscribe(topics: topics)
-    }
-
-    func unsubscribe(account: Account) async throws {
-        let topics = chatStorage.getThreads(account: account).map { $0.topic }
-        try await networkingInteractor.batchUnsubscribe(topics: topics)
     }
 }

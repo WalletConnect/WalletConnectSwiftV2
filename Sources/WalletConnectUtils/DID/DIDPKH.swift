@@ -10,31 +10,35 @@ public struct DIDPKH {
     }
 
     public let account: Account
-    public let iss: String
+    public let string: String
 
-    public init(iss: String) throws {
-        guard iss.starts(with: DIDPKH.didPrefix)
+    public init(did: String) throws {
+        guard did.starts(with: DIDPKH.didPrefix)
         else { throw Errors.invalidDIDPKH }
 
-        guard let string = iss.components(separatedBy: DIDPKH.didPrefix + ":").last
+        guard let string = did.components(separatedBy: DIDPKH.didPrefix + ":").last
         else { throw Errors.invalidDIDPKH }
 
         guard let account = Account(string)
         else { throw Errors.invalidAccount }
 
-        self.iss = iss
+        self.string = string
         self.account = account
     }
 
     public init(account: Account) {
-        self.iss = "\(DIDPKH.didPrefix):\(account.absoluteString)"
+        self.string = "\(DIDPKH.didPrefix):\(account.absoluteString)"
         self.account = account
     }
 }
 
 extension Account {
 
-    public var iss: String {
-        return DIDPKH(account: self).iss
+    public init(DIDPKHString: String) throws {
+        self = try DIDPKH(did: DIDPKHString).account
+    }
+
+    public var did: String {
+        return DIDPKH(account: self).string
     }
 }

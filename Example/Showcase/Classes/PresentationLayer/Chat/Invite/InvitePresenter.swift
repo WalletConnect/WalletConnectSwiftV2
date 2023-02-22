@@ -1,5 +1,6 @@
 import UIKit
 import Combine
+import Web3
 
 final class InvitePresenter: ObservableObject {
 
@@ -12,16 +13,9 @@ final class InvitePresenter: ObservableObject {
         didSet { didInputChanged() }
     }
 
-    lazy var rightBarButtonItem: UIBarButtonItem? = {
-        let item = UIBarButtonItem(
-            title: "Invite",
-            style: .plain,
-            target: self,
-            action: #selector(invite)
-        )
-        item.isEnabled = false
-        return item
-    }()
+    var showButton: Bool {
+        return resolveAccount(from: input) != nil
+    }
 
     init(interactor: InviteInteractor, router: InviteRouter, account: Account) {
         self.interactor = interactor
@@ -30,8 +24,12 @@ final class InvitePresenter: ObservableObject {
     }
 
     @MainActor
-    func setupInitialState() async {
+    func invite() async throws {
+        guard let inviteeAccount = resolveAccount(from: input)
+        else { return }
 
+        try await interactor.invite(inviterAccount: account, inviteeAccount: inviteeAccount, message: "Welcome to WalletConnect Chat!")
+        router.dismiss()
     }
 }
 
@@ -52,16 +50,20 @@ extension InvitePresenter: SceneViewModel {
 
 private extension InvitePresenter {
 
-    @MainActor
-    @objc func invite() {
-        guard let peerAccount = AccountNameResolver.resolveAccount(input) else { return }
-        Task(priority: .userInitiated) {
-            await interactor.invite(peerAccount: peerAccount, message: "Welcome to WalletConnect Chat!", selfAccount: account)
-            router.dismiss()
-        }
-    }
-
     func didInputChanged() {
         rightBarButtonItem?.isEnabled = !input.isEmpty
+    }
+
+    func resolveAccount(from input: String) -> Account? {
+        if let account = Account(input) {
+            return account
+        }
+        if let account = ImportAccount(input: input)?.account {
+            return account
+        }
+        if let address = try? EthereumAddress(hex: input, eip55: false) {
+            return Account("eip155:1:\(address.hex(eip55: true))")!
+        }
+        return nil
     }
 }

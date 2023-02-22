@@ -10,8 +10,8 @@ final class MainRouter {
         return ChatListModule.create(app: app, account: account).wrapToNavigationController()
     }
 
-    func web3InboxViewController(account: Account) -> UIViewController {
-        return Web3InboxModule.create(app: app, account: account).wrapToNavigationController()
+    func web3InboxViewController(importAccount: ImportAccount) -> UIViewController {
+        return Web3InboxModule.create(app: app, importAccount: importAccount).wrapToNavigationController()
     }
 
     init(app: Application) {

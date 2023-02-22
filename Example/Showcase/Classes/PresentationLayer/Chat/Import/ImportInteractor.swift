@@ -1,17 +1,18 @@
 final class ImportInteractor {
-    private let registerService: RegisterService
+
+    private let chatService: ChatService
     private let accountStorage: AccountStorage
 
-    init(registerService: RegisterService, accountStorage: AccountStorage) {
-        self.registerService = registerService
+    init(chatService: ChatService, accountStorage: AccountStorage) {
+        self.chatService = chatService
         self.accountStorage = accountStorage
     }
 
-    func save(account: Account) {
-        accountStorage.account = account
+    func save(importAccount: ImportAccount) {
+        accountStorage.importAccount = importAccount
     }
 
-    func register(account: Account) async {
-        await registerService.register(account: account)
+    func register(importAccount: ImportAccount) async throws {
+        try await chatService.register(account: importAccount.account, privateKey: importAccount.privateKey)
     }
 }

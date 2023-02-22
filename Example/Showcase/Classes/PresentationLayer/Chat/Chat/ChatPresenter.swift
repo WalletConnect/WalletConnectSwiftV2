@@ -9,27 +9,24 @@ final class ChatPresenter: ObservableObject {
     private let router: ChatRouter
     private var disposeBag = Set<AnyCancellable>()
 
-    @Published var messages: [MessageViewModel] = []
+    @Published private var messages: [Message] = []
     @Published var input: String = .empty
 
+    var messageViewModels: [MessageViewModel] {
+        return messages.sorted(by: { $0.timestamp < $1.timestamp })
+            .map { MessageViewModel(message: $0, thread: thread) }
+    }
+
     init(thread: WalletConnectChat.Thread, interactor: ChatInteractor, router: ChatRouter) {
+        defer { setupInitialState() }
         self.thread = thread
         self.interactor = interactor
         self.router = router
     }
 
-    @MainActor
-    func setupInitialState() async {
-        await loadMessages()
-
-        for await _ in interactor.messagesSubscription() {
-            await loadMessages()
-        }
-    }
-
     func didPressSend() {
         Task(priority: .userInitiated) {
-            await sendMessage()
+            try await sendMessage()
         }
     }
 }
@@ -39,7 +36,7 @@ final class ChatPresenter: ObservableObject {
 extension ChatPresenter: SceneViewModel {
 
     var sceneTitle: String? {
-        return AccountNameResolver.resolveName(thread.peerAccount)
+        return thread.peerAccount.address
     }
 }
 
@@ -47,15 +44,18 @@ extension ChatPresenter: SceneViewModel {
 
 private extension ChatPresenter {
 
-    func loadMessages() async {
-        let messages = await interactor.getMessages(thread: thread)
-        self.messages = messages.sorted(by: { $0.timestamp < $1.timestamp })
-            .map { MessageViewModel(message: $0, thread: thread) }
+    func setupInitialState() {
+        messages = interactor.getMessages(thread: thread)
+
+        interactor.messagesSubscription(thread: thread)
+            .sink { [unowned self] messages in
+                self.messages = messages
+            }.store(in: &disposeBag)
     }
 
     @MainActor
-    func sendMessage() async {
-        try! await interactor.sendMessage(topic: thread.topic, message: input)
+    func sendMessage() async throws {
+        try await interactor.sendMessage(topic: thread.topic, message: input)
         input = .empty
     }
 }

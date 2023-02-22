@@ -9,12 +9,11 @@ public struct SIWECacaoFormatter: SIWECacaoFormatting {
     public init() { }
 
     public func formatMessage(from payload: CacaoPayload) throws -> String {
-        let address = try DIDPKH(iss: payload.iss).account.address
-        let iss = try DIDPKH(iss: payload.iss)
+        let iss = try DIDPKH(did: payload.iss)
         let message = SIWEMessage(
             domain: payload.domain,
             uri: payload.aud,
-            address: address,
+            address: iss.account.address,
             version: payload.version,
             nonce: payload.nonce,
             chainId: iss.account.reference,

@@ -15,6 +15,7 @@ public protocol KeyManagementServiceProtocol {
     func deletePrivateKey(for publicKey: String)
     func deleteAgreementSecret(for topic: String)
     func deleteSymmetricKey(for topic: String)
+    func deletePublicKey(for topic: String)
     func deleteAll() throws
     func performKeyAgreement(selfPublicKey: AgreementPublicKey, peerPublicKey hexRepresentation: String) throws -> AgreementKeys
 }
@@ -121,6 +122,14 @@ public class KeyManagementService: KeyManagementServiceProtocol {
             try keychain.delete(key: topic)
         } catch {
             print("Error deleting symmetric key: \(error)")
+        }
+    }
+
+    public func deletePublicKey(for topic: String) {
+        do {
+            try keychain.delete(key: topic)
+        } catch {
+            print("Error deleting public key: \(error)")
         }
     }
 
