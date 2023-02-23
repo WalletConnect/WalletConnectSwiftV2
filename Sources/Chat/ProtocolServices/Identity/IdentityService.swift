@@ -124,11 +124,14 @@ private extension IdentityService {
     func makeIDAuth(account: Account, invitePublicKey: DIDKey) throws -> String {
         guard let identityKey = storage.getIdentityKey(for: account)
         else { throw Errors.identityKeyNotFound }
-        return try JWTFactory(keyPair: identityKey).createChatInviteJWT(
-            sub: invitePublicKey.did(prefix: true, variant: .X25519),
-            aud: getAudience(),
-            pkh: account.did
+
+        let payload = InviteKeyPayload(
+            keyserver: keyserverURL,
+            account: account,
+            invitePublicKey: invitePublicKey
         )
+
+        return try payload.createWrapperAndSign(keyPair: identityKey).jwtString
     }
 
     private func getNonce() -> String {
