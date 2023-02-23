@@ -50,12 +50,21 @@ class InvitationHandlingService {
         try kms.setSymmetricKey(symmetricKey.sharedKey, for: acceptTopic)
 
         let publicKey = try kms.createX25519KeyPair()
-        let jwt = try makeAcceptJWT(publicKey: publicKey.rawRepresentation, inviter: invite.inviterAccount)
-        let payload = AcceptPayload(responseAuth: jwt)
+
+        let payload = AcceptPayload(
+            keyserver: keyserverURL,
+            inviterAccount: invite.inviterAccount,
+            inviteePublicKey: DIDKey(rawData: publicKey.rawRepresentation)
+        )
+
+        guard let identityKey = identityStorage.getIdentityKey(for: accountService.currentAccount)
+        else { throw Errors.identityKeyNotFound }
+
+        let wrapper = try payload.createWrapperAndSign(keyPair: identityKey)
         
         try await networkingInteractor.respond(
             topic: acceptTopic,
-            response: RPCResponse(id: inviteId, result: payload),
+            response: RPCResponse(id: inviteId, result: wrapper),
             protocolMethod: ChatInviteProtocolMethod()
         )
 
@@ -110,40 +119,29 @@ private extension InvitationHandlingService {
 
     func setUpRequestHandling() {
         networkingInteractor.requestSubscription(on: ChatInviteProtocolMethod())
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<InvitePayload>) in
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<InvitePayload.Wrapper>) in
                 logger.debug("Did receive an invite")
 
-                guard let decoded = try? payload.request.decode()
+                guard let (invite, claims) = try? InvitePayload.decode(from: payload.request)
                 else { fatalError() /* TODO: Handle error */ }
 
                 Task(priority: .high) {
-                    let inviteeAccount = decoded.account
-                    let inviterAccount = try await identityService.resolveIdentity(iss: decoded.iss)
+                    let inviterAccount = try await identityService.resolveIdentity(iss: claims.iss)
                     // TODO: Should we cache it?
                     let inviteePublicKey = try await identityService.resolveInvite(account: inviterAccount)
+                    let inviterPublicKey = invite.inviterPublicKey.did(prefix: false, variant: .X25519)
 
                     let invite = ReceivedInvite(
                         id: payload.id.integer,
-                        message: decoded.message,
+                        message: invite.message,
                         inviterAccount: inviterAccount,
-                        inviteeAccount: inviteeAccount,
-                        inviterPublicKey: decoded.publicKey,
+                        inviteeAccount: invite.inviteeAccount,
+                        inviterPublicKey: inviterPublicKey,
                         inviteePublicKey: inviteePublicKey,
-                        timestamp: decoded.iat // TODO: Replace with relay message receivedAt
+                        timestamp: claims.iat // TODO: Replace with relay message receivedAt
                     )
-                    chatStorage.set(receivedInvite: invite, account: inviteeAccount)
+                    chatStorage.set(receivedInvite: invite, account: invite.inviteeAccount)
                 }
             }.store(in: &publishers)
-    }
-
-    func makeAcceptJWT(publicKey: Data, inviter: Account) throws -> String {
-        guard let identityKey = identityStorage.getIdentityKey(for: accountService.currentAccount)
-        else { throw Errors.identityKeyNotFound }
-
-        return try JWTFactory(keyPair: identityKey).createChatInviteApprovalJWT(
-            ksu: keyserverURL.absoluteString,
-            aud: inviter.did,
-            sub: DIDKey(rawData: publicKey).did(prefix: true, variant: .X25519)
-        )
     }
 }
