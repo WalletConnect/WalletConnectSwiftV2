@@ -45,7 +45,9 @@ class InvitationHandlingService {
         guard let inviteePublicKey = identityStorage.getInviteKey(for: currentAccount)
         else { throw Errors.inviteKeyNotFound }
 
-        let symmetricKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: invite.inviterPublicKey)
+        let inviterPublicKey = try DIDKey(did: invite.inviterPublicKey).hexString
+
+        let symmetricKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: inviterPublicKey)
         let acceptTopic = symmetricKey.derivedTopic()
         try kms.setSymmetricKey(symmetricKey.sharedKey, for: acceptTopic)
 
@@ -68,7 +70,7 @@ class InvitationHandlingService {
             protocolMethod: ChatInviteProtocolMethod()
         )
 
-        let threadSymmetricKey = try kms.performKeyAgreement(selfPublicKey: publicKey, peerPublicKey: invite.inviterPublicKey)
+        let threadSymmetricKey = try kms.performKeyAgreement(selfPublicKey: publicKey, peerPublicKey: inviterPublicKey)
         let threadTopic = threadSymmetricKey.derivedTopic()
         try kms.setSymmetricKey(threadSymmetricKey.sharedKey, for: threadTopic)
         try await networkingInteractor.subscribe(topic: threadTopic)
