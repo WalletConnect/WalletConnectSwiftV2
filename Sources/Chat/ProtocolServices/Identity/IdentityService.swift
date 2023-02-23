@@ -29,7 +29,7 @@ actor IdentityService {
         onSign: SigningCallback
     ) async throws -> String {
 
-        if let identityKey = storage.getIdentityKey(for: account) {
+        if let identityKey = try? storage.getIdentityKey(for: account) {
             return identityKey.publicKey.hexRepresentation
         }
 
@@ -42,7 +42,7 @@ actor IdentityService {
 
     func registerInvite(account: Account) async throws -> AgreementPublicKey {
 
-        if let inviteKey = storage.getInviteKey(for: account) {
+        if let inviteKey = try? storage.getInviteKey(for: account) {
             return inviteKey
         }
 
@@ -55,18 +55,14 @@ actor IdentityService {
     }
 
     func unregister(account: Account, onSign: SigningCallback) async throws {
-        guard let identityKey = storage.getIdentityKey(for: account)
-        else { throw Errors.identityKeyNotFound }
-
+        let identityKey = try storage.getIdentityKey(for: account)
         let cacao = try await makeCacao(DIDKey: identityKey.publicKey.did, account: account, onSign: onSign)
         try await networkService.removeIdentity(cacao: cacao)
         try storage.removeIdentityKey(for: account)
     }
 
     func goPrivate(account: Account) async throws -> AgreementPublicKey {
-        guard let inviteKey = storage.getInviteKey(for: account)
-        else { throw Errors.inviteKeyNotFound }
-
+        let inviteKey = try storage.getInviteKey(for: account)
         let invitePublicKey = DIDKey(rawData: inviteKey.rawRepresentation)
         let idAuth = try makeIDAuth(account: account, invitePublicKey: invitePublicKey)
         try await networkService.removeInvite(idAuth: idAuth)
@@ -87,11 +83,6 @@ actor IdentityService {
 }
 
 private extension IdentityService {
-
-    enum Errors: Error {
-        case identityKeyNotFound
-        case inviteKeyNotFound
-    }
 
     func makeCacao(
         DIDKey: String,
@@ -122,8 +113,7 @@ private extension IdentityService {
     }
 
     func makeIDAuth(account: Account, invitePublicKey: DIDKey) throws -> String {
-        guard let identityKey = storage.getIdentityKey(for: account)
-        else { throw Errors.identityKeyNotFound }
+        let identityKey = try storage.getIdentityKey(for: account)
 
         let payload = InviteKeyPayload(
             keyserver: keyserverURL,

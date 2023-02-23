@@ -39,12 +39,12 @@ final class RegistryTests: XCTestCase {
         let resolvedAccount = try await sut.resolveIdentity(iss: iss)
         XCTAssertEqual(resolvedAccount, account)
 
-        let recovered = storage.getIdentityKey(for: account)!.publicKey.hexRepresentation
+        let recovered = try storage.getIdentityKey(for: account).publicKey.hexRepresentation
         XCTAssertEqual(publicKey, recovered)
 
         let inviteKey = try await sut.registerInvite(account: account)
 
-        let recoveredKey = storage.getInviteKey(for: account)!
+        let recoveredKey = try storage.getInviteKey(for: account)
         XCTAssertEqual(inviteKey, recoveredKey)
 
         let resolvedKey = try await sut.resolveInvite(account: account)

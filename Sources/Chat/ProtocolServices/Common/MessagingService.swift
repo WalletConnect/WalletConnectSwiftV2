@@ -42,8 +42,7 @@ class MessagingService {
             throw Errors.threadDoNotExist
         }
 
-        guard let identityKey = identityStorage.getIdentityKey(for: accountService.currentAccount)
-        else { throw Errors.identityKeyNotFound }
+        let identityKey = try identityStorage.getIdentityKey(for: accountService.currentAccount)
 
         let payload = MessagePayload(keyserver: keyserverURL, message: messageString, recipientAccount: thread.peerAccount)
         let wrapper = try payload.createWrapperAndSign(keyPair: identityKey)
@@ -60,7 +59,6 @@ private extension MessagingService {
 
     enum Errors: Error {
         case threadDoNotExist
-        case identityKeyNotFound
     }
 
     func setUpResponseHandling() {
@@ -118,8 +116,7 @@ private extension MessagingService {
                         senderAccount: authorAccount
                     )
 
-                    guard let identityKey = identityStorage.getIdentityKey(for: accountService.currentAccount)
-                    else { throw Errors.identityKeyNotFound }
+                    let identityKey = try identityStorage.getIdentityKey(for: accountService.currentAccount)
 
                     let wrapper = try receiptPayload.createWrapperAndSign(keyPair: identityKey)
                     let response = RPCResponse(id: payload.id, result: wrapper)
