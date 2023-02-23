@@ -14,7 +14,7 @@ final class RegistryTests: XCTestCase {
     var signer: CacaoMessageSigner!
 
     override func setUp() {
-        let keyserverURL = URL(string: "https://staging.keys.walletconnect.com")!
+        let keyserverURL = URL(string: "https://keys.walletconnect.com")!
         let httpService = HTTPNetworkClient(host: keyserverURL.host!)
         let accountService = AccountService(currentAccount: account)
         let identityNetworkService = IdentityNetworkService(accountService: accountService, httpService: httpService)
