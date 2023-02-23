@@ -53,8 +53,7 @@ class InviteService {
             inviterPublicKey: DIDKey(rawData: selfPubKeyY.rawRepresentation)
         )
 
-        guard let identityKey = identityStorage.getIdentityKey(for: accountService.currentAccount)
-        else { throw Errors.identityKeyNotFound }
+        let identityKey = try identityStorage.getIdentityKey(for: accountService.currentAccount)
 
         let wrapper = try payload.createWrapperAndSign(keyPair: identityKey)
 
@@ -86,10 +85,6 @@ class InviteService {
 }
 
 private extension InviteService {
-
-    enum Errors: Error {
-        case identityKeyNotFound
-    }
 
     func setUpResponseHandling() {
         networkingInteractor.responseSubscription(on: ChatInviteProtocolMethod())

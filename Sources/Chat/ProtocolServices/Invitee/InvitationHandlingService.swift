@@ -42,9 +42,7 @@ class InvitationHandlingService {
         guard let invite = chatStorage.getReceivedInvite(id: inviteId, account: currentAccount)
         else { throw Errors.inviteForIdNotFound }
 
-        guard let inviteePublicKey = identityStorage.getInviteKey(for: currentAccount)
-        else { throw Errors.inviteKeyNotFound }
-
+        let inviteePublicKey = try identityStorage.getInviteKey(for: currentAccount)
         let inviterPublicKey = try DIDKey(did: invite.inviterPublicKey).hexString
 
         let symmetricKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: inviterPublicKey)
@@ -59,8 +57,7 @@ class InvitationHandlingService {
             inviteePublicKey: DIDKey(rawData: publicKey.rawRepresentation)
         )
 
-        guard let identityKey = identityStorage.getIdentityKey(for: accountService.currentAccount)
-        else { throw Errors.identityKeyNotFound }
+        let identityKey = try identityStorage.getIdentityKey(for: accountService.currentAccount)
 
         let wrapper = try payload.createWrapperAndSign(keyPair: identityKey)
         
@@ -93,8 +90,7 @@ class InvitationHandlingService {
         guard let invite = chatStorage.getReceivedInvite(id: inviteId, account: currentAccount)
         else { throw Errors.inviteForIdNotFound }
 
-        guard let inviteePublicKey = identityStorage.getInviteKey(for: currentAccount)
-        else { throw Errors.inviteKeyNotFound }
+        let inviteePublicKey = try identityStorage.getInviteKey(for: currentAccount)
 
         let symmetricKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: invite.inviterPublicKey)
         let rejectTopic = symmetricKey.derivedTopic()
@@ -115,8 +111,6 @@ private extension InvitationHandlingService {
 
     enum Errors: Error {
         case inviteForIdNotFound
-        case identityKeyNotFound
-        case inviteKeyNotFound
     }
 
     func setUpRequestHandling() {
