@@ -10,11 +10,9 @@ final class RelayClientEndToEndTests: XCTestCase {
     private var publishers = Set<AnyCancellable>()
 
     func makeRelayClient() -> RelayClient {
-        let didKeyFactory = ED25519DIDKeyFactory()
-        let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock(), didKeyFactory: didKeyFactory)
+        let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock())
         let socketAuthenticator = SocketAuthenticator(
             clientIdStorage: clientIdStorage,
-            didKeyFactory: didKeyFactory,
             relayHost: InputConfig.relayHost
         )
         let urlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)
@@ -62,12 +60,12 @@ final class RelayClientEndToEndTests: XCTestCase {
         expectationA.assertForOverFulfill = false
         expectationB.assertForOverFulfill = false
 
-        relayA.messagePublisher.sink { topic, payload in
+        relayA.messagePublisher.sink { topic, payload, _ in
             (subscriptionATopic, subscriptionAPayload) = (topic, payload)
             expectationA.fulfill()
         }.store(in: &publishers)
 
-        relayB.messagePublisher.sink { topic, payload in
+        relayB.messagePublisher.sink { topic, payload, _ in
             (subscriptionBTopic, subscriptionBPayload) = (topic, payload)
             expectationB.fulfill()
         }.store(in: &publishers)

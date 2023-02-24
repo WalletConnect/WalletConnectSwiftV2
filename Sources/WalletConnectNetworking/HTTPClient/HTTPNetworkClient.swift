@@ -56,7 +56,7 @@ public actor HTTPNetworkClient: HTTPClient {
             completion(.failure(HTTPError.malformedURL(service)))
             return
         }
-        session.dataTask(with: request) { _, response, error in
+        session.dataTask(with: request) { data, response, error in
             do {
                 try HTTPNetworkClient.validate(response, error)
                 completion(.success(()))

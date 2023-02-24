@@ -41,6 +41,11 @@ public struct AgreementPublicKey: GenericPasswordConvertible, Equatable {
     public var hexRepresentation: String {
         key.rawRepresentation.toHexString()
     }
+
+    public var did: String {
+        let key = DIDKey(rawData: rawRepresentation)
+        return key.did(prefix: true, variant: .X25519)
+    }
 }
 
 extension AgreementPublicKey: Codable {
@@ -68,7 +73,6 @@ public struct AgreementPrivateKey: GenericPasswordConvertible, Equatable {
     }
 
     public init<D>(rawRepresentation: D) throws where D: ContiguousBytes {
-
         self.key = try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: rawRepresentation)
     }
 

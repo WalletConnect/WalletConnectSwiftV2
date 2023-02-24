@@ -60,7 +60,7 @@ final class ApproveEngineTests: XCTestCase {
         pairingStorageMock.setPairing(pairing)
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
-        pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal))
+        pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal, publishedAt: Date()))
 
         try await engine.approveProposal(proposerPubKey: proposal.proposer.publicKey, validating: SessionNamespace.stubDictionary())
 
@@ -84,7 +84,7 @@ final class ApproveEngineTests: XCTestCase {
             sessionProposed = true
         }
 
-        pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal))
+        pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal, publishedAt: Date()))
         XCTAssertNotNil(try! proposalPayloadsStore.get(key: proposal.proposer.publicKey), "Proposer must store proposal payload")
         XCTAssertTrue(sessionProposed)
     }
@@ -108,7 +108,7 @@ final class ApproveEngineTests: XCTestCase {
             didCallBackOnSessionApproved = true
         }
         sessionTopicToProposal.set(SessionProposal.stub().publicRepresentation(pairingTopic: ""), forKey: sessionTopic)
-        networkingInteractor.requestPublisherSubject.send((sessionTopic, RPCRequest.stubSettle()))
+        networkingInteractor.requestPublisherSubject.send((sessionTopic, RPCRequest.stubSettle(), Date()))
 
         usleep(100)
 

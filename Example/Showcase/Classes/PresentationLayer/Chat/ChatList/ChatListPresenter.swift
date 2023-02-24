@@ -1,5 +1,6 @@
 import UIKit
 import Combine
+import WalletConnectChat
 
 final class ChatListPresenter: ObservableObject {
 
@@ -8,30 +9,35 @@ final class ChatListPresenter: ObservableObject {
     private let account: Account
     private var disposeBag = Set<AnyCancellable>()
 
-    @Published var threads: [ThreadViewModel] = []
-    @Published var invites: [InviteViewModel] = []
+    @Published private var threads: [WalletConnectChat.Thread] = []
+    @Published private var receivedInvites: [ReceivedInvite] = []
+
+    var threadViewModels: [ThreadViewModel] {
+        return threads
+            .sorted(by: { $0.topic < $1.topic })
+            .map { ThreadViewModel(thread: $0) }
+    }
+
+    var inviteViewModels: [InviteViewModel] {
+        return receivedInvites
+            .filter { $0.status == .pending }
+            .sorted(by: { $0.timestamp < $1.timestamp })
+            .map { InviteViewModel(invite: $0) }
+    }
 
     init(account: Account, interactor: ChatListInteractor, router: ChatListRouter) {
+        defer { setupInitialState() }
         self.account = account
         self.interactor = interactor
         self.router = router
     }
 
-    func setupInitialState() {
-        Task(priority: .userInitiated) {
-            await setupThreads()
-        }
-        Task(priority: .userInitiated) {
-            await setupInvites()
-        }
-    }
-
     var requestsCount: String {
-        return String(invites.count)
+        return String(inviteViewModels.count)
     }
 
     var showRequests: Bool {
-        return !invites.isEmpty
+        return !inviteViewModels.isEmpty
     }
 
     func didPressThread(_ thread: ThreadViewModel) {
@@ -42,8 +48,9 @@ final class ChatListPresenter: ObservableObject {
         router.presentInviteList(account: account)
     }
 
-    func didLogoutPress() {
-        interactor.logout()
+    @MainActor
+    func didLogoutPress() async throws {
+        try await interactor.logout()
         router.presentWelcome()
     }
 
@@ -77,36 +84,19 @@ extension ChatListPresenter: SceneViewModel {
 
 private extension ChatListPresenter {
 
-    @MainActor
-    func setupThreads() async {
-        await loadThreads()
+    func setupInitialState() {
+        threads = interactor.getThreads()
+        receivedInvites = interactor.getInvites()
 
-        for await _ in interactor.threadsSubscription() {
-            await loadThreads()
-        }
-    }
+        interactor.threadsSubscription()
+            .sink { [unowned self] threads in
+                self.threads = threads
+            }.store(in: &disposeBag)
 
-    @MainActor
-    func setupInvites() async {
-        loadInvites()
-
-        for await _ in interactor.invitesSubscription() {
-            loadInvites()
-        }
-    }
-
-    @MainActor
-    func loadThreads() async {
-        self.threads = interactor.getThreads()
-            .sorted(by: { $0.topic < $1.topic })
-            .map { ThreadViewModel(thread: $0) }
-    }
-
-    @MainActor
-    func loadInvites() {
-        self.invites = interactor.getInvites()
-            .sorted(by: { $0.publicKey < $1.publicKey })
-            .map { InviteViewModel(invite: $0) }
+        interactor.receivedInvitesSubscription()
+            .sink { [unowned self] receivedInvites in
+                self.receivedInvites = receivedInvites
+            }.store(in: &disposeBag)
     }
 
     @objc func presentInvite() {

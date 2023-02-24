@@ -10,7 +10,7 @@ final class ImportRouter {
         self.app = app
     }
 
-    func presentChat(account: Account) {
-        MainModule.create(app: app, account: account).present()
+    func presentChat(importAccount: ImportAccount) {
+        MainModule.create(app: app, importAccount: importAccount).present()
     }
 }

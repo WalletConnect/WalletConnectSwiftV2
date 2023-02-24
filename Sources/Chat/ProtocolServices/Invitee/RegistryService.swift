@@ -2,54 +2,61 @@ import Foundation
 
 actor RegistryService {
     private let networkingInteractor: NetworkInteracting
-    private let accountService: AccountService
-    private let resubscriptionService: ResubscriptionService
-    private let topicToRegistryRecordStore: CodableStore<RegistryRecord>
-    private let registry: Registry
+    private let identityService: IdentityService
     private let logger: ConsoleLogging
     private let kms: KeyManagementServiceProtocol
 
-    init(registry: Registry,
-         accountService: AccountService,
-         resubscriptionService: ResubscriptionService,
-         networkingInteractor: NetworkInteracting,
-         kms: KeyManagementServiceProtocol,
-         logger: ConsoleLogging,
-         topicToRegistryRecordStore: CodableStore<RegistryRecord>) {
-        self.registry = registry
+    init(
+        identityService: IdentityService,
+        networkingInteractor: NetworkInteracting,
+        kms: KeyManagementServiceProtocol,
+        logger: ConsoleLogging
+    ) {
+        self.identityService = identityService
         self.kms = kms
-        self.accountService = accountService
-        self.resubscriptionService = resubscriptionService
         self.networkingInteractor = networkingInteractor
         self.logger = logger
-        self.topicToRegistryRecordStore = topicToRegistryRecordStore
     }
 
-    func register(account: Account) async throws -> String {
-        let pubKey = try kms.createX25519KeyPair()
-        let pubKeyHex = pubKey.hexRepresentation
-        try await registry.register(account: account, pubKey: pubKeyHex)
+    func register(account: Account, onSign: SigningCallback) async throws -> String {
+        let pubKey = try await identityService.registerIdentity(account: account, onSign: onSign)
+        logger.debug("Did register an account: \(account)")
+        return pubKey
+    }
 
-        let topic = pubKey.rawRepresentation.sha256().toHexString()
-        try kms.setPublicKey(publicKey: pubKey, for: topic)
+    func goPublic(account: Account) async throws {
+        let inviteKey = try await identityService.registerInvite(account: account)
+        try await subscribeForInvites(inviteKey: inviteKey)
+        logger.debug("Did goPublic an account: \(account)")
+    }
 
-        let record = RegistryRecord(account: account, pubKey: pubKeyHex)
-        topicToRegistryRecordStore.set(record, forKey: topic)
+    func unregister(account: Account, onSign: SigningCallback) async throws {
+        try await identityService.unregister(account: account, onSign: onSign)
+        logger.debug("Did unregister an account: \(account)")
+    }
 
-        try await networkingInteractor.subscribe(topic: topic)
+    func goPrivate(account: Account) async throws {
+        let inviteKey = try await identityService.goPrivate(account: account)
+        unsubscribeFromInvites(inviteKey: inviteKey)
+        logger.debug("Did goPrivate an account: \(account)")
+    }
 
-        let oldAccount = accountService.currentAccount
-        try await resubscriptionService.unsubscribe(account: oldAccount)
-        accountService.setAccount(account)
-        try await resubscriptionService.resubscribe(account: account)
-
-        logger.debug("Did register an account: \(account) and is subscribing on topic: \(topic)")
-
-        return pubKeyHex
+    func resolve(account: Account) async throws -> String {
+        return try await identityService.resolveInvite(account: account)
     }
 }
 
-struct RegistryRecord: Codable {
-    let account: Account
-    let pubKey: String
+private extension RegistryService {
+
+    func subscribeForInvites(inviteKey: AgreementPublicKey) async throws {
+        let topic = inviteKey.rawRepresentation.sha256().toHexString()
+        try kms.setPublicKey(publicKey: inviteKey, for: topic)
+        try await networkingInteractor.subscribe(topic: topic)
+    }
+
+    func unsubscribeFromInvites(inviteKey: AgreementPublicKey) {
+        let topic = inviteKey.rawRepresentation.sha256().toHexString()
+        kms.deletePublicKey(for: topic)
+        networkingInteractor.unsubscribe(topic: topic)
+    }
 }

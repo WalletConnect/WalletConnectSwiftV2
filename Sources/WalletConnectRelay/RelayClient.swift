@@ -19,7 +19,7 @@ public final class RelayClient {
 
     var subscriptions: [String: String] = [:]
 
-    public var messagePublisher: AnyPublisher<(topic: String, message: String), Never> {
+    public var messagePublisher: AnyPublisher<(topic: String, message: String, publishedAt: Date), Never> {
         messagePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -27,7 +27,7 @@ public final class RelayClient {
         dispatcher.socketConnectionStatusPublisher
     }
 
-    private let messagePublisherSubject = PassthroughSubject<(topic: String, message: String), Never>()
+    private let messagePublisherSubject = PassthroughSubject<(topic: String, message: String, publishedAt: Date), Never>()
 
     private let subscriptionResponsePublisherSubject = PassthroughSubject<(RPCID?, [String]), Never>()
     private var subscriptionResponsePublisher: AnyPublisher<(RPCID?, [String]), Never> {
@@ -79,11 +79,9 @@ public final class RelayClient {
         socketConnectionType: SocketConnectionType = .automatic,
         logger: ConsoleLogging = ConsoleLogger(loggingLevel: .off)
     ) {
-        let didKeyFactory = ED25519DIDKeyFactory()
-        let clientIdStorage = ClientIdStorage(keychain: keychainStorage, didKeyFactory: didKeyFactory)
+        let clientIdStorage = ClientIdStorage(keychain: keychainStorage)
         let socketAuthenticator = SocketAuthenticator(
             clientIdStorage: clientIdStorage,
-            didKeyFactory: didKeyFactory,
             relayHost: relayHost
         )
         let relayUrlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)
@@ -226,7 +224,7 @@ public final class RelayClient {
                     try rpcHistory.set(request, forTopic: params.data.topic, emmitedBy: .remote)
                     logger.debug("topic \(params.data.topic)")
                     logger.debug("message: \(params.data.message)")
-                    messagePublisherSubject.send((params.data.topic, params.data.message))
+                    messagePublisherSubject.send((params.data.topic, params.data.message, params.data.publishedAt))
                 } catch {
                     logger.error("[RelayClient] RPC History 'set()' error: \(error)")
                 }

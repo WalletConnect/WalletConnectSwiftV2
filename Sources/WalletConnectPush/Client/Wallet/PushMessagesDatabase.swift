@@ -33,4 +33,5 @@ public struct PushMessageRecord: Codable, Equatable {
     public let id: String
     public let topic: String
     public let message: PushMessage
+    public let publishedAt: Date
 }

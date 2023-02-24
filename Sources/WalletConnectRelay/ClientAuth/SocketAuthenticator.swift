@@ -6,36 +6,19 @@ protocol SocketAuthenticating {
 
 struct SocketAuthenticator: SocketAuthenticating {
     private let clientIdStorage: ClientIdStoring
-    private let didKeyFactory: DIDKeyFactory
     private let relayHost: String
 
-    init(clientIdStorage: ClientIdStoring, didKeyFactory: DIDKeyFactory, relayHost: String) {
+    init(clientIdStorage: ClientIdStoring, relayHost: String) {
         self.clientIdStorage = clientIdStorage
-        self.didKeyFactory = didKeyFactory
         self.relayHost = relayHost
     }
 
     func createAuthToken() throws -> String {
-        let clientIdKeyPair = try clientIdStorage.getOrCreateKeyPair()
-        return try createAndSignJWT(keyPair: clientIdKeyPair)
-    }
-
-    private func createAndSignJWT(keyPair: SigningPrivateKey) throws -> String {
-        return try JWTFactory().createAndSignJWT(
-            keyPair: keyPair,
+        let keyPair = try clientIdStorage.getOrCreateKeyPair()
+        return try JWTFactory(keyPair: keyPair).createRelayJWT(
             sub: getSubject(),
-            aud: getAudience(),
-            exp: getExpiry(),
-            pkh: nil
+            aud: getAudience()
         )
-    }
-
-    private func getExpiry() -> Int {
-        var components = DateComponents()
-        components.setValue(1, for: .day)
-        // safe to unwrap as the date must be calculated
-        let date = Calendar.current.date(byAdding: components, to: Date())!
-        return Int(date.timeIntervalSince1970)
     }
 
     private func getAudience() -> String {

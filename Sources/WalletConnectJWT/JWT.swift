@@ -1,17 +1,24 @@
 import Foundation
 
-struct JWT: Codable, Equatable {
-    enum Errors: Error {
-        case jwtNotSigned
-    }
+struct JWT<JWTClaims: JWTEncodable>: Codable, Equatable {
 
-    var header: Header
-    var claims: Claims
+    var header: JWTHeader
+    var claims: JWTClaims
     var signature: String?
 
-    init(header: Header = Header(), claims: Claims) {
+    init(header: JWTHeader = JWTHeader(), claims: JWTClaims) {
         self.header = header
         self.claims = claims
+    }
+
+    init(string: String) throws {
+        let components = string.components(separatedBy: ".")
+
+        guard components.count == 3 else { throw JWTError.undefinedFormat }
+
+        self.header = try JWTHeader.decode(from: components[0])
+        self.claims = try JWTClaims.decode(from: components[1])
+        self.signature = components[2]
     }
 
     mutating func sign(using jwtSigner: JWTSigning) throws {
@@ -22,7 +29,7 @@ struct JWT: Codable, Equatable {
     }
 
     func encoded() throws -> String {
-        guard let signature = signature else { throw Errors.jwtNotSigned }
+        guard let signature = signature else { throw JWTError.jwtNotSigned }
         let headerString = try header.encode()
         let claimsString = try claims.encode()
         return [headerString, claimsString, signature].joined(separator: ".")

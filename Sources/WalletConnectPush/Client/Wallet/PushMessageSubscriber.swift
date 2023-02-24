@@ -25,7 +25,7 @@ class PushMessageSubscriber {
             .sink { [unowned self] (payload: RequestSubscriptionPayload<PushMessage>) in
                 logger.debug("Received Push Message")
 
-                let record = PushMessageRecord(id: payload.id.string, topic: payload.topic, message: payload.request)
+                let record = PushMessageRecord(id: payload.id.string, topic: payload.topic, message: payload.request, publishedAt: payload.publishedAt)
                 pushMessagesDatabase.setPushMessageRecord(record)
                 onPushMessage?(record)
 

@@ -84,6 +84,66 @@ final class Web3WalletTests: XCTestCase {
         }
     }
     
+    func testSocketConnectionStatusCalled() {
+        var success = false
+        web3WalletClient.socketConnectionStatusPublisher.sink { value in
+            success = true
+            XCTAssertTrue(true)
+        }
+        .store(in: &disposeBag)
+        
+        let expectation = expectation(description: "Fail after 0.1s timeout")
+        let result = XCTWaiter.wait(for: [expectation], timeout: 0.1)
+        if result == XCTWaiter.Result.timedOut && success == false {
+            XCTFail()
+        }
+    }
+    
+    func testSessionSettleCalled() {
+        var success = false
+        web3WalletClient.sessionSettlePublisher.sink { value in
+            success = true
+            XCTAssertTrue(true)
+        }
+        .store(in: &disposeBag)
+        
+        let expectation = expectation(description: "Fail after 0.1s timeout")
+        let result = XCTWaiter.wait(for: [expectation], timeout: 0.1)
+        if result == XCTWaiter.Result.timedOut && success == false {
+            XCTFail()
+        }
+    }
+    
+    func testSessionDeleteCalled() {
+        var success = false
+        web3WalletClient.sessionDeletePublisher.sink { value in
+            success = true
+            XCTAssertTrue(true)
+        }
+        .store(in: &disposeBag)
+        
+        let expectation = expectation(description: "Fail after 0.1s timeout")
+        let result = XCTWaiter.wait(for: [expectation], timeout: 0.1)
+        if result == XCTWaiter.Result.timedOut && success == false {
+            XCTFail()
+        }
+    }
+    
+    func testSessionResponseCalled() {
+        var success = false
+        web3WalletClient.sessionResponsePublisher.sink { value in
+            success = true
+            XCTAssertTrue(true)
+        }
+        .store(in: &disposeBag)
+        
+        let expectation = expectation(description: "Fail after 0.1s timeout")
+        let result = XCTWaiter.wait(for: [expectation], timeout: 0.1)
+        if result == XCTWaiter.Result.timedOut && success == false {
+            XCTFail()
+        }
+    }
+    
     func testApproveCalled() async {
         try! await web3WalletClient.approve(proposalId: "", namespaces: [:])
         XCTAssertTrue(signClient.approveCalled)
@@ -193,5 +253,14 @@ final class Web3WalletTests: XCTestCase {
     func testAuthPendingRequestsCalledAndNotEmpty() async {
         let pendingRequests = try! web3WalletClient.getPendingRequests()
         XCTAssertEqual(1, pendingRequests.count)
+    }
+    
+    func testCleanupCalled() async {
+        try! await web3WalletClient.cleanup()
+        XCTAssertTrue(signClient.cleanupCalled)
+    }
+    
+    func testGetPairingsNotEmpty() async {
+        XCTAssertEqual(1, web3WalletClient.getPairings().count)
     }
 }

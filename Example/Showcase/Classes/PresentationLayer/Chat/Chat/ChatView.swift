@@ -7,8 +7,7 @@ struct ChatView: View {
     var body: some View {
         ZStack {
             ChatScrollView {
-                // TODO: Replace id
-                ForEach(presenter.messages, id: \.text) { message in
+                ForEach(presenter.messageViewModels) { message in
                     MessageView(message: message)
                 }
 
@@ -25,9 +24,6 @@ struct ChatView: View {
                     .padding(16.0)
                 }
             }
-        }
-        .task {
-            await presenter.setupInitialState()
         }
     }
 }

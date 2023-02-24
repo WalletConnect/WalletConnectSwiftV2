@@ -28,7 +28,7 @@ public class PairingRequestsSubscriber {
             .filter { [unowned self] in !pairingProtocolMethods.contains($0.request.method)}
             .filter { [unowned self] in pairingStorage.hasPairing(forTopic: $0.topic)}
             .filter { [unowned self] in !registeredProtocolMethods.contains($0.request.method)}
-            .sink { [unowned self] topic, request in
+            .sink { [unowned self] topic, request, _ in
                 Task(priority: .high) {
                     let protocolMethod = UnsupportedProtocolMethod(method: request.method)
                     logger.debug("PairingRequestsSubscriber: responding unregistered request method")

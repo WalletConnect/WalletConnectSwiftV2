@@ -3,9 +3,9 @@ import SwiftUI
 final class MainModule {
 
     @discardableResult
-    static func create(app: Application, account: Account) -> UIViewController {
+    static func create(app: Application, importAccount: ImportAccount) -> UIViewController {
         let router = MainRouter(app: app)
-        let presenter = MainPresenter(router: router, account: account)
+        let presenter = MainPresenter(router: router, importAccount: importAccount)
         let viewController = MainViewController(presenter: presenter)
 
         router.viewController = viewController

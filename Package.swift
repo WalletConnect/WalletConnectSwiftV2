@@ -52,7 +52,7 @@ let package = Package(
             path: "Sources/WalletConnectSign"),
         .target(
             name: "WalletConnectChat",
-            dependencies: ["WalletConnectNetworking"],
+            dependencies: ["WalletConnectNetworking", "WalletConnectSigner"],
             path: "Sources/Chat"),
         .target(
             name: "Auth",

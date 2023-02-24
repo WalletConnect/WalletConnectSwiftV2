@@ -3,9 +3,8 @@ import Combine
 
 @testable import WalletConnectSign
 
+
 final class SignClientMock: SignClientProtocol {
-    
-    
     var approveCalled = false
     var rejectCalled = false
     var updateCalled = false
@@ -14,9 +13,11 @@ final class SignClientMock: SignClientProtocol {
     var emitCalled = false
     var pairCalled = false
     var disconnectCalled = false
+    var cleanupCalled = false
     
     private let metadata = AppMetadata(name: "", description: "", url: "", icons: [])
     private let request = WalletConnectSign.Request(id: .left(""), topic: "", method: "", params: "", chainId: Blockchain("eip155:1")!, expiry: nil)
+    private let response = WalletConnectSign.Response(id: RPCID(1234567890123456789), topic: "", chainId: "", result: .response(AnyCodable(any: "")))
     
     var sessionProposalPublisher: AnyPublisher<WalletConnectSign.Session.Proposal, Never> {
         let proposer = Participant(publicKey: "", metadata: metadata)
@@ -39,6 +40,26 @@ final class SignClientMock: SignClientProtocol {
     
     var sessionsPublisher: AnyPublisher<[WalletConnectSign.Session], Never> {
         return Result.Publisher([WalletConnectSign.Session(topic: "", pairingTopic: "", peer: metadata, namespaces: [:], expiryDate: Date())])
+            .eraseToAnyPublisher()
+    }
+    
+    var socketConnectionStatusPublisher: AnyPublisher<WalletConnectRelay.SocketConnectionStatus, Never> {
+        return Result.Publisher(.connected)
+            .eraseToAnyPublisher()
+    }
+    
+    var sessionSettlePublisher: AnyPublisher<WalletConnectSign.Session, Never> {
+        return Result.Publisher(Session(topic: "", pairingTopic: "", peer: metadata, namespaces: [:], expiryDate: Date()))
+            .eraseToAnyPublisher()
+    }
+    
+    var sessionDeletePublisher: AnyPublisher<(String, WalletConnectNetworking.Reason), Never> {
+        return Result.Publisher(("topic", ReasonMock()))
+            .eraseToAnyPublisher()
+    }
+    
+    var sessionResponsePublisher: AnyPublisher<WalletConnectSign.Response, Never> {
+        return Result.Publisher(.success(response))
             .eraseToAnyPublisher()
     }
     
@@ -84,5 +105,9 @@ final class SignClientMock: SignClientProtocol {
     
     func getSessionRequestRecord(id: JSONRPC.RPCID) -> WalletConnectSign.Request? {
         return request
+    }
+    
+    func cleanup() async throws {
+        cleanupCalled = true
     }
 }

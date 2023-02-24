@@ -46,7 +46,7 @@ class AppRespondSubscriber {
                 let requestPayload = payload.request
 
                 guard
-                    let address = try? DIDPKH(iss: cacao.p.iss).account.address,
+                    let address = try? DIDPKH(did: cacao.p.iss).account.address,
                     let message = try? messageFormatter.formatMessage(from: cacao.p)
                 else { self.onResponse?(requestId, .failure(.malformedResponseParams)); return }
 

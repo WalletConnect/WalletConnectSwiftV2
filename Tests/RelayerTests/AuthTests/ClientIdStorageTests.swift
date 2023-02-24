@@ -8,12 +8,10 @@ final class ClientIdStorageTests: XCTestCase {
 
     var sut: ClientIdStorage!
     var keychain: KeychainStorageMock!
-    var didKeyFactory: ED25519DIDKeyFactoryMock!
 
     override func setUp() {
         keychain = KeychainStorageMock()
-        didKeyFactory = ED25519DIDKeyFactoryMock()
-        sut = ClientIdStorage(keychain: keychain, didKeyFactory: didKeyFactory)
+        sut = ClientIdStorage(keychain: keychain)
     }
 
     func testGetOrCreate() throws {
@@ -26,13 +24,14 @@ final class ClientIdStorageTests: XCTestCase {
         XCTAssertEqual(saved, restored)
     }
 
-    func testGetClientId() {
-        let did = "did:key:z6MkodHZwneVRShtaLf8JKYkxpDGp1vGZnpGmdBpX8M2exxH"
-        didKeyFactory.did = did
-        _ = try! sut.getOrCreateKeyPair()
+    func testGetClientId() throws {
+        let didKey = try DIDKey(did: "did:key:z6MkodHZwneVRShtaLf8JKYkxpDGp1vGZnpGmdBpX8M2exxH")
 
-        let clientId = try! sut.getClientId()
-        XCTAssertEqual(did, clientId)
+        let privateKey = try SigningPrivateKey(rawRepresentation: didKey.rawData)
+        try keychain.add(privateKey, forKey: "com.walletconnect.iridium.client_id")
 
+        let clientId = try sut.getClientId()
+        let didPublicKey = DIDKey(rawData: privateKey.publicKey.rawRepresentation)
+        XCTAssertEqual(clientId, didPublicKey.did(prefix: true, variant: .ED25519))
     }
 }

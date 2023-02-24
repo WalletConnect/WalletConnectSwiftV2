@@ -5,17 +5,13 @@ import WalletConnectKMS
 
 final class SocketAuthenticatorTests: XCTestCase {
     var clientIdStorage: ClientIdStorageMock!
-    var DIDKeyFactory: ED25519DIDKeyFactoryMock!
     var sut: SocketAuthenticator!
     let expectedToken =  "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkaWQ6a2V5Ono2TWtvZEhad25lVlJTaHRhTGY4SktZa3hwREdwMXZHWm5wR21kQnBYOE0yZXh4SCIsInN1YiI6ImM0NzlmZTVkYzQ2NGU3NzFlNzhiMTkzZDIzOWE2NWI1OGQyNzhjYWQxYzM0YmZiMGI1NzE2ZTViYjUxNDkyOGUifQ.0JkxOM-FV21U7Hk-xycargj_qNRaYV2H5HYtE4GzAeVQYiKWj7YySY5AdSqtCgGzX4Gt98XWXn2kSr9rE1qvCA"
 
     override func setUp() {
         clientIdStorage = ClientIdStorageMock()
-        DIDKeyFactory = ED25519DIDKeyFactoryMock()
-        DIDKeyFactory.did = "did:key:z6MkodHZwneVRShtaLf8JKYkxpDGp1vGZnpGmdBpX8M2exxH"
         sut = SocketAuthenticator(
             clientIdStorage: clientIdStorage,
-            didKeyFactory: DIDKeyFactory,
             relayHost: "relay.walletconnect.com"
         )
     }

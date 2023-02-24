@@ -16,8 +16,8 @@ final class WelcomeRouter {
             .present()
     }
 
-    func presentMain(account: Account) {
-        MainModule.create(app: app, account: account)
+    func presentMain(importAccount: ImportAccount) {
+        MainModule.create(app: app, importAccount: importAccount)
             .present()
     }
     
