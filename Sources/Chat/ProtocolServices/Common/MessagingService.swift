@@ -45,7 +45,7 @@ class MessagingService {
         let identityKey = try identityStorage.getIdentityKey(for: accountService.currentAccount)
 
         let payload = MessagePayload(keyserver: keyserverURL, message: messageString, recipientAccount: thread.peerAccount)
-        let wrapper = try payload.createWrapperAndSign(keyPair: identityKey)
+        let wrapper = try payload.signAndCreateWrapper(keyPair: identityKey)
 
         let protocolMethod = ChatMessageProtocolMethod()
         let request = RPCRequest(method: protocolMethod.method, params: wrapper)
@@ -118,7 +118,7 @@ private extension MessagingService {
 
                     let identityKey = try identityStorage.getIdentityKey(for: accountService.currentAccount)
 
-                    let wrapper = try receiptPayload.createWrapperAndSign(keyPair: identityKey)
+                    let wrapper = try receiptPayload.signAndCreateWrapper(keyPair: identityKey)
                     let response = RPCResponse(id: payload.id, result: wrapper)
 
                     try await networkingInteractor.respond(

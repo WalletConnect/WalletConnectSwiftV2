@@ -34,7 +34,7 @@ extension JWTClaimsCodable {
         return (try Self.init(claims: jwt.claims), jwt.claims)
     }
 
-    public func createWrapperAndSign(keyPair: SigningPrivateKey) throws -> Wrapper {
+    public func signAndCreateWrapper(keyPair: SigningPrivateKey) throws -> Wrapper {
         let claims = try encode(iss: keyPair.publicKey.did)
         var jwt = JWT(claims: claims)
         try jwt.sign(using: EdDSASigner(keyPair))
@@ -44,6 +44,10 @@ extension JWTClaimsCodable {
 
     public func defaultIat() -> Int64 {
         return Int64(Date().timeIntervalSince1970)
+    }
+
+    public func defaultIatMilliseconds() -> Int64 {
+        return Int64(Date().timeIntervalSince1970 * 1000)
     }
 
     public func expiry(days: Int) -> Int64 {

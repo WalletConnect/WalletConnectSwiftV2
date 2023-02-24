@@ -4,7 +4,7 @@ public struct ChatClientFactory {
 
     static func create(account: Account) -> ChatClient {
         let keychain = KeychainStorage(serviceIdentifier: "com.walletconnect.showcase")
-        let keyserverURL = URL(string: "https://staging.keys.walletconnect.com")!
+        let keyserverURL = URL(string: "https://keys.walletconnect.com")!
         return ChatClientFactory.create(
             account: account,
             keyserverURL: keyserverURL,

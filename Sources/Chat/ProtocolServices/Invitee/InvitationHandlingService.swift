@@ -59,7 +59,7 @@ class InvitationHandlingService {
 
         let identityKey = try identityStorage.getIdentityKey(for: accountService.currentAccount)
 
-        let wrapper = try payload.createWrapperAndSign(keyPair: identityKey)
+        let wrapper = try payload.signAndCreateWrapper(keyPair: identityKey)
         
         try await networkingInteractor.respond(
             topic: acceptTopic,
@@ -92,7 +92,8 @@ class InvitationHandlingService {
 
         let inviteePublicKey = try identityStorage.getInviteKey(for: currentAccount)
 
-        let symmetricKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: invite.inviterPublicKey)
+        let inviterPublicKey = try DIDKey(did: invite.inviterPublicKey)
+        let symmetricKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: inviterPublicKey.hexString)
         let rejectTopic = symmetricKey.derivedTopic()
         try kms.setSymmetricKey(symmetricKey.sharedKey, for: rejectTopic)
 

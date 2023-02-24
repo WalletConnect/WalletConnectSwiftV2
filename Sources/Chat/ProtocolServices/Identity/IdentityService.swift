@@ -121,7 +121,7 @@ private extension IdentityService {
             invitePublicKey: invitePublicKey
         )
 
-        return try payload.createWrapperAndSign(keyPair: identityKey).jwtString
+        return try payload.signAndCreateWrapper(keyPair: identityKey).jwtString
     }
 
     private func getNonce() -> String {

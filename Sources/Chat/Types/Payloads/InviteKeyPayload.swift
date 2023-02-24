@@ -36,7 +36,7 @@ struct InviteKeyPayload: JWTClaimsCodable {
             iss: iss,
             sub: invitePublicKey.did(prefix: true, variant: .X25519),
             aud: keyserver.absoluteString,
-            iat: defaultIat(),
+            iat: defaultIatMilliseconds(),
             exp: expiry(days: 30),
             pkh: account.did
         )

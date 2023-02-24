@@ -18,7 +18,7 @@ final class ChatClientProxy {
 
         switch event {
         case .getReceivedInvites:
-            let invites = client.getReceivedInvites()
+            let invites = client.getReceivedInvites().filter({ $0.status == .pending })
             try await respond(with: invites, request: request)
 
         case .getSentInvites:
@@ -97,7 +97,7 @@ private extension ChatClientProxy {
     }
 
     func parse<Request: Codable>(_ type: Request.Type, params: AnyCodable?) throws -> Request {
-        guard let params = try params?.get([Request].self).first
+        guard let params = try params?.get(Request.self)
         else { throw Errors.unregisteredParams }
         return params
     }

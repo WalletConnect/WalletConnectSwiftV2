@@ -25,7 +25,7 @@ final class ChatTests: XCTestCase {
     }
 
     func makeClient(prefix: String, account: Account) -> ChatClient {
-        let keyserverURL = URL(string: "https://staging.keys.walletconnect.com")!
+        let keyserverURL = URL(string: "https://keys.walletconnect.com")!
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let keychain = KeychainStorageMock()
         let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keychainStorage: keychain, socketFactory: DefaultSocketFactory(), logger: logger)
