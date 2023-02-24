@@ -4,7 +4,6 @@ enum ChatError: Error {
     case noInviteForId
     case recordNotFound
     case userRejected
-    case signatureRejected
 }
 
 extension ChatError: Reason {

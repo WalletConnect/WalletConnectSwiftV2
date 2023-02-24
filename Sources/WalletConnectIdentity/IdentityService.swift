@@ -108,7 +108,7 @@ private extension IdentityService {
         case .signed(let cacaoSignature):
             return Cacao(h: cacaoHeader, p: cacaoPayload, s: cacaoSignature)
         case .rejected:
-            throw ChatError.signatureRejected
+            throw IdentityError.signatureRejected
         }
     }
 

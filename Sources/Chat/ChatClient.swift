@@ -1,16 +1,9 @@
 import Foundation
 import Combine
 
-public enum SigningResult {
-    case signed(CacaoSignature)
-    case rejected
-}
-
-public typealias SigningCallback = (String) async -> SigningResult
-
 public class ChatClient {
     private var publishers = [AnyCancellable]()
-    private let registryService: RegistryService
+    private let identityClient: IdentityClient
     private let messagingService: MessagingService
     private let accountService: AccountService
     private let resubscriptionService: ResubscriptionService
@@ -56,7 +49,7 @@ public class ChatClient {
 
     // MARK: - Initialization
 
-    init(registryService: RegistryService,
+    init(identityClient: IdentityClient,
          messagingService: MessagingService,
          accountService: AccountService,
          resubscriptionService: ResubscriptionService,
@@ -67,7 +60,7 @@ public class ChatClient {
          chatStorage: ChatStorage,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
     ) {
-        self.registryService = registryService
+        self.identityClient = identityClient
         self.messagingService = messagingService
         self.accountService = accountService
         self.resubscriptionService = resubscriptionService
@@ -90,7 +83,7 @@ public class ChatClient {
         isPrivate: Bool = false,
         onSign: @escaping SigningCallback
     ) async throws -> String {
-        let publicKey = try await registryService.register(account: account, onSign: onSign)
+        let publicKey = try await identityClient.register(account: account, onSign: onSign)
 
         accountService.setAccount(account)
 
@@ -107,14 +100,14 @@ public class ChatClient {
     /// Must not unregister invite key but must stop listening for invites
     /// - Parameter onSign: Callback for signing CAIP-122 message to verify blockchain account ownership
     public func unregister(account: Account, onSign: @escaping SigningCallback) async throws {
-        try await registryService.unregister(account: account, onSign: onSign)
+        try await identityClient.unregister(account: account, onSign: onSign)
     }
 
     /// Queries the keyserver with a blockchain account
     /// - Parameter account: CAIP10 blockachain account
     /// - Returns: Returns the invite key
     public func resolve(account: Account) async throws -> String {
-        try await registryService.resolve(account: account)
+        try await identityClient.resolveInvite(account: account)
     }
 
     /// Sends a chat invite
@@ -130,7 +123,7 @@ public class ChatClient {
     /// Stops listening for invites
     /// - Parameter account: CAIP10 blockachain account
     public func goPrivate(account: Account) async throws {
-        try await registryService.goPrivate(account: account)
+        try await identityClient.goPrivate(account: account)
     }
 
     /// Registers an invite key if not yet registered on this client from keyserver
@@ -138,7 +131,7 @@ public class ChatClient {
     /// - Parameter account: CAIP10 blockachain account
     /// - Returns: The public invite key
     public func goPublic(account: Account) async throws {
-        try await registryService.goPublic(account: account)
+        try await identityClient.goPublic(account: account)
     }
 
     /// Accepts a chat invite by id from account specified as inviteeAccount in Invite
