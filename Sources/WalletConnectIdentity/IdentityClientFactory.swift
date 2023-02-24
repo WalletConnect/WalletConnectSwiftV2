@@ -4,7 +4,7 @@ public final class IdentityClientFactory {
 
     public static func create(
         keyserver: URL,
-        networkingInteractor: NetworkInteracting,
+        networkClient: NetworkInteracting,
         keychain: KeychainStorageProtocol,
         logger: ConsoleLogging
     ) -> IdentityClient {
@@ -16,7 +16,7 @@ public final class IdentityClientFactory {
         return IdentityClient(
             identityService: identityService,
             identityStorage: identityStorage,
-            networkingInteractor: networkingInteractor,
+            networkClient: networkClient,
             kms: kms,
             logger: logger
         )

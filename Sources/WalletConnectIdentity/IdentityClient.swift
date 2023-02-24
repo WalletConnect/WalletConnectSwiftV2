@@ -8,7 +8,7 @@ public enum SigningResult {
 public typealias SigningCallback = (String) async -> SigningResult
 
 public final class IdentityClient {
-    private let networkingInteractor: NetworkInteracting
+    private let networkClient: NetworkInteracting
     private let identityService: IdentityService
     private let identityStorage: IdentityStorage
     private let logger: ConsoleLogging
@@ -17,14 +17,14 @@ public final class IdentityClient {
     init(
         identityService: IdentityService,
         identityStorage: IdentityStorage,
-        networkingInteractor: NetworkInteracting,
+        networkClient: NetworkInteracting,
         kms: KeyManagementServiceProtocol,
         logger: ConsoleLogging
     ) {
         self.identityService = identityService
         self.identityStorage = identityStorage
         self.kms = kms
-        self.networkingInteractor = networkingInteractor
+        self.networkClient = networkClient
         self.logger = logger
     }
 
@@ -77,12 +77,12 @@ private extension IdentityClient {
     func subscribeForInvites(inviteKey: AgreementPublicKey) async throws {
         let topic = inviteKey.rawRepresentation.sha256().toHexString()
         try kms.setPublicKey(publicKey: inviteKey, for: topic)
-        try await networkingInteractor.subscribe(topic: topic)
+        try await networkClient.subscribe(topic: topic)
     }
 
     func unsubscribeFromInvites(inviteKey: AgreementPublicKey) {
         let topic = inviteKey.rawRepresentation.sha256().toHexString()
         kms.deletePublicKey(for: topic)
-        networkingInteractor.unsubscribe(topic: topic)
+        networkClient.unsubscribe(topic: topic)
     }
 }
