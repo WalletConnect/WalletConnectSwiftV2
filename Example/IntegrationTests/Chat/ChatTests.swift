@@ -29,7 +29,13 @@ final class ChatTests: XCTestCase {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let keychain = KeychainStorageMock()
         let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keychainStorage: keychain, socketFactory: DefaultSocketFactory(), logger: logger)
-        return ChatClientFactory.create(account: account, keyserverURL: keyserverURL, relayClient: relayClient, keychain:  keychain, logger: logger, keyValueStorage: RuntimeKeyValueStorage())
+        let keyValueStorage = RuntimeKeyValueStorage()
+        let networkClient = NetworkingClientFactory.create(
+            relayClient: relayClient,
+            logger: logger,
+            keychainStorage: keychain,
+            keyValueStorage: keyValueStorage)
+        return ChatClientFactory.create(account: account, keyserverURL: keyserverURL, relayClient: relayClient, networkClient: networkClient, keychain:  keychain, logger: logger, keyValueStorage: keyValueStorage)
     }
 
     func testInvite() async throws {

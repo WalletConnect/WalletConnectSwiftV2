@@ -3,6 +3,7 @@ import WalletConnectNetworking
 import WalletConnectKMS
 import WalletConnectUtils
 @testable import WalletConnectChat
+@testable import WalletConnectIdentity
 
 final class RegistryTests: XCTestCase {
 
@@ -16,12 +17,11 @@ final class RegistryTests: XCTestCase {
     override func setUp() {
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
         let httpService = HTTPNetworkClient(host: keyserverURL.host!)
-        let accountService = AccountService(currentAccount: account)
-        let identityNetworkService = IdentityNetworkService(accountService: accountService, httpService: httpService)
+        let identityNetworkService = IdentityNetworkService(httpService: httpService)
         let keychain = KeychainStorageMock()
         let ksm = KeyManagementService(keychain: keychain)
         storage = IdentityStorage(keychain: keychain)
-        sut = IdentityService(
+        sut = IdentityService (
             keyserverURL: keyserverURL,
             kms: ksm,
             storage: storage,
