@@ -8,7 +8,7 @@ final class Web3InboxClientFactory {
         account: Account,
         onSign: @escaping SigningCallback
     ) -> Web3InboxClient {
-        let host = "https://web3inbox-dev-hidden-git-feat-pending-threads-ui-walletconnect1.vercel.app/?chatProvider=ios"
+        let host = "https://web3inbox-dev-hidden.vercel.app/?chatProvider=ios"
         let logger = ConsoleLogger(suffix: "📬")
         let webviewSubscriber = WebViewRequestSubscriber(logger: logger)
         let webView = WebViewFactory(host: host, webviewSubscriber: webviewSubscriber).create()

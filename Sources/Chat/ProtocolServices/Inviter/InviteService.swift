@@ -55,7 +55,7 @@ class InviteService {
 
         let identityKey = try identityStorage.getIdentityKey(for: accountService.currentAccount)
 
-        let wrapper = try payload.createWrapperAndSign(keyPair: identityKey)
+        let wrapper = try payload.signAndCreateWrapper(keyPair: identityKey)
 
         let inviteId = RPCID()
         let request = RPCRequest(method: protocolMethod.method, params: wrapper, rpcid: inviteId)

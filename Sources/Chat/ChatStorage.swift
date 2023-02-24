@@ -143,6 +143,7 @@ final class ChatStorage {
         else { return }
 
         let rejected = SentInvite(invite: invite, status: .rejected)
+        // TODO: Update also for peer invites
         sentInviteStore.set(rejected, for: account.absoluteString)
     }
 

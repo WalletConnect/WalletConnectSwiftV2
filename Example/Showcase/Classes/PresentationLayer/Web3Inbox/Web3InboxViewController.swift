@@ -19,9 +19,11 @@ final class Web3InboxViewController: UIViewController {
         super.viewDidLoad()
 
         Web3Inbox.configure(account: importAccount.account, onSign: onSing)
-        view = Web3Inbox.instance.getWebView()
 
+        edgesForExtendedLayout = []
         navigationItem.title = "Web3Inbox SDK"
+        navigationItem.largeTitleDisplayMode = .never
+        view = Web3Inbox.instance.getWebView()
     }
 }
 

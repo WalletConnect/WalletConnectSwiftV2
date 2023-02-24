@@ -43,7 +43,7 @@ struct ReceiptPayload: JWTClaimsCodable {
     func encode(iss: String) throws -> Claims {
         return Claims(
             iss: iss,
-            iat: defaultIat(),
+            iat: defaultIatMilliseconds(),
             exp: expiry(days: 30),
             ksu: keyserver.absoluteString,
             sub: messageHash,
