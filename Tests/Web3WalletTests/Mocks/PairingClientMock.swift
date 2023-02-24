@@ -14,4 +14,8 @@ final class PairingClientMock: PairingClientProtocol {
     func disconnect(topic: String) async throws {
         disconnectPairingCalled = true
     }
+    
+    func getPairings() -> [Pairing] {
+        return [Pairing(topic: "", peer: nil, expiryDate: Date())]
+    }
 }
