@@ -6,31 +6,28 @@ class InviteService {
     private var publishers = [AnyCancellable]()
     private let keyserverURL: URL
     private let networkingInteractor: NetworkInteracting
-    private let identityStorage: IdentityStorage
+    private let identityClient: IdentityClient
     private let accountService: AccountService
     private let logger: ConsoleLogging
     private let kms: KeyManagementService
     private let chatStorage: ChatStorage
-    private let registryService: RegistryService
 
     init(
         keyserverURL: URL,
         networkingInteractor: NetworkInteracting,
-        identityStorage: IdentityStorage,
+        identityClient: IdentityClient,
         accountService: AccountService,
         kms: KeyManagementService,
         chatStorage: ChatStorage,
-        logger: ConsoleLogging,
-        registryService: RegistryService
+        logger: ConsoleLogging
     ) {
         self.kms = kms
         self.keyserverURL = keyserverURL
         self.networkingInteractor = networkingInteractor
-        self.identityStorage = identityStorage
+        self.identityClient = identityClient
         self.accountService = accountService
         self.logger = logger
         self.chatStorage = chatStorage
-        self.registryService = registryService
         setUpResponseHandling()
     }
 
@@ -52,11 +49,10 @@ class InviteService {
             inviteeAccount: invite.inviteeAccount,
             inviterPublicKey: DIDKey(rawData: selfPubKeyY.rawRepresentation)
         )
-
-        let identityKey = try identityStorage.getIdentityKey(for: accountService.currentAccount)
-
-        let wrapper = try payload.signAndCreateWrapper(keyPair: identityKey)
-
+        let wrapper = try identityClient.signAndCreateWrapper(
+            payload: payload,
+            account: accountService.currentAccount
+        )
         let inviteId = RPCID()
         let request = RPCRequest(method: protocolMethod.method, params: wrapper, rpcid: inviteId)
 

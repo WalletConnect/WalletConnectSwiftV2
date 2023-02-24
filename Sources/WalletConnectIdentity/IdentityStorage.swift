@@ -1,6 +1,6 @@
 import Foundation
 
-final class IdentityStorage {
+public final class IdentityStorage {
 
     private let keychain: KeychainStorageProtocol
 
@@ -61,10 +61,10 @@ private extension IdentityStorage {
     }
 
     func identityKeyIdentifier(for account: Account) -> String {
-        return "com.walletconnect.chat.identity.\(account.absoluteString)"
+        return "com.walletconnect.identity.identity.\(account.absoluteString)"
     }
 
     func inviteKeyIdentifier(for account: Account) -> String {
-        return "com.walletconnect.chat.invite.\(account.absoluteString)"
+        return "com.walletconnect.identity.invite.\(account.absoluteString)"
     }
 }

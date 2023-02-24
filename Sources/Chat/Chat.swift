@@ -8,7 +8,11 @@ public class Chat {
         guard let account = account else {
             fatalError("Error - you must call Chat.configure(_:) before accessing the shared instance.")
         }
-        return ChatClientFactory.create(account: account)
+        return ChatClientFactory.create(
+            account: account,
+            relayClient: Relay.instance,
+            networkClient: Networking.interactor
+        )
     }()
 
     private static var account: Account?

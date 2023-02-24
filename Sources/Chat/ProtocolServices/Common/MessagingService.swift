@@ -5,8 +5,7 @@ class MessagingService {
 
     private let keyserverURL: URL
     private let networkingInteractor: NetworkInteracting
-    private let identityStorage: IdentityStorage
-    private let identityService: IdentityService
+    private let identityClient: IdentityClient
     private let accountService: AccountService
     private let chatStorage: ChatStorage
     private let logger: ConsoleLogging
@@ -20,16 +19,14 @@ class MessagingService {
     init(
         keyserverURL: URL,
         networkingInteractor: NetworkInteracting,
-        identityStorage: IdentityStorage,
-        identityService: IdentityService,
+        identityClient: IdentityClient,
         accountService: AccountService,
         chatStorage: ChatStorage,
         logger: ConsoleLogging
     ) {
         self.keyserverURL = keyserverURL
         self.networkingInteractor = networkingInteractor
-        self.identityStorage = identityStorage
-        self.identityService = identityService
+        self.identityClient = identityClient
         self.accountService = accountService
         self.chatStorage = chatStorage
         self.logger = logger
@@ -41,12 +38,11 @@ class MessagingService {
         guard let thread = chatStorage.getThread(topic: topic, account: currentAccount) else {
             throw Errors.threadDoNotExist
         }
-
-        let identityKey = try identityStorage.getIdentityKey(for: accountService.currentAccount)
-
         let payload = MessagePayload(keyserver: keyserverURL, message: messageString, recipientAccount: thread.peerAccount)
-        let wrapper = try payload.signAndCreateWrapper(keyPair: identityKey)
-
+        let wrapper = try identityClient.signAndCreateWrapper(
+            payload: payload,
+            account: accountService.currentAccount
+        )
         let protocolMethod = ChatMessageProtocolMethod()
         let request = RPCRequest(method: protocolMethod.method, params: wrapper)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
@@ -94,7 +90,7 @@ private extension MessagingService {
 
                 Task(priority: .high) {
 
-                    let authorAccount = try await identityService.resolveIdentity(iss: messageClaims.iss)
+                    let authorAccount = try await identityClient.resolveIdentity(iss: messageClaims.iss)
 
                     let newMessage = Message(
                         topic: payload.topic,
@@ -115,10 +111,10 @@ private extension MessagingService {
                         messageHash: messageHash,
                         senderAccount: authorAccount
                     )
-
-                    let identityKey = try identityStorage.getIdentityKey(for: accountService.currentAccount)
-
-                    let wrapper = try receiptPayload.signAndCreateWrapper(keyPair: identityKey)
+                    let wrapper = try identityClient.signAndCreateWrapper(
+                        payload: receiptPayload,
+                        account: accountService.currentAccount
+                    )
                     let response = RPCResponse(id: payload.id, result: wrapper)
 
                     try await networkingInteractor.respond(
