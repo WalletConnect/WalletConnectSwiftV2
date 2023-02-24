@@ -5,6 +5,7 @@ import WalletConnectUtils
 import WalletConnectNetworking
 import WalletConnectKMS
 @testable import TestingUtils
+@testable import WalletConnectIdentity
 
 final class RegistryServiceTests: XCTestCase {
     var identityClient: IdentityClient!
@@ -36,7 +37,7 @@ final class RegistryServiceTests: XCTestCase {
             iatProvader: DefaultIATProvider(),
             messageFormatter: SIWECacaoFormatter()
         )
-        identityClient = IdentityClient(identityService: identitySevice, networkingInteractor: networkingInteractor, kms: kms, logger: ConsoleLoggerMock())
+        identityClient = IdentityClient(identityService: identitySevice, identityStorage: identityStorage, networkClient: networkingInteractor, kms: kms, logger: ConsoleLoggerMock())
     }
 
     func testRegister() async throws {
@@ -88,7 +89,7 @@ final class RegistryServiceTests: XCTestCase {
     }
 
     func testResolve() async throws {
-        let inviteKey = try await identityClient.resolve(account: account)
+        let inviteKey = try await identityClient.resolveInvite(account: account)
 
         XCTAssertEqual(inviteKey, inviteKeyStub)
     }
