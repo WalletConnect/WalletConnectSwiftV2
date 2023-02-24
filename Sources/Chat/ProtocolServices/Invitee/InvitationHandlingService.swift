@@ -4,7 +4,7 @@ import Combine
 class InvitationHandlingService {
 
     private let keyserverURL: URL
-    private let networkingInteractor: NetworkInteracting
+    private let networkClient: NetworkInteracting
     private let identityClient: IdentityClient
     private let chatStorage: ChatStorage
     private let accountService: AccountService
@@ -18,7 +18,7 @@ class InvitationHandlingService {
 
     init(
         keyserverURL: URL,
-        networkingInteractor: NetworkInteracting,
+        networkClient: NetworkInteracting,
         identityClient: IdentityClient,
         accountService: AccountService,
         kms: KeyManagementService,
@@ -27,7 +27,7 @@ class InvitationHandlingService {
     ) {
         self.keyserverURL = keyserverURL
         self.kms = kms
-        self.networkingInteractor = networkingInteractor
+        self.networkClient = networkClient
         self.identityClient = identityClient
         self.accountService = accountService
         self.logger = logger
@@ -57,7 +57,7 @@ class InvitationHandlingService {
             payload: payload,
             account: currentAccount
         )
-        try await networkingInteractor.respond(
+        try await networkClient.respond(
             topic: acceptTopic,
             response: RPCResponse(id: inviteId, result: wrapper),
             protocolMethod: ChatInviteProtocolMethod()
@@ -66,7 +66,7 @@ class InvitationHandlingService {
         let threadSymmetricKey = try kms.performKeyAgreement(selfPublicKey: publicKey, peerPublicKey: inviterPublicKey)
         let threadTopic = threadSymmetricKey.derivedTopic()
         try kms.setSymmetricKey(threadSymmetricKey.sharedKey, for: threadTopic)
-        try await networkingInteractor.subscribe(topic: threadTopic)
+        try await networkClient.subscribe(topic: threadTopic)
 
         logger.debug("Accepting an invite on topic: \(threadTopic)")
 
@@ -93,7 +93,7 @@ class InvitationHandlingService {
         let rejectTopic = symmAgreementKey.derivedTopic()
         try kms.setSymmetricKey(symmAgreementKey.sharedKey, for: rejectTopic)
 
-        try await networkingInteractor.respondError(
+        try await networkClient.respondError(
             topic: rejectTopic,
             requestId: RPCID(inviteId),
             protocolMethod: ChatInviteProtocolMethod(),
@@ -111,7 +111,7 @@ private extension InvitationHandlingService {
     }
 
     func setUpRequestHandling() {
-        networkingInteractor.requestSubscription(on: ChatInviteProtocolMethod())
+        networkClient.requestSubscription(on: ChatInviteProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<InvitePayload.Wrapper>) in
                 logger.debug("Did receive an invite")
 

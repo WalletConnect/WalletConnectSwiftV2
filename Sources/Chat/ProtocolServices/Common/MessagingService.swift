@@ -4,7 +4,7 @@ import Combine
 class MessagingService {
 
     private let keyserverURL: URL
-    private let networkingInteractor: NetworkInteracting
+    private let networkClient: NetworkInteracting
     private let identityClient: IdentityClient
     private let accountService: AccountService
     private let chatStorage: ChatStorage
@@ -18,14 +18,14 @@ class MessagingService {
 
     init(
         keyserverURL: URL,
-        networkingInteractor: NetworkInteracting,
+        networkClient: NetworkInteracting,
         identityClient: IdentityClient,
         accountService: AccountService,
         chatStorage: ChatStorage,
         logger: ConsoleLogging
     ) {
         self.keyserverURL = keyserverURL
-        self.networkingInteractor = networkingInteractor
+        self.networkClient = networkClient
         self.identityClient = identityClient
         self.accountService = accountService
         self.chatStorage = chatStorage
@@ -45,7 +45,7 @@ class MessagingService {
         )
         let protocolMethod = ChatMessageProtocolMethod()
         let request = RPCRequest(method: protocolMethod.method, params: wrapper)
-        try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
+        try await networkClient.request(request, topic: topic, protocolMethod: protocolMethod)
 
         logger.debug("Message sent on topic: \(topic)")
     }
@@ -58,7 +58,7 @@ private extension MessagingService {
     }
 
     func setUpResponseHandling() {
-        networkingInteractor.responseSubscription(on: ChatMessageProtocolMethod())
+        networkClient.responseSubscription(on: ChatMessageProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<MessagePayload.Wrapper, ReceiptPayload.Wrapper>) in
 
                 logger.debug("Received Receipt response")
@@ -80,7 +80,7 @@ private extension MessagingService {
     }
 
     func setUpRequestHandling() {
-        networkingInteractor.requestSubscription(on: ChatMessageProtocolMethod())
+        networkClient.requestSubscription(on: ChatMessageProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<MessagePayload.Wrapper>) in
 
                 logger.debug("Received Message Request")
@@ -117,7 +117,7 @@ private extension MessagingService {
                     )
                     let response = RPCResponse(id: payload.id, result: wrapper)
 
-                    try await networkingInteractor.respond(
+                    try await networkClient.respond(
                         topic: payload.topic,
                         response: response,
                         protocolMethod: ChatMessageProtocolMethod()

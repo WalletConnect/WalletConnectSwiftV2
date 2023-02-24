@@ -5,7 +5,7 @@ class InviteService {
 
     private var publishers = [AnyCancellable]()
     private let keyserverURL: URL
-    private let networkingInteractor: NetworkInteracting
+    private let networkClient: NetworkInteracting
     private let identityClient: IdentityClient
     private let accountService: AccountService
     private let logger: ConsoleLogging
@@ -14,7 +14,7 @@ class InviteService {
 
     init(
         keyserverURL: URL,
-        networkingInteractor: NetworkInteracting,
+        networkClient: NetworkInteracting,
         identityClient: IdentityClient,
         accountService: AccountService,
         kms: KeyManagementService,
@@ -23,7 +23,7 @@ class InviteService {
     ) {
         self.kms = kms
         self.keyserverURL = keyserverURL
-        self.networkingInteractor = networkingInteractor
+        self.networkClient = networkClient
         self.identityClient = identityClient
         self.accountService = accountService
         self.logger = logger
@@ -61,8 +61,8 @@ class InviteService {
 
         try kms.setSymmetricKey(symKeyI.sharedKey, for: responseTopic)
 
-        try await networkingInteractor.subscribe(topic: responseTopic)
-        try await networkingInteractor.request(request, topic: inviteTopic, protocolMethod: protocolMethod, envelopeType: .type1(pubKey: selfPubKeyY.rawRepresentation))
+        try await networkClient.subscribe(topic: responseTopic)
+        try await networkClient.request(request, topic: inviteTopic, protocolMethod: protocolMethod, envelopeType: .type1(pubKey: selfPubKeyY.rawRepresentation))
 
         let sentInvite = SentInvite(
             id: inviteId.integer,
@@ -83,7 +83,7 @@ class InviteService {
 private extension InviteService {
 
     func setUpResponseHandling() {
-        networkingInteractor.responseSubscription(on: ChatInviteProtocolMethod())
+        networkClient.responseSubscription(on: ChatInviteProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<InvitePayload.Wrapper, AcceptPayload.Wrapper>) in
                 logger.debug("Invite has been accepted")
 
@@ -114,7 +114,7 @@ private extension InviteService {
         let threadTopic = agreementKeys.derivedTopic()
         try kms.setSymmetricKey(agreementKeys.sharedKey, for: threadTopic)
 
-        try await networkingInteractor.subscribe(topic: threadTopic)
+        try await networkClient.subscribe(topic: threadTopic)
 
         let thread = Thread(
             topic: threadTopic,
