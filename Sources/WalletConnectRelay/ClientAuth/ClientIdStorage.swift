@@ -1,11 +1,11 @@
 import Foundation
 
-protocol ClientIdStoring {
+public protocol ClientIdStoring {
     func getOrCreateKeyPair() throws -> SigningPrivateKey
     func getClientId() throws -> String
 }
 
-struct ClientIdStorage: ClientIdStoring {
+public struct ClientIdStorage: ClientIdStoring {
     private let key = "com.walletconnect.iridium.client_id"
     private let keychain: KeychainStorageProtocol
 
@@ -13,7 +13,7 @@ struct ClientIdStorage: ClientIdStoring {
         self.keychain = keychain
     }
 
-    func getOrCreateKeyPair() throws -> SigningPrivateKey {
+    public func getOrCreateKeyPair() throws -> SigningPrivateKey {
         do {
             return try keychain.read(key: key)
         } catch {
@@ -23,7 +23,7 @@ struct ClientIdStorage: ClientIdStoring {
         }
     }
 
-    func getClientId() throws -> String {
+    public func getClientId() throws -> String {
         let privateKey: SigningPrivateKey = try keychain.read(key: key)
         let pubKey = privateKey.publicKey.rawRepresentation
         return DIDKey(rawData: pubKey).did(prefix: true, variant: .ED25519)

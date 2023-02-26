@@ -68,7 +68,7 @@ let package = Package(
             path: "Sources/WalletConnectPush"),
         .target(
             name: "WalletConnectEcho",
-            dependencies: ["WalletConnectNetworking"],
+            dependencies: ["WalletConnectNetworking", "WalletConnectJWT"],
             path: "Sources/WalletConnectEcho"),
         .target(
             name: "WalletConnectRelay",

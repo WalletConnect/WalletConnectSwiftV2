@@ -1,5 +1,6 @@
 import Foundation
 import WalletConnectNetworking
+import WalletConnectJWT
 
 actor EchoRegisterService {
     private let httpClient: HTTPClient
@@ -55,3 +56,4 @@ actor EchoRegisterService {
     }
 #endif
 }
+
