@@ -40,6 +40,7 @@ extension SentInvite {
 
     public enum Status: Codable, Equatable {
         case pending
+        case approved
         case rejected
     }
 }

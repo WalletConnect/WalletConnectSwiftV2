@@ -47,6 +47,14 @@ public class ChatClient {
         return chatStorage.newThreadPublisher
     }
 
+    public var acceptPublisher: AnyPublisher<(String, SentInvite), Never> {
+        return chatStorage.acceptPublisher
+    }
+
+    public var rejectPublisher: AnyPublisher<SentInvite, Never> {
+        return chatStorage.rejectPublisher
+    }
+
     // MARK: - Initialization
 
     init(identityClient: IdentityClient,

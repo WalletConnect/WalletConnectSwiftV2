@@ -20,6 +20,9 @@ final class ChatStorage {
     private var newSentInvitePublisherSubject = PassthroughSubject<SentInvite, Never>()
     private var newThreadPublisherSubject = PassthroughSubject<Thread, Never>()
 
+    private var acceptPublisherSubject = PassthroughSubject<(String, SentInvite), Never>()
+    private var rejectPublisherSubject = PassthroughSubject<(SentInvite), Never>()
+
     var messagesPublisher: AnyPublisher<[Message], Never> {
         messagesPublisherSubject.eraseToAnyPublisher()
     }
@@ -50,6 +53,14 @@ final class ChatStorage {
 
     var newThreadPublisher: AnyPublisher<Thread, Never> {
         newThreadPublisherSubject.eraseToAnyPublisher()
+    }
+
+    var acceptPublisher: AnyPublisher<(String, SentInvite), Never> {
+        acceptPublisherSubject.eraseToAnyPublisher()
+    }
+
+    var rejectPublisher: AnyPublisher<SentInvite, Never> {
+        rejectPublisherSubject.eraseToAnyPublisher()
     }
 
     var currentAccount: Account {
@@ -131,20 +142,29 @@ final class ChatStorage {
         receivedInviteStore.set(rejected, for: account.absoluteString)
     }
 
-    func accept(sentInviteId: Int64, account: Account) {
+    func accept(sentInviteId: Int64, account: Account, topic: String) {
         guard let invite = getSentInvite(id: sentInviteId, account: account)
         else { return }
 
         sentInviteStore.delete(invite, for: account.absoluteString)
+
+        let approved = SentInvite(invite: invite, status: .approved)
+        sentInviteStore.set(approved, for: account.absoluteString)
+
+        acceptPublisherSubject.send((topic, approved))
     }
 
     func reject(sentInviteId: Int64, account: Account) {
         guard let invite = getSentInvite(id: sentInviteId, account: account)
         else { return }
 
+        sentInviteStore.delete(invite, for: account.absoluteString)
+
         let rejected = SentInvite(invite: invite, status: .rejected)
         // TODO: Update also for peer invites
         sentInviteStore.set(rejected, for: account.absoluteString)
+
+        rejectPublisherSubject.send(rejected)
     }
 
     // MARK: - Threads

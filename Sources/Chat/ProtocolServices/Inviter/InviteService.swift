@@ -93,12 +93,8 @@ private extension InviteService {
                 else { fatalError() /* TODO: Handle error */ }
 
                 Task(priority: .high) {
-                    let sentInviteId = payload.id.integer
-
-                    // TODO: Implement reject for sentInvite
-                    chatStorage.accept(sentInviteId: sentInviteId, account: accept.inviterAccount)
-
                     try await createThread(
+                        sentInviteId: payload.id.integer,
                         selfPubKeyHex: invite.inviterPublicKey.hexString,
                         peerPubKey: accept.inviteePublicKey,
                         account: accept.inviterAccount,
@@ -108,7 +104,7 @@ private extension InviteService {
             }.store(in: &publishers)
     }
 
-    func createThread(selfPubKeyHex: String, peerPubKey: DIDKey, account: Account, peerAccount: Account) async throws {
+    func createThread(sentInviteId: Int64, selfPubKeyHex: String, peerPubKey: DIDKey, account: Account, peerAccount: Account) async throws {
         let selfPubKey = try AgreementPublicKey(hex: selfPubKeyHex)
         let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey.hexString)
         let threadTopic = agreementKeys.derivedTopic()
@@ -123,6 +119,10 @@ private extension InviteService {
         )
 
         chatStorage.set(thread: thread, account: account)
+
+        // TODO: Implement reject for sentInvite
+        chatStorage.accept(sentInviteId: sentInviteId, account: account, topic: threadTopic)
+
         // TODO - remove symKeyI
     }
 }
