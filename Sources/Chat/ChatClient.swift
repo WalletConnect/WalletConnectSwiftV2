@@ -131,7 +131,8 @@ public class ChatClient {
     /// Stops listening for invites
     /// - Parameter account: CAIP10 blockachain account
     public func goPrivate(account: Account) async throws {
-        try await identityClient.goPrivate(account: account)
+        let inviteKey = try await identityClient.goPrivate(account: account)
+        resubscriptionService.unsubscribeFromInvites(inviteKey: inviteKey)
     }
 
     /// Registers an invite key if not yet registered on this client from keyserver
@@ -139,7 +140,8 @@ public class ChatClient {
     /// - Parameter account: CAIP10 blockachain account
     /// - Returns: The public invite key
     public func goPublic(account: Account) async throws {
-        try await identityClient.goPublic(account: account)
+        let inviteKey = try await identityClient.goPublic(account: account)
+        try await resubscriptionService.subscribeForInvites(inviteKey: inviteKey)
     }
 
     /// Accepts a chat invite by id from account specified as inviteeAccount in Invite

@@ -2,14 +2,14 @@ import Foundation
 
 public struct ChatClientFactory {
 
-    static func create(account: Account, relayClient: RelayClient, networkClient: NetworkingInteractor) -> ChatClient {
+    static func create(account: Account, relayClient: RelayClient, networkingInteractor: NetworkingInteractor) -> ChatClient {
         let keychain = KeychainStorage(serviceIdentifier: "com.walletconnect.showcase")
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
         return ChatClientFactory.create(
             account: account,
             keyserverURL: keyserverURL,
             relayClient: relayClient,
-            networkClient: networkClient,
+            networkingInteractor: networkingInteractor,
             keychain: keychain,
             logger: ConsoleLogger(loggingLevel: .debug),
             keyValueStorage: UserDefaults.standard
@@ -20,7 +20,7 @@ public struct ChatClientFactory {
         account: Account,
         keyserverURL: URL,
         relayClient: RelayClient,
-        networkClient: NetworkingInteractor,
+        networkingInteractor: NetworkingInteractor,
         keychain: KeychainStorageProtocol,
         logger: ConsoleLogging,
         keyValueStorage: KeyValueStorage
@@ -32,12 +32,12 @@ public struct ChatClientFactory {
         let sentInviteStore = KeyedDatabase<SentInvite>(storage: keyValueStorage, identifier: ChatStorageIdentifiers.sentInvites.rawValue)
         let threadStore = KeyedDatabase<Thread>(storage: keyValueStorage, identifier: ChatStorageIdentifiers.threads.rawValue)
         let chatStorage = ChatStorage(accountService: accountService, messageStore: messageStore, receivedInviteStore: receivedInviteStore, sentInviteStore: sentInviteStore, threadStore: threadStore)
-        let resubscriptionService = ResubscriptionService(networkingInteractor: networkClient, accountService: accountService, chatStorage: chatStorage, logger: logger)
-        let identityClient = IdentityClientFactory.create(keyserver: keyserverURL, networkingInteractor: networkClient, keychain: keychain, logger: logger)
-        let invitationHandlingService = InvitationHandlingService(keyserverURL: keyserverURL, networkingInteractor: networkClient, identityClient: identityClient, accountService: accountService, kms: kms, logger: logger, chatStorage: chatStorage)
-        let inviteService = InviteService(keyserverURL: keyserverURL, networkingInteractor: networkClient, identityClient: identityClient, accountService: accountService, kms: kms, chatStorage: chatStorage, logger: logger)
+        let resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, kms: kms, accountService: accountService, chatStorage: chatStorage, logger: logger)
+        let identityClient = IdentityClientFactory.create(keyserver: keyserverURL, keychain: keychain, logger: logger)
+        let invitationHandlingService = InvitationHandlingService(keyserverURL: keyserverURL, networkingInteractor: networkingInteractor, identityClient: identityClient, accountService: accountService, kms: kms, logger: logger, chatStorage: chatStorage)
+        let inviteService = InviteService(keyserverURL: keyserverURL, networkingInteractor: networkingInteractor, identityClient: identityClient, accountService: accountService, kms: kms, chatStorage: chatStorage, logger: logger)
         let leaveService = LeaveService()
-        let messagingService = MessagingService(keyserverURL: keyserverURL, networkingInteractor: networkClient, identityClient: identityClient, accountService: accountService, chatStorage: chatStorage, logger: logger)
+        let messagingService = MessagingService(keyserverURL: keyserverURL, networkingInteractor: networkingInteractor, identityClient: identityClient, accountService: accountService, chatStorage: chatStorage, logger: logger)
 
         let client = ChatClient(
             identityClient: identityClient,

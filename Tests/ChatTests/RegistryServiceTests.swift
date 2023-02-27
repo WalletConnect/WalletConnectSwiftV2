@@ -37,7 +37,7 @@ final class RegistryServiceTests: XCTestCase {
             iatProvader: DefaultIATProvider(),
             messageFormatter: SIWECacaoFormatter()
         )
-        identityClient = IdentityClient(identityService: identitySevice, identityStorage: identityStorage, networkClient: networkingInteractor, kms: kms, logger: ConsoleLoggerMock())
+        identityClient = IdentityClient(identityService: identitySevice, identityStorage: identityStorage, networkingInteractor: networkingInteractor, kms: kms, logger: ConsoleLoggerMock())
     }
 
     func testRegister() async throws {

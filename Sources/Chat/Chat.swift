@@ -11,7 +11,7 @@ public class Chat {
         return ChatClientFactory.create(
             account: account,
             relayClient: Relay.instance,
-            networkClient: Networking.interactor
+            networkingInteractor: Networking.interactor
         )
     }()
 

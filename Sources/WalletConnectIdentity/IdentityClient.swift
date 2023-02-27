@@ -8,23 +8,17 @@ public enum SigningResult {
 public typealias SigningCallback = (String) async -> SigningResult
 
 public final class IdentityClient {
-    private let networkingInteractor: NetworkInteracting
     private let identityService: IdentityService
     private let identityStorage: IdentityStorage
     private let logger: ConsoleLogging
-    private let kms: KeyManagementServiceProtocol
 
     init(
         identityService: IdentityService,
         identityStorage: IdentityStorage,
-        networkingInteractor: NetworkInteracting,
-        kms: KeyManagementServiceProtocol,
         logger: ConsoleLogging
     ) {
         self.identityService = identityService
         self.identityStorage = identityStorage
-        self.kms = kms
-        self.networkingInteractor = networkingInteractor
         self.logger = logger
     }
 
@@ -34,10 +28,10 @@ public final class IdentityClient {
         return pubKey
     }
 
-    public func goPublic(account: Account) async throws {
+    public func goPublic(account: Account) async throws -> AgreementPublicKey {
         let inviteKey = try await identityService.registerInvite(account: account)
-        try await subscribeForInvites(inviteKey: inviteKey)
         logger.debug("Did goPublic an account: \(account)")
+        return inviteKey
     }
 
     public func unregister(account: Account, onSign: SigningCallback) async throws {
@@ -45,10 +39,10 @@ public final class IdentityClient {
         logger.debug("Did unregister an account: \(account)")
     }
 
-    public func goPrivate(account: Account) async throws {
+    public func goPrivate(account: Account) async throws -> AgreementPublicKey {
         let inviteKey = try await identityService.goPrivate(account: account)
-        unsubscribeFromInvites(inviteKey: inviteKey)
         logger.debug("Did goPrivate an account: \(account)")
+        return inviteKey
     }
 
     public func resolveInvite(account: Account) async throws -> String {
@@ -69,20 +63,5 @@ public final class IdentityClient {
 
     public func getInviteKey(for account: Account) throws -> AgreementPublicKey {
         return try identityStorage.getInviteKey(for: account)
-    }
-}
-
-private extension IdentityClient {
-
-    func subscribeForInvites(inviteKey: AgreementPublicKey) async throws {
-        let topic = inviteKey.rawRepresentation.sha256().toHexString()
-        try kms.setPublicKey(publicKey: inviteKey, for: topic)
-        try await networkingInteractor.subscribe(topic: topic)
-    }
-
-    func unsubscribeFromInvites(inviteKey: AgreementPublicKey) {
-        let topic = inviteKey.rawRepresentation.sha256().toHexString()
-        kms.deletePublicKey(for: topic)
-        networkingInteractor.unsubscribe(topic: topic)
     }
 }
