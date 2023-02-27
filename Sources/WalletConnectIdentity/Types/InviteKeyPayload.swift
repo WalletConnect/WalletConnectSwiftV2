@@ -10,8 +10,8 @@ struct InviteKeyPayload: JWTClaimsCodable {
         let iss: String
         let sub: String
         let aud: String
-        let iat: Int64
-        let exp: Int64
+        let iat: UInt64
+        let exp: UInt64
         let pkh: String
     }
 

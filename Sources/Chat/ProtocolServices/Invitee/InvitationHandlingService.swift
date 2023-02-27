@@ -131,7 +131,7 @@ private extension InvitationHandlingService {
                         inviteeAccount: invite.inviteeAccount,
                         inviterPublicKey: inviterPublicKey,
                         inviteePublicKey: inviteePublicKey,
-                        timestamp: claims.iat // TODO: Replace with relay message receivedAt
+                        timestamp: payload.publishedAt.millisecondsSince1970
                     )
                     chatStorage.set(receivedInvite: invite, account: invite.inviteeAccount)
                 }

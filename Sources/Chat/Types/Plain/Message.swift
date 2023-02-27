@@ -4,14 +4,14 @@ public struct Message: Codable, Equatable {
     public let topic: String
     public let message: String
     public let authorAccount: Account
-    public let timestamp: Int64
+    public let timestamp: UInt64
     public let media: Media?
 
     init(
         topic: String,
         message: String,
         authorAccount: Account,
-        timestamp: Int64,
+        timestamp: UInt64,
         media: Message.Media? = nil // TODO: Implement media
     ) {
         self.topic = topic

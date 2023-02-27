@@ -7,7 +7,7 @@ public struct ReceivedInvite: Codable, Equatable {
     public let inviteeAccount: Account
     public let inviterPublicKey: String
     public let inviteePublicKey: String
-    public let timestamp: Int64
+    public let timestamp: UInt64
     public var status: Status
 
     public init(
@@ -17,8 +17,8 @@ public struct ReceivedInvite: Codable, Equatable {
         inviteeAccount: Account,
         inviterPublicKey: String,
         inviteePublicKey: String,
-        timestamp: Int64,
-        status: Status = .pending // TODO: Implement statuses
+        timestamp: UInt64,
+        status: Status = .pending
     ) {
         self.id = id
         self.message = message
@@ -46,7 +46,7 @@ public struct ReceivedInvite: Codable, Equatable {
 
 extension ReceivedInvite {
 
-    public enum Status: Codable, Equatable {
+    public enum Status: String, Codable, Equatable {
         case pending
         case rejected
         case approved

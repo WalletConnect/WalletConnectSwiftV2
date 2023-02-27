@@ -69,7 +69,7 @@ class InviteService {
             message: invite.message,
             inviterAccount: invite.inviterAccount,
             inviteeAccount: invite.inviteeAccount,
-            timestamp: Int64(Date().timeIntervalSince1970)
+            timestamp: Date().millisecondsSince1970
         )
 
         chatStorage.set(sentInvite: sentInvite, account: invite.inviterAccount)

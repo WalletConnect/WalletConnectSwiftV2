@@ -72,7 +72,7 @@ private extension MessagingService {
                     topic: payload.topic,
                     message: message.message,
                     authorAccount: receipt.senderAccount,
-                    timestamp: Int64(payload.publishedAt.millisecondsSince1970)
+                    timestamp: payload.publishedAt.millisecondsSince1970
                 )
 
                 chatStorage.set(message: newMessage, account: receipt.senderAccount)
@@ -96,7 +96,7 @@ private extension MessagingService {
                         topic: payload.topic,
                         message: message.message,
                         authorAccount: authorAccount,
-                        timestamp: Int64(payload.publishedAt.millisecondsSince1970)
+                        timestamp: payload.publishedAt.millisecondsSince1970
                     )
 
                     chatStorage.set(message: newMessage, account: message.recipientAccount)

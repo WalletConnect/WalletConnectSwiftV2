@@ -8,8 +8,8 @@ public protocol JWTWrapper: Codable {
 
 public protocol JWTClaims: JWTEncodable {
     var iss: String { get }
-    var iat: Int64 { get }
-    var exp: Int64 { get }
+    var iat: UInt64 { get }
+    var exp: UInt64 { get }
 }
 
 public protocol JWTClaimsCodable {
@@ -44,18 +44,18 @@ extension JWTClaimsCodable {
         return Wrapper(jwtString: jwtString)
     }
 
-    public func defaultIat() -> Int64 {
-        return Int64(Date().timeIntervalSince1970)
+    public func defaultIat() -> UInt64 {
+        return UInt64(Date().timeIntervalSince1970)
     }
 
-    public func defaultIatMilliseconds() -> Int64 {
-        return Int64(Date().timeIntervalSince1970 * 1000)
+    public func defaultIatMilliseconds() -> UInt64 {
+        return Date().millisecondsSince1970
     }
 
-    public func expiry(days: Int) -> Int64 {
+    public func expiry(days: Int) -> UInt64 {
         var components = DateComponents()
         components.setValue(days, for: .day)
         let date = Calendar.current.date(byAdding: components, to: Date())!
-        return Int64(date.timeIntervalSince1970)
+        return UInt64(date.timeIntervalSince1970)
     }
 }

@@ -4,8 +4,8 @@ struct ReceiptPayload: JWTClaimsCodable {
 
     struct Claims: JWTClaims {
         let iss: String
-        let iat: Int64
-        let exp: Int64
+        let iat: UInt64
+        let exp: UInt64
         let ksu: String
 
         let sub: String // hash of the message received
