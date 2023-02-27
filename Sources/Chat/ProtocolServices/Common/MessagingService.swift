@@ -64,7 +64,7 @@ private extension MessagingService {
                 logger.debug("Received Receipt response")
 
                 guard
-                    let (message, messageClaims) = try? MessagePayload.decode(from: payload.request),
+                    let (message, _) = try? MessagePayload.decode(from: payload.request),
                     let (receipt, _) = try? ReceiptPayload.decode(from: payload.response)
                 else { fatalError() /* TODO: Handle error */ }
 
@@ -72,7 +72,7 @@ private extension MessagingService {
                     topic: payload.topic,
                     message: message.message,
                     authorAccount: receipt.senderAccount,
-                    timestamp: messageClaims.iat // TODO: Replace with publishedAt
+                    timestamp: Int64(payload.publishedAt.millisecondsSince1970)
                 )
 
                 chatStorage.set(message: newMessage, account: receipt.senderAccount)
@@ -96,7 +96,7 @@ private extension MessagingService {
                         topic: payload.topic,
                         message: message.message,
                         authorAccount: authorAccount,
-                        timestamp: messageClaims.iat // TODO: Replace with publishedAt
+                        timestamp: Int64(payload.publishedAt.millisecondsSince1970)
                     )
 
                     chatStorage.set(message: newMessage, account: message.recipientAccount)

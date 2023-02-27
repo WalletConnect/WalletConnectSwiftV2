@@ -10,13 +10,13 @@ public class NetworkingInteractor: NetworkInteracting {
     private let logger: ConsoleLogging
 
     private let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, publishedAt: Date), Never>()
-    private let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse), Never>()
+    private let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date), Never>()
 
     public var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest, publishedAt: Date), Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
-    private var responsePublisher: AnyPublisher<(topic: String, request: RPCRequest, response: RPCResponse), Never> {
+    private var responsePublisher: AnyPublisher<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date), Never> {
         responsePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -83,12 +83,12 @@ public class NetworkingInteractor: NetworkInteracting {
             .filter { rpcRequest in
                 return rpcRequest.request.method == request.method
             }
-            .compactMap { topic, rpcRequest, rpcResponse in
+            .compactMap { topic, rpcRequest, rpcResponse, publishedAt  in
                 guard
                     let id = rpcRequest.id,
                     let request = try? rpcRequest.params?.get(Request.self),
                     let response = try? rpcResponse.result?.get(Response.self) else { return nil }
-                return ResponseSubscriptionPayload(id: id, topic: topic, request: request, response: response)
+                return ResponseSubscriptionPayload(id: id, topic: topic, request: request, response: response, publishedAt: publishedAt)
             }
             .eraseToAnyPublisher()
     }
@@ -96,7 +96,7 @@ public class NetworkingInteractor: NetworkInteracting {
     public func responseErrorSubscription<Request: Codable>(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionErrorPayload<Request>, Never> {
         return responsePublisher
             .filter { $0.request.method == request.method }
-            .compactMap { (topic, rpcRequest, rpcResponse) in
+            .compactMap { topic, rpcRequest, rpcResponse, publishedAt in
                 guard let id = rpcResponse.id, let request = try? rpcRequest.params?.get(Request.self), let error = rpcResponse.error else { return nil }
                 return ResponseSubscriptionErrorPayload(id: id, topic: topic, request: request, error: error)
             }
@@ -134,7 +134,7 @@ public class NetworkingInteractor: NetworkInteracting {
         if let deserializedJsonRpcRequest: RPCRequest = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleRequest(topic: topic, request: deserializedJsonRpcRequest, publishedAt: publishedAt)
         } else if let response: RPCResponse = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
-            handleResponse(response: response)
+            handleResponse(response: response, publishedAt: publishedAt)
         } else {
             logger.debug("Networking Interactor - Received unknown object type from networking relay")
         }
@@ -149,11 +149,11 @@ public class NetworkingInteractor: NetworkInteracting {
         }
     }
 
-    private func handleResponse(response: RPCResponse) {
+    private func handleResponse(response: RPCResponse, publishedAt: Date) {
         do {
             try rpcHistory.resolve(response)
             let record = rpcHistory.get(recordId: response.id!)!
-            responsePublisherSubject.send((record.topic, record.request, response))
+            responsePublisherSubject.send((record.topic, record.request, response, publishedAt))
         } catch {
             logger.debug("Handle json rpc response error: \(error)")
         }
