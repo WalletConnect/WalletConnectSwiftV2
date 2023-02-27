@@ -1,4 +1,5 @@
 import Foundation
+import WalletConnectNetworking
 
 class EchoAuthenticator {
     private let clientIdStorage: ClientIdStoring
