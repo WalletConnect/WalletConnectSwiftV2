@@ -8,6 +8,7 @@ import WalletConnectKMS
 @testable import WalletConnectIdentity
 
 final class RegistryServiceTests: XCTestCase {
+    var resubscriptionService: ResubscriptionService!
     var identityClient: IdentityClient!
     var identityStorage: IdentityStorage!
     var networkService: IdentityNetwotkServiceMock!
@@ -37,7 +38,18 @@ final class RegistryServiceTests: XCTestCase {
             iatProvader: DefaultIATProvider(),
             messageFormatter: SIWECacaoFormatter()
         )
-        identityClient = IdentityClient(identityService: identitySevice, identityStorage: identityStorage, networkingInteractor: networkingInteractor, kms: kms, logger: ConsoleLoggerMock())
+        identityClient = IdentityClient(identityService: identitySevice, identityStorage: identityStorage, logger: ConsoleLoggerMock())
+
+        let storage = RuntimeKeyValueStorage()
+        let accountService = AccountService(currentAccount: account)
+        let chatStorage = ChatStorage(
+            accountService: accountService,
+            messageStore: .init(storage: storage, identifier: ""),
+            receivedInviteStore: .init(storage: storage, identifier: ""),
+            sentInviteStore: .init(storage: storage, identifier: ""),
+            threadStore: .init(storage: storage, identifier: "")
+        )
+        resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, kms: kms, accountService: accountService, chatStorage: chatStorage, logger: ConsoleLoggerMock())
     }
 
     func testRegister() async throws {
@@ -53,7 +65,8 @@ final class RegistryServiceTests: XCTestCase {
         XCTAssertTrue(networkingInteractor.subscriptions.isEmpty)
 
         _ = try await identityClient.register(account: account, onSign: onSign)
-        try await identityClient.goPublic(account: account)
+        let inviteKey = try await identityClient.goPublic(account: account)
+        try await resubscriptionService.subscribeForInvites(inviteKey: inviteKey)
 
         XCTAssertNoThrow(try identityStorage.getInviteKey(for: account))
         XCTAssertTrue(networkService.callRegisterInvite)
@@ -83,7 +96,9 @@ final class RegistryServiceTests: XCTestCase {
         let topic = invitePubKey.rawRepresentation.sha256().toHexString()
         try await networkingInteractor.subscribe(topic: topic)
 
-        try await identityClient.goPrivate(account: account)
+        let inviteKey = try await identityClient.goPrivate(account: account)
+        resubscriptionService.unsubscribeFromInvites(inviteKey: inviteKey)
+
         XCTAssertThrowsError(try identityStorage.getInviteKey(for: account))
         XCTAssertTrue(networkingInteractor.unsubscriptions.contains(topic))
     }

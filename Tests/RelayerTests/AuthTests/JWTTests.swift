@@ -21,12 +21,12 @@ extension AuthPayload.Claims {
         let iss = "did:key:z6MkodHZwneVRShtaLf8JKYkxpDGp1vGZnpGmdBpX8M2exxH"
         let sub = "c479fe5dc464e771e78b193d239a65b58d278cad1c34bfb0b5716e5bb514928e"
         let iatDate = Date(timeIntervalSince1970: 1656910097)
-        let iat = Int64(iatDate.timeIntervalSince1970)
+        let iat = UInt64(iatDate.timeIntervalSince1970)
         var components = DateComponents()
         components.setValue(1, for: .day)
         let aud = "wss://relay.walletconnect.com"
         let expDate = Calendar.current.date(byAdding: components, to: iatDate)!
-        let exp = Int64(expDate.timeIntervalSince1970)
+        let exp = UInt64(expDate.timeIntervalSince1970)
         return AuthPayload.Claims(iss: iss, sub: sub, aud: aud, iat: iat, exp: exp)
     }
 }
