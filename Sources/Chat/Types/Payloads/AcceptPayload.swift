@@ -2,7 +2,7 @@ import Foundation
 
 struct AcceptPayload: JWTClaimsCodable {
 
-    struct Claims: JWTEncodable {
+    struct Claims: JWTClaims {
         let iss: String
         let iat: Int64
         let exp: Int64

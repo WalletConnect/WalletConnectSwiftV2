@@ -1,25 +1,19 @@
 import Foundation
 
-// TODO: Remove
-public struct JWTClaimsDecoder {
-
-    public static func claims<Claims: JWTEncodable>(
-        of type: Claims.Type,
-        from jwtString: String
-    ) throws -> Claims {
-        let jwt = try JWT<Claims>(string: jwtString)
-        return jwt.claims
-    }
-}
-
 public protocol JWTWrapper: Codable {
     var jwtString: String { get }
 
     init(jwtString: String)
 }
 
+public protocol JWTClaims: JWTEncodable {
+    var iss: String { get }
+    var iat: Int64 { get }
+    var exp: Int64 { get }
+}
+
 public protocol JWTClaimsCodable {
-    associatedtype Claims: JWTEncodable
+    associatedtype Claims: JWTClaims
     associatedtype Wrapper: JWTWrapper
 
     init(claims: Claims) throws
@@ -31,6 +25,14 @@ extension JWTClaimsCodable {
 
     public static func decode(from wrapper: Wrapper) throws -> (Self, Claims) {
         let jwt = try JWT<Claims>(string: wrapper.jwtString)
+
+        let publicKey = try DIDKey(did: jwt.claims.iss)
+        let signingPublicKey = try SigningPublicKey(rawRepresentation: publicKey.rawData)
+
+        guard try jwt.isValid(publicKey: signingPublicKey) else {
+            throw JWTError.signatureVerificationFailed
+        }
+
         return (try Self.init(claims: jwt.claims), jwt.claims)
     }
 

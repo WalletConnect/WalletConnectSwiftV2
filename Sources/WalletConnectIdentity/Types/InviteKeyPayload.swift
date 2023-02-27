@@ -6,7 +6,7 @@ struct InviteKeyPayload: JWTClaimsCodable {
         let jwtString: String
     }
 
-    struct Claims: JWTEncodable {
+    struct Claims: JWTClaims {
         let iss: String
         let sub: String
         let aud: String

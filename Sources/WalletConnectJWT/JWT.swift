@@ -28,6 +28,21 @@ struct JWT<JWTClaims: JWTEncodable>: Codable, Equatable {
         self.signature = try jwtSigner.sign(header: headerString, claims: claimsString)
     }
 
+    func isValid(publicKey: SigningPublicKey) throws -> Bool {
+        guard let signature else { throw JWTError.noSignature }
+
+        let headerString = try header.encode()
+        let claimsString = try claims.encode()
+        let unsignedJWT = [headerString, claimsString].joined(separator: ".")
+
+        guard let unsignedData = unsignedJWT.data(using: .utf8) else {
+            throw JWTError.invalidJWTString
+        }
+
+        let signatureData = try JWTEncoder.base64urlDecodedData(string: signature)
+        return publicKey.isValid(signature: signatureData, for: unsignedData)
+    }
+
     func encoded() throws -> String {
         guard let signature = signature else { throw JWTError.jwtNotSigned }
         let headerString = try header.encode()
