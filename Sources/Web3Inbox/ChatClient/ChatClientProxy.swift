@@ -18,7 +18,7 @@ final class ChatClientProxy {
 
         switch event {
         case .getReceivedInvites:
-            let invites = client.getReceivedInvites().filter({ $0.status == .pending })
+            let invites = client.getReceivedInvites()
             try await respond(with: invites, request: request)
 
         case .getSentInvites:
