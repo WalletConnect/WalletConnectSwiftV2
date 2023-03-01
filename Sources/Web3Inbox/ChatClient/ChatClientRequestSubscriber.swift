@@ -24,18 +24,28 @@ final class ChatClientRequestSubscriber {
             }.store(in: &publishers)
 
         chatClient.newMessagePublisher
-            .sink { [unowned self] thread in
-                handle(event: .chatThread, params: thread)
-            }.store(in: &publishers)
-
-        chatClient.newMessagePublisher
             .sink { [unowned self] message in
                 handle(event: .chatMessage, params: message)
+            }.store(in: &publishers)
+
+        chatClient.acceptPublisher.sink { [unowned self] (topic, invite) in
+            let params = AcceptPayload(topic: topic, invite: invite)
+            handle(event: .chatInviteAccepted, params: params)
+        }.store(in: &publishers)
+
+        chatClient.rejectPublisher
+            .sink { [unowned self] invite in
+                handle(event: .chatInviteRejected, params: invite)
             }.store(in: &publishers)
     }
 }
 
 private extension ChatClientRequestSubscriber {
+
+    struct AcceptPayload: Codable {
+        let topic: String
+        let invite: SentInvite
+    }
 
     func handle(event: ChatClientRequest, params: Codable) {
         Task {

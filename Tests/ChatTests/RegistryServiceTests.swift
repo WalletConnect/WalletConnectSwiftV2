@@ -5,9 +5,11 @@ import WalletConnectUtils
 import WalletConnectNetworking
 import WalletConnectKMS
 @testable import TestingUtils
+@testable import WalletConnectIdentity
 
 final class RegistryServiceTests: XCTestCase {
-    var registryService: RegistryService!
+    var resubscriptionService: ResubscriptionService!
+    var identityClient: IdentityClient!
     var identityStorage: IdentityStorage!
     var networkService: IdentityNetwotkServiceMock!
     var networkingInteractor: NetworkingInteractorMock!
@@ -36,26 +38,37 @@ final class RegistryServiceTests: XCTestCase {
             iatProvader: DefaultIATProvider(),
             messageFormatter: SIWECacaoFormatter()
         )
-        registryService = RegistryService(identityService: identitySevice, networkingInteractor: networkingInteractor, kms: kms, logger: ConsoleLoggerMock())
+        identityClient = IdentityClient(identityService: identitySevice, identityStorage: identityStorage, logger: ConsoleLoggerMock())
+
+        let storage = RuntimeKeyValueStorage()
+        let accountService = AccountService(currentAccount: account)
+        let chatStorage = ChatStorage(
+            accountService: accountService,
+            messageStore: .init(storage: storage, identifier: ""),
+            receivedInviteStore: .init(storage: storage, identifier: ""),
+            sentInviteStore: .init(storage: storage, identifier: ""),
+            threadStore: .init(storage: storage, identifier: "")
+        )
+        resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, kms: kms, accountService: accountService, chatStorage: chatStorage, logger: ConsoleLoggerMock())
     }
 
     func testRegister() async throws {
-        let pubKey = try await registryService.register(account: account, onSign: onSign)
+        let pubKey = try await identityClient.register(account: account, onSign: onSign)
 
-        XCTAssertNotNil(identityStorage.getIdentityKey(for: account))
         XCTAssertTrue(networkService.callRegisterIdentity)
 
-        let identityKey = identityStorage.getIdentityKey(for: account)
-        XCTAssertEqual(identityKey?.publicKey.hexRepresentation, pubKey)
+        let identityKey = try identityStorage.getIdentityKey(for: account)
+        XCTAssertEqual(identityKey.publicKey.hexRepresentation, pubKey)
     }
 
     func testGoPublic() async throws {
         XCTAssertTrue(networkingInteractor.subscriptions.isEmpty)
 
-        _ = try await registryService.register(account: account, onSign: onSign)
-        try await registryService.goPublic(account: account)
+        _ = try await identityClient.register(account: account, onSign: onSign)
+        let inviteKey = try await identityClient.goPublic(account: account)
+        try await resubscriptionService.subscribeForInvites(inviteKey: inviteKey)
 
-        XCTAssertNotNil(identityStorage.getInviteKey(for: account))
+        XCTAssertNoThrow(try identityStorage.getInviteKey(for: account))
         XCTAssertTrue(networkService.callRegisterInvite)
 
         XCTAssertEqual(networkingInteractor.subscriptions.count, 1)
@@ -63,13 +76,13 @@ final class RegistryServiceTests: XCTestCase {
     }
 
     func testUnregister() async throws {
-        XCTAssertNil(identityStorage.getIdentityKey(for: account))
+        XCTAssertThrowsError(try identityStorage.getIdentityKey(for: account))
 
-        _ = try await registryService.register(account: account, onSign: onSign)
-        XCTAssertNotNil(identityStorage.getIdentityKey(for: account))
+        _ = try await identityClient.register(account: account, onSign: onSign)
+        XCTAssertNoThrow(try identityStorage.getIdentityKey(for: account))
 
-        try await registryService.unregister(account: account, onSign: onSign)
-        XCTAssertNil(identityStorage.getIdentityKey(for: account))
+        try await identityClient.unregister(account: account, onSign: onSign)
+        XCTAssertThrowsError(try identityStorage.getIdentityKey(for: account))
         XCTAssertTrue(networkService.callRemoveIdentity)
     }
 
@@ -83,13 +96,15 @@ final class RegistryServiceTests: XCTestCase {
         let topic = invitePubKey.rawRepresentation.sha256().toHexString()
         try await networkingInteractor.subscribe(topic: topic)
 
-        try await registryService.goPrivate(account: account)
-        XCTAssertNil(identityStorage.getInviteKey(for: account))
+        let inviteKey = try await identityClient.goPrivate(account: account)
+        resubscriptionService.unsubscribeFromInvites(inviteKey: inviteKey)
+
+        XCTAssertThrowsError(try identityStorage.getInviteKey(for: account))
         XCTAssertTrue(networkingInteractor.unsubscriptions.contains(topic))
     }
 
     func testResolve() async throws {
-        let inviteKey = try await registryService.resolve(account: account)
+        let inviteKey = try await identityClient.resolveInvite(account: account)
 
         XCTAssertEqual(inviteKey, inviteKeyStub)
     }

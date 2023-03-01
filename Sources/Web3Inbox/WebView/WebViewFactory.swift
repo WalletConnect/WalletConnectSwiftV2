@@ -18,7 +18,6 @@ final class WebViewFactory {
             name: WebViewRequestSubscriber.name
         )
         let webview = WKWebView(frame: .zero, configuration: configuration)
-        webview.navigationDelegate = webviewSubscriber
         let request = URLRequest(url: URL(string: host)!)
         webview.load(request)
         return webview

@@ -1,6 +1,6 @@
 import Foundation
 
-final class IdentityStorage {
+public final class IdentityStorage {
 
     private let keychain: KeychainStorageProtocol
 
@@ -34,22 +34,37 @@ final class IdentityStorage {
         try keychain.delete(key: inviteKeyIdentifier(for: account))
     }
 
-    func getIdentityKey(for account: Account) -> SigningPrivateKey? {
-        return try? keychain.read(key: identityKeyIdentifier(for: account))
+    func getIdentityKey(for account: Account) throws -> SigningPrivateKey {
+        let identifier = identityKeyIdentifier(for: account)
+
+        guard let key: SigningPrivateKey = try? keychain.read(key: identifier)
+        else { throw Errors.identityKeyNotFound }
+
+        return key
     }
 
-    func getInviteKey(for account: Account) -> AgreementPublicKey? {
-        return try? keychain.read(key: inviteKeyIdentifier(for: account))
+    func getInviteKey(for account: Account) throws -> AgreementPublicKey {
+        let identifier = inviteKeyIdentifier(for: account)
+
+        guard let key: AgreementPublicKey = try? keychain.read(key: identifier)
+        else { throw Errors.inviteKeyNotFound }
+
+        return key
     }
 }
 
 private extension IdentityStorage {
 
+    enum Errors: Error {
+        case identityKeyNotFound
+        case inviteKeyNotFound
+    }
+
     func identityKeyIdentifier(for account: Account) -> String {
-        return "com.walletconnect.chat.identity.\(account.absoluteString)"
+        return "com.walletconnect.identity.identity.\(account.absoluteString)"
     }
 
     func inviteKeyIdentifier(for account: Account) -> String {
-        return "com.walletconnect.chat.invite.\(account.absoluteString)"
+        return "com.walletconnect.identity.invite.\(account.absoluteString)"
     }
 }

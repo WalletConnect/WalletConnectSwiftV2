@@ -31,13 +31,13 @@ public class NetworkingInteractorMock: NetworkInteracting {
     }
 
     public let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, publishedAt: Date), Never>()
-    public let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse), Never>()
+    public let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date), Never>()
 
     public var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest, publishedAt: Date), Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
-    private var responsePublisher: AnyPublisher<(topic: String, request: RPCRequest, response: RPCResponse), Never> {
+    private var responsePublisher: AnyPublisher<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date), Never> {
         responsePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -60,12 +60,12 @@ public class NetworkingInteractorMock: NetworkInteracting {
             .filter { rpcRequest in
                 return rpcRequest.request.method == request.method
             }
-            .compactMap { topic, rpcRequest, rpcResponse in
+            .compactMap { topic, rpcRequest, rpcResponse, publishedAt  in
                 guard
                     let id = rpcRequest.id,
                     let request = try? rpcRequest.params?.get(Request.self),
                     let response = try? rpcResponse.result?.get(Response.self) else { return nil }
-                return ResponseSubscriptionPayload(id: id, topic: topic, request: request, response: response)
+                return ResponseSubscriptionPayload(id: id, topic: topic, request: request, response: response, publishedAt: publishedAt)
             }
             .eraseToAnyPublisher()
     }
@@ -74,7 +74,7 @@ public class NetworkingInteractorMock: NetworkInteracting {
     public func responseErrorSubscription<Request: Codable>(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionErrorPayload<Request>, Never> {
         return responsePublisher
             .filter { $0.request.method == request.method }
-            .compactMap { (topic, rpcRequest, rpcResponse) in
+            .compactMap { (topic, rpcRequest, rpcResponse, publishedAt) in
                 guard let id = rpcResponse.id, let request = try? rpcRequest.params?.get(Request.self), let error = rpcResponse.error else { return nil }
                 return ResponseSubscriptionErrorPayload(id: id, topic: topic, request: request, error: error)
             }

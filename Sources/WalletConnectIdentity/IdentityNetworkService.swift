@@ -2,11 +2,9 @@ import Foundation
 
 actor IdentityNetworkService: IdentityNetworking {
 
-    private let accountService: AccountService
     private let httpService: HTTPClient
 
-    init(accountService: AccountService, httpService: HTTPClient) {
-        self.accountService = accountService
+    init(httpService: HTTPClient) {
         self.httpService = httpService
     }
 

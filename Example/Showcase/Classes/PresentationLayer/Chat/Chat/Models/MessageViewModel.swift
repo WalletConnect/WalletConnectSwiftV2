@@ -5,7 +5,7 @@ struct MessageViewModel: Identifiable {
     private let message: Message
     private let thread: WalletConnectChat.Thread
 
-    var id: Int64 {
+    var id: UInt64 {
         return message.timestamp
     }
 

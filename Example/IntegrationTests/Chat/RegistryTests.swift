@@ -3,6 +3,7 @@ import WalletConnectNetworking
 import WalletConnectKMS
 import WalletConnectUtils
 @testable import WalletConnectChat
+@testable import WalletConnectIdentity
 
 final class RegistryTests: XCTestCase {
 
@@ -14,14 +15,13 @@ final class RegistryTests: XCTestCase {
     var signer: CacaoMessageSigner!
 
     override func setUp() {
-        let keyserverURL = URL(string: "https://staging.keys.walletconnect.com")!
+        let keyserverURL = URL(string: "https://keys.walletconnect.com")!
         let httpService = HTTPNetworkClient(host: keyserverURL.host!)
-        let accountService = AccountService(currentAccount: account)
-        let identityNetworkService = IdentityNetworkService(accountService: accountService, httpService: httpService)
+        let identityNetworkService = IdentityNetworkService(httpService: httpService)
         let keychain = KeychainStorageMock()
         let ksm = KeyManagementService(keychain: keychain)
         storage = IdentityStorage(keychain: keychain)
-        sut = IdentityService(
+        sut = IdentityService (
             keyserverURL: keyserverURL,
             kms: ksm,
             storage: storage,
@@ -39,12 +39,12 @@ final class RegistryTests: XCTestCase {
         let resolvedAccount = try await sut.resolveIdentity(iss: iss)
         XCTAssertEqual(resolvedAccount, account)
 
-        let recovered = storage.getIdentityKey(for: account)!.publicKey.hexRepresentation
+        let recovered = try storage.getIdentityKey(for: account).publicKey.hexRepresentation
         XCTAssertEqual(publicKey, recovered)
 
         let inviteKey = try await sut.registerInvite(account: account)
 
-        let recoveredKey = storage.getInviteKey(for: account)!
+        let recoveredKey = try storage.getInviteKey(for: account)
         XCTAssertEqual(inviteKey, recoveredKey)
 
         let resolvedKey = try await sut.resolveInvite(account: account)
