@@ -30,6 +30,15 @@ public class Web3WalletClient {
         authClient.authRequestPublisher.eraseToAnyPublisher()
     }
     
+    /// Publisher that sends authentication responses
+    ///
+    /// App should subscribe for events in order to receive CACAO object with a signature matching authentication request.
+    ///
+    /// Emited result may be an error.
+    public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Cacao, AuthError>), Never> {
+        authClient.authResponsePublisher.eraseToAnyPublisher()
+    }
+    
     /// Publisher that sends sessions on every sessions update
     ///
     /// Event will be emited on controller and non-controller clients.

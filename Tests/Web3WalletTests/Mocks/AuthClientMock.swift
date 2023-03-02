@@ -27,7 +27,14 @@ final class AuthClientMock: AuthClientProtocol {
     }
     
     var authRequestPublisher: AnyPublisher<AuthRequest, Never> {
-        return Result.Publisher(authRequest).eraseToAnyPublisher()
+        return Result.Publisher(authRequest)
+            .eraseToAnyPublisher()
+    }
+
+    var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Cacao, AuthError>), Never> {
+        let cacao = Cacao(h: CacaoHeader(t: ""), p: CacaoPayload(iss: "", domain: "", aud: "", version: "", nonce: "", iat: "", nbf: "", exp: "", statement: "", requestId: "", resources: []), s: CacaoSignature(t: .eip191, s: "", m: ""))
+        return Result.Publisher((RPCID(0), .success(cacao)))
+            .eraseToAnyPublisher()
     }
     
     func formatMessage(payload: AuthPayload, address: String) throws -> String {

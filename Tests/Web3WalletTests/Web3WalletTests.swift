@@ -54,6 +54,21 @@ final class Web3WalletTests: XCTestCase {
         }
     }
     
+    func testAuthResponseCalled() {
+        var success = false
+        web3WalletClient.authResponsePublisher.sink { value in
+            success = true
+            XCTAssertTrue(true)
+        }
+        .store(in: &disposeBag)
+        
+        let expectation = expectation(description: "Fail after 0.1s timeout")
+        let result = XCTWaiter.wait(for: [expectation], timeout: 0.1)
+        if result == XCTWaiter.Result.timedOut && success == false {
+            XCTFail()
+        }
+    }
+    
     func testSessionProposalCalled() {
         var success = false
         web3WalletClient.sessionProposalPublisher.sink { value in
