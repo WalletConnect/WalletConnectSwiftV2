@@ -124,7 +124,7 @@ final class ApproveEngineTests: XCTestCase {
         let request = RPCRequest(method: SessionSettleProtocolMethod().method, params: SessionType.SettleParams.stub())
         let response = RPCResponse(matchingRequest: request, result: RPCResult.response(AnyCodable(true)))
 
-        networkingInteractor.responsePublisherSubject.send((session.topic, request, response))
+        networkingInteractor.responsePublisherSubject.send((session.topic, request, response, Date()))
 
         XCTAssertTrue(sessionStorageMock.getSession(forTopic: session.topic)!.acknowledged, "Responder must acknowledged session")
     }
@@ -139,7 +139,7 @@ final class ApproveEngineTests: XCTestCase {
         let request = RPCRequest(method: SessionSettleProtocolMethod().method, params: SessionType.SettleParams.stub())
         let response = RPCResponse.stubError(forRequest: request)
 
-        networkingInteractor.responsePublisherSubject.send((session.topic, request, response))
+        networkingInteractor.responsePublisherSubject.send((session.topic, request, response, Date()))
 
         XCTAssertNil(sessionStorageMock.getSession(forTopic: session.topic), "Responder must remove session")
         XCTAssertTrue(networkingInteractor.didUnsubscribe(to: session.topic), "Responder must unsubscribe topic B")

@@ -5,8 +5,7 @@ class MessagingService {
 
     private let keyserverURL: URL
     private let networkingInteractor: NetworkInteracting
-    private let identityStorage: IdentityStorage
-    private let identityService: IdentityService
+    private let identityClient: IdentityClient
     private let accountService: AccountService
     private let chatStorage: ChatStorage
     private let logger: ConsoleLogging
@@ -20,16 +19,14 @@ class MessagingService {
     init(
         keyserverURL: URL,
         networkingInteractor: NetworkInteracting,
-        identityStorage: IdentityStorage,
-        identityService: IdentityService,
+        identityClient: IdentityClient,
         accountService: AccountService,
         chatStorage: ChatStorage,
         logger: ConsoleLogging
     ) {
         self.keyserverURL = keyserverURL
         self.networkingInteractor = networkingInteractor
-        self.identityStorage = identityStorage
-        self.identityService = identityService
+        self.identityClient = identityClient
         self.accountService = accountService
         self.chatStorage = chatStorage
         self.logger = logger
@@ -41,10 +38,13 @@ class MessagingService {
         guard let thread = chatStorage.getThread(topic: topic, account: currentAccount) else {
             throw Errors.threadDoNotExist
         }
-        let jwt = try makeMessageJWT(recipientAccount: thread.peerAccount, message: messageString)
-        let payload = MessagePayload(messageAuth: jwt)
+        let payload = MessagePayload(keyserver: keyserverURL, message: messageString, recipientAccount: thread.peerAccount)
+        let wrapper = try identityClient.signAndCreateWrapper(
+            payload: payload,
+            account: accountService.currentAccount
+        )
         let protocolMethod = ChatMessageProtocolMethod()
-        let request = RPCRequest(method: protocolMethod.method, params: payload)
+        let request = RPCRequest(method: protocolMethod.method, params: wrapper)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
 
         logger.debug("Message sent on topic: \(topic)")
@@ -55,61 +55,67 @@ private extension MessagingService {
 
     enum Errors: Error {
         case threadDoNotExist
-        case identityKeyNotFound
     }
 
     func setUpResponseHandling() {
         networkingInteractor.responseSubscription(on: ChatMessageProtocolMethod())
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<MessagePayload, ReceiptPayload>) in
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<MessagePayload.Wrapper, ReceiptPayload.Wrapper>) in
 
                 logger.debug("Received Receipt response")
 
                 guard
-                    let messagePayload = try? payload.request.decode(),
-                    let receiptPayload = try? payload.response.decode()
+                    let (message, _) = try? MessagePayload.decode(from: payload.request),
+                    let (receipt, _) = try? ReceiptPayload.decode(from: payload.response)
                 else { fatalError() /* TODO: Handle error */ }
 
-                let message = Message(
+                let newMessage = Message(
                     topic: payload.topic,
-                    message: messagePayload.message,
-                    authorAccount: receiptPayload.senderAccount,
-                    timestamp: messagePayload.timestamp
+                    message: message.message,
+                    authorAccount: receipt.senderAccount,
+                    timestamp: payload.publishedAt.millisecondsSince1970
                 )
 
-                chatStorage.set(message: message, account: receiptPayload.senderAccount)
+                chatStorage.set(message: newMessage, account: receipt.senderAccount)
             }.store(in: &publishers)
     }
 
     func setUpRequestHandling() {
         networkingInteractor.requestSubscription(on: ChatMessageProtocolMethod())
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<MessagePayload>) in
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<MessagePayload.Wrapper>) in
 
                 logger.debug("Received Message Request")
 
-                guard let decoded = try? payload.request.decode()
+                guard let (message, messageClaims) = try? MessagePayload.decode(from: payload.request)
                 else { fatalError() /* TODO: Handle error */ }
 
                 Task(priority: .high) {
 
-                    let authorAccount = try await identityService.resolveIdentity(iss: decoded.iss)
+                    let authorAccount = try await identityClient.resolveIdentity(iss: messageClaims.iss)
 
-                    let message = Message(
+                    let newMessage = Message(
                         topic: payload.topic,
-                        message: decoded.message,
+                        message: message.message,
                         authorAccount: authorAccount,
-                        timestamp: decoded.timestamp
+                        timestamp: payload.publishedAt.millisecondsSince1970
                     )
 
-                    chatStorage.set(message: message, account: decoded.recipientAccount)
+                    chatStorage.set(message: newMessage, account: message.recipientAccount)
 
                     let messageHash = message.message
                         .data(using: .utf8)!
                         .sha256()
                         .toHexString()
 
-                    let jwt = try makeReceiptJWT(senderAccount: authorAccount, messageHash: messageHash)
-                    let params = ReceiptPayload(receiptAuth: jwt)
-                    let response = RPCResponse(id: payload.id, result: params)
+                    let receiptPayload = ReceiptPayload(
+                        keyserver: keyserverURL,
+                        messageHash: messageHash,
+                        senderAccount: authorAccount
+                    )
+                    let wrapper = try identityClient.signAndCreateWrapper(
+                        payload: receiptPayload,
+                        account: accountService.currentAccount
+                    )
+                    let response = RPCResponse(id: payload.id, result: wrapper)
 
                     try await networkingInteractor.respond(
                         topic: payload.topic,
@@ -120,27 +126,5 @@ private extension MessagingService {
                     logger.debug("Sent Receipt Response")
                 }
             }.store(in: &publishers)
-    }
-
-    func makeMessageJWT(recipientAccount: Account, message: String) throws -> String {
-        guard let identityKey = identityStorage.getIdentityKey(for: accountService.currentAccount)
-        else { throw Errors.identityKeyNotFound }
-
-        return try JWTFactory(keyPair: identityKey).createChatMessageJWT(
-            ksu: keyserverURL.absoluteString,
-            aud: DIDPKH(account: recipientAccount).string,
-            sub: message
-        )
-    }
-
-    func makeReceiptJWT(senderAccount: Account, messageHash: String) throws -> String {
-        guard let identityKey = identityStorage.getIdentityKey(for: accountService.currentAccount)
-        else { throw Errors.identityKeyNotFound }
-
-        return try JWTFactory(keyPair: identityKey).createChatMessageJWT(
-            ksu: keyserverURL.absoluteString,
-            aud: DIDPKH(account: senderAccount).string,
-            sub: messageHash
-        )
     }
 }

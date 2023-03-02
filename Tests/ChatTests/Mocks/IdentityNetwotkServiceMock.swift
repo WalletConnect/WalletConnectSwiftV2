@@ -1,5 +1,6 @@
 import Foundation
 @testable import WalletConnectChat
+@testable import WalletConnectIdentity
 
 final class IdentityNetwotkServiceMock: IdentityNetworking {
 

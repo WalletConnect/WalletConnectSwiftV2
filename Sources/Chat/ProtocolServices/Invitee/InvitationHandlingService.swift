@@ -5,8 +5,7 @@ class InvitationHandlingService {
 
     private let keyserverURL: URL
     private let networkingInteractor: NetworkInteracting
-    private let identityStorage: IdentityStorage
-    private let identityService: IdentityService
+    private let identityClient: IdentityClient
     private let chatStorage: ChatStorage
     private let accountService: AccountService
     private let logger: ConsoleLogging
@@ -20,8 +19,7 @@ class InvitationHandlingService {
     init(
         keyserverURL: URL,
         networkingInteractor: NetworkInteracting,
-        identityStorage: IdentityStorage,
-        identityService: IdentityService,
+        identityClient: IdentityClient,
         accountService: AccountService,
         kms: KeyManagementService,
         logger: ConsoleLogging,
@@ -30,8 +28,7 @@ class InvitationHandlingService {
         self.keyserverURL = keyserverURL
         self.kms = kms
         self.networkingInteractor = networkingInteractor
-        self.identityService = identityService
-        self.identityStorage = identityStorage
+        self.identityClient = identityClient
         self.accountService = accountService
         self.logger = logger
         self.chatStorage = chatStorage
@@ -42,24 +39,31 @@ class InvitationHandlingService {
         guard let invite = chatStorage.getReceivedInvite(id: inviteId, account: currentAccount)
         else { throw Errors.inviteForIdNotFound }
 
-        guard let inviteePublicKey = identityStorage.getInviteKey(for: currentAccount)
-        else { throw Errors.inviteKeyNotFound }
+        let inviteePublicKey = try identityClient.getInviteKey(for: currentAccount)
+        let inviterPublicKey = try DIDKey(did: invite.inviterPublicKey).hexString
 
-        let symmetricKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: invite.inviterPublicKey)
+        let symmetricKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: inviterPublicKey)
         let acceptTopic = symmetricKey.derivedTopic()
         try kms.setSymmetricKey(symmetricKey.sharedKey, for: acceptTopic)
 
         let publicKey = try kms.createX25519KeyPair()
-        let jwt = try makeAcceptJWT(publicKey: publicKey.rawRepresentation, inviter: invite.inviterAccount)
-        let payload = AcceptPayload(responseAuth: jwt)
-        
+
+        let payload = AcceptPayload(
+            keyserver: keyserverURL,
+            inviterAccount: invite.inviterAccount,
+            inviteePublicKey: DIDKey(rawData: publicKey.rawRepresentation)
+        )
+        let wrapper = try identityClient.signAndCreateWrapper(
+            payload: payload,
+            account: currentAccount
+        )
         try await networkingInteractor.respond(
             topic: acceptTopic,
-            response: RPCResponse(id: inviteId, result: payload),
+            response: RPCResponse(id: inviteId, result: wrapper),
             protocolMethod: ChatInviteProtocolMethod()
         )
 
-        let threadSymmetricKey = try kms.performKeyAgreement(selfPublicKey: publicKey, peerPublicKey: invite.inviterPublicKey)
+        let threadSymmetricKey = try kms.performKeyAgreement(selfPublicKey: publicKey, peerPublicKey: inviterPublicKey)
         let threadTopic = threadSymmetricKey.derivedTopic()
         try kms.setSymmetricKey(threadSymmetricKey.sharedKey, for: threadTopic)
         try await networkingInteractor.subscribe(topic: threadTopic)
@@ -82,12 +86,12 @@ class InvitationHandlingService {
         guard let invite = chatStorage.getReceivedInvite(id: inviteId, account: currentAccount)
         else { throw Errors.inviteForIdNotFound }
 
-        guard let inviteePublicKey = identityStorage.getInviteKey(for: currentAccount)
-        else { throw Errors.inviteKeyNotFound }
+        let inviteePublicKey = try identityClient.getInviteKey(for: currentAccount)
+        let inviterPublicKey = try DIDKey(did: invite.inviterPublicKey)
+        let symmAgreementKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: inviterPublicKey.hexString)
 
-        let symmetricKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: invite.inviterPublicKey)
-        let rejectTopic = symmetricKey.derivedTopic()
-        try kms.setSymmetricKey(symmetricKey.sharedKey, for: rejectTopic)
+        let rejectTopic = symmAgreementKey.derivedTopic()
+        try kms.setSymmetricKey(symmAgreementKey.sharedKey, for: rejectTopic)
 
         try await networkingInteractor.respondError(
             topic: rejectTopic,
@@ -104,46 +108,33 @@ private extension InvitationHandlingService {
 
     enum Errors: Error {
         case inviteForIdNotFound
-        case identityKeyNotFound
-        case inviteKeyNotFound
     }
 
     func setUpRequestHandling() {
         networkingInteractor.requestSubscription(on: ChatInviteProtocolMethod())
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<InvitePayload>) in
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<InvitePayload.Wrapper>) in
                 logger.debug("Did receive an invite")
 
-                guard let decoded = try? payload.request.decode()
+                guard let (invite, claims) = try? InvitePayload.decode(from: payload.request)
                 else { fatalError() /* TODO: Handle error */ }
 
                 Task(priority: .high) {
-                    let inviteeAccount = decoded.account
-                    let inviterAccount = try await identityService.resolveIdentity(iss: decoded.iss)
+                    let inviterAccount = try await identityClient.resolveIdentity(iss: claims.iss)
                     // TODO: Should we cache it?
-                    let inviteePublicKey = try await identityService.resolveInvite(account: inviterAccount)
+                    let inviteePublicKey = try await identityClient.resolveInvite(account: inviterAccount)
+                    let inviterPublicKey = invite.inviterPublicKey.did(prefix: false, variant: .X25519)
 
                     let invite = ReceivedInvite(
                         id: payload.id.integer,
-                        message: decoded.message,
+                        message: invite.message,
                         inviterAccount: inviterAccount,
-                        inviteeAccount: inviteeAccount,
-                        inviterPublicKey: decoded.publicKey,
+                        inviteeAccount: invite.inviteeAccount,
+                        inviterPublicKey: inviterPublicKey,
                         inviteePublicKey: inviteePublicKey,
-                        timestamp: decoded.iat // TODO: Replace with relay message receivedAt
+                        timestamp: payload.publishedAt.millisecondsSince1970
                     )
-                    chatStorage.set(receivedInvite: invite, account: inviteeAccount)
+                    chatStorage.set(receivedInvite: invite, account: invite.inviteeAccount)
                 }
             }.store(in: &publishers)
-    }
-
-    func makeAcceptJWT(publicKey: Data, inviter: Account) throws -> String {
-        guard let identityKey = identityStorage.getIdentityKey(for: accountService.currentAccount)
-        else { throw Errors.identityKeyNotFound }
-
-        return try JWTFactory(keyPair: identityKey).createChatInviteApprovalJWT(
-            ksu: keyserverURL.absoluteString,
-            aud: inviter.did,
-            sub: DIDKey(rawData: publicKey).did(prefix: true, variant: .X25519)
-        )
     }
 }
