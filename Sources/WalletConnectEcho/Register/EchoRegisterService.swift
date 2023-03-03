@@ -8,6 +8,7 @@ actor EchoRegisterService {
     private let clientId: String
     private let logger: ConsoleLogging
     private let environment: APNSEnvironment
+    private let echoAuthenticator: EchoAuthenticator
     // DID method specific identifier
     private var clientIdMutlibase: String {
         return clientId.replacingOccurrences(of: "did:key:", with: "")
@@ -20,10 +21,12 @@ actor EchoRegisterService {
     init(httpClient: HTTPClient,
          projectId: String,
          clientId: String,
+         echoAuthenticator: EchoAuthenticator,
          logger: ConsoleLogging,
          environment: APNSEnvironment) {
         self.httpClient = httpClient
         self.clientId = clientId
+        self.echoAuthenticator = echoAuthenticator
         self.projectId = projectId
         self.logger = logger
         self.environment = environment
@@ -32,6 +35,7 @@ actor EchoRegisterService {
     func register(deviceToken: Data) async throws {
         let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
         let token = tokenParts.joined()
+        let echoAuthToken = try echoAuthenticator.createAuthToken()
         logger.debug("APNS device token: \(token)")
         let response = try await httpClient.request(
             EchoResponse.self,
@@ -45,6 +49,7 @@ actor EchoRegisterService {
 
 #if DEBUG
     public func register(deviceToken: String) async throws {
+        let echoAuthToken = try echoAuthenticator.createAuthToken()
         let response = try await httpClient.request(
             EchoResponse.self,
             at: EchoAPI.register(clientId: clientIdMutlibase, token: deviceToken, projectId: projectId, environment: environment)
