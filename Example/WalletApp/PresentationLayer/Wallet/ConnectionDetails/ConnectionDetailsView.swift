@@ -34,6 +34,7 @@ struct ConnectionDetailsView: View {
                             .foregroundColor(.grey50)
                             .font(.system(size: 13, weight: .medium, design: .rounded))
                     }
+                    .padding(.horizontal, 15)
                     
                     ForEach(presenter.session.namespaces.keys.sorted(), id: \.self) { namespace in
                         VStack {

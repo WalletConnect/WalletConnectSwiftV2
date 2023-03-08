@@ -3,12 +3,16 @@ import Web3Wallet
 
 final class SessionRequestInteractor {
     func approve(sessionRequest: Request) async throws {
-        let result = Signer.sign(request: sessionRequest)
-        try await Web3Wallet.instance.respond(
-            topic: sessionRequest.topic,
-            requestId: sessionRequest.id,
-            response: .response(result)
-        )
+        do {
+            let result = try Signer.sign(request: sessionRequest)
+            try await Web3Wallet.instance.respond(
+                topic: sessionRequest.topic,
+                requestId: sessionRequest.id,
+                response: .response(result)
+            )
+        } catch {
+            throw error
+        }
     }
 
     func reject(sessionRequest: Request) async throws {

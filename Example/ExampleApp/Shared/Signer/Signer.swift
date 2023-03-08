@@ -2,11 +2,14 @@ import Foundation
 import Commons
 import WalletConnectSign
 
-class Signer {
-
+final class Signer {
+    enum Errors: Error {
+        case notImplemented
+    }
+    
     private init() {}
 
-    static func sign(request: Request) -> AnyCodable {
+    static func sign(request: Request) throws -> AnyCodable {
         switch request.method {
         case "personal_sign":
             return ETHSigner.personalSign(request.params)
@@ -19,8 +22,17 @@ class Signer {
 
         case "solana_signTransaction":
             return SOLSigner.signTransaction(request.params)
+            
         default:
-            fatalError("not implemented")
+            throw Signer.Errors.notImplemented
+        }
+    }
+}
+
+extension Signer.Errors: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .notImplemented:   return "Requested method is not implemented"
         }
     }
 }

@@ -236,7 +236,6 @@
 		C55D3497295DFA750004314A /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D3492295DFA750004314A /* WelcomeView.swift */; };
 		C55D349929630D440004314A /* Web3Wallet in Frameworks */ = {isa = PBXBuildFile; productRef = C55D349829630D440004314A /* Web3Wallet */; };
 		C55D349B2965BC2F0004314A /* TagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D349A2965BC2F0004314A /* TagsView.swift */; };
-		C55D349D2965F8D40004314A /* Proposal.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D349C2965F8D30004314A /* Proposal.swift */; };
 		C55D34AE2965FB750004314A /* SessionProposalModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D34A92965FB750004314A /* SessionProposalModule.swift */; };
 		C55D34AF2965FB750004314A /* SessionProposalPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D34AA2965FB750004314A /* SessionProposalPresenter.swift */; };
 		C55D34B02965FB750004314A /* SessionProposalRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D34AB2965FB750004314A /* SessionProposalRouter.swift */; };
@@ -566,7 +565,6 @@
 		C55D3491295DFA750004314A /* WelcomeInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeInteractor.swift; sourceTree = "<group>"; };
 		C55D3492295DFA750004314A /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		C55D349A2965BC2F0004314A /* TagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsView.swift; sourceTree = "<group>"; };
-		C55D349C2965F8D30004314A /* Proposal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Proposal.swift; sourceTree = "<group>"; };
 		C55D34A92965FB750004314A /* SessionProposalModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionProposalModule.swift; sourceTree = "<group>"; };
 		C55D34AA2965FB750004314A /* SessionProposalPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionProposalPresenter.swift; sourceTree = "<group>"; };
 		C55D34AB2965FB750004314A /* SessionProposalRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionProposalRouter.swift; sourceTree = "<group>"; };
@@ -1532,7 +1530,6 @@
 		C55D349E2965FAC30004314A /* SessionProposal */ = {
 			isa = PBXGroup;
 			children = (
-				C55D34B32965FF750004314A /* Models */,
 				C55D34A92965FB750004314A /* SessionProposalModule.swift */,
 				C55D34AA2965FB750004314A /* SessionProposalPresenter.swift */,
 				C55D34AB2965FB750004314A /* SessionProposalRouter.swift */,
@@ -1540,14 +1537,6 @@
 				C55D34AD2965FB750004314A /* SessionProposalView.swift */,
 			);
 			path = SessionProposal;
-			sourceTree = "<group>";
-		};
-		C55D34B32965FF750004314A /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				C55D349C2965F8D30004314A /* Proposal.swift */,
-			);
-			path = Models;
 			sourceTree = "<group>";
 		};
 		C56EE21C293F55ED004840D1 /* WalletApp */ = {
@@ -2347,7 +2336,6 @@
 				C5F32A322954816C00A6476E /* ConnectionDetailsPresenter.swift in Sources */,
 				84B815562991217900FAD54E /* PushMessagesRouter.swift in Sources */,
 				C56EE246293F566D004840D1 /* ScanRouter.swift in Sources */,
-				C55D349D2965F8D40004314A /* Proposal.swift in Sources */,
 				C55D3481295DD7140004314A /* AuthRequestRouter.swift in Sources */,
 				C5B2F6F829705293000DBA0E /* SessionRequestView.swift in Sources */,
 				C56EE28C293F5757004840D1 /* Configurator.swift in Sources */,

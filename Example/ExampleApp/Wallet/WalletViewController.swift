@@ -82,9 +82,13 @@ final class WalletViewController: UIViewController {
     private func showSessionRequest(_ request: Request) {
         let requestVC = RequestViewController(request)
         requestVC.onSign = { [unowned self] in
-            let result = Signer.sign(request: request)
-            respondOnSign(request: request, response: result)
-            reloadSessionDetailsIfNeeded()
+            do {
+                let result = try Signer.sign(request: request)
+                respondOnSign(request: request, response: result)
+                reloadSessionDetailsIfNeeded()
+            } catch {
+                fatalError(error.localizedDescription)
+            }
         }
         requestVC.onReject = { [unowned self] in
             respondOnReject(request: request)

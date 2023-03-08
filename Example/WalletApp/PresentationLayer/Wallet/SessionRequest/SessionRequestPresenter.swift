@@ -7,6 +7,9 @@ final class SessionRequestPresenter: ObservableObject {
     private let interactor: SessionRequestInteractor
     private let router: SessionRequestRouter
     
+    @Published var showError = false
+    @Published var errorMessage = "Error"
+    
     let sessionRequest: Request
     
     var message: String {
@@ -28,8 +31,13 @@ final class SessionRequestPresenter: ObservableObject {
 
     @MainActor
     func onApprove() async throws {
-        try await interactor.approve(sessionRequest: sessionRequest)
-        router.dismiss()
+        do {
+            try await interactor.approve(sessionRequest: sessionRequest)
+            router.dismiss()
+        } catch {
+            errorMessage = error.localizedDescription
+            showError.toggle()
+        }
     }
 
     @MainActor
