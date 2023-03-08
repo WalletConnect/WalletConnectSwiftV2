@@ -8,7 +8,7 @@ actor EchoRegisterService {
     private let clientId: String
     private let logger: ConsoleLogging
     private let environment: APNSEnvironment
-    private let echoAuthenticator: EchoAuthenticator
+    private let echoAuthenticator: IrnClientAuthenticator
     // DID method specific identifier
     private var clientIdMutlibase: String {
         return clientId.replacingOccurrences(of: "did:key:", with: "")
@@ -21,7 +21,7 @@ actor EchoRegisterService {
     init(httpClient: HTTPClient,
          projectId: String,
          clientId: String,
-         echoAuthenticator: EchoAuthenticator,
+         echoAuthenticator: IrnClientAuthenticator,
          logger: ConsoleLogging,
          environment: APNSEnvironment) {
         self.httpClient = httpClient
@@ -39,7 +39,7 @@ actor EchoRegisterService {
         logger.debug("APNS device token: \(token)")
         let response = try await httpClient.request(
             EchoResponse.self,
-            at: EchoAPI.register(clientId: clientIdMutlibase, token: token, projectId: projectId, environment: environment)
+            at: EchoAPI.register(clientId: clientIdMutlibase, token: token, projectId: projectId, environment: environment, auth: echoAuthToken)
         )
         guard response.status == .success else {
             throw Errors.registrationFailed
@@ -52,7 +52,7 @@ actor EchoRegisterService {
         let echoAuthToken = try echoAuthenticator.createAuthToken()
         let response = try await httpClient.request(
             EchoResponse.self,
-            at: EchoAPI.register(clientId: clientIdMutlibase, token: deviceToken, projectId: projectId, environment: environment)
+            at: EchoAPI.register(clientId: clientIdMutlibase, token: deviceToken, projectId: projectId, environment: environment, auth: echoAuthToken)
         )
         guard response.status == .success else {
             throw Errors.registrationFailed

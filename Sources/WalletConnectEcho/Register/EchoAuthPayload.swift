@@ -3,16 +3,16 @@ import WalletConnectJWT
 
 struct EchoAuthPayload: JWTClaimsCodable {
 
-    struct Wrapper: JWTWrapper {
-        let jwtString: String
-    }
-
-    struct Claims: JWTEncodable {
+    struct Claims: JWTClaims {
         let iss: String
         let sub: String
         let aud: String
-        let iat: Int64
-        let exp: Int64
+        let iat: UInt64
+        let exp: UInt64
+    }
+
+    struct Wrapper: JWTWrapper {
+        let jwtString: String
     }
 
     let subject: String
@@ -33,7 +33,7 @@ struct EchoAuthPayload: JWTClaimsCodable {
             iss: iss,
             sub: subject,
             aud: audience,
-            iat: defaultIat(),
+            iat: defaultIatMilliseconds(),
             exp: expiry(days: 1)
         )
     }
