@@ -18,7 +18,7 @@ struct SessionProposalView: View {
                         .resizable()
                         .scaledToFit()
                     
-                    Text(presenter.proposal.proposerName)
+                    Text(presenter.sessionProposal.proposer.name)
                         .foregroundColor(.grey8)
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .padding(.top, 10)
@@ -27,7 +27,7 @@ struct SessionProposalView: View {
                         .foregroundColor(.grey8)
                         .font(.system(size: 22, weight: .medium, design: .rounded))
                     
-                    Text(presenter.proposal.proposerName)
+                    Text(presenter.sessionProposal.proposer.name)
                         .foregroundColor(.grey50)
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .multilineTextAlignment(.center)
