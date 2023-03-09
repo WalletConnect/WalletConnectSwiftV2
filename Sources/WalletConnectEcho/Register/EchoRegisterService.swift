@@ -8,7 +8,7 @@ actor EchoRegisterService {
     private let clientId: String
     private let logger: ConsoleLogging
     private let environment: APNSEnvironment
-    private let echoAuthenticator: EchoAuthenticator
+    private let echoAuthenticator: EchoAuthenticating
     // DID method specific identifier
     private var clientIdMutlibase: String {
         return clientId.replacingOccurrences(of: "did:key:", with: "")
@@ -21,7 +21,7 @@ actor EchoRegisterService {
     init(httpClient: HTTPClient,
          projectId: String,
          clientId: String,
-         echoAuthenticator: EchoAuthenticator,
+         echoAuthenticator: EchoAuthenticating,
          logger: ConsoleLogging,
          environment: APNSEnvironment) {
         self.httpClient = httpClient

@@ -1,7 +1,11 @@
 import Foundation
 import WalletConnectNetworking
 
-class EchoAuthenticator {
+protocol EchoAuthenticating {
+    func createAuthToken() throws -> String
+}
+
+class EchoAuthenticator: EchoAuthenticating {
     private let clientIdStorage: ClientIdStoring
     private let echoHost: String
 

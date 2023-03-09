@@ -5,10 +5,11 @@ public struct EchoClientFactory {
     public static func create(projectId: String,
                               clientId: String,
                               echoHost: String,
-                              keychainStorage: KeychainStorageProtocol = KeychainStorage(serviceIdentifier: RelayStorageIndentifiers.keychain),
                               environment: APNSEnvironment) -> EchoClient {
 
         let httpClient = HTTPNetworkClient(host: echoHost)
+
+        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
 
         let clientIdStorage = ClientIdStorage(keychain: keychainStorage)
 
@@ -25,7 +26,7 @@ public struct EchoClientFactory {
     static func create(projectId: String,
                        clientId: String,
                        httpClient: HTTPClient,
-                       echoAuthenticator: EchoAuthenticator,
+                       echoAuthenticator: EchoAuthenticating,
                        environment: APNSEnvironment) -> EchoClient {
 
         let logger = ConsoleLogger(loggingLevel: .debug)
