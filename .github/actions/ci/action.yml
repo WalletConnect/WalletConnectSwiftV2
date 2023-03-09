@@ -1,9 +1,6 @@
 name: 'ci'
 description: 'Executes Swift specific CI steps'
 inputs:
-  type:
-    description: 'The type of CI step to run'
-    required: true
   relay-endpoint:
     description: 'The endpoint of the relay e.g. relay.walletconnect.com'
     required: false
@@ -17,13 +14,11 @@ runs:
   steps:
     # Package builds
     - name: Run tests
-      if: inputs.type == 'unit-tests'
       shell: bash
       run: make unit_tests
 
     # Integration tests
     - name: Run integration tests
-      if: inputs.type == 'integration-tests'
       shell: bash
       env:
         RELAY_ENDPOINT: ${{ inputs.relay-endpoint }}
@@ -32,19 +27,10 @@ runs:
 
     # Wallet build
     - name: Build Example Wallet
-      if: inputs.type == 'build-example-wallet'
       shell: bash
       run: make build_wallet
 
     # DApp build
     - name: Build Example Dapp
-      if: inputs.type == 'build-example-dapp'
       shell: bash
       run: make build_dapp
-
-    # UI tests
-    - name: UI Tests
-      if: inputs.type == 'ui-tests'
-      shell: bash
-      run: make ui_tests
-      continue-on-error: true
