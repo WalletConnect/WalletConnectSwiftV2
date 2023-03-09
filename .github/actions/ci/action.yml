@@ -15,7 +15,6 @@ runs:
 
     # Integration tests
     - name: Run integration tests
-      if: inputs.type == 'integration-tests'
       shell: bash
       env:
         RELAY_ENDPOINT: ${{ inputs.relay-endpoint }}
