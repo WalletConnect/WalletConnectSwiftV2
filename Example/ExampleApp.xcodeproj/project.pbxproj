@@ -947,6 +947,15 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		84CB43D429B9FC88004DDA31 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				A5E03E1028646F8000888481 /* KeychainStorageMock.swift */,
+				A518B31328E33A6500A2CE93 /* InputConfig.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
 		84CE641D27981DED00142511 /* DApp */ = {
 			isa = PBXGroup;
 			children = (
@@ -1367,6 +1376,7 @@
 		A5A8E479293A1C4400FEB97D /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				84CB43D429B9FC88004DDA31 /* Tests */,
 				A5629AEF2877F73000094373 /* DefaultSocketFactory.swift */,
 				A59CF4F5292F83D50031A42F /* DefaultSignerFactory.swift */,
 			);
@@ -1483,8 +1493,6 @@
 		A5E03E0A28646A8A00888481 /* Stubs */ = {
 			isa = PBXGroup;
 			children = (
-				A518B31328E33A6500A2CE93 /* InputConfig.swift */,
-				A5E03E1028646F8000888481 /* KeychainStorageMock.swift */,
 				A5E03DFC286465D100888481 /* Stubs.swift */,
 				84FE684528ACDB4700C893FF /* RequestParams.swift */,
 				845B8D8B2934B36C0084A966 /* Account.swift */,
