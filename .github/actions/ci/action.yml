@@ -10,7 +10,6 @@ inputs:
     required: true
 
 runs:
-  using: "composite"
   steps:
     # Package builds
     - name: Run tests
