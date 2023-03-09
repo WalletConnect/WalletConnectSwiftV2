@@ -9,9 +9,6 @@ on:
 jobs:
   build:    
     runs-on: macos-12
-    strategy:
-      matrix:
-        test-type: [unit-tests, integration-tests, build-example-wallet, build-example-dapp]
 
     steps:
     - uses: actions/checkout@v2
@@ -35,6 +32,20 @@ jobs:
       shell: bash
       run: make resolve_packages
 
-    - uses: ./.github/actions/ci
-      with:
-        project-id: ${{ secrets.PROJECT_ID }}
+    - name: Run tests
+      shell: bash
+      run: make unit_tests
+
+    - name: Run integration tests
+      shell: bash
+      env:
+        PROJECT_ID: ${{ secrets.PROJECT_ID }}
+      run: make integration_tests RELAY_HOST=$RELAY_ENDPOINT PROJECT_ID=$PROJECT_ID
+
+    - name: Build Example Wallet
+      shell: bash
+      run: make build_wallet
+
+    - name: Build Example Dapp
+      shell: bash
+      run: make build_dapp
