@@ -27,4 +27,9 @@ struct RPCService: HTTPService {
             "projectId": projectId
         ]
     }
+
+    var headerFields: [String : String]? {
+        return nil
+    }
+
 }

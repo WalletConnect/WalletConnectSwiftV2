@@ -12,7 +12,7 @@ public struct EchoClientFactory {
 
         let clientIdStorage = ClientIdStorage(keychain: keychainStorage)
 
-        let echoAuthenticator = IrnClientAuthenticator(clientIdStorage: clientIdStorage, echoHost: echoHost)
+        let echoAuthenticator = EchoAuthenticator(clientIdStorage: clientIdStorage, echoHost: echoHost)
 
         return EchoClientFactory.create(
             projectId: projectId,
@@ -25,7 +25,7 @@ public struct EchoClientFactory {
     static func create(projectId: String,
                        clientId: String,
                        httpClient: HTTPClient,
-                       echoAuthenticator: IrnClientAuthenticator,
+                       echoAuthenticator: EchoAuthenticator,
                        environment: APNSEnvironment) -> EchoClient {
 
         let logger = ConsoleLogger(loggingLevel: .debug)
