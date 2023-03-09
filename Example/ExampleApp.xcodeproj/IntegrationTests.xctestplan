@@ -2,7 +2,7 @@
   "configurations" : [
     {
       "id" : "BAABD63B-F7E2-4928-AD6F-325C999C17BB",
-      "name" : "Smoke Tests",
+      "name" : "SmokeTests",
       "options" : {
 
       }
