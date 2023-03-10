@@ -34,6 +34,9 @@ integration_tests:
 smoke_tests:
 	fastlane tests scheme:IntegrationTests testplan:SmokeTests relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID)
 
+relay_tests:
+	fastlane tests scheme:RelayIntegrationTests relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID)
+
 resolve_packages: 
 	fastlane resolve scheme:WalletApp
 

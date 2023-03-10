@@ -214,7 +214,6 @@
 		A5E03DFF2864662500888481 /* WalletConnect in Frameworks */ = {isa = PBXBuildFile; productRef = A5E03DFE2864662500888481 /* WalletConnect */; };
 		A5E03E01286466EA00888481 /* WalletConnectChat in Frameworks */ = {isa = PBXBuildFile; productRef = A5E03E00286466EA00888481 /* WalletConnectChat */; };
 		A5E03E03286466F400888481 /* ChatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E03E02286466F400888481 /* ChatTests.swift */; };
-		A5E03E0D28646AD200888481 /* RelayClientEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E03E0C28646AD200888481 /* RelayClientEndToEndTests.swift */; };
 		A5E03E1128646F8000888481 /* KeychainStorageMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E03E1028646F8000888481 /* KeychainStorageMock.swift */; };
 		A5E22D1A2840C62A00E36487 /* Engine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D192840C62A00E36487 /* Engine.swift */; };
 		A5E22D1C2840C85D00E36487 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D1B2840C85D00E36487 /* App.swift */; };
@@ -549,7 +548,6 @@
 		A5E03DF9286465C700888481 /* SignClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignClientTests.swift; sourceTree = "<group>"; };
 		A5E03DFC286465D100888481 /* Stubs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stubs.swift; sourceTree = "<group>"; };
 		A5E03E02286466F400888481 /* ChatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatTests.swift; sourceTree = "<group>"; };
-		A5E03E0C28646AD200888481 /* RelayClientEndToEndTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelayClientEndToEndTests.swift; sourceTree = "<group>"; };
 		A5E03E1028646F8000888481 /* KeychainStorageMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeychainStorageMock.swift; sourceTree = "<group>"; };
 		A5E22D192840C62A00E36487 /* Engine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Engine.swift; sourceTree = "<group>"; };
 		A5E22D1B2840C85D00E36487 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
@@ -1467,7 +1465,6 @@
 			children = (
 				849D7A91292E2115006A2BD4 /* Push */,
 				84CEC64728D8A98900D081A8 /* Pairing */,
-				A5E03E0B28646AA500888481 /* Relay */,
 				A5E03E0A28646A8A00888481 /* Stubs */,
 				A5E03E0928646A8100888481 /* Sign */,
 				A5E03E0828646A7B00888481 /* Chat */,
@@ -1503,14 +1500,6 @@
 				8439CB88293F658E00F2F2E2 /* PushMessage.swift */,
 			);
 			path = Stubs;
-			sourceTree = "<group>";
-		};
-		A5E03E0B28646AA500888481 /* Relay */ = {
-			isa = PBXGroup;
-			children = (
-				A5E03E0C28646AD200888481 /* RelayClientEndToEndTests.swift */,
-			);
-			path = Relay;
 			sourceTree = "<group>";
 		};
 		A5E22D252840D08B00E36487 /* Regression */ = {
@@ -2334,7 +2323,6 @@
 				7694A5262874296A0001257E /* RegistryTests.swift in Sources */,
 				A541959F2934BFEF0035AD19 /* SignerTests.swift in Sources */,
 				A50C036528AAD32200FE72D3 /* ClientDelegate.swift in Sources */,
-				A5E03E0D28646AD200888481 /* RelayClientEndToEndTests.swift in Sources */,
 				A5E03DFA286465C700888481 /* SignClientTests.swift in Sources */,
 				A54195A02934BFEF0035AD19 /* EIP1271VerifierTests.swift in Sources */,
 				A54195A12934BFEF0035AD19 /* EIP191VerifierTests.swift in Sources */,
