@@ -345,6 +345,16 @@ public final class SignClient: SignClientProtocol {
             return historyService.getPendingRequests()
         }
     }
+    
+    /// Query pending proposals
+    /// - Returns: Pending proposals received from peer with `wc_sessionPropose` protocol method
+    public func getPendingProposals(topic: String? = nil) -> [Session.Proposal] {
+        if let topic = topic {
+            return historyService.getPendingProposals(topic: topic)
+        } else {
+            return historyService.getPendingProposals()
+        }
+    }
 
     /// - Parameter id: id of a wc_sessionRequest jsonrpc request
     /// - Returns: json rpc record object for given id or nil if record for give id does not exits

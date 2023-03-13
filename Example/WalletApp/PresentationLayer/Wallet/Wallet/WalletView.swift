@@ -70,6 +70,9 @@ struct WalletView: View {
             }
             .padding(.vertical, 20)
         }
+        .onAppear {
+            presenter.onAppear()
+        }
     }
     
     private func connectionView(session: Session) -> some View {

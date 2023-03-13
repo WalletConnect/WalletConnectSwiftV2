@@ -27,4 +27,8 @@ final class WalletInteractor {
     func disconnectSession(session: Session) async throws {
         try await Web3Wallet.instance.disconnect(topic: session.topic)
     }
+    
+    func getPendingProposals() -> [Session.Proposal] {
+        Web3Wallet.instance.getPendingProposals()
+    }
 }

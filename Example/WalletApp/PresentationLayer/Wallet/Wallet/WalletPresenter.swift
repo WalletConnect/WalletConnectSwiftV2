@@ -26,6 +26,13 @@ final class WalletPresenter: ObservableObject {
         self.uri = uri
     }
     
+    func onAppear() {
+        let proposals = interactor.getPendingProposals()
+        if let proposal = proposals.last {
+            router.present(sessionProposal: proposal)
+        }
+    }
+    
     func onConnection(session: Session) {
         router.presentConnectionDetails(session: session)
     }

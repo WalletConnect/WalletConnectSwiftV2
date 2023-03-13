@@ -151,6 +151,15 @@ final class ApproveEngine {
         _ = try await [settleRequest, subscription]
         onSessionSettle?(session.publicRepresentation())
     }
+    
+    func setProposalPayloadStore(payload: RequestSubscriptionPayload<SessionType.ProposeParams>) {
+        logger.debug("Received Session Proposal")
+        let proposal = payload.request
+        do { try Namespace.validate(proposal.requiredNamespaces) } catch {
+            return respondError(payload: payload, reason: .invalidUpdateRequest, protocolMethod: SessionProposeProtocolMethod())
+        }
+        proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
+    }
 }
 
 // MARK: - Privates
@@ -271,13 +280,8 @@ private extension ApproveEngine {
     // MARK: SessionProposeRequest
 
     func handleSessionProposeRequest(payload: RequestSubscriptionPayload<SessionType.ProposeParams>) {
-        logger.debug("Received Session Proposal")
-        let proposal = payload.request
-        do { try Namespace.validate(proposal.requiredNamespaces) } catch {
-            return respondError(payload: payload, reason: .invalidUpdateRequest, protocolMethod: SessionProposeProtocolMethod())
-        }
-        proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
-        onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic))
+        setProposalPayloadStore(payload: payload)
+        onSessionProposal?(payload.request.publicRepresentation(pairingTopic: payload.topic))
     }
 
     // MARK: SessionSettleRequest
