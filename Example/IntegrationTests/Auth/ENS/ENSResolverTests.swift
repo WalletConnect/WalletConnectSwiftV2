@@ -15,7 +15,7 @@ class ENSSignerTests: XCTestCase {
 
     func testResolveAddress() async throws {
         let resolver = ENSResolverFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
-        let address = try await resolver.resolveAddress(ens: ens, blockchain: account.blockchain)
-        XCTAssertEqual(address, account.address)
+        let resolved = try await resolver.resolveAddress(ens: ens, blockchain: account.blockchain)
+        XCTAssertEqual(resolved, account)
     }
 }

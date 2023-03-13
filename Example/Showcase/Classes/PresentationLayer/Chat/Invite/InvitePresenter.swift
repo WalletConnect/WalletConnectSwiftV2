@@ -14,7 +14,7 @@ final class InvitePresenter: ObservableObject {
     }
 
     var showButton: Bool {
-        return resolveAccount(from: input) != nil
+        return validation(from: input)
     }
 
     init(interactor: InviteInteractor, router: InviteRouter, account: Account) {
@@ -25,11 +25,11 @@ final class InvitePresenter: ObservableObject {
 
     @MainActor
     func invite() async throws {
-        guard let inviteeAccount = resolveAccount(from: input)
-        else { return }
+        let inviteeAccount = try await resolveAccount(from: input)
 
         try await interactor.invite(inviterAccount: account, inviteeAccount: inviteeAccount, message: "Welcome to WalletConnect Chat!")
-        router.dismiss()
+
+        await dismiss()
     }
 }
 
@@ -50,11 +50,34 @@ extension InvitePresenter: SceneViewModel {
 
 private extension InvitePresenter {
 
+    @MainActor
+    func dismiss() async {
+        router.dismiss()
+    }
+
     func didInputChanged() {
         rightBarButtonItem?.isEnabled = !input.isEmpty
     }
 
-    func resolveAccount(from input: String) -> Account? {
+    func validation(from input: String) -> Bool {
+        if let _ = Account(input) {
+            return true
+        }
+        if let _ = ImportAccount(input: input)?.account {
+            return true
+        }
+        if let _ = try? EthereumAddress(hex: input, eip55: false) {
+            return true
+        }
+
+        let components = input.components(separatedBy: ".")
+        if components.count > 1, !components.contains("") {
+            return true
+        }
+        return false
+    }
+
+    func resolveAccount(from input: String) async throws -> Account {
         if let account = Account(input) {
             return account
         }
@@ -64,6 +87,6 @@ private extension InvitePresenter {
         if let address = try? EthereumAddress(hex: input, eip55: false) {
             return Account("eip155:1:\(address.hex(eip55: true))")!
         }
-        return nil
+        return try await interactor.resolve(ens: input)
     }
 }

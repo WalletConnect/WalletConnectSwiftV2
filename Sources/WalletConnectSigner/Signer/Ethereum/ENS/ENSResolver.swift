@@ -29,7 +29,7 @@ public actor ENSResolver {
         return try await resolver.name(namehash: namehash)
     }
 
-    public func resolveAddress(ens: String, blockchain: Blockchain) async throws -> String {
+    public func resolveAddress(ens: String, blockchain: Blockchain) async throws -> Account {
         let namehash = namehash(ens)
         let resolverAddaress = try await registry.resolver(
             namehash: namehash,
@@ -42,11 +42,20 @@ public actor ENSResolver {
             httpClient: httpClient
         )
 
-        return try await resolver.address(namehash: namehash)
+        let address = try await resolver.address(namehash: namehash)
+
+        guard let account = Account(blockchain: blockchain, address: address)
+        else { throw Errors.invalidAccount }
+
+        return account
     }
 }
 
 private extension ENSResolver {
+
+    enum Errors: Error {
+        case invalidAccount
+    }
 
     func namehash(_ name: String) -> Data {
         var result = [UInt8](repeating: 0, count: 32)
