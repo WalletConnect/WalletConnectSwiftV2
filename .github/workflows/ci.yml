@@ -20,7 +20,7 @@ jobs:
     runs-on: macos-12
     strategy:
       matrix:
-        test-type: [unit-tests, integration-tests, build-example-wallet, build-example-dapp]
+        test-type: [unit-tests, integration-tests, build-example-wallet, build-example-dapp, relay-tests]
 
     steps:
     - uses: actions/checkout@v2
