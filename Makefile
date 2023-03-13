@@ -34,6 +34,18 @@ integration_tests:
 relay_tests:
 	fastlane tests scheme:RelayIntegrationTests relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID)
 
+smoke_tests:
+	xcodebuild \
+        -project Example/ExampleApp.xcodeproj \
+        -scheme IntegrationTests \
+        -testPlan SmokeTests \
+        -clonedSourcePackagesDirPath SourcePackagesCache \
+        -destination 'platform=iOS Simulator,name=iPhone 14' \
+        -derivedDataPath DerivedDataCache \
+        RELAY_HOST=$(RELAY_HOST) \
+        PROJECT_ID=$(PROJECT_ID) \
+        test
+
 resolve_packages: 
 	fastlane resolve scheme:WalletApp
 
