@@ -2,29 +2,24 @@ import Foundation
 
 public actor ENSResolver {
 
-    private let resolverAddress: String
     private let projectId: String
     private let httpClient: HTTPClient
+    private let registry: ENSRegistryContract
     private let signer: EthereumSigner
 
-    init(resolverAddress: String, projectId: String, httpClient: HTTPClient, signer: EthereumSigner) {
-        self.resolverAddress = resolverAddress
+    init(projectId: String, httpClient: HTTPClient, registry: ENSRegistryContract, signer: EthereumSigner) {
         self.projectId = projectId
         self.httpClient = httpClient
+        self.registry = registry
         self.signer = signer
     }
 
-    public func resolve(account: Account) async throws -> String {
-        let registry = ENSRegistryContract(
-            address: resolverAddress,
-            projectId: projectId,
-            chainId: account.blockchainIdentifier,
-            httpClient: httpClient
+    public func resolveEns(account: Account) async throws -> String {
+        let namehash = namehash(account.reversedDomain)
+        let resolverAddaress = try await registry.resolver(
+            namehash: namehash,
+            chainId: account.blockchainIdentifier
         )
-        let reversedDomain = account.address.lowercased()
-            .replacingOccurrences(of: "0x", with: "") + ".addr.reverse"
-        let namehash = namehash(reversedDomain)
-        let resolverAddaress = try await registry.resolver(namehash: namehash)
         let resolver = ENSResolverContract(
             address: resolverAddaress,
             projectId: projectId,
@@ -32,6 +27,22 @@ public actor ENSResolver {
             httpClient: httpClient
         )
         return try await resolver.name(namehash: namehash)
+    }
+
+    public func resolveAddress(ens: String, blockchain: Blockchain) async throws -> String {
+        let namehash = namehash(ens)
+        let resolverAddaress = try await registry.resolver(
+            namehash: namehash,
+            chainId: blockchain.absoluteString
+        )
+        let resolver = ENSResolverContract(
+            address: resolverAddaress,
+            projectId: projectId,
+            chainId: blockchain.absoluteString,
+            httpClient: httpClient
+        )
+
+        return try await resolver.address(namehash: namehash)
     }
 }
 
@@ -41,16 +52,18 @@ private extension ENSResolver {
         var result = [UInt8](repeating: 0, count: 32)
         let labels = name.split(separator: ".")
         for label in labels.reversed() {
-            let labelHash = signer.keccak256(normalizeLabel(label).rawRepresentation)
+            let labelHash = signer.keccak256(label.lowercased().rawRepresentation)
             result.append(contentsOf: labelHash)
             result = [UInt8](signer.keccak256(Data(result)))
         }
         return Data(result)
     }
+}
 
-    func normalizeLabel<S: StringProtocol>(_ label: S) -> String {
-        // NOTE: this is NOT a [EIP-137](https://eips.ethereum.org/EIPS/eip-137) compliant implementation
-        // TODO: properly implement domain name encoding via [UTS #46](https://unicode.org/reports/tr46/)
-        return label.lowercased()
+private extension Account {
+
+    var reversedDomain: String {
+        return address.lowercased()
+            .replacingOccurrences(of: "0x", with: "") + ".addr.reverse"
     }
 }

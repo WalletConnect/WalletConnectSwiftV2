@@ -13,11 +13,16 @@ public final class ENSResolverFactory {
     }
 
     public func create(projectId: String) -> ENSResolver {
+        let httpClient = HTTPNetworkClient(host: "rpc.walletconnect.com")
         return ENSResolver(
-            // [Default ENS registry address](https://docs.ens.domains/ens-deployments)
-            resolverAddress: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
             projectId: projectId,
-            httpClient: HTTPNetworkClient(host: "rpc.walletconnect.com"),
+            httpClient: httpClient,
+            registry: ENSRegistryContract(
+                // [Default ENS registry address](https://docs.ens.domains/ens-deployments)
+                address: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
+                projectId: projectId,
+                httpClient: httpClient
+            ),
             signer: signerFactory.createEthereumSigner()
         )
     }
