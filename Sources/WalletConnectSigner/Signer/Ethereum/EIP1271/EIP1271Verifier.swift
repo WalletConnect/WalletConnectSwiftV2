@@ -36,9 +36,4 @@ extension EIP1271Verifier {
     enum Errors: Error {
         case invalidSignature
     }
-
-    struct EthCall: Codable {
-        let to: String
-        let data: String
-    }
 }

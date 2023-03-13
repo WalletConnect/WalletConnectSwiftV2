@@ -140,6 +140,7 @@
 		A578FA3D2874002400AA7720 /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA3C2874002400AA7720 /* View.swift */; };
 		A57E71A6291CF76400325797 /* ETHSigner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57E71A5291CF76400325797 /* ETHSigner.swift */; };
 		A57E71A8291CF8A500325797 /* SOLSigner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57E71A7291CF8A500325797 /* SOLSigner.swift */; };
+		A58A1ECC29BF458600A82A20 /* ENSResolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58A1ECB29BF458600A82A20 /* ENSResolverTests.swift */; };
 		A58E7CEB28729F550082D443 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58E7CEA28729F550082D443 /* AppDelegate.swift */; };
 		A58E7CED28729F550082D443 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58E7CEC28729F550082D443 /* SceneDelegate.swift */; };
 		A58E7CF428729F550082D443 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A58E7CF328729F550082D443 /* Assets.xcassets */; };
@@ -490,6 +491,7 @@
 		A578FA3C2874002400AA7720 /* View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
 		A57E71A5291CF76400325797 /* ETHSigner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ETHSigner.swift; sourceTree = "<group>"; };
 		A57E71A7291CF8A500325797 /* SOLSigner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOLSigner.swift; sourceTree = "<group>"; };
+		A58A1ECB29BF458600A82A20 /* ENSResolverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ENSResolverTests.swift; sourceTree = "<group>"; };
 		A58E7CE828729F550082D443 /* Showcase.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Showcase.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A58E7CEA28729F550082D443 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A58E7CEC28729F550082D443 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -1022,6 +1024,7 @@
 		84D2A66728A4F5260088AE09 /* Auth */ = {
 			isa = PBXGroup;
 			children = (
+				A58A1ECA29BF457800A82A20 /* ENS */,
 				A54195992934BFDD0035AD19 /* Signer */,
 				84D2A66528A4F51E0088AE09 /* AuthTests.swift */,
 			);
@@ -1195,6 +1198,14 @@
 				A57E71A7291CF8A500325797 /* SOLSigner.swift */,
 			);
 			path = Signer;
+			sourceTree = "<group>";
+		};
+		A58A1ECA29BF457800A82A20 /* ENS */ = {
+			isa = PBXGroup;
+			children = (
+				A58A1ECB29BF458600A82A20 /* ENSResolverTests.swift */,
+			);
+			path = ENS;
 			sourceTree = "<group>";
 		};
 		A58E7CE928729F550082D443 /* Showcase */ = {
@@ -2327,6 +2338,7 @@
 				7694A5262874296A0001257E /* RegistryTests.swift in Sources */,
 				A541959F2934BFEF0035AD19 /* SignerTests.swift in Sources */,
 				A50C036528AAD32200FE72D3 /* ClientDelegate.swift in Sources */,
+				A58A1ECC29BF458600A82A20 /* ENSResolverTests.swift in Sources */,
 				A5E03DFA286465C700888481 /* SignClientTests.swift in Sources */,
 				A54195A02934BFEF0035AD19 /* EIP1271VerifierTests.swift in Sources */,
 				A54195A12934BFEF0035AD19 /* EIP191VerifierTests.swift in Sources */,
