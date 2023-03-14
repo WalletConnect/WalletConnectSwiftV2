@@ -49,7 +49,7 @@ class ProposalResponseSubscriber {
         let pushSubscription = PushSubscription(topic: topic, account: payload.request.account, relay: relay, metadata: metadata)
 
         logger.debug("Subscribing to Push Subscription topic: \(topic)")
-        subscriptionsStore.set(pushSubscription, forKey: payload.topic)
+        subscriptionsStore.set(pushSubscription, forKey: topic)
         try await networkingInteractor.subscribe(topic: payload.topic)
         return pushSubscription
     }
