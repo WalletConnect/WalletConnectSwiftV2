@@ -1,0 +1,74 @@
+{
+  "configurations" : [
+    {
+      "id" : "EB662E8C-8DC0-4689-A2FF-B41B80A99F85",
+      "name" : "Configuration 1",
+      "options" : {
+        "targetForVariableExpansion" : {
+          "containerPath" : "container:ExampleApp.xcodeproj",
+          "identifier" : "A5E03DEC286464DB00888481",
+          "name" : "IntegrationTests"
+        }
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "environmentVariableEntries" : [
+      {
+        "key" : "RELAY_HOST",
+        "value" : "$(RELAY_HOST)"
+      },
+      {
+        "key" : "PROJECT_ID",
+        "value" : "$(PROJECT_ID)"
+      }
+    ],
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "skippedTests" : [
+        "AuthTests\/testEIP1271RespondSuccess()",
+        "AuthTests\/testEIP191RespondError()",
+        "AuthTests\/testRequest()",
+        "AuthTests\/testRespondSignatureVerificationFailed()",
+        "AuthTests\/testUserRespondError()",
+        "CacaoSignerTest",
+        "ChatTests\/testAcceptAndCreateNewThread()",
+        "ChatTests\/testInvite()",
+        "EIP1271VerifierTests",
+        "EIP191VerifierTests",
+        "PairingTests",
+        "PushTests\/testDappDeletePushSubscription()",
+        "PushTests\/testRequestPush()",
+        "PushTests\/testWalletApprovesPushRequest()",
+        "PushTests\/testWalletDeletePushSubscription()",
+        "PushTests\/testWalletRejectsPushRequest()",
+        "RegistryTests",
+        "RelayClientEndToEndTests",
+        "SignClientTests\/testCaip25SatisfyAllRequiredAllOptionalNamespacesSuccessful()",
+        "SignClientTests\/testCaip25SatisfyAllRequiredNamespacesSuccessful()",
+        "SignClientTests\/testCaip25SatisfyEmptyRequiredNamespacesExtraOptionalNamespacesSuccessful()",
+        "SignClientTests\/testCaip25SatisfyPartiallyRequiredNamespacesFails()",
+        "SignClientTests\/testCaip25SatisfyPartiallyRequiredNamespacesMethodsFails()",
+        "SignClientTests\/testNewSessionOnExistingPairing()",
+        "SignClientTests\/testSessionDelete()",
+        "SignClientTests\/testSessionEventFails()",
+        "SignClientTests\/testSessionEventSucceeds()",
+        "SignClientTests\/testSessionPing()",
+        "SignClientTests\/testSessionPropose()",
+        "SignClientTests\/testSessionReject()",
+        "SignClientTests\/testSessionRequestFailureResponse()",
+        "SignClientTests\/testSuccessfulSessionExtend()",
+        "SignClientTests\/testSuccessfulSessionUpdateNamespaces()",
+        "SignerTest"
+      ],
+      "target" : {
+        "containerPath" : "container:ExampleApp.xcodeproj",
+        "identifier" : "A5E03DEC286464DB00888481",
+        "name" : "IntegrationTests"
+      }
+    }
+  ],
+  "version" : 1
+}
