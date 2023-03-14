@@ -48,9 +48,9 @@ public struct Account: Equatable, Hashable {
     public init?(_ string: String) {
         guard String.conformsToCAIP10(string) else { return nil }
         let splits = string.split(separator: ":")
-        self.namespace = String(splits[0])
-        self.reference = String(splits[1])
-        self.address = String(splits[2])
+        self.namespace = String(splits[0].lowercased())
+        self.reference = String(splits[1].lowercased())
+        self.address = String(splits[2].lowercased())
     }
 
     /**
