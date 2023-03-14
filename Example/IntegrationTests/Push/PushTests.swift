@@ -25,8 +25,8 @@ final class PushTests: XCTestCase {
         let keychain = KeychainStorageMock()
         let keyValueStorage = RuntimeKeyValueStorage()
 
-        let relayLogger = ConsoleLogger(suffix: prefix + " [Relay]", loggingLevel: .debug)
-        let pairingLogger = ConsoleLogger(suffix: prefix + " [Pairing]", loggingLevel: .debug)
+        let relayLogger = ConsoleLogger(suffix: prefix + " [Relay]", loggingLevel: .off)
+        let pairingLogger = ConsoleLogger(suffix: prefix + " [Pairing]", loggingLevel: .off)
         let networkingLogger = ConsoleLogger(suffix: prefix + " [Networking]", loggingLevel: .debug)
 
         let relayClient = RelayClient(

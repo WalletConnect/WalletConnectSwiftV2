@@ -44,22 +44,20 @@ class ProposalResponseSubscriber {
     private func handleResponse(payload: ResponseSubscriptionPayload<PushRequestParams, PushResponseParams>) async throws -> PushSubscription {
         let peerPublicKeyHex = payload.response.publicKey
         let selfpublicKeyHex = payload.request.publicKey
-        let (topic, _) = try generateAgreementKeys(peerPublicKeyHex: peerPublicKeyHex, selfpublicKeyHex: selfpublicKeyHex)
-
+        let topic = try generateAgreementKeys(peerPublicKeyHex: peerPublicKeyHex, selfpublicKeyHex: selfpublicKeyHex)
         let pushSubscription = PushSubscription(topic: topic, account: payload.request.account, relay: relay, metadata: metadata)
-
         logger.debug("Subscribing to Push Subscription topic: \(topic)")
         subscriptionsStore.set(pushSubscription, forKey: topic)
         try await networkingInteractor.subscribe(topic: topic)
         return pushSubscription
     }
 
-    private func generateAgreementKeys(peerPublicKeyHex: String, selfpublicKeyHex: String) throws -> (topic: String, keys: AgreementKeys) {
+    private func generateAgreementKeys(peerPublicKeyHex: String, selfpublicKeyHex: String) throws -> String {
         let selfPublicKey = try AgreementPublicKey(hex: selfpublicKeyHex)
         let keys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: peerPublicKeyHex)
         let topic = keys.derivedTopic()
         try kms.setAgreementSecret(keys, topic: topic)
-        return (topic: topic, keys: keys)
+        return topic
     }
 
     private func subscribeForProposalErrors() {
