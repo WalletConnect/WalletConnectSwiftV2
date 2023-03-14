@@ -50,7 +50,7 @@ class ProposalResponseSubscriber {
 
         logger.debug("Subscribing to Push Subscription topic: \(topic)")
         subscriptionsStore.set(pushSubscription, forKey: topic)
-        try await networkingInteractor.subscribe(topic: payload.topic)
+        try await networkingInteractor.subscribe(topic: topic)
         return pushSubscription
     }
 
