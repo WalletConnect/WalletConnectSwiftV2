@@ -80,9 +80,8 @@ extension AutomaticSocketConnectionHandler: SocketConnectionHandler {
         throw Errors.manualSocketDisconnectionForbidden
     }
 
-    func handleDisconnection() {
-        if appStateObserver.currentState == .foreground {
-            reconnectIfNeeded()
-        }
+    func handleDisconnection() async {
+        guard await appStateObserver.currentState == .foreground else { return }
+        reconnectIfNeeded()
     }
 }
