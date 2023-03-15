@@ -1,4 +1,5 @@
 import WalletConnectNetworking
+import WalletConnectIdentity
 import Foundation
 
 class PushRequestResponder {
@@ -6,6 +7,8 @@ class PushRequestResponder {
         case recordForIdNotFound
         case malformedRequestParams
     }
+    private let keyserverURL: URL
+    private let identityClient: IdentityClient
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementService
     private let rpcHistory: RPCHistory
@@ -15,13 +18,17 @@ class PushRequestResponder {
     private let groupKeychainStorage: KeychainStorageProtocol
 
 
-    init(networkingInteractor: NetworkInteracting,
+    init(keyserverURL: URL,
+         networkingInteractor: NetworkInteracting,
+         identityClient: IdentityClient,
          logger: ConsoleLogging,
          kms: KeyManagementService,
          groupKeychainStorage: KeychainStorageProtocol,
          rpcHistory: RPCHistory,
          subscriptionsStore: CodableStore<PushSubscription>
     ) {
+        self.keyserverURL = keyserverURL
+        self.identityClient = identityClient
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.kms = kms
@@ -39,6 +46,7 @@ class PushRequestResponder {
 
         let keys = try generateAgreementKeys(peerPublicKey: peerPublicKey)
         let pushTopic = keys.derivedTopic()
+        let requestParams = try requestRecord.request.params!.get(PushRequestParams.self)
 
         try kms.setAgreementSecret(keys, topic: responseTopic)
 
@@ -49,13 +57,11 @@ class PushRequestResponder {
         try groupKeychainStorage.add(keys, forKey: pushTopic)
 
         logger.debug("Subscribing to push topic: \(pushTopic)")
+
         try await networkingInteractor.subscribe(topic: pushTopic)
 
-        let responseParams = PushResponseParams(subscriptionAuth: "to_do", publicKey: keys.publicKey.hexRepresentation)
+        let response = createJWTResponse(requestId: requestId, subscriptionAccount: requestParams.account, dappUrl: requestParams.metadata.url)
 
-        let response = RPCResponse(id: requestId, result: responseParams)
-
-        let requestParams = try requestRecord.request.params!.get(PushRequestParams.self)
         let pushSubscription = PushSubscription(topic: pushTopic, account: requestParams.account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: requestParams.metadata)
 
         subscriptionsStore.set(pushSubscription, forKey: pushTopic)
@@ -71,6 +77,15 @@ class PushRequestResponder {
         let pairingTopic = requestRecord.topic
 
         try await networkingInteractor.respondError(topic: pairingTopic, requestId: requestId, protocolMethod: PushRequestProtocolMethod(), reason: PushError.rejected)
+    }
+
+    private func createJWTResponse(requestId: RPCID, subscriptionAccount: Account, dappUrl: String) -> RPCResponse {
+        let jwtPayload = AcceptSubscriptionJWTPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl)
+        let wrapper = try identityClient.signAndCreateWrapper(
+            payload: jwtPayload,
+            account: subscriptionAccount
+        )
+        return RPCResponse(id: requestId, result: wrapper)
     }
 
     private func getRecord(requestId: RPCID) throws -> RPCHistory.Record {
