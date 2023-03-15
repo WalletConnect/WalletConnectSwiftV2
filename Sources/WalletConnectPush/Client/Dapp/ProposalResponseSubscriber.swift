@@ -32,7 +32,7 @@ class ProposalResponseSubscriber {
     private func subscribeForProposalResponse() {
         let protocolMethod = PushRequestProtocolMethod()
         networkingInteractor.responseSubscription(on: protocolMethod)
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<PushRequestParams, PushResponseParams>) in
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<PushRequestParams, AcceptSubscriptionJWTPayload.Wrapper>) in
                 logger.debug("Received Push Proposal response")
                 Task(priority: .userInitiated) {
                     let pushSubscription = try await handleResponse(payload: payload)
@@ -41,8 +41,9 @@ class ProposalResponseSubscriber {
             }.store(in: &publishers)
     }
 
-    private func handleResponse(payload: ResponseSubscriptionPayload<PushRequestParams, PushResponseParams>) async throws -> PushSubscription {
+    private func handleResponse(payload: ResponseSubscriptionPayload<PushRequestParams, AcceptSubscriptionJWTPayload.Wrapper>) async throws -> PushSubscription {
         let peerPublicKeyHex = payload.response.publicKey
+        
         let selfpublicKeyHex = payload.request.publicKey
         let topic = try generateAgreementKeys(peerPublicKeyHex: peerPublicKeyHex, selfpublicKeyHex: selfpublicKeyHex)
         let pushSubscription = PushSubscription(topic: topic, account: payload.request.account, relay: relay, metadata: metadata)
