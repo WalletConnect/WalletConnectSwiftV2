@@ -60,7 +60,7 @@ class PushRequestResponder {
 
         try await networkingInteractor.subscribe(topic: pushTopic)
 
-        let response = createJWTResponse(requestId: requestId, subscriptionAccount: requestParams.account, dappUrl: requestParams.metadata.url)
+        let response = try createJWTResponse(requestId: requestId, subscriptionAccount: requestParams.account, dappUrl: requestParams.metadata.url)
 
         let pushSubscription = PushSubscription(topic: pushTopic, account: requestParams.account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: requestParams.metadata)
 
@@ -79,7 +79,7 @@ class PushRequestResponder {
         try await networkingInteractor.respondError(topic: pairingTopic, requestId: requestId, protocolMethod: PushRequestProtocolMethod(), reason: PushError.rejected)
     }
 
-    private func createJWTResponse(requestId: RPCID, subscriptionAccount: Account, dappUrl: String) -> RPCResponse {
+    private func createJWTResponse(requestId: RPCID, subscriptionAccount: Account, dappUrl: String) throws -> RPCResponse {
         let jwtPayload = AcceptSubscriptionJWTPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl)
         let wrapper = try identityClient.signAndCreateWrapper(
             payload: jwtPayload,

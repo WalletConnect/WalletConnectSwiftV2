@@ -9,14 +9,14 @@ public class NetworkingInteractor: NetworkInteracting {
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
 
-    private let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, publishedAt: Date), Never>()
-    private let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date), Never>()
+    private let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, publishedAt: Date, derivedTopic: String?), Never>()
+    private let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date, derivedTopic: String?), Never>()
 
-    public var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest, publishedAt: Date), Never> {
+    public var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest, publishedAt: Date, derivedTopic: String?), Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
-    private var responsePublisher: AnyPublisher<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date), Never> {
+    private var responsePublisher: AnyPublisher<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date, derivedTopic: String?), Never> {
         responsePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -71,9 +71,9 @@ public class NetworkingInteractor: NetworkInteracting {
             .filter { rpcRequest in
                 return rpcRequest.request.method == request.method
             }
-            .compactMap { (topic, rpcRequest, publishedAt) in
+            .compactMap { topic, rpcRequest, publishedAt, derivedTopic in
                 guard let id = rpcRequest.id, let request = try? rpcRequest.params?.get(RequestParams.self) else { return nil }
-                return RequestSubscriptionPayload(id: id, topic: topic, request: request, publishedAt: publishedAt)
+                return RequestSubscriptionPayload(id: id, topic: topic, request: request, publishedAt: publishedAt, derivedTopic: derivedTopic)
             }
             .eraseToAnyPublisher()
     }
@@ -83,12 +83,12 @@ public class NetworkingInteractor: NetworkInteracting {
             .filter { rpcRequest in
                 return rpcRequest.request.method == request.method
             }
-            .compactMap { topic, rpcRequest, rpcResponse, publishedAt  in
+            .compactMap { topic, rpcRequest, rpcResponse, publishedAt, derivedTopic  in
                 guard
                     let id = rpcRequest.id,
                     let request = try? rpcRequest.params?.get(Request.self),
                     let response = try? rpcResponse.result?.get(Response.self) else { return nil }
-                return ResponseSubscriptionPayload(id: id, topic: topic, request: request, response: response, publishedAt: publishedAt)
+                return ResponseSubscriptionPayload(id: id, topic: topic, request: request, response: response, publishedAt: publishedAt, derivedTopic: derivedTopic)
             }
             .eraseToAnyPublisher()
     }
@@ -96,7 +96,7 @@ public class NetworkingInteractor: NetworkInteracting {
     public func responseErrorSubscription<Request: Codable>(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionErrorPayload<Request>, Never> {
         return responsePublisher
             .filter { $0.request.method == request.method }
-            .compactMap { topic, rpcRequest, rpcResponse, publishedAt in
+            .compactMap { topic, rpcRequest, rpcResponse, publishedAt, _ in
                 guard let id = rpcResponse.id, let request = try? rpcRequest.params?.get(Request.self), let error = rpcResponse.error else { return nil }
                 return ResponseSubscriptionErrorPayload(id: id, topic: topic, request: request, error: error)
             }
@@ -131,29 +131,29 @@ public class NetworkingInteractor: NetworkInteracting {
     }
 
     private func manageSubscription(_ topic: String, _ encodedEnvelope: String, _ publishedAt: Date) {
-        if let deserializedJsonRpcRequest: RPCRequest = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
-            handleRequest(topic: topic, request: deserializedJsonRpcRequest, publishedAt: publishedAt)
-        } else if let response: RPCResponse = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
-            handleResponse(response: response, publishedAt: publishedAt)
+        if let (deserializedJsonRpcRequest, derivedTopic): (RPCRequest, String?) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
+            handleRequest(topic: topic, request: deserializedJsonRpcRequest, publishedAt: publishedAt, derivedTopic: derivedTopic)
+        } else if let (response, derivedTopic): (RPCResponse, String?) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
+            handleResponse(response: response, publishedAt: publishedAt, derivedTopic: derivedTopic)
         } else {
             logger.debug("Networking Interactor - Received unknown object type from networking relay")
         }
     }
 
-    private func handleRequest(topic: String, request: RPCRequest, publishedAt: Date) {
+    private func handleRequest(topic: String, request: RPCRequest, publishedAt: Date, derivedTopic: String?) {
         do {
             try rpcHistory.set(request, forTopic: topic, emmitedBy: .remote)
-            requestPublisherSubject.send((topic, request, publishedAt))
+            requestPublisherSubject.send((topic, request, publishedAt, derivedTopic))
         } catch {
             logger.debug(error)
         }
     }
 
-    private func handleResponse(response: RPCResponse, publishedAt: Date) {
+    private func handleResponse(response: RPCResponse, publishedAt: Date, derivedTopic: String?) {
         do {
             try rpcHistory.resolve(response)
             let record = rpcHistory.get(recordId: response.id!)!
-            responsePublisherSubject.send((record.topic, record.request, response, publishedAt))
+            responsePublisherSubject.send((record.topic, record.request, response, publishedAt, derivedTopic))
         } catch {
             logger.debug("Handle json rpc response error: \(error)")
         }

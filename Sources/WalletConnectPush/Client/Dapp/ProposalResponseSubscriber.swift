@@ -42,10 +42,17 @@ class ProposalResponseSubscriber {
     }
 
     private func handleResponse(payload: ResponseSubscriptionPayload<PushRequestParams, AcceptSubscriptionJWTPayload.Wrapper>) async throws -> PushSubscription {
+
+
+// need to figure out how to derive peer's pub key
         let peerPublicKeyHex = payload.response.publicKey
         
         let selfpublicKeyHex = payload.request.publicKey
+
         let topic = try generateAgreementKeys(peerPublicKeyHex: peerPublicKeyHex, selfpublicKeyHex: selfpublicKeyHex)
+
+
+
         let pushSubscription = PushSubscription(topic: topic, account: payload.request.account, relay: relay, metadata: metadata)
         logger.debug("Subscribing to Push Subscription topic: \(topic)")
         subscriptionsStore.set(pushSubscription, forKey: topic)

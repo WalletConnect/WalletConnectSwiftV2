@@ -40,11 +40,12 @@ public class Serializer: Serializing {
     ///   - topic: Topic that is associated with a symetric key for decrypting particular codable object
     ///   - encodedEnvelope: Envelope to deserialize and decrypt
     /// - Returns: Deserialized object
-    public func deserialize<T: Codable>(topic: String, encodedEnvelope: String) throws -> T {
+    public func deserialize<T: Codable>(topic: String, encodedEnvelope: String) throws -> (T, String?) {
         let envelope = try Envelope(encodedEnvelope)
         switch envelope.type {
         case .type0:
-            return try handleType0Envelope(topic, envelope)
+            let deserialisedType: T = try handleType0Envelope(topic, envelope)
+            return (deserialisedType, nil)
         case .type1(let peerPubKey):
             return try handleType1Envelope(topic, peerPubKey: peerPubKey, sealbox: envelope.sealbox)
         }
@@ -58,15 +59,15 @@ public class Serializer: Serializing {
         }
     }
 
-    private func handleType1Envelope<T: Codable>(_ topic: String, peerPubKey: Data, sealbox: Data) throws -> T {
+    private func handleType1Envelope<T: Codable>(_ topic: String, peerPubKey: Data, sealbox: Data) throws -> (T, String) {
         guard let selfPubKey = kms.getPublicKey(for: topic)
         else { throw Errors.publicKeyForTopicNotFound }
 
         let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey.toHexString())
         let decodedType: T = try decode(sealbox: sealbox, symmetricKey: agreementKeys.sharedKey.rawRepresentation)
-        let newTopic = agreementKeys.derivedTopic()
-        try kms.setAgreementSecret(agreementKeys, topic: newTopic)
-        return decodedType
+        let derivedTopic = agreementKeys.derivedTopic()
+        try kms.setAgreementSecret(agreementKeys, topic: derivedTopic)
+        return (decodedType, derivedTopic)
     }
 
     private func decode<T: Codable>(sealbox: Data, symmetricKey: Data) throws -> T {

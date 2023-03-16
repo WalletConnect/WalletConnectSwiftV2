@@ -2,11 +2,11 @@ import Foundation
 
 public protocol Serializing {
     func serialize(topic: String, encodable: Encodable, envelopeType: Envelope.EnvelopeType) throws -> String
-    func deserialize<T: Codable>(topic: String, encodedEnvelope: String) throws -> T
+    func deserialize<T: Codable>(topic: String, encodedEnvelope: String) throws -> (T, String?)
 }
 
 public extension Serializing {
-    func tryDeserialize<T: Codable>(topic: String, encodedEnvelope: String) -> T? {
+    func tryDeserialize<T: Codable>(topic: String, encodedEnvelope: String) -> (T, String?)? {
         return try? deserialize(topic: topic, encodedEnvelope: encodedEnvelope)
     }
 
