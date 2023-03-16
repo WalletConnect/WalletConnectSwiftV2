@@ -47,7 +47,7 @@ struct AcceptSubscriptionJWTPayload: JWTClaimsCodable {
 
     func encode(iss: String) throws -> Claims {
         return Claims(
-            iat: expiry(days: 30),
+            iat: expiry(days: 1),
             exp: defaultIatMilliseconds(),
             iss: iss,
             ksu: keyserver.absoluteString,

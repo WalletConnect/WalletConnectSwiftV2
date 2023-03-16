@@ -13,7 +13,7 @@ class ProposalResponseSubscriber {
     private var publishers = [AnyCancellable]()
     private let metadata: AppMetadata
     private let relay: RelayProtocolOptions
-    var onResponse: ((_ id: RPCID, _ result: Result<PushSubscription, PushError>) -> Void)?
+    var onResponse: ((_ id: RPCID, _ result: Result<PushSubscriptionResult, PushError>) -> Void)?
     private let subscriptionsStore: CodableStore<PushSubscription>
 
     init(networkingInteractor: NetworkInteracting,
@@ -38,13 +38,22 @@ class ProposalResponseSubscriber {
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<PushRequestParams, AcceptSubscriptionJWTPayload.Wrapper>) in
                 logger.debug("Received Push Proposal response")
                 Task(priority: .userInitiated) {
-                    let pushSubscription = try await handleResponse(payload: payload)
-                    onResponse?(payload.id, .success(pushSubscription))
+                    do {
+                        let (pushSubscription, jwt) = try await handleResponse(payload: payload)
+                        let result = PushSubscriptionResult(pushSubscription: pushSubscription, subscriptionAuth: jwt)
+                        onResponse?(payload.id, .success(result))
+                    } catch {
+                        logger.error(error)
+                    }
                 }
             }.store(in: &publishers)
     }
 
-    private func handleResponse(payload: ResponseSubscriptionPayload<PushRequestParams, AcceptSubscriptionJWTPayload.Wrapper>) async throws -> PushSubscription {
+    private func handleResponse(payload: ResponseSubscriptionPayload<PushRequestParams, AcceptSubscriptionJWTPayload.Wrapper>) async throws -> (PushSubscription, String) {
+
+        let jwt = payload.response.jwtString
+        _ = try AcceptSubscriptionJWTPayload.decode(from: payload.response)
+        logger.debug("subscriptionAuth JWT validated")
 
         guard let subscriptionTopic = payload.derivedTopic else { throw Errors.subscriptionTopicNotDerived }
 
@@ -52,7 +61,7 @@ class ProposalResponseSubscriber {
         logger.debug("Subscribing to Push Subscription topic: \(subscriptionTopic)")
         subscriptionsStore.set(pushSubscription, forKey: subscriptionTopic)
         try await networkingInteractor.subscribe(topic: subscriptionTopic)
-        return pushSubscription
+        return (pushSubscription, jwt)
     }
 
     private func generateAgreementKeys(peerPublicKeyHex: String, selfpublicKeyHex: String) throws -> String {
