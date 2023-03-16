@@ -158,12 +158,12 @@ final class PushTests: XCTestCase {
         }.store(in: &publishers)
 
         dappPushClient.responsePublisher.sink { [unowned self] (_, result) in
-            guard case .success(let subscription) = result else {
+            guard case .success(let result) = result else {
                 XCTFail()
                 return
             }
-            pushSubscription = subscription
-            Task(priority: .userInitiated) { try! await dappPushClient.notify(topic: subscription.topic, message: pushMessage) }
+            pushSubscription = result.pushSubscription
+            Task(priority: .userInitiated) { try! await dappPushClient.notify(topic: result.pushSubscription.topic, message: pushMessage) }
         }.store(in: &publishers)
 
         walletPushClient.pushMessagePublisher.sink { [unowned self] receivedPushMessageRecord in
@@ -190,12 +190,12 @@ final class PushTests: XCTestCase {
         }.store(in: &publishers)
 
         dappPushClient.responsePublisher.sink { [unowned self] (_, result) in
-            guard case .success(let subscription) = result else {
+            guard case .success(let result) = result else {
                 XCTFail()
                 return
             }
-            subscriptionTopic = subscription.topic
-            Task(priority: .userInitiated) { try! await walletPushClient.deleteSubscription(topic: subscription.topic)}
+            subscriptionTopic = result.pushSubscription.topic
+            Task(priority: .userInitiated) { try! await walletPushClient.deleteSubscription(topic: result.pushSubscription.topic)}
         }.store(in: &publishers)
 
         dappPushClient.deleteSubscriptionPublisher.sink { topic in
@@ -217,12 +217,12 @@ final class PushTests: XCTestCase {
         }.store(in: &publishers)
 
         dappPushClient.responsePublisher.sink { [unowned self] (_, result) in
-            guard case .success(let subscription) = result else {
+            guard case .success(let result) = result else {
                 XCTFail()
                 return
             }
-            subscriptionTopic = subscription.topic
-            Task(priority: .userInitiated) { try! await dappPushClient.delete(topic: subscription.topic)}
+            subscriptionTopic = result.pushSubscription.topic
+            Task(priority: .userInitiated) { try! await dappPushClient.delete(topic: result.pushSubscription.topic)}
         }.store(in: &publishers)
 
         walletPushClient.deleteSubscriptionPublisher.sink { topic in
