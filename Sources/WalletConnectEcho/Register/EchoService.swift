@@ -47,9 +47,9 @@ enum EchoAPI: HTTPService {
     var headerFields: [String : String]? {
         switch self {
         case .register(_, _, _, _, let auth):
-            return ["auth": auth]
+            return ["Authorization": auth]
         case .unregister(_, _, let auth):
-            return ["auth": auth]
+            return ["Authorization": auth]
         }
     }
 
