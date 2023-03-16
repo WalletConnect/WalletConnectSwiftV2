@@ -33,7 +33,7 @@ struct EchoAuthPayload: JWTClaimsCodable {
             iss: iss,
             sub: subject,
             aud: audience,
-            iat: defaultIatMilliseconds(),
+            iat: defaultIat(),
             exp: expiry(days: 1)
         )
     }
