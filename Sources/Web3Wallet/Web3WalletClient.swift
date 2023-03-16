@@ -185,3 +185,11 @@ public class Web3WalletClient {
         try await echoClient.register(deviceToken: deviceToken)
     }
 }
+
+#if targetEnvironment(simulator)
+extension Web3WalletClient {
+    public func registerEchoClient(deviceToken: String) async throws {
+        try await echoClient.register(deviceToken: deviceToken)
+    }
+}
+#endif

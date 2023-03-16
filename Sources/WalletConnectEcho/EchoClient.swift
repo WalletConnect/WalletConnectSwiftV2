@@ -17,6 +17,4 @@ public class EchoClient: EchoClientProtocol {
         try await registerService.register(deviceToken: deviceToken)
     }
 #endif
-
-    
 }
