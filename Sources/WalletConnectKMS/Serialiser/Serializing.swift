@@ -2,11 +2,12 @@ import Foundation
 
 public protocol Serializing {
     func serialize(topic: String, encodable: Encodable, envelopeType: Envelope.EnvelopeType) throws -> String
-    func deserialize<T: Codable>(topic: String, encodedEnvelope: String) throws -> (T, String?)
+    /// - derivedTopic: topic derived from symmetric key as a result of key exchange if peers has sent envelope prefixed with it's public key
+    func deserialize<T: Codable>(topic: String, encodedEnvelope: String) throws -> (T, derivedTopic: String?)
 }
 
 public extension Serializing {
-    func tryDeserialize<T: Codable>(topic: String, encodedEnvelope: String) -> (T, String?)? {
+    func tryDeserialize<T: Codable>(topic: String, encodedEnvelope: String) -> (T, derivedTopic: String?)? {
         return try? deserialize(topic: topic, encodedEnvelope: encodedEnvelope)
     }
 

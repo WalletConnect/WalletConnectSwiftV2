@@ -40,7 +40,7 @@ public class Serializer: Serializing {
     ///   - topic: Topic that is associated with a symetric key for decrypting particular codable object
     ///   - encodedEnvelope: Envelope to deserialize and decrypt
     /// - Returns: Deserialized object
-    public func deserialize<T: Codable>(topic: String, encodedEnvelope: String) throws -> (T, String?) {
+    public func deserialize<T: Codable>(topic: String, encodedEnvelope: String) throws -> (T, derivedTopic: String?) {
         let envelope = try Envelope(encodedEnvelope)
         switch envelope.type {
         case .type0:

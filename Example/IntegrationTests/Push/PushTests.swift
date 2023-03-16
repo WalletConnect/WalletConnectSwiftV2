@@ -70,7 +70,9 @@ final class PushTests: XCTestCase {
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
         walletPairingClient = pairingClient
         let echoClient = EchoClientFactory.create(projectId: "", clientId: "", echoHost: "echo.walletconnect.com", environment: .sandbox)
-        walletPushClient = WalletPushClientFactory.create(logger: pushLogger,
+        let keyserverURL = URL(string: "https://keys.walletconnect.com")!
+        walletPushClient = WalletPushClientFactory.create(keyserverURL: keyserverURL,
+                                                          logger: pushLogger,
                                                           keyValueStorage: keyValueStorage,
                                                           keychainStorage: keychain,
                                                           groupKeychainStorage: KeychainStorageMock(),
@@ -106,7 +108,6 @@ final class PushTests: XCTestCase {
         try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
 
         walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
-
             Task(priority: .high) { try! await walletPushClient.approve(id: id) }
         }.store(in: &publishers)
 

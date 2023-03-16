@@ -4,6 +4,9 @@ import WalletConnectKMS
 import WalletConnectNetworking
 
 class ProposalResponseSubscriber {
+    enum Errors: Error {
+        case subscriptionTopicNotDerived
+    }
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
@@ -43,20 +46,12 @@ class ProposalResponseSubscriber {
 
     private func handleResponse(payload: ResponseSubscriptionPayload<PushRequestParams, AcceptSubscriptionJWTPayload.Wrapper>) async throws -> PushSubscription {
 
+        guard let subscriptionTopic = payload.derivedTopic else { throw Errors.subscriptionTopicNotDerived }
 
-// need to figure out how to derive peer's pub key
-        let peerPublicKeyHex = payload.response.publicKey
-        
-        let selfpublicKeyHex = payload.request.publicKey
-
-        let topic = try generateAgreementKeys(peerPublicKeyHex: peerPublicKeyHex, selfpublicKeyHex: selfpublicKeyHex)
-
-
-
-        let pushSubscription = PushSubscription(topic: topic, account: payload.request.account, relay: relay, metadata: metadata)
-        logger.debug("Subscribing to Push Subscription topic: \(topic)")
-        subscriptionsStore.set(pushSubscription, forKey: topic)
-        try await networkingInteractor.subscribe(topic: topic)
+        let pushSubscription = PushSubscription(topic: subscriptionTopic, account: payload.request.account, relay: relay, metadata: metadata)
+        logger.debug("Subscribing to Push Subscription topic: \(subscriptionTopic)")
+        subscriptionsStore.set(pushSubscription, forKey: subscriptionTopic)
+        try await networkingInteractor.subscribe(topic: subscriptionTopic)
         return pushSubscription
     }
 
