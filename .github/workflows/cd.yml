@@ -21,6 +21,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           token: ${{ secrets.GH_TOKEN }}
+          ref: ${{ github.ref_name }}
 
       - name: Set User Agent
         shell: bash
