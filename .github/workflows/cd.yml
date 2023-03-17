@@ -3,12 +3,14 @@
 # it takes pull request name
 # and automatically commit it as a package version
 # pull request name should always be a version of a new release
+# 
+# After version bump publishing Cocoapods release
 
-name: set-user-agent
+name: cd
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
 env:
   PACKAGE_VERSION: ${{ github.event.pull_request.title }}
 
@@ -18,6 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
+          fetch-depth: 0
           token: ${{ secrets.GH_TOKEN }}
 
       - name: Set User Agent
@@ -27,4 +30,11 @@ jobs:
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Set User Agent
+          tagging_message: ${{ github.event.pull_request.title }}
+          skip_checkout: true
 
+      - name: Publish to CocoaPod register
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+        run: |
+          pod trunk push WalletConnectSwiftV2.podspec
