@@ -30,14 +30,12 @@ jobs:
         with:
           commit_message: Set User Agent
 
-      - uses: actions/checkout@v2
       - uses: rickstaa/action-create-tag@v1
         id: "tag_create"
         with:
           tag: PACKAGE_VERSION
           tag_exists_error: false
 
-      - uses: actions/checkout@v2
       - name: Publish to CocoaPod register
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
