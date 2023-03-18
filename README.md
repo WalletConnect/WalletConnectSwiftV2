@@ -23,7 +23,7 @@ Swift implementation of WalletConnect v.2 protocol for native iOS applications.
 Add .package(url:_:) to your Package.swift:
 ```Swift
 dependencies: [
-    .package(url: "https://github.com/WalletConnect/WalletConnectSwiftV2", .branch("main")),
+    .package(url: "https://github.com/oneandzeros-co/WalletConnectSwiftV2", .branch("main")),
 ],
 ```
 ### Cocoapods
@@ -34,7 +34,7 @@ pod 'WalletConnectSwiftV2'
 ```
 If you encounter any problems during package installation, you can specify the exact path to the repository
 ```Ruby
-pod 'WalletConnectSwiftV2', :git => 'https://github.com/WalletConnect/WalletConnectSwiftV2.git', :tag => '1.0.5'
+pod 'WalletConnectSwiftV2', :git => 'https://github.com/oneandzeros-co/WalletConnectSwiftV2.git', :tag => '1.0.5'
 ```
 ## Setting Project ID
 Follow instructions from *Configuration.xcconfig* and configure PROJECT_ID with your ID from WalletConnect Dashboard
