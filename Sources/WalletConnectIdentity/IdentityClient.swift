@@ -28,6 +28,15 @@ public final class IdentityClient {
         return pubKey
     }
 
+    public func registerIfNeeded(account: Account, onSign: SigningCallback) async throws {
+        if let _ = try? identityStorage.getIdentityKey(for: account) {
+            return
+        } else {
+            let _ = try await identityService.registerIdentity(account: account, onSign: onSign)
+            logger.debug("Did register an account: \(account)")
+        }
+    }
+
     public func goPublic(account: Account) async throws -> AgreementPublicKey {
         let inviteKey = try await identityService.registerInvite(account: account)
         logger.debug("Did goPublic an account: \(account)")
