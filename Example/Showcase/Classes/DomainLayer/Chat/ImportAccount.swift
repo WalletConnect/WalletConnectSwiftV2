@@ -48,8 +48,8 @@ enum ImportAccount {
         case .js:
             return Account("eip155:1:0x7ABa5B1F436e42f6d4A579FB3Ad6D204F6A91863")!
         case .custom(let privateKey):
-            let address = try! EthereumPrivateKey(hexPrivateKey: "0x" + privateKey, ctx: nil).address.rawAddress
-            return Account("eip155:1:\(address))")!
+            let address = try! EthereumPrivateKey(hexPrivateKey: "0x" + privateKey, ctx: nil).address.hex(eip55: false)
+            return Account("eip155:1:\(address)")!
         }
     }
 
