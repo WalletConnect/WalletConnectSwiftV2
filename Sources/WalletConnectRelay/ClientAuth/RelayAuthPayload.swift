@@ -1,6 +1,6 @@
 import Foundation
 
-struct AuthPayload: JWTClaimsCodable {
+struct RelayAuthPayload: JWTClaimsCodable {
 
     struct Wrapper: JWTWrapper {
         let jwtString: String
