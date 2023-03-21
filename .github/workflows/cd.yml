@@ -37,5 +37,5 @@ jobs:
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
         run: |
-          pod trunk push WalletConnectSwiftV2.podspec --verbose
+          pod trunk push WalletConnectSwiftV2.podspec --verbose --allow-warnings
 
