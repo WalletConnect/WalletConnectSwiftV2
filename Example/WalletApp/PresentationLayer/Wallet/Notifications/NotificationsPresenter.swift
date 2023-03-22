@@ -49,7 +49,9 @@ private extension NotificationsPresenter {
 
     func setupSubscriptions() {
         self.subscriptions = interactor.getSubscriptions()
-            .map { SubscriptionsViewModel(subscription: $0) }
+            .map {
+                return SubscriptionsViewModel(subscription: $0)
+            }
         interactor.subscriptionsPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] pushSubscriptions in

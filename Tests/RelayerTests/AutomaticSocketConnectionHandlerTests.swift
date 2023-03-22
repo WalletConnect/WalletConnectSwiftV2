@@ -55,19 +55,19 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
         XCTAssertFalse(webSocketSession.isConnected)
     }
 
-    func testReconnectOnDisconnectForeground() {
+    func testReconnectOnDisconnectForeground() async {
         appStateObserver.currentState = .foreground
         XCTAssertTrue(webSocketSession.isConnected)
         webSocketSession.disconnect()
-        sut.handleDisconnection()
+        await sut.handleDisconnection()
         XCTAssertTrue(webSocketSession.isConnected)
     }
 
-    func testReconnectOnDisconnectBackground() {
+    func testReconnectOnDisconnectBackground() async {
         appStateObserver.currentState = .background
         XCTAssertTrue(webSocketSession.isConnected)
         webSocketSession.disconnect()
-        sut.handleDisconnection()
+        await sut.handleDisconnection()
         XCTAssertFalse(webSocketSession.isConnected)
     }
 }

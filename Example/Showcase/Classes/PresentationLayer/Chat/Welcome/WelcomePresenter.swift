@@ -7,30 +7,32 @@ final class WelcomePresenter: ObservableObject {
     private let router: WelcomeRouter
     private let interactor: WelcomeInteractor
 
-    @Published var connected: Bool = false
+    private var disposeBag = Set<AnyCancellable>()
 
     init(router: WelcomeRouter, interactor: WelcomeInteractor) {
+        defer { setupInitialState() }
         self.router = router
         self.interactor = interactor
-    }
-
-    @MainActor
-    func setupInitialState() async {
-        for await connected in interactor.trackConnection() {
-            print("Client connection status: \(connected)")
-            self.connected = connected == .connected
-        }
     }
 
     var buttonTitle: String {
         return interactor.isAuthorized() ? "Start Messaging" : "Connect wallet"
     }
 
-    func didPressImport() {
-        if let account = interactor.account {
-            router.presentMain(account: account)
+    @MainActor
+    func didPressImport() async throws {
+        if let importAccount = interactor.importAccount {
+            try await interactor.goPublic()
+            router.presentMain(importAccount: importAccount)
         } else {
             router.presentImport()
         }
+    }
+}
+
+private extension WelcomePresenter {
+
+    func setupInitialState() {
+        
     }
 }

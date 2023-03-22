@@ -14,19 +14,22 @@ final class ChatListInteractor {
         return chatService.getThreads()
     }
 
-    func threadsSubscription() -> Stream<WalletConnectChat.Thread> {
+    func threadsSubscription() -> Stream<[WalletConnectChat.Thread]> {
         return chatService.threadPublisher
     }
 
-    func getInvites() -> [Invite] {
-        return chatService.getInvites()
+    func getInvites() -> [ReceivedInvite] {
+        return chatService.getReceivedInvites()
     }
 
-    func invitesSubscription() -> Stream<Invite> {
-        return chatService.invitePublisher
+    func receivedInvitesSubscription() -> Stream<[ReceivedInvite]> {
+        return chatService.receivedInvitePublisher
     }
 
-    func logout() {
-        accountStorage.account = nil
+    func logout() async throws {
+        guard let importAccount = accountStorage.importAccount else { return }
+        try await chatService.goPrivate(account: importAccount.account)
+        try await chatService.unregister(account: importAccount.account, privateKey: importAccount.privateKey)
+        accountStorage.importAccount = nil
     }
 }

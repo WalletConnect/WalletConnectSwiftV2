@@ -22,7 +22,9 @@ struct SessionRequestView: View {
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .padding(.top, 10)
                     
-                    authRequestView()
+                    if presenter.message != "[:]" {
+                        authRequestView()
+                    }
                     
                     HStack(spacing: 20) {
                         Button {
@@ -77,6 +79,9 @@ struct SessionRequestView: View {
                 .padding(.horizontal, 10)
                 
                 Spacer()
+            }
+            .alert(presenter.errorMessage, isPresented: $presenter.showError) {
+                Button("OK", role: .cancel) {}
             }
         }
         .edgesIgnoringSafeArea(.all)

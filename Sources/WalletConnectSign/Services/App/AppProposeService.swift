@@ -48,6 +48,6 @@ final class AppProposeService {
         )
         
         let request = RPCRequest(method: protocolMethod.method, params: proposal)
-        try await networkingInteractor.requestNetworkAck(request, topic: pairingTopic, protocolMethod: protocolMethod)
+        try await networkingInteractor.request(request, topic: pairingTopic, protocolMethod: protocolMethod)
     }
 }

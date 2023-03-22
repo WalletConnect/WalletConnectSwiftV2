@@ -1,13 +1,13 @@
 import UIKit
-import Web3Inbox
 import WebKit
+import Web3Inbox
 
 final class Web3InboxViewController: UIViewController {
 
-    private let account: Account
+    private let importAccount: ImportAccount
 
-    init(account: Account) {
-        self.account = account
+    init(importAccount: ImportAccount) {
+        self.importAccount = importAccount
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -18,9 +18,21 @@ final class Web3InboxViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        Web3Inbox.configure(account: account)
-        view = Web3Inbox.instance.getWebView()
+        Web3Inbox.configure(account: importAccount.account, onSign: onSing)
 
+        edgesForExtendedLayout = []
         navigationItem.title = "Web3Inbox SDK"
+        navigationItem.largeTitleDisplayMode = .never
+        view = Web3Inbox.instance.getWebView()
+    }
+}
+
+private extension Web3InboxViewController {
+
+    func onSing(_ message: String) -> SigningResult {
+        let privateKey = Data(hex: importAccount.privateKey)
+        let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
+        let signature = try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
+        return .signed(signature)
     }
 }

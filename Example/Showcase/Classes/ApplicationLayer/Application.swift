@@ -10,8 +10,4 @@ final class Application {
     lazy var accountStorage: AccountStorage = {
         return AccountStorage(defaults: .standard)
     }()
-
-    lazy var registerService: RegisterService = {
-        return RegisterService(chatService: chatService)
-    }()
 }

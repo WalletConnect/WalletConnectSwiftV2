@@ -114,7 +114,7 @@ final class AppProposalServiceTests: XCTestCase {
             exp.fulfill()
         }
 
-        networkingInteractor.responsePublisherSubject.send((topicA, request, response))
+        networkingInteractor.responsePublisherSubject.send((topicA, request, response, Date()))
         let privateKey = try! cryptoMock.getPrivateKey(for: proposal.proposer.publicKey)!
         let topicB = deriveTopic(publicKey: responder.publicKey, privateKey: privateKey)
         _ = storageMock.getPairing(forTopic: topicA)!
@@ -143,7 +143,7 @@ final class AppProposalServiceTests: XCTestCase {
               }
 
         let response = RPCResponse.stubError(forRequest: request)
-        networkingInteractor.responsePublisherSubject.send((topicA, request, response))
+        networkingInteractor.responsePublisherSubject.send((topicA, request, response, Date()))
 
         XCTAssert(networkingInteractor.didUnsubscribe(to: pairing.topic), "Proposer must unsubscribe if pairing is inactive.")
         XCTAssertFalse(storageMock.hasPairing(forTopic: pairing.topic), "Proposer must delete an inactive pairing.")
@@ -171,7 +171,7 @@ final class AppProposalServiceTests: XCTestCase {
         storageMock.setPairing(storedPairing)
 
         let response = RPCResponse.stubError(forRequest: request)
-        networkingInteractor.responsePublisherSubject.send((topicA, request, response))
+        networkingInteractor.responsePublisherSubject.send((topicA, request, response, Date()))
 
         XCTAssertFalse(networkingInteractor.didUnsubscribe(to: pairing.topic), "Proposer must not unsubscribe if pairing is active.")
         XCTAssert(storageMock.hasPairing(forTopic: pairing.topic), "Proposer must not delete an active pairing.")

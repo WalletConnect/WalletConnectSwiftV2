@@ -37,6 +37,32 @@ public class Web3WalletClient {
     public var sessionsPublisher: AnyPublisher<[Session], Never> {
         signClient.sessionsPublisher.eraseToAnyPublisher()
     }
+    
+    /// Publisher that sends web socket connection status
+    public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
+        signClient.socketConnectionStatusPublisher.eraseToAnyPublisher()
+    }
+    
+    /// Publisher that sends session when one is settled
+    ///
+    /// Event is emited on proposer and responder client when both communicating peers have successfully established a session.
+    public var sessionSettlePublisher: AnyPublisher<Session, Never> {
+        signClient.sessionSettlePublisher.eraseToAnyPublisher()
+    }
+    
+    /// Publisher that sends deleted session topic
+    ///
+    /// Event can be emited on any type of the client.
+    public var sessionDeletePublisher: AnyPublisher<(String, Reason), Never> {
+        signClient.sessionDeletePublisher.eraseToAnyPublisher()
+    }
+    
+    /// Publisher that sends response for session request
+    ///
+    /// In most cases that event will be emited on dApp client.
+    public var sessionResponsePublisher: AnyPublisher<Response, Never> {
+        signClient.sessionResponsePublisher.eraseToAnyPublisher()
+    }
 
     // MARK: - Private Properties
     private let authClient: AuthClientProtocol
@@ -183,6 +209,17 @@ public class Web3WalletClient {
     
     public func registerEchoClient(deviceToken: Data) async throws {
         try await echoClient.register(deviceToken: deviceToken)
+    }
+    
+    /// Delete all stored data such as: pairings, sessions, keys
+    ///
+    /// - Note: Will unsubscribe from all topics
+    public func cleanup() async throws {
+        try await signClient.cleanup()
+    }
+    
+    public func getPairings() -> [Pairing] {
+        return pairingClient.getPairings()
     }
 }
 

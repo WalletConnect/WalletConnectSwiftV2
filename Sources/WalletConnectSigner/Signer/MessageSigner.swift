@@ -20,6 +20,7 @@ public protocol MessageSigning {
     ) throws -> CacaoSignature
 }
 
+// TODO: Fix naming
 public typealias CacaoMessageSigner = MessageSignatureVerifying & MessageSigning
 
 struct MessageSigner: CacaoMessageSigner {

@@ -3,10 +3,10 @@ import Combine
 
 public class ChatClient {
     private var publishers = [AnyCancellable]()
-    private let registry: Registry
-    private let registryService: RegistryService
+    private let identityClient: IdentityClient
     private let messagingService: MessagingService
     private let accountService: AccountService
+    private let resubscriptionService: ResubscriptionService
     private let invitationHandlingService: InvitationHandlingService
     private let inviteService: InviteService
     private let leaveService: LeaveService
@@ -15,27 +15,52 @@ public class ChatClient {
 
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
-    private var newThreadPublisherSubject = PassthroughSubject<Thread, Never>()
+    public var messagesPublisher: AnyPublisher<[Message], Never> {
+        return chatStorage.messagesPublisher
+    }
+
+    public var receivedInvitesPublisher: AnyPublisher<[ReceivedInvite], Never> {
+        return chatStorage.receivedInvitesPublisher
+    }
+
+    public var sentInvitesPublisher: AnyPublisher<[SentInvite], Never> {
+        return chatStorage.sentInvitesPublisher
+    }
+
+    public var threadsPublisher: AnyPublisher<[Thread], Never> {
+        return chatStorage.threadsPublisher
+    }
+
+    public var newMessagePublisher: AnyPublisher<Message, Never> {
+        return chatStorage.newMessagePublisher
+    }
+
+    public var newReceivedInvitePublisher: AnyPublisher<ReceivedInvite, Never> {
+        return chatStorage.newReceivedInvitePublisher
+    }
+
+    public var newSentInvitePublisher: AnyPublisher<SentInvite, Never> {
+        return chatStorage.newSentInvitePublisher
+    }
+
     public var newThreadPublisher: AnyPublisher<Thread, Never> {
-        newThreadPublisherSubject.eraseToAnyPublisher()
+        return chatStorage.newThreadPublisher
     }
 
-    private var invitePublisherSubject = PassthroughSubject<Invite, Never>()
-    public var invitePublisher: AnyPublisher<Invite, Never> {
-        invitePublisherSubject.eraseToAnyPublisher()
+    public var acceptPublisher: AnyPublisher<(String, SentInvite), Never> {
+        return chatStorage.acceptPublisher
     }
 
-    private var messagePublisherSubject = PassthroughSubject<Message, Never>()
-    public var messagePublisher: AnyPublisher<Message, Never> {
-        messagePublisherSubject.eraseToAnyPublisher()
+    public var rejectPublisher: AnyPublisher<SentInvite, Never> {
+        return chatStorage.rejectPublisher
     }
 
     // MARK: - Initialization
 
-    init(registry: Registry,
-         registryService: RegistryService,
+    init(identityClient: IdentityClient,
          messagingService: MessagingService,
          accountService: AccountService,
+         resubscriptionService: ResubscriptionService,
          invitationHandlingService: InvitationHandlingService,
          inviteService: InviteService,
          leaveService: LeaveService,
@@ -43,56 +68,97 @@ public class ChatClient {
          chatStorage: ChatStorage,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
     ) {
-        self.registry = registry
-        self.registryService = registryService
+        self.identityClient = identityClient
         self.messagingService = messagingService
         self.accountService = accountService
+        self.resubscriptionService = resubscriptionService
         self.invitationHandlingService = invitationHandlingService
         self.inviteService = inviteService
         self.leaveService = leaveService
         self.kms = kms
         self.chatStorage = chatStorage
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
-
-        setUpEnginesCallbacks()
     }
 
     // MARK: - Public interface
 
-    /// Registers a new record on Chat keyserver,
-    /// record is a blockchain account with a client generated public key
-    /// - Parameter account: CAIP10 blockchain account
-    /// - Returns: public key
+    /// Registers a blockchain account with an identity key if not yet registered on this client
+    /// Registers invite key if not yet registered on this client and starts listening on invites if private is false
+    /// - Parameter onSign: Callback for signing CAIP-122 message to verify blockchain account ownership
+    /// - Returns: Returns the public identity key
     @discardableResult
-    public func register(account: Account) async throws -> String {
-        try await registryService.register(account: account)
+    public func register(account: Account,
+        isPrivate: Bool = false,
+        onSign: @escaping SigningCallback
+    ) async throws -> String {
+        let publicKey = try await identityClient.register(account: account, onSign: onSign)
+
+        accountService.setAccount(account)
+
+        guard !isPrivate else {
+            return publicKey
+        }
+
+        try await goPublic(account: account)
+
+        return publicKey
     }
 
-    /// Queries the default keyserver with a blockchain account
+    /// Unregisters a blockchain account with previously registered identity key
+    /// Must not unregister invite key but must stop listening for invites
+    /// - Parameter onSign: Callback for signing CAIP-122 message to verify blockchain account ownership
+    public func unregister(account: Account, onSign: @escaping SigningCallback) async throws {
+        try await identityClient.unregister(account: account, onSign: onSign)
+    }
+
+    /// Queries the keyserver with a blockchain account
     /// - Parameter account: CAIP10 blockachain account
-    /// - Returns: public key associated with an account in chat's keyserver
+    /// - Returns: Returns the invite key
     public func resolve(account: Account) async throws -> String {
-        try await registry.resolve(account: account)
+        try await identityClient.resolveInvite(account: account)
     }
 
-    /// Sends a chat invite with opening message
-    /// - Parameters:
-    ///   - publicKey: publicKey associated with a peer
-    ///   - openingMessage: oppening message for a chat invite
-    ///   TODO - peerAccount should be derived
-    public func invite(peerAccount: Account, openingMessage: String) async throws {
-        try await inviteService.invite(peerAccount: peerAccount, openingMessage: openingMessage)
+    /// Sends a chat invite
+    /// Creates and stores SentInvite with `pending` state
+    /// - Parameter invite: An Invite object
+    /// - Returns: Returns an invite id
+    @discardableResult
+    public func invite(invite: Invite) async throws -> Int64 {
+        return try await inviteService.invite(invite: invite)
     }
 
-    public func accept(inviteId: Int64) async throws {
-        try await invitationHandlingService.accept(inviteId: inviteId)
+    /// Unregisters an invite key from keyserver
+    /// Stops listening for invites
+    /// - Parameter account: CAIP10 blockachain account
+    public func goPrivate(account: Account) async throws {
+        let inviteKey = try await identityClient.goPrivate(account: account)
+        resubscriptionService.unsubscribeFromInvites(inviteKey: inviteKey)
     }
 
+    /// Registers an invite key if not yet registered on this client from keyserver
+    /// Starts listening for invites
+    /// - Parameter account: CAIP10 blockachain account
+    /// - Returns: The public invite key
+    public func goPublic(account: Account) async throws {
+        let inviteKey = try await identityClient.goPublic(account: account)
+        try await resubscriptionService.subscribeForInvites(inviteKey: inviteKey)
+    }
+
+    /// Accepts a chat invite by id from account specified as inviteeAccount in Invite
+    /// - Parameter inviteId: Invite id
+    /// - Returns: Thread topic
+    @discardableResult
+    public func accept(inviteId: Int64) async throws -> String {
+        return try await invitationHandlingService.accept(inviteId: inviteId)
+    }
+
+    /// Rejects a chat invite by id from account specified as inviteeAccount in Invite
+    /// - Parameter inviteId: Invite id
     public func reject(inviteId: Int64) async throws {
         try await invitationHandlingService.reject(inviteId: inviteId)
     }
 
-    /// Sends a chat message to an active chat thread
+    /// Sends a chat message to an active chat thread from account specified as selfAccount in Thread
     /// - Parameters:
     ///   - topic: thread topic
     ///   - message: chat message
@@ -100,18 +166,31 @@ public class ChatClient {
         try await messagingService.send(topic: topic, messageString: message)
     }
 
-    /// To Ping peer client
+    /// Ping its peer to evaluate if it's currently online
     /// - Parameter topic: chat thread topic
     public func ping(topic: String) {
         fatalError("not implemented")
     }
 
+    /// Leaves a chat thread and stops receiving messages
+    /// - Parameter topic: chat thread topic
     public func leave(topic: String) async throws {
         try await leaveService.leave(topic: topic)
     }
 
-    public func getInvites() -> [Invite] {
-        return chatStorage.getInvites(account: accountService.currentAccount)
+    /// Sets peer account with public key
+    /// - Parameter account: CAIP10 blockachain account
+    /// - Parameter publicKey: Account associated publicKey hex string
+    public func setContact(account: Account, publicKey: String) async throws {
+        fatalError("not implemented")
+    }
+
+    public func getReceivedInvites() -> [ReceivedInvite] {
+        return chatStorage.getReceivedInvites(account: accountService.currentAccount)
+    }
+
+    public func getSentInvites() -> [SentInvite] {
+        return chatStorage.getSentInvites(account: accountService.currentAccount)
     }
 
     public func getThreads() -> [Thread] {
@@ -120,20 +199,5 @@ public class ChatClient {
 
     public func getMessages(topic: String) -> [Message] {
         return chatStorage.getMessages(topic: topic, account: accountService.currentAccount)
-    }
-
-    private func setUpEnginesCallbacks() {
-        invitationHandlingService.onInvite = { [unowned self] invite in
-            invitePublisherSubject.send(invite)
-        }
-        invitationHandlingService.onNewThread = { [unowned self] newThread in
-            newThreadPublisherSubject.send(newThread)
-        }
-        inviteService.onNewThread = { [unowned self] newThread in
-            newThreadPublisherSubject.send(newThread)
-        }
-        messagingService.onMessage = { [unowned self] message in
-            messagePublisherSubject.send(message)
-        }
     }
 }

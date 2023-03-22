@@ -37,7 +37,11 @@ public final class Web3InboxClient {
         return webView
     }
 
-    public func setAccount(_ account: Account) async throws {
+    public func setAccount(
+        _ account: Account,
+        onSign: @escaping SigningCallback
+    ) async throws {
+        clientProxy.onSign = onSign
         try await authorize(account: account)
     }
 }
@@ -47,9 +51,6 @@ public final class Web3InboxClient {
 private extension Web3InboxClient {
 
     func setupSubscriptions() {
-        webviewSubscriber.onLogin = { [unowned self] in
-            try await self.authorize(account: self.account)
-        }
         webviewSubscriber.onRequest = { [unowned self] request in
             try await self.clientProxy.request(request)
         }

@@ -10,7 +10,7 @@ struct InviteListView: View {
                 Spacer()
                     .frame(height: 16.0)
 
-                ForEach(presenter.invites, id: \.subtitle) { invite in
+                ForEach(presenter.invites) { invite in
                     HStack(spacing: 16.0) {
                         Image("avatar")
                             .resizable()
@@ -30,35 +30,43 @@ struct InviteListView: View {
 
                         Spacer()
 
-                        HStack(spacing: 8.0) {
-                            Button(action: { presenter.didPressAccept(invite: invite) }) {
-                                Image("checkmark_icon")
-                                    .resizable()
-                                    .frame(width: 32, height: 32)
+                        if invite.showActions {
+                            HStack(spacing: 8.0) {
+                                PlainButton {
+                                    try await presenter.didPressAccept(invite: invite)
+                                } label: {
+                                    Image("checkmark_icon")
+                                        .resizable()
+                                        .frame(width: 32, height: 32)
+                                }
+
+                                PlainButton {
+                                    try await presenter.didPressReject(invite: invite)
+                                } label: {
+                                    Image("cross_icon")
+                                        .resizable()
+                                        .frame(width: 32, height: 32)
+                                }
                             }
-                            Button(action: { presenter.didPressReject(invite: invite) }) {
-                                Image("cross_icon")
-                                    .resizable()
-                                    .frame(width: 32, height: 32)
-                            }
+                            .padding(4.0)
+                            .background(
+                                Capsule()
+                                    .foregroundColor(.w_secondaryBackground)
+                            )
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.w_tertiaryBackground, lineWidth: 0.5)
+                            )
+                        } else {
+                            Text(invite.statusTitle)
+                                .font(.subheadline)
+                                .foregroundColor(.w_secondaryForeground)
                         }
-                        .padding(4.0)
-                        .background(
-                            Capsule()
-                                .foregroundColor(.w_secondaryBackground)
-                        )
-                        .overlay(
-                            Capsule()
-                                .stroke(Color.w_tertiaryBackground, lineWidth: 0.5)
-                        )
                     }
                     .frame(height: 64.0)
                 }
                 .padding(16.0)
             }
-        }
-        .task {
-            await presenter.setupInitialState()
         }
     }
 }

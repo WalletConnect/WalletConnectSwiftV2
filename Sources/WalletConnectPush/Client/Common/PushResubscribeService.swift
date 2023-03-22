@@ -19,10 +19,10 @@ final class PushResubscribeService {
         networkInteractor.socketConnectionStatusPublisher
             .sink { [unowned self] status in
                 guard status == .connected else { return }
-                subscriptionsStorage.getAll()
-                    .forEach { subscription in
-                        Task(priority: .high) { try await networkInteractor.subscribe(topic: subscription.topic) }
-                    }
+                let topics = subscriptionsStorage.getAll().map{$0.topic}
+                Task(priority: .high) {
+                    try await networkInteractor.batchSubscribe(topics: topics)
+                }
             }
             .store(in: &publishers)
     }

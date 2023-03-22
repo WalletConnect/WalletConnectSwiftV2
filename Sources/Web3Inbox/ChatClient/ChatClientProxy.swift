@@ -4,10 +4,12 @@ final class ChatClientProxy {
 
     private let client: ChatClient
 
+    var onSign: SigningCallback
     var onResponse: ((RPCResponse) async throws -> Void)?
 
-    init(client: ChatClient) {
+    init(client: ChatClient, onSign: @escaping SigningCallback) {
         self.client = client
+        self.onSign = onSign
     }
 
     func request(_ request: RPCRequest) async throws {
@@ -15,8 +17,12 @@ final class ChatClientProxy {
         else { throw Errors.unregisteredMethod }
 
         switch event {
-        case .getInvites:
-            let invites = client.getInvites()
+        case .getReceivedInvites:
+            let invites = client.getReceivedInvites()
+            try await respond(with: invites, request: request)
+
+        case .getSentInvites:
+            let invites = client.getSentInvites()
             try await respond(with: invites, request: request)
 
         case .getThreads:
@@ -25,8 +31,13 @@ final class ChatClientProxy {
 
         case .register:
             let params = try parse(RegisterRequest.self, params: request.params)
-            try await client.register(account: params.account)
+            try await client.register(account: params.account, onSign: onSign)
             try await respond(request: request)
+
+        case .resolve:
+            let params = try parse(ResolveRequest.self, params: request.params)
+            let inviteKey = try await client.resolve(account: params.account)
+            try await respond(with: inviteKey,request: request)
 
         case .getMessages:
             let params = try parse(GetMessagesRequest.self, params: request.params)
@@ -34,9 +45,9 @@ final class ChatClientProxy {
             try await respond(with: messages, request: request)
 
         case .message:
-            let params = try parse(MessageRequest.self, params: request.params)
-            try await client.message(topic: params.topic, message: params.payload.message)
-            try await respond(with: params.payload, request: request)
+            let params = try parse(Message.self, params: request.params)
+            try await client.message(topic: params.topic, message: params.message)
+            try await respond(with: params, request: request)
 
         case .accept:
             let params = try parse(AcceptRequest.self, params: request.params)
@@ -49,8 +60,8 @@ final class ChatClientProxy {
             try await respond(request: request)
 
         case .invite:
-            let params = try parse(InviteRequest.self, params: request.params)
-            try await client.invite(peerAccount: params.invite.account, openingMessage: params.invite.message)
+            let params = try parse(Invite.self, params: request.params)
+            try await client.invite(invite: params)
             try await respond(request: request)
         }
     }
@@ -69,13 +80,12 @@ private extension ChatClientProxy {
         let account: Account
     }
 
-    struct GetMessagesRequest: Codable {
-        let topic: String
+    struct ResolveRequest: Codable {
+        let account: Account
     }
 
-    struct MessageRequest: Codable {
+    struct GetMessagesRequest: Codable {
         let topic: String
-        let payload: MessagePayload
     }
 
     struct AcceptRequest: Codable {
@@ -86,17 +96,8 @@ private extension ChatClientProxy {
         let id: Int64
     }
 
-    struct InviteRequest: Codable {
-        struct Invite: Codable {
-            let account: Account
-            let message: String
-        }
-        let account: Account
-        let invite: Invite
-    }
-
     func parse<Request: Codable>(_ type: Request.Type, params: AnyCodable?) throws -> Request {
-        guard let params = try params?.get([Request].self).first
+        guard let params = try params?.get(Request.self)
         else { throw Errors.unregisteredParams }
         return params
     }

@@ -1,9 +1,13 @@
 import Foundation
 import WalletConnectChat
 
-struct MessageViewModel {
+struct MessageViewModel: Identifiable {
     private let message: Message
     private let thread: WalletConnectChat.Thread
+
+    var id: UInt64 {
+        return message.timestamp
+    }
 
     init(message: Message, thread: WalletConnectChat.Thread) {
         self.message = message

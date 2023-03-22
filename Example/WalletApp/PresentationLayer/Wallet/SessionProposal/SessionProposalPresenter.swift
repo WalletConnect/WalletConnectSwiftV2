@@ -7,8 +7,7 @@ final class SessionProposalPresenter: ObservableObject {
     private let interactor: SessionProposalInteractor
     private let router: SessionProposalRouter
     
-    let proposal: Proposal
-    private let sessionProposal: Session.Proposal
+    let sessionProposal: Session.Proposal
     
     private var disposeBag = Set<AnyCancellable>()
 
@@ -20,7 +19,6 @@ final class SessionProposalPresenter: ObservableObject {
         defer { setupInitialState() }
         self.interactor = interactor
         self.router = router
-        self.proposal = Proposal(proposal: proposal)
         self.sessionProposal = proposal
     }
     

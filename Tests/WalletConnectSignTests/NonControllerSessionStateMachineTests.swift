@@ -35,7 +35,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
             didCallbackUpdatMethods = true
             XCTAssertEqual(topic, session.topic)
         }
-        networkingInteractor.requestPublisherSubject.send((session.topic, RPCRequest.stubUpdateNamespaces()))
+        networkingInteractor.requestPublisherSubject.send((session.topic, RPCRequest.stubUpdateNamespaces(), Date()))
         XCTAssertTrue(didCallbackUpdatMethods)
         usleep(100)
         XCTAssertTrue(networkingInteractor.didRespondSuccess)
@@ -51,7 +51,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
 //    }
 
     func testUpdateMethodPeerErrorSessionNotFound() {
-        networkingInteractor.requestPublisherSubject.send(("", RPCRequest.stubUpdateNamespaces()))
+        networkingInteractor.requestPublisherSubject.send(("", RPCRequest.stubUpdateNamespaces(), Date()))
         usleep(100)
         XCTAssertFalse(networkingInteractor.didRespondSuccess)
         XCTAssertEqual(networkingInteractor.lastErrorCode, 7001)
@@ -60,7 +60,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
     func testUpdateMethodPeerErrorUnauthorized() {
         let session = WCSession.stub(isSelfController: true) // Peer is not a controller
         storageMock.setSession(session)
-        networkingInteractor.requestPublisherSubject.send((session.topic, RPCRequest.stubUpdateNamespaces()))
+        networkingInteractor.requestPublisherSubject.send((session.topic, RPCRequest.stubUpdateNamespaces(), Date()))
         usleep(100)
         XCTAssertFalse(networkingInteractor.didRespondSuccess)
         XCTAssertEqual(networkingInteractor.lastErrorCode, 3003)
@@ -74,7 +74,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         storageMock.setSession(session)
         let twoDaysFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 2).timeIntervalSince1970)
 
-        networkingInteractor.requestPublisherSubject.send((session.topic, RPCRequest.stubUpdateExpiry(expiry: twoDaysFromNowTimestamp)))
+        networkingInteractor.requestPublisherSubject.send((session.topic, RPCRequest.stubUpdateExpiry(expiry: twoDaysFromNowTimestamp), Date()))
         let extendedSession = storageMock.getAll().first {$0.topic == session.topic}!
         print(extendedSession.expiryDate)
 
@@ -87,7 +87,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         storageMock.setSession(session)
         let twoDaysFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 2).timeIntervalSince1970)
 
-        networkingInteractor.requestPublisherSubject.send((session.topic, RPCRequest.stubUpdateExpiry(expiry: twoDaysFromNowTimestamp)))
+        networkingInteractor.requestPublisherSubject.send((session.topic, RPCRequest.stubUpdateExpiry(expiry: twoDaysFromNowTimestamp), Date()))
 
         let potentiallyExtendedSession = storageMock.getAll().first {$0.topic == session.topic}!
         XCTAssertEqual(potentiallyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, accuracy: 1, "expiry date has been extended for peer non controller request ")
@@ -98,7 +98,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         let session = WCSession.stub(isSelfController: false, expiryDate: tomorrow)
         storageMock.setSession(session)
         let tenDaysFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 10).timeIntervalSince1970)
-        networkingInteractor.requestPublisherSubject.send((session.topic, RPCRequest.stubUpdateExpiry(expiry: tenDaysFromNowTimestamp)))
+        networkingInteractor.requestPublisherSubject.send((session.topic, RPCRequest.stubUpdateExpiry(expiry: tenDaysFromNowTimestamp), Date()))
 
         let potentaillyExtendedSession = storageMock.getAll().first {$0.topic == session.topic}!
         XCTAssertEqual(potentaillyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, accuracy: 1, "expiry date has been extended despite ttl to high")
@@ -110,7 +110,7 @@ class NonControllerSessionStateMachineTests: XCTestCase {
         storageMock.setSession(session)
         let oneDayFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 10).timeIntervalSince1970)
 
-        networkingInteractor.requestPublisherSubject.send((session.topic, RPCRequest.stubUpdateExpiry(expiry: oneDayFromNowTimestamp)))
+        networkingInteractor.requestPublisherSubject.send((session.topic, RPCRequest.stubUpdateExpiry(expiry: oneDayFromNowTimestamp), Date()))
         let potentaillyExtendedSession = storageMock.getAll().first {$0.topic == session.topic}!
         XCTAssertEqual(potentaillyExtendedSession.expiryDate.timeIntervalSinceReferenceDate, tomorrow.timeIntervalSinceReferenceDate, accuracy: 1, "expiry date has been extended despite ttl to low")
     }
