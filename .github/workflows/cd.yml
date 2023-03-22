@@ -10,7 +10,7 @@ name: cd
 
 on:
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
 env:
   PACKAGE_VERSION: ${{ github.event.pull_request.title }}
 
