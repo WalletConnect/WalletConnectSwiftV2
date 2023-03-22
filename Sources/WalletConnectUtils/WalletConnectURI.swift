@@ -11,6 +11,11 @@ public struct WalletConnectURI: Equatable {
         return "wc:\(topic)@\(version)?symKey=\(symKey)&\(relayQuery)"
     }
 
+    public var deeplinkUri: String {
+        return absoluteString
+            .addingPercentEncoding(withAllowedCharacters: .rfc3986)!
+    }
+
     public init(topic: String, symKey: String, relay: RelayProtocolOptions) {
         self.version = "2"
         self.topic = topic
