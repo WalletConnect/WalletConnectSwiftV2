@@ -13,7 +13,7 @@ public struct WalletConnectURI: Equatable {
 
     public var deeplinkUri: String {
         return absoluteString
-            .addingPercentEncoding(withAllowedCharacters: .rfc3986)!
+            .addingPercentEncoding(withAllowedCharacters: .rfc3986) ?? absoluteString
     }
 
     public init(topic: String, symKey: String, relay: RelayProtocolOptions) {
