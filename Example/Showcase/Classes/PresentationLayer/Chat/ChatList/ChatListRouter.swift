@@ -17,8 +17,12 @@ final class ChatListRouter {
             .present(from: viewController)
     }
 
-    func presentInviteList(account: Account) {
-        InviteListModule.create(app: app, account: account).push(from: viewController)
+    func presentReceivedInviteList(account: Account) {
+        InviteListModule.create(app: app, account: account, type: .received).push(from: viewController)
+    }
+
+    func presentSentInviteList(account: Account) {
+        InviteListModule.create(app: app, account: account, type: .sent).push(from: viewController)
     }
 
     func presentChat(thread: WalletConnectChat.Thread) {

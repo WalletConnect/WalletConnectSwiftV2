@@ -12,17 +12,11 @@ struct ValidSignatureMethod {
     func encode() -> String {
         return [
             ValidSignatureMethod.methodHash,
-            leadingZeros(for: messageHash.toHexString(), end: false),
+            ContractEncoder.leadingZeros(for: messageHash.toHexString(), end: false),
             ValidSignatureMethod.paddingIndex,
             ValidSignatureMethod.signatureLength,
-            leadingZeros(for: signature.toHexString(), end: true),
+            ContractEncoder.leadingZeros(for: signature.toHexString(), end: true),
             ValidSignatureMethod.signaturePadding
         ].joined()
-    }
-
-    private func leadingZeros(for value: String, end: Bool) -> String {
-        let count = max(0, value.count % 32 - 2)
-        let padding = String(repeating: "0", count: count)
-        return end ? padding + value : value + padding
     }
 }

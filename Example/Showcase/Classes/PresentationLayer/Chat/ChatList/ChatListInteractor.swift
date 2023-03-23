@@ -18,12 +18,20 @@ final class ChatListInteractor {
         return chatService.threadPublisher
     }
 
-    func getInvites() -> [ReceivedInvite] {
+    func getReceivedInvites() -> [ReceivedInvite] {
         return chatService.getReceivedInvites()
+    }
+
+    func getSentInvites() -> [SentInvite] {
+        return chatService.getSentInvites()
     }
 
     func receivedInvitesSubscription() -> Stream<[ReceivedInvite]> {
         return chatService.receivedInvitePublisher
+    }
+
+    func sentInvitesSubscription() -> Stream<[SentInvite]> {
+        return chatService.sentInvitePublisher
     }
 
     func logout() async throws {

@@ -7,29 +7,49 @@ final class InviteListPresenter: ObservableObject {
     private let interactor: InviteListInteractor
     private let router: InviteListRouter
     private let account: Account
+    private let inviteType: InviteType
     private var disposeBag = Set<AnyCancellable>()
 
-    @Published private var receivedInvites: [ReceivedInvite] = []
-
     var invites: [InviteViewModel] {
+        switch inviteType {
+        case .received:
+            return receivedInviteViewModels
+        case .sent:
+            return sentInviteViewModels
+        }
+    }
+
+    @Published private var receivedInvites: [ReceivedInvite] = []
+    @Published private var sentInvites: [SentInvite] = []
+
+    private var receivedInviteViewModels: [InviteViewModel] {
         return receivedInvites
             .sorted(by: { $0.timestamp > $1.timestamp })
             .map { InviteViewModel(invite: $0) }
     }
 
-    init(interactor: InviteListInteractor, router: InviteListRouter, account: Account) {
+    private var sentInviteViewModels: [InviteViewModel] {
+        return sentInvites
+            .sorted(by: { $0.timestamp > $1.timestamp })
+            .map { InviteViewModel(invite: $0) }
+    }
+
+    init(interactor: InviteListInteractor, router: InviteListRouter, account: Account, inviteType: InviteType) {
         defer { setupInitialState() }
         self.interactor = interactor
         self.router = router
         self.account = account
+        self.inviteType = inviteType
     }
 
     func didPressAccept(invite: InviteViewModel) async throws {
-        try await interactor.accept(invite: invite.invite)
+        guard let invite = invite.receivedInvite else { return }
+        try await interactor.accept(invite: invite)
     }
 
     func didPressReject(invite: InviteViewModel) async throws {
-        try await interactor.reject(invite: invite.invite)
+        guard let invite = invite.receivedInvite else { return }
+        try await interactor.reject(invite: invite)
     }
 }
 
@@ -38,7 +58,7 @@ final class InviteListPresenter: ObservableObject {
 extension InviteListPresenter: SceneViewModel {
 
     var sceneTitle: String? {
-        return "Chat Requests"
+        return inviteType.title
     }
 
     var largeTitleDisplayMode: UINavigationItem.LargeTitleDisplayMode {
@@ -52,10 +72,16 @@ private extension InviteListPresenter {
 
     func setupInitialState() {
         receivedInvites = interactor.getReceivedInvites()
+        sentInvites = interactor.getSentInvites()
 
-        interactor.invitesReceivedSubscription()
+        interactor.receivedInvitesSubscription()
             .sink { [unowned self] receivedInvites in
                 self.receivedInvites = receivedInvites
+            }.store(in: &disposeBag)
+
+        interactor.sentInvitesSubscription()
+            .sink { [unowned self] sentInvites in
+                self.sentInvites = sentInvites
             }.store(in: &disposeBag)
     }
 
