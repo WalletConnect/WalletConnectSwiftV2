@@ -4,7 +4,7 @@ extension String {
 
     static let chainNamespaceRegex = "^[-a-z0-9]{3,8}$"
     static let chainReferenceRegex = "^[-a-zA-Z0-9_]{1,32}$"
-    static let accountAddressRegex = "^[a-zA-Z0-9]{1,64}$"
+    static let accountAddressRegex = "^[-.%a-zA-Z0-9]{1,128}$"
 
     static func conformsToCAIP2(_ string: String) -> Bool {
         let splits = string.split(separator: ":", omittingEmptySubsequences: false)
