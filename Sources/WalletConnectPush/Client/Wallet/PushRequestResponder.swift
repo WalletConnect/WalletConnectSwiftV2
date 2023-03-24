@@ -37,7 +37,7 @@ class PushRequestResponder {
         self.subscriptionsStore = subscriptionsStore
     }
 
-    func respond(requestId: RPCID, onSign: SigningCallback) async throws {
+    func respond(requestId: RPCID, onSign: @escaping SigningCallback) async throws {
 
         logger.debug("Approving Push Proposal")
 
@@ -49,7 +49,7 @@ class PushRequestResponder {
         let pushTopic = keys.derivedTopic()
         let requestParams = try requestRecord.request.params!.get(PushRequestParams.self)
 
-        try await identityClient.registerIfNeeded(account: requestParams.account, onSign: onSign)
+        _ = try await identityClient.register(account: requestParams.account, onSign: onSign)
 
         try kms.setAgreementSecret(keys, topic: responseTopic)
 

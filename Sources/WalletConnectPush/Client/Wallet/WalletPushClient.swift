@@ -3,7 +3,6 @@ import Combine
 import WalletConnectNetworking
 import WalletConnectPairing
 import WalletConnectEcho
-import WalletConnectIdentity
 
 
 public class WalletPushClient {
@@ -73,7 +72,7 @@ public class WalletPushClient {
         setupSubscriptions()
     }
 
-    public func approve(id: RPCID, onSign: SigningCallback) async throws {
+    public func approve(id: RPCID, onSign: @escaping SigningCallback) async throws {
         try await proposeResponder.respond(requestId: id, onSign: onSign)
     }
 
