@@ -2,9 +2,9 @@ import Foundation
 
 public struct ChatClientFactory {
 
-    static func create(relayClient: RelayClient, networkingInteractor: NetworkingInteractor) -> ChatClient {
+    static func create(keyserverUrl: String, relayClient: RelayClient, networkingInteractor: NetworkingInteractor) -> ChatClient {
         let keychain = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
-        let keyserverURL = URL(string: "https://keys.walletconnect.com")!
+        let keyserverURL = URL(string: keyserverUrl)!
         return ChatClientFactory.create(
             keyserverURL: keyserverURL,
             relayClient: relayClient,

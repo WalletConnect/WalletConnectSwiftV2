@@ -8,6 +8,7 @@ typealias Stream<T> = AnyPublisher<T, Never>
 final class ChatService {
 
     private lazy var client: ChatClient = {
+        Chat.configure()
         return Chat.instance
     }()
 
