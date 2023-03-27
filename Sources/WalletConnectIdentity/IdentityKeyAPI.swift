@@ -18,7 +18,7 @@ enum IdentityKeyAPI: HTTPService {
         }
     }
 
-    var method: WalletConnectNetworking.HTTPMethod {
+    var method: HTTPMethod {
         switch self {
         case .registerIdentity, .registerInvite:
             return .post
