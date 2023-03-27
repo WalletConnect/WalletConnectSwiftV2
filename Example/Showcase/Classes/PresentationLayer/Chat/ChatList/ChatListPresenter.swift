@@ -97,9 +97,11 @@ extension ChatListPresenter: SceneViewModel {
 private extension ChatListPresenter {
 
     func setupInitialState() {
-        threads = interactor.getThreads()
-        receivedInvites = interactor.getReceivedInvites()
-        sentInvites = interactor.getSentInvites()
+        interactor.setupSubscriptions(account: account)
+
+        threads = interactor.getThreads(account: account)
+        receivedInvites = interactor.getReceivedInvites(account: account)
+        sentInvites = interactor.getSentInvites(account: account)
 
         interactor.threadsSubscription()
             .sink { [unowned self] threads in

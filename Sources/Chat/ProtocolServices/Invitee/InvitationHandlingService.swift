@@ -7,20 +7,14 @@ class InvitationHandlingService {
     private let networkingInteractor: NetworkInteracting
     private let identityClient: IdentityClient
     private let chatStorage: ChatStorage
-    private let accountService: AccountService
     private let logger: ConsoleLogging
     private let kms: KeyManagementService
     private var publishers = [AnyCancellable]()
-
-    private var currentAccount: Account {
-        return accountService.currentAccount
-    }
 
     init(
         keyserverURL: URL,
         networkingInteractor: NetworkInteracting,
         identityClient: IdentityClient,
-        accountService: AccountService,
         kms: KeyManagementService,
         logger: ConsoleLogging,
         chatStorage: ChatStorage
@@ -29,17 +23,16 @@ class InvitationHandlingService {
         self.kms = kms
         self.networkingInteractor = networkingInteractor
         self.identityClient = identityClient
-        self.accountService = accountService
         self.logger = logger
         self.chatStorage = chatStorage
         setUpRequestHandling()
     }
 
     func accept(inviteId: Int64) async throws -> String {
-        guard let invite = chatStorage.getReceivedInvite(id: inviteId, account: currentAccount)
+        guard let invite = chatStorage.getReceivedInvite(id: inviteId)
         else { throw Errors.inviteForIdNotFound }
 
-        let inviteePublicKey = try identityClient.getInviteKey(for: currentAccount)
+        let inviteePublicKey = try identityClient.getInviteKey(for: invite.inviteeAccount)
         let inviterPublicKey = try DIDKey(did: invite.inviterPublicKey).hexString
 
         let symmetricKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: inviterPublicKey)
@@ -55,7 +48,7 @@ class InvitationHandlingService {
         )
         let wrapper = try identityClient.signAndCreateWrapper(
             payload: payload,
-            account: currentAccount
+            account: invite.inviteeAccount
         )
         try await networkingInteractor.respond(
             topic: acceptTopic,
@@ -72,21 +65,21 @@ class InvitationHandlingService {
 
         let thread = Thread(
             topic: threadTopic,
-            selfAccount: currentAccount,
+            selfAccount: invite.inviteeAccount,
             peerAccount: invite.inviterAccount
         )
 
-        chatStorage.set(thread: thread, account: currentAccount)
-        chatStorage.accept(receivedInvite: invite, account: currentAccount)
+        chatStorage.set(thread: thread, account: invite.inviteeAccount)
+        chatStorage.accept(receivedInvite: invite, account: invite.inviteeAccount)
 
         return thread.topic
     }
 
     func reject(inviteId: Int64) async throws {
-        guard let invite = chatStorage.getReceivedInvite(id: inviteId, account: currentAccount)
+        guard let invite = chatStorage.getReceivedInvite(id: inviteId)
         else { throw Errors.inviteForIdNotFound }
 
-        let inviteePublicKey = try identityClient.getInviteKey(for: currentAccount)
+        let inviteePublicKey = try identityClient.getInviteKey(for: invite.inviteeAccount)
         let inviterPublicKey = try DIDKey(did: invite.inviterPublicKey)
         let symmAgreementKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: inviterPublicKey.hexString)
 
@@ -100,7 +93,7 @@ class InvitationHandlingService {
             reason: ChatError.userRejected
         )
 
-        chatStorage.reject(receivedInvite: invite, account: currentAccount)
+        chatStorage.reject(receivedInvite: invite, account: invite.inviteeAccount)
     }
 }
 
