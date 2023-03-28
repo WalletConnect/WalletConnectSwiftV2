@@ -15,7 +15,7 @@ final class InviteInteractor {
     }
 
     func resolve(ens: String) async throws -> Account {
-        let resolver = ENSResolverFactory(signerFactory: DefaultSignerFactory()).create()
+        let resolver = ENSResolverFactory(crypto: DefaultCryptoProvider()).create()
         let blochain = Blockchain("eip155:1")!
         return try await resolver.resolveAddress(ens: ens, blockchain: Blockchain("eip155:1")!)
     }

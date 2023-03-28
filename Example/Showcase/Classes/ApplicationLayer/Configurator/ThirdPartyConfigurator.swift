@@ -14,6 +14,6 @@ struct ThirdPartyConfigurator: Configurator {
                 icons: ["https://avatars.githubusercontent.com/u/37784886"]
             ))
 
-        Auth.configure(signerFactory: DefaultSignerFactory())
+        Auth.configure(crypto: DefaultCryptoProvider())
     }
 }
