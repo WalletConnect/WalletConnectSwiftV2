@@ -5,7 +5,7 @@ import Combine
 import TestingUtils
 import Combine
 
-private class KeychainStorageMock: KeychainStorageProtocol {
+private class DispatcherKeychainStorageMock: KeychainStorageProtocol {
     func add<T>(_ item: T, forKey key: String) throws where T : WalletConnectKMS.GenericPasswordConvertible {}
     func read<T>(key: String) throws -> T where T : WalletConnectKMS.GenericPasswordConvertible {
         return try T(rawRepresentation: Data())
@@ -54,17 +54,16 @@ final class DispatcherTests: XCTestCase {
     var publishers = Set<AnyCancellable>()
     var sut: Dispatcher!
     var webSocket: WebSocketMock!
-    var webSocketFactory: WebSocketFactoryMock!
     var networkMonitor: NetworkMonitoringMock!
     
     override func setUp() {
         webSocket = WebSocketMock()
-        webSocketFactory = WebSocketFactoryMock(webSocket: webSocket)
+        let webSocketFactory = WebSocketFactoryMock(webSocket: webSocket)
         networkMonitor = NetworkMonitoringMock()
-        let keychainStorageMock = KeychainStorageMock()
+        let keychainStorageMock = DispatcherKeychainStorageMock()
         sut = Dispatcher(
-            relayHost: "",
-            projectId: "",
+            relayHost: "relay.walletconnect.com",
+            projectId: "1012db890cf3cfb0c1cdc929add657ba",
             clientIdStorage: ClientIdStorage(keychain: keychainStorageMock),
             socketFactory: webSocketFactory,
             socketConnectionType: .manual,
