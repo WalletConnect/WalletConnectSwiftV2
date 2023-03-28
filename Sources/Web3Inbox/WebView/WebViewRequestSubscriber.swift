@@ -29,7 +29,7 @@ final class WebViewRequestSubscriber: NSObject, WKScriptMessageHandler {
             do {
                 try await onRequest?(request)
             } catch {
-                logger.error("WebView Request error: \(error.localizedDescription)")
+                logger.error("WebView Request error: \(error.localizedDescription). Request: \(request)")
             }
         }
     }
