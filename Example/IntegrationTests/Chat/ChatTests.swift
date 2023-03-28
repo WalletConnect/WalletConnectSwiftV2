@@ -35,7 +35,7 @@ final class ChatTests: XCTestCase {
             logger: logger,
             keychainStorage: keychain,
             keyValueStorage: keyValueStorage)
-        return ChatClientFactory.create(account: account, keyserverURL: keyserverURL, relayClient: relayClient, networkingInteractor: networkingInteractor, keychain:  keychain, logger: logger, keyValueStorage: keyValueStorage)
+        return ChatClientFactory.create(keyserverURL: keyserverURL, relayClient: relayClient, networkingInteractor: networkingInteractor, keychain:  keychain, logger: logger, keyValueStorage: keyValueStorage)
     }
 
     func testInvite() async throws {
