@@ -52,7 +52,7 @@ class ProposalResponseSubscriber {
     private func handleResponse(payload: ResponseSubscriptionPayload<PushRequestParams, AcceptSubscriptionJWTPayload.Wrapper>) async throws -> (PushSubscription, String) {
 
         let jwt = payload.response.jwtString
-        _ = try AcceptSubscriptionJWTPayload.decode(from: payload.response)
+        _ = try AcceptSubscriptionJWTPayload.decodeAndVerify(from: payload.response)
         logger.debug("subscriptionAuth JWT validated")
 
         guard let subscriptionTopic = payload.derivedTopic else { throw Errors.subscriptionTopicNotDerived }
