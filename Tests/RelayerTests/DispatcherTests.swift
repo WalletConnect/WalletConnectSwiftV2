@@ -5,6 +5,15 @@ import Combine
 import TestingUtils
 import Combine
 
+private class KeychainStorageMock: KeychainStorageProtocol {
+    func add<T>(_ item: T, forKey key: String) throws where T : WalletConnectKMS.GenericPasswordConvertible {}
+    func read<T>(key: String) throws -> T where T : WalletConnectKMS.GenericPasswordConvertible {
+        return try T(rawRepresentation: Data())
+    }
+    func delete(key: String) throws {}
+    func deleteAll() throws {}
+}
+
 class WebSocketMock: WebSocketConnecting {
     var request: URLRequest = URLRequest(url: URL(string: "wss://relay.walletconnect.com")!)
 
@@ -29,15 +38,38 @@ class WebSocketMock: WebSocketConnecting {
     }
 }
 
+class WebSocketFactoryMock: WebSocketFactory {
+    private let webSocket: WebSocketMock
+    
+    init(webSocket: WebSocketMock) {
+        self.webSocket = webSocket
+    }
+    
+    func create(with url: URL) -> WebSocketConnecting {
+        return webSocket
+    }
+}
+
 final class DispatcherTests: XCTestCase {
     var publishers = Set<AnyCancellable>()
     var sut: Dispatcher!
     var webSocket: WebSocketMock!
+    var webSocketFactory: WebSocketFactoryMock!
     var networkMonitor: NetworkMonitoringMock!
+    
     override func setUp() {
         webSocket = WebSocketMock()
+        webSocketFactory = WebSocketFactoryMock(webSocket: webSocket)
         networkMonitor = NetworkMonitoringMock()
-        sut = Dispatcher(socket: webSocket, socketConnectionHandler: ManualSocketConnectionHandler(socket: webSocket), logger: ConsoleLoggerMock())
+        let keychainStorageMock = KeychainStorageMock()
+        sut = Dispatcher(
+            relayHost: "",
+            projectId: "",
+            clientIdStorage: ClientIdStorage(keychain: keychainStorageMock),
+            socketFactory: webSocketFactory,
+            socketConnectionType: .manual,
+            logger: ConsoleLoggerMock()
+        )
     }
 
     func testSendWhileConnected() {
