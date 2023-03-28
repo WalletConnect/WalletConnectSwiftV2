@@ -41,8 +41,8 @@ final class RelayClientEndToEndTests: XCTestCase {
         let webSocketFactory = WebSocketFactoryMock(webSocket: socket)
         let logger = ConsoleLogger()
         let dispatcher = Dispatcher(
-            relayHost: "relay.walletconnect.com",
-            projectId: "1012db890cf3cfb0c1cdc929add657ba",
+            relayHost: InputConfig.relayHost,
+            projectId: InputConfig.projectId,
             clientIdStorage: ClientIdStorage(keychain: RelayKeychainStorageMock()),
             socketFactory: webSocketFactory,
             socketConnectionType: .manual,
