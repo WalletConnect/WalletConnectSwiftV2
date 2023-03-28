@@ -12,7 +12,7 @@ final class RegistryTests: XCTestCase {
 
     var sut: IdentityService!
     var storage: IdentityStorage!
-    var signer: CacaoMessageSigner!
+    var signer: MessageSigner!
 
     override func setUp() {
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
