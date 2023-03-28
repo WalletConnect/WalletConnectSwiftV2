@@ -36,7 +36,12 @@ public class Web3Wallet {
     /// - Parameters:
     ///   - metadata: App metadata
     ///   - signerFactory: Auth signers factory
-    static public func configure(metadata: AppMetadata, signerFactory: SignerFactory, echoHost: String = "echo.walletconnect.com", environment: APNSEnvironment) {
+    static public func configure(
+        metadata: AppMetadata,
+        signerFactory: SignerFactory,
+        echoHost: String = "echo.walletconnect.com",
+        environment: APNSEnvironment = .production
+    ) {
         Pair.configure(metadata: metadata)
         Auth.configure(signerFactory: signerFactory)
         let clientId = try! Networking.interactor.getClientId()
