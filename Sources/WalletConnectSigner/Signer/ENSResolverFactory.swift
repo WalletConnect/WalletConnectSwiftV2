@@ -2,10 +2,10 @@ import Foundation
 
 public final class ENSResolverFactory {
 
-    public let signerFactory: SignerFactory
+    public let crypto: CryptoProvider
 
-    public init(signerFactory: SignerFactory) {
-        self.signerFactory = signerFactory
+    public init(crypto: CryptoProvider) {
+        self.crypto = crypto
     }
 
     public func create() -> ENSResolver {
@@ -23,7 +23,7 @@ public final class ENSResolverFactory {
                 projectId: projectId,
                 httpClient: httpClient
             ),
-            signer: signerFactory.createEthereumSigner()
+            crypto: crypto
         )
     }
 }

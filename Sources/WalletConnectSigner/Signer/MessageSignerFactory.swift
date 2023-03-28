@@ -8,19 +8,13 @@ public struct MessageSignerFactory {
         self.signerFactory = signerFactory
     }
 
-    public func create() -> CacaoMessageSigner {
+    public func create() -> MessageSigner {
         return create(projectId: Networking.projectId)
     }
 
-    public func create(projectId: String) -> CacaoMessageSigner {
+    public func create(projectId: String) -> MessageSigner {
         return MessageSigner(
             signer: signerFactory.createEthereumSigner(),
-            eip191Verifier: EIP191Verifier(signer: signerFactory.createEthereumSigner()),
-            eip1271Verifier: EIP1271Verifier(
-                projectId: projectId,
-                httpClient: HTTPNetworkClient(host: "rpc.walletconnect.com"),
-                signer: signerFactory.createEthereumSigner()
-            ),
             messageFormatter: SIWECacaoFormatter()
         )
     }
