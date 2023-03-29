@@ -14,7 +14,7 @@ struct ThirdPartyConfigurator: Configurator {
             icons: ["https://avatars.githubusercontent.com/u/37784886"]
         )
         
-        Web3Wallet.configure(metadata: metadata, signerFactory: DefaultSignerFactory())
+        Web3Wallet.configure(metadata: metadata, signerFactory: DefaultSignerFactory(), environment: .sandbox)
         Push.configure(environment: BuildConfiguration.shared.apnsEnvironment)
     }
     
