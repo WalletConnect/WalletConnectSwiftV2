@@ -9,8 +9,8 @@ public protocol IdentifierGenerator {
 struct IntIdentifierGenerator: IdentifierGenerator {
 
     func next() -> RPCID {
-        let timestamp = Int64(Date().timeIntervalSince1970 * 1000) * 1000
-        let random = Int64.random(in: 0..<1000)
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000) * 1000000
+        let random = Int64.random(in: 0..<1000000)
         return RPCID(timestamp + random)
     }
 }
@@ -41,7 +41,7 @@ extension RPCID {
 
     public var timestamp: Date {
         guard let id = self.right else { return .distantPast }
-        let interval = TimeInterval(id / 1000 / 1000)
+        let interval = TimeInterval(id / 1000 / 1000000)
         return Date(timeIntervalSince1970: interval)
     }
 }
