@@ -14,6 +14,15 @@ final class JWTTests: XCTestCase {
         let encoded = try! jwt.encoded()
         XCTAssertEqual(expectedJWT, encoded)
     }
+
+    func testBase64Encoding() throws {
+        let signature = "gf8ZZb04-6DeqhboeA-I7EucdSVuLCJmKcPSTHJqG0CBfVKn0YihgosaD9-6gXED8Itrx5EsyEi49kLmTvS8DA"
+
+        let data = try JWTEncoder.base64urlDecodedData(string: signature)
+        let string = JWTEncoder.base64urlEncodedString(data: data)
+
+        XCTAssertEqual(signature, string)
+    }
 }
 
 extension AuthPayload.Claims {

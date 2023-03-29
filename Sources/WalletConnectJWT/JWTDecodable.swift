@@ -29,9 +29,8 @@ extension JWTClaimsCodable {
         let publicKey = try DIDKey(did: jwt.claims.iss)
         let signingPublicKey = try SigningPublicKey(rawRepresentation: publicKey.rawData)
 
-        guard try jwt.isValid(publicKey: signingPublicKey) else {
-            throw JWTError.signatureVerificationFailed
-        }
+        guard try JWTValidator(jwtString: wrapper.jwtString).isValid(publicKey: signingPublicKey)
+        else { throw JWTError.signatureVerificationFailed }
 
         return (try Self.init(claims: jwt.claims), jwt.claims)
     }
