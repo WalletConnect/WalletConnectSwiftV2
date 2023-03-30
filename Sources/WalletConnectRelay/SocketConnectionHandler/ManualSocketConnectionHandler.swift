@@ -15,7 +15,7 @@ class ManualSocketConnectionHandler: SocketConnectionHandler {
         socket.disconnect()
     }
 
-    func handleDisconnection() {
+    func handleDisconnection() async {
         // No operation
         // ManualSocketConnectionHandler does not support reconnection logic
     }

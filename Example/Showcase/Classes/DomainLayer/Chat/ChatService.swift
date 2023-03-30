@@ -70,6 +70,10 @@ final class ChatService {
         client.getReceivedInvites()
     }
 
+    func getSentInvites() -> [SentInvite] {
+        client.getSentInvites()
+    }
+
     func sendMessage(topic: String, message: String) async throws {
         try await client.message(topic: topic, message: message)
     }

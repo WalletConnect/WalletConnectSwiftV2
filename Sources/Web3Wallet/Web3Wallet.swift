@@ -1,4 +1,5 @@
 import Foundation
+import WalletConnectEcho
 import Combine
 
 /// Web3Wallet instance wrapper
@@ -19,11 +20,11 @@ public class Web3Wallet {
         guard let config = Web3Wallet.config else {
             fatalError("Error - you must call Web3Wallet.configure(_:) before accessing the shared instance.")
         }
-        
         return Web3WalletClientFactory.create(
             authClient: Auth.instance,
             signClient: Sign.instance,
-            pairingClient: Pair.instance as! PairingClient
+            pairingClient: Pair.instance as! PairingClient,
+            echoClient: Echo.instance
         )
     }()
     
@@ -35,10 +36,16 @@ public class Web3Wallet {
     /// - Parameters:
     ///   - metadata: App metadata
     ///   - signerFactory: Auth signers factory
-    static public func configure(metadata: AppMetadata, signerFactory: SignerFactory) {
+    static public func configure(
+        metadata: AppMetadata,
+        signerFactory: SignerFactory,
+        echoHost: String = "echo.walletconnect.com",
+        environment: APNSEnvironment = .production
+    ) {
         Pair.configure(metadata: metadata)
         Auth.configure(signerFactory: signerFactory)
-        
+        let clientId = try! Networking.interactor.getClientId()
+        Echo.configure(clientId: clientId, echoHost: echoHost, environment: environment)
         Web3Wallet.config = Web3Wallet.Config(signerFactory: signerFactory)
     }
 }

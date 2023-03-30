@@ -9,29 +9,22 @@ struct ChatListView: View {
             VStack {
                 ScrollView(showsIndicators: false) {
                     VStack {
-                        if presenter.showRequests {
-                            Button(action: {
-                                presenter.didPressChatRequests()
-                            }) {
-                                HStack(spacing: 8.0) {
-                                    Text(presenter.requestsCount)
-                                        .frame(width: 24.0, height: 24.0)
-                                        .background(Color.w_greenForground)
-                                        .foregroundColor(.w_greenBackground)
-                                        .font(.system(size: 17.0, weight: .bold))
-                                        .clipShape(Circle())
-                                    
-                                    Text("Chat Requests")
-                                        .foregroundColor(.w_greenForground)
-                                        .font(.system(size: 17.0, weight: .bold))
+                        HStack {
+                            if presenter.showReceivedInvites {
+                                invitesButton(title: "Received Invites", count: presenter.receivedInviteViewModels.count, textColor: .w_greenForground, backgroundColor: .w_greenBackground) {
+                                    presenter.didPressReceivedInvites()
                                 }
                             }
-                            .frame(height: 44.0)
-                            .frame(maxWidth: .infinity)
-                            .background(Color.w_greenBackground)
-                            .clipShape(Capsule())
-                            .padding(16.0)
+
+                            if presenter.showSentInvites {
+                                invitesButton(title: "Sent Invites", count: presenter.sentInviteViewModels.count, textColor: .w_foreground, backgroundColor: .w_purpleBackground) {
+                                    presenter.didPressSentInvites()
+                                }
+                            }
+
+                            Spacer()
                         }
+                        .padding(16.0)
                         
                         if presenter.threadViewModels.isEmpty {
                             Spacer()
@@ -52,6 +45,34 @@ struct ChatListView: View {
                 .padding(.bottom, 16)
             }
         }
+    }
+
+    private func invitesButton(
+        title: String,
+        count: Int,
+        textColor: Color,
+        backgroundColor: Color,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 8.0) {
+                Text(String(count))
+                    .frame(width: 24.0, height: 24.0)
+                    .background(textColor)
+                    .foregroundColor(backgroundColor)
+                    .font(.system(size: 15.0, weight: .bold))
+                    .clipShape(Circle())
+
+                Text(title)
+                    .foregroundColor(textColor)
+                    .font(.system(size: 15.0, weight: .bold))
+            }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 16)
+        }
+        .frame(height: 44.0)
+        .background(backgroundColor)
+        .clipShape(Capsule())
     }
 
     private func chatsList() -> some View {

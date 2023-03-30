@@ -11,8 +11,16 @@ final class InviteListInteractor {
         return chatService.getReceivedInvites()
     }
 
-    func invitesReceivedSubscription() -> Stream<[ReceivedInvite]> {
+    func getSentInvites() -> [SentInvite] {
+        return chatService.getSentInvites()
+    }
+
+    func receivedInvitesSubscription() -> Stream<[ReceivedInvite]> {
         return chatService.receivedInvitePublisher
+    }
+
+    func sentInvitesSubscription() -> Stream<[SentInvite]> {
+        return chatService.sentInvitePublisher
     }
 
     func accept(invite: ReceivedInvite) async throws {

@@ -1,7 +1,7 @@
 import Foundation
 import WalletConnectNetworking
 
-public class EchoClient {
+public class EchoClient: EchoClientProtocol {
     private let registerService: EchoRegisterService
 
     init(registerService: EchoRegisterService) {
@@ -17,6 +17,4 @@ public class EchoClient {
         try await registerService.register(deviceToken: deviceToken)
     }
 #endif
-
-    
 }

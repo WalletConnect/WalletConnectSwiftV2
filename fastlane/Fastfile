@@ -23,6 +23,7 @@ platform :ios do
     run_tests(
       project: 'Example/ExampleApp.xcodeproj',
       scheme: options[:scheme],
+      testplan: options[:testplan],
       cloned_source_packages_path: 'SourcePackagesCache',
       destination: 'platform=iOS Simulator,name=iPhone 13',
       derived_data_path: 'DerivedDataCache',

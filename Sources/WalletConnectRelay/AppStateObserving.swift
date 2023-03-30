@@ -11,7 +11,7 @@ enum ApplicationState {
 }
 
 protocol AppStateObserving: AnyObject {
-    var currentState: ApplicationState { get }
+    var currentState: ApplicationState { get async }
     var onWillEnterForeground: (() -> Void)? {get set}
     var onWillEnterBackground: (() -> Void)? {get set}
 }
@@ -26,14 +26,17 @@ class AppStateObserver: AppStateObserving {
         subscribeNotificationCenter()
     }
 
-    var currentState: ApplicationState {
+    @MainActor
+    var currentState: ApplicationState{
+        get async {
 #if canImport(UIKit)
-        let isActive = UIApplication.shared.applicationState == .active
-        return isActive ? .foreground : .background
+            let isActive = UIApplication.shared.applicationState == .active
+            return isActive ? .foreground : .background
 #elseif canImport(AppKit)
-        let isActive = NSApplication.shared.isActive
-        return isActive ? .foreground : .background
+            let isActive = NSApplication.shared.isActive
+            return isActive ? .foreground : .background
 #endif
+        }
     }
 
     private func subscribeNotificationCenter() {
