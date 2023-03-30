@@ -34,7 +34,7 @@ struct InviteKeyPayload: JWTClaimsCodable {
     func encode(iss: String) throws -> Claims {
         return Claims(
             iss: iss,
-            sub: invitePublicKey.did(prefix: true, variant: .X25519),
+            sub: invitePublicKey.did(variant: .X25519),
             aud: keyserver.absoluteString,
             iat: defaultIatMilliseconds(),
             exp: expiry(days: 30),

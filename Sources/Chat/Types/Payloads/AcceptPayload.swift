@@ -47,7 +47,7 @@ struct AcceptPayload: JWTClaimsCodable {
             exp: expiry(days: 30),
             ksu: keyserver.absoluteString,
             aud: inviterAccount.did,
-            sub: inviteePublicKey.did(prefix: true, variant: .X25519)
+            sub: inviteePublicKey.did(variant: .X25519)
         )
     }
 }

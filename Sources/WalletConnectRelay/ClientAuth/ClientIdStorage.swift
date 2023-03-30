@@ -26,6 +26,6 @@ public struct ClientIdStorage: ClientIdStoring {
     public func getClientId() throws -> String {
         let privateKey: SigningPrivateKey = try keychain.read(key: key)
         let pubKey = privateKey.publicKey.rawRepresentation
-        return DIDKey(rawData: pubKey).did(prefix: true, variant: .ED25519)
+        return DIDKey(rawData: pubKey).did(variant: .ED25519)
     }
 }

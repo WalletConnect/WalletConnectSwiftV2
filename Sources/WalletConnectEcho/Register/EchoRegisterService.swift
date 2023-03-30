@@ -9,10 +9,6 @@ actor EchoRegisterService {
     private let logger: ConsoleLogging
     private let environment: APNSEnvironment
     private let echoAuthenticator: EchoAuthenticating
-    // DID method specific identifier
-    private var clientIdMutlibase: String {
-        return clientId.replacingOccurrences(of: "did:key:", with: "")
-    }
 
     enum Errors: Error {
         case registrationFailed
@@ -36,6 +32,7 @@ actor EchoRegisterService {
         let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
         let token = tokenParts.joined()
         let echoAuthToken = try echoAuthenticator.createAuthToken()
+        let clientIdMutlibase = try DIDKey(did: clientId).multibase(variant: .ED25519)
         logger.debug("APNS device token: \(token)")
         let response = try await httpClient.request(
             EchoResponse.self,
@@ -50,6 +47,7 @@ actor EchoRegisterService {
 #if DEBUG
     public func register(deviceToken: String) async throws {
         let echoAuthToken = try echoAuthenticator.createAuthToken()
+        let clientIdMutlibase = try DIDKey(did: clientId).multibase(variant: .ED25519)
         let response = try await httpClient.request(
             EchoResponse.self,
             at: EchoAPI.register(clientId: clientIdMutlibase, token: deviceToken, projectId: projectId, environment: environment, auth: echoAuthToken)
