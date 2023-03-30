@@ -51,7 +51,7 @@ enum IdentityKeyAPI: HTTPService {
         }
     }
 
-    var headerFields: [String : String]? {
+    var additionalHeaderFields: [String : String]? {
         return nil
     }
 }

@@ -28,7 +28,7 @@ struct RPCService: HTTPService {
         ]
     }
 
-    var headerFields: [String : String]? {
+    var additionalHeaderFields: [String : String]? {
         return nil
     }
 

@@ -12,7 +12,7 @@ public protocol HTTPService {
     var method: HTTPMethod { get }
     var body: Data? { get }
     var queryParameters: [String: String]? { get }
-    var headerFields: [String: String]? { get }
+    var additionalHeaderFields: [String: String]? { get }
     func resolve(for host: String) -> URLRequest?
 }
 
@@ -35,7 +35,7 @@ public extension HTTPService {
         }
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
-        headerFields?.forEach {
+        additionalHeaderFields?.forEach {
             request.addValue($0.value, forHTTPHeaderField: $0.key)
         }
 

@@ -44,7 +44,7 @@ enum EchoAPI: HTTPService {
         return "https"
     }
 
-    var headerFields: [String : String]? {
+    var additionalHeaderFields: [String : String]? {
         switch self {
         case .register(_, _, _, _, let auth):
             return ["Authorization": auth]
