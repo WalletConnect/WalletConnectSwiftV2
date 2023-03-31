@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectEcho
 
 public struct Web3WalletClientFactory {
     public static func create(

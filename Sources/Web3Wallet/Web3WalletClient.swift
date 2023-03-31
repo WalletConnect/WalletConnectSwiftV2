@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectEcho
 import Combine
 
 /// Web3 Wallet Client
