@@ -1,23 +1,27 @@
 import Foundation
-import Auth
+@testable import WalletConnectSigner
 
-struct MessageSignerMock: CacaoMessageSigner {
-    func sign(message: String, privateKey: Data, type: WalletConnectUtils.CacaoSignatureType) throws -> WalletConnectUtils.CacaoSignature {
-        return CacaoSignature(t: .eip191, s: "")
+extension MessageVerifier {
+
+    static func stub() -> MessageVerifier {
+        return MessageVerifier(
+            eip191Verifier: EIP191Verifier(crypto: Crypto()),
+            eip1271Verifier: EIP1271Verifier(
+                projectId: "",
+                httpClient: HTTPNetworkClient(host: ""),
+                crypto: Crypto()
+            )
+        )
     }
 
-    func verify(signature: CacaoSignature,
-        message: String,
-        address: String,
-        chainId: String
-    ) async throws {
+    struct Crypto: CryptoProvider {
 
-    }
+        func keccak256(_ data: Data) -> Data {
+            return Data()
+        }
 
-    func sign(payload: CacaoPayload,
-        privateKey: Data,
-        type: CacaoSignatureType
-    ) throws -> CacaoSignature {
-        return CacaoSignature(t: .eip191, s: "")
+        func recoverPubKey(signature: EthereumSignature, message: Data) throws -> Data {
+            return Data()
+        }
     }
 }

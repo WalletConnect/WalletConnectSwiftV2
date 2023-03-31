@@ -35,17 +35,17 @@ public class Web3Wallet {
     /// Wallet instance wallet config method.
     /// - Parameters:
     ///   - metadata: App metadata
-    ///   - signerFactory: Auth signers factory
+    ///   - crypto: Auth crypto utils
     static public func configure(
         metadata: AppMetadata,
-        signerFactory: SignerFactory,
+        crypto: CryptoProvider,
         echoHost: String = "echo.walletconnect.com",
         environment: APNSEnvironment = .production
     ) {
         Pair.configure(metadata: metadata)
-        Auth.configure(signerFactory: signerFactory)
+        Auth.configure(crypto: crypto)
         let clientId = try! Networking.interactor.getClientId()
         Echo.configure(clientId: clientId, echoHost: echoHost, environment: environment)
-        Web3Wallet.config = Web3Wallet.Config(signerFactory: signerFactory)
+        Web3Wallet.config = Web3Wallet.Config(crypto: crypto)
     }
 }

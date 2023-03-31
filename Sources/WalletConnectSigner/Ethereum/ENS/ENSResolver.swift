@@ -5,13 +5,13 @@ public actor ENSResolver {
     private let projectId: String
     private let httpClient: HTTPClient
     private let registry: ENSRegistryContract
-    private let signer: EthereumSigner
+    private let crypto: CryptoProvider
 
-    init(projectId: String, httpClient: HTTPClient, registry: ENSRegistryContract, signer: EthereumSigner) {
+    init(projectId: String, httpClient: HTTPClient, registry: ENSRegistryContract, crypto: CryptoProvider) {
         self.projectId = projectId
         self.httpClient = httpClient
         self.registry = registry
-        self.signer = signer
+        self.crypto = crypto
     }
 
     public func resolveEns(account: Account) async throws -> String {
@@ -61,9 +61,9 @@ private extension ENSResolver {
         var result = [UInt8](repeating: 0, count: 32)
         let labels = name.split(separator: ".")
         for label in labels.reversed() {
-            let labelHash = signer.keccak256(label.lowercased().rawRepresentation)
+            let labelHash = crypto.keccak256(label.lowercased().rawRepresentation)
             result.append(contentsOf: labelHash)
-            result = [UInt8](signer.keccak256(Data(result)))
+            result = [UInt8](crypto.keccak256(Data(result)))
         }
         return Data(result)
     }

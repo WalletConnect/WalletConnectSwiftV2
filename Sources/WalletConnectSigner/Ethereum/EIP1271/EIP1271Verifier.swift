@@ -3,16 +3,16 @@ import Foundation
 actor EIP1271Verifier {
     private let projectId: String
     private let httpClient: HTTPClient
-    private let signer: EthereumSigner
+    private let crypto: CryptoProvider
 
-    init(projectId: String, httpClient: HTTPClient, signer: EthereumSigner) {
+    init(projectId: String, httpClient: HTTPClient, crypto: CryptoProvider) {
         self.projectId = projectId
         self.httpClient = httpClient
-        self.signer = signer
+        self.crypto = crypto
     }
 
     func verify(signature: Data, message: Data, address: String, chainId: String) async throws {
-        let messageHash = signer.keccak256(message)
+        let messageHash = crypto.keccak256(message)
         let encoder = ValidSignatureMethod(signature: signature, messageHash: messageHash)
         let call = EthCall(to: address, data: encoder.encode())
         let params = AnyCodable([AnyCodable(call), AnyCodable("latest")])

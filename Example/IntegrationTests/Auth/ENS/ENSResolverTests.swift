@@ -8,13 +8,13 @@ class ENSSignerTests: XCTestCase {
     private let ens = "web3.eth"
 
     func testResolveEns() async throws {
-        let resolver = ENSResolverFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
+        let resolver = ENSResolverFactory(crypto: DefaultCryptoProvider()).create(projectId: InputConfig.projectId)
         let resolved = try await resolver.resolveEns(account: account)
         XCTAssertEqual(resolved, ens)
     }
 
     func testResolveAddress() async throws {
-        let resolver = ENSResolverFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
+        let resolver = ENSResolverFactory(crypto: DefaultCryptoProvider()).create(projectId: InputConfig.projectId)
         let resolved = try await resolver.resolveAddress(ens: ens, blockchain: account.blockchain)
         XCTAssertEqual(resolved, account)
     }
