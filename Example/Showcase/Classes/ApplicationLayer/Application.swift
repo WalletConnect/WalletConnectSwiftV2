@@ -4,7 +4,7 @@ import WalletConnectChat
 final class Application {
 
     lazy var chatService: ChatService = {
-        return ChatService(accountStorage: accountStorage)
+        return ChatService()
     }()
 
     lazy var accountStorage: AccountStorage = {

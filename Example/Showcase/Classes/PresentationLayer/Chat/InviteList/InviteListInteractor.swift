@@ -7,12 +7,12 @@ final class InviteListInteractor {
         self.chatService = chatService
     }
 
-    func getReceivedInvites() -> [ReceivedInvite] {
-        return chatService.getReceivedInvites()
+    func getReceivedInvites(account: Account) -> [ReceivedInvite] {
+        return chatService.getReceivedInvites(account: account)
     }
 
-    func getSentInvites() -> [SentInvite] {
-        return chatService.getSentInvites()
+    func getSentInvites(account: Account) -> [SentInvite] {
+        return chatService.getSentInvites(account: account)
     }
 
     func receivedInvitesSubscription() -> Stream<[ReceivedInvite]> {

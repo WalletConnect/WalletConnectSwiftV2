@@ -3,8 +3,6 @@ import Combine
 
 final class ChatStorage {
 
-    private let accountService: AccountService
-
     private let messageStore: KeyedDatabase<Message>
     private let receivedInviteStore: KeyedDatabase<ReceivedInvite>
     private let sentInviteStore: KeyedDatabase<SentInvite>
@@ -63,50 +61,42 @@ final class ChatStorage {
         rejectPublisherSubject.eraseToAnyPublisher()
     }
 
-    var currentAccount: Account {
-        return accountService.currentAccount
-    }
-
     init(
-        accountService: AccountService,
         messageStore: KeyedDatabase<Message>,
         receivedInviteStore: KeyedDatabase<ReceivedInvite>,
         sentInviteStore: KeyedDatabase<SentInvite>,
         threadStore: KeyedDatabase<Thread>
     ) {
-        self.accountService = accountService
         self.messageStore = messageStore
         self.receivedInviteStore = receivedInviteStore
         self.sentInviteStore = sentInviteStore
         self.threadStore = threadStore
-
-        setupSubscriptions()
     }
 
-    func setupSubscriptions() {
+    func setupSubscriptions(account: Account) {
         messageStore.onUpdate = { [unowned self] in
-            messagesPublisherSubject.send(getMessages(account: currentAccount))
+            messagesPublisherSubject.send(getMessages(account: account))
         }
         receivedInviteStore.onUpdate = { [unowned self] in
-            receivedInvitesPublisherSubject.send(getReceivedInvites(account: currentAccount))
+            receivedInvitesPublisherSubject.send(getReceivedInvites(account: account))
         }
         sentInviteStore.onUpdate = { [unowned self] in
-            sentInvitesPublisherSubject.send(getSentInvites(account: currentAccount))
+            sentInvitesPublisherSubject.send(getSentInvites(account: account))
         }
         threadStore.onUpdate = { [unowned self] in
-            threadsPublisherSubject.send(getThreads(account: currentAccount))
+            threadsPublisherSubject.send(getThreads(account: account))
         }
     }
 
     // MARK: - Invites
 
-    func getReceivedInvite(id: Int64, account: Account) -> ReceivedInvite? {
-        return receivedInviteStore.getElements(for: account.absoluteString)
+    func getReceivedInvite(id: Int64) -> ReceivedInvite? {
+        return receivedInviteStore.getAll()
             .first(where: { $0.id == id })
     }
 
-    func getSentInvite(id: Int64, account: Account) -> SentInvite? {
-        return sentInviteStore.getElements(for: account.absoluteString)
+    func getSentInvite(id: Int64) -> SentInvite? {
+        return sentInviteStore.getAll()
             .first(where: { $0.id == id })
     }
 
@@ -143,7 +133,7 @@ final class ChatStorage {
     }
 
     func accept(sentInviteId: Int64, account: Account, topic: String) {
-        guard let invite = getSentInvite(id: sentInviteId, account: account)
+        guard let invite = getSentInvite(id: sentInviteId)
         else { return }
 
         sentInviteStore.delete(invite, for: account.absoluteString)
@@ -155,7 +145,7 @@ final class ChatStorage {
     }
 
     func reject(sentInviteId: Int64, account: Account) {
-        guard let invite = getSentInvite(id: sentInviteId, account: account)
+        guard let invite = getSentInvite(id: sentInviteId)
         else { return }
 
         sentInviteStore.delete(invite, for: account.absoluteString)
@@ -177,8 +167,8 @@ final class ChatStorage {
         return threadStore.getElements(for: account.absoluteString)
     }
 
-    func getThread(topic: String, account: Account) -> Thread? {
-        return getThreads(account: account).first(where: { $0.topic == topic })
+    func getThread(topic: String) -> Thread? {
+        return getAllThreads().first(where: { $0.topic == topic })
     }
 
     func set(thread: Thread, account: Account) {
@@ -193,11 +183,11 @@ final class ChatStorage {
         newMessagePublisherSubject.send(message)
     }
 
-    func getMessages(account: Account) -> [Message] {
-        return messageStore.getElements(for: account.absoluteString)
+    func getMessages(topic: String) -> [Message] {
+        return messageStore.getAll().filter { $0.topic == topic }
     }
 
-    func getMessages(topic: String, account: Account) -> [Message] {
-        return messageStore.getElements(for: account.absoluteString).filter { $0.topic == topic }
+    func getMessages(account: Account) -> [Message] {
+        return messageStore.getElements(for: account.absoluteString)
     }
 }
