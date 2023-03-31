@@ -2,6 +2,7 @@ import Web3
 import Foundation
 
 class EthKeyStore {
+    private let defaultsKey = "eth_prv_key"
     static let shared = EthKeyStore()
     let privateKey: EthereumPrivateKey
 
@@ -14,6 +15,11 @@ class EthKeyStore {
     }
 
     private init() {
-        privateKey = try! EthereumPrivateKey()
+        if let privateKeyRaw = UserDefaults.standard.data(forKey: defaultsKey) {
+            self.privateKey = try! EthereumPrivateKey(privateKeyRaw)
+        } else {
+            self.privateKey = try! EthereumPrivateKey()
+            UserDefaults.standard.set(privateKeyRaw, forKey: defaultsKey)
+        }
     }
 }
