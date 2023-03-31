@@ -122,7 +122,7 @@ private extension InvitationHandlingService {
                     let inviterAccount = try await identityClient.resolveIdentity(iss: claims.iss)
                     // TODO: Should we cache it?
                     let inviteePublicKey = try await identityClient.resolveInvite(account: inviterAccount)
-                    let inviterPublicKey = invite.inviterPublicKey.did(prefix: false, variant: .X25519)
+                    let inviterPublicKey = invite.inviterPublicKey.did(variant: .X25519)
 
                     let invite = ReceivedInvite(
                         id: payload.id.integer,

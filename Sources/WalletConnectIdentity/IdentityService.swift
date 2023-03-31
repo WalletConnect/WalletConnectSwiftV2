@@ -72,7 +72,7 @@ actor IdentityService {
     }
 
     func resolveIdentity(iss: String) async throws -> Account {
-        let did = try DIDKey(did: iss).did(prefix: false, variant: .ED25519)
+        let did = try DIDKey(did: iss).multibase(variant: .ED25519)
         let cacao = try await networkService.resolveIdentity(publicKey: did)
         return try Account(DIDPKHString: cacao.p.iss)
     }

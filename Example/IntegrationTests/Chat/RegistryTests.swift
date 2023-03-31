@@ -35,7 +35,7 @@ final class RegistryTests: XCTestCase {
     func testRegisterIdentityAndInviteKey() async throws {
         let publicKey = try await sut.registerIdentity(account: account, onSign: onSign)
 
-        let iss = DIDKey(rawData: Data(hex: publicKey)).did(prefix: true, variant: .ED25519)
+        let iss = DIDKey(rawData: Data(hex: publicKey)).did(variant: .ED25519)
         let resolvedAccount = try await sut.resolveIdentity(iss: iss)
         XCTAssertEqual(resolvedAccount, account)
 

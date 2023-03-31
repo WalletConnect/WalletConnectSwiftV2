@@ -50,6 +50,10 @@ enum IdentityKeyAPI: HTTPService {
             return nil
         }
     }
+
+    var additionalHeaderFields: [String : String]? {
+        return nil
+    }
 }
 
 private extension IdentityKeyAPI {
