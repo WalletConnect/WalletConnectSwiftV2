@@ -23,15 +23,14 @@ public protocol JWTClaimsCodable {
 
 extension JWTClaimsCodable {
 
-    public static func decode(from wrapper: Wrapper) throws -> (Self, Claims) {
+    public static func decodeAndVerify(from wrapper: Wrapper) throws -> (Self, Claims) {
         let jwt = try JWT<Claims>(string: wrapper.jwtString)
 
         let publicKey = try DIDKey(did: jwt.claims.iss)
         let signingPublicKey = try SigningPublicKey(rawRepresentation: publicKey.rawData)
 
-        guard try jwt.isValid(publicKey: signingPublicKey) else {
-            throw JWTError.signatureVerificationFailed
-        }
+        guard try JWTValidator(jwtString: wrapper.jwtString).isValid(publicKey: signingPublicKey)
+        else { throw JWTError.signatureVerificationFailed }
 
         return (try Self.init(claims: jwt.claims), jwt.claims)
     }
