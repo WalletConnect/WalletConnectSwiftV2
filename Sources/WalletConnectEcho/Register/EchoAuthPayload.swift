@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectJWT
 
 struct EchoAuthPayload: JWTClaimsCodable {
 
