@@ -20,8 +20,7 @@ final class WebViewRequestSubscriber: NSObject, WKScriptMessageHandler {
         guard message.name == WebViewRequestSubscriber.name else { return }
 
         guard
-            let dict = message.body as? [String: Any],
-            let data = try? JSONSerialization.data(withJSONObject: dict),
+            let body = message.body as? String, let data = body.data(using: .utf8),
             let request = try? JSONDecoder().decode(RPCRequest.self, from: data)
         else { return }
 

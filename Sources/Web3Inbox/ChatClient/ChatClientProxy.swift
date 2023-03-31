@@ -112,7 +112,7 @@ private extension ChatClientProxy {
     }
 
     func parse<Request: Codable>(_ type: Request.Type, params: AnyCodable?) throws -> Request {
-        guard let params = try params?.get([Request].self).first
+        guard let params = try params?.get(Request.self)
         else { throw Errors.unregisteredParams }
         return params
     }
