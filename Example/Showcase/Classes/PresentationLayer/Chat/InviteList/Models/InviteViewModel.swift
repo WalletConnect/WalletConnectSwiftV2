@@ -2,36 +2,33 @@ import Foundation
 import WalletConnectChat
 
 struct InviteViewModel: Identifiable {
-    let invite: ReceivedInvite
 
-    var id: Int64 {
-        return invite.id
-    }
+    let id: Int64
+    let title: String
+    let subtitle: String
+    let showActions: Bool
+    let statusTitle: String
+
+    let receivedInvite: ReceivedInvite?
+    let sentInvite: SentInvite?
 
     init(invite: ReceivedInvite) {
-        self.invite = invite
+        self.id = invite.id
+        self.title = invite.inviterAccount.address
+        self.subtitle = invite.message
+        self.showActions = invite.status == .pending
+        self.statusTitle = invite.status.rawValue.capitalized
+        self.receivedInvite = invite
+        self.sentInvite = nil
     }
 
-    var title: String {
-        return invite.inviterAccount.address
-    }
-
-    var subtitle: String {
-        return invite.message
-    }
-
-    var showActions: Bool {
-        return invite.status == .pending
-    }
-
-    var statusTitle: String {
-        switch invite.status {
-        case .pending:
-            return "Pending"
-        case .approved:
-            return "Approved"
-        case .rejected:
-            return "Rejected"
-        }
+    init(invite: SentInvite) {
+        self.id = invite.id
+        self.title = invite.inviteeAccount.address
+        self.subtitle = invite.message
+        self.showActions = false
+        self.statusTitle = invite.status.rawValue.capitalized
+        self.sentInvite = invite
+        self.receivedInvite = nil
     }
 }

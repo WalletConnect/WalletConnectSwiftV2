@@ -4,7 +4,6 @@ import Combine
 class ResubscriptionService {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
-    private let accountService: AccountService
     private let logger: ConsoleLogging
     private var chatStorage: ChatStorage
     private var publishers = [AnyCancellable]()
@@ -12,13 +11,11 @@ class ResubscriptionService {
     init(
         networkingInteractor: NetworkInteracting,
         kms: KeyManagementServiceProtocol,
-        accountService: AccountService,
         chatStorage: ChatStorage,
         logger: ConsoleLogging
     ) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
-        self.accountService = accountService
         self.logger = logger
         self.chatStorage = chatStorage
 

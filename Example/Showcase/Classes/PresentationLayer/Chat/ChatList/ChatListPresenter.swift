@@ -11,6 +11,7 @@ final class ChatListPresenter: ObservableObject {
 
     @Published private var threads: [WalletConnectChat.Thread] = []
     @Published private var receivedInvites: [ReceivedInvite] = []
+    @Published private var sentInvites: [SentInvite] = []
 
     var threadViewModels: [ThreadViewModel] {
         return threads
@@ -18,8 +19,15 @@ final class ChatListPresenter: ObservableObject {
             .map { ThreadViewModel(thread: $0) }
     }
 
-    var inviteViewModels: [InviteViewModel] {
+    var receivedInviteViewModels: [InviteViewModel] {
         return receivedInvites
+            .filter { $0.status == .pending }
+            .sorted(by: { $0.timestamp < $1.timestamp })
+            .map { InviteViewModel(invite: $0) }
+    }
+
+    var sentInviteViewModels: [InviteViewModel] {
+        return sentInvites
             .filter { $0.status == .pending }
             .sorted(by: { $0.timestamp < $1.timestamp })
             .map { InviteViewModel(invite: $0) }
@@ -32,20 +40,24 @@ final class ChatListPresenter: ObservableObject {
         self.router = router
     }
 
-    var requestsCount: String {
-        return String(inviteViewModels.count)
+    var showReceivedInvites: Bool {
+        return !receivedInviteViewModels.isEmpty
     }
 
-    var showRequests: Bool {
-        return !inviteViewModels.isEmpty
+    var showSentInvites: Bool {
+        return !sentInviteViewModels.isEmpty
     }
 
     func didPressThread(_ thread: ThreadViewModel) {
         router.presentChat(thread: thread.thread)
     }
 
-    func didPressChatRequests() {
-        router.presentInviteList(account: account)
+    func didPressReceivedInvites() {
+        router.presentReceivedInviteList(account: account)
+    }
+
+    func didPressSentInvites() {
+        router.presentSentInviteList(account: account)
     }
 
     @MainActor
@@ -85,8 +97,11 @@ extension ChatListPresenter: SceneViewModel {
 private extension ChatListPresenter {
 
     func setupInitialState() {
-        threads = interactor.getThreads()
-        receivedInvites = interactor.getInvites()
+        interactor.setupSubscriptions(account: account)
+
+        threads = interactor.getThreads(account: account)
+        receivedInvites = interactor.getReceivedInvites(account: account)
+        sentInvites = interactor.getSentInvites(account: account)
 
         interactor.threadsSubscription()
             .sink { [unowned self] threads in
@@ -96,6 +111,11 @@ private extension ChatListPresenter {
         interactor.receivedInvitesSubscription()
             .sink { [unowned self] receivedInvites in
                 self.receivedInvites = receivedInvites
+            }.store(in: &disposeBag)
+
+        interactor.sentInvitesSubscription()
+            .sink { [unowned self] sentInvites in
+                self.sentInvites = sentInvites
             }.store(in: &disposeBag)
     }
 

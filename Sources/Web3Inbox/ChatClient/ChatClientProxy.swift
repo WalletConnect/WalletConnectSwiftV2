@@ -18,15 +18,18 @@ final class ChatClientProxy {
 
         switch event {
         case .getReceivedInvites:
-            let invites = client.getReceivedInvites()
+            let params = try parse(GetReceivedInvitesRequest.self, params: request.params)
+            let invites = client.getReceivedInvites(account: params.account)
             try await respond(with: invites, request: request)
 
         case .getSentInvites:
-            let invites = client.getSentInvites()
+            let params = try parse(GetSentInvitesRequest.self, params: request.params)
+            let invites = client.getSentInvites(account: params.account)
             try await respond(with: invites, request: request)
 
         case .getThreads:
-            let threads = client.getThreads()
+            let params = try parse(GetThreadsRequest.self, params: request.params)
+            let threads = client.getThreads(account: params.account)
             try await respond(with: threads, request: request)
 
         case .register:
@@ -81,6 +84,18 @@ private extension ChatClientProxy {
     }
 
     struct ResolveRequest: Codable {
+        let account: Account
+    }
+
+    struct GetReceivedInvitesRequest: Codable {
+        let account: Account
+    }
+
+    struct GetSentInvitesRequest: Codable {
+        let account: Account
+    }
+
+    struct GetThreadsRequest: Codable {
         let account: Account
     }
 
