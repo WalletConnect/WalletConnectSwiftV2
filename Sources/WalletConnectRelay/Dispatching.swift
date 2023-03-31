@@ -19,7 +19,6 @@ final class Dispatcher: NSObject, Dispatching {
     private let relayHost: String
     private let projectId: String
     private let relayUrlFactory: RelayUrlFactory
-    private let socketFactory: WebSocketFactory
     private let socketConnectionType: SocketConnectionType
     private let logger: ConsoleLogging
     
@@ -48,12 +47,24 @@ final class Dispatcher: NSObject, Dispatching {
             relayHost: relayHost
         )
         self.relayUrlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)
-        self.socketFactory = socketFactory
         self.socketConnectionType = socketConnectionType
         self.logger = logger
-
+        
+        let socket = socketFactory.create(with: relayUrlFactory.create(
+            host: relayHost,
+            projectId: projectId
+        ))
+        socket.request.addValue(EnvironmentInfo.userAgent, forHTTPHeaderField: "User-Agent")
+        self.socket = socket
+        
+        switch socketConnectionType {
+        case .automatic:    socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket)
+        case .manual:       socketConnectionHandler = ManualSocketConnectionHandler(socket: socket)
+        }
+        
         super.init()
-        setUpSocketConnection()
+        setUpWebSocketSession()
+        setUpSocketConnectionObserving()
     }
 
     func send(_ string: String, completion: @escaping (Error?) -> Void) {
@@ -110,23 +121,8 @@ final class Dispatcher: NSObject, Dispatching {
     }
     
     private func setUpSocketConnection() {
-        setUpSocket()
         setUpWebSocketSession()
         setUpSocketConnectionObserving()
-    }
-    
-    private func setUpSocket() {
-        let socket = socketFactory.create(with: relayUrlFactory.create(
-            host: relayHost,
-            projectId: projectId
-        ))
-        socket.request.addValue(EnvironmentInfo.userAgent, forHTTPHeaderField: "User-Agent")
-        self.socket = socket
-        
-        switch socketConnectionType {
-        case .automatic:    socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket)
-        case .manual:       socketConnectionHandler = ManualSocketConnectionHandler(socket: socket)
-        }
     }
 
     private func setUpWebSocketSession() {
@@ -142,11 +138,13 @@ final class Dispatcher: NSObject, Dispatching {
         socket?.onDisconnect = { [unowned self] error in
             self.socketConnectionStatusPublisherSubject.send(.disconnected)
             if error != nil {
-                setUpSocketConnection()
-            } else {
-                Task(priority: .high) {
-                    await self.socketConnectionHandler?.handleDisconnection()
-                }
+                self.socket?.request.url = relayUrlFactory.create(
+                    host: relayHost,
+                    projectId: projectId
+                )
+            }
+            Task(priority: .high) {
+                await self.socketConnectionHandler?.handleDisconnection()
             }
         }
     }
