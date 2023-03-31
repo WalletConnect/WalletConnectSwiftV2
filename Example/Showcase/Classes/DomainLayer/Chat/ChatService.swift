@@ -8,22 +8,13 @@ typealias Stream<T> = AnyPublisher<T, Never>
 final class ChatService {
 
     private lazy var client: ChatClient = {
-        guard let importAccount = accountStorage.importAccount else {
-            fatalError("Error - you must call Chat.configure(_:) before accessing the shared instance.")
-        }
-        Chat.configure(account: importAccount.account)
+        Chat.configure()
         return Chat.instance
     }()
 
     private lazy var networking: NetworkingClient = {
         return Networking.instance
     }()
-
-    private let accountStorage: AccountStorage
-
-    init(accountStorage: AccountStorage) {
-        self.accountStorage = accountStorage
-    }
 
     var connectionPublisher: Stream<SocketConnectionStatus> {
         return networking.socketConnectionStatusPublisher
@@ -62,12 +53,20 @@ final class ChatService {
         client.getMessages(topic: thread.topic)
     }
 
-    func getThreads() -> [WalletConnectChat.Thread] {
-        client.getThreads()
+    func getThreads(account: Account) -> [WalletConnectChat.Thread] {
+        return client.getThreads(account: account)
     }
 
-    func getReceivedInvites() -> [ReceivedInvite] {
-        client.getReceivedInvites()
+    func getReceivedInvites(account: Account) -> [ReceivedInvite] {
+        return client.getReceivedInvites(account: account)
+    }
+
+    func getSentInvites(account: Account) -> [SentInvite] {
+        return client.getSentInvites(account: account)
+    }
+
+    func setupSubscriptions(account: Account) {
+        client.setupSubscriptions(account: account)
     }
 
     func sendMessage(topic: String, message: String) async throws {

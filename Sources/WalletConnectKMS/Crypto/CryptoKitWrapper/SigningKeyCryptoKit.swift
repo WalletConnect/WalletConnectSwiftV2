@@ -47,7 +47,7 @@ public struct SigningPublicKey: GenericPasswordConvertible, Equatable {
 
     public var did: String {
         let key = DIDKey(rawData: rawRepresentation)
-        return key.did(prefix: true, variant: .ED25519)
+        return key.did(variant: .ED25519)
     }
 }
 

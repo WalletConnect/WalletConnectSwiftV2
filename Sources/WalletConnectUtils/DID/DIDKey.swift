@@ -16,7 +16,11 @@ public struct DIDKey {
         return rawData.toHexString()
     }
 
-    public func did(prefix: Bool, variant: DIDKeyVariant) -> String {
-        return DIDKeyFactory().make(pubKey: rawData, variant: variant, prefix: prefix)
+    public func multibase(variant: DIDKeyVariant) -> String {
+        return DIDKeyFactory().make(pubKey: rawData, variant: variant, prefix: false)
+    }
+
+    public func did(variant: DIDKeyVariant) -> String {
+        return DIDKeyFactory().make(pubKey: rawData, variant: variant, prefix: true)
     }
 }
