@@ -32,6 +32,11 @@ extension Session {
         public let name: String
         public let data: AnyCodable
 
+        public init(name: String, data: AnyCodable) {
+            self.name = name
+            self.data = data
+        }
+        
         internal func internalRepresentation() -> SessionType.EventParams.Event {
             SessionType.EventParams.Event(name: name, data: data)
         }

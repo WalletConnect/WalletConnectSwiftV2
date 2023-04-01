@@ -15,7 +15,7 @@ struct SocketAuthenticator: SocketAuthenticating {
 
     func createAuthToken() throws -> String {
         let keyPair = try clientIdStorage.getOrCreateKeyPair()
-        let payload = AuthPayload(subject: getSubject(), audience: getAudience())
+        let payload = RelayAuthPayload(subject: getSubject(), audience: getAudience())
         return try payload.signAndCreateWrapper(keyPair: keyPair).jwtString
     }
 

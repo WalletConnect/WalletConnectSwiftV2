@@ -1,10 +1,6 @@
 import Foundation
 
-struct AuthPayload: JWTClaimsCodable {
-
-    struct Wrapper: JWTWrapper {
-        let jwtString: String
-    }
+struct EchoAuthPayload: JWTClaimsCodable {
 
     struct Claims: JWTClaims {
         let iss: String
@@ -12,6 +8,10 @@ struct AuthPayload: JWTClaimsCodable {
         let aud: String
         let iat: UInt64
         let exp: UInt64
+    }
+
+    struct Wrapper: JWTWrapper {
+        let jwtString: String
     }
 
     let subject: String

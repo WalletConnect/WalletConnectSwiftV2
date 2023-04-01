@@ -84,7 +84,7 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
 
     @objc
     private func openWallet() {
-        UIApplication.shared.open(URL(string: "walletconnectwallet://")!)
+        UIApplication.shared.open(URL(string: "walletapp://")!)
     }
 
     private func showConnectScreen(uri: WalletConnectURI) {
