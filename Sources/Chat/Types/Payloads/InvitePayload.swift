@@ -52,7 +52,7 @@ struct InvitePayload: JWTClaimsCodable {
             ksu: keyserver.absoluteString,
             aud: inviteeAccount.did,
             sub: message,
-            pke: inviterPublicKey.did(prefix: true, variant: .X25519)
+            pke: inviterPublicKey.did(variant: .X25519)
         )
     }
 }

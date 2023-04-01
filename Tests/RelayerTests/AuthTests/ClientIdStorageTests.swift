@@ -32,6 +32,6 @@ final class ClientIdStorageTests: XCTestCase {
 
         let clientId = try sut.getClientId()
         let didPublicKey = DIDKey(rawData: privateKey.publicKey.rawRepresentation)
-        XCTAssertEqual(clientId, didPublicKey.did(prefix: true, variant: .ED25519))
+        XCTAssertEqual(clientId, didPublicKey.did(variant: .ED25519))
     }
 }

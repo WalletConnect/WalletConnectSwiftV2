@@ -9,6 +9,7 @@ final class Web3WalletTests: XCTestCase {
     var authClient: AuthClientMock!
     var signClient: SignClientMock!
     var pairingClient: PairingClientMock!
+    var echoClient: EchoClientMock!
 
     private var disposeBag = Set<AnyCancellable>()
     
@@ -16,11 +17,13 @@ final class Web3WalletTests: XCTestCase {
         authClient = AuthClientMock()
         signClient = SignClientMock()
         pairingClient = PairingClientMock()
+        echoClient = EchoClientMock()
         
         web3WalletClient = Web3WalletClientFactory.create(
             authClient: authClient,
             signClient: signClient,
-            pairingClient: pairingClient
+            pairingClient: pairingClient,
+            echoClient: echoClient
         )
     }
     
@@ -262,5 +265,13 @@ final class Web3WalletTests: XCTestCase {
     
     func testGetPairingsNotEmpty() async {
         XCTAssertEqual(1, web3WalletClient.getPairings().count)
+    }
+    
+    func testEchoClientRegisterCalled() async {
+        try! await echoClient.register(deviceToken: Data())
+        XCTAssertTrue(echoClient.registedCalled)
+        echoClient.registedCalled = false
+        try! await echoClient.register(deviceToken: "")
+        XCTAssertTrue(echoClient.registedCalled)
     }
 }
