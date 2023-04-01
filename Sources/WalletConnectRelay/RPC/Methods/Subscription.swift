@@ -1,6 +1,4 @@
-
 import Foundation
-import WalletConnectUtils
 
 struct Subscription: RelayRPC {
 

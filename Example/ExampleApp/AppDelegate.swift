@@ -22,7 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
         Pair.configure(metadata: metadata)
 
-        Push.configure()
+        Push.configure(environment: .sandbox)
         Push.wallet.requestPublisher.sink { (id: RPCID, account: Account, metadata: AppMetadata) in
             Task(priority: .high) { try! await Push.wallet.approve(id: id) }
         }.store(in: &publishers)

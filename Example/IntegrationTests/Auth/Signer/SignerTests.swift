@@ -32,6 +32,6 @@ class SignerTest: XCTestCase {
     func testSignerAddressFromAccount() throws {
         let account = Account("eip155:1:0xBAc675C310721717Cd4A37F6cbeA1F081b1C2a07")!
 
-        XCTAssertEqual(DIDPKH(account: account).string, "did:pkh:eip155:1:0xBAc675C310721717Cd4A37F6cbeA1F081b1C2a07")
+        XCTAssertEqual(DIDPKH(account: account).string, "did:pkh:eip155:1:0xbac675c310721717cd4a37f6cbea1f081b1c2a07")
     }
 }

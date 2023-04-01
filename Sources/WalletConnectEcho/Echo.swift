@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectNetworking
 
 public class Echo {
     static public let echoHost = "echo.walletconnect.com"

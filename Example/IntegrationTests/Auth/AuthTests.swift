@@ -50,7 +50,7 @@ final class AuthTests: XCTestCase {
         let authClient = AuthClientFactory.create(
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
             projectId: InputConfig.projectId,
-            signerFactory: DefaultSignerFactory(),
+            crypto: DefaultCryptoProvider(),
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,

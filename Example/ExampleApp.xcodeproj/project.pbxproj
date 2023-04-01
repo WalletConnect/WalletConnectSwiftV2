@@ -140,6 +140,7 @@
 		A578FA3D2874002400AA7720 /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA3C2874002400AA7720 /* View.swift */; };
 		A57E71A6291CF76400325797 /* ETHSigner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57E71A5291CF76400325797 /* ETHSigner.swift */; };
 		A57E71A8291CF8A500325797 /* SOLSigner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57E71A7291CF8A500325797 /* SOLSigner.swift */; };
+		A58A1ECC29BF458600A82A20 /* ENSResolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58A1ECB29BF458600A82A20 /* ENSResolverTests.swift */; };
 		A58E7CEB28729F550082D443 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58E7CEA28729F550082D443 /* AppDelegate.swift */; };
 		A58E7CED28729F550082D443 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58E7CEC28729F550082D443 /* SceneDelegate.swift */; };
 		A58E7CF428729F550082D443 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A58E7CF328729F550082D443 /* Assets.xcassets */; };
@@ -172,6 +173,10 @@
 		A59CF4F6292F83D50031A42F /* DefaultSignerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59CF4F5292F83D50031A42F /* DefaultSignerFactory.swift */; };
 		A59F877628B5462900A9CD80 /* WalletConnectAuth in Frameworks */ = {isa = PBXBuildFile; productRef = A59F877528B5462900A9CD80 /* WalletConnectAuth */; };
 		A59FAEC928B7B93A002BB66F /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = A59FAEC828B7B93A002BB66F /* Web3 */; };
+		A5A0843D29D2F624000B9B17 /* DefaultCryptoProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A0843B29D2F60A000B9B17 /* DefaultCryptoProvider.swift */; };
+		A5A0843E29D2F624000B9B17 /* DefaultCryptoProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A0843B29D2F60A000B9B17 /* DefaultCryptoProvider.swift */; };
+		A5A0843F29D2F625000B9B17 /* DefaultCryptoProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A0843B29D2F60A000B9B17 /* DefaultCryptoProvider.swift */; };
+		A5A0844029D2F626000B9B17 /* DefaultCryptoProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A0843B29D2F60A000B9B17 /* DefaultCryptoProvider.swift */; };
 		A5A4FC56283CBB7800BBEC1E /* SessionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC55283CBB7800BBEC1E /* SessionDetailView.swift */; };
 		A5A4FC58283CBB9F00BBEC1E /* SessionDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC57283CBB9F00BBEC1E /* SessionDetailViewModel.swift */; };
 		A5A4FC5A283CC08600BBEC1E /* SessionNamespaceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC59283CC08600BBEC1E /* SessionNamespaceViewModel.swift */; };
@@ -205,6 +210,7 @@
 		A5C20229287EB34C007E3188 /* AccountStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20228287EB34C007E3188 /* AccountStorage.swift */; };
 		A5C2022B287EB89A007E3188 /* WelcomeInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C2022A287EB89A007E3188 /* WelcomeInteractor.swift */; };
 		A5C4DD8728A2DE88006A626D /* WalletConnectRouter in Frameworks */ = {isa = PBXBuildFile; productRef = A5C4DD8628A2DE88006A626D /* WalletConnectRouter */; };
+		A5C5153329BB7A6A004210BA /* InviteType.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C5153229BB7A6A004210BA /* InviteType.swift */; };
 		A5C8BE85292FE20B006CC85C /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = A5C8BE84292FE20B006CC85C /* Web3 */; };
 		A5D85226286333D500DAF5C3 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5D85225286333D500DAF5C3 /* Starscream */; };
 		A5D85228286333E300DAF5C3 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5D85227286333E300DAF5C3 /* Starscream */; };
@@ -489,6 +495,7 @@
 		A578FA3C2874002400AA7720 /* View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
 		A57E71A5291CF76400325797 /* ETHSigner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ETHSigner.swift; sourceTree = "<group>"; };
 		A57E71A7291CF8A500325797 /* SOLSigner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOLSigner.swift; sourceTree = "<group>"; };
+		A58A1ECB29BF458600A82A20 /* ENSResolverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ENSResolverTests.swift; sourceTree = "<group>"; };
 		A58E7CE828729F550082D443 /* Showcase.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Showcase.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A58E7CEA28729F550082D443 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A58E7CEC28729F550082D443 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -519,6 +526,7 @@
 		A58E7D472872EF610082D443 /* MessageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageViewModel.swift; sourceTree = "<group>"; };
 		A58EC615299D5C6400F3452A /* PlainButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlainButton.swift; sourceTree = "<group>"; };
 		A59CF4F5292F83D50031A42F /* DefaultSignerFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultSignerFactory.swift; sourceTree = "<group>"; };
+		A5A0843B29D2F60A000B9B17 /* DefaultCryptoProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultCryptoProvider.swift; sourceTree = "<group>"; };
 		A5A4FC55283CBB7800BBEC1E /* SessionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailView.swift; sourceTree = "<group>"; };
 		A5A4FC57283CBB9F00BBEC1E /* SessionDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailViewModel.swift; sourceTree = "<group>"; };
 		A5A4FC59283CC08600BBEC1E /* SessionNamespaceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionNamespaceViewModel.swift; sourceTree = "<group>"; };
@@ -544,6 +552,7 @@
 		A5C20222287EA7E2007E3188 /* BrandButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandButton.swift; sourceTree = "<group>"; };
 		A5C20228287EB34C007E3188 /* AccountStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountStorage.swift; sourceTree = "<group>"; };
 		A5C2022A287EB89A007E3188 /* WelcomeInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeInteractor.swift; sourceTree = "<group>"; };
+		A5C5153229BB7A6A004210BA /* InviteType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteType.swift; sourceTree = "<group>"; };
 		A5E03DED286464DB00888481 /* IntegrationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IntegrationTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5E03DF9286465C700888481 /* SignClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignClientTests.swift; sourceTree = "<group>"; };
 		A5E03DFC286465D100888481 /* Stubs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stubs.swift; sourceTree = "<group>"; };
@@ -1020,6 +1029,7 @@
 		84D2A66728A4F5260088AE09 /* Auth */ = {
 			isa = PBXGroup;
 			children = (
+				A58A1ECA29BF457800A82A20 /* ENS */,
 				A54195992934BFDD0035AD19 /* Signer */,
 				84D2A66528A4F51E0088AE09 /* AuthTests.swift */,
 			);
@@ -1135,6 +1145,7 @@
 			isa = PBXGroup;
 			children = (
 				A5629AE728772A0100094373 /* InviteViewModel.swift */,
+				A5C5153229BB7A6A004210BA /* InviteType.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1192,6 +1203,14 @@
 				A57E71A7291CF8A500325797 /* SOLSigner.swift */,
 			);
 			path = Signer;
+			sourceTree = "<group>";
+		};
+		A58A1ECA29BF457800A82A20 /* ENS */ = {
+			isa = PBXGroup;
+			children = (
+				A58A1ECB29BF458600A82A20 /* ENSResolverTests.swift */,
+			);
+			path = ENS;
 			sourceTree = "<group>";
 		};
 		A58E7CE928729F550082D443 /* Showcase */ = {
@@ -1381,6 +1400,7 @@
 				84CB43D429B9FC88004DDA31 /* Tests */,
 				A5629AEF2877F73000094373 /* DefaultSocketFactory.swift */,
 				A59CF4F5292F83D50031A42F /* DefaultSignerFactory.swift */,
+				A5A0843B29D2F60A000B9B17 /* DefaultCryptoProvider.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -2194,6 +2214,7 @@
 				A5BB7FA928B6A5FD00707FC6 /* AuthViewModel.swift in Sources */,
 				84CE6452279ED42B00142511 /* ConnectView.swift in Sources */,
 				A5A8E47E293A1CFE00FEB97D /* DefaultSignerFactory.swift in Sources */,
+				A5A0843D29D2F624000B9B17 /* DefaultCryptoProvider.swift in Sources */,
 				84CE6448279AE68600142511 /* AccountRequestViewController.swift in Sources */,
 				A5BB7F9F28B69B7100707FC6 /* SignCoordinator.swift in Sources */,
 				84CE642127981DED00142511 /* SceneDelegate.swift in Sources */,
@@ -2247,6 +2268,7 @@
 				A578FA35287304A300AA7720 /* Color.swift in Sources */,
 				A5629ADE2876CC6E00094373 /* InviteListModule.swift in Sources */,
 				A578FA322873036400AA7720 /* InputView.swift in Sources */,
+				A5A0843F29D2F625000B9B17 /* DefaultCryptoProvider.swift in Sources */,
 				A5C2021B287E1FD8007E3188 /* ImportRouter.swift in Sources */,
 				A5629AE42876E6D200094373 /* ThreadViewModel.swift in Sources */,
 				A58E7D0C2872A45B0082D443 /* MainModule.swift in Sources */,
@@ -2259,6 +2281,7 @@
 				A58E7CED28729F550082D443 /* SceneDelegate.swift in Sources */,
 				A5C2020F287D9DEE007E3188 /* WelcomeView.swift in Sources */,
 				A518A98929683FB60035247E /* Web3InboxRouter.swift in Sources */,
+				A5C5153329BB7A6A004210BA /* InviteType.swift in Sources */,
 				A5C2020D287D9DEE007E3188 /* WelcomeRouter.swift in Sources */,
 				A578FA372873D8EE00AA7720 /* UIColor.swift in Sources */,
 				A518A98729683FB60035247E /* Web3InboxViewController.swift in Sources */,
@@ -2309,6 +2332,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A5A0843E29D2F624000B9B17 /* DefaultCryptoProvider.swift in Sources */,
 				84CEC64628D89D6B00D081A8 /* PairingTests.swift in Sources */,
 				767DC83528997F8E00080FA9 /* EthSendTransaction.swift in Sources */,
 				8439CB89293F658E00F2F2E2 /* PushMessage.swift in Sources */,
@@ -2323,6 +2347,7 @@
 				7694A5262874296A0001257E /* RegistryTests.swift in Sources */,
 				A541959F2934BFEF0035AD19 /* SignerTests.swift in Sources */,
 				A50C036528AAD32200FE72D3 /* ClientDelegate.swift in Sources */,
+				A58A1ECC29BF458600A82A20 /* ENSResolverTests.swift in Sources */,
 				A5E03DFA286465C700888481 /* SignClientTests.swift in Sources */,
 				A54195A02934BFEF0035AD19 /* EIP1271VerifierTests.swift in Sources */,
 				A54195A12934BFEF0035AD19 /* EIP191VerifierTests.swift in Sources */,
@@ -2357,6 +2382,7 @@
 				C56EE250293F566D004840D1 /* ScanTargetView.swift in Sources */,
 				C56EE28F293F5757004840D1 /* MigrationConfigurator.swift in Sources */,
 				84B815552991217900FAD54E /* PushMessagesPresenter.swift in Sources */,
+				A5A0844029D2F626000B9B17 /* DefaultCryptoProvider.swift in Sources */,
 				847BD1DD2989494F00076C90 /* TabPage.swift in Sources */,
 				C55D348B295DD8CA0004314A /* PasteUriRouter.swift in Sources */,
 				84B815572991217900FAD54E /* PushMessagesInteractor.swift in Sources */,
