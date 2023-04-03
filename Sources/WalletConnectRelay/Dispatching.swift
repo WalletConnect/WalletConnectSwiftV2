@@ -16,10 +16,7 @@ final class Dispatcher: NSObject, Dispatching {
     var socket: WebSocketConnecting?
     var socketConnectionHandler: SocketConnectionHandler?
     
-    private let relayHost: String
-    private let projectId: String
     private let relayUrlFactory: RelayUrlFactory
-    private let socketConnectionType: SocketConnectionType
     private let logger: ConsoleLogging
     
     private let defaultTimeout: Int = 5
@@ -33,27 +30,15 @@ final class Dispatcher: NSObject, Dispatching {
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.dispatcher", attributes: .concurrent)
 
     init(
-        relayHost: String,
-        projectId: String,
-        clientIdStorage: ClientIdStorage,
         socketFactory: WebSocketFactory,
+        relayUrlFactory: RelayUrlFactory,
         socketConnectionType: SocketConnectionType,
         logger: ConsoleLogging
     ) {
-        self.relayHost = relayHost
-        self.projectId = projectId
-        let socketAuthenticator = SocketAuthenticator(
-            clientIdStorage: clientIdStorage,
-            relayHost: relayHost
-        )
-        self.relayUrlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)
-        self.socketConnectionType = socketConnectionType
+        self.relayUrlFactory = relayUrlFactory
         self.logger = logger
         
-        let socket = socketFactory.create(with: relayUrlFactory.create(
-            host: relayHost,
-            projectId: projectId
-        ))
+        let socket = socketFactory.create(with: relayUrlFactory.create())
         socket.request.addValue(EnvironmentInfo.userAgent, forHTTPHeaderField: "User-Agent")
         self.socket = socket
         
@@ -119,11 +104,6 @@ final class Dispatcher: NSObject, Dispatching {
     func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
         try socketConnectionHandler?.handleDisconnect(closeCode: closeCode)
     }
-    
-    private func setUpSocketConnection() {
-        setUpWebSocketSession()
-        setUpSocketConnectionObserving()
-    }
 
     private func setUpWebSocketSession() {
         socket?.onText = { [unowned self] in
@@ -138,10 +118,7 @@ final class Dispatcher: NSObject, Dispatching {
         socket?.onDisconnect = { [unowned self] error in
             self.socketConnectionStatusPublisherSubject.send(.disconnected)
             if error != nil {
-                self.socket?.request.url = relayUrlFactory.create(
-                    host: relayHost,
-                    projectId: projectId
-                )
+                self.socket?.request.url = relayUrlFactory.create()
             }
             Task(priority: .high) {
                 await self.socketConnectionHandler?.handleDisconnection()

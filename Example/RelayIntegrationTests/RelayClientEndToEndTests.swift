@@ -36,8 +36,12 @@ final class RelayClientEndToEndTests: XCTestCase {
             clientIdStorage: clientIdStorage,
             relayHost: InputConfig.relayHost
         )
-        let urlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)
-        let socket = WebSocket(url: urlFactory.create(host: InputConfig.relayHost, projectId: InputConfig.projectId))
+        let urlFactory = RelayUrlFactory(
+            relayHost: InputConfig.relayHost,
+            projectId: InputConfig.projectId,
+            socketAuthenticator: socketAuthenticator
+        )
+        let socket = WebSocket(url: urlFactory.create())
         let webSocketFactory = WebSocketFactoryMock(webSocket: socket)
         let logger = ConsoleLogger()
         let dispatcher = Dispatcher(
