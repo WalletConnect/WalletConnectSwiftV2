@@ -61,11 +61,19 @@ final class DispatcherTests: XCTestCase {
         let webSocketFactory = WebSocketFactoryMock(webSocket: webSocket)
         networkMonitor = NetworkMonitoringMock()
         let keychainStorageMock = DispatcherKeychainStorageMock()
-        sut = Dispatcher(
+        let clientIdStorage = ClientIdStorage(keychain: keychainStorageMock)
+        let socketAuthenticator = SocketAuthenticator(
+            clientIdStorage: clientIdStorage,
+            relayHost: "relay.walletconnect.com"
+        )
+        let relayUrlFactory = RelayUrlFactory(
             relayHost: "relay.walletconnect.com",
             projectId: "1012db890cf3cfb0c1cdc929add657ba",
-            clientIdStorage: ClientIdStorage(keychain: keychainStorageMock),
+            socketAuthenticator: socketAuthenticator
+        )
+        sut = Dispatcher(
             socketFactory: webSocketFactory,
+            relayUrlFactory: relayUrlFactory,
             socketConnectionType: .manual,
             logger: ConsoleLoggerMock()
         )
