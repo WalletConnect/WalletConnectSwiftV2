@@ -7,8 +7,10 @@ import WalletConnectRelay
 import Combine
 
 final class ChatTests: XCTestCase {
-    var invitee: ChatClient!
-    var inviter: ChatClient!
+
+    lazy var invitee: ChatClient = makeClient(prefix: "🦖 Invitee", account: inviteeAccount)
+    lazy var inviter: ChatClient = makeClient(prefix: "🍄 Inviter", account: inviterAccount)
+
     private var publishers = [AnyCancellable]()
 
     let inviteeAccount = Account("eip155:1:0x5927e14698A00D799d3430ad919D94aB1dD87458")!
@@ -18,9 +20,6 @@ final class ChatTests: XCTestCase {
     let privateKey2 = Data(hex: "f4230d5166b30a20bd092b3afa471023caefdba9ecdf41a3c953712ead2d558a")
 
     override func setUp() async throws {
-        invitee = makeClient(prefix: "🦖 Invitee", account: inviteeAccount)
-        inviter = makeClient(prefix: "🍄 Inviter", account: inviterAccount)
-
         try await invitee.register(account: inviteeAccount) { [unowned self] message in
             sign(message, privateKey: privateKey1)
         }
