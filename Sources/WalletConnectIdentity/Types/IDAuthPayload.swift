@@ -1,6 +1,6 @@
 import Foundation
 
-struct InviteKeyPayload: JWTClaimsCodable {
+struct IDAuthPayload: JWTClaimsCodable {
 
     struct Wrapper: JWTWrapper {
         let jwtString: String
