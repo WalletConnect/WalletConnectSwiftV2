@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectNetworking
 
 protocol EchoAuthenticating {
     func createAuthToken() throws -> String

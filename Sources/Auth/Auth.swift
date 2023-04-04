@@ -22,7 +22,7 @@ public class Auth {
         return AuthClientFactory.create(
             metadata: Pair.metadata,
             projectId: Networking.projectId,
-            signerFactory: config.signerFactory,
+            crypto: config.crypto,
             networkingClient: Networking.interactor,
             pairingRegisterer: Pair.registerer
         )
@@ -35,7 +35,7 @@ public class Auth {
     /// Auth instance wallet config method.  For DApp usage
     /// - Parameters:
     ///   - signerFactory: Auth signers factory
-    static public func configure(signerFactory: SignerFactory) {
-        Auth.config = Auth.Config(signerFactory: signerFactory)
+    static public func configure(crypto: CryptoProvider) {
+        Auth.config = Auth.Config(crypto: crypto)
     }
 }

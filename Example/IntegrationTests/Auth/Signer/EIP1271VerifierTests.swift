@@ -15,8 +15,7 @@ class EIP1271VerifierTests: XCTestCase {
 
     func testSuccessVerify() async throws {
         let httpClient = HTTPNetworkClient(host: "rpc.walletconnect.com")
-        let signer = DefaultSignerFactory().createEthereumSigner()
-        let verifier = EIP1271Verifier(projectId: InputConfig.projectId, httpClient: httpClient, signer: signer)
+        let verifier = EIP1271Verifier(projectId: InputConfig.projectId, httpClient: httpClient, crypto: DefaultCryptoProvider())
         try await verifier.verify(
             signature: signature,
             message: message,
@@ -27,8 +26,7 @@ class EIP1271VerifierTests: XCTestCase {
 
     func testFailureVerify() async throws {
         let httpClient = HTTPNetworkClient(host: "rpc.walletconnect.com")
-        let signer = DefaultSignerFactory().createEthereumSigner()
-        let verifier = EIP1271Verifier(projectId: InputConfig.projectId, httpClient: httpClient, signer: signer)
+        let verifier = EIP1271Verifier(projectId: InputConfig.projectId, httpClient: httpClient, crypto: DefaultCryptoProvider())
 
         await XCTAssertThrowsErrorAsync(try await verifier.verify(
             signature: Data("deadbeaf"),

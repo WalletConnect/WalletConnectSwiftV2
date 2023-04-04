@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectEcho
 import Combine
 
 /// Web3 Wallet Client
@@ -223,7 +222,7 @@ public class Web3WalletClient {
     }
 }
 
-#if targetEnvironment(simulator)
+#if DEBUG
 extension Web3WalletClient {
     public func registerEchoClient(deviceToken: String) async throws {
         try await echoClient.register(deviceToken: deviceToken)

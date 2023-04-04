@@ -7,7 +7,6 @@ class InviteService {
     private let keyserverURL: URL
     private let networkingInteractor: NetworkInteracting
     private let identityClient: IdentityClient
-    private let accountService: AccountService
     private let logger: ConsoleLogging
     private let kms: KeyManagementService
     private let chatStorage: ChatStorage
@@ -16,7 +15,6 @@ class InviteService {
         keyserverURL: URL,
         networkingInteractor: NetworkInteracting,
         identityClient: IdentityClient,
-        accountService: AccountService,
         kms: KeyManagementService,
         chatStorage: ChatStorage,
         logger: ConsoleLogging
@@ -25,7 +23,6 @@ class InviteService {
         self.keyserverURL = keyserverURL
         self.networkingInteractor = networkingInteractor
         self.identityClient = identityClient
-        self.accountService = accountService
         self.logger = logger
         self.chatStorage = chatStorage
         setUpResponseHandling()
@@ -51,8 +48,9 @@ class InviteService {
         )
         let wrapper = try identityClient.signAndCreateWrapper(
             payload: payload,
-            account: accountService.currentAccount
+            account: invite.inviterAccount
         )
+
         let inviteId = RPCID()
         let request = RPCRequest(method: protocolMethod.method, params: wrapper, rpcid: inviteId)
 

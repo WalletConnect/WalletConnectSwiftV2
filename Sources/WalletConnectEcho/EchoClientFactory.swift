@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectNetworking
 
 public struct EchoClientFactory {
     public static func create(projectId: String,

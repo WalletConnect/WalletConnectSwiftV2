@@ -19,8 +19,8 @@ public final class Web3Inbox {
     /// - Parameters:
     ///   - account: Web3Inbox initial account
     static public func configure(account: Account, onSign: @escaping SigningCallback) {
-        Chat.configure(account: account)
         Web3Inbox.account = account
         Web3Inbox.onSign = onSign
+        Chat.configure()
     }
 }

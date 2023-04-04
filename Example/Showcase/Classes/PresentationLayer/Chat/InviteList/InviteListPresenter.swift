@@ -71,8 +71,8 @@ extension InviteListPresenter: SceneViewModel {
 private extension InviteListPresenter {
 
     func setupInitialState() {
-        receivedInvites = interactor.getReceivedInvites()
-        sentInvites = interactor.getSentInvites()
+        receivedInvites = interactor.getReceivedInvites(account: account)
+        sentInvites = interactor.getSentInvites(account: account)
 
         interactor.receivedInvitesSubscription()
             .sink { [unowned self] receivedInvites in

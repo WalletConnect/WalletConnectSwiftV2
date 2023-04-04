@@ -6,28 +6,21 @@ class MessagingService {
     private let keyserverURL: URL
     private let networkingInteractor: NetworkInteracting
     private let identityClient: IdentityClient
-    private let accountService: AccountService
     private let chatStorage: ChatStorage
     private let logger: ConsoleLogging
 
     private var publishers = [AnyCancellable]()
 
-    private var currentAccount: Account {
-        return accountService.currentAccount
-    }
-
     init(
         keyserverURL: URL,
         networkingInteractor: NetworkInteracting,
         identityClient: IdentityClient,
-        accountService: AccountService,
         chatStorage: ChatStorage,
         logger: ConsoleLogging
     ) {
         self.keyserverURL = keyserverURL
         self.networkingInteractor = networkingInteractor
         self.identityClient = identityClient
-        self.accountService = accountService
         self.chatStorage = chatStorage
         self.logger = logger
         setUpResponseHandling()
@@ -35,14 +28,15 @@ class MessagingService {
     }
 
     func send(topic: String, messageString: String) async throws {
-        guard let thread = chatStorage.getThread(topic: topic, account: currentAccount) else {
+        guard let thread = chatStorage.getThread(topic: topic) else {
             throw Errors.threadDoNotExist
         }
         let payload = MessagePayload(keyserver: keyserverURL, message: messageString, recipientAccount: thread.peerAccount)
         let wrapper = try identityClient.signAndCreateWrapper(
             payload: payload,
-            account: accountService.currentAccount
+            account: thread.selfAccount
         )
+
         let protocolMethod = ChatMessageProtocolMethod()
         let request = RPCRequest(method: protocolMethod.method, params: wrapper)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
@@ -113,8 +107,9 @@ private extension MessagingService {
                     )
                     let wrapper = try identityClient.signAndCreateWrapper(
                         payload: receiptPayload,
-                        account: accountService.currentAccount
+                        account: message.recipientAccount
                     )
+
                     let response = RPCResponse(id: payload.id, result: wrapper)
 
                     try await networkingInteractor.respond(
