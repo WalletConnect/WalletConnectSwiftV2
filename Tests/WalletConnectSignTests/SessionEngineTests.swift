@@ -47,7 +47,7 @@ final class SessionEngineTests: XCTestCase {
             expiry: UInt64(Date().timeIntervalSince1970)
         )
 
-        networkingInteractor.requestPublisherSubject.send(("topic", request, Date()))
+        networkingInteractor.requestPublisherSubject.send(("topic", request, Date(), nil))
 
         wait(for: [expectation], timeout: 0.5)
     }

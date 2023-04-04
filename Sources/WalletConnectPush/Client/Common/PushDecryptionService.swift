@@ -17,7 +17,7 @@ public class PushDecryptionService {
     }
 
     public func decryptMessage(topic: String, ciphertext: String) throws -> PushMessage {
-        let rpcRequest: RPCRequest = try serializer.deserialize(topic: topic, encodedEnvelope: ciphertext)
+        let (rpcRequest, _): (RPCRequest, String?) = try serializer.deserialize(topic: topic, encodedEnvelope: ciphertext)
         guard let params = rpcRequest.params else { throw Errors.malformedPushMessage }
         return try params.get(PushMessage.self)
     }
