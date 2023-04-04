@@ -11,7 +11,7 @@ final class PushRequestInteractor {
     }
 
     func onSing(_ message: String) async -> SigningResult {
-        let privateKey = Data(hex: "e56da0e170b5e09a8bb8f1b693392c7d56c3739a9c75740fbc558a2877868540")
+        let privateKey = EthKeyStore.shared.privateKeyRaw
         let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
         let signature = try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
         return .signed(signature)
