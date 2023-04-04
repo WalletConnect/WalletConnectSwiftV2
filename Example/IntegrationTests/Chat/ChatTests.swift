@@ -11,17 +11,22 @@ final class ChatTests: XCTestCase {
     var inviter: ChatClient!
     private var publishers = [AnyCancellable]()
 
-    let inviteeAccount = Account("eip155:1:0x15bca56b6e2728aec2532df9d436bd1600e86688")!
-    let inviterAccount = Account("eip155:2:0x15bca56b6e2728aec2532df9d436bd1600e86688")!
+    let inviteeAccount = Account("eip155:1:0x5927e14698A00D799d3430ad919D94aB1dD87458")!
+    let inviterAccount = Account("eip155:1:0xf3Dd9c482061b7a977aF08D8a6c28f9CB7b72043")!
 
-    let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
+    let privateKey1 = Data(hex: "c0a4b45292a714b56cc00faf197a963f8b6e04334507a70ab0b9defc3bc8492a")
+    let privateKey2 = Data(hex: "f4230d5166b30a20bd092b3afa471023caefdba9ecdf41a3c953712ead2d558a")
 
     override func setUp() async throws {
         invitee = makeClient(prefix: "🦖 Invitee", account: inviteeAccount)
         inviter = makeClient(prefix: "🍄 Inviter", account: inviterAccount)
 
-        try await invitee.register(account: inviteeAccount, onSign: sign)
-        try await inviter.register(account: inviterAccount, onSign: sign)
+        try await invitee.register(account: inviteeAccount) { [unowned self] message in
+            sign(message, privateKey: privateKey1)
+        }
+        try await inviter.register(account: inviterAccount) { [unowned self] message in
+            sign(message, privateKey: privateKey2)
+        }
     }
 
     func makeClient(prefix: String, account: Account) -> ChatClient {
@@ -121,8 +126,7 @@ final class ChatTests: XCTestCase {
         wait(for: [messageExpectation], timeout: InputConfig.defaultTimeout)
     }
 
-    private func sign(_ message: String) -> SigningResult {
-        let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
+    func sign(_ message: String, privateKey: Data) -> SigningResult {
         let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
         return .signed(try! signer.sign(message: message, privateKey: privateKey, type: .eip191))
     }
