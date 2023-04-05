@@ -19,8 +19,11 @@ class NotificationService: UNNotificationServiceExtension {
         if let bestAttemptContent = bestAttemptContent {
             let topic = bestAttemptContent.userInfo["topic"] as! String
             let ciphertext = bestAttemptContent.userInfo["blob"] as! String
+            NSLog("echo decryption, topic=%@", topic)
             do {
+                Self.logger.warning("topic \(topic, privacy: .public)")
                 let service = PushDecryptionService()
+                print(topic)
                 let pushMessage = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
                 bestAttemptContent.title = pushMessage.title
                 bestAttemptContent.body = pushMessage.body
@@ -28,6 +31,7 @@ class NotificationService: UNNotificationServiceExtension {
                 return
             }
             catch {
+                NSLog("echo decryption, error=%@", error.localizedDescription)
                 Self.logger.trace("\("echo-test: PN decryption error: \(error.localizedDescription)", privacy: .public)")
 
                 Self.logger.warning("\(error.localizedDescription, privacy: .public)")

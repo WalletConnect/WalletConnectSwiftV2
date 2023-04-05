@@ -44,6 +44,7 @@ public final class GroupKeychainStorage: KeychainStorageProtocol {
 
         var item: CFTypeRef?
         let status = secItem.copyMatching(query as CFDictionary, &item)
+        NSLog("echo decryption, -----keychain storage status=%@",status.message)
 
         switch status {
         case errSecSuccess:
@@ -94,7 +95,7 @@ public final class GroupKeychainStorage: KeychainStorageProtocol {
     private func buildBaseServiceQuery(for key: String) -> [CFString: Any] {
         return [
             kSecClass: kSecClassGenericPassword,
-            kSecAttrAccessible: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+            kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
             kSecAttrIsInvisible: true,
             kSecUseDataProtectionKeychain: true,
             kSecAttrAccessGroup: accessGroup,
