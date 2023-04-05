@@ -304,7 +304,6 @@
 		764E1D5626F8DB6000A1FB15 /* WalletConnectSwiftV2 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WalletConnectSwiftV2; path = ..; sourceTree = "<group>"; };
 		767DC83428997F8E00080FA9 /* EthSendTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthSendTransaction.swift; sourceTree = "<group>"; };
 		7694A5252874296A0001257E /* RegistryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistryTests.swift; sourceTree = "<group>"; };
-		8414FC832962F3D9007E20C9 /* PushDecryptionService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PushDecryptionService.entitlements; sourceTree = "<group>"; };
 		84310D04298BC980000C15B6 /* MainInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainInteractor.swift; sourceTree = "<group>"; };
 		8439CB88293F658E00F2F2E2 /* PushMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushMessage.swift; sourceTree = "<group>"; };
 		844749F329B9E5B9005F520B /* RelayIntegrationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RelayIntegrationTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -328,8 +327,6 @@
 		849A4F19298281F100E61ACE /* PNDecryptionServiceRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PNDecryptionServiceRelease.entitlements; sourceTree = "<group>"; };
 		849D7A92292E2169006A2BD4 /* PushTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushTests.swift; sourceTree = "<group>"; };
 		84AA01DA28CF0CD7005D48D8 /* XCTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTest.swift; sourceTree = "<group>"; };
-		84B767782954554A00E92316 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
-		84B7677A2954554A00E92316 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		84B8154D2991099000FAD54E /* BuildConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildConfiguration.swift; sourceTree = "<group>"; };
 		84B8154F2991217900FAD54E /* PushMessagesModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushMessagesModule.swift; sourceTree = "<group>"; };
 		84B815502991217900FAD54E /* PushMessagesPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushMessagesPresenter.swift; sourceTree = "<group>"; };
@@ -632,7 +629,6 @@
 				A5A4FC732840C12C00BBEC1E /* UITests */,
 				A5E03DEE286464DB00888481 /* IntegrationTests */,
 				A58E7CE928729F550082D443 /* Showcase */,
-				84B767772954554A00E92316 /* PushDecryptionService */,
 				C56EE21C293F55ED004840D1 /* WalletApp */,
 				84E6B84829787A8000428BAF /* PNDecryptionService */,
 				844749F429B9E5B9005F520B /* RelayIntegrationTests */,
@@ -731,16 +727,6 @@
 				849D7A92292E2169006A2BD4 /* PushTests.swift */,
 			);
 			path = Push;
-			sourceTree = "<group>";
-		};
-		84B767772954554A00E92316 /* PushDecryptionService */ = {
-			isa = PBXGroup;
-			children = (
-				8414FC832962F3D9007E20C9 /* PushDecryptionService.entitlements */,
-				84B767782954554A00E92316 /* NotificationService.swift */,
-				84B7677A2954554A00E92316 /* Info.plist */,
-			);
-			path = PushDecryptionService;
 			sourceTree = "<group>";
 		};
 		84B815592991217F00FAD54E /* PushMessages */ = {
