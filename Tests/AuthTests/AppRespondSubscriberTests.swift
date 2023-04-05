@@ -65,7 +65,7 @@ class AppRespondSubscriberTests: XCTestCase {
         let cacao = Cacao(h: cacaoHeader, p: cacaoPayload, s: cacaoSignature)
 
         let response = RPCResponse(id: requestId, result: cacao)
-        networkingInteractor.responsePublisherSubject.send((topic, request, response, Date()))
+        networkingInteractor.responsePublisherSubject.send((topic, request, response, Date(), nil))
 
         wait(for: [messageExpectation], timeout: defaultTimeout)
         XCTAssertTrue(pairingRegisterer.isActivateCalled)

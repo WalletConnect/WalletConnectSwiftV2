@@ -19,3 +19,5 @@ struct ThirdPartyConfigurator: Configurator {
     }
     
 }
+
+

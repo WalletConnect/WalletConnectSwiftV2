@@ -66,10 +66,10 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
         let account = session.namespaces.values.first!.accounts.first!
 
         Task(priority: .high){ try! await Push.dapp.request(account: account, topic: session.pairingTopic)}
-        Push.dapp.responsePublisher.sink { (id: RPCID, result: Result<PushSubscription, PushError>) in
+        Push.dapp.responsePublisher.sink { (id: RPCID, result: Result<PushSubscriptionResult, PushError>) in
             switch result {
-            case .success(let subscription):
-                self.pushSubscription = subscription
+            case .success(let subscriptionResult):
+                self.pushSubscription = subscriptionResult.pushSubscription
             case .failure(let error):
                 print(error)
             }

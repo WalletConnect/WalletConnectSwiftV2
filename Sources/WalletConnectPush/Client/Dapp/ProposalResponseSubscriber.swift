@@ -4,13 +4,16 @@ import WalletConnectKMS
 import WalletConnectNetworking
 
 class ProposalResponseSubscriber {
+    enum Errors: Error {
+        case subscriptionTopicNotDerived
+    }
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
     private var publishers = [AnyCancellable]()
     private let metadata: AppMetadata
     private let relay: RelayProtocolOptions
-    var onResponse: ((_ id: RPCID, _ result: Result<PushSubscription, PushError>) -> Void)?
+    var onResponse: ((_ id: RPCID, _ result: Result<PushSubscriptionResult, PushError>) -> Void)?
     private let subscriptionsStore: CodableStore<PushSubscription>
 
     init(networkingInteractor: NetworkInteracting,
@@ -32,33 +35,41 @@ class ProposalResponseSubscriber {
     private func subscribeForProposalResponse() {
         let protocolMethod = PushRequestProtocolMethod()
         networkingInteractor.responseSubscription(on: protocolMethod)
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<PushRequestParams, PushResponseParams>) in
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<PushRequestParams, AcceptSubscriptionJWTPayload.Wrapper>) in
                 logger.debug("Received Push Proposal response")
                 Task(priority: .userInitiated) {
-                    let pushSubscription = try await handleResponse(payload: payload)
-                    onResponse?(payload.id, .success(pushSubscription))
+                    do {
+                        let (pushSubscription, jwt) = try await handleResponse(payload: payload)
+                        let result = PushSubscriptionResult(pushSubscription: pushSubscription, subscriptionAuth: jwt)
+                        onResponse?(payload.id, .success(result))
+                    } catch {
+                        logger.error(error)
+                    }
                 }
             }.store(in: &publishers)
     }
 
-    private func handleResponse(payload: ResponseSubscriptionPayload<PushRequestParams, PushResponseParams>) async throws -> PushSubscription {
-        let peerPublicKeyHex = payload.response.publicKey
-        let selfpublicKeyHex = payload.request.publicKey
-        let (topic, _) = try generateAgreementKeys(peerPublicKeyHex: peerPublicKeyHex, selfpublicKeyHex: selfpublicKeyHex)
+    private func handleResponse(payload: ResponseSubscriptionPayload<PushRequestParams, AcceptSubscriptionJWTPayload.Wrapper>) async throws -> (PushSubscription, String) {
 
-        let pushSubscription = PushSubscription(topic: topic, account: payload.request.account, relay: relay, metadata: metadata)
-        subscriptionsStore.set(pushSubscription, forKey: topic)
-        kms.deletePrivateKey(for: selfpublicKeyHex)
-        try await networkingInteractor.subscribe(topic: topic)
-        return pushSubscription
+        let jwt = payload.response.jwtString
+        _ = try AcceptSubscriptionJWTPayload.decodeAndVerify(from: payload.response)
+        logger.debug("subscriptionAuth JWT validated")
+
+        guard let subscriptionTopic = payload.derivedTopic else { throw Errors.subscriptionTopicNotDerived }
+
+        let pushSubscription = PushSubscription(topic: subscriptionTopic, account: payload.request.account, relay: relay, metadata: metadata)
+        logger.debug("Subscribing to Push Subscription topic: \(subscriptionTopic)")
+        subscriptionsStore.set(pushSubscription, forKey: subscriptionTopic)
+        try await networkingInteractor.subscribe(topic: subscriptionTopic)
+        return (pushSubscription, jwt)
     }
 
-    private func generateAgreementKeys(peerPublicKeyHex: String, selfpublicKeyHex: String) throws -> (topic: String, keys: AgreementKeys) {
+    private func generateAgreementKeys(peerPublicKeyHex: String, selfpublicKeyHex: String) throws -> String {
         let selfPublicKey = try AgreementPublicKey(hex: selfpublicKeyHex)
         let keys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: peerPublicKeyHex)
         let topic = keys.derivedTopic()
         try kms.setAgreementSecret(keys, topic: topic)
-        return (topic: topic, keys: keys)
+        return topic
     }
 
     private func subscribeForProposalErrors() {

@@ -72,8 +72,8 @@ public class WalletPushClient {
         setupSubscriptions()
     }
 
-    public func approve(id: RPCID) async throws {
-        try await proposeResponder.respond(requestId: id)
+    public func approve(id: RPCID, onSign: @escaping SigningCallback) async throws {
+        try await proposeResponder.respond(requestId: id, onSign: onSign)
     }
 
     public func reject(id: RPCID) async throws {
