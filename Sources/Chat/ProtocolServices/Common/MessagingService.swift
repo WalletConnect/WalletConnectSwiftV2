@@ -58,8 +58,8 @@ private extension MessagingService {
                 logger.debug("Received Receipt response")
 
                 guard
-                    let (message, _) = try? MessagePayload.decode(from: payload.request),
-                    let (receipt, _) = try? ReceiptPayload.decode(from: payload.response)
+                    let (message, _) = try? MessagePayload.decodeAndVerify(from: payload.request),
+                    let (receipt, _) = try? ReceiptPayload.decodeAndVerify(from: payload.response)
                 else { fatalError() /* TODO: Handle error */ }
 
                 let newMessage = Message(
@@ -79,7 +79,7 @@ private extension MessagingService {
 
                 logger.debug("Received Message Request")
 
-                guard let (message, messageClaims) = try? MessagePayload.decode(from: payload.request)
+                guard let (message, messageClaims) = try? MessagePayload.decodeAndVerify(from: payload.request)
                 else { fatalError() /* TODO: Handle error */ }
 
                 Task(priority: .high) {

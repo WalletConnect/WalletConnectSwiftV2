@@ -108,7 +108,7 @@ private extension InvitationHandlingService {
             .sink { [unowned self] (payload: RequestSubscriptionPayload<InvitePayload.Wrapper>) in
                 logger.debug("Did receive an invite")
 
-                guard let (invite, claims) = try? InvitePayload.decode(from: payload.request)
+                guard let (invite, claims) = try? InvitePayload.decodeAndVerify(from: payload.request)
                 else { fatalError() /* TODO: Handle error */ }
 
                 Task(priority: .high) {
