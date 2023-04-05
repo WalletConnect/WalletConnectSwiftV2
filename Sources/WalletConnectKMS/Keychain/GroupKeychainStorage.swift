@@ -44,7 +44,6 @@ public final class GroupKeychainStorage: KeychainStorageProtocol {
 
         var item: CFTypeRef?
         let status = secItem.copyMatching(query as CFDictionary, &item)
-        NSLog("echo decryption, -----keychain storage status=%@",status.message)
 
         switch status {
         case errSecSuccess:

@@ -63,7 +63,6 @@ public class KeyManagementService: KeyManagementServiceProtocol {
         do {
             return try keychain.read(key: topic) as SymmetricKey
         } catch {
-            NSLog("echo decryption, keychain getSymmetricKey error=%@", error.localizedDescription)
             return nil
         }
     }
@@ -90,7 +89,6 @@ public class KeyManagementService: KeyManagementServiceProtocol {
         do {
             return try keychain.read(key: topic) as AgreementKeys
         } catch {
-            NSLog("echo decryption, keychain getAgreementSecret error=%@", error.localizedDescription)
             return nil
         }
     }

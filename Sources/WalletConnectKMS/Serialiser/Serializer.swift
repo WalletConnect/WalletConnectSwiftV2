@@ -55,7 +55,6 @@ public class Serializer: Serializing {
         if let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) {
             return try decode(sealbox: envelope.sealbox, symmetricKey: symmetricKey)
         } else {
-            NSLog("echo decryption, serialiser - sym key for topic not found")
             throw Errors.symmetricKeyForTopicNotFound
         }
     }
