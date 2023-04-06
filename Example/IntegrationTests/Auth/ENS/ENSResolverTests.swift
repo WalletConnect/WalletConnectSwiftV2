@@ -2,9 +2,9 @@ import Foundation
 import XCTest
 @testable import WalletConnectSigner
 
-class ENSSignerTests: XCTestCase {
+class ENSResolverTests: XCTestCase {
 
-    private let account = Account("eip155:1:0x025d1eac1467c5be5e38ca411dc2454964b5c666")!
+    private let account = Account("eip155:1:0xD02D090F8f99B61D65d8e8876Ea86c2720aB27BC")!
     private let ens = "web3.eth"
 
     func testResolveEns() async throws {
