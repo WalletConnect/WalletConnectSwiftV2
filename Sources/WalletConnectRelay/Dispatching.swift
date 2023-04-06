@@ -13,8 +13,8 @@ protocol Dispatching {
 
 final class Dispatcher: NSObject, Dispatching {
     var onMessage: ((String) -> Void)?
-    var socket: WebSocketConnecting?
-    var socketConnectionHandler: SocketConnectionHandler?
+    var socket: WebSocketConnecting
+    var socketConnectionHandler: SocketConnectionHandler
     
     private let relayUrlFactory: RelayUrlFactory
     private let logger: ConsoleLogging
@@ -53,7 +53,7 @@ final class Dispatcher: NSObject, Dispatching {
     }
 
     func send(_ string: String, completion: @escaping (Error?) -> Void) {
-        guard let socket, socket.isConnected else {
+        guard socket.isConnected else {
             completion(NetworkError.webSocketNotConnected)
             return
         }
@@ -63,7 +63,7 @@ final class Dispatcher: NSObject, Dispatching {
     }
 
     func protectedSend(_ string: String, completion: @escaping (Error?) -> Void) {
-        guard let socket, !socket.isConnected else {
+        guard !socket.isConnected else {
             return send(string, completion: completion)
         }
 
@@ -98,30 +98,30 @@ final class Dispatcher: NSObject, Dispatching {
     }
 
     func connect() throws {
-        try socketConnectionHandler?.handleConnect()
+        try socketConnectionHandler.handleConnect()
     }
 
     func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
-        try socketConnectionHandler?.handleDisconnect(closeCode: closeCode)
+        try socketConnectionHandler.handleDisconnect(closeCode: closeCode)
     }
 
     private func setUpWebSocketSession() {
-        socket?.onText = { [unowned self] in
+        socket.onText = { [unowned self] in
             self.onMessage?($0)
         }
     }
 
     private func setUpSocketConnectionObserving() {
-        socket?.onConnect = { [unowned self] in
+        socket.onConnect = { [unowned self] in
             self.socketConnectionStatusPublisherSubject.send(.connected)
         }
-        socket?.onDisconnect = { [unowned self] error in
+        socket.onDisconnect = { [unowned self] error in
             self.socketConnectionStatusPublisherSubject.send(.disconnected)
             if error != nil {
-                self.socket?.request.url = relayUrlFactory.create()
+                self.socket.request.url = relayUrlFactory.create()
             }
             Task(priority: .high) {
-                await self.socketConnectionHandler?.handleDisconnection()
+                await self.socketConnectionHandler.handleDisconnection()
             }
         }
     }
