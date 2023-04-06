@@ -147,6 +147,641 @@ final class Web3WalletTests: XCTestCase {
         }
     }
     
+    func testApprovedNamespacesSameChainRequiredAndOptional() async {
+        let accounts = [Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!]
+        
+        let sessionNamespaces = try! web3WalletClient.buildApprovedNamespaces(
+            requiredNamespaces: [
+                "eip155": ProposalNamespace(
+                    chains: [Blockchain("eip155:1")!],
+                    methods: ["personal_sign"],
+                    events: ["chainChanged"]
+                )
+            ],
+            optionalNamespaces: [
+                "eip155": ProposalNamespace(
+                    chains: [Blockchain("eip155:1")!],
+                    methods: ["eth_sendTransaction"],
+                    events: ["chainChanged"]
+                )
+            ],
+            chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:3")!],
+            methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
+            events: ["chainChanged"],
+            accounts: Set(accounts)
+        )
+
+        let expectedNamespaces: [String: SessionNamespace] = [
+            "eip155": SessionNamespace(
+                chains: [Blockchain("eip155:1")!],
+                accounts: Set(accounts),
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["chainChanged"]
+            )
+        ]
+        
+        XCTAssertEqual(sessionNamespaces, expectedNamespaces)
+    }
+    
+    func testApprovedNamespacesDifferentChainsRequiredAndOptional() async {
+        let accounts = [
+            Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+            Account(blockchain: Blockchain("eip155:2")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+        ]
+        
+        let sessionNamespaces = try! web3WalletClient.buildApprovedNamespaces(
+            requiredNamespaces: [
+                "eip155": ProposalNamespace(
+                    chains: [Blockchain("eip155:1")!],
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                )
+            ],
+            optionalNamespaces: [
+                "eip155": ProposalNamespace(
+                    chains: [Blockchain("eip155:2")!],
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                )
+            ],
+            chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:3")!],
+            methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
+            events: ["chainChanged"],
+            accounts: Set(accounts)
+        )
+
+        let expectedNamespaces: [String: SessionNamespace] = [
+            "eip155": SessionNamespace(
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
+                accounts: Set(accounts),
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["chainChanged"]
+            )
+        ]
+        
+        XCTAssertEqual(sessionNamespaces, expectedNamespaces)
+    }
+    
+    func testApprovedNamespacesInlineChainRequiredAndOptional() async {
+        let accounts = [
+            Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+            Account(blockchain: Blockchain("eip155:2")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+        ]
+        
+        let sessionNamespaces = try! web3WalletClient.buildApprovedNamespaces(
+            requiredNamespaces: [
+                "eip155:1": ProposalNamespace(
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                )
+            ],
+            optionalNamespaces: [
+                "eip155": ProposalNamespace(
+                    chains: [Blockchain("eip155:2")!],
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                )
+            ],
+            chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:3")!],
+            methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
+            events: ["chainChanged"],
+            accounts: Set(accounts)
+        )
+
+        let expectedNamespaces: [String: SessionNamespace] = [
+            "eip155": SessionNamespace(
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
+                accounts: Set(accounts),
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["chainChanged"]
+            )
+        ]
+        XCTAssertEqual(sessionNamespaces, expectedNamespaces)
+    }
+    
+    func testApprovedNamespacesMultipleInlineChainRequiredAndOptional() async {
+        let accounts = [
+            Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+            Account(blockchain: Blockchain("eip155:2")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+            Account(blockchain: Blockchain("eip155:3")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+        ]
+        
+        let sessionNamespaces = try! web3WalletClient.buildApprovedNamespaces(
+            requiredNamespaces: [
+                "eip155:1": ProposalNamespace(
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                ),
+                "eip155:2": ProposalNamespace(
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                )
+            ],
+            optionalNamespaces: [
+                "eip155": ProposalNamespace(
+                    chains: [Blockchain("eip155:3")!],
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                )
+            ],
+            chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:3")!],
+            methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
+            events: ["chainChanged"],
+            accounts: Set(accounts)
+        )
+
+        let expectedNamespaces: [String: SessionNamespace] = [
+            "eip155": SessionNamespace(
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:3")!],
+                accounts: Set(accounts),
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["chainChanged"]
+            )
+        ]
+        
+        XCTAssertEqual(sessionNamespaces, expectedNamespaces)
+    }
+    
+    func testApprovedNamespacesMultipleInlineChains() async {
+        let accounts = [
+            Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+            Account(blockchain: Blockchain("eip155:2")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+            Account(blockchain: Blockchain("eip155:3")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+            Account(blockchain: Blockchain("eip155:4")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+        ]
+        
+        let sessionNamespaces = try! web3WalletClient.buildApprovedNamespaces(
+            requiredNamespaces: [
+                "eip155:1": ProposalNamespace(
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                ),
+                "eip155:2": ProposalNamespace(
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                )
+            ],
+            optionalNamespaces: [
+                "eip155": ProposalNamespace(
+                    chains: [Blockchain("eip155:3")!],
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                ),
+                "eip155:4": ProposalNamespace(
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                )
+            ],
+            chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:3")!, Blockchain("eip155:4")!],
+            methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
+            events: ["chainChanged"],
+            accounts: Set(accounts)
+        )
+
+        let expectedNamespaces: [String: SessionNamespace] = [
+            "eip155": SessionNamespace(
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:3")!, Blockchain("eip155:4")!],
+                accounts: Set(accounts),
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["chainChanged"]
+            )
+        ]
+        
+        XCTAssertEqual(sessionNamespaces, expectedNamespaces)
+    }
+    
+    func testApprovedNamespacesUnsupportedOptionalChains() async {
+        let accounts = [
+            Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+            Account(blockchain: Blockchain("eip155:2")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+        ]
+        
+        let sessionNamespaces = try! web3WalletClient.buildApprovedNamespaces(
+            requiredNamespaces: [
+                "eip155:1": ProposalNamespace(
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                ),
+                "eip155:2": ProposalNamespace(
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                )
+            ],
+            optionalNamespaces: [
+                "eip155": ProposalNamespace(
+                    chains: [Blockchain("eip155:3")!],
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                ),
+                "eip155:4": ProposalNamespace(
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                )
+            ],
+            chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
+            methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
+            events: ["chainChanged"],
+            accounts: Set(accounts)
+        )
+
+        let expectedNamespaces: [String: SessionNamespace] = [
+            "eip155": SessionNamespace(
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
+                accounts: Set(accounts),
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["chainChanged"]
+            )
+        ]
+        
+        XCTAssertEqual(sessionNamespaces, expectedNamespaces)
+    }
+    
+    func testApprovedNamespacesPartiallySupportedOptionalChains() async {
+        let accounts = [
+            Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+            Account(blockchain: Blockchain("eip155:2")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+            Account(blockchain: Blockchain("eip155:4")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+        ]
+        
+        let sessionNamespaces = try! web3WalletClient.buildApprovedNamespaces(
+            requiredNamespaces: [
+                "eip155:1": ProposalNamespace(
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                ),
+                "eip155:2": ProposalNamespace(
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                )
+            ],
+            optionalNamespaces: [
+                "eip155": ProposalNamespace(
+                    chains: [Blockchain("eip155:3")!],
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                ),
+                "eip155:4": ProposalNamespace(
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                )
+            ],
+            chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:4")!],
+            methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
+            events: ["chainChanged"],
+            accounts: Set(accounts)
+        )
+
+        let expectedNamespaces: [String: SessionNamespace] = [
+            "eip155": SessionNamespace(
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:4")!],
+                accounts: Set(accounts),
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["chainChanged"]
+            )
+        ]
+        
+        XCTAssertEqual(sessionNamespaces, expectedNamespaces)
+    }
+    
+    func testApprovedNamespacesPartiallySupportedOptionalMethods() async {
+        let accounts = [
+            Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+            Account(blockchain: Blockchain("eip155:2")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+        ]
+        
+        let sessionNamespaces = try! web3WalletClient.buildApprovedNamespaces(
+            requiredNamespaces: [
+                "eip155:1": ProposalNamespace(
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                ),
+                "eip155:2": ProposalNamespace(
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                )
+            ],
+            optionalNamespaces: [
+                "eip155": ProposalNamespace(
+                    chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
+                    methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction", "eth_signTypedData"],
+                    events: ["chainChanged"]
+                )
+            ],
+            chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:4")!],
+            methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
+            events: ["chainChanged"],
+            accounts: Set(accounts)
+        )
+
+        let expectedNamespaces: [String: SessionNamespace] = [
+            "eip155": SessionNamespace(
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
+                accounts: Set(accounts),
+                methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
+                events: ["chainChanged"]
+            )
+        ]
+        
+        XCTAssertEqual(sessionNamespaces, expectedNamespaces)
+    }
+    
+    func testApprovedNamespacesPartiallySupportedOptionalEvents() async {
+        let accounts = [
+            Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+            Account(blockchain: Blockchain("eip155:2")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+        ]
+        
+        let sessionNamespaces = try! web3WalletClient.buildApprovedNamespaces(
+            requiredNamespaces: [
+                "eip155:1": ProposalNamespace(
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                ),
+                "eip155:2": ProposalNamespace(
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                )
+            ],
+            optionalNamespaces: [
+                "eip155": ProposalNamespace(
+                    chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
+                    methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction", "eth_signTypedData"],
+                    events: ["chainChanged", "accountsChanged"]
+                )
+            ],
+            chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:4")!],
+            methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
+            events: ["chainChanged", "accountsChanged"],
+            accounts: Set(accounts)
+        )
+
+        let expectedNamespaces: [String: SessionNamespace] = [
+            "eip155": SessionNamespace(
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
+                accounts: Set(accounts),
+                methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
+                events: ["chainChanged", "accountsChanged"]
+            )
+        ]
+        
+        XCTAssertEqual(sessionNamespaces, expectedNamespaces)
+    }
+    
+    func testApprovedNamespacesExtraSupportedChains() async {
+        let accounts = [
+            Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+            Account(blockchain: Blockchain("eip155:2")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+            Account(blockchain: Blockchain("eip155:4")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+        ]
+        
+        let sessionNamespaces = try! web3WalletClient.buildApprovedNamespaces(
+            requiredNamespaces: [
+                "eip155:1": ProposalNamespace(
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                ),
+                "eip155:2": ProposalNamespace(
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                )
+            ],
+            optionalNamespaces: [
+                "eip155": ProposalNamespace(
+                    chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
+                    methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction", "eth_signTypedData"],
+                    events: ["chainChanged", "accountsChanged"]
+                )
+            ],
+            chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:4")!],
+            methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
+            events: ["chainChanged", "accountsChanged"],
+            accounts: Set(accounts)
+        )
+
+        let expectedNamespaces: [String: SessionNamespace] = [
+            "eip155": SessionNamespace(
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
+                accounts: Set(accounts),
+                methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
+                events: ["chainChanged", "accountsChanged"]
+            )
+        ]
+        
+        XCTAssertEqual(sessionNamespaces, expectedNamespaces)
+    }
+    
+    func testApprovedNamespacesMultipleNamespacesRequired() async {
+        let accounts = [
+            Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+            Account(blockchain: Blockchain("eip155:2")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+            Account(blockchain: Blockchain("eip155:4")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+            Account(blockchain: Blockchain("cosmos:cosmoshub-4")!, address: "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02")!
+        ]
+        
+        let sessionNamespaces = try! web3WalletClient.buildApprovedNamespaces(
+            requiredNamespaces: [
+                "eip155:1": ProposalNamespace(
+                    methods: ["personal_sign", "eth_sendTransaction"],
+                    events: ["chainChanged"]
+                ),
+                "cosmos": ProposalNamespace(
+                    chains: [Blockchain("cosmos:cosmoshub-4")!],
+                    methods: ["cosmos_method"],
+                    events: ["cosmos_event"]
+                )
+            ],
+            optionalNamespaces: [
+                "eip155": ProposalNamespace(
+                    chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
+                    methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction", "eth_signTypedData"],
+                    events: ["chainChanged", "accountsChanged"]
+                )
+            ],
+            chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:4")!, Blockchain("cosmos:cosmoshub-4")!],
+            methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction", "cosmos_method"],
+            events: ["chainChanged", "accountsChanged", "cosmos_event"],
+            accounts: Set(accounts)
+        )
+
+        let expectedNamespaces: [String: SessionNamespace] = [
+            "eip155": SessionNamespace(
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
+                accounts: Set([
+                    Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+                    Account(blockchain: Blockchain("eip155:2")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+                    Account(blockchain: Blockchain("eip155:4")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+                ]),
+                methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
+                events: ["chainChanged", "accountsChanged"]
+            ),
+            "cosmos": SessionNamespace(
+                chains: [Blockchain("cosmos:cosmoshub-4")!],
+                accounts: Set([
+                    Account(blockchain: Blockchain("cosmos:cosmoshub-4")!, address: "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02")!
+                ]),
+                methods: ["cosmos_method"],
+                events: ["cosmos_event"]
+            )
+        ]
+        
+        XCTAssertEqual(sessionNamespaces, expectedNamespaces)
+    }
+    
+    func testApprovedNamespacesNoSupportedRequiredChains() async {
+        let accounts = [
+            Account(blockchain: Blockchain("eip155:5")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+        ]
+        
+        XCTAssertThrowsError(
+            try web3WalletClient.buildApprovedNamespaces(
+                requiredNamespaces: [
+                    "eip155:1": ProposalNamespace(
+                        methods: ["personal_sign", "eth_sendTransaction"],
+                        events: ["chainChanged"]
+                    ),
+                    "cosmos": ProposalNamespace(
+                        chains: [Blockchain("cosmos:cosmoshub-4")!],
+                        methods: ["cosmos_method"],
+                        events: ["cosmos_event"]
+                    )
+                ],
+                optionalNamespaces: [
+                    "eip155": ProposalNamespace(
+                        chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
+                        methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction", "eth_signTypedData"],
+                        events: ["chainChanged", "accountsChanged"]
+                    )
+                ],
+                chains: [Blockchain("eip155:5")!],
+                methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
+                events: ["chainChanged", "accountsChanged"],
+                accounts: Set(accounts)
+            )
+        )
+    }
+    
+    func testApprovedNamespacesPartiallySupportedRequiredChains() async {
+        let accounts = [
+            Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+            Account(blockchain: Blockchain("eip155:5")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+        ]
+        
+        XCTAssertThrowsError(
+            try web3WalletClient.buildApprovedNamespaces(
+                requiredNamespaces: [
+                    "eip155:1": ProposalNamespace(
+                        methods: ["personal_sign", "eth_sendTransaction"],
+                        events: ["chainChanged"]
+                    ),
+                    "cosmos": ProposalNamespace(
+                        chains: [Blockchain("cosmos:cosmoshub-4")!],
+                        methods: ["cosmos_method"],
+                        events: ["cosmos_event"]
+                    )
+                ],
+                optionalNamespaces: [
+                    "eip155": ProposalNamespace(
+                        chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
+                        methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction", "eth_signTypedData"],
+                        events: ["chainChanged", "accountsChanged"]
+                    )
+                ],
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:5")!],
+                methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
+                events: ["chainChanged", "accountsChanged"],
+                accounts: Set(accounts)
+            )
+        )
+    }
+    
+    func testApprovedNamespacesNoSupportedRequiredMethods() async {
+        let accounts = [
+            Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+        ]
+        
+        XCTAssertThrowsError(
+            try web3WalletClient.buildApprovedNamespaces(
+                requiredNamespaces: [
+                    "eip155:1": ProposalNamespace(
+                        methods: ["personal_sign", "eth_sendTransaction"],
+                        events: ["chainChanged"]
+                    )
+                ],
+                optionalNamespaces: [
+                    "eip155": ProposalNamespace(
+                        chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
+                        methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction", "eth_signTypedData"],
+                        events: ["chainChanged", "accountsChanged"]
+                    )
+                ],
+                chains: [Blockchain("eip155:1")!],
+                methods: ["personal_sign"],
+                events: ["chainChanged", "accountsChanged"],
+                accounts: Set(accounts)
+            )
+        )
+    }
+    
+    func testApprovedNamespacesNoAccountsForRequiredChain() async {
+        let accounts = [
+            Account(blockchain: Blockchain("eip155:2")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+        ]
+        
+        XCTAssertThrowsError(
+            try web3WalletClient.buildApprovedNamespaces(
+                requiredNamespaces: [
+                    "eip155:1": ProposalNamespace(
+                        methods: ["personal_sign", "eth_sendTransaction"],
+                        events: ["chainChanged"]
+                    )
+                ],
+                optionalNamespaces: [
+                    "eip155": ProposalNamespace(
+                        chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
+                        methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction", "eth_signTypedData"],
+                        events: ["chainChanged", "accountsChanged"]
+                    )
+                ],
+                chains: [Blockchain("eip155:1")!],
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["chainChanged"],
+                accounts: Set(accounts)
+            )
+        )
+    }
+    
+    func testApprovedNamespacesPartialAccountsForRequiredChain() async {
+        let accounts = [
+            Account(blockchain: Blockchain("eip155:2")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+        ]
+        
+        XCTAssertThrowsError(
+            try web3WalletClient.buildApprovedNamespaces(
+                requiredNamespaces: [
+                    "eip155:1": ProposalNamespace(
+                        methods: ["personal_sign", "eth_sendTransaction"],
+                        events: ["chainChanged"]
+                    ),
+                    "eip155:2": ProposalNamespace(
+                        methods: ["personal_sign", "eth_sendTransaction"],
+                        events: ["chainChanged"]
+                    )
+                ],
+                optionalNamespaces: [
+                    "eip155": ProposalNamespace(
+                        chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
+                        methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction", "eth_signTypedData"],
+                        events: ["chainChanged", "accountsChanged"]
+                    )
+                ],
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["chainChanged"],
+                accounts: Set(accounts)
+            )
+        )
+    }
+    
     func testApproveCalled() async {
         try! await web3WalletClient.approve(proposalId: "", namespaces: [:])
         XCTAssertTrue(signClient.approveCalled)
