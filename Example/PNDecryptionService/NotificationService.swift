@@ -1,6 +1,6 @@
-
 import UserNotifications
 import WalletConnectPush
+import os
 
 class NotificationService: UNNotificationServiceExtension {
 
@@ -10,9 +10,10 @@ class NotificationService: UNNotificationServiceExtension {
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         self.contentHandler = contentHandler
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
-        if let bestAttemptContent = bestAttemptContent,
-           let topic = bestAttemptContent.userInfo["topic"] as? String,
-           let ciphertext = bestAttemptContent.userInfo["blob"] as? String {
+        if let bestAttemptContent = bestAttemptContent {
+            let topic = bestAttemptContent.userInfo["topic"] as! String
+            let ciphertext = bestAttemptContent.userInfo["blob"] as! String
+            NSLog("echo decryption, topic=%@", topic)
             do {
                 let service = PushDecryptionService()
                 let pushMessage = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
@@ -22,10 +23,10 @@ class NotificationService: UNNotificationServiceExtension {
                 return
             }
             catch {
-                print(error)
+                NSLog("echo decryption, error=%@", error.localizedDescription)
+                bestAttemptContent.title = ""
+                bestAttemptContent.body = "content not set"
             }
-            bestAttemptContent.title = ""
-            bestAttemptContent.body = "content not set"
             contentHandler(bestAttemptContent)
         }
     }
