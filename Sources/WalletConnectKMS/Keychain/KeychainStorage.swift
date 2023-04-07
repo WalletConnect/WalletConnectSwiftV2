@@ -100,7 +100,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
     private func buildBaseServiceQuery(for key: String) -> [CFString: Any] {
         return [
             kSecClass: kSecClassGenericPassword,
-            kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+            kSecAttrAccessible: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
             kSecAttrIsInvisible: true,
             kSecUseDataProtectionKeychain: true,
             kSecAttrService: service,
