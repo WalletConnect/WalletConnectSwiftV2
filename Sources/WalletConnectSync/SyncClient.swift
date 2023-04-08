@@ -3,24 +3,28 @@ import Combine
 
 public final class SyncClient {
 
-    private let updateSubject = PassthroughSubject<SyncUpdate, Never>()
-
     public var updatePublisher: AnyPublisher<SyncUpdate, Never> {
-        return updateSubject.eraseToAnyPublisher()
+        return syncStorage.syncUpdatePublisher
     }
 
-    public init() {
-        
+    private let syncStorage: SyncStorage
+
+    init(syncStorage: SyncStorage) {
+        self.syncStorage = syncStorage
     }
 
     /// Get message to sign for an account
-    public func getMessage(account: Account) async throws -> String {
-        fatalError()
+    public func getMessage(account: Account) -> String {
+        return """
+        I authorize this app to sync my account: \(account.absoluteString)
+
+        Read more about Sync API: https://docs.walletconnect.com/2.0/specs/clients/sync
+        """
     }
 
     /// Register an account to sync
-    public func register(account: Account, signature: CacaoSignature) async throws {
-        fatalError()
+    public func register(account: Account, signature: CacaoSignature) throws {
+        try syncStorage.saveIdentityKey(signature.s, for: account)
     }
 
     /// Create a store

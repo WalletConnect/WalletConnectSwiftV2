@@ -1,6 +1,6 @@
 import Foundation
 
-class KeyedDatabase<Element> where Element: Codable & Equatable {
+public class KeyedDatabase<Element> where Element: Codable & Equatable {
 
     private var index: [String: [Element]] = [:] {
         didSet {
@@ -13,28 +13,28 @@ class KeyedDatabase<Element> where Element: Codable & Equatable {
     private let storage: KeyValueStorage
     private let identifier: String
 
-    var onUpdate: (() -> Void)?
+    public var onUpdate: (() -> Void)?
 
-    init(storage: KeyValueStorage, identifier: String) {
+    public init(storage: KeyValueStorage, identifier: String) {
         self.storage = storage
         self.identifier = identifier
 
         initializeIndex()
     }
 
-    func getAll() -> [Element] {
+    public func getAll() -> [Element] {
         return index.values.reduce([], +)
     }
 
-    func getElements(for key: String) -> [Element] {
+    public func getElements(for key: String) -> [Element] {
         return index[key] ?? []
     }
 
-    func set(_ element: Element, for key: String) {
+    public func set(_ element: Element, for key: String) {
         index.append(element, for: key)
     }
 
-    func delete(_ element: Element, for key: String) {
+    public func delete(_ element: Element, for key: String) {
         index.delete(element, for: key)
     }
 }
