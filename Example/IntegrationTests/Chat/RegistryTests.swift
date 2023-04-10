@@ -15,7 +15,7 @@ final class RegistryTests: XCTestCase {
     var signer: MessageSigner!
 
     override func setUp() {
-        let keyserverURL = URL(string: "https://keys.walletconnect.com")!
+        let keyserverURL = URL(string: "https://staging.keys.walletconnect.com")!
         let httpService = HTTPNetworkClient(host: keyserverURL.host!)
         let identityNetworkService = IdentityNetworkService(httpService: httpService)
         let keychain = KeychainStorageMock()
