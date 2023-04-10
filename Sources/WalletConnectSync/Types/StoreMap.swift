@@ -1,6 +1,3 @@
 import Foundation
 
-public struct StoreMap {
-    public let store: String
-    public let state: [String: String]
-}
+public typealias StoreMap = Dictionary<String, [String: String]>

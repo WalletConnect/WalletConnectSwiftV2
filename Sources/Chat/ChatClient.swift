@@ -11,6 +11,7 @@ public class ChatClient {
     private let leaveService: LeaveService
     private let kms: KeyManagementService
     private let chatStorage: ChatStorage
+    private let syncRegisterService: SyncRegisterService
 
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
@@ -64,6 +65,7 @@ public class ChatClient {
          leaveService: LeaveService,
          kms: KeyManagementService,
          chatStorage: ChatStorage,
+         syncRegisterService: SyncRegisterService,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
     ) {
         self.identityClient = identityClient
@@ -74,6 +76,7 @@ public class ChatClient {
         self.leaveService = leaveService
         self.kms = kms
         self.chatStorage = chatStorage
+        self.syncRegisterService = syncRegisterService
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
     }
 
@@ -89,6 +92,8 @@ public class ChatClient {
         onSign: @escaping SigningCallback
     ) async throws -> String {
         let publicKey = try await identityClient.register(account: account, onSign: onSign)
+
+        try await syncRegisterService.register(account: account, onSign: onSign)
 
         guard !isPrivate else {
             return publicKey
@@ -136,6 +141,7 @@ public class ChatClient {
     /// - Returns: The public invite key
     public func goPublic(account: Account) async throws {
         let inviteKey = try await identityClient.goPublic(account: account)
+        try await chatStorage.initialize(for: account)
         try await resubscriptionService.subscribeForInvites(inviteKey: inviteKey)
     }
 
@@ -189,7 +195,7 @@ public class ChatClient {
         return chatStorage.getMessages(topic: topic)
     }
 
-    public func setupSubscriptions(account: Account) {
-        chatStorage.setupSubscriptions(account: account)
+    public func setupSubscriptions(account: Account) throws {
+        try chatStorage.setupSubscriptions(account: account)
     }
 }

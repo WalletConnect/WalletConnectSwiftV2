@@ -36,6 +36,13 @@ public struct SentInvite: Codable, Equatable {
     }
 }
 
+extension SentInvite: SyncObject {
+
+    public var syncId: String {
+        return String(id)
+    }
+}
+
 extension SentInvite {
 
     public enum Status: String, Codable, Equatable {

@@ -3,16 +3,13 @@ import Combine
 
 final class ChatStorage {
 
-    private let messageStore: KeyedDatabase<Message>
-    private let receivedInviteStore: KeyedDatabase<ReceivedInvite>
-    private let sentInviteStore: KeyedDatabase<SentInvite>
-    private let threadStore: KeyedDatabase<Thread>
+    private let messageStore: KeyedDatabase<[Message]>
+    private let receivedInviteStore: KeyedDatabase<[ReceivedInvite]>
+    private let sentInviteStore: SyncStore<SentInvite>
+    private let threadStore: SyncStore<Thread>
 
     private var messagesPublisherSubject = PassthroughSubject<[Message], Never>()
     private var receivedInvitesPublisherSubject = PassthroughSubject<[ReceivedInvite], Never>()
-    private var sentInvitesPublisherSubject = PassthroughSubject<[SentInvite], Never>()
-    private var threadsPublisherSubject = PassthroughSubject<[Thread], Never>()
-
     private var newMessagePublisherSubject = PassthroughSubject<Message, Never>()
     private var newReceivedInvitePublisherSubject = PassthroughSubject<ReceivedInvite, Never>()
     private var newSentInvitePublisherSubject = PassthroughSubject<SentInvite, Never>()
@@ -30,11 +27,11 @@ final class ChatStorage {
     }
 
     var sentInvitesPublisher: AnyPublisher<[SentInvite], Never> {
-        sentInvitesPublisherSubject.eraseToAnyPublisher()
+        sentInviteStore.dataUpdatePublisher
     }
 
     var threadsPublisher: AnyPublisher<[Thread], Never> {
-        threadsPublisherSubject.eraseToAnyPublisher()
+        threadStore.dataUpdatePublisher
     }
 
     var newMessagePublisher: AnyPublisher<Message, Never> {
@@ -62,10 +59,10 @@ final class ChatStorage {
     }
 
     init(
-        messageStore: KeyedDatabase<Message>,
-        receivedInviteStore: KeyedDatabase<ReceivedInvite>,
-        sentInviteStore: KeyedDatabase<SentInvite>,
-        threadStore: KeyedDatabase<Thread>
+        messageStore: KeyedDatabase<[Message]>,
+        receivedInviteStore: KeyedDatabase<[ReceivedInvite]>,
+        sentInviteStore: SyncStore<SentInvite>,
+        threadStore: SyncStore<Thread>
     ) {
         self.messageStore = messageStore
         self.receivedInviteStore = receivedInviteStore
@@ -73,19 +70,20 @@ final class ChatStorage {
         self.threadStore = threadStore
     }
 
-    func setupSubscriptions(account: Account) {
+    func initialize(for account: Account) async throws {
+        try await sentInviteStore.initialize(for: account)
+        try await threadStore.initialize(for: account)
+    }
+
+    func setupSubscriptions(account: Account) throws {
         messageStore.onUpdate = { [unowned self] in
             messagesPublisherSubject.send(getMessages(account: account))
         }
         receivedInviteStore.onUpdate = { [unowned self] in
             receivedInvitesPublisherSubject.send(getReceivedInvites(account: account))
         }
-        sentInviteStore.onUpdate = { [unowned self] in
-            sentInvitesPublisherSubject.send(getSentInvites(account: account))
-        }
-        threadStore.onUpdate = { [unowned self] in
-            threadsPublisherSubject.send(getThreads(account: account))
-        }
+        try threadStore.setupSubscriptions(account: account)
+        try sentInviteStore.setupSubscriptions(account: account)
     }
 
     // MARK: - Invites
@@ -95,8 +93,8 @@ final class ChatStorage {
             .first(where: { $0.id == id })
     }
 
-    func getSentInvite(id: Int64) -> SentInvite? {
-        return sentInviteStore.getAll()
+    func getSentInvite(id: Int64, account: Account) -> SentInvite? {
+        return try? sentInviteStore.getAll(for: account)
             .first(where: { $0.id == id })
     }
 
@@ -105,17 +103,22 @@ final class ChatStorage {
         newReceivedInvitePublisherSubject.send(receivedInvite)
     }
 
-    func set(sentInvite: SentInvite, account: Account) {
-        sentInviteStore.set(sentInvite, for: account.absoluteString)
+    func set(sentInvite: SentInvite, account: Account) async throws {
+        try await sentInviteStore.set(object: sentInvite, for: account)
         newSentInvitePublisherSubject.send(sentInvite)
     }
 
     func getReceivedInvites(account: Account) -> [ReceivedInvite] {
-        return receivedInviteStore.getElements(for: account.absoluteString)
+        return receivedInviteStore.getElements(for: account.absoluteString) ?? []
     }
 
     func getSentInvites(account: Account) -> [SentInvite] {
-        return sentInviteStore.getElements(for: account.absoluteString)
+        do {
+            return try sentInviteStore.getAll(for: account)
+        } catch {
+            // TODO: remove fatalError
+            fatalError(error.localizedDescription)
+        }
     }
 
     func accept(receivedInvite: ReceivedInvite, account: Account) {
@@ -132,27 +135,27 @@ final class ChatStorage {
         receivedInviteStore.set(rejected, for: account.absoluteString)
     }
 
-    func accept(sentInviteId: Int64, account: Account, topic: String) {
-        guard let invite = getSentInvite(id: sentInviteId)
+    func accept(sentInviteId: Int64, account: Account, topic: String) async throws {
+        guard let invite = getSentInvite(id: sentInviteId, account: account)
         else { return }
 
-        sentInviteStore.delete(invite, for: account.absoluteString)
+        try await sentInviteStore.delete(id: invite.syncId, for: account)
 
         let approved = SentInvite(invite: invite, status: .approved)
-        sentInviteStore.set(approved, for: account.absoluteString)
+        try await sentInviteStore.set(object: approved, for: account)
 
         acceptPublisherSubject.send((topic, approved))
     }
 
-    func reject(sentInviteId: Int64, account: Account) {
-        guard let invite = getSentInvite(id: sentInviteId)
+    func reject(sentInviteId: Int64, account: Account) async throws {
+        guard let invite = getSentInvite(id: sentInviteId, account: account)
         else { return }
 
-        sentInviteStore.delete(invite, for: account.absoluteString)
+        try await sentInviteStore.delete(id: invite.syncId, for: account)
 
         let rejected = SentInvite(invite: invite, status: .rejected)
         // TODO: Update also for peer invites
-        sentInviteStore.set(rejected, for: account.absoluteString)
+        try await sentInviteStore.set(object: rejected, for: account)
 
         rejectPublisherSubject.send(rejected)
     }
@@ -164,15 +167,20 @@ final class ChatStorage {
     }
 
     func getThreads(account: Account) -> [Thread] {
-        return threadStore.getElements(for: account.absoluteString)
+        do {
+            return try threadStore.getAll(for: account)
+        } catch {
+            // TODO: remove fatalError
+            fatalError(error.localizedDescription)
+        }
     }
 
     func getThread(topic: String) -> Thread? {
         return getAllThreads().first(where: { $0.topic == topic })
     }
 
-    func set(thread: Thread, account: Account) {
-        threadStore.set(thread, for: account.absoluteString)
+    func set(thread: Thread, account: Account) async throws {
+        try await threadStore.set(object: thread, for: account)
         newThreadPublisherSubject.send(thread)
     }
 
@@ -188,6 +196,6 @@ final class ChatStorage {
     }
 
     func getMessages(account: Account) -> [Message] {
-        return messageStore.getElements(for: account.absoluteString)
+        return messageStore.getElements(for: account.absoluteString) ?? []
     }
 }

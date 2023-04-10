@@ -70,7 +70,7 @@ class InviteService {
             timestamp: Date().millisecondsSince1970
         )
 
-        chatStorage.set(sentInvite: sentInvite, account: invite.inviterAccount)
+        try await chatStorage.set(sentInvite: sentInvite, account: invite.inviterAccount)
 
         logger.debug("invite sent on topic: \(inviteTopic)")
 
@@ -116,10 +116,10 @@ private extension InviteService {
             peerAccount: peerAccount
         )
 
-        chatStorage.set(thread: thread, account: account)
+        try await chatStorage.set(thread: thread, account: account)
 
         // TODO: Implement reject for sentInvite
-        chatStorage.accept(sentInviteId: sentInviteId, account: account, topic: threadTopic)
+        try await chatStorage.accept(sentInviteId: sentInviteId, account: account, topic: threadTopic)
 
         // TODO - remove symKeyI
     }

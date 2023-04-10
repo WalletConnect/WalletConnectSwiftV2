@@ -1,6 +1,6 @@
 import Foundation
 
-public class KeyedDatabase<Element> where Element: Codable & Equatable {
+public class NewKeyedDatabase<Element> where Element: Codable & Equatable {
 
     public var index: [String: Element] = [:] {
         didSet {
@@ -21,28 +21,21 @@ public class KeyedDatabase<Element> where Element: Codable & Equatable {
 
         initializeIndex()
     }
-}
 
-extension KeyedDatabase where Element: RangeReplaceableCollection, Element.Element: Equatable {
-
-    public func getAll() -> [Element.Element] {
-        return index.values.reduce([], +)
+    public func getAll() -> [Element] {
+        return Array(index.values)
     }
 
-    public func set(_ element: Element.Element, for key: String) {
-        index.append(element, for: key)
-    }
-
-    public func delete(_ element: Element.Element, for key: String) {
-        index.delete(element, for: key)
-    }
-
-    public func getElements(for key: String) -> Element? {
+    public func getElement(for key: String) -> Element? {
         return index[key]
     }
+
+    public func set(element: Element, for key: String) {
+        index[key] = element
+    }
 }
 
-private extension KeyedDatabase {
+private extension NewKeyedDatabase {
 
     func initializeIndex() {
         guard

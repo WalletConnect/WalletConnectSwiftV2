@@ -1,17 +1,15 @@
 import Foundation
 
-public enum StoreUpdate: Codable, Equatable {
-    case set(StoreSet)
-    case delete(StoreDelete)
+public enum StoreUpdate {
+    case set(AnyCodable)
+    case delete(String)
 }
 
-public struct StoreSet: Codable, Equatable {
-    public let id: Int64
+public struct StoreSet<Object: SyncObject>: Codable, Equatable {
     public let key: String
-    public let value: String
+    public let value: Object
 }
 
 public struct StoreDelete: Codable, Equatable {
-    public let id: Int64
     public let key: String
 }

@@ -69,7 +69,8 @@ class InvitationHandlingService {
             peerAccount: invite.inviterAccount
         )
 
-        chatStorage.set(thread: thread, account: invite.inviteeAccount)
+        try await chatStorage.set(thread: thread, account: invite.inviteeAccount)
+
         chatStorage.accept(receivedInvite: invite, account: invite.inviteeAccount)
 
         return thread.topic
