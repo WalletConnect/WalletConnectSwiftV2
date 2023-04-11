@@ -9,6 +9,7 @@ class PushSubscribeRequester {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementService
     private let logger: ConsoleLogging
+    private let webDidResolver: WebDidResolver
     private let subscriptionsStore: CodableStore<PushSubscription>
     // Keychain shared with UNNotificationServiceExtension in order to decrypt PNs
     private let groupKeychainStorage: KeychainStorageProtocol
@@ -19,7 +20,8 @@ class PushSubscribeRequester {
          logger: ConsoleLogging,
          kms: KeyManagementService,
          groupKeychainStorage: KeychainStorageProtocol,
-         subscriptionsStore: CodableStore<PushSubscription>
+         subscriptionsStore: CodableStore<PushSubscription>,
+         webDidResolver: WebDidResolver
     ) {
         self.keyserverURL = keyserverURL
         self.identityClient = identityClient
@@ -28,15 +30,16 @@ class PushSubscribeRequester {
         self.kms = kms
         self.groupKeychainStorage = groupKeychainStorage
         self.subscriptionsStore = subscriptionsStore
+        self.webDidResolver = webDidResolver
     }
 
-    func subscribe(publicKey: String, account: Account, onSign: @escaping SigningCallback) async throws {
+    func subscribe(dappUrl: String, account: Account, onSign: @escaping SigningCallback) async throws {
+
 
         logger.debug("Subscribing for Push")
 
-        let peerPublicKey = try AgreementPublicKey(hex: publicKey)
+        let peerPublicKey = try await resolvePublicKey(dappUrl: dappUrl)
         let subscribeTopic = peerPublicKey.rawRepresentation.sha256().toHexString()
-
 
 //
         let keys = try generateAgreementKeys(peerPublicKey: peerPublicKey)
@@ -47,7 +50,7 @@ class PushSubscribeRequester {
         try kms.setAgreementSecret(keys, topic: subscribeTopic)
 
 
-        let request = try createJWTRequest(subscriptionAccount: account, dappUrl: <#T##String#>)
+        let request = try createJWTRequest(subscriptionAccount: account, dappUrl: dappUrl)
 
         let protocolMethod = PushSubscribeProtocolMethod()
 
@@ -66,6 +69,10 @@ class PushSubscribeRequester {
 
     }
 
+    private func resolvePublicKey(dappUrl: String) async throws -> AgreementPublicKey {
+        let didDoc = webDidResolver.resolveDidDoc(url: dappUrl)
+
+    }
 
 
     private func generateAgreementKeys(peerPublicKey: AgreementPublicKey) throws -> AgreementKeys {
