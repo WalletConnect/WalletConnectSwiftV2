@@ -16,11 +16,7 @@ struct DAppEngine {
     // Accounts screen
 
     var accountRow: XCUIElement {
-        instance.tables.cells.containing("0x").firstMatch
-    }
-    
-    var methodRow: XCUIElement {
-        instance.tables.cells.firstMatch
+        instance.staticTexts["0xe5EeF1368781911d265fDB6946613dA61915a501"]
     }
 
     var disconnectButton: XCUIElement {

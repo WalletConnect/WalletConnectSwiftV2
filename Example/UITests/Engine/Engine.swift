@@ -11,8 +11,8 @@ struct Engine {
     /// - Context:
     ///     - wallet opened
     ///     - approval request sent
-    func allowSessionAndCheck() {
-        wallet.allowButton.waitTap()
+    func approveSessionAndCheck() {
+        wallet.approveButton.waitTap()
 
         XCTAssertTrue(wallet.sessionRow.waitExists())
 

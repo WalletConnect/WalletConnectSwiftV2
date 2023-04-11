@@ -12,7 +12,7 @@ enum App {
         case .dapp:
             return "com.walletconnect.dapp"
         case .wallet:
-            return "com.walletconnect.walletapp"
+            return "com.walletconnect.example"
         case .safari:
             return "com.apple.mobilesafari"
         case .springboard:
