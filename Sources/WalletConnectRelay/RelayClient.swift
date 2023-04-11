@@ -84,20 +84,17 @@ public final class RelayClient {
             clientIdStorage: clientIdStorage,
             relayHost: relayHost
         )
-        let relayUrlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)
-        let socket = socketFactory.create(with: relayUrlFactory.create(
-            host: relayHost,
-            projectId: projectId
-        ))
-        socket.request.addValue(EnvironmentInfo.userAgent, forHTTPHeaderField: "User-Agent")
-        let socketConnectionHandler: SocketConnectionHandler
-        switch socketConnectionType {
-        case .automatic:
-            socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket)
-        case .manual:
-            socketConnectionHandler = ManualSocketConnectionHandler(socket: socket)
-        }
-        let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: socketConnectionHandler, logger: logger)
+        let relayUrlFactory = RelayUrlFactory(
+            relayHost: relayHost,
+            projectId: projectId,
+            socketAuthenticator: socketAuthenticator
+        )
+        let dispatcher = Dispatcher(
+            socketFactory: socketFactory,
+            relayUrlFactory: relayUrlFactory,
+            socketConnectionType: socketConnectionType,
+            logger: logger
+        )
         self.init(dispatcher: dispatcher, logger: logger, keyValueStorage: keyValueStorage, clientIdStorage: clientIdStorage)
     }
 
