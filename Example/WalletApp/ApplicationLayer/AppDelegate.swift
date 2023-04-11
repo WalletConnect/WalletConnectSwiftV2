@@ -34,15 +34,15 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
         
-       // Commenting this out as it breaks UI tests that copy/paste URI
-//        Task(priority: .high) {
-//            // Use pasteboard for testing purposes
-//            let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
-//            let token = tokenParts.joined()
+        Task(priority: .high) {
+            // Use pasteboard for testing purposes
+            let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
+            let token = tokenParts.joined()
+            // Commenting this out as it breaks UI tests that copy/paste URI
 //            let pasteboard = UIPasteboard.general
 //            pasteboard.string = token
-//            try await Push.wallet.register(deviceToken: deviceToken)
-//        }
+            try await Push.wallet.register(deviceToken: deviceToken)
+        }
     }
 
     func application(

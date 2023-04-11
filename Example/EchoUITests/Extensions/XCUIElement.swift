@@ -13,10 +13,12 @@ extension XCUIElement {
         tap()
     }
 
-    func pasteText(application: XCUIApplication, file: StaticString = #file, line: UInt = #line) {
-        tap()
-        doubleTap()
-        application.menuItems.element(boundBy: 0).tap()
+    func tapUntilOtherElementHittable(otherElement: XCUIElement, maxRetries: Int = 5) {
+        var retry = 0
+        while(!otherElement .isHittable && retry < maxRetries) {
+            tap ()
+            retry += 1
+        }
     }
     
     func waitExists(file: StaticString = #file, line: UInt = #line) -> Bool {

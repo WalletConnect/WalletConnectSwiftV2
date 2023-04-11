@@ -31,8 +31,8 @@ struct WalletEngine {
 
     // Proposal
 
-    var allowButton: XCUIElement {
-        instance.buttons["Allow"]
+    var approveButton: XCUIElement {
+        instance.buttons["Approve"]
     }
 
     var rejectButton: XCUIElement {

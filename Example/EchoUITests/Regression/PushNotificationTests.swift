@@ -22,7 +22,7 @@ class PushNotificationTests: XCTestCase {
         allowPushNotificationsIfNeeded(app: engine.wallet.instance)
         engine.wallet.getStartedButton.waitTap()
         engine.wallet.pasteURIButton.waitTap()
-        engine.wallet.alertUriTextField.pasteText(application: App.wallet.instance)
+        pasteText(element: engine.wallet.alertUriTextField, application: engine.wallet.instance)
         engine.wallet.alertConnectButton.waitTap()
     
         // Allow session
