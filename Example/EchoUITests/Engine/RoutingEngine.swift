@@ -26,10 +26,6 @@ struct RoutingEngine {
         app.waitForAppearence()
     }
 
-    func home() {
-        XCUIDevice.shared.press(.home)
-    }
-
     func wait(for interval: TimeInterval) {
         Thread.sleep(forTimeInterval: interval)
     }

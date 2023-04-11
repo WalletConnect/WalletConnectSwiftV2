@@ -35,12 +35,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     ) {
         
         Task(priority: .high) {
-            // Use pasteboard for testing purposes
-            let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
-            let token = tokenParts.joined()
             // Commenting this out as it breaks UI tests that copy/paste URI
-//            let pasteboard = UIPasteboard.general
-//            pasteboard.string = token
+            // Use pasteboard for testing purposes
+            // let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
+            // let token = tokenParts.joined()
+            // let pasteboard = UIPasteboard.general
+            // pasteboard.string = token
             try await Push.wallet.register(deviceToken: deviceToken)
         }
     }

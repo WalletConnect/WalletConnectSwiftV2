@@ -22,6 +22,9 @@ build_dapp:
 build_wallet:
 	fastlane build scheme:WalletApp
 
+echo_ui_tests:
+	fastlane tests scheme:EchoUITests relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID)
+
 ui_tests:
 	echo "UI Tests disabled"
 

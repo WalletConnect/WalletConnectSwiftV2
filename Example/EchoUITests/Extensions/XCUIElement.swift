@@ -4,12 +4,12 @@ import XCTest
 extension XCUIElement {
 
     @discardableResult
-    func waitForAppearence(timeout: TimeInterval = 5, file: StaticString = #file, line: UInt = #line) -> Bool {
+    func waitForAppearence(timeout: TimeInterval = 5) -> Bool {
         return waitForExistence(timeout: timeout)
     }
 
-    func waitTap(file: StaticString = #file, line: UInt = #line) {
-        waitForAppearence(file: file, line: line)
+    func waitTap() {
+        waitForAppearence()
         tap()
     }
 
@@ -21,8 +21,8 @@ extension XCUIElement {
         }
     }
     
-    func waitExists(file: StaticString = #file, line: UInt = #line) -> Bool {
-        waitForAppearence(file: file, line: line)
+    func waitExists() -> Bool {
+        waitForAppearence()
         return exists
     }
 }

@@ -288,6 +288,20 @@
 			remoteGlobalIDString = 84CE641B27981DED00142511;
 			remoteInfo = DApp;
 		};
+		CF11913F29E5D86F000D4538 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 764E1D3426F8D3FC00A1FB15 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 84CE641B27981DED00142511;
+			remoteInfo = DApp;
+		};
+		CF11914129E5D873000D4538 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 764E1D3426F8D3FC00A1FB15 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C56EE21A293F55ED004840D1;
+			remoteInfo = WalletApp;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -1813,6 +1827,8 @@
 			buildRules = (
 			);
 			dependencies = (
+				CF11914229E5D873000D4538 /* PBXTargetDependency */,
+				CF11914029E5D86F000D4538 /* PBXTargetDependency */,
 			);
 			name = EchoUITests;
 			productName = EchoUITests;
@@ -2248,6 +2264,16 @@
 			isa = PBXTargetDependency;
 			target = 84CE641B27981DED00142511 /* DApp */;
 			targetProxy = A5A4FC7D2840C5D400BBEC1E /* PBXContainerItemProxy */;
+		};
+		CF11914029E5D86F000D4538 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 84CE641B27981DED00142511 /* DApp */;
+			targetProxy = CF11913F29E5D86F000D4538 /* PBXContainerItemProxy */;
+		};
+		CF11914229E5D873000D4538 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C56EE21A293F55ED004840D1 /* WalletApp */;
+			targetProxy = CF11914129E5D873000D4538 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -2792,7 +2818,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = XBSPGPE6R6;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.EchoUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2810,7 +2836,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = XBSPGPE6R6;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.EchoUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";

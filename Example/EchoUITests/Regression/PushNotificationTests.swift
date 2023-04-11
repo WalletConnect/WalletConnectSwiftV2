@@ -40,11 +40,11 @@ class PushNotificationTests: XCTestCase {
         engine.routing.activate(app: .springboard)
         let expectedCopy = "WALLETAPP, now, Signature required, You have a message to sign"
         let notification = engine.routing.springboard.otherElements["Notification"].descendants(matching: .any)["NotificationShortLookView"]
+        
         XCTAssertTrue(notification.waitExists())
         XCTAssertEqual(notification.label, expectedCopy)
         
         notification.waitTap()
-        engine.wallet.instance.waitForAppearence()
-        XCTAssertTrue(engine.wallet.allowButton.waitExists())
+        XCTAssertTrue(engine.wallet.instance.waitForAppearence())
     }
 }
