@@ -45,6 +45,10 @@ final class SignClientTests: XCTestCase {
             pairingClient: pairingClient,
             networkingClient: networkingClient
         )
+
+        let clientId = try! networkingClient.getClientId()
+        logger.debug("My client id is: \(clientId)")
+        
         return ClientDelegate(client: client)
     }
 

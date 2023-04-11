@@ -35,6 +35,10 @@ final class ChatTests: XCTestCase {
             logger: logger,
             keychainStorage: keychain,
             keyValueStorage: keyValueStorage)
+
+        let clientId = try! networkingInteractor.getClientId()
+        logger.debug("My client id is: \(clientId)")
+
         return ChatClientFactory.create(keyserverURL: keyserverURL, relayClient: relayClient, networkingInteractor: networkingInteractor, keychain:  keychain, logger: logger, keyValueStorage: keyValueStorage)
     }
 
