@@ -3,7 +3,7 @@ import XCTest
 
 struct RoutingEngine {
 
-    private var springboard: XCUIApplication {
+    var springboard: XCUIApplication {
         return App.springboard.instance
     }
 

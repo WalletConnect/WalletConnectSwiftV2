@@ -29,7 +29,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
             let token = tokenParts.joined()
             let pasteboard = UIPasteboard.general
-            pasteboard.string = token
+//            pasteboard.string = token
             try await Push.wallet.register(deviceToken: deviceToken)
         }
     }

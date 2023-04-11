@@ -3,26 +3,32 @@ import XCTest
 
 struct WalletEngine {
 
-    private var instance: XCUIApplication {
+    var instance: XCUIApplication {
         return App.wallet.instance
     }
 
+    // Onboarding
+    
+    var getStartedButton: XCUIElement {
+        instance.buttons["Get Started"]
+    }
+    
     // MainScreen
 
     var pasteURIButton: XCUIElement {
-        instance.buttons["Paste URI"]
+        instance.buttons["copy"]
     }
 
     var alert: XCUIElement {
-        instance.alerts["Paste URI"]
+        instance.descendants(matching: .any)["PasteUriView"]
     }
 
-    var uriTextfield: XCUIElement {
+    var alertUriTextField: XCUIElement {
         alert.textFields.firstMatch
     }
 
-    var pasteAndConnect: XCUIElement {
-        alert.buttons["Paste and Connect"]
+    var alertConnectButton: XCUIElement {
+        alert.buttons["Connect"]
     }
 
     var sessionRow: XCUIElement {
@@ -31,8 +37,8 @@ struct WalletEngine {
 
     // Proposal
 
-    var approveButton: XCUIElement {
-        instance.buttons["Approve"]
+    var allowButton: XCUIElement {
+        instance.buttons["Allow"]
     }
 
     var rejectButton: XCUIElement {

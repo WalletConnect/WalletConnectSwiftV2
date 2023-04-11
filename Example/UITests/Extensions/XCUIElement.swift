@@ -4,22 +4,22 @@ import XCTest
 extension XCUIElement {
 
     @discardableResult
-    func waitForAppearence(timeout: TimeInterval = 5) -> Bool {
+    func waitForAppearence(timeout: TimeInterval = 5, file: StaticString = #file, line: UInt = #line) -> Bool {
         return waitForExistence(timeout: timeout)
     }
 
-    func waitTap() {
-        waitForAppearence()
+    func waitTap(file: StaticString = #file, line: UInt = #line) {
+        waitForAppearence(file: file, line: line)
         tap()
     }
 
-    func waitTypeText(_ text: String) {
-        waitForAppearence()
+    func waitTypeText(_ text: String, file: StaticString = #file, line: UInt = #line) {
+        waitForAppearence(file: file, line: line)
         typeText(text)
     }
 
-    func waitExists() -> Bool {
-        waitForAppearence()
+    func waitExists(file: StaticString = #file, line: UInt = #line) -> Bool {
+        waitForAppearence(file: file, line: line)
         return exists
     }
 }
