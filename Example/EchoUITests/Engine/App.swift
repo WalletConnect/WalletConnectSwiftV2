@@ -6,7 +6,11 @@ enum App {
     case wallet
     case springboard
 
-    var bundleID: String {
+    var instance: XCUIApplication {
+        return XCUIApplication(bundleIdentifier: bundleID)
+    }
+    
+    private var bundleID: String {
         switch self {
         case .dapp:
             return "com.walletconnect.dapp"
@@ -15,9 +19,5 @@ enum App {
         case .springboard:
             return "com.apple.springboard"
         }
-    }
-
-    var instance: XCUIApplication {
-        return XCUIApplication(bundleIdentifier: bundleID)
     }
 }

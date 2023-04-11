@@ -269,6 +269,8 @@
 		CF1A594B29E5876600AAC16B /* DAppEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF1A594229E5876600AAC16B /* DAppEngine.swift */; };
 		CF1A594C29E5876600AAC16B /* RoutingEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF1A594329E5876600AAC16B /* RoutingEngine.swift */; };
 		CF1A594D29E5876600AAC16B /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF1A594429E5876600AAC16B /* App.swift */; };
+		CF6704DF29E59DDC003326A4 /* XCUIElementQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF6704DE29E59DDC003326A4 /* XCUIElementQuery.swift */; };
+		CF6704E129E5A014003326A4 /* XCTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF6704E029E5A014003326A4 /* XCTestCase.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -547,6 +549,8 @@
 		CF1A594229E5876600AAC16B /* DAppEngine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAppEngine.swift; sourceTree = "<group>"; };
 		CF1A594329E5876600AAC16B /* RoutingEngine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoutingEngine.swift; sourceTree = "<group>"; };
 		CF1A594429E5876600AAC16B /* App.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
+		CF6704DE29E59DDC003326A4 /* XCUIElementQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCUIElementQuery.swift; sourceTree = "<group>"; };
+		CF6704E029E5A014003326A4 /* XCTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestCase.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1607,6 +1611,8 @@
 			isa = PBXGroup;
 			children = (
 				CF1A593A29E5876600AAC16B /* XCUIElement.swift */,
+				CF6704DE29E59DDC003326A4 /* XCUIElementQuery.swift */,
+				CF6704E029E5A014003326A4 /* XCTestCase.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -2220,10 +2226,12 @@
 			files = (
 				CF1A594D29E5876600AAC16B /* App.swift in Sources */,
 				CF1A594B29E5876600AAC16B /* DAppEngine.swift in Sources */,
+				CF6704DF29E59DDC003326A4 /* XCUIElementQuery.swift in Sources */,
 				CF1A594629E5876600AAC16B /* PushNotificationTests.swift in Sources */,
 				CF1A594829E5876600AAC16B /* Engine.swift in Sources */,
 				CF1A594529E5876600AAC16B /* XCUIElement.swift in Sources */,
 				CF1A594C29E5876600AAC16B /* RoutingEngine.swift in Sources */,
+				CF6704E129E5A014003326A4 /* XCTestCase.swift in Sources */,
 				CF1A594929E5876600AAC16B /* WalletEngine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -13,11 +13,6 @@ extension XCUIElement {
         tap()
     }
 
-    func waitTypeText(_ text: String, file: StaticString = #file, line: UInt = #line) {
-        waitForAppearence(file: file, line: line)
-        typeText(text)
-    }
-
     func pasteText(application: XCUIApplication, file: StaticString = #file, line: UInt = #line) {
         tap()
         doubleTap()

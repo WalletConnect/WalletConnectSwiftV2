@@ -19,16 +19,12 @@ struct WalletEngine {
         instance.buttons["copy"]
     }
 
-    var alert: XCUIElement {
-        instance.descendants(matching: .any)["PasteUriView"]
-    }
-
     var alertUriTextField: XCUIElement {
-        alert.textFields.firstMatch
+        instance.textFields["wc://a13aef..."]
     }
 
     var alertConnectButton: XCUIElement {
-        alert.buttons["Connect"]
+        instance.buttons["Connect"]
     }
 
     var sessionRow: XCUIElement {
@@ -39,27 +35,5 @@ struct WalletEngine {
 
     var allowButton: XCUIElement {
         instance.buttons["Allow"]
-    }
-
-    var rejectButton: XCUIElement {
-        instance.buttons["Reject"]
-    }
-
-    // SessionDetails
-
-    var pingButton: XCUIElement {
-        instance.buttons["Ping"]
-    }
-
-    var okButton: XCUIElement {
-        instance.buttons["OK"]
-    }
-
-    var pingAlert: XCUIElement {
-        instance.alerts.element.staticTexts["Received ping response"]
-    }
-
-    func swipeDismiss() {
-        instance.swipeDown(velocity: .fast)
     }
 }

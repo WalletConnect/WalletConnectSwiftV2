@@ -93,20 +93,6 @@ struct PasteUriView: View {
             .padding(.bottom, 20)
         }
         .edgesIgnoringSafeArea(.top)
-        .accessibilityElement(children: .contain)
-        .debugAccessibility(String(describing: PasteUriView.self))
-    }
-}
-
-extension View {
-
-    func debugAccessibility(_ value: String) -> ModifiedContent<Self, AccessibilityAttachmentModifier> {
-        #if DEBUG
-        return self
-            .accessibility(identifier: value)
-        #else
-        return self
-        #endif
     }
 }
 

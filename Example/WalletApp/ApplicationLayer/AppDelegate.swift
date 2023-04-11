@@ -7,7 +7,16 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     private var publishers = [AnyCancellable]()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-disableAnimations") {
+            UIView.setAnimationsEnabled(false)
+            UIApplication.shared.connectedScenes
+                .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
+                .last { $0.isKeyWindow }?.layer.speed = 200
+        }
+        #endif
+        
         return true
     }
 

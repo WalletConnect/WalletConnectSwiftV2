@@ -12,7 +12,7 @@ struct Engine {
     ///     - wallet opened
     ///     - approval request sent
     func approveSessionAndCheck() {
-        wallet.approveButton.waitTap()
+        wallet.allowButton.waitTap()
 
         XCTAssertTrue(wallet.sessionRow.waitExists())
 

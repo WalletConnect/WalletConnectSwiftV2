@@ -3,7 +3,7 @@ import XCTest
 
 struct DAppEngine {
 
-    private var instance: XCUIApplication {
+    var instance: XCUIApplication {
         return App.dapp.instance
     }
 
@@ -23,15 +23,7 @@ struct DAppEngine {
         instance.tables.cells.firstMatch
     }
 
-    var disconnectButton: XCUIElement {
-        instance.buttons["Disconnect"]
-    }
-
     // Pairing screen
-
-    var pairingRow: XCUIElement {
-        instance.staticTexts["Example Wallet"]
-    }
 
     var newPairingButton: XCUIElement {
         instance.buttons["New Pairing"]

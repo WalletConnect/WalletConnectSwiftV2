@@ -12,7 +12,7 @@ struct RoutingEngine {
 
         if clean {
             let app = app.instance
-            app.launchArguments = ["-cleanInstall"]
+            app.launchArguments = ["-cleanInstall", "-disableAnimations"]
             app.launch()
         } else {
             let app = app.instance
