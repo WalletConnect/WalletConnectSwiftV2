@@ -35,6 +35,7 @@ public class WalletPushClient {
 
     private let deletePushSubscriptionService: DeletePushSubscriptionService
     private let deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
+    private let pushSubscribeService: PushSubscribeService
 
     public let logger: ConsoleLogging
 
@@ -57,7 +58,9 @@ public class WalletPushClient {
          deletePushSubscriptionService: DeletePushSubscriptionService,
          deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber,
          resubscribeService: PushResubscribeService,
-         pushSubscriptionsObserver: PushSubscriptionsObserver) {
+         pushSubscriptionsObserver: PushSubscriptionsObserver,
+         pushSubscribeService: PushSubscribeService
+    ) {
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
         self.proposeResponder = proposeResponder
@@ -69,7 +72,12 @@ public class WalletPushClient {
         self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
         self.resubscribeService = resubscribeService
         self.pushSubscriptionsObserver = pushSubscriptionsObserver
+        self.pushSubscribeService = pushSubscribeService
         setupSubscriptions()
+    }
+
+    public func subscribe(publicKey: String) async throws {
+        try await pushSubscribeService.subscribe(publicKey: publicKey)
     }
 
     public func approve(id: RPCID, onSign: @escaping SigningCallback) async throws {

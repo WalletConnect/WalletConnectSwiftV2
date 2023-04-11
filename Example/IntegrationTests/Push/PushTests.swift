@@ -234,7 +234,25 @@ final class PushTests: XCTestCase {
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
-    private func sign(_ message: String) -> SigningResult {
+    // Push Subscribe
+    func testWalletCreatesSubscription() async {
+        let expectation = expectation(description: "expects to create push subscription")
+
+        let publicKey = cast.subscribeTopic()
+
+        try! await walletPushClient.subscribe(publicKey: publicKey)
+        walletPushClient.subscriptionsPublisher.sink { subscriptions in
+            XCTAssertNotNil(subscriptions.first)
+            expectation.fulfill()
+        }
+        await fulfillment(of: [expectation], timeout: InputConfig.defaultTimeout)
+    }
+
+}
+
+
+private extension PushTests {
+    func sign(_ message: String) -> SigningResult {
         let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
         let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
         return .signed(try! signer.sign(message: message, privateKey: privateKey, type: .eip191))
