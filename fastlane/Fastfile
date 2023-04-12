@@ -32,7 +32,8 @@ platform :ios do
       xcargs: "RELAY_HOST='#{options[:relay_host]}' PROJECT_ID='#{options[:project_id]}'",
       xcodebuild_formatter: "xcpretty",
       output_directory: "test_results",
-      result_bundle: true
+      result_bundle: true,
+      include_simulator_logs: true
     )
   end
 

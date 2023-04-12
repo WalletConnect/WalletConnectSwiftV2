@@ -6,7 +6,8 @@ import Combine
 final class AppDelegate: UIResponder, UIApplicationDelegate {
     private var publishers = [AnyCancellable]()
     
-    private var deviceToken: Data?
+    static var deviceToken: Data?
+    static var registrationLogs: String = ""
     
     private let app = Application()
 
@@ -37,10 +38,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         Networking.interactor.socketConnectionStatusPublisher
             .first {$0  == .connected}
             .sink{ [weak self] status in
-                guard let deviceToken = self?.deviceToken else {
+                guard let deviceToken = AppDelegate.deviceToken else {
                     return
                 }
                 Task(priority: .high) {
+                    
+                    AppDelegate.registrationLogs.append("socket connected registering token \n")
+                    
                     try await Push.wallet.register(deviceToken: deviceToken)
                 }
             }.store(in: &self.publishers)
@@ -62,7 +66,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
         
-        self.deviceToken = deviceToken
+        AppDelegate.deviceToken = deviceToken
         
         Task(priority: .high) {
             // Commenting this out as it breaks UI tests that copy/paste URI
@@ -71,6 +75,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             // let token = tokenParts.joined()
             // let pasteboard = UIPasteboard.general
             // pasteboard.string = token
+            AppDelegate.registrationLogs.append("didRegisterWithDeviceToken registering token \n")
+            
             try await Push.wallet.register(deviceToken: deviceToken)
         }
     }
@@ -79,7 +85,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       _ application: UIApplication,
       didFailToRegisterForRemoteNotificationsWithError error: Error
     ) {
-        print("Failed to register: \(error)")
+        
+        
+        AppDelegate.registrationLogs.append("didFailToRegisterWithError registering token \(error.localizedDescription) \n")
     }
 
 }

@@ -8,20 +8,33 @@ class PushRegisterer {
     private var publishers = [AnyCancellable]()
 
     func getNotificationSettings() {
-      UNUserNotificationCenter.current().getNotificationSettings { settings in
-        print("Notification settings: \(settings)")
-          guard settings.authorizationStatus == .authorized else { return }
-          DispatchQueue.main.async {
-            UIApplication.shared.registerForRemoteNotifications()
-          }
-      }
+        
+        AppDelegate.registrationLogs.append("getNotificationSettings \n")
+        
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            print("Notification settings: \(settings)")
+            
+            AppDelegate.registrationLogs.append("Notification settings: \(settings.authorizationStatus) \n")
+            
+            guard settings.authorizationStatus == .authorized else { return }
+            
+            
+            DispatchQueue.main.async {
+                UIApplication.shared.registerForRemoteNotifications()
+            }
+        }
     }
 
     func registerForPushNotifications() {
+        
+        AppDelegate.registrationLogs.append("requestAuthorization \n")
         UNUserNotificationCenter.current()
           .requestAuthorization(
-            options: [.alert, .sound, .badge]) { granted, _ in
+            options: [.alert, .sound, .badge]) { granted, error in
             print("Permission granted: \(granted)")
+                
+                AppDelegate.registrationLogs.append("registerForPushNotifications granted: \(granted) error: \(error?.localizedDescription) \n")
+                
                 guard granted else { return }
                 self.getNotificationSettings()
 #if targetEnvironment(simulator)
