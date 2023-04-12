@@ -7,18 +7,23 @@ class PushNotificationTests: XCTestCase {
     override func setUp() {
         super.setUp()
         engine = Engine()
+        engine.routing.launch(app: .wallet, clean: true)
+        engine.routing.launch(app: .dapp, clean: true)
     }
     
     func testPushNotification() {
-        engine.routing.launch(app: .dapp, clean: true)
-
+        
         // Initiate connection & copy URI from dApp
+        engine.routing.activate(app: .dapp)
         engine.dapp.connectButton.wait(until: \.exists).tap()
         engine.dapp.newPairingButton.wait(until: \.exists).tap()
         engine.dapp.copyURIButton.wait(until: \.exists).tap()
         
         // Paste URI into Wallet & and allow connect
-        engine.routing.launch(app: .wallet, clean: true)
+        engine.routing.activate(app: .wallet)
+        
+        engine.routing.wait(for: 3)
+        
         allowPushNotificationsIfNeeded(app: engine.wallet.instance)
         engine.wallet.getStartedButton.wait(until: \.exists).tap()
         engine.wallet.pasteURIButton.wait(until: \.exists).tap()

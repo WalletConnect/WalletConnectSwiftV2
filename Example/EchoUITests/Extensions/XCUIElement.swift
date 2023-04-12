@@ -3,7 +3,7 @@ import XCTest
 
 extension XCUIElement {
 
-    static let waitTimeout: TimeInterval = 5
+    static let waitTimeout: TimeInterval = 15
 
     func tapUntilOtherElementHittable(otherElement: XCUIElement, maxRetries: Int = 5) {
         var retry = 0

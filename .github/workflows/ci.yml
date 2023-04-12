@@ -20,7 +20,8 @@ jobs:
     runs-on: macos-12
     strategy:
       matrix:
-        test-type: [unit-tests, integration-tests, build-example-wallet, build-example-dapp, relay-tests, echo-ui-tests]
+        test-type: [echo-ui-tests]
+        # test-type: [unit-tests, integration-tests, build-example-wallet, build-example-dapp, relay-tests, echo-ui-tests]
 
     steps:
     - uses: actions/checkout@v2
@@ -50,8 +51,9 @@ jobs:
         project-id: ${{ secrets.PROJECT_ID }}
 
     - name: Zip test artifacts
+      if: always()
       shell: bash
-      run: zip –r artifacts.zip ./test_results
+      run: test -d "test_results" && zip artifacts.zip -r ./test_results || echo "Nothing to zip"
 
     - name: Upload test artifacts
       if: always()

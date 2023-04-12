@@ -5,7 +5,20 @@ import Combine
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
     private var publishers = [AnyCancellable]()
+    
+    private var deviceToken: Data?
+    
+    private let app = Application()
 
+    private var configurators: [Configurator] {
+        return [
+            MigrationConfigurator(app: app),
+            ThirdPartyConfigurator(),
+            ApplicationConfigurator(app: app),
+            AppearanceConfigurator()
+        ]
+    }
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         #if DEBUG
@@ -16,6 +29,21 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                 .last { $0.isKeyWindow }?.layer.speed = 200
         }
         #endif
+    
+        
+        ThirdPartyConfigurator().configure()
+        PushRegisterer().registerForPushNotifications()
+        
+        Networking.interactor.socketConnectionStatusPublisher
+            .first {$0  == .connected}
+            .sink{ [weak self] status in
+                guard let deviceToken = self?.deviceToken else {
+                    return
+                }
+                Task(priority: .high) {
+                    try await Push.wallet.register(deviceToken: deviceToken)
+                }
+            }.store(in: &self.publishers)
         
         return true
     }
@@ -33,6 +61,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       _ application: UIApplication,
       didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
+        
+        self.deviceToken = deviceToken
         
         Task(priority: .high) {
             // Commenting this out as it breaks UI tests that copy/paste URI
