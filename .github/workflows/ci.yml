@@ -48,3 +48,15 @@ jobs:
       with:
         type: ${{ matrix.test-type }}
         project-id: ${{ secrets.PROJECT_ID }}
+
+    - name: Zip test artifacts
+      shell: bash
+      run: zip –r artifacts.zip ./test_results
+
+    - name: Upload test artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.test-type }} test_results
+        path: ./artifacts.zip
+        if-no-files-found: warn

@@ -48,7 +48,6 @@ runs:
         PROJECT_ID: ${{ inputs.project-id }}
       run: make smoke_tests RELAY_HOST=$RELAY_ENDPOINT PROJECT_ID=$PROJECT_ID
 
-
     # Wallet build
     - name: Build Example Wallet
       if: inputs.type == 'build-example-wallet'
