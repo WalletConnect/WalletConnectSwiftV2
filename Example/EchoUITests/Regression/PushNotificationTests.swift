@@ -8,6 +8,8 @@ class PushNotificationTests: XCTestCase {
         super.setUp()
         engine = Engine()
         engine.routing.launch(app: .wallet, clean: true)
+        engine.routing.wait(for: 15)
+        
         engine.routing.launch(app: .dapp, clean: true)
     }
     
@@ -21,8 +23,6 @@ class PushNotificationTests: XCTestCase {
         
         // Paste URI into Wallet & and allow connect
         engine.routing.activate(app: .wallet)
-        
-        engine.routing.wait(for: 3)
         
         allowPushNotificationsIfNeeded(app: engine.wallet.instance)
         engine.wallet.getStartedButton.wait(until: \.exists).tap()

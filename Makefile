@@ -23,7 +23,7 @@ build_wallet:
 	fastlane build scheme:WalletApp
 
 echo_ui_tests:
-	fastlane tests scheme:EchoUITests relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID)
+	fastlane tests scheme:EchoUITests relay_host:$(RELAY_HOST) project_id:9bfe94c9cbf74aaa0597094ef561f703
 
 ui_tests:
 	echo "UI Tests disabled"

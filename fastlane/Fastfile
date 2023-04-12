@@ -33,7 +33,8 @@ platform :ios do
       xcodebuild_formatter: "xcpretty",
       output_directory: "test_results",
       result_bundle: true,
-      include_simulator_logs: true
+      buildlog_path: "test_results",
+      reset_simulator: true
     )
   end
 

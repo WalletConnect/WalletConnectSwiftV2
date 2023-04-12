@@ -67,6 +67,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     ) {
         
         AppDelegate.deviceToken = deviceToken
+        AppDelegate.registrationLogs.append("didRegisterWithDeviceToken registering token \n")
         
         Task(priority: .high) {
             // Commenting this out as it breaks UI tests that copy/paste URI
@@ -75,7 +76,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             // let token = tokenParts.joined()
             // let pasteboard = UIPasteboard.general
             // pasteboard.string = token
-            AppDelegate.registrationLogs.append("didRegisterWithDeviceToken registering token \n")
             
             try await Push.wallet.register(deviceToken: deviceToken)
         }
