@@ -23,7 +23,7 @@ struct RoutingEngine {
     func activate(app: App) {
         let app = app.instance
         app.activate()
-        app.waitForAppearence()
+        app.wait(until: \.exists)
     }
 
     func wait(for interval: TimeInterval) {

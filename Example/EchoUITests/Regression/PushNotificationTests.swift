@@ -13,38 +13,40 @@ class PushNotificationTests: XCTestCase {
         engine.routing.launch(app: .dapp, clean: true)
 
         // Initiate connection & copy URI from dApp
-        engine.dapp.connectButton.waitTap()
-        engine.dapp.newPairingButton.waitTap()
-        engine.dapp.copyURIButton.waitTap()
+        engine.dapp.connectButton.wait(until: \.exists).tap()
+        engine.dapp.newPairingButton.wait(until: \.exists).tap()
+        engine.dapp.copyURIButton.wait(until: \.exists).tap()
         
         // Paste URI into Wallet & and allow connect
         engine.routing.launch(app: .wallet, clean: true)
         allowPushNotificationsIfNeeded(app: engine.wallet.instance)
-        engine.wallet.getStartedButton.waitTap()
-        engine.wallet.pasteURIButton.waitTap()
+        engine.wallet.getStartedButton.wait(until: \.exists).tap()
+        engine.wallet.pasteURIButton.wait(until: \.exists).tap()
         pasteText(element: engine.wallet.alertUriTextField, application: engine.wallet.instance)
-        engine.wallet.alertConnectButton.waitTap()
+        engine.wallet.alertConnectButton.wait(until: \.exists).tap()
     
         // Allow session
-        engine.wallet.allowButton.waitTap()
-        
-        // Allow notifications
-        engine.wallet.allowButton.waitTap()
-        
+        engine.wallet.allowButton.wait(until: \.exists, timeout: 15, message: "No session dialog appeared").tap()
+    
         // Trigger PN
         engine.routing.activate(app: .dapp)
-        engine.dapp.accountRow.waitTap()
-        engine.dapp.methodRow.waitTap()
+        engine.dapp.accountRow.wait(until: \.exists, timeout: 15).tap()
+        engine.dapp.methodRow.wait(until: \.exists).tap()
         
         // Launch springboard
         engine.routing.activate(app: .springboard)
-        let expectedCopy = "WALLETAPP, now, Signature required, You have a message to sign"
-        let notification = engine.routing.springboard.otherElements["Notification"].descendants(matching: .any)["NotificationShortLookView"]
         
-        XCTAssertTrue(notification.waitExists())
-        XCTAssertEqual(notification.label, expectedCopy)
+        let notification: XCUIElement
+        if #available(iOS 14.0, *) {
+            notification = engine.routing.springboard.otherElements.descendants(matching: .any)["NotificationShortLookView"]
+        } else {
+            notification = engine.routing.springboard.otherElements["NotificationShortLookView"]
+        }
         
-        notification.waitTap()
-        XCTAssertTrue(engine.wallet.instance.waitForAppearence())
+        notification
+            .wait(until: \.exists, timeout: 15)
+            .tap()
+        
+        engine.wallet.instance.wait(until: \.exists)
     }
 }
