@@ -70,6 +70,7 @@
 		84E6B86329816A7900428BAF /* WalletConnectPush in Frameworks */ = {isa = PBXBuildFile; productRef = 84E6B86229816A7900428BAF /* WalletConnectPush */; };
 		84E6B8652981720400428BAF /* WalletConnectPush in Frameworks */ = {isa = PBXBuildFile; productRef = 84E6B8642981720400428BAF /* WalletConnectPush */; };
 		84FE684628ACDB4700C893FF /* RequestParams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FE684528ACDB4700C893FF /* RequestParams.swift */; };
+		A507BE1A29E8032E0038EF70 /* EIP55Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A507BE1929E8032E0038EF70 /* EIP55Tests.swift */; };
 		A50C036528AAD32200FE72D3 /* ClientDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50C036428AAD32200FE72D3 /* ClientDelegate.swift */; };
 		A50F3946288005B200064555 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50F3945288005B200064555 /* Types.swift */; };
 		A518A98729683FB60035247E /* Web3InboxViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A518A98429683FB60035247E /* Web3InboxViewController.swift */; };
@@ -365,6 +366,7 @@
 		84F568C1279582D200D0A289 /* Signer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Signer.swift; sourceTree = "<group>"; };
 		84F568C32795832A00D0A289 /* EthereumTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthereumTransaction.swift; sourceTree = "<group>"; };
 		84FE684528ACDB4700C893FF /* RequestParams.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestParams.swift; sourceTree = "<group>"; };
+		A507BE1929E8032E0038EF70 /* EIP55Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EIP55Tests.swift; sourceTree = "<group>"; };
 		A50C036428AAD32200FE72D3 /* ClientDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientDelegate.swift; sourceTree = "<group>"; };
 		A50F3945288005B200064555 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		A518A98429683FB60035247E /* Web3InboxViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Web3InboxViewController.swift; sourceTree = "<group>"; };
@@ -866,6 +868,7 @@
 				A541959D2934BFEF0035AD19 /* EIP191VerifierTests.swift */,
 				A541959C2934BFEF0035AD19 /* EIP1271VerifierTests.swift */,
 				A541959B2934BFEF0035AD19 /* SignerTests.swift */,
+				A507BE1929E8032E0038EF70 /* EIP55Tests.swift */,
 			);
 			path = Signer;
 			sourceTree = "<group>";
@@ -2024,6 +2027,7 @@
 				84AA01DB28CF0CD7005D48D8 /* XCTest.swift in Sources */,
 				A5E03E1128646F8000888481 /* KeychainStorageMock.swift in Sources */,
 				A5E03DFD286465D100888481 /* Stubs.swift in Sources */,
+				A507BE1A29E8032E0038EF70 /* EIP55Tests.swift in Sources */,
 				A5A8E47A293A1C9B00FEB97D /* DefaultSocketFactory.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
