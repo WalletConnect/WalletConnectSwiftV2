@@ -4,7 +4,7 @@ import XCTest
 
 class ENSResolverTests: XCTestCase {
 
-    private let account = Account("eip155:1:0xd02d090f8f99b61d65d8e8876ea86c2720ab27bc")!
+    private let account = Account("eip155:1:0xD02D090F8f99B61D65d8e8876Ea86c2720aB27BC")!
     private let ens = "web3.eth"
 
     func testResolveEns() async throws {
