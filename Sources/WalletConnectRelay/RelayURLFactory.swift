@@ -1,16 +1,24 @@
 import Foundation
 
 struct RelayUrlFactory {
+    private let relayHost: String
+    private let projectId: String
     private let socketAuthenticator: SocketAuthenticating
 
-    init(socketAuthenticator: SocketAuthenticating) {
+    init(
+        relayHost: String,
+        projectId: String,
+        socketAuthenticator: SocketAuthenticating
+    ) {
+        self.relayHost = relayHost
+        self.projectId = projectId
         self.socketAuthenticator = socketAuthenticator
     }
 
-    func create(host: String, projectId: String) -> URL {
+    func create() -> URL {
         var components = URLComponents()
         components.scheme = "wss"
-        components.host = host
+        components.host = relayHost
         components.queryItems = [
             URLQueryItem(name: "projectId", value: projectId)
         ]
