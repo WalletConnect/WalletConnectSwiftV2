@@ -32,7 +32,7 @@ public struct SIWEMessage: Equatable {
     public var formatted: String {
         return """
                 \(domain) wants you to sign in with your Ethereum account:
-                \(address)
+                \(address.lowercased())
                 \(statementLine)
                 URI: \(uri)
                 Version: \(version)
