@@ -15,6 +15,8 @@ struct AcceptSubscriptionJWTPayload: JWTClaimsCodable {
         let aud: String
         /// blockchain account that push subscription has been proposed for (did:pkh)
         let sub: String
+        /// description of action intent. Must be equal to "push_subscription"
+        let act: String
     }
 
     struct Wrapper: JWTWrapper {
@@ -52,7 +54,8 @@ struct AcceptSubscriptionJWTPayload: JWTClaimsCodable {
             iss: iss,
             ksu: keyserver.absoluteString,
             aud: dappUrl,
-            sub: subscriptionAccount.did
+            sub: subscriptionAccount.did,
+            act: "push_subscription"
         )
     }
 }

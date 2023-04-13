@@ -21,8 +21,8 @@ actor IdentityNetworkService: IdentityNetworking {
         return response.value.cacao
     }
 
-    func removeIdentity(cacao: Cacao) async throws {
-        let api = IdentityKeyAPI.removeIdentity(cacao: cacao)
+    func removeIdentity(idAuth: String) async throws {
+        let api = IdentityKeyAPI.removeIdentity(idAuth: idAuth)
         try await httpService.request(service: api)
     }
 
