@@ -34,7 +34,6 @@ platform :ios do
       output_directory: "test_results",
       result_bundle: true,
       buildlog_path: "test_results",
-      reset_simulator: true
     )
   end
 

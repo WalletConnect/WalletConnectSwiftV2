@@ -33,7 +33,11 @@ extension XCTestCase {
     func pasteText(element: XCUIElement, application: XCUIApplication, file: StaticString = #file, line: UInt = #line) {
         let pasteButton = application.menuItems["Paste"]
         // Getting the paste button to appear can be finicky as focus can differ between devices
+        
         element.tapUntilOtherElementHittable(otherElement: pasteButton)
-        pasteButton.tap()
+        pasteButton
+            .wait(until: \.exists)
+            .wait(until: \.isHittable)
+            .tap()
     }
 }

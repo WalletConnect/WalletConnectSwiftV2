@@ -8,8 +8,7 @@ class PushNotificationTests: XCTestCase {
         super.setUp()
         engine = Engine()
         engine.routing.launch(app: .wallet, clean: true)
-        engine.routing.wait(for: 15)
-        
+        engine.routing.wait(for: 30)
         engine.routing.launch(app: .dapp, clean: true)
     }
     
@@ -19,15 +18,23 @@ class PushNotificationTests: XCTestCase {
         engine.routing.activate(app: .dapp)
         engine.dapp.connectButton.wait(until: \.exists).tap()
         engine.dapp.newPairingButton.wait(until: \.exists).tap()
+        
+        let uri = engine.dapp.instance.staticTexts.containing("wc:").firstMatch.label
+        
         engine.dapp.copyURIButton.wait(until: \.exists).tap()
         
         // Paste URI into Wallet & and allow connect
         engine.routing.activate(app: .wallet)
         
         allowPushNotificationsIfNeeded(app: engine.wallet.instance)
+        
         engine.wallet.getStartedButton.wait(until: \.exists).tap()
         engine.wallet.pasteURIButton.wait(until: \.exists).tap()
-        pasteText(element: engine.wallet.alertUriTextField, application: engine.wallet.instance)
+        
+        engine.wallet.alertUriTextField.wait(until: \.exists).tap()
+        engine.wallet.alertUriTextField.typeText(uri)
+        
+//        pasteText(element: engine.wallet.alertUriTextField, application: engine.wallet.instance)
         engine.wallet.alertConnectButton.wait(until: \.exists).tap()
     
         // Allow session

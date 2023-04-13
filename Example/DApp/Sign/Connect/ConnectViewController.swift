@@ -34,6 +34,14 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
                 self.connectView.copyButton.isHidden = false
             }
         }
+        
+        let uriLabel = UILabel(frame: CGRect(origin: .zero, size: .init(width: 400, height: 400)))
+        uriLabel.numberOfLines = 0
+        uriLabel.textColor = .clear
+        uriLabel.text = uri.absoluteString
+        
+        connectView.addSubview(uriLabel)
+        
         connectView.copyButton.addTarget(self, action: #selector(copyURI), for: .touchUpInside)
         connectView.connectWalletButton.addTarget(self, action: #selector(connectWithExampleWallet), for: .touchUpInside)
         connectView.tableView.dataSource = self

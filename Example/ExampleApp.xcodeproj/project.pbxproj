@@ -302,6 +302,13 @@
 			remoteGlobalIDString = C56EE21A293F55ED004840D1;
 			remoteInfo = WalletApp;
 		};
+		CF12A92229E847D600B42F2A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 764E1D3426F8D3FC00A1FB15 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 84E6B84629787A8000428BAF;
+			remoteInfo = PNDecryptionService;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -1827,6 +1834,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				CF12A92329E847D600B42F2A /* PBXTargetDependency */,
 				CF11914229E5D873000D4538 /* PBXTargetDependency */,
 				CF11914029E5D86F000D4538 /* PBXTargetDependency */,
 			);
@@ -2274,6 +2282,11 @@
 			isa = PBXTargetDependency;
 			target = C56EE21A293F55ED004840D1 /* WalletApp */;
 			targetProxy = CF11914129E5D873000D4538 /* PBXContainerItemProxy */;
+		};
+		CF12A92329E847D600B42F2A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 84E6B84629787A8000428BAF /* PNDecryptionService */;
+			targetProxy = CF12A92229E847D600B42F2A /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -2741,11 +2754,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = WalletApp/WalletApp.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 7;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = W5R8AG9K22;
+				DEVELOPMENT_TEAM = W5R8AG9K22;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WalletApp/Other/Info.plist;
@@ -2764,7 +2776,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.walletapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match Development com.walletconnect.walletapp";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

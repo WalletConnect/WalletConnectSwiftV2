@@ -5,9 +5,9 @@ extension XCUIElement {
 
     static let waitTimeout: TimeInterval = 15
 
-    func tapUntilOtherElementHittable(otherElement: XCUIElement, maxRetries: Int = 5) {
+    func tapUntilOtherElementHittable(otherElement: XCUIElement, maxRetries: Int = 10) {
         var retry = 0
-        while(!otherElement .isHittable && retry < maxRetries) {
+        while(!otherElement.isHittable && retry < maxRetries) {
             tap ()
             retry += 1
         }

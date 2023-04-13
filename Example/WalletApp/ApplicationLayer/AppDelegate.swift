@@ -49,6 +49,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                 }
             }.store(in: &self.publishers)
         
+        UIApplication.shared.registerForRemoteNotifications()
+        
         return true
     }
 
@@ -80,13 +82,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             try await Push.wallet.register(deviceToken: deviceToken)
         }
     }
-
+    
     func application(
       _ application: UIApplication,
       didFailToRegisterForRemoteNotificationsWithError error: Error
     ) {
-        
-        
+
+        printContent("didFailToRegisterWithError registering token \(error.localizedDescription) \n")
         AppDelegate.registrationLogs.append("didFailToRegisterWithError registering token \(error.localizedDescription) \n")
     }
 

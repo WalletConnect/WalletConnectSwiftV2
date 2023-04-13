@@ -34,6 +34,12 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         configurators.configure()
 //        app.pushRegisterer.registerForPushNotifications()
     }
+    
+    func sceneWillEnterForeground(_ scene: UIScene) {
+        AppDelegate.registrationLogs.append("willEnterForeground isRegistered: \(UIApplication.shared.isRegisteredForRemoteNotifications) \n")
+        
+        UIApplication.shared.registerForRemoteNotifications()
+    }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard let context = URLContexts.first else { return }
