@@ -28,9 +28,9 @@ extension WebDidDoc {
             case X25519
         }
         let kty: String
-        The x member contains the x coordinate for the elliptic curve point. It is represented as the base64url encoding of the coordinate's big endian representation.
 
         let crv: Curve
+        /// The x member contains the x coordinate for the elliptic curve point. It is represented as the base64url encoding of the coordinate's big endian representation.
         let x: String
     }
 }

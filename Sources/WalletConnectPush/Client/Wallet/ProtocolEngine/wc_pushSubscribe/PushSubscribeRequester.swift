@@ -14,8 +14,6 @@ class PushSubscribeRequester {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementService
     private let logger: ConsoleLogging
-    private let webDidResolver: WebDidResolver
-    private let subscriptionsStore: CodableStore<PushSubscription>
     // Keychain shared with UNNotificationServiceExtension in order to decrypt PNs
     private let groupKeychainStorage: KeychainStorageProtocol
 
@@ -25,7 +23,6 @@ class PushSubscribeRequester {
          logger: ConsoleLogging,
          kms: KeyManagementService,
          groupKeychainStorage: KeychainStorageProtocol,
-         subscriptionsStore: CodableStore<PushSubscription>,
          webDidResolver: WebDidResolver
     ) {
         self.keyserverURL = keyserverURL
@@ -34,7 +31,6 @@ class PushSubscribeRequester {
         self.logger = logger
         self.kms = kms
         self.groupKeychainStorage = groupKeychainStorage
-        self.subscriptionsStore = subscriptionsStore
         self.webDidResolver = webDidResolver
     }
 
@@ -62,18 +58,9 @@ class PushSubscribeRequester {
 
         try await networkingInteractor.subscribe(topic: subscribeTopic)
 
+        logger.debug("PushSubscribeRequester: subscribing to subscribe topic: \(subscribeTopic)")
+
         try await networkingInteractor.request(request, topic: subscribeTopic, protocolMethod: protocolMethod)
-
-//        logger.debug("PushSubscribeRequester: subscribing to push on topic: \(subscribeTopic)")
-//
-//        try kms.setAgreementSecret(keys, topic: pushTopic)
-//
-//        try groupKeychainStorage.add(keys, forKey: pushTopic)
-
-//        logger.debug("Subscribing to push topic: \(pushTopic)")
-
-//        try await networkingInteractor.subscribe(topic: pushTopic)
-
 
     }
 
