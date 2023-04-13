@@ -5,6 +5,27 @@ import WalletConnectUtils
 import Starscream
 @testable import WalletConnectRelay
 
+private class RelayKeychainStorageMock: KeychainStorageProtocol {
+    func add<T>(_ item: T, forKey key: String) throws where T : WalletConnectKMS.GenericPasswordConvertible {}
+    func read<T>(key: String) throws -> T where T : WalletConnectKMS.GenericPasswordConvertible {
+        return try T(rawRepresentation: Data())
+    }
+    func delete(key: String) throws {}
+    func deleteAll() throws {}
+}
+
+class WebSocketFactoryMock: WebSocketFactory {
+    private let webSocket: WebSocket
+    
+    init(webSocket: WebSocket) {
+        self.webSocket = webSocket
+    }
+    
+    func create(with url: URL) -> WebSocketConnecting {
+        return webSocket
+    }
+}
+
 final class RelayClientEndToEndTests: XCTestCase {
 
     private var publishers = Set<AnyCancellable>()
@@ -15,11 +36,20 @@ final class RelayClientEndToEndTests: XCTestCase {
             clientIdStorage: clientIdStorage,
             relayHost: InputConfig.relayHost
         )
-        let urlFactory = RelayUrlFactory(socketAuthenticator: socketAuthenticator)
-        let socket = WebSocket(url: urlFactory.create(host: InputConfig.relayHost, projectId: InputConfig.projectId))
-
+        let urlFactory = RelayUrlFactory(
+            relayHost: InputConfig.relayHost,
+            projectId: InputConfig.projectId,
+            socketAuthenticator: socketAuthenticator
+        )
+        let socket = WebSocket(url: urlFactory.create())
+        let webSocketFactory = WebSocketFactoryMock(webSocket: socket)
         let logger = ConsoleLogger()
-        let dispatcher = Dispatcher(socket: socket, socketConnectionHandler: ManualSocketConnectionHandler(socket: socket), logger: logger)
+        let dispatcher = Dispatcher(
+            socketFactory: webSocketFactory,
+            relayUrlFactory: urlFactory,
+            socketConnectionType: .manual,
+            logger: logger
+        )
         return RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), clientIdStorage: clientIdStorage)
     }
 

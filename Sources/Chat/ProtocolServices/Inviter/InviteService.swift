@@ -86,8 +86,8 @@ private extension InviteService {
                 logger.debug("Invite has been accepted")
 
                 guard
-                    let (invite, _) = try? InvitePayload.decode(from: payload.request),
-                    let (accept, _) = try? AcceptPayload.decode(from: payload.response)
+                    let (invite, _) = try? InvitePayload.decodeAndVerify(from: payload.request),
+                    let (accept, _) = try? AcceptPayload.decodeAndVerify(from: payload.response)
                 else { fatalError() /* TODO: Handle error */ }
 
                 Task(priority: .high) {

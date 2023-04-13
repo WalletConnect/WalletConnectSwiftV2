@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 @testable import WalletConnectSigner
 
-class ENSSignerTests: XCTestCase {
+class ENSResolverTests: XCTestCase {
 
     private let account = Account("eip155:1:0xd02d090f8f99b61d65d8e8876ea86c2720ab27bc")!
     private let ens = "web3.eth"

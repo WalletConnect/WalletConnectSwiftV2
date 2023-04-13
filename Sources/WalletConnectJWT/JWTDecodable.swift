@@ -23,7 +23,7 @@ public protocol JWTClaimsCodable {
 
 extension JWTClaimsCodable {
 
-    public static func decode(from wrapper: Wrapper) throws -> (Self, Claims) {
+    public static func decodeAndVerify(from wrapper: Wrapper) throws -> (Self, Claims) {
         let jwt = try JWT<Claims>(string: wrapper.jwtString)
 
         let publicKey = try DIDKey(did: jwt.claims.iss)
