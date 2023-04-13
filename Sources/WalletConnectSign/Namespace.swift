@@ -156,7 +156,7 @@ public enum AutoNamespaces {
         chains: [Blockchain],
         methods: [String],
         events: [String],
-        accounts: Set<Account>
+        accounts: [Account]
     ) throws -> [String: SessionNamespace] {
         var sessionNamespaces = [String: SessionNamespace]()
 
@@ -187,7 +187,7 @@ public enum AutoNamespaces {
 
                 let sessionNamespace = SessionNamespace(
                     chains: sessionChains,
-                    accounts: accounts.filter { sessionChains.contains($0.blockchain) },
+                    accounts: Set(accounts).filter { sessionChains.contains($0.blockchain) },
                     methods: sessionMethods,
                     events: sessionEvents
                 )
@@ -230,7 +230,7 @@ public enum AutoNamespaces {
 
                     let sessionNamespace = SessionNamespace(
                         chains: Set([Blockchain(namespace: network, reference: chain)!]),
-                        accounts: accounts.filter { $0.blockchain == Blockchain(namespace: network, reference: chain)! },
+                        accounts: Set(accounts).filter { $0.blockchain == Blockchain(namespace: network, reference: chain)! },
                         methods: sessionMethods,
                         events: sessionEvents
                     )
@@ -273,7 +273,7 @@ public enum AutoNamespaces {
 
                 let sessionNamespace = SessionNamespace(
                     chains: sessionChains,
-                    accounts: accounts.filter { sessionChains.contains($0.blockchain) },
+                    accounts: Set(accounts).filter { sessionChains.contains($0.blockchain) },
                     methods: sessionMethods,
                     events: sessionEvents
                 )
@@ -311,7 +311,7 @@ public enum AutoNamespaces {
                     
                     let sessionNamespace = SessionNamespace(
                         chains: Set([Blockchain(namespace: network, reference: chain)!]),
-                        accounts: accounts.filter { $0.blockchain == Blockchain(namespace: network, reference: chain)! },
+                        accounts: Set(accounts).filter { $0.blockchain == Blockchain(namespace: network, reference: chain)! },
                         methods: sessionMethods,
                         events: sessionEvents
                     )

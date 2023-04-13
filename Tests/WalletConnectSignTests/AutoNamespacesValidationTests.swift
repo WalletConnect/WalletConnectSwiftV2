@@ -32,7 +32,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:3")!],
             methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
             events: ["chainChanged"],
-            accounts: Set(accounts)
+            accounts: accounts
         )
         let expectedNamespaces: [String: SessionNamespace] = [
             "eip155": SessionNamespace(
@@ -78,7 +78,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:3")!],
             methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
             events: ["chainChanged"],
-            accounts: Set(accounts)
+            accounts: accounts
         )
 
         let expectedNamespaces: [String: SessionNamespace] = [
@@ -124,7 +124,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:3")!],
             methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
             events: ["chainChanged"],
-            accounts: Set(accounts)
+            accounts: accounts
         )
         let expectedNamespaces: [String: SessionNamespace] = [
             "eip155": SessionNamespace(
@@ -174,7 +174,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:3")!],
             methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
             events: ["chainChanged"],
-            accounts: Set(accounts)
+            accounts: accounts
         )
         let expectedNamespaces: [String: SessionNamespace] = [
             "eip155": SessionNamespace(
@@ -229,7 +229,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:3")!, Blockchain("eip155:4")!],
             methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
             events: ["chainChanged"],
-            accounts: Set(accounts)
+            accounts: accounts
         )
         let expectedNamespaces: [String: SessionNamespace] = [
             "eip155": SessionNamespace(
@@ -282,7 +282,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
             methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
             events: ["chainChanged"],
-            accounts: Set(accounts)
+            accounts: accounts
         )
         let expectedNamespaces: [String: SessionNamespace] = [
             "eip155": SessionNamespace(
@@ -336,7 +336,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:4")!],
             methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
             events: ["chainChanged"],
-            accounts: Set(accounts)
+            accounts: accounts
         )
         let expectedNamespaces: [String: SessionNamespace] = [
             "eip155": SessionNamespace(
@@ -385,7 +385,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:4")!],
             methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
             events: ["chainChanged"],
-            accounts: Set(accounts)
+            accounts: accounts
         )
         let expectedNamespaces: [String: SessionNamespace] = [
             "eip155": SessionNamespace(
@@ -434,7 +434,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:4")!],
             methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
             events: ["chainChanged", "accountsChanged"],
-            accounts: Set(accounts)
+            accounts: accounts
         )
         let expectedNamespaces: [String: SessionNamespace] = [
             "eip155": SessionNamespace(
@@ -484,15 +484,15 @@ final class AutoNamespacesValidationTests: XCTestCase {
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:4")!],
             methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
             events: ["chainChanged", "accountsChanged"],
-            accounts: Set(accounts)
+            accounts: accounts
         )
         let expectedNamespaces: [String: SessionNamespace] = [
             "eip155": SessionNamespace(
                 chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
-                accounts: Set([
+                accounts: [
                     Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
                     Account(blockchain: Blockchain("eip155:2")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
-                ]),
+                ],
                 methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
                 events: ["chainChanged", "accountsChanged"]
             )
@@ -539,7 +539,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:4")!, Blockchain("cosmos:cosmoshub-4")!],
             methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction", "cosmos_method"],
             events: ["chainChanged", "accountsChanged", "cosmos_event"],
-            accounts: Set(accounts)
+            accounts: accounts
         )
         let expectedNamespaces: [String: SessionNamespace] = [
             "eip155": SessionNamespace(
@@ -553,9 +553,9 @@ final class AutoNamespacesValidationTests: XCTestCase {
             ),
             "cosmos": SessionNamespace(
                 chains: [Blockchain("cosmos:cosmoshub-4")!],
-                accounts: Set([
+                accounts: [
                     Account(blockchain: Blockchain("cosmos:cosmoshub-4")!, address: "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02")!
-                ]),
+                ],
                 methods: ["cosmos_method"],
                 events: ["cosmos_event"]
             )
@@ -600,7 +600,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 chains: [Blockchain("eip155:5")!],
                 methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
                 events: ["chainChanged", "accountsChanged"],
-                accounts: Set(accounts)
+                accounts: accounts
             )
         )
     }
@@ -643,7 +643,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 chains: [Blockchain("eip155:1")!, Blockchain("eip155:5")!],
                 methods: ["personal_sign", "eth_sendTransaction", "eth_signTransaction"],
                 events: ["chainChanged", "accountsChanged"],
-                accounts: Set(accounts)
+                accounts: accounts
             )
         )
     }
@@ -680,7 +680,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 chains: [Blockchain("eip155:1")!],
                 methods: ["personal_sign"],
                 events: ["chainChanged", "accountsChanged"],
-                accounts: Set(accounts)
+                accounts: accounts
             )
         )
     }
@@ -717,7 +717,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 chains: [Blockchain("eip155:1")!],
                 methods: ["personal_sign", "eth_sendTransaction"],
                 events: ["chainChanged"],
-                accounts: Set(accounts)
+                accounts: accounts
             )
         )
     }
@@ -754,7 +754,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 chains: [Blockchain("eip155:1")!],
                 methods: ["personal_sign", "eth_sendTransaction"],
                 events: ["chainChanged"],
-                accounts: Set(accounts)
+                accounts: accounts
             )
         )
     }
@@ -795,7 +795,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
                 methods: ["personal_sign", "eth_sendTransaction"],
                 events: ["chainChanged"],
-                accounts: Set(accounts)
+                accounts: accounts
             )
         )
     }
