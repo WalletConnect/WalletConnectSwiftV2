@@ -46,6 +46,7 @@ public class WalletPushClient {
     private let subscriptionsProvider: SubscriptionsProvider
     private let pushMessagesDatabase: PushMessagesDatabase
     private let resubscribeService: PushResubscribeService
+    private let pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
@@ -59,7 +60,8 @@ public class WalletPushClient {
          deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber,
          resubscribeService: PushResubscribeService,
          pushSubscriptionsObserver: PushSubscriptionsObserver,
-         pushSubscribeRequester: PushSubscribeRequester
+         pushSubscribeRequester: PushSubscribeRequester,
+         pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber
     ) {
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
@@ -73,11 +75,12 @@ public class WalletPushClient {
         self.resubscribeService = resubscribeService
         self.pushSubscriptionsObserver = pushSubscriptionsObserver
         self.pushSubscribeRequester = pushSubscribeRequester
+        self.pushSubscribeResponseSubscriber = pushSubscribeResponseSubscriber
         setupSubscriptions()
     }
 
-    public func subscribe(publicKey: String) async throws {
-        try await pushSubscribeRequester.subscribe(publicKey: publicKey)
+    public func subscribe(dappUrl: String, account: Account, onSign: @escaping SigningCallback) async throws {
+        try await pushSubscribeRequester.subscribe(dappUrl: dappUrl, account: account, onSign: onSign)
     }
 
     public func approve(id: RPCID, onSign: @escaping SigningCallback) async throws {

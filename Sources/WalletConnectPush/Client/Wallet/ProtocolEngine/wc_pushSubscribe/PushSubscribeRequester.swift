@@ -66,7 +66,7 @@ class PushSubscribeRequester {
     }
 
     private func resolvePublicKey(dappUrl: String) async throws -> AgreementPublicKey {
-        let didDoc = webDidResolver.resolveDidDoc(domainUrl: dappUrl)
+        let didDoc = try await webDidResolver.resolveDidDoc(domainUrl: dappUrl)
         guard let keyAgreement = didDoc.keyAgreement.first else { throw Errors.didDocDoesNotContainKeyAgreement }
         guard let verificationMethod = didDoc.verificationMethod.first(where: { verificationMethod in verificationMethod.id == keyAgreement }) else { throw Errors.noVerificationMethodForKey }
         guard verificationMethod.publicKeyJwk.crv == .X25519 else { throw Errors.unsupportedCurve}
