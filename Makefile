@@ -1,6 +1,6 @@
 XCODE_USER_TEMPLATES_DIR=/Applications/Xcode.app/Contents/Developer/Library/Xcode/Templates/File\ Templates
 TEMPLATE_NAME=VIPER
-TEMPLATES_DIR=Example/Templates/VIPER
+TEMPLATES_DIR=ios/Templates/VIPER
 
 EXISTS_FASTLANE = $(shell command -v fastlane 2> /dev/null)
 
@@ -36,7 +36,7 @@ relay_tests:
 
 smoke_tests:
 	xcodebuild \
-        -project Example/ExampleApp.xcodeproj \
+        -project ios/ExampleApp.xcodeproj \
         -scheme IntegrationTests \
         -testPlan SmokeTests \
         -clonedSourcePackagesDirPath SourcePackagesCache \

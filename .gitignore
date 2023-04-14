@@ -31,3 +31,7 @@ DerivedDataCache
 # Artifacts
 *.ipa
 *.zip
+
+# react native
+node_modules
+Pods

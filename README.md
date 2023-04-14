@@ -46,7 +46,7 @@ Follow instructions from *Configuration.xcconfig* and configure PROJECT_ID with 
 SIMULATOR_IDENTIFIER = YOUR_SIMULATOR_IDENTIFIER
 ```
 ## Example App
-open `Example/ExampleApp.xcodeproj`
+open `ios/ExampleApp.xcodeproj`
 
 ## Web3Wallet
 Web3Wallet SDK introduces a new interface for all wallets that wraps the Sign and Auth clients internally.

@@ -1,0 +1,25 @@
+{
+  "name": "w3m-bridge",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx react-native start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.18.1",
+    "@web3modal/react-native": "./web3modal-react-native-v1.0.0-alpha.1.tgz",
+    "react": "18.2.0",
+    "react-native": "^0.71.6",
+    "react-native-get-random-values": "^1.8.0",
+    "react-native-modal": "^13.0.1",
+    "react-native-svg": "^13.9.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.21.4",
+    "@babel/preset-env": "^7.1.6"
+  }
+}
