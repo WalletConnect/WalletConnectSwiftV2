@@ -46,7 +46,6 @@ class PushSubscribeResponseSubscriber {
 
                 subscriptionsStore.set(pushSubscription, forKey: pushTopic)
 
-
                 logger.debug("Subscribing to push topic: \(pushSubscriptionTopic)")
 
                 try await networkingInteractor.subscribe(topic: pushSubscriptionTopic)
