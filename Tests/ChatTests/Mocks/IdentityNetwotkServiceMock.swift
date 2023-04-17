@@ -25,7 +25,7 @@ final class IdentityNetwotkServiceMock: IdentityNetworking {
         return cacao
     }
 
-    func removeIdentity(cacao: WalletConnectUtils.Cacao) async throws {
+    func removeIdentity(idAuth: String) async throws {
         callRemoveIdentity = true
     }
 
