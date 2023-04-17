@@ -3,6 +3,9 @@ import Foundation
 import Combine
 
 class PushSubscribeResponseSubscriber {
+    enum Errors: Error {
+        case noKeyForTopic
+    }
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
@@ -30,7 +33,7 @@ class PushSubscribeResponseSubscriber {
             .sink {[unowned self] (payload: ResponseSubscriptionPayload<CreateSubscriptionJWTPayload.Wrapper, Bool>) in
                 logger.debug("Received Push Subscribe response")
 
-                guard let pushSubscryptionKey = kms.getAgreementSecret(for: payload.topic) else { throw }
+                guard let pushSubscryptionKey = kms.getAgreementSecret(for: payload.topic) else { throw Errors.noKeyForTopic }
                 let pushSubscriptionTopic = pushSubscryptionKey.derivedTopic()
                 try kms.setAgreementSecret(pushSubscryptionKey, topic: pushSubscriptionTopic)
 
@@ -42,9 +45,9 @@ class PushSubscribeResponseSubscriber {
                 let account = try Account(DIDPKHString: claims.sub)
                 let metadata = ?? // wher we should take it from?
 
-                let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: requestParams.metadata)
+                let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata)
 
-                subscriptionsStore.set(pushSubscription, forKey: pushTopic)
+                subscriptionsStore.set(pushSubscription, forKey: pushSubscriptionTopic)
 
                 logger.debug("Subscribing to push topic: \(pushSubscriptionTopic)")
 

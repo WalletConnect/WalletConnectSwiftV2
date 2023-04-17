@@ -238,13 +238,11 @@ final class PushTests: XCTestCase {
     func testWalletCreatesSubscription() async {
         let expectation = expectation(description: "expects to create push subscription")
 
-        let publicKey = cast.subscribeTopic()
-
-        try! await walletPushClient.subscribe(publicKey: publicKey)
+        try! await walletPushClient.subscribe(dappUrl: <#T##String#>, account: Account.stub(), onSign: sign)
         walletPushClient.subscriptionsPublisher.sink { subscriptions in
             XCTAssertNotNil(subscriptions.first)
             expectation.fulfill()
-        }
+        }.store(in: &publishers)
         await fulfillment(of: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
