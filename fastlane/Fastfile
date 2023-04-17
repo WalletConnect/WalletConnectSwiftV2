@@ -24,12 +24,17 @@ platform :ios do
     xcargs << "RELAY_HOST='#{options[:relay_host]}' " if options[:relay_host]
     xcargs << "PROJECT_ID='#{options[:project_id]}' " if options[:project_id]
 
+    xctestrun = ""
+    Dir.chdir("..") do
+      xctestrun = Dir.glob("**/Products/*#{options[:testplan]}*.xctestrun").first
+    end
+  
     run_tests(
       project: 'Example/ExampleApp.xcodeproj',
       scheme: options[:scheme],
-      testplan: options[:testplan],
+      testplan: defined?(xctestrun) ? nil : options[:testplan],
       cloned_source_packages_path: 'SourcePackagesCache',
-      destination: 'platform=iOS Simulator,name=iPhone 13',
+      destination: 'platform=iOS Simulator,name=iPhone 14',
       derived_data_path: 'DerivedDataCache',
       skip_package_dependencies_resolution: true,
       skip_build: true,
@@ -38,7 +43,22 @@ platform :ios do
       output_directory: "test_results",
       result_bundle: true,
       buildlog_path: "test_results",
-      output_types: "junit"
+      output_types: "junit",
+      xctestrun: xctestrun
+    )
+  end
+
+  lane :build_for_testing do |options|
+
+    xcargs = "build-for-testing -clonedSourcePackagesDirPath SourcePackagesCache -derivedDataPath DerivedDataCache "
+    xcargs << "RELAY_HOST='#{options[:relay_host]}' " if options[:relay_host]
+    xcargs << "PROJECT_ID='#{options[:project_id]}' " if options[:project_id]
+
+    xcodebuild(
+      project: 'Example/ExampleApp.xcodeproj',
+      scheme: options[:scheme],
+      destination: 'platform=iOS Simulator,name=iPhone 14',
+      xcargs: xcargs,
     )
   end
 

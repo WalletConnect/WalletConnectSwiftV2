@@ -17,7 +17,17 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  build:    
+  prepare:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/build
+        with:
+          project-id: ${{ secrets.PROJECT_ID }}
+
+  test:    
+    needs: prepare
     runs-on: macos-12
     strategy:
       matrix:
@@ -26,28 +36,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Install xcbeautify
-      shell: bash
-      run: brew install xcbeautify
-    
-    - name: Setup Xcode Version
-      uses: maxim-lobanov/setup-xcode@v1
+    - uses: actions/download-artifact@v3
       with:
-        xcode-version: 14.1
-  
-    - uses: actions/cache@v3
-      with:
-        path: |
-          .build
-          SourcePackagesCache
-          DerivedDataCache
-        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
-        restore-keys: |
-          ${{ runner.os }}-spm-
-
-    - name: Resolve Dependencies
-      shell: bash
-      run: make resolve_packages
+        name: Products
 
     - uses: ./.github/actions/ci
       with:
