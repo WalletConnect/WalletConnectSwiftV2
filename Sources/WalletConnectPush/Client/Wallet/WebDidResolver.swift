@@ -2,6 +2,7 @@
 import Foundation
 
 class WebDidResolver {
+
     enum Errors: Error {
         case invalidUrl
     }

@@ -68,6 +68,7 @@ class PushSubscribeRequester {
     }
 
     private func resolvePublicKey(dappUrl: String) async throws -> AgreementPublicKey {
+        logger.debug("PushSubscribeRequester: Resolving DIDDoc for: \(dappUrl)")
         let didDoc = try await webDidResolver.resolveDidDoc(domainUrl: dappUrl)
         guard let keyAgreement = didDoc.keyAgreement.first else { throw Errors.didDocDoesNotContainKeyAgreement }
         guard let verificationMethod = didDoc.verificationMethod.first(where: { verificationMethod in verificationMethod.id == keyAgreement }) else { throw Errors.noVerificationMethodForKey }
