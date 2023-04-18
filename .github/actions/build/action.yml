@@ -19,7 +19,7 @@ runs:
       with:
         path: |
           .build
-          SourcePackagesCache
+          ../SourcePackagesCache
           DerivedDataCache
         key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
         restore-keys: |
