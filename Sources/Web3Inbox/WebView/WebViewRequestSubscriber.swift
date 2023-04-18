@@ -18,6 +18,7 @@ final class WebViewRequestSubscriber: NSObject, WKScriptMessageHandler {
         didReceive message: WKScriptMessage
     ) {
         guard message.name == WebViewRequestSubscriber.name else { return }
+        chat/push?
 
         guard
             let body = message.body as? String, let data = body.data(using: .utf8),
