@@ -47,7 +47,6 @@ class PushSubscribeResponseSubscriber {
                     return
                 }
                 let pushSubscriptionTopic = pushSubscryptionKey.derivedTopic()
-                let jwt = payload.request.jwtString
 
                 var account: Account!
                 var metadata: AppMetadata!

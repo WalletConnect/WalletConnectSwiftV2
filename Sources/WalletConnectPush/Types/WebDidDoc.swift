@@ -6,7 +6,7 @@ struct WebDidDoc: Codable {
     let context: [String]
     let id: String
     let verificationMethod: [VerificationMethod]
-    let authentication: [String]
+    let authentication: [String]?
     let keyAgreement: [String]
 
     enum CodingKeys: String, CodingKey {
@@ -24,8 +24,8 @@ extension WebDidDoc {
     }
 
     struct PublicKeyJwk: Codable {
-        enum Curve: Codable {
-            case X25519
+        enum Curve: String, Codable {
+            case X25519 = "X25519"
         }
         let kty: String
 

@@ -238,7 +238,8 @@ final class PushTests: XCTestCase {
     func testWalletCreatesSubscription() async {
         let expectation = expectation(description: "expects to create push subscription")
 
-        try! await walletPushClient.subscribe(dappUrl: <#T##String#>, account: Account.stub(), onSign: sign)
+        let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
+        try! await walletPushClient.subscribe(metadata: metadata, account: Account.stub(), onSign: sign)
         walletPushClient.subscriptionsPublisher.sink { subscriptions in
             XCTAssertNotNil(subscriptions.first)
             expectation.fulfill()

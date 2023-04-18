@@ -55,14 +55,13 @@ class PushSubscribeRequester {
 
         try kms.setAgreementSecret(keys, topic: subscribeTopic)
 
-
         let request = try createJWTRequest(subscriptionAccount: account, dappUrl: dappUrl)
 
         let protocolMethod = PushSubscribeProtocolMethod()
 
-        try await networkingInteractor.subscribe(topic: subscribeTopic)
-
         logger.debug("PushSubscribeRequester: subscribing to subscribe topic: \(subscribeTopic)")
+
+        try await networkingInteractor.subscribe(topic: subscribeTopic)
 
         try await networkingInteractor.request(request, topic: subscribeTopic, protocolMethod: protocolMethod)
 
