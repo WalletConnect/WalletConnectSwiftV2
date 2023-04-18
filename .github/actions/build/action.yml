@@ -1,41 +1,45 @@
 name: 'build'
 description: 'Compiles and stores artifacts for further use'
+inputs:
+  relay-endpoint:
+    description: 'The endpoint of the relay e.g. relay.walletconnect.com'
+    required: false
+    default: 'relay.walletconnect.com'
+  project-id:
+    description: 'WalletConnect project id'
+    required: true
 
 runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v3
 
-    - name: Install xcbeautify
-      shell: bash
-      run: brew install xcbeautify
+    # - name: Install xcbeautify
+    #   shell: bash
+    #   run: brew install xcbeautify
     
     - name: Setup Xcode Version
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: 14.2
   
-    - uses: actions/cache@v3
-      with:
-        path: |
-          .build
-          ../SourcePackagesCache
-          DerivedDataCache
-        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
-        restore-keys: |
-          ${{ runner.os }}-spm-
-
     - name: Resolve Dependencies
       shell: bash
       run: make resolve_packages
 
     - name: Build for testing
       shell: bash
-      run: make build_all
+      env:
+        RELAY_ENDPOINT: ${{ inputs.relay-endpoint }}
+        PROJECT_ID: ${{ inputs.project-id }}
+      run: make build_all RELAY_HOST=$RELAY_ENDPOINT PROJECT_ID=$PROJECT_ID
+
+    - name: Zip products.zip
+      shell: bash
+      run: test -d "DerivedDataCache" && zip products.zip -r DerivedDataCache/Build || echo "Nothing to zip"
 
     - name: Upload build Products
       uses: actions/upload-artifact@v3
       with:
         name: Products
-        path: |
-          DerivedDataCache/Build/Products
+        path: products.zip

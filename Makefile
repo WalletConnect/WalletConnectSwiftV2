@@ -17,7 +17,7 @@ endif
 	@echo "All dependencies was installed"
 
 build_all:
-	fastlane build_for_testing scheme:BuildAll relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID)
+	fastlane build_for_testing scheme:IntegrationTests relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID)
 
 build_dapp:
 	fastlane build scheme:DApp

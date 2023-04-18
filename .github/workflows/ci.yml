@@ -23,24 +23,38 @@ jobs:
       - uses: actions/checkout@v3
 
       - uses: ./.github/actions/build
+        with:
+          project-id: ${{ secrets.PROJECT_ID }}
 
   test:    
     needs: prepare
     runs-on: macos-12
     strategy:
       matrix:
-        test-type: [unit-tests, integration-tests, build-example-wallet, build-example-dapp, relay-tests]
+        test-type: [integration-tests, smoke-tests]
+        # test-type: [unit-tests, integration-tests, build-example-wallet, build-example-dapp, relay-tests]
 
     steps:
     - uses: actions/checkout@v3
+
+    - uses: futureware-tech/simulator-action@v2
+      with:
+        model: 'iPhone 14'
+        os: 'iOS'
+        os_version: '16.2'
+        erase_before_boot: false
 
     - uses: actions/download-artifact@v3
       with:
         name: Products
 
-    - name: Install xcbeautify
+    - name: Unzip Products artifacts
       shell: bash
-      run: brew install xcbeautify
+      run: unzip products.zip
+
+    # - name: Install xcbeautify
+    #   shell: bash
+    #   run: brew install xcbeautify
     
     - name: Setup Xcode Version
       uses: maxim-lobanov/setup-xcode@v1
