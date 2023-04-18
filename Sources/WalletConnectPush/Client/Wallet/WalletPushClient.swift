@@ -9,6 +9,11 @@ public class WalletPushClient {
 
     private var publishers = Set<AnyCancellable>()
 
+    /// publishes new subscriptions
+    public var subscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
+        return pushSubscribeResponseSubscriber.subscriptionPublisher
+    }
+
     public var subscriptionsPublisher: AnyPublisher<[PushSubscription], Never> {
         return pushSubscriptionsObserver.subscriptionsPublisher
     }
@@ -79,8 +84,8 @@ public class WalletPushClient {
         setupSubscriptions()
     }
 
-    public func subscribe(dappUrl: String, account: Account, onSign: @escaping SigningCallback) async throws {
-        try await pushSubscribeRequester.subscribe(dappUrl: dappUrl, account: account, onSign: onSign)
+    public func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {
+        try await pushSubscribeRequester.subscribe(metadata: metadata, account: account, onSign: onSign)
     }
 
     public func approve(id: RPCID, onSign: @escaping SigningCallback) async throws {

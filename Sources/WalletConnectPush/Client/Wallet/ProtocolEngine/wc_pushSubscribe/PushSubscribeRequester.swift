@@ -17,6 +17,7 @@ class PushSubscribeRequester {
     // Keychain shared with UNNotificationServiceExtension in order to decrypt PNs
     private let groupKeychainStorage: KeychainStorageProtocol
     private let webDidResolver: WebDidResolver
+    private let dappsMetadataStore: CodableStore<AppMetadata>
 
     init(keyserverURL: URL,
          networkingInteractor: NetworkInteracting,
@@ -24,7 +25,8 @@ class PushSubscribeRequester {
          logger: ConsoleLogging,
          kms: KeyManagementService,
          groupKeychainStorage: KeychainStorageProtocol,
-         webDidResolver: WebDidResolver
+         webDidResolver: WebDidResolver,
+         dappsMetadataStore: CodableStore<AppMetadata>
     ) {
         self.keyserverURL = keyserverURL
         self.identityClient = identityClient
@@ -33,22 +35,23 @@ class PushSubscribeRequester {
         self.kms = kms
         self.groupKeychainStorage = groupKeychainStorage
         self.webDidResolver = webDidResolver
+        self.dappsMetadataStore = dappsMetadataStore
     }
 
-    func subscribe(dappUrl: String, account: Account, onSign: @escaping SigningCallback) async throws {
+    func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {
 
+        let dappUrl = metadata.url
 
         logger.debug("Subscribing for Push")
 
         let peerPublicKey = try await resolvePublicKey(dappUrl: dappUrl)
         let subscribeTopic = peerPublicKey.rawRepresentation.sha256().toHexString()
 
-
+        dappsMetadataStore.set(metadata, forKey: dappUrl)
+        
         let keys = try generateAgreementKeys(peerPublicKey: peerPublicKey)
-//        let pushTopic = keys.derivedTopic()
 
         _ = try await identityClient.register(account: account, onSign: onSign)
-
 
         try kms.setAgreementSecret(keys, topic: subscribeTopic)
 
