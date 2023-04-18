@@ -3,6 +3,9 @@ import Foundation
 import Combine
 
 class PushSubscribeResponseSubscriber {
+    enum Errors: Error {
+        case couldNotCreateSubscription
+    }
 
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
@@ -32,7 +35,6 @@ class PushSubscribeResponseSubscriber {
         subscribeForSubscriptionResponse()
     }
 
-
     private func subscribeForSubscriptionResponse() {
         let protocolMethod = PushSubscribeProtocolMethod()
         networkingInteractor.responseSubscription(on: protocolMethod)
@@ -41,31 +43,37 @@ class PushSubscribeResponseSubscriber {
 
                 guard let pushSubscryptionKey = kms.getAgreementSecret(for: payload.topic) else {
                     logger.debug("PushSubscribeResponseSubscriber: no sym key for topic")
+                    subscriptionPublisherSubject.send(.failure(Errors.couldNotCreateSubscription))
                     return
                 }
                 let pushSubscriptionTopic = pushSubscryptionKey.derivedTopic()
-                try kms.setAgreementSecret(pushSubscryptionKey, topic: pushSubscriptionTopic)
-
-                try groupKeychainStorage.add(pushSubscryptionKey, forKey: pushSubscriptionTopic)
-
-
                 let jwt = payload.request.jwtString
-                let (_, claims) = try CreateSubscriptionJWTPayload.decodeAndVerify(from: payload.request)
-                let account = try Account(DIDPKHString: claims.sub)
 
-                guard let metadata = dappsMetadataStore.get(key: payload.topic) else {
-                    logger.debug("PushSubscribeResponseSubscriber: no metadata for subscribe topic")
+                var account: Account!
+                var metadata: AppMetadata!
+                do {
+                    try kms.setAgreementSecret(pushSubscryptionKey, topic: pushSubscriptionTopic)
+                    try groupKeychainStorage.add(pushSubscryptionKey, forKey: pushSubscriptionTopic)
+                    let (_, claims) = try CreateSubscriptionJWTPayload.decodeAndVerify(from: payload.request)
+                    account = try Account(DIDPKHString: claims.sub)
+                    metadata = try dappsMetadataStore.get(key: payload.topic)
+                } catch {
+                    logger.debug("PushSubscribeResponseSubscriber: error: \(error)")
+                    subscriptionPublisherSubject.send(.failure(Errors.couldNotCreateSubscription))
                     return
                 }
+
                 dappsMetadataStore.delete(forKey: payload.topic)
 
                 let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata)
 
                 subscriptionsStore.set(pushSubscription, forKey: pushSubscriptionTopic)
 
+                subscriptionPublisherSubject.send(.success(pushSubscription))
+
                 logger.debug("Subscribing to push topic: \(pushSubscriptionTopic)")
 
-                try await networkingInteractor.subscribe(topic: pushSubscriptionTopic)
+                Task { try await networkingInteractor.subscribe(topic: pushSubscriptionTopic) }
 
             }.store(in: &publishers)
     }

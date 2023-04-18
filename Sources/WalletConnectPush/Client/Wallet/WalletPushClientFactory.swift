@@ -54,9 +54,12 @@ public struct WalletPushClientFactory {
         let pushSubscriptionsObserver = PushSubscriptionsObserver(store: subscriptionStore)
 
         let webDidResolver = WebDidResolver()
-        let pushSubscribeRequester = PushSubscribeRequester(keyserverURL: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, kms: kms, groupKeychainStorage: groupKeychainStorage, webDidResolver: webDidResolver)
 
-        let pushSubscribeResponseSubscriber = PushSubscribeResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, groupKeychainStorage: groupKeychainStorage, subscriptionsStore: subscriptionStore)
+        let dappsMetadataStore = CodableStore<AppMetadata>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.dappsMetadataStore)
+
+        let pushSubscribeRequester = PushSubscribeRequester(keyserverURL: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, kms: kms, groupKeychainStorage: groupKeychainStorage, webDidResolver: webDidResolver, dappsMetadataStore: dappsMetadataStore)
+
+        let pushSubscribeResponseSubscriber = PushSubscribeResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, groupKeychainStorage: groupKeychainStorage, subscriptionsStore: subscriptionStore, dappsMetadataStore: dappsMetadataStore)
 
         return WalletPushClient(
             logger: logger,
