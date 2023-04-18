@@ -15,6 +15,7 @@ final class MainPresenter {
         return [
             router.walletViewController(),
             router.notificationsViewController(),
+            router.web3InboxViewController()
         ]
     }
 

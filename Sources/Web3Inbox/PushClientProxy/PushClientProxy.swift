@@ -27,7 +27,7 @@ final class PushClientProxy {
             try await respond(request: request)
         case .subscribe:
             let params = try parse(SubscribeRequest.self, params: request.params)
-            try await client.subscribe(dappUrl: params.dappUrl, account: params.account, onSign: onSign)
+            try await client.subscribe(metadata: params.metadata, account: params.account, onSign: onSign)
             try await respond(request: request)
         case .getActiveSubscriptions: 
             let subscriptions = client.getActiveSubscriptions()
@@ -66,7 +66,7 @@ private extension PushClientProxy {
     }
 
     struct SubscribeRequest: Codable {
-        let dappUrl: String
+        let metadata: AppMetadata
         let account: Account
     }
 
