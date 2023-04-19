@@ -25,6 +25,8 @@ final class WebViewRequestSubscriber: NSObject, WKScriptMessageHandler {
             let request = try? JSONDecoder().decode(RPCRequest.self, from: data)
         else { return }
 
+        print(request)
+
         Task {
             do {
                 try await onRequest?(request)

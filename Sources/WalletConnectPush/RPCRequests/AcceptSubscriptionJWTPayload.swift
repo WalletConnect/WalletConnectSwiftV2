@@ -18,6 +18,8 @@ struct CreateSubscriptionJWTPayload: JWTClaimsCodable {
         let sub: String
         /// description of action intent. Must be equal to "push_subscription"
         let act: String
+
+        let scp: String
     }
 
     struct Wrapper: JWTWrapper {
@@ -35,17 +37,20 @@ struct CreateSubscriptionJWTPayload: JWTClaimsCodable {
     let keyserver: URL
     let subscriptionAccount: Account
     let dappUrl: String
+    let scope: String
 
-    init(keyserver: URL, subscriptionAccount: Account, dappUrl: String) {
+    init(keyserver: URL, subscriptionAccount: Account, dappUrl: String, scope: String) {
         self.keyserver = keyserver
         self.subscriptionAccount = subscriptionAccount
         self.dappUrl = dappUrl
+        self.scope = scope
     }
 
     init(claims: Claims) throws {
         self.keyserver = try claims.ksu.asURL()
         self.subscriptionAccount = try Account(DIDPKHString: claims.sub)
         self.dappUrl = claims.aud
+        self.scope = claims.scp
     }
 
     func encode(iss: String) throws -> Claims {
@@ -56,7 +61,10 @@ struct CreateSubscriptionJWTPayload: JWTClaimsCodable {
             ksu: keyserver.absoluteString,
             aud: dappUrl,
             sub: subscriptionAccount.did,
-            act: "push_subscription"
+            act: "push_subscription",
+            scp: scope
         )
     }
 }
+//🦋 Wallet:  [Push] PushSubscribeResponseSubscriber: no sym key for topic - 11:59:04.1430
+//add scope to sunscriptionAuth

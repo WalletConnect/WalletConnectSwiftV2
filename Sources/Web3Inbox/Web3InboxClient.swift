@@ -62,10 +62,12 @@ public final class Web3InboxClient {
 private extension Web3InboxClient {
 
     func setupSubscriptions() {
-        webviewSubscriber.onRequest = { [unowned self] request in
-            try await self.chatClientProxy.request(request)
-        }
-
+//        chatWebviewSubscriber.onRequest = { [unowned self] request in
+//            print(request.method)
+////            try await self.pushClientProxy.request(request)
+//            try await self.chatClientProxy.request(request)
+//        }
+//
 
 
 

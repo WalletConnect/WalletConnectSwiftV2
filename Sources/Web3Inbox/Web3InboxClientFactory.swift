@@ -37,6 +37,6 @@ final class Web3InboxClientFactory {
     }
 
     private static func hostUrlString(account: Account) -> String {
-        return "https://web3inbox-dev-hidden.vercel.app/?chatProvider=ios&account=\(account.address)"
+        return "https://web3inbox-dev-hidden.vercel.app/?chatProvider=ios&pushProvider=ios&account=\(account.address)"
     }
 }

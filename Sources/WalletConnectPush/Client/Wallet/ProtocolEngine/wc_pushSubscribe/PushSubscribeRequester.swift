@@ -51,20 +51,25 @@ class PushSubscribeRequester {
         
         let keys = try generateAgreementKeys(peerPublicKey: peerPublicKey)
 
-//        try kms.setSymmetricKey(keys.sharedKey, for: subscribeTopic)
+        let subscriptionTopic  = keys.derivedTopic()
+
+        try kms.setSymmetricKey(keys.sharedKey, for: subscribeTopic)
+
 
         print("xxxxxxxxxxxxx \(keys.sharedKey.hexRepresentation)")
         _ = try await identityClient.register(account: account, onSign: onSign)
 
-        try kms.setAgreementSecret(keys, topic: subscribeTopic)
+        try kms.setAgreementSecret(keys, topic: subscriptionTopic)
+
+        logger.debug("setting symm key for topic \(subscriptionTopic)")
 
         let request = try createJWTRequest(subscriptionAccount: account, dappUrl: dappUrl)
 
         let protocolMethod = PushSubscribeProtocolMethod()
 
-        logger.debug("PushSubscribeRequester: subscribing to subscribe topic: \(subscribeTopic)")
+        logger.debug("PushSubscribeRequester: subscribing to subscription topic: \(subscriptionTopic)")
 
-        try await networkingInteractor.subscribe(topic: subscribeTopic)
+        try await networkingInteractor.subscribe(topic: subscriptionTopic)
 
         try await networkingInteractor.request(request, topic: subscribeTopic, protocolMethod: protocolMethod, envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
     }
@@ -90,7 +95,7 @@ class PushSubscribeRequester {
 
     private func createJWTRequest(subscriptionAccount: Account, dappUrl: String) throws -> RPCRequest {
         let protocolMethod = PushSubscribeProtocolMethod().method
-        let jwtPayload = CreateSubscriptionJWTPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl)
+        let jwtPayload = CreateSubscriptionJWTPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: "")
         let wrapper = try identityClient.signAndCreateWrapper(
             payload: jwtPayload,
             account: subscriptionAccount

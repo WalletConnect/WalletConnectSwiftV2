@@ -42,7 +42,7 @@ class PushSubscribeResponseSubscriber {
                 logger.debug("Received Push Subscribe response")
 
                 guard let pushSubscryptionKey = kms.getAgreementSecret(for: payload.topic) else {
-                    logger.debug("PushSubscribeResponseSubscriber: no sym key for topic")
+                    logger.debug("PushSubscribeResponseSubscriber: no symmetric key for topic \(payload.topic)")
                     subscriptionPublisherSubject.send(.failure(Errors.couldNotCreateSubscription))
                     return
                 }

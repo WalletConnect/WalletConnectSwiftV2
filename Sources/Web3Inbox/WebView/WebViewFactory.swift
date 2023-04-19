@@ -17,6 +17,10 @@ final class WebViewFactory {
             webviewSubscriber,
             name: WebViewRequestSubscriber.name
         )
+//        configuration.userContentController.add(
+//            webviewSubscriber2,
+//            name: WebViewRequestSubscriber.name
+//        )
         let webview = WKWebView(frame: .zero, configuration: configuration)
         let request = URLRequest(url: URL(string: host)!)
         webview.load(request)
