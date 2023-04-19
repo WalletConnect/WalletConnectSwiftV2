@@ -34,12 +34,12 @@ runs:
         PROJECT_ID: ${{ inputs.project-id }}
       run: make build_all RELAY_HOST=$RELAY_ENDPOINT PROJECT_ID=$PROJECT_ID
 
-    - name: Zip products.zip
+    - name: Tar DerivedDataCache
       shell: bash
-      run: test -d "DerivedDataCache" && zip products.zip -r DerivedDataCache/Build || echo "Nothing to zip"
+      run: test -d "DerivedDataCache" && tar cfPp products.tar --format posix DerivedDataCache/Build
 
     - name: Upload build Products
       uses: actions/upload-artifact@v3
       with:
         name: Products
-        path: products.zip
+        path: products.tar

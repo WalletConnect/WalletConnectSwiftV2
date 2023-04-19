@@ -48,9 +48,14 @@ jobs:
       with:
         name: Products
 
-    - name: Unzip Products artifacts
+    - name: Untar DerivedDataCache
       shell: bash
-      run: unzip products.zip
+      run: tar xvPpf products.tar
+
+    - name: Update mtime for incremental builds
+      shell: bash
+      run: |
+        python3 ./.github/scripts/git-restore-mtime --force
 
     # - name: Install xcbeautify
     #   shell: bash

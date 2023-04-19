@@ -41,6 +41,7 @@ relay_tests:
 	fastlane tests scheme:RelayIntegrationTests relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID)
 
 smoke_tests:
+	defaults write com.apple.dt.XCBuild IgnoreFileSystemDeviceInodeChanges -bool YES
 	fastlane tests scheme:IntegrationTests testplan:SmokeTests relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID)
 
 resolve_packages: 
