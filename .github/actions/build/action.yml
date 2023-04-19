@@ -13,10 +13,6 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v3
-
-    # - name: Install xcbeautify
-    #   shell: bash
-    #   run: brew install xcbeautify
     
     - name: Setup Xcode Version
       uses: maxim-lobanov/setup-xcode@v1
@@ -38,8 +34,8 @@ runs:
       shell: bash
       run: test -d "DerivedDataCache" && tar cfPp products.tar --format posix DerivedDataCache/Build
 
-    - name: Upload build Products
-      uses: actions/upload-artifact@v3
+    - uses: actions/cache/save@v3
       with:
-        name: Products
-        path: products.tar
+        path: |
+          products.tar
+        key: ${{ runner.os }}-deriveddata-

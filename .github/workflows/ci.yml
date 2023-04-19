@@ -37,6 +37,17 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    # - name: Get last develop commit SHA
+    #   shell: bash
+    #   run: |
+    #     echo "Develop SHA: $(git log -n 1 origin/develop --pretty=format:"%H")"
+    #     echo "develop-sha:$(git log -n 1 origin/develop --pretty=format:"%H")" >> $GITHUB_ENV
+
+    - name: Setup Xcode Version
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: 14.2
+
     - uses: futureware-tech/simulator-action@v2
       with:
         model: 'iPhone 14'
@@ -44,9 +55,11 @@ jobs:
         os_version: '16.2'
         erase_before_boot: false
 
-    - uses: actions/download-artifact@v3
+    - uses: actions/cache/restore@v3
       with:
-        name: Products
+        path: |
+          products.tar
+        key: ${{ runner.os }}-deriveddata-
 
     - name: Untar DerivedDataCache
       shell: bash
@@ -56,15 +69,6 @@ jobs:
       shell: bash
       run: |
         python3 ./.github/scripts/git-restore-mtime --force
-
-    # - name: Install xcbeautify
-    #   shell: bash
-    #   run: brew install xcbeautify
-    
-    - name: Setup Xcode Version
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: 14.2
 
     - uses: ./.github/actions/ci
       with:

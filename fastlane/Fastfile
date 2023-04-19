@@ -36,7 +36,7 @@ platform :ios do
       puts xctestrun
 
       sh("rm -rf test_results")
-      sh("#{xcodebuild_command} -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath #{derived_data_path} -resultBundlePath 'test_results/#{options[:scheme]}.xcresult' -xctestrun '#{xctestrun}' #{xcargs}  test-without-building")  # | xcbeautify")
+      sh("#{xcodebuild_command} -verbose -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath #{derived_data_path} -resultBundlePath 'test_results/#{options[:scheme]}.xcresult' -xctestrun '#{xctestrun}' #{xcargs}  test-without-building")  # | xcbeautify")
     end
   
     # run_tests(
