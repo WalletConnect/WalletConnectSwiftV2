@@ -5,6 +5,7 @@ final class Web3InboxClientFactory {
 
     static func create(
         chatClient: ChatClient,
+        pushClient: WalletPushClient,
         account: Account,
         onSign: @escaping SigningCallback
     ) -> Web3InboxClient {
@@ -12,18 +13,26 @@ final class Web3InboxClientFactory {
         let logger = ConsoleLogger(suffix: "📬")
         let webviewSubscriber = WebViewRequestSubscriber(logger: logger)
         let webView = WebViewFactory(host: host, webviewSubscriber: webviewSubscriber).create()
-        let webViewProxy = WebViewProxy(webView: webView, scriptFormatter: <#WebViewScriptFormatter#>)
+        let chatWebViewProxy = WebViewProxy(webView: webView, scriptFormatter: ChatWebViewScriptFormatter())
+        let pushWebViewProxy = WebViewProxy(webView: webView, scriptFormatter: PushWebViewScriptFormatter())
+
         let clientProxy = ChatClientProxy(client: chatClient, onSign: onSign)
         let clientSubscriber = ChatClientRequestSubscriber(chatClient: chatClient, logger: logger)
+
+        let pushClientProxy = PushClientProxy(client: pushClient, onSign: onSign)
+        let pushClientSubscriber = PushClientRequestSubscriber(client: pushClient, logger: logger)
 
         return Web3InboxClient(
             webView: webView,
             account: account,
             logger: ConsoleLogger(),
-            clientProxy: clientProxy,
+            chatClientProxy: clientProxy,
             clientSubscriber: clientSubscriber,
-            webviewProxy: webViewProxy,
-            webviewSubscriber: webviewSubscriber
+            chatWebviewProxy: chatWebViewProxy,
+            pushWebviewProxy: pushWebViewProxy,
+            webviewSubscriber: webviewSubscriber,
+            pushClientProxy: pushClientProxy,
+            pushClientSubscriber: pushClientSubscriber
         )
     }
 

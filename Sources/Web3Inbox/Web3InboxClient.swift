@@ -7,28 +7,39 @@ public final class Web3InboxClient {
     private var account: Account
     private let logger: ConsoleLogging
 
-    private let clientProxy: ChatClientProxy
-    private let clientSubscriber: ChatClientRequestSubscriber
+    private let chatClientProxy: ChatClientProxy
+    private let chatClientSubscriber: ChatClientRequestSubscriber
 
-    private let webviewProxy: WebViewProxy
+    private let pushClientProxy: PushClientProxy
+    private let pushClientSubscriber: PushClientRequestSubscriber
+
+    private let chatWebviewProxy: WebViewProxy
+    private let pushWebviewProxy: WebViewProxy
+
     private let webviewSubscriber: WebViewRequestSubscriber
 
     init(
         webView: WKWebView,
         account: Account,
         logger: ConsoleLogging,
-        clientProxy: ChatClientProxy,
+        chatClientProxy: ChatClientProxy,
         clientSubscriber: ChatClientRequestSubscriber,
-        webviewProxy: WebViewProxy,
-        webviewSubscriber: WebViewRequestSubscriber
+        chatWebviewProxy: WebViewProxy,
+        pushWebviewProxy: WebViewProxy,
+        webviewSubscriber: WebViewRequestSubscriber,
+        pushClientProxy: PushClientProxy,
+        pushClientSubscriber: PushClientRequestSubscriber
     ) {
         self.webView = webView
         self.account = account
         self.logger = logger
-        self.clientProxy = clientProxy
-        self.clientSubscriber = clientSubscriber
-        self.webviewProxy = webviewProxy
+        self.chatClientProxy = chatClientProxy
+        self.chatClientSubscriber = clientSubscriber
+        self.chatWebviewProxy = chatWebviewProxy
+        self.pushWebviewProxy = pushWebviewProxy
         self.webviewSubscriber = webviewSubscriber
+        self.pushClientProxy = pushClientProxy
+        self.pushClientSubscriber = pushClientSubscriber
 
         setupSubscriptions()
     }
@@ -41,7 +52,7 @@ public final class Web3InboxClient {
         _ account: Account,
         onSign: @escaping SigningCallback
     ) async throws {
-        clientProxy.onSign = onSign
+        chatClientProxy.onSign = onSign
         try await authorize(account: account)
     }
 }
@@ -52,14 +63,30 @@ private extension Web3InboxClient {
 
     func setupSubscriptions() {
         webviewSubscriber.onRequest = { [unowned self] request in
-            try await self.clientProxy.request(request)
+            try await self.chatClientProxy.request(request)
         }
-        clientProxy.onResponse = { [unowned self] response in
-            try await self.webviewProxy.respond(response)
+
+
+        // Chat
+        chatClientProxy.onResponse = { [unowned self] response in
+            try await self.chatWebviewProxy.respond(response)
         }
-        clientSubscriber.onRequest = { [unowned self] request in
-            try await self.webviewProxy.request(request)
+
+        chatClientSubscriber.onRequest = { [unowned self] request in
+            try await self.chatWebviewProxy.request(request)
         }
+
+
+        // Push
+
+        pushClientProxy.onResponse = { [unowned self] response in
+            try await self.pushWebviewProxy.respond(response)
+        }
+
+        pushClientSubscriber.onRequest = { [unowned self] request in
+            try await self.pushWebviewProxy.request(request)
+        }
+
     }
 
     func authorize(account: Account) async throws {
@@ -69,6 +96,6 @@ private extension Web3InboxClient {
             method: ChatClientRequest.setAccount.method,
             params: ["account": account.address]
         )
-        try await webviewProxy.request(request)
+        try await chatWebviewProxy.request(request)
     }
 }

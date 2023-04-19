@@ -7,7 +7,7 @@ public final class Web3Inbox {
         guard let account, let onSign else {
             fatalError("Error - you must call Web3Inbox.configure(_:) before accessing the shared instance.")
         }
-        return Web3InboxClientFactory.create(chatClient: Chat.instance, account: account, onSign: onSign)
+        return Web3InboxClientFactory.create(chatClient: Chat.instance, pushClient: Push.wallet, account: account, onSign: onSign)
     }()
 
     private static var account: Account?
