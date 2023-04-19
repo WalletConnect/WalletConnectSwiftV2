@@ -49,6 +49,8 @@ struct PushMessagesView: View {
         }
     }
 
+
+
     private func notificationView(pushMessage: PushMessageViewModel) -> some View {
         VStack {
             HStack(spacing: 10) {

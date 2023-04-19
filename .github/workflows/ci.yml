@@ -20,8 +20,7 @@ jobs:
     runs-on: macos-12
     strategy:
       matrix:
-        test-type: [echo-ui-tests]
-        # test-type: [unit-tests, integration-tests, build-example-wallet, build-example-dapp, relay-tests, echo-ui-tests]
+        test-type: [unit-tests, integration-tests, build-example-wallet, build-example-dapp, relay-tests]
 
     steps:
     - uses: actions/checkout@v2
@@ -29,7 +28,7 @@ jobs:
     - name: Setup Xcode Version
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: 14.2
+        xcode-version: 14.1
 
     - uses: actions/cache@v2
       with:
@@ -49,16 +48,3 @@ jobs:
       with:
         type: ${{ matrix.test-type }}
         project-id: ${{ secrets.PROJECT_ID }}
-
-    - name: Zip test artifacts
-      if: always()
-      shell: bash
-      run: test -d "test_results" && zip artifacts.zip -r ./test_results || echo "Nothing to zip"
-
-    - name: Upload test artifacts
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ matrix.test-type }} test_results
-        path: ./artifacts.zip
-        if-no-files-found: warn

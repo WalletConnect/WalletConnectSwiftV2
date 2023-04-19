@@ -1623,7 +1623,7 @@
 			children = (
 				CF1A593E29E5876600AAC16B /* Engine */,
 				CF1A593929E5876600AAC16B /* Extensions */,
-				CF1A593B29E5876600AAC16B /* Regression */,
+				CF1A593B29E5876600AAC16B /* Tests */,
 			);
 			path = EchoUITests;
 			sourceTree = "<group>";
@@ -1638,12 +1638,12 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
-		CF1A593B29E5876600AAC16B /* Regression */ = {
+		CF1A593B29E5876600AAC16B /* Tests */ = {
 			isa = PBXGroup;
 			children = (
 				CF1A593C29E5876600AAC16B /* PushNotificationTests.swift */,
 			);
-			path = Regression;
+			path = Tests;
 			sourceTree = "<group>";
 		};
 		CF1A593E29E5876600AAC16B /* Engine */ = {

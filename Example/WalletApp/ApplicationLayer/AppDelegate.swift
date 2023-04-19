@@ -5,52 +5,9 @@ import Combine
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
     private var publishers = [AnyCancellable]()
-    
-    static var deviceToken: Data?
-    static var registrationLogs: String = ""
-    
-    private let app = Application()
 
-    private var configurators: [Configurator] {
-        return [
-            MigrationConfigurator(app: app),
-            ThirdPartyConfigurator(),
-            ApplicationConfigurator(app: app),
-            AppearanceConfigurator()
-        ]
-    }
-    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
-        #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("-disableAnimations") {
-            UIView.setAnimationsEnabled(false)
-            UIApplication.shared.connectedScenes
-                .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
-                .last { $0.isKeyWindow }?.layer.speed = 200
-        }
-        #endif
-    
-        
-        ThirdPartyConfigurator().configure()
-        PushRegisterer().registerForPushNotifications()
-        
-        Networking.interactor.socketConnectionStatusPublisher
-            .first {$0  == .connected}
-            .sink{ [weak self] status in
-                guard let deviceToken = AppDelegate.deviceToken else {
-                    return
-                }
-                Task(priority: .high) {
-                    
-                    AppDelegate.registrationLogs.append("socket connected registering token \n")
-                    
-                    try await Push.wallet.register(deviceToken: deviceToken)
-                }
-            }.store(in: &self.publishers)
-        
-        UIApplication.shared.registerForRemoteNotifications()
-        
+        // Override point for customization after application launch.
         return true
     }
 
@@ -67,10 +24,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       _ application: UIApplication,
       didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
-        
-        AppDelegate.deviceToken = deviceToken
-        AppDelegate.registrationLogs.append("didRegisterWithDeviceToken registering token \n")
-        
+
         Task(priority: .high) {
             // Commenting this out as it breaks UI tests that copy/paste URI
             // Use pasteboard for testing purposes
@@ -82,14 +36,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             try await Push.wallet.register(deviceToken: deviceToken)
         }
     }
-    
+
     func application(
       _ application: UIApplication,
       didFailToRegisterForRemoteNotificationsWithError error: Error
     ) {
-
-        printContent("didFailToRegisterWithError registering token \(error.localizedDescription) \n")
-        AppDelegate.registrationLogs.append("didFailToRegisterWithError registering token \(error.localizedDescription) \n")
+        print("Failed to register: \(error)")
     }
 
 }

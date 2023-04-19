@@ -10,19 +10,7 @@ struct PasteUriView: View {
     @EnvironmentObject var presenter: PasteUriPresenter
     
     @State private var text = ""
-    
-    var tokenString: String {
-        guard let tokenData = AppDelegate.deviceToken else { return "noToken" }
-        
-        let tokenParts = tokenData.map { data in String(format: "%02.2hhx", data) }
-        
-        return tokenParts.joined()
-    }
 
-    var registrationsLog: String {
-        AppDelegate.registrationLogs
-    }
-    
     var body: some View {
         ZStack {
             Color(red: 20/255, green: 20/255, blue: 20/255, opacity: 0.4)
@@ -30,15 +18,15 @@ struct PasteUriView: View {
             
             VStack {
                 Spacer()
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(tokenString)
+                VStack(spacing: 6) {
+                    Text("Enter a WalletConnect URI")
                         .foregroundColor(.grey8)
-                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                        .font(.system(size: 22, weight: .bold, design: .rounded))
                     
-                    Text(registrationsLog)
+                    Text("To get the URI press the copy to clipboard button in wallet connection interfaces.")
                         .foregroundColor(.grey50)
-                        .font(.system(size: 10, weight: .medium, design: .rounded))
-//                        .multilineTextAlignment(.center)
+                        .font(.system(size: 15, weight: .medium, design: .rounded))
+                        .multilineTextAlignment(.center)
                         .lineSpacing(4)
                     
                     ZStack {
@@ -47,9 +35,9 @@ struct PasteUriView: View {
                         
                         HStack {
                             TextField("wc://a13aef...", text: $text)
-//                                .padding(.horizontal, 17)
+                                .padding(.horizontal, 17)
                                 .foregroundColor(.grey50)
-                                .font(.system(size: 15, weight: .regular, design: .rounded))
+                                .font(.system(size: 17, weight: .regular, design: .rounded))
                             
                             Button {
                                 text = ""
@@ -71,8 +59,8 @@ struct PasteUriView: View {
                         Text("Connect")
                             .frame(maxWidth: .infinity)
                             .foregroundColor(.white)
-                            .font(.system(size: 10, weight: .semibold, design: .rounded))
-//                            .padding(.vertical, 11)
+                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                            .padding(.vertical, 11)
                             .background(
                                 LinearGradient(
                                     gradient: Gradient(colors: [
@@ -83,6 +71,7 @@ struct PasteUriView: View {
                             )
                             .cornerRadius(20)
                     }
+                    .padding(.top, 20)
                     .shadow(color: .white.opacity(0.25), radius: 8, y: 2)
                     .disabled(text.isEmpty)
                     
@@ -92,14 +81,14 @@ struct PasteUriView: View {
                         Text("Cancel")
                             .frame(maxWidth: .infinity)
                             .foregroundColor(.blue100)
-                            .font(.system(size: 10, weight: .semibold, design: .rounded))
+                            .font(.system(size: 20, weight: .semibold, design: .rounded))
                     }
-                    
+                    .padding(.top, 20)
                 }
-                .padding(.top, 20)
+                .padding(20)
                 .background(Color.lightBackground)
                 .cornerRadius(34)
-//                .padding(.horizontal, 10)
+                .padding(.horizontal, 10)
             }
             .padding(.bottom, 20)
         }

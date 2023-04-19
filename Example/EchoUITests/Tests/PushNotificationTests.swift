@@ -8,7 +8,6 @@ class PushNotificationTests: XCTestCase {
         super.setUp()
         engine = Engine()
         engine.routing.launch(app: .wallet, clean: true)
-        engine.routing.wait(for: 30)
         engine.routing.launch(app: .dapp, clean: true)
     }
     
@@ -19,6 +18,7 @@ class PushNotificationTests: XCTestCase {
         engine.dapp.connectButton.wait(until: \.exists).tap()
         engine.dapp.newPairingButton.wait(until: \.exists).tap()
         
+        // Relies on existence of invisible label with uri in Dapp
         let uri = engine.dapp.instance.staticTexts.containing("wc:").firstMatch.label
         
         engine.dapp.copyURIButton.wait(until: \.exists).tap()
@@ -33,8 +33,6 @@ class PushNotificationTests: XCTestCase {
         
         engine.wallet.alertUriTextField.wait(until: \.exists).tap()
         engine.wallet.alertUriTextField.typeText(uri)
-        
-//        pasteText(element: engine.wallet.alertUriTextField, application: engine.wallet.instance)
         engine.wallet.alertConnectButton.wait(until: \.exists).tap()
     
         // Allow session
