@@ -67,6 +67,8 @@ private extension Web3InboxClient {
         }
 
 
+
+
         // Chat
         chatClientProxy.onResponse = { [unowned self] response in
             try await self.chatWebviewProxy.respond(response)
