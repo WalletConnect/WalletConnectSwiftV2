@@ -49,7 +49,7 @@ class PushSubscribeResponseSubscriber {
                 let pushSubscriptionTopic = pushSubscryptionKey.derivedTopic()
 
                 var account: Account!
-                var metadata: AppMetadata!
+                var metadata: AppMetadata?
                 do {
                     try kms.setAgreementSecret(pushSubscryptionKey, topic: pushSubscriptionTopic)
                     try groupKeychainStorage.add(pushSubscryptionKey, forKey: pushSubscriptionTopic)
@@ -62,6 +62,10 @@ class PushSubscribeResponseSubscriber {
                     return
                 }
 
+                guard let metadata = metadata else {
+                    logger.debug("PushSubscribeResponseSubscriber: no metadata for topic: \(payload.topic)")
+                    return
+                }
                 dappsMetadataStore.delete(forKey: payload.topic)
 
                 let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata)
