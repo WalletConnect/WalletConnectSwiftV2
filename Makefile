@@ -48,9 +48,6 @@ smoke_tests:
 	rm -rf test_results
 	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -verbose -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/IntegrationTests.xcresult' -xctestrun 'DerivedDataCache/Build/Products/IntegrationTests_SmokeTests_iphonesimulator16.2-x86_64.xctestrun' RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' test-without-building
 
-resolve_packages: 
-	fastlane resolve scheme:WalletApp
-
 release_wallet:
 	fastlane release_testflight username:$(APPLE_ID) token:$(TOKEN) relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID) --env WalletApp
 

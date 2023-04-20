@@ -14,15 +14,11 @@ runs:
   steps:
     - uses: actions/checkout@v3
     
-    - name: Setup Xcode Version
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: 14.2
+    # - name: Setup Xcode Version
+    #   uses: maxim-lobanov/setup-xcode@v1
+    #   with:
+    #     xcode-version: 14.2
   
-    - name: Resolve Dependencies
-      shell: bash
-      run: make resolve_packages
-
     - name: Build for testing
       shell: bash
       env:

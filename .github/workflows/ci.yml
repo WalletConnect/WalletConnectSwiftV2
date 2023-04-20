@@ -43,17 +43,18 @@ jobs:
     #     echo "Develop SHA: $(git log -n 1 origin/develop --pretty=format:"%H")"
     #     echo "develop-sha:$(git log -n 1 origin/develop --pretty=format:"%H")" >> $GITHUB_ENV
 
-    - name: Setup Xcode Version
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: 14.2
+    # - name: Setup Xcode Version
+    #   uses: maxim-lobanov/setup-xcode@v1
+    #   with:
+    #     xcode-version: 14.2
 
-    - uses: futureware-tech/simulator-action@v2
-      with:
-        model: 'iPhone 14'
-        os: 'iOS'
-        os_version: '16.2'
-        erase_before_boot: false
+    # - uses: futureware-tech/simulator-action@v2
+    #   with:
+    #     model: 'iPhone 14'
+    #     os: 'iOS'
+    #     os_version: '16.2'
+    #     erase_before_boot: false
+    #     shutdown_after_job: false
 
     - uses: actions/cache/restore@v3
       with:
@@ -65,10 +66,10 @@ jobs:
       shell: bash
       run: tar xvPpf products.tar
 
-    - name: Update modified time for incremental builds
-      shell: bash
-      run: |
-        python3 ./.github/scripts/git-restore-mtime --force
+    # - name: Update modified time for incremental builds
+    #   shell: bash
+    #   run: |
+    #     python3 ./.github/scripts/git-restore-mtime --force
 
     - uses: ./.github/actions/ci
       with:
