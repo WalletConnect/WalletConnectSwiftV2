@@ -1,0 +1,37 @@
+name: 'smoke_tests'
+description: 'Executes smoke-tests'
+inputs:
+  without-building:
+    description: 'Try using xctestrun if true'
+    required: true
+  relay-endpoint:
+    description: 'The endpoint of the relay e.g. relay.walletconnect.com'
+    required: false
+    default: 'relay.walletconnect.com'
+  project-id:
+    description: 'WalletConnect project id'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+
+    - uses: actions/cache/restore@v3
+      with:
+        path: |
+          products.tar
+        key: ${{ runner.os }}-deriveddata-
+        fail-on-cache-miss: true
+      
+    - name: Untar DerivedDataCache
+      shell: bash
+      run: tar xvPpf products.tar
+
+    # Smoke tests
+    - name: Run smoke tests
+      if: inputs.without-building == 'true'
+      shell: bash
+      env:
+        RELAY_ENDPOINT: ${{ inputs.relay-endpoint }}
+        PROJECT_ID: ${{ inputs.project-id }}
+      run: make smoke_tests_without_building RELAY_HOST=$RELAY_ENDPOINT PROJECT_ID=$PROJECT_ID
