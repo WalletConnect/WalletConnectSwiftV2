@@ -16,7 +16,8 @@ public final class Web3InboxClient {
     private let chatWebviewProxy: WebViewProxy
     private let pushWebviewProxy: WebViewProxy
 
-    private let webviewSubscriber: WebViewRequestSubscriber
+    private let chatWebviewSubscriber: WebViewRequestSubscriber
+    private let pushWebviewSubscriber: WebViewRequestSubscriber
 
     init(
         webView: WKWebView,
@@ -26,7 +27,8 @@ public final class Web3InboxClient {
         clientSubscriber: ChatClientRequestSubscriber,
         chatWebviewProxy: WebViewProxy,
         pushWebviewProxy: WebViewProxy,
-        webviewSubscriber: WebViewRequestSubscriber,
+        chatWebviewSubscriber: WebViewRequestSubscriber,
+        pushWebviewSubscriber: WebViewRequestSubscriber,
         pushClientProxy: PushClientProxy,
         pushClientSubscriber: PushClientRequestSubscriber
     ) {
@@ -37,7 +39,8 @@ public final class Web3InboxClient {
         self.chatClientSubscriber = clientSubscriber
         self.chatWebviewProxy = chatWebviewProxy
         self.pushWebviewProxy = pushWebviewProxy
-        self.webviewSubscriber = webviewSubscriber
+        self.chatWebviewSubscriber = chatWebviewSubscriber
+        self.pushWebviewSubscriber = pushWebviewSubscriber
         self.pushClientProxy = pushClientProxy
         self.pushClientSubscriber = pushClientSubscriber
 
@@ -62,13 +65,16 @@ public final class Web3InboxClient {
 private extension Web3InboxClient {
 
     func setupSubscriptions() {
-//        chatWebviewSubscriber.onRequest = { [unowned self] request in
-//            print(request.method)
-////            try await self.pushClientProxy.request(request)
-//            try await self.chatClientProxy.request(request)
-//        }
-//
-
+        chatWebviewSubscriber.onRequest = { [unowned self] request in
+            print(request.method)
+            print("^^^^^^Chat^^^^^^")
+            try await self.chatClientProxy.request(request)
+        }
+        pushWebviewSubscriber.onRequest = { [unowned self] request in
+            print(request.method)
+            print("^^^^^^Push^^^^^^")
+            try await self.pushClientProxy.request(request)
+        }
 
 
         // Chat

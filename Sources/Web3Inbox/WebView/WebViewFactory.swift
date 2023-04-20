@@ -4,23 +4,29 @@ import WebKit
 final class WebViewFactory {
 
     private let host: String
-    private let webviewSubscriber: WebViewRequestSubscriber
+    private let chatWebviewSubscriber: WebViewRequestSubscriber
+    private let pushWebviewSubscriber: WebViewRequestSubscriber
 
-    init(host: String, webviewSubscriber: WebViewRequestSubscriber) {
+    init(
+        host: String,
+        chatWebviewSubscriber: WebViewRequestSubscriber,
+        pushWebviewSubscriber: WebViewRequestSubscriber
+    ) {
         self.host = host
-        self.webviewSubscriber = webviewSubscriber
+        self.chatWebviewSubscriber = chatWebviewSubscriber
+        self.pushWebviewSubscriber = pushWebviewSubscriber
     }
 
     func create() -> WKWebView {
         let configuration = WKWebViewConfiguration()
         configuration.userContentController.add(
-            webviewSubscriber,
-            name: WebViewRequestSubscriber.name
+            chatWebviewSubscriber,
+            name: WebViewRequestSubscriber.chat
         )
-//        configuration.userContentController.add(
-//            webviewSubscriber2,
-//            name: WebViewRequestSubscriber.name
-//        )
+        configuration.userContentController.add(
+            pushWebviewSubscriber,
+            name: WebViewRequestSubscriber.push
+        )
         let webview = WKWebView(frame: .zero, configuration: configuration)
         let request = URLRequest(url: URL(string: host)!)
         webview.load(request)

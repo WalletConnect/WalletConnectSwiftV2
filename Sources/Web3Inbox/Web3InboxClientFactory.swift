@@ -11,8 +11,9 @@ final class Web3InboxClientFactory {
     ) -> Web3InboxClient {
         let host = hostUrlString(account: account)
         let logger = ConsoleLogger(suffix: "📬")
-        let webviewSubscriber = WebViewRequestSubscriber(logger: logger)
-        let webView = WebViewFactory(host: host, webviewSubscriber: webviewSubscriber).create()
+        let chatWebviewSubscriber = WebViewRequestSubscriber(logger: logger)
+        let pushWebviewSubscriber = WebViewRequestSubscriber(logger: logger)
+        let webView = WebViewFactory(host: host, chatWebviewSubscriber: chatWebviewSubscriber, pushWebviewSubscriber: pushWebviewSubscriber).create()
         let chatWebViewProxy = WebViewProxy(webView: webView, scriptFormatter: ChatWebViewScriptFormatter())
         let pushWebViewProxy = WebViewProxy(webView: webView, scriptFormatter: PushWebViewScriptFormatter())
 
@@ -30,13 +31,14 @@ final class Web3InboxClientFactory {
             clientSubscriber: clientSubscriber,
             chatWebviewProxy: chatWebViewProxy,
             pushWebviewProxy: pushWebViewProxy,
-            webviewSubscriber: webviewSubscriber,
+            chatWebviewSubscriber: chatWebviewSubscriber,
+            pushWebviewSubscriber: pushWebviewSubscriber,
             pushClientProxy: pushClientProxy,
             pushClientSubscriber: pushClientSubscriber
         )
     }
 
     private static func hostUrlString(account: Account) -> String {
-        return "https://web3inbox-dev-hidden.vercel.app/?chatProvider=ios&pushProvider=ios&account=\(account.address)"
+        return "https://web3inbox-dev-hidden-git-feat-targeted-ex-3bf147-walletconnect1.vercel.app/?chatProvider=ios&pushProvider=ios&account=\(account.address)"
     }
 }

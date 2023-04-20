@@ -33,12 +33,12 @@ protocol WebViewScriptFormatter {
 
 class ChatWebViewScriptFormatter: WebViewScriptFormatter {
     func formatScript(body: String) -> String {
-        return "window.\(WebViewRequestSubscriber.name).chat.postMessage(\(body))"
+        return "window.web3inbox.chat.postMessage(\(body))"
     }
 }
 
 class PushWebViewScriptFormatter: WebViewScriptFormatter {
     func formatScript(body: String) -> String {
-        return "window.\(WebViewRequestSubscriber.name).push.postMessage(\(body))"
+        return "window.web3inbox.push.postMessage(\(body))"
     }
 }
