@@ -9,6 +9,8 @@
     }
   ],
   "defaultOptions" : {
+    "codeCoverage" : false,
+    "mainThreadCheckerEnabled" : false,
     "testTimeoutsEnabled" : true
   },
   "testTargets" : [

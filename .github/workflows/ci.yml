@@ -61,13 +61,6 @@ jobs:
           products.tar
         key: ${{ runner.os }}-deriveddata-
 
-    - name: Upload test artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ matrix.test-type }} products
-        path: products.tar
-        if-no-files-found: warn
-
     - name: Untar DerivedDataCache
       shell: bash
       run: tar xvPpf products.tar

@@ -17,7 +17,8 @@ endif
 	@echo "All dependencies was installed"
 
 build_all:
-	fastlane build_for_testing scheme:IntegrationTests relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID)
+	rm -rf test_results
+	set -o pipefail && xcodebuild -verbose -project "Example/ExampleApp.xcodeproj" -scheme "IntegrationTests" -destination "platform=iOS Simulator,name=iPhone 14" -clonedSourcePackagesDirPath ../SourcePackagesCache -derivedDataPath DerivedDataCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' build-for-testing
 
 build_dapp:
 	fastlane build scheme:DApp
@@ -35,14 +36,17 @@ unit_tests:
 	fastlane tests scheme:WalletConnect
 
 integration_tests:
-	fastlane tests scheme:IntegrationTests testplan:IntegrationTests relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID)
+	defaults write com.apple.dt.XCBuild IgnoreFileSystemDeviceInodeChanges -bool YES
+	rm -rf test_results
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -verbose -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/IntegrationTests.xcresult' -xctestrun 'DerivedDataCache/Build/Products/IntegrationTests_IntegrationTests_iphonesimulator16.2-x86_64.xctestrun' RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' test-without-building
 
 relay_tests:
 	fastlane tests scheme:RelayIntegrationTests relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID)
 
 smoke_tests:
 	defaults write com.apple.dt.XCBuild IgnoreFileSystemDeviceInodeChanges -bool YES
-	fastlane tests scheme:IntegrationTests testplan:SmokeTests relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID)
+	rm -rf test_results
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -verbose -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/IntegrationTests.xcresult' -xctestrun 'DerivedDataCache/Build/Products/IntegrationTests_SmokeTests_iphonesimulator16.2-x86_64.xctestrun' RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' test-without-building
 
 resolve_packages: 
 	fastlane resolve scheme:WalletApp
