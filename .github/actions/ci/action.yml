@@ -15,12 +15,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    # Package builds
-    - name: Run tests
-      if: inputs.type == 'unit-tests'
-      shell: bash
-      run: make unit_tests
-
     # Integration tests
     - name: Run integration tests
       if: inputs.type == 'integration-tests'
@@ -46,7 +40,7 @@ runs:
       env:
         RELAY_ENDPOINT: ${{ inputs.relay-endpoint }}
         PROJECT_ID: ${{ inputs.project-id }}
-      run: make smoke_tests_without_building RELAY_HOST=$RELAY_ENDPOINT PROJECT_ID=$PROJECT_ID
+      run: make smoke_tests RELAY_HOST=$RELAY_ENDPOINT PROJECT_ID=$PROJECT_ID
 
     # Wallet build
     - name: Build Example Wallet

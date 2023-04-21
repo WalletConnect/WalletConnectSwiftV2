@@ -16,9 +16,13 @@ ifeq "${EXISTS_FASTLANE}" ""
 endif		
 	@echo "All dependencies was installed"
 
+test_setup: 
+	defaults write com.apple.dt.XCBuild IgnoreFileSystemDeviceInodeChanges -bool YES
+	rm -rf test_results
+
 build_all:
 	rm -rf test_results
-	set -o pipefail && xcodebuild -verbose -project "Example/ExampleApp.xcodeproj" -scheme "IntegrationTests" -destination "platform=iOS Simulator,name=iPhone 14" -clonedSourcePackagesDirPath ../SourcePackagesCache -derivedDataPath DerivedDataCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' build-for-testing
+	set -o pipefail && xcodebuild -verbose -project "Example/ExampleApp.xcodeproj" -scheme "BuildAll" -destination "platform=iOS Simulator,name=iPhone 14" -clonedSourcePackagesDirPath ../SourcePackagesCache -derivedDataPath DerivedDataCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' build-for-testing
 
 build_dapp:
 	fastlane build scheme:DApp
@@ -32,25 +36,32 @@ echo_ui_tests:
 ui_tests:
 	echo "UI Tests disabled"
 
-unit_tests:
-	fastlane tests scheme:WalletConnect
+integrationxctestrun = $(shell find . -name '*_IntegrationTests*.xctestrun')
 
-integration_tests:
-	defaults write com.apple.dt.XCBuild IgnoreFileSystemDeviceInodeChanges -bool YES
-	rm -rf test_results
-	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -verbose -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/IntegrationTests.xcresult' -xctestrun 'DerivedDataCache/Build/Products/IntegrationTests_IntegrationTests_iphonesimulator16.2-x86_64.xctestrun' RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' test-without-building
+integration_tests: test_setup
+ifneq ($(integrationxctestrun),)
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/IntegrationTests.xcresult' -xctestrun '$(integrationxctestrun)' RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' test-without-building
+else
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -project Example/ExampleApp.xcodeproj -scheme IntegrationTests -testPlan IntegrationTests -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/IntegrationTests.xcresult' RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' test
+endif
 
-relay_tests:
-	fastlane tests scheme:RelayIntegrationTests relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID)
+relayxctestrun = $(shell find . -name '*_RelayIntegrationTests*.xctestrun')
 
-smoke_tests_without_building:
-	defaults write com.apple.dt.XCBuild IgnoreFileSystemDeviceInodeChanges -bool YES
-	rm -rf test_results
-	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -verbose -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/IntegrationTests.xcresult' -xctestrun 'DerivedDataCache/Build/Products/IntegrationTests_SmokeTests_iphonesimulator16.2-x86_64.xctestrun' RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' test-without-building
+relay_tests: test_setup
+ifneq ($(relayxctestrun),)
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/RelayIntegrationTests.xcresult' -xctestrun '$(relayxctestrun)' RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' test-without-building
+else
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -project Example/ExampleApp.xcodeproj -scheme RelayIntegrationTests -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/RelayIntegrationTests.xcresult' RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' test
+endif
 
-smoke_tests:
-	rm -rf test_results
-	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -verbose -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/IntegrationTests.xcresult' RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' test
+smokexctestrun = $(shell find . -name '*_SmokeTests*.xctestrun')
+
+smoke_tests: test_setup
+ifneq ($(smokexctestrun),)
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/SmokeTests.xcresult' -xctestrun '$(smokexctestrun)' RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' test-without-building
+else
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -project Example/ExampleApp.xcodeproj -scheme IntegrationTests -testPlan SmokeTests -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/SmokeTests.xcresult' RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' test
+endif
 
 release_wallet:
 	fastlane release_testflight username:$(APPLE_ID) token:$(TOKEN) relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID) --env WalletApp

@@ -31,7 +31,7 @@ jobs:
     runs-on: macos-12
     strategy:
       matrix:
-        test-type: [integration-tests, smoke-tests]
+        test-type: [integration-tests, smoke-tests, relay-tests]
         # test-type: [unit-tests, integration-tests, build-example-wallet, build-example-dapp, relay-tests]
 
     steps:
@@ -52,7 +52,6 @@ jobs:
       with:
         type: ${{ matrix.test-type }}
         project-id: ${{ secrets.PROJECT_ID }}
-        cache-hit: ${{ steps.cache-primes.outputs.cache-hit }}
 
     - name: Publish Test Report
       uses: mikepenz/action-junit-report@v3
