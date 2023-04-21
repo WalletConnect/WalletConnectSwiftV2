@@ -65,19 +65,9 @@ public final class Web3InboxClient {
 private extension Web3InboxClient {
 
     func setupSubscriptions() {
-        chatWebviewSubscriber.onRequest = { [unowned self] request in
-            print(request.method)
-            print("^^^^^^Chat^^^^^^")
-            try await self.chatClientProxy.request(request)
-        }
-        pushWebviewSubscriber.onRequest = { [unowned self] request in
-            print(request.method)
-            print("^^^^^^Push^^^^^^")
-            try await self.pushClientProxy.request(request)
-        }
-
 
         // Chat
+        
         chatClientProxy.onResponse = { [unowned self] response in
             try await self.chatWebviewProxy.respond(response)
         }
@@ -86,6 +76,10 @@ private extension Web3InboxClient {
             try await self.chatWebviewProxy.request(request)
         }
 
+        chatWebviewSubscriber.onRequest = { [unowned self] request in
+            logger.debug("w3i: chat method \(request.method) requested")
+            try await self.chatClientProxy.request(request)
+        }
 
         // Push
 
@@ -97,6 +91,10 @@ private extension Web3InboxClient {
             try await self.pushWebviewProxy.request(request)
         }
 
+        pushWebviewSubscriber.onRequest = { [unowned self] request in
+            logger.debug("w3i: push method \(request.method) requested")
+            try await self.pushClientProxy.request(request)
+        }
     }
 
     func authorize(account: Account) async throws {
