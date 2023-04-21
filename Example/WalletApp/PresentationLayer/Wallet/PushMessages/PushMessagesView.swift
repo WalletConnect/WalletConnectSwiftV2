@@ -68,16 +68,26 @@ struct PushMessagesView: View {
                     }
                 }
                 .padding(.leading, 20)
-
+                
+                    
                 VStack(alignment: .leading, spacing: 2) {
                     Text(pushMessage.title)
                         .foregroundColor(.grey8)
                         .font(.system(size: 20, weight: .semibold, design: .rounded))
-
-                    Text(pushMessage.subtitle)
-                        .foregroundColor(.grey50)
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                    
+                    HStack {
+                        Text(pushMessage.subtitle)
+                            .foregroundColor(.grey50)
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                        
+                        Spacer()
+                        
+                        Text(pushMessage.publishedAt)
+                            .foregroundColor(.grey50)
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                    }
                 }
+                .padding(.trailing, 20)
             }
         }
     }

@@ -9,6 +9,10 @@ final class PushMessagesInteractor {
         self.subscription = subscription
     }
 
+    var pushMessagePublisher: AnyPublisher<PushMessageRecord, Never> {
+        return Push.wallet.pushMessagePublisher
+    }
+    
     func getPushMessages() -> [PushMessageRecord] {
         return Push.wallet.getMessageHistory(topic: subscription.topic)
     }
