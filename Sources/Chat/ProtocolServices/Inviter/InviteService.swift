@@ -100,6 +100,14 @@ private extension InviteService {
                     )
                 }
             }.store(in: &publishers)
+
+        networkingInteractor.responseErrorSubscription(on: ChatInviteProtocolMethod())
+            .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<InvitePayload.Wrapper>) in
+
+                Task(priority: .high) {
+                    try await chatStorage.reject(sentInviteId: payload.id.integer)
+                }
+            }.store(in: &publishers)
     }
 
     func createThread(sentInviteId: Int64, selfPubKeyHex: String, peerPubKey: DIDKey, account: Account, peerAccount: Account) async throws {
@@ -117,9 +125,7 @@ private extension InviteService {
         )
 
         try await chatStorage.set(thread: thread, account: account)
-
-        // TODO: Implement reject for sentInvite
-        try await chatStorage.accept(sentInviteId: sentInviteId, account: account, topic: threadTopic)
+        try await chatStorage.accept(sentInviteId: sentInviteId, topic: threadTopic)
 
         // TODO - remove symKeyI
     }

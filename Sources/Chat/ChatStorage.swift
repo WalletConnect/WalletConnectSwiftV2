@@ -93,8 +93,8 @@ final class ChatStorage {
             .first(where: { $0.id == id })
     }
 
-    func getSentInvite(id: Int64, account: Account) -> SentInvite? {
-        return try? sentInviteStore.getAll(for: account)
+    func getSentInvite(id: Int64) -> SentInvite? {
+        return sentInviteStore.getAll()
             .first(where: { $0.id == id })
     }
 
@@ -135,10 +135,11 @@ final class ChatStorage {
         receivedInviteStore.set(rejected, for: account.absoluteString)
     }
 
-    func accept(sentInviteId: Int64, account: Account, topic: String) async throws {
-        guard let invite = getSentInvite(id: sentInviteId, account: account)
+    func accept(sentInviteId: Int64, topic: String) async throws {
+        guard let invite = getSentInvite(id: sentInviteId)
         else { return }
 
+        let account = invite.inviterAccount
         try await sentInviteStore.delete(id: invite.syncId, for: account)
 
         let approved = SentInvite(invite: invite, status: .approved)
@@ -147,10 +148,11 @@ final class ChatStorage {
         acceptPublisherSubject.send((topic, approved))
     }
 
-    func reject(sentInviteId: Int64, account: Account) async throws {
-        guard let invite = getSentInvite(id: sentInviteId, account: account)
+    func reject(sentInviteId: Int64) async throws {
+        guard let invite = getSentInvite(id: sentInviteId)
         else { return }
 
+        let account = invite.inviterAccount
         try await sentInviteStore.delete(id: invite.syncId, for: account)
 
         let rejected = SentInvite(invite: invite, status: .rejected)
