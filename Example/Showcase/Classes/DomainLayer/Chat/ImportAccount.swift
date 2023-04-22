@@ -65,4 +65,9 @@ enum ImportAccount {
             return privateKey
         }
     }
+
+    static func new() -> ImportAccount {
+        let key = try! EthereumPrivateKey()
+        return ImportAccount.custom(privateKey: key.rawPrivateKey.toHexString())
+    }
 }
