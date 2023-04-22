@@ -91,7 +91,7 @@ private extension SyncStore {
 
             let record = try! indexStore.getRecord(topic: topic)
 
-            guard record.topic == name else { return }
+            guard record.store == name else { return }
 
             switch update {
             case .set(let value):

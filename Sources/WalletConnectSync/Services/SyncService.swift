@@ -30,27 +30,29 @@ final class SyncService {
     }
 
     func set<Object: SyncObject>(account: Account, store: String, object: Object) async throws {
-        defer { logger.debug("Did set value for \(store)") }
         let protocolMethod = SyncSetMethod()
         let params = StoreSet(key: object.syncId, value: object)
         let request = RPCRequest(method: protocolMethod.method, params: params)
         let record = try indexStore.getRecord(account: account, name: store)
         try await networkInteractor.request(request, topic: record.topic, protocolMethod: protocolMethod)
+
+        logger.debug("Did set value for \(store). Sent on \(record.topic)")
     }
 
     func delete(account: Account, store: String, key: String) async throws {
-        defer { logger.debug("Did delete value for \(store)") }
         let protocolMethod = SyncDeleteMethod()
         let request = RPCRequest(method: protocolMethod.method, params: ["key": key])
         let record = try indexStore.getRecord(account: account, name: store)
         try await networkInteractor.request(request, topic: record.topic, protocolMethod: protocolMethod)
+
+        logger.debug("Did delete value for \(store). Sent on: \(record.topic)")
     }
 
     func create(account: Account, store: String) async throws {
-        defer { logger.debug("Store \(store) created") }
-
         let topic = try getTopic(for: account, store: store)
         try await networkInteractor.subscribe(topic: topic)
+
+        logger.debug("Store \(store) created. Subscribed on: \(topic)")
     }
 }
 
@@ -76,7 +78,7 @@ private extension SyncService {
 
     func getTopic(for account: Account, store: String) throws -> String {
         if let record = try? indexStore.getRecord(account: account, name: store) {
-            return record.store
+            return record.topic
         }
 
         let topic = try derivationService.deriveTopic(account: account, store: store)
