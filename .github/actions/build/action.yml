@@ -34,4 +34,4 @@ runs:
       with:
         path: |
           products.tar
-        key: ${{ runner.os }}-deriveddata-${{ steps.extract_branch.outputs.branch }}
+        key: ${{ runner.os }}-deriveddata-${{ steps.extract_branch.outputs.branch }}-${{ github.sha }}
