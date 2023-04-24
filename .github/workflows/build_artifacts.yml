@@ -2,7 +2,7 @@ name: build_artifacts
 
 on:
   push:
-    branches: [ main, feature/gh-cache-build-artifacts ]
+    branches: [ main ]
 
 jobs:
   build:    

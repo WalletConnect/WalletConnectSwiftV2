@@ -8,6 +8,9 @@ inputs:
   project-id:
     description: 'WalletConnect project id'
     required: true
+  commit-sha:
+    description: 'Latest Commit in main SHA'
+    required: false
 
 runs:
   using: "composite"
@@ -16,7 +19,8 @@ runs:
       with:
         path: |
           products.tar
-        key: ${{ runner.os }}-deriveddata-main
+        key: ${{ runner.os }}-deriveddata-main-${{ inputs.commit-sha }}
+        restore-keys: ${{ runner.os }}-deriveddata-main-
       
     - name: Untar DerivedDataCache
       shell: bash

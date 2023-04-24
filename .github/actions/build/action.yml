@@ -13,11 +13,6 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v3
-
-    - name: Extract branch name
-      shell: bash
-      run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >>$GITHUB_OUTPUT
-      id: extract_branch
     
     - name: Build for testing
       shell: bash
@@ -34,4 +29,4 @@ runs:
       with:
         path: |
           products.tar
-        key: ${{ runner.os }}-deriveddata-${{ steps.extract_branch.outputs.branch }}-${{ github.sha }}
+        key: ${{ runner.os }}-deriveddata-${{ github.ref }}-${{ github.sha }}

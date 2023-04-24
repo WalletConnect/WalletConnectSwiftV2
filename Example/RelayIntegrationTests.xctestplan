@@ -10,7 +10,22 @@
   ],
   "defaultOptions" : {
     "codeCoverage" : false,
+    "environmentVariableEntries" : [
+      {
+        "key" : "RELAY_HOST",
+        "value" : "$(RELAY_HOST)"
+      },
+      {
+        "key" : "PROJECT_ID",
+        "value" : "$(PROJECT_ID)"
+      }
+    ],
     "mainThreadCheckerEnabled" : false,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:ExampleApp.xcodeproj",
+      "identifier" : "844749F229B9E5B9005F520B",
+      "name" : "RelayIntegrationTests"
+    },
     "testTimeoutsEnabled" : true
   },
   "testTargets" : [
