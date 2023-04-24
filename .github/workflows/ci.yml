@@ -4,9 +4,6 @@ on:
   pull_request:
     branches: [ main, develop ]
 
-env:
-  HOMEBREW_NO_INSTALL_CLEANUP: 1
-
 concurrency:
   # Support push/pr as event types with different behaviors each:
   # 1. push: queue up builds by branch
@@ -30,9 +27,9 @@ jobs:
     needs: prepare
     runs-on: macos-12
     strategy:
+      fail-fast: false
       matrix:
         test-type: [integration-tests, smoke-tests, relay-tests]
-        # test-type: [unit-tests, integration-tests, build-example-wallet, build-example-dapp, relay-tests]
 
     steps:
     - uses: actions/checkout@v3
@@ -47,7 +44,6 @@ jobs:
         path: |
           products.tar
         key: ${{ runner.os }}-deriveddata-${{ steps.extract_branch.outputs.branch }}
-        fail-on-cache-miss: true
 
     - name: Untar DerivedDataCache
       shell: bash

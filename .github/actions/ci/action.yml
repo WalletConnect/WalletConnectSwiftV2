@@ -15,7 +15,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    # Integration tests
     - name: Run integration tests
       if: inputs.type == 'integration-tests'
       shell: bash
@@ -24,8 +23,7 @@ runs:
         PROJECT_ID: ${{ inputs.project-id }}
       run: make integration_tests RELAY_HOST=$RELAY_ENDPOINT PROJECT_ID=$PROJECT_ID
 
-    # Relay Integration tests
-    - name: Run integration tests
+    - name: Run relay integration tests
       if: inputs.type == 'relay-tests'
       shell: bash
       env:
@@ -33,7 +31,6 @@ runs:
         PROJECT_ID: ${{ inputs.project-id }}
       run: make relay_tests RELAY_HOST=$RELAY_ENDPOINT PROJECT_ID=$PROJECT_ID
 
-    # Smoke tests
     - name: Run smoke tests
       if: inputs.type == 'smoke-tests'
       shell: bash
@@ -41,32 +38,3 @@ runs:
         RELAY_ENDPOINT: ${{ inputs.relay-endpoint }}
         PROJECT_ID: ${{ inputs.project-id }}
       run: make smoke_tests RELAY_HOST=$RELAY_ENDPOINT PROJECT_ID=$PROJECT_ID
-
-    # Wallet build
-    - name: Build Example Wallet
-      if: inputs.type == 'build-example-wallet'
-      shell: bash
-      run: make build_wallet
-
-    # DApp build
-    - name: Build Example Dapp
-      if: inputs.type == 'build-example-dapp'
-      shell: bash
-      run: make build_dapp
-
-    # UI tests
-    - name: UI Tests
-      if: inputs.type == 'ui-tests'
-      shell: bash
-      run: make ui_tests
-      continue-on-error: true
-
-    # Echo UI tests
-    - name: Run Echo UI tests
-      if: inputs.type == 'echo-ui-tests'
-      shell: bash
-      env:
-        RELAY_ENDPOINT: ${{ inputs.relay-endpoint }}
-        PROJECT_ID: ${{ inputs.project-id }}
-      run: make echo_ui_tests RELAY_HOST=$RELAY_ENDPOINT PROJECT_ID=$PROJECT_ID
-    
