@@ -38,7 +38,7 @@ class PushSubscribeResponseSubscriber {
     private func subscribeForSubscriptionResponse() {
         let protocolMethod = PushSubscribeProtocolMethod()
         networkingInteractor.responseSubscription(on: protocolMethod)
-            .sink {[unowned self] (payload: ResponseSubscriptionPayload<CreateSubscriptionJWTPayload.Wrapper, Bool>) in
+            .sink {[unowned self] (payload: ResponseSubscriptionPayload<SubscriptionJWTPayload.Wrapper, Bool>) in
                 logger.debug("Received Push Subscribe response")
 
                 guard let pushSubscryptionKey = kms.getAgreementSecret(for: payload.topic) else {
@@ -53,7 +53,7 @@ class PushSubscribeResponseSubscriber {
                 do {
                     try kms.setAgreementSecret(pushSubscryptionKey, topic: pushSubscriptionTopic)
                     try groupKeychainStorage.add(pushSubscryptionKey, forKey: pushSubscriptionTopic)
-                    let (_, claims) = try CreateSubscriptionJWTPayload.decodeAndVerify(from: payload.request)
+                    let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
                     account = try Account(DIDPKHString: claims.sub)
                     metadata = try dappsMetadataStore.get(key: payload.topic)
                 } catch {

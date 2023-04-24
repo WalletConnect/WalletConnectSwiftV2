@@ -92,7 +92,7 @@ class PushSubscribeRequester {
 
     private func createJWTRequest(subscriptionAccount: Account, dappUrl: String) throws -> RPCRequest {
         let protocolMethod = PushSubscribeProtocolMethod().method
-        let jwtPayload = CreateSubscriptionJWTPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: "")
+        let jwtPayload = SubscriptionJWTPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: "")
         let wrapper = try identityClient.signAndCreateWrapper(
             payload: jwtPayload,
             account: subscriptionAccount

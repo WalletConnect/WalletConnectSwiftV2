@@ -52,6 +52,7 @@ public class WalletPushClient {
     private let pushMessagesDatabase: PushMessagesDatabase
     private let resubscribeService: PushResubscribeService
     private let pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber
+    private let notifyUpdateRequester: NotifyUpdateRequester
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
@@ -66,7 +67,8 @@ public class WalletPushClient {
          resubscribeService: PushResubscribeService,
          pushSubscriptionsObserver: PushSubscriptionsObserver,
          pushSubscribeRequester: PushSubscribeRequester,
-         pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber
+         pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber,
+         notifyUpdateRequester: NotifyUpdateRequester
     ) {
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
@@ -81,6 +83,7 @@ public class WalletPushClient {
         self.pushSubscriptionsObserver = pushSubscriptionsObserver
         self.pushSubscribeRequester = pushSubscribeRequester
         self.pushSubscribeResponseSubscriber = pushSubscribeResponseSubscriber
+        self.notifyUpdateRequester = notifyUpdateRequester
         setupSubscriptions()
     }
 
@@ -94,6 +97,10 @@ public class WalletPushClient {
 
     public func reject(id: RPCID) async throws {
         try await proposeResponder.respondError(requestId: id)
+    }
+
+    public func update(topic: String, scope: Set<NotificationScope>) {
+        notifyUpdateRequester.update(topic: topic, scope: scope)
     }
 
     public func getActiveSubscriptions() -> [PushSubscription] {

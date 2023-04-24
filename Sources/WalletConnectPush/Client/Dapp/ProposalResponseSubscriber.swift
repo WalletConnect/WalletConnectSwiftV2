@@ -35,7 +35,7 @@ class ProposalResponseSubscriber {
     private func subscribeForProposalResponse() {
         let protocolMethod = PushRequestProtocolMethod()
         networkingInteractor.responseSubscription(on: protocolMethod)
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<PushRequestParams, AcceptSubscriptionJWTPayload.Wrapper>) in
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<PushRequestParams, SubscriptionJWTPayload.Wrapper>) in
                 logger.debug("Received Push Proposal response")
                 Task(priority: .userInitiated) {
                     do {
@@ -49,10 +49,10 @@ class ProposalResponseSubscriber {
             }.store(in: &publishers)
     }
 
-    private func handleResponse(payload: ResponseSubscriptionPayload<PushRequestParams, AcceptSubscriptionJWTPayload.Wrapper>) async throws -> (PushSubscription, String) {
+    private func handleResponse(payload: ResponseSubscriptionPayload<PushRequestParams, SubscriptionJWTPayload.Wrapper>) async throws -> (PushSubscription, String) {
 
         let jwt = payload.response.jwtString
-        _ = try AcceptSubscriptionJWTPayload.decodeAndVerify(from: payload.response)
+        _ = try SubscriptionJWTPayload.decodeAndVerify(from: payload.response)
         logger.debug("subscriptionAuth JWT validated")
 
         guard let subscriptionTopic = payload.derivedTopic else { throw Errors.subscriptionTopicNotDerived }

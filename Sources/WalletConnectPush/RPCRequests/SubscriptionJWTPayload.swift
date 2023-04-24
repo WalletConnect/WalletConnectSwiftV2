@@ -1,7 +1,6 @@
 import Foundation
 
-typealias AcceptSubscriptionJWTPayload = CreateSubscriptionJWTPayload
-struct CreateSubscriptionJWTPayload: JWTClaimsCodable {
+struct SubscriptionJWTPayload: JWTClaimsCodable {
 
     struct Claims: JWTClaims {
         /// timestamp when jwt was issued
