@@ -14,6 +14,14 @@ runs:
   steps:
     - uses: actions/checkout@v3
     
+    - uses: actions/cache@v3
+      with:
+        path: |
+          SourcePackagesCache
+        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-
+
     - name: Build for testing
       shell: bash
       env:

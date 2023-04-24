@@ -23,7 +23,7 @@ test_setup:
 
 build_all:
 	rm -rf test_results
-	set -o pipefail && xcodebuild -verbose -project "Example/ExampleApp.xcodeproj" -scheme "BuildAll" -destination "platform=iOS Simulator,name=iPhone 14" -clonedSourcePackagesDirPath ../SourcePackagesCache -derivedDataPath DerivedDataCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' build-for-testing
+	set -o pipefail && xcodebuild -verbose -project "Example/ExampleApp.xcodeproj" -scheme "BuildAll" -destination "platform=iOS Simulator,name=iPhone 14" -clonedSourcePackagesDirPath SourcePackagesCache -derivedDataPath DerivedDataCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' build-for-testing | xcpretty
 
 build_dapp:
 	fastlane build scheme:DApp
