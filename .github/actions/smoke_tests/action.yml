@@ -11,6 +11,9 @@ inputs:
   project-id:
     description: 'WalletConnect project id'
     required: true
+  branch-name:
+    description: 'Branch to pull build artifacts from'
+    default: 'main'
 
 runs:
   using: "composite"
@@ -20,7 +23,7 @@ runs:
       with:
         path: |
           products.tar
-        key: ${{ runner.os }}-deriveddata-
+        key: ${{ runner.os }}-deriveddata-${{ inputs.branch-name }}
         fail-on-cache-miss: true
       
     - name: Untar DerivedDataCache

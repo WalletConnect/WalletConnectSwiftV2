@@ -37,11 +37,16 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Extract branch name
+      shell: bash
+      run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >>$GITHUB_OUTPUT
+      id: extract_branch
+
     - uses: actions/cache/restore@v3
       with:
         path: |
           products.tar
-        key: ${{ runner.os }}-deriveddata-
+        key: ${{ runner.os }}-deriveddata-${{ steps.extract_branch.outputs.branch }}
         fail-on-cache-miss: true
 
     - name: Untar DerivedDataCache
