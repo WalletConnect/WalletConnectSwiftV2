@@ -18,10 +18,29 @@ struct SessionProposalView: View {
                         .resizable()
                         .scaledToFit()
                     
-                    Text(presenter.sessionProposal.proposer.name)
-                        .foregroundColor(.grey8)
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
-                        .padding(.top, 10)
+                    HStack {
+                        Text(presenter.sessionProposal.proposer.name)
+                            .foregroundColor(.grey8)
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                        
+                        if let verified = presenter.verified {
+                            if verified {
+                                Image(systemName: "checkmark.shield.fill")
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.white, .green)
+                            } else {
+                                Image(systemName: "xmark.shield.fill")
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.white, .red)
+                            }
+                        } else {
+                            Image(systemName: "exclamationmark.shield.fill")
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(.white, .orange)
+                        }
+                    }
+                    
+                    .padding(.top, 10)
                     
                     Text("would like to connect")
                         .foregroundColor(.grey8)

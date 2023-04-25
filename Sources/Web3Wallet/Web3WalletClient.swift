@@ -12,21 +12,21 @@ public class Web3WalletClient {
     /// Publisher that sends session proposal
     ///
     /// event is emited on responder client only
-    public var sessionProposalPublisher: AnyPublisher<Session.Proposal, Never> {
+    public var sessionProposalPublisher: AnyPublisher<(proposal: Session.Proposal, context: Session.Context?), Never> {
         signClient.sessionProposalPublisher.eraseToAnyPublisher()
     }
 
     /// Publisher that sends session request
     ///
     /// In most cases event will be emited on wallet
-    public var sessionRequestPublisher: AnyPublisher<Request, Never> {
+    public var sessionRequestPublisher: AnyPublisher<(request: Request, context: Session.Context?), Never> {
         signClient.sessionRequestPublisher.eraseToAnyPublisher()
     }
     
     /// Publisher that sends authentication requests
     ///
     /// Wallet should subscribe on events in order to receive auth requests.
-    public var authRequestPublisher: AnyPublisher<AuthRequest, Never> {
+    public var authRequestPublisher: AnyPublisher<(request: AuthRequest, context: AuthContext?), Never> {
         authClient.authRequestPublisher.eraseToAnyPublisher()
     }
     

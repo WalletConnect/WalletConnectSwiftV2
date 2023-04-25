@@ -5,7 +5,7 @@ import Foundation
 
 final class MainInteractor {
 
-    var sessionProposalPublisher: AnyPublisher<Session.Proposal, Never> {
+    var sessionProposalPublisher: AnyPublisher<(proposal: Session.Proposal, context: Session.Context?), Never> {
         return Web3Wallet.instance.sessionProposalPublisher
     }
 

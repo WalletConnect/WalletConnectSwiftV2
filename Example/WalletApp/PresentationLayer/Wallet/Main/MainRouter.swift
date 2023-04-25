@@ -12,8 +12,8 @@ final class MainRouter {
             .wrapToNavigationController()
     }
 
-    func present(proposal: Session.Proposal) {
-        SessionProposalModule.create(app: app, proposal: proposal)
+    func present(proposal: Session.Proposal, context: Session.Context?) {
+        SessionProposalModule.create(app: app, proposal: proposal, context: context)
             .presentFullScreen(from: viewController, transparentBackground: true)
     }
 

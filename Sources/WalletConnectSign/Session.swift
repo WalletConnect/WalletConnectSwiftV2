@@ -42,4 +42,15 @@ extension Session {
         }
     }
 
+    public struct Context: Equatable, Hashable {
+        public enum ValidationStatus {
+            case unknown
+            case valid
+            case invalid
+        }
+        
+        public let origin: String?
+        public let validation: ValidationStatus
+        public let verifyUrl: String
+    }
 }

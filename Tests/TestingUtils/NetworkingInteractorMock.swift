@@ -49,7 +49,7 @@ public class NetworkingInteractorMock: NetworkInteracting {
             }
             .compactMap { topic, rpcRequest, publishedAt, derivedTopic in
                 guard let id = rpcRequest.id, let request = try? rpcRequest.params?.get(Request.self) else { return nil }
-                return RequestSubscriptionPayload(id: id, topic: topic, request: request, publishedAt: publishedAt, derivedTopic: derivedTopic)
+                return RequestSubscriptionPayload(id: id, topic: topic, request: request, rpcRequest: rpcRequest, publishedAt: publishedAt, derivedTopic: derivedTopic)
             }
             .eraseToAnyPublisher()
     }

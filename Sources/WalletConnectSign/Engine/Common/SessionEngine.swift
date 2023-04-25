@@ -1,6 +1,8 @@
 import Foundation
 import Combine
 
+import WalletConnectVerify
+
 final class SessionEngine {
     enum Errors: Error {
         case sessionNotFound(topic: String)
@@ -8,7 +10,7 @@ final class SessionEngine {
     }
 
     var onSessionsUpdate: (([Session]) -> Void)?
-    var onSessionRequest: ((Request) -> Void)?
+    var onSessionRequest: ((Request, Session.Context?) -> Void)?
     var onSessionResponse: ((Response) -> Void)?
     var onSessionRejected: ((String, SessionType.Reason) -> Void)?
     var onSessionDelete: ((String, SessionType.Reason) -> Void)?
@@ -127,7 +129,9 @@ private extension SessionEngine {
 
         networkingInteractor.requestSubscription(on: SessionRequestProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionType.RequestParams>) in
-                onSessionRequest(payload: payload)
+                Task(priority: .high) {
+                    await onSessionRequest(payload: payload)
+                }
             }.store(in: &publishers)
 
         networkingInteractor.requestSubscription(on: SessionPingProtocolMethod())
@@ -210,7 +214,7 @@ private extension SessionEngine {
         onSessionDelete?(topic, payload.request)
     }
 
-    func onSessionRequest(payload: RequestSubscriptionPayload<SessionType.RequestParams>) {
+    func onSessionRequest(payload: RequestSubscriptionPayload<SessionType.RequestParams>) async {
         let protocolMethod = SessionRequestProtocolMethod()
         let topic = payload.topic
         let request = Request(
@@ -236,7 +240,21 @@ private extension SessionEngine {
             return respondError(payload: payload, reason: .sessionRequestExpired, protocolMethod: protocolMethod)
         }
 
-        onSessionRequest?(request)
+        if #available(iOS 14.0, *) {
+            let verifyUrl = "https://verify.walletconnect.com"
+            let verifyClient = try? VerifyClientFactory.create(verifyHost: verifyUrl)
+            let attestationId = payload.rawRequest!.rawRepresentation.sha256().toHexString()
+            let origin = try? await verifyClient?.registerAssertion(attestationId: attestationId)
+            
+            let sessionContext = Session.Context(
+                origin: origin,
+                validation: (origin == session.peerParticipant.metadata.url) ? .valid : (origin == nil ? .unknown : .invalid),
+                verifyUrl: verifyUrl
+            )
+            onSessionRequest?(request, sessionContext)
+        } else {
+            onSessionRequest?(request, nil)
+        }
     }
 
     func onSessionPing(payload: SubscriptionPayload) {

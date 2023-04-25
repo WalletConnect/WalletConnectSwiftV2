@@ -7,8 +7,8 @@ final class SessionProposalInteractor {
         do {
             let sessionNamespaces = try AutoNamespaces.build(
                 sessionProposal: proposal,
-                chains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!],
-                methods: ["eth_sendTransaction", "personal_sign"],
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:5")!],
+                methods: ["eth_signTransaction", "personal_sign", "eth_signTypedData", "eth_sendTransaction", "eth_sign"],
                 events: ["accountsChanged", "chainChanged"],
                 accounts: [
                     Account(blockchain: Blockchain("eip155:5")!, address: ETHSigner.address)!,

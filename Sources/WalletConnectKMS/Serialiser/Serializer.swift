@@ -40,12 +40,13 @@ public class Serializer: Serializing {
     ///   - topic: Topic that is associated with a symetric key for decrypting particular codable object
     ///   - encodedEnvelope: Envelope to deserialize and decrypt
     /// - Returns: Deserialized object
-    public func deserialize<T: Codable>(topic: String, encodedEnvelope: String) throws -> (T, derivedTopic: String?) {
+    public func deserialize<T: Codable>(topic: String, encodedEnvelope: String) throws -> (T, derivedTopic: String?, rawData: String?) {
         let envelope = try Envelope(encodedEnvelope)
         switch envelope.type {
         case .type0:
             let deserialisedType: T = try handleType0Envelope(topic, envelope)
-            return (deserialisedType, nil)
+            let rawData = try rawData(topic, envelope)
+            return (deserialisedType, nil, rawData)
         case .type1(let peerPubKey):
             return try handleType1Envelope(topic, peerPubKey: peerPubKey, sealbox: envelope.sealbox)
         }
@@ -59,7 +60,7 @@ public class Serializer: Serializing {
         }
     }
 
-    private func handleType1Envelope<T: Codable>(_ topic: String, peerPubKey: Data, sealbox: Data) throws -> (T, String) {
+    private func handleType1Envelope<T: Codable>(_ topic: String, peerPubKey: Data, sealbox: Data) throws -> (T, String, String?) {
         guard let selfPubKey = kms.getPublicKey(for: topic)
         else { throw Errors.publicKeyForTopicNotFound }
 
@@ -67,11 +68,19 @@ public class Serializer: Serializing {
         let decodedType: T = try decode(sealbox: sealbox, symmetricKey: agreementKeys.sharedKey.rawRepresentation)
         let derivedTopic = agreementKeys.derivedTopic()
         try kms.setAgreementSecret(agreementKeys, topic: derivedTopic)
-        return (decodedType, derivedTopic)
+        return (decodedType, derivedTopic, nil)
     }
 
     private func decode<T: Codable>(sealbox: Data, symmetricKey: Data) throws -> T {
         let decryptedData = try codec.decode(sealbox: sealbox, symmetricKey: symmetricKey)
         return try JSONDecoder().decode(T.self, from: decryptedData)
+    }
+    
+    private func rawData(_ topic: String, _ envelope: Envelope) throws -> String? {
+        if let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) {
+            return try String(data: codec.decode(sealbox: envelope.sealbox, symmetricKey: symmetricKey), encoding: .utf8)
+        } else {
+            throw Errors.symmetricKeyForTopicNotFound
+        }
     }
 }

@@ -10,13 +10,13 @@ final class WalletRouter {
         self.app = app
     }
 
-    func present(request: AuthRequest) {
-        AuthRequestModule.create(app: app, request: request)
+    func present(request: AuthRequest, context: AuthContext?) {
+        AuthRequestModule.create(app: app, request: request, context: context)
             .presentFullScreen(from: viewController, transparentBackground: true)
     }
 
-    func present(sessionRequest: Request) {
-        SessionRequestModule.create(app: app, sessionRequest: sessionRequest)
+    func present(sessionRequest: Request, sessionContext: Session.Context?) {
+        SessionRequestModule.create(app: app, sessionRequest: sessionRequest, sessionContext: sessionContext)
             .presentFullScreen(from: viewController, transparentBackground: true)
     }
     

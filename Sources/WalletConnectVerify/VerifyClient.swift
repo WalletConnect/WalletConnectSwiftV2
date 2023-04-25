@@ -1,6 +1,7 @@
 import DeviceCheck
 import Foundation
 import WalletConnectUtils
+import WalletConnectNetworking
 
 @available(iOS 14.0, *)
 @available(macOS 11.0, *)
@@ -14,7 +15,8 @@ public actor VerifyClient {
 
     init(originVerifier: OriginVerifier,
          assertionRegistrer: AssertionRegistrer,
-         appAttestationRegistrer: AppAttestationRegistrer) throws {
+         appAttestationRegistrer: AppAttestationRegistrer
+    ) throws {
         if !DCAppAttestService.shared.isSupported {
             throw Errors.attestationNotSupported
         }
@@ -31,8 +33,7 @@ public actor VerifyClient {
         try await originVerifier.verifyOrigin()
     }
 
-    public func registerAssertion() async throws {
-        try await assertionRegistrer.registerAssertion()
+    public func registerAssertion(attestationId: String) async throws -> String {
+        return try await assertionRegistrer.registerAssertion(attestationId: attestationId)
     }
-
 }

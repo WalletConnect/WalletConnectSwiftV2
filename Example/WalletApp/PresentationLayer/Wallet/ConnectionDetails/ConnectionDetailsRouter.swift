@@ -10,8 +10,8 @@ final class ConnectionDetailsRouter {
         self.app = app
     }
 
-    func present(request: AuthRequest) {
-        AuthRequestModule.create(app: app, request: request)
+    func present(request: AuthRequest, context: AuthContext) {
+        AuthRequestModule.create(app: app, request: request, context: context)
             .wrapToNavigationController()
             .present(from: viewController)
     }

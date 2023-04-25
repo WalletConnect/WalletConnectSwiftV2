@@ -1,6 +1,8 @@
 import Foundation
 import Combine
 
+import WalletConnectVerify
+
 final class ApproveEngine {
     enum Errors: Error {
         case wrongRequestParams
@@ -11,7 +13,7 @@ final class ApproveEngine {
         case agreementMissingOrInvalid
     }
 
-    var onSessionProposal: ((Session.Proposal) -> Void)?
+    var onSessionProposal: ((Session.Proposal, Session.Context?) -> Void)?
     var onSessionRejected: ((Session.Proposal, Reason) -> Void)?
     var onSessionSettle: ((Session) -> Void)?
 
@@ -160,7 +162,9 @@ private extension ApproveEngine {
     func setupRequestSubscriptions() {
         pairingRegisterer.register(method: SessionProposeProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionType.ProposeParams>) in
-                handleSessionProposeRequest(payload: payload)
+                Task {
+                    await handleSessionProposeRequest(payload: payload)
+                }
             }.store(in: &publishers)
 
         networkingInteractor.requestSubscription(on: SessionSettleProtocolMethod())
@@ -270,14 +274,40 @@ private extension ApproveEngine {
 
     // MARK: SessionProposeRequest
 
-    func handleSessionProposeRequest(payload: RequestSubscriptionPayload<SessionType.ProposeParams>) {
+    func handleSessionProposeRequest(payload: RequestSubscriptionPayload<SessionType.ProposeParams>) async {
         logger.debug("Received Session Proposal")
         let proposal = payload.request
         do { try Namespace.validate(proposal.requiredNamespaces) } catch {
             return respondError(payload: payload, reason: .invalidUpdateRequest, protocolMethod: SessionProposeProtocolMethod())
         }
         proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
-        onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic))
+        
+        if #available(iOS 14.0, *) {
+            let verifyUrl = "https://verify.walletconnect.com"
+            let verifyClient = try? VerifyClientFactory.create(verifyHost: verifyUrl)
+            let attestationId = payload.rawRequest!.rawRepresentation.sha256().toHexString()
+            let origin = try? await verifyClient?.registerAssertion(attestationId: attestationId)
+            
+            let sessionContext = Session.Context(
+                origin: origin,
+                validation: (origin == payload.request.proposer.metadata.url) ? .valid : (origin == nil ? .unknown : .invalid),
+                verifyUrl: verifyUrl
+            )
+            onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), sessionContext)
+        } else {
+            onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), nil)
+        }
+    }
+    
+    func jsonStringify(value: Any) -> String {
+        if JSONSerialization.isValidJSONObject(value) {
+            if let data = try? JSONSerialization.data(withJSONObject: value) {
+                if let string = NSString(data: data, encoding: NSUTF8StringEncoding) {
+                    return (string as String).rawRepresentation.sha256().toHexString()
+                }
+            }
+        }
+        return ""
     }
 
     // MARK: SessionSettleRequest
@@ -334,5 +364,17 @@ private extension ApproveEngine {
             try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod)
         }
         onSessionSettle?(session.publicRepresentation())
+    }
+}
+
+extension Encodable {
+    func asDictionary() throws -> String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
+        let data = try encoder.encode(self)
+        if let string = NSString(data: data, encoding: NSUTF8StringEncoding) {
+            return (string as String)
+        }
+        return ""
     }
 }
