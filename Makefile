@@ -23,7 +23,8 @@ test_setup:
 
 build_all:
 	rm -rf test_results
-	set -o pipefail && xcodebuild -verbose -project "Example/ExampleApp.xcodeproj" -scheme "BuildAll" -destination "platform=iOS Simulator,name=iPhone 14" -clonedSourcePackagesDirPath SourcePackagesCache -derivedDataPath DerivedDataCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' build-for-testing | xcpretty
+	set -o pipefail && xcodebuild -scheme "WalletConnect-Package" -destination "platform=iOS Simulator,name=iPhone 14" -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackages RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' build-for-testing | xcpretty
+	set -o pipefail && xcodebuild -project "Example/ExampleApp.xcodeproj" -scheme "BuildAll" -destination "platform=iOS Simulator,name=iPhone 14" -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackages RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' build-for-testing | xcpretty
 
 build_dapp:
 	fastlane build scheme:DApp
@@ -36,6 +37,15 @@ echo_ui_tests:
 
 ui_tests:
 	echo "UI Tests disabled"
+
+unitxctestrun = $(shell find . -name '*WalletConnect-Package*.xctestrun')
+
+unit_tests: test_setup
+ifneq ($(unitxctestrun),)
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/UnitTests.xcresult' -xctestrun '$(integrationxctestrun)' RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' test-without-building | tee ./test_results/xcodebuild.log | xcpretty --report junit --output ./test_results/report.junit
+else
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -scheme WalletConnect-Package -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/UnitTests.xcresult' RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' test | tee ./test_results/xcodebuild.log | xcpretty --report junit --output ./test_results/report.junit
+endif
 
 integrationxctestrun = $(shell find . -name '*_IntegrationTests*.xctestrun')
 
