@@ -68,7 +68,7 @@ class PushSubscribeResponseSubscriber {
                 }
                 dappsMetadataStore.delete(forKey: payload.topic)
 
-                let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata)
+                let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata, scope: <#Set<NotificationScope>#>)
 
                 subscriptionsStore.set(pushSubscription, forKey: pushSubscriptionTopic)
 

@@ -99,8 +99,8 @@ public class WalletPushClient {
         try await proposeResponder.respondError(requestId: id)
     }
 
-    public func update(topic: String, scope: Set<NotificationScope>) {
-        notifyUpdateRequester.update(topic: topic, scope: scope)
+    public func update(topic: String, scope: Set<NotificationScope>) async throws {
+        try await notifyUpdateRequester.update(topic: topic, scope: scope)
     }
 
     public func getActiveSubscriptions() -> [PushSubscription] {
