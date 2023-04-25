@@ -3,7 +3,7 @@ import WebKit
 
 final class WebViewRequestSubscriber: NSObject, WKScriptMessageHandler {
 
-    static let name = "web3inbox"
+    static let name = "web3inboxChat"
 
     var onRequest: ((RPCRequest) async throws -> Void)?
 
