@@ -47,7 +47,7 @@ jobs:
       shell: bash
       run: tar xvPpf products.tar
 
-    - uses: ./.github/actions/ci
+    - uses: ./.github/actions/ci_v2
       with:
         type: ${{ matrix.test-type }}
         project-id: ${{ secrets.PROJECT_ID }}

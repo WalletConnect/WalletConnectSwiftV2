@@ -15,20 +15,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/cache/restore@v3
-      with:
-        path: |
-          products.tar
-        key: ${{ runner.os }}-deriveddata-main-${{ inputs.commit-sha }}
-        # FOR TESTING: remove restore key without `main` as we don't want to use cache from feature branches
-        restore-keys: |
-          ${{ runner.os }}-deriveddata-main-
-          ${{ runner.os }}-deriveddata- 
-
-    - name: Untar DerivedDataCache
-      shell: bash
-      run: tar xvPpf products.tar
-
     - name: Run integration tests
       if: inputs.type == 'integration-tests'
       shell: bash
