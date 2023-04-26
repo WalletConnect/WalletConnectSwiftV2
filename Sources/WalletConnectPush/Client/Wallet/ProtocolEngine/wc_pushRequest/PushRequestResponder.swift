@@ -65,7 +65,7 @@ class PushRequestResponder {
 
         let response = try createJWTResponse(requestId: requestId, subscriptionAccount: requestParams.account, dappUrl: requestParams.metadata.url)
 
-        let pushSubscription = PushSubscription(topic: pushTopic, account: requestParams.account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: requestParams.metadata)
+        let pushSubscription = PushSubscription(topic: pushTopic, account: requestParams.account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: requestParams.metadata, scope: [])
 
         subscriptionsStore.set(pushSubscription, forKey: pushTopic)
 

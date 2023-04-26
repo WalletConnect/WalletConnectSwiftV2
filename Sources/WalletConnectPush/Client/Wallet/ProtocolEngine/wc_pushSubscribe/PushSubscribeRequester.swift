@@ -25,7 +25,7 @@ class PushSubscribeRequester {
          logger: ConsoleLogging,
          kms: KeyManagementService,
          groupKeychainStorage: KeychainStorageProtocol,
-         webDidResolver: WebDidResolver,
+         webDidResolver: WebDidResolver = WebDidResolver(),
          dappsMetadataStore: CodableStore<AppMetadata>
     ) {
         self.keyserverURL = keyserverURL

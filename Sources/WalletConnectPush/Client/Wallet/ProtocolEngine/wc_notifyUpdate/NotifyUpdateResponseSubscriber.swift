@@ -39,32 +39,33 @@ class NotifyUpdateResponseSubscriber {
         let protocolMethod = NotifyUpdateProtocolMethod()
         networkingInteractor.responseSubscription(on: protocolMethod)
             .sink {[unowned self] (payload: ResponseSubscriptionPayload<SubscriptionJWTPayload.Wrapper, Bool>) in
-                logger.debug("Received Push Update response")
+                Task(priority: .high) {
+                    logger.debug("Received Push Update response")
 
-                let subscriptionTopic = payload.topic
+                    let subscriptionTopic = payload.topic
 
-                // force unwrap is safe because jwt has been signed by self peer
-                let (_, claims) = try! SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
-                let updatedScopeString = claims.scp
+                    // force unwrap is safe because jwt has been signed by self peer
+                    let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
+                    let updatedScopeString = claims.scp
 
-                let scope = updatedScopeString
-                    .components(separatedBy: " ")
-                    .compactMap { NotificationScope(rawValue: $0) }
+                    let scope = updatedScopeString
+                        .components(separatedBy: " ")
+                        .compactMap { NotificationScope(rawValue: $0) }
 
-                guard let oldSubscription = try? subscriptionsStore.get(key: subscriptionTopic) else {
-                    logger.debug("NotifyUpdateResponseSubscriber Subscription does not exist")
-                    subscriptionPublisherSubject.send(.failure(Errors.subscriptionDoesNotExist))
-                    return
+                    guard let oldSubscription = try? subscriptionsStore.get(key: subscriptionTopic) else {
+                        logger.debug("NotifyUpdateResponseSubscriber Subscription does not exist")
+                        subscriptionPublisherSubject.send(.failure(Errors.subscriptionDoesNotExist))
+                        return
+                    }
+
+                    let updatedSubscription = PushSubscription(topic: subscriptionTopic, account: oldSubscription.account, relay: oldSubscription.relay, metadata: oldSubscription.metadata, scope: Set(scope))
+
+                    subscriptionsStore.set(updatedSubscription, forKey: subscriptionTopic)
+
+                    subscriptionPublisherSubject.send(.success(updatedSubscription))
+
+                    logger.debug("Updated Subscription")
                 }
-
-                let updatedSubscription = PushSubscription(topic: subscriptionTopic, account: oldSubscription.account, relay: oldSubscription.relay, metadata: oldSubscription.metadata, scope: Set(scope))
-
-                subscriptionsStore.set(updatedSubscription, forKey: subscriptionTopic)
-
-                subscriptionPublisherSubject.send(.success(updatedSubscription))
-
-                logger.debug("Updated Subscription")
-
             }.store(in: &publishers)
     }
 }
