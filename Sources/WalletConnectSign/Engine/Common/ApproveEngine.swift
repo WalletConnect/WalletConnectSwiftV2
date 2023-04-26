@@ -283,31 +283,22 @@ private extension ApproveEngine {
         proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
         
         if #available(iOS 14.0, *) {
-            let verifyUrl = "https://verify.walletconnect.com"
-            let verifyClient = try? VerifyClientFactory.create(verifyHost: verifyUrl)
-            let attestationId = payload.rawRequest!.rawRepresentation.sha256().toHexString()
-            let origin = try? await verifyClient?.registerAssertion(attestationId: attestationId)
-            
-            let sessionContext = Session.Context(
-                origin: origin,
-                validation: (origin == payload.request.proposer.metadata.url) ? .valid : (origin == nil ? .unknown : .invalid),
-                verifyUrl: verifyUrl
-            )
-            onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), sessionContext)
+            if let rawRequest = payload.rawRequest {
+                let verifyUrl = "https://verify.walletconnect.com"
+                let verifyClient = try? VerifyClientFactory.create(verifyHost: verifyUrl)
+                let attestationId = rawRequest.rawRepresentation.sha256().toHexString()
+                let origin = try? await verifyClient?.registerAssertion(attestationId: attestationId)
+                
+                let sessionContext = Session.Context(
+                    origin: origin,
+                    validation: (origin == payload.request.proposer.metadata.url) ? .valid : (origin == nil ? .unknown : .invalid),
+                    verifyUrl: verifyUrl
+                )
+                onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), sessionContext)
+            }
         } else {
             onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), nil)
         }
-    }
-    
-    func jsonStringify(value: Any) -> String {
-        if JSONSerialization.isValidJSONObject(value) {
-            if let data = try? JSONSerialization.data(withJSONObject: value) {
-                if let string = NSString(data: data, encoding: NSUTF8StringEncoding) {
-                    return (string as String).rawRepresentation.sha256().toHexString()
-                }
-            }
-        }
-        return ""
     }
 
     // MARK: SessionSettleRequest
@@ -364,17 +355,5 @@ private extension ApproveEngine {
             try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod)
         }
         onSessionSettle?(session.publicRepresentation())
-    }
-}
-
-extension Encodable {
-    func asDictionary() throws -> String {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
-        let data = try encoder.encode(self)
-        if let string = NSString(data: data, encoding: NSUTF8StringEncoding) {
-            return (string as String)
-        }
-        return ""
     }
 }

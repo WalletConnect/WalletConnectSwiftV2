@@ -241,17 +241,19 @@ private extension SessionEngine {
         }
 
         if #available(iOS 14.0, *) {
-            let verifyUrl = "https://verify.walletconnect.com"
-            let verifyClient = try? VerifyClientFactory.create(verifyHost: verifyUrl)
-            let attestationId = payload.rawRequest!.rawRepresentation.sha256().toHexString()
-            let origin = try? await verifyClient?.registerAssertion(attestationId: attestationId)
-            
-            let sessionContext = Session.Context(
-                origin: origin,
-                validation: (origin == session.peerParticipant.metadata.url) ? .valid : (origin == nil ? .unknown : .invalid),
-                verifyUrl: verifyUrl
-            )
-            onSessionRequest?(request, sessionContext)
+            if let rawRequest = payload.rawRequest {
+                let verifyUrl = "https://verify.walletconnect.com"
+                let verifyClient = try? VerifyClientFactory.create(verifyHost: verifyUrl)
+                let attestationId = rawRequest.rawRepresentation.sha256().toHexString()
+                let origin = try? await verifyClient?.registerAssertion(attestationId: attestationId)
+                
+                let sessionContext = Session.Context(
+                    origin: origin,
+                    validation: (origin == session.peerParticipant.metadata.url) ? .valid : (origin == nil ? .unknown : .invalid),
+                    verifyUrl: verifyUrl
+                )
+                onSessionRequest?(request, sessionContext)
+            }
         } else {
             onSessionRequest?(request, nil)
         }

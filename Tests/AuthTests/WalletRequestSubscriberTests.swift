@@ -35,13 +35,13 @@ class WalletRequestSubscriberTests: XCTestCase {
 
         var requestId: RPCID!
         var requestPayload: AuthPayload!
-        sut.onRequest = { request in
-            requestId = request.id
-            requestPayload = request.payload
+        sut.onRequest = { result in
+            requestId = result.0.id
+            requestPayload = result.0.payload
             messageExpectation.fulfill()
         }
 
-        let payload = RequestSubscriptionPayload<AuthRequestParams>(id: expectedRequestId, topic: "123", request: AuthRequestParams.stub(id: expectedRequestId, iat: iat), rpcRequest: RPCRequest(method: "", id: ""), publishedAt: Date(), derivedTopic: nil)
+        let payload = RequestSubscriptionPayload<AuthRequestParams>(id: expectedRequestId, topic: "123", request: AuthRequestParams.stub(id: expectedRequestId, iat: iat), rawRequest: "", publishedAt: Date(), derivedTopic: nil)
 
         pairingRegisterer.subject.send(payload)
 

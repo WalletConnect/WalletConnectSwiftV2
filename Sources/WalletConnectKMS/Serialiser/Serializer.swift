@@ -45,8 +45,8 @@ public class Serializer: Serializing {
         switch envelope.type {
         case .type0:
             let deserialisedType: T = try handleType0Envelope(topic, envelope)
-            let rawData = try rawData(topic, envelope)
-            return (deserialisedType, nil, rawData)
+            let rawRequest = try rawRequest(topic, envelope)
+            return (deserialisedType, nil, rawRequest)
         case .type1(let peerPubKey):
             return try handleType1Envelope(topic, peerPubKey: peerPubKey, sealbox: envelope.sealbox)
         }
@@ -60,6 +60,14 @@ public class Serializer: Serializing {
         }
     }
 
+    private func rawRequest(_ topic: String, _ envelope: Envelope) throws -> String? {
+        if let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) {
+            return try String(data: codec.decode(sealbox: envelope.sealbox, symmetricKey: symmetricKey), encoding: .utf8)
+        } else {
+            throw Errors.symmetricKeyForTopicNotFound
+        }
+    }
+    
     private func handleType1Envelope<T: Codable>(_ topic: String, peerPubKey: Data, sealbox: Data) throws -> (T, String, String?) {
         guard let selfPubKey = kms.getPublicKey(for: topic)
         else { throw Errors.publicKeyForTopicNotFound }
@@ -74,13 +82,5 @@ public class Serializer: Serializing {
     private func decode<T: Codable>(sealbox: Data, symmetricKey: Data) throws -> T {
         let decryptedData = try codec.decode(sealbox: sealbox, symmetricKey: symmetricKey)
         return try JSONDecoder().decode(T.self, from: decryptedData)
-    }
-    
-    private func rawData(_ topic: String, _ envelope: Envelope) throws -> String? {
-        if let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) {
-            return try String(data: codec.decode(sealbox: envelope.sealbox, symmetricKey: symmetricKey), encoding: .utf8)
-        } else {
-            throw Errors.symmetricKeyForTopicNotFound
-        }
     }
 }

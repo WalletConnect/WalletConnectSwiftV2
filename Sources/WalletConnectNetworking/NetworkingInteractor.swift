@@ -133,7 +133,7 @@ public class NetworkingInteractor: NetworkInteracting {
     private func manageSubscription(_ topic: String, _ encodedEnvelope: String, _ publishedAt: Date) {
         if let (deserializedJsonRpcRequest, derivedTopic, rawData): (RPCRequest, String?, String?) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleRequest(topic: topic, request: deserializedJsonRpcRequest, rawRequest: rawData, publishedAt: publishedAt, derivedTopic: derivedTopic)
-        } else if let (response, derivedTopic, rawData): (RPCResponse, String?, String?) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
+        } else if let (response, derivedTopic, _): (RPCResponse, String?, String?) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleResponse(response: response, publishedAt: publishedAt, derivedTopic: derivedTopic)
         } else {
             logger.debug("Networking Interactor - Received unknown object type from networking relay")

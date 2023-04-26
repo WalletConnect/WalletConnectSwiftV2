@@ -39,18 +39,20 @@ class WalletRequestSubscriber {
                 let request = AuthRequest(id: payload.id, payload: payload.request.payloadParams)
                 
                 if #available(iOS 14.0, *) {
-                    let verifyUrl = "https://verify.walletconnect.com"
-                    let verifyClient = try? VerifyClientFactory.create(verifyHost: verifyUrl)
-                    let attestationId = payload.rawRequest!.rawRepresentation.sha256().toHexString()
-                    
-                    Task(priority: .high) {
-                        let origin = try? await verifyClient?.registerAssertion(attestationId: attestationId)
-                        let authContext = AuthContext(
-                            origin: origin,
-                            validation: (origin == payload.request.payloadParams.domain) ? .valid : (origin == nil ? .unknown : .invalid),
-                            verifyUrl: verifyUrl
-                        )
-                        onRequest?((request, authContext))
+                    if let rawRequest = payload.rawRequest {
+                        let verifyUrl = "https://verify.walletconnect.com"
+                        let verifyClient = try? VerifyClientFactory.create(verifyHost: verifyUrl)
+                        let attestationId = rawRequest.rawRepresentation.sha256().toHexString()
+                        
+                        Task(priority: .high) {
+                            let origin = try? await verifyClient?.registerAssertion(attestationId: attestationId)
+                            let authContext = AuthContext(
+                                origin: origin,
+                                validation: (origin == payload.request.payloadParams.domain) ? .valid : (origin == nil ? .unknown : .invalid),
+                                verifyUrl: verifyUrl
+                            )
+                            onRequest?((request, authContext))
+                        }
                     }
                 } else {
                     onRequest?((request, nil))
