@@ -61,6 +61,7 @@ class PushSubscribeResponseSubscriber {
                     scope = try await getSubscriptionScope(dappUrl: metadata!.url)
                 } catch {
                     logger.debug("PushSubscribeResponseSubscriber: error: \(error)")
+                    Task { try await networkingInteractor.unsubscribe(topic: pushSubscriptionTopic) }
                     subscriptionPublisherSubject.send(.failure(Errors.couldNotCreateSubscription))
                     return
                 }
@@ -77,16 +78,13 @@ class PushSubscribeResponseSubscriber {
 
                 subscriptionPublisherSubject.send(.success(pushSubscription))
 
-                logger.debug("Subscribing to push topic: \(pushSubscriptionTopic)")
-
-                Task { try await networkingInteractor.subscribe(topic: pushSubscriptionTopic) }
-
             }.store(in: &publishers)
     }
 
     private func getSubscriptionScope(dappUrl: String) async throws -> Set<NotificationScope> {
         guard let scopeUrl = URL(string: "\(dappUrl)/.well-known/wc-push-config.json") else { throw Errors.invalidUrl }
         let (data, _) = try await URLSession.shared.data(from: scopeUrl)
-
+        let config = try JSONDecoder().decode(NotificationConfig.self, from: data)
+        return Set(config.types.map { $0.name })
     }
 }

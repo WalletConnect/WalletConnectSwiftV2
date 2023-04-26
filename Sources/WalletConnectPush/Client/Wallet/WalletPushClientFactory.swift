@@ -61,6 +61,8 @@ public struct WalletPushClientFactory {
 
         let pushSubscribeResponseSubscriber = PushSubscribeResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, groupKeychainStorage: groupKeychainStorage, subscriptionsStore: subscriptionStore, dappsMetadataStore: dappsMetadataStore)
 
+        let notifyUpdateRequester = NotifyUpdateRequester(keyserverURL: keyserverURL, identityClient: identityClient, networkingInteractor: networkInteractor, logger: logger, subscriptionsStore: subscriptionStore)
+
         return WalletPushClient(
             logger: logger,
             kms: kms,
@@ -75,7 +77,8 @@ public struct WalletPushClientFactory {
             resubscribeService: resubscribeService,
             pushSubscriptionsObserver: pushSubscriptionsObserver,
             pushSubscribeRequester: pushSubscribeRequester,
-            pushSubscribeResponseSubscriber: pushSubscribeResponseSubscriber
+            pushSubscribeResponseSubscriber: pushSubscribeResponseSubscriber,
+            notifyUpdateRequester: notifyUpdateRequester
         )
     }
 }

@@ -2,7 +2,6 @@
 import Foundation
 
 class NotifyUpdateRequester {
-
     enum Errors: Error {
         case noSubscriptionForGivenTopic
     }
@@ -12,7 +11,6 @@ class NotifyUpdateRequester {
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging
     private let subscriptionsStore: CodableStore<PushSubscription>
-
 
     init(keyserverURL: URL,
          identityClient: IdentityClient,

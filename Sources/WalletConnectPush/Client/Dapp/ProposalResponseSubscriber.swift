@@ -57,7 +57,7 @@ class ProposalResponseSubscriber {
 
         guard let subscriptionTopic = payload.derivedTopic else { throw Errors.subscriptionTopicNotDerived }
 
-        let pushSubscription = PushSubscription(topic: subscriptionTopic, account: payload.request.account, relay: relay, metadata: metadata)
+        let pushSubscription = PushSubscription(topic: subscriptionTopic, account: payload.request.account, relay: relay, metadata: metadata, scope: <#Set<NotificationScope>#>)
         logger.debug("Subscribing to Push Subscription topic: \(subscriptionTopic)")
         subscriptionsStore.set(pushSubscription, forKey: subscriptionTopic)
         try await networkingInteractor.subscribe(topic: subscriptionTopic)
