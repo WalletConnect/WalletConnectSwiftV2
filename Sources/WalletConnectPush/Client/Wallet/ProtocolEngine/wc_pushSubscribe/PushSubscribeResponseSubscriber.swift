@@ -5,6 +5,7 @@ import Combine
 class PushSubscribeResponseSubscriber {
     enum Errors: Error {
         case couldNotCreateSubscription
+        case invalidUrl
     }
 
     private let networkingInteractor: NetworkInteracting
@@ -49,13 +50,15 @@ class PushSubscribeResponseSubscriber {
                 let pushSubscriptionTopic = pushSubscryptionKey.derivedTopic()
 
                 var account: Account!
-                var metadata: AppMetadata?
+                var metadata: AppMetadata!
+                var scope: Set<NotificationScope>!
                 do {
                     try kms.setAgreementSecret(pushSubscryptionKey, topic: pushSubscriptionTopic)
                     try groupKeychainStorage.add(pushSubscryptionKey, forKey: pushSubscriptionTopic)
                     let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
                     account = try Account(DIDPKHString: claims.sub)
                     metadata = try dappsMetadataStore.get(key: payload.topic)
+                    scope = try await getSubscriptionScope(dappUrl: metadata!.url)
                 } catch {
                     logger.debug("PushSubscribeResponseSubscriber: error: \(error)")
                     subscriptionPublisherSubject.send(.failure(Errors.couldNotCreateSubscription))
@@ -68,7 +71,7 @@ class PushSubscribeResponseSubscriber {
                 }
                 dappsMetadataStore.delete(forKey: payload.topic)
 
-                let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata, scope: <#Set<NotificationScope>#>)
+                let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata, scope: scope)
 
                 subscriptionsStore.set(pushSubscription, forKey: pushSubscriptionTopic)
 
@@ -79,5 +82,11 @@ class PushSubscribeResponseSubscriber {
                 Task { try await networkingInteractor.subscribe(topic: pushSubscriptionTopic) }
 
             }.store(in: &publishers)
+    }
+
+    private func getSubscriptionScope(dappUrl: String) async throws -> Set<NotificationScope> {
+        guard let scopeUrl = URL(string: "\(dappUrl)/.well-known/wc-push-config.json") else { throw Errors.invalidUrl }
+        let (data, _) = try await URLSession.shared.data(from: scopeUrl)
+
     }
 }
