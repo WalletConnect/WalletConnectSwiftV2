@@ -1,11 +1,9 @@
 import Foundation
 import WalletConnectUtils
 
-@available(iOS 14.0, *)
-@available(macOS 11.0, *)
 public class VerifyClientFactory {
-
-    public static func create(verifyHost: String) throws -> VerifyClient {
+    public static func create() throws -> VerifyClient {
+        let verifyHost = "verify.walletconnect.com"
         let originVerifier = OriginVerifier()
         let assertionRegistrer = AssertionRegistrer(verifyHost: verifyHost)
         let logger = ConsoleLogger(loggingLevel: .off)
@@ -22,6 +20,7 @@ public class VerifyClientFactory {
             keyAttestationService: keyAttestationService
         )
         return try VerifyClient(
+            verifyHost: verifyHost,
             originVerifier: originVerifier,
             assertionRegistrer: assertionRegistrer,
             appAttestationRegistrer: appAttestationRegistrer

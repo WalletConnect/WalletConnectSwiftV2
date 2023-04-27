@@ -19,6 +19,7 @@ final class SessionEngine {
     private let sessionStore: WCSessionStorage
     private let networkingInteractor: NetworkInteracting
     private let historyService: HistoryService
+    private let verifyClient: VerifyClient?
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
@@ -26,12 +27,14 @@ final class SessionEngine {
     init(
         networkingInteractor: NetworkInteracting,
         historyService: HistoryService,
+        verifyClient: VerifyClient?,
         kms: KeyManagementServiceProtocol,
         sessionStore: WCSessionStorage,
         logger: ConsoleLogging
     ) {
         self.networkingInteractor = networkingInteractor
         self.historyService = historyService
+        self.verifyClient = verifyClient
         self.kms = kms
         self.sessionStore = sessionStore
         self.logger = logger
@@ -239,23 +242,17 @@ private extension SessionEngine {
         guard !request.isExpired() else {
             return respondError(payload: payload, reason: .sessionRequestExpired, protocolMethod: protocolMethod)
         }
-
-        if #available(iOS 14.0, *) {
-            if let rawRequest = payload.rawRequest {
-                let verifyUrl = "https://verify.walletconnect.com"
-                let verifyClient = try? VerifyClientFactory.create(verifyHost: verifyUrl)
-                let attestationId = rawRequest.rawRepresentation.sha256().toHexString()
-                let origin = try? await verifyClient?.registerAssertion(attestationId: attestationId)
-                
-                let sessionContext = Session.Context(
-                    origin: origin,
-                    validation: (origin == session.peerParticipant.metadata.url) ? .valid : (origin == nil ? .unknown : .invalid),
-                    verifyUrl: verifyUrl
-                )
-                onSessionRequest?(request, sessionContext)
-            }
-        } else {
-            onSessionRequest?(request, nil)
+        
+        if let rawRequest = payload.rawRequest, let verifyClient {
+            let attestationId = rawRequest.rawRepresentation.sha256().toHexString()
+            let origin = try? await verifyClient.registerAssertion(attestationId: attestationId)
+            
+            let sessionContext = await Session.Context(
+                origin: origin,
+                validation: (origin == session.peerParticipant.metadata.url) ? .valid : (origin == nil ? .unknown : .invalid),
+                verifyUrl: verifyClient.verifyHost
+            )
+            onSessionRequest?(request, sessionContext)
         }
     }
 

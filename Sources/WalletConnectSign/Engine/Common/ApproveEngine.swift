@@ -20,6 +20,7 @@ final class ApproveEngine {
     private let networkingInteractor: NetworkInteracting
     private let pairingStore: WCPairingStorage
     private let sessionStore: WCSessionStorage
+    private let verifyClient: VerifyClient?
     private let proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>
     private let sessionTopicToProposal: CodableStore<Session.Proposal>
     private let pairingRegisterer: PairingRegisterer
@@ -38,7 +39,8 @@ final class ApproveEngine {
         kms: KeyManagementServiceProtocol,
         logger: ConsoleLogging,
         pairingStore: WCPairingStorage,
-        sessionStore: WCSessionStorage
+        sessionStore: WCSessionStorage,
+        verifyClient: VerifyClient?
     ) {
         self.networkingInteractor = networkingInteractor
         self.proposalPayloadsStore = proposalPayloadsStore
@@ -49,6 +51,7 @@ final class ApproveEngine {
         self.logger = logger
         self.pairingStore = pairingStore
         self.sessionStore = sessionStore
+        self.verifyClient = verifyClient
 
         setupRequestSubscriptions()
         setupResponseSubscriptions()
@@ -282,22 +285,16 @@ private extension ApproveEngine {
         }
         proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
         
-        if #available(iOS 14.0, *) {
-            if let rawRequest = payload.rawRequest {
-                let verifyUrl = "https://verify.walletconnect.com"
-                let verifyClient = try? VerifyClientFactory.create(verifyHost: verifyUrl)
-                let attestationId = rawRequest.rawRepresentation.sha256().toHexString()
-                let origin = try? await verifyClient?.registerAssertion(attestationId: attestationId)
-                
-                let sessionContext = Session.Context(
-                    origin: origin,
-                    validation: (origin == payload.request.proposer.metadata.url) ? .valid : (origin == nil ? .unknown : .invalid),
-                    verifyUrl: verifyUrl
-                )
-                onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), sessionContext)
-            }
-        } else {
-            onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), nil)
+        if let rawRequest = payload.rawRequest, let verifyClient {
+            let attestationId = rawRequest.rawRepresentation.sha256().toHexString()
+            let origin = try? await verifyClient.registerAssertion(attestationId: attestationId)
+            
+            let sessionContext = await Session.Context(
+                origin: origin,
+                validation: (origin == payload.request.proposer.metadata.url) ? .valid : (origin == nil ? .unknown : .invalid),
+                verifyUrl: verifyClient.verifyHost
+            )
+            onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), sessionContext)
         }
     }
 

@@ -68,7 +68,8 @@ final class AppProposalServiceTests: XCTestCase {
             kms: cryptoMock,
             logger: logger,
             pairingStore: storageMock,
-            sessionStore: WCSessionStorageMock()
+            sessionStore: WCSessionStorageMock(),
+            verifyClient: nil
         )
     }
 

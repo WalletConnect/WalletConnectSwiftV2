@@ -26,8 +26,8 @@ final class AuthClientMock: AuthClientProtocol {
         )
     }
     
-    var authRequestPublisher: AnyPublisher<AuthRequest, Never> {
-        return Result.Publisher(authRequest).eraseToAnyPublisher()
+    var authRequestPublisher: AnyPublisher<(request: AuthRequest, context: AuthContext?), Never> {
+        return Result.Publisher((authRequest, nil)).eraseToAnyPublisher()
     }
     
     func formatMessage(payload: AuthPayload, address: String) throws -> String {

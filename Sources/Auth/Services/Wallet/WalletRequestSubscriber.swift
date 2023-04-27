@@ -10,6 +10,7 @@ class WalletRequestSubscriber {
     private var publishers = [AnyCancellable]()
     private let walletErrorResponder: WalletErrorResponder
     private let pairingRegisterer: PairingRegisterer
+    private let verifyClient: VerifyClient?
     var onRequest: (((AuthRequest, AuthContext?)) -> Void)?
     
     init(
@@ -17,14 +18,17 @@ class WalletRequestSubscriber {
         logger: ConsoleLogging,
         kms: KeyManagementServiceProtocol,
         walletErrorResponder: WalletErrorResponder,
-        pairingRegisterer: PairingRegisterer) {
-            self.networkingInteractor = networkingInteractor
-            self.logger = logger
-            self.kms = kms
-            self.walletErrorResponder = walletErrorResponder
-            self.pairingRegisterer = pairingRegisterer
-            subscribeForRequest()
-        }
+        pairingRegisterer: PairingRegisterer,
+        verifyClient: VerifyClient?
+    ) {
+        self.networkingInteractor = networkingInteractor
+        self.logger = logger
+        self.kms = kms
+        self.walletErrorResponder = walletErrorResponder
+        self.pairingRegisterer = pairingRegisterer
+        self.verifyClient = verifyClient
+        subscribeForRequest()
+    }
     
     private func subscribeForRequest() {
         pairingRegisterer.register(method: AuthRequestProtocolMethod())
@@ -38,26 +42,20 @@ class WalletRequestSubscriber {
                 
                 let request = AuthRequest(id: payload.id, payload: payload.request.payloadParams)
                 
-                if #available(iOS 14.0, *) {
-                    if let rawRequest = payload.rawRequest {
-                        let verifyUrl = "https://verify.walletconnect.com"
-                        let verifyClient = try? VerifyClientFactory.create(verifyHost: verifyUrl)
-                        let attestationId = rawRequest.rawRepresentation.sha256().toHexString()
-                        
-                        Task(priority: .high) {
-                            let origin = try? await verifyClient?.registerAssertion(attestationId: attestationId)
-                            let authContext = AuthContext(
-                                origin: origin,
-                                validation: (origin == payload.request.payloadParams.domain) ? .valid : (origin == nil ? .unknown : .invalid),
-                                verifyUrl: verifyUrl
-                            )
-                            onRequest?((request, authContext))
-                        }
-                    }
-                } else {
-                    onRequest?((request, nil))
-                }
                 
+                if let rawRequest = payload.rawRequest, let verifyClient {
+                    let attestationId = rawRequest.rawRepresentation.sha256().toHexString()
+                    
+                    Task(priority: .high) {
+                        let origin = try? await verifyClient.registerAssertion(attestationId: attestationId)
+                        let authContext = await AuthContext(
+                            origin: origin,
+                            validation: (origin == payload.request.payloadParams.domain) ? .valid : (origin == nil ? .unknown : .invalid),
+                            verifyUrl: verifyClient.verifyHost
+                        )
+                        onRequest?((request, authContext))
+                    }
+                }
             }.store(in: &publishers)
     }
 }

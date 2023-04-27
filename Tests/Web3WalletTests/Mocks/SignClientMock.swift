@@ -19,7 +19,7 @@ final class SignClientMock: SignClientProtocol {
     private let request = WalletConnectSign.Request(id: .left(""), topic: "", method: "", params: "", chainId: Blockchain("eip155:1")!, expiry: nil)
     private let response = WalletConnectSign.Response(id: RPCID(1234567890123456789), topic: "", chainId: "", result: .response(AnyCodable(any: "")))
     
-    var sessionProposalPublisher: AnyPublisher<WalletConnectSign.Session.Proposal, Never> {
+    var sessionProposalPublisher: AnyPublisher<(proposal: WalletConnectSign.Session.Proposal, context: WalletConnectSign.Session.Context?), Never> {
         let proposer = Participant(publicKey: "", metadata: metadata)
         let sessionProposal = WalletConnectSign.SessionProposal(
             relays: [],
@@ -29,12 +29,12 @@ final class SignClientMock: SignClientProtocol {
             sessionProperties: nil
         ).publicRepresentation(pairingTopic: "")
 
-        return Result.Publisher(sessionProposal)
+        return Result.Publisher((sessionProposal, nil))
             .eraseToAnyPublisher()
     }
     
-    var sessionRequestPublisher: AnyPublisher<WalletConnectSign.Request, Never> {
-        return Result.Publisher(request)
+    var sessionRequestPublisher: AnyPublisher<(request: WalletConnectSign.Request, context: WalletConnectSign.Session.Context?), Never> {
+        return Result.Publisher((request, nil))
             .eraseToAnyPublisher()
     }
     

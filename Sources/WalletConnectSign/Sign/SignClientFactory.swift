@@ -1,5 +1,7 @@
 import Foundation
 
+import WalletConnectVerify
+
 public struct SignClientFactory {
 
     /// Initializes and returns newly created WalletConnect Client Instance
@@ -25,11 +27,12 @@ public struct SignClientFactory {
         let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(store: .init(defaults: keyValueStorage, identifier: SignStorageIdentifiers.sessions.rawValue)))
         let proposalPayloadsStore = CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>(defaults: RuntimeKeyValueStorage(), identifier: SignStorageIdentifiers.proposals.rawValue)
         let historyService = HistoryService(history: rpcHistory)
-        let sessionEngine = SessionEngine(networkingInteractor: networkingClient, historyService: historyService, kms: kms, sessionStore: sessionStore, logger: logger)
+        let verifyClient = try? VerifyClientFactory.create()
+        let sessionEngine = SessionEngine(networkingInteractor: networkingClient, historyService: historyService, verifyClient: verifyClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let sessionTopicToProposal = CodableStore<Session.Proposal>(defaults: RuntimeKeyValueStorage(), identifier: SignStorageIdentifiers.sessionTopicToProposal.rawValue)
-        let approveEngine = ApproveEngine(networkingInteractor: networkingClient, proposalPayloadsStore: proposalPayloadsStore, sessionTopicToProposal: sessionTopicToProposal, pairingRegisterer: pairingClient, metadata: metadata, kms: kms, logger: logger, pairingStore: pairingStore, sessionStore: sessionStore)
+        let approveEngine = ApproveEngine(networkingInteractor: networkingClient, proposalPayloadsStore: proposalPayloadsStore, sessionTopicToProposal: sessionTopicToProposal, pairingRegisterer: pairingClient, metadata: metadata, kms: kms, logger: logger, pairingStore: pairingStore, sessionStore: sessionStore, verifyClient: verifyClient)
         let cleanupService = SignCleanupService(pairingStore: pairingStore, sessionStore: sessionStore, kms: kms, sessionTopicToProposal: sessionTopicToProposal, networkInteractor: networkingClient)
         let deleteSessionService = DeleteSessionService(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let disconnectService = DisconnectService(deleteSessionService: deleteSessionService, sessionStorage: sessionStore)

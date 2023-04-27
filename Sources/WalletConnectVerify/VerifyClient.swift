@@ -3,23 +3,23 @@ import Foundation
 import WalletConnectUtils
 import WalletConnectNetworking
 
-@available(iOS 14.0, *)
-@available(macOS 11.0, *)
 public actor VerifyClient {
     enum Errors: Error {
         case attestationNotSupported
     }
+    
+    public let verifyHost: String
     let originVerifier: OriginVerifier
     let assertionRegistrer: AssertionRegistrer
     let appAttestationRegistrer: AppAttestationRegistrer
 
-    init(originVerifier: OriginVerifier,
-         assertionRegistrer: AssertionRegistrer,
-         appAttestationRegistrer: AppAttestationRegistrer
+    init(
+        verifyHost: String,
+        originVerifier: OriginVerifier,
+        assertionRegistrer: AssertionRegistrer,
+        appAttestationRegistrer: AppAttestationRegistrer
     ) throws {
-        if !DCAppAttestService.shared.isSupported {
-            throw Errors.attestationNotSupported
-        }
+        self.verifyHost = verifyHost
         self.originVerifier = originVerifier
         self.assertionRegistrer = assertionRegistrer
         self.appAttestationRegistrer = appAttestationRegistrer
