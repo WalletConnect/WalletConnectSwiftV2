@@ -67,7 +67,7 @@ class PushRequestResponder {
 
         // will be changed in stage 2 refactor
         let expiry = Date()
-        let pushSubscription = PushSubscription(topic: pushTopic, account: requestParams.account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: requestParams.metadata, scope: [], expiry: expiry)
+        let pushSubscription = PushSubscription(topic: pushTopic, account: requestParams.account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: requestParams.metadata, scope: [:], expiry: expiry)
 
         subscriptionsStore.set(pushSubscription, forKey: pushTopic)
 

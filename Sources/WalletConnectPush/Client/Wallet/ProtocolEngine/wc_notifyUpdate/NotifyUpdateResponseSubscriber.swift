@@ -11,6 +11,7 @@ class NotifyUpdateResponseSubscriber {
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
     private let subscriptionsStore: CodableStore<PushSubscription>
+    private let subscriptionScopeProvider: SubscriptionScopeProvider
     private var subscriptionPublisherSubject = PassthroughSubject<Result<PushSubscription, Error>, Never>()
     var subscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
         return subscriptionPublisherSubject.eraseToAnyPublisher()
@@ -18,11 +19,13 @@ class NotifyUpdateResponseSubscriber {
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
+         subscriptionScopeProvider: SubscriptionScopeProvider,
          subscriptionsStore: CodableStore<PushSubscription>
     ) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.subscriptionsStore = subscriptionsStore
+        self.subscriptionScopeProvider = subscriptionScopeProvider
         subscribeForUpdateResponse()
     }
 
@@ -36,11 +39,7 @@ class NotifyUpdateResponseSubscriber {
                     let subscriptionTopic = payload.topic
 
                     let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
-                    let updatedScopeString = claims.scp
-
-                    let scope = updatedScopeString
-                        .components(separatedBy: " ")
-                        .compactMap { NotificationScope(rawValue: $0) }
+                    let scope = try await builScope(selected: claims.scp, dappUrl: claims.aud)
 
                     guard let oldSubscription = try? subscriptionsStore.get(key: subscriptionTopic) else {
                         logger.debug("NotifyUpdateResponseSubscriber Subscription does not exist")
@@ -49,7 +48,7 @@ class NotifyUpdateResponseSubscriber {
                     }
                     let expiry = Date(timeIntervalSince1970: TimeInterval(claims.exp))
 
-                    let updatedSubscription = PushSubscription(topic: subscriptionTopic, account: oldSubscription.account, relay: oldSubscription.relay, metadata: oldSubscription.metadata, scope: Set(scope), expiry: expiry)
+                    let updatedSubscription = PushSubscription(topic: subscriptionTopic, account: oldSubscription.account, relay: oldSubscription.relay, metadata: oldSubscription.metadata, scope: scope, expiry: expiry)
 
                     subscriptionsStore.set(updatedSubscription, forKey: subscriptionTopic)
 
@@ -59,4 +58,15 @@ class NotifyUpdateResponseSubscriber {
                 }
             }.store(in: &publishers)
     }
+
+    private func builScope(selected: String, dappUrl: String) async throws -> [NotificationScope: Bool] {
+        let selectedScope = selected
+            .components(separatedBy: " ")
+            .compactMap { NotificationScope(rawValue: $0) }
+
+        let availableScope = try await subscriptionScopeProvider.getSubscriptionScope(dappUrl: dappUrl)
+        return availableScope.reduce(into: [:]) { $0[$1] = selectedScope.contains($1) }
+    }
+
+    // TODO: handle error response
 }

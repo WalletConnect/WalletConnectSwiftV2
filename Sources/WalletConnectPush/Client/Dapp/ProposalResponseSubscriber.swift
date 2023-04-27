@@ -58,7 +58,7 @@ class ProposalResponseSubscriber {
         guard let subscriptionTopic = payload.derivedTopic else { throw Errors.subscriptionTopicNotDerived }
         let expiry = Date(timeIntervalSince1970: TimeInterval(claims.exp))
 
-        let pushSubscription = PushSubscription(topic: subscriptionTopic, account: payload.request.account, relay: relay, metadata: metadata, scope: [], expiry: expiry)
+        let pushSubscription = PushSubscription(topic: subscriptionTopic, account: payload.request.account, relay: relay, metadata: metadata, scope: [:], expiry: expiry)
         logger.debug("Subscribing to Push Subscription topic: \(subscriptionTopic)")
         subscriptionsStore.set(pushSubscription, forKey: subscriptionTopic)
         try await networkingInteractor.subscribe(topic: subscriptionTopic)

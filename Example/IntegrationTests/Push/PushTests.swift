@@ -261,7 +261,8 @@ final class PushTests: XCTestCase {
         walletPushClient.subscriptionsPublisher
             .dropFirst()
             .sink {
-                XCTAssertEqual($0.first!.scope, updateScope)
+                let updatedScope = Set($0.first!.scope.filter{ $0.value == true }.keys)
+                XCTAssertEqual(updatedScope, updateScope)
                 expectation.fulfill()
             }.store(in: &publishers)
 

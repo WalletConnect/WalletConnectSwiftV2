@@ -26,7 +26,7 @@ class PushSubscribeResponseSubscriber {
          groupKeychainStorage: KeychainStorageProtocol,
          subscriptionsStore: CodableStore<PushSubscription>,
          dappsMetadataStore: CodableStore<AppMetadata>,
-         subscriptionScopeProvider: SubscriptionScopeProvider = SubscriptionScopeProvider()
+         subscriptionScopeProvider: SubscriptionScopeProvider
     ) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
@@ -54,14 +54,14 @@ class PushSubscribeResponseSubscriber {
 
                     var account: Account!
                     var metadata: AppMetadata!
-                    var scope: Set<NotificationScope>!
+                    var availableScope: Set<NotificationScope>!
                     let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
                     do {
                         try kms.setAgreementSecret(pushSubscryptionKey, topic: pushSubscriptionTopic)
                         try groupKeychainStorage.add(pushSubscryptionKey, forKey: pushSubscriptionTopic)
                         account = try Account(DIDPKHString: claims.sub)
                         metadata = try dappsMetadataStore.get(key: payload.topic)
-                        scope = try await subscriptionScopeProvider.getSubscriptionScope(dappUrl: metadata!.url)
+                        availableScope = try await subscriptionScopeProvider.getSubscriptionScope(dappUrl: metadata!.url)
                     } catch {
                         logger.debug("PushSubscribeResponseSubscriber: error: \(error)")
                         networkingInteractor.unsubscribe(topic: pushSubscriptionTopic)
@@ -75,6 +75,7 @@ class PushSubscribeResponseSubscriber {
                     }
                     dappsMetadataStore.delete(forKey: payload.topic)
                     let expiry = Date(timeIntervalSince1970: TimeInterval(claims.exp))
+                    let scope: [NotificationScope: Bool] = availableScope.reduce(into: [:]) { $0[$1] = true }
                     let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata, scope: scope, expiry: expiry)
 
                     subscriptionsStore.set(pushSubscription, forKey: pushSubscriptionTopic)
@@ -83,4 +84,7 @@ class PushSubscribeResponseSubscriber {
                 }
             }.store(in: &publishers)
     }
+
+    // TODO: handle error response
+
 }
