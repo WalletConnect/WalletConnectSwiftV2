@@ -234,19 +234,7 @@ final class PushTests: XCTestCase {
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
-    // Push Subscribe
-    func testWalletCreatesSubscription() async {
-        let expectation = expectation(description: "expects to create push subscription")
-        let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
-        try! await walletPushClient.subscribe(metadata: metadata, account: Account.stub(), onSign: sign)
-        walletPushClient.subscriptionsPublisher.sink { subscriptions in
-            XCTAssertNotNil(subscriptions.first)
-            expectation.fulfill()
-        }.store(in: &publishers)
-        await fulfillment(of: [expectation], timeout: InputConfig.defaultTimeout)
-    }
-
-    func testWalletUpdatesSubscription() async {
+    func testWalletCreatesAndUpdatesSubscription() async {
         let expectation = expectation(description: "expects to create and update push subscription")
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
         let updateScope: Set<NotificationScope> = [NotificationScope.alerts]

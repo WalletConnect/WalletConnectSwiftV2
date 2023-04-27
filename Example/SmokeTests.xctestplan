@@ -47,6 +47,7 @@
         "PushTests\/testWalletCreatesSubscription()",
         "PushTests\/testWalletDeletePushSubscription()",
         "PushTests\/testWalletRejectsPushRequest()",
+        "PushTests\/testWalletUpdatesSubscription()",
         "RegistryTests",
         "RelayClientEndToEndTests",
         "SignClientTests\/testCaip25SatisfyAllRequiredAllOptionalNamespacesSuccessful()",
