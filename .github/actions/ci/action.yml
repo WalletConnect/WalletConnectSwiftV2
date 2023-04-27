@@ -73,7 +73,7 @@ runs:
       uses: mikepenz/action-junit-report@v3
       if: success() || failure()
       with:
-          check_name: ${{ matrix.test-type }} junit report
+          check_name: ${{ inputs.type }} junit report
           report_paths: 'test_results/report.junit'
        
     - name: Zip test artifacts
@@ -85,6 +85,6 @@ runs:
       if: always()
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ matrix.test-type }} test_results
+        name: ${{ inputs.type }} test_results
         path: ./artifacts.zip
         if-no-files-found: warn
