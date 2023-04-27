@@ -8,7 +8,7 @@ on:
     relay-endpoint:
       description: 'The endpoint of the relay e.g. relay.walletconnect.com'
       required: false
-      default: 'relay.walletconnect.com'
+      default: 'staging.relay.walletconnect.com'
     project-id:
       description: 'WalletConnect project id'
       required: true
