@@ -53,6 +53,7 @@ public class WalletPushClient {
     private let resubscribeService: PushResubscribeService
     private let pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber
     private let notifyUpdateRequester: NotifyUpdateRequester
+    private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
@@ -68,7 +69,8 @@ public class WalletPushClient {
          pushSubscriptionsObserver: PushSubscriptionsObserver,
          pushSubscribeRequester: PushSubscribeRequester,
          pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber,
-         notifyUpdateRequester: NotifyUpdateRequester
+         notifyUpdateRequester: NotifyUpdateRequester,
+         notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
     ) {
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
@@ -84,6 +86,7 @@ public class WalletPushClient {
         self.pushSubscribeRequester = pushSubscribeRequester
         self.pushSubscribeResponseSubscriber = pushSubscribeResponseSubscriber
         self.notifyUpdateRequester = notifyUpdateRequester
+        self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
         setupSubscriptions()
     }
 

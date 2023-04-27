@@ -65,7 +65,9 @@ class PushRequestResponder {
 
         let response = try createJWTResponse(requestId: requestId, subscriptionAccount: requestParams.account, dappUrl: requestParams.metadata.url)
 
-        let pushSubscription = PushSubscription(topic: pushTopic, account: requestParams.account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: requestParams.metadata, scope: [])
+        // will be changed in stage 2 refactor
+        let expiry = Date()
+        let pushSubscription = PushSubscription(topic: pushTopic, account: requestParams.account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: requestParams.metadata, scope: [], expiry: expiry)
 
         subscriptionsStore.set(pushSubscription, forKey: pushTopic)
 

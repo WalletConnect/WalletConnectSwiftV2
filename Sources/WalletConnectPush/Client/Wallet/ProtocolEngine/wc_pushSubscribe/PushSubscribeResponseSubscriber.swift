@@ -55,10 +55,10 @@ class PushSubscribeResponseSubscriber {
                     var account: Account!
                     var metadata: AppMetadata!
                     var scope: Set<NotificationScope>!
+                    let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
                     do {
                         try kms.setAgreementSecret(pushSubscryptionKey, topic: pushSubscriptionTopic)
                         try groupKeychainStorage.add(pushSubscryptionKey, forKey: pushSubscriptionTopic)
-                        let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
                         account = try Account(DIDPKHString: claims.sub)
                         metadata = try dappsMetadataStore.get(key: payload.topic)
                         scope = try await subscriptionScopeProvider.getSubscriptionScope(dappUrl: metadata!.url)
@@ -74,8 +74,8 @@ class PushSubscribeResponseSubscriber {
                         return
                     }
                     dappsMetadataStore.delete(forKey: payload.topic)
-
-                    let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata, scope: scope)
+                    let expiry = Date(timeIntervalSince1970: TimeInterval(claims.exp))
+                    let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata, scope: scope, expiry: expiry)
 
                     subscriptionsStore.set(pushSubscription, forKey: pushSubscriptionTopic)
 

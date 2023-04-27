@@ -27,6 +27,7 @@ class NotifyUpdateRequester {
 
     func update(topic: String, scope: Set<NotificationScope>) async throws {
 
+        logger.debug("NotifyUpdateRequester: updating subscription for topic: \(topic)")
         guard let subscription = try subscriptionsStore.get(key: topic) else { throw Errors.noSubscriptionForGivenTopic }
 
         let request = try createJWTRequest(subscriptionAccount: subscription.account, dappUrl: subscription.metadata.url, scope: scope)

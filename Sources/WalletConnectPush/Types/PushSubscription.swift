@@ -8,5 +8,5 @@ public struct PushSubscription: Codable, Equatable {
     public let relay: RelayProtocolOptions
     public let metadata: AppMetadata
     public let scope: Set<NotificationScope>
-    // Add expiry?
+    public let expiry: Date
 }

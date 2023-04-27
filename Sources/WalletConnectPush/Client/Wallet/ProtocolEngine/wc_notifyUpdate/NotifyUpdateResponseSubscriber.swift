@@ -8,30 +8,21 @@ class NotifyUpdateResponseSubscriber {
     }
 
     private let networkingInteractor: NetworkInteracting
-    private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
     private let subscriptionsStore: CodableStore<PushSubscription>
-    private let groupKeychainStorage: KeychainStorageProtocol
-    private let dappsMetadataStore: CodableStore<AppMetadata>
     private var subscriptionPublisherSubject = PassthroughSubject<Result<PushSubscription, Error>, Never>()
     var subscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
         return subscriptionPublisherSubject.eraseToAnyPublisher()
     }
 
     init(networkingInteractor: NetworkInteracting,
-         kms: KeyManagementServiceProtocol,
          logger: ConsoleLogging,
-         groupKeychainStorage: KeychainStorageProtocol,
-         subscriptionsStore: CodableStore<PushSubscription>,
-         dappsMetadataStore: CodableStore<AppMetadata>
+         subscriptionsStore: CodableStore<PushSubscription>
     ) {
         self.networkingInteractor = networkingInteractor
-        self.kms = kms
         self.logger = logger
-        self.groupKeychainStorage = groupKeychainStorage
         self.subscriptionsStore = subscriptionsStore
-        self.dappsMetadataStore = dappsMetadataStore
         subscribeForUpdateResponse()
     }
 
@@ -44,7 +35,6 @@ class NotifyUpdateResponseSubscriber {
 
                     let subscriptionTopic = payload.topic
 
-                    // force unwrap is safe because jwt has been signed by self peer
                     let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
                     let updatedScopeString = claims.scp
 
@@ -57,8 +47,9 @@ class NotifyUpdateResponseSubscriber {
                         subscriptionPublisherSubject.send(.failure(Errors.subscriptionDoesNotExist))
                         return
                     }
+                    let expiry = Date(timeIntervalSince1970: TimeInterval(claims.exp))
 
-                    let updatedSubscription = PushSubscription(topic: subscriptionTopic, account: oldSubscription.account, relay: oldSubscription.relay, metadata: oldSubscription.metadata, scope: Set(scope))
+                    let updatedSubscription = PushSubscription(topic: subscriptionTopic, account: oldSubscription.account, relay: oldSubscription.relay, metadata: oldSubscription.metadata, scope: Set(scope), expiry: expiry)
 
                     subscriptionsStore.set(updatedSubscription, forKey: subscriptionTopic)
 

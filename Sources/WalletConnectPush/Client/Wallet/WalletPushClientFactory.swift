@@ -62,6 +62,8 @@ public struct WalletPushClientFactory {
 
         let notifyUpdateRequester = NotifyUpdateRequester(keyserverURL: keyserverURL, identityClient: identityClient, networkingInteractor: networkInteractor, logger: logger, subscriptionsStore: subscriptionStore)
 
+        let notifyUpdateResponseSubscriber = NotifyUpdateResponseSubscriber(networkingInteractor: networkInteractor, logger: logger, subscriptionsStore: subscriptionStore)
+
         return WalletPushClient(
             logger: logger,
             kms: kms,
@@ -77,7 +79,8 @@ public struct WalletPushClientFactory {
             pushSubscriptionsObserver: pushSubscriptionsObserver,
             pushSubscribeRequester: pushSubscribeRequester,
             pushSubscribeResponseSubscriber: pushSubscribeResponseSubscriber,
-            notifyUpdateRequester: notifyUpdateRequester
+            notifyUpdateRequester: notifyUpdateRequester,
+            notifyUpdateResponseSubscriber: notifyUpdateResponseSubscriber
         )
     }
 }
