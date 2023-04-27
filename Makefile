@@ -23,7 +23,7 @@ test_setup:
 
 build_all:
 	rm -rf test_results
-	# set -o pipefail && xcodebuild -scheme "WalletConnect-Package" -destination "platform=iOS Simulator,name=iPhone 14" -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackagesCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' build-for-testing | xcpretty
+	set -o pipefail && xcodebuild -scheme "WalletConnect-Package" -destination "platform=iOS Simulator,name=iPhone 14" -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackagesCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' build-for-testing | xcpretty
 	set -o pipefail && xcodebuild -project "Example/ExampleApp.xcodeproj" -scheme "BuildAll" -destination "platform=iOS Simulator,name=iPhone 14" -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackagesCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' build-for-testing | xcpretty
 
 build_dapp:
@@ -40,7 +40,7 @@ ui_tests:
 
 unitxctestrun = $(shell find . -name '*WalletConnect-Package*.xctestrun')
 
-unit_tests: test_setup
+unit-tests: test_setup
 ifneq ($(unitxctestrun),)
 # override ENV variables
 	plutil -replace TestConfigurations.0.TestTargets.0.EnvironmentVariables.RELAY_HOST -string $(RELAY_HOST) $(unitxctestrun)
@@ -53,7 +53,7 @@ endif
 
 integrationxctestrun = $(shell find . -name '*_IntegrationTests*.xctestrun')
 
-integration_tests: test_setup
+integration-tests: test_setup
 ifneq ($(integrationxctestrun),)
 # override ENV variables
 	plutil -replace TestConfigurations.0.TestTargets.0.EnvironmentVariables.RELAY_HOST -string $(RELAY_HOST) $(integrationxctestrun)
@@ -66,7 +66,7 @@ endif
 
 relayxctestrun = $(shell find . -name '*_RelayIntegrationTests*.xctestrun')
 
-relay_tests: test_setup
+relay-tests: test_setup
 ifneq ($(relayxctestrun),)
 # override ENV variables
 	plutil -replace TestConfigurations.0.TestTargets.0.EnvironmentVariables.RELAY_HOST -string $(RELAY_HOST) $(relayxctestrun)
@@ -79,7 +79,7 @@ endif
 
 smokexctestrun = $(shell find . -name '*_SmokeTests*.xctestrun')
 
-smoke_tests: test_setup
+smoke-tests: test_setup
 ifneq ($(smokexctestrun),)
 # override ENV variables
 	plutil -replace TestConfigurations.0.TestTargets.0.EnvironmentVariables.RELAY_HOST -string $(RELAY_HOST) $(smokexctestrun)

@@ -1,17 +1,7 @@
 name: build_artifacts
 
 on:
-  pull_request:
-    branches: [ develop ]
-
   workflow_dispatch:
-    relay-endpoint:
-      description: 'The endpoint of the relay e.g. relay.walletconnect.com'
-      required: false
-      default: 'staging.relay.walletconnect.com'
-    project-id:
-      description: 'WalletConnect project id'
-      required: true
     
   push:
     branches: [ main ]
@@ -37,7 +27,7 @@ jobs:
       env:
         RELAY_ENDPOINT: ${{ inputs.relay-endpoint }}
         PROJECT_ID: ${{ inputs.project-id }}
-      run: make build_all RELAY_HOST=$RELAY_ENDPOINT PROJECT_ID=$PROJECT_ID
+      run: make build_all
 
     - name: Tar DerivedDataCache
       shell: bash

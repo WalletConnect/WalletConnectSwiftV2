@@ -5,12 +5,7 @@ on:
     branches: [ main, develop ]
 
 concurrency:
-  # Support push/pr as event types with different behaviors each:
-  # 1. push: queue up builds by branch
-  # 2. pr: only allow one run per PR
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }}
-  # If there is already a workflow running for the same pull request, cancel it
-  # For non-PR triggers queue up builds
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
@@ -29,29 +24,29 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-type: [relay-tests]
-        # test-type: [integration-tests, relay-tests, unit-tests]
+        test-type: [integration-tests, relay-tests, unit-tests]
 
     steps:
     - uses: actions/checkout@v3
 
-    # - uses: actions/cache/restore@v3
-    #   with:
-    #     path: |
-    #       products.tar
-    #     key: ${{ runner.os }}-deriveddata-${{ github.ref }}-${{ github.sha }}
-    #     restore-keys: |
-    #       ${{ runner.os }}-deriveddata-${{ github.ref }}-
-    #       ${{ runner.os }}-deriveddata-
-
-    # - name: Untar DerivedDataCache
-    #   shell: bash
-    #   run: tar xPpf products.tar
-
-    - uses: ./.github/actions/ci
+    - uses: actions/cache/restore@v3
       with:
-        type: ${{ matrix.test-type }}
-        project-id: ${{ secrets.PROJECT_ID }}
+        path: |
+          products.tar
+        key: ${{ runner.os }}-deriveddata-${{ github.ref }}-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-deriveddata-${{ github.ref }}-
+
+    - name: Untar DerivedDataCache
+      shell: bash
+      run: tar xPpf products.tar
+
+    - name: Run tests
+      shell: bash
+      env:
+        RELAY_ENDPOINT: ${{ inputs.relay-endpoint }}
+        PROJECT_ID: ${{ inputs.project-id }}
+      run: make ${{ matrix.test-type }}
 
     - name: Publish Test Report
       uses: mikepenz/action-junit-report@v3
@@ -72,3 +67,4 @@ jobs:
         name: ${{ matrix.test-type }} test_results
         path: ./artifacts.zip
         if-no-files-found: warn
+
