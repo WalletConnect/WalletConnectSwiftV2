@@ -1,6 +1,15 @@
 name: build_artifacts
 
 on:
+  workflow_dispatch:
+    relay-endpoint:
+      description: 'The endpoint of the relay e.g. relay.walletconnect.com'
+      required: false
+      default: 'relay.walletconnect.com'
+    project-id:
+      description: 'WalletConnect project id'
+      required: true
+    
   push:
     branches: [ main ]
 
@@ -10,7 +19,30 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    
-    - uses: ./.github/actions/build
       with:
-        project-id: ${{ secrets.PROJECT_ID }}
+        ref: main
+    
+    - uses: actions/cache@v3
+      with:
+        path: |
+          **/SourcePackagesCache
+          DerivedDataCache
+        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-
+
+    - name: Build for testing
+      shell: bash
+      env:
+        RELAY_ENDPOINT: ${{ inputs.relay-endpoint }}
+        PROJECT_ID: ${{ inputs.project-id }}
+      run: make build_all RELAY_HOST=$RELAY_ENDPOINT PROJECT_ID=$PROJECT_ID
+
+    - name: Tar DerivedDataCache
+      shell: bash
+      run: test -d "DerivedDataCache" && tar cfPp products.tar --format posix DerivedDataCache/Build
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: main-derivedData
+        path: products.tar

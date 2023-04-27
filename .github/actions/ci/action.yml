@@ -25,6 +25,13 @@ runs:
           ${{ runner.os }}-deriveddata-main-
           ${{ runner.os }}-deriveddata- 
 
+    - name: Download artifact
+      id: download-artifact
+      uses: dawidd6/action-download-artifact@v2
+      with:
+          name: main-derivedData
+          repo: WalletConnect/WalletConnectSwiftV2
+
     - name: Untar DerivedDataCache
       shell: bash
       run: tar xvPpf products.tar
