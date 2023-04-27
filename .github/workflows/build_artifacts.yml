@@ -1,6 +1,9 @@
 name: build_artifacts
 
 on:
+  pull_request:
+    branches: [ develop ]
+
   workflow_dispatch:
     relay-endpoint:
       description: 'The endpoint of the relay e.g. relay.walletconnect.com'
@@ -19,8 +22,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-      with:
-        ref: main
     
     - uses: actions/cache@v3
       with:

@@ -34,8 +34,7 @@ runs:
       shell: bash
       run: test -d "DerivedDataCache" && tar cfPp products.tar --format posix DerivedDataCache/Build
 
-    - uses: actions/cache/save@v3
+    - uses: actions/upload-artifact@v3
       with:
-        path: |
-          products.tar
-        key: ${{ runner.os }}-deriveddata-${{ github.ref }}-${{ github.sha }}
+        name: main-derivedData
+        path: products.tar

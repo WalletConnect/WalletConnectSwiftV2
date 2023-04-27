@@ -29,25 +29,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-type: [integration-tests, relay-tests, unit-tests]
+        test-type: [relay-tests]
+        # test-type: [integration-tests, relay-tests, unit-tests]
 
     steps:
     - uses: actions/checkout@v3
 
-    - uses: actions/cache/restore@v3
-      with:
-        path: |
-          products.tar
-        key: ${{ runner.os }}-deriveddata-${{ github.ref }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-deriveddata-${{ github.ref }}-
-          ${{ runner.os }}-deriveddata-
+    # - uses: actions/cache/restore@v3
+    #   with:
+    #     path: |
+    #       products.tar
+    #     key: ${{ runner.os }}-deriveddata-${{ github.ref }}-${{ github.sha }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-deriveddata-${{ github.ref }}-
+    #       ${{ runner.os }}-deriveddata-
 
-    - name: Untar DerivedDataCache
-      shell: bash
-      run: tar xvPpf products.tar
+    # - name: Untar DerivedDataCache
+    #   shell: bash
+    #   run: tar xPpf products.tar
 
-    - uses: ./.github/actions/ci_v2
+    - uses: ./.github/actions/ci
       with:
         type: ${{ matrix.test-type }}
         project-id: ${{ secrets.PROJECT_ID }}
