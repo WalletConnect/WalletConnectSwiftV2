@@ -49,6 +49,9 @@ final class PairingTests: XCTestCase {
             keychainStorage: keychain,
             networkingClient: networkingClient)
 
+        let clientId = try! networkingClient.getClientId()
+        networkingLogger.debug("My client id is: \(clientId)")
+        
         return (pairingClient, networkingClient, keychain, keyValueStorage)
     }
 

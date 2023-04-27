@@ -126,7 +126,7 @@ enum Namespace {
             if let chains = proposedNamespace.chains {
                 try chains.forEach { chain in
                     if !approvedNamespace.accounts.contains(where: { $0.blockchain == chain }) {
-                        throw WalletConnectError.unsupportedNamespace(.unsupportedChains)
+                        throw WalletConnectError.unsupportedNamespace(.unsupportedAccounts)
                     }
                 }
             } else {

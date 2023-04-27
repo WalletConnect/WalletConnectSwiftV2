@@ -3,7 +3,7 @@ import WebKit
 
 final class WebViewRequestSubscriber: NSObject, WKScriptMessageHandler {
 
-    static let name = "web3inbox"
+    static let name = "web3inboxChat"
 
     var onRequest: ((RPCRequest) async throws -> Void)?
 
@@ -31,5 +31,13 @@ final class WebViewRequestSubscriber: NSObject, WKScriptMessageHandler {
                 logger.error("WebView Request error: \(error.localizedDescription). Request: \(request)")
             }
         }
+    }
+}
+
+extension WebViewRequestSubscriber: WKUIDelegate {
+
+    @available(iOS 15.0, *)
+    func webView(_ webView: WKWebView, requestMediaCapturePermissionFor origin: WKSecurityOrigin, initiatedByFrame frame: WKFrameInfo, type: WKMediaCaptureType, decisionHandler: @escaping (WKPermissionDecision) -> Void) {
+        decisionHandler(.grant)
     }
 }

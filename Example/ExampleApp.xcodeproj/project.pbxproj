@@ -2474,6 +2474,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Showcase/Other/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Allow the app to scan for QR codes";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "If you want to use the microphone, you have to give permission.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -2508,6 +2509,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Showcase/Other/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Allow the app to scan for QR codes";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "If you want to use the microphone, you have to give permission.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;

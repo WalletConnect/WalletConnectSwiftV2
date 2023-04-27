@@ -59,6 +59,9 @@ final class AuthTests: XCTestCase {
             pairingRegisterer: pairingClient,
             iatProvider: iatProvider)
 
+        let clientId = try! networkingClient.getClientId()
+        logger.debug("My client id is: \(clientId)")
+
         return (pairingClient, authClient)
     }
 

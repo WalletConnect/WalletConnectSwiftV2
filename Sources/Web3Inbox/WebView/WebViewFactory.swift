@@ -13,6 +13,7 @@ final class WebViewFactory {
 
     func create() -> WKWebView {
         let configuration = WKWebViewConfiguration()
+        configuration.allowsInlineMediaPlayback = true
         configuration.userContentController.add(
             webviewSubscriber,
             name: WebViewRequestSubscriber.name
@@ -20,6 +21,7 @@ final class WebViewFactory {
         let webview = WKWebView(frame: .zero, configuration: configuration)
         let request = URLRequest(url: URL(string: host)!)
         webview.load(request)
+        webview.uiDelegate = webviewSubscriber
         return webview
     }
 }

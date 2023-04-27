@@ -21,4 +21,8 @@ struct PushMessageViewModel: Identifiable {
     var subtitle: String {
         return pushMessageRecord.message.body
     }
+    
+    var publishedAt: String {
+        return pushMessageRecord.publishedAt.formatted(.relative(presentation: .named, unitsStyle: .wide))
+    }
 }
