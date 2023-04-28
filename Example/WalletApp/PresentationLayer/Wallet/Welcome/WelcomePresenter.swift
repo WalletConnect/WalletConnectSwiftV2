@@ -17,10 +17,9 @@ final class WelcomePresenter: ObservableObject {
     
     func onGetStarted() {
         
-        // Commenting this out as it breaks UI tests that copy/paste URI
-//        let pasteboard = UIPasteboard.general
-//        let clientId = try? Networking.interactor.getClientId()
-//        pasteboard.string = clientId
+        let pasteboard = UIPasteboard.general
+        let clientId = try? Networking.interactor.getClientId()
+        pasteboard.string = clientId
         router.presentWallet()
     }
 }

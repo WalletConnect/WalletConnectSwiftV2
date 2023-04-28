@@ -46,13 +46,8 @@ class PushNotificationTests: XCTestCase {
         // Launch springboard
         engine.routing.activate(app: .springboard)
         
-        let notification: XCUIElement
-        if #available(iOS 14.0, *) {
-            notification = engine.routing.springboard.otherElements.descendants(matching: .any)["NotificationShortLookView"]
-        } else {
-            notification = engine.routing.springboard.otherElements["NotificationShortLookView"]
-        }
-        
+        // Assert notification
+        let notification = engine.routing.springboard.otherElements.descendants(matching: .any)["NotificationShortLookView"]
         notification
             .wait(until: \.exists, timeout: 15)
             .tap()
