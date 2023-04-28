@@ -114,7 +114,7 @@ let package = Package(
             dependencies: ["WalletConnectUtils", "WalletConnectNetworking"]),
         .testTarget(
             name: "WalletConnectSignTests",
-            dependencies: ["WalletConnectSign", "WalletConnectUtils", "TestingUtils"]),
+            dependencies: ["WalletConnectSign", "WalletConnectUtils", "TestingUtils", "WalletConnectVerify"]),
         .testTarget(
             name: "Web3WalletTests",
             dependencies: ["Web3Wallet", "TestingUtils"]),
@@ -126,7 +126,7 @@ let package = Package(
             dependencies: ["WalletConnectChat", "WalletConnectUtils", "TestingUtils"]),
         .testTarget(
             name: "AuthTests",
-            dependencies: ["Auth", "WalletConnectUtils", "TestingUtils"]),
+            dependencies: ["Auth", "WalletConnectUtils", "TestingUtils", "WalletConnectVerify"]),
         .testTarget(
             name: "RelayerTests",
             dependencies: ["WalletConnectRelay", "WalletConnectUtils", "TestingUtils"]),

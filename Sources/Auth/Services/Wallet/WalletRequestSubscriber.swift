@@ -11,7 +11,7 @@ class WalletRequestSubscriber {
     private let walletErrorResponder: WalletErrorResponder
     private let pairingRegisterer: PairingRegisterer
     private let verifyClient: VerifyClient?
-    var onRequest: (((AuthRequest, AuthContext?)) -> Void)?
+    var onRequest: (((request: AuthRequest, context: AuthContext?)) -> Void)?
     
     init(
         networkingInteractor: NetworkInteracting,
@@ -42,11 +42,9 @@ class WalletRequestSubscriber {
                 
                 let request = AuthRequest(id: payload.id, payload: payload.request.payloadParams)
                 
-                
                 if let rawRequest = payload.rawRequest, let verifyClient {
-                    let attestationId = rawRequest.rawRepresentation.sha256().toHexString()
-                    
                     Task(priority: .high) {
+                        let attestationId = rawRequest.rawRepresentation.sha256().toHexString()
                         let origin = try? await verifyClient.registerAssertion(attestationId: attestationId)
                         let authContext = await AuthContext(
                             origin: origin,
@@ -55,6 +53,8 @@ class WalletRequestSubscriber {
                         )
                         onRequest?((request, authContext))
                     }
+                } else {
+                    onRequest?((request, nil))
                 }
             }.store(in: &publishers)
     }

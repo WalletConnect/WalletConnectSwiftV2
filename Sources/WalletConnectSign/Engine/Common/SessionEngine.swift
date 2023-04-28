@@ -217,7 +217,7 @@ private extension SessionEngine {
         onSessionDelete?(topic, payload.request)
     }
 
-    func onSessionRequest(payload: RequestSubscriptionPayload<SessionType.RequestParams>) async {
+    func onSessionRequest(payload: RequestSubscriptionPayload<SessionType.RequestParams>) {
         let protocolMethod = SessionRequestProtocolMethod()
         let topic = payload.topic
         let request = Request(
@@ -244,15 +244,18 @@ private extension SessionEngine {
         }
         
         if let rawRequest = payload.rawRequest, let verifyClient {
-            let attestationId = rawRequest.rawRepresentation.sha256().toHexString()
-            let origin = try? await verifyClient.registerAssertion(attestationId: attestationId)
-            
-            let sessionContext = await Session.Context(
-                origin: origin,
-                validation: (origin == session.peerParticipant.metadata.url) ? .valid : (origin == nil ? .unknown : .invalid),
-                verifyUrl: verifyClient.verifyHost
-            )
-            onSessionRequest?(request, sessionContext)
+            Task(priority: .high) {
+                let attestationId = rawRequest.rawRepresentation.sha256().toHexString()
+                let origin = try? await verifyClient.registerAssertion(attestationId: attestationId)
+                let sessionContext = await Session.Context(
+                    origin: origin,
+                    validation: (origin == session.peerParticipant.metadata.url) ? .valid : (origin == nil ? .unknown : .invalid),
+                    verifyUrl: verifyClient.verifyHost
+                )
+                onSessionRequest?(request, sessionContext)
+            }
+        } else {
+            onSessionRequest?(request, nil)
         }
     }
 

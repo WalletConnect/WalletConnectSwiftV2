@@ -165,9 +165,7 @@ private extension ApproveEngine {
     func setupRequestSubscriptions() {
         pairingRegisterer.register(method: SessionProposeProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionType.ProposeParams>) in
-                Task {
-                    await handleSessionProposeRequest(payload: payload)
-                }
+                handleSessionProposeRequest(payload: payload)
             }.store(in: &publishers)
 
         networkingInteractor.requestSubscription(on: SessionSettleProtocolMethod())
@@ -277,7 +275,7 @@ private extension ApproveEngine {
 
     // MARK: SessionProposeRequest
 
-    func handleSessionProposeRequest(payload: RequestSubscriptionPayload<SessionType.ProposeParams>) async {
+    func handleSessionProposeRequest(payload: RequestSubscriptionPayload<SessionType.ProposeParams>) {
         logger.debug("Received Session Proposal")
         let proposal = payload.request
         do { try Namespace.validate(proposal.requiredNamespaces) } catch {
@@ -286,15 +284,18 @@ private extension ApproveEngine {
         proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
         
         if let rawRequest = payload.rawRequest, let verifyClient {
+            Task(priority: .high) {
             let attestationId = rawRequest.rawRepresentation.sha256().toHexString()
-            let origin = try? await verifyClient.registerAssertion(attestationId: attestationId)
-            
-            let sessionContext = await Session.Context(
-                origin: origin,
-                validation: (origin == payload.request.proposer.metadata.url) ? .valid : (origin == nil ? .unknown : .invalid),
-                verifyUrl: verifyClient.verifyHost
-            )
-            onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), sessionContext)
+                let origin = try? await verifyClient.registerAssertion(attestationId: attestationId)
+                let sessionContext = await Session.Context(
+                    origin: origin,
+                    validation: (origin == payload.request.proposer.metadata.url) ? .valid : (origin == nil ? .unknown : .invalid),
+                    verifyUrl: verifyClient.verifyHost
+                )
+                onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), sessionContext)
+            }
+        } else {
+            onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), nil)
         }
     }
 

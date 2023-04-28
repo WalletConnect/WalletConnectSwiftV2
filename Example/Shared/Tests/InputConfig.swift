@@ -11,7 +11,7 @@ struct InputConfig {
     }
 
     static var defaultTimeout: TimeInterval {
-        return 45
+        return 5
     }
 
     private static func config(for key: String) -> String? {

@@ -2,8 +2,7 @@ import Foundation
 import WalletConnectUtils
 
 public class VerifyClientFactory {
-    public static func create() throws -> VerifyClient {
-        let verifyHost = "verify.walletconnect.com"
+    public static func create(verifyHost: String) throws -> VerifyClient {
         let originVerifier = OriginVerifier()
         let assertionRegistrer = AssertionRegistrer(verifyHost: verifyHost)
         let logger = ConsoleLogger(loggingLevel: .off)

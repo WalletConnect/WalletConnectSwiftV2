@@ -37,8 +37,8 @@ class WalletRequestSubscriberTests: XCTestCase {
         var requestId: RPCID!
         var requestPayload: AuthPayload!
         sut.onRequest = { result in
-            requestId = result.0.id
-            requestPayload = result.0.payload
+            requestId = result.request.id
+            requestPayload = result.request.payload
             messageExpectation.fulfill()
         }
 
