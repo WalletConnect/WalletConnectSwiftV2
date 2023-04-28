@@ -27,13 +27,29 @@ runs:
       shell: bash
       run: tar xPpf products.tar
 
+      # Package Unit tests
     - name: Run tests
+      if: inputs.type == 'unit-tests'
       shell: bash
-      env:
-        RELAY_ENDPOINT: ${{ inputs.relay-endpoint }}
-        PROJECT_ID: ${{ inputs.project-id }}
-        TYPE: ${{ inputs.type }}
-      run: make $TYPE RELAY_HOST=$RELAY_ENDPOINT PROJECT_ID=$PROJECT_ID
+      run: make unit_tests
+
+     # Integration tests
+    - name: Run integration tests
+      if: inputs.type == 'integration-tests'
+      shell: bash
+      run: make integration_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.PROJECT_ID }}
+
+    # Relay Integration tests
+    - name: Run Relay integration tests
+      if: inputs.type == 'relay-tests'
+      shell: bash
+      run: make relay_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.PROJECT_ID }}
+
+    # Smoke tests
+    - name: Run smoke tests
+      if: inputs.type == 'smoke-tests'
+      shell: bash
+      run: make smoke_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.PROJECT_ID }}
 
     - name: Publish Test Report
       uses: mikepenz/action-junit-report@v3

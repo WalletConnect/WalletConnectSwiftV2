@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-type: [integration-tests, relay-tests, unit-tests]
+        type: [integration-tests, relay-tests, unit-tests]
 
     steps:
     - uses: actions/checkout@v3
@@ -41,18 +41,35 @@ jobs:
       shell: bash
       run: tar xPpf products.tar
 
+    # Package Unit tests
     - name: Run tests
+      if: matrix.type == 'unit-tests'
       shell: bash
-      env:
-        RELAY_ENDPOINT: ${{ inputs.relay-endpoint }}
-        PROJECT_ID: ${{ inputs.project-id }}
-      run: make ${{ matrix.test-type }}
+      run: make unit_tests
+
+     # Integration tests
+    - name: Run integration tests
+      if: matrix.type == 'integration-tests'
+      shell: bash
+      run: make integration_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }}
+
+    # Relay Integration tests
+    - name: Run Relay integration tests
+      if: matrix.type == 'relay-tests'
+      shell: bash
+      run: make relay_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }}
+
+    # Smoke tests
+    - name: Run smoke tests
+      if: matrix.type == 'smoke-tests'
+      shell: bash
+      run: make smoke_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }}
 
     - name: Publish Test Report
       uses: mikepenz/action-junit-report@v3
       if: success() || failure()
       with:
-          check_name: ${{ matrix.test-type }} junit report
+          check_name: ${{ matrix.type }} junit report
           report_paths: 'test_results/report.junit'
        
     - name: Zip test artifacts
@@ -64,7 +81,7 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ matrix.test-type }} test_results
+        name: ${{ matrix.type }} test_results
         path: ./artifacts.zip
         if-no-files-found: warn
 
