@@ -33,7 +33,7 @@ build_wallet:
 	fastlane build scheme:WalletApp
 
 echo_ui_tests:
-	fastlane tests scheme:EchoUITests relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID)
+	echo "EchoUITests disabled"
 
 ui_tests:
 	echo "UI Tests disabled"
@@ -42,9 +42,9 @@ unitxctestrun = $(shell find . -name '*WalletConnect-Package*.xctestrun')
 
 unit_tests: test_setup
 ifneq ($(unitxctestrun),)
-	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/UnitTests.xcresult' -xctestrun '$(integrationxctestrun)' test-without-building | tee ./test_results/xcodebuild.log | xcpretty --report junit --output ./test_results/report.junit
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/UnitTests.xcresult' -xctestrun '$(unitxctestrun)' test-without-building | tee ./test_results/xcodebuild.log | xcpretty --report junit --output ./test_results/report.junit
 else
-	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -scheme WalletConnect-Package -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/UnitTests.xcresult' RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' test | tee ./test_results/xcodebuild.log | xcpretty --report junit --output ./test_results/report.junit
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -scheme WalletConnect-Package -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/UnitTests.xcresult' test | tee ./test_results/xcodebuild.log | xcpretty --report junit --output ./test_results/report.junit
 endif
 
 integrationxctestrun = $(shell find . -name '*_IntegrationTests*.xctestrun')

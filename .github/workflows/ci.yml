@@ -39,7 +39,7 @@ jobs:
 
     - name: Untar DerivedDataCache
       shell: bash
-      run: tar xPpf products.tar
+      run: test -f products.tar && tar xPpf products.tar || echo "No artifacts to untar"
 
     # Package Unit tests
     - name: Run tests

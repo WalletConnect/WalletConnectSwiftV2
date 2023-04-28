@@ -24,10 +24,7 @@ jobs:
 
     - name: Build for testing
       shell: bash
-      env:
-        RELAY_ENDPOINT: relay.walletconnect.com
-        PROJECT_ID: ${{ secrets.PROJECT_ID }}
-      run: make build_all
+      run: make build_all RELAY_HOST=${{ inputs.project-id }} PROJECT_ID=${{ inputs.project-id }}
 
     - name: Tar DerivedDataCache
       shell: bash

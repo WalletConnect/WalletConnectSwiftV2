@@ -22,10 +22,11 @@ runs:
           name: main-derivedData
           workflow: build_artifacts.yml
           repo: 'WalletConnect/WalletConnectSwiftV2'
+          if_no_artifact_found: warn
 
     - name: Untar DerivedDataCache
       shell: bash
-      run: tar xPpf products.tar
+      run: test -f products.tar && tar xPpf products.tar || echo "No artifacts to untar"
 
       # Package Unit tests
     - name: Run tests
