@@ -54,10 +54,15 @@ final class WalletPresenter: ObservableObject {
     }
 
     func onScanUri() {
-        router.presentScan { [unowned self] value in
-            guard let uri = WalletConnectURI(string: value) else { return }
-            self.pair(uri: uri)
-            self.router.dismiss()
+        router.presentScan { [weak self] uri in
+            guard let uri = WalletConnectURI(string: uri) else {
+                self?.errorMessage = Errors.invalidUri(uri: uri).localizedDescription
+                self?.showError.toggle()
+                return
+            }
+            print("URI: \(uri)")
+            self?.pair(uri: uri)
+            self?.router.dismiss()
         } onError: { error in
             print(error.localizedDescription)
             self.router.dismiss()
