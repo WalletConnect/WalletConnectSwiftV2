@@ -43,8 +43,14 @@ let package = Package(
         .library(
             name: "Web3Inbox",
             targets: ["Web3Inbox"]),
+        .library(
+            name: "Web3Modal",
+            targets: ["Web3Modal"]),
+
     ],
-    dependencies: [],
+    dependencies: [
+        .package(url: "https://github.com/dagronf/QRCode", from: "13.9.0")
+    ],
     targets: [
         .target(
             name: "WalletConnectSign",
@@ -112,6 +118,9 @@ let package = Package(
         .target(
             name: "WalletConnectVerify",
             dependencies: ["WalletConnectUtils"]),
+        .target(
+            name: "Web3Modal",
+            dependencies: ["QRCode"]),
         .testTarget(
             name: "WalletConnectSignTests",
             dependencies: ["WalletConnectSign", "WalletConnectUtils", "TestingUtils"]),
