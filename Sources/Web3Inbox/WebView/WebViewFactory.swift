@@ -31,7 +31,7 @@ final class WebViewFactory {
         let webview = WKWebView(frame: .zero, configuration: configuration)
         let request = URLRequest(url: URL(string: host)!)
         webview.load(request)
-        webview.uiDelegate = webviewSubscriber
+        webview.uiDelegate = chatWebviewSubscriber
         return webview
     }
 }
