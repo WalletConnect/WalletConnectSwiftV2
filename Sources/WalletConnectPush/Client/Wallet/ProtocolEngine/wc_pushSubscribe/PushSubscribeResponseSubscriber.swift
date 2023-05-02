@@ -85,7 +85,7 @@ class PushSubscribeResponseSubscriber {
                     }
                     dappsMetadataStore.delete(forKey: payload.topic)
                     let expiry = Date(timeIntervalSince1970: TimeInterval(claims.exp))
-                    let scope: [NotificationScope: Bool] = availableScope.reduce(into: [:]) { $0[$1] = true }
+                    let scope: [NotificationScope: Bool] = availableScope.reduce(into: [:]) { $0[$1] = ScopeValue(description: $1., enabled: true) }
                     let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata, scope: scope, expiry: expiry)
 
                     subscriptionsStore.set(pushSubscription, forKey: pushSubscriptionTopic)
