@@ -45,32 +45,36 @@ class PushSubscribeResponseSubscriber {
                 Task(priority: .high) {
                     logger.debug("Received Push Subscribe response")
 
-                    guard let pushSubscryptionKey = kms.getAgreementSecret(for: payload.topic) else {
+                    guard let responseKeys = kms.getAgreementSecret(for: payload.topic) else {
                         logger.debug("PushSubscribeResponseSubscriber: no symmetric key for topic \(payload.topic)")
                         subscriptionPublisherSubject.send(.failure(Errors.couldNotCreateSubscription))
                         return
                     }
 
                     // get keypair Y
-                    // generate symm key P
-                    // subscribe to push topic
+                    let pubKeyY = responseKeys.publicKey
+                    let peerPubKeyZ = payload.response.publicKey
 
 
-                    let pushSubscriptionTopic = pushSubscryptionKey.derivedTopic()
 
                     var account: Account!
                     var metadata: AppMetadata!
+                    var pushSubscriptionTopic: String!
                     var availableScope: Set<NotificationScope>!
                     let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
                     do {
-                        try kms.setAgreementSecret(pushSubscryptionKey, topic: pushSubscriptionTopic)
-                        try groupKeychainStorage.add(pushSubscryptionKey, forKey: pushSubscriptionTopic)
+                        // generate symm key P
+                        let agreementKeysP = try kms.performKeyAgreement(selfPublicKey: pubKeyY, peerPublicKey: peerPubKeyZ)
+                        pushSubscriptionTopic = agreementKeysP.derivedTopic()
+                        try kms.setAgreementSecret(agreementKeysP, topic: pushSubscriptionTopic)
+                        try groupKeychainStorage.add(agreementKeysP, forKey: pushSubscriptionTopic)
                         account = try Account(DIDPKHString: claims.sub)
                         metadata = try dappsMetadataStore.get(key: payload.topic)
                         availableScope = try await subscriptionScopeProvider.getSubscriptionScope(dappUrl: metadata!.url)
+                        logger.debug("PushSubscribeResponseSubscriber: subscribing push subscription topic: \(payload.topic)")
+                        try await networkingInteractor.subscribe(topic: pushSubscriptionTopic)
                     } catch {
                         logger.debug("PushSubscribeResponseSubscriber: error: \(error)")
-                        networkingInteractor.unsubscribe(topic: pushSubscriptionTopic)
                         subscriptionPublisherSubject.send(.failure(Errors.couldNotCreateSubscription))
                         return
                     }
@@ -86,6 +90,8 @@ class PushSubscribeResponseSubscriber {
 
                     subscriptionsStore.set(pushSubscription, forKey: pushSubscriptionTopic)
 
+                    logger.debug("PushSubscribeResponseSubscriber: unsubscribing response topic: \(payload.topic)")
+                    networkingInteractor.unsubscribe(topic: payload.topic)
                     subscriptionPublisherSubject.send(.success(pushSubscription))
                 }
             }.store(in: &publishers)

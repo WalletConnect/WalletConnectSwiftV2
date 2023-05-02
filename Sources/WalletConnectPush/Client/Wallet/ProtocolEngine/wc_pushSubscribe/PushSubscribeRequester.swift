@@ -59,7 +59,7 @@ class PushSubscribeRequester {
 
         try kms.setAgreementSecret(keysY, topic: responseTopic)
 
-        logger.debug("setting symm key for topic \(responseTopic)")
+        logger.debug("setting symm key for response topic \(responseTopic)")
 
         let request = try createJWTRequest(subscriptionAccount: account, dappUrl: dappUrl)
 
