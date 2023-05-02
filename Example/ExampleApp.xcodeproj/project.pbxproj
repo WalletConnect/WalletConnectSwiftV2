@@ -574,6 +574,7 @@
 		CF1A594429E5876600AAC16B /* App.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		CF6704DE29E59DDC003326A4 /* XCUIElementQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCUIElementQuery.swift; sourceTree = "<group>"; };
 		CF6704E029E5A014003326A4 /* XCTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestCase.swift; sourceTree = "<group>"; };
+		CF79389D29EDD9DC00441B4F /* RelayIntegrationTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = RelayIntegrationTests.xctestplan; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -667,6 +668,7 @@
 		764E1D3326F8D3FC00A1FB15 = {
 			isa = PBXGroup;
 			children = (
+				CF79389D29EDD9DC00441B4F /* RelayIntegrationTests.xctestplan */,
 				845AA7D929BA1EBA00F33739 /* IntegrationTests.xctestplan */,
 				845AA7DC29BB424800F33739 /* SmokeTests.xctestplan */,
 				A5A8E479293A1C4400FEB97D /* Shared */,
@@ -2727,6 +2729,7 @@
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.walletconnect.IntegrationTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
