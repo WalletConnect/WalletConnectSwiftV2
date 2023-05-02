@@ -47,17 +47,17 @@ class PushSubscribeRequester {
         let peerPublicKey = try await resolvePublicKey(dappUrl: metadata.url)
         let subscribeTopic = peerPublicKey.rawRepresentation.sha256().toHexString()
 
-        let keys = try generateAgreementKeys(peerPublicKey: peerPublicKey)
+        let keysY = try generateAgreementKeys(peerPublicKey: peerPublicKey)
 
-        let responseTopic  = keys.derivedTopic()
+        let responseTopic  = keysY.derivedTopic()
         
         dappsMetadataStore.set(metadata, forKey: responseTopic)
 
-        try kms.setSymmetricKey(keys.sharedKey, for: subscribeTopic)
+        try kms.setSymmetricKey(keysY.sharedKey, for: subscribeTopic)
 
         _ = try await identityClient.register(account: account, onSign: onSign)
 
-        try kms.setAgreementSecret(keys, topic: responseTopic)
+        try kms.setAgreementSecret(keysY, topic: responseTopic)
 
         logger.debug("setting symm key for topic \(responseTopic)")
 
@@ -69,7 +69,7 @@ class PushSubscribeRequester {
 
         try await networkingInteractor.subscribe(topic: responseTopic)
 
-        try await networkingInteractor.request(request, topic: subscribeTopic, protocolMethod: protocolMethod, envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
+        try await networkingInteractor.request(request, topic: subscribeTopic, protocolMethod: protocolMethod, envelopeType: .type1(pubKey: keysY.publicKey.rawRepresentation))
     }
 
     private func resolvePublicKey(dappUrl: String) async throws -> AgreementPublicKey {

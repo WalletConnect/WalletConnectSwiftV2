@@ -50,6 +50,12 @@ class PushSubscribeResponseSubscriber {
                         subscriptionPublisherSubject.send(.failure(Errors.couldNotCreateSubscription))
                         return
                     }
+
+                    // get keypair Y
+                    // generate symm key P
+                    // subscribe to push topic
+
+
                     let pushSubscriptionTopic = pushSubscryptionKey.derivedTopic()
 
                     var account: Account!
