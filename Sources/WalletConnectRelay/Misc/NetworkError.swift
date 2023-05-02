@@ -1,11 +1,16 @@
+import Foundation
+
 enum NetworkError: Error {
     case webSocketNotConnected
     case sendMessageFailed(Error)
     case receiveMessageFailure(Error)
 }
 
-extension NetworkError {
-
+extension NetworkError: LocalizedError {
+    var errorDescription: String? {
+        return localizedDescription
+    }
+    
     var localizedDescription: String {
         switch self {
         case .webSocketNotConnected:
