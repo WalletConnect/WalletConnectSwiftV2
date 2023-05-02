@@ -34,6 +34,8 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
                 self.connectView.copyButton.isHidden = false
             }
         }
+        
+        connectView.invisibleUriLabel.text = uri.absoluteString
         connectView.copyButton.addTarget(self, action: #selector(copyURI), for: .touchUpInside)
         connectView.connectWalletButton.addTarget(self, action: #selector(connectWithExampleWallet), for: .touchUpInside)
         connectView.tableView.dataSource = self

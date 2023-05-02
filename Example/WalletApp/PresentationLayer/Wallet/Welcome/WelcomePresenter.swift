@@ -16,6 +16,7 @@ final class WelcomePresenter: ObservableObject {
     }
     
     func onGetStarted() {
+        
         let pasteboard = UIPasteboard.general
         let clientId = try? Networking.interactor.getClientId()
         pasteboard.string = clientId

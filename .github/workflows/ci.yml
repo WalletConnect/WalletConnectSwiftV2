@@ -5,44 +5,83 @@ on:
     branches: [ main, develop ]
 
 concurrency:
-  # Support push/pr as event types with different behaviors each:
-  # 1. push: queue up builds by branch
-  # 2. pr: only allow one run per PR
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }}
-  # If there is already a workflow running for the same pull request, cancel it
-  # For non-PR triggers queue up builds
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  build:    
+  prepare:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/build
+        with:
+          project-id: ${{ secrets.PROJECT_ID }}
+
+  test:    
+    needs: prepare
     runs-on: macos-12
     strategy:
+      fail-fast: false
       matrix:
-        test-type: [unit-tests, integration-tests, build-example-wallet, build-example-dapp, relay-tests]
+        type: [integration-tests, relay-tests, unit-tests]
 
     steps:
-    - uses: actions/checkout@v2
-    
-    - name: Setup Xcode Version
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: 14.1
+    - uses: actions/checkout@v3
 
-    - uses: actions/cache@v2
+    - uses: actions/cache/restore@v3
       with:
         path: |
-          .build
-          SourcePackagesCache
-          DerivedDataCache
-        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+          products.tar
+        key: ${{ runner.os }}-deriveddata-${{ github.ref }}-${{ github.sha }}
         restore-keys: |
-          ${{ runner.os }}-spm-
+          ${{ runner.os }}-deriveddata-${{ github.ref }}-
 
-    - name: Resolve Dependencies
+    - name: Untar DerivedDataCache
       shell: bash
-      run: make resolve_packages
+      run: test -f products.tar && tar xPpf products.tar || echo "No artifacts to untar"
 
-    - uses: ./.github/actions/ci
+    # Package Unit tests
+    - name: Run tests
+      if: matrix.type == 'unit-tests'
+      shell: bash
+      run: make unit_tests
+
+     # Integration tests
+    - name: Run integration tests
+      if: matrix.type == 'integration-tests'
+      shell: bash
+      run: make integration_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }}
+
+    # Relay Integration tests
+    - name: Run Relay integration tests
+      if: matrix.type == 'relay-tests'
+      shell: bash
+      run: make relay_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }}
+
+    # Smoke tests
+    - name: Run smoke tests
+      if: matrix.type == 'smoke-tests'
+      shell: bash
+      run: make smoke_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }}
+
+    - name: Publish Test Report
+      uses: mikepenz/action-junit-report@v3
+      if: success() || failure()
       with:
-        type: ${{ matrix.test-type }}
-        project-id: ${{ secrets.PROJECT_ID }}
+          check_name: ${{ matrix.type }} junit report
+          report_paths: 'test_results/report.junit'
+       
+    - name: Zip test artifacts
+      if: always()
+      shell: bash
+      run: test -d "test_results" && zip artifacts.zip -r ./test_results || echo "Nothing to zip"
+
+    - name: Upload test artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.type }} test_results
+        path: ./artifacts.zip
+        if-no-files-found: warn
+
