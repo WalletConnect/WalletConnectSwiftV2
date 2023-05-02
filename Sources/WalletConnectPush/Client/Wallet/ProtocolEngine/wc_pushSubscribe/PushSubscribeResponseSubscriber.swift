@@ -41,7 +41,7 @@ class PushSubscribeResponseSubscriber {
     private func subscribeForSubscriptionResponse() {
         let protocolMethod = PushSubscribeProtocolMethod()
         networkingInteractor.responseSubscription(on: protocolMethod)
-            .sink {[unowned self] (payload: ResponseSubscriptionPayload<SubscriptionJWTPayload.Wrapper, Bool>) in
+            .sink {[unowned self] (payload: ResponseSubscriptionPayload<SubscriptionJWTPayload.Wrapper, SubscribeResponseParams>) in
                 Task(priority: .high) {
                     logger.debug("Received Push Subscribe response")
 

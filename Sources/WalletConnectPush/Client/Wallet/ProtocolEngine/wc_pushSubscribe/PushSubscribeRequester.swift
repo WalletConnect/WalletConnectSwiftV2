@@ -49,25 +49,25 @@ class PushSubscribeRequester {
 
         let keys = try generateAgreementKeys(peerPublicKey: peerPublicKey)
 
-        let subscriptionTopic  = keys.derivedTopic()
+        let responseTopic  = keys.derivedTopic()
         
-        dappsMetadataStore.set(metadata, forKey: subscriptionTopic)
+        dappsMetadataStore.set(metadata, forKey: responseTopic)
 
         try kms.setSymmetricKey(keys.sharedKey, for: subscribeTopic)
 
         _ = try await identityClient.register(account: account, onSign: onSign)
 
-        try kms.setAgreementSecret(keys, topic: subscriptionTopic)
+        try kms.setAgreementSecret(keys, topic: responseTopic)
 
-        logger.debug("setting symm key for topic \(subscriptionTopic)")
+        logger.debug("setting symm key for topic \(responseTopic)")
 
         let request = try createJWTRequest(subscriptionAccount: account, dappUrl: dappUrl)
 
         let protocolMethod = PushSubscribeProtocolMethod()
 
-        logger.debug("PushSubscribeRequester: subscribing to subscription topic: \(subscriptionTopic)")
+        logger.debug("PushSubscribeRequester: subscribing to response topic: \(responseTopic)")
 
-        try await networkingInteractor.subscribe(topic: subscriptionTopic)
+        try await networkingInteractor.subscribe(topic: responseTopic)
 
         try await networkingInteractor.request(request, topic: subscribeTopic, protocolMethod: protocolMethod, envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
     }
