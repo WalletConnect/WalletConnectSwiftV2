@@ -234,6 +234,21 @@ final class PushTests: XCTestCase {
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
+    // Push Subscribe
+    func testWalletCreatesSubscription() async {
+        let expectation = expectation(description: "expects to create push subscription")
+        let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
+        try! await walletPushClient.subscribe(metadata: metadata, account: Account.stub(), onSign: sign)
+        walletPushClient.subscriptionsPublisher
+            .first()
+            .sink { [unowned self] subscriptions in
+            XCTAssertNotNil(subscriptions.first)
+            Task { try! await walletPushClient.deleteSubscription(topic: subscriptions.first!.topic) }
+            expectation.fulfill()
+        }.store(in: &publishers)
+        await fulfillment(of: [expectation], timeout: InputConfig.defaultTimeout)
+    }
+
     func testWalletCreatesAndUpdatesSubscription() async {
         let expectation = expectation(description: "expects to create and update push subscription")
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
@@ -249,6 +264,7 @@ final class PushTests: XCTestCase {
         walletPushClient.subscriptionsPublisher
             .dropFirst()
             .sink { [unowned self] subscriptions in
+                guard !subscriptions.isEmpty else {return}
                 let updatedScope = Set(subscriptions.first!.scope.filter{ $0.value == true }.keys)
                 XCTAssertEqual(updatedScope, updateScope)
                 Task { try! await walletPushClient.deleteSubscription(topic: subscriptions.first!.topic) }
