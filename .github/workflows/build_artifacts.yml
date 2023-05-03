@@ -24,7 +24,7 @@ jobs:
 
     - name: Build for testing
       shell: bash
-      run: make build_all RELAY_HOST=${{ inputs.project-id }} PROJECT_ID=${{ inputs.project-id }}
+      run: make build_all RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }}
 
     - name: Tar DerivedDataCache
       shell: bash
