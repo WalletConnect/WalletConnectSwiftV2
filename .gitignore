@@ -31,3 +31,4 @@ DerivedDataCache
 # Artifacts
 *.ipa
 *.zip
+test_results/

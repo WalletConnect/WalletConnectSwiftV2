@@ -4,12 +4,19 @@ import Combine
 import Web3Wallet
 
 final class WalletPresenter: ObservableObject {
+    enum Errors: Error {
+        case invalidUri(uri: String)
+    }
+    
     private let interactor: WalletInteractor
     private let router: WalletRouter
     
+    private let uri: String?
+    
     @Published var sessions = [Session]()
     
-    private let uri: String?
+    @Published var showError = false
+    @Published var errorMessage = "Error"
     
     private var disposeBag = Set<AnyCancellable>()
 
@@ -33,9 +40,11 @@ final class WalletPresenter: ObservableObject {
     func onPasteUri() {
         router.presentPaste { [weak self] uri in
             guard let uri = WalletConnectURI(string: uri) else {
+                self?.errorMessage = Errors.invalidUri(uri: uri).localizedDescription
+                self?.showError.toggle()
                 return
             }
-            print(uri)
+            print("URI: \(uri)")
             self?.pair(uri: uri)
 
         } onError: { [weak self] error in
@@ -45,10 +54,15 @@ final class WalletPresenter: ObservableObject {
     }
 
     func onScanUri() {
-        router.presentScan { [unowned self] value in
-            guard let uri = WalletConnectURI(string: value) else { return }
-            self.pair(uri: uri)
-            self.router.dismiss()
+        router.presentScan { [weak self] uri in
+            guard let uri = WalletConnectURI(string: uri) else {
+                self?.errorMessage = Errors.invalidUri(uri: uri).localizedDescription
+                self?.showError.toggle()
+                return
+            }
+            print("URI: \(uri)")
+            self?.pair(uri: uri)
+            self?.router.dismiss()
         } onError: { error in
             print(error.localizedDescription)
             self.router.dismiss()
@@ -84,9 +98,17 @@ extension WalletPresenter {
         pairFromDapp()
     }
 
+    
     private func pair(uri: WalletConnectURI) {
         Task(priority: .high) { [unowned self] in
-            try await self.interactor.pair(uri: uri)
+            do {
+                try await self.interactor.pair(uri: uri)
+            } catch {
+                Task.detached { @MainActor in
+                    self.errorMessage = error.localizedDescription
+                    self.showError.toggle()
+                }
+            }
         }
     }
     
@@ -114,5 +136,14 @@ extension WalletPresenter: SceneViewModel {
 
     var largeTitleDisplayMode: UINavigationItem.LargeTitleDisplayMode {
         return .always
+    }
+}
+
+// MARK: - LocalizedError
+extension WalletPresenter.Errors: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .invalidUri(let uri):  return "URI invalid format\n\(uri)"
+        }
     }
 }
