@@ -21,8 +21,8 @@ public struct Web3ModalContainerView: View {
                     .animation(.spring(), value: showModal)
             }
         }
-        .ignoresSafeArea()
-        .onChange(of: showModal, perform: { newValue in
+        .edgesIgnoringSafeArea(.all)
+        .onChangeBackported(of: showModal, perform: { newValue in
             if newValue == false {
                 dismiss()
             }
@@ -34,12 +34,12 @@ public struct Web3ModalContainerView: View {
         }
     }
     
-    
-    func dismiss() {
-        
+    private func dismiss() {
         // Small delay so the sliding transition can happen before cross disolve starts
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             presentationMode.wrappedValue.dismiss()
         }
     }
 }
+
+

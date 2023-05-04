@@ -14,12 +14,9 @@ final class ChatListRouter {
     }
 
     func presentInvite(account: Account) {
-//        InviteModule.create(app: app, account: account)
-//            .wrapToNavigationController()
-//            .present(from: viewController)
-        
-        let modal = Web3ModalSheetController()
-        modal.present(from: viewController)
+        InviteModule.create(app: app, account: account)
+            .wrapToNavigationController()
+            .present(from: viewController)
     }
 
     func presentReceivedInviteList(account: Account) {

@@ -6,9 +6,7 @@ struct QRCodeView: View {
     @State var doc: QRCode.Document!
     
     @Environment(\.colorScheme) var colorScheme: ColorScheme
-    
-    
-    
+        
     var body: some View {
         
         GeometryReader { g in
@@ -19,7 +17,7 @@ struct QRCodeView: View {
         .padding(.bottom, 40)
     }
     
-    func render(frame: CGRect) -> Image? {
+    private func render(frame: CGRect) -> Image? {
         let doc = QRCode.Document(
             utf8String: Array(repeating: ["a", "b", "c", "1", "2", "3"], count: 50).flatMap({ $0 }).shuffled().joined(),
             errorCorrection: .high

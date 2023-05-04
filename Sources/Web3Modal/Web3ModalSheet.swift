@@ -34,15 +34,15 @@ public struct Web3ModalSheet: View {
                 case .welcome:
                     
                     Button("Help") {
-//                        withAnimation(.default) {
+                        withAnimation(.default) {
                             destination = .help
-//                        }
+                        }
                     }
                     
                     Button("QR") {
-//                        withAnimation(.default) {
+                        withAnimation(.default) {
                             destination = .qr
-//                        }
+                        }
                     }
                 case .help:
                     WhatIsWalletView()
