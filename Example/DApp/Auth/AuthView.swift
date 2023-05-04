@@ -1,57 +1,39 @@
 import SwiftUI
-import Web3Modal
 
 struct AuthView: View {
 
     @ObservedObject var viewModel: AuthViewModel
-
-    @State var showSheet: Bool = false
     
     var body: some View {
-        ZStack(alignment: .bottom) {
+        VStack(spacing: 16.0) {
             
-            VStack(spacing: 16.0) {
-                
-                Spacer()
-                
-                Image(uiImage: viewModel.qrImage ?? UIImage())
-                    .interpolation(.none)
-                    .resizable()
-                    .frame(width: 300, height: 300)
-                
-                signingLabel()
-                    .frame(maxWidth: .infinity)
-                
-                Spacer()
-                
-                connectWalletButton()
-                
-                Button("Copy URI", action: { viewModel.copyDidPressed() })
-                    .buttonStyle(CircleButtonStyle())
-                
-                Button("Deeplink", action: { viewModel.deeplinkPressed() })
-                    .buttonStyle(CircleButtonStyle())
-                
-                
-            }
-            .padding(16.0)
+            Spacer()
+            
+            Image(uiImage: viewModel.qrImage ?? UIImage())
+                .interpolation(.none)
+                .resizable()
+                .frame(width: 300, height: 300)
+            
+            signingLabel()
+                .frame(maxWidth: .infinity)
+            
+            Spacer()
+            
+            Button("Connect Wallet", action: { })
+                .buttonStyle(CircleButtonStyle())
+            
+            Button("Copy URI", action: { viewModel.copyDidPressed() })
+                .buttonStyle(CircleButtonStyle())
+            
+            Button("Deeplink", action: { viewModel.deeplinkPressed() })
+                .buttonStyle(CircleButtonStyle())
             
             
-            if showSheet {
-                Web3ModalSheet()
-                    .transition(.move(edge: .bottom))
-                    .animation(.easeInOut)
-            }
         }
+        .padding(16.0)
         .onAppear { Task(priority: .userInitiated) {
             try await viewModel.setupInitialState()
         }}
-    }
-
-    private func connectWalletButton() -> some View {
-        
-        Button("Connect Wallet", action: { showSheet.toggle() })
-            .buttonStyle(CircleButtonStyle())
     }
     
     @ViewBuilder

@@ -1,10 +1,12 @@
 import UIKit
+import SwiftUI
+import Web3Modal
 import WalletConnectChat
 
 final class ChatListRouter {
 
     weak var viewController: UIViewController!
-
+    
     private let app: Application
 
     init(app: Application) {
@@ -12,9 +14,12 @@ final class ChatListRouter {
     }
 
     func presentInvite(account: Account) {
-        InviteModule.create(app: app, account: account)
-            .wrapToNavigationController()
-            .present(from: viewController)
+//        InviteModule.create(app: app, account: account)
+//            .wrapToNavigationController()
+//            .present(from: viewController)
+        
+        let modal = Web3ModalSheetController()
+        modal.present(from: viewController)
     }
 
     func presentReceivedInviteList(account: Account) {
@@ -33,3 +38,4 @@ final class ChatListRouter {
         WelcomeModule.create(app: app).present()
     }
 }
+

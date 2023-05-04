@@ -2,86 +2,86 @@ import SwiftUI
 
 public struct Web3ModalSheet: View {
     
-    @State var destination: Destination = .welcome
+    @State public var destination: Destination
+    @Binding public var isShown: Bool
     
-    enum Destination: String {
+    public enum Destination: String {
         case welcome
         case help
         case qr
-        
-        var preferredHeight: CGFloat {
-            switch self {
-            case .welcome:
-                return 300
-            case .help:
-                return 600
-            case .qr:
-                return 400
-            }
-        }
     }
-    
-    public init() {}
     
     public var body: some View {
         ZStack(alignment: .top) {
             Color.white
             
             VStack {
-                Color.cyan
+                Color.blue
                     .frame(height: 40)
+                    .overlay(
+                        HStack() {
+                            backButton()
+                                .disabled(destination == .welcome)
+                            
+                            Spacer()
+                            
+                            closeButton()
+                        }.animation(nil),
+                        alignment: .topTrailing
+                    )
                 
                 switch destination {
                 case .welcome:
                     
                     Button("Help") {
-                        withAnimation(.default) {
+//                        withAnimation(.default) {
                             destination = .help
-                        }
+//                        }
                     }
                     
                     Button("QR") {
-                        withAnimation(.default) {
+//                        withAnimation(.default) {
                             destination = .qr
-                        }
+//                        }
                     }
                 case .help:
                     WhatIsWalletView()
-                        .overlay(
-                            backButton(),
-                            alignment: .topTrailing
-                        )
                 case .qr:
                     QRCodeView()
-                        .overlay(
-                            backButton(),
-                            alignment: .topTrailing
-                        )
                 }
             }
         }
-        .frame(height: destination.preferredHeight)
+        .animation(nil)
     }
     
     func backButton() -> some View {
         Button(action: {
-            withAnimation(.default) {
-                destination = .welcome
-            }
+            destination = .welcome
+        }, label: {
+            Image(systemName: "chevron.backward")
+                .foregroundColor(.black)
+        })
+        .padding()
+    }
+    
+    func closeButton() -> some View {
+        Button(action: {
+            isShown = false
         }, label: {
             Image(systemName: "x.circle")
                 .foregroundColor(.black)
         })
+        .padding()
     }
 }
 
 struct Web3ModalSheet_Previews: PreviewProvider {
     static var previews: some View {
-        Web3ModalSheet()
+        Web3ModalSheet(destination: .welcome, isShown: .constant(true))
             .previewLayout(.sizeThatFits)
             .preferredColorScheme(.light)
         
-        Web3ModalSheet()
+        Web3ModalSheet(destination: .qr, isShown: .constant(true))
             .previewLayout(.sizeThatFits)
             .preferredColorScheme(.dark)
     }

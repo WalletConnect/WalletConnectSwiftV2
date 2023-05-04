@@ -71,7 +71,6 @@ struct HelpSection: View {
                 .font(.system(size: 14))
                 .foregroundColor(.foreground2)
                 .multilineTextAlignment(.center)
-                .lineLimit(3, reservesSpace: true)
         }
         .padding(.top, 10)
         .padding(.bottom, 5)

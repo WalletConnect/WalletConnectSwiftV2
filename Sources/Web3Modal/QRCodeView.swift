@@ -7,20 +7,21 @@ struct QRCodeView: View {
     
     @Environment(\.colorScheme) var colorScheme: ColorScheme
     
+    
+    
     var body: some View {
-        VStack {
-            render()?
-                .resizable()
-                .scaledToFit()
-//                .padding(.top, 60)
-//                .padding([.horizontal, .bottom], 20)
-            
+        
+        GeometryReader { g in
+            VStack(alignment: .center) {
+                render(frame: g.frame(in: .local))
+            }
         }
+        .padding(.bottom, 40)
     }
     
-    func render() -> Image? {
+    func render(frame: CGRect) -> Image? {
         let doc = QRCode.Document(
-            utf8String: "jfhaskfhakslfhkljashdfkjahdkljfhakljhfklhkjaglkjdhfjhaskjdfhakjfbajlsdhfkjsfkjahsdfkjlhalkjdhfajskdfkjdhaksjdhakjdhakjsdhkasjhskjdhskjashdkjashda13aefdsadsadsajdkajshdaksjhdskajhsdakjhsakdasjdhkasjdhaksjdhakjdhakjsdhkasjhskjdhskjashdkjashd",
+            utf8String: Array(repeating: ["a", "b", "c", "1", "2", "3"], count: 50).flatMap({ $0 }).shuffled().joined(),
             errorCorrection: .high
         )
 
@@ -37,7 +38,7 @@ struct QRCodeView: View {
         
         guard let logo = UIImage(named: "wc_logo", in: .module, with: .none)?.cgImage else {
             return doc.imageUI(
-                CGSize(width: 600, height: 600), label: Text("fooo")
+                frame.size, label: Text("fooo")
             )
         }
 
@@ -50,7 +51,7 @@ struct QRCodeView: View {
         )
         
         return doc.imageUI(
-            CGSize(width: 600, height: 600), label: Text("fooo")
+            frame.size, label: Text("fooo")
         )
     }
 }
