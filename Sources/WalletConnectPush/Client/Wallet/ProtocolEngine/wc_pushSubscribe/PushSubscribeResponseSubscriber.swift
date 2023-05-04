@@ -55,12 +55,10 @@ class PushSubscribeResponseSubscriber {
                     let pubKeyY = responseKeys.publicKey
                     let peerPubKeyZ = payload.response.publicKey
 
-
-
                     var account: Account!
                     var metadata: AppMetadata!
                     var pushSubscriptionTopic: String!
-                    var availableScope: Set<NotificationScope>!
+                    var availableScope: Set<NotificationType>!
                     let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
                     do {
                         // generate symm key P
@@ -85,7 +83,7 @@ class PushSubscribeResponseSubscriber {
                     }
                     dappsMetadataStore.delete(forKey: payload.topic)
                     let expiry = Date(timeIntervalSince1970: TimeInterval(claims.exp))
-                    let scope: [NotificationScope: Bool] = availableScope.reduce(into: [:]) { $0[$1] = ScopeValue(description: $1., enabled: true) }
+                    let scope: [NotificationScope: ScopeValue] = availableScope.reduce(into: [:]) { $0[$1.name] = ScopeValue(description: $1.description, enabled: true) }
                     let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata, scope: scope, expiry: expiry)
 
                     subscriptionsStore.set(pushSubscription, forKey: pushSubscriptionTopic)

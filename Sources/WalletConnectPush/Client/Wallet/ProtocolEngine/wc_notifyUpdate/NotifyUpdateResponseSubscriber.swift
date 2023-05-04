@@ -59,13 +59,13 @@ class NotifyUpdateResponseSubscriber {
             }.store(in: &publishers)
     }
 
-    private func builScope(selected: String, dappUrl: String) async throws -> [NotificationScope: Bool] {
+    private func builScope(selected: String, dappUrl: String) async throws -> [NotificationScope: ScopeValue] {
         let selectedScope = selected
             .components(separatedBy: " ")
             .compactMap { NotificationScope(rawValue: $0) }
 
         let availableScope = try await subscriptionScopeProvider.getSubscriptionScope(dappUrl: dappUrl)
-        return availableScope.reduce(into: [:]) { $0[$1] = selectedScope.contains($1) }
+        return availableScope.reduce(into: [:]) { $0[$1.name] = ScopeValue(description: $1.description, enabled: selectedScope.contains($1.name)) }
     }
 
     // TODO: handle error response
