@@ -268,7 +268,7 @@ final class PushTests: XCTestCase {
             .dropFirst()
             .sink { [unowned self] subscriptions in
                 guard !subscriptions.isEmpty else {return}
-                let updatedScope = Set(subscriptions.first!.scope.filter{ $0.value == true }.keys)
+                let updatedScope = Set(subscriptions.first!.scope.filter{ $0.value.enabled == true }.keys)
                 XCTAssertEqual(updatedScope, updateScope)
                 Task { try! await walletPushClient.deleteSubscription(topic: subscriptions.first!.topic) }
                 expectation.fulfill()

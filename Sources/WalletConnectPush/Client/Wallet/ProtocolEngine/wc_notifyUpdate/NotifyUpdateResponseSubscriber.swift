@@ -47,7 +47,7 @@ class NotifyUpdateResponseSubscriber {
                         return
                     }
                     let expiry = Date(timeIntervalSince1970: TimeInterval(claims.exp))
-
+                    
                     let updatedSubscription = PushSubscription(topic: subscriptionTopic, account: oldSubscription.account, relay: oldSubscription.relay, metadata: oldSubscription.metadata, scope: scope, expiry: expiry)
 
                     subscriptionsStore.set(updatedSubscription, forKey: subscriptionTopic)

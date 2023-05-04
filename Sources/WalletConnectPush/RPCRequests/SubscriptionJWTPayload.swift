@@ -54,8 +54,8 @@ struct SubscriptionJWTPayload: JWTClaimsCodable {
 
     func encode(iss: String) throws -> Claims {
         return Claims(
-            iat: expiry(days: 1),
-            exp: defaultIatMilliseconds(),
+            iat: defaultIatMilliseconds(),
+            exp: expiry(days: 30),
             iss: iss,
             ksu: keyserver.absoluteString,
             aud: dappUrl,
@@ -65,5 +65,4 @@ struct SubscriptionJWTPayload: JWTClaimsCodable {
         )
     }
 }
-//🦋 Wallet:  [Push] PushSubscribeResponseSubscriber: no sym key for topic - 11:59:04.1430
-//add scope to sunscriptionAuth
+
