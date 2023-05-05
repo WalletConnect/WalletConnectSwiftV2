@@ -2,7 +2,14 @@ name: build_artifacts
 
 on:
   workflow_dispatch:
-    
+    inputs:
+      relay-endpoint:
+        description: 'The endpoint of the relay e.g. relay.walletconnect.com'
+        required: false
+        default: 'relay.walletconnect.com'
+      project-id:
+        description: 'WalletConnect project id'
+        required: true
   push:
     branches: [ main ]
 
@@ -22,9 +29,15 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-spm-
 
-    - name: Build for testing
+    - name: Build for testing on workflow_dispatch
+      if: ${{ github.event_name == 'workflow_dispatch' }}
       shell: bash
-      run: make build_all RELAY_HOST=${{ inputs.project-id }} PROJECT_ID=${{ inputs.project-id }}
+      run: make build_all RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }}
+
+    - name: Build for testing on push
+      if: ${{ github.event_name == 'push' }}
+      shell: bash
+      run: make build_all RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }}
 
     - name: Tar DerivedDataCache
       shell: bash

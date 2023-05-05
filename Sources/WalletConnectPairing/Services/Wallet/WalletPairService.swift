@@ -2,7 +2,7 @@ import Foundation
 
 actor WalletPairService {
     enum Errors: Error {
-        case pairingAlreadyExist
+        case pairingAlreadyExist(topic: String)
     }
 
     let networkingInteractor: NetworkInteracting
@@ -19,7 +19,7 @@ actor WalletPairService {
 
     func pair(_ uri: WalletConnectURI) async throws {
         guard !hasPairing(for: uri.topic) else {
-            throw Errors.pairingAlreadyExist
+            throw Errors.pairingAlreadyExist(topic: uri.topic)
         }
         var pairing = WCPairing(uri: uri)
         let symKey = try SymmetricKey(hex: uri.symKey)
@@ -31,5 +31,14 @@ actor WalletPairService {
 
     func hasPairing(for topic: String) -> Bool {
         return pairingStorage.hasPairing(forTopic: topic)
+    }
+}
+
+// MARK: - LocalizedError
+extension WalletPairService.Errors: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .pairingAlreadyExist(let topic):   return "Pairing with topic (\(topic)) already exist"
+        }
     }
 }

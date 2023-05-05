@@ -25,7 +25,7 @@ runs:
 
     - name: Build for testing
       shell: bash
-      run: make build_all RELAY_HOST=${{ inputs.project-id }} PROJECT_ID=${{ inputs.project-id }}
+      run: make build_all RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }}
 
     - name: Tar DerivedDataCache
       shell: bash
