@@ -26,7 +26,7 @@ public struct Web3ModalSheet: View {
                             Spacer()
                             
                             closeButton()
-                        }.animation(nil),
+                        },
                         alignment: .topTrailing
                     )
                 
@@ -34,13 +34,13 @@ public struct Web3ModalSheet: View {
                 case .welcome:
                     
                     Button("Help") {
-                        withAnimation(.default) {
+                        withAnimation {
                             destination = .help
                         }
                     }
                     
                     Button("QR") {
-                        withAnimation(.default) {
+                        withAnimation {
                             destination = .qr
                         }
                     }
@@ -51,12 +51,13 @@ public struct Web3ModalSheet: View {
                 }
             }
         }
-        .animation(nil)
     }
     
     func backButton() -> some View {
         Button(action: {
-            destination = .welcome
+            withAnimation {
+                destination = .welcome
+            }
         }, label: {
             Image(systemName: "chevron.backward")
                 .foregroundColor(.black)
@@ -66,7 +67,9 @@ public struct Web3ModalSheet: View {
     
     func closeButton() -> some View {
         Button(action: {
-            isShown = false
+            withAnimation {
+                isShown = false
+            }
         }, label: {
             Image(systemName: "x.circle")
                 .foregroundColor(.black)

@@ -1,6 +1,4 @@
 import UIKit
-import SwiftUI
-import Web3Modal
 import WalletConnectChat
 
 final class ChatListRouter {

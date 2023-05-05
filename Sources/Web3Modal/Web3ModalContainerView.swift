@@ -6,13 +6,19 @@ public struct Web3ModalContainerView: View {
     
     @State var showModal: Bool = false
     
+    public init() {
+        
+    }
+    
     public var body: some View {
         
         VStack(spacing: 0) {
             
             Color.black.opacity(0.3)
                 .onTapGesture {
-                    showModal = false
+                    withAnimation {
+                        showModal = false
+                    }
                 }
             
             if showModal {
