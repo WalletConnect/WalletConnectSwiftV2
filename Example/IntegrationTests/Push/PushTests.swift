@@ -249,7 +249,7 @@ final class PushTests: XCTestCase {
             Task { try! await walletPushClient.deleteSubscription(topic: subscriptions.first!.topic) }
             expectation.fulfill()
         }.store(in: &publishers)
-        await fulfillment(of: [expectation], timeout: InputConfig.defaultTimeout)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testWalletCreatesAndUpdatesSubscription() async {
@@ -274,7 +274,7 @@ final class PushTests: XCTestCase {
                 expectation.fulfill()
             }.store(in: &publishers)
 
-        await fulfillment(of: [expectation], timeout: InputConfig.defaultTimeout)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
 }
