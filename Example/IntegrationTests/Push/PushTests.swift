@@ -264,13 +264,12 @@ final class PushTests: XCTestCase {
             }
             .store(in: &publishers)
 
-        walletPushClient.subscriptionsPublisher
-            .dropFirst()
-            .sink { [unowned self] subscriptions in
-                guard !subscriptions.isEmpty else {return}
-                let updatedScope = Set(subscriptions.first!.scope.filter{ $0.value.enabled == true }.keys)
+        walletPushClient.updateSubscriptionPublisher
+            .sink { [unowned self] result in
+                guard case .success(let subscription) = result else { XCTFail(); return }
+                let updatedScope = Set(subscription.scope.filter{ $0.value.enabled == true }.keys)
                 XCTAssertEqual(updatedScope, updateScope)
-                Task { try! await walletPushClient.deleteSubscription(topic: subscriptions.first!.topic) }
+                Task { try! await walletPushClient.deleteSubscription(topic: subscription.topic) }
                 expectation.fulfill()
             }.store(in: &publishers)
 

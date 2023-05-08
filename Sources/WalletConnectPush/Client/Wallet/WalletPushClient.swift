@@ -38,6 +38,10 @@ public class WalletPushClient {
         deleteSubscriptionPublisherSubject.eraseToAnyPublisher()
     }
 
+    public var updateSubscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
+        return notifyUpdateResponseSubscriber.updateSubscriptionPublisher
+    }
+
     private let deletePushSubscriptionService: DeletePushSubscriptionService
     private let deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
     private let pushSubscribeRequester: PushSubscribeRequester

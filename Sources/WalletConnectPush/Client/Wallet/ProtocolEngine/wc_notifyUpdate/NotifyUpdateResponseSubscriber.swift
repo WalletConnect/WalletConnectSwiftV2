@@ -13,7 +13,7 @@ class NotifyUpdateResponseSubscriber {
     private let subscriptionsStore: CodableStore<PushSubscription>
     private let subscriptionScopeProvider: SubscriptionScopeProvider
     private var subscriptionPublisherSubject = PassthroughSubject<Result<PushSubscription, Error>, Never>()
-    var subscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
+    var updateSubscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
         return subscriptionPublisherSubject.eraseToAnyPublisher()
     }
 

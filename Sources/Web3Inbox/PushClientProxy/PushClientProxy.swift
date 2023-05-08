@@ -21,6 +21,10 @@ final class PushClientProxy {
             let params = try parse(ApproveRequest.self, params: request.params)
             try await client.reject(id: params.id)
             try await respond(request: request)
+        case .update:
+            let params = try parse(UpdateRequest.self, params: request.params)
+            try await client.update(topic: params.topic, scope: params.scope)
+            try await respond(request: request)
         case .reject:
             let params = try parse(RejectRequest.self, params: request.params)
             try await client.reject(id: params.id)
@@ -59,6 +63,11 @@ private extension PushClientProxy {
 
     struct ApproveRequest: Codable {
         let id: RPCID
+    }
+
+    struct UpdateRequest: Codable {
+        let topic: String
+        let scope: Set<NotificationScope>
     }
 
     struct RejectRequest: Codable {
