@@ -19,7 +19,7 @@ final class PushClientProxy {
         switch event {
         case .approve:
             let params = try parse(ApproveRequest.self, params: request.params)
-            try await client.reject(id: params.id)
+            try await client.approve(id: params.id, onSign: onSign)
             try await respond(request: request)
         case .update:
             let params = try parse(UpdateRequest.self, params: request.params)
