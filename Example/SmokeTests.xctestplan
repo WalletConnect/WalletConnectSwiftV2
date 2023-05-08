@@ -42,6 +42,7 @@
         "ChatTests\/testInvite()",
         "EIP1271VerifierTests",
         "EIP191VerifierTests",
+        "EIP55Tests",
         "ENSResolverTests",
         "PairingTests",
         "PushTests\/testDappDeletePushSubscription()",
