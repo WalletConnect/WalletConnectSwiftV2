@@ -56,7 +56,7 @@ public struct WalletPushClientFactory {
 
         let dappsMetadataStore = CodableStore<AppMetadata>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.dappsMetadataStore)
 
-        let pushSubscribeRequester = PushSubscribeRequester(keyserverURL: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, kms: kms, groupKeychainStorage: groupKeychainStorage, dappsMetadataStore: dappsMetadataStore)
+        let pushSubscribeRequester = PushSubscribeRequester(keyserverURL: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, kms: kms, dappsMetadataStore: dappsMetadataStore)
 
         let subscriptionScopeProvider = SubscriptionScopeProvider()
         let pushSubscribeResponseSubscriber = PushSubscribeResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, groupKeychainStorage: groupKeychainStorage, subscriptionsStore: subscriptionStore, dappsMetadataStore: dappsMetadataStore, subscriptionScopeProvider: subscriptionScopeProvider)

@@ -14,8 +14,6 @@ class PushSubscribeRequester {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementService
     private let logger: ConsoleLogging
-    // Keychain shared with UNNotificationServiceExtension in order to decrypt PNs
-    private let groupKeychainStorage: KeychainStorageProtocol
     private let webDidResolver: WebDidResolver
     private let dappsMetadataStore: CodableStore<AppMetadata>
 
@@ -24,7 +22,6 @@ class PushSubscribeRequester {
          identityClient: IdentityClient,
          logger: ConsoleLogging,
          kms: KeyManagementService,
-         groupKeychainStorage: KeychainStorageProtocol,
          webDidResolver: WebDidResolver = WebDidResolver(),
          dappsMetadataStore: CodableStore<AppMetadata>
     ) {
@@ -33,7 +30,6 @@ class PushSubscribeRequester {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.kms = kms
-        self.groupKeychainStorage = groupKeychainStorage
         self.webDidResolver = webDidResolver
         self.dappsMetadataStore = dappsMetadataStore
     }
