@@ -164,7 +164,7 @@ final class SignClientTests: XCTestCase {
         let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces)!
         try await wallet.client.pair(uri: uri)
 
-        wait(for: [expectation], timeout: .infinity)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testSessionRequest() async throws {
