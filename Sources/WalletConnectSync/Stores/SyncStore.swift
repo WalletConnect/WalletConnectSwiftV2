@@ -53,25 +53,13 @@ public final class SyncStore<Object: SyncObject> {
 
     public func set(object: Object, for account: Account) async throws {
         let record = try indexStore.getRecord(account: account, name: name)
-
-        guard !objectStore.isExists(topic: record.topic, id: object.syncId) else {
-            return
-        }
-
         try await syncClient.set(account: account, store: record.store, object: object)
-
         objectStore.set(object: object, topic: record.topic)
     }
 
     public func delete(id: String, for account: Account) async throws {
         let record = try indexStore.getRecord(account: account, name: name)
-
-        guard objectStore.isExists(topic: record.topic, id: id) else {
-            return
-        }
-
         try await syncClient.delete(account: account, store: record.store, key: id)
-
         objectStore.delete(id: id, topic: record.topic)
     }
 
@@ -107,21 +95,11 @@ private extension SyncStore {
 
     func setInStore(object: Object, for account: Account) throws {
         let record = try indexStore.getRecord(account: account, name: name)
-
-        guard !objectStore.isExists(topic: record.topic, id: object.syncId) else {
-            return
-        }
-
         objectStore.set(object: object, topic: record.topic)
     }
 
     func deleteInStore(id: String, for account: Account) throws {
         let record = try indexStore.getRecord(account: account, name: name)
-
-        guard objectStore.isExists(topic: record.topic, id: id) else {
-            return
-        }
-
         objectStore.delete(id: id, topic: record.topic)
     }
 }

@@ -33,19 +33,32 @@ final class SyncObjectStore<Object: SyncObject> {
         }
     }
 
-    func isExists(topic: String, id: String) -> Bool {
-        return store.getElement(for: topic)?[id] != nil
-    }
-
     func set(object: Object, topic: String) {
+        guard isChanged(object, topic: topic) else { return }
         var map = getMap(topic: topic)
         map[object.syncId] = object
         store.set(element: map, for: topic)
     }
 
     func delete(id: String, topic: String) {
+        guard isExists(id: id, topic: topic) else { return }
         var map = getMap(topic: topic)
         map[id] = nil
         store.set(element: map, for: topic)
+    }
+}
+
+private extension SyncObjectStore {
+
+    func isExists(id: String, topic: String) -> Bool {
+        return getElement(id: id, topic: topic) != nil
+    }
+
+    func getElement(id: String, topic: String) -> Object? {
+        return store.getElement(for: topic)?[id]
+    }
+
+    func isChanged(_ object: Object, topic: String) -> Bool {
+        return object != getElement(id: object.syncId, topic: topic)
     }
 }

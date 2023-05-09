@@ -139,11 +139,8 @@ final class ChatStorage {
         guard let invite = getSentInvite(id: sentInviteId)
         else { return }
 
-        let account = invite.inviterAccount
-        try await sentInviteStore.delete(id: invite.syncId, for: account)
-
         let approved = SentInvite(invite: invite, status: .approved)
-        try await sentInviteStore.set(object: approved, for: account)
+        try await sentInviteStore.set(object: approved, for: invite.inviterAccount)
 
         acceptPublisherSubject.send((topic, approved))
     }
@@ -152,12 +149,8 @@ final class ChatStorage {
         guard let invite = getSentInvite(id: sentInviteId)
         else { return }
 
-        let account = invite.inviterAccount
-        try await sentInviteStore.delete(id: invite.syncId, for: account)
-
         let rejected = SentInvite(invite: invite, status: .rejected)
-        // TODO: Update also for peer invites
-        try await sentInviteStore.set(object: rejected, for: account)
+        try await sentInviteStore.set(object: rejected, for: invite.inviterAccount)
 
         rejectPublisherSubject.send(rejected)
     }
