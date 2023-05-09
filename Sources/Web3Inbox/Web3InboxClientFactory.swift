@@ -40,7 +40,7 @@ final class Web3InboxClientFactory {
     }
 
     private static func buildUrl(account: Account, config: [ConfigParam: Bool]) -> URL {
-        var urlComponents = URLComponents(string: "https://web3inbox-dev-hidden.vercel.app/")!
+        var urlComponents = URLComponents(string: "https://web3inbox-dev-hidden-git-feat-preferences-modal-walletconnect1.vercel.app/")!
         let defaultQueryItems = [URLQueryItem(name: "chatProvider", value: "ios"), URLQueryItem(name: "pushProvider", value: "ios")]
         let accountQueryItem = URLQueryItem(name: "account", value: account.address)
         var queryItems = [URLQueryItem]()
@@ -51,7 +51,6 @@ final class Web3InboxClientFactory {
             queryItems.append(URLQueryItem(name: "\(param.key)", value: "false"))
         }
         urlComponents.queryItems = queryItems
-        print(urlComponents.url!.absoluteString)
         return urlComponents.url!
     }
 }

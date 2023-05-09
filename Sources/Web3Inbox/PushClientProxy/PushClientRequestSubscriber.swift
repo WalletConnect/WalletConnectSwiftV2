@@ -22,9 +22,22 @@ final class PushClientRequestSubscriber {
             let params = RequestPayload(id: id, account: account, metadata: metadata)
             handle(event: .pushRequest, params: params)
         }.store(in: &publishers)
+
         client.pushMessagePublisher.sink { [unowned self] record in
             handle(event: .pushMessage, params: record)
         }.store(in: &publishers)
+
+        client.deleteSubscriptionPublisher.sink { [unowned self] record in
+            handle(event: .pushDelete, params: record)
+        }.store(in: &publishers)
+
+//        client.subscriptionPublisher.sink { [unowned self] record in
+//            handle(event: .pushSubscription, params: record)
+//        }.store(in: &publishers)
+//
+//        client.updateSubscriptionPublisher.sink { [unowned self] record in
+//            handle(event: .pushUpdate, params: record)
+//        }.store(in: &publishers)
     }
 }
 
