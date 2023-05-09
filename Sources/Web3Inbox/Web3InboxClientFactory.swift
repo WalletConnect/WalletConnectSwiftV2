@@ -7,13 +7,14 @@ final class Web3InboxClientFactory {
         chatClient: ChatClient,
         pushClient: WalletPushClient,
         account: Account,
+        config: [ConfigParam: Bool],
         onSign: @escaping SigningCallback
     ) -> Web3InboxClient {
-        let host = hostUrlString(account: account)
+        let url = buildUrl(account: account, config: config)
         let logger = ConsoleLogger(suffix: "📬")
         let chatWebviewSubscriber = WebViewRequestSubscriber(logger: logger)
         let pushWebviewSubscriber = WebViewRequestSubscriber(logger: logger)
-        let webView = WebViewFactory(host: host, chatWebviewSubscriber: chatWebviewSubscriber, pushWebviewSubscriber: pushWebviewSubscriber).create()
+        let webView = WebViewFactory(url: url, chatWebviewSubscriber: chatWebviewSubscriber, pushWebviewSubscriber: pushWebviewSubscriber).create()
         let chatWebViewProxy = WebViewProxy(webView: webView, scriptFormatter: ChatWebViewScriptFormatter())
         let pushWebViewProxy = WebViewProxy(webView: webView, scriptFormatter: PushWebViewScriptFormatter())
 
@@ -38,7 +39,19 @@ final class Web3InboxClientFactory {
         )
     }
 
-    private static func hostUrlString(account: Account) -> String {
-        return "https://web3inbox-dev-hidden.vercel.app/?chatProvider=ios&pushProvider=ios&account=\(account.address)"
+    private static func buildUrl(account: Account, config: [ConfigParam: Bool]) -> URL {
+        var urlComponents = URLComponents(string: "https://web3inbox-dev-hidden.vercel.app/")!
+        let defaultQueryItems = [URLQueryItem(name: "chatProvider", value: "ios"), URLQueryItem(name: "pushProvider", value: "ios")]
+        let accountQueryItem = URLQueryItem(name: "account", value: account.address)
+        var queryItems = [URLQueryItem]()
+        queryItems.append(accountQueryItem)
+        queryItems.append(contentsOf: defaultQueryItems)
+
+        for param in config.filter({ $0.value == false}) {
+            queryItems.append(URLQueryItem(name: "\(param.key)", value: "false"))
+        }
+        urlComponents.queryItems = queryItems
+        print(urlComponents.url!.absoluteString)
+        return urlComponents.url!
     }
 }

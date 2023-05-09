@@ -3,16 +3,16 @@ import WebKit
 
 final class WebViewFactory {
 
-    private let host: String
+    private let url: URL
     private let chatWebviewSubscriber: WebViewRequestSubscriber
     private let pushWebviewSubscriber: WebViewRequestSubscriber
 
     init(
-        host: String,
+        url: URL,
         chatWebviewSubscriber: WebViewRequestSubscriber,
         pushWebviewSubscriber: WebViewRequestSubscriber
     ) {
-        self.host = host
+        self.url = url
         self.chatWebviewSubscriber = chatWebviewSubscriber
         self.pushWebviewSubscriber = pushWebviewSubscriber
     }
@@ -29,7 +29,7 @@ final class WebViewFactory {
             name: WebViewRequestSubscriber.push
         )
         let webview = WKWebView(frame: .zero, configuration: configuration)
-        let request = URLRequest(url: URL(string: host)!)
+        let request = URLRequest(url: url)
         webview.load(request)
         webview.uiDelegate = chatWebviewSubscriber
         return webview

@@ -16,7 +16,7 @@ final class Web3InboxViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         let account = Account(blockchain: Blockchain("eip155:1")!, address: EthKeyStore.shared.address)!
-        Web3Inbox.configure(account: account, onSign: onSing)
+        Web3Inbox.configure(account: account, config: [.chatEnabled: false, .settingsEnabled: false], onSign: onSing)
 
         edgesForExtendedLayout = []
         navigationItem.title = "Web3Inbox SDK"
