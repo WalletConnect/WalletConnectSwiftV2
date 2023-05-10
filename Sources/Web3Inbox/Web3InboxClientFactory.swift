@@ -11,7 +11,7 @@ final class Web3InboxClientFactory {
         onSign: @escaping SigningCallback
     ) -> Web3InboxClient {
         let url = buildUrl(account: account, config: config)
-        let logger = ConsoleLogger(suffix: "📬")
+        let logger = ConsoleLogger(suffix: "📬", loggingLevel: .debug)
         let chatWebviewSubscriber = WebViewRequestSubscriber(logger: logger)
         let pushWebviewSubscriber = WebViewRequestSubscriber(logger: logger)
         let webView = WebViewFactory(url: url, chatWebviewSubscriber: chatWebviewSubscriber, pushWebviewSubscriber: pushWebviewSubscriber).create()
@@ -27,7 +27,7 @@ final class Web3InboxClientFactory {
         return Web3InboxClient(
             webView: webView,
             account: account,
-            logger: ConsoleLogger(),
+            logger: logger,
             chatClientProxy: clientProxy,
             clientSubscriber: clientSubscriber,
             chatWebviewProxy: chatWebViewProxy,
@@ -40,7 +40,7 @@ final class Web3InboxClientFactory {
     }
 
     private static func buildUrl(account: Account, config: [ConfigParam: Bool]) -> URL {
-        var urlComponents = URLComponents(string: "https://web3inbox-dev-hidden-git-feat-preferences-modal-walletconnect1.vercel.app/")!
+        var urlComponents = URLComponents(string: "https://web3inbox-dev-hidden.vercel.app/")!
         let defaultQueryItems = [URLQueryItem(name: "chatProvider", value: "ios"), URLQueryItem(name: "pushProvider", value: "ios")]
         let accountQueryItem = URLQueryItem(name: "account", value: account.address)
         var queryItems = [URLQueryItem]()

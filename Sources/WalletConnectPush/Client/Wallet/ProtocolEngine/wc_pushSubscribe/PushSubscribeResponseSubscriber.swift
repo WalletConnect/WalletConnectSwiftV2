@@ -69,7 +69,7 @@ class PushSubscribeResponseSubscriber {
                         account = try Account(DIDPKHString: claims.sub)
                         metadata = try dappsMetadataStore.get(key: payload.topic)
                         availableScope = try await subscriptionScopeProvider.getSubscriptionScope(dappUrl: metadata!.url)
-                        logger.debug("PushSubscribeResponseSubscriber: subscribing push subscription topic: \(payload.topic)")
+                        logger.debug("PushSubscribeResponseSubscriber: subscribing push subscription topic: \(pushSubscriptionTopic!)")
                         try await networkingInteractor.subscribe(topic: pushSubscriptionTopic)
                     } catch {
                         logger.debug("PushSubscribeResponseSubscriber: error: \(error)")
@@ -78,7 +78,7 @@ class PushSubscribeResponseSubscriber {
                     }
 
                     guard let metadata = metadata else {
-                        logger.debug("PushSubscribeResponseSubscriber: no metadata for topic: \(payload.topic)")
+                        logger.debug("PushSubscribeResponseSubscriber: no metadata for topic: \(pushSubscriptionTopic)")
                         return
                     }
                     dappsMetadataStore.delete(forKey: payload.topic)

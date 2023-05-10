@@ -18,12 +18,12 @@ final class WebViewRequestSubscriber: NSObject, WKScriptMessageHandler {
         _ userContentController: WKUserContentController,
         didReceive message: WKScriptMessage
     ) {
-
+        logger.debug("WebViewRequestSubscriber: received request from w3i")
         guard
             let body = message.body as? String, let data = body.data(using: .utf8),
             let request = try? JSONDecoder().decode(RPCRequest.self, from: data)
         else { return }
-
+        logger.debug("request method: \(request.method)")
         Task {
             do {
                 try await onRequest?(request)

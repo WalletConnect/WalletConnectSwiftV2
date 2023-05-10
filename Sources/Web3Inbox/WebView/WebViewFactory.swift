@@ -29,6 +29,9 @@ final class WebViewFactory {
             name: WebViewRequestSubscriber.push
         )
         let webview = WKWebView(frame: .zero, configuration: configuration)
+        if #available(iOS 16.4, *) {
+            webview.isInspectable = true
+        } 
         let request = URLRequest(url: url)
         webview.load(request)
         webview.uiDelegate = chatWebviewSubscriber
