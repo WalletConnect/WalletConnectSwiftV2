@@ -45,4 +45,21 @@ class ResubscriptionService {
         kms.deletePublicKey(for: topic)
         networkingInteractor.unsubscribe(topic: topic)
     }
+
+    func subscribeForSyncInvites(account: Account) async throws {
+        let invites = chatStorage.getSentInvites(account: account)
+
+        for invite in invites {
+            let symmetricKey = try SymmetricKey(hex: invite.symKey)
+            let agreementPublicKey = try AgreementPublicKey(hex: invite.inviterPubKeyY)
+            let agreementPrivateKey = try AgreementPrivateKey(hex: invite.inviterPrivKeyY)
+
+            // TODO: Should we set symKey for inviteTopic???
+            try kms.setSymmetricKey(symmetricKey, for: invite.responseTopic)
+            try kms.setPublicKey(publicKey: agreementPublicKey, for: invite.responseTopic)
+            try kms.setPrivateKey(agreementPrivateKey)
+        }
+
+        try await networkingInteractor.batchSubscribe(topics: invites.map { $0.responseTopic })
+    }
 }

@@ -80,6 +80,11 @@ public struct AgreementPrivateKey: GenericPasswordConvertible, Equatable {
         self.key = Curve25519.KeyAgreement.PrivateKey()
     }
 
+    public init(hex: String) throws {
+        let data = Data(hex: hex)
+        try self.init(rawRepresentation: data)
+    }
+
     public init<D>(rawRepresentation: D) throws where D: ContiguousBytes {
         self.key = try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: rawRepresentation)
     }
