@@ -10,7 +10,7 @@ final class SessionEngine {
     }
 
     var onSessionsUpdate: (([Session]) -> Void)?
-    var onSessionRequest: ((Request, Session.Context?) -> Void)?
+    var onSessionRequest: ((Request, VerifyContext?) -> Void)?
     var onSessionResponse: ((Response) -> Void)?
     var onSessionRejected: ((String, SessionType.Reason) -> Void)?
     var onSessionDelete: ((String, SessionType.Reason) -> Void)?
@@ -133,7 +133,7 @@ private extension SessionEngine {
         networkingInteractor.requestSubscription(on: SessionRequestProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionType.RequestParams>) in
                 Task(priority: .high) {
-                    await onSessionRequest(payload: payload)
+                    onSessionRequest(payload: payload)
                 }
             }.store(in: &publishers)
 
@@ -228,7 +228,6 @@ private extension SessionEngine {
             chainId: payload.request.chainId,
             expiry: payload.request.request.expiry
         )
-
         guard let session = sessionStore.getSession(forTopic: topic) else {
             return respondError(payload: payload, reason: .noSessionForTopic, protocolMethod: protocolMethod)
         }
@@ -238,24 +237,21 @@ private extension SessionEngine {
         guard session.hasPermission(forMethod: request.method, onChain: request.chainId) else {
             return respondError(payload: payload, reason: .unauthorizedMethod(request.method), protocolMethod: protocolMethod)
         }
-
         guard !request.isExpired() else {
             return respondError(payload: payload, reason: .sessionRequestExpired, protocolMethod: protocolMethod)
         }
-        
-        if let rawRequest = payload.rawRequest, let verifyClient {
-            Task(priority: .high) {
-                let attestationId = rawRequest.rawRepresentation.sha256().toHexString()
-                let origin = try? await verifyClient.registerAssertion(attestationId: attestationId)
-                let sessionContext = await Session.Context(
-                    origin: origin,
-                    validation: (origin == session.peerParticipant.metadata.url) ? .valid : (origin == nil ? .unknown : .invalid),
-                    verifyUrl: verifyClient.verifyHost
-                )
-                onSessionRequest?(request, sessionContext)
-            }
-        } else {
+        guard let verifyClient else {
             onSessionRequest?(request, nil)
+            return
+        }
+        Task(priority: .high) {
+            let assertionId = payload.decryptedPayload.sha256().toHexString()
+            let origin = try? await verifyClient.verifyOrigin(assertionId: assertionId)
+            let verifyContext = await verifyClient.createVerifyContext(
+                origin: origin,
+                domain: session.peerParticipant.metadata.url
+            )
+            onSessionRequest?(request, verifyContext)
         }
     }
 

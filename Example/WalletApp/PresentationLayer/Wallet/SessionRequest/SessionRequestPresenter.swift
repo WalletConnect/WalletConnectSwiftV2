@@ -23,7 +23,7 @@ final class SessionRequestPresenter: ObservableObject {
         interactor: SessionRequestInteractor,
         router: SessionRequestRouter,
         sessionRequest: Request,
-        context: Session.Context?
+        context: VerifyContext?
     ) {
         defer { setupInitialState() }
         self.interactor = interactor

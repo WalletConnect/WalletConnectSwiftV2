@@ -2,11 +2,11 @@ import Foundation
 import WalletConnectNetworking
 
 enum VerifyAPI: HTTPService {
-    case resolve(attestationId: String)
+    case resolve(assertionId: String)
 
     var path: String {
         switch self {
-        case .resolve(let attestationId):   return "/attestation/\(attestationId)"
+        case .resolve(let assertionId):   return "/attestation/\(assertionId)"
         }
     }
 

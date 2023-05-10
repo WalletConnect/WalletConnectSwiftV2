@@ -16,14 +16,14 @@ public final class SignClient: SignClientProtocol {
     /// Publisher that sends session proposal
     ///
     /// event is emited on responder client only
-    public var sessionProposalPublisher: AnyPublisher<(proposal: Session.Proposal, context: Session.Context?), Never> {
+    public var sessionProposalPublisher: AnyPublisher<(proposal: Session.Proposal, context: VerifyContext?), Never> {
         sessionProposalPublisherSubject.eraseToAnyPublisher()
     }
 
     /// Publisher that sends session request
     ///
     /// In most cases event will be emited on wallet
-    public var sessionRequestPublisher: AnyPublisher<(request: Request, context: Session.Context?), Never> {
+    public var sessionRequestPublisher: AnyPublisher<(request: Request, context: VerifyContext?), Never> {
         sessionRequestPublisherSubject.eraseToAnyPublisher()
     }
 
@@ -113,8 +113,8 @@ public final class SignClient: SignClientProtocol {
     private let historyService: HistoryService
     private let cleanupService: SignCleanupService
 
-    private let sessionProposalPublisherSubject = PassthroughSubject<(proposal: Session.Proposal, context: Session.Context?), Never>()
-    private let sessionRequestPublisherSubject = PassthroughSubject<(request: Request, context: Session.Context?), Never>()
+    private let sessionProposalPublisherSubject = PassthroughSubject<(proposal: Session.Proposal, context: VerifyContext?), Never>()
+    private let sessionRequestPublisherSubject = PassthroughSubject<(request: Request, context: VerifyContext?), Never>()
     private let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
     private let sessionSettlePublisherSubject = PassthroughSubject<Session, Never>()
     private let sessionDeletePublisherSubject = PassthroughSubject<(String, Reason), Never>()

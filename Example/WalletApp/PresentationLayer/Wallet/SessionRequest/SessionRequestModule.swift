@@ -1,9 +1,10 @@
 import SwiftUI
+
 import Web3Wallet
 
 final class SessionRequestModule {
     @discardableResult
-    static func create(app: Application, sessionRequest: Request, sessionContext: Session.Context?) -> UIViewController {
+    static func create(app: Application, sessionRequest: Request, sessionContext: VerifyContext?) -> UIViewController {
         let router = SessionRequestRouter(app: app)
         let interactor = SessionRequestInteractor()
         let presenter = SessionRequestPresenter(interactor: interactor, router: router, sessionRequest: sessionRequest, context: sessionContext)

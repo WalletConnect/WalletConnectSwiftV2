@@ -1,4 +1,5 @@
 import UIKit
+
 import Web3Wallet
 
 final class WalletRouter {
@@ -10,12 +11,12 @@ final class WalletRouter {
         self.app = app
     }
 
-    func present(request: AuthRequest, context: AuthContext?) {
+    func present(request: AuthRequest, context: VerifyContext?) {
         AuthRequestModule.create(app: app, request: request, context: context)
             .presentFullScreen(from: viewController, transparentBackground: true)
     }
 
-    func present(sessionRequest: Request, sessionContext: Session.Context?) {
+    func present(sessionRequest: Request, sessionContext: VerifyContext?) {
         SessionRequestModule.create(app: app, sessionRequest: sessionRequest, sessionContext: sessionContext)
             .presentFullScreen(from: viewController, transparentBackground: true)
     }

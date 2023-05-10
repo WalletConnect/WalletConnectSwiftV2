@@ -11,7 +11,8 @@ struct ThirdPartyConfigurator: Configurator {
             name: "Example Wallet",
             description: "wallet description",
             url: "example.wallet",
-            icons: ["https://avatars.githubusercontent.com/u/37784886"]
+            icons: ["https://avatars.githubusercontent.com/u/37784886"],
+            verifyUrl: "verify.walletconnect.com"
         )
         
         Web3Wallet.configure(metadata: metadata, crypto: DefaultCryptoProvider(), environment: BuildConfiguration.shared.apnsEnvironment)

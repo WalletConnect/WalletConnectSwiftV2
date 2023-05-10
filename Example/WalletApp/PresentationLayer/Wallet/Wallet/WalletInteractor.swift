@@ -4,11 +4,11 @@ import Web3Wallet
 import WalletConnectPush
 
 final class WalletInteractor {
-    var requestPublisher: AnyPublisher<(request: AuthRequest, context: AuthContext?), Never> {
+    var requestPublisher: AnyPublisher<(request: AuthRequest, context: VerifyContext?), Never> {
         return Web3Wallet.instance.authRequestPublisher
     }
 
-    var sessionRequestPublisher: AnyPublisher<(request: Request, context: Session.Context?), Never> {
+    var sessionRequestPublisher: AnyPublisher<(request: Request, context: VerifyContext?), Never> {
         return Web3Wallet.instance.sessionRequestPublisher
     }
 

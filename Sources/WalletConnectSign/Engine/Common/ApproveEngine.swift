@@ -13,7 +13,7 @@ final class ApproveEngine {
         case agreementMissingOrInvalid
     }
 
-    var onSessionProposal: ((Session.Proposal, Session.Context?) -> Void)?
+    var onSessionProposal: ((Session.Proposal, VerifyContext?) -> Void)?
     var onSessionRejected: ((Session.Proposal, Reason) -> Void)?
     var onSessionSettle: ((Session) -> Void)?
 
@@ -283,19 +283,18 @@ private extension ApproveEngine {
         }
         proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
         
-        if let rawRequest = payload.rawRequest, let verifyClient {
-            Task(priority: .high) {
-            let attestationId = rawRequest.rawRepresentation.sha256().toHexString()
-                let origin = try? await verifyClient.registerAssertion(attestationId: attestationId)
-                let sessionContext = await Session.Context(
-                    origin: origin,
-                    validation: (origin == payload.request.proposer.metadata.url) ? .valid : (origin == nil ? .unknown : .invalid),
-                    verifyUrl: verifyClient.verifyHost
-                )
-                onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), sessionContext)
-            }
-        } else {
+        guard let verifyClient else {
             onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), nil)
+            return
+        }
+        Task(priority: .high) {
+            let assertionId = payload.decryptedPayload.sha256().toHexString()
+            let origin = try? await verifyClient.verifyOrigin(assertionId: assertionId)
+            let verifyContext = await verifyClient.createVerifyContext(
+                origin: origin,
+                domain: payload.request.proposer.metadata.url
+            )
+            onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
         }
     }
 

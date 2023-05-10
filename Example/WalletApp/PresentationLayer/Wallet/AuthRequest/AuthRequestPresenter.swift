@@ -20,7 +20,7 @@ final class AuthRequestPresenter: ObservableObject {
         interactor: AuthRequestInteractor,
         router: AuthRequestRouter,
         request: AuthRequest,
-        context: AuthContext?
+        context: VerifyContext?
     ) {
         defer { setupInitialState() }
         self.interactor = interactor

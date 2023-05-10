@@ -3,7 +3,6 @@ import Combine
 
 @testable import WalletConnectSign
 
-
 final class SignClientMock: SignClientProtocol {
     var approveCalled = false
     var rejectCalled = false
@@ -19,7 +18,7 @@ final class SignClientMock: SignClientProtocol {
     private let request = WalletConnectSign.Request(id: .left(""), topic: "", method: "", params: "", chainId: Blockchain("eip155:1")!, expiry: nil)
     private let response = WalletConnectSign.Response(id: RPCID(1234567890123456789), topic: "", chainId: "", result: .response(AnyCodable(any: "")))
     
-    var sessionProposalPublisher: AnyPublisher<(proposal: WalletConnectSign.Session.Proposal, context: WalletConnectSign.Session.Context?), Never> {
+    var sessionProposalPublisher: AnyPublisher<(proposal: WalletConnectSign.Session.Proposal, context: VerifyContext?), Never> {
         let proposer = Participant(publicKey: "", metadata: metadata)
         let sessionProposal = WalletConnectSign.SessionProposal(
             relays: [],
@@ -33,7 +32,7 @@ final class SignClientMock: SignClientProtocol {
             .eraseToAnyPublisher()
     }
     
-    var sessionRequestPublisher: AnyPublisher<(request: WalletConnectSign.Request, context: WalletConnectSign.Session.Context?), Never> {
+    var sessionRequestPublisher: AnyPublisher<(request: WalletConnectSign.Request, context: VerifyContext?), Never> {
         return Result.Publisher((request, nil))
             .eraseToAnyPublisher()
     }

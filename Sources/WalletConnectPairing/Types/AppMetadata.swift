@@ -44,7 +44,7 @@ public struct AppMetadata: Codable, Equatable {
     public let icons: [String]
     
     /// The URL which used by VerifyClient.
-    public let verifyUrl: String
+    public let verifyUrl: String?
 
     /// Redirect links which could be manually used on wallet side.
     public let redirect: Redirect?
@@ -65,7 +65,7 @@ public struct AppMetadata: Codable, Equatable {
         description: String,
         url: String,
         icons: [String],
-        verifyUrl: String = "verify.walletconnect.com",
+        verifyUrl: String? = nil,
         redirect: Redirect? = nil
     ) {
         self.name = name

@@ -11,7 +11,7 @@ class WalletRequestSubscriber {
     private let walletErrorResponder: WalletErrorResponder
     private let pairingRegisterer: PairingRegisterer
     private let verifyClient: VerifyClient?
-    var onRequest: (((request: AuthRequest, context: AuthContext?)) -> Void)?
+    var onRequest: (((request: AuthRequest, context: VerifyContext?)) -> Void)?
     
     init(
         networkingInteractor: NetworkInteracting,
@@ -42,19 +42,18 @@ class WalletRequestSubscriber {
                 
                 let request = AuthRequest(id: payload.id, payload: payload.request.payloadParams)
                 
-                if let rawRequest = payload.rawRequest, let verifyClient {
-                    Task(priority: .high) {
-                        let attestationId = rawRequest.rawRepresentation.sha256().toHexString()
-                        let origin = try? await verifyClient.registerAssertion(attestationId: attestationId)
-                        let authContext = await AuthContext(
-                            origin: origin,
-                            validation: (origin == payload.request.payloadParams.domain) ? .valid : (origin == nil ? .unknown : .invalid),
-                            verifyUrl: verifyClient.verifyHost
-                        )
-                        onRequest?((request, authContext))
-                    }
-                } else {
+                guard let verifyClient else {
                     onRequest?((request, nil))
+                    return
+                }
+                Task(priority: .high) {
+                    let assertionId = payload.decryptedPayload.sha256().toHexString()
+                    let origin = try? await verifyClient.verifyOrigin(assertionId: assertionId)
+                    let verifyContext = await verifyClient.createVerifyContext(
+                        origin: origin,
+                        domain: payload.request.payloadParams.domain
+                    )
+                    onRequest?((request, verifyContext))
                 }
             }.store(in: &publishers)
     }

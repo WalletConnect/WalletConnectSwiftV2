@@ -2,9 +2,12 @@ import Foundation
 import WalletConnectUtils
 
 public class VerifyClientFactory {
-    public static func create(verifyHost: String) throws -> VerifyClient {
-        let originVerifier = OriginVerifier()
-        let assertionRegistrer = AssertionRegistrer(verifyHost: verifyHost)
+    public static func create(verifyHost: String?) throws -> VerifyClient? {
+        guard let verifyHost else {
+            return nil
+        }
+        let originVerifier = OriginVerifier(verifyHost: verifyHost)
+        let assertionRegistrer = AssertionRegistrer()
         let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults.standard
         let keyIdStorage = CodableStore<String>(defaults: keyValueStorage, identifier: VerifyStorageIdentifier.keyId)

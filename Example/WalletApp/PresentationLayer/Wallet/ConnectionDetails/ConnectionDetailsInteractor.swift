@@ -3,7 +3,7 @@ import Combine
 import Web3Wallet
 
 final class ConnectionDetailsInteractor {
-    var requestPublisher: AnyPublisher<(request: AuthRequest, context: AuthContext?), Never> {
+    var requestPublisher: AnyPublisher<(request: AuthRequest, context: VerifyContext?), Never> {
         return Web3Wallet.instance.authRequestPublisher
     }
     

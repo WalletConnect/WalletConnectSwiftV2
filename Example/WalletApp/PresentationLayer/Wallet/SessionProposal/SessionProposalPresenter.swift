@@ -16,7 +16,7 @@ final class SessionProposalPresenter: ObservableObject {
         interactor: SessionProposalInteractor,
         router: SessionProposalRouter,
         proposal: Session.Proposal,
-        context: Session.Context?
+        context: VerifyContext?
     ) {
         defer { setupInitialState() }
         self.interactor = interactor
