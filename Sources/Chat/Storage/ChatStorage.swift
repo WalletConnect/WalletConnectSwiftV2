@@ -8,6 +8,9 @@ final class ChatStorage {
     private let sentInviteStore: SyncStore<SentInvite>
     private let threadStore: SyncStore<Thread>
 
+    private let sentInviteStoreDelegate: SentInviteStoreDelegate
+    private let threadStoreDelegate: ThreadStoreDelegate
+
     private var messagesPublisherSubject = PassthroughSubject<[Message], Never>()
     private var receivedInvitesPublisherSubject = PassthroughSubject<[ReceivedInvite], Never>()
     private var newMessagePublisherSubject = PassthroughSubject<Message, Never>()
@@ -62,15 +65,27 @@ final class ChatStorage {
         messageStore: KeyedDatabase<[Message]>,
         receivedInviteStore: KeyedDatabase<[ReceivedInvite]>,
         sentInviteStore: SyncStore<SentInvite>,
-        threadStore: SyncStore<Thread>
+        threadStore: SyncStore<Thread>,
+        sentInviteStoreDelegate: SentInviteStoreDelegate,
+        threadStoreDelegate: ThreadStoreDelegate
     ) {
         self.messageStore = messageStore
         self.receivedInviteStore = receivedInviteStore
         self.sentInviteStore = sentInviteStore
         self.threadStore = threadStore
+        self.sentInviteStoreDelegate = sentInviteStoreDelegate
+        self.threadStoreDelegate = threadStoreDelegate
     }
 
     func initialize(for account: Account) async throws {
+        sentInviteStore.onInitialization = sentInviteStoreDelegate.onInitialization
+        sentInviteStore.onUpdate = sentInviteStoreDelegate.onUpdate
+        sentInviteStore.onDelete = sentInviteStoreDelegate.onDelete
+
+        threadStore.onInitialization = threadStoreDelegate.onInitialization
+        threadStore.onUpdate = threadStoreDelegate.onUpdate
+        threadStore.onDelete = threadStoreDelegate.onDelete
+
         try await sentInviteStore.initialize(for: account)
         try await threadStore.initialize(for: account)
     }
@@ -82,6 +97,7 @@ final class ChatStorage {
         receivedInviteStore.onUpdate = { [unowned self] in
             receivedInvitesPublisherSubject.send(getReceivedInvites(account: account))
         }
+
         try threadStore.setupSubscriptions(account: account)
         try sentInviteStore.setupSubscriptions(account: account)
     }

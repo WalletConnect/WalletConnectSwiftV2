@@ -66,7 +66,8 @@ class InvitationHandlingService {
         let thread = Thread(
             topic: threadTopic,
             selfAccount: invite.inviteeAccount,
-            peerAccount: invite.inviterAccount
+            peerAccount: invite.inviterAccount,
+            symKey: threadSymmetricKey.sharedKey.hexRepresentation
         )
 
         try await chatStorage.set(thread: thread, account: invite.inviteeAccount)

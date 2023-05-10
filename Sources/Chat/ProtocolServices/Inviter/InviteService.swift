@@ -128,7 +128,8 @@ private extension InviteService {
         let thread = Thread(
             topic: threadTopic,
             selfAccount: account,
-            peerAccount: peerAccount
+            peerAccount: peerAccount,
+            symKey: agreementKeys.sharedKey.hexRepresentation
         )
 
         try await chatStorage.set(thread: thread, account: account)

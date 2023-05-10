@@ -15,7 +15,7 @@ final class SyncClientFactory {
             crypto: crypto,
             kms: kms
         )
-        let indexStore = CodableStore<SyncRecord>(defaults: UserDefaults.standard, identifier: SyncStorageIdentifiers.index.rawValue)
+        let indexStore = CodableStore<SyncRecord>(defaults: UserDefaults.standard, identifier: SyncStorageIdentifiers.index.identifier)
         let syncIndexStore = SyncIndexStore(store: indexStore)
         let syncService = SyncService(
             networkInteractor: networkInteractor,

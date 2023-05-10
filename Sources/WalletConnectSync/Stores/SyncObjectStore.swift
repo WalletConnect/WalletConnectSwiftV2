@@ -33,18 +33,21 @@ final class SyncObjectStore<Object: SyncObject> {
         }
     }
 
-    func set(object: Object, topic: String) {
-        guard isChanged(object, topic: topic) else { return }
+    @discardableResult func set(object: Object, topic: String) -> Bool {
+        guard isChanged(object, topic: topic) else { return false }
         var map = getMap(topic: topic)
         map[object.syncId] = object
         store.set(element: map, for: topic)
+        return true
     }
 
-    func delete(id: String, topic: String) {
-        guard isExists(id: id, topic: topic) else { return }
+
+    @discardableResult func delete(id: String, topic: String) -> Bool {
+        guard isExists(id: id, topic: topic) else { return false }
         var map = getMap(topic: topic)
         map[id] = nil
         store.set(element: map, for: topic)
+        return true
     }
 }
 

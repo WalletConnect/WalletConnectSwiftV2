@@ -47,7 +47,7 @@ public struct AgreementPublicKey: GenericPasswordConvertible, Equatable {
     }
 
     public var hexRepresentation: String {
-        key.rawRepresentation.toHexString()
+        rawRepresentation.toHexString()
     }
 
     public var did: String {

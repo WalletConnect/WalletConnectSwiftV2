@@ -12,7 +12,7 @@ public struct SentInvite: Codable, Equatable {
     public let timestamp: UInt64
     public var status: Status
 
-    public init(
+    init(
         id: Int64,
         message: String,
         inviterAccount: Account,

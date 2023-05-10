@@ -29,6 +29,10 @@ public final class SyncStore<Object: SyncObject> {
         return syncUpdateSubject.eraseToAnyPublisher()
     }
 
+    public var onInitialization: (([Object]) async throws -> Void)?
+    public var onUpdate: ((Object) async throws -> Void)?
+    public var onDelete: ((String) async throws -> Void)?
+
     init(name: String, syncClient: SyncClient, indexStore: SyncIndexStore, objectStore: SyncObjectStore<Object>) {
         self.name = name
         self.syncClient = syncClient
@@ -40,6 +44,7 @@ public final class SyncStore<Object: SyncObject> {
 
     public func initialize(for account: Account) async throws {
         try await syncClient.create(account: account, store: name)
+        try await onInitialization?(getAll())
     }
 
     public func getAll(for account: Account) throws -> [Object] {
@@ -54,13 +59,19 @@ public final class SyncStore<Object: SyncObject> {
     public func set(object: Object, for account: Account) async throws {
         let record = try indexStore.getRecord(account: account, name: name)
         try await syncClient.set(account: account, store: record.store, object: object)
-        objectStore.set(object: object, topic: record.topic)
+
+        if objectStore.set(object: object, topic: record.topic) {
+            try await onUpdate?(object)
+        }
     }
 
     public func delete(id: String, for account: Account) async throws {
         let record = try indexStore.getRecord(account: account, name: name)
         try await syncClient.delete(account: account, store: record.store, key: id)
-        objectStore.delete(id: id, topic: record.topic)
+
+        if objectStore.delete(id: id, topic: record.topic) {
+            try await onDelete?(id)
+        }
     }
 
     public func setupSubscriptions(account: Account) throws {

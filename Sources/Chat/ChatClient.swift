@@ -143,7 +143,6 @@ public class ChatClient {
         let inviteKey = try await identityClient.goPublic(account: account)
         try await chatStorage.initialize(for: account)
         try await resubscriptionService.subscribeForInvites(inviteKey: inviteKey)
-        try await resubscriptionService.subscribeForSyncInvites(account: account)
     }
 
     /// Accepts a chat invite by id from account specified as inviteeAccount in Invite

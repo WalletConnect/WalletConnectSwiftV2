@@ -1,6 +1,15 @@
 import Foundation
 
-enum SyncStorageIdentifiers: String {
-    case index = "com.walletconnect.sync.index"
-    case object = "com.walletconnect.sync.object"
+enum SyncStorageIdentifiers {
+    case index
+    case object(store: String)
+
+    var identifier: String {
+        switch self {
+        case .index:
+            return "com.walletconnect.sync.index"
+        case .object(let store):
+            return "com.walletconnect.sync.object.\(store)"
+        }
+    }
 }
