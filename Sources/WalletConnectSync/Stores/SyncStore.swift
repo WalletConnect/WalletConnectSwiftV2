@@ -60,18 +60,13 @@ public final class SyncStore<Object: SyncObject> {
         let record = try indexStore.getRecord(account: account, name: name)
         try await syncClient.set(account: account, store: record.store, object: object)
 
-        if objectStore.set(object: object, topic: record.topic) {
-            try await onUpdate?(object)
-        }
+        objectStore.set(object: object, topic: record.topic)
     }
 
     public func delete(id: String, for account: Account) async throws {
         let record = try indexStore.getRecord(account: account, name: name)
         try await syncClient.delete(account: account, store: record.store, key: id)
-
-        if objectStore.delete(id: id, topic: record.topic) {
-            try await onDelete?(id)
-        }
+        objectStore.delete(id: id, topic: record.topic)
     }
 
     public func setupSubscriptions(account: Account) throws {
@@ -106,11 +101,21 @@ private extension SyncStore {
 
     func setInStore(object: Object, for account: Account) throws {
         let record = try indexStore.getRecord(account: account, name: name)
-        objectStore.set(object: object, topic: record.topic)
+
+        if objectStore.set(object: object, topic: record.topic) {
+            Task(priority: .high) {
+                try await onUpdate?(object) // TODO: Replace with syncUpdatePublisher
+            }
+        }
     }
 
     func deleteInStore(id: String, for account: Account) throws {
         let record = try indexStore.getRecord(account: account, name: name)
-        objectStore.delete(id: id, topic: record.topic)
+
+        if objectStore.delete(id: id, topic: record.topic) {
+            Task(priority: .high) {
+                try await onDelete?(id) // TODO: Replace with syncUpdatePublisher
+            }
+        }
     }
 }

@@ -16,9 +16,9 @@ final class ThreadStoreDelegate {
     }
 
     func onUpdate(_ thread: Thread) async throws {
-//        let symmetricKey = try SymmetricKey(hex: thread.symKey)
-//        try kms.setSymmetricKey(symmetricKey, for: thread.topic)
-//        try await networkingInteractor.subscribe(topic: thread.topic)
+        let symmetricKey = try SymmetricKey(hex: thread.symKey)
+        try kms.setSymmetricKey(symmetricKey, for: thread.topic)
+        try await networkingInteractor.subscribe(topic: thread.topic)
     }
 
     func onDelete(_ id: String) async throws {

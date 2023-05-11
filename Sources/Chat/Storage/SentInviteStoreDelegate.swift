@@ -32,13 +32,11 @@ final class SentInviteStoreDelegate {
 private extension SentInviteStoreDelegate {
 
     func syncKeychain(invite: SentInvite) throws {
-//        let symmetricKey = try SymmetricKey(hex: invite.symKey)
-//        let agreementPublicKey = try AgreementPublicKey(hex: invite.inviterPubKeyY)
-//        let agreementPrivateKey = try AgreementPrivateKey(hex: invite.inviterPrivKeyY)
-//
-//        // TODO: Should we set symKey for inviteTopic???
-//        try kms.setSymmetricKey(symmetricKey, for: invite.responseTopic)
-//        try kms.setPublicKey(publicKey: agreementPublicKey, for: invite.responseTopic)
-//        try kms.setPrivateKey(agreementPrivateKey)
+        let symmetricKey = try SymmetricKey(hex: invite.symKey)
+        let agreementPrivateKey = try AgreementPrivateKey(hex: invite.inviterPrivKeyY)
+
+        // TODO: Should we set symKey for inviteTopic???
+        try kms.setSymmetricKey(symmetricKey, for: invite.responseTopic)
+        try kms.setPrivateKey(agreementPrivateKey)
     }
 }
