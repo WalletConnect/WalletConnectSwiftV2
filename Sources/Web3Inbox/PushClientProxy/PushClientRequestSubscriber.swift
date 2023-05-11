@@ -45,7 +45,7 @@ final class PushClientRequestSubscriber {
         client.updateSubscriptionPublisher.sink { [unowned self] record in
             switch record {
             case .success(let subscription):
-                handle(event: .pushSubscription, params: subscription)
+                handle(event: .pushUpdate, params: subscription)
             case .failure:
                 //TODO - handle error
                 break

@@ -11,8 +11,10 @@ public class WalletPushClient {
 
     /// publishes new subscriptions
     public var subscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
-        return pushSubscribeResponseSubscriber.subscriptionPublisher
+        return subscriptionPublisherSubject.eraseToAnyPublisher()
     }
+
+    public var subscriptionPublisherSubject = PassthroughSubject<Result<PushSubscription, Error>, Never>()
 
     public var subscriptionsPublisher: AnyPublisher<[PushSubscription], Never> {
         return pushSubscriptionsObserver.subscriptionsPublisher
@@ -144,9 +146,18 @@ private extension WalletPushClient {
         pushMessageSubscriber.onPushMessage = { [unowned self] pushMessageRecord in
             pushMessagePublisherSubject.send(pushMessageRecord)
         }
+
         deletePushSubscriptionSubscriber.onDelete = {[unowned self] topic in
             deleteSubscriptionPublisherSubject.send(topic)
         }
+
+        pushSubscribeResponseSubscriber.subscriptionPublisher.sink { [unowned self] result in
+            subscriptionPublisherSubject.send(result)
+        }.store(in: &publishers)
+
+        proposeResponder.subscriptionPublisher.sink { [unowned self] result in
+            subscriptionPublisherSubject.send(result)
+        }.store(in: &publishers)
     }
 }
 
