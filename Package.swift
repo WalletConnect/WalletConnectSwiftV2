@@ -49,7 +49,7 @@ let package = Package(
 
     ],
     dependencies: [
-        .package(url: "https://github.com/dagronf/QRCode", from: "13.9.0")
+        .package(url: "https://github.com/WalletConnect/QRCode", branch: "main")
     ],
     targets: [
         .target(
