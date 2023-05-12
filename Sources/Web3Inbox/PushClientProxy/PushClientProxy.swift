@@ -35,7 +35,6 @@ final class PushClientProxy {
             try await respond(request: request)
         case .getActiveSubscriptions: 
             let subscriptions = client.getActiveSubscriptions()
-            print(subscriptions)
             try await respond(with: subscriptions, request: request)
         case .getMessageHistory:
             let params = try parse(GetMessageHistoryRequest.self, params: request.params)

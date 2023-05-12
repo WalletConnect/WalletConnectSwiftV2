@@ -5,16 +5,20 @@ actor WebViewProxy {
 
     private let webView: WKWebView
     private let scriptFormatter: WebViewScriptFormatter
+    private let logger: ConsoleLogging
+
     init(webView: WKWebView,
-         scriptFormatter: WebViewScriptFormatter) {
+         scriptFormatter: WebViewScriptFormatter,
+         logger: ConsoleLogging) {
         self.webView = webView
         self.scriptFormatter = scriptFormatter
+        self.logger = logger
     }
 
     @MainActor
     func respond(_ response: RPCResponse) async throws {
         let body = try response.json()
-        print("resonding to w3i with \(body)")
+        logger.debug("resonding to w3i with \(body)")
         let script = scriptFormatter.formatScript(body: body)
         webView.evaluateJavaScript(script, completionHandler: nil)
     }
@@ -22,7 +26,7 @@ actor WebViewProxy {
     @MainActor
     func request(_ request: RPCRequest) async throws {
         let body = try request.json()
-        print("requesting w3i with \(body)")
+        logger.debug("requesting w3i with \(body)")
         let script = scriptFormatter.formatScript(body: body)
         webView.evaluateJavaScript(script, completionHandler: nil)
     }

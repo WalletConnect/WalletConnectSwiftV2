@@ -15,8 +15,8 @@ final class Web3InboxClientFactory {
         let chatWebviewSubscriber = WebViewRequestSubscriber(logger: logger)
         let pushWebviewSubscriber = WebViewRequestSubscriber(logger: logger)
         let webView = WebViewFactory(url: url, chatWebviewSubscriber: chatWebviewSubscriber, pushWebviewSubscriber: pushWebviewSubscriber).create()
-        let chatWebViewProxy = WebViewProxy(webView: webView, scriptFormatter: ChatWebViewScriptFormatter())
-        let pushWebViewProxy = WebViewProxy(webView: webView, scriptFormatter: PushWebViewScriptFormatter())
+        let chatWebViewProxy = WebViewProxy(webView: webView, scriptFormatter: ChatWebViewScriptFormatter(), logger: logger)
+        let pushWebViewProxy = WebViewProxy(webView: webView, scriptFormatter: PushWebViewScriptFormatter(), logger: logger)
 
         let clientProxy = ChatClientProxy(client: chatClient, onSign: onSign)
         let clientSubscriber = ChatClientRequestSubscriber(chatClient: chatClient, logger: logger)
