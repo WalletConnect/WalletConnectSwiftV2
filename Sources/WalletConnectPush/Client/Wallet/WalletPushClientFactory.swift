@@ -52,6 +52,19 @@ public struct WalletPushClientFactory {
         let deletePushSubscriptionSubscriber = DeletePushSubscriptionSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore)
         let resubscribeService = PushResubscribeService(networkInteractor: networkInteractor, subscriptionsStorage: subscriptionStore)
         let pushSubscriptionsObserver = PushSubscriptionsObserver(store: subscriptionStore)
+
+
+        let dappsMetadataStore = CodableStore<AppMetadata>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.dappsMetadataStore)
+
+        let pushSubscribeRequester = PushSubscribeRequester(keyserverURL: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, kms: kms, dappsMetadataStore: dappsMetadataStore)
+
+        let subscriptionScopeProvider = SubscriptionScopeProvider()
+        let pushSubscribeResponseSubscriber = PushSubscribeResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, groupKeychainStorage: groupKeychainStorage, subscriptionsStore: subscriptionStore, dappsMetadataStore: dappsMetadataStore, subscriptionScopeProvider: subscriptionScopeProvider)
+
+        let notifyUpdateRequester = NotifyUpdateRequester(keyserverURL: keyserverURL, identityClient: identityClient, networkingInteractor: networkInteractor, logger: logger, subscriptionsStore: subscriptionStore)
+
+        let notifyUpdateResponseSubscriber = NotifyUpdateResponseSubscriber(networkingInteractor: networkInteractor, logger: logger, subscriptionScopeProvider: subscriptionScopeProvider, subscriptionsStore: subscriptionStore)
+
         return WalletPushClient(
             logger: logger,
             kms: kms,
@@ -64,7 +77,11 @@ public struct WalletPushClientFactory {
             deletePushSubscriptionService: deletePushSubscriptionService,
             deletePushSubscriptionSubscriber: deletePushSubscriptionSubscriber,
             resubscribeService: resubscribeService,
-            pushSubscriptionsObserver: pushSubscriptionsObserver
+            pushSubscriptionsObserver: pushSubscriptionsObserver,
+            pushSubscribeRequester: pushSubscribeRequester,
+            pushSubscribeResponseSubscriber: pushSubscribeResponseSubscriber,
+            notifyUpdateRequester: notifyUpdateRequester,
+            notifyUpdateResponseSubscriber: notifyUpdateResponseSubscriber
         )
     }
 }

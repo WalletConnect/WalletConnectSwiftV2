@@ -9,6 +9,11 @@ public class WalletPushClient {
 
     private var publishers = Set<AnyCancellable>()
 
+    /// publishes new subscriptions
+    public var subscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
+        return pushSubscribeResponseSubscriber.subscriptionPublisher
+    }
+
     public var subscriptionsPublisher: AnyPublisher<[PushSubscription], Never> {
         return pushSubscriptionsObserver.subscriptionsPublisher
     }
@@ -33,8 +38,13 @@ public class WalletPushClient {
         deleteSubscriptionPublisherSubject.eraseToAnyPublisher()
     }
 
+    public var updateSubscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
+        return notifyUpdateResponseSubscriber.updateSubscriptionPublisher
+    }
+
     private let deletePushSubscriptionService: DeletePushSubscriptionService
     private let deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
+    private let pushSubscribeRequester: PushSubscribeRequester
 
     public let logger: ConsoleLogging
 
@@ -45,6 +55,9 @@ public class WalletPushClient {
     private let subscriptionsProvider: SubscriptionsProvider
     private let pushMessagesDatabase: PushMessagesDatabase
     private let resubscribeService: PushResubscribeService
+    private let pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber
+    private let notifyUpdateRequester: NotifyUpdateRequester
+    private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
@@ -57,7 +70,12 @@ public class WalletPushClient {
          deletePushSubscriptionService: DeletePushSubscriptionService,
          deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber,
          resubscribeService: PushResubscribeService,
-         pushSubscriptionsObserver: PushSubscriptionsObserver) {
+         pushSubscriptionsObserver: PushSubscriptionsObserver,
+         pushSubscribeRequester: PushSubscribeRequester,
+         pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber,
+         notifyUpdateRequester: NotifyUpdateRequester,
+         notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
+    ) {
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
         self.proposeResponder = proposeResponder
@@ -69,7 +87,15 @@ public class WalletPushClient {
         self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
         self.resubscribeService = resubscribeService
         self.pushSubscriptionsObserver = pushSubscriptionsObserver
+        self.pushSubscribeRequester = pushSubscribeRequester
+        self.pushSubscribeResponseSubscriber = pushSubscribeResponseSubscriber
+        self.notifyUpdateRequester = notifyUpdateRequester
+        self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
         setupSubscriptions()
+    }
+
+    public func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {
+        try await pushSubscribeRequester.subscribe(metadata: metadata, account: account, onSign: onSign)
     }
 
     public func approve(id: RPCID, onSign: @escaping SigningCallback) async throws {
@@ -78,6 +104,10 @@ public class WalletPushClient {
 
     public func reject(id: RPCID) async throws {
         try await proposeResponder.respondError(requestId: id)
+    }
+
+    public func update(topic: String, scope: Set<NotificationScope>) async throws {
+        try await notifyUpdateRequester.update(topic: topic, scope: scope)
     }
 
     public func getActiveSubscriptions() -> [PushSubscription] {

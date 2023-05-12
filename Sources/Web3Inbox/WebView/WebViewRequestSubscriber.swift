@@ -3,7 +3,8 @@ import WebKit
 
 final class WebViewRequestSubscriber: NSObject, WKScriptMessageHandler {
 
-    static let name = "web3inboxChat"
+    static let chat = "web3inboxChat"
+    static let push = "web3inboxPush"
 
     var onRequest: ((RPCRequest) async throws -> Void)?
 
@@ -17,7 +18,6 @@ final class WebViewRequestSubscriber: NSObject, WKScriptMessageHandler {
         _ userContentController: WKUserContentController,
         didReceive message: WKScriptMessage
     ) {
-        guard message.name == WebViewRequestSubscriber.name else { return }
 
         guard
             let body = message.body as? String, let data = body.data(using: .utf8),

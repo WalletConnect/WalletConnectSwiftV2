@@ -1,6 +1,6 @@
 import Foundation
 
-enum WebViewEvent: String {
+enum ChatWebViewEvent: String {
     case getReceivedInvites
     case getSentInvites
     case getThreads
