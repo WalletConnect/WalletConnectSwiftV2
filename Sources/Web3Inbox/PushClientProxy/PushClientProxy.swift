@@ -80,10 +80,6 @@ private extension PushClientProxy {
         let account: Account
     }
 
-    struct GetActiveSubscriptionsRequest: Codable {
-
-    }
-
     struct GetMessageHistoryRequest: Codable {
         let topic: String
     }
