@@ -5,6 +5,11 @@ public protocol SyncObject: Codable & Equatable {
     var syncId: String { get }
 }
 
+public enum SyncUpdate<Object: SyncObject> {
+    case set(object: Object)
+    case delete(id: String)
+}
+
 public final class SyncStore<Object: SyncObject> {
 
     private var publishers = Set<AnyCancellable>()
@@ -19,19 +24,15 @@ public final class SyncStore<Object: SyncObject> {
     private let objectStore: SyncObjectStore<Object>
 
     private let dataUpdateSubject = PassthroughSubject<[Object], Never>()
-    private let syncUpdateSubject = PassthroughSubject<(String, StoreUpdate), Never>()
+    private let syncUpdateSubject = PassthroughSubject<(String, SyncUpdate<Object>), Never>()
 
     public var dataUpdatePublisher: AnyPublisher<[Object], Never> {
         return dataUpdateSubject.eraseToAnyPublisher()
     }
 
-    public var syncUpdatePublisher: AnyPublisher<(String, StoreUpdate), Never> {
+    public var syncUpdatePublisher: AnyPublisher<(String, SyncUpdate<Object>), Never> {
         return syncUpdateSubject.eraseToAnyPublisher()
     }
-
-    public var onInitialization: (([Object]) async throws -> Void)?
-    public var onUpdate: ((Object) async throws -> Void)?
-    public var onDelete: ((String) async throws -> Void)?
 
     init(name: String, syncClient: SyncClient, indexStore: SyncIndexStore, objectStore: SyncObjectStore<Object>) {
         self.name = name
@@ -44,7 +45,6 @@ public final class SyncStore<Object: SyncObject> {
 
     public func initialize(for account: Account) async throws {
         try await syncClient.create(account: account, store: name)
-        try await onInitialization?(getAll())
     }
 
     public func getAll(for account: Account) throws -> [Object] {
@@ -90,32 +90,24 @@ private extension SyncStore {
             switch update {
             case .set(let value):
                 let decoded = try! value.get(StoreSet<Object>.self)
-                try! setInStore(object: decoded.value, for: record.account)
-                syncUpdateSubject.send((topic, update))
+                if try! setInStore(object: decoded.value, for: record.account) {
+                    syncUpdateSubject.send((topic, .set(object: decoded.value)))
+                }
             case .delete(let key):
-                try! deleteInStore(id: key, for: record.account)
-                syncUpdateSubject.send((topic, update))
+                if try! deleteInStore(id: key, for: record.account) {
+                    syncUpdateSubject.send((topic, .delete(id: key)))
+                }
             }
         }.store(in: &publishers)
     }
 
-    func setInStore(object: Object, for account: Account) throws {
+    func setInStore(object: Object, for account: Account) throws -> Bool {
         let record = try indexStore.getRecord(account: account, name: name)
-
-        if objectStore.set(object: object, topic: record.topic) {
-            Task(priority: .high) {
-                try await onUpdate?(object) // TODO: Replace with syncUpdatePublisher
-            }
-        }
+        return objectStore.set(object: object, topic: record.topic)
     }
 
-    func deleteInStore(id: String, for account: Account) throws {
+    func deleteInStore(id: String, for account: Account) throws -> Bool {
         let record = try indexStore.getRecord(account: account, name: name)
-
-        if objectStore.delete(id: id, topic: record.topic) {
-            Task(priority: .high) {
-                try await onDelete?(id) // TODO: Replace with syncUpdatePublisher
-            }
-        }
+        return objectStore.delete(id: id, topic: record.topic)
     }
 }

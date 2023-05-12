@@ -7,7 +7,7 @@ typealias Stream<T> = AnyPublisher<T, Never>
 
 final class ChatService {
 
-    private lazy var client: ChatClient = {
+    private var client: ChatClient = {
         Chat.configure(crypto: DefaultCryptoProvider())
         return Chat.instance
     }()

@@ -10,18 +10,22 @@ final class ThreadStoreDelegate {
         self.kms = kms
     }
 
-    func onInitialization(_ threads: [Thread]) async throws {
-        let topics = threads.map { $0.topic }
-        try await networkingInteractor.batchSubscribe(topics: topics)
+    func onInitialization(_ threads: [Thread]) {
+        Task(priority: .high) {
+            let topics = threads.map { $0.topic }
+            try await networkingInteractor.batchSubscribe(topics: topics)
+        }
     }
 
-    func onUpdate(_ thread: Thread) async throws {
-        let symmetricKey = try SymmetricKey(hex: thread.symKey)
-        try kms.setSymmetricKey(symmetricKey, for: thread.topic)
-        try await networkingInteractor.subscribe(topic: thread.topic)
+    func onUpdate(_ thread: Thread) {
+        Task(priority: .high) {
+            let symmetricKey = try SymmetricKey(hex: thread.symKey)
+            try kms.setSymmetricKey(symmetricKey, for: thread.topic)
+            try await networkingInteractor.subscribe(topic: thread.topic)
+        }
     }
 
-    func onDelete(_ id: String) async throws {
+    func onDelete(_ id: String) {
 
     }
 }

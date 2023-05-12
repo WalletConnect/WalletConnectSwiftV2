@@ -3,6 +3,8 @@ import Combine
 
 final class ChatStorage {
 
+    private var publishers = Set<AnyCancellable>()
+
     private let messageStore: KeyedDatabase<[Message]>
     private let receivedInviteStore: KeyedDatabase<[ReceivedInvite]>
     private let sentInviteStore: SyncStore<SentInvite>
@@ -75,17 +77,11 @@ final class ChatStorage {
         self.threadStore = threadStore
         self.sentInviteStoreDelegate = sentInviteStoreDelegate
         self.threadStoreDelegate = threadStoreDelegate
+
+        setupSyncSubscriptions()
     }
 
     func initialize(for account: Account) async throws {
-        sentInviteStore.onInitialization = sentInviteStoreDelegate.onInitialization
-        sentInviteStore.onUpdate = sentInviteStoreDelegate.onUpdate
-        sentInviteStore.onDelete = sentInviteStoreDelegate.onDelete
-
-        threadStore.onInitialization = threadStoreDelegate.onInitialization
-        threadStore.onUpdate = threadStoreDelegate.onUpdate
-        threadStore.onDelete = threadStoreDelegate.onDelete
-
         try await sentInviteStore.initialize(for: account)
         try await threadStore.initialize(for: account)
     }
@@ -208,5 +204,31 @@ final class ChatStorage {
 
     func getMessages(account: Account) -> [Message] {
         return messageStore.getElements(for: account.absoluteString) ?? []
+    }
+}
+
+private extension ChatStorage {
+
+    func setupSyncSubscriptions() {
+        sentInviteStoreDelegate.onInitialization(sentInviteStore.getAll())
+        threadStoreDelegate.onInitialization(threadStore.getAll())
+
+        sentInviteStore.syncUpdatePublisher.sink { [unowned self] topic, update in
+            switch update {
+            case .set(let object):
+                self.sentInviteStoreDelegate.onUpdate(object)
+            case .delete(let id):
+                self.sentInviteStoreDelegate.onDelete(id)
+            }
+        }.store(in: &publishers)
+
+        threadStore.syncUpdatePublisher.sink { [unowned self] topic, update in
+            switch update {
+            case .set(let object):
+                self.threadStoreDelegate.onUpdate(object)
+            case .delete(let id):
+                self.threadStoreDelegate.onDelete(id)
+            }
+        }.store(in: &publishers)
     }
 }
