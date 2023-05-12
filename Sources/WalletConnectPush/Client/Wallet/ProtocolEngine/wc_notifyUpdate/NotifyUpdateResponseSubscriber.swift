@@ -39,7 +39,7 @@ class NotifyUpdateResponseSubscriber {
                     let subscriptionTopic = payload.topic
 
                     let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
-                    let scope = try await builScope(selected: claims.scp, dappUrl: claims.aud)
+                    let scope = try await buildScope(selected: claims.scp, dappUrl: claims.aud)
 
                     guard let oldSubscription = try? subscriptionsStore.get(key: subscriptionTopic) else {
                         logger.debug("NotifyUpdateResponseSubscriber Subscription does not exist")
@@ -59,7 +59,7 @@ class NotifyUpdateResponseSubscriber {
             }.store(in: &publishers)
     }
 
-    private func builScope(selected: String, dappUrl: String) async throws -> [NotificationScope: ScopeValue] {
+    private func buildScope(selected: String, dappUrl: String) async throws -> [NotificationScope: ScopeValue] {
         let selectedScope = selected
             .components(separatedBy: " ")
             .compactMap { NotificationScope(rawValue: $0) }

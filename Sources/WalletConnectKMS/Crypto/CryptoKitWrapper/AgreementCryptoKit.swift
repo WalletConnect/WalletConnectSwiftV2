@@ -38,14 +38,7 @@ public struct AgreementPublicKey: GenericPasswordConvertible, Equatable {
     }
 
     public init(base64url: String) throws {
-        var base64 = base64url
-            .replacingOccurrences(of: "-", with: "+")
-            .replacingOccurrences(of: "_", with: "/")
-
-        if base64.count % 4 != 0 {
-            base64.append(String(repeating: "=", count: 4 - base64.count % 4))
-        }
-        guard let raw = Data(base64Encoded: base64) else { throw Errors.invalidBase64urlString }
+        guard let raw = Data(base64url: base64url) else { throw Errors.invalidBase64urlString }
         try self.init(rawRepresentation: raw)
     }
 
