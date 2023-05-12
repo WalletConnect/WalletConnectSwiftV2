@@ -1,5 +1,6 @@
 import WalletConnectNetworking
 import WalletConnectIdentity
+import Combine
 import Foundation
 
 class PushRequestResponder {
@@ -17,6 +18,10 @@ class PushRequestResponder {
     // Keychain shared with UNNotificationServiceExtension in order to decrypt PNs
     private let groupKeychainStorage: KeychainStorageProtocol
 
+    private var subscriptionPublisherSubject = PassthroughSubject<Result<PushSubscription, Error>, Never>()
+    var subscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
+        return subscriptionPublisherSubject.eraseToAnyPublisher()
+    }
 
     init(keyserverURL: URL,
          networkingInteractor: NetworkInteracting,
@@ -74,6 +79,7 @@ class PushRequestResponder {
         try await networkingInteractor.respond(topic: responseTopic, response: response, protocolMethod: PushRequestProtocolMethod(), envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
 
         kms.deletePrivateKey(for: keys.publicKey.hexRepresentation)
+        subscriptionPublisherSubject.send(.success(pushSubscription))
     }
 
     func respondError(requestId: RPCID) async throws {
@@ -85,7 +91,7 @@ class PushRequestResponder {
     }
 
     private func createJWTResponse(requestId: RPCID, subscriptionAccount: Account, dappUrl: String) throws -> RPCResponse {
-        let jwtPayload = SubscriptionJWTPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: "")
+        let jwtPayload = SubscriptionJWTPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: "v1")
         let wrapper = try identityClient.signAndCreateWrapper(
             payload: jwtPayload,
             account: subscriptionAccount

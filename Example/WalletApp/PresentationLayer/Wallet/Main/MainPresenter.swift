@@ -14,7 +14,6 @@ final class MainPresenter {
     var viewControllers: [UIViewController] {
         return [
             router.walletViewController(),
-            router.notificationsViewController(),
             router.web3InboxViewController()
         ]
     }
@@ -35,7 +34,8 @@ extension MainPresenter {
         interactor.pushRequestPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] request in
-                self?.router.present(pushRequest: request)
+
+//                self?.router.present(pushRequest: request)
             }.store(in: &disposeBag)
 
         interactor.sessionProposalPublisher

@@ -45,6 +45,7 @@ class NotifyUpdateRequester {
             payload: jwtPayload,
             account: subscriptionAccount
         )
+        print(wrapper.subscriptionAuth)
         return RPCRequest(method: protocolMethod, params: wrapper)
     }
 }

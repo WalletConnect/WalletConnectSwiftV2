@@ -15,8 +15,6 @@ final class Web3InboxViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        let account = Account(blockchain: Blockchain("eip155:1")!, address: EthKeyStore.shared.address)!
-        Web3Inbox.configure(account: account, onSign: onSing)
 
         edgesForExtendedLayout = []
         navigationItem.title = "Web3Inbox SDK"
@@ -25,12 +23,5 @@ final class Web3InboxViewController: UIViewController {
     }
 }
 
-private extension Web3InboxViewController {
 
-    func onSing(_ message: String) -> SigningResult {
-        let privateKey = EthKeyStore.shared.privateKeyRaw
-        let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
-        let signature = try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
-        return .signed(signature)
-    }
-}
+
