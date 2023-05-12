@@ -19,10 +19,11 @@ public final class Web3Inbox {
     /// Web3Inbox instance config method
     /// - Parameters:
     ///   - account: Web3Inbox initial account
-    static public func configure(account: Account, config: [ConfigParam: Bool] = [:], onSign: @escaping SigningCallback) {
+    static public func configure(account: Account, config: [ConfigParam: Bool] = [:], onSign: @escaping SigningCallback, environment: APNSEnvironment) {
         Web3Inbox.account = account
         Web3Inbox.config = config
         Web3Inbox.onSign = onSign
         Chat.configure()
+        Push.configure(environment: environment)
     }
 }
