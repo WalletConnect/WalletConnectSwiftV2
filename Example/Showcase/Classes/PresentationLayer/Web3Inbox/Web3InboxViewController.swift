@@ -18,7 +18,7 @@ final class Web3InboxViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        Web3Inbox.configure(account: importAccount.account, onSign: onSing)
+        Web3Inbox.configure(account: importAccount.account, config: [.pushEnabled: false], onSign: onSing, environment: .sandbox)
 
         edgesForExtendedLayout = []
         navigationItem.title = "Web3Inbox SDK"

@@ -22,6 +22,11 @@ final class MainRouter {
             .wrapToNavigationController()
     }
 
+    func web3InboxViewController() -> UIViewController {
+        return Web3InboxModule.create(app: app)
+            .wrapToNavigationController()
+    }
+
     func present(pushRequest: PushRequest) {
         PushRequestModule.create(app: app, pushRequest: pushRequest)
             .presentFullScreen(from: viewController, transparentBackground: true)

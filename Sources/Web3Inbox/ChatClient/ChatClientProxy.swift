@@ -13,7 +13,7 @@ final class ChatClientProxy {
     }
 
     func request(_ request: RPCRequest) async throws {
-        guard let event = WebViewEvent(rawValue: request.method)
+        guard let event = ChatWebViewEvent(rawValue: request.method)
         else { throw Errors.unregisteredMethod }
 
         switch event {

@@ -13,17 +13,8 @@ struct JWTEncoder {
     }
 
     public static func base64urlDecodedData(string: String) throws -> Data {
-        var base64 = string
-            .replacingOccurrences(of: "-", with: "+")
-            .replacingOccurrences(of: "_", with: "/")
-
-        if base64.count % 4 != 0 {
-            base64.append(String(repeating: "=", count: 4 - base64.count % 4))
-        }
-
-        guard let result = Data(base64Encoded: base64)
+        guard let result = Data(base64url: string)
         else { throw JWTError.notBase64String }
-
         return result
     }
 }
