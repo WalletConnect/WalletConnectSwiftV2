@@ -87,6 +87,22 @@ public class ClientIdMigrationController {
             return
         }
 
+
+        var getQuery: [CFString: Any] = [
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+            kSecAttrIsInvisible: true,
+            kSecUseDataProtectionKeychain: true,
+            kSecAttrService: service,
+            kSecAttrAccount: cleintIdStorageKey
+        ]
+
+        getQuery[kSecReturnData] = true
+
+        var item: CFTypeRef?
+        let getStatus = secItem.copyMatching(getQuery as CFDictionary, &item)
+        print(status.description)
+
         keyValueStorage.set(EnvironmentInfo.packageVersion, forKey: lastMigrationKey)
     }
 
