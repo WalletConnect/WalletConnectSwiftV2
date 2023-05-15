@@ -53,4 +53,15 @@ extension Data {
     public func toHexString() -> String {
         return map({ String(format: "%02x", $0) }).joined()
     }
+
+    public init?(base64url: String) {
+        var base64 = base64url
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+
+        if base64.count % 4 != 0 {
+            base64.append(String(repeating: "=", count: 4 - base64.count % 4))
+        }
+        self.init(base64Encoded: base64)
+    }
 }

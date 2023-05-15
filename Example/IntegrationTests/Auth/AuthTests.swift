@@ -7,6 +7,7 @@ import Combine
 @testable import Auth
 import WalletConnectPairing
 import WalletConnectNetworking
+import WalletConnectVerify
 
 final class AuthTests: XCTestCase {
     var appPairingClient: PairingClient!
@@ -86,9 +87,9 @@ final class AuthTests: XCTestCase {
             Task(priority: .high) {
                 let signerFactory = DefaultSignerFactory()
                 let signer = MessageSignerFactory(signerFactory: signerFactory).create(projectId: InputConfig.projectId)
-                let payload = try! request.payload.cacaoPayload(address: walletAccount.address)
+                let payload = try! request.0.payload.cacaoPayload(address: walletAccount.address)
                 let signature = try! signer.sign(payload: payload, privateKey: prvKey, type: .eip191)
-                try! await walletAuthClient.respond(requestId: request.id, signature: signature, from: walletAccount)
+                try! await walletAuthClient.respond(requestId: request.0.id, signature: signature, from: walletAccount)
             }
         }
         .store(in: &publishers)
@@ -123,7 +124,7 @@ final class AuthTests: XCTestCase {
         walletAuthClient.authRequestPublisher.sink { [unowned self] request in
             Task(priority: .high) {
                 let signature = CacaoSignature(t: .eip1271, s: eip1271Signature)
-                try! await walletAuthClient.respond(requestId: request.id, signature: signature, from: account)
+                try! await walletAuthClient.respond(requestId: request.0.id, signature: signature, from: account)
             }
         }
         .store(in: &publishers)
@@ -144,7 +145,7 @@ final class AuthTests: XCTestCase {
         walletAuthClient.authRequestPublisher.sink { [unowned self] request in
             Task(priority: .high) {
                 let signature = CacaoSignature(t: .eip1271, s: eip1271Signature)
-                try! await walletAuthClient.respond(requestId: request.id, signature: signature, from: walletAccount)
+                try! await walletAuthClient.respond(requestId: request.0.id, signature: signature, from: walletAccount)
             }
         }
         .store(in: &publishers)
@@ -164,7 +165,7 @@ final class AuthTests: XCTestCase {
         try! await walletPairingClient.pair(uri: uri)
         walletAuthClient.authRequestPublisher.sink { [unowned self] request in
             Task(priority: .high) {
-                try! await walletAuthClient.reject(requestId: request.id)
+                try! await walletAuthClient.reject(requestId: request.0.id)
             }
         }
         .store(in: &publishers)
@@ -187,7 +188,7 @@ final class AuthTests: XCTestCase {
             Task(priority: .high) {
                 let invalidSignature = "438effc459956b57fcd9f3dac6c675f9cee88abf21acab7305e8e32aa0303a883b06dcbd956279a7a2ca21ffa882ff55cc22e8ab8ec0f3fe90ab45f306938cfa1b"
                 let cacaoSignature = CacaoSignature(t: .eip191, s: invalidSignature)
-                try! await walletAuthClient.respond(requestId: request.id, signature: cacaoSignature, from: walletAccount)
+                try! await walletAuthClient.respond(requestId: request.0.id, signature: cacaoSignature, from: walletAccount)
             }
         }
         .store(in: &publishers)
