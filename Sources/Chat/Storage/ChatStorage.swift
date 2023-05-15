@@ -5,13 +5,16 @@ final class ChatStorage {
 
     private var publishers = Set<AnyCancellable>()
 
+    private let kms: KeyManagementServiceProtocol
     private let messageStore: KeyedDatabase<[Message]>
     private let receivedInviteStore: KeyedDatabase<[ReceivedInvite]>
     private let sentInviteStore: SyncStore<SentInvite>
     private let threadStore: SyncStore<Thread>
+    private let inviteKeyStore: SyncStore<InviteKey>
 
     private let sentInviteStoreDelegate: SentInviteStoreDelegate
     private let threadStoreDelegate: ThreadStoreDelegate
+    private let inviteKeyDelegate: InviteKeyDelegate
 
     private var messagesPublisherSubject = PassthroughSubject<[Message], Never>()
     private var receivedInvitesPublisherSubject = PassthroughSubject<[ReceivedInvite], Never>()
@@ -64,19 +67,25 @@ final class ChatStorage {
     }
 
     init(
+        kms: KeyManagementServiceProtocol,
         messageStore: KeyedDatabase<[Message]>,
         receivedInviteStore: KeyedDatabase<[ReceivedInvite]>,
         sentInviteStore: SyncStore<SentInvite>,
         threadStore: SyncStore<Thread>,
+        inviteKeyStore: SyncStore<InviteKey>,
         sentInviteStoreDelegate: SentInviteStoreDelegate,
-        threadStoreDelegate: ThreadStoreDelegate
+        threadStoreDelegate: ThreadStoreDelegate,
+        inviteKeyDelegate: InviteKeyDelegate
     ) {
+        self.kms = kms
         self.messageStore = messageStore
         self.receivedInviteStore = receivedInviteStore
         self.sentInviteStore = sentInviteStore
         self.threadStore = threadStore
+        self.inviteKeyStore = inviteKeyStore
         self.sentInviteStoreDelegate = sentInviteStoreDelegate
         self.threadStoreDelegate = threadStoreDelegate
+        self.inviteKeyDelegate = inviteKeyDelegate
 
         setupSyncSubscriptions()
     }
@@ -84,6 +93,7 @@ final class ChatStorage {
     func initialize(for account: Account) async throws {
         try await sentInviteStore.initialize(for: account)
         try await threadStore.initialize(for: account)
+        try await inviteKeyStore.initialize(for: account)
     }
 
     func setupSubscriptions(account: Account) throws {
@@ -95,6 +105,7 @@ final class ChatStorage {
         }
 
         try threadStore.setupSubscriptions(account: account)
+        try sentInviteStore.setupSubscriptions(account: account)
         try sentInviteStore.setupSubscriptions(account: account)
     }
 
@@ -167,6 +178,18 @@ final class ChatStorage {
         rejectPublisherSubject.send(rejected)
     }
 
+    // MARK: InviteKeys
+
+    func syncInviteKey(_ inviteKey: AgreementPublicKey, account: Account) async throws {
+        if let privateKey = try kms.getPrivateKey(for: inviteKey) {
+            let key = InviteKey(
+                publicKey: inviteKey.hexRepresentation,
+                privateKey: privateKey.rawRepresentation.toHexString()
+            )
+            try await inviteKeyStore.set(object: key, for: account)
+        }
+    }
+
     // MARK: - Threads
 
     func getAllThreads() -> [Thread] {
@@ -212,8 +235,9 @@ private extension ChatStorage {
     func setupSyncSubscriptions() {
         sentInviteStoreDelegate.onInitialization(sentInviteStore.getAll())
         threadStoreDelegate.onInitialization(threadStore.getAll())
+        inviteKeyDelegate.onInitialization(inviteKeyStore.getAll())
 
-        sentInviteStore.syncUpdatePublisher.sink { [unowned self] topic, update in
+        sentInviteStore.syncUpdatePublisher.sink { [unowned self] topic, account, update in
             switch update {
             case .set(let object):
                 self.sentInviteStoreDelegate.onUpdate(object)
@@ -222,12 +246,21 @@ private extension ChatStorage {
             }
         }.store(in: &publishers)
 
-        threadStore.syncUpdatePublisher.sink { [unowned self] topic, update in
+        threadStore.syncUpdatePublisher.sink { [unowned self] topic, account, update in
             switch update {
             case .set(let object):
                 self.threadStoreDelegate.onUpdate(object)
             case .delete(let id):
                 self.threadStoreDelegate.onDelete(id)
+            }
+        }.store(in: &publishers)
+
+        inviteKeyStore.syncUpdatePublisher.sink { [unowned self] topic, account, update in
+            switch update {
+            case .set(let object):
+                self.inviteKeyDelegate.onUpdate(object, account: account)
+            case .delete(let id):
+                self.inviteKeyDelegate.onDelete(id)
             }
         }.store(in: &publishers)
     }

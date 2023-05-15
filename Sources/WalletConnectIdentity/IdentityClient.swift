@@ -45,6 +45,14 @@ public final class IdentityClient {
         return inviteKey
     }
 
+    public func setInviteKey(_ inviteKey: AgreementPublicKey, account: Account) throws {
+        try identityStorage.saveInviteKey(inviteKey, for: account)
+    }
+
+    public func deleteInviteKey(account: Account) throws {
+        try identityStorage.removeInviteKey(for: account)
+    }
+
     public func resolveInvite(account: Account) async throws -> String {
         return try await identityService.resolveInvite(account: account)
     }

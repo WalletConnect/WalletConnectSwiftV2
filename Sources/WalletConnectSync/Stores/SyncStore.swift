@@ -24,13 +24,13 @@ public final class SyncStore<Object: SyncObject> {
     private let objectStore: SyncObjectStore<Object>
 
     private let dataUpdateSubject = PassthroughSubject<[Object], Never>()
-    private let syncUpdateSubject = PassthroughSubject<(String, SyncUpdate<Object>), Never>()
+    private let syncUpdateSubject = PassthroughSubject<(String, Account, SyncUpdate<Object>), Never>()
 
     public var dataUpdatePublisher: AnyPublisher<[Object], Never> {
         return dataUpdateSubject.eraseToAnyPublisher()
     }
 
-    public var syncUpdatePublisher: AnyPublisher<(String, SyncUpdate<Object>), Never> {
+    public var syncUpdatePublisher: AnyPublisher<(String, Account, SyncUpdate<Object>), Never> {
         return syncUpdateSubject.eraseToAnyPublisher()
     }
 
@@ -91,11 +91,11 @@ private extension SyncStore {
             case .set(let value):
                 let decoded = try! value.get(StoreSet<Object>.self)
                 if try! setInStore(object: decoded.value, for: record.account) {
-                    syncUpdateSubject.send((topic, .set(object: decoded.value)))
+                    syncUpdateSubject.send((topic, record.account, .set(object: decoded.value)))
                 }
             case .delete(let key):
                 if try! deleteInStore(id: key, for: record.account) {
-                    syncUpdateSubject.send((topic, .delete(id: key)))
+                    syncUpdateSubject.send((topic, record.account, .delete(id: key)))
                 }
             }
         }.store(in: &publishers)

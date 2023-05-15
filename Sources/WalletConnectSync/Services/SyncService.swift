@@ -36,7 +36,7 @@ final class SyncService {
         let record = try indexStore.getRecord(account: account, name: store)
         try await networkInteractor.request(request, topic: record.topic, protocolMethod: protocolMethod)
 
-        logger.debug("Did set value for \(store). Sent on \(record.topic)")
+        logger.debug("Did set value for \(store). Sent on \(record.topic). Object: \n\(object)\n")
     }
 
     func delete(account: Account, store: String, key: String) async throws {
@@ -45,7 +45,7 @@ final class SyncService {
         let record = try indexStore.getRecord(account: account, name: store)
         try await networkInteractor.request(request, topic: record.topic, protocolMethod: protocolMethod)
 
-        logger.debug("Did delete value for \(store). Sent on: \(record.topic)")
+        logger.debug("Did delete value for \(store). Sent on: \(record.topic). Key: \n\(key)\n")
     }
 
     func create(account: Account, store: String) async throws {

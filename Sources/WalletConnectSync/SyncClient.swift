@@ -13,8 +13,6 @@ public final class SyncClient {
     init(syncService: SyncService, syncSignatureStore: SyncSignatureStore) {
         self.syncService = syncService
         self.syncSignatureStore = syncSignatureStore
-
-        // TODO: Resubscription service
     }
 
     /// Get message to sign for an account
