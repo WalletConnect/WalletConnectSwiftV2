@@ -81,6 +81,7 @@ public class ClientIdMigrationController {
         let attributes = [kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly]
 
         let status = secItem.update(query as CFDictionary, attributes as CFDictionary)
+        print(status.message)
         guard status == errSecSuccess else {
             print(status)
             return
