@@ -134,7 +134,7 @@ public class NetworkingInteractor: NetworkInteracting {
         if let (deserializedJsonRpcRequest, derivedTopic, decryptedPayload): (RPCRequest, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleRequest(topic: topic, request: deserializedJsonRpcRequest, decryptedPayload: decryptedPayload, publishedAt: publishedAt, derivedTopic: derivedTopic)
         } else if let (response, derivedTopic, _): (RPCResponse, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
-            handleResponse(response: response, publishedAt: publishedAt, derivedTopic: derivedTopic)
+            handleResponse(topic: topic, response: response, publishedAt: publishedAt, derivedTopic: derivedTopic)
         } else {
             logger.debug("Networking Interactor - Received unknown object type from networking relay")
         }
@@ -149,11 +149,11 @@ public class NetworkingInteractor: NetworkInteracting {
         }
     }
 
-    private func handleResponse(response: RPCResponse, publishedAt: Date, derivedTopic: String?) {
+    private func handleResponse(topic: String, response: RPCResponse, publishedAt: Date, derivedTopic: String?) {
         do {
             try rpcHistory.resolve(response)
             let record = rpcHistory.get(recordId: response.id!)!
-            responsePublisherSubject.send((record.topic, record.request, response, publishedAt, derivedTopic))
+            responsePublisherSubject.send((topic, record.request, response, publishedAt, derivedTopic))
         } catch {
             logger.debug("Handle json rpc response error: \(error)")
         }

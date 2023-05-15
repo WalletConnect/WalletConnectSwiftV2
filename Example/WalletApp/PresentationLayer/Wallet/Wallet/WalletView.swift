@@ -70,6 +70,9 @@ struct WalletView: View {
             }
             .padding(.vertical, 20)
         }
+        .alert(presenter.errorMessage, isPresented: $presenter.showError) {
+            Button("OK", role: .cancel) {}
+        }
     }
     
     private func connectionView(session: Session) -> some View {

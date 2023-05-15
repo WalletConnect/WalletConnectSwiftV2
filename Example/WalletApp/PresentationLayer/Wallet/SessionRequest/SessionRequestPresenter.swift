@@ -7,15 +7,15 @@ final class SessionRequestPresenter: ObservableObject {
     private let interactor: SessionRequestInteractor
     private let router: SessionRequestRouter
     
-    @Published var showError = false
-    @Published var errorMessage = "Error"
-    
     let sessionRequest: Request
     let verified: Bool?
     
     var message: String {
         return String(describing: sessionRequest.params.value)
     }
+    
+    @Published var showError = false
+    @Published var errorMessage = "Error"
     
     private var disposeBag = Set<AnyCancellable>()
 

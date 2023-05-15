@@ -4,6 +4,7 @@
       "id" : "EB662E8C-8DC0-4689-A2FF-B41B80A99F85",
       "name" : "Configuration 1",
       "options" : {
+        "mainThreadCheckerEnabled" : false,
         "targetForVariableExpansion" : {
           "containerPath" : "container:ExampleApp.xcodeproj",
           "identifier" : "A5E03DEC286464DB00888481",
@@ -13,6 +14,7 @@
     }
   ],
   "defaultOptions" : {
+    "codeCoverage" : false,
     "environmentVariableEntries" : [
       {
         "key" : "RELAY_HOST",
@@ -23,6 +25,7 @@
         "value" : "$(PROJECT_ID)"
       }
     ],
+    "mainThreadCheckerEnabled" : false,
     "testTimeoutsEnabled" : true
   },
   "testTargets" : [
@@ -39,13 +42,16 @@
         "ChatTests\/testInvite()",
         "EIP1271VerifierTests",
         "EIP191VerifierTests",
+        "EIP55Tests",
         "ENSResolverTests",
         "PairingTests",
         "PushTests\/testDappDeletePushSubscription()",
         "PushTests\/testRequestPush()",
         "PushTests\/testWalletApprovesPushRequest()",
+        "PushTests\/testWalletCreatesSubscription()",
         "PushTests\/testWalletDeletePushSubscription()",
         "PushTests\/testWalletRejectsPushRequest()",
+        "PushTests\/testWalletUpdatesSubscription()",
         "RegistryTests",
         "RelayClientEndToEndTests",
         "SignClientTests\/testCaip25SatisfyAllRequiredAllOptionalNamespacesSuccessful()",

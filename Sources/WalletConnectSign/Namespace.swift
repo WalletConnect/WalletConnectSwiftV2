@@ -1,4 +1,4 @@
-enum AutoNamespacesError: Error {
+public enum AutoNamespacesError: Error {
     case requiredChainsNotSatisfied
     case requiredAccountsNotSatisfied
     case requiredMethodsNotSatisfied
