@@ -63,9 +63,8 @@ public final class KeychainStorage: KeychainStorageProtocol {
             return item as? Data
         case errSecItemNotFound:
             return nil
-        case errSecNotAvailable, errSecReadOnly,errSecAuthFailed, errSecNoSuchKeychain,errSecInvalidKeychain, errSecDuplicateKeychain,errSecDuplicateCallback, errSecDuplicateItem, errSecBufferTooSmall, errSecDataTooLarge, errSecNoSuchAttr,errSecInvalidItemRef, errSecNoSuchClass, errSecNoDefaultKeychain, errSecInteractionNotAllowed, errSecReadOnlyAttr:
-            fatalError()
         default:
+            print(status.message)
             throw KeychainError(status)
         }
     }
@@ -109,7 +108,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
     private func buildBaseServiceQuery(for key: String) -> [CFString: Any] {
         return [
             kSecClass: kSecClassGenericPassword,
-            kSecAttrAccessible: kSecAttrAccessible,
+            kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
             kSecAttrIsInvisible: true,
             kSecUseDataProtectionKeychain: true,
             kSecAttrService: service,
