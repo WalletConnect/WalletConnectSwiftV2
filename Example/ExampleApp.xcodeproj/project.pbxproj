@@ -276,6 +276,7 @@
 		CF1A594D29E5876600AAC16B /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF1A594429E5876600AAC16B /* App.swift */; };
 		CF6704DF29E59DDC003326A4 /* XCUIElementQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF6704DE29E59DDC003326A4 /* XCUIElementQuery.swift */; };
 		CF6704E129E5A014003326A4 /* XCTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF6704E029E5A014003326A4 /* XCTestCase.swift */; };
+		CF9C7E4A2A01802F0037C006 /* Web3Modal in Frameworks */ = {isa = PBXBuildFile; productRef = CF9C7E492A01802F0037C006 /* Web3Modal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -618,6 +619,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CF9C7E4A2A01802F0037C006 /* Web3Modal in Frameworks */,
 				A58EC618299D665A00F3452A /* Web3Inbox in Frameworks */,
 				A5629AEA2877F2D600094373 /* WalletConnectChat in Frameworks */,
 				A59FAEC928B7B93A002BB66F /* Web3 in Frameworks */,
@@ -1770,6 +1772,7 @@
 				A59FAEC828B7B93A002BB66F /* Web3 */,
 				A58EC610299D57B800F3452A /* AsyncButton */,
 				A58EC617299D665A00F3452A /* Web3Inbox */,
+				CF9C7E492A01802F0037C006 /* Web3Modal */,
 			);
 			productName = Showcase;
 			productReference = A58E7CE828729F550082D443 /* Showcase.app */;
@@ -2392,7 +2395,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -2450,7 +2453,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = NO;
@@ -2517,7 +2520,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2551,7 +2554,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -3137,6 +3140,10 @@
 		C5DD5BE0294E09E3008FD3A4 /* Web3Wallet */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Web3Wallet;
+		};
+		CF9C7E492A01802F0037C006 /* Web3Modal */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Web3Modal;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
