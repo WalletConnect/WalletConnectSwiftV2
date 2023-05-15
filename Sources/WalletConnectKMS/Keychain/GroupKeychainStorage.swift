@@ -2,6 +2,10 @@
 import Foundation
 
 public final class GroupKeychainStorage: KeychainStorageProtocol {
+    public func migrate(key: String) throws {
+        fatalError()
+    }
+
 
     private let accessGroup: String
 

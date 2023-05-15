@@ -74,12 +74,13 @@ public final class RelayClient {
         relayHost: String,
         projectId: String,
         keyValueStorage: KeyValueStorage = UserDefaults.standard,
-        keychainStorage: KeychainStorageProtocol = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk"),
+        keychainStorage: KeychainStorageProtocol = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk", kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly),
         socketFactory: WebSocketFactory,
         socketConnectionType: SocketConnectionType = .automatic,
         logger: ConsoleLogging = ConsoleLogger(loggingLevel: .debug)
     ) {
-        let clientIdStorage = ClientIdStorage(keychain: keychainStorage)
+        let clientIdMigrationController = ClientIdMigrationController(serviceIdentifier: "com.walletconnect.sdk", keyValueStorage: keyValueStorage, logger: logger)
+        let clientIdStorage = ClientIdStorage(keychain: keychainStorage, clientIdMigrationController: clientIdMigrationController)
         let socketAuthenticator = SocketAuthenticator(
             clientIdStorage: clientIdStorage,
             relayHost: relayHost

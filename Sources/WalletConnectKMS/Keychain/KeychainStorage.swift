@@ -13,8 +13,15 @@ public final class KeychainStorage: KeychainStorageProtocol {
 
     private let secItem: KeychainServiceProtocol
 
-    public init(keychainService: KeychainServiceProtocol = KeychainServiceWrapper(), serviceIdentifier: String) {
+    private let kSecAttrAccessible: CFString
+
+    public init(
+        keychainService: KeychainServiceProtocol = KeychainServiceWrapper(),
+        serviceIdentifier: String,
+        kSecAttrAccessible: CFString = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+    ) {
         self.secItem = keychainService
+        self.kSecAttrAccessible = kSecAttrAccessible
         service = serviceIdentifier
     }
 
@@ -56,6 +63,8 @@ public final class KeychainStorage: KeychainStorageProtocol {
             return item as? Data
         case errSecItemNotFound:
             return nil
+        case errSecNotAvailable, errSecReadOnly,errSecAuthFailed, errSecNoSuchKeychain,errSecInvalidKeychain, errSecDuplicateKeychain,errSecDuplicateCallback, errSecDuplicateItem, errSecBufferTooSmall, errSecDataTooLarge, errSecNoSuchAttr,errSecInvalidItemRef, errSecNoSuchClass, errSecNoDefaultKeychain, errSecInteractionNotAllowed, errSecReadOnlyAttr:
+            fatalError()
         default:
             throw KeychainError(status)
         }
@@ -100,7 +109,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
     private func buildBaseServiceQuery(for key: String) -> [CFString: Any] {
         return [
             kSecClass: kSecClassGenericPassword,
-            kSecAttrAccessible: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+            kSecAttrAccessible: kSecAttrAccessible,
             kSecAttrIsInvisible: true,
             kSecUseDataProtectionKeychain: true,
             kSecAttrService: service,
