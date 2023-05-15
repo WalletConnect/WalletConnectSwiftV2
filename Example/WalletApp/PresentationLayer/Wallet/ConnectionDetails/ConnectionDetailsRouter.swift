@@ -1,4 +1,5 @@
 import UIKit
+
 import Web3Wallet
 
 final class ConnectionDetailsRouter {
@@ -10,8 +11,8 @@ final class ConnectionDetailsRouter {
         self.app = app
     }
 
-    func present(request: AuthRequest) {
-        AuthRequestModule.create(app: app, request: request)
+    func present(request: AuthRequest, context: VerifyContext) {
+        AuthRequestModule.create(app: app, request: request, context: context)
             .wrapToNavigationController()
             .present(from: viewController)
     }

@@ -75,15 +75,15 @@ extension WalletPresenter {
     private func setupInitialState() {
         interactor.requestPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] request in
-                self?.router.present(request: request)
+            .sink { [weak self] result in
+                self?.router.present(request: result.request, context: result.context)
             }
             .store(in: &disposeBag)
         
         interactor.sessionRequestPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] sessionRequest in
-                self?.router.present(sessionRequest: sessionRequest)
+            .sink { [weak self] request, context in
+                self?.router.present(sessionRequest: request, sessionContext: context)
             }.store(in: &disposeBag)
 
         interactor.sessionsPublisher
