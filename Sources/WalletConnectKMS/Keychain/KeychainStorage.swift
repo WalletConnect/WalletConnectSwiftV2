@@ -64,7 +64,6 @@ public final class KeychainStorage: KeychainStorageProtocol {
         case errSecItemNotFound:
             return nil
         default:
-            print(status.message)
             throw KeychainError(status)
         }
     }
