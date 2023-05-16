@@ -20,10 +20,10 @@ extension ModalSheet {
             Networking.configure(projectId: projectId, socketFactory: socketFactory)
         }
         
-//        func getListings() async throws -> [Listing] {
-//            let listingResponse = try await ExplorerApi.live().getMobileListings(projectId)
-//            return listingResponse.listings.values.compactMap { $0 }
-//        }
+        func getListings() async throws -> [Listing] {
+            let listingResponse = try await ExplorerApi.live().getMobileListings(projectId)
+            return listingResponse.listings.values.compactMap { $0 }
+        }
         
         func connect() async throws -> WalletConnectURI {
             
