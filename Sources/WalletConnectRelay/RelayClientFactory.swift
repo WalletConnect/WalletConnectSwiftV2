@@ -17,7 +17,7 @@ public struct RelayClientFactory {
 
         let keychainStorage = KeychainStorage(serviceIdentifier: serviceIdentifier)
 
-        let logger = ConsoleLogger(loggingLevel: .debug)
+        let logger = ConsoleLogger(suffix: "🚄" ,loggingLevel: .debug)
 
         let clientIdMigrationController = ClientIdMigrationController(serviceIdentifier: serviceIdentifier, keyValueStorage: keyValueStorage, logger: logger)
 
