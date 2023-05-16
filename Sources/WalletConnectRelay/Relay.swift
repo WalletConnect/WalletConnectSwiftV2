@@ -12,7 +12,7 @@ public class Relay {
         guard let config = Relay.config else {
             fatalError("Error - you must call Relay.configure(_:) before accessing the shared instance.")
         }
-        return RelayClient(
+        return RelayClientFactory.create(
             relayHost: config.relayHost,
             projectId: config.projectId,
             socketFactory: config.socketFactory,
