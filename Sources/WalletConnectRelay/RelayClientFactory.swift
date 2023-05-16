@@ -13,9 +13,13 @@ public struct RelayClientFactory {
 
         let keyValueStorage = UserDefaults.standard
 
-        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
+        let serviceIdentifier = "com.walletconnect.sdk"
+
+        let keychainStorage = KeychainStorage(serviceIdentifier: serviceIdentifier)
 
         let logger = ConsoleLogger(loggingLevel: .debug)
+
+        let clientIdMigrationController = ClientIdMigrationController(serviceIdentifier: serviceIdentifier, keyValueStorage: keyValueStorage, logger: logger)
 
         return RelayClientFactory.create(
             relayHost: relayHost,
@@ -24,7 +28,8 @@ public struct RelayClientFactory {
             keychainStorage: keychainStorage,
             socketFactory: socketFactory,
             socketConnectionType: socketConnectionType,
-            logger: logger
+            logger: logger,
+            clientIdMigrationController: clientIdMigrationController
         )
     }
 
@@ -36,10 +41,9 @@ public struct RelayClientFactory {
         keychainStorage: KeychainStorageProtocol,
         socketFactory: WebSocketFactory,
         socketConnectionType: SocketConnectionType = .automatic,
-        logger: ConsoleLogging
+        logger: ConsoleLogging,
+        clientIdMigrationController: ClientIdMigrationController? = nil
     ) -> RelayClient {
-
-        let clientIdMigrationController = ClientIdMigrationController(serviceIdentifier: "com.walletconnect.sdk", keyValueStorage: keyValueStorage, logger: logger)
 
         let clientIdStorage = ClientIdStorage(keychain: keychainStorage, clientIdMigrationController: clientIdMigrationController)
 
