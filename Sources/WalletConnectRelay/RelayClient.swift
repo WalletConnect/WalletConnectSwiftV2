@@ -57,6 +57,20 @@ public final class RelayClient {
         setUpBindings()
     }
 
+
+    init(
+        dispatcher: Dispatching,
+        logger: ConsoleLogging,
+        rpcHistory: RPCHistory,
+        clientIdStorage: ClientIdStoring
+    ) {
+        self.logger = logger
+        self.dispatcher = dispatcher
+        self.rpcHistory = rpcHistory
+        self.clientIdStorage = clientIdStorage
+        setUpBindings()
+    }
+
     private func setUpBindings() {
         dispatcher.onMessage = { [weak self] payload in
             self?.handlePayloadMessage(payload)
