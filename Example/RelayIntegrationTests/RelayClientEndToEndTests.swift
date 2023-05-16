@@ -50,7 +50,9 @@ final class RelayClientEndToEndTests: XCTestCase {
             socketConnectionType: .manual,
             logger: logger
         )
-        return RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), clientIdStorage: clientIdStorage)
+        let rpcHistory = RPCHistoryFactory.createForRelay(keyValueStorage: RuntimeKeyValueStorage())
+
+        return RelayClient(dispatcher: dispatcher, logger: logger, rpcHistory: rpcHistory, clientIdStorage: clientIdStorage)
     }
 
     func testSubscribe() {
