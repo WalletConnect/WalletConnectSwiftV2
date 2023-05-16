@@ -19,4 +19,16 @@ class ResubscriptionService {
         self.logger = logger
         self.chatStorage = chatStorage
     }
+
+    func subscribeForInvites(inviteKey: AgreementPublicKey) async throws {
+        let topic = inviteKey.rawRepresentation.sha256().toHexString()
+        try kms.setPublicKey(publicKey: inviteKey, for: topic)
+        try await networkingInteractor.subscribe(topic: topic)
+    }
+
+    func unsubscribeFromInvites(inviteKey: AgreementPublicKey) {
+        let topic = inviteKey.rawRepresentation.sha256().toHexString()
+        kms.deletePublicKey(for: topic)
+        networkingInteractor.unsubscribe(topic: topic)
+    }
 }

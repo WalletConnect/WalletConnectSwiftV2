@@ -75,7 +75,7 @@ final class SyncTests: XCTestCase {
 
         let object = TestObject(id: "id", value: "value")
 
-        syncStore1.syncUpdatePublisher.sink { (_, update) in
+        syncStore1.syncUpdatePublisher.sink { (_, _, update) in
             switch update {
             case .set:
                 XCTFail()
@@ -84,7 +84,7 @@ final class SyncTests: XCTestCase {
             }
         }.store(in: &publishers)
 
-        syncStore2.syncUpdatePublisher.sink { (_, update) in
+        syncStore2.syncUpdatePublisher.sink { (_, _, update) in
             switch update {
             case .set:
                 setExpectation.fulfill()

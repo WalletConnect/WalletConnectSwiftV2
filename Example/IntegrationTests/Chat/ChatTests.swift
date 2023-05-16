@@ -6,23 +6,43 @@ import WalletConnectUtils
 @testable import WalletConnectSync
 import WalletConnectRelay
 import Combine
+import Web3
 
 final class ChatTests: XCTestCase {
-    var invitee: ChatClient!
-    var inviter: ChatClient!
+    var invitee1: ChatClient!
+    var inviter1: ChatClient!
+    var invitee2: ChatClient!
+    var inviter2: ChatClient!
     private var publishers = [AnyCancellable]()
 
-    let inviteeAccount = Account("eip155:1:0x15bca56b6e2728aec2532df9d436bd1600e86688")!
-    let inviterAccount = Account("eip155:2:0x15bca56b6e2728aec2532df9d436bd1600e86688")!
+    var inviteeAccount: Account {
+        return Account("eip155:1:" + pk1.address.hex(eip55: true))!
+    }
 
-    let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
+    var inviterAccount: Account {
+        return Account("eip155:1:" + pk2.address.hex(eip55: true))!
+    }
+
+    let pk1 = try! EthereumPrivateKey()
+    let pk2 = try! EthereumPrivateKey()
+
+    var privateKey1: Data {
+        return Data(pk1.rawPrivateKey)
+    }
+    var privateKey2: Data {
+        return Data(pk2.rawPrivateKey)
+    }
 
     override func setUp() async throws {
-        invitee = makeClient(prefix: "🦖 Invitee", account: inviteeAccount)
-        inviter = makeClient(prefix: "🍄 Inviter", account: inviterAccount)
+        invitee1 = makeClient(prefix: "🦖 Invitee", account: inviteeAccount)
+        inviter1 = makeClient(prefix: "🍄 Inviter", account: inviterAccount)
 
-        try await invitee.register(account: inviteeAccount, onSign: sign)
-        try await inviter.register(account: inviterAccount, onSign: sign)
+        try await invitee1.register(account: inviteeAccount) { message in
+            return self.sign(message, privateKey: self.privateKey1)
+        }
+        try await inviter1.register(account: inviterAccount) { message in
+            return self.sign(message, privateKey: self.privateKey2)
+        }
     }
 
     func makeClient(prefix: String, account: Account) -> ChatClient {
@@ -46,24 +66,24 @@ final class ChatTests: XCTestCase {
         let clientId = try! networkingInteractor.getClientId()
         logger.debug("My client id is: \(clientId)")
 
-        return ChatClientFactory.create(keyserverURL: keyserverURL, relayClient: relayClient, networkingInteractor: networkingInteractor, keychain:  keychain, logger: logger, keyValueStorage: keyValueStorage, syncClient: syncClient)
+        return ChatClientFactory.create(keyserverURL: keyserverURL, relayClient: relayClient, networkingInteractor: networkingInteractor, keychain:  keychain, logger: logger, storage: keyValueStorage, syncClient: syncClient)
     }
 
     func testInvite() async throws {
         let inviteExpectation = expectation(description: "invitation expectation")
         inviteExpectation.expectedFulfillmentCount = 2
 
-        invitee.newReceivedInvitePublisher.sink { _ in
+        invitee1.newReceivedInvitePublisher.sink { _ in
             inviteExpectation.fulfill()
         }.store(in: &publishers)
 
-        inviter.newSentInvitePublisher.sink { _ in
+        inviter1.newSentInvitePublisher.sink { _ in
             inviteExpectation.fulfill()
         }.store(in: &publishers)
 
-        let inviteePublicKey = try await inviter.resolve(account: inviteeAccount)
+        let inviteePublicKey = try await inviter1.resolve(account: inviteeAccount)
         let invite = Invite(message: "", inviterAccount: inviterAccount, inviteeAccount: inviteeAccount, inviteePublicKey: inviteePublicKey)
-        _ = try await inviter.invite(invite: invite)
+        _ = try await inviter1.invite(invite: invite)
 
         wait(for: [inviteExpectation], timeout: InputConfig.defaultTimeout)
     }
@@ -72,21 +92,21 @@ final class ChatTests: XCTestCase {
         let newThreadInviterExpectation = expectation(description: "new thread on inviting client expectation")
         let newThreadinviteeExpectation = expectation(description: "new thread on invitee client expectation")
 
-        invitee.newReceivedInvitePublisher.sink { [unowned self] invite in
-            Task { try! await invitee.accept(inviteId: invite.id) }
+        invitee1.newReceivedInvitePublisher.sink { [unowned self] invite in
+            Task { try! await invitee1.accept(inviteId: invite.id) }
         }.store(in: &publishers)
 
-        invitee.newThreadPublisher.sink { _ in
+        invitee1.newThreadPublisher.sink { _ in
             newThreadinviteeExpectation.fulfill()
         }.store(in: &publishers)
 
-        inviter.newThreadPublisher.sink { _ in
+        inviter1.newThreadPublisher.sink { _ in
             newThreadInviterExpectation.fulfill()
         }.store(in: &publishers)
 
-        let inviteePublicKey = try await inviter.resolve(account: inviteeAccount)
+        let inviteePublicKey = try await inviter1.resolve(account: inviteeAccount)
         let invite = Invite(message: "", inviterAccount: inviterAccount, inviteeAccount: inviteeAccount, inviteePublicKey: inviteePublicKey)
-        try await inviter.invite(invite: invite)
+        try await inviter1.invite(invite: invite)
 
         wait(for: [newThreadinviteeExpectation, newThreadInviterExpectation], timeout: InputConfig.defaultTimeout)
     }
@@ -95,19 +115,19 @@ final class ChatTests: XCTestCase {
         let messageExpectation = expectation(description: "message received")
         messageExpectation.expectedFulfillmentCount = 4
 
-        invitee.newReceivedInvitePublisher.sink { [unowned self] invite in
-            Task { try! await invitee.accept(inviteId: invite.id) }
+        invitee1.newReceivedInvitePublisher.sink { [unowned self] invite in
+            Task { try! await invitee1.accept(inviteId: invite.id) }
         }.store(in: &publishers)
 
-        invitee.newThreadPublisher.sink { [unowned self] thread in
-            Task { try! await invitee.message(topic: thread.topic, message: "message1") }
+        invitee1.newThreadPublisher.sink { [unowned self] thread in
+            Task { try! await invitee1.message(topic: thread.topic, message: "message1") }
         }.store(in: &publishers)
 
-        inviter.newThreadPublisher.sink { [unowned self] thread in
-            Task { try! await inviter.message(topic: thread.topic, message: "message2") }
+        inviter1.newThreadPublisher.sink { [unowned self] thread in
+            Task { try! await inviter1.message(topic: thread.topic, message: "message2") }
         }.store(in: &publishers)
 
-        inviter.newMessagePublisher.sink { message in
+        inviter1.newMessagePublisher.sink { message in
             if message.authorAccount == self.inviterAccount {
                 XCTAssertEqual(message.message, "message2")
             } else {
@@ -116,7 +136,7 @@ final class ChatTests: XCTestCase {
             messageExpectation.fulfill()
         }.store(in: &publishers)
 
-        invitee.newMessagePublisher.sink { message in
+        invitee1.newMessagePublisher.sink { message in
             if message.authorAccount == self.inviteeAccount {
                 XCTAssertEqual(message.message, "message1")
             } else {
@@ -125,15 +145,14 @@ final class ChatTests: XCTestCase {
             messageExpectation.fulfill()
         }.store(in: &publishers)
 
-        let inviteePublicKey = try await inviter.resolve(account: inviteeAccount)
+        let inviteePublicKey = try await inviter1.resolve(account: inviteeAccount)
         let invite = Invite(message: "", inviterAccount: inviterAccount, inviteeAccount: inviteeAccount, inviteePublicKey: inviteePublicKey)
-        try await inviter.invite(invite: invite)
+        try await inviter1.invite(invite: invite)
 
         wait(for: [messageExpectation], timeout: InputConfig.defaultTimeout)
     }
 
-    private func sign(_ message: String) -> SigningResult {
-        let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
+    private func sign(_ message: String, privateKey: Data) -> SigningResult {
         let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
         return .signed(try! signer.sign(message: message, privateKey: privateKey, type: .eip191))
     }

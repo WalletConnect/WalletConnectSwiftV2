@@ -47,6 +47,14 @@ public final class SyncStore<Object: SyncObject> {
         try await syncClient.create(account: account, store: name)
     }
 
+    public func setupSubscriptions(account: Account) throws {
+        let record = try indexStore.getRecord(account: account, name: name)
+
+        objectStore.onUpdate = { [unowned self] in
+            dataUpdateSubject.send(objectStore.getAll(topic: record.topic))
+        }
+    }
+
     public func getAll(for account: Account) throws -> [Object] {
         let record = try indexStore.getRecord(account: account, name: name)
         return objectStore.getAll(topic: record.topic)
@@ -67,14 +75,6 @@ public final class SyncStore<Object: SyncObject> {
         let record = try indexStore.getRecord(account: account, name: name)
         try await syncClient.delete(account: account, store: record.store, key: id)
         objectStore.delete(id: id, topic: record.topic)
-    }
-
-    public func setupSubscriptions(account: Account) throws {
-        let record = try indexStore.getRecord(account: account, name: name)
-
-        objectStore.onUpdate = { [unowned self] in
-            dataUpdateSubject.send(objectStore.getAll(topic: record.topic))
-        }
     }
 }
 

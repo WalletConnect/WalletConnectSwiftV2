@@ -10,15 +10,13 @@ final class SentInviteStoreDelegate {
         self.kms = kms
     }
 
-    func onInitialization(_ objects: [SentInvite]) {
-        Task(priority: .high) {
-            for invite in objects {
-                try syncKeychain(invite: invite)
-            }
-
-            let topics = objects.map { $0.responseTopic }
-            try await networkingInteractor.batchSubscribe(topics: topics)
+    func onInitialization(_ objects: [SentInvite]) async throws {
+        for invite in objects {
+            try syncKeychain(invite: invite)
         }
+
+        let topics = objects.map { $0.responseTopic }
+        try await networkingInteractor.batchSubscribe(topics: topics)
     }
 
     func onUpdate(_ object: SentInvite) {

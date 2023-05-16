@@ -11,7 +11,7 @@ public struct ChatClientFactory {
             networkingInteractor: networkingInteractor,
             keychain: keychain,
             logger: ConsoleLogger(loggingLevel: .debug),
-            keyValueStorage: UserDefaults.standard,
+            storage: UserDefaults.standard,
             syncClient: syncClient
         )
     }
@@ -22,19 +22,19 @@ public struct ChatClientFactory {
         networkingInteractor: NetworkingInteractor,
         keychain: KeychainStorageProtocol,
         logger: ConsoleLogging,
-        keyValueStorage: KeyValueStorage,
+        storage: KeyValueStorage,
         syncClient: SyncClient
     ) -> ChatClient {
         let kms = KeyManagementService(keychain: keychain)
-        let messageStore = KeyedDatabase<[Message]>(storage: keyValueStorage, identifier: ChatStorageIdentifiers.messages.rawValue)
-        let receivedInviteStore = KeyedDatabase<[ReceivedInvite]>(storage: keyValueStorage, identifier: ChatStorageIdentifiers.receivedInvites.rawValue)
-        let threadStore: SyncStore<Thread> = SyncStoreFactory.create(name: ChatStorageIdentifiers.thread.rawValue, syncClient: syncClient)
+        let messageStore = KeyedDatabase<[Message]>(storage: storage, identifier: ChatStorageIdentifiers.messages.rawValue)
+        let receivedInviteStore = KeyedDatabase<[ReceivedInvite]>(storage: storage, identifier: ChatStorageIdentifiers.receivedInvites.rawValue)
+        let threadStore: SyncStore<Thread> = SyncStoreFactory.create(name: ChatStorageIdentifiers.thread.rawValue, syncClient: syncClient, storage: storage)
         let identityClient = IdentityClientFactory.create(keyserver: keyserverURL, keychain: keychain, logger: logger)
         let inviteKeyDelegate = InviteKeyDelegate(networkingInteractor: networkingInteractor, kms: kms, identityClient: identityClient)
         let sentInviteDelegate = SentInviteStoreDelegate(networkingInteractor: networkingInteractor, kms: kms)
         let threadDelegate = ThreadStoreDelegate(networkingInteractor: networkingInteractor, kms: kms)
-        let sentInviteStore: SyncStore<SentInvite> = SyncStoreFactory.create(name: ChatStorageIdentifiers.sentInvite.rawValue, syncClient: syncClient)
-        let inviteKeyStore: SyncStore<InviteKey> = SyncStoreFactory.create(name: ChatStorageIdentifiers.inviteKey.rawValue, syncClient: syncClient)
+        let sentInviteStore: SyncStore<SentInvite> = SyncStoreFactory.create(name: ChatStorageIdentifiers.sentInvite.rawValue, syncClient: syncClient, storage: storage)
+        let inviteKeyStore: SyncStore<InviteKey> = SyncStoreFactory.create(name: ChatStorageIdentifiers.inviteKey.rawValue, syncClient: syncClient, storage: storage)
         let chatStorage = ChatStorage(kms: kms, messageStore: messageStore, receivedInviteStore: receivedInviteStore, sentInviteStore: sentInviteStore, threadStore: threadStore, inviteKeyStore: inviteKeyStore, sentInviteStoreDelegate: sentInviteDelegate, threadStoreDelegate: threadDelegate, inviteKeyDelegate: inviteKeyDelegate)
         let resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, kms: kms, chatStorage: chatStorage, logger: logger)
         let invitationHandlingService = InvitationHandlingService(keyserverURL: keyserverURL, networkingInteractor: networkingInteractor, identityClient: identityClient, kms: kms, logger: logger, chatStorage: chatStorage)

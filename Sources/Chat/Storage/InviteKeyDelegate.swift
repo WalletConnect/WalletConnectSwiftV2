@@ -12,15 +12,13 @@ final class InviteKeyDelegate {
         self.identityClient = identityClient
     }
 
-    func onInitialization(_ keys: [InviteKey]) {
-        Task(priority: .high) {
-            for key in keys {
-                try syncKms(key: key)
-            }
-
-            let topics = keys.map { $0.topic }
-            try await networkingInteractor.batchSubscribe(topics: topics)
+    func onInitialization(_ keys: [InviteKey]) async throws {
+        for key in keys {
+            try syncKms(key: key)
         }
+
+        let topics = keys.map { $0.topic }
+        try await networkingInteractor.batchSubscribe(topics: topics)
     }
 
     func onUpdate(_ key: InviteKey, account: Account) {

@@ -10,11 +10,9 @@ final class ThreadStoreDelegate {
         self.kms = kms
     }
 
-    func onInitialization(_ threads: [Thread]) {
-        Task(priority: .high) {
-            let topics = threads.map { $0.topic }
-            try await networkingInteractor.batchSubscribe(topics: topics)
-        }
+    func onInitialization(_ threads: [Thread]) async throws {
+        let topics = threads.map { $0.topic }
+        try await networkingInteractor.batchSubscribe(topics: topics)
     }
 
     func onUpdate(_ thread: Thread) {

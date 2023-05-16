@@ -90,10 +90,18 @@ final class ChatStorage {
         setupSyncSubscriptions()
     }
 
-    func initialize(for account: Account) async throws {
+    // MARK: - Configuration
+
+    func initializeStores(for account: Account) async throws {
         try await sentInviteStore.initialize(for: account)
         try await threadStore.initialize(for: account)
         try await inviteKeyStore.initialize(for: account)
+    }
+
+    func initializeDelegates() async throws {
+        try await sentInviteStoreDelegate.onInitialization(sentInviteStore.getAll())
+        try await threadStoreDelegate.onInitialization(threadStore.getAll())
+        try await inviteKeyDelegate.onInitialization(inviteKeyStore.getAll())
     }
 
     func setupSubscriptions(account: Account) throws {
@@ -104,9 +112,9 @@ final class ChatStorage {
             receivedInvitesPublisherSubject.send(getReceivedInvites(account: account))
         }
 
+        try sentInviteStore.setupSubscriptions(account: account)
         try threadStore.setupSubscriptions(account: account)
-        try sentInviteStore.setupSubscriptions(account: account)
-        try sentInviteStore.setupSubscriptions(account: account)
+        try inviteKeyStore.setupSubscriptions(account: account)
     }
 
     // MARK: - Invites
@@ -180,12 +188,11 @@ final class ChatStorage {
 
     // MARK: InviteKeys
 
-    func syncInviteKey(_ inviteKey: AgreementPublicKey, account: Account) async throws {
+    func setInviteKey(_ inviteKey: AgreementPublicKey, account: Account) async throws {
         if let privateKey = try kms.getPrivateKey(for: inviteKey) {
-            let key = InviteKey(
-                publicKey: inviteKey.hexRepresentation,
-                privateKey: privateKey.rawRepresentation.toHexString()
-            )
+            let pubKeyHex = inviteKey.hexRepresentation
+            let privKeyHex = privateKey.rawRepresentation.toHexString()
+            let key = InviteKey(publicKey: pubKeyHex, privateKey: privKeyHex)
             try await inviteKeyStore.set(object: key, for: account)
         }
     }
@@ -233,10 +240,6 @@ final class ChatStorage {
 private extension ChatStorage {
 
     func setupSyncSubscriptions() {
-        sentInviteStoreDelegate.onInitialization(sentInviteStore.getAll())
-        threadStoreDelegate.onInitialization(threadStore.getAll())
-        inviteKeyDelegate.onInitialization(inviteKeyStore.getAll())
-
         sentInviteStore.syncUpdatePublisher.sink { [unowned self] topic, account, update in
             switch update {
             case .set(let object):

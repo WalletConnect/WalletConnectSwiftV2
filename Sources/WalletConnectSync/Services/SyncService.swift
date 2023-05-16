@@ -51,8 +51,6 @@ final class SyncService {
     func create(account: Account, store: String) async throws {
         let topic = try getTopic(for: account, store: store)
         try await networkInteractor.subscribe(topic: topic)
-
-        logger.debug("Store \(store) created. Subscribed on: \(topic)")
     }
 }
 

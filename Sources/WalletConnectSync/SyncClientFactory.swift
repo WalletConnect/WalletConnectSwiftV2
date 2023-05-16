@@ -2,12 +2,12 @@ import Foundation
 
 final class SyncClientFactory {
 
-    static func create(networkInteractor: NetworkingInteractor, crypto: CryptoProvider) -> SyncClient {
+    static func create(networkInteractor: NetworkInteracting, crypto: CryptoProvider) -> SyncClient {
         let keychain = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
         return create(networkInteractor: networkInteractor, crypto: crypto, keychain: keychain)
     }
 
-    static func create(networkInteractor: NetworkingInteractor, crypto: CryptoProvider, keychain: KeychainStorageProtocol) -> SyncClient {
+    static func create(networkInteractor: NetworkInteracting, crypto: CryptoProvider, keychain: KeychainStorageProtocol) -> SyncClient {
         let signatureStore = SyncSignatureStore(keychain: keychain)
         let kms = KeyManagementService(keychain: keychain)
         let deriviationService = SyncDerivationService(
