@@ -1,6 +1,5 @@
 import Foundation
 import DeviceCheck
-import WalletConnectUtils
 import CryptoKit
 
 class AppAttestationRegistrer {
