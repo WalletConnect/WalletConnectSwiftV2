@@ -13,7 +13,7 @@ public class AuthClient: AuthClientProtocol {
     /// Publisher that sends authentication requests
     ///
     /// Wallet should subscribe on events in order to receive auth requests.
-    public var authRequestPublisher: AnyPublisher<AuthRequest, Never> {
+    public var authRequestPublisher: AnyPublisher<(request: AuthRequest, context: VerifyContext?), Never> {
         authRequestPublisherSubject.eraseToAnyPublisher()
     }
 
@@ -37,7 +37,7 @@ public class AuthClient: AuthClientProtocol {
     private let pairingRegisterer: PairingRegisterer
 
     private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, AuthError>), Never>()
-    private var authRequestPublisherSubject = PassthroughSubject<AuthRequest, Never>()
+    private var authRequestPublisherSubject = PassthroughSubject<(request: AuthRequest, context: VerifyContext?), Never>()
     private let appRequestService: AppRequestService
     private let appRespondSubscriber: AppRespondSubscriber
     private let walletRequestSubscriber: WalletRequestSubscriber

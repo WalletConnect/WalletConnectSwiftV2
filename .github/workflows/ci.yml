@@ -21,6 +21,7 @@ jobs:
   test:    
     needs: prepare
     runs-on: macos-12
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:

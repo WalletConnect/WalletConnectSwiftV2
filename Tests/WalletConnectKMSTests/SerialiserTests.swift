@@ -23,7 +23,7 @@ final class SerializerTests: XCTestCase {
         _ = try! myKms.createSymmetricKey(topic)
         let messageToSerialize = "todo - change for request object"
         let serializedMessage = try! mySerializer.serialize(topic: topic, encodable: messageToSerialize, envelopeType: .type0)
-        let (deserializedMessage, _): (String, String?) = mySerializer.tryDeserialize(topic: topic, encodedEnvelope: serializedMessage)!
+        let (deserializedMessage, _, _): (String, String?, Data) = mySerializer.tryDeserialize(topic: topic, encodedEnvelope: serializedMessage)!
         XCTAssertEqual(messageToSerialize, deserializedMessage)
     }
 
@@ -39,7 +39,7 @@ final class SerializerTests: XCTestCase {
         let serializedMessage = try! peerSerializer.serialize(topic: topic, encodable: messageToSerialize, envelopeType: .type1(pubKey: peerPubKey.rawRepresentation))
         print(agreementKeys.sharedKey.hexRepresentation)
         // -----------Me Deserialising -------------------
-        let (deserializedMessage, _): (String, String?) = mySerializer.tryDeserialize(topic: topic, encodedEnvelope: serializedMessage)!
+        let (deserializedMessage, _, _): (String, String?, Data) = mySerializer.tryDeserialize(topic: topic, encodedEnvelope: serializedMessage)!
         XCTAssertEqual(messageToSerialize, deserializedMessage)
     }
 }

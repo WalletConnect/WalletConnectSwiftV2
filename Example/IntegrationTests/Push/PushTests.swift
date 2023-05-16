@@ -237,7 +237,50 @@ final class PushTests: XCTestCase {
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
-    private func sign(_ message: String) -> SigningResult {
+    // Push Subscribe
+    func testWalletCreatesSubscription() async {
+        let expectation = expectation(description: "expects to create push subscription")
+        let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
+        try! await walletPushClient.subscribe(metadata: metadata, account: Account.stub(), onSign: sign)
+        walletPushClient.subscriptionsPublisher
+            .first()
+            .sink { [unowned self] subscriptions in
+            XCTAssertNotNil(subscriptions.first)
+            Task { try! await walletPushClient.deleteSubscription(topic: subscriptions.first!.topic) }
+            expectation.fulfill()
+        }.store(in: &publishers)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+    }
+
+    func testWalletCreatesAndUpdatesSubscription() async {
+        let expectation = expectation(description: "expects to create and update push subscription")
+        let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
+        let updateScope: Set<NotificationScope> = [NotificationScope.alerts]
+        try! await walletPushClient.subscribe(metadata: metadata, account: Account.stub(), onSign: sign)
+        walletPushClient.subscriptionsPublisher
+            .first()
+            .sink { [unowned self] subscriptions in
+                Task { try! await walletPushClient.update(topic: subscriptions.first!.topic, scope: updateScope) }
+            }
+            .store(in: &publishers)
+
+        walletPushClient.updateSubscriptionPublisher
+            .sink { [unowned self] result in
+                guard case .success(let subscription) = result else { XCTFail(); return }
+                let updatedScope = Set(subscription.scope.filter{ $0.value.enabled == true }.keys)
+                XCTAssertEqual(updatedScope, updateScope)
+                Task { try! await walletPushClient.deleteSubscription(topic: subscription.topic) }
+                expectation.fulfill()
+            }.store(in: &publishers)
+
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+    }
+
+}
+
+
+private extension PushTests {
+    func sign(_ message: String) -> SigningResult {
         let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
         let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
         return .signed(try! signer.sign(message: message, privateKey: privateKey, type: .eip191))

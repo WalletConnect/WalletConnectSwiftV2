@@ -1,6 +1,6 @@
 import Foundation
 
-struct AcceptSubscriptionJWTPayload: JWTClaimsCodable {
+struct SubscriptionJWTPayload: JWTClaimsCodable {
 
     struct Claims: JWTClaims {
         /// timestamp when jwt was issued
@@ -17,6 +17,8 @@ struct AcceptSubscriptionJWTPayload: JWTClaimsCodable {
         let sub: String
         /// description of action intent. Must be equal to "push_subscription"
         let act: String
+
+        let scp: String
     }
 
     struct Wrapper: JWTWrapper {
@@ -34,28 +36,33 @@ struct AcceptSubscriptionJWTPayload: JWTClaimsCodable {
     let keyserver: URL
     let subscriptionAccount: Account
     let dappUrl: String
+    let scope: String
 
-    init(keyserver: URL, subscriptionAccount: Account, dappUrl: String) {
+    init(keyserver: URL, subscriptionAccount: Account, dappUrl: String, scope: String) {
         self.keyserver = keyserver
         self.subscriptionAccount = subscriptionAccount
         self.dappUrl = dappUrl
+        self.scope = scope
     }
 
     init(claims: Claims) throws {
         self.keyserver = try claims.ksu.asURL()
         self.subscriptionAccount = try Account(DIDPKHString: claims.sub)
         self.dappUrl = claims.aud
+        self.scope = claims.scp
     }
 
     func encode(iss: String) throws -> Claims {
         return Claims(
-            iat: expiry(days: 1),
-            exp: defaultIatMilliseconds(),
+            iat: defaultIatMilliseconds(),
+            exp: expiry(days: 30),
             iss: iss,
             ksu: keyserver.absoluteString,
             aud: dappUrl,
             sub: subscriptionAccount.did,
-            act: "push_subscription"
+            act: "push_subscription",
+            scp: scope
         )
     }
 }
+

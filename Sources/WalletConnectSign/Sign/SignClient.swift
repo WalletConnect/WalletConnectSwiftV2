@@ -16,14 +16,14 @@ public final class SignClient: SignClientProtocol {
     /// Publisher that sends session proposal
     ///
     /// event is emited on responder client only
-    public var sessionProposalPublisher: AnyPublisher<Session.Proposal, Never> {
+    public var sessionProposalPublisher: AnyPublisher<(proposal: Session.Proposal, context: VerifyContext?), Never> {
         sessionProposalPublisherSubject.eraseToAnyPublisher()
     }
 
     /// Publisher that sends session request
     ///
     /// In most cases event will be emited on wallet
-    public var sessionRequestPublisher: AnyPublisher<Request, Never> {
+    public var sessionRequestPublisher: AnyPublisher<(request: Request, context: VerifyContext?), Never> {
         sessionRequestPublisherSubject.eraseToAnyPublisher()
     }
 
@@ -113,8 +113,8 @@ public final class SignClient: SignClientProtocol {
     private let historyService: HistoryService
     private let cleanupService: SignCleanupService
 
-    private let sessionProposalPublisherSubject = PassthroughSubject<Session.Proposal, Never>()
-    private let sessionRequestPublisherSubject = PassthroughSubject<Request, Never>()
+    private let sessionProposalPublisherSubject = PassthroughSubject<(proposal: Session.Proposal, context: VerifyContext?), Never>()
+    private let sessionRequestPublisherSubject = PassthroughSubject<(request: Request, context: VerifyContext?), Never>()
     private let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
     private let sessionSettlePublisherSubject = PassthroughSubject<Session, Never>()
     private let sessionDeletePublisherSubject = PassthroughSubject<(String, Reason), Never>()
@@ -371,8 +371,8 @@ public final class SignClient: SignClientProtocol {
     // MARK: - Private
 
     private func setUpEnginesCallbacks() {
-        approveEngine.onSessionProposal = { [unowned self] proposal in
-            sessionProposalPublisherSubject.send(proposal)
+        approveEngine.onSessionProposal = { [unowned self] (proposal, context) in
+            sessionProposalPublisherSubject.send((proposal, context))
         }
         approveEngine.onSessionRejected = { [unowned self] proposal, reason in
             sessionRejectionPublisherSubject.send((proposal, reason))
@@ -380,8 +380,8 @@ public final class SignClient: SignClientProtocol {
         approveEngine.onSessionSettle = { [unowned self] settledSession in
             sessionSettlePublisherSubject.send(settledSession)
         }
-        sessionEngine.onSessionRequest = { [unowned self] sessionRequest in
-            sessionRequestPublisherSubject.send(sessionRequest)
+        sessionEngine.onSessionRequest = { [unowned self] (sessionRequest, context) in
+            sessionRequestPublisherSubject.send((sessionRequest, context))
         }
         sessionEngine.onSessionDelete = { [unowned self] topic, reason in
             sessionDeletePublisherSubject.send((topic, reason))

@@ -4,7 +4,7 @@ import WalletConnectChat
 final class ChatListRouter {
 
     weak var viewController: UIViewController!
-
+    
     private let app: Application
 
     init(app: Application) {
@@ -33,3 +33,4 @@ final class ChatListRouter {
         WelcomeModule.create(app: app).present()
     }
 }
+

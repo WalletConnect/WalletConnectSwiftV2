@@ -24,7 +24,8 @@ class WalletRequestSubscriberTests: XCTestCase {
                                       logger: ConsoleLoggerMock(),
                                       kms: KeyManagementServiceMock(),
                                       walletErrorResponder: walletErrorResponder,
-                                      pairingRegisterer: pairingRegisterer)
+                                      pairingRegisterer: pairingRegisterer,
+                                      verifyClient: nil)
     }
 
     func testSubscribeRequest() {
@@ -35,13 +36,13 @@ class WalletRequestSubscriberTests: XCTestCase {
 
         var requestId: RPCID!
         var requestPayload: AuthPayload!
-        sut.onRequest = { request in
-            requestId = request.id
-            requestPayload = request.payload
+        sut.onRequest = { result in
+            requestId = result.request.id
+            requestPayload = result.request.payload
             messageExpectation.fulfill()
         }
 
-        let payload = RequestSubscriptionPayload<AuthRequestParams>(id: expectedRequestId, topic: "123", request: AuthRequestParams.stub(id: expectedRequestId, iat: iat), publishedAt: Date(), derivedTopic: nil)
+        let payload = RequestSubscriptionPayload<AuthRequestParams>(id: expectedRequestId, topic: "123", request: AuthRequestParams.stub(id: expectedRequestId, iat: iat), decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil)
 
         pairingRegisterer.subject.send(payload)
 

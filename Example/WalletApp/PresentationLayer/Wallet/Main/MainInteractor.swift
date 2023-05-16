@@ -1,11 +1,12 @@
+import Foundation
 import Combine
+
 import Web3Wallet
 import WalletConnectPush
-import Foundation
 
 final class MainInteractor {
 
-    var sessionProposalPublisher: AnyPublisher<Session.Proposal, Never> {
+    var sessionProposalPublisher: AnyPublisher<(proposal: Session.Proposal, context: VerifyContext?), Never> {
         return Web3Wallet.instance.sessionProposalPublisher
     }
 
