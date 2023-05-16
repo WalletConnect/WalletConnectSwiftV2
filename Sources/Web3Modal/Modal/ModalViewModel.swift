@@ -31,7 +31,7 @@ extension ModalSheet {
         @Published var uri: String?
         @Published var destination: Destination = .wallets
         @Published var errorMessage: String?
-//        @Published var wallets: [Listing] = []
+        @Published var wallets: [Listing] = []
         
         init(isShown: Binding<Bool>, projectId: String, interactor: Interactor) {
             self.isShown = isShown
@@ -47,17 +47,17 @@ extension ModalSheet {
                 .store(in: &disposeBag)
         }
         
-//        @MainActor
-//        func fetchWallets() async {
-//            do {
-//
-//                try await Task.sleep(nanoseconds: 1_000_000_000)
-//                wallets = try await interactor.getListings()
-//            } catch {
-//                print(error)
-//                errorMessage = error.localizedDescription
-//            }
-//        }
+        @MainActor
+        func fetchWallets() async {
+            do {
+
+                try await Task.sleep(nanoseconds: 1_000_000_000)
+                wallets = try await interactor.getListings()
+            } catch {
+                print(error)
+                errorMessage = error.localizedDescription
+            }
+        }
         
         @MainActor
         func createURI() async {
