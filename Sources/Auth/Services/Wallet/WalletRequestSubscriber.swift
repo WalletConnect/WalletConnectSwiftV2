@@ -1,8 +1,6 @@
 import Foundation
 import Combine
 
-import WalletConnectVerify
-
 class WalletRequestSubscriber {
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging
