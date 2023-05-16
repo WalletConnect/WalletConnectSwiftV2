@@ -64,6 +64,7 @@ public class ClientIdMigrationController {
     }
 
     func migrateIfNeeded() {
+        getClientId()
         if let lastMigration = keyValueStorage.object(forKey: lastMigrationKey) as? String {
             print("last migration: \(lastMigration)")
             return
@@ -86,8 +87,13 @@ public class ClientIdMigrationController {
             print(status)
             return
         }
+        getClientId()
 
 
+        keyValueStorage.set(EnvironmentInfo.packageVersion, forKey: lastMigrationKey)
+    }
+
+    private func getClientId() {
         var getQuery: [CFString: Any] = [
             kSecClass: kSecClassGenericPassword,
             kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
@@ -101,9 +107,8 @@ public class ClientIdMigrationController {
 
         var item: CFTypeRef?
         let getStatus = secItem.copyMatching(getQuery as CFDictionary, &item)
-        print(status.description)
+        print(getStatus.description)
 
-        keyValueStorage.set(EnvironmentInfo.packageVersion, forKey: lastMigrationKey)
     }
 
 }

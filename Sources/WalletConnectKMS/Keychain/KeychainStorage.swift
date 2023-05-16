@@ -13,7 +13,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
 
     private let secItem: KeychainServiceProtocol
 
-    private let kSecAttrAccessible: CFString
+//    private let kSecAttrAccessible: CFString
 
     public init(
         keychainService: KeychainServiceProtocol = KeychainServiceWrapper(),
@@ -21,7 +21,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
         kSecAttrAccessible: CFString = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
     ) {
         self.secItem = keychainService
-        self.kSecAttrAccessible = kSecAttrAccessible
+//        self.kSecAttrAccessible = kSecAttrAccessible
         service = serviceIdentifier
     }
 
