@@ -13,15 +13,15 @@ public final class KeychainStorage: KeychainStorageProtocol {
 
     private let secItem: KeychainServiceProtocol
 
-//    private let kSecAttrAccessible: CFString
+    private let attrAccessible: CFString
 
     public init(
         keychainService: KeychainServiceProtocol = KeychainServiceWrapper(),
         serviceIdentifier: String,
-        kSecAttrAccessible: CFString = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+        attrAccessible: CFString = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
     ) {
         self.secItem = keychainService
-//        self.kSecAttrAccessible = kSecAttrAccessible
+        self.attrAccessible = attrAccessible
         service = serviceIdentifier
     }
 
@@ -107,7 +107,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
     private func buildBaseServiceQuery(for key: String) -> [CFString: Any] {
         return [
             kSecClass: kSecClassGenericPassword,
-            kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+            kSecAttrAccessible: attrAccessible,
             kSecAttrIsInvisible: true,
             kSecUseDataProtectionKeychain: true,
             kSecAttrService: service,

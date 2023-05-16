@@ -15,7 +15,7 @@ public struct RelayClientFactory {
 
         let serviceIdentifier = "com.walletconnect.sdk"
 
-        let keychainStorage = KeychainStorage(serviceIdentifier: serviceIdentifier)
+        let keychainStorage = KeychainStorage(serviceIdentifier: serviceIdentifier, attrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly)
 
         let logger = ConsoleLogger(suffix: "🚄" ,loggingLevel: .debug)
 
