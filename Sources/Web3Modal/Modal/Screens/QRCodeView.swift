@@ -6,13 +6,19 @@ struct QRCodeView: View {
     @State var doc: QRCode.Document!
     
     @Environment(\.colorScheme) var colorScheme: ColorScheme
-        
+    
+    @State var uri: String
+    
     var body: some View {
         
+        let backgroundColor = UIColor(named: "background1", in: .module, compatibleWith: nil)!.cgColor
+        let foregroundColor = UIColor(named: "foreground1", in: .module, compatibleWith: .current)!.cgColor
+
         QRCodeViewUI(
-            content: Array(repeating: ["a", "b", "c", "1", "2", "3"], count: 50).flatMap({ $0 }).shuffled().joined(),
-            foregroundColor: colorScheme == .light ? UIColor.black.cgColor : UIColor.white.cgColor,
-            backgroundColor: colorScheme == .light ? UIColor.white.cgColor : UIColor.black.cgColor,
+            content: uri,
+            errorCorrection: .quantize,
+            foregroundColor: foregroundColor,
+            backgroundColor: backgroundColor,
             pixelStyle: QRCode.PixelShape.Vertical(
                 insetFraction: 0.2,
                 cornerRadiusFraction: 1
@@ -26,19 +32,19 @@ struct QRCodeView: View {
                 )
             )
         )
-        .padding(.bottom, 40)
+        .frame(height: UIScreen.main.bounds.width)
     }
 }
 
-
 struct QRCodeView_Previews: PreviewProvider {
+    
+    static let stubUri: String = Array(repeating: ["a", "b", "c", "1", "2", "3"], count: 50)
+        .flatMap({ $0 })
+        .shuffled()
+        .joined()
+    
     static var previews: some View {
-        QRCodeView()
+        QRCodeView(uri: stubUri)
             .previewLayout(.sizeThatFits)
-            .preferredColorScheme(.dark)
-        
-        QRCodeView()
-            .previewLayout(.sizeThatFits)
-            .preferredColorScheme(.light)
     }
 }
