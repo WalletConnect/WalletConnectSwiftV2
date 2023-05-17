@@ -37,15 +37,8 @@ struct WhatIsWalletView: View {
             }
             .buttonStyle(W3MButtonStyle())
         }
-        .padding(34)
+        .padding(.horizontal, 24)
     }
-}
-
-extension Color {
-    static let foreground1 = Color(red: 20/255, green: 20/255, blue: 20/255)
-    static let foreground2 = Color(red: 121/255, green: 134/255, blue: 134/255)
-    
-    static let blueDark = Color(red: 71/255, green: 161/255, blue: 255/255)
 }
 
 struct HelpSection: View {
@@ -71,6 +64,7 @@ struct HelpSection: View {
                 .font(.system(size: 14))
                 .foregroundColor(.foreground2)
                 .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.top, 10)
         .padding(.bottom, 5)
@@ -82,16 +76,5 @@ struct WhatIsWalletView_Previews: PreviewProvider {
     static var previews: some View {
         
         WhatIsWalletView()
-    }
-}
-
-struct W3MButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .padding(.vertical, 6)
-            .padding(.horizontal, 10)
-            .background(Color.blueDark)
-            .foregroundColor(.white)
-            .clipShape(Capsule())
     }
 }
