@@ -34,7 +34,7 @@ public struct ModalSheet: View {
     
     private func modalHeader() -> some View {
         HStack(spacing: 0) {
-            Image("walletconnect_logo", bundle: .module)
+            Image(.walletconnect_logo)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 180)
@@ -159,52 +159,52 @@ public struct ModalSheet: View {
                 viewModel.navigateTo(.help)
             }
         }, label: {
-            Image("help", bundle: .module)
+            Image(.help)
                 .padding(8)
         })
         .buttonStyle(CircuralIconButtonStyle())
     }
     
     private func closeButton() -> some View {
-        Button(action: {
+        Button {
             withAnimation {
                 viewModel.isShown.wrappedValue = false
             }
-        }, label: {
-            Image("close", bundle: .module)
+        } label: {
+            Image(.close)
                 .padding(8)
-        })
+        }
         .buttonStyle(CircuralIconButtonStyle())
     }
     
     private func backButton() -> some View {
-        Button(action: {
+        Button {
             withAnimation {
                 viewModel.onBackButton()
             }
-        }, label: {
+        } label: {
             Image(systemName: "chevron.backward")
                 .padding(20)
-        })
+        }
     }
     
     private func qrButton() -> some View {
-        Button(action: {
+        Button {
             withAnimation {
                 viewModel.navigateTo(.qr)
             }
-        }, label: {
-            Image("qr_large", bundle: .module)
+        } label: {
+            Image(.qr_large)
                 .padding()
-        })
+        }
     }
     
     private func copyButton() -> some View {
-        Button(action: {
-            UIPasteboard.general.string = viewModel.uri
-        }, label: {
-            Image("copy_large", bundle: .module)
+        Button {
+            viewModel.onCopyButton()
+        } label: {
+            Image(.copy_large)
                 .padding()
-        })
+        }
     }
 }

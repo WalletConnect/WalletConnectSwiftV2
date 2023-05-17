@@ -77,6 +77,10 @@ extension ModalSheet {
             destination = .wallets
         }
         
+        func onCopyButton() {
+            UIPasteboard.general.string = uri
+        }
+        
 //        func imageUrl(for listing: Listing) -> URL? {
 //            let urlString = "https://explorer-api.walletconnect.com/v3/logo/md/\(listing.imageId)?projectId=\(projectId)"
 //            

@@ -10,22 +10,18 @@ struct QRCodeView: View {
     @State var uri: String
     
     var body: some View {
-        
-        let backgroundColor = UIColor(named: "background1", in: .module, compatibleWith: nil)!.cgColor
-        let foregroundColor = UIColor(named: "foreground1", in: .module, compatibleWith: .current)!.cgColor
-
         QRCodeViewUI(
             content: uri,
             errorCorrection: .quantize,
-            foregroundColor: foregroundColor,
-            backgroundColor: backgroundColor,
+            foregroundColor: AssetColor.background1.uiColor.cgColor,
+            backgroundColor: AssetColor.foreground1.uiColor.cgColor,
             pixelStyle: QRCode.PixelShape.Vertical(
                 insetFraction: 0.2,
                 cornerRadiusFraction: 1
             ),
             eyeStyle: QRCode.EyeShape.Squircle(),
             logoTemplate: QRCode.LogoTemplate(
-                image: (UIImage(named: "wc_logo", in: .module, with: .none)?.cgImage)!,
+                image: Asset.wc_logo.uiImage.cgImage!,
                 path: CGPath(
                     rect: CGRect(x: 0.35, y: 0.3875, width: 0.30, height: 0.225),
                     transform: nil
