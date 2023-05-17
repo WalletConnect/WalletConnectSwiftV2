@@ -143,6 +143,11 @@ final class ChatStorage {
         return receivedInviteStore.getElements(for: account.absoluteString) ?? []
     }
 
+    func getReceivedInvites(thread: Thread) -> [ReceivedInvite] {
+        return getReceivedInvites(account: thread.selfAccount)
+            .filter { $0.inviterAccount == thread.peerAccount }
+    }
+
     func getSentInvites(account: Account) -> [SentInvite] {
         do {
             return try sentInviteStore.getAll(for: account)
@@ -195,6 +200,10 @@ final class ChatStorage {
             let key = InviteKey(publicKey: pubKeyHex, privateKey: privKeyHex)
             try await inviteKeyStore.set(object: key, for: account)
         }
+    }
+
+    func removeInviteKey(_ inviteKey: AgreementPublicKey, account: Account) async throws {
+        try await inviteKeyStore.delete(id: inviteKey.hexRepresentation, for: account)
     }
 
     // MARK: - Threads
@@ -252,7 +261,7 @@ private extension ChatStorage {
         threadStore.syncUpdatePublisher.sink { [unowned self] topic, account, update in
             switch update {
             case .set(let object):
-                self.threadStoreDelegate.onUpdate(object)
+                self.threadStoreDelegate.onUpdate(object, storage: self)
             case .delete(let id):
                 self.threadStoreDelegate.onDelete(id)
             }

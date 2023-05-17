@@ -133,6 +133,7 @@ public class ChatClient {
     public func goPrivate(account: Account) async throws {
         let inviteKey = try await identityClient.goPrivate(account: account)
         resubscriptionService.unsubscribeFromInvites(inviteKey: inviteKey)
+        try await chatStorage.removeInviteKey(inviteKey, account: account)
     }
 
     /// Registers an invite key if not yet registered on this client from keyserver
