@@ -32,7 +32,8 @@ class InvitationHandlingService {
         guard let invite = chatStorage.getReceivedInvite(id: inviteId)
         else { throw Errors.inviteForIdNotFound }
 
-        let inviteePublicKey = try identityClient.getInviteKey(for: invite.inviteeAccount)
+        let inviteePublicKeyHex = try DIDKey(did: invite.inviteePublicKey).hexString
+        let inviteePublicKey = try AgreementPublicKey(hex: inviteePublicKeyHex)
         let inviterPublicKey = try DIDKey(did: invite.inviterPublicKey).hexString
 
         let symmetricKey = try kms.performKeyAgreement(selfPublicKey: inviteePublicKey, peerPublicKey: inviterPublicKey)
@@ -116,7 +117,7 @@ private extension InvitationHandlingService {
                 Task(priority: .high) {
                     let inviterAccount = try await identityClient.resolveIdentity(iss: claims.iss)
                     // TODO: Should we cache it?
-                    let inviteePublicKey = try await identityClient.resolveInvite(account: inviterAccount)
+                    let inviteePublicKey = try await identityClient.resolveInvite(account: invite.inviteeAccount)
                     let inviterPublicKey = invite.inviterPublicKey.did(variant: .X25519)
 
                     let invite = ReceivedInvite(
