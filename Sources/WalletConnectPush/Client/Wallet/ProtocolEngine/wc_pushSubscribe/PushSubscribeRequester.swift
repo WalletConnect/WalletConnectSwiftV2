@@ -62,7 +62,7 @@ class PushSubscribeRequester {
 
         let availableScope = try await subscriptionScopeProvider.getSubscriptionScope(dappUrl: metadata.url)
 
-        let scope = availableScope.map{$0.name.rawValue}.joined(separator: " ")
+        let scope = availableScope.map{$0.name}.joined(separator: " ")
 
         let request = try createJWTRequest(subscriptionAccount: account, dappUrl: dappUrl, scope: scope)
 

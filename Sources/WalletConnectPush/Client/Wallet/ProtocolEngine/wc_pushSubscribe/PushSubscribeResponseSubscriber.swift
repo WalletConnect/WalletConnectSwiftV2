@@ -62,7 +62,6 @@ class PushSubscribeResponseSubscriber {
                     let (subscriptionPayload, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
                     let subscribedScope = subscriptionPayload.scope
                         .components(separatedBy: " ")
-                        .compactMap{NotificationScope(rawValue: $0)}
                     do {
                         // generate symm key P
                         let agreementKeysP = try kms.performKeyAgreement(selfPublicKey: pubKeyY, peerPublicKey: peerPubKeyZ)
@@ -87,7 +86,7 @@ class PushSubscribeResponseSubscriber {
                     }
                     dappsMetadataStore.delete(forKey: payload.topic)
                     let expiry = Date(timeIntervalSince1970: TimeInterval(claims.exp))
-                    let scope: [NotificationScope: ScopeValue] = subscribedTypes.reduce(into: [:]) { $0[$1.name] = ScopeValue(description: $1.description, enabled: true) }
+                    let scope: [String: ScopeValue] = subscribedTypes.reduce(into: [:]) { $0[$1.name] = ScopeValue(description: $1.description, enabled: true) }
                     let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata, scope: scope, expiry: expiry)
 
                     subscriptionsStore.set(pushSubscription, forKey: pushSubscriptionTopic)
