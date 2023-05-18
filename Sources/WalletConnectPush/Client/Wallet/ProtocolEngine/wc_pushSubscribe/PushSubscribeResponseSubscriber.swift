@@ -58,8 +58,11 @@ class PushSubscribeResponseSubscriber {
                     var account: Account!
                     var metadata: AppMetadata!
                     var pushSubscriptionTopic: String!
-                    var availableScope: Set<NotificationType>!
-                    let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
+                    var subscribedTypes: Set<NotificationType>!
+                    let (subscriptionPayload, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
+                    let subscribedScope = subscriptionPayload.scope
+                        .components(separatedBy: " ")
+                        .compactMap{NotificationScope(rawValue: $0)}
                     do {
                         // generate symm key P
                         let agreementKeysP = try kms.performKeyAgreement(selfPublicKey: pubKeyY, peerPublicKey: peerPubKeyZ)
@@ -68,7 +71,8 @@ class PushSubscribeResponseSubscriber {
                         try groupKeychainStorage.add(agreementKeysP, forKey: pushSubscriptionTopic)
                         account = try Account(DIDPKHString: claims.sub)
                         metadata = try dappsMetadataStore.get(key: payload.topic)
-                        availableScope = try await subscriptionScopeProvider.getSubscriptionScope(dappUrl: metadata!.url)
+                        let availableTypes = try await subscriptionScopeProvider.getSubscriptionScope(dappUrl: metadata!.url)
+                        subscribedTypes = availableTypes.filter{subscribedScope.contains($0.name)}
                         logger.debug("PushSubscribeResponseSubscriber: subscribing push subscription topic: \(pushSubscriptionTopic!)")
                         try await networkingInteractor.subscribe(topic: pushSubscriptionTopic)
                     } catch {
@@ -78,12 +82,12 @@ class PushSubscribeResponseSubscriber {
                     }
 
                     guard let metadata = metadata else {
-                        logger.debug("PushSubscribeResponseSubscriber: no metadata for topic: \(pushSubscriptionTopic)")
+                        logger.debug("PushSubscribeResponseSubscriber: no metadata for topic: \(pushSubscriptionTopic!)")
                         return
                     }
                     dappsMetadataStore.delete(forKey: payload.topic)
                     let expiry = Date(timeIntervalSince1970: TimeInterval(claims.exp))
-                    let scope: [NotificationScope: ScopeValue] = availableScope.reduce(into: [:]) { $0[$1.name] = ScopeValue(description: $1.description, enabled: true) }
+                    let scope: [NotificationScope: ScopeValue] = subscribedTypes.reduce(into: [:]) { $0[$1.name] = ScopeValue(description: $1.description, enabled: true) }
                     let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata, scope: scope, expiry: expiry)
 
                     subscriptionsStore.set(pushSubscription, forKey: pushSubscriptionTopic)
