@@ -1,6 +1,7 @@
 import SwiftUI
 
 public struct ModalSheet: View {
+    
     @ObservedObject var viewModel: ModalViewModel
     
     public var body: some View {
@@ -73,10 +74,12 @@ public struct ModalSheet: View {
         .foregroundColor(.accent)
         .frame(height: 60)
         .overlay(
-            Text(viewModel.destination.contentTitle)
-                .font(.system(size: 20).weight(.semibold))
-                .foregroundColor(.foreground1)
-                .padding(.horizontal, 50)
+            VStack {
+                Text(viewModel.destination.contentTitle)
+                    .font(.system(size: 20).weight(.semibold))
+                    .foregroundColor(.foreground1)
+                    .padding(.horizontal, 50)
+            }
         )
     }
     
@@ -116,18 +119,19 @@ public struct ModalSheet: View {
     @ViewBuilder
     private func gridItem(for index: Int) -> some View {
         let wallet: Listing? = viewModel.wallets.indices.contains(index) ? viewModel.wallets[index] : nil
-
-        if #available(iOS 14.0, *) {
+        let walletUrl: URL? = wallet != nil ? viewModel.imageUrl(for: wallet!) : nil
+        
+        if #available(iOS 15.0, *) {
             VStack {
-                AsyncImage(url: wallet != nil ? viewModel.imageUrl(for: wallet!) : nil) { image in
+                AsyncImage(url: walletUrl) { image in
                     image
                         .resizable()
                         .scaledToFit()
                 } placeholder: {
-                    Color.foreground3
+                    Color
+                        .foreground3
                         .frame(width: 60, height: 60)
                 }
-                .animation(.default)
                 .cornerRadius(8)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
