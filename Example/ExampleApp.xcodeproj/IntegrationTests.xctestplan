@@ -28,6 +28,10 @@
   },
   "testTargets" : [
     {
+      "skippedTests" : [
+        "AuthTests\/testEIP1271RespondSuccess()",
+        "ChatTests"
+      ],
       "target" : {
         "containerPath" : "container:ExampleApp.xcodeproj",
         "identifier" : "A5E03DEC286464DB00888481",

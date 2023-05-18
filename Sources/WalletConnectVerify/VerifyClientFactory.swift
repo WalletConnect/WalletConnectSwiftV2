@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectUtils
 
 public class VerifyClientFactory {
     public static func create(verifyHost: String?) throws -> VerifyClient? {

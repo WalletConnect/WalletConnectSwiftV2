@@ -1,6 +1,5 @@
 import DeviceCheck
 import Foundation
-import WalletConnectUtils
 
 protocol AttestKeyGenerating {
     func generateKeys() async throws -> String

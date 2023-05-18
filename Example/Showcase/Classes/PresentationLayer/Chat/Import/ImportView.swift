@@ -15,8 +15,15 @@ struct ImportView: View {
 
             Spacer()
 
-            BrandButton(title: "Ok, done" ) {
-                try await presenter.didPressImport()
+            VStack {
+                
+//                BrandButton(title: "Web3Modal") {
+//                    try await presenter.didPressWeb3Modal()
+//                }
+                
+                BrandButton(title: "Ok, done" ) {
+                    try await presenter.didPressImport()
+                }
             }
             .padding(16.0)
         }
