@@ -17,7 +17,7 @@ struct ImportView: View {
 
             VStack {
                 
-                BrandButton(title: "Web3Modal") {
+                BrandButton(title: "Web3Modal WIP") {
                     try await presenter.didPressWeb3Modal()
                 }
                 

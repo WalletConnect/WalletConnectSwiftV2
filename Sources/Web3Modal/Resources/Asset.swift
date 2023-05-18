@@ -4,21 +4,21 @@ import UIKit
 
 enum Asset: String {
     
-    // Icons
+    /// Icons
     case close
     case external_link
     case help
     case wallet
     
-    // large
+    /// large
     case copy_large
     case qr_large
     
-    // Images
+    /// Images
     case walletconnect_logo
     case wc_logo
     
-    // Help
+    /// Help
     case Browser
     case DAO
     case DeFi

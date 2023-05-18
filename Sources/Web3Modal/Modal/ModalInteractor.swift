@@ -21,7 +21,7 @@ extension ModalSheet {
         }
         
         func getListings() async throws -> [Listing] {
-            let listingResponse = try await ExplorerApi.live().getMobileListings(projectId)
+            let listingResponse = try await ExplorerApi.live().getListings(projectId)
             return listingResponse.listings.values.compactMap { $0 }
         }
         
