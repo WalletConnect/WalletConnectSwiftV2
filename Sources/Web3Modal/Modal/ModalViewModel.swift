@@ -29,7 +29,7 @@ extension ModalSheet {
         @Published var isShown: Binding<Bool>
         
         @Published var uri: String?
-        @Published var destination: Destination = .wallets
+        @Published var destination: Destination = .qr
         @Published var errorMessage: String?
         @Published var wallets: [Listing] = []
         

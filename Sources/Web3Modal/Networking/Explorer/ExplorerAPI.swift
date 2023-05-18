@@ -14,7 +14,7 @@ extension ExplorerApi {
                     queryItems: [
                         .init(name: "projectId", value: projectId),
                         .init(name: "page", value: "1"),
-                        .init(name: "entries", value: "9"),
+                        .init(name: "entries", value: "11"),
                     ],
                     method: .GET,
                     host: "explorer-api.walletconnect.com"
