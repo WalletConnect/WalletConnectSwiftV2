@@ -37,6 +37,7 @@ class SIWEMessageFormatterTests: XCTestCase {
             service.invalid wants you to sign in with your Ethereum account:
             0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
 
+
             URI: https://service.invalid/login
             Version: 1
             Chain ID: 1
@@ -81,6 +82,7 @@ class SIWEMessageFormatterTests: XCTestCase {
             service.invalid wants you to sign in with your Ethereum account:
             0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
 
+            
             URI: https://service.invalid/login
             Version: 1
             Chain ID: 1

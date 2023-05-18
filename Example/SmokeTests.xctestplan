@@ -45,6 +45,7 @@
         "EIP55Tests",
         "ENSResolverTests",
         "PairingTests",
+        "PushTests",
         "PushTests\/testDappDeletePushSubscription()",
         "PushTests\/testRequestPush()",
         "PushTests\/testWalletApprovesPushRequest()",

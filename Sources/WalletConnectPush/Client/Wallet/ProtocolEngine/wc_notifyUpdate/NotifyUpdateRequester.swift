@@ -25,7 +25,7 @@ class NotifyUpdateRequester {
         self.subscriptionsStore = subscriptionsStore
     }
 
-    func update(topic: String, scope: Set<NotificationScope>) async throws {
+    func update(topic: String, scope: Set<String>) async throws {
 
         logger.debug("NotifyUpdateRequester: updating subscription for topic: \(topic)")
         guard let subscription = try subscriptionsStore.get(key: topic) else { throw Errors.noSubscriptionForGivenTopic }
@@ -37,9 +37,9 @@ class NotifyUpdateRequester {
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
     }
 
-    private func createJWTRequest(subscriptionAccount: Account, dappUrl: String, scope: Set<NotificationScope>) throws -> RPCRequest {
+    private func createJWTRequest(subscriptionAccount: Account, dappUrl: String, scope: Set<String>) throws -> RPCRequest {
         let protocolMethod = NotifyUpdateProtocolMethod().method
-        let scopeClaim = scope.map {$0.rawValue}.joined(separator: " ")
+        let scopeClaim = scope.joined(separator: " ")
         let jwtPayload = SubscriptionJWTPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: scopeClaim)
         let wrapper = try identityClient.signAndCreateWrapper(
             payload: jwtPayload,

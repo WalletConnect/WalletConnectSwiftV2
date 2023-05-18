@@ -34,6 +34,7 @@ public struct SIWEMessage: Equatable {
                 \(domain) wants you to sign in with your Ethereum account:
                 \(address)
                 \(statementLine)
+
                 URI: \(uri)
                 Version: \(version)
                 Chain ID: \(chainId)
@@ -52,7 +53,7 @@ private extension SIWEMessage {
 
     var statementLine: String {
         guard let statement = statement else { return "" }
-        return "\n\(statement)\n"
+        return "\n\(statement)"
     }
 
     var nbfLine: String {
