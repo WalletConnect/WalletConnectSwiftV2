@@ -16,6 +16,11 @@ final class ImportPresenter: ObservableObject {
     }
 
     @MainActor
+    func didPressWeb3Modal() async throws {
+        router.presentWeb3Modal()
+    }
+    
+    @MainActor
     func didPressImport() async throws {
         guard let importAccount = ImportAccount(input: input)
         else { return input = .empty }

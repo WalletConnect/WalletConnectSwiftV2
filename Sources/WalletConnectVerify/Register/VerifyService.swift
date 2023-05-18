@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectNetworking
 
 enum VerifyAPI: HTTPService {
     case resolve(assertionId: String)

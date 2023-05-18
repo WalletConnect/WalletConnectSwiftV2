@@ -67,7 +67,7 @@ private extension PushClientProxy {
 
     struct UpdateRequest: Codable {
         let topic: String
-        let scope: Set<NotificationScope>
+        let scope: Set<String>
     }
 
     struct RejectRequest: Codable {

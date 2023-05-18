@@ -1,9 +1,6 @@
 import DeviceCheck
 import Foundation
 
-import WalletConnectUtils
-import WalletConnectNetworking
-
 public actor VerifyClient {
     enum Errors: Error {
         case attestationNotSupported

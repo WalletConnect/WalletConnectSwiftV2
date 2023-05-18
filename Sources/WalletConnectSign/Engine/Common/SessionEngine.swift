@@ -1,8 +1,6 @@
 import Foundation
 import Combine
 
-import WalletConnectVerify
-
 final class SessionEngine {
     enum Errors: Error {
         case sessionNotFound(topic: String)

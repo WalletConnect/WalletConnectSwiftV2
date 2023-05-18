@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectNetworking
 
 public final class OriginVerifier {
     enum Errors: Error {

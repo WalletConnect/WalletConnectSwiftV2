@@ -1,20 +1,28 @@
 import SwiftUI
+import WalletConnectPairing
 
-public struct Web3ModalContainerView: View {
-        
+public struct ModalContainerView: View {
+    
     @Environment(\.presentationMode) var presentationMode
     
     @State var showModal: Bool = false
     
-    public init() {
-        
+    let projectId: String
+    let metadata: AppMetadata
+    let webSocketFactory: WebSocketFactory
+    
+    public init(projectId: String, metadata: AppMetadata, webSocketFactory: WebSocketFactory) {
+        self.projectId = projectId
+        self.metadata = metadata
+        self.webSocketFactory = webSocketFactory
     }
     
     public var body: some View {
         
         VStack(spacing: 0) {
             
-            Color.black.opacity(0.3)
+            Color.thickOverlay
+                .colorScheme(.light)
                 .onTapGesture {
                     withAnimation {
                         showModal = false
@@ -22,7 +30,12 @@ public struct Web3ModalContainerView: View {
                 }
             
             if showModal {
-                Web3ModalSheet(destination: .welcome, isShown: $showModal)
+                ModalSheet(
+                    viewModel: .init(
+                        isShown: $showModal,
+                        projectId: projectId,
+                        interactor: .init(projectId: projectId, metadata: metadata, webSocketFactory: webSocketFactory)
+                    ))
                     .transition(.move(edge: .bottom))
                     .animation(.spring(), value: showModal)
             }
@@ -30,7 +43,9 @@ public struct Web3ModalContainerView: View {
         .edgesIgnoringSafeArea(.all)
         .onChangeBackported(of: showModal, perform: { newValue in
             if newValue == false {
-                dismiss()
+                withAnimation {
+                    dismiss()
+                }
             }
         })
         .onAppear {
@@ -47,5 +62,3 @@ public struct Web3ModalContainerView: View {
         }
     }
 }
-
-

@@ -1,7 +1,5 @@
 import Foundation
 
-import WalletConnectVerify
-
 public struct SignClientFactory {
 
     /// Initializes and returns newly created WalletConnect Client Instance

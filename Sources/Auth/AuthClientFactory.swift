@@ -1,7 +1,5 @@
 import Foundation
 
-import WalletConnectVerify
-
 public struct AuthClientFactory {
 
     public static func create(

@@ -1,8 +1,6 @@
 import Foundation
 import Combine
 
-import WalletConnectVerify
-
 final class ApproveEngine {
     enum Errors: Error {
         case wrongRequestParams
