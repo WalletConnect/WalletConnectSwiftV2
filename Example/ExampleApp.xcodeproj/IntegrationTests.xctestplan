@@ -29,7 +29,7 @@
   "testTargets" : [
     {
       "skippedTests" : [
-        "AuthTests",
+        "AuthTests\/testEIP1271RespondSuccess()",
         "ChatTests"
       ],
       "target" : {
