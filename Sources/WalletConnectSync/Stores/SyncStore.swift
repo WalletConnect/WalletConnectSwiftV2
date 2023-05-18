@@ -88,14 +88,14 @@ private extension SyncStore {
             guard record.store == name else { return }
 
             switch update {
-            case .set(let value):
-                let decoded = try! value.get(StoreSet<Object>.self)
-                if try! setInStore(object: decoded.value, for: record.account) {
-                    syncUpdateSubject.send((topic, record.account, .set(object: decoded.value)))
+            case .set(let set):
+                let object = try! JSONDecoder().decode(Object.self, from: Data(set.value.utf8))
+                if try! setInStore(object: object, for: record.account) {
+                    syncUpdateSubject.send((topic, record.account, .set(object: object)))
                 }
-            case .delete(let key):
-                if try! deleteInStore(id: key, for: record.account) {
-                    syncUpdateSubject.send((topic, record.account, .delete(id: key)))
+            case .delete(let delete):
+                if try! deleteInStore(id: delete.key, for: record.account) {
+                    syncUpdateSubject.send((topic, record.account, .delete(id: delete.key)))
                 }
             }
         }.store(in: &publishers)

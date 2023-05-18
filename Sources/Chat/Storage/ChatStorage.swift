@@ -197,7 +197,7 @@ final class ChatStorage {
         if let privateKey = try kms.getPrivateKey(for: inviteKey) {
             let pubKeyHex = inviteKey.hexRepresentation
             let privKeyHex = privateKey.rawRepresentation.toHexString()
-            let key = InviteKey(publicKey: pubKeyHex, privateKey: privKeyHex)
+            let key = InviteKey(publicKey: pubKeyHex, privateKey: privKeyHex, account: account)
             try await inviteKeyStore.set(object: key, for: account)
         }
     }

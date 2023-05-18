@@ -31,7 +31,7 @@ final class SyncService {
 
     func set<Object: SyncObject>(account: Account, store: String, object: Object) async throws {
         let protocolMethod = SyncSetMethod()
-        let params = StoreSet(key: object.syncId, value: object)
+        let params = StoreSet(key: object.syncId, value: try object.json())
         let request = RPCRequest(method: protocolMethod.method, params: params)
         let record = try indexStore.getRecord(account: account, name: store)
         try await networkInteractor.request(request, topic: record.topic, protocolMethod: protocolMethod)
@@ -62,14 +62,14 @@ private extension SyncService {
 
     func setupSubscriptions() {
         networkInteractor.requestSubscription(on: SyncSetMethod())
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<AnyCodable>) in
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<StoreSet>) in
                 self.updateSubject.send((payload.topic, .set(payload.request)))
             }
             .store(in: &publishers)
 
         networkInteractor.requestSubscription(on: SyncDeleteMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<StoreDelete>) in
-                self.updateSubject.send((payload.topic, .delete(payload.request.key)))
+                self.updateSubject.send((payload.topic, .delete(payload.request)))
             }
             .store(in: &publishers)
     }
