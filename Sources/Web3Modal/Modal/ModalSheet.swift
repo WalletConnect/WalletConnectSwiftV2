@@ -19,7 +19,7 @@ public struct ModalSheet: View {
         .onAppear {
             Task {
                 await viewModel.createURI()
-//                await viewModel.fetchWallets()
+                await viewModel.fetchWallets()
             }
         }
         .background(
@@ -125,7 +125,9 @@ public struct ModalSheet: View {
                         .scaledToFit()
                 } placeholder: {
                     Color.foreground3
+                        .frame(width: 60, height: 60)
                 }
+                .animation(.default)
                 .cornerRadius(8)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)

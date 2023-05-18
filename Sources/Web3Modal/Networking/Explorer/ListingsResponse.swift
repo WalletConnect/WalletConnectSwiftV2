@@ -8,6 +8,7 @@ struct Listing: Codable, Hashable, Identifiable {
     let id: String
     let name: String
     let homepage: String
+    let order: Int
     let imageId: String
     let app: App
     let mobile: Mobile
@@ -16,6 +17,7 @@ struct Listing: Codable, Hashable, Identifiable {
         case id
         case name
         case homepage
+        case order
         case imageId = "image_id"
         case app
         case mobile

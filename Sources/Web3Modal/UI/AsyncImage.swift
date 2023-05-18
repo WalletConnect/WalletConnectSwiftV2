@@ -9,6 +9,7 @@ struct AsyncImage<Content>: View where Content: View {
 
         init(_ url: URL?) {
             guard let url = url else { return }
+            
             URLSession.shared.dataTaskPublisher(for: url)
                 .map(\.data)
                 .map { $0 as Data? }

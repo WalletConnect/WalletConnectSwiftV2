@@ -50,9 +50,10 @@ extension ModalSheet {
         @MainActor
         func fetchWallets() async {
             do {
-
-                try await Task.sleep(nanoseconds: 1_000_000_000)
-                wallets = try await interactor.getListings()
+                let wallets = try await interactor.getListings()
+                // Small deliberate delay to ensure animations execute properly
+                try await Task.sleep(nanoseconds: 500_000_000)
+                self.wallets = wallets.sorted { $0.order < $1.order }
             } catch {
                 print(error)
                 errorMessage = error.localizedDescription
@@ -81,10 +82,10 @@ extension ModalSheet {
             UIPasteboard.general.string = uri
         }
         
-//        func imageUrl(for listing: Listing) -> URL? {
-//            let urlString = "https://explorer-api.walletconnect.com/v3/logo/md/\(listing.imageId)?projectId=\(projectId)"
-//            
-//            return URL(string: urlString)
-//        }
+        func imageUrl(for listing: Listing) -> URL? {
+            let urlString = "https://explorer-api.walletconnect.com/v3/logo/md/\(listing.imageId)?projectId=\(projectId)"
+            
+            return URL(string: urlString)
+        }
     }
 }
