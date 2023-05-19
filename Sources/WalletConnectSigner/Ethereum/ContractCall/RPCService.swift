@@ -1,4 +1,5 @@
 import Foundation
+import HTTPClient
 
 struct RPCService: HTTPService {
     let data: Data

@@ -110,8 +110,11 @@ let package = Package(
             name: "Commons",
             dependencies: []),
         .target(
+            name: "HTTPClient",
+            dependencies: []),
+        .target(
             name: "WalletConnectNetworking",
-            dependencies: ["WalletConnectRelay"]),
+            dependencies: ["HTTPClient", "WalletConnectRelay"]),
         .target(
             name: "WalletConnectRouter",
             dependencies: []),

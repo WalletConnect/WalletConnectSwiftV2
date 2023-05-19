@@ -1,7 +1,7 @@
 import WalletConnectPairing
 import WalletConnectSign
 import Combine
-import WalletConnectNetworking
+import HTTPClient
 
 extension ModalSheet {
     final class Interactor {
@@ -21,8 +21,14 @@ extension ModalSheet {
         }
         
         func getListings() async throws -> [Listing] {
-            let listingResponse = try await ExplorerApi.live().getListings(projectId)
-            return listingResponse.listings.values.compactMap { $0 }
+            
+            let httpClient = HTTPNetworkClient(host: "explorer-api.walletconnect.com")
+            let response = try await httpClient.request(
+                ListingsResponse.self,
+                at: ExplorerAPI.getListings(projectId: projectId)
+            )
+        
+            return response.listings.values.compactMap { $0 }
         }
         
         func connect() async throws -> WalletConnectURI {

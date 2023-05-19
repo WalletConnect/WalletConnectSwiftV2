@@ -1,4 +1,5 @@
 import Foundation
+import HTTPClient
 @testable import WalletConnectSigner
 
 extension MessageVerifier {

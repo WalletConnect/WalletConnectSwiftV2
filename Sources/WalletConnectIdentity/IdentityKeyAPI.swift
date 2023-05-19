@@ -1,4 +1,5 @@
 import Foundation
+import HTTPClient
 
 enum IdentityKeyAPI: HTTPService {
 

@@ -1,4 +1,5 @@
 import Foundation
+import HTTPClient
 
 public struct EchoClientFactory {
     public static func create(projectId: String,

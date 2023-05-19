@@ -1,4 +1,5 @@
 import Foundation
+import HTTPClient
 
 enum EchoAPI: HTTPService {
     case register(clientId: String, token: String, projectId: String, environment: APNSEnvironment, auth: String)
