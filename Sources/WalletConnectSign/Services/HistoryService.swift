@@ -36,7 +36,7 @@ final class HistoryService {
                 guard let proposalParams = mapProposeParams(record) else {
                     return nil
                 }
-                return RequestSubscriptionPayload(id: record.id, topic: record.topic, request: proposalParams, publishedAt: Date())
+                return RequestSubscriptionPayload(id: record.id, topic: record.topic, request: proposalParams, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil)
             }
         
         requestSubscriptionPayloads.forEach {

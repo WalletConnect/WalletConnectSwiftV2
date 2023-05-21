@@ -7,11 +7,13 @@ final class SessionEngineTests: XCTestCase {
 
     var networkingInteractor: NetworkingInteractorMock!
     var sessionStorage: WCSessionStorageMock!
+    var proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>!
     var engine: SessionEngine!
 
     override func setUp() {
         networkingInteractor = NetworkingInteractorMock()
         sessionStorage = WCSessionStorageMock()
+        proposalPayloadsStore = CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>(defaults: RuntimeKeyValueStorage(), identifier: "")
         engine = SessionEngine(
             networkingInteractor: networkingInteractor,
             historyService: HistoryService(
@@ -20,7 +22,8 @@ final class SessionEngineTests: XCTestCase {
                         defaults: RuntimeKeyValueStorage(),
                         identifier: ""
                     )
-                )
+                ),
+                proposalPayloadsStore: proposalPayloadsStore
             ),
             verifyClient: nil,
             kms: KeyManagementServiceMock(),

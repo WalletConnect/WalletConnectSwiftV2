@@ -36,7 +36,7 @@ final class WalletPresenter: ObservableObject {
     func onAppear() {
         let proposals = interactor.getPendingProposals()
         if let proposal = proposals.last {
-            router.present(sessionProposal: proposal)
+            router.present(sessionProposal: proposal, sessionContext: nil)
         }
     }
     
