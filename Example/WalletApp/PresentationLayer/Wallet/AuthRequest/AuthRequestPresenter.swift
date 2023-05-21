@@ -8,6 +8,7 @@ final class AuthRequestPresenter: ObservableObject {
     private let router: AuthRequestRouter
     
     let request: AuthRequest
+    let verified: Bool?
     
     var message: String {
         return interactor.formatted(request: request)
@@ -18,12 +19,14 @@ final class AuthRequestPresenter: ObservableObject {
     init(
         interactor: AuthRequestInteractor,
         router: AuthRequestRouter,
-        request: AuthRequest
+        request: AuthRequest,
+        context: VerifyContext?
     ) {
         defer { setupInitialState() }
         self.interactor = interactor
         self.router = router
         self.request = request
+        self.verified = (context?.validation == .valid) ? true : (context?.validation == .unknown ? nil : false)
     }
 
     @MainActor

@@ -1,4 +1,5 @@
 import UIKit
+import WalletConnectNetworking
 import Combine
 
 final class WelcomePresenter: ObservableObject {
@@ -15,6 +16,10 @@ final class WelcomePresenter: ObservableObject {
     }
     
     func onGetStarted() {
+        
+        let pasteboard = UIPasteboard.general
+        let clientId = try? Networking.interactor.getClientId()
+        pasteboard.string = clientId
         router.presentWallet()
     }
 }

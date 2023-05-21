@@ -1,12 +1,11 @@
 import Foundation
-import WalletConnectUtils
 
-@available(iOS 14.0, *)
-@available(macOS 11.0, *)
 public class VerifyClientFactory {
-
-    public static func create() throws -> VerifyClient {
-        let originVerifier = OriginVerifier()
+    public static func create(verifyHost: String?) throws -> VerifyClient? {
+        guard let verifyHost else {
+            return nil
+        }
+        let originVerifier = OriginVerifier(verifyHost: verifyHost)
         let assertionRegistrer = AssertionRegistrer()
         let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults.standard
@@ -14,11 +13,18 @@ public class VerifyClientFactory {
         let attestKeyGenerator = AttestKeyGenerator(logger: logger, keyIdStorage: keyIdStorage)
         let attestChallengeProvider = AttestChallengeProvider()
         let keyAttestationService = KeyAttestationService()
-        let appAttestationRegistrer = AppAttestationRegistrer(logger: logger,
-                                                              keyIdStorage: keyIdStorage,
-                                                              attestKeyGenerator: attestKeyGenerator,
-                                                              attestChallengeProvider: attestChallengeProvider,
-                                                              keyAttestationService: keyAttestationService)
-        return try VerifyClient(originVerifier: originVerifier, assertionRegistrer: assertionRegistrer, appAttestationRegistrer: appAttestationRegistrer)
+        let appAttestationRegistrer = AppAttestationRegistrer(
+            logger: logger,
+            keyIdStorage: keyIdStorage,
+            attestKeyGenerator: attestKeyGenerator,
+            attestChallengeProvider: attestChallengeProvider,
+            keyAttestationService: keyAttestationService
+        )
+        return try VerifyClient(
+            verifyHost: verifyHost,
+            originVerifier: originVerifier,
+            assertionRegistrer: assertionRegistrer,
+            appAttestationRegistrer: appAttestationRegistrer
+        )
     }
 }

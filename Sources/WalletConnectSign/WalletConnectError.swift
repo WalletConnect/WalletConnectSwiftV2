@@ -1,3 +1,5 @@
+import Foundation
+
 enum WalletConnectError: Error {
 
     case pairingProposalFailed
@@ -58,5 +60,12 @@ extension WalletConnectError {
         case .emptySessionProperties:
             return "Session properties cannot be empty when set"
         }
+    }
+}
+
+
+extension WalletConnectError: LocalizedError {
+    public var errorDescription: String? {
+        return self.localizedDescription
     }
 }

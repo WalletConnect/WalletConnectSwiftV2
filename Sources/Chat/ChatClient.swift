@@ -5,7 +5,6 @@ public class ChatClient {
     private var publishers = [AnyCancellable]()
     private let identityClient: IdentityClient
     private let messagingService: MessagingService
-    private let accountService: AccountService
     private let resubscriptionService: ResubscriptionService
     private let invitationHandlingService: InvitationHandlingService
     private let inviteService: InviteService
@@ -59,7 +58,6 @@ public class ChatClient {
 
     init(identityClient: IdentityClient,
          messagingService: MessagingService,
-         accountService: AccountService,
          resubscriptionService: ResubscriptionService,
          invitationHandlingService: InvitationHandlingService,
          inviteService: InviteService,
@@ -70,7 +68,6 @@ public class ChatClient {
     ) {
         self.identityClient = identityClient
         self.messagingService = messagingService
-        self.accountService = accountService
         self.resubscriptionService = resubscriptionService
         self.invitationHandlingService = invitationHandlingService
         self.inviteService = inviteService
@@ -92,8 +89,6 @@ public class ChatClient {
         onSign: @escaping SigningCallback
     ) async throws -> String {
         let publicKey = try await identityClient.register(account: account, onSign: onSign)
-
-        accountService.setAccount(account)
 
         guard !isPrivate else {
             return publicKey
@@ -178,26 +173,23 @@ public class ChatClient {
         try await leaveService.leave(topic: topic)
     }
 
-    /// Sets peer account with public key
-    /// - Parameter account: CAIP10 blockachain account
-    /// - Parameter publicKey: Account associated publicKey hex string
-    public func setContact(account: Account, publicKey: String) async throws {
-        fatalError("not implemented")
+    public func getReceivedInvites(account: Account) -> [ReceivedInvite] {
+        return chatStorage.getReceivedInvites(account: account)
     }
 
-    public func getReceivedInvites() -> [ReceivedInvite] {
-        return chatStorage.getReceivedInvites(account: accountService.currentAccount)
+    public func getSentInvites(account: Account) -> [SentInvite] {
+        return chatStorage.getSentInvites(account: account)
     }
 
-    public func getSentInvites() -> [SentInvite] {
-        return chatStorage.getSentInvites(account: accountService.currentAccount)
-    }
-
-    public func getThreads() -> [Thread] {
-        return chatStorage.getThreads(account: accountService.currentAccount)
+    public func getThreads(account: Account) -> [Thread] {
+        return chatStorage.getThreads(account: account)
     }
 
     public func getMessages(topic: String) -> [Message] {
-        return chatStorage.getMessages(topic: topic, account: accountService.currentAccount)
+        return chatStorage.getMessages(topic: topic)
+    }
+
+    public func setupSubscriptions(account: Account) {
+        chatStorage.setupSubscriptions(account: account)
     }
 }

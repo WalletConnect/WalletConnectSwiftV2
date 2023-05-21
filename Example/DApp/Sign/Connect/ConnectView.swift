@@ -31,10 +31,18 @@ final class ConnectView: UIView {
         return button
     }()
 
+    let invisibleUriLabel: UILabel = { 
+        let label = UILabel(frame: CGRect(origin: .zero, size: .init(width: 1, height: 1)))
+        label.numberOfLines = 0
+        label.textColor = .clear
+        return label
+    }()
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .systemBackground
         addSubview(qrCodeView)
+        addSubview(invisibleUriLabel)
         addSubview(copyButton)
         addSubview(connectWalletButton)
         addSubview(tableView)

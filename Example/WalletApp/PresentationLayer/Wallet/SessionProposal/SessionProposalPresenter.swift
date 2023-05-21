@@ -8,18 +8,21 @@ final class SessionProposalPresenter: ObservableObject {
     private let router: SessionProposalRouter
     
     let sessionProposal: Session.Proposal
+    let verified: Bool?
     
     private var disposeBag = Set<AnyCancellable>()
 
     init(
         interactor: SessionProposalInteractor,
         router: SessionProposalRouter,
-        proposal: Session.Proposal
+        proposal: Session.Proposal,
+        context: VerifyContext?
     ) {
         defer { setupInitialState() }
         self.interactor = interactor
         self.router = router
         self.sessionProposal = proposal
+        self.verified = (context?.validation == .valid) ? true : (context?.validation == .unknown ? nil : false)
     }
     
     @MainActor

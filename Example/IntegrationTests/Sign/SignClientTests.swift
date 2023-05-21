@@ -45,6 +45,10 @@ final class SignClientTests: XCTestCase {
             pairingClient: pairingClient,
             networkingClient: networkingClient
         )
+
+        let clientId = try! networkingClient.getClientId()
+        logger.debug("My client id is: \(clientId)")
+        
         return ClientDelegate(client: client)
     }
 
@@ -160,7 +164,7 @@ final class SignClientTests: XCTestCase {
         let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces)!
         try await wallet.client.pair(uri: uri)
 
-        wait(for: [expectation], timeout: .infinity)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testSessionRequest() async throws {
@@ -409,7 +413,7 @@ final class SignClientTests: XCTestCase {
                 events: ["any"]
             ),
             "eip155": ProposalNamespace(
-                chains: [Blockchain("eip155:137")!],
+                chains: [Blockchain("eip155:137")!, Blockchain("eip155:1")!],
                 methods: ["personal_sign", "eth_sendTransaction"],
                 events: ["any"]
             )
@@ -427,30 +431,33 @@ final class SignClientTests: XCTestCase {
             )
         ]
         
-        let sessionNamespaces: [String: SessionNamespace] = [
-            "eip155:1": SessionNamespace(
-                accounts: [Account(blockchain: Blockchain("eip155:1")!, address: "0x00")!],
-                methods: ["personal_sign", "eth_sendTransaction"],
-                events: ["any"]
-            ),
-            "eip155": SessionNamespace(
-                chains: [Blockchain("eip155:137")!],
-                accounts: [Account(blockchain: Blockchain("eip155:137")!, address: "0x00")!],
-                methods: ["personal_sign", "eth_sendTransaction"],
-                events: ["any"]
-            ),
-            "eip155:5": SessionNamespace(
-                accounts: [Account(blockchain: Blockchain("eip155:5")!, address: "0x00")!],
-                methods: ["personal_sign", "eth_sendTransaction"],
-                events: ["any"]
-            ),
-            "solana": SessionNamespace(
-                chains: [Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!],
-                accounts: [Account(blockchain: Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!, address: "0x00")!],
-                methods: ["solana_signMessage"],
-                events: ["any"]
-            )
-        ]
+        let sessionProposal = Session.Proposal(
+            id: "",
+            pairingTopic: "",
+            proposer: AppMetadata(name: "", description: "", url: "", icons: []),
+            requiredNamespaces: requiredNamespaces,
+            optionalNamespaces: optionalNamespaces,
+            sessionProperties: nil,
+            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [])), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
+        )
+        
+        let sessionNamespaces = try AutoNamespaces.build(
+            sessionProposal: sessionProposal,
+            chains: [
+                Blockchain("eip155:137")!,
+                Blockchain("eip155:1")!,
+                Blockchain("eip155:5")!,
+                Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!
+            ],
+            methods: ["personal_sign", "eth_sendTransaction", "solana_signMessage"],
+            events: ["any"],
+            accounts: [
+                Account(blockchain: Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!, address: "4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!,
+                Account(blockchain: Blockchain("eip155:1")!, address: "0x00")!,
+                Account(blockchain: Blockchain("eip155:137")!, address: "0x00")!,
+                Account(blockchain: Blockchain("eip155:5")!, address: "0x00")!
+            ]
+        )
         
         wallet.onSessionProposal = { [unowned self] proposal in
             Task(priority: .high) {
@@ -496,19 +503,29 @@ final class SignClientTests: XCTestCase {
             )
         ]
         
-        let sessionNamespaces: [String: SessionNamespace] = [
-            "eip155:1": SessionNamespace(
-                accounts: [Account(blockchain: Blockchain("eip155:1")!, address: "0x00")!],
-                methods: ["personal_sign", "eth_sendTransaction"],
-                events: ["any"]
-            ),
-            "eip155": SessionNamespace(
-                chains: [Blockchain("eip155:137")!],
-                accounts: [Account(blockchain: Blockchain("eip155:137")!, address: "0x00")!],
-                methods: ["personal_sign", "eth_sendTransaction"],
-                events: ["any"]
-            ),
-        ]
+        let sessionProposal = Session.Proposal(
+            id: "",
+            pairingTopic: "",
+            proposer: AppMetadata(name: "", description: "", url: "", icons: []),
+            requiredNamespaces: requiredNamespaces,
+            optionalNamespaces: optionalNamespaces,
+            sessionProperties: nil,
+            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [])), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
+        )
+        
+        let sessionNamespaces = try AutoNamespaces.build(
+            sessionProposal: sessionProposal,
+            chains: [
+                Blockchain("eip155:137")!,
+                Blockchain("eip155:1")!
+            ],
+            methods: ["personal_sign", "eth_sendTransaction"],
+            events: ["any"],
+            accounts: [
+                Account(blockchain: Blockchain("eip155:1")!, address: "0x00")!,
+                Account(blockchain: Blockchain("eip155:137")!, address: "0x00")!
+            ]
+        )
         
         wallet.onSessionProposal = { [unowned self] proposal in
             Task(priority: .high) {
@@ -544,18 +561,29 @@ final class SignClientTests: XCTestCase {
             )
         ]
         
-        let sessionNamespaces: [String: SessionNamespace] = [
-            "eip155:5": SessionNamespace(
-                accounts: [Account(blockchain: Blockchain("eip155:5")!, address: "0x00")!],
-                methods: ["personal_sign", "eth_sendTransaction"],
-                events: ["any"]
-            ),
-            "eip155:1": SessionNamespace(
-                accounts: [Account(blockchain: Blockchain("eip155:1")!, address: "0x00")!],
-                methods: ["personal_sign", "eth_sendTransaction"],
-                events: ["any"]
-            )
-        ]
+        let sessionProposal = Session.Proposal(
+            id: "",
+            pairingTopic: "",
+            proposer: AppMetadata(name: "", description: "", url: "", icons: []),
+            requiredNamespaces: requiredNamespaces,
+            optionalNamespaces: optionalNamespaces,
+            sessionProperties: nil,
+            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [])), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
+        )
+        
+        let sessionNamespaces = try AutoNamespaces.build(
+            sessionProposal: sessionProposal,
+            chains: [
+                Blockchain("eip155:1")!,
+                Blockchain("eip155:5")!
+            ],
+            methods: ["personal_sign", "eth_sendTransaction"],
+            events: ["any"],
+            accounts: [
+                Account(blockchain: Blockchain("eip155:1")!, address: "0x00")!,
+                Account(blockchain: Blockchain("eip155:5")!, address: "0x00")!
+            ]
+        )
         
         wallet.onSessionProposal = { [unowned self] proposal in
             Task(priority: .high) {
@@ -599,22 +627,40 @@ final class SignClientTests: XCTestCase {
             )
         ]
         
-        let sessionNamespaces: [String: SessionNamespace] = [
-            "eip155:1": SessionNamespace(
-                accounts: [Account(blockchain: Blockchain("eip155:1")!, address: "0x00")!],
-                methods: ["personal_sign", "eth_sendTransaction"],
-                events: ["any"]
-            ),
-        ]
+        let sessionProposal = Session.Proposal(
+            id: "",
+            pairingTopic: "",
+            proposer: AppMetadata(name: "", description: "", url: "", icons: []),
+            requiredNamespaces: requiredNamespaces,
+            optionalNamespaces: optionalNamespaces,
+            sessionProperties: nil,
+            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [])), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
+        )
         
-        wallet.onSessionProposal = { [unowned self] proposal in
-            Task(priority: .high) {
-                do {
-                    try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
-                } catch {
-                    settlementFailedExpectation.fulfill()
+        do {
+            let sessionNamespaces = try AutoNamespaces.build(
+                sessionProposal: sessionProposal,
+                chains: [
+                    Blockchain("eip155:1")!
+                ],
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["any"],
+                accounts: [
+                    Account(blockchain: Blockchain("eip155:1")!, address: "0x00")!
+                ]
+            )
+            
+            wallet.onSessionProposal = { [unowned self] proposal in
+                Task(priority: .high) {
+                    do {
+                        try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                    } catch {
+                        settlementFailedExpectation.fulfill()
+                    }
                 }
             }
+        } catch {
+            settlementFailedExpectation.fulfill()
         }
         
         let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
@@ -644,32 +690,46 @@ final class SignClientTests: XCTestCase {
             )
         ]
         
-        let sessionNamespaces: [String: SessionNamespace] = [
-            "eip155:1": SessionNamespace(
-                accounts: [Account(blockchain: Blockchain("eip155:1")!, address: "0x00")!],
-                methods: ["personal_sign"],
-                events: ["any"]
-            ),
-            "eip155": SessionNamespace(
-                chains: [Blockchain("eip155:137")!],
-                accounts: [Account(blockchain: Blockchain("eip155:137")!, address: "0x00")!],
-                methods: ["personal_sign", "eth_sendTransaction"],
-                events: ["any"]
-            ),
-        ]
+        let sessionProposal = Session.Proposal(
+            id: "",
+            pairingTopic: "",
+            proposer: AppMetadata(name: "", description: "", url: "", icons: []),
+            requiredNamespaces: requiredNamespaces,
+            optionalNamespaces: optionalNamespaces,
+            sessionProperties: nil,
+            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [])), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
+        )
         
-        wallet.onSessionProposal = { [unowned self] proposal in
-            Task(priority: .high) {
-                do {
-                    try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
-                } catch {
-                    settlementFailedExpectation.fulfill()
+        do {
+            let sessionNamespaces = try AutoNamespaces.build(
+                sessionProposal: sessionProposal,
+                chains: [
+                    Blockchain("eip155:1")!,
+                    Blockchain("eip155:137")!
+                ],
+                methods: ["personal_sign"],
+                events: ["any"],
+                accounts: [
+                    Account(blockchain: Blockchain("eip155:1")!, address: "0x00")!,
+                    Account(blockchain: Blockchain("eip155:137")!, address: "0x00")!
+                ]
+            )
+            
+            wallet.onSessionProposal = { [unowned self] proposal in
+                Task(priority: .high) {
+                    do {
+                        try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                    } catch {
+                        settlementFailedExpectation.fulfill()
+                    }
                 }
             }
+        } catch {
+            settlementFailedExpectation.fulfill()
         }
 
         let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
         try await wallet.client.pair(uri: uri!)
-        wait(for: [settlementFailedExpectation], timeout: InputConfig.defaultTimeout)
+        wait(for: [settlementFailedExpectation], timeout: 1)
     }
 }

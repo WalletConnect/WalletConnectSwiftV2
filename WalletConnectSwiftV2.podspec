@@ -77,22 +77,56 @@ Pod::Spec.new do |spec|
   spec.subspec 'WalletConnect' do |ss|
     ss.source_files = 'Sources/WalletConnectSign/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectPairing'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectVerify'
   end
 
   spec.subspec 'WalletConnectAuth' do |ss|
     ss.source_files = 'Sources/Auth/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectPairing'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectSigner'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectVerify'
   end
 
   spec.subspec 'Web3Wallet' do |ss|
     ss.source_files = 'Sources/Web3Wallet/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnect'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectAuth'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectEcho'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectVerify'
+  end
+  
+  spec.subspec 'WalletConnectVerify' do |ss|
+    ss.source_files = 'Sources/WalletConnectVerify/**/*.{h,m,swift}'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectUtils'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectNetworking'
   end
 
   spec.subspec 'WalletConnectChat' do |ss|
     ss.source_files = 'Sources/Chat/**/*.{h,m,swift}'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectSigner'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectIdentity'
+  end
+
+  spec.subspec 'WalletConnectSigner' do |ss|
+    ss.source_files = 'Sources/WalletConnectSigner/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectNetworking'
+  end
+
+  spec.subspec 'WalletConnectIdentity' do |ss|
+    ss.source_files = 'Sources/WalletConnectIdentity/**/*.{h,m,swift}'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectNetworking'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectJWT'
+  end
+
+  spec.subspec 'WalletConnectEcho' do |ss|
+    ss.source_files = 'Sources/WalletConnectEcho/**/*.{h,m,swift}'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectNetworking'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectJWT'
+  end
+
+  spec.subspec 'WalletConnectJWT' do |ss|
+    ss.source_files = 'Sources/WalletConnectJWT/**/*.{h,m,swift}'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectKMS'
   end
 
   spec.subspec 'WalletConnectNetworking' do |ss|
@@ -117,7 +151,7 @@ Pod::Spec.new do |spec|
 
   spec.subspec 'WalletConnectRelay' do |ss|
     ss.source_files = 'Sources/WalletConnectRelay/**/*.{h,m,swift}'
-    ss.dependency 'WalletConnectSwiftV2/WalletConnectKMS'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectJWT'
     ss.resource_bundles = {
       'WalletConnect_WalletConnectRelay' => [
          'Sources/WalletConnectRelay/PackageConfig.json'

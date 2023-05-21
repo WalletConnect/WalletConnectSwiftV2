@@ -3,37 +3,39 @@ import SwiftUI
 struct AuthView: View {
 
     @ObservedObject var viewModel: AuthViewModel
-
+    
     var body: some View {
         VStack(spacing: 16.0) {
-
+            
             Spacer()
-
+            
             Image(uiImage: viewModel.qrImage ?? UIImage())
                 .interpolation(.none)
                 .resizable()
                 .frame(width: 300, height: 300)
-
+            
             signingLabel()
                 .frame(maxWidth: .infinity)
-
+            
             Spacer()
-
+            
             Button("Connect Wallet", action: { })
                 .buttonStyle(CircleButtonStyle())
-
+            
             Button("Copy URI", action: { viewModel.copyDidPressed() })
                 .buttonStyle(CircleButtonStyle())
-
+            
             Button("Deeplink", action: { viewModel.deeplinkPressed() })
                 .buttonStyle(CircleButtonStyle())
+            
+            
         }
         .padding(16.0)
         .onAppear { Task(priority: .userInitiated) {
             try await viewModel.setupInitialState()
         }}
     }
-
+    
     @ViewBuilder
     private func signingLabel() -> some View {
         switch viewModel.state {

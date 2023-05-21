@@ -47,10 +47,10 @@ final class StringExtensionTests: XCTestCase {
     func testConformanceToCAIP10() {
         // Minimum and maximum length cases
         XCTAssertTrue(String.conformsToCAIP10("std:0:0"), "Dummy min length (3+1+1+1+1 = 7 chars/bytes)")
-        XCTAssertTrue(String.conformsToCAIP10("chainstd:8c3444cf8970a9e41a706fab93e7a6c4:6d9b0b4b9994e8a6afbd3dc3ed983cd51c755afb27cd1dc7825ef59c134a39f7"), "Dummy max length (64+1+8+1+32 = 106 chars/bytes)")
+        XCTAssertTrue(String.conformsToCAIP10("chainstd:8c3444cf8970a9e41a706fab93e7a6c4:6d9b0b4b9994e8a6afbd3dc3ed983cd51c755afb27cd1dc7825ef59c134a39f76d9b0b4b9994e8a6afbd3dc3ed983cd51c755afb27cd1dc7825ef59c134a39f7"), "Dummy max length (8+1+32+1+128 = 170 chars/bytes)")
 
         // Invalid address formatting
-        XCTAssertFalse(String.conformsToCAIP10("chainstd:0:6d9b0b4b9994e8a6afbd3dc3ed983cd51c755afb27cd1dc7825ef59c134a39f77"), "Address overflow")
+        XCTAssertFalse(String.conformsToCAIP10("chainstd:0:6d9b0b4b9994e8a6afbd3dc3ed983cd51c755afb27cd1dc7825ef59c134a39f76d9b0b4b9994e8a6afbd3dc3ed983cd51c755afb27cd1dc7825ef59c134a39f7f"), "Address overflow")
         XCTAssertFalse(String.conformsToCAIP10("chainstd:0:$"), "Address uses special character")
         XCTAssertFalse(String.conformsToCAIP10("chainstd:0:"), "Empty address")
 

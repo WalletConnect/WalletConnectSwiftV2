@@ -70,6 +70,9 @@ struct WalletView: View {
             }
             .padding(.vertical, 20)
         }
+        .alert(presenter.errorMessage, isPresented: $presenter.showError) {
+            Button("OK", role: .cancel) {}
+        }
         .onAppear {
             presenter.onAppear()
         }

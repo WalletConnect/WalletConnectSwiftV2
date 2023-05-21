@@ -11,13 +11,14 @@ final class ApproveEngine {
         case agreementMissingOrInvalid
     }
 
-    var onSessionProposal: ((Session.Proposal) -> Void)?
+    var onSessionProposal: ((Session.Proposal, VerifyContext?) -> Void)?
     var onSessionRejected: ((Session.Proposal, Reason) -> Void)?
     var onSessionSettle: ((Session) -> Void)?
 
     private let networkingInteractor: NetworkInteracting
     private let pairingStore: WCPairingStorage
     private let sessionStore: WCSessionStorage
+    private let verifyClient: VerifyClient?
     private let proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>
     private let sessionTopicToProposal: CodableStore<Session.Proposal>
     private let pairingRegisterer: PairingRegisterer
@@ -36,7 +37,8 @@ final class ApproveEngine {
         kms: KeyManagementServiceProtocol,
         logger: ConsoleLogging,
         pairingStore: WCPairingStorage,
-        sessionStore: WCSessionStorage
+        sessionStore: WCSessionStorage,
+        verifyClient: VerifyClient?
     ) {
         self.networkingInteractor = networkingInteractor
         self.proposalPayloadsStore = proposalPayloadsStore
@@ -47,6 +49,7 @@ final class ApproveEngine {
         self.logger = logger
         self.pairingStore = pairingStore
         self.sessionStore = sessionStore
+        self.verifyClient = verifyClient
 
         setupRequestSubscriptions()
         setupResponseSubscriptions()
@@ -150,15 +153,6 @@ final class ApproveEngine {
 
         _ = try await [settleRequest, subscription]
         onSessionSettle?(session.publicRepresentation())
-    }
-    
-    func setProposalPayloadStore(payload: RequestSubscriptionPayload<SessionType.ProposeParams>) {
-        logger.debug("Received Session Proposal")
-        let proposal = payload.request
-        do { try Namespace.validate(proposal.requiredNamespaces) } catch {
-            return respondError(payload: payload, reason: .invalidUpdateRequest, protocolMethod: SessionProposeProtocolMethod())
-        }
-        proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
     }
 }
 
@@ -280,8 +274,26 @@ private extension ApproveEngine {
     // MARK: SessionProposeRequest
 
     func handleSessionProposeRequest(payload: RequestSubscriptionPayload<SessionType.ProposeParams>) {
-        setProposalPayloadStore(payload: payload)
-        onSessionProposal?(payload.request.publicRepresentation(pairingTopic: payload.topic))
+        logger.debug("Received Session Proposal")
+        let proposal = payload.request
+        do { try Namespace.validate(proposal.requiredNamespaces) } catch {
+            return respondError(payload: payload, reason: .invalidUpdateRequest, protocolMethod: SessionProposeProtocolMethod())
+        }
+        proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
+        
+        guard let verifyClient else {
+            onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), nil)
+            return
+        }
+        Task(priority: .high) {
+            let assertionId = payload.decryptedPayload.sha256().toHexString()
+            let origin = try? await verifyClient.verifyOrigin(assertionId: assertionId)
+            let verifyContext = await verifyClient.createVerifyContext(
+                origin: origin,
+                domain: payload.request.proposer.metadata.url
+            )
+            onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
+        }
     }
 
     // MARK: SessionSettleRequest

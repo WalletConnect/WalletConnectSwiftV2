@@ -14,14 +14,14 @@ class AppRespondSubscriberTests: XCTestCase {
     var messageFormatter: SIWECacaoFormatter!
     var rpcHistory: RPCHistory!
     let defaultTimeout: TimeInterval = 0.01
-    var messageSigner: CacaoMessageSigner!
+    var messageVerifier: MessageVerifier!
     var pairingStorage: WCPairingStorageMock!
     var pairingRegisterer: PairingRegistererMock<AuthRequestParams>!
 
     override func setUp() {
         networkingInteractor = NetworkingInteractorMock()
         messageFormatter = SIWECacaoFormatter()
-        messageSigner = MessageSignerMock()
+        messageVerifier = .stub()
         rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: RuntimeKeyValueStorage())
         pairingStorage = WCPairingStorageMock()
         pairingRegisterer = PairingRegistererMock<AuthRequestParams>()
@@ -29,7 +29,7 @@ class AppRespondSubscriberTests: XCTestCase {
             networkingInteractor: networkingInteractor,
             logger: ConsoleLoggerMock(),
             rpcHistory: rpcHistory,
-            signatureVerifier: messageSigner,
+            signatureVerifier: messageVerifier,
             pairingRegisterer: pairingRegisterer,
             messageFormatter: messageFormatter)
     }
@@ -65,7 +65,7 @@ class AppRespondSubscriberTests: XCTestCase {
         let cacao = Cacao(h: cacaoHeader, p: cacaoPayload, s: cacaoSignature)
 
         let response = RPCResponse(id: requestId, result: cacao)
-        networkingInteractor.responsePublisherSubject.send((topic, request, response, Date()))
+        networkingInteractor.responsePublisherSubject.send((topic, request, response, Date(), nil))
 
         wait(for: [messageExpectation], timeout: defaultTimeout)
         XCTAssertTrue(pairingRegisterer.isActivateCalled)

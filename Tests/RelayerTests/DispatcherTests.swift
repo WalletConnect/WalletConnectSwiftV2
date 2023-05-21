@@ -5,6 +5,15 @@ import Combine
 import TestingUtils
 import Combine
 
+private class DispatcherKeychainStorageMock: KeychainStorageProtocol {
+    func add<T>(_ item: T, forKey key: String) throws where T : WalletConnectKMS.GenericPasswordConvertible {}
+    func read<T>(key: String) throws -> T where T : WalletConnectKMS.GenericPasswordConvertible {
+        return try T(rawRepresentation: Data())
+    }
+    func delete(key: String) throws {}
+    func deleteAll() throws {}
+}
+
 class WebSocketMock: WebSocketConnecting {
     var request: URLRequest = URLRequest(url: URL(string: "wss://relay.walletconnect.com")!)
 
@@ -29,15 +38,45 @@ class WebSocketMock: WebSocketConnecting {
     }
 }
 
+class WebSocketFactoryMock: WebSocketFactory {
+    private let webSocket: WebSocketMock
+    
+    init(webSocket: WebSocketMock) {
+        self.webSocket = webSocket
+    }
+    
+    func create(with url: URL) -> WebSocketConnecting {
+        return webSocket
+    }
+}
+
 final class DispatcherTests: XCTestCase {
     var publishers = Set<AnyCancellable>()
     var sut: Dispatcher!
     var webSocket: WebSocketMock!
     var networkMonitor: NetworkMonitoringMock!
+    
     override func setUp() {
         webSocket = WebSocketMock()
+        let webSocketFactory = WebSocketFactoryMock(webSocket: webSocket)
         networkMonitor = NetworkMonitoringMock()
-        sut = Dispatcher(socket: webSocket, socketConnectionHandler: ManualSocketConnectionHandler(socket: webSocket), logger: ConsoleLoggerMock())
+        let keychainStorageMock = DispatcherKeychainStorageMock()
+        let clientIdStorage = ClientIdStorage(keychain: keychainStorageMock)
+        let socketAuthenticator = SocketAuthenticator(
+            clientIdStorage: clientIdStorage,
+            relayHost: "relay.walletconnect.com"
+        )
+        let relayUrlFactory = RelayUrlFactory(
+            relayHost: "relay.walletconnect.com",
+            projectId: "1012db890cf3cfb0c1cdc929add657ba",
+            socketAuthenticator: socketAuthenticator
+        )
+        sut = Dispatcher(
+            socketFactory: webSocketFactory,
+            relayUrlFactory: relayUrlFactory,
+            socketConnectionType: .manual,
+            logger: ConsoleLoggerMock()
+        )
     }
 
     func testSendWhileConnected() {

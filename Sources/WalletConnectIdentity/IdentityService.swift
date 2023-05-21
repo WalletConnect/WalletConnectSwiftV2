@@ -48,7 +48,7 @@ actor IdentityService {
 
         let inviteKey = try kms.createX25519KeyPair()
         let invitePublicKey = DIDKey(rawData: inviteKey.rawRepresentation)
-        let idAuth = try makeIDAuth(account: account, invitePublicKey: invitePublicKey)
+        let idAuth = try makeIDAuth(account: account, issuer: invitePublicKey, kind: .registerInvite)
         try await networkService.registerInvite(idAuth: idAuth)
 
         return try storage.saveInviteKey(inviteKey, for: account)
@@ -56,15 +56,16 @@ actor IdentityService {
 
     func unregister(account: Account, onSign: SigningCallback) async throws {
         let identityKey = try storage.getIdentityKey(for: account)
-        let cacao = try await makeCacao(DIDKey: identityKey.publicKey.did, account: account, onSign: onSign)
-        try await networkService.removeIdentity(cacao: cacao)
+        let identityPublicKey = DIDKey(rawData: identityKey.publicKey.rawRepresentation)
+        let idAuth = try makeIDAuth(account: account, issuer: identityPublicKey, kind: .unregisterIdentity)
+        try await networkService.removeIdentity(idAuth: idAuth)
         try storage.removeIdentityKey(for: account)
     }
 
     func goPrivate(account: Account) async throws -> AgreementPublicKey {
         let inviteKey = try storage.getInviteKey(for: account)
         let invitePublicKey = DIDKey(rawData: inviteKey.rawRepresentation)
-        let idAuth = try makeIDAuth(account: account, invitePublicKey: invitePublicKey)
+        let idAuth = try makeIDAuth(account: account, issuer: invitePublicKey, kind: .unregisterInvite)
         try await networkService.removeInvite(idAuth: idAuth)
         try storage.removeInviteKey(for: account)
 
@@ -72,7 +73,7 @@ actor IdentityService {
     }
 
     func resolveIdentity(iss: String) async throws -> Account {
-        let did = try DIDKey(did: iss).did(prefix: false, variant: .ED25519)
+        let did = try DIDKey(did: iss).multibase(variant: .ED25519)
         let cacao = try await networkService.resolveIdentity(publicKey: did)
         return try Account(DIDPKHString: cacao.p.iss)
     }
@@ -112,13 +113,14 @@ private extension IdentityService {
         }
     }
 
-    func makeIDAuth(account: Account, invitePublicKey: DIDKey) throws -> String {
+    func makeIDAuth(account: Account, issuer: DIDKey, kind: IDAuthPayload.Kind) throws -> String {
         let identityKey = try storage.getIdentityKey(for: account)
 
-        let payload = InviteKeyPayload(
+        let payload = IDAuthPayload(
+            kind: kind,
             keyserver: keyserverURL,
             account: account,
-            invitePublicKey: invitePublicKey
+            invitePublicKey: issuer
         )
 
         return try payload.signAndCreateWrapper(keyPair: identityKey).jwtString

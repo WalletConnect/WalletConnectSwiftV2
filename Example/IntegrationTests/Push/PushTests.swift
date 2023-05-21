@@ -8,6 +8,8 @@ import WalletConnectNetworking
 import WalletConnectEcho
 @testable import WalletConnectPush
 @testable import WalletConnectPairing
+import WalletConnectIdentity
+import WalletConnectSigner
 
 final class PushTests: XCTestCase {
 
@@ -49,6 +51,9 @@ final class PushTests: XCTestCase {
             keychainStorage: keychain,
             networkingClient: networkingClient)
 
+        let clientId = try! networkingClient.getClientId()
+        networkingLogger.debug("My client id is: \(clientId)")
+        
         return (pairingClient, networkingClient, keychain, keyValueStorage)
     }
 
@@ -70,7 +75,9 @@ final class PushTests: XCTestCase {
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
         walletPairingClient = pairingClient
         let echoClient = EchoClientFactory.create(projectId: "", clientId: "", echoHost: "echo.walletconnect.com", environment: .sandbox)
-        walletPushClient = WalletPushClientFactory.create(logger: pushLogger,
+        let keyserverURL = URL(string: "https://keys.walletconnect.com")!
+        walletPushClient = WalletPushClientFactory.create(keyserverURL: keyserverURL,
+                                                          logger: pushLogger,
                                                           keyValueStorage: keyValueStorage,
                                                           keychainStorage: keychain,
                                                           groupKeychainStorage: KeychainStorageMock(),
@@ -106,8 +113,7 @@ final class PushTests: XCTestCase {
         try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
 
         walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
-
-            Task(priority: .high) { try! await walletPushClient.approve(id: id) }
+            Task(priority: .high) { try! await walletPushClient.approve(id: id, onSign: sign) }
         }.store(in: &publishers)
 
         dappPushClient.responsePublisher.sink { (_, result) in
@@ -153,16 +159,16 @@ final class PushTests: XCTestCase {
         try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
 
         walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
-            Task(priority: .high) { try! await walletPushClient.approve(id: id) }
+            Task(priority: .high) { try! await walletPushClient.approve(id: id, onSign: sign) }
         }.store(in: &publishers)
 
         dappPushClient.responsePublisher.sink { [unowned self] (_, result) in
-            guard case .success(let subscription) = result else {
+            guard case .success(let result) = result else {
                 XCTFail()
                 return
             }
-            pushSubscription = subscription
-            Task(priority: .userInitiated) { try! await dappPushClient.notify(topic: subscription.topic, message: pushMessage) }
+            pushSubscription = result.pushSubscription
+            Task(priority: .userInitiated) { try! await dappPushClient.notify(topic: result.pushSubscription.topic, message: pushMessage) }
         }.store(in: &publishers)
 
         walletPushClient.pushMessagePublisher.sink { [unowned self] receivedPushMessageRecord in
@@ -185,16 +191,16 @@ final class PushTests: XCTestCase {
         var subscriptionTopic: String!
 
         walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
-            Task(priority: .high) { try! await walletPushClient.approve(id: id) }
+            Task(priority: .high) { try! await walletPushClient.approve(id: id, onSign: sign) }
         }.store(in: &publishers)
 
         dappPushClient.responsePublisher.sink { [unowned self] (_, result) in
-            guard case .success(let subscription) = result else {
+            guard case .success(let result) = result else {
                 XCTFail()
                 return
             }
-            subscriptionTopic = subscription.topic
-            Task(priority: .userInitiated) { try! await walletPushClient.deleteSubscription(topic: subscription.topic)}
+            subscriptionTopic = result.pushSubscription.topic
+            Task(priority: .userInitiated) { try! await walletPushClient.deleteSubscription(topic: result.pushSubscription.topic)}
         }.store(in: &publishers)
 
         dappPushClient.deleteSubscriptionPublisher.sink { topic in
@@ -212,16 +218,16 @@ final class PushTests: XCTestCase {
         var subscriptionTopic: String!
 
         walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
-            Task(priority: .high) { try! await walletPushClient.approve(id: id) }
+            Task(priority: .high) { try! await walletPushClient.approve(id: id, onSign: sign) }
         }.store(in: &publishers)
 
         dappPushClient.responsePublisher.sink { [unowned self] (_, result) in
-            guard case .success(let subscription) = result else {
+            guard case .success(let result) = result else {
                 XCTFail()
                 return
             }
-            subscriptionTopic = subscription.topic
-            Task(priority: .userInitiated) { try! await dappPushClient.delete(topic: subscription.topic)}
+            subscriptionTopic = result.pushSubscription.topic
+            Task(priority: .userInitiated) { try! await dappPushClient.delete(topic: result.pushSubscription.topic)}
         }.store(in: &publishers)
 
         walletPushClient.deleteSubscriptionPublisher.sink { topic in
@@ -229,5 +235,54 @@ final class PushTests: XCTestCase {
             expectation.fulfill()
         }.store(in: &publishers)
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+    }
+
+    // Push Subscribe
+    func testWalletCreatesSubscription() async {
+        let expectation = expectation(description: "expects to create push subscription")
+        let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
+        try! await walletPushClient.subscribe(metadata: metadata, account: Account.stub(), onSign: sign)
+        walletPushClient.subscriptionsPublisher
+            .first()
+            .sink { [unowned self] subscriptions in
+            XCTAssertNotNil(subscriptions.first)
+            Task { try! await walletPushClient.deleteSubscription(topic: subscriptions.first!.topic) }
+            expectation.fulfill()
+        }.store(in: &publishers)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+    }
+
+    func testWalletCreatesAndUpdatesSubscription() async {
+        let expectation = expectation(description: "expects to create and update push subscription")
+        let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
+        let updateScope: Set<String> = ["alerts"]
+        try! await walletPushClient.subscribe(metadata: metadata, account: Account.stub(), onSign: sign)
+        walletPushClient.subscriptionsPublisher
+            .first()
+            .sink { [unowned self] subscriptions in
+                Task { try! await walletPushClient.update(topic: subscriptions.first!.topic, scope: updateScope) }
+            }
+            .store(in: &publishers)
+
+        walletPushClient.updateSubscriptionPublisher
+            .sink { [unowned self] result in
+                guard case .success(let subscription) = result else { XCTFail(); return }
+                let updatedScope = Set(subscription.scope.filter{ $0.value.enabled == true }.keys)
+                XCTAssertEqual(updatedScope, updateScope)
+                Task { try! await walletPushClient.deleteSubscription(topic: subscription.topic) }
+                expectation.fulfill()
+            }.store(in: &publishers)
+
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+    }
+
+}
+
+
+private extension PushTests {
+    func sign(_ message: String) -> SigningResult {
+        let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
+        let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
+        return .signed(try! signer.sign(message: message, privateKey: privateKey, type: .eip191))
     }
 }

@@ -10,7 +10,8 @@ struct MessagePayload: JWTClaimsCodable {
 
         let aud: String // recipient blockchain account (did:pkh)
         let sub: String // message sent by the author account
-
+        let act: String // description of action intent
+        
         // TODO: Media not implemented
         // public let xma: Media?
     }
@@ -50,7 +51,8 @@ struct MessagePayload: JWTClaimsCodable {
             exp: expiry(days: 30),
             ksu: keyserver.absoluteString,
             aud: DIDPKH(account: recipientAccount).string,
-            sub: message
+            sub: message,
+            act: "chat_message"
         )
     }
 }

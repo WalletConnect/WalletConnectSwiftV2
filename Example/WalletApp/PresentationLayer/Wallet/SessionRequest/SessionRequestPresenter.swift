@@ -7,26 +7,29 @@ final class SessionRequestPresenter: ObservableObject {
     private let interactor: SessionRequestInteractor
     private let router: SessionRequestRouter
     
-    @Published var showError = false
-    @Published var errorMessage = "Error"
-    
     let sessionRequest: Request
+    let verified: Bool?
     
     var message: String {
         return String(describing: sessionRequest.params.value)
     }
+    
+    @Published var showError = false
+    @Published var errorMessage = "Error"
     
     private var disposeBag = Set<AnyCancellable>()
 
     init(
         interactor: SessionRequestInteractor,
         router: SessionRequestRouter,
-        sessionRequest: Request
+        sessionRequest: Request,
+        context: VerifyContext?
     ) {
         defer { setupInitialState() }
         self.interactor = interactor
         self.router = router
         self.sessionRequest = sessionRequest
+        self.verified = (context?.validation == .valid) ? true : (context?.validation == .unknown ? nil : false)
     }
 
     @MainActor

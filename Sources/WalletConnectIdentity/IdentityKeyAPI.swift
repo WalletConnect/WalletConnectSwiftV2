@@ -4,7 +4,7 @@ enum IdentityKeyAPI: HTTPService {
 
     case registerIdentity(cacao: Cacao)
     case resolveIdentity(publicKey: String)
-    case removeIdentity(cacao: Cacao)
+    case removeIdentity(idAuth: String)
     case registerInvite(idAuth: String)
     case resolveInvite(account: String)
     case removeInvite(idAuth: String)
@@ -18,7 +18,7 @@ enum IdentityKeyAPI: HTTPService {
         }
     }
 
-    var method: WalletConnectNetworking.HTTPMethod {
+    var method: HTTPMethod {
         switch self {
         case .registerIdentity, .registerInvite:
             return .post
@@ -31,10 +31,10 @@ enum IdentityKeyAPI: HTTPService {
 
     var body: Data? {
         switch self {
-        case .registerIdentity(let cacao), .removeIdentity(let cacao):
+        case .registerIdentity(let cacao):
             return try? JSONEncoder().encode(RegisterIdentityRequest(cacao: cacao))
-        case .registerInvite(let idAuth), .removeInvite(let idAuth):
-            return try? JSONEncoder().encode(RegisterInviteRequest(idAuth: idAuth))
+        case .registerInvite(let idAuth), .removeInvite(let idAuth), .removeIdentity(let idAuth):
+            return try? JSONEncoder().encode(IdAuthRequest(idAuth: idAuth))
         case .resolveIdentity, .resolveInvite:
             return nil
         }
@@ -50,6 +50,10 @@ enum IdentityKeyAPI: HTTPService {
             return nil
         }
     }
+
+    var additionalHeaderFields: [String : String]? {
+        return nil
+    }
 }
 
 private extension IdentityKeyAPI {
@@ -58,7 +62,7 @@ private extension IdentityKeyAPI {
         let cacao: Cacao
     }
 
-    struct RegisterInviteRequest: Codable {
+    struct IdAuthRequest: Codable {
         let idAuth: String
     }
 }

@@ -15,8 +15,10 @@ final class Dispatcher: NSObject, Dispatching {
     var onMessage: ((String) -> Void)?
     var socket: WebSocketConnecting
     var socketConnectionHandler: SocketConnectionHandler
-
+    
+    private let relayUrlFactory: RelayUrlFactory
     private let logger: ConsoleLogging
+    
     private let defaultTimeout: Int = 5
 
     private let socketConnectionStatusPublisherSubject = CurrentValueSubject<SocketConnectionStatus, Never>(.disconnected)
@@ -27,24 +29,36 @@ final class Dispatcher: NSObject, Dispatching {
 
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.dispatcher", attributes: .concurrent)
 
-    init(socket: WebSocketConnecting,
-         socketConnectionHandler: SocketConnectionHandler,
-         logger: ConsoleLogging) {
-        self.socket = socket
+    init(
+        socketFactory: WebSocketFactory,
+        relayUrlFactory: RelayUrlFactory,
+        socketConnectionType: SocketConnectionType,
+        logger: ConsoleLogging
+    ) {
+        self.relayUrlFactory = relayUrlFactory
         self.logger = logger
-        self.socketConnectionHandler = socketConnectionHandler
+        
+        let socket = socketFactory.create(with: relayUrlFactory.create())
+        socket.request.addValue(EnvironmentInfo.userAgent, forHTTPHeaderField: "User-Agent")
+        self.socket = socket
+        
+        switch socketConnectionType {
+        case .automatic:    socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket)
+        case .manual:       socketConnectionHandler = ManualSocketConnectionHandler(socket: socket)
+        }
+        
         super.init()
         setUpWebSocketSession()
         setUpSocketConnectionObserving()
     }
 
     func send(_ string: String, completion: @escaping (Error?) -> Void) {
-        if socket.isConnected {
-            self.socket.write(string: string) {
-                completion(nil)
-            }
-        } else {
+        guard socket.isConnected else {
             completion(NetworkError.webSocketNotConnected)
+            return
+        }
+        socket.write(string: string) {
+            completion(nil)
         }
     }
 
@@ -101,9 +115,14 @@ final class Dispatcher: NSObject, Dispatching {
         socket.onConnect = { [unowned self] in
             self.socketConnectionStatusPublisherSubject.send(.connected)
         }
-        socket.onDisconnect = { [unowned self] _ in
+        socket.onDisconnect = { [unowned self] error in
             self.socketConnectionStatusPublisherSubject.send(.disconnected)
-            self.socketConnectionHandler.handleDisconnection()
+            if error != nil {
+                self.socket.request.url = relayUrlFactory.create()
+            }
+            Task(priority: .high) {
+                await self.socketConnectionHandler.handleDisconnection()
+            }
         }
     }
 }

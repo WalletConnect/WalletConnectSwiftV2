@@ -49,6 +49,9 @@ final class PairingTests: XCTestCase {
             keychainStorage: keychain,
             networkingClient: networkingClient)
 
+        let clientId = try! networkingClient.getClientId()
+        networkingLogger.debug("My client id is: \(clientId)")
+        
         return (pairingClient, networkingClient, keychain, keyValueStorage)
     }
 
@@ -70,7 +73,9 @@ final class PairingTests: XCTestCase {
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
         walletPairingClient = pairingClient
         let echoClient = EchoClientFactory.create(projectId: "", clientId: "", echoHost: "echo.walletconnect.com", environment: .sandbox)
-        walletPushClient = WalletPushClientFactory.create(logger: pushLogger,
+        let keyserverURL = URL(string: "https://keys.walletconnect.com")!
+        walletPushClient = WalletPushClientFactory.create(keyserverURL: keyserverURL,
+                                                          logger: pushLogger,
                                                           keyValueStorage: keyValueStorage,
                                                           keychainStorage: keychain,
                                                           groupKeychainStorage: KeychainStorageMock(),

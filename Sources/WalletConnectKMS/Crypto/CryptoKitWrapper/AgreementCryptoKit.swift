@@ -18,6 +18,9 @@ extension Curve25519.KeyAgreement.PrivateKey: Equatable {
 // MARK: - Public Key
 
 public struct AgreementPublicKey: GenericPasswordConvertible, Equatable {
+    enum Errors: Error {
+        case invalidBase64urlString
+    }
 
     fileprivate let key: Curve25519.KeyAgreement.PublicKey
 
@@ -34,6 +37,11 @@ public struct AgreementPublicKey: GenericPasswordConvertible, Equatable {
         try self.init(rawRepresentation: data)
     }
 
+    public init(base64url: String) throws {
+        guard let raw = Data(base64url: base64url) else { throw Errors.invalidBase64urlString }
+        try self.init(rawRepresentation: raw)
+    }
+
     public var rawRepresentation: Data {
         key.rawRepresentation
     }
@@ -44,7 +52,7 @@ public struct AgreementPublicKey: GenericPasswordConvertible, Equatable {
 
     public var did: String {
         let key = DIDKey(rawData: rawRepresentation)
-        return key.did(prefix: true, variant: .X25519)
+        return key.did(variant: .X25519)
     }
 }
 

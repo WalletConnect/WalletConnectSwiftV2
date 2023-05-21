@@ -2,8 +2,8 @@ import Foundation
 import Combine
 
 public protocol SignClientProtocol {
-    var sessionProposalPublisher: AnyPublisher<Session.Proposal, Never> { get }
-    var sessionRequestPublisher: AnyPublisher<Request, Never> { get }
+    var sessionProposalPublisher: AnyPublisher<(proposal: Session.Proposal, context: VerifyContext?), Never> { get }
+    var sessionRequestPublisher: AnyPublisher<(request: Request, context: VerifyContext?), Never> { get }
     var sessionsPublisher: AnyPublisher<[Session], Never> { get }
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> { get }
     var sessionSettlePublisher: AnyPublisher<Session, Never> { get }

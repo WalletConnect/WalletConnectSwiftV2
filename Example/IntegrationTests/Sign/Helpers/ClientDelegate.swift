@@ -33,12 +33,12 @@ class ClientDelegate {
             self.onConnected?()
         }.store(in: &publishers)
 
-        client.sessionProposalPublisher.sink { proposal in
-            self.onSessionProposal?(proposal)
+        client.sessionProposalPublisher.sink { result in
+            self.onSessionProposal?(result.proposal)
         }.store(in: &publishers)
 
-        client.sessionRequestPublisher.sink { request in
-            self.onSessionRequest?(request)
+        client.sessionRequestPublisher.sink { result in
+            self.onSessionRequest?(result.request)
         }.store(in: &publishers)
 
         client.sessionResponsePublisher.sink { response in

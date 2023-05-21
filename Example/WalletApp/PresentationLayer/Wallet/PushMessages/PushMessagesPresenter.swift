@@ -7,6 +7,7 @@ final class PushMessagesPresenter: ObservableObject {
     private let interactor: PushMessagesInteractor
     private let router: PushMessagesRouter
     private var disposeBag = Set<AnyCancellable>()
+    
     @Published var pushMessages: [PushMessageViewModel] = []
 
     init(interactor: PushMessagesInteractor, router: PushMessagesRouter) {
@@ -14,7 +15,7 @@ final class PushMessagesPresenter: ObservableObject {
         self.interactor = interactor
         self.router = router
     }
-
+    
     func deletePushMessage(at indexSet: IndexSet) {
         if let index = indexSet.first {
             interactor.deletePushMessage(id: pushMessages[index].id)
@@ -40,9 +41,28 @@ extension PushMessagesPresenter: SceneViewModel {
 private extension PushMessagesPresenter {
 
     func reloadPushMessages() {
-        self.pushMessages = interactor.getPushMessages().map({ pushMessageRecord in
-            PushMessageViewModel(pushMessageRecord: pushMessageRecord)
-        })
+        self.pushMessages = interactor.getPushMessages()
+            .sorted {
+                // Most recent first
+                $0.publishedAt > $1.publishedAt
+            }
+            .map { pushMessageRecord in
+                PushMessageViewModel(pushMessageRecord: pushMessageRecord)
+            }
+        
+        interactor.pushMessagePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] newPushMessage in
+                let newMessageViewModel = PushMessageViewModel(pushMessageRecord: newPushMessage)
+                guard let index = self?.pushMessages.firstIndex(
+                    where: { $0.pushMessageRecord.publishedAt > newPushMessage.publishedAt }
+                ) else {
+                    self?.pushMessages.append(newMessageViewModel)
+                    return
+                }
+                self?.pushMessages.insert(newMessageViewModel, at: index)
+            }
+            .store(in: &disposeBag)
     }
 }
 
