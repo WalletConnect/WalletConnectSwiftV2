@@ -1,5 +1,4 @@
 import Foundation
-import HTTPClient
 
 enum VerifyAPI: HTTPService {
     case resolve(assertionId: String)

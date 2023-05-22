@@ -1,7 +1,6 @@
 import WalletConnectPairing
 import WalletConnectSign
 import Combine
-import HTTPClient
 
 extension ModalSheet {
     final class Interactor {

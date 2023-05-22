@@ -1,5 +1,4 @@
 import Foundation
-import HTTPClient
 
 public actor ENSResolver {
 

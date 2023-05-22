@@ -118,12 +118,11 @@ public struct ModalSheet: View {
     
     @ViewBuilder
     private func gridItem(for index: Int) -> some View {
-        let wallet: Listing? = viewModel.wallets.indices.contains(index) ? viewModel.wallets[index] : nil
-        let walletUrl: URL? = wallet != nil ? viewModel.imageUrl(for: wallet!) : nil
+        let wallet: Listing? = viewModel.wallets[safe: index]
         
         if #available(iOS 15.0, *) {
             VStack {
-                AsyncImage(url: walletUrl) { image in
+                AsyncImage(url: viewModel.imageUrl(for: wallet)) { image in
                     image
                         .resizable()
                         .scaledToFit()

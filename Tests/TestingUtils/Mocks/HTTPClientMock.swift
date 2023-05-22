@@ -1,5 +1,5 @@
 import Foundation
-import HTTPClient
+@testable import HTTPClient
 
 public final class HTTPClientMock<T: Decodable>: HTTPClient {
 

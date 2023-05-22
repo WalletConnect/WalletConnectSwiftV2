@@ -1,5 +1,4 @@
 import Foundation
-import HTTPClient
 
 actor EIP1271Verifier {
     private let projectId: String

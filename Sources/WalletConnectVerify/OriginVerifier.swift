@@ -1,5 +1,4 @@
 import Foundation
-import HTTPClient
 
 public final class OriginVerifier {
     enum Errors: Error {
