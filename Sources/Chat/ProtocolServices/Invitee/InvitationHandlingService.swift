@@ -97,6 +97,8 @@ class InvitationHandlingService {
         )
 
         chatStorage.reject(receivedInvite: invite, account: invite.inviteeAccount)
+
+        try await chatStorage.syncRejectedReceivedInviteStatus(id: inviteId, account: invite.inviteeAccount)
     }
 }
 

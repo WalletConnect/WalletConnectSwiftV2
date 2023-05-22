@@ -8,4 +8,5 @@ enum ChatStorageIdentifiers: String {
     case thread = "com.walletconnect.chat.threads"
     case sentInvite = "com.walletconnect.chat.sentInvites"
     case inviteKey = "com.walletconnect.chat.inviteKeys"
+    case receivedInviteStatus = "com.walletconnect.chat.receivedInviteStatuses"
 }

@@ -11,10 +11,12 @@ final class ChatStorage {
     private let sentInviteStore: SyncStore<SentInvite>
     private let threadStore: SyncStore<Thread>
     private let inviteKeyStore: SyncStore<InviteKey>
+    private let receivedInviteStatusStore: SyncStore<ReceivedInviteStatus>
 
     private let sentInviteStoreDelegate: SentInviteStoreDelegate
     private let threadStoreDelegate: ThreadStoreDelegate
     private let inviteKeyDelegate: InviteKeyDelegate
+    private let receiviedInviteStatusDelegate: ReceiviedInviteStatusDelegate
 
     private var messagesPublisherSubject = PassthroughSubject<[Message], Never>()
     private var receivedInvitesPublisherSubject = PassthroughSubject<[ReceivedInvite], Never>()
@@ -73,9 +75,11 @@ final class ChatStorage {
         sentInviteStore: SyncStore<SentInvite>,
         threadStore: SyncStore<Thread>,
         inviteKeyStore: SyncStore<InviteKey>,
+        receivedInviteStatusStore: SyncStore<ReceivedInviteStatus>,
         sentInviteStoreDelegate: SentInviteStoreDelegate,
         threadStoreDelegate: ThreadStoreDelegate,
-        inviteKeyDelegate: InviteKeyDelegate
+        inviteKeyDelegate: InviteKeyDelegate,
+        receiviedInviteStatusDelegate: ReceiviedInviteStatusDelegate
     ) {
         self.kms = kms
         self.messageStore = messageStore
@@ -83,9 +87,11 @@ final class ChatStorage {
         self.sentInviteStore = sentInviteStore
         self.threadStore = threadStore
         self.inviteKeyStore = inviteKeyStore
+        self.receivedInviteStatusStore = receivedInviteStatusStore
         self.sentInviteStoreDelegate = sentInviteStoreDelegate
         self.threadStoreDelegate = threadStoreDelegate
         self.inviteKeyDelegate = inviteKeyDelegate
+        self.receiviedInviteStatusDelegate = receiviedInviteStatusDelegate
 
         setupSyncSubscriptions()
     }
@@ -96,12 +102,14 @@ final class ChatStorage {
         try await sentInviteStore.initialize(for: account)
         try await threadStore.initialize(for: account)
         try await inviteKeyStore.initialize(for: account)
+        try await receivedInviteStatusStore.initialize(for: account)
     }
 
     func initializeDelegates() async throws {
         try await sentInviteStoreDelegate.onInitialization(sentInviteStore.getAll())
         try await threadStoreDelegate.onInitialization(threadStore.getAll())
         try await inviteKeyDelegate.onInitialization(inviteKeyStore.getAll())
+        try await receiviedInviteStatusDelegate.onInitialization()
     }
 
     func setupSubscriptions(account: Account) throws {
@@ -141,6 +149,11 @@ final class ChatStorage {
 
     func getReceivedInvites(account: Account) -> [ReceivedInvite] {
         return receivedInviteStore.getElements(for: account.absoluteString) ?? []
+    }
+
+    func syncRejectedReceivedInviteStatus(id: Int64, account: Account) async throws {
+        let status = ReceivedInviteStatus(id: id, status: .rejected)
+        try await receivedInviteStatusStore.set(object: status, for: account)
     }
 
     func getReceivedInvites(thread: Thread) -> [ReceivedInvite] {
@@ -273,6 +286,15 @@ private extension ChatStorage {
                 self.inviteKeyDelegate.onUpdate(object, account: account)
             case .delete(let id):
                 self.inviteKeyDelegate.onDelete(id)
+            }
+        }.store(in: &publishers)
+
+        receivedInviteStatusStore.syncUpdatePublisher.sink { [unowned self] topic, account, update in
+            switch update {
+            case .set(let object):
+                self.receiviedInviteStatusDelegate.onUpdate(object, storage: self, account: account)
+            case .delete(let id):
+                self.receiviedInviteStatusDelegate.onDelete(id)
             }
         }.store(in: &publishers)
     }
