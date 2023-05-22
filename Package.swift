@@ -120,7 +120,7 @@ let package = Package(
             dependencies: ["WalletConnectUtils", "WalletConnectNetworking"]),
         .target(
             name: "Web3Modal",
-            dependencies: ["QRCode", "WalletConnectSign"]),
+            dependencies: ["QRCode", "WalletConnectSign", "Auth"]),
         .testTarget(
             name: "WalletConnectSignTests",
             dependencies: ["WalletConnectSign", "WalletConnectUtils", "TestingUtils", "WalletConnectVerify"]),

@@ -1,4 +1,5 @@
 import Foundation
+import Web3Modal
 import Combine
 import WalletConnectChat
 import WalletConnectRelay
@@ -93,8 +94,8 @@ final class ChatService {
 
     func register(account: Account, privateKey: String) async throws {
         _ = try await client.register(account: account) { message in
-            let signature = self.onSign(message: message, privateKey: privateKey)
-            return SigningResult.signed(signature)
+            let result = await Web3Modal.personal_sign(message: message) // self.onSign(message: message, privateKey: privateKey)
+            return result
         }
     }
 
