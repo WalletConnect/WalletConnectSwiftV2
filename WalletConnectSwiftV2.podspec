@@ -60,7 +60,7 @@ Pod::Spec.new do |spec|
   osx_deployment_target  = '10.15'
   tvos_deployment_target = '13.0'
 
-  spec.swift_versions = '5.3'
+  spec.swift_versions = '5.5'
 
   spec.pod_target_xcconfig = {
     'OTHER_SWIFT_FLAGS' => '-DCocoaPods'
@@ -132,6 +132,7 @@ Pod::Spec.new do |spec|
   spec.subspec 'WalletConnectNetworking' do |ss|
     ss.source_files = 'Sources/WalletConnectNetworking/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectRelay'
+    ss.dependency 'WalletConnectSwiftV2/HTTPClient'
   end
 
   spec.subspec 'WalletConnectPairing' do |ss|
@@ -177,5 +178,8 @@ Pod::Spec.new do |spec|
     ss.source_files = 'Sources/JSONRPC/**/*'
     ss.dependency 'WalletConnectSwiftV2/Commons'
   end
-
+  
+  spec.subspec 'HTTPClient' do |ss|
+    ss.source_files = 'Sources/HTTPClient/**/*'
+  end
 end
