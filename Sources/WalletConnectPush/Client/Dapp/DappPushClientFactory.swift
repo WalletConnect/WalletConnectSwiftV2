@@ -26,6 +26,8 @@ public struct DappPushClientFactory {
         let deletePushSubscriptionService = DeletePushSubscriptionService(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore, pushMessagesDatabase: nil)
         let deletePushSubscriptionSubscriber = DeletePushSubscriptionSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore)
         let resubscribeService = PushResubscribeService(networkInteractor: networkInteractor, subscriptionsStorage: subscriptionStore)
+        let notifyProposer = NotifyProposer(networkingInteractor: networkInteractor, kms: kms, appMetadata: metadata, logger: logger)
+        let notifyProposeResponseSubscriber = NotifyProposeResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, metadata: metadata)
         return DappPushClient(
             logger: logger,
             kms: kms,
@@ -35,7 +37,9 @@ public struct DappPushClientFactory {
             subscriptionsProvider: subscriptionProvider,
             deletePushSubscriptionService: deletePushSubscriptionService,
             deletePushSubscriptionSubscriber: deletePushSubscriptionSubscriber,
-            resubscribeService: resubscribeService
+            resubscribeService: resubscribeService,
+            notifyProposer: notifyProposer,
+            notifyProposeResponseSubscriber: notifyProposeResponseSubscriber
         )
     }
 }

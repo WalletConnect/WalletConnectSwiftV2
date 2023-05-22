@@ -127,6 +127,10 @@ final class PushTests: XCTestCase {
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
+    func testPushPropose() async {
+
+    }
+
     func testWalletRejectsPushRequest() async {
         let expectation = expectation(description: "expects dapp to receive error response")
 

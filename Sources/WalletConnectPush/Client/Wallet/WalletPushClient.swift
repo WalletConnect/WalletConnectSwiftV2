@@ -104,6 +104,11 @@ public class WalletPushClient {
         try await proposeResponder.respond(requestId: id, onSign: onSign)
     }
 
+    // rename method after approve deprication
+    public func approvePropose(id: RPCID, onSign: @escaping SigningCallback) async throws {
+        try await proposeResponder.respond(requestId: id, onSign: onSign)
+    }
+
     public func reject(id: RPCID) async throws {
         try await proposeResponder.respondError(requestId: id)
     }

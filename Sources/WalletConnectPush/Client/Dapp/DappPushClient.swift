@@ -10,6 +10,10 @@ public class DappPushClient {
         responsePublisherSubject.eraseToAnyPublisher()
     }
 
+    var proposalResponsePublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
+        return notifyProposeResponseSubscriber.proposalResponsePublisher
+    }
+
     private let deleteSubscriptionPublisherSubject = PassthroughSubject<String, Never>()
 
     public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
@@ -19,12 +23,14 @@ public class DappPushClient {
     public let logger: ConsoleLogging
 
     private let pushProposer: PushProposer
+    private let notifyProposer: NotifyProposer
     private let pushMessageSender: PushMessageSender
     private let proposalResponseSubscriber: ProposalResponseSubscriber
     private let subscriptionsProvider: SubscriptionsProvider
     private let deletePushSubscriptionService: DeletePushSubscriptionService
     private let deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
     private let resubscribeService: PushResubscribeService
+    private let notifyProposeResponseSubscriber: NotifyProposeResponseSubscriber
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
@@ -34,7 +40,9 @@ public class DappPushClient {
          subscriptionsProvider: SubscriptionsProvider,
          deletePushSubscriptionService: DeletePushSubscriptionService,
          deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber,
-         resubscribeService: PushResubscribeService) {
+         resubscribeService: PushResubscribeService,
+         notifyProposer: NotifyProposer,
+         notifyProposeResponseSubscriber: NotifyProposeResponseSubscriber) {
         self.logger = logger
         self.pushProposer = pushProposer
         self.proposalResponseSubscriber = proposalResponseSubscriber
@@ -43,11 +51,17 @@ public class DappPushClient {
         self.deletePushSubscriptionService = deletePushSubscriptionService
         self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
         self.resubscribeService = resubscribeService
+        self.notifyProposer = notifyProposer
+        self.notifyProposeResponseSubscriber = notifyProposeResponseSubscriber
         setupSubscriptions()
     }
 
     public func request(account: Account, topic: String) async throws {
         try await pushProposer.request(topic: topic, account: account)
+    }
+
+    public func propose(account: Account, topic: String) async throws {
+        try await notifyProposer.propose(topic: topic, account: account)
     }
 
     public func notify(topic: String, message: PushMessage) async throws {
