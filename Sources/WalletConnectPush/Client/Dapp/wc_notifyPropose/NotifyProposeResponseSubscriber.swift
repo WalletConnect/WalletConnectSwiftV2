@@ -4,17 +4,24 @@ import Combine
 
 class NotifyProposeResponseSubscriber {
     private let networkingInteractor: NetworkInteracting
+    private let metadata: AppMetadata
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
-    var onResponse: ((_ id: RPCID, _ result: Result<PushSubscription, PushError>) -> Void)?
+    var proposalResponsePublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
+        proposalResponsePublisherSubject.eraseToAnyPublisher()
+    }
+    private let proposalResponsePublisherSubject = PassthroughSubject<Result<PushSubscription, Error>, Never>()
+
     private var publishers = [AnyCancellable]()
 
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
-         logger: ConsoleLogging) {
+         logger: ConsoleLogging,
+         metadata: AppMetadata) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.logger = logger
+        self.metadata = metadata
         subscribeForProposalResponse()
     }
 
@@ -27,7 +34,7 @@ class NotifyProposeResponseSubscriber {
                 Task(priority: .userInitiated) {
                     do {
                         let pushSubscription = try await handleResponse(payload: payload)
-                        onResponse?(payload.id, .success(result))
+                        proposalResponsePublisherSubject.send(.success(pushSubscription))
                     } catch {
                         logger.error(error)
                     }
@@ -35,20 +42,18 @@ class NotifyProposeResponseSubscriber {
             }.store(in: &publishers)
     }
 
-
+    /// Implemented only for integration testing purpose, dapp client is not supported
     func handleResponse(payload: ResponseSubscriptionPayload<NotifyProposeParams, SubscriptionJWTPayload.Wrapper>) async throws -> PushSubscription {
-        let jwt = payload.response.jwtString
         let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.response)
         logger.debug("subscriptionAuth JWT validated")
 
         let expiry = Date(timeIntervalSince1970: TimeInterval(claims.exp))
 
-        let updateTopic = jwt.data(using: .utf8)?.sha256().hexString
+        let updateTopic = "update_topic"
 
+        let relay = RelayProtocolOptions(protocol: "irn", data: nil)
 
-        Subscription should have reference to update topic
-        let pushSubscription = PushSubscription(topic: subscriptionTopic, account: payload.request.account, relay: relay, metadata: metadata, scope: [:], expiry: expiry)
-
+        return PushSubscription(topic: updateTopic, account: payload.request.account, relay: relay, metadata: metadata, scope: [:], expiry: expiry)
     }
 
 

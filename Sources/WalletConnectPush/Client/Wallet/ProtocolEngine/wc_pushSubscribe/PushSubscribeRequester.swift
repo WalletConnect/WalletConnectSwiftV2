@@ -34,7 +34,7 @@ class PushSubscribeRequester {
         self.dappsMetadataStore = dappsMetadataStore
     }
 
-    func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {
+    @discardableResult func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws -> SubscriptionJWTPayload.Wrapper {
 
         let dappUrl = metadata.url
 
@@ -56,16 +56,17 @@ class PushSubscribeRequester {
         try kms.setAgreementSecret(keysY, topic: responseTopic)
 
         logger.debug("setting symm key for response topic \(responseTopic)")
-
-        let request = try createJWTRequest(subscriptionAccount: account, dappUrl: dappUrl)
-
         let protocolMethod = PushSubscribeProtocolMethod()
+
+        let subscriptionAuthWrapper = try createJWTWrapper(subscriptionAccount: account, dappUrl: dappUrl)
+        let request = RPCRequest(method: protocolMethod.method, params: subscriptionAuthWrapper)
 
         logger.debug("PushSubscribeRequester: subscribing to response topic: \(responseTopic)")
 
         try await networkingInteractor.subscribe(topic: responseTopic)
 
         try await networkingInteractor.request(request, topic: subscribeTopic, protocolMethod: protocolMethod, envelopeType: .type1(pubKey: keysY.publicKey.rawRepresentation))
+        return subscriptionAuthWrapper
     }
 
     private func resolvePublicKey(dappUrl: String) async throws -> AgreementPublicKey {
@@ -86,13 +87,11 @@ class PushSubscribeRequester {
         return keys
     }
 
-    private func createJWTRequest(subscriptionAccount: Account, dappUrl: String) throws -> RPCRequest {
-        let protocolMethod = PushSubscribeProtocolMethod().method
+    private func createJWTWrapper(subscriptionAccount: Account, dappUrl: String) throws -> SubscriptionJWTPayload.Wrapper {
         let jwtPayload = SubscriptionJWTPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: "")
-        let wrapper = try identityClient.signAndCreateWrapper(
+        return try identityClient.signAndCreateWrapper(
             payload: jwtPayload,
             account: subscriptionAccount
         )
-        return RPCRequest(method: protocolMethod, params: wrapper)
     }
 }

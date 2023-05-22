@@ -143,6 +143,11 @@ private extension WalletPushClient {
                 requestPublisherSubject.send((id: payload.id, account: payload.request.account, metadata: payload.request.metadata))
         }.store(in: &publishers)
 
+        pairingRegisterer.register(method: NotifyProposeProtocolMethod())
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<NotifyProposeParams>) in
+                requestPublisherSubject.send((id: payload.id, account: payload.request.account, metadata: payload.request.metadata))
+        }.store(in: &publishers)
+
         pushMessageSubscriber.onPushMessage = { [unowned self] pushMessageRecord in
             pushMessagePublisherSubject.send(pushMessageRecord)
         }
