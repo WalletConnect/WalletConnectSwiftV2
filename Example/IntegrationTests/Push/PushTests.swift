@@ -127,9 +127,27 @@ final class PushTests: XCTestCase {
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
-    func testPushPropose() async {
-
-    }
+//    func testPushPropose() async {
+//        let expectation = expectation(description: "expects dapp to receive error response")
+//
+//        let uri = try! await dappPairingClient.create()
+//        try! await walletPairingClient.pair(uri: uri)
+//        try! await dappPushClient.propose(account: Account.stub(), topic: uri.topic)
+//
+//        walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
+//            Task(priority: .high) { try! await walletPushClient.approvePropose(id: id, onSign: sign) }
+//        }.store(in: &publishers)
+//
+//        dappPushClient.proposalResponsePublisher.sink { (result) in
+//            guard case .success = result else {
+//                XCTFail()
+//                return
+//            }
+//            expectation.fulfill()
+//        }.store(in: &publishers)
+//        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+//
+//    }
 
     func testWalletRejectsPushRequest() async {
         let expectation = expectation(description: "expects dapp to receive error response")
@@ -139,7 +157,6 @@ final class PushTests: XCTestCase {
         try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
 
         walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
-
             Task(priority: .high) { try! await walletPushClient.reject(id: id) }
         }.store(in: &publishers)
 
