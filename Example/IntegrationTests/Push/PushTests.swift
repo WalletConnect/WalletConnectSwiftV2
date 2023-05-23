@@ -27,8 +27,8 @@ final class PushTests: XCTestCase {
         let keychain = KeychainStorageMock()
         let keyValueStorage = RuntimeKeyValueStorage()
 
-        let relayLogger = ConsoleLogger(suffix: prefix + " [Relay]", loggingLevel: .debug)
-        let pairingLogger = ConsoleLogger(suffix: prefix + " [Pairing]", loggingLevel: .debug)
+        let relayLogger = ConsoleLogger(suffix: prefix + " [Relay]", loggingLevel: .off)
+        let pairingLogger = ConsoleLogger(suffix: prefix + " [Pairing]", loggingLevel: .off)
         let networkingLogger = ConsoleLogger(suffix: prefix + " [Networking]", loggingLevel: .debug)
 
         let relayClient = RelayClient(
@@ -62,7 +62,7 @@ final class PushTests: XCTestCase {
         let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
         dappPairingClient = pairingClient
-        dappPushClient = DappPushClientFactory.create(metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
+        dappPushClient = DappPushClientFactory.create(metadata: AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: []),
                                                       logger: pushLogger,
                                                       keyValueStorage: keyValueStorage,
                                                       keychainStorage: keychain,
@@ -127,27 +127,27 @@ final class PushTests: XCTestCase {
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
-//    func testPushPropose() async {
-//        let expectation = expectation(description: "expects dapp to receive error response")
-//
-//        let uri = try! await dappPairingClient.create()
-//        try! await walletPairingClient.pair(uri: uri)
-//        try! await dappPushClient.propose(account: Account.stub(), topic: uri.topic)
-//
-//        walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
-//            Task(priority: .high) { try! await walletPushClient.approvePropose(id: id, onSign: sign) }
-//        }.store(in: &publishers)
-//
-//        dappPushClient.proposalResponsePublisher.sink { (result) in
-//            guard case .success = result else {
-//                XCTFail()
-//                return
-//            }
-//            expectation.fulfill()
-//        }.store(in: &publishers)
-//        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
-//
-//    }
+    func testPushPropose() async {
+        let expectation = expectation(description: "expects dapp to receive error response")
+
+        let uri = try! await dappPairingClient.create()
+        try! await walletPairingClient.pair(uri: uri)
+        try! await dappPushClient.propose(account: Account.stub(), topic: uri.topic)
+
+        walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
+            Task(priority: .high) { try! await walletPushClient.approvePropose(id: id, onSign: sign) }
+        }.store(in: &publishers)
+
+        dappPushClient.proposalResponsePublisher.sink { (result) in
+            guard case .success = result else {
+                XCTFail()
+                return
+            }
+            expectation.fulfill()
+        }.store(in: &publishers)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+
+    }
 
     func testWalletRejectsPushRequest() async {
         let expectation = expectation(description: "expects dapp to receive error response")

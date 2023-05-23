@@ -60,6 +60,7 @@ public class WalletPushClient {
     private let pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber
     private let notifyUpdateRequester: NotifyUpdateRequester
     private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
+    private let notifyProposeResponder: NotifyProposeResponder
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
@@ -76,7 +77,8 @@ public class WalletPushClient {
          pushSubscribeRequester: PushSubscribeRequester,
          pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber,
          notifyUpdateRequester: NotifyUpdateRequester,
-         notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
+         notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber,
+         notifyProposeResponder: NotifyProposeResponder
     ) {
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
@@ -93,6 +95,7 @@ public class WalletPushClient {
         self.pushSubscribeResponseSubscriber = pushSubscribeResponseSubscriber
         self.notifyUpdateRequester = notifyUpdateRequester
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
+        self.notifyProposeResponder = notifyProposeResponder
         setupSubscriptions()
     }
 
@@ -106,7 +109,7 @@ public class WalletPushClient {
 
     // rename method after approve deprication
     public func approvePropose(id: RPCID, onSign: @escaping SigningCallback) async throws {
-        try await proposeResponder.respond(requestId: id, onSign: onSign)
+        try await notifyProposeResponder.approve(requestId: id, onSign: onSign)
     }
 
     public func reject(id: RPCID) async throws {
