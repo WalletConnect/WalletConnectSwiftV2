@@ -60,7 +60,7 @@ Pod::Spec.new do |spec|
   osx_deployment_target  = '10.15'
   tvos_deployment_target = '13.0'
 
-  spec.swift_versions = '5.5'
+  spec.swift_versions = '5.3'
 
   spec.pod_target_xcconfig = {
     'OTHER_SWIFT_FLAGS' => '-DCocoaPods'
@@ -145,11 +145,6 @@ Pod::Spec.new do |spec|
     ss.platform = :ios
   end
 
-  spec.subspec 'WalletConnectNetworking' do |ss|
-    ss.source_files = 'Sources/WalletConnectNetworking/**/*.{h,m,swift}'
-    ss.dependency 'WalletConnectSwiftV2/WalletConnectRelay'
-  end
-
   spec.subspec 'WalletConnectRelay' do |ss|
     ss.source_files = 'Sources/WalletConnectRelay/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectJWT'
@@ -161,25 +156,25 @@ Pod::Spec.new do |spec|
   end
 
   spec.subspec 'WalletConnectUtils' do |ss|
-    ss.source_files = 'Sources/WalletConnectUtils/**/*'
+    ss.source_files = 'Sources/WalletConnectUtils/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/JSONRPC'
   end
 
   spec.subspec 'WalletConnectKMS' do |ss|
-    ss.source_files = 'Sources/WalletConnectKMS/**/*'
+    ss.source_files = 'Sources/WalletConnectKMS/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectUtils'
   end
 
   spec.subspec 'Commons' do |ss|
-    ss.source_files = 'Sources/Commons/**/*'
+    ss.source_files = 'Sources/Commons/**/*.{h,m,swift}'
   end
 
   spec.subspec 'JSONRPC' do |ss|
-    ss.source_files = 'Sources/JSONRPC/**/*'
+    ss.source_files = 'Sources/JSONRPC/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/Commons'
   end
   
   spec.subspec 'HTTPClient' do |ss|
-    ss.source_files = 'Sources/HTTPClient/**/*'
+    ss.source_files = 'Sources/HTTPClient/**/*.{h,m,swift}'
   end
 end
