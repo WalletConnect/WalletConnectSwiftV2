@@ -62,7 +62,7 @@ class PushSubscribeRequester {
 
         let protocolMethod = PushSubscribeProtocolMethod()
 
-        let subscriptionAuthWrapper = try createJWTWrapper(subscriptionAccount: account, dappUrl: dappUrl)
+        let subscriptionAuthWrapper = try await createJWTWrapper(subscriptionAccount: account, dappUrl: dappUrl)
         let request = RPCRequest(method: protocolMethod.method, params: subscriptionAuthWrapper)
 
         logger.debug("PushSubscribeRequester: subscribing to response topic: \(responseTopic)")
@@ -90,9 +90,11 @@ class PushSubscribeRequester {
         let keys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPublicKey.hexRepresentation)
         return keys
     }
-// todo
-    private func createJWTWrapper(subscriptionAccount: Account, dappUrl: String) throws -> SubscriptionJWTPayload.Wrapper {
-        let jwtPayload = SubscriptionJWTPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: "asdsadsadas")
+
+    private func createJWTWrapper(subscriptionAccount: Account, dappUrl: String) async throws -> SubscriptionJWTPayload.Wrapper {
+        let types = try await subscriptionScopeProvider.getSubscriptionScope(dappUrl: dappUrl)
+        let scope = types.map{$0.name}.joined(separator: " ")
+        let jwtPayload = SubscriptionJWTPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: scope)
         return try identityClient.signAndCreateWrapper(
             payload: jwtPayload,
             account: subscriptionAccount
