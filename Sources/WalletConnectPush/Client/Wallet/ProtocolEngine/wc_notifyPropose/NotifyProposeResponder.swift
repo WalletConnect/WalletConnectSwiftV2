@@ -12,7 +12,7 @@ class NotifyProposeResponder {
     private let logger: ConsoleLogging
     private let pushSubscribeRequester: PushSubscribeRequester
     private let rpcHistory: RPCHistory
-    private let subscriptionResponsePublisher: AnyPublisher<Result<PushSubscription, Error>, Never>
+    private var subscriptionResponsePublisher: AnyPublisher<Result<PushSubscription, Error>, Never>
 
     private var publishers = [AnyCancellable]()
 
@@ -21,7 +21,8 @@ class NotifyProposeResponder {
          logger: ConsoleLogging,
          pushSubscribeRequester: PushSubscribeRequester,
          rpcHistory: RPCHistory,
-         pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber) {
+        pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber
+    ) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.logger = logger
@@ -39,18 +40,18 @@ class NotifyProposeResponder {
 
         let subscriptionAuthWrapper = try await pushSubscribeRequester.subscribe(metadata: proposal.metadata, account: proposal.account, onSign: onSign)
 
-
-        await subscriptionResponsePublisher
-               .first() // Wait for the first value to be published
-               .sink { _ in
-                   // Continue code execution here
-                   do {
-                       try await networkingInteractor.respond(topic: responseTopic, response: response, protocolMethod: protocolMethod, envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
-                       kms.deleteSymmetricKey(for: responseTopic)
-                   } catch {
-                       // Handle any errors that occur during response or key deletion
-                   }
-               }.store(in: publishers)
+        try await withCheckedThrowingContinuation { continuation in
+            subscriptionResponsePublisher
+                .first()
+                .sink(receiveValue: { value in
+                switch value {
+                case .success:
+                    continuation.resume()
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
+            }).store(in: &publishers)
+        }
 
         guard let peerPublicKey = try? AgreementPublicKey(hex: proposal.publicKey) else {
             throw Errors.malformedRequestParams
@@ -65,6 +66,8 @@ class NotifyProposeResponder {
         let response = RPCResponse(id: requestId, result: subscriptionAuthWrapper)
 
         let protocolMethod = NotifyProposeProtocolMethod()
+
+        logger.debug("NotifyProposeResponder: sending response")
 
         try await networkingInteractor.respond(topic: responseTopic, response: response, protocolMethod: protocolMethod, envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
         kms.deleteSymmetricKey(for: responseTopic)

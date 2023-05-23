@@ -82,6 +82,7 @@ class PushSubscribeResponseSubscriber {
 
                     guard let metadata = metadata else {
                         logger.debug("PushSubscribeResponseSubscriber: no metadata for topic: \(pushSubscriptionTopic!)")
+                        subscriptionPublisherSubject.send(.failure(Errors.couldNotCreateSubscription))
                         return
                     }
                     dappsMetadataStore.delete(forKey: payload.topic)
@@ -93,6 +94,7 @@ class PushSubscribeResponseSubscriber {
 
                     logger.debug("PushSubscribeResponseSubscriber: unsubscribing response topic: \(payload.topic)")
                     networkingInteractor.unsubscribe(topic: payload.topic)
+
                     subscriptionPublisherSubject.send(.success(pushSubscription))
                 }
             }.store(in: &publishers)

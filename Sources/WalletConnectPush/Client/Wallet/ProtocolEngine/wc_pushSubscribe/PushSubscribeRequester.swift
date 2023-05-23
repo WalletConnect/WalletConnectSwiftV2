@@ -90,9 +90,9 @@ class PushSubscribeRequester {
         let keys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPublicKey.hexRepresentation)
         return keys
     }
-
+// todo
     private func createJWTWrapper(subscriptionAccount: Account, dappUrl: String) throws -> SubscriptionJWTPayload.Wrapper {
-        let jwtPayload = SubscriptionJWTPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: "")
+        let jwtPayload = SubscriptionJWTPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: "asdsadsadas")
         return try identityClient.signAndCreateWrapper(
             payload: jwtPayload,
             account: subscriptionAccount
