@@ -7,6 +7,8 @@ public struct Web3WalletClientFactory {
         pairingClient: PairingClientProtocol,
         echoClient: EchoClientProtocol
     ) -> Web3WalletClient {
+        EnvironmentInfo.storeApiFlags(flag: .w3w)
+        
         return Web3WalletClient(
             authClient: authClient,
             signClient: signClient,

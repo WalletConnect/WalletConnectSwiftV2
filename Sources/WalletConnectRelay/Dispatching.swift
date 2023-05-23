@@ -40,6 +40,9 @@ final class Dispatcher: NSObject, Dispatching {
         
         let socket = socketFactory.create(with: relayUrlFactory.create())
         socket.request.addValue(EnvironmentInfo.userAgent, forHTTPHeaderField: "User-Agent")
+
+        EnvironmentInfo.clearUserAgentStorage()
+        
         self.socket = socket
         
         switch socketConnectionType {

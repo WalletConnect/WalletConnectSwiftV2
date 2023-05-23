@@ -6,6 +6,8 @@ import WalletConnectIdentity
 public struct WalletPushClientFactory {
 
     public static func create(networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, echoClient: EchoClient) -> WalletPushClient {
+        EnvironmentInfo.storeApiFlags(flag: .push)
+        
         let logger = ConsoleLogger(suffix: "🔔",loggingLevel: .debug)
         let keyValueStorage = UserDefaults.standard
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!

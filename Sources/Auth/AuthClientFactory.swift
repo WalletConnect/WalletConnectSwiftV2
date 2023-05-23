@@ -9,7 +9,8 @@ public struct AuthClientFactory {
         networkingClient: NetworkingInteractor,
         pairingRegisterer: PairingRegisterer
     ) -> AuthClient {
-
+        EnvironmentInfo.storeApiFlags(flag: .auth)
+        
         let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults.standard
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")

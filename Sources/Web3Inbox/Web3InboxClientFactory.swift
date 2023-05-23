@@ -10,6 +10,8 @@ final class Web3InboxClientFactory {
         config: [ConfigParam: Bool],
         onSign: @escaping SigningCallback
     ) -> Web3InboxClient {
+        EnvironmentInfo.storeApiFlags(flag: .w3i)
+        
         let url = buildUrl(account: account, config: config)
         let logger = ConsoleLogger(suffix: "📬", loggingLevel: .debug)
         let chatWebviewSubscriber = WebViewRequestSubscriber(logger: logger)
