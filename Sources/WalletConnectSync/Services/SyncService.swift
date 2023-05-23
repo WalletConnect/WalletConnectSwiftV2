@@ -14,16 +14,18 @@ final class SyncService {
     private let networkInteractor: NetworkInteracting
     private let derivationService: SyncDerivationService
     private let signatureStore: SyncSignatureStore
+    private let historyStore: SyncHistoryStore
     private let logger: ConsoleLogging
 
     /// `account` to `Record` keyValue store
     private let indexStore: SyncIndexStore
 
-    init(networkInteractor: NetworkInteracting, derivationService: SyncDerivationService, signatureStore: SyncSignatureStore, indexStore: SyncIndexStore, logger: ConsoleLogging) {
+    init(networkInteractor: NetworkInteracting, derivationService: SyncDerivationService, signatureStore: SyncSignatureStore, indexStore: SyncIndexStore, historyStore: SyncHistoryStore, logger: ConsoleLogging) {
         self.networkInteractor = networkInteractor
         self.derivationService = derivationService
         self.signatureStore = signatureStore
         self.indexStore = indexStore
+        self.historyStore = historyStore
         self.logger = logger
 
         setupSubscriptions()
@@ -32,18 +34,26 @@ final class SyncService {
     func set<Object: SyncObject>(account: Account, store: String, object: Object) async throws {
         let protocolMethod = SyncSetMethod()
         let params = StoreSet(key: object.syncId, value: try object.json())
-        let request = RPCRequest(method: protocolMethod.method, params: params)
+        let rpcid = RPCID()
+        let request = RPCRequest(method: protocolMethod.method, params: params, rpcid: rpcid)
         let record = try indexStore.getRecord(account: account, name: store)
+
         try await networkInteractor.request(request, topic: record.topic, protocolMethod: protocolMethod)
+
+        historyStore.set(rpcid: rpcid.integer, topic: record.topic)
 
         logger.debug("Did set value for \(store). Sent on \(record.topic). Object: \n\(object)\n")
     }
 
     func delete(account: Account, store: String, key: String) async throws {
         let protocolMethod = SyncDeleteMethod()
-        let request = RPCRequest(method: protocolMethod.method, params: ["key": key])
+        let rpcid = RPCID()
+        let request = RPCRequest(method: protocolMethod.method, params: ["key": key], rpcid: rpcid)
         let record = try indexStore.getRecord(account: account, name: store)
+
         try await networkInteractor.request(request, topic: record.topic, protocolMethod: protocolMethod)
+
+        historyStore.set(rpcid: rpcid.integer, topic: record.topic)
 
         logger.debug("Did delete value for \(store). Sent on: \(record.topic). Key: \n\(key)\n")
     }
@@ -63,13 +73,17 @@ private extension SyncService {
     func setupSubscriptions() {
         networkInteractor.requestSubscription(on: SyncSetMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<StoreSet>) in
-                self.updateSubject.send((payload.topic, .set(payload.request)))
+                if historyStore.isNew(topic: payload.topic, rpcid: payload.id) {
+                    self.updateSubject.send((payload.topic, .set(payload.request)))
+                }
             }
             .store(in: &publishers)
 
         networkInteractor.requestSubscription(on: SyncDeleteMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<StoreDelete>) in
-                self.updateSubject.send((payload.topic, .delete(payload.request)))
+                if historyStore.isNew(topic: payload.topic, rpcid: payload.id) {
+                    self.updateSubject.send((payload.topic, .delete(payload.request)))
+                }
             }
             .store(in: &publishers)
     }

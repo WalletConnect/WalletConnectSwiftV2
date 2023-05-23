@@ -17,11 +17,14 @@ final class SyncClientFactory {
         )
         let indexStore = CodableStore<SyncRecord>(defaults: UserDefaults.standard, identifier: SyncStorageIdentifiers.index.identifier)
         let syncIndexStore = SyncIndexStore(store: indexStore)
+        let historyStore = CodableStore<Int64>(defaults: UserDefaults.standard, identifier: SyncStorageIdentifiers.history.identifier)
+        let syncHistoryStore = SyncHistoryStore(store: historyStore)
         let syncService = SyncService(
             networkInteractor: networkInteractor,
             derivationService: deriviationService,
             signatureStore: signatureStore,
             indexStore: syncIndexStore,
+            historyStore: syncHistoryStore,
             logger: ConsoleLogger(loggingLevel: .debug)
         )
         return SyncClient(syncService: syncService, syncSignatureStore: signatureStore)
