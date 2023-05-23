@@ -73,7 +73,7 @@ private extension SyncService {
     func setupSubscriptions() {
         networkInteractor.requestSubscription(on: SyncSetMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<StoreSet>) in
-                if historyStore.isNew(topic: payload.topic, rpcid: payload.id) {
+                if historyStore.update(topic: payload.topic, rpcid: payload.id) {
                     self.updateSubject.send((payload.topic, .set(payload.request)))
                 }
             }
@@ -81,7 +81,7 @@ private extension SyncService {
 
         networkInteractor.requestSubscription(on: SyncDeleteMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<StoreDelete>) in
-                if historyStore.isNew(topic: payload.topic, rpcid: payload.id) {
+                if historyStore.update(topic: payload.topic, rpcid: payload.id) {
                     self.updateSubject.send((payload.topic, .delete(payload.request)))
                 }
             }
