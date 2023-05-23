@@ -55,7 +55,7 @@ public struct SentInvite: Codable, Equatable {
 extension SentInvite: SyncObject {
 
     public var syncId: String {
-        return String(id)
+        return responseTopic
     }
 }
 
