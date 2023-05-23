@@ -25,7 +25,7 @@ public final class Web3Inbox {
         crypto: CryptoProvider,
         config: [ConfigParam: Bool] = [:],
         environment: APNSEnvironment,
-        onSign: @escaping SigningCallback,
+        onSign: @escaping SigningCallback
     ) {
         Web3Inbox.account = account
         Web3Inbox.config = config
