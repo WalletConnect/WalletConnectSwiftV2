@@ -16,6 +16,7 @@ class PushSubscribeRequester {
     private let logger: ConsoleLogging
     private let webDidResolver: WebDidResolver
     private let dappsMetadataStore: CodableStore<AppMetadata>
+    private let subscriptionScopeProvider: SubscriptionScopeProvider
 
     init(keyserverURL: URL,
          networkingInteractor: NetworkInteracting,
@@ -23,6 +24,7 @@ class PushSubscribeRequester {
          logger: ConsoleLogging,
          kms: KeyManagementService,
          webDidResolver: WebDidResolver = WebDidResolver(),
+         subscriptionScopeProvider: SubscriptionScopeProvider,
          dappsMetadataStore: CodableStore<AppMetadata>
     ) {
         self.keyserverURL = keyserverURL
@@ -31,6 +33,7 @@ class PushSubscribeRequester {
         self.logger = logger
         self.kms = kms
         self.webDidResolver = webDidResolver
+        self.subscriptionScopeProvider = subscriptionScopeProvider
         self.dappsMetadataStore = dappsMetadataStore
     }
 
@@ -56,6 +59,7 @@ class PushSubscribeRequester {
         try kms.setAgreementSecret(keysY, topic: responseTopic)
 
         logger.debug("setting symm key for response topic \(responseTopic)")
+
         let protocolMethod = PushSubscribeProtocolMethod()
 
         let subscriptionAuthWrapper = try createJWTWrapper(subscriptionAccount: account, dappUrl: dappUrl)

@@ -49,7 +49,7 @@ let package = Package(
 
     ],
     dependencies: [
-        .package(url: "https://github.com/WalletConnect/QRCode", branch: "main")
+        .package(url: "https://github.com/WalletConnect/QRCode", from: "14.3.1")
     ],
     targets: [
         .target(
@@ -120,7 +120,7 @@ let package = Package(
             dependencies: ["WalletConnectUtils", "WalletConnectNetworking"]),
         .target(
             name: "Web3Modal",
-            dependencies: ["QRCode"]),
+            dependencies: ["QRCode", "WalletConnectSign"]),
         .testTarget(
             name: "WalletConnectSignTests",
             dependencies: ["WalletConnectSign", "WalletConnectUtils", "TestingUtils", "WalletConnectVerify"]),

@@ -276,7 +276,7 @@ final class PushTests: XCTestCase {
     func testWalletCreatesAndUpdatesSubscription() async {
         let expectation = expectation(description: "expects to create and update push subscription")
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
-        let updateScope: Set<NotificationScope> = [NotificationScope.alerts]
+        let updateScope: Set<String> = ["alerts"]
         try! await walletPushClient.subscribe(metadata: metadata, account: Account.stub(), onSign: sign)
         walletPushClient.subscriptionsPublisher
             .first()

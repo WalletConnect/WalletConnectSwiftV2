@@ -25,10 +25,7 @@ class NotifyProposer {
         try kms.setPublicKey(publicKey: publicKey, for: responseTopic)
 
 
-        let scope = NotificationScope.allCases.map{$0.rawValue}.joined(separator: " ")
-
-
-        let params = NotifyProposeParams(publicKey: publicKey.hexRepresentation, metadata: metadata, account: account, scope: scope)
+        let params = NotifyProposeParams(publicKey: publicKey.hexRepresentation, metadata: metadata, account: account, scope: "")
         let request = RPCRequest(method: protocolMethod.method, params: params)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
         try await networkingInteractor.subscribe(topic: responseTopic)
