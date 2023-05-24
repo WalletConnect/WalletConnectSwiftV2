@@ -9,12 +9,17 @@ struct AsyncImage<Content>: View where Content: View {
 
         init(_ url: URL?) {
             guard let url = url else { return }
+            
             URLSession.shared.dataTaskPublisher(for: url)
                 .map(\.data)
                 .map { $0 as Data? }
                 .replaceError(with: nil)
                 .receive(on: RunLoop.main)
-                .assign(to: \.data, on: self)
+                .sink(receiveValue: { data in
+                    withAnimation {
+                        self.data = data
+                    }
+                })
                 .store(in: &cancellables)
         }
     }
@@ -27,7 +32,11 @@ struct AsyncImage<Content>: View where Content: View {
         self.conditionalContent = nil
     }
 
-    init<I, P>(url: URL?, @ViewBuilder content: @escaping (Image) -> I, @ViewBuilder placeholder: @escaping () -> P) where Content == _ConditionalContent<I, P>, I: View, P: View {
+    init<I, P>(
+        url: URL?,
+        @ViewBuilder content: @escaping (Image) -> I,
+        @ViewBuilder placeholder: @escaping () -> P
+    ) where Content == _ConditionalContent<I, P>, I: View, P: View {
         self.imageLoader = Loader(url)
         self.conditionalContent = { image in
             if let image = image {

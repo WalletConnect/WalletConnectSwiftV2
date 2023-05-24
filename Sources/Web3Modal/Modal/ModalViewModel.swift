@@ -31,7 +31,7 @@ extension ModalSheet {
         @Published var uri: String?
         @Published var destination: Destination = .wallets
         @Published var errorMessage: String?
-//        @Published var wallets: [Listing] = []
+        @Published var wallets: [Listing] = []
         
         init(isShown: Binding<Bool>, projectId: String, interactor: Interactor) {
             self.isShown = isShown
@@ -47,17 +47,21 @@ extension ModalSheet {
                 .store(in: &disposeBag)
         }
         
-//        @MainActor
-//        func fetchWallets() async {
-//            do {
-//
-//                try await Task.sleep(nanoseconds: 1_000_000_000)
-//                wallets = try await interactor.getListings()
-//            } catch {
-//                print(error)
-//                errorMessage = error.localizedDescription
-//            }
-//        }
+        @MainActor
+        func fetchWallets() async {
+            do {
+                let wallets = try await interactor.getListings()
+                // Small deliberate delay to ensure animations execute properly
+                try await Task.sleep(nanoseconds: 500_000_000)
+                
+                withAnimation {
+                    self.wallets = wallets.sorted { $0.order < $1.order }
+                }
+            } catch {
+                print(error)
+                errorMessage = error.localizedDescription
+            }
+        }
         
         @MainActor
         func createURI() async {
@@ -81,10 +85,12 @@ extension ModalSheet {
             UIPasteboard.general.string = uri
         }
         
-//        func imageUrl(for listing: Listing) -> URL? {
-//            let urlString = "https://explorer-api.walletconnect.com/v3/logo/md/\(listing.imageId)?projectId=\(projectId)"
-//            
-//            return URL(string: urlString)
-//        }
+        func imageUrl(for listing: Listing?) -> URL? {
+            guard let listing = listing else { return nil }
+            
+            let urlString = "https://explorer-api.walletconnect.com/v3/logo/md/\(listing.imageId)?projectId=\(projectId)"
+            
+            return URL(string: urlString)
+        }
     }
 }
