@@ -24,7 +24,7 @@ class NotifyProposer {
         let responseTopic = publicKey.rawRepresentation.sha256().toHexString()
         try kms.setPublicKey(publicKey: publicKey, for: responseTopic)
 
-        let params = NotifyProposeParams(publicKey: publicKey.hexRepresentation, metadata: metadata, account: account, scope: "")
+        let params = NotifyProposeParams(publicKey: publicKey.hexRepresentation, metadata: metadata, account: account, scope: [])
         let request = RPCRequest(method: protocolMethod.method, params: params)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
         try await networkingInteractor.subscribe(topic: responseTopic)
