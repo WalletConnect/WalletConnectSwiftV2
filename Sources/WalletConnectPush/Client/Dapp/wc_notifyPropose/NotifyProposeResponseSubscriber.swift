@@ -23,6 +23,7 @@ class NotifyProposeResponseSubscriber {
         self.logger = logger
         self.metadata = metadata
         subscribeForProposalResponse()
+        subscribeForProposalErrors()
     }
 
 
@@ -56,5 +57,14 @@ class NotifyProposeResponseSubscriber {
         return PushSubscription(topic: updateTopic, account: payload.request.account, relay: relay, metadata: metadata, scope: [:], expiry: expiry)
     }
 
+    private func subscribeForProposalErrors() {
+        let protocolMethod = PushRequestProtocolMethod()
+        networkingInteractor.responseErrorSubscription(on: protocolMethod)
+            .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<PushRequestParams>) in
+                kms.deletePrivateKey(for: payload.request.publicKey)
+                guard let error = PushError(code: payload.error.code) else { return }
+                proposalResponsePublisherSubject.send(.failure(error))
+            }.store(in: &publishers)
+    }
 
 }

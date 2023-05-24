@@ -73,6 +73,14 @@ class NotifyProposeResponder {
         kms.deleteSymmetricKey(for: responseTopic)
     }
 
+    func reject(requestId: RPCID) async throws {
+        logger.debug("NotifyProposeResponder - rejecting notify request")
+        guard let requestRecord = rpcHistory.get(recordId: requestId) else { throw Errors.recordForIdNotFound }
+        let pairingTopic = requestRecord.topic
+
+        try await networkingInteractor.respondError(topic: pairingTopic, requestId: requestId, protocolMethod: PushRequestProtocolMethod(), reason: PushError.rejected)
+    }
+
     private func generateAgreementKeys(peerPublicKey: AgreementPublicKey) throws -> AgreementKeys {
         let selfPubKey = try kms.createX25519KeyPair()
         let keys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPublicKey.hexRepresentation)
