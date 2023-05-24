@@ -85,7 +85,9 @@ extension ModalSheet {
             UIPasteboard.general.string = uri
         }
         
-        func imageUrl(for listing: Listing) -> URL? {
+        func imageUrl(for listing: Listing?) -> URL? {
+            guard let listing = listing else { return nil }
+            
             let urlString = "https://explorer-api.walletconnect.com/v3/logo/md/\(listing.imageId)?projectId=\(projectId)"
             
             return URL(string: urlString)

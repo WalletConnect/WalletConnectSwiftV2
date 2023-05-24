@@ -49,7 +49,7 @@ let package = Package(
 
     ],
     dependencies: [
-        .package(url: "https://github.com/WalletConnect/QRCode", branch: "main")
+        .package(url: "https://github.com/WalletConnect/QRCode", from: "14.3.1")
     ],
     targets: [
         .target(
@@ -110,8 +110,11 @@ let package = Package(
             name: "Commons",
             dependencies: []),
         .target(
+            name: "HTTPClient",
+            dependencies: []),
+        .target(
             name: "WalletConnectNetworking",
-            dependencies: ["WalletConnectRelay"]),
+            dependencies: ["HTTPClient", "WalletConnectRelay"]),
         .target(
             name: "WalletConnectRouter",
             dependencies: []),

@@ -1,37 +1,41 @@
 import Foundation
+import HTTPClient
 
-struct ExplorerApi {
-    let getListings: @Sendable (_ projectID: String) async throws -> ListingsResponse
-}
+enum ExplorerAPI: HTTPService {
+    case getListings(projectId: String)
+    
+    var path: String {
+        switch self {
+        case .getListings: return "/w3m/v1/getiOSListings"
+        }
+    }
+    
+    var method: HTTPMethod {
+        switch self {
+        case .getListings: return .get
+        }
+    }
+    
+    var body: Data? {
+        nil
+    }
 
-extension ExplorerApi {
-    static func live(httpService: HttpService = .live) -> Self {
-        .init(
-            getListings: { projectId in
+    var queryParameters: [String: String]? {
+        switch self {
+        case let .getListings(projectId):
+            return [
+                "projectId": projectId,
+                "page": "1",
+                "entries": "9",
+            ]
+        }
+    }
+    
+    var scheme: String {
+        return "https"
+    }
 
-                let endpoint = Endpoint.bare(
-                    path: "/w3m/v1/getiOSListings",
-                    queryItems: [
-                        .init(name: "projectId", value: projectId),
-                        .init(name: "page", value: "1"),
-                        .init(name: "entries", value: "11"),
-                    ],
-                    method: .GET,
-                    host: "explorer-api.walletconnect.com"
-                )
-
-                let response = try await httpService.performRequest(endpoint)
-
-                switch response {
-                case let .success(data):
-                    
-                    let listings = try JSONDecoder().decode(ListingsResponse.self, from: data)
-                    
-                    return listings
-                case let .failure(error):
-                    throw error
-                }
-            }
-        )
+    var additionalHeaderFields: [String: String]? {
+        nil
     }
 }

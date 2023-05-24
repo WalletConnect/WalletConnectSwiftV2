@@ -3,7 +3,6 @@ import Foundation
 import WalletConnectPairing
 import WalletConnectSign
 import Combine
-import WalletConnectNetworking
 
 extension ModalSheet {
     final class Interactor {
@@ -33,30 +32,15 @@ extension ModalSheet {
                 .store(in: &disposeBag)
         }
         
-        func personal_sign(session: Session) {
-         
-            let method = "personal_sign"
-            let account = session.namespaces.first!.value.accounts.first!.absoluteString
-            let requestParams =  AnyCodable(
-                ["0x4d7920656d61696c206973206a6f686e40646f652e636f6d202d2031363533333933373535313531", account]
-            )
-            
-            let request = Request(
-                topic: session.topic,
-                method: method,
-                params: requestParams,
-                chainId: Blockchain("eip155:1")!
-            )
-            
-            Task {
-                
-                try? await Sign.instance.request(params: request)
-            }
-        }
-        
         func getListings() async throws -> [Listing] {
-            let listingResponse = try await ExplorerApi.live().getListings(projectId)
-            return listingResponse.listings.values.compactMap { $0 }
+            
+            let httpClient = HTTPNetworkClient(host: "explorer-api.walletconnect.com")
+            let response = try await httpClient.request(
+                ListingsResponse.self,
+                at: ExplorerAPI.getListings(projectId: projectId)
+            )
+        
+            return response.listings.values.compactMap { $0 }
         }
         
         func connect() async throws -> WalletConnectURI {

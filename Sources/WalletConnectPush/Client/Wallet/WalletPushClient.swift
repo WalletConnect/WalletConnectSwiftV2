@@ -108,7 +108,7 @@ public class WalletPushClient {
         try await proposeResponder.respondError(requestId: id)
     }
 
-    public func update(topic: String, scope: Set<NotificationScope>) async throws {
+    public func update(topic: String, scope: Set<String>) async throws {
         try await notifyUpdateRequester.update(topic: topic, scope: scope)
     }
 
