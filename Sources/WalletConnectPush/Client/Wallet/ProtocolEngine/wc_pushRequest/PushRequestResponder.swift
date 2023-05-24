@@ -91,7 +91,7 @@ class PushRequestResponder {
     }
 
     private func createJWTResponse(requestId: RPCID, subscriptionAccount: Account, dappUrl: String) throws -> RPCResponse {
-        let jwtPayload = SubscriptionJWTPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: "v1")
+        let jwtPayload = SubscriptionJWTPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: "gm_hourly")
         let wrapper = try identityClient.signAndCreateWrapper(
             payload: jwtPayload,
             account: subscriptionAccount
