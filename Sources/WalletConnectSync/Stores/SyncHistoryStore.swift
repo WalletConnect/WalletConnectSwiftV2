@@ -24,6 +24,6 @@ private extension SyncHistoryStore {
 
     func isNew(topic: String, rpcid: RPCID) -> Bool {
         guard let old = try? store.get(key: topic) else { return true }
-        return old <= rpcid.integer
+        return old < rpcid.integer
     }
 }
