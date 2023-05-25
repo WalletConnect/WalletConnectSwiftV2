@@ -58,9 +58,9 @@ class NotifyProposeResponseSubscriber {
     }
 
     private func subscribeForProposalErrors() {
-        let protocolMethod = PushRequestProtocolMethod()
+        let protocolMethod = NotifyProposeProtocolMethod()
         networkingInteractor.responseErrorSubscription(on: protocolMethod)
-            .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<PushRequestParams>) in
+            .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<NotifyProposeParams>) in
                 kms.deletePrivateKey(for: payload.request.publicKey)
                 guard let error = PushError(code: payload.error.code) else { return }
                 proposalResponsePublisherSubject.send(.failure(error))

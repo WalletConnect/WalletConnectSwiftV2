@@ -113,7 +113,7 @@ public class WalletPushClient {
     }
 
     public func reject(id: RPCID) async throws {
-        try await proposeResponder.respondError(requestId: id)
+        try await notifyProposeResponder.reject(requestId: id)
     }
 
     public func update(topic: String, scope: Set<String>) async throws {

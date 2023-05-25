@@ -91,42 +91,6 @@ final class PushTests: XCTestCase {
         makeWalletClients()
     }
 
-    func testRequestPush() async {
-        let expectation = expectation(description: "expects to receive push request")
-
-        let uri = try! await dappPairingClient.create()
-        try! await walletPairingClient.pair(uri: uri)
-        try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
-
-        walletPushClient.requestPublisher.sink { (_, _, _) in
-            expectation.fulfill()
-        }
-        .store(in: &publishers)
-        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
-    }
-
-    func testWalletApprovesPushRequest() async {
-        let expectation = expectation(description: "expects dapp to receive successful response")
-
-        let uri = try! await dappPairingClient.create()
-        try! await walletPairingClient.pair(uri: uri)
-        try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
-
-        walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
-            Task(priority: .high) { try! await walletPushClient.approve(id: id, onSign: sign) }
-        }.store(in: &publishers)
-
-        dappPushClient.responsePublisher.sink { (_, result) in
-            guard case .success = result else {
-                XCTFail()
-                return
-            }
-            expectation.fulfill()
-        }.store(in: &publishers)
-
-        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
-    }
-
     func testPushPropose() async {
         let expectation = expectation(description: "expects dapp to receive error response")
 
@@ -149,18 +113,18 @@ final class PushTests: XCTestCase {
 
     }
 
-    func testWalletRejectsPushRequest() async {
+    func testWalletRejectsPushPropose() async {
         let expectation = expectation(description: "expects dapp to receive error response")
 
         let uri = try! await dappPairingClient.create()
         try! await walletPairingClient.pair(uri: uri)
-        try! await dappPushClient.request(account: Account.stub(), topic: uri.topic)
+        try! await dappPushClient.propose(account: Account.stub(), topic: uri.topic)
 
         walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
             Task(priority: .high) { try! await walletPushClient.reject(id: id) }
         }.store(in: &publishers)
 
-        dappPushClient.responsePublisher.sink { (_, result) in
+        dappPushClient.proposalResponsePublisher.sink { (result) in
             guard case .failure = result else {
                 XCTFail()
                 return
