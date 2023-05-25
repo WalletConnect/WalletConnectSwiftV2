@@ -63,8 +63,7 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
     }
 
     @objc func connectWithExampleWallet() {
-		let encodedUri = uri.absoluteString.addingPercentEncoding(withAllowedCharacters: .rfc3986)!
-        let url = URL(string: "walletapp://wc?uri=\(encodedUri)")!
+        let url = URL(string: "walletapp://wc?uri=\(uri.deeplinkUri)")!
         DispatchQueue.main.async {
             UIApplication.shared.open(url, options: [:]) { [weak self] _ in
                 self?.dismiss(animated: true, completion: nil)
