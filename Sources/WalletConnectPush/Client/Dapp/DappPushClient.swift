@@ -3,7 +3,7 @@ import Combine
 import WalletConnectUtils
 
 public class DappPushClient {
-    var proposalResponsePublisher: AnyPublisher<Result<PushSubscription, PushError>, Never> {
+    public var proposalResponsePublisher: AnyPublisher<Result<PushSubscription, PushError>, Never> {
         return notifyProposeResponseSubscriber.proposalResponsePublisher
     }
 
