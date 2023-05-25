@@ -34,7 +34,7 @@ public struct ModalContainerView: View {
                     viewModel: .init(
                         isShown: $showModal,
                         projectId: projectId,
-                        interactor: .init(projectId: projectId, metadata: metadata, webSocketFactory: webSocketFactory)
+                        interactor: DefaultModalSheetInteractor(projectId: projectId, metadata: metadata, webSocketFactory: webSocketFactory)
                     ))
                     .transition(.move(edge: .bottom))
                     .animation(.spring(), value: showModal)

@@ -120,7 +120,7 @@ public struct ModalSheet: View {
     private func gridItem(for index: Int) -> some View {
         let wallet: Listing? = viewModel.wallets[safe: index]
         
-        if #available(iOS 15.0, *) {
+        if #available(iOS 14.0, *) {
             VStack {
                 AsyncImage(url: viewModel.imageUrl(for: wallet)) { image in
                     image
@@ -151,6 +151,11 @@ public struct ModalSheet: View {
             }
             .redacted(reason: wallet == nil ? .placeholder : [])
             .frame(maxWidth: 80, maxHeight: 96)
+            .onTapGesture {
+                Task {
+                    await viewModel.onWalletTapped(index: index)
+                }
+            }
         }
     }
     
