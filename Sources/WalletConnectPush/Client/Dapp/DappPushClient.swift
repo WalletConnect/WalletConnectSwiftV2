@@ -3,7 +3,7 @@ import Combine
 import WalletConnectUtils
 
 public class DappPushClient {
-    var proposalResponsePublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
+    var proposalResponsePublisher: AnyPublisher<Result<PushSubscription, PushError>, Never> {
         return notifyProposeResponseSubscriber.proposalResponsePublisher
     }
 
@@ -17,7 +17,6 @@ public class DappPushClient {
 
     private let notifyProposer: NotifyProposer
     private let subscriptionsProvider: SubscriptionsProvider
-    private let deletePushSubscriptionService: DeletePushSubscriptionService
     private let deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
     private let resubscribeService: PushResubscribeService
     private let notifyProposeResponseSubscriber: NotifyProposeResponseSubscriber
@@ -25,14 +24,12 @@ public class DappPushClient {
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
          subscriptionsProvider: SubscriptionsProvider,
-         deletePushSubscriptionService: DeletePushSubscriptionService,
          deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber,
          resubscribeService: PushResubscribeService,
          notifyProposer: NotifyProposer,
          notifyProposeResponseSubscriber: NotifyProposeResponseSubscriber) {
         self.logger = logger
         self.subscriptionsProvider = subscriptionsProvider
-        self.deletePushSubscriptionService = deletePushSubscriptionService
         self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
         self.resubscribeService = resubscribeService
         self.notifyProposer = notifyProposer
@@ -47,11 +44,6 @@ public class DappPushClient {
     public func getActiveSubscriptions() -> [PushSubscription] {
         subscriptionsProvider.getActiveSubscriptions()
     }
-
-    public func delete(topic: String) async throws {
-        try await deletePushSubscriptionService.delete(topic: topic)
-    }
-
 }
 
 private extension DappPushClient {

@@ -7,10 +7,10 @@ class NotifyProposeResponseSubscriber {
     private let metadata: AppMetadata
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
-    var proposalResponsePublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
+    var proposalResponsePublisher: AnyPublisher<Result<PushSubscription, PushError>, Never> {
         proposalResponsePublisherSubject.eraseToAnyPublisher()
     }
-    private let proposalResponsePublisherSubject = PassthroughSubject<Result<PushSubscription, Error>, Never>()
+    private let proposalResponsePublisherSubject = PassthroughSubject<Result<PushSubscription, PushError>, Never>()
 
     private var publishers = [AnyCancellable]()
 

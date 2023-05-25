@@ -20,7 +20,6 @@ public struct DappPushClientFactory {
         let kms = KeyManagementService(keychain: keychainStorage)
         let subscriptionStore = CodableStore<PushSubscription>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.pushSubscription)
         let subscriptionProvider = SubscriptionsProvider(store: subscriptionStore)
-        let deletePushSubscriptionService = DeletePushSubscriptionService(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore, pushMessagesDatabase: nil)
         let deletePushSubscriptionSubscriber = DeletePushSubscriptionSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore)
         let resubscribeService = PushResubscribeService(networkInteractor: networkInteractor, subscriptionsStorage: subscriptionStore)
         let notifyProposer = NotifyProposer(networkingInteractor: networkInteractor, kms: kms, appMetadata: metadata, logger: logger)
@@ -29,7 +28,6 @@ public struct DappPushClientFactory {
             logger: logger,
             kms: kms,
             subscriptionsProvider: subscriptionProvider,
-            deletePushSubscriptionService: deletePushSubscriptionService,
             deletePushSubscriptionSubscriber: deletePushSubscriptionSubscriber,
             resubscribeService: resubscribeService,
             notifyProposer: notifyProposer,
