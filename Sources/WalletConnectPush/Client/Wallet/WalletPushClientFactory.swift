@@ -42,8 +42,6 @@ public struct WalletPushClientFactory {
 
         let identityClient = IdentityClientFactory.create(keyserver: keyserverURL, keychain: keychainStorage, logger: logger)
 
-        let proposeResponder = PushRequestResponder(keyserverURL: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, kms: kms, groupKeychainStorage: groupKeychainStorage, rpcHistory: history, subscriptionsStore: subscriptionStore)
-
         let pushMessagesRecordsStore = CodableStore<PushMessageRecord>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.pushMessagesRecords)
         let pushMessagesDatabase = PushMessagesDatabase(store: pushMessagesRecordsStore)
         let pushMessageSubscriber = PushMessageSubscriber(networkingInteractor: networkInteractor, pushMessagesDatabase: pushMessagesDatabase, logger: logger)
@@ -71,7 +69,6 @@ public struct WalletPushClientFactory {
             kms: kms,
             echoClient: echoClient,
             pairingRegisterer: pairingRegisterer,
-            proposeResponder: proposeResponder,
             pushMessageSubscriber: pushMessageSubscriber,
             subscriptionsProvider: subscriptionProvider,
             pushMessagesDatabase: pushMessagesDatabase,

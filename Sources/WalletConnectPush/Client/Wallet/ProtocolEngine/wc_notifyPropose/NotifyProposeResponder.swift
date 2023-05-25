@@ -78,7 +78,7 @@ class NotifyProposeResponder {
         guard let requestRecord = rpcHistory.get(recordId: requestId) else { throw Errors.recordForIdNotFound }
         let pairingTopic = requestRecord.topic
 
-        try await networkingInteractor.respondError(topic: pairingTopic, requestId: requestId, protocolMethod: PushRequestProtocolMethod(), reason: PushError.rejected)
+        try await networkingInteractor.respondError(topic: pairingTopic, requestId: requestId, protocolMethod: NotifyProposeProtocolMethod(), reason: PushError.rejected)
     }
 
     private func generateAgreementKeys(peerPublicKey: AgreementPublicKey) throws -> AgreementKeys {
