@@ -63,7 +63,9 @@ class NotifyProposeResponder {
 
         try kms.setSymmetricKey(keys.sharedKey, for: responseTopic)
 
-        let response = RPCResponse(id: requestId, result: subscriptionAuthWrapper)
+        let responseParams = NotifyProposeResponseParams(subscriptionAuth: subscriptionAuthWrapper, subscriptionSymKey: keys.sharedKey.hexRepresentation)
+
+        let response = RPCResponse(id: requestId, result: responseParams)
 
         let protocolMethod = NotifyProposeProtocolMethod()
 
@@ -87,3 +89,4 @@ class NotifyProposeResponder {
         return keys
     }
 }
+

@@ -30,7 +30,7 @@ class NotifyProposeResponseSubscriber {
     private func subscribeForProposalResponse() {
         let protocolMethod = NotifyProposeProtocolMethod()
         networkingInteractor.responseSubscription(on: protocolMethod)
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<NotifyProposeParams, SubscriptionJWTPayload.Wrapper>) in
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<NotifyProposeParams, NotifyProposeResponseParams>) in
                 logger.debug("Received Notify Proposal response")
                 Task(priority: .userInitiated) {
                     do {
@@ -44,8 +44,8 @@ class NotifyProposeResponseSubscriber {
     }
 
     /// Implemented only for integration testing purpose, dapp client is not supported
-    func handleResponse(payload: ResponseSubscriptionPayload<NotifyProposeParams, SubscriptionJWTPayload.Wrapper>) async throws -> PushSubscription {
-        let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.response)
+    func handleResponse(payload: ResponseSubscriptionPayload<NotifyProposeParams, NotifyProposeResponseParams>) async throws -> PushSubscription {
+        let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.response.subscriptionAuth)
         logger.debug("subscriptionAuth JWT validated")
 
         let expiry = Date(timeIntervalSince1970: TimeInterval(claims.exp))
