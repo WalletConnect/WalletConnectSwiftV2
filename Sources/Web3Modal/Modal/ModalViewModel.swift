@@ -22,23 +22,31 @@ extension ModalSheet {
     }
     
     final class ModalViewModel: ObservableObject {
-        private var disposeBag = Set<AnyCancellable>()
-        private let interactor: Interactor
+        @Published private(set) var isShown: Binding<Bool>
         private let projectId: String
+        private let interactor: ModalSheetInteractor
+        private let uiApplicationWrapper: UIApplicationWrapper
+                
+        private var disposeBag = Set<AnyCancellable>()
+        private var deeplinkUri: String?
         
-        @Published var isShown: Binding<Bool>
+        @Published private(set) var uri: String?
+        @Published private(set) var destination: Destination = .wallets
+        @Published private(set) var errorMessage: String?
+        @Published private(set) var wallets: [Listing] = []
         
-        @Published var uri: String?
-        @Published var destination: Destination = .wallets
-        @Published var errorMessage: String?
-        @Published var wallets: [Listing] = []
-        
-        init(isShown: Binding<Bool>, projectId: String, interactor: Interactor) {
+        init(
+            isShown: Binding<Bool>,
+            projectId: String,
+            interactor: ModalSheetInteractor,
+            uiApplicationWrapper: UIApplicationWrapper = .live
+        ) {
             self.isShown = isShown
             self.interactor = interactor
             self.projectId = projectId
+            self.uiApplicationWrapper = uiApplicationWrapper
             
-            interactor.sessionsPublisher
+            interactor.sessionSettlePublisher
                 .receive(on: DispatchQueue.main)
                 .sink { sessions in
                     print(sessions)
@@ -66,7 +74,9 @@ extension ModalSheet {
         @MainActor
         func createURI() async {
             do {
-                uri = try await interactor.connect().absoluteString
+                let wcUri = try await interactor.connect()
+                uri = wcUri.absoluteString
+                deeplinkUri = wcUri.deeplinkUri
             } catch {
                 print(error)
                 errorMessage = error.localizedDescription
@@ -85,6 +95,15 @@ extension ModalSheet {
             UIPasteboard.general.string = uri
         }
         
+        func onWalletTapped(index: Int) {
+            guard let wallet = wallets[safe: index] else { return }
+            
+            navigateToDeepLink(
+                universalLink: wallet.mobile.universal ?? "",
+                nativeLink: wallet.mobile.native ?? ""
+            )
+        }
+        
         func imageUrl(for listing: Listing?) -> URL? {
             guard let listing = listing else { return nil }
             
@@ -92,5 +111,75 @@ extension ModalSheet {
             
             return URL(string: urlString)
         }
+    }
+}
+
+private extension ModalSheet.ModalViewModel {
+    enum Errors: Error {
+        case noWalletLinkFound
+    }
+
+    func navigateToDeepLink(universalLink: String, nativeLink: String) {
+        do {
+            let nativeUrlString = formatNativeUrlString(nativeLink)
+            let universalUrlString = formatUniversalUrlString(universalLink)
+            
+            if let nativeUrl = nativeUrlString?.toURL() {
+                uiApplicationWrapper.openURL(nativeUrl)
+            } else if let universalUrl = universalUrlString?.toURL() {
+                uiApplicationWrapper.openURL(universalUrl)
+            } else {
+                throw Errors.noWalletLinkFound
+            }
+        } catch {
+            let alertController = UIAlertController(title: "Unable to open the app", message: nil, preferredStyle: .alert)
+            alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            UIApplication.shared.windows.first?.rootViewController?.present(alertController, animated: true, completion: nil)
+        }
+    }
+        
+    func isHttpUrl(url: String) -> Bool {
+        return url.hasPrefix("http://") || url.hasPrefix("https://")
+    }
+        
+    func formatNativeUrlString(_ string: String) -> String? {
+        if string.isEmpty { return nil }
+            
+        if isHttpUrl(url: string) {
+            return formatUniversalUrlString(string)
+        }
+            
+        var safeAppUrl = string
+        if !safeAppUrl.contains("://") {
+            safeAppUrl = safeAppUrl.replacingOccurrences(of: "/", with: "").replacingOccurrences(of: ":", with: "")
+            safeAppUrl = "\(safeAppUrl)://"
+        }
+        
+        guard let deeplinkUri else { return nil }
+            
+        return "\(safeAppUrl)wc?uri=\(deeplinkUri)"
+    }
+        
+    func formatUniversalUrlString(_ string: String) -> String? {
+        if string.isEmpty { return nil }
+            
+        if !isHttpUrl(url: string) {
+            return formatNativeUrlString(string)
+        }
+            
+        var plainAppUrl = string
+        if plainAppUrl.hasSuffix("/") {
+            plainAppUrl = String(plainAppUrl.dropLast())
+        }
+        
+        guard let deeplinkUri else { return nil }
+            
+        return "\(plainAppUrl)/wc?uri=\(deeplinkUri)"
+    }
+}
+
+private extension String {
+    func toURL() -> URL? {
+        URL(string: self)
     }
 }
