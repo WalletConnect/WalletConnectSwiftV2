@@ -30,7 +30,8 @@ public class Push {
 
     /// Wallet's configuration method
     static public func configure(echoHost: String = "echo.walletconnect.com", environment: APNSEnvironment) {
-        let clientId = try! Networking.interactor.getClientId()
+        do catch
+        let clientId = try Networking.interactor.getClientId()
         Push.config = Push.Config(clientId: clientId, echoHost: echoHost, environment: environment)
     }
 
