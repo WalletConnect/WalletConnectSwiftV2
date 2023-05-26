@@ -66,15 +66,18 @@ public final class SyncStore<Object: SyncObject> {
 
     public func set(object: Object, for account: Account) async throws {
         let record = try indexStore.getRecord(account: account, name: name)
-        try await syncClient.set(account: account, store: record.store, object: object)
 
-        objectStore.set(object: object, topic: record.topic)
+        if objectStore.set(object: object, topic: record.topic) {
+            try await syncClient.set(account: account, store: record.store, object: object)
+        }
     }
 
     public func delete(id: String, for account: Account) async throws {
         let record = try indexStore.getRecord(account: account, name: name)
-        try await syncClient.delete(account: account, store: record.store, key: id)
-        objectStore.delete(id: id, topic: record.topic)
+
+        if objectStore.delete(id: id, topic: record.topic) {
+            try await syncClient.delete(account: account, store: record.store, key: id)
+        }
     }
 }
 
