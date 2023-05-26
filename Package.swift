@@ -123,7 +123,7 @@ let package = Package(
             dependencies: []),
         .target(
             name: "WalletConnectVerify",
-            dependencies: ["WalletConnectUtils"]),
+            dependencies: ["WalletConnectUtils", "WalletConnectNetworking"]),
         .target(
             name: "Web3Modal",
             dependencies: ["QRCode", "WalletConnectSign"]),
