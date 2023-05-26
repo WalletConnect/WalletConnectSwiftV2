@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import XCTest
+import Web3
 @testable import WalletConnectSync
 @testable import WalletConnectSigner
 
@@ -29,8 +30,16 @@ final class SyncTests: XCTestCase {
     var signer: MessageSigner!
 
     let storeName = "SyncTests_store"
-    let account = Account("eip155:1:0x1FF34C90a0850Fe7227fcFA642688b9712477482")!
-    let privateKey = Data(hex: "99c6f0a7ac44d40d3d7f31083e9f5b045d4bf932fdf9f4a3c241cdd3cbc98045")
+
+    var account: Account {
+        return Account("eip155:1:" + pk.address.hex(eip55: true))!
+    }
+
+    let pk = try! EthereumPrivateKey()
+
+    var privateKey: Data {
+        return Data(pk.rawPrivateKey)
+    }
 
     override func setUp() async throws {
         indexStore1 = makeIndexStore()
@@ -75,7 +84,7 @@ final class SyncTests: XCTestCase {
         let setExpectation = expectation(description: "syncSetTest")
         let delExpectation = expectation(description: "syncDelTest")
 
-        let object = TestObject(id: "id", value: "value")
+        let object = TestObject(id: "id-1", value: "value-1")
 
         syncStore1.syncUpdatePublisher.sink { (_, _, update) in
             switch update {
