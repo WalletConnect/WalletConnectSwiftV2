@@ -40,14 +40,7 @@ final class RegistryServiceTests: XCTestCase {
         )
         identityClient = IdentityClient(identityService: identitySevice, identityStorage: identityStorage, logger: ConsoleLoggerMock())
 
-        let storage = RuntimeKeyValueStorage()
-        let chatStorage = ChatStorage(
-            messageStore: .init(storage: storage, identifier: ""),
-            receivedInviteStore: .init(storage: storage, identifier: ""),
-            sentInviteStore: .init(storage: storage, identifier: ""),
-            threadStore: .init(storage: storage, identifier: "")
-        )
-        resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, kms: kms, chatStorage: chatStorage, logger: ConsoleLoggerMock())
+        resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, kms: kms, logger: ConsoleLoggerMock())
     }
 
     func testRegister() async throws {

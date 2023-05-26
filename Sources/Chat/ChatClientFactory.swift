@@ -38,7 +38,7 @@ public struct ChatClientFactory {
         let receivedInviteStatusStore: SyncStore<ReceivedInviteStatus> = SyncStoreFactory.create(name: ChatStorageIdentifiers.receivedInviteStatus.rawValue, syncClient: syncClient, storage: storage)
         let receivedInviteStatusDelegate = ReceiviedInviteStatusDelegate()
         let chatStorage = ChatStorage(kms: kms, messageStore: messageStore, receivedInviteStore: receivedInviteStore, sentInviteStore: sentInviteStore, threadStore: threadStore, inviteKeyStore: inviteKeyStore, receivedInviteStatusStore: receivedInviteStatusStore, sentInviteStoreDelegate: sentInviteDelegate, threadStoreDelegate: threadDelegate, inviteKeyDelegate: inviteKeyDelegate, receiviedInviteStatusDelegate: receivedInviteStatusDelegate)
-        let resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, kms: kms, chatStorage: chatStorage, logger: logger)
+        let resubscriptionService = ResubscriptionService(networkingInteractor: networkingInteractor, kms: kms, logger: logger)
         let invitationHandlingService = InvitationHandlingService(keyserverURL: keyserverURL, networkingInteractor: networkingInteractor, identityClient: identityClient, kms: kms, logger: logger, chatStorage: chatStorage)
         let inviteService = InviteService(keyserverURL: keyserverURL, networkingInteractor: networkingInteractor, identityClient: identityClient, kms: kms, chatStorage: chatStorage, logger: logger)
         let leaveService = LeaveService()

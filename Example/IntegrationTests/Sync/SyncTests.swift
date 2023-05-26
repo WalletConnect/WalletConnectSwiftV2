@@ -54,7 +54,9 @@ final class SyncTests: XCTestCase {
             logger: logger,
             keychainStorage: keychain,
             keyValueStorage: RuntimeKeyValueStorage())
-        let syncService = SyncService(networkInteractor: networkingInteractor, derivationService: derivationService, signatureStore: syncSignatureStore, indexStore: indexStore, logger: logger)
+        let historyStore = CodableStore<Int64>(defaults: RuntimeKeyValueStorage(), identifier: "historyStore")
+        let syncHistoryStore = SyncHistoryStore(store: historyStore)
+        let syncService = SyncService(networkInteractor: networkingInteractor, derivationService: derivationService, signatureStore: syncSignatureStore, indexStore: indexStore, historyStore: syncHistoryStore, logger: logger)
         return SyncClient(syncService: syncService, syncSignatureStore: syncSignatureStore)
     }
 
