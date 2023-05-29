@@ -44,7 +44,8 @@ class NotifyProposeResponseSubscriber {
     }
 
     func handleResponse(payload: ResponseSubscriptionPayload<NotifyProposeParams, NotifyProposeResponseParams>) async throws -> PushSubscription {
-        let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.response.subscriptionAuth)
+        let jwtWrapper = SubscriptionJWTPayload.Wrapper(jwtString: payload.response.subscriptionAuth)
+        let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: jwtWrapper)
         logger.debug("subscriptionAuth JWT validated")
         let expiry = Date(timeIntervalSince1970: TimeInterval(claims.exp))
         let subscriptionKey = try SymmetricKey(hex: payload.response.subscriptionSymKey)

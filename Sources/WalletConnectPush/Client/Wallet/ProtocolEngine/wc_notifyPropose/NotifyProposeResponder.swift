@@ -68,7 +68,7 @@ class NotifyProposeResponder {
 
         guard let subscriptionKey = kms.getSymmetricKeyRepresentable(for: pushSubscription.topic)?.toHexString() else { throw Errors.subscriptionNotFound }
 
-        let responseParams = NotifyProposeResponseParams(subscriptionAuth: subscriptionAuthWrapper, subscriptionSymKey: subscriptionKey)
+        let responseParams = NotifyProposeResponseParams(subscriptionAuth: subscriptionAuthWrapper.subscriptionAuth, subscriptionSymKey: subscriptionKey)
 
         let response = RPCResponse(id: requestId, result: responseParams)
 

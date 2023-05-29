@@ -2,6 +2,7 @@
 import Foundation
 
 struct NotifyProposeResponseParams: Codable {
-    let subscriptionAuth: SubscriptionJWTPayload.Wrapper
+    let subscriptionAuth: String
     let subscriptionSymKey: String
 }
+
