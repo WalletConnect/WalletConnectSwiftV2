@@ -62,6 +62,7 @@ class NotifyProposeResponseSubscriber {
         networkingInteractor.responseErrorSubscription(on: protocolMethod)
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<NotifyProposeParams>) in
                 kms.deletePrivateKey(for: payload.request.publicKey)
+                networkingInteractor.unsubscribe(topic: payload.topic)
                 guard let error = PushError(code: payload.error.code) else { return }
                 proposalResponsePublisherSubject.send(.failure(error))
             }.store(in: &publishers)
