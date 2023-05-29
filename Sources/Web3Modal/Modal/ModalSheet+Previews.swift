@@ -23,6 +23,7 @@ class WebSocketFactoryMock: WebSocketFactory {
     }
 }
 
+@available(iOS 14.0, *)
 struct ModalSheet_Previews: PreviewProvider {
     static let projectId = "9bfe94c9cbf74aaa0597094ef561f703"
     static let metadata = AppMetadata(

@@ -1,7 +1,6 @@
 import SwiftUI
 
 public struct ModalSheet: View {
-    
     @ObservedObject var viewModel: ModalViewModel
     
     public var body: some View {
@@ -17,10 +16,11 @@ public struct ModalSheet: View {
             .cornerRadius(30, corners: [.topLeft, .topRight])
         }
         .padding(.bottom, 40)
+        .edgesIgnoringSafeArea(.bottom)
         .onAppear {
             Task {
-                await viewModel.createURI()
                 await viewModel.fetchWallets()
+                await viewModel.createURI()
             }
         }
         .background(
@@ -55,16 +55,16 @@ public struct ModalSheet: View {
     
     private func contentHeader() -> some View {
         HStack(spacing: 0) {
-            if viewModel.destination != .wallets {
+            if viewModel.destination != .welcome {
                 backButton()
             }
             
             Spacer()
             
             switch viewModel.destination {
-            case .wallets:
+            case .welcome:
                 qrButton()
-            case .qr:
+            case .qr, .walletDetail:
                 copyButton()
             default:
                 EmptyView()
@@ -84,139 +84,48 @@ public struct ModalSheet: View {
     }
     
     @ViewBuilder
+    private func welcome() -> some View {
+        if #available(iOS 14.0, *) {
+            WalletList(
+                wallets: $viewModel.wallets,
+                destination: .init(get: {
+                    viewModel.destination
+                }, set: { _ in }),
+                navigateTo: viewModel.navigateTo(_:)
+            )
+        } else {
+            EmptyView()
+        }
+    }
+    
+    private func qrCode() -> some View {
+        VStack {
+            if let uri = viewModel.uri {
+                QRCodeView(uri: uri)
+            } else {
+                ActivityIndicator(isAnimating: .constant(true), style: .large)
+            }
+        }
+    }
+    
+    @ViewBuilder
     private func content() -> some View {
         switch viewModel.destination {
-        case .wallets:
-            ZStack {
-                VStack {
-                    HStack {
-                        ForEach(0..<4) { wallet in
-                            gridItem(for: wallet)
-                        }
-                    }
-                    HStack {
-                        ForEach(4..<7) { wallet in
-                            gridItem(for: wallet)
-                        }
-                        
-                        viewAllItem()
-                    }
-                }
-
-                Spacer().frame(height: 200)
-            }
+        case .welcome,
+             .walletDetail,
+             .viewAll:
+           welcome()
         case .help:
-            WhatIsWalletView()
+            WhatIsWalletView(navigateTo: viewModel.navigateTo(_:))
         case .qr:
-            VStack {
-                if let uri = viewModel.uri {
-                    QRCodeView(uri: uri)
-                } else {
-                    ActivityIndicator(isAnimating: .constant(true), style: .large)
-                }
-            }
+            qrCode()
+        case .getWallet:
+            GetAWalletView(wallets: Array(viewModel.wallets.prefix(6)))
         }
     }
-    
-    @ViewBuilder
-    func viewAllItem() -> some View {
-        VStack {
-            VStack(spacing: 3) {
-                HStack(spacing: 3) {
-                    ForEach(7..<9) { index in
-                        imageForWallet(at: index)
-                            .cornerRadius(8)
-                            .aspectRatio(1, contentMode: .fit)
-                    }
-                }
-                .padding(.horizontal, 5)
-                
-                HStack(spacing: 3) {
-                    ForEach(9..<11) { index in
-                        imageForWallet(at: index)
-                            .cornerRadius(8)
-                            .aspectRatio(1, contentMode: .fit)
-                    }
-                }
-                .padding(.horizontal, 5)
-            }
-            .padding(.vertical, 3)
-            .frame(width: 60, height: 60)
-            .background(Color.background2)
-            .cornerRadius(8)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(.gray.opacity(0.4), lineWidth: 1)
-            )
-            
-            
-            Text("View All")
-                .font(.system(size: 12))
-                .foregroundColor(.foreground1)
-                .padding(.horizontal, 12)
-                .fixedSize(horizontal: true, vertical: true)
-            
-            Spacer()
-        }
-        .frame(maxWidth: 80, maxHeight: 96)
-    }
-    
-    @ViewBuilder
-    func imageForWallet(at index: Int) -> some View {
-        
-        let wallet: Listing? = viewModel.wallets.indices.contains(index) ? viewModel.wallets[index] : nil
-        let walletUrl: URL? = wallet != nil ? viewModel.imageUrl(for: wallet!) : nil
-        
-        AsyncImage(url: walletUrl) { image in
-            image
-                .resizable()
-                .scaledToFit()
-        } placeholder: {
-            Color.foreground3
-        }
-    }
-    
-    
-    @ViewBuilder
-    func gridItem(for index: Int) -> some View {
-        let wallet: Listing? = viewModel.wallets.indices.contains(index) ? viewModel.wallets[index] : nil
-        let walletUrl: URL? = wallet != nil ? viewModel.imageUrl(for: wallet!) : nil
-        
-        if #available(iOS 14.0, *) {
-            VStack {
-                AsyncImage(url: walletUrl) { image in
-                    image
-                        .resizable()
-                        .scaledToFit()
-                } placeholder: {
-                    Color
-                        .foreground3
-                        
-                }
-                .frame(width: 60, height: 60)
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(.gray.opacity(0.4), lineWidth: 1)
-                )
+}
 
-                Text(wallet?.name ?? "WalletName")
-                    .font(.system(size: 12))
-                    .foregroundColor(.foreground1)
-                    .padding(.horizontal, 12)
-                    .fixedSize(horizontal: true, vertical: true)
-
-                Text("RECENT")
-                    .opacity(Double(Int.random(in: 0...1)))
-                    .font(.system(size: 10))
-                    .foregroundColor(.foreground3)
-                    .padding(.horizontal, 12)
-            }
-            .redacted(reason: wallet == nil ? .placeholder : [])
-            .frame(maxWidth: 80, maxHeight: 96)
-        }
-    }
-    
+extension ModalSheet {
     private func helpButton() -> some View {
         Button(action: {
             withAnimation {

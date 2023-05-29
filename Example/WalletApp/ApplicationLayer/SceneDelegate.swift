@@ -1,11 +1,9 @@
-import UIKit
 import Auth
+import UIKit
 import WalletConnectPairing
-
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
-
 
     private let app = Application()
 
@@ -17,19 +15,19 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             AppearanceConfigurator()
         ]
     }
-    
+
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-          let sceneConfig: UISceneConfiguration = UISceneConfiguration(name: nil, sessionRole: connectingSceneSession.role)
-          sceneConfig.delegateClass = SceneDelegate.self
-          return sceneConfig
-      }
+        let sceneConfig = UISceneConfiguration(name: nil, sessionRole: connectingSceneSession.role)
+        sceneConfig.delegateClass = SceneDelegate.self
+        return sceneConfig
+    }
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
         window = UIWindow(windowScene: windowScene)
         window?.makeKeyAndVisible()
-        
+
         app.uri = connectionOptions.urlContexts.first?.url.absoluteString.replacingOccurrences(of: "walletapp://wc?uri=", with: "")
 
         configurators.configure()
@@ -39,10 +37,24 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard let context = URLContexts.first else { return }
 
-        let uri = context.url.absoluteString.replacingOccurrences(of: "walletapp://wc?uri=", with: "")
-        Task {
-            try await Pair.instance.pair(uri: WalletConnectURI(string: uri)!)
-        }
+        let queryParams = context.url.queryParameters
 
+        if let uri = queryParams["uri"] as? String {
+            Task {
+                try await Pair.instance.pair(uri: WalletConnectURI(string: uri)!)
+            }
+        }
+    }
+}
+
+extension URL {
+    var queryParameters: [AnyHashable: Any] {
+        let urlComponents = URLComponents(url: self, resolvingAgainstBaseURL: false)
+        guard let queryItems = urlComponents?.queryItems else { return [:] }
+        var queryParams: [AnyHashable: Any] = [:]
+        queryItems.forEach {
+            queryParams[$0.name] = $0.value
+        }
+        return queryParams
     }
 }
