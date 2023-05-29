@@ -32,7 +32,7 @@ final class RelayClientEndToEndTests: XCTestCase {
 
     func makeRelayClient(prefix: String) -> RelayClient {
         let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock())
-        let socketAuthenticator = SocketAuthenticator(
+        let socketAuthenticator = ClientIdAuthenticator(
             clientIdStorage: clientIdStorage,
             relayHost: InputConfig.relayHost
         )
