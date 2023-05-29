@@ -6,6 +6,7 @@ class NotifyProposeResponder {
     enum Errors: Error {
         case recordForIdNotFound
         case malformedRequestParams
+        case subscriptionNotFound
     }
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
@@ -40,12 +41,14 @@ class NotifyProposeResponder {
 
         let subscriptionAuthWrapper = try await pushSubscribeRequester.subscribe(metadata: proposal.metadata, account: proposal.account, onSign: onSign)
 
+        var pushSubscription: PushSubscription!
         try await withCheckedThrowingContinuation { continuation in
             subscriptionResponsePublisher
                 .first()
                 .sink(receiveValue: { value in
                 switch value {
-                case .success:
+                case .success(let subscription):
+                    pushSubscription = subscription
                     continuation.resume()
                 case .failure(let error):
                     continuation.resume(throwing: error)
@@ -63,7 +66,9 @@ class NotifyProposeResponder {
 
         try kms.setSymmetricKey(keys.sharedKey, for: responseTopic)
 
-        let responseParams = NotifyProposeResponseParams(subscriptionAuth: subscriptionAuthWrapper, subscriptionSymKey: keys.sharedKey.hexRepresentation)
+        guard let subscriptionKey = kms.getSymmetricKeyRepresentable(for: pushSubscription.topic)?.toHexString() else { throw Errors.subscriptionNotFound }
+
+        let responseParams = NotifyProposeResponseParams(subscriptionAuth: subscriptionAuthWrapper, subscriptionSymKey: subscriptionKey)
 
         let response = RPCResponse(id: requestId, result: responseParams)
 

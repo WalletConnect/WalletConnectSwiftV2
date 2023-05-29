@@ -47,7 +47,6 @@ public struct WalletPushClientFactory {
         let pushMessageSubscriber = PushMessageSubscriber(networkingInteractor: networkInteractor, pushMessagesDatabase: pushMessagesDatabase, logger: logger)
         let subscriptionProvider = SubscriptionsProvider(store: subscriptionStore)
         let deletePushSubscriptionService = DeletePushSubscriptionService(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore, pushMessagesDatabase: pushMessagesDatabase)
-        let deletePushSubscriptionSubscriber = DeletePushSubscriptionSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore)
         let resubscribeService = PushResubscribeService(networkInteractor: networkInteractor, subscriptionsStorage: subscriptionStore)
         let pushSubscriptionsObserver = PushSubscriptionsObserver(store: subscriptionStore)
 
@@ -73,7 +72,6 @@ public struct WalletPushClientFactory {
             subscriptionsProvider: subscriptionProvider,
             pushMessagesDatabase: pushMessagesDatabase,
             deletePushSubscriptionService: deletePushSubscriptionService,
-            deletePushSubscriptionSubscriber: deletePushSubscriptionSubscriber,
             resubscribeService: resubscribeService,
             pushSubscriptionsObserver: pushSubscriptionsObserver,
             pushSubscribeRequester: pushSubscribeRequester,

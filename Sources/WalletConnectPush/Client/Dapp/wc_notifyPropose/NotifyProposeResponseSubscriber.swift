@@ -43,18 +43,17 @@ class NotifyProposeResponseSubscriber {
             }.store(in: &publishers)
     }
 
-    /// Implemented only for integration testing purpose, dapp client is not supported
     func handleResponse(payload: ResponseSubscriptionPayload<NotifyProposeParams, NotifyProposeResponseParams>) async throws -> PushSubscription {
         let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.response.subscriptionAuth)
         logger.debug("subscriptionAuth JWT validated")
-
         let expiry = Date(timeIntervalSince1970: TimeInterval(claims.exp))
-
-        let updateTopic = "update_topic"
-
+        let subscriptionKey = try SymmetricKey(hex: payload.response.subscriptionSymKey)
+        let subscriptionTopic = subscriptionKey.rawRepresentation.sha256().toHexString()
         let relay = RelayProtocolOptions(protocol: "irn", data: nil)
-
-        return PushSubscription(topic: updateTopic, account: payload.request.account, relay: relay, metadata: metadata, scope: [:], expiry: expiry)
+        let subscription = PushSubscription(topic: subscriptionTopic, account: payload.request.account, relay: relay, metadata: metadata, scope: [:], expiry: expiry)
+        try kms.setSymmetricKey(subscriptionKey, for: subscriptionTopic)
+        try await networkingInteractor.subscribe(topic: subscriptionTopic)
+        return subscription
     }
 
     private func subscribeForProposalErrors() {

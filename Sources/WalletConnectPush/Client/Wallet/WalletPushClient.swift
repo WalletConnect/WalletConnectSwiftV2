@@ -34,18 +34,11 @@ public class WalletPushClient {
         pushMessagePublisherSubject.eraseToAnyPublisher()
     }
 
-    private let deleteSubscriptionPublisherSubject = PassthroughSubject<String, Never>()
-
-    public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
-        deleteSubscriptionPublisherSubject.eraseToAnyPublisher()
-    }
-
     public var updateSubscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
         return notifyUpdateResponseSubscriber.updateSubscriptionPublisher
     }
 
     private let deletePushSubscriptionService: DeletePushSubscriptionService
-    private let deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
     private let pushSubscribeRequester: PushSubscribeRequester
 
     public let logger: ConsoleLogging
@@ -69,7 +62,6 @@ public class WalletPushClient {
          subscriptionsProvider: SubscriptionsProvider,
          pushMessagesDatabase: PushMessagesDatabase,
          deletePushSubscriptionService: DeletePushSubscriptionService,
-         deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber,
          resubscribeService: PushResubscribeService,
          pushSubscriptionsObserver: PushSubscriptionsObserver,
          pushSubscribeRequester: PushSubscribeRequester,
@@ -85,7 +77,6 @@ public class WalletPushClient {
         self.subscriptionsProvider = subscriptionsProvider
         self.pushMessagesDatabase = pushMessagesDatabase
         self.deletePushSubscriptionService = deletePushSubscriptionService
-        self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
         self.resubscribeService = resubscribeService
         self.pushSubscriptionsObserver = pushSubscriptionsObserver
         self.pushSubscribeRequester = pushSubscribeRequester
@@ -143,10 +134,6 @@ private extension WalletPushClient {
 
         pushMessageSubscriber.onPushMessage = { [unowned self] pushMessageRecord in
             pushMessagePublisherSubject.send(pushMessageRecord)
-        }
-
-        deletePushSubscriptionSubscriber.onDelete = {[unowned self] topic in
-            deleteSubscriptionPublisherSubject.send(topic)
         }
     }
 }
