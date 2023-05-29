@@ -34,7 +34,7 @@ final class RelayClientEndToEndTests: XCTestCase {
         let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock())
         let socketAuthenticator = ClientIdAuthenticator(
             clientIdStorage: clientIdStorage,
-            relayHost: InputConfig.relayHost
+            url: InputConfig.relayUrl
         )
         let urlFactory = RelayUrlFactory(
             relayHost: InputConfig.relayHost,
