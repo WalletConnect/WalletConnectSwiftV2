@@ -40,11 +40,15 @@ enum HistoryAPI: HTTPService {
         }
     }
 
-    var queryParameters: [String : String]? {
+    var queryParameters: [String: String]? {
         switch self {
         case .messages(let payload):
-            let data = try! JSONEncoder().encode(payload)
-            return try? JSONDecoder().decode([String : String].self, from: data)
+            return [
+                "topic": payload.topic,
+                "originId": payload.originId.map { String($0) },
+                "messageCount": payload.messageCount.map { String($0) },
+                "direction": payload.direction.rawValue
+            ].compactMapValues { $0 }
         case .register:
             return nil
         }
