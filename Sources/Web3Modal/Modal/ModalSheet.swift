@@ -2,7 +2,7 @@ import SwiftUI
 
 public struct ModalSheet: View {
 
-    var foo: Bool = false
+    var foo: Bool = true
     
     @ObservedObject var viewModel: ModalViewModel
     
