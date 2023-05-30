@@ -11,7 +11,7 @@ public class WalletPushClient {
 
     /// publishes new subscriptions
     public var subscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
-        return subscriptionPublisherSubject.eraseToAnyPublisher()
+        return pushSubscribeResponseSubscriber.subscriptionPublisher
     }
 
     public var subscriptionPublisherSubject = PassthroughSubject<Result<PushSubscription, Error>, Never>()
@@ -34,25 +34,17 @@ public class WalletPushClient {
         pushMessagePublisherSubject.eraseToAnyPublisher()
     }
 
-    private let deleteSubscriptionPublisherSubject = PassthroughSubject<String, Never>()
-
-    public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
-        deleteSubscriptionPublisherSubject.eraseToAnyPublisher()
-    }
-
     public var updateSubscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
         return notifyUpdateResponseSubscriber.updateSubscriptionPublisher
     }
 
     private let deletePushSubscriptionService: DeletePushSubscriptionService
-    private let deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
     private let pushSubscribeRequester: PushSubscribeRequester
 
     public let logger: ConsoleLogging
 
     private let pairingRegisterer: PairingRegisterer
     private let echoClient: EchoClient
-    private let proposeResponder: PushRequestResponder
     private let pushMessageSubscriber: PushMessageSubscriber
     private let subscriptionsProvider: SubscriptionsProvider
     private let pushMessagesDatabase: PushMessagesDatabase
@@ -60,39 +52,38 @@ public class WalletPushClient {
     private let pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber
     private let notifyUpdateRequester: NotifyUpdateRequester
     private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
+    private let notifyProposeResponder: NotifyProposeResponder
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
          echoClient: EchoClient,
          pairingRegisterer: PairingRegisterer,
-         proposeResponder: PushRequestResponder,
          pushMessageSubscriber: PushMessageSubscriber,
          subscriptionsProvider: SubscriptionsProvider,
          pushMessagesDatabase: PushMessagesDatabase,
          deletePushSubscriptionService: DeletePushSubscriptionService,
-         deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber,
          resubscribeService: PushResubscribeService,
          pushSubscriptionsObserver: PushSubscriptionsObserver,
          pushSubscribeRequester: PushSubscribeRequester,
          pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber,
          notifyUpdateRequester: NotifyUpdateRequester,
-         notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
+         notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber,
+         notifyProposeResponder: NotifyProposeResponder
     ) {
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
-        self.proposeResponder = proposeResponder
         self.echoClient = echoClient
         self.pushMessageSubscriber = pushMessageSubscriber
         self.subscriptionsProvider = subscriptionsProvider
         self.pushMessagesDatabase = pushMessagesDatabase
         self.deletePushSubscriptionService = deletePushSubscriptionService
-        self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
         self.resubscribeService = resubscribeService
         self.pushSubscriptionsObserver = pushSubscriptionsObserver
         self.pushSubscribeRequester = pushSubscribeRequester
         self.pushSubscribeResponseSubscriber = pushSubscribeResponseSubscriber
         self.notifyUpdateRequester = notifyUpdateRequester
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
+        self.notifyProposeResponder = notifyProposeResponder
         setupSubscriptions()
     }
 
@@ -101,11 +92,11 @@ public class WalletPushClient {
     }
 
     public func approve(id: RPCID, onSign: @escaping SigningCallback) async throws {
-        try await proposeResponder.respond(requestId: id, onSign: onSign)
+        try await notifyProposeResponder.approve(requestId: id, onSign: onSign)
     }
 
     public func reject(id: RPCID) async throws {
-        try await proposeResponder.respondError(requestId: id)
+        try await notifyProposeResponder.reject(requestId: id)
     }
 
     public func update(topic: String, scope: Set<String>) async throws {
@@ -136,28 +127,14 @@ public class WalletPushClient {
 private extension WalletPushClient {
 
     func setupSubscriptions() {
-        let protocolMethod = PushRequestProtocolMethod()
-
-        pairingRegisterer.register(method: protocolMethod)
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<PushRequestParams>) in
+        pairingRegisterer.register(method: NotifyProposeProtocolMethod())
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<NotifyProposeParams>) in
                 requestPublisherSubject.send((id: payload.id, account: payload.request.account, metadata: payload.request.metadata))
         }.store(in: &publishers)
 
         pushMessageSubscriber.onPushMessage = { [unowned self] pushMessageRecord in
             pushMessagePublisherSubject.send(pushMessageRecord)
         }
-
-        deletePushSubscriptionSubscriber.onDelete = {[unowned self] topic in
-            deleteSubscriptionPublisherSubject.send(topic)
-        }
-
-        pushSubscribeResponseSubscriber.subscriptionPublisher.sink { [unowned self] result in
-            subscriptionPublisherSubject.send(result)
-        }.store(in: &publishers)
-
-        proposeResponder.subscriptionPublisher.sink { [unowned self] result in
-            subscriptionPublisherSubject.send(result)
-        }.store(in: &publishers)
     }
 }
 

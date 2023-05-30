@@ -46,13 +46,6 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
             action: #selector(disconnect)
         )
 
-        navigationItem.leftBarButtonItem = UIBarButtonItem(
-            title: "Push Test",
-            style: .plain,
-            target: self,
-            action: #selector(pushTest)
-        )
-
         accountsView.tableView.dataSource = self
         accountsView.tableView.delegate = self
         session.namespaces.values.forEach { namespace in
@@ -65,22 +58,15 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
     func proposePushSubscription() {
         let account = session.namespaces.values.first!.accounts.first!
 
-        Task(priority: .high){ try! await Push.dapp.request(account: account, topic: session.pairingTopic)}
-        Push.dapp.responsePublisher.sink { (id: RPCID, result: Result<PushSubscriptionResult, PushError>) in
+        Task(priority: .high){ try! await Push.dapp.propose(account: account, topic: session.pairingTopic)}
+        Push.dapp.proposalResponsePublisher.sink { result in
             switch result {
-            case .success(let subscriptionResult):
-                self.pushSubscription = subscriptionResult.pushSubscription
+            case .success(let subscription):
+                self.pushSubscription = subscription
             case .failure(let error):
                 print(error)
             }
         }.store(in: &publishers)
-    }
-
-    @objc
-    private func pushTest() {
-        guard let pushTopic = pushSubscription?.topic else {return}
-        let message = PushMessage(title: "Push Message", body: "He,y this is a message from the swift client", icon: "", url: "")
-        Task(priority: .userInitiated) { try! await Push.dapp.notify(topic: pushTopic, message: message) }
     }
 
     @objc
