@@ -30,8 +30,8 @@ final class MainRouter {
     }
 
     func present(pushRequest: PushRequest) {
-        PushRequestModule.create(app: app, pushRequest: pushRequest)
-            .presentFullScreen(from: viewController, transparentBackground: true)
+//        PushRequestModule.create(app: app, pushRequest: pushRequest)
+//            .presentFullScreen(from: viewController, transparentBackground: true)
     }
 
     init(app: Application) {

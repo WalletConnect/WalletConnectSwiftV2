@@ -32,7 +32,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         app.uri = connectionOptions.urlContexts.first?.url.absoluteString.replacingOccurrences(of: "walletapp://wc?uri=", with: "")
 
-        configurators.configure()
+            configurators.configure()
         app.pushRegisterer.registerForPushNotifications()
     }
 
