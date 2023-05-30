@@ -110,8 +110,11 @@ let package = Package(
             name: "Commons",
             dependencies: []),
         .target(
+            name: "HTTPClient",
+            dependencies: []),
+        .target(
             name: "WalletConnectNetworking",
-            dependencies: ["WalletConnectRelay"]),
+            dependencies: ["HTTPClient", "WalletConnectRelay"]),
         .target(
             name: "WalletConnectRouter",
             dependencies: []),
@@ -157,7 +160,10 @@ let package = Package(
             dependencies: ["JSONRPC", "TestingUtils"]),
         .testTarget(
             name: "CommonsTests",
-            dependencies: ["Commons", "TestingUtils"])
+            dependencies: ["Commons", "TestingUtils"]),
+        .testTarget(
+            name: "Web3ModalTests",
+            dependencies: ["Web3Modal", "TestingUtils"])
     ],
     swiftLanguageVersions: [.v5]
 )

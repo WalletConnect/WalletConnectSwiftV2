@@ -37,7 +37,7 @@ class PushSubscribeRequester {
         self.dappsMetadataStore = dappsMetadataStore
     }
 
-    func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {
+    @discardableResult func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws -> SubscriptionJWTPayload.Wrapper {
 
         let dappUrl = metadata.url
 
@@ -60,19 +60,17 @@ class PushSubscribeRequester {
 
         logger.debug("setting symm key for response topic \(responseTopic)")
 
-        let availableScope = try await subscriptionScopeProvider.getSubscriptionScope(dappUrl: metadata.url)
-
-        let scope = availableScope.map{$0.name}.joined(separator: " ")
-
-        let request = try createJWTRequest(subscriptionAccount: account, dappUrl: dappUrl, scope: scope)
-
         let protocolMethod = PushSubscribeProtocolMethod()
+
+        let subscriptionAuthWrapper = try await createJWTWrapper(subscriptionAccount: account, dappUrl: dappUrl)
+        let request = RPCRequest(method: protocolMethod.method, params: subscriptionAuthWrapper)
 
         logger.debug("PushSubscribeRequester: subscribing to response topic: \(responseTopic)")
 
         try await networkingInteractor.subscribe(topic: responseTopic)
 
         try await networkingInteractor.request(request, topic: subscribeTopic, protocolMethod: protocolMethod, envelopeType: .type1(pubKey: keysY.publicKey.rawRepresentation))
+        return subscriptionAuthWrapper
     }
 
     private func resolvePublicKey(dappUrl: String) async throws -> AgreementPublicKey {
@@ -93,13 +91,13 @@ class PushSubscribeRequester {
         return keys
     }
 
-    private func createJWTRequest(subscriptionAccount: Account, dappUrl: String, scope: String) throws -> RPCRequest {
-        let protocolMethod = PushSubscribeProtocolMethod().method
+    private func createJWTWrapper(subscriptionAccount: Account, dappUrl: String) async throws -> SubscriptionJWTPayload.Wrapper {
+        let types = try await subscriptionScopeProvider.getSubscriptionScope(dappUrl: dappUrl)
+        let scope = types.map{$0.name}.joined(separator: " ")
         let jwtPayload = SubscriptionJWTPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: scope)
-        let wrapper = try identityClient.signAndCreateWrapper(
+        return try identityClient.signAndCreateWrapper(
             payload: jwtPayload,
             account: subscriptionAccount
         )
-        return RPCRequest(method: protocolMethod, params: wrapper)
     }
 }

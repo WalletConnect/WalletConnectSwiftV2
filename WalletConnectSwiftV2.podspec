@@ -132,6 +132,7 @@ Pod::Spec.new do |spec|
   spec.subspec 'WalletConnectNetworking' do |ss|
     ss.source_files = 'Sources/WalletConnectNetworking/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectRelay'
+    ss.dependency 'WalletConnectSwiftV2/HTTPClient'
   end
 
   spec.subspec 'WalletConnectPairing' do |ss|
@@ -142,11 +143,6 @@ Pod::Spec.new do |spec|
   spec.subspec 'WalletConnectRouter' do |ss|
     ss.source_files = 'Sources/WalletConnectRouter/**/*.{h,m,swift}'
     ss.platform = :ios
-  end
-
-  spec.subspec 'WalletConnectNetworking' do |ss|
-    ss.source_files = 'Sources/WalletConnectNetworking/**/*.{h,m,swift}'
-    ss.dependency 'WalletConnectSwiftV2/WalletConnectRelay'
   end
 
   spec.subspec 'WalletConnectRelay' do |ss|
@@ -160,22 +156,25 @@ Pod::Spec.new do |spec|
   end
 
   spec.subspec 'WalletConnectUtils' do |ss|
-    ss.source_files = 'Sources/WalletConnectUtils/**/*'
+    ss.source_files = 'Sources/WalletConnectUtils/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/JSONRPC'
   end
 
   spec.subspec 'WalletConnectKMS' do |ss|
-    ss.source_files = 'Sources/WalletConnectKMS/**/*'
+    ss.source_files = 'Sources/WalletConnectKMS/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectUtils'
   end
 
   spec.subspec 'Commons' do |ss|
-    ss.source_files = 'Sources/Commons/**/*'
+    ss.source_files = 'Sources/Commons/**/*.{h,m,swift}'
   end
 
   spec.subspec 'JSONRPC' do |ss|
-    ss.source_files = 'Sources/JSONRPC/**/*'
+    ss.source_files = 'Sources/JSONRPC/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/Commons'
   end
-
+  
+  spec.subspec 'HTTPClient' do |ss|
+    ss.source_files = 'Sources/HTTPClient/**/*.{h,m,swift}'
+  end
 end

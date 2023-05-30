@@ -1,0 +1,100 @@
+name: ci_v2
+
+on:
+  pull_request_target:
+    branches:
+      - develop
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request_target' && github.event.pull_request.number || github.ref_name }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request_target' }}
+    
+jobs:
+  authorize:
+    environment:
+      ${{ (github.event_name == 'pull_request_target' &&
+      github.event.pull_request.head.repo.full_name != github.repository) &&
+      'external' || 'internal' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ✓
+
+  prepare:
+    needs: authorize
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/build
+        with:
+          project-id: ${{ secrets.PROJECT_ID }}
+
+  test:    
+    needs: prepare
+    runs-on: macos-12
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        type: [relay-tests] # Put this back when verified it is working [integration-tests, relay-tests, unit-tests]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/cache/restore@v3
+      with:
+        path: |
+          products.tar
+        key: ${{ runner.os }}-deriveddata-${{ github.ref }}-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-deriveddata-${{ github.ref }}-
+
+    - name: Untar DerivedDataCache
+      shell: bash
+      run: test -f products.tar && tar xPpf products.tar || echo "No artifacts to untar"
+
+    # Package Unit tests
+    - name: Run tests
+      if: matrix.type == 'unit-tests'
+      shell: bash
+      run: make unit_tests
+
+     # Integration tests
+    - name: Run integration tests
+      if: matrix.type == 'integration-tests'
+      shell: bash
+      run: make integration_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }}
+
+    # Relay Integration tests
+    - name: Run Relay integration tests
+      if: matrix.type == 'relay-tests'
+      shell: bash
+      run: make relay_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }}
+
+    # Smoke tests
+    - name: Run smoke tests
+      if: matrix.type == 'smoke-tests'
+      shell: bash
+      run: make smoke_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }}
+
+    - name: Publish Test Report
+      uses: mikepenz/action-junit-report@v3
+      if: success() || failure()
+      with:
+          check_name: ${{ matrix.type }} junit report
+          report_paths: 'test_results/report.junit'
+       
+    - name: Zip test artifacts
+      if: always()
+      shell: bash
+      run: test -d "test_results" && zip artifacts.zip -r ./test_results || echo "Nothing to zip"
+
+    - name: Upload test artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.type }} test_results
+        path: ./artifacts.zip
+        if-no-files-found: warn
+

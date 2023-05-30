@@ -1,6 +1,7 @@
 import SwiftUI
 
 public struct ModalSheet: View {
+    
     @ObservedObject var viewModel: ModalViewModel
     
     public var body: some View {
@@ -19,7 +20,7 @@ public struct ModalSheet: View {
         .onAppear {
             Task {
                 await viewModel.createURI()
-//                await viewModel.fetchWallets()
+                await viewModel.fetchWallets()
             }
         }
         .background(
@@ -73,10 +74,12 @@ public struct ModalSheet: View {
         .foregroundColor(.accent)
         .frame(height: 60)
         .overlay(
-            Text(viewModel.destination.contentTitle)
-                .font(.system(size: 20).weight(.semibold))
-                .foregroundColor(.foreground1)
-                .padding(.horizontal, 50)
+            VStack {
+                Text(viewModel.destination.contentTitle)
+                    .font(.system(size: 20).weight(.semibold))
+                    .foregroundColor(.foreground1)
+                    .padding(.horizontal, 50)
+            }
         )
     }
     
@@ -84,26 +87,22 @@ public struct ModalSheet: View {
     private func content() -> some View {
         switch viewModel.destination {
         case .wallets:
-            
-            Text("TBD in subsequent PR")
-            
-//            ZStack {
-//                VStack {
-//                    HStack {
-//                        ForEach(0..<4) { wallet in
-//                            gridItem(for: wallet)
-//                        }
-//                    }
-//                    HStack {
-//                        ForEach(4..<7) { wallet in
-//                            gridItem(for: wallet)
-//                        }
-//                    }
-//                }
-//
-//                Spacer().frame(height: 200)
-//            }
-            
+            ZStack {
+                VStack {
+                    HStack {
+                        ForEach(0..<4) { wallet in
+                            gridItem(for: wallet)
+                        }
+                    }
+                    HStack {
+                        ForEach(4..<7) { wallet in
+                            gridItem(for: wallet)
+                        }
+                    }
+                }
+
+                Spacer().frame(height: 200)
+            }
         case .help:
             WhatIsWalletView()
         case .qr:
@@ -117,41 +116,48 @@ public struct ModalSheet: View {
         }
     }
     
-//    @ViewBuilder
-//    private func gridItem(for index: Int) -> some View {
-//        let wallet: Listing = viewModel.wallets.indices.contains(index) ? viewModel.wallets[index] : nil
-//
-//        if #available(iOS 14.0, *) {
-//            VStack {
-//                AsyncImage(url: wallet != nil ? viewModel.imageUrl(for: wallet!) : nil) { image in
-//                    image
-//                        .resizable()
-//                        .scaledToFit()
-//                } placeholder: {
-//                    Color.foreground3
-//                }
-//                .cornerRadius(8)
-//                .overlay(
-//                    RoundedRectangle(cornerRadius: 8)
-//                        .stroke(.gray.opacity(0.4), lineWidth: 1)
-//                )
-//
-//                Text(wallet?.name ?? "WalletName")
-//                    .font(.system(size: 12))
-//                    .foregroundColor(.foreground1)
-//                    .padding(.horizontal, 12)
-//                    .fixedSize(horizontal: true, vertical: true)
-//
-//                Text("RECENT")
-//                    .opacity(0)
-//                    .font(.system(size: 10))
-//                    .foregroundColor(.foreground3)
-//                    .padding(.horizontal, 12)
-//            }
-//            .redacted(reason: wallet == nil ? .placeholder : [])
-//            .frame(maxWidth: 80, maxHeight: 96)
-//        }
-//    }
+    @ViewBuilder
+    private func gridItem(for index: Int) -> some View {
+        let wallet: Listing? = viewModel.wallets[safe: index]
+        
+        if #available(iOS 14.0, *) {
+            VStack {
+                AsyncImage(url: viewModel.imageUrl(for: wallet)) { image in
+                    image
+                        .resizable()
+                        .scaledToFit()
+                } placeholder: {
+                    Color
+                        .foreground3
+                        .frame(width: 60, height: 60)
+                }
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(.gray.opacity(0.4), lineWidth: 1)
+                )
+
+                Text(wallet?.name ?? "WalletName")
+                    .font(.system(size: 12))
+                    .foregroundColor(.foreground1)
+                    .padding(.horizontal, 12)
+                    .fixedSize(horizontal: true, vertical: true)
+
+                Text("RECENT")
+                    .opacity(0)
+                    .font(.system(size: 10))
+                    .foregroundColor(.foreground3)
+                    .padding(.horizontal, 12)
+            }
+            .redacted(reason: wallet == nil ? .placeholder : [])
+            .frame(maxWidth: 80, maxHeight: 96)
+            .onTapGesture {
+                Task {
+                    await viewModel.onWalletTapped(index: index)
+                }
+            }
+        }
+    }
     
     private func helpButton() -> some View {
         Button(action: {

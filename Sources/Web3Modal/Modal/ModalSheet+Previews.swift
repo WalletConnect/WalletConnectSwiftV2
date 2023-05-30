@@ -37,7 +37,7 @@ struct ModalSheet_Previews: PreviewProvider {
             viewModel: .init(
                 isShown: .constant(true),
                 projectId: projectId,
-                interactor: .init(
+                interactor: DefaultModalSheetInteractor(
                     projectId: projectId,
                     metadata: metadata,
                     webSocketFactory: WebSocketFactoryMock()

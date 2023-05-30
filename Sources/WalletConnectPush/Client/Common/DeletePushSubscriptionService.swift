@@ -24,11 +24,11 @@ class DeletePushSubscriptionService {
     }
 
     func delete(topic: String) async throws {
+        let params = PushDeleteParams.userDisconnected
+        logger.debug("Will delete push subscription for reason: message: \(params.message) code: \(params.code), topic: \(topic)")
         guard let _ = try? pushSubscriptionStore.get(key: topic)
         else { throw Errors.pushSubscriptionNotFound}
         let protocolMethod = PushDeleteProtocolMethod()
-        let params = PushDeleteParams.userDisconnected
-        logger.debug("Will delete push subscription for reason: message: \(params.message) code: \(params.code)")
         pushSubscriptionStore.delete(forKey: topic)
         pushMessagesDatabase?.deletePushMessages(topic: topic)
         let request = RPCRequest(method: protocolMethod.method, params: params)

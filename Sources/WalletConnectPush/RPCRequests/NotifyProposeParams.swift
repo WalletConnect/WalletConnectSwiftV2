@@ -1,7 +1,9 @@
+
 import Foundation
 
-public struct PushRequestParams: Codable {
+struct NotifyProposeParams: Codable {
     let publicKey: String
     let metadata: AppMetadata
     let account: Account
+    let scope: [String]
 }
