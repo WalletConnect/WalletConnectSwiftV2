@@ -87,14 +87,15 @@ public struct ModalSheet: View {
     private func welcome() -> some View {
         if #available(iOS 14.0, *) {
             WalletList(
-                wallets: $viewModel.wallets,
+                wallets: .init(get: {
+                    viewModel.wallets
+                }, set: { _ in }),
                 destination: .init(get: {
                     viewModel.destination
                 }, set: { _ in }),
-                navigateTo: viewModel.navigateTo(_:)
+                navigateTo: viewModel.navigateTo(_:),
+                onListingTap: viewModel.onListingTap(_:)
             )
-        } else {
-            EmptyView()
         }
     }
     
@@ -120,7 +121,10 @@ public struct ModalSheet: View {
         case .qr:
             qrCode()
         case .getWallet:
-            GetAWalletView(wallets: Array(viewModel.wallets.prefix(6)))
+            GetAWalletView(
+                wallets: Array(viewModel.wallets.prefix(6)),
+                onTap: viewModel.onGetWalletTap(_:)
+            )
         }
     }
 }

@@ -8,6 +8,7 @@ struct WalletList: View {
     @Binding var destination: Destination
     
     var navigateTo: (Destination) -> Void
+    var onListingTap: (Listing) -> Void
     
     var body: some View {
         content()
@@ -137,6 +138,10 @@ struct WalletList: View {
             guard let wallet else { return }
             
             navigateTo(.walletDetail(wallet))
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                onListingTap(wallet)
+            }
         }
     }
     

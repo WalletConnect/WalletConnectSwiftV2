@@ -43,7 +43,7 @@ class PushSubscribeResponseSubscriber {
         networkingInteractor.responseSubscription(on: protocolMethod)
             .sink {[unowned self] (payload: ResponseSubscriptionPayload<SubscriptionJWTPayload.Wrapper, SubscribeResponseParams>) in
                 Task(priority: .high) {
-                    logger.debug("Received Push Subscribe response")
+                    logger.debug("PushSubscribeResponseSubscriber: Received Push Subscribe response")
 
                     guard let responseKeys = kms.getAgreementSecret(for: payload.topic) else {
                         logger.debug("PushSubscribeResponseSubscriber: no symmetric key for topic \(payload.topic)")
@@ -82,6 +82,7 @@ class PushSubscribeResponseSubscriber {
 
                     guard let metadata = metadata else {
                         logger.debug("PushSubscribeResponseSubscriber: no metadata for topic: \(pushSubscriptionTopic!)")
+                        subscriptionPublisherSubject.send(.failure(Errors.couldNotCreateSubscription))
                         return
                     }
                     dappsMetadataStore.delete(forKey: payload.topic)
@@ -93,6 +94,7 @@ class PushSubscribeResponseSubscriber {
 
                     logger.debug("PushSubscribeResponseSubscriber: unsubscribing response topic: \(payload.topic)")
                     networkingInteractor.unsubscribe(topic: payload.topic)
+
                     subscriptionPublisherSubject.send(.success(pushSubscription))
                 }
             }.store(in: &publishers)

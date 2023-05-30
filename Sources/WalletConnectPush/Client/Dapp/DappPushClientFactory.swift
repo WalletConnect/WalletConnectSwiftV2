@@ -18,24 +18,20 @@ public struct DappPushClientFactory {
 
     static func create(metadata: AppMetadata, logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, networkInteractor: NetworkInteracting) -> DappPushClient {
         let kms = KeyManagementService(keychain: keychainStorage)
-        let pushProposer = PushProposer(networkingInteractor: networkInteractor, kms: kms, appMetadata: metadata, logger: logger)
         let subscriptionStore = CodableStore<PushSubscription>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.pushSubscription)
-        let proposalResponseSubscriber = ProposalResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, metadata: metadata, relay: RelayProtocolOptions(protocol: "irn", data: nil), subscriptionsStore: subscriptionStore)
-        let pushMessageSender = PushMessageSender(networkingInteractor: networkInteractor, kms: kms, logger: logger)
         let subscriptionProvider = SubscriptionsProvider(store: subscriptionStore)
-        let deletePushSubscriptionService = DeletePushSubscriptionService(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore, pushMessagesDatabase: nil)
         let deletePushSubscriptionSubscriber = DeletePushSubscriptionSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore)
         let resubscribeService = PushResubscribeService(networkInteractor: networkInteractor, subscriptionsStorage: subscriptionStore)
+        let notifyProposer = NotifyProposer(networkingInteractor: networkInteractor, kms: kms, appMetadata: metadata, logger: logger)
+        let notifyProposeResponseSubscriber = NotifyProposeResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, metadata: metadata)
         return DappPushClient(
             logger: logger,
             kms: kms,
-            pushProposer: pushProposer,
-            proposalResponseSubscriber: proposalResponseSubscriber,
-            pushMessageSender: pushMessageSender,
             subscriptionsProvider: subscriptionProvider,
-            deletePushSubscriptionService: deletePushSubscriptionService,
             deletePushSubscriptionSubscriber: deletePushSubscriptionSubscriber,
-            resubscribeService: resubscribeService
+            resubscribeService: resubscribeService,
+            notifyProposer: notifyProposer,
+            notifyProposeResponseSubscriber: notifyProposeResponseSubscriber
         )
     }
 }

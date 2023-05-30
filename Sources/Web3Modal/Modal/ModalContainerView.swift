@@ -35,7 +35,11 @@ public struct ModalContainerView: View {
                     viewModel: .init(
                         isShown: $showModal,
                         projectId: projectId,
-                        interactor: .init(projectId: projectId, metadata: metadata, webSocketFactory: webSocketFactory)
+                        interactor: DefaultModalSheetInteractor(
+                            projectId: projectId,
+                            metadata: metadata,
+                            webSocketFactory: webSocketFactory
+                        )
                     )
                 )
                 .environment(\.projectId, projectId)

@@ -3,19 +3,13 @@ import SwiftUI
 struct GetAWalletView: View {
     
     let wallets: [Listing]
-    
-    init(wallets: [Listing]) {
-        self.wallets = wallets
-        
-        UITableView.appearance().backgroundColor = .clear // tableview background
-        UITableViewCell.appearance().backgroundColor = .clear // cell background
-    }
+    let onTap: (Listing) -> Void
     
     var body: some View {
         List {
             ForEach(wallets) { wallet in
                 Button {
-                    print("foo")
+                    onTap(wallet)
                 } label: {
                     
                     HStack {
