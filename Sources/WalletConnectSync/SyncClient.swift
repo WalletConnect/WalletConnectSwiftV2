@@ -20,7 +20,7 @@ public final class SyncClient {
         return """
         I authorize this app to sync my account: \(account.absoluteString)
 
-        Read more about Sync API: https://docs.walletconnect.com/2.0/specs/clients/core/sync
+        Read more about it here: https://walletconnect.com/faq
         """
     }
 
