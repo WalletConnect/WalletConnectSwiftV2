@@ -1,6 +1,8 @@
 import SwiftUI
 
 public struct ModalSheet: View {
+
+    var foo: Bool = false
     
     @ObservedObject var viewModel: ModalViewModel
     
