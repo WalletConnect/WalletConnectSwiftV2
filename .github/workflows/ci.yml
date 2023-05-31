@@ -37,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        type: [relay-tests] # Put this back when verified it is working [integration-tests, relay-tests, unit-tests]
+        type: [integration-tests, relay-tests, unit-tests]
 
     steps:
     - uses: actions/checkout@v3
