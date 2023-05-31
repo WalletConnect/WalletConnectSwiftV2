@@ -55,3 +55,7 @@ Web3Wallet SDK introduces a new interface for all wallets that wraps the Sign an
 ## License
 
 Apache 2.0
+
+## Guides
+
+- [Dowloading GH actions artifacts if they are not shown in the Web UI](./docs/guides/downloading_artifacts.md)
