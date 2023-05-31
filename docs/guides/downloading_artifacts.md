@@ -1,5 +1,7 @@
 
-# Downloading run artifacts if they're not visible on Github 
+# Artifacts sometimes not available in Actions -> Build name -> Artifacts
+
+For some reason GitHub sometimes won't show uploaded artifacts from nested workflows if the top-level workflow fails or does not finish. However for troubleshooting you still might want to download the artifacts. Since they are not shown anywhere, we need to resort to using GitHub API. This guide shows how to set it up (specifically through [GH CLI](https://cli.github.com/manual/gh_api)) and how to download the artifacts using it.
 
 ## Setup GH CLI
 

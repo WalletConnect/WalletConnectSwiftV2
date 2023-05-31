@@ -58,4 +58,4 @@ Apache 2.0
 
 ## Guides
 
-- [Dowloading GH actions artifacts if they are not shown in the Web UI](./docs/guides/downloading_artifacts.md)
+- [Artifacts sometimes not available in Actions -> Build name -> Artifacts?](./docs/guides/downloading_artifacts.md)
