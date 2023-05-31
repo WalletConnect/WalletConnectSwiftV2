@@ -37,24 +37,12 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard let context = URLContexts.first else { return }
 
-        let queryParams = context.url.queryParameters
-
-        if let uri = queryParams["uri"] as? String {
-            Task {
-                try await Pair.instance.pair(uri: WalletConnectURI(string: uri)!)
-            }
-        }
-    }
-}
-
-extension URL {
-    var queryParameters: [AnyHashable: Any] {
-        let urlComponents = URLComponents(url: self, resolvingAgainstBaseURL: false)
-        guard let queryItems = urlComponents?.queryItems else { return [:] }
-        var queryParams: [AnyHashable: Any] = [:]
-        queryItems.forEach {
-            queryParams[$0.name] = $0.value
-        }
-        return queryParams
+		let queryParams = context.url.queryParameters
+		
+		if let uri = queryParams["uri"] as? String {
+			Task {
+				try await Pair.instance.pair(uri: WalletConnectURI(string: uri)!)
+			}
+		}
     }
 }
