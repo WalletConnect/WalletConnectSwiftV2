@@ -77,6 +77,15 @@ jobs:
       if: matrix.type == 'smoke-tests'
       shell: bash
       run: make smoke_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }}
+      
+    - name: Slack Notification for Failure
+      if: failure() && matrix.type == 'smoke-tests'
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: The smoke tests failed in the CI pipeline. Check the logs for more details.
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
 
     - name: Publish Test Report
       uses: mikepenz/action-junit-report@v3
