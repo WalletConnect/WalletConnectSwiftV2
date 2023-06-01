@@ -64,6 +64,8 @@ final class HistoryTests: XCTestCase {
  
         await fulfillment(of: [exp], timeout: InputConfig.defaultTimeout)
 
+        sleep(5) // History server has a queue
+
         let messages = try await historyClient.getMessages(
             payload: GetMessagesPayload(
                 topic: topic,
