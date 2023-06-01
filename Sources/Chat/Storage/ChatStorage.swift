@@ -107,7 +107,7 @@ final class ChatStorage {
 
     func initializeDelegates() async throws {
         try await sentInviteStoreDelegate.onInitialization(sentInviteStore.getAll())
-        try await threadStoreDelegate.onInitialization(threadStore.getAll())
+        try await threadStoreDelegate.onInitialization(storage: self)
         try await inviteKeyDelegate.onInitialization(inviteKeyStore.getAll())
         try await receiviedInviteStatusDelegate.onInitialization()
     }

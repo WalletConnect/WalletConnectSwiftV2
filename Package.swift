@@ -64,7 +64,7 @@ let package = Package(
             path: "Sources/WalletConnectSign"),
         .target(
             name: "WalletConnectChat",
-            dependencies: ["WalletConnectIdentity", "WalletConnectSync"],
+            dependencies: ["WalletConnectIdentity", "WalletConnectSync", "WalletConnectHistory"],
             path: "Sources/Chat"),
         .target(
             name: "Auth",

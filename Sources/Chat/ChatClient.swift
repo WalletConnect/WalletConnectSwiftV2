@@ -4,6 +4,7 @@ import Combine
 public class ChatClient {
     private var publishers = [AnyCancellable]()
     private let identityClient: IdentityClient
+    private let historyClient: HistoryClient
     private let messagingService: MessagingService
     private let resubscriptionService: ResubscriptionService
     private let invitationHandlingService: InvitationHandlingService
@@ -58,6 +59,7 @@ public class ChatClient {
     // MARK: - Initialization
 
     init(identityClient: IdentityClient,
+         historyClient: HistoryClient,
          messagingService: MessagingService,
          resubscriptionService: ResubscriptionService,
          invitationHandlingService: InvitationHandlingService,
@@ -69,6 +71,7 @@ public class ChatClient {
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
     ) {
         self.identityClient = identityClient
+        self.historyClient = historyClient
         self.messagingService = messagingService
         self.resubscriptionService = resubscriptionService
         self.invitationHandlingService = invitationHandlingService
@@ -92,6 +95,10 @@ public class ChatClient {
         onSign: @escaping SigningCallback
     ) async throws -> String {
         let publicKey = try await identityClient.register(account: account, onSign: onSign)
+
+
+        let payload = RegisterPayload(tags: ["2002"], relayUrl: "wss://relay.walletconnect.com")
+        try await historyClient.registerTags(payload: payload, historyUrl: "https://history.walletconnect.com")
 
         try await syncRegisterService.register(account: account, onSign: onSign)
 
