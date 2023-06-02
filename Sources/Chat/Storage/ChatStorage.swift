@@ -6,8 +6,8 @@ final class ChatStorage {
     private var publishers = Set<AnyCancellable>()
 
     private let kms: KeyManagementServiceProtocol
-    private let messageStore: NewKeyedDatabase<Message>
-    private let receivedInviteStore: NewKeyedDatabase<ReceivedInvite>
+    private let messageStore: KeyedDatabase<Message>
+    private let receivedInviteStore: KeyedDatabase<ReceivedInvite>
     private let sentInviteStore: SyncStore<SentInvite>
     private let threadStore: SyncStore<Thread>
     private let inviteKeyStore: SyncStore<InviteKey>
@@ -70,8 +70,8 @@ final class ChatStorage {
 
     init(
         kms: KeyManagementServiceProtocol,
-        messageStore: NewKeyedDatabase<Message>,
-        receivedInviteStore: NewKeyedDatabase<ReceivedInvite>,
+        messageStore: KeyedDatabase<Message>,
+        receivedInviteStore: KeyedDatabase<ReceivedInvite>,
         sentInviteStore: SyncStore<SentInvite>,
         threadStore: SyncStore<Thread>,
         inviteKeyStore: SyncStore<InviteKey>,

@@ -6,7 +6,7 @@ public final class SyncStoreFactory {
         let indexDatabase = CodableStore<SyncRecord>(defaults: UserDefaults.standard, identifier: SyncStorageIdentifiers.index.identifier)
         let indexStore = SyncIndexStore(store: indexDatabase)
         let objectIdentifier = SyncStorageIdentifiers.object(store: name).identifier
-        let objectStore = NewKeyedDatabase<Object>(storage: storage, identifier: objectIdentifier)
+        let objectStore = KeyedDatabase<Object>(storage: storage, identifier: objectIdentifier)
         return SyncStore(name: name, syncClient: syncClient, indexStore: indexStore, objectStore: objectStore)
     }
 }

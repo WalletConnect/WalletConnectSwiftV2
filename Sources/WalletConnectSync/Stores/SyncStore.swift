@@ -17,7 +17,7 @@ public final class SyncStore<Object: DatabaseObject> {
     private let indexStore: SyncIndexStore
 
     /// `storeTopic` to [`id`: `Object`] map keyValue store
-    private let objectStore: NewKeyedDatabase<Object>
+    private let objectStore: KeyedDatabase<Object>
 
     private let dataUpdateSubject = PassthroughSubject<[Object], Never>()
     private let syncUpdateSubject = PassthroughSubject<(String, Account, SyncUpdate<Object>), Never>()
@@ -30,7 +30,7 @@ public final class SyncStore<Object: DatabaseObject> {
         return syncUpdateSubject.eraseToAnyPublisher()
     }
 
-    init(name: String, syncClient: SyncClient, indexStore: SyncIndexStore, objectStore: NewKeyedDatabase<Object>) {
+    init(name: String, syncClient: SyncClient, indexStore: SyncIndexStore, objectStore: KeyedDatabase<Object>) {
         self.name = name
         self.syncClient = syncClient
         self.indexStore = indexStore

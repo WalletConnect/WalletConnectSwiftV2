@@ -75,7 +75,7 @@ final class SyncTests: XCTestCase {
     }
 
     func makeSyncStore(client: SyncClient, indexStore: SyncIndexStore) -> SyncStore<TestObject> {
-        let objectStore = NewKeyedDatabase<TestObject>(storage: RuntimeKeyValueStorage(), identifier: "objectStore")
+        let objectStore = KeyedDatabase<TestObject>(storage: RuntimeKeyValueStorage(), identifier: "objectStore")
         return SyncStore(name: storeName, syncClient: client, indexStore: indexStore, objectStore: objectStore)
     }
 

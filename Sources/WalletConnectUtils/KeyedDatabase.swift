@@ -4,7 +4,7 @@ public protocol DatabaseObject: Codable & Equatable {
     var databaseId: String { get }
 }
 
-public class NewKeyedDatabase<Element> where Element: DatabaseObject {
+public class KeyedDatabase<Element> where Element: DatabaseObject {
 
     public typealias Index = [String: [String: Element]]
 
@@ -67,7 +67,7 @@ public class NewKeyedDatabase<Element> where Element: DatabaseObject {
     }
 }
 
-private extension NewKeyedDatabase {
+private extension KeyedDatabase {
 
     func initializeIndex() {
         guard
