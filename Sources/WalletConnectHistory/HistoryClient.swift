@@ -2,40 +2,39 @@ import Foundation
 
 public final class HistoryClient {
 
-    private let clientIdStorage: ClientIdStorage
+    private let historyUrl: String
+    private let relayUrl: String
+    private let serializer: Serializer
+    private let historyNetworkService: HistoryNetworkService
 
-    public init(clientIdStorage: ClientIdStorage) {
-        self.clientIdStorage = clientIdStorage
+    init(historyUrl: String, relayUrl: String, serializer: Serializer, historyNetworkService: HistoryNetworkService) {
+        self.historyUrl = historyUrl
+        self.relayUrl = relayUrl
+        self.serializer = serializer
+        self.historyNetworkService = historyNetworkService
     }
 
-    public func registerTags(payload: RegisterPayload, historyUrl: String) async throws {
-        let service = HTTPNetworkClient(host: try host(from: historyUrl))
-        let api = HistoryAPI.register(payload: payload, jwt: try getJwt(historyUrl: historyUrl))
-        try await service.request(service: api)
+    public func register(tags: [String]) async throws {
+        let payload = RegisterPayload(tags: tags, relayUrl: relayUrl)
+        try await historyNetworkService.registerTags(payload: payload, historyUrl: historyUrl)
     }
 
-    public func getMessages(payload: GetMessagesPayload, historyUrl: String) async throws -> GetMessagesResponse {
-        let service = HTTPNetworkClient(host: try host(from: historyUrl))
-        let api = HistoryAPI.messages(payload: payload)
-        return try await service.request(GetMessagesResponse.self, at: api)
-    }
-}
+    public func getMessages<T: Codable>(topic: String, count: Int, direction: GetMessagesPayload.Direction) async throws -> [T] {
+        let payload = GetMessagesPayload(topic: topic, originId: nil, messageCount: count, direction: direction)
+        let response = try await historyNetworkService.getMessages(payload: payload, historyUrl: historyUrl)
 
-private extension HistoryClient {
-
-    enum Errors: Error {
-        case couldNotResolveHost
-    }
-
-    func getJwt(historyUrl: String) throws -> String {
-        let authenticator = ClientIdAuthenticator(clientIdStorage: clientIdStorage, url: historyUrl)
-        return try authenticator.createAuthToken()
-    }
-
-    func host(from url: String) throws -> String {
-        guard let host = URL(string: url)?.host else {
-            throw Errors.couldNotResolveHost
+        let objects = response.messages.compactMap { payload in
+            do {
+                let (request, _, _): (RPCRequest, _, _) = try serializer.deserialize(
+                    topic: topic,
+                    encodedEnvelope: payload
+                )
+                return try request.params?.get(T.self)
+            } catch {
+                fatalError(error.localizedDescription)
+            }
         }
-        return host
+
+        return objects
     }
 }

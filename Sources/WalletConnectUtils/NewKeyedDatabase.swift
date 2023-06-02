@@ -1,6 +1,6 @@
 import Foundation
 
-public class NewKeyedDatabase<Element> where Element: Codable & Equatable {
+public class NewKeyedDatabase<Element> where Element: Codable & Equatable & Identifiable {
 
     public var index: [String: Element] = [:] {
         didSet {

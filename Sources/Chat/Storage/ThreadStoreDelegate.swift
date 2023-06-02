@@ -45,30 +45,27 @@ final class ThreadStoreDelegate {
 private extension ThreadStoreDelegate {
 
     func fetchMessageHistory(thread: Thread, storage: ChatStorage) async throws {
-        let historyPayload = GetMessagesPayload(topic: thread.topic, originId: nil, messageCount: 200, direction: .forward)
-        let response = try await historyClient.getMessages(payload: historyPayload, historyUrl: "https://history.walletconnect.com")
 
-        for messagePayload in response.messages {
-            let (request, _, _): (RPCRequest, _, _) = try serializer.deserialize(
-                topic: thread.topic,
-                encodedEnvelope: messagePayload
-            )
+        let wrappers: [MessagePayload.Wrapper] = try await historyClient.getMessages(
+            topic: thread.topic,
+            count: 200, direction: .backward
+        )
 
-            let wrapper = try request.params!.get(MessagePayload.Wrapper.self)
-
-            let (messagePayload, messageClaims) = try MessagePayload.decodeAndVerify(from: wrapper)
+        let messages = wrappers.map { wrapper in
+            let (messagePayload, messageClaims) = try! MessagePayload.decodeAndVerify(from: wrapper)
 
             let authorAccount = messagePayload.recipientAccount == thread.selfAccount
                 ? thread.peerAccount
                 : thread.selfAccount
 
-            let message = Message(
+            return Message(
                 topic: thread.topic,
                 message: messagePayload.message,
                 authorAccount: authorAccount,
                 timestamp: messageClaims.iat)
-
-            storage.set(message: message, account: thread.selfAccount)
         }
+
+//        TODO: Set in store
+//        storage.set(message: message, account: thread.selfAccount)
     }
 }

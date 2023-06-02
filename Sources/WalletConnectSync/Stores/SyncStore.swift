@@ -1,8 +1,12 @@
 import Foundation
 import Combine
 
-public protocol SyncObject: Codable & Equatable {
+public protocol SyncObject: Codable & Equatable & Identifiable {
     var syncId: String { get }
+}
+
+extension SyncObject {
+    var id: String { return syncId }
 }
 
 public enum SyncUpdate<Object: SyncObject> {

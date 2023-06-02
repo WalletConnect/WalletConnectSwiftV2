@@ -24,6 +24,11 @@ public final class SyncClient {
         """
     }
 
+    /// Checks if account is already registered in sync
+    public func isRegistered(account: Account) -> Bool {
+        return syncSignatureStore.isSignatureExists(account: account)
+    }
+
     /// Register an account to sync
     public func register(account: Account, signature: CacaoSignature) async throws {
         // TODO: Signature verify
