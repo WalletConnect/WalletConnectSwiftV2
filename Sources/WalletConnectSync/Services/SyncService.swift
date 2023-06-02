@@ -31,9 +31,9 @@ final class SyncService {
         setupSubscriptions()
     }
 
-    func set<Object: SyncObject>(account: Account, store: String, object: Object) async throws {
+    func set<Object: DatabaseObject>(account: Account, store: String, object: Object) async throws {
         let protocolMethod = SyncSetMethod()
-        let params = StoreSet(key: object.syncId, value: try object.json())
+        let params = StoreSet(key: object.databaseId, value: try object.json())
         let rpcid = RPCID()
         let request = RPCRequest(method: protocolMethod.method, params: params, rpcid: rpcid)
         let record = try indexStore.getRecord(account: account, name: store)

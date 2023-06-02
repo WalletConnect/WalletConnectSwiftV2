@@ -1,20 +1,12 @@
 import Foundation
 import Combine
 
-public protocol SyncObject: Codable & Equatable & Identifiable {
-    var syncId: String { get }
-}
-
-extension SyncObject {
-    var id: String { return syncId }
-}
-
-public enum SyncUpdate<Object: SyncObject> {
+public enum SyncUpdate<Object: DatabaseObject> {
     case set(object: Object)
     case delete(id: String)
 }
 
-public final class SyncStore<Object: SyncObject> {
+public final class SyncStore<Object: DatabaseObject> {
 
     private var publishers = Set<AnyCancellable>()
 
@@ -25,7 +17,7 @@ public final class SyncStore<Object: SyncObject> {
     private let indexStore: SyncIndexStore
 
     /// `storeTopic` to [`id`: `Object`] map keyValue store
-    private let objectStore: SyncObjectStore<Object>
+    private let objectStore: NewKeyedDatabase<Object>
 
     private let dataUpdateSubject = PassthroughSubject<[Object], Never>()
     private let syncUpdateSubject = PassthroughSubject<(String, Account, SyncUpdate<Object>), Never>()
@@ -38,7 +30,7 @@ public final class SyncStore<Object: SyncObject> {
         return syncUpdateSubject.eraseToAnyPublisher()
     }
 
-    init(name: String, syncClient: SyncClient, indexStore: SyncIndexStore, objectStore: SyncObjectStore<Object>) {
+    init(name: String, syncClient: SyncClient, indexStore: SyncIndexStore, objectStore: NewKeyedDatabase<Object>) {
         self.name = name
         self.syncClient = syncClient
         self.indexStore = indexStore
@@ -55,13 +47,13 @@ public final class SyncStore<Object: SyncObject> {
         let record = try indexStore.getRecord(account: account, name: name)
 
         objectStore.onUpdate = { [unowned self] in
-            dataUpdateSubject.send(objectStore.getAll(topic: record.topic))
+            dataUpdateSubject.send(objectStore.getAll(for: record.topic))
         }
     }
 
     public func getAll(for account: Account) throws -> [Object] {
         let record = try indexStore.getRecord(account: account, name: name)
-        return objectStore.getAll(topic: record.topic)
+        return objectStore.getAll(for: record.topic)
     }
 
     public func getAll() -> [Object] {
@@ -71,7 +63,7 @@ public final class SyncStore<Object: SyncObject> {
     public func set(object: Object, for account: Account) async throws {
         let record = try indexStore.getRecord(account: account, name: name)
 
-        if objectStore.set(object: object, topic: record.topic) {
+        if objectStore.set(element: object, for: record.topic) {
             try await syncClient.set(account: account, store: record.store, object: object)
         }
     }
@@ -79,7 +71,7 @@ public final class SyncStore<Object: SyncObject> {
     public func delete(id: String, for account: Account) async throws {
         let record = try indexStore.getRecord(account: account, name: name)
 
-        if objectStore.delete(id: id, topic: record.topic) {
+        if objectStore.delete(id: id, for: record.topic) {
             try await syncClient.delete(account: account, store: record.store, key: id)
         }
     }
@@ -110,11 +102,11 @@ private extension SyncStore {
 
     func setInStore(object: Object, for account: Account) throws -> Bool {
         let record = try indexStore.getRecord(account: account, name: name)
-        return objectStore.set(object: object, topic: record.topic)
+        return objectStore.set(element: object, for: record.topic)
     }
 
     func deleteInStore(id: String, for account: Account) throws -> Bool {
         let record = try indexStore.getRecord(account: account, name: name)
-        return objectStore.delete(id: id, topic: record.topic)
+        return objectStore.delete(id: id, for: record.topic)
     }
 }

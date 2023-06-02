@@ -41,7 +41,7 @@ public final class SyncClient {
     }
 
     // Set value to store
-    public func set<Object: SyncObject>(
+    public func set<Object: DatabaseObject>(
         account: Account,
         store: String,
         object: Object

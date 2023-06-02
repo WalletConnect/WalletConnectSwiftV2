@@ -1,10 +1,10 @@
 import Foundation
 
-struct ReceivedInviteStatus: Codable, SyncObject {
+struct ReceivedInviteStatus: Codable, DatabaseObject {
     let id: Int64
     let status: ReceivedInvite.Status
 
-    var syncId: String {
+    var databaseId: String {
         return String(id)
     }
 }
