@@ -43,6 +43,21 @@ public class KeyedDatabase<Element> where Element: DatabaseObject {
     }
 
     @discardableResult
+    public func set(elements: [Element], for key: String) -> Bool {
+        var map = index[key] ?? [:]
+
+        for element in elements {
+            guard
+                map[element.databaseId] == nil else { continue }
+                map[element.databaseId] = element
+        }
+
+        index[key] = map
+
+        return true
+    }
+
+    @discardableResult
     public func set(element: Element, for key: String) -> Bool {
         var map = index[key] ?? [:]
 

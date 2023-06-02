@@ -12,6 +12,7 @@ final class ChatStorage {
     private let threadStore: SyncStore<Thread>
     private let inviteKeyStore: SyncStore<InviteKey>
     private let receivedInviteStatusStore: SyncStore<ReceivedInviteStatus>
+    private let historyService: HistoryService
 
     private let sentInviteStoreDelegate: SentInviteStoreDelegate
     private let threadStoreDelegate: ThreadStoreDelegate
@@ -76,6 +77,7 @@ final class ChatStorage {
         threadStore: SyncStore<Thread>,
         inviteKeyStore: SyncStore<InviteKey>,
         receivedInviteStatusStore: SyncStore<ReceivedInviteStatus>,
+        historyService: HistoryService,
         sentInviteStoreDelegate: SentInviteStoreDelegate,
         threadStoreDelegate: ThreadStoreDelegate,
         inviteKeyDelegate: InviteKeyDelegate,
@@ -88,6 +90,7 @@ final class ChatStorage {
         self.threadStore = threadStore
         self.inviteKeyStore = inviteKeyStore
         self.receivedInviteStatusStore = receivedInviteStatusStore
+        self.historyService = historyService
         self.sentInviteStoreDelegate = sentInviteStoreDelegate
         self.threadStoreDelegate = threadStoreDelegate
         self.inviteKeyDelegate = inviteKeyDelegate
@@ -110,6 +113,15 @@ final class ChatStorage {
         try await threadStoreDelegate.onInitialization(storage: self)
         try await inviteKeyDelegate.onInitialization(inviteKeyStore.getAll())
         try await receiviedInviteStatusDelegate.onInitialization()
+    }
+
+    func initializeHistory(account: Account) async throws {
+        try await historyService.register()
+
+        for thread in getAllThreads() {
+            let messages = try await historyService.fetchMessageHistory(thread: thread)
+            set(messages: messages, account: account)
+        }
     }
 
     func setupSubscriptions(account: Account) throws {
@@ -250,12 +262,16 @@ final class ChatStorage {
         newMessagePublisherSubject.send(message)
     }
 
+    func set(messages: [Message], account: Account) {
+        messageStore.set(elements: messages, for: account.absoluteString)
+    }
+
     func getMessages(topic: String) -> [Message] {
         return messageStore.getAll().filter { $0.topic == topic }
     }
 
     func getMessages(account: Account) -> [Message] {
-        return messageStore.getAll(for: account.absoluteString) ?? []
+        return messageStore.getAll(for: account.absoluteString) 
     }
 }
 
