@@ -42,6 +42,7 @@ public class KeyedDatabase<Element> where Element: DatabaseObject {
         return index[key]?[id]
     }
 
+    @discardableResult
     public func set(element: Element, for key: String) -> Bool {
         var map = index[key] ?? [:]
 
@@ -54,6 +55,7 @@ public class KeyedDatabase<Element> where Element: DatabaseObject {
         return true
     }
 
+    @discardableResult
     public func delete(id: String, for key: String) -> Bool {
         var map = index[key]
 
