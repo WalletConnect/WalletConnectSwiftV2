@@ -96,7 +96,7 @@ public class ChatClient {
     ) async throws -> String {
         let publicKey = try await identityClient.register(account: account, onSign: onSign)
 
-        if syncRegisterService.isRegistered(account: account) {
+        if !syncRegisterService.isRegistered(account: account) {
             try await historyClient.register(tags: ["2002"])
             try await syncRegisterService.register(account: account, onSign: onSign)
         }

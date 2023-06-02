@@ -1,6 +1,6 @@
 import Foundation
 
-struct ReceivedInviteStatus: Codable, DatabaseObject {
+struct ReceivedInviteStatus: DatabaseObject {
     let id: Int64
     let status: ReceivedInvite.Status
 

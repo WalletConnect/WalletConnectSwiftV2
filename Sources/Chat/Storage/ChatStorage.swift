@@ -6,8 +6,8 @@ final class ChatStorage {
     private var publishers = Set<AnyCancellable>()
 
     private let kms: KeyManagementServiceProtocol
-    private let messageStore: KeyedDatabase<[Message]>
-    private let receivedInviteStore: KeyedDatabase<[ReceivedInvite]>
+    private let messageStore: NewKeyedDatabase<Message>
+    private let receivedInviteStore: NewKeyedDatabase<ReceivedInvite>
     private let sentInviteStore: SyncStore<SentInvite>
     private let threadStore: SyncStore<Thread>
     private let inviteKeyStore: SyncStore<InviteKey>
@@ -70,8 +70,8 @@ final class ChatStorage {
 
     init(
         kms: KeyManagementServiceProtocol,
-        messageStore: KeyedDatabase<[Message]>,
-        receivedInviteStore: KeyedDatabase<[ReceivedInvite]>,
+        messageStore: NewKeyedDatabase<Message>,
+        receivedInviteStore: NewKeyedDatabase<ReceivedInvite>,
         sentInviteStore: SyncStore<SentInvite>,
         threadStore: SyncStore<Thread>,
         inviteKeyStore: SyncStore<InviteKey>,
@@ -138,7 +138,7 @@ final class ChatStorage {
     }
 
     func set(receivedInvite: ReceivedInvite, account: Account) {
-        receivedInviteStore.set(receivedInvite, for: account.absoluteString)
+        receivedInviteStore.set(element: receivedInvite, for: account.absoluteString)
         newReceivedInvitePublisherSubject.send(receivedInvite)
     }
 
@@ -148,7 +148,7 @@ final class ChatStorage {
     }
 
     func getReceivedInvites(account: Account) -> [ReceivedInvite] {
-        return receivedInviteStore.getElements(for: account.absoluteString) ?? []
+        return receivedInviteStore.getAll(for: account.absoluteString) ?? []
     }
 
     func syncRejectedReceivedInviteStatus(id: Int64, account: Account) async throws {
@@ -171,17 +171,17 @@ final class ChatStorage {
     }
 
     func accept(receivedInvite: ReceivedInvite, account: Account) {
-        receivedInviteStore.delete(receivedInvite, for: account.absoluteString)
+        receivedInviteStore.delete(id: receivedInvite.databaseId, for: account.absoluteString)
 
         let accepted = ReceivedInvite(invite: receivedInvite, status: .approved)
-        receivedInviteStore.set(accepted, for: account.absoluteString)
+        receivedInviteStore.set(element: accepted, for: account.absoluteString)
     }
 
     func reject(receivedInvite: ReceivedInvite, account: Account) {
-        receivedInviteStore.delete(receivedInvite, for: account.absoluteString)
+        receivedInviteStore.delete(id: receivedInvite.databaseId, for: account.absoluteString)
 
         let rejected = ReceivedInvite(invite: receivedInvite, status: .rejected)
-        receivedInviteStore.set(rejected, for: account.absoluteString)
+        receivedInviteStore.set(element: rejected, for: account.absoluteString)
     }
 
     func accept(sentInviteId: Int64, topic: String) async throws {
@@ -246,7 +246,7 @@ final class ChatStorage {
     // MARK: - Messages
 
     func set(message: Message, account: Account) {
-        messageStore.set(message, for: account.absoluteString)
+        messageStore.set(element: message, for: account.absoluteString)
         newMessagePublisherSubject.send(message)
     }
 
@@ -255,7 +255,7 @@ final class ChatStorage {
     }
 
     func getMessages(account: Account) -> [Message] {
-        return messageStore.getElements(for: account.absoluteString) ?? []
+        return messageStore.getAll(for: account.absoluteString) ?? []
     }
 }
 
