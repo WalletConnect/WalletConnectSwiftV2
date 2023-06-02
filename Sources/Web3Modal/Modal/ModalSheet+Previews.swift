@@ -1,7 +1,6 @@
 #if DEBUG
 
 import SwiftUI
-import WalletConnectPairing
 
 class WebSocketMock: WebSocketConnecting {
     var request: URLRequest = .init(url: URL(string: "wss://relay.walletconnect.com")!)
@@ -37,12 +36,7 @@ struct ModalSheet_Previews: PreviewProvider {
         ModalSheet(
             viewModel: .init(
                 isShown: .constant(true),
-                projectId: projectId,
-                interactor: DefaultModalSheetInteractor(
-                    projectId: projectId,
-                    metadata: metadata,
-                    webSocketFactory: WebSocketFactoryMock()
-                )
+                interactor: DefaultModalSheetInteractor()
             )
         )
         .previewLayout(.sizeThatFits)

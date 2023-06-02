@@ -268,6 +268,7 @@
 		C5F32A322954816C00A6476E /* ConnectionDetailsPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F32A312954816C00A6476E /* ConnectionDetailsPresenter.swift */; };
 		C5F32A342954817600A6476E /* ConnectionDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F32A332954817600A6476E /* ConnectionDetailsView.swift */; };
 		C5F32A362954FE3C00A6476E /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C5F32A352954FE3C00A6476E /* Colors.xcassets */; };
+		CF140F2D2A2A288D00BEB791 /* Web3Modal in Frameworks */ = {isa = PBXBuildFile; productRef = CF140F2C2A2A288D00BEB791 /* Web3Modal */; };
 		CF1A594529E5876600AAC16B /* XCUIElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF1A593A29E5876600AAC16B /* XCUIElement.swift */; };
 		CF1A594629E5876600AAC16B /* PushNotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF1A593C29E5876600AAC16B /* PushNotificationTests.swift */; };
 		CF1A594829E5876600AAC16B /* Engine.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF1A593F29E5876600AAC16B /* Engine.swift */; };
@@ -604,6 +605,7 @@
 				8448F1D427E4726F0000B866 /* WalletConnect in Frameworks */,
 				A54195A52934E83F0035AD19 /* Web3 in Frameworks */,
 				84E6B8652981720400428BAF /* WalletConnectPush in Frameworks */,
+				CF140F2D2A2A288D00BEB791 /* Web3Modal in Frameworks */,
 				A5D85228286333E300DAF5C3 /* Starscream in Frameworks */,
 				A5BB7FA328B6A50400707FC6 /* WalletConnectAuth in Frameworks */,
 			);
@@ -1730,6 +1732,7 @@
 				A5BB7FA228B6A50400707FC6 /* WalletConnectAuth */,
 				A54195A42934E83F0035AD19 /* Web3 */,
 				84E6B8642981720400428BAF /* WalletConnectPush */,
+				CF140F2C2A2A288D00BEB791 /* Web3Modal */,
 			);
 			productName = DApp;
 			productReference = 84CE641C27981DED00142511 /* DApp.app */;
@@ -3142,6 +3145,10 @@
 		C5DD5BE0294E09E3008FD3A4 /* Web3Wallet */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Web3Wallet;
+		};
+		CF140F2C2A2A288D00BEB791 /* Web3Modal */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Web3Modal;
 		};
 		CF9C7E492A01802F0037C006 /* Web3Modal */ = {
 			isa = XCSwiftPackageProductDependency;

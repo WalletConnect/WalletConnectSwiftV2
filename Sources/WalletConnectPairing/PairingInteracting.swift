@@ -3,7 +3,7 @@ import Foundation
 public protocol PairingInteracting {
     func pair(uri: WalletConnectURI) async throws
 
-    func create()  async throws -> WalletConnectURI
+    func create() async throws -> WalletConnectURI
 
     func getPairings() -> [Pairing]
 

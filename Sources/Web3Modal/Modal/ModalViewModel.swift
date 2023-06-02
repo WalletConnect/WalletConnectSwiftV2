@@ -34,7 +34,6 @@ final class ModalViewModel: ObservableObject {
     
     var isShown: Binding<Bool>
     let interactor: ModalSheetInteractor
-    let projectId: String
     let uiApplicationWrapper: UIApplicationWrapper
     
     
@@ -52,13 +51,11 @@ final class ModalViewModel: ObservableObject {
     
     init(
         isShown: Binding<Bool>,
-        projectId: String,
         interactor: ModalSheetInteractor,
         uiApplicationWrapper: UIApplicationWrapper = .live
     ) {
         self.isShown = isShown
         self.interactor = interactor
-        self.projectId = projectId
         self.uiApplicationWrapper = uiApplicationWrapper
             
         interactor.sessionSettlePublisher
@@ -68,12 +65,25 @@ final class ModalViewModel: ObservableObject {
                 isShown.wrappedValue = false
             }
             .store(in: &disposeBag)
+        
+        interactor.sessionRejectionPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { (proposal, reason) in
+                
+                print(reason)
+                self.errorMessage = reason.message
+                
+                Task {
+                    await self.createURI()
+                }
+            }
+            .store(in: &disposeBag)
     }
         
     @MainActor
     func createURI() async {
         do {
-            let wcUri = try await interactor.connect()
+            let wcUri = try await interactor.createPairingAndConnect()
             uri = wcUri.absoluteString
             deeplinkUri = wcUri.deeplinkUri
         } catch {
