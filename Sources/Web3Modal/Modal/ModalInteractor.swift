@@ -1,6 +1,8 @@
+
+import Combine
+import Foundation
 import WalletConnectPairing
 import WalletConnectSign
-import Combine
 
 protocol ModalSheetInteractor {
     func getListings() async throws -> [Listing]

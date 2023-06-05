@@ -8,7 +8,7 @@ struct Listing: Codable, Hashable, Identifiable {
     let id: String
     let name: String
     let homepage: String
-    let order: Int
+    let order: Int?
     let imageId: String
     let app: App
     let mobile: Mobile
