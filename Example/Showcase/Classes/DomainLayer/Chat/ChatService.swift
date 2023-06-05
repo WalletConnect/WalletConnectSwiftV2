@@ -8,7 +8,7 @@ typealias Stream<T> = AnyPublisher<T, Never>
 final class ChatService {
 
     private var client: ChatClient = {
-        Chat.configure(crypto: DefaultCryptoProvider())
+        Chat.configure(derivator: DefaultDerivationProvider())
         return Chat.instance
     }()
 

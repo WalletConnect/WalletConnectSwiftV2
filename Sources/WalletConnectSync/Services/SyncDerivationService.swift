@@ -3,16 +3,16 @@ import Foundation
 final class SyncDerivationService {
 
     private let syncStorage: SyncSignatureStore
-    private let crypto: CryptoProvider
+    private let derivator: DerivationProvider
     private let kms: KeyManagementServiceProtocol
 
     init(
         syncStorage: SyncSignatureStore,
-        crypto: CryptoProvider,
+        derivator: DerivationProvider,
         kms: KeyManagementServiceProtocol
     ) {
         self.syncStorage = syncStorage
-        self.crypto = crypto
+        self.derivator = derivator
         self.kms = kms
     }
 
@@ -34,7 +34,7 @@ final class SyncDerivationService {
         ] + slice.map { .notHardened($0) }
 
         let entropy = signatureData.sha256()
-        let storeKey = crypto.derive(entropy: entropy, path: path)
+        let storeKey = derivator.derive(entropy: entropy, path: path)
         let topic = storeKey.sha256().toHexString()
 
         let symmetricKey = try SymmetricKey(rawRepresentation: storeKey)

@@ -55,7 +55,7 @@ final class SyncTests: XCTestCase {
         let syncSignatureStore = SyncSignatureStore(keychain: KeychainStorageMock())
         let keychain = KeychainStorageMock()
         let kms = KeyManagementService(keychain: keychain)
-        let derivationService = SyncDerivationService(syncStorage: syncSignatureStore, crypto: DefaultCryptoProvider(), kms: kms)
+        let derivationService = SyncDerivationService(syncStorage: syncSignatureStore, derivator: DefaultDerivationProvider(), kms: kms)
         let logger = ConsoleLogger(suffix: suffix, loggingLevel: .debug)
         let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keychainStorage: keychain, socketFactory: DefaultSocketFactory(), logger: logger)
         let networkingInteractor = NetworkingClientFactory.create(

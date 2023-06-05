@@ -17,12 +17,9 @@ public final class Web3Inbox {
     private init() { }
 
     /// Web3Inbox instance config method
-    /// - Parameters:
-    ///   - account: Web3Inbox initial account
-    ///   - crypto: Crypto utils implementation
     static public func configure(
         account: Account,
-        crypto: CryptoProvider,
+        derivator: DerivationProvider,
         config: [ConfigParam: Bool] = [:],
         environment: APNSEnvironment,
         onSign: @escaping SigningCallback
@@ -30,7 +27,7 @@ public final class Web3Inbox {
         Web3Inbox.account = account
         Web3Inbox.config = config
         Web3Inbox.onSign = onSign
-        Chat.configure(crypto: crypto)
+        Chat.configure(derivator: derivator)
         Push.configure(environment: environment)
     }
 }
