@@ -19,6 +19,7 @@ public class KeyedDatabase<Element> where Element: DatabaseObject {
     private let storage: KeyValueStorage
     private let identifier: String
 
+    // TODO: Replace with publisher
     public var onUpdate: (() -> Void)?
 
     public init(storage: KeyValueStorage, identifier: String) {
