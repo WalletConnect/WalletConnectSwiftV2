@@ -1,7 +1,7 @@
 import Foundation
 import Combine
 
-@testable import Auth        
+@testable import Auth
 
 final class AuthClientMock: AuthClientProtocol {
     var respondCalled = false
@@ -26,8 +26,8 @@ final class AuthClientMock: AuthClientProtocol {
         )
     }
     
-    var authRequestPublisher: AnyPublisher<AuthRequest, Never> {
-        return Result.Publisher(authRequest).eraseToAnyPublisher()
+    var authRequestPublisher: AnyPublisher<(request: AuthRequest, context: VerifyContext?), Never> {
+        return Result.Publisher((authRequest, nil)).eraseToAnyPublisher()
     }
     
     func formatMessage(payload: AuthPayload, address: String) throws -> String {

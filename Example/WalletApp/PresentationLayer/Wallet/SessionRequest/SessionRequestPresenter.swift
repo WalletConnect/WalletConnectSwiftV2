@@ -8,6 +8,7 @@ final class SessionRequestPresenter: ObservableObject {
     private let router: SessionRequestRouter
     
     let sessionRequest: Request
+    let verified: Bool?
     
     var message: String {
         return String(describing: sessionRequest.params.value)
@@ -21,12 +22,14 @@ final class SessionRequestPresenter: ObservableObject {
     init(
         interactor: SessionRequestInteractor,
         router: SessionRequestRouter,
-        sessionRequest: Request
+        sessionRequest: Request,
+        context: VerifyContext?
     ) {
         defer { setupInitialState() }
         self.interactor = interactor
         self.router = router
         self.sessionRequest = sessionRequest
+        self.verified = (context?.validation == .valid) ? true : (context?.validation == .unknown ? nil : false)
     }
 
     @MainActor

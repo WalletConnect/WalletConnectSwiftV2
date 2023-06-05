@@ -3,7 +3,7 @@ import Combine
 
 public protocol NetworkInteracting {
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> { get }
-    var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest, publishedAt: Date, derivedTopic: String?), Never> { get }
+    var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?), Never> { get }
     func subscribe(topic: String) async throws
     func unsubscribe(topic: String)
     func batchSubscribe(topics: [String]) async throws

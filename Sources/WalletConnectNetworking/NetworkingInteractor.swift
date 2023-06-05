@@ -9,10 +9,10 @@ public class NetworkingInteractor: NetworkInteracting {
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
 
-    private let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, publishedAt: Date, derivedTopic: String?), Never>()
+    private let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?), Never>()
     private let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date, derivedTopic: String?), Never>()
 
-    public var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest, publishedAt: Date, derivedTopic: String?), Never> {
+    public var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?), Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
@@ -71,9 +71,9 @@ public class NetworkingInteractor: NetworkInteracting {
             .filter { rpcRequest in
                 return rpcRequest.request.method == request.method
             }
-            .compactMap { topic, rpcRequest, publishedAt, derivedTopic in
+            .compactMap { topic, rpcRequest, decryptedPayload, publishedAt, derivedTopic in
                 guard let id = rpcRequest.id, let request = try? rpcRequest.params?.get(RequestParams.self) else { return nil }
-                return RequestSubscriptionPayload(id: id, topic: topic, request: request, publishedAt: publishedAt, derivedTopic: derivedTopic)
+                return RequestSubscriptionPayload(id: id, topic: topic, request: request, decryptedPayload: decryptedPayload, publishedAt: publishedAt, derivedTopic: derivedTopic)
             }
             .eraseToAnyPublisher()
     }
@@ -111,7 +111,7 @@ public class NetworkingInteractor: NetworkInteracting {
 
     public func respond(topic: String, response: RPCResponse, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
         try rpcHistory.resolve(response)
-        let message = try! serializer.serialize(topic: topic, encodable: response, envelopeType: envelopeType)
+        let message = try serializer.serialize(topic: topic, encodable: response, envelopeType: envelopeType)
         try await relayClient.publish(topic: topic, payload: message, tag: protocolMethod.responseConfig.tag, prompt: protocolMethod.responseConfig.prompt, ttl: protocolMethod.responseConfig.ttl)
     }
 
@@ -131,19 +131,19 @@ public class NetworkingInteractor: NetworkInteracting {
     }
 
     private func manageSubscription(_ topic: String, _ encodedEnvelope: String, _ publishedAt: Date) {
-        if let (deserializedJsonRpcRequest, derivedTopic): (RPCRequest, String?) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
-            handleRequest(topic: topic, request: deserializedJsonRpcRequest, publishedAt: publishedAt, derivedTopic: derivedTopic)
-        } else if let (response, derivedTopic): (RPCResponse, String?) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
+        if let (deserializedJsonRpcRequest, derivedTopic, decryptedPayload): (RPCRequest, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
+            handleRequest(topic: topic, request: deserializedJsonRpcRequest, decryptedPayload: decryptedPayload, publishedAt: publishedAt, derivedTopic: derivedTopic)
+        } else if let (response, derivedTopic, _): (RPCResponse, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleResponse(topic: topic, response: response, publishedAt: publishedAt, derivedTopic: derivedTopic)
         } else {
             logger.debug("Networking Interactor - Received unknown object type from networking relay")
         }
     }
 
-    private func handleRequest(topic: String, request: RPCRequest, publishedAt: Date, derivedTopic: String?) {
+    private func handleRequest(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?) {
         do {
             try rpcHistory.set(request, forTopic: topic, emmitedBy: .remote)
-            requestPublisherSubject.send((topic, request, publishedAt, derivedTopic))
+            requestPublisherSubject.send((topic, request, decryptedPayload, publishedAt, derivedTopic))
         } catch {
             logger.debug(error)
         }

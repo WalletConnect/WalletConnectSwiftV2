@@ -8,7 +8,7 @@ final class SessionEngine {
     }
 
     var onSessionsUpdate: (([Session]) -> Void)?
-    var onSessionRequest: ((Request) -> Void)?
+    var onSessionRequest: ((Request, VerifyContext?) -> Void)?
     var onSessionResponse: ((Response) -> Void)?
     var onSessionRejected: ((String, SessionType.Reason) -> Void)?
     var onSessionDelete: ((String, SessionType.Reason) -> Void)?
@@ -17,6 +17,7 @@ final class SessionEngine {
     private let sessionStore: WCSessionStorage
     private let networkingInteractor: NetworkInteracting
     private let historyService: HistoryService
+    private let verifyClient: VerifyClient?
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
@@ -24,12 +25,14 @@ final class SessionEngine {
     init(
         networkingInteractor: NetworkInteracting,
         historyService: HistoryService,
+        verifyClient: VerifyClient?,
         kms: KeyManagementServiceProtocol,
         sessionStore: WCSessionStorage,
         logger: ConsoleLogging
     ) {
         self.networkingInteractor = networkingInteractor
         self.historyService = historyService
+        self.verifyClient = verifyClient
         self.kms = kms
         self.sessionStore = sessionStore
         self.logger = logger
@@ -127,7 +130,9 @@ private extension SessionEngine {
 
         networkingInteractor.requestSubscription(on: SessionRequestProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionType.RequestParams>) in
-                onSessionRequest(payload: payload)
+                Task(priority: .high) {
+                    onSessionRequest(payload: payload)
+                }
             }.store(in: &publishers)
 
         networkingInteractor.requestSubscription(on: SessionPingProtocolMethod())
@@ -221,7 +226,6 @@ private extension SessionEngine {
             chainId: payload.request.chainId,
             expiry: payload.request.request.expiry
         )
-
         guard let session = sessionStore.getSession(forTopic: topic) else {
             return respondError(payload: payload, reason: .noSessionForTopic, protocolMethod: protocolMethod)
         }
@@ -231,12 +235,22 @@ private extension SessionEngine {
         guard session.hasPermission(forMethod: request.method, onChain: request.chainId) else {
             return respondError(payload: payload, reason: .unauthorizedMethod(request.method), protocolMethod: protocolMethod)
         }
-
         guard !request.isExpired() else {
             return respondError(payload: payload, reason: .sessionRequestExpired, protocolMethod: protocolMethod)
         }
-
-        onSessionRequest?(request)
+        guard let verifyClient else {
+            onSessionRequest?(request, nil)
+            return
+        }
+        Task(priority: .high) {
+            let assertionId = payload.decryptedPayload.sha256().toHexString()
+            let origin = try? await verifyClient.verifyOrigin(assertionId: assertionId)
+            let verifyContext = await verifyClient.createVerifyContext(
+                origin: origin,
+                domain: session.peerParticipant.metadata.url
+            )
+            onSessionRequest?(request, verifyContext)
+        }
     }
 
     func onSessionPing(payload: SubscriptionPayload) {

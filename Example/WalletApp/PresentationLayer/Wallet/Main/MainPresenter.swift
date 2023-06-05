@@ -35,13 +35,13 @@ extension MainPresenter {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] request in
 
-//                self?.router.present(pushRequest: request)
+                self?.router.present(pushRequest: request)
             }.store(in: &disposeBag)
 
         interactor.sessionProposalPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] proposal in
-                self?.router.present(proposal: proposal)
+            .sink { [weak self] session in
+                self?.router.present(proposal: session.proposal, context: session.context)
             }
             .store(in: &disposeBag)
     }

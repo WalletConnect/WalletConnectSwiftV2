@@ -41,5 +41,4 @@ extension Session {
             SessionType.EventParams.Event(name: name, data: data)
         }
     }
-
 }

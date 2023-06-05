@@ -15,7 +15,16 @@ extension Foundation.Bundle {
             Bundle(for: BundleFinder.self).resourceURL,
 
             // For command-line tools.
-            Bundle.main.bundleURL
+            Bundle.main.bundleURL,
+            
+            // One of these should be used when building SwiftUI Previews
+            Bundle(for: BundleFinder.self).resourceURL?
+                .deletingLastPathComponent()
+                .deletingLastPathComponent()
+                .deletingLastPathComponent(),
+            Bundle(for: BundleFinder.self).resourceURL?
+                .deletingLastPathComponent()
+                .deletingLastPathComponent()
         ]
 
         for candidate in candidates {

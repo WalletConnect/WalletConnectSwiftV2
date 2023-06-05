@@ -6,7 +6,6 @@ import WalletConnectKMS
 import WalletConnectNetworking
 
 public class NetworkingInteractorMock: NetworkInteracting {
-
     private(set) var subscriptions: [String] = []
     private(set) var unsubscriptions: [String] = []
 
@@ -30,10 +29,10 @@ public class NetworkingInteractorMock: NetworkInteracting {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
     }
 
-    public let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, publishedAt: Date, derivedTopic: String?), Never>()
+    public let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?), Never>()
     public let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date, derivedTopic: String?), Never>()
 
-    public var requestPublisher: AnyPublisher<(topic: String, request: JSONRPC.RPCRequest, publishedAt: Date, derivedTopic: String?), Never> {
+    public var requestPublisher: AnyPublisher<(topic: String, request: JSONRPC.RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?), Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
@@ -47,9 +46,9 @@ public class NetworkingInteractorMock: NetworkInteracting {
             .filter { rpcRequest in
                 return rpcRequest.request.method == request.method
             }
-            .compactMap { topic, rpcRequest, publishedAt, derivedTopic in
+            .compactMap { topic, rpcRequest, decryptedPayload, publishedAt, derivedTopic in
                 guard let id = rpcRequest.id, let request = try? rpcRequest.params?.get(Request.self) else { return nil }
-                return RequestSubscriptionPayload(id: id, topic: topic, request: request, publishedAt: publishedAt, derivedTopic: derivedTopic)
+                return RequestSubscriptionPayload(id: id, topic: topic, request: request, decryptedPayload: decryptedPayload, publishedAt: publishedAt, derivedTopic: derivedTopic)
             }
             .eraseToAnyPublisher()
     }

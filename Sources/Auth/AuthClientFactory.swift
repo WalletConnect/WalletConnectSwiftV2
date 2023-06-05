@@ -44,11 +44,12 @@ public struct AuthClientFactory {
         let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
         let messageFormatter = SIWECacaoFormatter()
         let appRequestService = AppRequestService(networkingInteractor: networkingClient, kms: kms, appMetadata: metadata, logger: logger, iatProvader: iatProvider)
+        let verifyClient = try? VerifyClientFactory.create(verifyHost: metadata.verifyUrl)
         let messageVerifierFactory = MessageVerifierFactory(crypto: crypto)
         let signatureVerifier = messageVerifierFactory.create(projectId: projectId)
         let appRespondSubscriber = AppRespondSubscriber(networkingInteractor: networkingClient, logger: logger, rpcHistory: history, signatureVerifier: signatureVerifier, pairingRegisterer: pairingRegisterer, messageFormatter: messageFormatter)
         let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: history)
-        let walletRequestSubscriber = WalletRequestSubscriber(networkingInteractor: networkingClient, logger: logger, kms: kms, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingRegisterer)
+        let walletRequestSubscriber = WalletRequestSubscriber(networkingInteractor: networkingClient, logger: logger, kms: kms, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingRegisterer, verifyClient: verifyClient)
         let walletRespondService = WalletRespondService(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: history, walletErrorResponder: walletErrorResponder)
         let pendingRequestsProvider = PendingRequestsProvider(rpcHistory: history)
 

@@ -30,7 +30,7 @@ final class RelayClientEndToEndTests: XCTestCase {
 
     private var publishers = Set<AnyCancellable>()
 
-    func makeRelayClient() -> RelayClient {
+    func makeRelayClient(prefix: String) -> RelayClient {
         let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock())
         let socketAuthenticator = SocketAuthenticator(
             clientIdStorage: clientIdStorage,
@@ -43,20 +43,24 @@ final class RelayClientEndToEndTests: XCTestCase {
         )
         let socket = WebSocket(url: urlFactory.create())
         let webSocketFactory = WebSocketFactoryMock(webSocket: socket)
-        let logger = ConsoleLogger()
+        let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let dispatcher = Dispatcher(
             socketFactory: webSocketFactory,
             relayUrlFactory: urlFactory,
             socketConnectionType: .manual,
             logger: logger
         )
-        let rpcHistory = RPCHistoryFactory.createForRelay(keyValueStorage: RuntimeKeyValueStorage())
 
-        return RelayClient(dispatcher: dispatcher, logger: logger, rpcHistory: rpcHistory, clientIdStorage: clientIdStorage)
+        let rpcHistory = RPCHistoryFactory.createForRelay(keyValueStorage: RuntimeKeyValueStorage())
+        let relayClient = RelayClient(dispatcher: dispatcher, logger: logger, rpcHistory: rpcHistory, keyValueStorage: RuntimeKeyValueStorage(), clientIdStorage: clientIdStorage)
+        let clientId = try! relayClient.getClientId()
+        logger.debug("My client id is: \(clientId)")
+
+        return relayClient
     }
 
     func testSubscribe() {
-        let relayClient = makeRelayClient()
+        let relayClient = makeRelayClient(prefix: "")
 
         try! relayClient.connect()
         let subscribeExpectation = expectation(description: "subscribe call succeeds")
@@ -72,8 +76,8 @@ final class RelayClientEndToEndTests: XCTestCase {
     }
 
     func testEndToEndPayload() {
-        let relayA = makeRelayClient()
-        let relayB = makeRelayClient()
+        let relayA = makeRelayClient(prefix: "⚽️ A ")
+        let relayB = makeRelayClient(prefix: "🏀 B ")
 
         try! relayA.connect()
         try! relayB.connect()

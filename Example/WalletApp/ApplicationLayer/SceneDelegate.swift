@@ -32,17 +32,19 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         app.uri = connectionOptions.urlContexts.first?.url.absoluteString.replacingOccurrences(of: "walletapp://wc?uri=", with: "")
 
-        configurators.configure()
+            configurators.configure()
         app.pushRegisterer.registerForPushNotifications()
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard let context = URLContexts.first else { return }
 
-        let uri = context.url.absoluteString.replacingOccurrences(of: "walletapp://wc?uri=", with: "")
-        Task {
-            try await Pair.instance.pair(uri: WalletConnectURI(string: uri)!)
-        }
-
+		let queryParams = context.url.queryParameters
+		
+		if let uri = queryParams["uri"] as? String {
+			Task {
+				try await Pair.instance.pair(uri: WalletConnectURI(string: uri)!)
+			}
+		}
     }
 }

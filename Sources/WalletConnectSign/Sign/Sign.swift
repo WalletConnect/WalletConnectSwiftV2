@@ -1,6 +1,10 @@
 import Foundation
 import Combine
 
+#if SWIFT_PACKAGE
+public typealias VerifyContext = WalletConnectVerify.VerifyContext
+#endif
+
 /// Sign instatnce wrapper
 ///
 /// ```swift
