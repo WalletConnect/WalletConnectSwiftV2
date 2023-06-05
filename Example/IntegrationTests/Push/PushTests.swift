@@ -167,6 +167,7 @@ final class PushTests: XCTestCase {
                 return
             }
             subscriptionTopic = pushSubscription.topic
+            sleep(1)
             Task(priority: .userInitiated) { try! await walletPushClient.deleteSubscription(topic: pushSubscription.topic)}
         }.store(in: &publishers)
 
