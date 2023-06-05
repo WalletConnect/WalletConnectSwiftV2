@@ -9,7 +9,6 @@ public class Echo {
 
         return EchoClientFactory.create(
             projectId: Networking.projectId,
-            clientId: config.clientId,
             echoHost: config.echoHost,
             environment: config.environment)
     }()
@@ -21,10 +20,9 @@ public class Echo {
     /// Echo instance config method
     /// - Parameter clientId: https://github.com/WalletConnect/walletconnect-docs/blob/main/docs/specs/clients/core/relay/relay-client-auth.md#overview
     static public func configure(
-        clientId: String,
         echoHost: String = echoHost,
         environment: APNSEnvironment
     ) {
-        Echo.config = Echo.Config(clientId: clientId, echoHost: echoHost, environment: environment)
+        Echo.config = Echo.Config(echoHost: echoHost, environment: environment)
     }
 }
