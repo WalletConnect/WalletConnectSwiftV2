@@ -2,17 +2,17 @@ import Foundation
 
 final class SyncClientFactory {
 
-    static func create(networkInteractor: NetworkInteracting, derivator: DerivationProvider) -> SyncClient {
+    static func create(networkInteractor: NetworkInteracting, bip44: BIP44Provider) -> SyncClient {
         let keychain = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
-        return create(networkInteractor: networkInteractor, derivator: derivator, keychain: keychain)
+        return create(networkInteractor: networkInteractor, bip44: bip44, keychain: keychain)
     }
 
-    static func create(networkInteractor: NetworkInteracting, derivator: DerivationProvider, keychain: KeychainStorageProtocol) -> SyncClient {
+    static func create(networkInteractor: NetworkInteracting, bip44: BIP44Provider, keychain: KeychainStorageProtocol) -> SyncClient {
         let signatureStore = SyncSignatureStore(keychain: keychain)
         let kms = KeyManagementService(keychain: keychain)
         let deriviationService = SyncDerivationService(
             syncStorage: signatureStore,
-            derivator: derivator,
+            bip44: bip44,
             kms: kms
         )
         let indexStore = CodableStore<SyncRecord>(defaults: UserDefaults.standard, identifier: SyncStorageIdentifiers.index.identifier)

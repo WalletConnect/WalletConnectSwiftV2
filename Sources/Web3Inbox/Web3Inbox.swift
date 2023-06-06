@@ -19,7 +19,7 @@ public final class Web3Inbox {
     /// Web3Inbox instance config method
     static public func configure(
         account: Account,
-        derivator: DerivationProvider,
+        bip44: BIP44Provider,
         config: [ConfigParam: Bool] = [:],
         environment: APNSEnvironment,
         onSign: @escaping SigningCallback
@@ -27,7 +27,7 @@ public final class Web3Inbox {
         Web3Inbox.account = account
         Web3Inbox.config = config
         Web3Inbox.onSign = onSign
-        Chat.configure(derivator: derivator)
+        Chat.configure(bip44: bip44)
         Push.configure(environment: environment)
     }
 }

@@ -4,7 +4,7 @@ import Web3
 import CryptoSwift
 import HDWalletKit
 
-struct DefaultDerivationProvider: DerivationProvider {
+struct DefaultBIP44Provider: BIP44Provider {
 
     public func derive(entropy: Data, path: [WalletConnectSigner.DerivationPath]) -> Data {
         let mnemonic = Mnemonic.create(entropy: entropy)

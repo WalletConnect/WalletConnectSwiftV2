@@ -10,7 +10,7 @@ public class Sync {
         }
         return SyncClientFactory.create(
             networkInteractor: Networking.interactor,
-            derivator: config.derivator
+            bip44: config.bip44
         )
     }()
 
@@ -21,7 +21,7 @@ public class Sync {
     /// Auth instance wallet config method.  For DApp usage
     /// - Parameters:
     ///   - crypto: Crypto utils implementation
-    static public func configure(derivator: DerivationProvider) {
-        Sync.config = Sync.Config(derivator: derivator)
+    static public func configure(bip44: BIP44Provider) {
+        Sync.config = Sync.Config(bip44: bip44)
     }
 }

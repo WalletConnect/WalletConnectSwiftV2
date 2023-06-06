@@ -13,7 +13,7 @@ class SyncDerivationServiceTests: XCTestCase {
         let kms = KeyManagementService(keychain: keychain)
         let derivationService = SyncDerivationService(
             syncStorage: syncStorage,
-            derivator: DefaultDerivationProvider(),
+            bip44: DefaultBIP44Provider(),
             kms: kms
         )
 

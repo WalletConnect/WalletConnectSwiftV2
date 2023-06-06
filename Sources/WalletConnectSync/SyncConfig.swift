@@ -2,6 +2,6 @@ import Foundation
 
 extension Sync {
     struct Config {
-        let derivator: DerivationProvider
+        let bip44: BIP44Provider
     }
 }

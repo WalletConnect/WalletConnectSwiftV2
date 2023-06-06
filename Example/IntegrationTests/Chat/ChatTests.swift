@@ -59,7 +59,7 @@ final class ChatTests: XCTestCase {
 
         let syncClient = SyncClientFactory.create(
             networkInteractor: networkingInteractor,
-            derivator: DefaultDerivationProvider(),
+            bip44: DefaultBIP44Provider(),
             keychain: keychain
         )
 

@@ -76,10 +76,10 @@
 		A507BE1A29E8032E0038EF70 /* EIP55Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A507BE1929E8032E0038EF70 /* EIP55Tests.swift */; };
 		A50C036528AAD32200FE72D3 /* ClientDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50C036428AAD32200FE72D3 /* ClientDelegate.swift */; };
 		A50F3946288005B200064555 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50F3945288005B200064555 /* Types.swift */; };
-		A51606F32A2E2DE000CACB92 /* DefaultDerivationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51606F22A2E2DE000CACB92 /* DefaultDerivationProvider.swift */; };
-		A51606F42A2E2DE000CACB92 /* DefaultDerivationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51606F22A2E2DE000CACB92 /* DefaultDerivationProvider.swift */; };
-		A51606F52A2E2DE000CACB92 /* DefaultDerivationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51606F22A2E2DE000CACB92 /* DefaultDerivationProvider.swift */; };
-		A51606F62A2E2DE000CACB92 /* DefaultDerivationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51606F22A2E2DE000CACB92 /* DefaultDerivationProvider.swift */; };
+		A51606F82A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */; };
+		A51606F92A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */; };
+		A51606FA2A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */; };
+		A51606FB2A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */; };
 		A518A98729683FB60035247E /* Web3InboxViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A518A98429683FB60035247E /* Web3InboxViewController.swift */; };
 		A518A98829683FB60035247E /* Web3InboxModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A518A98529683FB60035247E /* Web3InboxModule.swift */; };
 		A518A98929683FB60035247E /* Web3InboxRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A518A98629683FB60035247E /* Web3InboxRouter.swift */; };
@@ -418,7 +418,7 @@
 		A507BE1929E8032E0038EF70 /* EIP55Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EIP55Tests.swift; sourceTree = "<group>"; };
 		A50C036428AAD32200FE72D3 /* ClientDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientDelegate.swift; sourceTree = "<group>"; };
 		A50F3945288005B200064555 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
-		A51606F22A2E2DE000CACB92 /* DefaultDerivationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultDerivationProvider.swift; sourceTree = "<group>"; };
+		A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DefaultBIP44Provider.swift; sourceTree = "<group>"; };
 		A518A98429683FB60035247E /* Web3InboxViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Web3InboxViewController.swift; sourceTree = "<group>"; };
 		A518A98529683FB60035247E /* Web3InboxModule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Web3InboxModule.swift; sourceTree = "<group>"; };
 		A518A98629683FB60035247E /* Web3InboxRouter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Web3InboxRouter.swift; sourceTree = "<group>"; };
@@ -1291,7 +1291,7 @@
 				A5629AEF2877F73000094373 /* DefaultSocketFactory.swift */,
 				A59CF4F5292F83D50031A42F /* DefaultSignerFactory.swift */,
 				A5A0843B29D2F60A000B9B17 /* DefaultCryptoProvider.swift */,
-				A51606F22A2E2DE000CACB92 /* DefaultDerivationProvider.swift */,
+				A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -2071,7 +2071,6 @@
 				A5BB7FA928B6A5FD00707FC6 /* AuthViewModel.swift in Sources */,
 				84CE6452279ED42B00142511 /* ConnectView.swift in Sources */,
 				A5A8E47E293A1CFE00FEB97D /* DefaultSignerFactory.swift in Sources */,
-				A51606F32A2E2DE000CACB92 /* DefaultDerivationProvider.swift in Sources */,
 				A5A0843D29D2F624000B9B17 /* DefaultCryptoProvider.swift in Sources */,
 				84CE6448279AE68600142511 /* AccountRequestViewController.swift in Sources */,
 				A5BB7F9F28B69B7100707FC6 /* SignCoordinator.swift in Sources */,
@@ -2079,6 +2078,7 @@
 				84CE644E279ED2FF00142511 /* SelectChainView.swift in Sources */,
 				84CE644B279EA1FA00142511 /* AccountRequestView.swift in Sources */,
 				84CE6431279820F600142511 /* AccountsView.swift in Sources */,
+				A51606F82A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */,
 				84CE643D2798322600142511 /* ConnectViewController.swift in Sources */,
 				84CE6444279AB5AD00142511 /* SelectChainViewController.swift in Sources */,
 			);
@@ -2123,11 +2123,11 @@
 				A58E7D3D2872D55F0082D443 /* ChatView.swift in Sources */,
 				A5629ABD2876CBC000094373 /* ChatListModule.swift in Sources */,
 				A58E7CEB28729F550082D443 /* AppDelegate.swift in Sources */,
+				A51606FA2A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */,
 				A578FA35287304A300AA7720 /* Color.swift in Sources */,
 				A5629ADE2876CC6E00094373 /* InviteListModule.swift in Sources */,
 				A5E776BA29F4362D00172091 /* AlertError.swift in Sources */,
 				A578FA322873036400AA7720 /* InputView.swift in Sources */,
-				A51606F52A2E2DE000CACB92 /* DefaultDerivationProvider.swift in Sources */,
 				A5A0843F29D2F625000B9B17 /* DefaultCryptoProvider.swift in Sources */,
 				A5C2021B287E1FD8007E3188 /* ImportRouter.swift in Sources */,
 				A5629AE42876E6D200094373 /* ThreadViewModel.swift in Sources */,
@@ -2191,6 +2191,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A51606F92A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */,
 				A573C53729EC34A600E3CBFD /* SyncDerivationServiceTests.swift in Sources */,
 				A5A0843E29D2F624000B9B17 /* DefaultCryptoProvider.swift in Sources */,
 				84CEC64628D89D6B00D081A8 /* PairingTests.swift in Sources */,
@@ -2217,7 +2218,6 @@
 				A5E03DFD286465D100888481 /* Stubs.swift in Sources */,
 				A507BE1A29E8032E0038EF70 /* EIP55Tests.swift in Sources */,
 				A5A8E47A293A1C9B00FEB97D /* DefaultSocketFactory.swift in Sources */,
-				A51606F42A2E2DE000CACB92 /* DefaultDerivationProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2243,6 +2243,7 @@
 				C56EE241293F566D004840D1 /* WalletModule.swift in Sources */,
 				C56EE245293F566D004840D1 /* WalletPresenter.swift in Sources */,
 				C56EE240293F566D004840D1 /* ScanQRView.swift in Sources */,
+				A51606FB2A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */,
 				C56EE250293F566D004840D1 /* ScanTargetView.swift in Sources */,
 				C56EE28F293F5757004840D1 /* MigrationConfigurator.swift in Sources */,
 				84B815552991217900FAD54E /* PushMessagesPresenter.swift in Sources */,
@@ -2306,7 +2307,6 @@
 				C5B2F6F929705293000DBA0E /* SessionRequestPresenter.swift in Sources */,
 				84DB38F32983CDAE00BFEE37 /* PushRegisterer.swift in Sources */,
 				C5B2F6FB297055B0000DBA0E /* ETHSigner.swift in Sources */,
-				A51606F62A2E2DE000CACB92 /* DefaultDerivationProvider.swift in Sources */,
 				C56EE274293F56D7004840D1 /* SceneViewController.swift in Sources */,
 				847BD1E5298A806800076C90 /* NotificationsPresenter.swift in Sources */,
 				C55D3496295DFA750004314A /* WelcomeInteractor.swift in Sources */,

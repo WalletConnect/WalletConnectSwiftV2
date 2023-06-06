@@ -26,9 +26,9 @@ public class Chat {
     ///   - crypto: Crypto utils implementation
     static public func configure(
         keyserverUrl: String = "https://keys.walletconnect.com",
-        derivator: DerivationProvider
+        bip44: BIP44Provider
     ) {
         Chat.keyserverUrl = keyserverUrl
-        Sync.configure(derivator: derivator)
+        Sync.configure(bip44: bip44)
     }
 }

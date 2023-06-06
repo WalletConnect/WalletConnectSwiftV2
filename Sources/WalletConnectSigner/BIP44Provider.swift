@@ -5,6 +5,6 @@ public enum DerivationPath {
     case notHardened(UInt32)
 }
 
-public protocol DerivationProvider {
+public protocol BIP44Provider {
     func derive(entropy: Data, path: [DerivationPath]) -> Data
 }
