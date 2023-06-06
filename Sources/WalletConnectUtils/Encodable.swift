@@ -10,8 +10,11 @@ public enum DataConversionError: Error {
 public extension Encodable {
 
     // TODO: Migrate
-    func json() throws -> String {
+    func json(dateEncodingStrategy: JSONEncoder.DateEncodingStrategy? = nil) throws -> String {
         let encoder = JSONEncoder()
+        if let dateEncodingStrategy = dateEncodingStrategy {
+            encoder.dateEncodingStrategy = dateEncodingStrategy
+        }
         encoder.outputFormatting = .withoutEscapingSlashes
         let data = try encoder.encode(self)
         guard let string = String(data: data, encoding: .utf8) else {

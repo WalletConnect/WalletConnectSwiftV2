@@ -74,7 +74,10 @@ final class PushTests: XCTestCase {
         let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
         walletPairingClient = pairingClient
-        let echoClient = EchoClientFactory.create(projectId: "", clientId: "", echoHost: "echo.walletconnect.com", environment: .sandbox)
+        let echoClient = EchoClientFactory.create(projectId: "",
+                                                  echoHost: "echo.walletconnect.com",
+                                                  keychainStorage: keychain,
+                                                  environment: .sandbox)
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
         walletPushClient = WalletPushClientFactory.create(keyserverURL: keyserverURL,
                                                           logger: pushLogger,
@@ -167,6 +170,7 @@ final class PushTests: XCTestCase {
                 return
             }
             subscriptionTopic = pushSubscription.topic
+            sleep(1)
             Task(priority: .userInitiated) { try! await walletPushClient.deleteSubscription(topic: pushSubscription.topic)}
         }.store(in: &publishers)
 
