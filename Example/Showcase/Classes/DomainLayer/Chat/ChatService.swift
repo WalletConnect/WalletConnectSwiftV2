@@ -7,8 +7,8 @@ typealias Stream<T> = AnyPublisher<T, Never>
 
 final class ChatService {
 
-    private lazy var client: ChatClient = {
-        Chat.configure()
+    private var client: ChatClient = {
+        Chat.configure(bip44: DefaultBIP44Provider())
         return Chat.instance
     }()
 
@@ -66,7 +66,7 @@ final class ChatService {
     }
 
     func setupSubscriptions(account: Account) {
-        client.setupSubscriptions(account: account)
+        try! client.setupSubscriptions(account: account)
     }
 
     func sendMessage(topic: String, message: String) async throws {

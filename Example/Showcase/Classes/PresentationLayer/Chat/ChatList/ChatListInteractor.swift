@@ -5,6 +5,10 @@ final class ChatListInteractor {
     private let chatService: ChatService
     private let accountStorage: AccountStorage
 
+    var account: Account? {
+        return accountStorage.importAccount?.account
+    }
+
     init(chatService: ChatService, accountStorage: AccountStorage) {
         self.chatService = chatService
         self.accountStorage = accountStorage

@@ -99,7 +99,7 @@ private extension IdentityService {
             version: getVersion(),
             nonce: getNonce(),
             iat: iatProvader.iat,
-            nbf: nil, exp: nil, statement: nil, requestId: nil,
+            nbf: nil, exp: nil, statement: "statement", requestId: nil,
             resources: [DIDKey]
         )
 

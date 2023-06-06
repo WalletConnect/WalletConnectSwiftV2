@@ -22,12 +22,15 @@ final class ImportPresenter: ObservableObject {
     
     @MainActor
     func didPressImport() async throws {
-        guard let importAccount = ImportAccount(input: input)
+        guard let account = ImportAccount(input: input)
         else { return input = .empty }
+        try await importAccount(account)
+    }
 
-        interactor.save(importAccount: importAccount)
-        try await interactor.register(importAccount: importAccount)
-        router.presentChat(importAccount: importAccount)
+
+    func didPressRandom() async throws {
+        let account = ImportAccount.new()
+        try await importAccount(account)
     }
 }
 
@@ -50,5 +53,12 @@ private extension ImportPresenter {
 
     func setupInitialState() {
 
+    }
+
+    @MainActor
+    func importAccount(_ importAccount: ImportAccount) async throws {
+        interactor.save(importAccount: importAccount)
+        try await interactor.register(importAccount: importAccount)
+        router.presentChat(importAccount: importAccount)
     }
 }

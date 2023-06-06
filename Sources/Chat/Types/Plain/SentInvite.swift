@@ -5,21 +5,33 @@ public struct SentInvite: Codable, Equatable {
     public let message: String
     public let inviterAccount: Account
     public let inviteeAccount: Account
+    public let inviterPubKeyY: String
+    public let inviterPrivKeyY: String
+    public let responseTopic: String
+    public let symKey: String
     public let timestamp: UInt64
     public var status: Status
 
-    public init(
+    init(
         id: Int64,
         message: String,
         inviterAccount: Account,
         inviteeAccount: Account,
+        inviterPubKeyY: String,
+        inviterPrivKeyY: String,
+        responseTopic: String,
+        symKey: String,
         timestamp: UInt64,
-        status: SentInvite.Status = .pending // TODO: Implement statuses
+        status: SentInvite.Status = .pending
     ) {
         self.id = id
         self.message = message
         self.inviterAccount = inviterAccount
         self.inviteeAccount = inviteeAccount
+        self.inviterPubKeyY = inviterPubKeyY
+        self.inviterPrivKeyY = inviterPrivKeyY
+        self.responseTopic = responseTopic
+        self.symKey = symKey
         self.timestamp = timestamp
         self.status = status
     }
@@ -30,9 +42,20 @@ public struct SentInvite: Codable, Equatable {
             message: invite.message,
             inviterAccount: invite.inviterAccount,
             inviteeAccount: invite.inviteeAccount,
+            inviterPubKeyY: invite.inviterPubKeyY,
+            inviterPrivKeyY: invite.inviterPrivKeyY,
+            responseTopic: invite.responseTopic,
+            symKey: invite.symKey,
             timestamp: invite.timestamp,
             status: status
         )
+    }
+}
+
+extension SentInvite: SyncObject {
+
+    public var syncId: String {
+        return responseTopic
     }
 }
 
