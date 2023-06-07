@@ -3,7 +3,7 @@ import TestingUtils
 import XCTest
 
 final class ModalViewModelTests: XCTestCase {
-    private var sut: ModalSheet.ModalViewModel!
+    private var sut: ModalViewModel!
     
     private var openURLFuncTest: FuncTest<URL>!
     private var canOpenURLFuncTest: FuncTest<URL>!
@@ -57,7 +57,7 @@ final class ModalViewModelTests: XCTestCase {
         
         expectation = XCTestExpectation(description: "Wait for openUrl to be called")
         
-        sut.onWalletTapped(index: 0)
+        sut.onListingTap(sut.wallets[0])
         
         XCTWaiter.wait(for: [expectation], timeout: 3)
         
@@ -68,7 +68,7 @@ final class ModalViewModelTests: XCTestCase {
         
         expectation = XCTestExpectation(description: "Wait for openUrl to be called 2nd time")
         
-        sut.onWalletTapped(index: 1)
+        sut.onListingTap(sut.wallets[1])
         
         XCTWaiter.wait(for: [expectation], timeout: 3)
         
