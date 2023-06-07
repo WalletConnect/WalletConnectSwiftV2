@@ -18,7 +18,6 @@ runs:
       with:
         path: |
           **/SourcePackagesCache
-          DerivedDataCache
         key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
 
     - name: Build for testing
