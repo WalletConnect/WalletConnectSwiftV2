@@ -23,7 +23,7 @@ class WebSocketFactoryMock: WebSocketFactory {
 }
 
 @available(iOS 14.0, *)
-struct ModalSheet_Previews: PreviewProvider {
+struct ModalContainerView_Previews: PreviewProvider {
     
     static var previews: some View {
         Content()
@@ -47,14 +47,6 @@ struct ModalSheet_Previews: PreviewProvider {
         }
         
         var body: some View {
-            
-//                ModalSheet(
-//                    viewModel: .init(
-//                        isShown: .constant(true),
-//                        interactor: DefaultModalSheetInteractor()
-//                    )
-//                )
-            
             ModalContainerView()
         }
     }
