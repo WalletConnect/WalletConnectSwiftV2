@@ -2,6 +2,8 @@ import SwiftUI
 
 struct WhatIsWalletView: View {
     
+    var navigateTo: (Destination) -> Void
+    
     var body: some View {
         
         VStack(spacing: 10) {
@@ -22,13 +24,17 @@ struct WhatIsWalletView: View {
             )
             
             HStack {
-                Button(action: {}) {
+                Button(action: {
+                    navigateTo(.getWallet)
+                }) {
                     HStack {
                         Image("wallet", bundle: .module)
                         Text("Get a Wallet")
                     }
                 }
-                Button(action: {}) {
+                Button(action: {
+                    
+                }) {
                     HStack {
                         Text("Learn More")
                         Image("external_link", bundle: .module)
@@ -75,6 +81,6 @@ struct WhatIsWalletView_Previews: PreviewProvider {
     
     static var previews: some View {
         
-        WhatIsWalletView()
+        WhatIsWalletView(navigateTo: { _ in})
     }
 }

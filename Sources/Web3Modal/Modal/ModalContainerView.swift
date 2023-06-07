@@ -1,6 +1,7 @@
 import SwiftUI
 import WalletConnectPairing
 
+@available(iOS 14.0, *)
 public struct ModalContainerView: View {
     
     @Environment(\.presentationMode) var presentationMode
@@ -34,10 +35,16 @@ public struct ModalContainerView: View {
                     viewModel: .init(
                         isShown: $showModal,
                         projectId: projectId,
-                        interactor: DefaultModalSheetInteractor(projectId: projectId, metadata: metadata, webSocketFactory: webSocketFactory)
-                    ))
-                    .transition(.move(edge: .bottom))
-                    .animation(.spring(), value: showModal)
+                        interactor: DefaultModalSheetInteractor(
+                            projectId: projectId,
+                            metadata: metadata,
+                            webSocketFactory: webSocketFactory
+                        )
+                    )
+                )
+                .environment(\.projectId, projectId)
+                .transition(.move(edge: .bottom))
+                .animation(.spring(), value: showModal)
             }
         }
         .edgesIgnoringSafeArea(.all)

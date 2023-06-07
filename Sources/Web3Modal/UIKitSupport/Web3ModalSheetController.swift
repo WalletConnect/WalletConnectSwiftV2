@@ -2,6 +2,7 @@ import SwiftUI
 import WalletConnectNetworking
 import WalletConnectPairing
 
+@available(iOS 14.0, *)
 public class Web3ModalSheetController: UIHostingController<AnyView> {
     
     @MainActor dynamic required init?(coder aDecoder: NSCoder) {
