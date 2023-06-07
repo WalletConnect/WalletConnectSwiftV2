@@ -56,7 +56,10 @@ public class Web3Modal {
     }
     
     public static func present(from presentingViewController: UIViewController? = nil) {
-        let vc = presentingViewController ?? topViewController()
+        guard let vc = presentingViewController ?? topViewController() else {
+            assertionFailure("No controller found for presenting modal")
+            return
+        }
         
         if #available(iOS 14.0, *) {
             let modal = Web3ModalSheetController()
@@ -64,9 +67,15 @@ public class Web3Modal {
         }
     }
     
-    static func topViewController(
-        _ base: UIViewController? = UIApplication.shared.keyWindow?.rootViewController
-    ) -> UIViewController {
+    private static func topViewController(_ base: UIViewController? = nil) -> UIViewController? {
+        
+        let base = base ?? UIApplication
+            .shared
+            .connectedScenes
+            .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
+            .last { $0.isKeyWindow }?
+            .rootViewController
+        
         if let nav = base as? UINavigationController {
             return topViewController(nav.visibleViewController)
         }
@@ -81,7 +90,7 @@ public class Web3Modal {
             return topViewController(presented)
         }
         
-        return base!
+        return base
     }
 }
 

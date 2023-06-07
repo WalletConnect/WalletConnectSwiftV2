@@ -9,7 +9,7 @@ public struct ModalContainerView: View {
         
     public var body: some View {
         
-        VStack(spacing: 0) {
+        VStack(spacing: -10) {
             
             Color.thickOverlay
                 .colorScheme(.light)

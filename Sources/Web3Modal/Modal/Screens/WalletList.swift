@@ -6,6 +6,7 @@ struct WalletList: View {
     
     @Binding var wallets: [Listing]
     @Binding var destination: Destination
+    @State var retryButtonShown: Bool = false
     
     var navigateTo: (Destination) -> Void
     var onListingTap: (Listing) -> Void
@@ -138,15 +139,11 @@ struct WalletList: View {
             guard let wallet else { return }
             
             navigateTo(.walletDetail(wallet))
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                onListingTap(wallet)
-            }
         }
     }
     
     private func walletDetail(_ wallet: Listing) -> some View {
-        VStack {
+        VStack(spacing: 8) {
             WalletImage(wallet: wallet, size: .large)
                 .frame(maxWidth: 96, maxHeight: 96)
             
@@ -157,7 +154,33 @@ struct WalletList: View {
             Text("Accept connection request in the app")
                 .font(.system(size: 14))
                 .foregroundColor(.foreground3)
+            
+            if retryButtonShown {
+                Button {
+                    onListingTap(wallet)
+                } label: {
+                    HStack {
+                        Text("Try Again")
+                        Image("external_link", bundle: .module)
+                    }
+                }
+                .buttonStyle(W3MButtonStyle())
+                .padding()
+            }
         }
         .padding()
+        .onAppear {
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                onListingTap(wallet)
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                retryButtonShown = true
+            }
+        }
+        .onDisappear {
+            retryButtonShown = false
+        }
     }
 }

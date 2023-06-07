@@ -24,22 +24,39 @@ class WebSocketFactoryMock: WebSocketFactory {
 
 @available(iOS 14.0, *)
 struct ModalSheet_Previews: PreviewProvider {
-    static let projectId = "9bfe94c9cbf74aaa0597094ef561f703"
-    static let metadata = AppMetadata(
-        name: "Showcase App",
-        description: "Showcase description",
-        url: "example.wallet",
-        icons: ["https://avatars.githubusercontent.com/u/37784886"]
-    )
-
+    
     static var previews: some View {
-        ModalSheet(
-            viewModel: .init(
-                isShown: .constant(true),
-                interactor: DefaultModalSheetInteractor()
+        Content()
+            .previewLayout(.sizeThatFits)
+    }
+    
+    struct Content: View {
+        
+        init() {
+            
+            let projectId = "9bfe94c9cbf74aaa0597094ef561f703"
+            let metadata = AppMetadata(
+                name: "Showcase App",
+                description: "Showcase description",
+                url: "example.wallet",
+                icons: ["https://avatars.githubusercontent.com/u/37784886"]
             )
-        )
-        .previewLayout(.sizeThatFits)
+            
+            Networking.configure(projectId: projectId, socketFactory: WebSocketFactoryMock())
+            Web3Modal.configure(projectId: projectId, metadata: metadata)
+        }
+        
+        var body: some View {
+            
+//                ModalSheet(
+//                    viewModel: .init(
+//                        isShown: .constant(true),
+//                        interactor: DefaultModalSheetInteractor()
+//                    )
+//                )
+            
+            ModalContainerView()
+        }
     }
 }
 
