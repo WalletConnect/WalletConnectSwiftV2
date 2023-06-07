@@ -20,8 +20,6 @@ runs:
           **/SourcePackagesCache
           DerivedDataCache
         key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
-        restore-keys: |
-          ${{ runner.os }}-spm-
 
     - name: Build for testing
       shell: bash
