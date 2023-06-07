@@ -24,8 +24,7 @@ final class SignCoordinator {
             name: "Swift Dapp",
             description: "WalletConnect DApp sample",
             url: "wallet.connect",
-            icons: ["https://avatars.githubusercontent.com/u/37784886"]
-        )
+            icons: ["https://avatars.githubusercontent.com/u/37784886"])
 
         Pair.configure(metadata: metadata)
 #if DEBUG

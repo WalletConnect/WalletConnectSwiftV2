@@ -74,7 +74,7 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
         try await walletPairService.pair(uri)
     }
 
-    public func create() async throws -> WalletConnectURI {
+    public func create()  async throws -> WalletConnectURI {
         return try await appPairService.create()
     }
 
