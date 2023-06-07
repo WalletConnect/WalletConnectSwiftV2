@@ -17,13 +17,17 @@ public final class Web3Inbox {
     private init() { }
 
     /// Web3Inbox instance config method
-    /// - Parameters:
-    ///   - account: Web3Inbox initial account
-    static public func configure(account: Account, config: [ConfigParam: Bool] = [:], onSign: @escaping SigningCallback, environment: APNSEnvironment) {
+    static public func configure(
+        account: Account,
+        bip44: BIP44Provider,
+        config: [ConfigParam: Bool] = [:],
+        environment: APNSEnvironment,
+        onSign: @escaping SigningCallback
+    ) {
         Web3Inbox.account = account
         Web3Inbox.config = config
         Web3Inbox.onSign = onSign
-        Chat.configure()
+        Chat.configure(bip44: bip44)
         Push.configure(environment: environment)
     }
 }

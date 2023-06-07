@@ -1,5 +1,5 @@
-import SwiftUI
 import Combine
+import SwiftUI
 
 struct Backport<Content> {
     let content: Content
@@ -39,7 +39,7 @@ extension View {
         if #available(iOS 14.0, *) {
             self.onChange(of: value, perform: perform)
         } else {
-            self.onReceive(Just(value)) { (value) in
+            self.onReceive(Just(value)) { value in
                 perform(value)
             }
         }

@@ -3,10 +3,10 @@ import Foundation
 actor EchoRegisterService {
     private let httpClient: HTTPClient
     private let projectId: String
-    private let clientId: String
     private let logger: ConsoleLogging
     private let environment: APNSEnvironment
     private let echoAuthenticator: EchoAuthenticating
+    private let clientIdStorage: ClientIdStoring
 
     enum Errors: Error {
         case registrationFailed
@@ -14,12 +14,12 @@ actor EchoRegisterService {
 
     init(httpClient: HTTPClient,
          projectId: String,
-         clientId: String,
+         clientIdStorage: ClientIdStoring,
          echoAuthenticator: EchoAuthenticating,
          logger: ConsoleLogging,
          environment: APNSEnvironment) {
         self.httpClient = httpClient
-        self.clientId = clientId
+        self.clientIdStorage = clientIdStorage
         self.echoAuthenticator = echoAuthenticator
         self.projectId = projectId
         self.logger = logger
@@ -30,6 +30,7 @@ actor EchoRegisterService {
         let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
         let token = tokenParts.joined()
         let echoAuthToken = try echoAuthenticator.createAuthToken()
+        let clientId = try clientIdStorage.getClientId()
         let clientIdMutlibase = try DIDKey(did: clientId).multibase(variant: .ED25519)
         logger.debug("APNS device token: \(token)")
         let response = try await httpClient.request(
@@ -45,6 +46,7 @@ actor EchoRegisterService {
 #if DEBUG
     public func register(deviceToken: String) async throws {
         let echoAuthToken = try echoAuthenticator.createAuthToken()
+        let clientId = try clientIdStorage.getClientId()
         let clientIdMutlibase = try DIDKey(did: clientId).multibase(variant: .ED25519)
         let response = try await httpClient.request(
             EchoResponse.self,
