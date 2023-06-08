@@ -33,6 +33,8 @@ private extension ImportAccount {
             return name
         case .custom(let privateKey):
             return privateKey
+        case .web3Modal(let account):
+            return account.absoluteString
         }
     }
 }

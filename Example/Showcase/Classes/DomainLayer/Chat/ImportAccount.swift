@@ -6,6 +6,7 @@ enum ImportAccount {
     case kotlin
     case js
     case custom(privateKey: String)
+    case web3Modal(account: Account)
 
     init?(input: String) {
         switch input.lowercased() {
@@ -34,7 +35,7 @@ enum ImportAccount {
             return "kotlin.eth"
         case .js:
             return "js.eth"
-        case .custom:
+        case .custom, .web3Modal:
             return account.address
         }
     }
@@ -50,6 +51,8 @@ enum ImportAccount {
         case .custom(let privateKey):
             let address = try! EthereumPrivateKey(hexPrivateKey: "0x" + privateKey, ctx: nil).address.hex(eip55: true)
             return Account("eip155:1:\(address)")!
+        case .web3Modal(let account):
+            return account
         }
     }
 
@@ -63,6 +66,8 @@ enum ImportAccount {
             return "de15cb11963e9bde0a5cce06a5ee2bda1cf3a67be6fbcd7a4fc8c0e4c4db0298"
         case .custom(let privateKey):
             return privateKey
+        case .web3Modal:
+            fatalError("Private key not available")
         }
     }
 
