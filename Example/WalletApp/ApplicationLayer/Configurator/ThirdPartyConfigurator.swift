@@ -19,7 +19,13 @@ struct ThirdPartyConfigurator: Configurator {
 
         let account = Account(blockchain: Blockchain("eip155:1")!, address: EthKeyStore.shared.address)!
 
-        Web3Inbox.configure(account: account, crypto: DefaultCryptoProvider(), config: [.chatEnabled: false, .settingsEnabled: false], environment: BuildConfiguration.shared.apnsEnvironment, onSign: Web3InboxSigner.onSing)
+        Web3Inbox.configure(
+            account: account,
+            bip44: DefaultBIP44Provider(),
+            config: [.chatEnabled: false, .settingsEnabled: false],
+            environment: BuildConfiguration.shared.apnsEnvironment,
+            onSign: Web3InboxSigner.onSing
+        )
     }
     
 }
