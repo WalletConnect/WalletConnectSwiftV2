@@ -25,6 +25,8 @@ jobs:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - uses: ./.github/actions/build
         with:
@@ -41,6 +43,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
 
     - uses: actions/cache/restore@v3
       with:
