@@ -67,7 +67,16 @@ extension ImportPresenter: SceneViewModel {
 private extension ImportPresenter {
 
     func setupInitialState() {
+        Sign.instance.sessionSettlePublisher.sink { session in
+            let accounts = session.namespaces.values.reduce(into: []) { result, namespace in
+                result = result + Array(namespace.accounts)
+            }
 
+            Task(priority: .userInitiated) {
+                try await self.importAccount(.web3Modal(account: accounts.first!))
+            }
+
+        }.store(in: &disposeBag)
     }
 
     @MainActor

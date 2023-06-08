@@ -61,8 +61,8 @@ final class HistoryTests: XCTestCase {
 
         try await relayClient2.subscribe(topic: topic)
         try await relayClient1.publish(topic: topic, payload: payload, tag: tag, prompt: false, ttl: 3000)
- 
-        await fulfillment(of: [exp], timeout: InputConfig.defaultTimeout)
+
+        wait(for: [exp], timeout: InputConfig.defaultTimeout)
 
         sleep(5) // History server has a queue
 
