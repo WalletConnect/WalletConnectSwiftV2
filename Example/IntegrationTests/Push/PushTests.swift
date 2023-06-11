@@ -248,7 +248,9 @@ class Notifier {
         let notifyRequestPayload = NotifyRequest(notificiation: message, accounts: [account])
         let payload = try JSONEncoder().encode(notifyRequestPayload)
         request.httpMethod = "POST"
-        let (_, response) = try await URLSession.shared.upload(for: request, from: payload)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = payload
+        let (data, response) = try await URLSession.shared.data(for: request)
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { fatalError("Notify error") }
     }
 }
