@@ -21,6 +21,7 @@ final class PushTests: XCTestCase {
 
     var pairingStorage: PairingStorage!
 
+
     private var publishers = [AnyCancellable]()
 
     func makeClientDependencies(prefix: String) -> (PairingClient, NetworkInteracting, KeychainStorageProtocol, KeyValueStorage) {
@@ -205,6 +206,30 @@ final class PushTests: XCTestCase {
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
+    func testNotifyServerSubscribeAndNotifies() async {
+        let subscribeExpectation = expectation(description: "creates push subscription")
+        let messageExpectation = expectation(description: "receives a push message")
+        let pushMessage = PushMessage(title: "swift_test", body: "", icon: "", url: "")
+        let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
+        try! await walletPushClient.subscribe(metadata: metadata, account: Account.stub(), onSign: sign)
+        walletPushClient.subscriptionsPublisher
+            .first()
+            .sink { [unowned self] subscriptions in
+                XCTAssertNotNil(subscriptions.first)
+                subscribeExpectation.fulfill()
+                let subscription = subscriptions.first!
+                let notifier = Notifier()
+                Task(priority: .high) { try await notifier.notify(topic: subscription.topic, account: subscription.account, message: pushMessage) }
+            }.store(in: &publishers)
+        wait(for: [subscribeExpectation, messageExpectation], timeout: InputConfig.defaultTimeout)
+        walletPushClient.pushMessagePublisher
+            .sink { [unowned self] pushMessageRecord in
+                XCTAssertEqual(pushMessage, pushMessageRecord.message)
+                messageExpectation.fulfill()
+        }.store(in: &publishers)
+
+    }
+
 }
 
 
@@ -214,4 +239,21 @@ private extension PushTests {
         let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
         return .signed(try! signer.sign(message: message, privateKey: privateKey, type: .eip191))
     }
+}
+
+class Notifier {
+    func notify(topic: String, account: Account, message: PushMessage) async throws {
+        let url = URL(string: "https://cast.walletconnect.com/b5dba79e421fd90af68d0a1006caf864/notify")!
+        var request = URLRequest(url: url)
+        let notifyRequestPayload = NotifyRequest(notificiation: message, accounts: [account])
+        let payload = try JSONEncoder().encode(notifyRequestPayload)
+        request.httpMethod = "POST"
+        let (_, response) = try await URLSession.shared.upload(for: request, from: payload)
+        guard (response as? HTTPURLResponse)?.statusCode == 200 else { fatalError("Notify error") }
+    }
+}
+
+struct NotifyRequest: Codable {
+    let notificiation: PushMessage
+    let accounts: [Account]
 }
