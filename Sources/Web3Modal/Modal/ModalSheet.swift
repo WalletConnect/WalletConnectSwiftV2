@@ -31,6 +31,7 @@ public struct ModalSheet: View {
                 Color.background1
             }
         )
+        .toastView(toast: $viewModel.toast)
     }
     
     private func modalHeader() -> some View {

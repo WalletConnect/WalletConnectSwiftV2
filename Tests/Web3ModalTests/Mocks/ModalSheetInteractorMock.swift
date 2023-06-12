@@ -19,16 +19,31 @@ final class ModalSheetInteractorMock: ModalSheetInteractor {
         self.listings = listings
     }
 
-    func getListings() async throws -> [Web3Modal.Listing] {
+    func getListings() async throws -> [Listing] {
         listings
     }
     
-    func connect() async throws -> WalletConnectURI {
+    func createPairingAndConnect() async throws -> WalletConnectURI? {
         .init(topic: "foo", symKey: "bar", relay: .init(protocol: "irn", data: nil))
     }
     
     var sessionSettlePublisher: AnyPublisher<Session, Never> {
         Result.Publisher(Session(topic: "", pairingTopic: "", peer: .stub(), namespaces: [:], expiryDate: Date()))
+            .eraseToAnyPublisher()
+    }
+    
+    var sessionRejectionPublisher: AnyPublisher<(Session.Proposal, Reason), Never> {
+        let sessionProposal = Session.Proposal(
+            id: "",
+            pairingTopic: "",
+            proposer: AppMetadata(name: "", description: "", url: "", icons: []),
+            requiredNamespaces: [:],
+            optionalNamespaces: nil,
+            sessionProperties: nil,
+            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [])), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
+        )
+        
+        return Result.Publisher((sessionProposal, SignReasonCode.userRejectedChains))
             .eraseToAnyPublisher()
     }
 }
