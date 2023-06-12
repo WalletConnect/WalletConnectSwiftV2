@@ -4,7 +4,7 @@ import Foundation
 
 protocol ModalSheetInteractor {
     func getListings() async throws -> [Listing]
-    func createPairingAndConnect() async throws -> WalletConnectURI
+    func createPairingAndConnect() async throws -> WalletConnectURI?
     
     var sessionSettlePublisher: AnyPublisher<Session, Never> { get }
     var sessionRejectionPublisher: AnyPublisher<(Session.Proposal, Reason), Never> { get }
@@ -26,7 +26,7 @@ final class DefaultModalSheetInteractor: ModalSheetInteractor {
         return response.listings.values.compactMap { $0 }
     }
     
-    func createPairingAndConnect() async throws -> WalletConnectURI {
-        try await Web3Modal.instance.createPairingAndConnect()
+    func createPairingAndConnect() async throws -> WalletConnectURI? {
+        try await Web3Modal.instance.connect(topic: nil)
     }
 }

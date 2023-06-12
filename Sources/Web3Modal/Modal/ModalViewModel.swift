@@ -82,7 +82,10 @@ final class ModalViewModel: ObservableObject {
     @MainActor
     func createURI() async {
         do {
-            let wcUri = try await interactor.createPairingAndConnect()
+            guard let wcUri = try await interactor.createPairingAndConnect() else {
+                toast = Toast(style: .error, message: "Failed to create pairing")
+                return
+            }
             uri = wcUri.absoluteString
             deeplinkUri = wcUri.deeplinkUri
         } catch {

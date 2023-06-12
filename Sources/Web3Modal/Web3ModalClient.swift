@@ -49,12 +49,13 @@ public class Web3ModalClient {
     }
     
     // MARK: - Private Properties
+
     private let signClient: SignClientProtocol
-    private let pairingClient: (PairingClientProtocol & PairingInteracting)
+    private let pairingClient: PairingClientProtocol & PairingInteracting & PairingRegisterer
     
     init(
         signClient: SignClientProtocol,
-        pairingClient: (PairingClientProtocol & PairingInteracting)
+        pairingClient: PairingClientProtocol & PairingInteracting & PairingRegisterer
     ) {
         self.signClient = signClient
         self.pairingClient = pairingClient
@@ -67,29 +68,35 @@ public class Web3ModalClient {
     
     /// For proposing a session to a wallet.
     /// Function will propose a session on existing pairing.
-    /// - Parameter topic: topic from existing pairing.
-    public func connect(on topic: String) async throws {
-        try await signClient.connect(
-            requiredNamespaces: Web3Modal.config.sessionParams.requiredNamespaces,
-            optionalNamespaces: Web3Modal.config.sessionParams.optionalNamespaces,
-            sessionProperties: Web3Modal.config.sessionParams.sessionProperties,
-            topic: topic
-        )
-    }
-    
-    /// For proposing a session to a wallet.
-    /// Function will propose a session on newly created pairing.
-    public func createPairingAndConnect() async throws -> WalletConnectURI {
-        let uri = try await createPairing()
+    /// - Parameters:
+    ///   - topic: pairing topic
+    public func connect(
+        topic: String?
+    ) async throws -> WalletConnectURI? {
+        var topic = topic
+        if topic == nil {
+            topic = try await createPairing().topic
+        }
         
-        try await signClient.connect(
-            requiredNamespaces: Web3Modal.config.sessionParams.requiredNamespaces,
-            optionalNamespaces: Web3Modal.config.sessionParams.optionalNamespaces,
-            sessionProperties: Web3Modal.config.sessionParams.sessionProperties,
-            topic: uri.topic
-        )
-        
-        return uri
+        if let topic = topic {
+            try pairingClient.validatePairingExistance(topic)
+            try await signClient.connect(
+                requiredNamespaces: Web3Modal.config.sessionParams.requiredNamespaces,
+                optionalNamespaces: Web3Modal.config.sessionParams.optionalNamespaces,
+                sessionProperties: Web3Modal.config.sessionParams.sessionProperties,
+                topic: topic
+            )
+            return nil
+        } else {
+            let pairingURI = try await pairingClient.create()
+            try await signClient.connect(
+                requiredNamespaces: Web3Modal.config.sessionParams.requiredNamespaces,
+                optionalNamespaces: Web3Modal.config.sessionParams.optionalNamespaces,
+                sessionProperties: Web3Modal.config.sessionParams.sessionProperties,
+                topic: pairingURI.topic
+            )
+            return pairingURI
+        }
     }
     
     /// For proposing a session to a wallet.

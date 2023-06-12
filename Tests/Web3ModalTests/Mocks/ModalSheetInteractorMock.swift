@@ -23,7 +23,7 @@ final class ModalSheetInteractorMock: ModalSheetInteractor {
         listings
     }
     
-    func createPairingAndConnect() async throws -> WalletConnectURI {
+    func createPairingAndConnect() async throws -> WalletConnectURI? {
         .init(topic: "foo", symKey: "bar", relay: .init(protocol: "irn", data: nil))
     }
     

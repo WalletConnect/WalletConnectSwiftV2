@@ -71,19 +71,15 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
         ]
         
         Task {
-        
             Web3Modal.set(sessionParams: .init(
                 requiredNamespaces: namespaces,
                 optionalNamespaces: optionalNamespaces,
                 sessionProperties: sessionProperties
             ))
             
-            let uri = try await Web3Modal.instance.createPairingAndConnect(
-                
-            )
+            let uri = try await Web3Modal.instance.connect(topic: nil)
         }
         
-
         Web3Modal.present(from: self)
     }
 

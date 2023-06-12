@@ -26,7 +26,7 @@ public class Web3Modal {
         }
         return Web3ModalClient(
             signClient: Sign.instance,
-            pairingClient: Pair.instance as! (PairingClientProtocol & PairingInteracting)
+            pairingClient: Pair.instance as! (PairingClientProtocol & PairingInteracting & PairingRegisterer)
         )
     }()
     
