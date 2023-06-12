@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/krzyzanowskim/CryptoSwift.git",
         "state": {
           "branch": null,
-          "revision": "eee9ad754926c40a0f7e73f152357d37b119b7fa",
-          "version": "1.7.1"
+          "revision": "19b3c3ceed117c5cc883517c4e658548315ba70b",
+          "version": "1.6.0"
         }
       },
       {
@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/mxcl/PromiseKit.git",
         "state": {
           "branch": null,
-          "revision": "8a98e31a47854d3180882c8068cc4d9381bf382d",
-          "version": "6.22.1"
+          "revision": "43772616c46a44a9977e41924ae01d0e55f2f9ca",
+          "version": "6.18.1"
         }
       },
       {
@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/bigearsenal/task-retrying-swift.git",
         "state": {
           "branch": null,
-          "revision": "1249b3524378423c848cef39fb220041e00a08ec",
-          "version": "1.0.4"
+          "revision": "645eaaf207a6f39ab4b469558d916ae23df199b5",
+          "version": "1.0.3"
         }
       },
       {

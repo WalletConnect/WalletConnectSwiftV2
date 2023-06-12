@@ -1,5 +1,6 @@
 import UIKit
 import Combine
+import WalletConnectSign
 
 final class ImportPresenter: ObservableObject {
 
@@ -18,6 +19,20 @@ final class ImportPresenter: ObservableObject {
     @MainActor
     func didPressWeb3Modal() async throws {
         router.presentWeb3Modal()
+
+        let session: Session = try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = Sign.instance.sessionSettlePublisher.sink { session in
+                defer { cancellable?.cancel() }
+                return continuation.resume(returning: session)
+            }
+        }
+
+        guard let account = session.accounts.first(where: { $0.blockchain.absoluteString == "eip155:1" }) else {
+            throw AlertError(message: "Тo matching accounts found in namespaces")
+        }
+
+        try await importAccount(.web3Modal(account: account, topic: session.topic))
     }
     
     @MainActor
@@ -57,8 +72,8 @@ private extension ImportPresenter {
 
     @MainActor
     func importAccount(_ importAccount: ImportAccount) async throws {
+        try! await interactor.register(importAccount: importAccount)
         interactor.save(importAccount: importAccount)
-        try await interactor.register(importAccount: importAccount)
         router.presentChat(importAccount: importAccount)
     }
 }

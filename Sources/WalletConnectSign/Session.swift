@@ -41,4 +41,10 @@ extension Session {
             SessionType.EventParams.Event(name: name, data: data)
         }
     }
+
+    public var accounts: [Account] {
+        return namespaces.values.reduce(into: []) { result, namespace in
+            result = result + Array(namespace.accounts)
+        }
+    }
 }
