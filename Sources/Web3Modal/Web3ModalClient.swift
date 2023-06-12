@@ -73,11 +73,6 @@ public class Web3ModalClient {
     public func connect(
         topic: String?
     ) async throws -> WalletConnectURI? {
-        var topic = topic
-        if topic == nil {
-            topic = try await createPairing().topic
-        }
-        
         if let topic = topic {
             try pairingClient.validatePairingExistance(topic)
             try await signClient.connect(
