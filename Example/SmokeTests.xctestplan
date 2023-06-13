@@ -70,7 +70,9 @@
         "SignClientTests\/testSessionRequestFailureResponse()",
         "SignClientTests\/testSuccessfulSessionExtend()",
         "SignClientTests\/testSuccessfulSessionUpdateNamespaces()",
-        "SignerTest"
+        "SignerTest",
+        "SyncDerivationServiceTests",
+        "SyncTests"
       ],
       "target" : {
         "containerPath" : "container:ExampleApp.xcodeproj",
