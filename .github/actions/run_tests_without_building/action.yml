@@ -56,7 +56,7 @@ runs:
       run: make smoke_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }}
 
     - name: Slack Notification for Failure
-      if: failure() && matrix.type == 'smoke-tests'
+      if: failure() && (inputs.type == 'smoke-tests' || inputs.type == 'relay-tests')
       uses: 8398a7/action-slack@v3
       with:
         status: ${{ job.status }}

@@ -58,6 +58,8 @@ final class RelayClientEndToEndTests: XCTestCase {
     }
 
     func testSubscribe() {
+        XCTFail()
+        return
         let relayClient = makeRelayClient(prefix: "")
 
         try! relayClient.connect()
@@ -74,6 +76,8 @@ final class RelayClientEndToEndTests: XCTestCase {
     }
 
     func testEndToEndPayload() {
+        XCTFail()
+        return
         let relayA = makeRelayClient(prefix: "⚽️ A ")
         let relayB = makeRelayClient(prefix: "🏀 B ")
 
