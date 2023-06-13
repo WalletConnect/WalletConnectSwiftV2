@@ -206,28 +206,37 @@ final class PushTests: XCTestCase {
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
-    func testNotifyServerSubscribeAndNotifies() async {
+    func testNotifyServerSubscribeAndNotifies() async throws {
         let subscribeExpectation = expectation(description: "creates push subscription")
         let messageExpectation = expectation(description: "receives a push message")
-        let pushMessage = PushMessage(title: "swift_test", body: "", icon: "", url: "")
+        let pushMessage = PushMessage(
+            title: "swift_test",
+            body: "gm_hourly",
+            icon: "https://images.unsplash.com/photo-1581224463294-908316338239?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=250&q=80",
+            url: "https://web3inbox.com",
+            type: "private")
+
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
         try! await walletPushClient.subscribe(metadata: metadata, account: Account.stub(), onSign: sign)
+        var subscription: PushSubscription!
         walletPushClient.subscriptionsPublisher
             .first()
-            .sink { [unowned self] subscriptions in
+            .sink { subscriptions in
                 XCTAssertNotNil(subscriptions.first)
                 subscribeExpectation.fulfill()
-                let subscription = subscriptions.first!
-                let notifier = Notifier()
-                Task(priority: .high) { try await notifier.notify(topic: subscription.topic, account: subscription.account, message: pushMessage) }
+                subscription = subscriptions.first!
+                let notifier = Publisher()
+                sleep(1)
+                Task(priority: .high) { try await notifier.notify(topic: subscriptions.first!.topic, account: subscriptions.first!.account, message: pushMessage) }
             }.store(in: &publishers)
-        wait(for: [subscribeExpectation, messageExpectation], timeout: InputConfig.defaultTimeout)
         walletPushClient.pushMessagePublisher
-            .sink { [unowned self] pushMessageRecord in
+            .sink { pushMessageRecord in
                 XCTAssertEqual(pushMessage, pushMessageRecord.message)
                 messageExpectation.fulfill()
         }.store(in: &publishers)
 
+        wait(for: [subscribeExpectation, messageExpectation], timeout: InputConfig.defaultTimeout)
+        try await walletPushClient.deleteSubscription(topic: subscription.topic)
     }
 
 }
@@ -241,21 +250,23 @@ private extension PushTests {
     }
 }
 
-class Notifier {
+class Publisher {
     func notify(topic: String, account: Account, message: PushMessage) async throws {
         let url = URL(string: "https://cast.walletconnect.com/b5dba79e421fd90af68d0a1006caf864/notify")!
         var request = URLRequest(url: url)
-        let notifyRequestPayload = NotifyRequest(notificiation: message, accounts: [account])
-        let payload = try JSONEncoder().encode(notifyRequestPayload)
+        let notifyRequestPayload = NotifyRequest(notification: message, accounts: [account])
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .withoutEscapingSlashes
+        let payload = try encoder.encode(notifyRequestPayload)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = payload
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (_, response) = try await URLSession.shared.data(for: request)
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { fatalError("Notify error") }
     }
 }
 
 struct NotifyRequest: Codable {
-    let notificiation: PushMessage
+    let notification: PushMessage
     let accounts: [Account]
 }

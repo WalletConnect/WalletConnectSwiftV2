@@ -31,7 +31,7 @@ public class WalletPushClient {
     private let pushMessagePublisherSubject = PassthroughSubject<PushMessageRecord, Never>()
 
     public var pushMessagePublisher: AnyPublisher<PushMessageRecord, Never> {
-        pushMessagePublisherSubject.eraseToAnyPublisher()
+        return pushMessageSubscriber.pushMessagePublisher
     }
 
     public var updateSubscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
@@ -131,10 +131,6 @@ private extension WalletPushClient {
             .sink { [unowned self] (payload: RequestSubscriptionPayload<NotifyProposeParams>) in
                 requestPublisherSubject.send((id: payload.id, account: payload.request.account, metadata: payload.request.metadata))
         }.store(in: &publishers)
-
-        pushMessageSubscriber.onPushMessage = { [unowned self] pushMessageRecord in
-            pushMessagePublisherSubject.send(pushMessageRecord)
-        }
     }
 }
 
