@@ -6,6 +6,10 @@ struct InputConfig {
         return config(for: "RELAY_HOST")!
     }
 
+    static var castHost: String {
+        return config(for: "CAST_HOST")!
+    }
+
     static var projectId: String {
         return config(for: "PROJECT_ID")!
     }

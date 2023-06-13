@@ -209,12 +209,7 @@ final class PushTests: XCTestCase {
     func testNotifyServerSubscribeAndNotifies() async throws {
         let subscribeExpectation = expectation(description: "creates push subscription")
         let messageExpectation = expectation(description: "receives a push message")
-        let pushMessage = PushMessage(
-            title: "swift_test",
-            body: "gm_hourly",
-            icon: "https://images.unsplash.com/photo-1581224463294-908316338239?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=250&q=80",
-            url: "https://web3inbox.com",
-            type: "private")
+        let pushMessage = PushMessage.stub()
 
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
         try! await walletPushClient.subscribe(metadata: metadata, account: Account.stub(), onSign: sign)
@@ -248,25 +243,4 @@ private extension PushTests {
         let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
         return .signed(try! signer.sign(message: message, privateKey: privateKey, type: .eip191))
     }
-}
-
-class Publisher {
-    func notify(topic: String, account: Account, message: PushMessage) async throws {
-        let url = URL(string: "https://cast.walletconnect.com/b5dba79e421fd90af68d0a1006caf864/notify")!
-        var request = URLRequest(url: url)
-        let notifyRequestPayload = NotifyRequest(notification: message, accounts: [account])
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = .withoutEscapingSlashes
-        let payload = try encoder.encode(notifyRequestPayload)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = payload
-        let (_, response) = try await URLSession.shared.data(for: request)
-        guard (response as? HTTPURLResponse)?.statusCode == 200 else { fatalError("Notify error") }
-    }
-}
-
-struct NotifyRequest: Codable {
-    let notification: PushMessage
-    let accounts: [Account]
 }
