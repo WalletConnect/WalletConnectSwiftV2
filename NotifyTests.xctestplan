@@ -1,0 +1,43 @@
+{
+  "configurations" : [
+    {
+      "id" : "841BA375-1F12-4558-98A7-CE22EF446BB4",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "skippedTests" : [
+        "AuthTests",
+        "CacaoSignerTest",
+        "ChatTests",
+        "EIP1271VerifierTests",
+        "EIP191VerifierTests",
+        "EIP55Tests",
+        "ENSResolverTests",
+        "PairingTests",
+        "PushTests\/testDeletePushSubscription()",
+        "PushTests\/testPushPropose()",
+        "PushTests\/testWalletCreatesSubscription()",
+        "PushTests\/testWalletRejectsPushPropose()",
+        "RegistryTests",
+        "SignClientTests",
+        "SignerTest",
+        "SyncDerivationServiceTests",
+        "SyncTests"
+      ],
+      "target" : {
+        "containerPath" : "container:ExampleApp.xcodeproj",
+        "identifier" : "A5E03DEC286464DB00888481",
+        "name" : "IntegrationTests"
+      }
+    }
+  ],
+  "version" : 1
+}
