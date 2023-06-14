@@ -1,6 +1,6 @@
 import Foundation
 
-public struct ReceivedInvite: Codable, Equatable {
+public struct ReceivedInvite: DatabaseObject {
     public let id: Int64
     public let message: String
     public let inviterAccount: Account
@@ -9,6 +9,10 @@ public struct ReceivedInvite: Codable, Equatable {
     public let inviteePublicKey: String
     public let timestamp: UInt64
     public var status: Status
+
+    public var databaseId: String {
+        return String(id)
+    }
 
     public init(
         id: Int64,

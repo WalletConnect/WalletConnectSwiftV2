@@ -1,6 +1,6 @@
 import Foundation
 
-struct InviteKey: SyncObject {
+struct InviteKey: DatabaseObject {
     let publicKey: String
     let privateKey: String
     let account: Account
@@ -9,7 +9,7 @@ struct InviteKey: SyncObject {
         return Data(hex: publicKey).sha256().toHexString()
     }
 
-    var syncId: String {
+    var databaseId: String {
         return account.absoluteString
     }
 }

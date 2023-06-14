@@ -93,7 +93,10 @@ public class ChatClient {
     ) async throws -> String {
         let publicKey = try await identityClient.register(account: account, onSign: onSign)
 
-        try await syncRegisterService.register(account: account, onSign: onSign)
+        if !syncRegisterService.isRegistered(account: account) {
+            try await chatStorage.initializeHistory(account: account)
+            try await syncRegisterService.register(account: account, onSign: onSign)
+        }
 
         guard !isPrivate else {
             return publicKey

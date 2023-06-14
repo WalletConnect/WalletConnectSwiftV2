@@ -7,9 +7,9 @@ public struct Thread: Codable, Equatable {
     public let symKey: String
 }
 
-extension Thread: SyncObject {
+extension Thread: DatabaseObject {
 
-    public var syncId: String {
+    public var databaseId: String {
         return topic
     }
 }
