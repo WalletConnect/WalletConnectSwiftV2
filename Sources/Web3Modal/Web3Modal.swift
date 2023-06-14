@@ -32,6 +32,7 @@ public class Web3Modal {
     
     struct Config {
         let projectId: String
+        var metadata: AppMetadata
         var sessionParams: SessionParams
     }
     
@@ -48,7 +49,11 @@ public class Web3Modal {
         sessionParams: SessionParams = .default
     ) {
         Pair.configure(metadata: metadata)
-        Web3Modal.config = Web3Modal.Config(projectId: projectId, sessionParams: sessionParams)
+        Web3Modal.config = Web3Modal.Config(
+            projectId: projectId,
+            metadata: metadata,
+            sessionParams: sessionParams
+        )
     }
     
     public static func set(sessionParams: SessionParams) {
