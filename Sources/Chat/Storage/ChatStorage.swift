@@ -160,7 +160,7 @@ final class ChatStorage {
     }
 
     func getReceivedInvites(account: Account) -> [ReceivedInvite] {
-        return receivedInviteStore.getAll(for: account.absoluteString) ?? []
+        return receivedInviteStore.getAll(for: account.absoluteString)
     }
 
     func syncRejectedReceivedInviteStatus(id: Int64, account: Account) async throws {

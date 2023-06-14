@@ -2,10 +2,6 @@ import Foundation
 
 public extension String {
 
-    enum Errors: Error {
-        case notAnURL
-    }
-
     func toHexEncodedString(uppercase: Bool = true, prefix: String = "", separator: String = "") -> String {
         return unicodeScalars.map { prefix + .init($0.value, radix: 16, uppercase: uppercase) } .joined(separator: separator)
     }
@@ -19,4 +15,8 @@ public extension String {
         guard let url = URL(string: self) else { throw Errors.notAnURL }
         return url
     }
+}
+
+fileprivate enum Errors: Error {
+    case notAnURL
 }
