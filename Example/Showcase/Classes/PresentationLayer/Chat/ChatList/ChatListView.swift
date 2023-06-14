@@ -37,6 +37,14 @@ struct ChatListView: View {
                 }
 
                 PlainButton {
+                    try await presenter.didCopyPress()
+                } label: {
+                    Text("Copy account")
+                        .foregroundColor(.white)
+                }
+                .padding(.bottom, 16)
+
+                PlainButton {
                     try await presenter.didLogoutPress()
                 } label: {
                     Text("Log out")

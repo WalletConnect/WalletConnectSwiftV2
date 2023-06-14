@@ -1,68 +1,98 @@
 import Foundation
 import Web3
+import WalletConnectSign
 
-enum ImportAccount {
+enum ImportAccount: Codable {
     case swift
     case kotlin
     case js
     case custom(privateKey: String)
+    case web3Modal(account: Account, topic: String)
+
+    static let swiftId = "swift.eth"
+    static let kotlinId = "kotlin.eth"
+    static let jsId = "js.eth"
+    static let privateKeyId = "privateKey"
+    static let web3ModalId = "web3Modal"
 
     init?(input: String) {
         switch input.lowercased() {
-        case ImportAccount.swift.name:
+        case ImportAccount.swiftId:
             self = .swift
-        case ImportAccount.kotlin.name:
+        case ImportAccount.kotlinId:
             self = .kotlin
-        case ImportAccount.js.name:
+        case ImportAccount.jsId:
             self = .js
         default:
-            if let _ = try? EthereumPrivateKey(hexPrivateKey: "0x" + input, ctx: nil) {
-                self = .custom(privateKey: input)
-            } else if let _ = try? EthereumPrivateKey(hexPrivateKey: input, ctx: nil) {
-                self = .custom(privateKey: input.replacingOccurrences(of: "0x", with: ""))
-            } else {
+            switch true {
+            case input.starts(with: ImportAccount.privateKeyId):
+                if let _ = try? EthereumPrivateKey(hexPrivateKey: "0x" + input, ctx: nil) {
+                    self = .custom(privateKey: input)
+                } else if let _ = try? EthereumPrivateKey(hexPrivateKey: input, ctx: nil) {
+                    self = .custom(privateKey: input.replacingOccurrences(of: "0x", with: ""))
+                } else {
+                    return nil
+                }
+            case input.starts(with: ImportAccount.web3ModalId):
+                let components = input.components(separatedBy: "-")
+                guard components.count == 3, let account = Account(components[1]) else {
+                    return nil
+                }
+                self = .web3Modal(account: account, topic: components[2])
+            default:
                 return nil
             }
         }
     }
 
-    var name: String {
+    var storageId: String {
         switch self {
         case .swift:
-            return "swift.eth"
+            return ImportAccount.swiftId
         case .kotlin:
-            return "kotlin.eth"
+            return ImportAccount.kotlinId
         case .js:
-            return "js.eth"
-        case .custom:
-            return account.address
+            return ImportAccount.jsId
+        case .custom(let privateKey):
+            return "\(ImportAccount.privateKeyId)-\(privateKey)"
+        case .web3Modal(let account, let topic):
+            return "\(ImportAccount.web3ModalId)-\(account.absoluteString)-\(topic)"
         }
     }
 
     var account: Account {
         switch self {
         case .swift:
-            return Account("eip155:1:0x1AAe9864337E821f2F86b5D27468C59AA333C877")!
+            return Account("eip155:1:0x5F847B18b4a2Dd0F428796E89CaEe71480a2a98e")!
         case .kotlin:
-            return Account("eip155:1:0x4c0fb06CD854ab7D5909E830a5f49D184EB41BF5")!
+            return Account("eip155:1:0xC313B6F74FcB89147e751220184F0C56D37a210e")!
         case .js:
-            return Account("eip155:1:0x7ABa5B1F436e42f6d4A579FB3Ad6D204F6A91863")!
+            return Account("eip155:1:0x265F4Eb49ab95ED142C4995EF8B5FC9e57538836")!
         case .custom(let privateKey):
-            let address = try! EthereumPrivateKey(hexPrivateKey: "0x" + privateKey, ctx: nil).address.hex(eip55: false)
+            let address = try! EthereumPrivateKey(hexPrivateKey: "0x" + privateKey, ctx: nil).address.hex(eip55: true)
             return Account("eip155:1:\(address)")!
+        case .web3Modal(let account, _):
+            return account
         }
     }
 
     var privateKey: String {
         switch self {
         case .swift:
-            return "4dc0055d1831f7df8d855fc8cd9118f4a85ddc05395104c4cb0831a6752621a8"
+            return "85f52ec43821c1e2e24a248ee464e8d3f883e460acb0506e1eb6b520eb67ae15"
         case .kotlin:
-            return "ebe738a76b9a3b7457c3d5eca8d3d9ea6909bc563e05b6e0c5c35448f93100a0"
+            return "646a0ebac6bd34ba5f498b809148b2aca3793374cafe9dc417cf63bea80450bf"
         case .js:
-            return "de15cb11963e9bde0a5cce06a5ee2bda1cf3a67be6fbcd7a4fc8c0e4c4db0298"
+            return "8df6b8206eebcd3da89b750f1cf9bba887630c3c5eade83f44c06fa4f7cc5f65"
         case .custom(let privateKey):
             return privateKey
+        case .web3Modal:
+            fatalError("Private key not available")
         }
+    }
+
+    static func new() -> ImportAccount {
+        let key = try! EthereumPrivateKey()
+        return ImportAccount.custom(privateKey: key.rawPrivateKey.toHexString())
     }
 }

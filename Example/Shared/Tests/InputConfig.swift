@@ -6,6 +6,10 @@ struct InputConfig {
         return config(for: "RELAY_HOST")!
     }
 
+    static var relayUrl: String {
+        return "wss://\(relayHost)"
+    }
+
     static var projectId: String {
         return config(for: "PROJECT_ID")!
     }

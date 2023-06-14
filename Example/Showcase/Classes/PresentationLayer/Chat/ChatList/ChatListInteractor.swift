@@ -5,6 +5,10 @@ final class ChatListInteractor {
     private let chatService: ChatService
     private let accountStorage: AccountStorage
 
+    var account: Account? {
+        return accountStorage.importAccount?.account
+    }
+
     init(chatService: ChatService, accountStorage: AccountStorage) {
         self.chatService = chatService
         self.accountStorage = accountStorage
@@ -41,7 +45,7 @@ final class ChatListInteractor {
     func logout() async throws {
         guard let importAccount = accountStorage.importAccount else { return }
         try await chatService.goPrivate(account: importAccount.account)
-        try await chatService.unregister(account: importAccount.account, privateKey: importAccount.privateKey)
+        try await chatService.unregister(account: importAccount.account, importAccount: importAccount)
         accountStorage.importAccount = nil
     }
 }

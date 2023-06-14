@@ -101,10 +101,22 @@ Pod::Spec.new do |spec|
     ss.dependency 'WalletConnectSwiftV2/WalletConnectNetworking'
   end
 
+  spec.subspec 'WalletConnectHistory' do |ss|
+    ss.source_files = 'Sources/WalletConnectHistory/**/*.{h,m,swift}'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectRelay'
+    ss.dependency 'WalletConnectSwiftV2/HTTPClient'
+  end
+
   spec.subspec 'WalletConnectChat' do |ss|
     ss.source_files = 'Sources/Chat/**/*.{h,m,swift}'
-    ss.dependency 'WalletConnectSwiftV2/WalletConnectSigner'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectSync'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectIdentity'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectHistory'
+  end
+
+  spec.subspec 'WalletConnectSync' do |ss|
+    ss.source_files = 'Sources/WalletConnectSync/**/*.{h,m,swift}'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectSigner'
   end
 
   spec.subspec 'WalletConnectSigner' do |ss|

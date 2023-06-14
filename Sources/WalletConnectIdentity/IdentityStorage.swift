@@ -18,7 +18,7 @@ public final class IdentityStorage {
     }
 
     @discardableResult
-    func saveInviteKey(
+    public func saveInviteKey(
         _ key: AgreementPublicKey,
         for account: Account
     ) throws -> AgreementPublicKey {
@@ -30,7 +30,7 @@ public final class IdentityStorage {
         try keychain.delete(key: identityKeyIdentifier(for: account))
     }
 
-    func removeInviteKey(for account: Account) throws {
+    public func removeInviteKey(for account: Account) throws {
         try keychain.delete(key: inviteKeyIdentifier(for: account))
     }
 

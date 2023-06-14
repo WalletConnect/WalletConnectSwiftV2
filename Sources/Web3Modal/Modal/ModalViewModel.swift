@@ -3,118 +3,155 @@ import Combine
 import Foundation
 import SwiftUI
 
-extension ModalSheet {
-    enum Destination: String, CaseIterable {
-        case wallets
-        case help
-        case qr
+enum Destination: Equatable {
+    case welcome
+    case viewAll
+    case help
+    case qr
+    case walletDetail(Listing)
+    case getWallet
         
-        var contentTitle: String {
-            switch self {
-            case .wallets:
-                return "Connect your wallet"
-            case .qr:
-                return "Scan the code"
-            case .help:
-                return "What is a wallet?"
-            }
-        }
-    }
-    
-    final class ModalViewModel: ObservableObject {
-        @Published private(set) var isShown: Binding<Bool>
-        private let projectId: String
-        private let interactor: ModalSheetInteractor
-        private let uiApplicationWrapper: UIApplicationWrapper
-                
-        private var disposeBag = Set<AnyCancellable>()
-        private var deeplinkUri: String?
-        
-        @Published private(set) var uri: String?
-        @Published private(set) var destination: Destination = .wallets
-        @Published private(set) var errorMessage: String?
-        @Published private(set) var wallets: [Listing] = []
-        
-        init(
-            isShown: Binding<Bool>,
-            projectId: String,
-            interactor: ModalSheetInteractor,
-            uiApplicationWrapper: UIApplicationWrapper = .live
-        ) {
-            self.isShown = isShown
-            self.interactor = interactor
-            self.projectId = projectId
-            self.uiApplicationWrapper = uiApplicationWrapper
-            
-            interactor.sessionSettlePublisher
-                .receive(on: DispatchQueue.main)
-                .sink { sessions in
-                    print(sessions)
-                    isShown.wrappedValue = false
-                }
-                .store(in: &disposeBag)
-        }
-        
-        @MainActor
-        func fetchWallets() async {
-            do {
-                let wallets = try await interactor.getListings()
-                // Small deliberate delay to ensure animations execute properly
-                try await Task.sleep(nanoseconds: 500_000_000)
-                
-                withAnimation {
-                    self.wallets = wallets.sorted { $0.order < $1.order }
-                }
-            } catch {
-                print(error)
-                errorMessage = error.localizedDescription
-            }
-        }
-        
-        @MainActor
-        func createURI() async {
-            do {
-                let wcUri = try await interactor.connect()
-                uri = wcUri.absoluteString
-                deeplinkUri = wcUri.deeplinkUri
-            } catch {
-                print(error)
-                errorMessage = error.localizedDescription
-            }
-        }
-        
-        func navigateTo(_ destination: Destination) {
-            self.destination = destination
-        }
-        
-        func onBackButton() {
-            destination = .wallets
-        }
-        
-        func onCopyButton() {
-            UIPasteboard.general.string = uri
-        }
-        
-        func onWalletTapped(index: Int) {
-            guard let wallet = wallets[safe: index] else { return }
-            
-            navigateToDeepLink(
-                universalLink: wallet.mobile.universal ?? "",
-                nativeLink: wallet.mobile.native ?? ""
-            )
-        }
-        
-        func imageUrl(for listing: Listing?) -> URL? {
-            guard let listing = listing else { return nil }
-            
-            let urlString = "https://explorer-api.walletconnect.com/v3/logo/md/\(listing.imageId)?projectId=\(projectId)"
-            
-            return URL(string: urlString)
+    var contentTitle: String {
+        switch self {
+        case .welcome:
+            return "Connect your wallet"
+        case .viewAll:
+            return "View all"
+        case .qr:
+            return "Scan the code"
+        case .help:
+            return "What is a wallet?"
+        case .getWallet:
+            return "Get a wallet"
+        case let .walletDetail(wallet):
+            return wallet.name
         }
     }
 }
 
-private extension ModalSheet.ModalViewModel {
+final class ModalViewModel: ObservableObject {
+    var isShown: Binding<Bool>
+    let interactor: ModalSheetInteractor
+    let uiApplicationWrapper: UIApplicationWrapper
+    
+    @Published private(set) var destinationStack: [Destination] = [.welcome]
+    @Published private(set) var uri: String?
+    @Published private(set) var wallets: [Listing] = []
+    
+    @Published var toast: Toast?
+    
+    var destination: Destination {
+        destinationStack.last!
+    }
+    
+    private var disposeBag = Set<AnyCancellable>()
+    private var deeplinkUri: String?
+    
+    init(
+        isShown: Binding<Bool>,
+        interactor: ModalSheetInteractor,
+        uiApplicationWrapper: UIApplicationWrapper = .live
+    ) {
+        self.isShown = isShown
+        self.interactor = interactor
+        self.uiApplicationWrapper = uiApplicationWrapper
+            
+        interactor.sessionSettlePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { sessions in
+                print(sessions)
+//                isShown.wrappedValue = false
+                self.toast = Toast(style: .success, message: "Session estabilished", duration: 15)
+            }
+            .store(in: &disposeBag)
+        
+        interactor.sessionRejectionPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { (proposal, reason) in
+                
+                print(reason)
+                self.toast = Toast(style: .error, message: reason.message)
+                
+                Task {
+                    await self.createURI()
+                }
+            }
+            .store(in: &disposeBag)
+    }
+        
+    @MainActor
+    func createURI() async {
+        do {
+            guard let wcUri = try await interactor.createPairingAndConnect() else {
+                toast = Toast(style: .error, message: "Failed to create pairing")
+                return
+            }
+            uri = wcUri.absoluteString
+            deeplinkUri = wcUri.deeplinkUri
+        } catch {
+            print(error)
+            toast = Toast(style: .error, message: error.localizedDescription)
+        }
+    }
+        
+    func navigateTo(_ destination: Destination) {
+        guard self.destination != destination else { return }
+        destinationStack.append(destination)
+    }
+    
+    func onListingTap(_ listing: Listing) {
+        navigateToDeepLink(
+            universalLink: listing.mobile.universal ?? "",
+            nativeLink: listing.mobile.native ?? ""
+        )
+    }
+    
+    func onGetWalletTap(_ listing: Listing) {
+        guard
+            let storeLinkString = listing.app.ios,
+            let storeLink = URL(string: storeLinkString)
+        else { return }
+        
+        uiApplicationWrapper.openURL(storeLink)
+    }
+    
+    func onBackButton() {
+        guard destinationStack.count != 1 else { return }
+        _ = destinationStack.popLast()
+    }
+        
+    func onCopyButton() {
+        UIPasteboard.general.string = uri
+        toast = Toast(style: .info, message: "URI copied into clipboard")
+    }
+    
+    @MainActor
+    func fetchWallets() async {
+        do {
+            let wallets = try await interactor.getListings()
+            // Small deliberate delay to ensure animations execute properly
+            try await Task.sleep(nanoseconds: 500_000_000)
+                
+            withAnimation {
+                self.wallets = wallets.sorted {
+                    guard let lhs = $0.order else {
+                        return false
+                    }
+                        
+                    guard let rhs = $1.order else {
+                        return true
+                    }
+                    
+                    return lhs < rhs
+                }
+            }
+        } catch {
+            toast = Toast(style: .error, message: error.localizedDescription)
+        }
+    }
+}
+
+private extension ModalViewModel {
     enum Errors: Error {
         case noWalletLinkFound
     }
@@ -132,9 +169,7 @@ private extension ModalSheet.ModalViewModel {
                 throw Errors.noWalletLinkFound
             }
         } catch {
-            let alertController = UIAlertController(title: "Unable to open the app", message: nil, preferredStyle: .alert)
-            alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-            UIApplication.shared.windows.first?.rootViewController?.present(alertController, animated: true, completion: nil)
+            toast = Toast(style: .error, message: error.localizedDescription)
         }
     }
         
