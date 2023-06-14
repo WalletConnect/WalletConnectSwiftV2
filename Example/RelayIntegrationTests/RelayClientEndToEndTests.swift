@@ -101,18 +101,23 @@ final class RelayClientEndToEndTests: XCTestCase {
 
         relayB.messagePublisher.sink { topic, payload, _ in
             (subscriptionBTopic, subscriptionBPayload) = (topic, payload)
+            Task(priority: .high) {
+                sleep(1)
+                try await relayB.publish(topic: randomTopic, payload: payloadB, tag: 0, prompt: false, ttl: 60)
+            }
             expectationB.fulfill()
         }.store(in: &publishers)
 
-        relayA.socketConnectionStatusPublisher.sink {  _ in
+        relayA.socketConnectionStatusPublisher.sink {  status in
+            guard status == .connected else {return}
             Task(priority: .high) {
-                try await relayA.publish(topic: randomTopic, payload: payloadA, tag: 0, prompt: false, ttl: 60)
                 try await relayA.subscribe(topic: randomTopic)
+                try await relayA.publish(topic: randomTopic, payload: payloadA, tag: 0, prompt: false, ttl: 60)
             }
         }.store(in: &publishers)
-        relayB.socketConnectionStatusPublisher.sink {  _ in
+        relayB.socketConnectionStatusPublisher.sink {  status in
+            guard status == .connected else {return}
             Task(priority: .high) {
-                try await relayB.publish(topic: randomTopic, payload: payloadB, tag: 0, prompt: false, ttl: 60)
                 try await relayB.subscribe(topic: randomTopic)
             }
         }.store(in: &publishers)
