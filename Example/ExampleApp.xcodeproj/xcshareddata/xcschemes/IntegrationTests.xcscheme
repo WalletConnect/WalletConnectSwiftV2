@@ -50,14 +50,14 @@
       </EnvironmentVariables>
       <TestPlans>
          <TestPlanReference
-            reference = "container:ExampleApp.xcodeproj/IntegrationTests.xctestplan"
-            default = "YES">
+            reference = "container:ExampleApp.xcodeproj/IntegrationTests.xctestplan">
          </TestPlanReference>
          <TestPlanReference
             reference = "container:SmokeTests.xctestplan">
          </TestPlanReference>
          <TestPlanReference
-            reference = "container:../NotifyTests.xctestplan">
+            reference = "container:../NotifyTests.xctestplan"
+            default = "YES">
          </TestPlanReference>
       </TestPlans>
       <Testables>

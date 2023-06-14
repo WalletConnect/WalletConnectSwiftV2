@@ -9,7 +9,25 @@
     }
   ],
   "defaultOptions" : {
-
+    "environmentVariableEntries" : [
+      {
+        "key" : "RELAY_HOST",
+        "value" : "$(RELAY_HOST)"
+      },
+      {
+        "key" : "CAST_HOST",
+        "value" : "$(CAST_HOST)"
+      },
+      {
+        "key" : "PROJECT_ID",
+        "value" : "$(PROJECT_ID)"
+      }
+    ],
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:ExampleApp.xcodeproj",
+      "identifier" : "A5E03DEC286464DB00888481",
+      "name" : "IntegrationTests"
+    }
   },
   "testTargets" : [
     {
