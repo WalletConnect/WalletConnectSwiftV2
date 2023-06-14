@@ -24,7 +24,7 @@ test_setup:
 build_all:
 	rm -rf test_results
 	set -o pipefail && xcodebuild -scheme "WalletConnect-Package" -destination "platform=iOS Simulator,name=iPhone 14" -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackagesCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' build-for-testing | xcpretty
-	set -o pipefail && xcodebuild -project "Example/ExampleApp.xcodeproj" -scheme "BuildAll" -destination "platform=iOS Simulator,name=iPhone 14" -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackagesCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' build-for-testing | xcpretty
+	set -o pipefail && xcodebuild -project "Example/ExampleApp.xcodeproj" -scheme "BuildAll" -destination "platform=iOS Simulator,name=iPhone 14" -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackagesCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' CAST_HOST='$(CAST_HOST)' build-for-testing | xcpretty
 
 build_dapp:
 	fastlane build scheme:DApp
