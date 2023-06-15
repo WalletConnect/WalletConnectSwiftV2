@@ -1,6 +1,9 @@
 name: ci
 
 on:
+  push:
+    branches:
+      - feature/w3m-search
   pull_request_target:
     branches:
       - develop
@@ -50,9 +53,7 @@ jobs:
       with:
         path: |
           products.tar
-        key: ${{ runner.os }}-deriveddata-${{ github.ref }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-deriveddata-${{ github.ref }}-
+        key: ${{ runner.os }}-deriveddata-${{ github.event.pull_request.head.sha }}
 
     - name: Untar DerivedDataCache
       shell: bash
