@@ -8,6 +8,10 @@ inputs:
     description: 'The endpoint of the relay e.g. relay.walletconnect.com'
     required: false
     default: 'relay.walletconnect.com'
+  notify-endpoint:
+    description: 'The endpoint of the notufy server e.g. cast.walletconnect.com'
+    required: false
+    default: 'cast.walletconnect.com'
   project-id:
     description: 'WalletConnect project id'
     required: true
@@ -55,6 +59,13 @@ runs:
       shell: bash
       run: make smoke_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }}
 
+      # Notify tests
+    - name: Run notify tests
+      if: inputs.type == 'notify-tests'
+      shell: bash
+      run: make notify_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }} CAST_HOST=${{ inputs.notify-endpoint }}
+
+      # Slack notification for failing smoke and relay tests
     - name: Slack Notification for Failure
       if: failure() && (inputs.type == 'smoke-tests' || inputs.type == 'relay-tests')
       uses: 8398a7/action-slack@v3
