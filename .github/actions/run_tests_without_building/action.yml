@@ -51,7 +51,7 @@ runs:
     - name: Run Relay integration tests
       if: inputs.type == 'relay-tests'
       shell: bash
-      run: make relay_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }}
+      run: make relay_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }} CAST_HOST=${{ inputs.notify-endpoint }}
 
     # Smoke tests
     - name: Run smoke tests
