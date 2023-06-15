@@ -190,6 +190,7 @@ final class PushTests: XCTestCase {
         walletPushClient.subscriptionsPublisher
             .first()
             .sink { [unowned self] subscriptions in
+                sleep(1)
                 Task { try! await walletPushClient.update(topic: subscriptions.first!.topic, scope: updateScope) }
             }
             .store(in: &publishers)
