@@ -17,7 +17,11 @@ inputs:
     required: true
   slack-webhook-url:
     description: 'Smoke tests slack webhoook url'
-    required: true
+    required: false
+  gm-dapp-project-id:
+    description: 'GM DApp Project ID'
+    required: false
+
 
 runs:
   using: "composite"
@@ -45,7 +49,7 @@ runs:
     - name: Run integration tests
       if: inputs.type == 'integration-tests'
       shell: bash
-      run: make integration_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }}
+      run: make integration_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }} GM_DAPP_PROJECT_ID=${{ inputs.gm-dapp-project-id }}
 
     # Relay Integration tests
     - name: Run Relay integration tests
@@ -63,7 +67,7 @@ runs:
     - name: Run notify tests
       if: inputs.type == 'notify-tests'
       shell: bash
-      run: make notify_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }} CAST_HOST=${{ inputs.notify-endpoint }}
+      run: make notify_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }} CAST_HOST=${{ inputs.notify-endpoint }} GM_DAPP_PROJECT_ID=${{ inputs.gm-dapp-project-id }}
 
       # Slack notification for failing smoke and relay tests
     - name: Slack Notification for Failure
