@@ -9,7 +9,7 @@ inputs:
     required: false
     default: 'relay.walletconnect.com'
   notify-endpoint:
-    description: 'The endpoint of the notufy server e.g. cast.walletconnect.com'
+    description: 'The endpoint of the notify server e.g. cast.walletconnect.com'
     required: false
     default: 'cast.walletconnect.com'
   project-id:
