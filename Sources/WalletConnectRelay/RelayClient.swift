@@ -79,9 +79,9 @@ public final class RelayClient {
         logger: ConsoleLogging = ConsoleLogger(loggingLevel: .debug)
     ) {
         let clientIdStorage = ClientIdStorage(keychain: keychainStorage)
-        let socketAuthenticator = SocketAuthenticator(
+        let socketAuthenticator = ClientIdAuthenticator(
             clientIdStorage: clientIdStorage,
-            relayHost: relayHost
+            url: "wss://\(relayHost)"
         )
         let relayUrlFactory = RelayUrlFactory(
             relayHost: relayHost,

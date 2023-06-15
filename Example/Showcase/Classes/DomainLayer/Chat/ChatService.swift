@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import WalletConnectChat
 import WalletConnectRelay
+import WalletConnectSign
 
 typealias Stream<T> = AnyPublisher<T, Never>
 
@@ -81,7 +82,7 @@ final class ChatService {
         try await client.reject(inviteId: invite.id)
     }
 
-    func goPublic(account: Account, privateKey: String) async throws {
+    func goPublic(account: Account) async throws {
         try await client.goPublic(account: account)
     }
 
@@ -91,17 +92,15 @@ final class ChatService {
         try await client.invite(invite: invite)
     }
 
-    func register(account: Account, privateKey: String) async throws {
+    func register(account: Account, importAccount: ImportAccount) async throws {
         _ = try await client.register(account: account) { message in
-            let signature = self.onSign(message: message, privateKey: privateKey)
-            return SigningResult.signed(signature)
+            return await self.onSign(message: message, importAccount: importAccount)
         }
     }
 
-    func unregister(account: Account, privateKey: String) async throws {
+    func unregister(account: Account, importAccount: ImportAccount) async throws {
         try await client.unregister(account: account) { message in
-            let signature = self.onSign(message: message, privateKey: privateKey)
-            return SigningResult.signed(signature)
+            return await self.onSign(message: message, importAccount: importAccount)
         }
     }
 
@@ -116,9 +115,71 @@ final class ChatService {
 
 private extension ChatService {
 
+    func onSign(message: String, importAccount: ImportAccount) async -> SigningResult {
+        switch importAccount {
+        case .swift, .kotlin, .js, .custom:
+            return .signed(onSign(message: message, privateKey: importAccount.privateKey))
+        case .web3Modal(let account, let topic):
+            return await onWeb3ModalSign(message: message, account: account, topic: topic)
+        }
+    }
+
     func onSign(message: String, privateKey: String) -> CacaoSignature {
         let privateKey = Data(hex: privateKey)
         let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
         return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
+    }
+
+    func onWeb3ModalSign(message: String, account: Account, topic: String) async -> SigningResult {
+        guard let session = Sign.instance.getSessions().first(where: { $0.topic == topic }) else { return .rejected }
+
+        do {
+            let request = makeRequest(session: session, message: message, account: account)
+            try await Sign.instance.request(params: request)
+
+            let signature: CacaoSignature = try await withCheckedThrowingContinuation { continuation in
+                var cancellable: AnyCancellable?
+                cancellable = Sign.instance.sessionResponsePublisher
+                    .sink { response in
+                        defer { cancellable?.cancel() }
+                        switch response.result {
+                        case .response(let value):
+                            do {
+                                let string = try value.get(String.self)
+                                let signature = CacaoSignature(t: .eip191, s: string.deleting0x())
+                                continuation.resume(returning: signature)
+                            } catch {
+                                continuation.resume(throwing: error)
+                            }
+                        case .error(let error):
+                            continuation.resume(throwing: error)
+                        }
+                    }
+            }
+
+            return .signed(signature)
+        } catch {
+            return .rejected
+        }
+    }
+
+    func makeRequest(session: WalletConnectSign.Session, message: String, account: Account) -> Request {
+        return Request(
+            topic: session.topic,
+            method: "personal_sign",
+            params: AnyCodable(["0x" + message.data(using: .utf8)!.toHexString(), account.address]),
+            chainId: Blockchain("eip155:1")!
+        )
+    }
+}
+
+fileprivate extension String {
+
+    func deleting0x() -> String {
+        var string = self
+        if starts(with: "0x") {
+            string.removeFirst(2)
+        }
+        return string
     }
 }

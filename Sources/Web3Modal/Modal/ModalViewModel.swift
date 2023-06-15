@@ -30,18 +30,15 @@ enum Destination: Equatable {
 }
 
 final class ModalViewModel: ObservableObject {
-    
-    
     var isShown: Binding<Bool>
     let interactor: ModalSheetInteractor
-    let projectId: String
     let uiApplicationWrapper: UIApplicationWrapper
-    
     
     @Published private(set) var destinationStack: [Destination] = [.welcome]
     @Published private(set) var uri: String?
-    @Published private(set) var errorMessage: String?
     @Published private(set) var wallets: [Listing] = []
+    
+    @Published var toast: Toast?
     
     var destination: Destination {
         destinationStack.last!
@@ -52,20 +49,32 @@ final class ModalViewModel: ObservableObject {
     
     init(
         isShown: Binding<Bool>,
-        projectId: String,
         interactor: ModalSheetInteractor,
         uiApplicationWrapper: UIApplicationWrapper = .live
     ) {
         self.isShown = isShown
         self.interactor = interactor
-        self.projectId = projectId
         self.uiApplicationWrapper = uiApplicationWrapper
             
         interactor.sessionSettlePublisher
             .receive(on: DispatchQueue.main)
             .sink { sessions in
                 print(sessions)
-                isShown.wrappedValue = false
+//                isShown.wrappedValue = false
+                self.toast = Toast(style: .success, message: "Session estabilished", duration: 15)
+            }
+            .store(in: &disposeBag)
+        
+        interactor.sessionRejectionPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { (proposal, reason) in
+                
+                print(reason)
+                self.toast = Toast(style: .error, message: reason.message)
+                
+                Task {
+                    await self.createURI()
+                }
             }
             .store(in: &disposeBag)
     }
@@ -73,12 +82,15 @@ final class ModalViewModel: ObservableObject {
     @MainActor
     func createURI() async {
         do {
-            let wcUri = try await interactor.connect()
+            guard let wcUri = try await interactor.createPairingAndConnect() else {
+                toast = Toast(style: .error, message: "Failed to create pairing")
+                return
+            }
             uri = wcUri.absoluteString
             deeplinkUri = wcUri.deeplinkUri
         } catch {
             print(error)
-            errorMessage = error.localizedDescription
+            toast = Toast(style: .error, message: error.localizedDescription)
         }
     }
         
@@ -110,8 +122,8 @@ final class ModalViewModel: ObservableObject {
         
     func onCopyButton() {
         UIPasteboard.general.string = uri
+        toast = Toast(style: .info, message: "URI copied into clipboard")
     }
-
     
     @MainActor
     func fetchWallets() async {
@@ -134,7 +146,7 @@ final class ModalViewModel: ObservableObject {
                 }
             }
         } catch {
-            print(error)
+            toast = Toast(style: .error, message: error.localizedDescription)
         }
     }
 }
@@ -157,9 +169,7 @@ private extension ModalViewModel {
                 throw Errors.noWalletLinkFound
             }
         } catch {
-            let alertController = UIAlertController(title: "Unable to open the app", message: nil, preferredStyle: .alert)
-            alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-            UIApplication.shared.windows.first?.rootViewController?.present(alertController, animated: true, completion: nil)
+            toast = Toast(style: .error, message: error.localizedDescription)
         }
     }
         

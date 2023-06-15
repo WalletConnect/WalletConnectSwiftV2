@@ -13,16 +13,7 @@ final class ImportRouter {
     }
     
     func presentWeb3Modal() {
-        Web3ModalSheetController(
-            projectId: InputConfig.projectId,
-            metadata: AppMetadata(
-                name: "Showcase App",
-                description: "Showcase description",
-                url: "example.wallet",
-                icons: ["https://avatars.githubusercontent.com/u/37784886"]
-            )
-        )
-        .present(from: viewController)
+        Web3ModalSheetController().present(from: viewController)
     }
 
     func presentChat(importAccount: ImportAccount) {

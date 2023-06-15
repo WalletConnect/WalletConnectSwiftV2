@@ -4,6 +4,7 @@ import Combine
 @testable import WalletConnectSign
 
 final class SignClientMock: SignClientProtocol {
+        
     var approveCalled = false
     var rejectCalled = false
     var updateCalled = false
@@ -13,6 +14,8 @@ final class SignClientMock: SignClientProtocol {
     var pairCalled = false
     var disconnectCalled = false
     var cleanupCalled = false
+    var connectCalled = false
+    var requestCalled = false
     
     private let metadata = AppMetadata(name: "", description: "", url: "", icons: [])
     private let request = WalletConnectSign.Request(id: .left(""), topic: "", method: "", params: "", chainId: Blockchain("eip155:1")!, expiry: nil)
@@ -54,6 +57,21 @@ final class SignClientMock: SignClientProtocol {
     
     var sessionDeletePublisher: AnyPublisher<(String, WalletConnectNetworking.Reason), Never> {
         return Result.Publisher(("topic", ReasonMock()))
+            .eraseToAnyPublisher()
+    }
+    
+    var sessionRejectionPublisher: AnyPublisher<(Session.Proposal, Reason), Never> {
+        let sessionProposal = Session.Proposal(
+            id: "",
+            pairingTopic: "",
+            proposer: AppMetadata(name: "", description: "", url: "", icons: []),
+            requiredNamespaces: [:],
+            optionalNamespaces: nil,
+            sessionProperties: nil,
+            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [])), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
+        )
+        
+        return Result.Publisher((sessionProposal, SignReasonCode.userRejectedChains))
             .eraseToAnyPublisher()
     }
     
@@ -108,5 +126,18 @@ final class SignClientMock: SignClientProtocol {
     
     func cleanup() async throws {
         cleanupCalled = true
+    }
+    
+    func connect(
+        requiredNamespaces: [String : WalletConnectSign.ProposalNamespace],
+        optionalNamespaces: [String : WalletConnectSign.ProposalNamespace]?,
+        sessionProperties: [String : String]?,
+        topic: String
+    ) async throws {
+        connectCalled = true
+    }
+    
+    func request(params: WalletConnectSign.Request) async throws {
+        requestCalled = true
     }
 }

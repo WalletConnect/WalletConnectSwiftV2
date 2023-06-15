@@ -7,11 +7,11 @@ import Web3
 
 final class SyncTests: XCTestCase {
 
-    struct TestObject: SyncObject {
+    struct TestObject: DatabaseObject {
         let id: String
         let value: String
 
-        var syncId: String {
+        var databaseId: String {
             return id
         }
     }
@@ -75,8 +75,7 @@ final class SyncTests: XCTestCase {
     }
 
     func makeSyncStore(client: SyncClient, indexStore: SyncIndexStore) -> SyncStore<TestObject> {
-        let store = NewKeyedDatabase<[String: TestObject]>(storage: RuntimeKeyValueStorage(), identifier: "objectStore")
-        let objectStore = SyncObjectStore(store: store)
+        let objectStore = KeyedDatabase<TestObject>(storage: RuntimeKeyValueStorage(), identifier: "objectStore")
         return SyncStore(name: storeName, syncClient: client, indexStore: indexStore, objectStore: objectStore)
     }
 

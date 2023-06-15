@@ -52,9 +52,9 @@ public struct SentInvite: Codable, Equatable {
     }
 }
 
-extension SentInvite: SyncObject {
+extension SentInvite: DatabaseObject {
 
-    public var syncId: String {
+    public var databaseId: String {
         return responseTopic
     }
 }

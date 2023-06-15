@@ -1,25 +1,13 @@
 import SwiftUI
-import WalletConnectPairing
 
 @available(iOS 14.0, *)
 public struct ModalContainerView: View {
-    
     @Environment(\.presentationMode) var presentationMode
     
     @State var showModal: Bool = false
-    
-    let projectId: String
-    let metadata: AppMetadata
-    
-    public init(projectId: String, metadata: AppMetadata) {
-        self.projectId = projectId
-        self.metadata = metadata
-    }
-    
-    public var body: some View {
-        
-        VStack(spacing: 0) {
-            
+
+    public var body: some View {        
+        VStack(spacing: -10) {
             Color.thickOverlay
                 .colorScheme(.light)
                 .onTapGesture {
@@ -32,14 +20,10 @@ public struct ModalContainerView: View {
                 ModalSheet(
                     viewModel: .init(
                         isShown: $showModal,
-                        projectId: projectId,
-                        interactor: DefaultModalSheetInteractor(
-                            projectId: projectId,
-                            metadata: metadata
-                        )
+                        interactor: DefaultModalSheetInteractor()
                     )
                 )
-                .environment(\.projectId, projectId)
+                .environment(\.projectId, Web3Modal.config.projectId)
                 .transition(.move(edge: .bottom))
                 .animation(.spring(), value: showModal)
             }

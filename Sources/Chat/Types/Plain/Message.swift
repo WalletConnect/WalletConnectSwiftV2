@@ -1,11 +1,15 @@
 import Foundation
 
-public struct Message: Codable, Equatable {
+public struct Message: DatabaseObject {
     public let topic: String
     public let message: String
     public let authorAccount: Account
     public let timestamp: UInt64
     public let media: Media?
+
+    public var databaseId: String {
+        return String(timestamp)
+    }
 
     init(
         topic: String,

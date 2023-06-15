@@ -44,6 +44,7 @@
         "EIP191VerifierTests",
         "EIP55Tests",
         "ENSResolverTests",
+        "HistoryTests",
         "PairingTests",
         "PushTests",
         "PushTests\/testDappDeletePushSubscription()",
@@ -70,7 +71,9 @@
         "SignClientTests\/testSessionRequestFailureResponse()",
         "SignClientTests\/testSuccessfulSessionExtend()",
         "SignClientTests\/testSuccessfulSessionUpdateNamespaces()",
-        "SignerTest"
+        "SignerTest",
+        "SyncDerivationServiceTests",
+        "SyncTests"
       ],
       "target" : {
         "containerPath" : "container:ExampleApp.xcodeproj",

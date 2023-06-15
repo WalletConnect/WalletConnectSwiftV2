@@ -11,6 +11,9 @@ inputs:
   project-id:
     description: 'WalletConnect project id'
     required: true
+  slack-webhook-url:
+    description: 'Smoke tests slack webhoook url'
+    required: true
 
 runs:
   using: "composite"
@@ -53,13 +56,13 @@ runs:
       run: make smoke_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }}
 
     - name: Slack Notification for Failure
-      if: failure() && matrix.type == 'smoke-tests'
+      if: failure() && (inputs.type == 'smoke-tests' || inputs.type == 'relay-tests')
       uses: 8398a7/action-slack@v3
       with:
         status: ${{ job.status }}
         text: The smoke tests failed in the CI pipeline. Check the logs for more details.
       env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_WEBHOOK_URL: ${{ inputs.slack-webhook-url }}
 
     - name: Publish Test Report
       uses: mikepenz/action-junit-report@v3
