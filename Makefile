@@ -82,7 +82,7 @@ ifneq ($(notifyxctestrun),)
 # override ENV variables
 	plutil -replace TestConfigurations.0.TestTargets.0.EnvironmentVariables.RELAY_HOST -string $(RELAY_HOST) $(notifyxctestrun)
 	plutil -replace TestConfigurations.0.TestTargets.0.EnvironmentVariables.PROJECT_ID -string $(PROJECT_ID) $(notifyxctestrun)
-    plutil -replace TestConfigurations.0.TestTargets.0.EnvironmentVariables.CAST_HOST -string $(CAST_HOST) $(notifyxctestrun)
+	plutil -replace TestConfigurations.0.TestTargets.0.EnvironmentVariables.CAST_HOST -string $(CAST_HOST) $(notifyxctestrun)
 # test-without-building
 	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/NotifyTests.xcresult' -xctestrun '$(notifyxctestrun)' test-without-building | tee ./test_results/xcodebuild.log | xcpretty --report junit --output ./test_results/report.junit
 else
