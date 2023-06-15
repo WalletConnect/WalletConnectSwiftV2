@@ -10,6 +10,10 @@ struct InputConfig {
         return config(for: "CAST_HOST")!
     }
 
+    static var gmDappProjectId: String {
+        return config(for: "GM_DAPP_PROJECT_ID")!
+    }
+
     static var projectId: String {
         return config(for: "PROJECT_ID")!
     }
