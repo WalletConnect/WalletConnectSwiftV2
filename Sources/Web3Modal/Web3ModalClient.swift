@@ -15,11 +15,6 @@ public class Web3ModalClient {
         signClient.sessionsPublisher.eraseToAnyPublisher()
     }
     
-    /// Publisher that sends web socket connection status
-    public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
-        signClient.socketConnectionStatusPublisher.eraseToAnyPublisher()
-    }
-    
     /// Publisher that sends session when one is settled
     ///
     /// Event is emited on proposer and responder client when both communicating peers have successfully established a session.
@@ -48,6 +43,11 @@ public class Web3ModalClient {
         signClient.sessionResponsePublisher.eraseToAnyPublisher()
     }
     
+    /// Publisher that sends web socket connection status
+    public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
+        signClient.socketConnectionStatusPublisher.eraseToAnyPublisher()
+    }
+    
     // MARK: - Private Properties
 
     private let signClient: SignClientProtocol
@@ -61,13 +61,14 @@ public class Web3ModalClient {
         self.pairingClient = pairingClient
     }
     
-    /// For creating new pairing URI
+    /// For creating new pairing
     public func createPairing() async throws -> WalletConnectURI {
         try await pairingClient.create()
     }
     
     /// For proposing a session to a wallet.
-    /// Function will propose a session on existing pairing.
+    /// Function will propose a session on existing pairing or create new one if not specified
+    /// Namespaces from Web3Modal.config will be used
     /// - Parameters:
     ///   - topic: pairing topic
     public func connect(
