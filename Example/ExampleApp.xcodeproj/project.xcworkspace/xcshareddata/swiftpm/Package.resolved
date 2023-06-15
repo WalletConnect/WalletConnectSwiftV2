@@ -65,15 +65,6 @@
         }
       },
       {
-        "package": "Starscream",
-        "repositoryURL": "https://github.com/daltoniam/Starscream",
-        "state": {
-          "branch": null,
-          "revision": "a063fda2b8145a231953c20e7a646be254365396",
-          "version": "3.1.2"
-        }
-      },
-      {
         "package": "swift-qrcode-generator",
         "repositoryURL": "https://github.com/dagronf/swift-qrcode-generator",
         "state": {

@@ -20,9 +20,9 @@ final class ImportRouter {
                 description: "Showcase description",
                 url: "example.wallet",
                 icons: ["https://avatars.githubusercontent.com/u/37784886"]
-            ),
-            webSocketFactory: DefaultSocketFactory()
-        ).present(from: viewController)
+            )
+        )
+        .present(from: viewController)
     }
 
     func presentChat(importAccount: ImportAccount) {

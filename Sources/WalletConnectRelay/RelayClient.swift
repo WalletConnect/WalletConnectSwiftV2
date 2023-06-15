@@ -75,7 +75,6 @@ public final class RelayClient {
         projectId: String,
         keyValueStorage: KeyValueStorage = UserDefaults.standard,
         keychainStorage: KeychainStorageProtocol = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk"),
-        socketFactory: WebSocketFactory,
         socketConnectionType: SocketConnectionType = .automatic,
         logger: ConsoleLogging = ConsoleLogger(loggingLevel: .debug)
     ) {
@@ -89,8 +88,9 @@ public final class RelayClient {
             projectId: projectId,
             socketAuthenticator: socketAuthenticator
         )
+        let webSocketClientFactory = WebSocketClientFactory()
         let dispatcher = Dispatcher(
-            socketFactory: socketFactory,
+            socketFactory: webSocketClientFactory,
             relayUrlFactory: relayUrlFactory,
             socketConnectionType: socketConnectionType,
             logger: logger

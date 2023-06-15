@@ -14,17 +14,15 @@ protocol ModalSheetInteractor {
 final class DefaultModalSheetInteractor: ModalSheetInteractor {
     let projectId: String
     let metadata: AppMetadata
-    let socketFactory: WebSocketFactory
     
     lazy var sessionSettlePublisher: AnyPublisher<Session, Never> = Sign.instance.sessionSettlePublisher
     
-    init(projectId: String, metadata: AppMetadata, webSocketFactory: WebSocketFactory) {
+    init(projectId: String, metadata: AppMetadata) {
         self.projectId = projectId
         self.metadata = metadata
-        self.socketFactory = webSocketFactory
         
         Pair.configure(metadata: metadata)
-        Networking.configure(projectId: projectId, socketFactory: socketFactory)
+        Networking.configure(projectId: projectId)
     }
     
     func getListings() async throws -> [Listing] {

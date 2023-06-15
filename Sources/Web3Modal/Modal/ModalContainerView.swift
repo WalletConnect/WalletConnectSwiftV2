@@ -10,12 +10,10 @@ public struct ModalContainerView: View {
     
     let projectId: String
     let metadata: AppMetadata
-    let webSocketFactory: WebSocketFactory
     
-    public init(projectId: String, metadata: AppMetadata, webSocketFactory: WebSocketFactory) {
+    public init(projectId: String, metadata: AppMetadata) {
         self.projectId = projectId
         self.metadata = metadata
-        self.webSocketFactory = webSocketFactory
     }
     
     public var body: some View {
@@ -37,8 +35,7 @@ public struct ModalContainerView: View {
                         projectId: projectId,
                         interactor: DefaultModalSheetInteractor(
                             projectId: projectId,
-                            metadata: metadata,
-                            webSocketFactory: webSocketFactory
+                            metadata: metadata
                         )
                     )
                 )

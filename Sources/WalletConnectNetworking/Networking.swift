@@ -30,24 +30,20 @@ public class Networking {
     /// - Parameters:
     ///   - relayHost: relay host
     ///   - projectId: project id
-    ///   - socketFactory: web socket factory
     ///   - socketConnectionType: socket connection type
     static public func configure(
         relayHost: String = "relay.walletconnect.com",
         projectId: String,
-        socketFactory: WebSocketFactory,
         socketConnectionType: SocketConnectionType = .automatic
     ) {
         Networking.config = Networking.Config(
             relayHost: relayHost,
             projectId: projectId,
-            socketFactory: socketFactory,
             socketConnectionType: socketConnectionType
         )
         Relay.configure(
             relayHost: relayHost,
             projectId: projectId,
-            socketFactory: socketFactory,
             socketConnectionType: socketConnectionType)
     }
 }

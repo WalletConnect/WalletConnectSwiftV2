@@ -5,7 +5,7 @@ import Web3Inbox
 struct ThirdPartyConfigurator: Configurator {
 
     func configure() {
-        Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
+        Networking.configure(projectId: InputConfig.projectId)
 
         let metadata = AppMetadata(
             name: "Example Wallet",

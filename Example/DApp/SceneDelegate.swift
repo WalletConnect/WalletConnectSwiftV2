@@ -11,7 +11,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private let authCoordinator = AuthCoordinator()
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
+        Networking.configure(projectId: InputConfig.projectId)
         Auth.configure(crypto: DefaultCryptoProvider())
 
         setupWindow(scene: scene)

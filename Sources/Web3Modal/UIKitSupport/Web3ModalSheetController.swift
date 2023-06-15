@@ -9,9 +9,9 @@ public class Web3ModalSheetController: UIHostingController<AnyView> {
         fatalError("init(coder:) has not been implemented")
     }
     
-    public init(projectId: String, metadata: AppMetadata, webSocketFactory: WebSocketFactory) {
+    public init(projectId: String, metadata: AppMetadata) {
         let view = AnyView(
-            ModalContainerView(projectId: projectId, metadata: metadata, webSocketFactory: webSocketFactory)
+            ModalContainerView(projectId: projectId, metadata: metadata)
         )
         
         super.init(rootView: view)

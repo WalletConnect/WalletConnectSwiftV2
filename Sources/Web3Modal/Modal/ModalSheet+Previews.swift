@@ -40,8 +40,7 @@ struct ModalSheet_Previews: PreviewProvider {
                 projectId: projectId,
                 interactor: DefaultModalSheetInteractor(
                     projectId: projectId,
-                    metadata: metadata,
-                    webSocketFactory: WebSocketFactoryMock()
+                    metadata: metadata
                 )
             )
         )
