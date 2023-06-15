@@ -56,7 +56,7 @@ public struct ModalSheet: View {
     
     private func contentHeader() -> some View {
         HStack(spacing: 0) {
-            if viewModel.destination != .welcome {
+            if viewModel.destinationStack.count > 1 {
                 backButton()
             }
             
@@ -76,10 +76,17 @@ public struct ModalSheet: View {
         .frame(height: 60)
         .overlay(
             VStack {
-                Text(viewModel.destination.contentTitle)
-                    .font(.system(size: 20).weight(.semibold))
-                    .foregroundColor(.foreground1)
-                    .padding(.horizontal, 50)
+                if viewModel.destination.hasSearch {
+                    TextField("Search", text: $viewModel.searchTerm)
+                        .textFieldStyle(.roundedBorder)
+                        .autocapitalization(.none)
+                        .padding(.horizontal, 50)
+                } else {
+                    Text(viewModel.destination.contentTitle)
+                        .font(.system(size: 20).weight(.semibold))
+                        .foregroundColor(.foreground1)
+                        .padding(.horizontal, 50)
+                }
             }
         )
     }
@@ -89,7 +96,7 @@ public struct ModalSheet: View {
         if #available(iOS 14.0, *) {
             WalletList(
                 wallets: .init(get: {
-                    viewModel.wallets
+                    viewModel.filteredWallets
                 }, set: { _ in }),
                 destination: .init(get: {
                     viewModel.destination
@@ -116,7 +123,7 @@ public struct ModalSheet: View {
         case .welcome,
              .walletDetail,
              .viewAll:
-           welcome()
+            welcome()
         case .help:
             WhatIsWalletView(navigateTo: viewModel.navigateTo(_:))
         case .qr:

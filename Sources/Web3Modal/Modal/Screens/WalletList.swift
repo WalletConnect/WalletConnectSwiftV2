@@ -2,8 +2,6 @@ import SwiftUI
 
 @available(iOS 14.0, *)
 struct WalletList: View {
-    @Namespace var namespace
-    
     @Binding var wallets: [Listing]
     @Binding var destination: Destination
     @State var retryButtonShown: Bool = false
@@ -31,41 +29,63 @@ struct WalletList: View {
     
     private func initialList() -> some View {
         ZStack {
+            Spacer().frame(height: 200)
+            
             VStack {
                 HStack {
-                    ForEach(0..<4) { wallet in
-                        gridItem(for: wallet)
+                    ForEach(0..<4) { index in
+                        gridItem(for: index)
                     }
                 }
                 HStack {
-                    ForEach(4..<7) { wallet in
-                        gridItem(for: wallet)
+                    ForEach(4..<7) { index in
+                        gridItem(for: index)
                     }
                     
                     viewAllItem()
                         .onTapGesture {
-                            navigateTo(.viewAll)
+                            withAnimation {
+                                navigateTo(.viewAll)
+                            }
                         }
                 }
             }
-            
-            Spacer().frame(height: 200)
         }
     }
     
+    @ViewBuilder
     private func viewAll() -> some View {
-        ScrollView(.vertical) {
-            VStack(alignment: .leading) {
-                ForEach(Array(stride(from: 0, to: wallets.count, by: 4)), id: \.self) { row in
-                    HStack {
-                        ForEach(row..<(row + 4), id: \.self) { index in
-                            if wallets.indices.contains(index) {
-                                gridItem(for: index)
+        ZStack {
+            
+            Spacer().frame(height: 450)
+            
+            ScrollView(.vertical) {
+                VStack(alignment: .leading) {
+                    ForEach(Array(stride(from: 0, to: wallets.count, by: 4)), id: \.self) { row in
+                        HStack {
+                            ForEach(row..<(row + 4), id: \.self) { index in
+                                if wallets.indices.contains(index) {
+                                    gridItem(for: index)
+                                }
                             }
                         }
                     }
                 }
+                .padding(.top)
             }
+            
+            LinearGradient(
+                stops: [
+                    .init(color: .background1, location: 0.0),
+                    .init(color: .background1.opacity(0), location: 0.04),
+                    .init(color: .background1.opacity(0), location: 0.96),
+                    .init(color: .background1, location: 1.0),
+                    
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .allowsHitTesting(false)
         }
     }
     
@@ -118,7 +138,6 @@ struct WalletList: View {
         VStack {
             WalletImage(wallet: wallet)
                 .frame(width: 60, height: 60)
-                .matchedGeometryEffect(id: index, in: namespace)
             
             Text(wallet?.name ?? "WalletName")
                 .font(.system(size: 12))
@@ -138,7 +157,9 @@ struct WalletList: View {
         .onTapGesture {
             guard let wallet else { return }
             
-            navigateTo(.walletDetail(wallet))
+            withAnimation {
+                navigateTo(.walletDetail(wallet))
+            }
         }
     }
     
@@ -155,18 +176,18 @@ struct WalletList: View {
                 .font(.system(size: 14))
                 .foregroundColor(.foreground3)
             
-            if retryButtonShown {
-                Button {
-                    onListingTap(wallet)
-                } label: {
-                    HStack {
-                        Text("Try Again")
-                        Image("external_link", bundle: .module)
-                    }
+            Button {
+                onListingTap(wallet)
+            } label: {
+                HStack {
+                    Text("Try Again")
+                    Image("external_link", bundle: .module)
                 }
-                .buttonStyle(W3MButtonStyle())
-                .padding()
             }
+            .buttonStyle(W3MButtonStyle())
+            .padding()
+            .opacity(retryButtonShown ? 1 : 0)
+            .animation(.easeIn)
         }
         .padding()
         .onAppear {
