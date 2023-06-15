@@ -31,24 +31,9 @@
   },
   "testTargets" : [
     {
-      "skippedTests" : [
-        "AuthTests",
-        "CacaoSignerTest",
-        "ChatTests",
-        "EIP1271VerifierTests",
-        "EIP191VerifierTests",
-        "EIP55Tests",
-        "ENSResolverTests",
-        "PairingTests",
-        "PushTests\/testDeletePushSubscription()",
-        "PushTests\/testPushPropose()",
-        "PushTests\/testWalletCreatesSubscription()",
-        "PushTests\/testWalletRejectsPushPropose()",
-        "RegistryTests",
-        "SignClientTests",
-        "SignerTest",
-        "SyncDerivationServiceTests",
-        "SyncTests"
+      "selectedTests" : [
+        "PushTests\/testNotifyServerSubscribeAndNotifies()",
+        "PushTests\/testWalletCreatesAndUpdatesSubscription()"
       ],
       "target" : {
         "containerPath" : "container:ExampleApp.xcodeproj",
