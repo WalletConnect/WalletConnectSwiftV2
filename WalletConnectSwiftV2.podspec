@@ -112,6 +112,7 @@ Pod::Spec.new do |spec|
     ss.dependency 'WalletConnectSwiftV2/WalletConnectSync'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectIdentity'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectHistory'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectEcho'
   end
 
   spec.subspec 'WalletConnectSync' do |ss|

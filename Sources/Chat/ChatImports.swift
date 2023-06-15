@@ -3,4 +3,5 @@
 @_exported import WalletConnectIdentity
 @_exported import WalletConnectSync
 @_exported import WalletConnectHistory
+@_exported import WalletConnectEcho
 #endif

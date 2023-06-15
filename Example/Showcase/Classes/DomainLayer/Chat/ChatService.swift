@@ -111,6 +111,10 @@ final class ChatService {
     func resolve(account: Account) async throws -> String {
         return try await client.resolve(account: account)
     }
+
+    public func register(deviceToken: Data) async throws {
+        try await client.register(deviceToken: deviceToken)
+    }
 }
 
 private extension ChatService {

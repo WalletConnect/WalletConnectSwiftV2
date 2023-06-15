@@ -11,6 +11,7 @@ public class Chat {
         return ChatClientFactory.create(
             keyserverUrl: keyserverUrl,
             relayClient: Relay.instance,
+            echoClient: Echo.instance,
             networkingInteractor: Networking.interactor,
             syncClient: Sync.instance
         )
@@ -30,5 +31,6 @@ public class Chat {
     ) {
         Chat.keyserverUrl = keyserverUrl
         Sync.configure(bip44: bip44)
+        Echo.configure(environment: .sandbox)
     }
 }

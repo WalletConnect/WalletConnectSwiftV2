@@ -2,12 +2,13 @@ import Foundation
 
 public struct ChatClientFactory {
 
-    static func create(keyserverUrl: String, relayClient: RelayClient, networkingInteractor: NetworkingInteractor, syncClient: SyncClient) -> ChatClient {
+    static func create(keyserverUrl: String, relayClient: RelayClient, echoClient: EchoClient, networkingInteractor: NetworkingInteractor, syncClient: SyncClient) -> ChatClient {
         let keychain = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
         let keyserverURL = URL(string: keyserverUrl)!
         return ChatClientFactory.create(
             keyserverURL: keyserverURL,
             relayClient: relayClient,
+            echoClient: echoClient,
             networkingInteractor: networkingInteractor,
             keychain: keychain,
             logger: ConsoleLogger(loggingLevel: .debug),
@@ -19,6 +20,7 @@ public struct ChatClientFactory {
     public static func create(
         keyserverURL: URL,
         relayClient: RelayClient,
+        echoClient: EchoClient,
         networkingInteractor: NetworkingInteractor,
         keychain: KeychainStorageProtocol,
         logger: ConsoleLogging,
@@ -50,6 +52,7 @@ public struct ChatClientFactory {
 
         let client = ChatClient(
             identityClient: identityClient,
+            echoClient: echoClient,
             messagingService: messagingService,
             resubscriptionService: resubscriptionService,
             invitationHandlingService: invitationHandlingService,

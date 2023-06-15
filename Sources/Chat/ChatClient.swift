@@ -4,6 +4,7 @@ import Combine
 public class ChatClient {
     private var publishers = [AnyCancellable]()
     private let identityClient: IdentityClient
+    private let echoClient: EchoClient
     private let messagingService: MessagingService
     private let resubscriptionService: ResubscriptionService
     private let invitationHandlingService: InvitationHandlingService
@@ -58,6 +59,7 @@ public class ChatClient {
     // MARK: - Initialization
 
     init(identityClient: IdentityClient,
+         echoClient: EchoClient,
          messagingService: MessagingService,
          resubscriptionService: ResubscriptionService,
          invitationHandlingService: InvitationHandlingService,
@@ -69,6 +71,7 @@ public class ChatClient {
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
     ) {
         self.identityClient = identityClient
+        self.echoClient = echoClient
         self.messagingService = messagingService
         self.resubscriptionService = resubscriptionService
         self.invitationHandlingService = invitationHandlingService
@@ -177,6 +180,12 @@ public class ChatClient {
     /// - Parameter topic: chat thread topic
     public func ping(topic: String) {
         fatalError("not implemented")
+    }
+
+    /// Register APNS device token
+    /// - Parameter deviceToken: deviceToken data
+    public func register(deviceToken: Data) async throws {
+        try await echoClient.register(deviceToken: deviceToken)
     }
 
     /// Leaves a chat thread and stops receiving messages
