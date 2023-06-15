@@ -42,7 +42,7 @@ struct ModalContainerView_Previews: PreviewProvider {
                 icons: ["https://avatars.githubusercontent.com/u/37784886"]
             )
             
-            Networking.configure(projectId: projectId, socketFactory: WebSocketFactoryMock())
+            Networking.configure(projectId: projectId)
             Web3Modal.configure(projectId: projectId, metadata: metadata)
         }
         

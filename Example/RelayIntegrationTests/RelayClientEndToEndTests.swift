@@ -2,7 +2,6 @@ import Foundation
 import Combine
 import XCTest
 import WalletConnectUtils
-import Starscream
 @testable import WalletConnectRelay
 
 private class RelayKeychainStorageMock: KeychainStorageProtocol {
@@ -15,9 +14,9 @@ private class RelayKeychainStorageMock: KeychainStorageProtocol {
 }
 
 class WebSocketFactoryMock: WebSocketFactory {
-    private let webSocket: WebSocket
+    private let webSocket: WebSocketClient
     
-    init(webSocket: WebSocket) {
+    init(webSocket: WebSocketClient) {
         self.webSocket = webSocket
     }
     
@@ -41,9 +40,10 @@ final class RelayClientEndToEndTests: XCTestCase {
             projectId: InputConfig.projectId,
             socketAuthenticator: socketAuthenticator
         )
-        let socket = WebSocket(url: urlFactory.create())
-        let webSocketFactory = WebSocketFactoryMock(webSocket: socket)
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
+        let socket = WebSocketClient(url: urlFactory.create(), logger: ConsoleLogger(suffix: prefix, loggingLevel: .debug))
+        let webSocketFactory = WebSocketFactoryMock(webSocket: socket)
+        
         let dispatcher = Dispatcher(
             socketFactory: webSocketFactory,
             relayUrlFactory: urlFactory,

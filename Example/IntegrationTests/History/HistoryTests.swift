@@ -29,7 +29,6 @@ final class HistoryTests: XCTestCase {
             projectId: InputConfig.projectId,
             keyValueStorage: RuntimeKeyValueStorage(),
             keychainStorage: keychain,
-            socketFactory: DefaultSocketFactory(),
             logger: ConsoleLogger(suffix: prefix + " [Relay]", loggingLevel: .debug))
     }
 

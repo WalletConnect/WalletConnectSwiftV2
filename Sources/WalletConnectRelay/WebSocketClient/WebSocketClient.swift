@@ -6,7 +6,7 @@ enum WebSocketClientError: Error {
 
 struct WebSocketClientFactory: WebSocketFactory {
     func create(with url: URL) -> WebSocketConnecting {
-        return WebSocketClient(withURL: url, logger: ConsoleLogger(loggingLevel: .debug))
+        return WebSocketClient(url: url, logger: ConsoleLogger(loggingLevel: .debug))
     }
 }
 
@@ -15,7 +15,7 @@ final class WebSocketClient: NSObject, WebSocketConnecting {
     private var url: URL
     private let logger: ConsoleLogging
     
-    init(withURL url: URL, logger: ConsoleLogging) {
+    init(url url: URL, logger: ConsoleLogging) {
         self.url = url
         self.logger = logger
         self.isConnected = false
