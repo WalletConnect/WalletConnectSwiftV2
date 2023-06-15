@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -3065,8 +3065,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/lorenzofiamingo/swiftui-async-button";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
+				kind = exactVersion;
+				version = 1.1.0;
 			};
 		};
 		A5AE354528A1A2AC0059AE8A /* XCRemoteSwiftPackageReference "Web3" */ = {
@@ -3081,8 +3081,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/daltoniam/Starscream";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 3.0.0;
+				kind = exactVersion;
+				version = 3.1.2;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
