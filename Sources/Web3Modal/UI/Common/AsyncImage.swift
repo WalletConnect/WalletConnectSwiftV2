@@ -10,7 +10,11 @@ struct AsyncImage<Content>: View where Content: View {
         init(_ url: URL?) {
             guard let url = url else { return }
             
-            URLSession.shared.dataTaskPublisher(for: url)
+            var request = URLRequest(url: url)
+            request.setValue(ExplorerAPI.userAgent, forHTTPHeaderField: "User-Agent")
+            request.setValue(Web3Modal.config.metadata.name, forHTTPHeaderField: "Referer")
+            
+            URLSession.shared.dataTaskPublisher(for: request)
                 .map(\.data)
                 .map { $0 as Data? }
                 .replaceError(with: nil)
