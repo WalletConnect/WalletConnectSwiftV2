@@ -50,6 +50,7 @@ public class WalletPushClient {
     private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
     private let notifyProposeResponder: NotifyProposeResponder
     private let notifyProposeSubscriber: NotifyProposeSubscriber
+    private let subscriptionsStore: SyncStore<PushSubscription>
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
@@ -66,7 +67,7 @@ public class WalletPushClient {
          notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber,
          notifyProposeResponder: NotifyProposeResponder,
          notifyProposeSubscriber: NotifyProposeSubscriber,
-         deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
+         subscriptionsStore: SyncStore<PushSubscription>
     ) {
         self.logger = logger
         self.echoClient = echoClient
@@ -82,10 +83,11 @@ public class WalletPushClient {
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
         self.notifyProposeResponder = notifyProposeResponder
         self.notifyProposeSubscriber = notifyProposeSubscriber
-        self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
+        self.subscriptionsStore = subscriptionsStore
     }
 
     public func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {
+        try await subscriptionsStore.initialize(for: account)
         try await pushSubscribeRequester.subscribe(metadata: metadata, account: account, onSign: onSign)
     }
 

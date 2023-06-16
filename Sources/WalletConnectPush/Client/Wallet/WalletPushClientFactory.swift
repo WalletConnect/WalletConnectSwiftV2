@@ -83,7 +83,7 @@ public struct WalletPushClientFactory {
             notifyUpdateResponseSubscriber: notifyUpdateResponseSubscriber,
             notifyProposeResponder: notifyProposeResponder,
             notifyProposeSubscriber: notifyProposeSubscriber,
-            deletePushSubscriptionSubscriber: deletePushSubscriptionSubscriber
+            subscriptionsStore: subscriptionStore
         )
     }
 }
