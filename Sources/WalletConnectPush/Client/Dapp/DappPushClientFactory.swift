@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectPairing
 
 public struct DappPushClientFactory {
 

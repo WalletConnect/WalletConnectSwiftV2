@@ -1,7 +1,4 @@
 import Foundation
-import WalletConnectUtils
-import WalletConnectEcho
-import WalletConnectIdentity
 
 public struct WalletPushClientFactory {
 
