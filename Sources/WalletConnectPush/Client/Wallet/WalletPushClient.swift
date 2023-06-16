@@ -1,7 +1,5 @@
 import Foundation
 import Combine
-import WalletConnectNetworking
-import WalletConnectEcho
 
 
 public class WalletPushClient {

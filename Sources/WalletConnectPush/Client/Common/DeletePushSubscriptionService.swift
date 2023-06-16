@@ -1,6 +1,4 @@
 import Foundation
-import WalletConnectKMS
-import WalletConnectUtils
 
 class DeletePushSubscriptionService {
     enum Errors: Error {

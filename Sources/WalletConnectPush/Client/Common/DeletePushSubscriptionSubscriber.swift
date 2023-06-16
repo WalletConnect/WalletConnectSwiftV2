@@ -1,7 +1,5 @@
 import Foundation
 import Combine
-import WalletConnectKMS
-import WalletConnectPairing
 
 class DeletePushSubscriptionSubscriber {
     private let networkingInteractor: NetworkInteracting

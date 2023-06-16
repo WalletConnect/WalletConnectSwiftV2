@@ -1,6 +1,5 @@
 import Foundation
 import Combine
-import WalletConnectUtils
 
 public class DappPushClient {
     public var proposalResponsePublisher: AnyPublisher<Result<PushSubscription, PushError>, Never> {

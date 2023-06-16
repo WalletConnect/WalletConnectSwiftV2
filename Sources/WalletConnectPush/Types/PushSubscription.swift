@@ -1,6 +1,4 @@
 import Foundation
-import WalletConnectUtils
-import WalletConnectPairing
 
 public struct PushSubscription: DatabaseObject {
     public let topic: String

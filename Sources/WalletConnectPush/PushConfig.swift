@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectEcho
 
 extension Push {
     struct Config {
