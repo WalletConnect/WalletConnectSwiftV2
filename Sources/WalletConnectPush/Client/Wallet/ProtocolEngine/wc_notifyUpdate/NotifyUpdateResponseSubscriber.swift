@@ -41,7 +41,7 @@ class NotifyUpdateResponseSubscriber {
                     let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
                     let scope = try await buildScope(selected: claims.scp, dappUrl: claims.aud)
 
-                    guard let oldSubscription = try? subscriptionsStore.get(key: subscriptionTopic) else {
+                    guard let oldSubscription = try? subscriptionsStore.get(for: subscriptionTopic) else {
                         logger.debug("NotifyUpdateResponseSubscriber Subscription does not exist")
                         subscriptionPublisherSubject.send(.failure(Errors.subscriptionDoesNotExist))
                         return
@@ -50,7 +50,7 @@ class NotifyUpdateResponseSubscriber {
                     
                     let updatedSubscription = PushSubscription(topic: subscriptionTopic, account: oldSubscription.account, relay: oldSubscription.relay, metadata: oldSubscription.metadata, scope: scope, expiry: expiry)
 
-                    subscriptionsStore.set(updatedSubscription, forKey: subscriptionTopic)
+                    try await subscriptionsStore.set(object: updatedSubscription, for: updatedSubscription.account)
 
                     subscriptionPublisherSubject.send(.success(updatedSubscription))
 

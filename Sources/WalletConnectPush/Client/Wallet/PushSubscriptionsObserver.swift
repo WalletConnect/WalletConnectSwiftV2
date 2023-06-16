@@ -17,8 +17,7 @@ class PushSubscriptionsObserver {
     }
 
     func setUpSubscription() {
-        store.storeUpdatePublisher.sink(receiveValue: { [unowned self] in
-            let subscriptions = store.getAll()
+        store.dataUpdatePublisher.sink(receiveValue: { [unowned self] subscriptions in
             subscriptionsPublisherSubject.send(subscriptions)
         }).store(in: &publishers)
     }

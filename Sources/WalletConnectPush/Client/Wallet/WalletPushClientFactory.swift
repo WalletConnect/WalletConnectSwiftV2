@@ -5,7 +5,7 @@ import WalletConnectIdentity
 
 public struct WalletPushClientFactory {
 
-    public static func create(networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, echoClient: EchoClient) -> WalletPushClient {
+    public static func create(networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, echoClient: EchoClient, syncClient: SyncClient) -> WalletPushClient {
         let logger = ConsoleLogger(suffix: "🔔",loggingLevel: .debug)
         let keyValueStorage = UserDefaults.standard
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
@@ -20,7 +20,8 @@ public struct WalletPushClientFactory {
             groupKeychainStorage: groupKeychainService,
             networkInteractor: networkInteractor,
             pairingRegisterer: pairingRegisterer,
-            echoClient: echoClient
+            echoClient: echoClient,
+            syncClient: syncClient
         )
     }
 
@@ -32,13 +33,15 @@ public struct WalletPushClientFactory {
         groupKeychainStorage: KeychainStorageProtocol,
         networkInteractor: NetworkInteracting,
         pairingRegisterer: PairingRegisterer,
-        echoClient: EchoClient
+        echoClient: EchoClient,
+        syncClient: SyncClient
     ) -> WalletPushClient {
         let kms = KeyManagementService(keychain: keychainStorage)
 
         let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
 
-        let subscriptionStore = SyncStore<PushSubscription>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.pushSubscription)
+        let subscriptionStore: SyncStore<PushSubscription> = SyncStoreFactory.create(name: PushStorageIdntifiers.pushSubscription, syncClient: syncClient, storage: keyValueStorage)
+
 
         let identityClient = IdentityClientFactory.create(keyserver: keyserverURL, keychain: keychainStorage, logger: logger)
 

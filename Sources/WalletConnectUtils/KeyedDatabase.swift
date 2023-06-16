@@ -42,6 +42,15 @@ public class KeyedDatabase<Element> where Element: DatabaseObject {
         return index[key]?[id]
     }
 
+    public func find(id: String) -> (key: String, element: Element)? {
+        guard
+            let value = index.first(where: { $0.key == id }),
+            let element = value.value[id]
+        else { return nil }
+
+        return (value.key, element)
+    }
+
     @discardableResult
     public func set(elements: [Element], for key: String) -> Bool {
         var map = index[key] ?? [:]
