@@ -9,9 +9,9 @@ class PushSubscriptionsObserver {
     }
     private let subscriptionsPublisherSubject = PassthroughSubject<[PushSubscription], Never>()
 
-    private let store: CodableStore<PushSubscription>
+    private let store: SyncStore<PushSubscription>
 
-    init(store: CodableStore<PushSubscription>) {
+    init(store: SyncStore<PushSubscription>) {
         self.store = store
         setUpSubscription()
     }

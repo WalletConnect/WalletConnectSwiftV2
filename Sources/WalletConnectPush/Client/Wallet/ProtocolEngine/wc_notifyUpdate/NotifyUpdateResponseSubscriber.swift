@@ -10,7 +10,7 @@ class NotifyUpdateResponseSubscriber {
     private let networkingInteractor: NetworkInteracting
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
-    private let subscriptionsStore: CodableStore<PushSubscription>
+    private let subscriptionsStore: SyncStore<PushSubscription>
     private let subscriptionScopeProvider: SubscriptionScopeProvider
     private var subscriptionPublisherSubject = PassthroughSubject<Result<PushSubscription, Error>, Never>()
     var updateSubscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
@@ -20,7 +20,7 @@ class NotifyUpdateResponseSubscriber {
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
          subscriptionScopeProvider: SubscriptionScopeProvider,
-         subscriptionsStore: CodableStore<PushSubscription>
+         subscriptionsStore: SyncStore<PushSubscription>
     ) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger

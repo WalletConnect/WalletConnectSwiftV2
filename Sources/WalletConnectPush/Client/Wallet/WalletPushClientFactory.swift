@@ -38,7 +38,7 @@ public struct WalletPushClientFactory {
 
         let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
 
-        let subscriptionStore = CodableStore<PushSubscription>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.pushSubscription)
+        let subscriptionStore = SyncStore<PushSubscription>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.pushSubscription)
 
         let identityClient = IdentityClientFactory.create(keyserver: keyserverURL, keychain: keychainStorage, logger: logger)
 

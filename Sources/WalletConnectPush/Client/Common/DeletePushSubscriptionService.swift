@@ -9,12 +9,12 @@ class DeletePushSubscriptionService {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
-    private let pushSubscriptionStore: CodableStore<PushSubscription>
+    private let pushSubscriptionStore: SyncStore<PushSubscription>
     private let pushMessagesDatabase: PushMessagesDatabase?
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
          logger: ConsoleLogging,
-         pushSubscriptionStore: CodableStore<PushSubscription>,
+         pushSubscriptionStore: SyncStore<PushSubscription>,
          pushMessagesDatabase: PushMessagesDatabase?) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
@@ -26,7 +26,7 @@ class DeletePushSubscriptionService {
     func delete(topic: String) async throws {
         let params = PushDeleteParams.userDisconnected
         logger.debug("Will delete push subscription for reason: message: \(params.message) code: \(params.code), topic: \(topic)")
-        guard let _ = try? pushSubscriptionStore.get(key: topic)
+        guard let _ = pushSubscriptionStore.get(for: topic)
         else { throw Errors.pushSubscriptionNotFound}
         let protocolMethod = PushDeleteProtocolMethod()
         pushSubscriptionStore.delete(forKey: topic)

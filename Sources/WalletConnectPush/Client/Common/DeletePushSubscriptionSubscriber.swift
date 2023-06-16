@@ -8,7 +8,7 @@ class DeletePushSubscriptionSubscriber {
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
     private var publishers = [AnyCancellable]()
-    private let pushSubscriptionStore: CodableStore<PushSubscription>
+    private let pushSubscriptionStore: SyncStore<PushSubscription>
 
     private let deleteSubscriptionPublisherSubject = PassthroughSubject<String, Never>()
 
@@ -19,7 +19,7 @@ class DeletePushSubscriptionSubscriber {
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
          logger: ConsoleLogging,
-         pushSubscriptionStore: CodableStore<PushSubscription>
+         pushSubscriptionStore: SyncStore<PushSubscription>
     ) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
