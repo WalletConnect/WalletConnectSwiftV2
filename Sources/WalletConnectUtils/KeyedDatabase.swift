@@ -1,8 +1,14 @@
 import Foundation
 
-public class KeyedDatabase<Element> where Element: Codable & Equatable {
+public protocol DatabaseObject: Codable & Equatable {
+    var databaseId: String { get }
+}
 
-    public var index: [String: Element] = [:] {
+public class KeyedDatabase<Element> where Element: DatabaseObject {
+
+    public typealias Index = [String: [String: Element]]
+
+    public var index: Index = [:] {
         didSet {
             guard oldValue != index else { return }
             set(index, for: identifier)
@@ -21,24 +27,60 @@ public class KeyedDatabase<Element> where Element: Codable & Equatable {
 
         initializeIndex()
     }
-}
 
-extension KeyedDatabase where Element: RangeReplaceableCollection, Element.Element: Equatable {
-
-    public func getAll() -> [Element.Element] {
-        return index.values.reduce([], +)
+    public func getAll() -> [Element] {
+        return index.values.reduce([]) { result, map in
+            return result + map.values
+        }
     }
 
-    public func set(_ element: Element.Element, for key: String) {
-        index.append(element, for: key)
+    public func getAll(for key: String) -> [Element] {
+        return index[key].map { Array($0.values) } ?? []
     }
 
-    public func delete(_ element: Element.Element, for key: String) {
-        index.delete(element, for: key)
+    public func getElement(for key: String, id: String) -> Element? {
+        return index[key]?[id]
     }
 
-    public func getElements(for key: String) -> Element? {
-        return index[key]
+    @discardableResult
+    public func set(elements: [Element], for key: String) -> Bool {
+        var map = index[key] ?? [:]
+
+        for element in elements {
+            guard
+                map[element.databaseId] == nil else { continue }
+                map[element.databaseId] = element
+        }
+
+        index[key] = map
+
+        return true
+    }
+
+    @discardableResult
+    public func set(element: Element, for key: String) -> Bool {
+        var map = index[key] ?? [:]
+
+        guard
+            map[element.databaseId] == nil else { return false }
+            map[element.databaseId] = element
+
+        index[key] = map
+
+        return true
+    }
+
+    @discardableResult
+    public func delete(id: String, for key: String) -> Bool {
+        var map = index[key]
+
+        guard
+            map?[id] != nil else { return false }
+            map?[id] = nil
+
+        index[key] = map
+
+        return true
     }
 }
 
@@ -47,13 +89,13 @@ private extension KeyedDatabase {
     func initializeIndex() {
         guard
             let data =  storage.object(forKey: identifier) as? Data,
-            let decoded = try? JSONDecoder().decode([String: Element].self, from: data)
+            let decoded = try? JSONDecoder().decode(Index.self, from: data)
         else { return }
 
         index = decoded
     }
 
-    func set(_ value: [String: Element], for key: String) {
+    func set(_ value: Index, for key: String) {
         let data = try! JSONEncoder().encode(value)
         storage.set(data, forKey: key)
     }

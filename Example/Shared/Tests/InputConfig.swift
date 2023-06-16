@@ -14,6 +14,10 @@ struct InputConfig {
         return config(for: "GM_DAPP_PROJECT_ID")!
     }
 
+    static var relayUrl: String {
+        return "wss://\(relayHost)"
+    }
+
     static var projectId: String {
         return config(for: "PROJECT_ID")!
     }

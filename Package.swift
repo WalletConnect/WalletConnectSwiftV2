@@ -44,6 +44,9 @@ let package = Package(
             name: "WalletConnectVerify",
             targets: ["WalletConnectVerify"]),
         .library(
+            name: "WalletConnectHistory",
+            targets: ["WalletConnectHistory"]),
+        .library(
             name: "Web3Inbox",
             targets: ["Web3Inbox"]),
         .library(
@@ -61,7 +64,7 @@ let package = Package(
             path: "Sources/WalletConnectSign"),
         .target(
             name: "WalletConnectChat",
-            dependencies: ["WalletConnectIdentity", "WalletConnectSync"],
+            dependencies: ["WalletConnectIdentity", "WalletConnectSync", "WalletConnectHistory"],
             path: "Sources/Chat"),
         .target(
             name: "Auth",
@@ -91,6 +94,9 @@ let package = Package(
         .target(
             name: "WalletConnectPairing",
             dependencies: ["WalletConnectNetworking"]),
+        .target(
+            name: "WalletConnectHistory",
+            dependencies: ["HTTPClient", "WalletConnectRelay"]),
         .target(
             name: "Web3Inbox",
             dependencies: ["WalletConnectChat", "WalletConnectPush"]),
