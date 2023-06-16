@@ -80,11 +80,13 @@ public final class SyncStore<Object: DatabaseObject> {
         }
     }
 
-    public func delete(id: String) {
-        guard let object = get(for: id) else { return }
-
-        // TODO: How to get store topic by object id ???
-        // TODO: Let's try to add account
+    public func delete(id: String) async throws {
+        guard let result = objectStore.find(id: id) else {
+            return
+        }
+        // TODO: Should we pass topic to sync client?
+        let record = try indexStore.getRecord(topic: result.key)
+        try await delete(id: id, for: record.account)
     }
 }
 

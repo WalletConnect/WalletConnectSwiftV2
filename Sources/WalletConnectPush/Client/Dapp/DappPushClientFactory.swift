@@ -3,7 +3,7 @@ import WalletConnectPairing
 
 public struct DappPushClientFactory {
 
-    public static func create(metadata: AppMetadata, networkInteractor: NetworkInteracting) -> DappPushClient {
+    public static func create(metadata: AppMetadata, networkInteractor: NetworkInteracting, syncClient: SyncClient) -> DappPushClient {
         let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults.standard
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
@@ -12,13 +12,14 @@ public struct DappPushClientFactory {
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychainStorage,
-            networkInteractor: networkInteractor
+            networkInteractor: networkInteractor,
+            syncClient: syncClient
         )
     }
 
-    static func create(metadata: AppMetadata, logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, networkInteractor: NetworkInteracting) -> DappPushClient {
+    static func create(metadata: AppMetadata, logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, networkInteractor: NetworkInteracting, syncClient: SyncClient) -> DappPushClient {
         let kms = KeyManagementService(keychain: keychainStorage)
-        let subscriptionStore = SyncStore<PushSubscription>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.pushSubscription)
+        let subscriptionStore: SyncStore<PushSubscription> = SyncStoreFactory.create(name: PushStorageIdntifiers.pushSubscription, syncClient: syncClient, storage: keyValueStorage)
         let subscriptionProvider = SubscriptionsProvider(store: subscriptionStore)
         let deletePushSubscriptionSubscriber = DeletePushSubscriptionSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore)
         let resubscribeService = PushResubscribeService(networkInteractor: networkInteractor, subscriptionsStorage: subscriptionStore)

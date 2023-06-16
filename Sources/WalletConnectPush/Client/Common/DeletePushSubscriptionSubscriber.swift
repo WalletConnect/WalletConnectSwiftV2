@@ -35,7 +35,9 @@ class DeletePushSubscriptionSubscriber {
                 logger.debug("Peer deleted subscription")
                 let topic = payload.topic
                 networkingInteractor.unsubscribe(topic: topic)
-                pushSubscriptionStore.delete(forKey: topic)
+                Task(priority: .high) {
+                    try await pushSubscriptionStore.delete(id: topic)
+                }
                 kms.deleteSymmetricKey(for: topic)
                 deleteSubscriptionPublisherSubject.send(payload.topic)
             }.store(in: &publishers)

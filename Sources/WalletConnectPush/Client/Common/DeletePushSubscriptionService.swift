@@ -29,7 +29,7 @@ class DeletePushSubscriptionService {
         guard let _ = pushSubscriptionStore.get(for: topic)
         else { throw Errors.pushSubscriptionNotFound}
         let protocolMethod = PushDeleteProtocolMethod()
-        pushSubscriptionStore.delete(forKey: topic)
+        try await pushSubscriptionStore.delete(id: topic)
         pushMessagesDatabase?.deletePushMessages(topic: topic)
         let request = RPCRequest(method: protocolMethod.method, params: params)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
