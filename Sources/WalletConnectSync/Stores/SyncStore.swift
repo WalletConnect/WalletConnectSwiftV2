@@ -60,6 +60,10 @@ public final class SyncStore<Object: DatabaseObject> {
         return objectStore.getAll()
     }
 
+    public func get(for id: String) -> Object? {
+        return getAll().first(where: { $0.databaseId == id })
+    }
+
     public func set(object: Object, for account: Account) async throws {
         let record = try indexStore.getRecord(account: account, name: name)
 
@@ -74,6 +78,13 @@ public final class SyncStore<Object: DatabaseObject> {
         if objectStore.delete(id: id, for: record.topic) {
             try await syncClient.delete(account: account, store: record.store, key: id)
         }
+    }
+
+    public func delete(id: String) {
+        guard let object = get(for: id) else { return }
+
+        // TODO: How to get store topic by object id ???
+        // TODO: Let's try to add account
     }
 }
 

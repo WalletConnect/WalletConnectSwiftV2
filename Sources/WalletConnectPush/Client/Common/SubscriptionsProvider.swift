@@ -1,9 +1,9 @@
 import Foundation
 
 class SubscriptionsProvider {
-    let store: CodableStore<PushSubscription>
+    let store: SyncStore<PushSubscription>
 
-    init(store: CodableStore<PushSubscription>) {
+    init(store: SyncStore<PushSubscription>) {
         self.store = store
     }
 

@@ -1,5 +1,6 @@
 #if !CocoaPods
 @_exported import WalletConnectPairing
-@_exported import WalletConnectSigner
+@_exported import WalletConnectEcho
 @_exported import WalletConnectIdentity
+@_exported import WalletConnectSync
 #endif

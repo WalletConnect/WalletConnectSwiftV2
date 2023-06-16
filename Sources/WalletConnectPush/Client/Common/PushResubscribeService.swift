@@ -7,9 +7,9 @@ final class PushResubscribeService {
     private var publishers = Set<AnyCancellable>()
 
     private let networkInteractor: NetworkInteracting
-    private let subscriptionsStorage: CodableStore<PushSubscription>
+    private let subscriptionsStorage: SyncStore<PushSubscription>
 
-    init(networkInteractor: NetworkInteracting, subscriptionsStorage: CodableStore<PushSubscription>) {
+    init(networkInteractor: NetworkInteracting, subscriptionsStorage: SyncStore<PushSubscription>) {
         self.networkInteractor = networkInteractor
         self.subscriptionsStorage = subscriptionsStorage
         setUpResubscription()

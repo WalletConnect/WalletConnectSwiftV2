@@ -11,7 +11,7 @@ class PushSubscribeResponseSubscriber {
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
-    private let subscriptionsStore: CodableStore<PushSubscription>
+    private let subscriptionsStore: SyncStore<PushSubscription>
     private let groupKeychainStorage: KeychainStorageProtocol
     private let dappsMetadataStore: CodableStore<AppMetadata>
     private let subscriptionScopeProvider: SubscriptionScopeProvider
@@ -24,7 +24,7 @@ class PushSubscribeResponseSubscriber {
          kms: KeyManagementServiceProtocol,
          logger: ConsoleLogging,
          groupKeychainStorage: KeychainStorageProtocol,
-         subscriptionsStore: CodableStore<PushSubscription>,
+         subscriptionsStore: SyncStore<PushSubscription>,
          dappsMetadataStore: CodableStore<AppMetadata>,
          subscriptionScopeProvider: SubscriptionScopeProvider
     ) {
