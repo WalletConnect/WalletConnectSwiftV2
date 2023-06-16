@@ -19,7 +19,10 @@ final class DefaultModalSheetInteractor: ModalSheetInteractor {
         let httpClient = HTTPNetworkClient(host: "explorer-api.walletconnect.com")
         let response = try await httpClient.request(
             ListingsResponse.self,
-            at: ExplorerAPI.getListings(projectId: Web3Modal.config.projectId)
+            at: ExplorerAPI.getListings(
+                projectId: Web3Modal.config.projectId,
+                metadata: Web3Modal.config.metadata
+            )
         )
     
         return response.listings.values.compactMap { $0 }
