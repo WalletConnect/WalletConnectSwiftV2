@@ -1,9 +1,6 @@
 name: ci
 
 on:
-  push:
-    branches:
-      - feature/w3m-search
   pull_request_target:
     branches:
       - develop

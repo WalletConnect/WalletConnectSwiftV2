@@ -77,7 +77,7 @@ private extension ImportPresenter {
 
     @MainActor
     func importAccount(_ importAccount: ImportAccount) async throws {
-        try! await interactor.register(importAccount: importAccount)
+        try await interactor.register(importAccount: importAccount)
         interactor.save(importAccount: importAccount)
         router.presentChat(importAccount: importAccount)
     }
