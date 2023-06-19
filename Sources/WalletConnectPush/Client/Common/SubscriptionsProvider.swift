@@ -10,4 +10,8 @@ class SubscriptionsProvider {
     public func getActiveSubscriptions() -> [PushSubscription] {
         store.getAll()
     }
+
+    public func initialize(account: Account) async throws {
+        try await store.initialize(for: account)
+    }
 }

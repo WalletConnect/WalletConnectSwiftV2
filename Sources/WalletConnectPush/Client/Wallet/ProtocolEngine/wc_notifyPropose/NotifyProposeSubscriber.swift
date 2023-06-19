@@ -6,7 +6,7 @@ class NotifyProposeSubscriber {
 
     private let requestPublisherSubject = PassthroughSubject<PushRequest, Never>()
     private let networkingInteractor: NetworkInteracting
-    private let subscriptionsStore: CodableStore<PushSubscription>
+    private let subscriptionsStore: SyncStore<PushSubscription>
     private var publishers = Set<AnyCancellable>()
     public var requestPublisher: AnyPublisher<PushRequest, Never> {
         requestPublisherSubject.eraseToAnyPublisher()
@@ -15,7 +15,7 @@ class NotifyProposeSubscriber {
     private let pairingRegisterer: PairingRegisterer
 
     init(networkingInteractor: NetworkInteracting,
-         subscriptionsStore: CodableStore<PushSubscription>,
+         subscriptionsStore: SyncStore<PushSubscription>,
          publishers: Set<AnyCancellable> = Set<AnyCancellable>(),
          logger: ConsoleLogging,
          pairingRegisterer: PairingRegisterer) {

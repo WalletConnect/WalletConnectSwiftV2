@@ -90,7 +90,7 @@ class PushSubscribeResponseSubscriber {
                     let scope: [String: ScopeValue] = subscribedTypes.reduce(into: [:]) { $0[$1.name] = ScopeValue(description: $1.description, enabled: true) }
                     let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata, scope: scope, expiry: expiry)
 
-                    try await subscriptionsStore.set(object: pushSubscription, for: pushSubscription.account)
+                    try! await subscriptionsStore.set(object: pushSubscription, for: pushSubscription.account)
 
                     logger.debug("PushSubscribeResponseSubscriber: unsubscribing response topic: \(payload.topic)")
                     networkingInteractor.unsubscribe(topic: payload.topic)
