@@ -133,7 +133,7 @@ final class PairingTests: XCTestCase {
         let expectation = expectation(description: "wallet responds unsupported method for unregistered method")
 
         appPushClient.proposalResponsePublisher.sink { (response) in
-            XCTAssertEqual(response, .failure(PushError(code: 10001)!))
+            XCTAssertEqual(response, .failure(PushError(code: 5000)!))
             expectation.fulfill()
         }.store(in: &publishers)
 
