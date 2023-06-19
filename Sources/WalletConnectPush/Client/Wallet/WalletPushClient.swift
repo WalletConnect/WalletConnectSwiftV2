@@ -22,10 +22,8 @@ public class WalletPushClient {
 
     private let pushSubscriptionsObserver: PushSubscriptionsObserver
 
-    private let requestPublisherSubject = PassthroughSubject<PushRequest, Never>()
-
     public var requestPublisher: AnyPublisher<PushRequest, Never> {
-        requestPublisherSubject.eraseToAnyPublisher()
+        notifyProposeSubscriber.requestPublisher
     }
 
     private let pushMessagePublisherSubject = PassthroughSubject<PushMessageRecord, Never>()
@@ -53,6 +51,7 @@ public class WalletPushClient {
     private let notifyUpdateRequester: NotifyUpdateRequester
     private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
     private let notifyProposeResponder: NotifyProposeResponder
+    private let notifyProposeSubscriber: NotifyProposeSubscriber
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
@@ -68,7 +67,8 @@ public class WalletPushClient {
          pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber,
          notifyUpdateRequester: NotifyUpdateRequester,
          notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber,
-         notifyProposeResponder: NotifyProposeResponder
+         notifyProposeResponder: NotifyProposeResponder,
+         notifyProposeSubscriber: NotifyProposeSubscriber
     ) {
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
@@ -84,6 +84,7 @@ public class WalletPushClient {
         self.notifyUpdateRequester = notifyUpdateRequester
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
         self.notifyProposeResponder = notifyProposeResponder
+        self.notifyProposeSubscriber = notifyProposeSubscriber
         setupSubscriptions()
     }
 
@@ -127,11 +128,6 @@ public class WalletPushClient {
 private extension WalletPushClient {
 
     func setupSubscriptions() {
-        pairingRegisterer.register(method: NotifyProposeProtocolMethod())
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<NotifyProposeParams>) in
-                requestPublisherSubject.send((id: payload.id, account: payload.request.account, metadata: payload.request.metadata))
-        }.store(in: &publishers)
-
         pushMessageSubscriber.onPushMessage = { [unowned self] pushMessageRecord in
             pushMessagePublisherSubject.send(pushMessageRecord)
         }

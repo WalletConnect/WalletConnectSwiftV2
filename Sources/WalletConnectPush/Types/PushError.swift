@@ -2,6 +2,7 @@ import Foundation
 
 public enum PushError: Codable, Equatable, Error {
     case rejected
+    case userHasExistingSubscription
     case methodUnsupported
 }
 
@@ -23,6 +24,8 @@ extension PushError: Reason {
             return 10001
         case .rejected:
             return 15000
+        case .userHasExistingSubscription:
+            return 6001
         }
     }
 
@@ -32,6 +35,8 @@ extension PushError: Reason {
             return "Push request rejected"
         case .methodUnsupported:
             return "Method Unsupported"
+        case .userHasExistingSubscription:
+            return "User Has Existing Subscription"
         }
     }
 
