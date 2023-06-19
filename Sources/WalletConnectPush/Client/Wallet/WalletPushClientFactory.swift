@@ -39,7 +39,6 @@ public struct WalletPushClientFactory {
 
         let subscriptionStore: SyncStore<PushSubscription> = SyncStoreFactory.create(name: PushStorageIdntifiers.pushSubscription, syncClient: syncClient, storage: keyValueStorage)
 
-
         let identityClient = IdentityClientFactory.create(keyserver: keyserverURL, keychain: keychainStorage, logger: logger)
 
         let pushMessagesRecordsStore = CodableStore<PushMessageRecord>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.pushMessagesRecords)
@@ -49,7 +48,6 @@ public struct WalletPushClientFactory {
         let deletePushSubscriptionService = DeletePushSubscriptionService(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore, pushMessagesDatabase: pushMessagesDatabase)
         let resubscribeService = PushResubscribeService(networkInteractor: networkInteractor, subscriptionsStorage: subscriptionStore)
         let pushSubscriptionsObserver = PushSubscriptionsObserver(store: subscriptionStore)
-
 
         let dappsMetadataStore = CodableStore<AppMetadata>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.dappsMetadataStore)
         let subscriptionScopeProvider = SubscriptionScopeProvider()
@@ -71,6 +69,7 @@ public struct WalletPushClientFactory {
             logger: logger,
             kms: kms,
             echoClient: echoClient,
+            syncClient: syncClient,
             pushMessageSubscriber: pushMessageSubscriber,
             subscriptionsProvider: subscriptionProvider,
             pushMessagesDatabase: pushMessagesDatabase,
@@ -82,8 +81,7 @@ public struct WalletPushClientFactory {
             notifyUpdateRequester: notifyUpdateRequester,
             notifyUpdateResponseSubscriber: notifyUpdateResponseSubscriber,
             notifyProposeResponder: notifyProposeResponder,
-            notifyProposeSubscriber: notifyProposeSubscriber,
-            subscriptionsStore: subscriptionStore
+            notifyProposeSubscriber: notifyProposeSubscriber
         )
     }
 }

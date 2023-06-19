@@ -4,6 +4,7 @@ public enum PushError: Codable, Equatable, Error {
     case userRejeted
     case userHasExistingSubscription
     case methodUnsupported
+    case registerSignatureRejected
 }
 
 extension PushError: Reason {
@@ -12,8 +13,12 @@ extension PushError: Reason {
         switch code {
         case Self.userRejeted.code:
             self = .userRejeted
+        case Self.userHasExistingSubscription.code:
+            self = .userHasExistingSubscription
         case Self.methodUnsupported.code:
             self = .methodUnsupported
+        case Self.registerSignatureRejected.code:
+            self = .registerSignatureRejected
         default:
             return nil
         }
@@ -26,6 +31,8 @@ extension PushError: Reason {
             return 5000
         case .userHasExistingSubscription:
             return 6001
+        case .registerSignatureRejected:
+            return 1501
         }
     }
 
@@ -37,6 +44,8 @@ extension PushError: Reason {
             return "Push request rejected"
         case .userHasExistingSubscription:
             return "User Has Existing Subscription"
+        case .registerSignatureRejected:
+            return "Register signature rejected"
         }
     }
 

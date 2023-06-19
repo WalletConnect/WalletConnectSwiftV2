@@ -41,6 +41,7 @@ public class WalletPushClient {
     public let logger: ConsoleLogging
 
     private let echoClient: EchoClient
+    private let syncClient: SyncClient
     private let pushMessageSubscriber: PushMessageSubscriber
     private let subscriptionsProvider: SubscriptionsProvider
     private let pushMessagesDatabase: PushMessagesDatabase
@@ -50,11 +51,11 @@ public class WalletPushClient {
     private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
     private let notifyProposeResponder: NotifyProposeResponder
     private let notifyProposeSubscriber: NotifyProposeSubscriber
-    private let subscriptionsStore: SyncStore<PushSubscription>
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
          echoClient: EchoClient,
+         syncClient: SyncClient,
          pushMessageSubscriber: PushMessageSubscriber,
          subscriptionsProvider: SubscriptionsProvider,
          pushMessagesDatabase: PushMessagesDatabase,
@@ -66,11 +67,11 @@ public class WalletPushClient {
          notifyUpdateRequester: NotifyUpdateRequester,
          notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber,
          notifyProposeResponder: NotifyProposeResponder,
-         notifyProposeSubscriber: NotifyProposeSubscriber,
-         subscriptionsStore: SyncStore<PushSubscription>
+         notifyProposeSubscriber: NotifyProposeSubscriber
     ) {
         self.logger = logger
         self.echoClient = echoClient
+        self.syncClient = syncClient
         self.pushMessageSubscriber = pushMessageSubscriber
         self.subscriptionsProvider = subscriptionsProvider
         self.pushMessagesDatabase = pushMessagesDatabase
@@ -83,11 +84,25 @@ public class WalletPushClient {
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
         self.notifyProposeResponder = notifyProposeResponder
         self.notifyProposeSubscriber = notifyProposeSubscriber
-        self.subscriptionsStore = subscriptionsStore
+    }
+
+    public func register(account: Account, onSign: @escaping SigningCallback) async throws {
+        try await subscriptionsProvider.initialize(account: account)
+
+        guard !syncClient.isRegistered(account: account) else { return }
+
+        let result = await onSign(syncClient.getMessage(account: account))
+
+        switch result {
+        case .signed(let signature):
+            try await syncClient.register(account: account, signature: signature)
+            logger.debug("Sync pushSubscriptions store registered and initialized")
+        case .rejected:
+            throw PushError.registerSignatureRejected
+        }
     }
 
     public func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {
-        try await subscriptionsStore.initialize(for: account)
         try await pushSubscribeRequester.subscribe(metadata: metadata, account: account, onSign: onSign)
     }
 
