@@ -13,8 +13,6 @@ public class WalletPushClient {
         return pushSubscribeResponseSubscriber.subscriptionPublisher
     }
 
-    public var subscriptionPublisherSubject = PassthroughSubject<Result<PushSubscription, Error>, Never>()
-
     public var subscriptionsPublisher: AnyPublisher<[PushSubscription], Never> {
         return pushSubscriptionsObserver.subscriptionsPublisher
     }
@@ -25,10 +23,8 @@ public class WalletPushClient {
         notifyProposeSubscriber.requestPublisher
     }
 
-    private let pushMessagePublisherSubject = PassthroughSubject<PushMessageRecord, Never>()
-
     public var pushMessagePublisher: AnyPublisher<PushMessageRecord, Never> {
-        pushMessagePublisherSubject.eraseToAnyPublisher()
+        pushMessageSubscriber.pushMessagePublisher
     }
 
     public var updateSubscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
@@ -81,7 +77,6 @@ public class WalletPushClient {
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
         self.notifyProposeResponder = notifyProposeResponder
         self.notifyProposeSubscriber = notifyProposeSubscriber
-        setupSubscriptions()
     }
 
     public func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {
@@ -118,15 +113,6 @@ public class WalletPushClient {
 
     public func register(deviceToken: Data) async throws {
         try await echoClient.register(deviceToken: deviceToken)
-    }
-}
-
-private extension WalletPushClient {
-
-    func setupSubscriptions() {
-        pushMessageSubscriber.onPushMessage = { [unowned self] pushMessageRecord in
-            pushMessagePublisherSubject.send(pushMessageRecord)
-        }
     }
 }
 
