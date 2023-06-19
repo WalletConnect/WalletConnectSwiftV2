@@ -1,7 +1,6 @@
 import Foundation
 import Combine
 import WalletConnectNetworking
-import WalletConnectPairing
 import WalletConnectEcho
 
 
@@ -41,7 +40,6 @@ public class WalletPushClient {
 
     public let logger: ConsoleLogging
 
-    private let pairingRegisterer: PairingRegisterer
     private let echoClient: EchoClient
     private let pushMessageSubscriber: PushMessageSubscriber
     private let subscriptionsProvider: SubscriptionsProvider
@@ -56,7 +54,6 @@ public class WalletPushClient {
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
          echoClient: EchoClient,
-         pairingRegisterer: PairingRegisterer,
          pushMessageSubscriber: PushMessageSubscriber,
          subscriptionsProvider: SubscriptionsProvider,
          pushMessagesDatabase: PushMessagesDatabase,
@@ -71,7 +68,6 @@ public class WalletPushClient {
          notifyProposeSubscriber: NotifyProposeSubscriber
     ) {
         self.logger = logger
-        self.pairingRegisterer = pairingRegisterer
         self.echoClient = echoClient
         self.pushMessageSubscriber = pushMessageSubscriber
         self.subscriptionsProvider = subscriptionsProvider
