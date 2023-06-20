@@ -67,12 +67,7 @@ extension ImportPresenter: SceneViewModel {
 private extension ImportPresenter {
 
     func setupInitialState() {
-        Sign.instance.sessionSettlePublisher.sink { session in
-            Task(priority: .userInitiated) {
-                try await self.importAccount(.web3Modal(account: session.accounts.first!, topic: session.topic))
-            }
 
-        }.store(in: &disposeBag)
     }
 
     @MainActor
