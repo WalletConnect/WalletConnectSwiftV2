@@ -6,7 +6,7 @@ class DeletePushSubscriptionSubscriber {
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
     private var publishers = [AnyCancellable]()
-    private let pushSubscriptionStore: SyncStore<PushSubscription>
+    private let pushStorage: PushStorage
 
     private let deleteSubscriptionPublisherSubject = PassthroughSubject<String, Never>()
 
@@ -17,12 +17,12 @@ class DeletePushSubscriptionSubscriber {
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
          logger: ConsoleLogging,
-         pushSubscriptionStore: SyncStore<PushSubscription>
+         pushStorage: PushStorage
     ) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.logger = logger
-        self.pushSubscriptionStore = pushSubscriptionStore
+        self.pushStorage = pushStorage
         subscribeForDeleteSubscription()
     }
 
@@ -34,7 +34,7 @@ class DeletePushSubscriptionSubscriber {
                 let topic = payload.topic
                 networkingInteractor.unsubscribe(topic: topic)
                 Task(priority: .high) {
-                    try await pushSubscriptionStore.delete(id: topic)
+                    try await pushStorage.deleteSubscription(topic: topic)
                 }
                 kms.deleteSymmetricKey(for: topic)
                 deleteSubscriptionPublisherSubject.send(payload.topic)

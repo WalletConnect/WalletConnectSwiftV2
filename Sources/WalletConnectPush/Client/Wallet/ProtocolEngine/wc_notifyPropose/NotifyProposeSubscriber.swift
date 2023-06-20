@@ -6,7 +6,7 @@ class NotifyProposeSubscriber {
 
     private let requestPublisherSubject = PassthroughSubject<PushRequest, Never>()
     private let networkingInteractor: NetworkInteracting
-    private let subscriptionsStore: SyncStore<PushSubscription>
+    private let pushStorage: PushStorage
     private var publishers = Set<AnyCancellable>()
     public var requestPublisher: AnyPublisher<PushRequest, Never> {
         requestPublisherSubject.eraseToAnyPublisher()
@@ -15,12 +15,12 @@ class NotifyProposeSubscriber {
     private let pairingRegisterer: PairingRegisterer
 
     init(networkingInteractor: NetworkInteracting,
-         subscriptionsStore: SyncStore<PushSubscription>,
+         pushStorage: PushStorage,
          publishers: Set<AnyCancellable> = Set<AnyCancellable>(),
          logger: ConsoleLogging,
          pairingRegisterer: PairingRegisterer) {
         self.networkingInteractor = networkingInteractor
-        self.subscriptionsStore = subscriptionsStore
+        self.pushStorage = pushStorage
         self.publishers = publishers
         self.logger = logger
         self.pairingRegisterer = pairingRegisterer
@@ -40,7 +40,7 @@ class NotifyProposeSubscriber {
     }
 
     func hasNoSubscription(for domain: String) -> Bool {
-        subscriptionsStore.getAll().first {$0.metadata.url == domain} == nil
+        pushStorage.getSubscriptions().first { $0.metadata.url == domain } == nil
     }
 
     func respondError(requestId: RPCID, pairingTopic: String) async throws {

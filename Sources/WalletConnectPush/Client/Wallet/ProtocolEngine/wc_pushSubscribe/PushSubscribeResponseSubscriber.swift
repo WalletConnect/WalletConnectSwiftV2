@@ -11,20 +11,16 @@ class PushSubscribeResponseSubscriber {
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
-    private let subscriptionsStore: SyncStore<PushSubscription>
+    private let pushStorage: PushStorage
     private let groupKeychainStorage: KeychainStorageProtocol
     private let dappsMetadataStore: CodableStore<AppMetadata>
     private let subscriptionScopeProvider: SubscriptionScopeProvider
-    private var subscriptionPublisherSubject = PassthroughSubject<Result<PushSubscription, Error>, Never>()
-    var subscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
-        return subscriptionPublisherSubject.eraseToAnyPublisher()
-    }
 
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
          logger: ConsoleLogging,
          groupKeychainStorage: KeychainStorageProtocol,
-         subscriptionsStore: SyncStore<PushSubscription>,
+         pushStorage: PushStorage,
          dappsMetadataStore: CodableStore<AppMetadata>,
          subscriptionScopeProvider: SubscriptionScopeProvider
     ) {
@@ -32,7 +28,7 @@ class PushSubscribeResponseSubscriber {
         self.kms = kms
         self.logger = logger
         self.groupKeychainStorage = groupKeychainStorage
-        self.subscriptionsStore = subscriptionsStore
+        self.pushStorage = pushStorage
         self.dappsMetadataStore = dappsMetadataStore
         self.subscriptionScopeProvider = subscriptionScopeProvider
         subscribeForSubscriptionResponse()
@@ -47,7 +43,8 @@ class PushSubscribeResponseSubscriber {
 
                     guard let responseKeys = kms.getAgreementSecret(for: payload.topic) else {
                         logger.debug("PushSubscribeResponseSubscriber: no symmetric key for topic \(payload.topic)")
-                        subscriptionPublisherSubject.send(.failure(Errors.couldNotCreateSubscription))
+                        // TODO: Error Subscription
+                        // subscriptionPublisherSubject.send(.failure(Errors.couldNotCreateSubscription))
                         return
                     }
 
@@ -76,13 +73,15 @@ class PushSubscribeResponseSubscriber {
                         try await networkingInteractor.subscribe(topic: pushSubscriptionTopic)
                     } catch {
                         logger.debug("PushSubscribeResponseSubscriber: error: \(error)")
-                        subscriptionPublisherSubject.send(.failure(Errors.couldNotCreateSubscription))
+                        // TODO: Error Subscription
+                        // subscriptionPublisherSubject.send(.failure(Errors.couldNotCreateSubscription))
                         return
                     }
 
                     guard let metadata = metadata else {
                         logger.debug("PushSubscribeResponseSubscriber: no metadata for topic: \(pushSubscriptionTopic!)")
-                        subscriptionPublisherSubject.send(.failure(Errors.couldNotCreateSubscription))
+                        // TODO: Error Subscription
+                        // subscriptionPublisherSubject.send(.failure(Errors.couldNotCreateSubscription))
                         return
                     }
                     dappsMetadataStore.delete(forKey: payload.topic)
@@ -90,12 +89,10 @@ class PushSubscribeResponseSubscriber {
                     let scope: [String: ScopeValue] = subscribedTypes.reduce(into: [:]) { $0[$1.name] = ScopeValue(description: $1.description, enabled: true) }
                     let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata, scope: scope, expiry: expiry)
 
-                    try! await subscriptionsStore.set(object: pushSubscription, for: pushSubscription.account)
+                    try await pushStorage.setSubscription(pushSubscription)
 
                     logger.debug("PushSubscribeResponseSubscriber: unsubscribing response topic: \(payload.topic)")
                     networkingInteractor.unsubscribe(topic: payload.topic)
-
-                    subscriptionPublisherSubject.send(.success(pushSubscription))
                 }
             }.store(in: &publishers)
     }

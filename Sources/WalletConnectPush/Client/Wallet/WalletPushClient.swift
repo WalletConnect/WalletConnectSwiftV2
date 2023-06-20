@@ -13,15 +13,13 @@ public class WalletPushClient {
     }
 
     /// publishes new subscriptions
-    public var subscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
-        return pushSubscribeResponseSubscriber.subscriptionPublisher
+    public var subscriptionPublisher: AnyPublisher<PushSubscription, Never> {
+        return pushStorage.newSubscriptionPublisher
     }
 
     public var subscriptionsPublisher: AnyPublisher<[PushSubscription], Never> {
-        return pushSubscriptionsObserver.subscriptionsPublisher
+        return pushStorage.subscriptionsPublisher
     }
-
-    private let pushSubscriptionsObserver: PushSubscriptionsObserver
 
     public var requestPublisher: AnyPublisher<PushRequest, Never> {
         notifyProposeSubscriber.requestPublisher
@@ -42,8 +40,8 @@ public class WalletPushClient {
 
     private let echoClient: EchoClient
     private let syncClient: SyncClient
+    private let pushStorage: PushStorage
     private let pushMessageSubscriber: PushMessageSubscriber
-    private let subscriptionsProvider: SubscriptionsProvider
     private let pushMessagesDatabase: PushMessagesDatabase
     private let resubscribeService: PushResubscribeService
     private let pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber
@@ -57,11 +55,10 @@ public class WalletPushClient {
          echoClient: EchoClient,
          syncClient: SyncClient,
          pushMessageSubscriber: PushMessageSubscriber,
-         subscriptionsProvider: SubscriptionsProvider,
+         pushStorage: PushStorage,
          pushMessagesDatabase: PushMessagesDatabase,
          deletePushSubscriptionService: DeletePushSubscriptionService,
          resubscribeService: PushResubscribeService,
-         pushSubscriptionsObserver: PushSubscriptionsObserver,
          pushSubscribeRequester: PushSubscribeRequester,
          pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber,
          notifyUpdateRequester: NotifyUpdateRequester,
@@ -73,11 +70,10 @@ public class WalletPushClient {
         self.echoClient = echoClient
         self.syncClient = syncClient
         self.pushMessageSubscriber = pushMessageSubscriber
-        self.subscriptionsProvider = subscriptionsProvider
+        self.pushStorage = pushStorage
         self.pushMessagesDatabase = pushMessagesDatabase
         self.deletePushSubscriptionService = deletePushSubscriptionService
         self.resubscribeService = resubscribeService
-        self.pushSubscriptionsObserver = pushSubscriptionsObserver
         self.pushSubscribeRequester = pushSubscribeRequester
         self.pushSubscribeResponseSubscriber = pushSubscribeResponseSubscriber
         self.notifyUpdateRequester = notifyUpdateRequester
@@ -87,19 +83,8 @@ public class WalletPushClient {
     }
 
     public func register(account: Account, onSign: @escaping SigningCallback) async throws {
-        try await subscriptionsProvider.initialize(account: account)
-
-        guard !syncClient.isRegistered(account: account) else { return }
-
-        let result = await onSign(syncClient.getMessage(account: account))
-
-        switch result {
-        case .signed(let signature):
-            try await syncClient.register(account: account, signature: signature)
-            logger.debug("Sync pushSubscriptions store registered and initialized")
-        case .rejected:
-            throw PushError.registerSignatureRejected
-        }
+        try await registerIfNeeded(account: account, onSign: onSign)
+        try await pushStorage.initialize(account: account)
     }
 
     public func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {
@@ -119,7 +104,7 @@ public class WalletPushClient {
     }
 
     public func getActiveSubscriptions() -> [PushSubscription] {
-        subscriptionsProvider.getActiveSubscriptions()
+        return pushStorage.getSubscriptions()
     }
 
     public func getMessageHistory(topic: String) -> [PushMessageRecord] {
@@ -136,6 +121,23 @@ public class WalletPushClient {
 
     public func register(deviceToken: Data) async throws {
         try await echoClient.register(deviceToken: deviceToken)
+    }
+}
+
+private extension WalletPushClient {
+
+    func registerIfNeeded(account: Account, onSign: @escaping SigningCallback) async throws {
+        guard !syncClient.isRegistered(account: account) else { return }
+
+        let result = await onSign(syncClient.getMessage(account: account))
+
+        switch result {
+        case .signed(let signature):
+            try await syncClient.register(account: account, signature: signature)
+            logger.debug("Sync pushSubscriptions store registered and initialized")
+        case .rejected:
+            throw PushError.registerSignatureRejected
+        }
     }
 }
 
