@@ -25,8 +25,6 @@ enum ExplorerAPI: HTTPService {
         case let .getListings(projectId, _):
             return [
                 "projectId": projectId,
-                "page": "1",
-                "entries": "300",
             ]
         }
     }

@@ -15,7 +15,7 @@ public typealias VerifyContext = WalletConnectVerify.VerifyContext
 ///     url: "dapp.wallet.connect",
 ///     icons:  ["https://my_icon.com/1"]
 /// )
-/// Web3Modal.configure(metadata: metadata)
+/// Web3Modal.configure(projectId: PROJECT_ID, metadata: metadata)
 /// Web3Modal.instance.getSessions()
 /// ```
 public class Web3Modal {

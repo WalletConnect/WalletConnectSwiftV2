@@ -1,6 +1,6 @@
 import UIKit
 import Combine
-import WalletConnectSign
+import Web3Modal
 
 final class ImportPresenter: ObservableObject {
 
@@ -22,7 +22,7 @@ final class ImportPresenter: ObservableObject {
 
         let session: Session = try await withCheckedThrowingContinuation { continuation in
             var cancellable: AnyCancellable?
-            cancellable = Sign.instance.sessionSettlePublisher.sink { session in
+            cancellable = Web3Modal.instance.sessionSettlePublisher.sink { session in
                 defer { cancellable?.cancel() }
                 return continuation.resume(returning: session)
             }

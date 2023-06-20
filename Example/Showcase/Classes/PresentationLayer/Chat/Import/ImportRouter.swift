@@ -13,7 +13,7 @@ final class ImportRouter {
     }
     
     func presentWeb3Modal() {
-        Web3ModalSheetController().present(from: viewController)
+        Web3Modal.present(from: viewController)
     }
 
     func presentChat(importAccount: ImportAccount) {
