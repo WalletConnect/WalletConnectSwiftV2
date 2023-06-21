@@ -28,7 +28,7 @@ class WebViewRefreshHandler {
                 let request = URLRequest(url: initUrl)
 
                 webview.load(request)
-                _ = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { [unowned self] timer in
+                _ = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { [unowned self] timer in
                     isReloadingContent = false
                 }
             }
