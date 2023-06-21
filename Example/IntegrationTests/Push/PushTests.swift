@@ -1,6 +1,7 @@
 import Foundation
 import XCTest
 import WalletConnectUtils
+import Web3
 @testable import WalletConnectKMS
 import WalletConnectRelay
 import Combine
@@ -21,6 +22,16 @@ final class PushTests: XCTestCase {
     var walletPushClient: WalletPushClient!
 
     var pairingStorage: PairingStorage!
+
+    let pk = try! EthereumPrivateKey()
+
+    var privateKey: Data {
+        return Data(pk.rawPrivateKey)
+    }
+
+    var account: Account {
+        return Account("eip155:1:" + pk.address.hex(eip55: true))!
+    }
 
     private var publishers = [AnyCancellable]()
 
@@ -104,7 +115,7 @@ final class PushTests: XCTestCase {
 
         let uri = try! await dappPairingClient.create()
         try! await walletPairingClient.pair(uri: uri)
-        try! await dappPushClient.propose(account: Account.stub(), topic: uri.topic)
+        try! await dappPushClient.propose(account: account, topic: uri.topic)
 
         walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
             Task(priority: .high) { try! await walletPushClient.approve(id: id, onSign: sign) }
@@ -126,7 +137,7 @@ final class PushTests: XCTestCase {
 
         let uri = try! await dappPairingClient.create()
         try! await walletPairingClient.pair(uri: uri)
-        try! await dappPushClient.propose(account: Account.stub(), topic: uri.topic)
+        try! await dappPushClient.propose(account: account, topic: uri.topic)
 
         walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
             Task(priority: .high) { try! await walletPushClient.reject(id: id) }
@@ -146,8 +157,8 @@ final class PushTests: XCTestCase {
     func testWalletCreatesSubscription() async {
         let expectation = expectation(description: "expects to create push subscription")
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
-        try! await walletPushClient.register(account: Account.stub(), onSign: sign)
-        try! await walletPushClient.subscribe(metadata: metadata, account: Account.stub(), onSign: sign)
+        try! await walletPushClient.register(account: account, onSign: sign)
+        try! await walletPushClient.subscribe(metadata: metadata, account: account, onSign: sign)
         walletPushClient.subscriptionsPublisher
             .first()
             .sink { [unowned self] subscriptions in
@@ -162,7 +173,7 @@ final class PushTests: XCTestCase {
         let expectation = expectation(description: "expects to delete push subscription")
         let uri = try! await dappPairingClient.create()
         try! await walletPairingClient.pair(uri: uri)
-        try! await dappPushClient.propose(account: Account.stub(), topic: uri.topic)
+        try! await dappPushClient.propose(account: account, topic: uri.topic)
         var subscriptionTopic: String!
 
         walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
@@ -190,7 +201,7 @@ final class PushTests: XCTestCase {
         let expectation = expectation(description: "expects to create and update push subscription")
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
         let updateScope: Set<String> = ["alerts"]
-        try! await walletPushClient.subscribe(metadata: metadata, account: Account.stub(), onSign: sign)
+        try! await walletPushClient.subscribe(metadata: metadata, account: account, onSign: sign)
         walletPushClient.subscriptionsPublisher
             .first()
             .sink { [unowned self] subscriptions in
@@ -215,7 +226,6 @@ final class PushTests: XCTestCase {
 
 private extension PushTests {
     func sign(_ message: String) -> SigningResult {
-        let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
         let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
         return .signed(try! signer.sign(message: message, privateKey: privateKey, type: .eip191))
     }
