@@ -85,6 +85,7 @@ public class WalletPushClient {
     public func register(account: Account, onSign: @escaping SigningCallback) async throws {
         try await registerIfNeeded(account: account, onSign: onSign)
         try await pushStorage.initialize(account: account)
+        try await pushStorage.setupSubscriptions(account: account)
     }
 
     public func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {
