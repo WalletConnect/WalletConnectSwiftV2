@@ -24,7 +24,7 @@ final class Web3InboxClientFactory {
         let pushClientProxy = PushClientProxy(client: pushClient, onSign: onSign)
         let pushClientSubscriber = PushClientRequestSubscriber(client: pushClient, logger: logger)
 
-        let webViewRefreshHandler = WebViewRefreshHandler(webView: webView, initUrl: url)
+        let webViewRefreshHandler = WebViewRefreshHandler(webView: webView, initUrl: url, logger: logger)
 
         return Web3InboxClient(
             webView: webView,
@@ -44,7 +44,7 @@ final class Web3InboxClientFactory {
 
     private static func buildUrl(account: Account, config: [ConfigParam: Bool]) -> URL {
         var urlComponents = URLComponents(string: "https://web3inbox-dev-hidden.vercel.app/")!
-        var queryItems = [URLQueryItem(name: "chatProvider", value: "ios"), URLQueryItem(name: "pushProvider", value: "ios"), URLQueryItem(name: "account", value: account.address)]
+        var queryItems = [URLQueryItem(name: "chatProvider", value: "ios"), URLQueryItem(name: "pushProvider", value: "ios"), URLQueryItem(name: "account", value: account.address), URLQueryItem(name: "authProvider", value: "ios")]
 
         for param in config.filter({ $0.value == false}) {
             queryItems.append(URLQueryItem(name: "\(param.key)", value: "false"))
