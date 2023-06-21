@@ -1,6 +1,30 @@
 import Foundation
 import WebKit
 
+class WebViewRefreshHandler {
+    var webViewURLObserver: NSKeyValueObservation!
+    let webView: WKWebView
+    let initUrl: URL
+
+    init(webView: WKWebView, initUrl: URL) {
+        self.webView = webView
+        self.initUrl = initUrl
+//        let timer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { timer in
+//            print("Timer fired!")
+//            webView.reload()
+//        }
+        self.webViewURLObserver = webView.observe(\.url, options: .new) { webview, change in
+            print("URL: \(String(describing: change.newValue))")
+            if let newValue = change.newValue,
+               let url = newValue?.absoluteString,
+               url.contains("/login") {
+                let request = URLRequest(url: initUrl)
+                webview.load(request)
+            }
+        }
+    }
+}
+
 actor WebViewProxy {
 
     private let webView: WKWebView
@@ -13,6 +37,7 @@ actor WebViewProxy {
         self.webView = webView
         self.scriptFormatter = scriptFormatter
         self.logger = logger
+
     }
 
     @MainActor

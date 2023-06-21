@@ -24,6 +24,8 @@ final class Web3InboxClientFactory {
         let pushClientProxy = PushClientProxy(client: pushClient, onSign: onSign)
         let pushClientSubscriber = PushClientRequestSubscriber(client: pushClient, logger: logger)
 
+        let webViewRefreshHandler = WebViewRefreshHandler(webView: webView, initUrl: url)
+
         return Web3InboxClient(
             webView: webView,
             account: account,
@@ -35,7 +37,8 @@ final class Web3InboxClientFactory {
             chatWebviewSubscriber: chatWebviewSubscriber,
             pushWebviewSubscriber: pushWebviewSubscriber,
             pushClientProxy: pushClientProxy,
-            pushClientSubscriber: pushClientSubscriber
+            pushClientSubscriber: pushClientSubscriber,
+            webViewRefreshHandler: webViewRefreshHandler
         )
     }
 
