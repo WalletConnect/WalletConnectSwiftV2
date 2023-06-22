@@ -27,6 +27,12 @@ public class WalletPushClient {
         pushMessageSubscriber.pushMessagePublisher
     }
 
+    private let deleteSubscriptionPublisherSubject = PassthroughSubject<String, Never>()
+
+    public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
+        deleteSubscriptionPublisherSubject.eraseToAnyPublisher()
+    }
+
     public var updateSubscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
         return notifyUpdateResponseSubscriber.updateSubscriptionPublisher
     }
