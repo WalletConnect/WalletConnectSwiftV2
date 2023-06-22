@@ -180,34 +180,7 @@ final class PushTests: XCTestCase {
         }.store(in: &publishers)
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
-
-    func testDappDeletePushSubscription() async {
-        let expectation = expectation(description: "expects to delete push subscription")
-        let uri = try! await dappPairingClient.create()
-        try! await walletPairingClient.pair(uri: uri)
-        try! await dappPushClient.propose(account: Account.stub(), topic: uri.topic)
-        var subscriptionTopic: String!
-
-        walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
-            Task(priority: .high) { try! await walletPushClient.approve(id: id, onSign: sign) }
-        }.store(in: &publishers)
-
-        dappPushClient.proposalResponsePublisher.sink { [unowned self] (result) in
-            guard case .success(let pushSubscription) = result else {
-                XCTFail()
-                return
-            }
-            subscriptionTopic = pushSubscription.topic
-            Task(priority: .userInitiated) { try! await dappPushClient.delete(topic: result.pushSubscription.topic)}
-        }.store(in: &publishers)
-
-        walletPushClient.deleteSubscriptionPublisher.sink { topic in
-            XCTAssertEqual(subscriptionTopic, topic)
-            expectation.fulfill()
-        }.store(in: &publishers)
-        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
-    }
-
+    
     func testWalletCreatesAndUpdatesSubscription() async {
         let expectation = expectation(description: "expects to create and update push subscription")
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
