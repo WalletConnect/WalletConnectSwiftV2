@@ -8,6 +8,12 @@ public class WalletPushClient {
 
     private var publishers = Set<AnyCancellable>()
 
+    private let deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
+
+    public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
+        deletePushSubscriptionSubscriber.deleteSubscriptionPublisher
+    }
+
     /// publishes new subscriptions
     public var subscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
         return pushSubscribeResponseSubscriber.subscriptionPublisher
@@ -25,12 +31,6 @@ public class WalletPushClient {
 
     public var pushMessagePublisher: AnyPublisher<PushMessageRecord, Never> {
         pushMessageSubscriber.pushMessagePublisher
-    }
-
-    private let deleteSubscriptionPublisherSubject = PassthroughSubject<String, Never>()
-
-    public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
-        deleteSubscriptionPublisherSubject.eraseToAnyPublisher()
     }
 
     public var updateSubscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
@@ -67,7 +67,8 @@ public class WalletPushClient {
          notifyUpdateRequester: NotifyUpdateRequester,
          notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber,
          notifyProposeResponder: NotifyProposeResponder,
-         notifyProposeSubscriber: NotifyProposeSubscriber
+         notifyProposeSubscriber: NotifyProposeSubscriber,
+         deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
     ) {
         self.logger = logger
         self.echoClient = echoClient
@@ -83,6 +84,7 @@ public class WalletPushClient {
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
         self.notifyProposeResponder = notifyProposeResponder
         self.notifyProposeSubscriber = notifyProposeSubscriber
+        self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
     }
 
     public func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {

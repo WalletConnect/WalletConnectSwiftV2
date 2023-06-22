@@ -192,12 +192,12 @@ final class PushTests: XCTestCase {
             Task(priority: .high) { try! await walletPushClient.approve(id: id, onSign: sign) }
         }.store(in: &publishers)
 
-        dappPushClient.responsePublisher.sink { [unowned self] (_, result) in
-            guard case .success(let result) = result else {
+        dappPushClient.proposalResponsePublisher.sink { [unowned self] (result) in
+            guard case .success(let pushSubscription) = result else {
                 XCTFail()
                 return
             }
-            subscriptionTopic = result.pushSubscription.topic
+            subscriptionTopic = pushSubscription.topic
             Task(priority: .userInitiated) { try! await dappPushClient.delete(topic: result.pushSubscription.topic)}
         }.store(in: &publishers)
 
