@@ -27,6 +27,10 @@ final class PushClientRequestSubscriber {
             handle(event: .pushMessage, params: record)
         }.store(in: &publishers)
 
+        client.deleteSubscriptionPublisher.sink { [unowned self] record in
+            handle(event: .pushDelete, params: record)
+        }.store(in: &publishers)
+
         client.subscriptionPublisher.sink { [unowned self] record in
             switch record {
             case .success(let subscription):
