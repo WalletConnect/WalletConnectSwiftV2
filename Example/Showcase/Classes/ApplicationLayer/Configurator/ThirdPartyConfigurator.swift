@@ -1,7 +1,7 @@
 import WalletConnectNetworking
 import WalletConnectPairing
 import Auth
-import Web3Modal
+import WalletConnectModal
 
 struct ThirdPartyConfigurator: Configurator {
 
@@ -16,6 +16,6 @@ struct ThirdPartyConfigurator: Configurator {
         
         Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
         Auth.configure(crypto: DefaultCryptoProvider())
-        Web3Modal.configure(projectId: InputConfig.projectId, metadata: metadata)
+        WalletConnectModal.configure(projectId: InputConfig.projectId, metadata: metadata)
     }
 }

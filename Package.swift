@@ -50,8 +50,8 @@ let package = Package(
             name: "Web3Inbox",
             targets: ["Web3Inbox"]),
         .library(
-            name: "Web3Modal",
-            targets: ["Web3Modal"]),
+            name: "WalletConnectModal",
+            targets: ["WalletConnectModal"]),
 
     ],
     dependencies: [
@@ -131,7 +131,7 @@ let package = Package(
             name: "WalletConnectVerify",
             dependencies: ["WalletConnectUtils", "WalletConnectNetworking"]),
         .target(
-            name: "Web3Modal",
+            name: "WalletConnectModal",
             dependencies: ["QRCode", "WalletConnectSign"]),
         .target(
             name: "WalletConnectSync",
@@ -174,8 +174,8 @@ let package = Package(
             name: "CommonsTests",
             dependencies: ["Commons", "TestingUtils"]),
         .testTarget(
-            name: "Web3ModalTests",
-            dependencies: ["Web3Modal", "TestingUtils"])
+            name: "WalletConnectModalTests",
+            dependencies: ["WalletConnectModal", "TestingUtils"])
     ],
     swiftLanguageVersions: [.v5]
 )

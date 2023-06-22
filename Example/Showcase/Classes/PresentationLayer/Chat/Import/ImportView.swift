@@ -1,5 +1,5 @@
 import SwiftUI
-import Web3Modal
+import WalletConnectModal
 
 struct ImportView: View {
 
@@ -18,8 +18,8 @@ struct ImportView: View {
 
             VStack {
                 
-                BrandButton(title: "Web3Modal WIP") {
-                    try await presenter.didPressWeb3Modal()
+                BrandButton(title: "WalletConnectModal WIP") {
+                    try await presenter.didPressWalletConnectModal()
                 }
                 
                 BrandButton(title: "Ok, done" ) {

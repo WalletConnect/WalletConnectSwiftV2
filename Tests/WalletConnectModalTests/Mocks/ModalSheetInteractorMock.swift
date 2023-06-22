@@ -2,7 +2,7 @@ import Combine
 import Foundation
 import WalletConnectSign
 import WalletConnectUtils
-@testable import Web3Modal
+@testable import WalletConnectModal
 @testable import WalletConnectSign
 
 final class ModalSheetInteractorMock: ModalSheetInteractor {

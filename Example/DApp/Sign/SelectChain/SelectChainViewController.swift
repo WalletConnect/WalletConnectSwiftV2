@@ -1,5 +1,5 @@
 import Foundation
-import Web3Modal
+import WalletConnectModal
 import UIKit
 import Combine
 
@@ -71,16 +71,16 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
         ]
         
         Task {
-            Web3Modal.set(sessionParams: .init(
+            WalletConnectModal.set(sessionParams: .init(
                 requiredNamespaces: namespaces,
                 optionalNamespaces: optionalNamespaces,
                 sessionProperties: sessionProperties
             ))
             
-            let uri = try await Web3Modal.instance.connect(topic: nil)
+            let uri = try await WalletConnectModal.instance.connect(topic: nil)
         }
         
-        Web3Modal.present(from: self)
+        WalletConnectModal.present(from: self)
     }
 
     @objc
