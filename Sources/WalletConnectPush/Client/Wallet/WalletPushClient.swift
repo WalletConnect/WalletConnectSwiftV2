@@ -116,19 +116,7 @@ public class WalletPushClient {
     }
 }
 
-<<<<<<< HEAD
-private extension WalletPushClient {
 
-    func setupSubscriptions() {
-        pairingRegisterer.register(method: NotifyProposeProtocolMethod())
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<NotifyProposeParams>) in
-                requestPublisherSubject.send((id: payload.id, account: payload.request.account, metadata: payload.request.metadata))
-        }.store(in: &publishers)
-    }
-}
-
-=======
->>>>>>> ba2a60aced5bc40afc31efa86798bc4b11beac3f
 #if targetEnvironment(simulator)
 extension WalletPushClient {
     public func register(deviceToken: String) async throws {
