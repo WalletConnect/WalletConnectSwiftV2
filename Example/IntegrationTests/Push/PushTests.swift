@@ -115,6 +115,7 @@ final class PushTests: XCTestCase {
 
         let uri = try! await dappPairingClient.create()
         try! await walletPairingClient.pair(uri: uri)
+        try! await walletPushClient.register(account: account, onSign: sign)
         try! await dappPushClient.propose(account: account, topic: uri.topic)
 
         walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
@@ -173,6 +174,7 @@ final class PushTests: XCTestCase {
         let expectation = expectation(description: "expects to delete push subscription")
         let uri = try! await dappPairingClient.create()
         try! await walletPairingClient.pair(uri: uri)
+        try! await walletPushClient.register(account: account, onSign: sign)
         try! await dappPushClient.propose(account: account, topic: uri.topic)
         var subscriptionTopic: String!
 
@@ -201,6 +203,7 @@ final class PushTests: XCTestCase {
         let expectation = expectation(description: "expects to create and update push subscription")
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
         let updateScope: Set<String> = ["alerts"]
+        try! await walletPushClient.register(account: account, onSign: sign)
         try! await walletPushClient.subscribe(metadata: metadata, account: account, onSign: sign)
         walletPushClient.subscriptionsPublisher
             .first()
