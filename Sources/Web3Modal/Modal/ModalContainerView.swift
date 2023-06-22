@@ -1,13 +1,13 @@
 import SwiftUI
 
 @available(iOS 14.0, *)
-public struct ModalContainerView: View {
+struct ModalContainerView: View {
     
     @Environment(\.presentationMode) var presentationMode
     
     @State var showModal: Bool = false
         
-    public var body: some View {
+    var body: some View {
         
         VStack(spacing: -10) {
             

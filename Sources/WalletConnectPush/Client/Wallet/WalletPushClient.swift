@@ -1,7 +1,6 @@
 import Foundation
 import Combine
 import WalletConnectNetworking
-import WalletConnectPairing
 import WalletConnectEcho
 
 
@@ -14,24 +13,18 @@ public class WalletPushClient {
         return pushSubscribeResponseSubscriber.subscriptionPublisher
     }
 
-    public var subscriptionPublisherSubject = PassthroughSubject<Result<PushSubscription, Error>, Never>()
-
     public var subscriptionsPublisher: AnyPublisher<[PushSubscription], Never> {
         return pushSubscriptionsObserver.subscriptionsPublisher
     }
 
     private let pushSubscriptionsObserver: PushSubscriptionsObserver
 
-    private let requestPublisherSubject = PassthroughSubject<PushRequest, Never>()
-
     public var requestPublisher: AnyPublisher<PushRequest, Never> {
-        requestPublisherSubject.eraseToAnyPublisher()
+        notifyProposeSubscriber.requestPublisher
     }
 
-    private let pushMessagePublisherSubject = PassthroughSubject<PushMessageRecord, Never>()
-
     public var pushMessagePublisher: AnyPublisher<PushMessageRecord, Never> {
-        return pushMessageSubscriber.pushMessagePublisher
+        pushMessageSubscriber.pushMessagePublisher
     }
 
     public var updateSubscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
@@ -43,7 +36,6 @@ public class WalletPushClient {
 
     public let logger: ConsoleLogging
 
-    private let pairingRegisterer: PairingRegisterer
     private let echoClient: EchoClient
     private let pushMessageSubscriber: PushMessageSubscriber
     private let subscriptionsProvider: SubscriptionsProvider
@@ -53,11 +45,11 @@ public class WalletPushClient {
     private let notifyUpdateRequester: NotifyUpdateRequester
     private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
     private let notifyProposeResponder: NotifyProposeResponder
+    private let notifyProposeSubscriber: NotifyProposeSubscriber
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
          echoClient: EchoClient,
-         pairingRegisterer: PairingRegisterer,
          pushMessageSubscriber: PushMessageSubscriber,
          subscriptionsProvider: SubscriptionsProvider,
          pushMessagesDatabase: PushMessagesDatabase,
@@ -68,10 +60,10 @@ public class WalletPushClient {
          pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber,
          notifyUpdateRequester: NotifyUpdateRequester,
          notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber,
-         notifyProposeResponder: NotifyProposeResponder
+         notifyProposeResponder: NotifyProposeResponder,
+         notifyProposeSubscriber: NotifyProposeSubscriber
     ) {
         self.logger = logger
-        self.pairingRegisterer = pairingRegisterer
         self.echoClient = echoClient
         self.pushMessageSubscriber = pushMessageSubscriber
         self.subscriptionsProvider = subscriptionsProvider
@@ -84,7 +76,7 @@ public class WalletPushClient {
         self.notifyUpdateRequester = notifyUpdateRequester
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
         self.notifyProposeResponder = notifyProposeResponder
-        setupSubscriptions()
+        self.notifyProposeSubscriber = notifyProposeSubscriber
     }
 
     public func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {
@@ -124,6 +116,7 @@ public class WalletPushClient {
     }
 }
 
+<<<<<<< HEAD
 private extension WalletPushClient {
 
     func setupSubscriptions() {
@@ -134,6 +127,8 @@ private extension WalletPushClient {
     }
 }
 
+=======
+>>>>>>> ba2a60aced5bc40afc31efa86798bc4b11beac3f
 #if targetEnvironment(simulator)
 extension WalletPushClient {
     public func register(deviceToken: String) async throws {
