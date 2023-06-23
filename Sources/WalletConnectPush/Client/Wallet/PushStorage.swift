@@ -8,9 +8,14 @@ final class PushStorage {
     private let subscriptionStore: SyncStore<PushSubscription>
 
     private let newSubscriptionSubject = PassthroughSubject<PushSubscription, Never>()
+    private let deleteSubscriptionSubject = PassthroughSubject<String, Never>()
 
     var newSubscriptionPublisher: AnyPublisher<PushSubscription, Never> {
         return newSubscriptionSubject.eraseToAnyPublisher()
+    }
+
+    var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
+        return deleteSubscriptionSubject.eraseToAnyPublisher()
     }
 
     var subscriptionsPublisher: AnyPublisher<[PushSubscription], Never> {
@@ -45,6 +50,7 @@ final class PushStorage {
 
     func deleteSubscription(topic: String) async throws {
         try await subscriptionStore.delete(id: topic)
+        deleteSubscriptionSubject.send(topic)
     }
 }
 
@@ -55,8 +61,8 @@ private extension PushStorage {
             switch update {
             case .set(let subscription):
                 newSubscriptionSubject.send(subscription)
-            case .delete:
-                break
+            case .delete(let id):
+                deleteSubscriptionSubject.send(id)
             }
         }.store(in: &publishers)
     }

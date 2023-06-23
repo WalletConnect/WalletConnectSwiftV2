@@ -44,7 +44,7 @@ public class KeyedDatabase<Element> where Element: DatabaseObject {
 
     public func find(id: String) -> (key: String, element: Element)? {
         guard
-            let value = index.first(where: { $0.key == id }),
+            let value = index.first(where: { $0.value[id] != nil }),
             let element = value.value[id]
         else { return nil }
 

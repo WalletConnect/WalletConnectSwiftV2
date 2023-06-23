@@ -13,8 +13,12 @@ public class WalletPushClient {
     }
 
     /// publishes new subscriptions
-    public var subscriptionPublisher: AnyPublisher<PushSubscription, Never> {
+    public var newSubscriptionPublisher: AnyPublisher<PushSubscription, Never> {
         return pushStorage.newSubscriptionPublisher
+    }
+
+    public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
+        return pushStorage.deleteSubscriptionPublisher
     }
 
     public var subscriptionsPublisher: AnyPublisher<[PushSubscription], Never> {
