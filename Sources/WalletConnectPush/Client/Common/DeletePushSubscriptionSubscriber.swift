@@ -8,12 +8,6 @@ class DeletePushSubscriptionSubscriber {
     private var publishers = [AnyCancellable]()
     private let pushStorage: PushStorage
 
-    private let deleteSubscriptionPublisherSubject = PassthroughSubject<String, Never>()
-
-    public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
-        deleteSubscriptionPublisherSubject.eraseToAnyPublisher()
-    }
-
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
          logger: ConsoleLogging,
@@ -37,7 +31,6 @@ class DeletePushSubscriptionSubscriber {
                     try await pushStorage.deleteSubscription(topic: topic)
                 }
                 kms.deleteSymmetricKey(for: topic)
-                deleteSubscriptionPublisherSubject.send(payload.topic)
             }.store(in: &publishers)
     }
 }

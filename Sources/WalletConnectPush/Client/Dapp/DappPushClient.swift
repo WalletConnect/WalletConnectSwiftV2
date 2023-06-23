@@ -7,7 +7,7 @@ public class DappPushClient {
     }
 
     public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
-        deletePushSubscriptionSubscriber.deleteSubscriptionPublisher
+        return pushStorage.deleteSubscriptionPublisher
     }
 
     public let logger: ConsoleLogging

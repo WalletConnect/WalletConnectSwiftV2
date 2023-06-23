@@ -6,12 +6,6 @@ public class WalletPushClient {
 
     private var publishers = Set<AnyCancellable>()
 
-    private let deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
-
-    public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
-        deletePushSubscriptionSubscriber.deleteSubscriptionPublisher
-    }
-
     /// publishes new subscriptions
     public var newSubscriptionPublisher: AnyPublisher<PushSubscription, Never> {
         return pushStorage.newSubscriptionPublisher
@@ -49,6 +43,7 @@ public class WalletPushClient {
     private let pushMessagesDatabase: PushMessagesDatabase
     private let resubscribeService: PushResubscribeService
     private let pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber
+    private let deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
     private let notifyUpdateRequester: NotifyUpdateRequester
     private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
     private let notifyProposeResponder: NotifyProposeResponder
@@ -65,6 +60,7 @@ public class WalletPushClient {
          resubscribeService: PushResubscribeService,
          pushSubscribeRequester: PushSubscribeRequester,
          pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber,
+         deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber,
          notifyUpdateRequester: NotifyUpdateRequester,
          notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber,
          notifyProposeResponder: NotifyProposeResponder,
@@ -80,6 +76,7 @@ public class WalletPushClient {
         self.resubscribeService = resubscribeService
         self.pushSubscribeRequester = pushSubscribeRequester
         self.pushSubscribeResponseSubscriber = pushSubscribeResponseSubscriber
+        self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
         self.notifyUpdateRequester = notifyUpdateRequester
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
         self.notifyProposeResponder = notifyProposeResponder
