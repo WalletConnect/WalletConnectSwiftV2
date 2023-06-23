@@ -35,7 +35,8 @@ final class Web3InboxClientFactory {
             chatWebviewSubscriber: chatWebviewSubscriber,
             pushWebviewSubscriber: pushWebviewSubscriber,
             pushClientProxy: pushClientProxy,
-            pushClientSubscriber: pushClientSubscriber
+            pushClientSubscriber: pushClientSubscriber,
+            pushClient: pushClient
         )
     }
 
