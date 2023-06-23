@@ -10,7 +10,11 @@ class DeletePushSubscriptionSubscriber {
     private var publishers = [AnyCancellable]()
     private let pushSubscriptionStore: CodableStore<PushSubscription>
 
-    var onDelete: ((String) -> Void)?
+    private let deleteSubscriptionPublisherSubject = PassthroughSubject<String, Never>()
+
+    public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
+        deleteSubscriptionPublisherSubject.eraseToAnyPublisher()
+    }
 
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
@@ -33,7 +37,7 @@ class DeletePushSubscriptionSubscriber {
                 networkingInteractor.unsubscribe(topic: topic)
                 pushSubscriptionStore.delete(forKey: topic)
                 kms.deleteSymmetricKey(for: topic)
-                onDelete?(payload.topic)
+                deleteSubscriptionPublisherSubject.send(payload.topic)
             }.store(in: &publishers)
     }
 }
