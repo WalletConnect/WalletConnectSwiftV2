@@ -27,6 +27,14 @@ enum Destination: Equatable {
             return wallet.name
         }
     }
+    
+    var hasSearch: Bool {
+        if case .viewAll = self {
+            return true
+        }
+        
+        return false
+    }
 }
 
 final class ModalViewModel: ObservableObject {
@@ -38,10 +46,18 @@ final class ModalViewModel: ObservableObject {
     @Published private(set) var uri: String?
     @Published private(set) var wallets: [Listing] = []
     
+    @Published var searchTerm: String = ""
+    
     @Published var toast: Toast?
     
     var destination: Destination {
         destinationStack.last!
+    }
+    
+    var filteredWallets: [Listing] {
+        if searchTerm.isEmpty { return wallets }
+        
+        return wallets.filter { $0.name.lowercased().contains(searchTerm.lowercased()) }
     }
     
     private var disposeBag = Set<AnyCancellable>()
@@ -60,7 +76,7 @@ final class ModalViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { sessions in
                 print(sessions)
-//                isShown.wrappedValue = false
+                isShown.wrappedValue = false
                 self.toast = Toast(style: .success, message: "Session estabilished", duration: 15)
             }
             .store(in: &disposeBag)
@@ -118,6 +134,10 @@ final class ModalViewModel: ObservableObject {
     func onBackButton() {
         guard destinationStack.count != 1 else { return }
         _ = destinationStack.popLast()
+        
+        if destinationStack.last?.hasSearch == false {
+            searchTerm = ""
+        }
     }
         
     func onCopyButton() {

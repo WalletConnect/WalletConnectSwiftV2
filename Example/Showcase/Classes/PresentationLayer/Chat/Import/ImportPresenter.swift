@@ -1,6 +1,6 @@
 import UIKit
 import Combine
-import WalletConnectSign
+import Web3Modal
 
 final class ImportPresenter: ObservableObject {
 
@@ -22,7 +22,7 @@ final class ImportPresenter: ObservableObject {
 
         let session: Session = try await withCheckedThrowingContinuation { continuation in
             var cancellable: AnyCancellable?
-            cancellable = Sign.instance.sessionSettlePublisher.sink { session in
+            cancellable = Web3Modal.instance.sessionSettlePublisher.sink { session in
                 defer { cancellable?.cancel() }
                 return continuation.resume(returning: session)
             }
@@ -67,17 +67,12 @@ extension ImportPresenter: SceneViewModel {
 private extension ImportPresenter {
 
     func setupInitialState() {
-        Sign.instance.sessionSettlePublisher.sink { session in
-            Task(priority: .userInitiated) {
-                try await self.importAccount(.web3Modal(account: session.accounts.first!, topic: session.topic))
-            }
 
-        }.store(in: &disposeBag)
     }
 
     @MainActor
     func importAccount(_ importAccount: ImportAccount) async throws {
-        try! await interactor.register(importAccount: importAccount)
+        try await interactor.register(importAccount: importAccount)
         interactor.save(importAccount: importAccount)
         router.presentChat(importAccount: importAccount)
     }

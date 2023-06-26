@@ -180,7 +180,7 @@ final class PushTests: XCTestCase {
         }.store(in: &publishers)
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
-
+    
     func testWalletCreatesAndUpdatesSubscription() async {
         let expectation = expectation(description: "expects to create and update push subscription")
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])

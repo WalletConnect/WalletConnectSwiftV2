@@ -16,6 +16,8 @@ public final class Web3InboxClient {
     private let chatWebviewProxy: WebViewProxy
     private let pushWebviewProxy: WebViewProxy
 
+    private let webViewRefreshHandler: WebViewRefreshHandler
+
     private let chatWebviewSubscriber: WebViewRequestSubscriber
     private let pushWebviewSubscriber: WebViewRequestSubscriber
 
@@ -30,7 +32,8 @@ init(
         chatWebviewSubscriber: WebViewRequestSubscriber,
         pushWebviewSubscriber: WebViewRequestSubscriber,
         pushClientProxy: PushClientProxy,
-        pushClientSubscriber: PushClientRequestSubscriber
+        pushClientSubscriber: PushClientRequestSubscriber,
+        webViewRefreshHandler: WebViewRefreshHandler
     ) {
         self.webView = webView
         self.account = account
@@ -43,7 +46,7 @@ init(
         self.pushWebviewSubscriber = pushWebviewSubscriber
         self.pushClientProxy = pushClientProxy
         self.pushClientSubscriber = pushClientSubscriber
-
+        self.webViewRefreshHandler = webViewRefreshHandler
         setupSubscriptions()
     }
 

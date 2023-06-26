@@ -7,10 +7,8 @@ public class DappPushClient {
         return notifyProposeResponseSubscriber.proposalResponsePublisher
     }
 
-    private let deleteSubscriptionPublisherSubject = PassthroughSubject<String, Never>()
-
     public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
-        deleteSubscriptionPublisherSubject.eraseToAnyPublisher()
+        deletePushSubscriptionSubscriber.deleteSubscriptionPublisher
     }
 
     public let logger: ConsoleLogging
@@ -34,7 +32,6 @@ public class DappPushClient {
         self.resubscribeService = resubscribeService
         self.notifyProposer = notifyProposer
         self.notifyProposeResponseSubscriber = notifyProposeResponseSubscriber
-        setupSubscriptions()
     }
 
     public func propose(account: Account, topic: String) async throws {
@@ -43,14 +40,5 @@ public class DappPushClient {
 
     public func getActiveSubscriptions() -> [PushSubscription] {
         subscriptionsProvider.getActiveSubscriptions()
-    }
-}
-
-private extension DappPushClient {
-
-    func setupSubscriptions() {
-        deletePushSubscriptionSubscriber.onDelete = {[unowned self] topic in
-            deleteSubscriptionPublisherSubject.send(topic)
-        }
     }
 }
