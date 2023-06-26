@@ -54,8 +54,6 @@ final class PushTests: XCTestCase {
 
         let clientId = try! networkingClient.getClientId()
         networkingLogger.debug("My client id is: \(clientId)")
-        networkingLogger.debug("cast host is: \(InputConfig.castHost)")
-        
         return (pairingClient, networkingClient, keychain, keyValueStorage)
     }
 
