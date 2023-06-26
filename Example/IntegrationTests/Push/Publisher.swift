@@ -2,7 +2,15 @@
 import Foundation
 
 class Publisher {
+
+    var logger: ConsoleLogging
+
+    init(logger: ConsoleLogging = ConsoleLogger(suffix: "🐙", loggingLevel: .debug)) {
+        self.logger = logger
+    }
+
     func notify(topic: String, account: Account, message: PushMessage) async throws {
+        logger.debug("cast host has been set for: \(InputConfig.castHost)")
         let url = URL(string: "https://\(InputConfig.castHost)/\(InputConfig.gmDappProjectId)/notify")!
         var request = URLRequest(url: url)
         let notifyRequestPayload = NotifyRequest(notification: message, accounts: [account])
