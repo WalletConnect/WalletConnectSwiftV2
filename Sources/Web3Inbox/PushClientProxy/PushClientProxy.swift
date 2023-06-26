@@ -10,17 +10,13 @@ final class PushClientProxy {
     init(client: WalletPushClient, onSign: @escaping SigningCallback) {
         self.client = client
         self.onSign = onSign
-
-        // TODO: For testing !!!
-        Task(priority: .high) {
-            let account = Account("eip155:1:0x32F9ABCf897010fDF038D1A15c6553511EcD8c1D")!
-            try await client.register(account: account, onSign: onSign)
-        }
     }
 
     func request(_ request: RPCRequest) async throws {
         guard let event = PushWebViewEvent(rawValue: request.method)
         else { throw Errors.unregisteredMethod }
+
+        // TODO: Handle register event
 
         switch event {
         case .approve:

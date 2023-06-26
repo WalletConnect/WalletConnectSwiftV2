@@ -84,7 +84,6 @@ public final class SyncStore<Object: DatabaseObject> {
         guard let result = objectStore.find(id: id) else {
             return
         }
-        // TODO: Should we pass topic to sync client?
         let record = try indexStore.getRecord(topic: result.key)
         try await delete(id: id, for: record.account)
     }
