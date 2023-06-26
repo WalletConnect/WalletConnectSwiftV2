@@ -120,7 +120,7 @@ private extension ChatService {
         case .swift, .kotlin, .js, .custom:
             return .signed(onSign(message: message, privateKey: importAccount.privateKey))
         case .web3Modal(let account, let topic):
-            return await onWeb3ModalSign(message: message, account: account, topic: topic)
+            return await onWalletConnectModalSign(message: message, account: account, topic: topic)
         }
     }
 
@@ -130,7 +130,7 @@ private extension ChatService {
         return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
     }
 
-    func onWeb3ModalSign(message: String, account: Account, topic: String) async -> SigningResult {
+    func onWalletConnectModalSign(message: String, account: Account, topic: String) async -> SigningResult {
         guard let session = Sign.instance.getSessions().first(where: { $0.topic == topic }) else { return .rejected }
 
         do {

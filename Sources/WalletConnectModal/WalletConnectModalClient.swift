@@ -4,8 +4,8 @@ import Combine
 ///
 /// Cannot be instantiated outside of the SDK
 ///
-/// Access via `Web3Modal.instance`
-public class Web3ModalClient {
+/// Access via `WalletConnectModal.instance`
+public class WalletConnectModalClient {
     // MARK: - Public Properties
     
     /// Publisher that sends sessions on every sessions update
@@ -68,7 +68,7 @@ public class Web3ModalClient {
     
     /// For proposing a session to a wallet.
     /// Function will propose a session on existing pairing or create new one if not specified
-    /// Namespaces from Web3Modal.config will be used
+    /// Namespaces from WalletConnectModal.config will be used
     /// - Parameters:
     ///   - topic: pairing topic
     public func connect(
@@ -77,18 +77,18 @@ public class Web3ModalClient {
         if let topic = topic {
             try pairingClient.validatePairingExistance(topic)
             try await signClient.connect(
-                requiredNamespaces: Web3Modal.config.sessionParams.requiredNamespaces,
-                optionalNamespaces: Web3Modal.config.sessionParams.optionalNamespaces,
-                sessionProperties: Web3Modal.config.sessionParams.sessionProperties,
+                requiredNamespaces: WalletConnectModal.config.sessionParams.requiredNamespaces,
+                optionalNamespaces: WalletConnectModal.config.sessionParams.optionalNamespaces,
+                sessionProperties: WalletConnectModal.config.sessionParams.sessionProperties,
                 topic: topic
             )
             return nil
         } else {
             let pairingURI = try await pairingClient.create()
             try await signClient.connect(
-                requiredNamespaces: Web3Modal.config.sessionParams.requiredNamespaces,
-                optionalNamespaces: Web3Modal.config.sessionParams.optionalNamespaces,
-                sessionProperties: Web3Modal.config.sessionParams.sessionProperties,
+                requiredNamespaces: WalletConnectModal.config.sessionParams.requiredNamespaces,
+                optionalNamespaces: WalletConnectModal.config.sessionParams.optionalNamespaces,
+                sessionProperties: WalletConnectModal.config.sessionParams.sessionProperties,
                 topic: pairingURI.topic
             )
             return pairingURI

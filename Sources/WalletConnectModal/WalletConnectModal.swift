@@ -6,7 +6,7 @@ import UIKit
 public typealias VerifyContext = WalletConnectVerify.VerifyContext
 #endif
 
-/// Web3Modal instance wrapper
+/// WalletConnectModal instance wrapper
 ///
 /// ```Swift
 /// let metadata = AppMetadata(
@@ -15,16 +15,16 @@ public typealias VerifyContext = WalletConnectVerify.VerifyContext
 ///     url: "dapp.wallet.connect",
 ///     icons:  ["https://my_icon.com/1"]
 /// )
-/// Web3Modal.configure(projectId: PROJECT_ID, metadata: metadata)
-/// Web3Modal.instance.getSessions()
+/// WalletConnectModal.configure(projectId: PROJECT_ID, metadata: metadata)
+/// WalletConnectModal.instance.getSessions()
 /// ```
-public class Web3Modal {
-    /// Web3Modalt client instance
-    public static var instance: Web3ModalClient = {
-        guard let config = Web3Modal.config else {
-            fatalError("Error - you must call Web3Modal.configure(_:) before accessing the shared instance.")
+public class WalletConnectModal {
+    /// WalletConnectModalt client instance
+    public static var instance: WalletConnectModalClient = {
+        guard let config = WalletConnectModal.config else {
+            fatalError("Error - you must call WalletConnectModal.configure(_:) before accessing the shared instance.")
         }
-        return Web3ModalClient(
+        return WalletConnectModalClient(
             signClient: Sign.instance,
             pairingClient: Pair.instance as! (PairingClientProtocol & PairingInteracting & PairingRegisterer)
         )
@@ -49,7 +49,7 @@ public class Web3Modal {
         sessionParams: SessionParams = .default
     ) {
         Pair.configure(metadata: metadata)
-        Web3Modal.config = Web3Modal.Config(
+        WalletConnectModal.config = WalletConnectModal.Config(
             projectId: projectId,
             metadata: metadata,
             sessionParams: sessionParams
@@ -57,7 +57,7 @@ public class Web3Modal {
     }
     
     public static func set(sessionParams: SessionParams) {
-        Web3Modal.config.sessionParams = sessionParams
+        WalletConnectModal.config.sessionParams = sessionParams
     }
     
     public static func present(from presentingViewController: UIViewController? = nil) {
@@ -67,7 +67,7 @@ public class Web3Modal {
         }
         
         if #available(iOS 14.0, *) {
-            let modal = Web3ModalSheetController()
+            let modal = WalletConnectModalSheetController()
             vc.present(modal, animated: true)
         }
     }

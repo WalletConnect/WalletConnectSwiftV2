@@ -128,7 +128,7 @@ final class ModalViewModel: ObservableObject {
             let storeLink = URL(string: storeLinkString)
         else { return }
         
-        uiApplicationWrapper.openURL(storeLink)
+        uiApplicationWrapper.openURL(storeLink, nil)
     }
     
     func onBackButton() {
@@ -172,21 +172,42 @@ final class ModalViewModel: ObservableObject {
 }
 
 private extension ModalViewModel {
-    enum Errors: Error {
+    enum DeeplinkErrors: LocalizedError {
         case noWalletLinkFound
+        case uriNotCreated
+        case failedToOpen
+        
+        var errorDescription: String? {
+            switch self {
+            case .noWalletLinkFound:
+                return NSLocalizedString("No valid link for opening given wallet found", comment: "")
+            case .uriNotCreated:
+                return NSLocalizedString("Couldn't generate link due to missing connection URI", comment: "")
+            case .failedToOpen:
+                return NSLocalizedString("Given link couldn't be opened", comment: "")
+            }
+        }
     }
 
     func navigateToDeepLink(universalLink: String, nativeLink: String) {
         do {
-            let nativeUrlString = formatNativeUrlString(nativeLink)
-            let universalUrlString = formatUniversalUrlString(universalLink)
+            let nativeUrlString = try formatNativeUrlString(nativeLink)
+            let universalUrlString = try formatUniversalUrlString(universalLink)
             
             if let nativeUrl = nativeUrlString?.toURL() {
-                uiApplicationWrapper.openURL(nativeUrl)
+                uiApplicationWrapper.openURL(nativeUrl) { success in
+                    if !success {
+                        self.toast = Toast(style: .error, message: DeeplinkErrors.failedToOpen.localizedDescription)
+                    }
+                }
             } else if let universalUrl = universalUrlString?.toURL() {
-                uiApplicationWrapper.openURL(universalUrl)
+                uiApplicationWrapper.openURL(universalUrl) { success in
+                    if !success {
+                        self.toast = Toast(style: .error, message: DeeplinkErrors.failedToOpen.localizedDescription)
+                    }
+               }
             } else {
-                throw Errors.noWalletLinkFound
+                throw DeeplinkErrors.noWalletLinkFound
             }
         } catch {
             toast = Toast(style: .error, message: error.localizedDescription)
@@ -197,11 +218,11 @@ private extension ModalViewModel {
         return url.hasPrefix("http://") || url.hasPrefix("https://")
     }
         
-    func formatNativeUrlString(_ string: String) -> String? {
+    func formatNativeUrlString(_ string: String) throws -> String? {
         if string.isEmpty { return nil }
             
         if isHttpUrl(url: string) {
-            return formatUniversalUrlString(string)
+            return try formatUniversalUrlString(string)
         }
             
         var safeAppUrl = string
@@ -210,16 +231,18 @@ private extension ModalViewModel {
             safeAppUrl = "\(safeAppUrl)://"
         }
         
-        guard let deeplinkUri else { return nil }
+        guard let deeplinkUri else {
+            throw DeeplinkErrors.uriNotCreated
+        }
             
         return "\(safeAppUrl)wc?uri=\(deeplinkUri)"
     }
         
-    func formatUniversalUrlString(_ string: String) -> String? {
+    func formatUniversalUrlString(_ string: String) throws -> String? {
         if string.isEmpty { return nil }
             
         if !isHttpUrl(url: string) {
-            return formatNativeUrlString(string)
+            return try formatNativeUrlString(string)
         }
             
         var plainAppUrl = string
@@ -227,7 +250,9 @@ private extension ModalViewModel {
             plainAppUrl = String(plainAppUrl.dropLast())
         }
         
-        guard let deeplinkUri else { return nil }
+        guard let deeplinkUri else {
+            throw DeeplinkErrors.uriNotCreated
+        }
             
         return "\(plainAppUrl)/wc?uri=\(deeplinkUri)"
     }
