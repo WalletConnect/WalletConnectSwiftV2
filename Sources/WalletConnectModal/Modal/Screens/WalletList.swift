@@ -1,6 +1,5 @@
 import SwiftUI
 
-@available(iOS 14.0, *)
 struct WalletList: View {
     @Binding var wallets: [Listing]
     @Binding var destination: Destination
@@ -9,8 +8,18 @@ struct WalletList: View {
     var navigateTo: (Destination) -> Void
     var onListingTap: (Listing) -> Void
     
+    @State var numberOfColumns = 4
+    
     var body: some View {
         content()
+            .readSize { size in
+                if numberOfColumns == 4 {
+                    numberOfColumns = Int(round(size.width / 140))
+                }
+                
+                return
+            }
+            .id(numberOfColumns)
     }
     
     @ViewBuilder
@@ -33,20 +42,24 @@ struct WalletList: View {
             
             VStack {
                 HStack {
-                    ForEach(0..<4) { index in
+                    ForEach(0..<numberOfColumns) { index in
                         gridItem(for: index)
                     }
                 }
                 HStack {
-                    ForEach(4..<7) { index in
+                    ForEach(numberOfColumns..<(2 * numberOfColumns - 1)) { index in
                         gridItem(for: index)
                     }
                     
                     viewAllItem()
-                        .onTapGesture {
-                            withAnimation {
-                                navigateTo(.viewAll)
-                            }
+                        .transform {
+                            #if os(iOS)
+                                $0.onTapGesture {
+                                    withAnimation {
+                                        navigateTo(.viewAll)
+                                    }
+                                }
+                            #endif
                         }
                 }
             }
@@ -56,14 +69,13 @@ struct WalletList: View {
     @ViewBuilder
     private func viewAll() -> some View {
         ZStack {
-            
             Spacer().frame(height: 450)
             
             ScrollView(.vertical) {
                 VStack(alignment: .leading) {
-                    ForEach(Array(stride(from: 0, to: wallets.count, by: 4)), id: \.self) { row in
+                    ForEach(Array(stride(from: 0, to: wallets.count, by: numberOfColumns)), id: \.self) { row in
                         HStack {
-                            ForEach(row..<(row + 4), id: \.self) { index in
+                            ForEach(row..<(row + numberOfColumns), id: \.self) { index in
                                 if wallets.indices.contains(index) {
                                     gridItem(for: index)
                                 }
@@ -93,8 +105,10 @@ struct WalletList: View {
     func viewAllItem() -> some View {
         VStack {
             VStack(spacing: 3) {
+                let startingIndex = (2 * numberOfColumns - 1)
+                
                 HStack(spacing: 3) {
-                    ForEach(7..<9) { index in
+                    ForEach(startingIndex..<(startingIndex + 2)) { index in
                         WalletImage(wallet: wallets[safe: index])
                             .cornerRadius(8)
                             .aspectRatio(1, contentMode: .fit)
@@ -103,7 +117,7 @@ struct WalletList: View {
                 .padding(.horizontal, 5)
                 
                 HStack(spacing: 3) {
-                    ForEach(9..<11) { index in
+                    ForEach((startingIndex + 2)..<(startingIndex + 4)) { index in
                         WalletImage(wallet: wallets[safe: index])
                             .cornerRadius(8)
                             .aspectRatio(1, contentMode: .fit)
@@ -154,12 +168,16 @@ struct WalletList: View {
         }
         .redacted(reason: wallet == nil ? .placeholder : [])
         .frame(maxWidth: 80, maxHeight: 96)
-        .onTapGesture {
-            guard let wallet else { return }
-            
-            withAnimation {
-                navigateTo(.walletDetail(wallet))
-            }
+        .transform {
+            #if os(iOS)
+                $0.onTapGesture {
+                    guard let wallet else { return }
+                    
+                    withAnimation {
+                        navigateTo(.walletDetail(wallet))
+                    }
+                }
+            #endif
         }
     }
     
@@ -191,7 +209,6 @@ struct WalletList: View {
         }
         .padding()
         .onAppear {
-            
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 onListingTap(wallet)
             }

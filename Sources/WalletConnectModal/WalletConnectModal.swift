@@ -1,6 +1,8 @@
 import Foundation
 
+#if canImport(UIKit)
 import UIKit
+#endif
 
 #if SWIFT_PACKAGE
 public typealias VerifyContext = WalletConnectVerify.VerifyContext
@@ -59,6 +61,11 @@ public class WalletConnectModal {
     public static func set(sessionParams: SessionParams) {
         WalletConnectModal.config.sessionParams = sessionParams
     }
+}
+
+#if canImport(UIKit)
+
+extension WalletConnectModal {
     
     public static func present(from presentingViewController: UIViewController? = nil) {
         guard let vc = presentingViewController ?? topViewController() else {
@@ -66,10 +73,8 @@ public class WalletConnectModal {
             return
         }
         
-        if #available(iOS 14.0, *) {
-            let modal = WalletConnectModalSheetController()
-            vc.present(modal, animated: true)
-        }
+        let modal = WalletConnectModalSheetController()
+        vc.present(modal, animated: true)
     }
     
     private static func topViewController(_ base: UIViewController? = nil) -> UIViewController? {
@@ -98,6 +103,21 @@ public class WalletConnectModal {
         return base
     }
 }
+
+#elseif canImport(AppKit)
+
+import AppKit
+
+extension WalletConnectModal {
+    
+    public static func present(from presentingViewController: NSViewController? = nil) {
+        
+        let modal = WalletConnectModalSheetController()
+        presentingViewController!.presentAsModalWindow(modal)
+    }
+}
+
+#endif
 
 public struct SessionParams {
     public let requiredNamespaces: [String: ProposalNamespace]
