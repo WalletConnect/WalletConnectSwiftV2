@@ -7,6 +7,7 @@ public struct PushSubscription: DatabaseObject {
     public let metadata: AppMetadata
     public let scope: [String: ScopeValue]
     public let expiry: Date
+    public let symKey: String
 
     public var databaseId: String {
         return topic

@@ -56,12 +56,13 @@ class PushSubscribeResponseSubscriber {
                     var metadata: AppMetadata!
                     var pushSubscriptionTopic: String!
                     var subscribedTypes: Set<NotificationType>!
+                    var agreementKeysP: AgreementKeys!
                     let (subscriptionPayload, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
                     let subscribedScope = subscriptionPayload.scope
                         .components(separatedBy: " ")
                     do {
                         // generate symm key P
-                        let agreementKeysP = try kms.performKeyAgreement(selfPublicKey: pubKeyY, peerPublicKey: peerPubKeyZ)
+                        agreementKeysP = try kms.performKeyAgreement(selfPublicKey: pubKeyY, peerPublicKey: peerPubKeyZ)
                         pushSubscriptionTopic = agreementKeysP.derivedTopic()
                         try kms.setAgreementSecret(agreementKeysP, topic: pushSubscriptionTopic)
                         try groupKeychainStorage.add(agreementKeysP, forKey: pushSubscriptionTopic)
@@ -87,7 +88,7 @@ class PushSubscribeResponseSubscriber {
                     dappsMetadataStore.delete(forKey: payload.topic)
                     let expiry = Date(timeIntervalSince1970: TimeInterval(claims.exp))
                     let scope: [String: ScopeValue] = subscribedTypes.reduce(into: [:]) { $0[$1.name] = ScopeValue(description: $1.description, enabled: true) }
-                    let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata, scope: scope, expiry: expiry)
+                    let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata, scope: scope, expiry: expiry, symKey: agreementKeysP.sharedKey.hexRepresentation)
 
                     try await pushStorage.setSubscription(pushSubscription)
 

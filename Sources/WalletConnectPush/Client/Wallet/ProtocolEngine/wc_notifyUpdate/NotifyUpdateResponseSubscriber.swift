@@ -48,7 +48,7 @@ class NotifyUpdateResponseSubscriber {
                     }
                     let expiry = Date(timeIntervalSince1970: TimeInterval(claims.exp))
                     
-                    let updatedSubscription = PushSubscription(topic: subscriptionTopic, account: oldSubscription.account, relay: oldSubscription.relay, metadata: oldSubscription.metadata, scope: scope, expiry: expiry)
+                    let updatedSubscription = PushSubscription(topic: subscriptionTopic, account: oldSubscription.account, relay: oldSubscription.relay, metadata: oldSubscription.metadata, scope: scope, expiry: expiry, symKey: oldSubscription.symKey)
 
                     try await pushStorage.setSubscription(updatedSubscription)
 

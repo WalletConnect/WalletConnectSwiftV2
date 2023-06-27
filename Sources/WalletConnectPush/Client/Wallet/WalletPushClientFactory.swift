@@ -34,15 +34,11 @@ public struct WalletPushClientFactory {
         syncClient: SyncClient
     ) -> WalletPushClient {
         let kms = KeyManagementService(keychain: keychainStorage)
-
         let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
-
         let subscriptionStore: SyncStore<PushSubscription> = SyncStoreFactory.create(name: PushStorageIdntifiers.pushSubscription, syncClient: syncClient, storage: keyValueStorage)
-
-        let pushStorage = PushStorage(subscriptionStore: subscriptionStore)
-
+        let subscriptionStoreDelegate = PushSubscriptionStoreDelegate(networkingInteractor: networkInteractor, kms: kms)
+        let pushStorage = PushStorage(subscriptionStore: subscriptionStore, subscriptionStoreDelegate: subscriptionStoreDelegate)
         let identityClient = IdentityClientFactory.create(keyserver: keyserverURL, keychain: keychainStorage, logger: logger)
-
         let pushMessagesRecordsStore = CodableStore<PushMessageRecord>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.pushMessagesRecords)
         let pushMessagesDatabase = PushMessagesDatabase(store: pushMessagesRecordsStore)
         let pushMessageSubscriber = PushMessageSubscriber(networkingInteractor: networkInteractor, pushMessagesDatabase: pushMessagesDatabase, logger: logger)

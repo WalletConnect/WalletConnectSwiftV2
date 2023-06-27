@@ -10,6 +10,8 @@ final class PushStorage {
     private let newSubscriptionSubject = PassthroughSubject<PushSubscription, Never>()
     private let deleteSubscriptionSubject = PassthroughSubject<String, Never>()
 
+    private let subscriptionStoreDelegate: PushSubscriptionStoreDelegate
+
     var newSubscriptionPublisher: AnyPublisher<PushSubscription, Never> {
         return newSubscriptionSubject.eraseToAnyPublisher()
     }
@@ -22,8 +24,9 @@ final class PushStorage {
         return subscriptionStore.dataUpdatePublisher
     }
 
-    init(subscriptionStore: SyncStore<PushSubscription>) {
+    init(subscriptionStore: SyncStore<PushSubscription>, subscriptionStoreDelegate: PushSubscriptionStoreDelegate) {
         self.subscriptionStore = subscriptionStore
+        self.subscriptionStoreDelegate = subscriptionStoreDelegate
         setupSubscriptions()
     }
 
@@ -60,8 +63,10 @@ private extension PushStorage {
         subscriptionStore.syncUpdatePublisher.sink { [unowned self] (_, _, update) in
             switch update {
             case .set(let subscription):
+                subscriptionStoreDelegate.onUpdate(subscription)
                 newSubscriptionSubject.send(subscription)
             case .delete(let id):
+                subscriptionStoreDelegate.onDelete(id)
                 deleteSubscriptionSubject.send(id)
             }
         }.store(in: &publishers)
