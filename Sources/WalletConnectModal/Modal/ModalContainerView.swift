@@ -26,7 +26,7 @@ struct ModalContainerView: View {
                         interactor: DefaultModalSheetInteractor()
                     )
                 )
-                .environment(\.projectId, Web3Modal.config.projectId)
+                .environment(\.projectId, WalletConnectModal.config.projectId)
                 .transition(.move(edge: .bottom))
                 .animation(.spring(), value: showModal)
             }

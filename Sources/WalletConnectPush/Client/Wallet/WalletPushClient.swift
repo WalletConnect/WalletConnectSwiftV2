@@ -124,6 +124,7 @@ public class WalletPushClient {
     }
 }
 
+
 #if targetEnvironment(simulator)
 extension WalletPushClient {
     public func register(deviceToken: String) async throws {

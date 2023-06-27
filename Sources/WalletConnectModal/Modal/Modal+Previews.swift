@@ -43,7 +43,7 @@ struct ModalContainerView_Previews: PreviewProvider {
             )
             
             Networking.configure(projectId: projectId, socketFactory: WebSocketFactoryMock())
-            Web3Modal.configure(projectId: projectId, metadata: metadata)
+            WalletConnectModal.configure(projectId: projectId, metadata: metadata)
         }
         
         var body: some View {

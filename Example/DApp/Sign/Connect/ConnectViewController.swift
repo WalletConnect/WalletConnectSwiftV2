@@ -1,6 +1,6 @@
 import Foundation
 import UIKit
-import Web3Modal
+import WalletConnectModal
 
 class ConnectViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     let uri: WalletConnectURI

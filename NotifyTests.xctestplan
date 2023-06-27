@@ -1,38 +1,43 @@
 {
   "configurations" : [
     {
-      "id" : "EB662E8C-8DC0-4689-A2FF-B41B80A99F85",
+      "id" : "841BA375-1F12-4558-98A7-CE22EF446BB4",
       "name" : "Configuration 1",
       "options" : {
-        "mainThreadCheckerEnabled" : false,
-        "targetForVariableExpansion" : {
-          "containerPath" : "container:ExampleApp.xcodeproj",
-          "identifier" : "A5E03DEC286464DB00888481",
-          "name" : "IntegrationTests"
-        }
+
       }
     }
   ],
   "defaultOptions" : {
-    "codeCoverage" : false,
     "environmentVariableEntries" : [
       {
         "key" : "RELAY_HOST",
         "value" : "$(RELAY_HOST)"
       },
       {
+        "key" : "GM_DAPP_PROJECT_ID",
+        "value" : "$(GM_DAPP_PROJECT_ID)"
+      },
+      {
+        "key" : "CAST_HOST",
+        "value" : "$(CAST_HOST)"
+      },
+      {
         "key" : "PROJECT_ID",
         "value" : "$(PROJECT_ID)"
       }
     ],
-    "mainThreadCheckerEnabled" : false,
-    "testTimeoutsEnabled" : true
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:ExampleApp.xcodeproj",
+      "identifier" : "A5E03DEC286464DB00888481",
+      "name" : "IntegrationTests"
+    }
   },
   "testTargets" : [
     {
       "selectedTests" : [
-        "AuthTests\/testEIP191RespondSuccess()",
-        "SignClientTests\/testSessionRequest()"
+        "PushTests\/testNotifyServerSubscribeAndNotifies()",
+        "PushTests\/testWalletCreatesAndUpdatesSubscription()"
       ],
       "target" : {
         "containerPath" : "container:ExampleApp.xcodeproj",

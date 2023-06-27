@@ -21,6 +21,7 @@ final class PushTests: XCTestCase {
 
     var pairingStorage: PairingStorage!
 
+
     private var publishers = [AnyCancellable]()
 
     func makeClientDependencies(prefix: String) -> (PairingClient, NetworkInteracting, KeychainStorageProtocol, KeyValueStorage) {
@@ -53,7 +54,6 @@ final class PushTests: XCTestCase {
 
         let clientId = try! networkingClient.getClientId()
         networkingLogger.debug("My client id is: \(clientId)")
-        
         return (pairingClient, networkingClient, keychain, keyValueStorage)
     }
 
@@ -189,6 +189,7 @@ final class PushTests: XCTestCase {
         walletPushClient.subscriptionsPublisher
             .first()
             .sink { [unowned self] subscriptions in
+                sleep(1)
                 Task { try! await walletPushClient.update(topic: subscriptions.first!.topic, scope: updateScope) }
             }
             .store(in: &publishers)
@@ -203,6 +204,34 @@ final class PushTests: XCTestCase {
             }.store(in: &publishers)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+    }
+
+    func testNotifyServerSubscribeAndNotifies() async throws {
+        let subscribeExpectation = expectation(description: "creates push subscription")
+        let messageExpectation = expectation(description: "receives a push message")
+        let pushMessage = PushMessage.stub()
+
+        let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
+        try! await walletPushClient.subscribe(metadata: metadata, account: Account.stub(), onSign: sign)
+        var subscription: PushSubscription!
+        walletPushClient.subscriptionsPublisher
+            .first()
+            .sink { subscriptions in
+                XCTAssertNotNil(subscriptions.first)
+                subscribeExpectation.fulfill()
+                subscription = subscriptions.first!
+                let notifier = Publisher()
+                sleep(1)
+                Task(priority: .high) { try await notifier.notify(topic: subscriptions.first!.topic, account: subscriptions.first!.account, message: pushMessage) }
+            }.store(in: &publishers)
+        walletPushClient.pushMessagePublisher
+            .sink { pushMessageRecord in
+                XCTAssertEqual(pushMessage, pushMessageRecord.message)
+                messageExpectation.fulfill()
+        }.store(in: &publishers)
+
+        wait(for: [subscribeExpectation, messageExpectation], timeout: InputConfig.defaultTimeout)
+        try await walletPushClient.deleteSubscription(topic: subscription.topic)
     }
 
 }

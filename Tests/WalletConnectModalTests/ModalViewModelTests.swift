@@ -1,5 +1,5 @@
 import TestingUtils
-@testable import Web3Modal
+@testable import WalletConnectModal
 import XCTest
 
 final class ModalViewModelTests: XCTestCase {
@@ -22,7 +22,7 @@ final class ModalViewModelTests: XCTestCase {
                 Listing(id: "2", name: "Awesome App", homepage: "https://example.com/awesome", order: 2, imageId: "2", app: Listing.App(ios: "https://example.com/download-ios", mac: "https://example.com/download-mac", safari: "https://example.com/download-safari"), mobile: Listing.Mobile(native: "awesomeapp://deeplink", universal: "https://awesome.com/awesome/universal")),
             ]),
             uiApplicationWrapper: .init(
-                openURL: { url in
+                openURL: { url, _  in
                     self.openURLFuncTest.call(url)
                     self.expectation.fulfill()
                 },

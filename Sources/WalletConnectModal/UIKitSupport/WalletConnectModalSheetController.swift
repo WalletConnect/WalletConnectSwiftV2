@@ -1,7 +1,7 @@
 import SwiftUI
 
 @available(iOS 14.0, *)
-class Web3ModalSheetController: UIHostingController<ModalContainerView> {
+class WalletConnectModalSheetController: UIHostingController<ModalContainerView> {
     
     @MainActor dynamic required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

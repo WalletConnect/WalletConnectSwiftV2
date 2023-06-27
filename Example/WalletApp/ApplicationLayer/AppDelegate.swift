@@ -1,5 +1,5 @@
 import UIKit
-import WalletConnectPush
+import Web3Inbox
 import Combine
 
 @main
@@ -26,7 +26,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     ) {
 
         Task(priority: .high) {            
-            try await Push.wallet.register(deviceToken: deviceToken)
+            try await Web3Inbox.instance.register(deviceToken: deviceToken)
         }
     }
 

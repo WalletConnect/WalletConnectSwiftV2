@@ -1,5 +1,5 @@
 import TestingUtils
-@testable import Web3Modal
+@testable import WalletConnectModal
 import XCTest
 
 final class ExplorerAPITests: XCTestCase {
