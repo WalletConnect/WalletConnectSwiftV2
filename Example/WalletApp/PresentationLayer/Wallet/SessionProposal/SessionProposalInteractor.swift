@@ -28,7 +28,7 @@ final class SessionProposalInteractor {
                 events: Array(supportedEvents),
                 accounts: supportedAccounts
             )
-            try await Web3Wallet.instance.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+            try await Web3Wallet.instance.approve(proposalId: proposal.id, namespaces: sessionNamespaces, sessionProperties: proposal.sessionProperties)
         } catch {
             print(error)
         }

@@ -26,7 +26,7 @@ public class Web3WalletClient {
     /// Publisher that sends authentication requests
     ///
     /// Wallet should subscribe on events in order to receive auth requests.
-    public var authRequestPublisher: AnyPublisher<(request: AuthRequest, context: VerifyContext?), Never> {
+    public var authRequestPublisher: AnyPublisher<(request: AuthRequest, context: VerifyContext?, appMetadata: payload.request.requester.metadata), Never> {
         authClient.authRequestPublisher.eraseToAnyPublisher()
     }
     
@@ -87,8 +87,8 @@ public class Web3WalletClient {
     /// - Parameters:
     ///   - proposalId: Session Proposal id
     ///   - namespaces: namespaces for given session, needs to contain at least required namespaces proposed by dApp.
-    public func approve(proposalId: String, namespaces: [String: SessionNamespace]) async throws {
-        try await signClient.approve(proposalId: proposalId, namespaces: namespaces)
+    public func approve(proposalId: String, namespaces: [String: SessionNamespace], sessionProperties: [String: String]? = nil) async throws {
+        try await signClient.approve(proposalId: proposalId, namespaces: namespaces, sessionProperties: sessionProperties)
     }
 
     /// For the wallet to reject a session proposal.
