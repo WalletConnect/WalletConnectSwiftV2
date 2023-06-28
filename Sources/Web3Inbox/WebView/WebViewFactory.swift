@@ -19,7 +19,9 @@ final class WebViewFactory {
 
     func create() -> WKWebView {
         let configuration = WKWebViewConfiguration()
+        #if os(iOS)
         configuration.allowsInlineMediaPlayback = true
+        #endif
         configuration.userContentController.add(
             chatWebviewSubscriber,
             name: WebViewRequestSubscriber.chat
