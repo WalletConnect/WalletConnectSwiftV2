@@ -13,13 +13,9 @@ public struct RelayClientFactory {
 
         let keyValueStorage = UserDefaults.standard
 
-        let serviceIdentifier = "com.walletconnect.sdk"
-
-        let keychainStorage = KeychainStorage(serviceIdentifier: serviceIdentifier, attrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly)
+        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
 
         let logger = ConsoleLogger(suffix: "🚄" ,loggingLevel: .debug)
-
-        let clientIdMigrationController = ClientIdMigrationController(serviceIdentifier: serviceIdentifier, keyValueStorage: keyValueStorage, logger: logger)
 
         return RelayClientFactory.create(
             relayHost: relayHost,
@@ -28,8 +24,7 @@ public struct RelayClientFactory {
             keychainStorage: keychainStorage,
             socketFactory: socketFactory,
             socketConnectionType: socketConnectionType,
-            logger: logger,
-            clientIdMigrationController: clientIdMigrationController
+            logger: logger
         )
     }
 
@@ -41,15 +36,14 @@ public struct RelayClientFactory {
         keychainStorage: KeychainStorageProtocol,
         socketFactory: WebSocketFactory,
         socketConnectionType: SocketConnectionType = .automatic,
-        logger: ConsoleLogging,
-        clientIdMigrationController: ClientIdMigrationController? = nil
+        logger: ConsoleLogging
     ) -> RelayClient {
 
-        let clientIdStorage = ClientIdStorage(keychain: keychainStorage, clientIdMigrationController: clientIdMigrationController)
+        let clientIdStorage = ClientIdStorage(keychain: keychainStorage)
 
-        let socketAuthenticator = SocketAuthenticator(
+        let socketAuthenticator = ClientIdAuthenticator(
             clientIdStorage: clientIdStorage,
-            relayHost: relayHost
+            url: "wss://\(relayHost)"
         )
         let relayUrlFactory = RelayUrlFactory(
             relayHost: relayHost,

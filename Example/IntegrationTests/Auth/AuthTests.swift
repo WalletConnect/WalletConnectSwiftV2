@@ -41,7 +41,6 @@ final class AuthTests: XCTestCase {
             keychainStorage: keychain,
             socketFactory: DefaultSocketFactory(),
             logger: logger)
-        let keyValueStorage = RuntimeKeyValueStorage()
 
         let networkingClient = NetworkingClientFactory.create(
             relayClient: relayClient,
