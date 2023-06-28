@@ -28,7 +28,7 @@ public struct EchoClientFactory {
                        echoAuthenticator: EchoAuthenticating,
                        environment: APNSEnvironment) -> EchoClient {
 
-        let logger = ConsoleLogger(loggingLevel: .debug)
+        let logger = ConsoleLogger(suffix: "👂🏻", loggingLevel: .debug)
 
         let registerService = EchoRegisterService(httpClient: httpClient, projectId: projectId, clientId: clientId, echoAuthenticator: echoAuthenticator, logger: logger, environment: environment)
 
