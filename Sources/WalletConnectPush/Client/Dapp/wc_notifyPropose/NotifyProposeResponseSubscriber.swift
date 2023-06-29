@@ -51,7 +51,7 @@ class NotifyProposeResponseSubscriber {
         let subscriptionKey = try SymmetricKey(hex: payload.response.subscriptionSymKey)
         let subscriptionTopic = subscriptionKey.rawRepresentation.sha256().toHexString()
         let relay = RelayProtocolOptions(protocol: "irn", data: nil)
-        let subscription = PushSubscription(topic: subscriptionTopic, account: payload.request.account, relay: relay, metadata: metadata, scope: [:], expiry: expiry)
+        let subscription = PushSubscription(topic: subscriptionTopic, account: payload.request.account, relay: relay, metadata: metadata, scope: [:], expiry: expiry, symKey: subscriptionKey.hexRepresentation)
         try kms.setSymmetricKey(subscriptionKey, for: subscriptionTopic)
         try await networkingInteractor.subscribe(topic: subscriptionTopic)
         return subscription

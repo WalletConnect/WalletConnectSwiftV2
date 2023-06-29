@@ -10,7 +10,7 @@ class NotifyUpdateResponseSubscriber {
     private let networkingInteractor: NetworkInteracting
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
-    private let subscriptionsStore: SyncStore<PushSubscription>
+    private let pushStorage: PushStorage
     private let subscriptionScopeProvider: SubscriptionScopeProvider
     private var subscriptionPublisherSubject = PassthroughSubject<Result<PushSubscription, Error>, Never>()
     var updateSubscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
@@ -20,11 +20,11 @@ class NotifyUpdateResponseSubscriber {
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
          subscriptionScopeProvider: SubscriptionScopeProvider,
-         subscriptionsStore: SyncStore<PushSubscription>
+         pushStorage: PushStorage
     ) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
-        self.subscriptionsStore = subscriptionsStore
+        self.pushStorage = pushStorage
         self.subscriptionScopeProvider = subscriptionScopeProvider
         subscribeForUpdateResponse()
     }
@@ -41,16 +41,16 @@ class NotifyUpdateResponseSubscriber {
                     let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
                     let scope = try await buildScope(selected: claims.scp, dappUrl: claims.aud)
 
-                    guard let oldSubscription = try? subscriptionsStore.get(for: subscriptionTopic) else {
+                    guard let oldSubscription = pushStorage.getSubscription(topic: subscriptionTopic) else {
                         logger.debug("NotifyUpdateResponseSubscriber Subscription does not exist")
                         subscriptionPublisherSubject.send(.failure(Errors.subscriptionDoesNotExist))
                         return
                     }
                     let expiry = Date(timeIntervalSince1970: TimeInterval(claims.exp))
                     
-                    let updatedSubscription = PushSubscription(topic: subscriptionTopic, account: oldSubscription.account, relay: oldSubscription.relay, metadata: oldSubscription.metadata, scope: scope, expiry: expiry)
+                    let updatedSubscription = PushSubscription(topic: subscriptionTopic, account: oldSubscription.account, relay: oldSubscription.relay, metadata: oldSubscription.metadata, scope: scope, expiry: expiry, symKey: oldSubscription.symKey)
 
-                    try await subscriptionsStore.set(object: updatedSubscription, for: updatedSubscription.account)
+                    try await pushStorage.setSubscription(updatedSubscription)
 
                     subscriptionPublisherSubject.send(.success(updatedSubscription))
 
