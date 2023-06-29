@@ -26,7 +26,7 @@ public class Web3WalletClient {
     /// Publisher that sends authentication requests
     ///
     /// Wallet should subscribe on events in order to receive auth requests.
-    public var authRequestPublisher: AnyPublisher<(request: AuthRequest, context: VerifyContext?, appMetadata: payload.request.requester.metadata), Never> {
+    public var authRequestPublisher: AnyPublisher<(request: AuthRequest, context: VerifyContext?), Never> {
         authClient.authRequestPublisher.eraseToAnyPublisher()
     }
     
