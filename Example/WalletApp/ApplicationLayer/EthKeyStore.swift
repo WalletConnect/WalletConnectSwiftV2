@@ -7,7 +7,7 @@ class EthKeyStore {
     let privateKey: EthereumPrivateKey
 
     var address: String {
-        return privateKey.address.hex(eip55: false)
+        return privateKey.address.hex(eip55: true)
     }
 
     var privateKeyRaw: Data {

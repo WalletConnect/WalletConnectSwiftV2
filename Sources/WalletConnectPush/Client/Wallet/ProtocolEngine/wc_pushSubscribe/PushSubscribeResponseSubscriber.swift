@@ -1,4 +1,3 @@
-
 import Foundation
 import Combine
 
@@ -7,24 +6,26 @@ class PushSubscribeResponseSubscriber {
         case couldNotCreateSubscription
     }
 
+    private let subscriptionErrorSubject = PassthroughSubject<Error, Never>()
+
+    var subscriptionErrorPublisher: AnyPublisher<Error, Never> {
+        return subscriptionErrorSubject.eraseToAnyPublisher()
+    }
+
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
-    private let subscriptionsStore: CodableStore<PushSubscription>
+    private let pushStorage: PushStorage
     private let groupKeychainStorage: KeychainStorageProtocol
     private let dappsMetadataStore: CodableStore<AppMetadata>
     private let subscriptionScopeProvider: SubscriptionScopeProvider
-    private var subscriptionPublisherSubject = PassthroughSubject<Result<PushSubscription, Error>, Never>()
-    var subscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
-        return subscriptionPublisherSubject.eraseToAnyPublisher()
-    }
 
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
          logger: ConsoleLogging,
          groupKeychainStorage: KeychainStorageProtocol,
-         subscriptionsStore: CodableStore<PushSubscription>,
+         pushStorage: PushStorage,
          dappsMetadataStore: CodableStore<AppMetadata>,
          subscriptionScopeProvider: SubscriptionScopeProvider
     ) {
@@ -32,7 +33,7 @@ class PushSubscribeResponseSubscriber {
         self.kms = kms
         self.logger = logger
         self.groupKeychainStorage = groupKeychainStorage
-        self.subscriptionsStore = subscriptionsStore
+        self.pushStorage = pushStorage
         self.dappsMetadataStore = dappsMetadataStore
         self.subscriptionScopeProvider = subscriptionScopeProvider
         subscribeForSubscriptionResponse()
@@ -47,8 +48,7 @@ class PushSubscribeResponseSubscriber {
 
                     guard let responseKeys = kms.getAgreementSecret(for: payload.topic) else {
                         logger.debug("PushSubscribeResponseSubscriber: no symmetric key for topic \(payload.topic)")
-                        subscriptionPublisherSubject.send(.failure(Errors.couldNotCreateSubscription))
-                        return
+                        return subscriptionErrorSubject.send(Errors.couldNotCreateSubscription)
                     }
 
                     // get keypair Y
@@ -59,12 +59,13 @@ class PushSubscribeResponseSubscriber {
                     var metadata: AppMetadata!
                     var pushSubscriptionTopic: String!
                     var subscribedTypes: Set<NotificationType>!
+                    var agreementKeysP: AgreementKeys!
                     let (subscriptionPayload, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
                     let subscribedScope = subscriptionPayload.scope
                         .components(separatedBy: " ")
                     do {
                         // generate symm key P
-                        let agreementKeysP = try kms.performKeyAgreement(selfPublicKey: pubKeyY, peerPublicKey: peerPubKeyZ)
+                        agreementKeysP = try kms.performKeyAgreement(selfPublicKey: pubKeyY, peerPublicKey: peerPubKeyZ)
                         pushSubscriptionTopic = agreementKeysP.derivedTopic()
                         try kms.setAgreementSecret(agreementKeysP, topic: pushSubscriptionTopic)
                         try groupKeychainStorage.add(agreementKeysP, forKey: pushSubscriptionTopic)
@@ -76,26 +77,22 @@ class PushSubscribeResponseSubscriber {
                         try await networkingInteractor.subscribe(topic: pushSubscriptionTopic)
                     } catch {
                         logger.debug("PushSubscribeResponseSubscriber: error: \(error)")
-                        subscriptionPublisherSubject.send(.failure(Errors.couldNotCreateSubscription))
-                        return
+                        return subscriptionErrorSubject.send(Errors.couldNotCreateSubscription)
                     }
 
                     guard let metadata = metadata else {
                         logger.debug("PushSubscribeResponseSubscriber: no metadata for topic: \(pushSubscriptionTopic!)")
-                        subscriptionPublisherSubject.send(.failure(Errors.couldNotCreateSubscription))
-                        return
+                        return subscriptionErrorSubject.send(Errors.couldNotCreateSubscription)
                     }
                     dappsMetadataStore.delete(forKey: payload.topic)
                     let expiry = Date(timeIntervalSince1970: TimeInterval(claims.exp))
                     let scope: [String: ScopeValue] = subscribedTypes.reduce(into: [:]) { $0[$1.name] = ScopeValue(description: $1.description, enabled: true) }
-                    let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata, scope: scope, expiry: expiry)
+                    let pushSubscription = PushSubscription(topic: pushSubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata, scope: scope, expiry: expiry, symKey: agreementKeysP.sharedKey.hexRepresentation)
 
-                    subscriptionsStore.set(pushSubscription, forKey: pushSubscriptionTopic)
+                    try await pushStorage.setSubscription(pushSubscription)
 
                     logger.debug("PushSubscribeResponseSubscriber: unsubscribing response topic: \(payload.topic)")
                     networkingInteractor.unsubscribe(topic: payload.topic)
-
-                    subscriptionPublisherSubject.send(.success(pushSubscription))
                 }
             }.store(in: &publishers)
     }

@@ -1,30 +1,22 @@
 import Foundation
 import Combine
-import WalletConnectKMS
-import WalletConnectPairing
 
 class DeletePushSubscriptionSubscriber {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
     private var publishers = [AnyCancellable]()
-    private let pushSubscriptionStore: CodableStore<PushSubscription>
-
-    private let deleteSubscriptionPublisherSubject = PassthroughSubject<String, Never>()
-
-    public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
-        deleteSubscriptionPublisherSubject.eraseToAnyPublisher()
-    }
+    private let pushStorage: PushStorage
 
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
          logger: ConsoleLogging,
-         pushSubscriptionStore: CodableStore<PushSubscription>
+         pushStorage: PushStorage
     ) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.logger = logger
-        self.pushSubscriptionStore = pushSubscriptionStore
+        self.pushStorage = pushStorage
         subscribeForDeleteSubscription()
     }
 
@@ -35,9 +27,10 @@ class DeletePushSubscriptionSubscriber {
                 logger.debug("Peer deleted subscription")
                 let topic = payload.topic
                 networkingInteractor.unsubscribe(topic: topic)
-                pushSubscriptionStore.delete(forKey: topic)
+                Task(priority: .high) {
+                    try await pushStorage.deleteSubscription(topic: topic)
+                }
                 kms.deleteSymmetricKey(for: topic)
-                deleteSubscriptionPublisherSubject.send(payload.topic)
             }.store(in: &publishers)
     }
 }

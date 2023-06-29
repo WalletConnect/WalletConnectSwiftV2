@@ -11,24 +11,25 @@ class NotifyProposeResponder {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
+    private let pushStorage: PushStorage
     private let pushSubscribeRequester: PushSubscribeRequester
     private let rpcHistory: RPCHistory
-    private var subscriptionResponsePublisher: AnyPublisher<Result<PushSubscription, Error>, Never>
 
     private var publishers = [AnyCancellable]()
 
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
          logger: ConsoleLogging,
+         pushStorage: PushStorage,
          pushSubscribeRequester: PushSubscribeRequester,
          rpcHistory: RPCHistory,
-        pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber
+         pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber
     ) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.logger = logger
+        self.pushStorage = pushStorage
         self.pushSubscribeRequester = pushSubscribeRequester
-        self.subscriptionResponsePublisher = pushSubscribeResponseSubscriber.subscriptionPublisher
         self.rpcHistory = rpcHistory
     }
 
@@ -42,18 +43,13 @@ class NotifyProposeResponder {
         let subscriptionAuthWrapper = try await pushSubscribeRequester.subscribe(metadata: proposal.metadata, account: proposal.account, onSign: onSign)
 
         var pushSubscription: PushSubscription!
-        try await withCheckedThrowingContinuation { continuation in
-            subscriptionResponsePublisher
+        try await withCheckedThrowingContinuation { [unowned self] continuation in
+            pushStorage.newSubscriptionPublisher
                 .first()
-                .sink(receiveValue: { value in
-                switch value {
-                case .success(let subscription):
-                    pushSubscription = subscription
+                .sink { value in
+                    pushSubscription = value
                     continuation.resume()
-                case .failure(let error):
-                    continuation.resume(throwing: error)
-                }
-            }).store(in: &publishers)
+                }.store(in: &publishers)
         }
 
         guard let peerPublicKey = try? AgreementPublicKey(hex: proposal.publicKey) else {
