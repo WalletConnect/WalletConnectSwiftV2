@@ -7,6 +7,8 @@ final class WelcomePresenter: ObservableObject {
     private let router: WelcomeRouter
     private var disposeBag = Set<AnyCancellable>()
 
+    @Published var input: String = .empty
+
     init(interactor: WelcomeInteractor, router: WelcomeRouter) {
         defer {
             setupInitialState()
@@ -16,10 +18,17 @@ final class WelcomePresenter: ObservableObject {
     }
     
     func onGetStarted() {
-        
         let pasteboard = UIPasteboard.general
         let clientId = try? Networking.interactor.getClientId()
         pasteboard.string = clientId
+        interactor.saveAccount(ImportAccount.new())
+        router.presentWallet()
+    }
+
+    func onImport() {
+        guard let account = ImportAccount(input: input)
+        else { return input = .empty }
+        interactor.saveAccount(account)
         router.presentWallet()
     }
 }

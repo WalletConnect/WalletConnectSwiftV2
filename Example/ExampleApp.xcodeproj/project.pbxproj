@@ -122,6 +122,9 @@
 		A573C53929EC365000E3CBFD /* HDWalletKit in Frameworks */ = {isa = PBXBuildFile; productRef = A573C53829EC365000E3CBFD /* HDWalletKit */; };
 		A573C53B29EC365800E3CBFD /* HDWalletKit in Frameworks */ = {isa = PBXBuildFile; productRef = A573C53A29EC365800E3CBFD /* HDWalletKit */; };
 		A573C53D29EC366500E3CBFD /* HDWalletKit in Frameworks */ = {isa = PBXBuildFile; productRef = A573C53C29EC366500E3CBFD /* HDWalletKit */; };
+		A57879712A4EDC8100F8D10B /* TextFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57879702A4EDC8100F8D10B /* TextFieldView.swift */; };
+		A57879722A4F225E00F8D10B /* ImportAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5417BBD299BFC3E00B469F3 /* ImportAccount.swift */; };
+		A57879732A4F248200F8D10B /* AccountStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20228287EB34C007E3188 /* AccountStorage.swift */; };
 		A578FA322873036400AA7720 /* InputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA312873036400AA7720 /* InputView.swift */; };
 		A578FA35287304A300AA7720 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA34287304A300AA7720 /* Color.swift */; };
 		A578FA372873D8EE00AA7720 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A578FA362873D8EE00AA7720 /* UIColor.swift */; };
@@ -459,6 +462,7 @@
 		A5629AE728772A0100094373 /* InviteViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteViewModel.swift; sourceTree = "<group>"; };
 		A5629AEF2877F73000094373 /* DefaultSocketFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultSocketFactory.swift; sourceTree = "<group>"; };
 		A573C53629EC34A600E3CBFD /* SyncDerivationServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncDerivationServiceTests.swift; sourceTree = "<group>"; };
+		A57879702A4EDC8100F8D10B /* TextFieldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldView.swift; sourceTree = "<group>"; };
 		A578FA312873036400AA7720 /* InputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputView.swift; sourceTree = "<group>"; };
 		A578FA34287304A300AA7720 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		A578FA362873D8EE00AA7720 /* UIColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
@@ -998,7 +1002,6 @@
 		A5629AA42876A19D00094373 /* DomainLayer */ = {
 			isa = PBXGroup;
 			children = (
-				A5C20227287EB342007E3188 /* AccountStorage */,
 				A5629AEB2877F69C00094373 /* Chat */,
 			);
 			path = DomainLayer;
@@ -1063,7 +1066,6 @@
 		A5629AEB2877F69C00094373 /* Chat */ = {
 			isa = PBXGroup;
 			children = (
-				A5417BBD299BFC3E00B469F3 /* ImportAccount.swift */,
 				A5629AA82876A23100094373 /* ChatService.swift */,
 			);
 			path = Chat;
@@ -1077,6 +1079,14 @@
 				A518A98429683FB60035247E /* Web3InboxViewController.swift */,
 			);
 			path = Web3Inbox;
+			sourceTree = "<group>";
+		};
+		A578796F2A4EDC6B00F8D10B /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A57879702A4EDC8100F8D10B /* TextFieldView.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 		A578FA332873049400AA7720 /* Style */ = {
@@ -1313,6 +1323,8 @@
 				A59CF4F5292F83D50031A42F /* DefaultSignerFactory.swift */,
 				A5A0843B29D2F60A000B9B17 /* DefaultCryptoProvider.swift */,
 				A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */,
+				A5417BBD299BFC3E00B469F3 /* ImportAccount.swift */,
+				A5C20228287EB34C007E3188 /* AccountStorage.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -1382,14 +1394,6 @@
 				A58EC615299D5C6400F3452A /* PlainButton.swift */,
 			);
 			path = Components;
-			sourceTree = "<group>";
-		};
-		A5C20227287EB342007E3188 /* AccountStorage */ = {
-			isa = PBXGroup;
-			children = (
-				A5C20228287EB34C007E3188 /* AccountStorage.swift */,
-			);
-			path = AccountStorage;
 			sourceTree = "<group>";
 		};
 		A5E03DEE286464DB00888481 /* IntegrationTests */ = {
@@ -1479,6 +1483,7 @@
 		C55D3477295DD4AA0004314A /* Welcome */ = {
 			isa = PBXGroup;
 			children = (
+				A578796F2A4EDC6B00F8D10B /* Views */,
 				C55D348E295DFA750004314A /* WelcomeModule.swift */,
 				C55D348F295DFA750004314A /* WelcomePresenter.swift */,
 				C55D3490295DFA750004314A /* WelcomeRouter.swift */,
@@ -2283,6 +2288,7 @@
 				C55D348C295DD8CA0004314A /* PasteUriInteractor.swift in Sources */,
 				847BD1D92989492500076C90 /* MainPresenter.swift in Sources */,
 				C55D3497295DFA750004314A /* WelcomeView.swift in Sources */,
+				A57879722A4F225E00F8D10B /* ImportAccount.swift in Sources */,
 				C5B2F71029705827000DBA0E /* EthereumTransaction.swift in Sources */,
 				C56EE271293F56D7004840D1 /* View.swift in Sources */,
 				C5B2F6FD297055B0000DBA0E /* Signer.swift in Sources */,
@@ -2333,6 +2339,7 @@
 				C55D3489295DD8CA0004314A /* PasteUriModule.swift in Sources */,
 				C55D3494295DFA750004314A /* WelcomePresenter.swift in Sources */,
 				C5B2F6F929705293000DBA0E /* SessionRequestPresenter.swift in Sources */,
+				A57879712A4EDC8100F8D10B /* TextFieldView.swift in Sources */,
 				84DB38F32983CDAE00BFEE37 /* PushRegisterer.swift in Sources */,
 				C5B2F6FB297055B0000DBA0E /* ETHSigner.swift in Sources */,
 				C56EE274293F56D7004840D1 /* SceneViewController.swift in Sources */,
@@ -2347,6 +2354,7 @@
 				C56EE2A3293F6BAF004840D1 /* UIPasteboardWrapper.swift in Sources */,
 				C5B2F6F629705293000DBA0E /* SessionRequestModule.swift in Sources */,
 				C56EE24E293F566D004840D1 /* WalletInteractor.swift in Sources */,
+				A57879732A4F248200F8D10B /* AccountStorage.swift in Sources */,
 				84E0582229D6DA9B00E359B1 /* EthKeyStore.swift in Sources */,
 				C55D34AF2965FB750004314A /* SessionProposalPresenter.swift in Sources */,
 				C5F32A302954816100A6476E /* ConnectionDetailsInteractor.swift in Sources */,
