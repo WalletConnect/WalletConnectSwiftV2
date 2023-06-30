@@ -266,7 +266,12 @@ public enum AutoNamespaces {
                     return
                 }
                 
-                let sessionEvents = Set(proposalNamespace.events).intersection(Set(events))
+                var sessionEvents = Set<String>()
+                if !proposalNamespace.events.isEmpty && !events.isEmpty {
+                    sessionEvents = Set(proposalNamespace.events).intersection(Set(events))
+                } else {
+                    sessionEvents = Set(proposalNamespace.events).symmetricDifference(Set(events))
+                }
                 guard !sessionEvents.isEmpty else {
                     return
                 }
@@ -304,7 +309,12 @@ public enum AutoNamespaces {
                         return
                     }
                     
-                    let sessionEvents = Set(proposalNamespace.events).intersection(Set(events))
+                    var sessionEvents = Set<String>()
+                    if !proposalNamespace.events.isEmpty && !events.isEmpty {
+                        sessionEvents = Set(proposalNamespace.events).intersection(Set(events))
+                    } else {
+                        sessionEvents = Set(proposalNamespace.events).symmetricDifference(Set(events))
+                    }
                     guard !sessionEvents.isEmpty else {
                         return
                     }
