@@ -265,16 +265,8 @@ public enum AutoNamespaces {
                 guard !sessionMethods.isEmpty else {
                     return
                 }
-                
-                var sessionEvents = Set<String>()
-                if !proposalNamespace.events.isEmpty && !events.isEmpty {
-                    sessionEvents = Set(proposalNamespace.events).intersection(Set(events))
-                } else {
-                    sessionEvents = Set(proposalNamespace.events).symmetricDifference(Set(events))
-                }
-                guard !sessionEvents.isEmpty else {
-                    return
-                }
+
+                let sessionEvents = Set(proposalNamespace.events).intersection(Set(events))
 
                 let sessionNamespace = SessionNamespace(
                     chains: sessionChains,
@@ -309,15 +301,7 @@ public enum AutoNamespaces {
                         return
                     }
                     
-                    var sessionEvents = Set<String>()
-                    if !proposalNamespace.events.isEmpty && !events.isEmpty {
-                        sessionEvents = Set(proposalNamespace.events).intersection(Set(events))
-                    } else {
-                        sessionEvents = Set(proposalNamespace.events).symmetricDifference(Set(events))
-                    }
-                    guard !sessionEvents.isEmpty else {
-                        return
-                    }
+                    let sessionEvents = Set(proposalNamespace.events).intersection(Set(events))
                     
                     let sessionNamespace = SessionNamespace(
                         chains: Set([Blockchain(namespace: network, reference: chain)!]),
